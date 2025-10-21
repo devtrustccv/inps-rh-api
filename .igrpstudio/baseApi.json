@@ -1,0 +1,13 @@
+{
+  "type": "springboot",
+  "name": "RH_INPS_SERVICE",
+  "group": "cv.inps",
+  "artifact": "rh",
+  "packageName": "rh",
+  "database": "Oracle",
+  "projectStructureStyle": "domain",
+  "enableObservability": false,
+  "enableEntityRevision": false,
+  "version": "0.1.0-beta.15",
+  "enableGraalVm": false
+}

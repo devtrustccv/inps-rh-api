@@ -1,0 +1,49 @@
+name: 'rhinpsservice-api-service'
+
+networks:
+  default:
+    name: rhinpsservice
+    external: false
+
+services:
+
+  oracle-rhinpsservice-api-service:
+      image: gvenzl/oracle-xe:21-slim
+      container_name: oracle-rhinpsservice-api-service
+      environment:
+        ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+        ORACLE_DATABASE: ${ORACLE_DATABASE}
+        ORACLE_USER: ${ORACLE_USER}
+      ports:
+        - ${ORACLE_PORT}:${ORACLE_PORT}
+      volumes:
+        - oracle-data-21-rhinpsservice-api-service:/opt/oracle/oradata
+      restart: unless-stopped  
+  rhinpsservice-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rhinpsservice-service
+    env_file:
+      - .env
+    depends_on:
+      - oracle-rhinpsservice-api-service
+        environment:
+      - SERVER_PORT=${SERVICE_PORT}
+      - SERVICE_NAME=rhinpsservice-service
+      - SPRING_ACTIVE_PROFILE=${SERVICE_PROFILE}
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle:${ORACLE_PORT}:${ORACLE_DATABASE}
+      - SPRING_DATASOURCE_USERNAME=${ORACLE_USER}
+      - SPRING_DATASOURCE_PASSWORD=${ORACLE_PASSWORD}
+      - ENABLE_SWAGGER=${ENABLE_SWAGGER}
+    ports:
+      - ${SERVICE_PORT}:${SERVICE_PORT}
+    #restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+
+volumes:
+  oracle-data-21-rhinpsservice-api-service:
+    driver: local
