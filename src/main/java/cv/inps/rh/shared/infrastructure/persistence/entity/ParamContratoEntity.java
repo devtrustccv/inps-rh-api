@@ -1,0 +1,62 @@
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+
+package cv.inps.rh.shared.infrastructure.persistence.entity;
+
+import cv.inps.rh.shared.config.AuditEntity;
+import cv.igrp.framework.stereotype.IgrpEntity;
+import jakarta.persistence.*;
+import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+
+
+@Getter
+@Setter
+@IgrpEntity
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "RH_T_PARAM_CONTRATO")
+public class ParamContratoEntity extends AuditEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", unique = true, nullable = false)
+    private Long id;
+
+  
+    @NotBlank(message = "codigo is mandatory")
+    @Column(name="codigo", nullable = false)
+    private String codigo;
+
+  
+    @Column(name="nome")
+    private String nome;
+
+  
+    @Column(name="natureza")
+    private String natureza;
+
+  
+    @Column(name="flg_renovavel")
+    private Integer flgRenovavel;
+
+  
+    @Column(name="duracao_renovavel")
+    private Integer duracaoRenovavel;
+
+  
+    @Column(name="prazo_obrigatorio")
+    private Integer prazoObrigatorio;
+
+  
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "param_vinculo_id", referencedColumnName = "id")
+    private ParamVinculoEntity paramVinculoId;
+    @Column(name="estado")
+    private String estado;
+
+  
+}
