@@ -44,4 +44,9 @@ public class DocumentoPessoalEntity extends AuditEntity {
     private UUID uuid;
 
   
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fun_id", referencedColumnName = "id")
+    private FuncionarioEntity funId;
 }
