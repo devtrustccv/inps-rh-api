@@ -1,4 +1,4 @@
-name: 'rhinpsservice-api-service'
+version: '3.8'
 
 networks:
   default:
@@ -6,19 +6,17 @@ networks:
     external: false
 
 services:
-
   oracle-rhinpsservice-api-service:
-      image: gvenzl/oracle-xe:21-slim
-      container_name: oracle-rhinpsservice-api-service
-      environment:
-        ORACLE_PASSWORD: ${ORACLE_PASSWORD}
-        ORACLE_DATABASE: ${ORACLE_DATABASE}
-        ORACLE_USER: ${ORACLE_USER}
-      ports:
-        - ${ORACLE_PORT}:${ORACLE_PORT}
-      volumes:
-        - oracle-data-21-rhinpsservice-api-service:/opt/oracle/oradata
-      restart: unless-stopped  
+    image: gvenzl/oracle-xe:21-slim
+    container_name: oracle-rhinpsservice-api-service
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+    ports:
+      - "${ORACLE_PORT}:1521"
+    volumes:
+      - oracle-data-21-rhinpsservice-api-service:/opt/oracle/oradata
+    restart: unless-stopped
+
   rhinpsservice-service:
     build:
       context: .
@@ -28,17 +26,16 @@ services:
       - .env
     depends_on:
       - oracle-rhinpsservice-api-service
-        environment:
+    environment:
       - SERVER_PORT=${SERVICE_PORT}
       - SERVICE_NAME=rhinpsservice-service
       - SPRING_ACTIVE_PROFILE=${SERVICE_PROFILE}
-      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle:${ORACLE_PORT}:${ORACLE_DATABASE}
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@//${ORACLE_HOST}:${ORACLE_PORT}/${ORACLE_SERVICE_NAME}
       - SPRING_DATASOURCE_USERNAME=${ORACLE_USER}
       - SPRING_DATASOURCE_PASSWORD=${ORACLE_PASSWORD}
       - ENABLE_SWAGGER=${ENABLE_SWAGGER}
     ports:
-      - ${SERVICE_PORT}:${SERVICE_PORT}
-    #restart: unless-stopped
+      - "${SERVICE_PORT}:${SERVICE_PORT}"
     deploy:
       resources:
         limits:
