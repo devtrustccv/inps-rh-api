@@ -75,7 +75,7 @@ public class Funcionario {
   }
 
   // factory metodo para criar um funcionario
-  public static Funcionario criar(
+  public static Funcionario create(
       TipoDocumento tipoDocumento,
       String numeroDocumento,
       String nomeCompleto,
@@ -97,7 +97,7 @@ public class Funcionario {
 
     return new Funcionario(
         null,
-        IdentificadorUnico.novo(),
+        IdentificadorUnico.create(),
         tipoDocumento,
         numeroDocumento,
         nomeCompleto,
@@ -119,7 +119,7 @@ public class Funcionario {
   }
 
   // Factory para reconstrução de repositorio
-  public static Funcionario reconstruir(
+  public static Funcionario rebuild(
       Long id,
       UUID uuid,
       TipoDocumento tipoDocumento,
@@ -142,7 +142,7 @@ public class Funcionario {
   ) {
     return new Funcionario(
         id,
-        IdentificadorUnico.de(uuid),
+        IdentificadorUnico.from(uuid),
         tipoDocumento,
         numeroDocumento,
         nomeCompleto,

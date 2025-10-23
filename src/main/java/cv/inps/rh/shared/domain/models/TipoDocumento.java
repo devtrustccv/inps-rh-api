@@ -1,8 +1,9 @@
 package cv.inps.rh.shared.domain.models;
 
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import lombok.Getter;
+
+import java.util.UUID;
 
 @Getter
 public class TipoDocumento {
@@ -31,7 +32,7 @@ public class TipoDocumento {
   }
 
   /** Factory para criar um novo TipoDocumento */
-  public static TipoDocumento criar(
+  public static TipoDocumento create(
       String referencia,
       String codigo,
       String nome
@@ -39,7 +40,7 @@ public class TipoDocumento {
 
     return new TipoDocumento(
         null,
-        IdentificadorUnico.novo(),
+        IdentificadorUnico.create(),
         referencia,
         codigo,
         nome,
@@ -47,9 +48,9 @@ public class TipoDocumento {
     );
   }
 
-  public static TipoDocumento reconstruir(
+  public static TipoDocumento rebuild(
       Long id,
-      IdentificadorUnico uuid,
+      UUID uuid,
       String referencia,
       String codigo,
       String nome,
@@ -57,7 +58,7 @@ public class TipoDocumento {
   ) {
     return new TipoDocumento(
         id,
-        uuid,
+        IdentificadorUnico.from(uuid),
         referencia,
         codigo,
         nome,

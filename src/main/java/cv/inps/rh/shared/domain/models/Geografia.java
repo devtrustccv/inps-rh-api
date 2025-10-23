@@ -44,7 +44,7 @@ public class Geografia {
   }
 
 
-  public static Geografia reconstruir(
+  public static Geografia rebuild(
       Long id,
       String nome,
       String nacionalidade,

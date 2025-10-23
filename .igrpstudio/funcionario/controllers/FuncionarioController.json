@@ -1,0 +1,43 @@
+{
+  "type": "controller",
+  "name": "Funcionario",
+  "module": "funcionario",
+  "description": "gestao de funcionarios",
+  "basePath": "api/v1/funcionarios",
+  "actions": [
+    {
+      "actionName": "createFuncionario",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "FuncionarioRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "FuncionarioResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "id": "69p09wi4e0-criarFuncionario"
+}

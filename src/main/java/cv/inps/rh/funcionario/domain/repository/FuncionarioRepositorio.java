@@ -1,0 +1,8 @@
+package cv.inps.rh.funcionario.domain.repository;
+
+import cv.inps.rh.funcionario.domain.models.Funcionario;
+
+public interface FuncionarioRepositorio {
+
+  Funcionario save(Funcionario funcionario);
+}
