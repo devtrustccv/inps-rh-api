@@ -10,7 +10,7 @@ import lombok.*;
 import java.util.UUID;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import cv.inps.rh.shared.application.constants.EstadoFuncionario;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -98,7 +98,7 @@ public class FuncionarioEntity extends AuditEntity {
   
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private EstadoFuncionario estado;
+    private Estado estado;
 
   
     @Column(name="estado_validacao", length=1)
