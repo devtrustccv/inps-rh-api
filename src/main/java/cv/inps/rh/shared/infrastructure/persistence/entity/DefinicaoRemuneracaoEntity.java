@@ -7,7 +7,8 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import jakarta.validation.constraints.NotBlank;
+import java.math.BigDecimal;
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 
@@ -17,8 +18,8 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_T_DOCUMENTO_PESSOAL")
-public class DocumentoPessoalEntity extends AuditEntity {
+@Table(name = "RH_T_DEF_REMUNERACOES")
+public class DefinicaoRemuneracaoEntity extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,18 +27,21 @@ public class DocumentoPessoalEntity extends AuditEntity {
     private Long id;
 
   
-    @NotBlank(message = "numDocumento is mandatory")
-    @Column(name="num_documento", nullable = false)
-    private String numDocumento;
+    @NotNull(message = "percentagem is mandatory")
+    @Column(name="percentagem", nullable = false)
+    private BigDecimal percentagem;
 
   
+    @Column(name="valor")
+    private BigDecimal valor;
 
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tipo_documento_id", referencedColumnName = "id")
-    private TipoDocumentoEntity tipoDocumentoId;
+  
     @Column(name="estado")
     private String estado;
+
+  
+    @Column(name="obs", length=4000)
+    private String obs;
 
   
     @Column(name="uuid")
@@ -49,4 +53,13 @@ public class DocumentoPessoalEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fun_id", referencedColumnName = "id")
     private FuncionarioEntity funId;
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contrato_id", referencedColumnName = "id")
+    private ContratoEntity contratoId;
+    @Column(name="tm_id")
+    private Long tmId;
+
+  
 }

@@ -11,6 +11,8 @@ import java.util.UUID;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import cv.inps.rh.shared.application.constants.EstadoFuncionario;
+import java.util.List;
+import java.util.ArrayList;
 
 
 @Getter
@@ -103,4 +105,36 @@ public class FuncionarioEntity extends AuditEntity {
     private String estadoValidacao;
 
   
+
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+private List<ContactoEntity> contactos = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+private List<EnderecoEntity> enderecos = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+private List<FamiliarEntity> familiares = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+private List<HabilitacaoLiterariaEntity> habilitacoesLiterarias = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+private List<FormacaoFeitaEntity> formacoesFeitas = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+private List<ExperienciaProfEntity> experienciasProfissionais = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+private List<DadosBancariosEntity> dadosBancarios = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY)
+private List<DocumentoEntity> documentos = new ArrayList<>();
 }

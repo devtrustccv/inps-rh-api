@@ -8,7 +8,7 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotBlank;
-import java.util.UUID;
+import java.time.LocalDate;
 
 
 @Getter
@@ -17,8 +17,8 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_T_DOCUMENTO_PESSOAL")
-public class DocumentoPessoalEntity extends AuditEntity {
+@Table(name = "RH_T_REGIME_TRAB")
+public class RegimeTrabalhoEntity extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,22 +26,25 @@ public class DocumentoPessoalEntity extends AuditEntity {
     private Long id;
 
   
-    @NotBlank(message = "numDocumento is mandatory")
-    @Column(name="num_documento", nullable = false)
-    private String numDocumento;
+    @NotBlank(message = "tipoRegime is mandatory")
+    @Column(name="tipo_regime", nullable = false)
+    private String tipoRegime;
 
   
+    @Column(name="tipo_situacao")
+    private String tipoSituacao;
 
+  
+    @Column(name="data_fim")
+    private LocalDate dataFim;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tipo_documento_id", referencedColumnName = "id")
-    private TipoDocumentoEntity tipoDocumentoId;
+  
     @Column(name="estado")
     private String estado;
 
   
-    @Column(name="uuid")
-    private UUID uuid;
+    @Column(name="obs", length=4000)
+    private String obs;
 
   
 
@@ -49,4 +52,14 @@ public class DocumentoPessoalEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fun_id", referencedColumnName = "id")
     private FuncionarioEntity funId;
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contrato_id", referencedColumnName = "id")
+    private ContratoEntity contratoId;
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
+    private TiposRelacionamentoEntity tiprelId;
 }

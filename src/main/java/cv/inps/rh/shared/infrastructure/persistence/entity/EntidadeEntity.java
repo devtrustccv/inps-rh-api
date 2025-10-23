@@ -7,7 +7,6 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.UUID;
 import jakarta.validation.constraints.NotBlank;
 
 
@@ -17,8 +16,8 @@ import jakarta.validation.constraints.NotBlank;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_T_PARAM_LOCAL_TRAB")
-public class ParamLocalTrabEntity extends AuditEntity {
+@Table(name = "ENTIDADE")
+public class EntidadeEntity extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,31 +25,13 @@ public class ParamLocalTrabEntity extends AuditEntity {
     private Long id;
 
   
-    @Column(name="uuid")
-    private UUID uuid;
-
-  
     @NotBlank(message = "nome is mandatory")
     @Column(name="nome", nullable = false)
     private String nome;
 
   
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pais_id", referencedColumnName = "id")
-    private GeografiaEntity paisId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ilha_id", referencedColumnName = "id")
-    private GeografiaEntity ilhaId;
-    @Column(name="ups")
-    private Long ups;
-
-  
-    @Column(name="estado")
-    private String estado;
+    @Column(name="codigo")
+    private String codigo;
 
   
 }

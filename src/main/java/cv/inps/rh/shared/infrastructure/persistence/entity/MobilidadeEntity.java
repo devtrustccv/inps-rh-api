@@ -17,8 +17,8 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_T_DOCUMENTO_PESSOAL")
-public class DocumentoPessoalEntity extends AuditEntity {
+@Table(name = "RH_T_MOBILIDADE")
+public class MobilidadeEntity extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,18 +26,17 @@ public class DocumentoPessoalEntity extends AuditEntity {
     private Long id;
 
   
-    @NotBlank(message = "numDocumento is mandatory")
-    @Column(name="num_documento", nullable = false)
-    private String numDocumento;
+    @NotBlank(message = "tipoSituacao is mandatory")
+    @Column(name="tipo_situacao", nullable = false)
+    private String tipoSituacao;
 
   
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tipo_documento_id", referencedColumnName = "id")
-    private TipoDocumentoEntity tipoDocumentoId;
     @Column(name="estado")
     private String estado;
+
+  
+    @Column(name="obs")
+    private String obs;
 
   
     @Column(name="uuid")
@@ -49,4 +48,22 @@ public class DocumentoPessoalEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fun_id", referencedColumnName = "id")
     private FuncionarioEntity funId;
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contrato_id", referencedColumnName = "id")
+    private ContratoEntity contratoId;
+    @Column(name="local_trab_id")
+    private Long localTrabId;
+
+  
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "secao_id", referencedColumnName = "id")
+    private SecaoEntity secaoId;
+    @Column(name="instid_id")
+    private Long instidId;
+
+  
 }

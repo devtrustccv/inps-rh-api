@@ -8,6 +8,8 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
+import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,41 +20,47 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_T_DOCUMENTO")
-public class DocumentoEntity extends AuditEntity {
+@Table(name = "RH_T_EXPERIENCIA_PROF")
+public class ExperienciaProfEntity extends AuditEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
   
-    @Column(name="uuid")
-    private String uuid;
-
-  
-    @NotNull(message = "tpDocumentoId is mandatory")
+    @NotNull(message = "paisId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tp_documento_id", referencedColumnName = "id")
-    private TipoDocumentoEntity tpDocumentoId;
-    @Column(name="doc_id")
-    private Long docId;
+    @JoinColumn(name = "pais_id", referencedColumnName = "id")
+    private GeografiaEntity paisId;
+    @Column(name="empresa")
+    private String empresa;
 
   
-
-
-  
-    @Column(name="referencia_name")
-    private String referenciaName;
+    @Column(name="cargo")
+    private String cargo;
 
   
-    @Column(name="referencia_id")
-    private String referenciaId;
+    @Column(name="data_inicio")
+    private LocalDate dataInicio;
+
+  
+    @Column(name="data_fim")
+    private String dataFim;
+
+  
+    @Column(name="observacao")
+    private String observacao;
 
   
     @Column(name="estado")
     private String estado;
+
+  
+    @Column(name="uuid")
+    private UUID uuid;
 
      @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "fun_id")

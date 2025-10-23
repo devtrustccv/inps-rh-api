@@ -7,8 +7,10 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
-import jakarta.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Getter
@@ -17,8 +19,8 @@ import jakarta.validation.constraints.NotBlank;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_T_PARAM_LOCAL_TRAB")
-public class ParamLocalTrabEntity extends AuditEntity {
+@Table(name = "RH_T_ENDERECO")
+public class EnderecoEntity extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,15 +28,7 @@ public class ParamLocalTrabEntity extends AuditEntity {
     private Long id;
 
   
-    @Column(name="uuid")
-    private UUID uuid;
-
-  
-    @NotBlank(message = "nome is mandatory")
-    @Column(name="nome", nullable = false)
-    private String nome;
-
-  
+    @NotNull(message = "paisId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -45,12 +39,30 @@ public class ParamLocalTrabEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ilha_id", referencedColumnName = "id")
     private GeografiaEntity ilhaId;
-    @Column(name="ups")
-    private Long ups;
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "concelho_id", referencedColumnName = "id")
+    private GeografiaEntity concelhoId;
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "zona_id", referencedColumnName = "id")
+    private GeografiaEntity zonaId;
+    @Column(name="morada")
+    private String morada;
 
   
     @Column(name="estado")
     private String estado;
 
   
+    @Column(name="uuid")
+    private UUID uuid;
+
+     @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "fun_id")
+   private FuncionarioEntity funId;
+
+
 }

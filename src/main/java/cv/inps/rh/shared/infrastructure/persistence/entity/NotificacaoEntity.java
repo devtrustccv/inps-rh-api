@@ -7,8 +7,9 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.UUID;
 import jakarta.validation.constraints.NotBlank;
+import java.time.LocalDate;
+import java.util.UUID;
 
 
 @Getter
@@ -17,8 +18,8 @@ import jakarta.validation.constraints.NotBlank;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_T_PARAM_LOCAL_TRAB")
-public class ParamLocalTrabEntity extends AuditEntity {
+@Table(name = "RH_T_NOTIFICACAO")
+public class NotificacaoEntity extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,31 +27,41 @@ public class ParamLocalTrabEntity extends AuditEntity {
     private Long id;
 
   
-    @Column(name="uuid")
-    private UUID uuid;
+    @NotBlank(message = "referencia is mandatory")
+    @Column(name="referencia", nullable = false)
+    private String referencia;
 
   
-    @NotBlank(message = "nome is mandatory")
-    @Column(name="nome", nullable = false)
-    private String nome;
+    @Column(name="message")
+    private String message;
 
   
+    @Column(name="assunto")
+    private String assunto;
 
+  
+    @Column(name="email")
+    private String email;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pais_id", referencedColumnName = "id")
-    private GeografiaEntity paisId;
+  
+    @Column(name="nome_receptor")
+    private String nOMERECEPTOR;
 
+  
+    @Column(name="data_envio")
+    private LocalDate dATAENVIO;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ilha_id", referencedColumnName = "id")
-    private GeografiaEntity ilhaId;
-    @Column(name="ups")
-    private Long ups;
+  
+    @Column(name="url")
+    private String url;
 
   
     @Column(name="estado")
     private String estado;
+
+  
+    @Column(name="uuid")
+    private UUID uuid;
 
   
 }

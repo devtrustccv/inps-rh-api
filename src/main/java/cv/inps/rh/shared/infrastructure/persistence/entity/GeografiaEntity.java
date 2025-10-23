@@ -30,4 +30,41 @@ public class GeografiaEntity extends AuditEntity {
     private String nome;
 
   
+    @Column(name="nacionalidade")
+    private String nacionalidade;
+
+  
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "geogr_id", referencedColumnName = "id")
+    private GeografiaEntity geogrId;
+    @Column(name="pais")
+    private Long pais;
+
+  
+    @Column(name="nivel_detalhe")
+    private Long nivelDetalhe;
+
+  
+    @Column(name="nome_oficial")
+    private String nomeOficial;
+
+  
+    @Column(name="flag_alter")
+    private String flagAlter;
+
+  
+    @Column(name="nome_norm")
+    private String nomeNorm;
+
+  
+    @Column(name="tip_geog_cd")
+    private String tipGeogCd;
+
+  
+    @Column(name="flg_situacao")
+    private String flgSituacao;
+
+  
 }

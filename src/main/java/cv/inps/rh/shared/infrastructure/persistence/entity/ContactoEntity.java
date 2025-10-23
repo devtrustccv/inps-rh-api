@@ -7,7 +7,8 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,41 +19,30 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_T_DOCUMENTO")
-public class DocumentoEntity extends AuditEntity {
+@Table(name = "RH_T_CONTACTO")
+public class ContactoEntity extends AuditEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
   
-    @Column(name="uuid")
-    private String uuid;
+    @NotBlank(message = "tipoContacto is mandatory")
+    @Column(name="tipo_contacto", nullable = false)
+    private String tipoContacto;
 
   
-    @NotNull(message = "tpDocumentoId is mandatory")
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tp_documento_id", referencedColumnName = "id")
-    private TipoDocumentoEntity tpDocumentoId;
-    @Column(name="doc_id")
-    private Long docId;
-
-  
-
-
-  
-    @Column(name="referencia_name")
-    private String referenciaName;
-
-  
-    @Column(name="referencia_id")
-    private String referenciaId;
+    @Column(name="contacto")
+    private String contacto;
 
   
     @Column(name="estado")
     private String estado;
+
+  
+    @Column(name="uuid")
+    private UUID uuid;
 
      @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "fun_id")

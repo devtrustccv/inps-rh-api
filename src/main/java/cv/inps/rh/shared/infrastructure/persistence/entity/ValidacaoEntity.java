@@ -7,8 +7,8 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.UUID;
 import jakarta.validation.constraints.NotBlank;
+import java.util.UUID;
 
 
 @Getter
@@ -17,8 +17,8 @@ import jakarta.validation.constraints.NotBlank;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_T_PARAM_LOCAL_TRAB")
-public class ParamLocalTrabEntity extends AuditEntity {
+@Table(name = "RH_T_VALIDACAO")
+public class ValidacaoEntity extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,31 +26,39 @@ public class ParamLocalTrabEntity extends AuditEntity {
     private Long id;
 
   
-    @Column(name="uuid")
-    private UUID uuid;
+    @NotBlank(message = "tipoAccao is mandatory")
+    @Column(name="tipo_accao", nullable = false)
+    private String tipoAccao;
 
   
-    @NotBlank(message = "nome is mandatory")
-    @Column(name="nome", nullable = false)
-    private String nome;
+    @Column(name="referencia_name")
+    private String referenciaName;
+
+  
+    @Column(name="referencia_id")
+    private Long referenciaId;
 
   
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pais_id", referencedColumnName = "id")
-    private GeografiaEntity paisId;
+    @JoinColumn(name = "fund_id", referencedColumnName = "id")
+    private FuncionarioEntity fundId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ilha_id", referencedColumnName = "id")
-    private GeografiaEntity ilhaId;
-    @Column(name="ups")
-    private Long ups;
-
-  
+    @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
+    private TiposRelacionamentoEntity tiprelId;
     @Column(name="estado")
     private String estado;
+
+  
+    @Column(name="obs")
+    private String obs;
+
+  
+    @Column(name="uuid")
+    private UUID uuid;
 
   
 }

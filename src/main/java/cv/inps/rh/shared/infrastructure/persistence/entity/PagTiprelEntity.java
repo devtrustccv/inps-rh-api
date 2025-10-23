@@ -7,8 +7,8 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
-import jakarta.validation.constraints.NotBlank;
 
 
 @Getter
@@ -17,8 +17,8 @@ import jakarta.validation.constraints.NotBlank;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_T_PARAM_LOCAL_TRAB")
-public class ParamLocalTrabEntity extends AuditEntity {
+@Table(name = "RH_T_PAG_TIPREL")
+public class PagTiprelEntity extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,31 +26,27 @@ public class ParamLocalTrabEntity extends AuditEntity {
     private Long id;
 
   
-    @Column(name="uuid")
-    private UUID uuid;
-
-  
-    @NotBlank(message = "nome is mandatory")
-    @Column(name="nome", nullable = false)
-    private String nome;
-
-  
+    @NotNull(message = "pagId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pais_id", referencedColumnName = "id")
-    private GeografiaEntity paisId;
+    @JoinColumn(name = "pag_id", referencedColumnName = "id")
+    private DefPagamentoEntity pagId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ilha_id", referencedColumnName = "id")
-    private GeografiaEntity ilhaId;
-    @Column(name="ups")
-    private Long ups;
-
-  
+    @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
+    private TiposRelacionamentoEntity tiprelId;
     @Column(name="estado")
     private String estado;
+
+  
+    @Column(name="obs", length=4000)
+    private String obs;
+
+  
+    @Column(name="uuid")
+    private UUID uuid;
 
   
 }
