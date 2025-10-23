@@ -3,7 +3,6 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,7 +16,7 @@ import jakarta.validation.constraints.NotBlank;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "GLB_T_GEOGRAFIA")
-public class GeografiaEntity extends AuditEntity {
+public class GeografiaEntity  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,11 +33,10 @@ public class GeografiaEntity extends AuditEntity {
     private String nacionalidade;
 
   
+    @Column(name="geogr_id")
+    private Long geogrId;
 
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "geogr_id", referencedColumnName = "id")
-    private GeografiaEntity geogrId;
+  
     @Column(name="pais")
     private Long pais;
 
@@ -59,8 +57,8 @@ public class GeografiaEntity extends AuditEntity {
     private String nomeNorm;
 
   
-    @Column(name="tip_geog_cd")
-    private String tipGeogCd;
+    @Column(name="tp_geog_cd")
+    private String tpGeogCd;
 
   
     @Column(name="flg_situacao")

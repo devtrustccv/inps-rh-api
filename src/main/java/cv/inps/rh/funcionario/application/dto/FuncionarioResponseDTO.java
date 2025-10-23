@@ -21,7 +21,7 @@ public class FuncionarioResponseDTO  {
 
   
   
-  private String id ;
+  private Long id ;
   
   
   private String uuid ;
@@ -60,7 +60,7 @@ public class FuncionarioResponseDTO  {
   private String nacionalidade ;
   
   
-  private String naturalidadeId ;
+  private Long naturalidadeId ;
   
   
   private String naturalidadeDesc ;

@@ -128,7 +128,7 @@
     {
       "name": "naturalidadeId",
       "objectType": "java",
-      "type": "string",
+      "type": "integer",
       "required": false,
       "before": false,
       "after": false,
@@ -140,7 +140,7 @@
     {
       "name": "nif",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,

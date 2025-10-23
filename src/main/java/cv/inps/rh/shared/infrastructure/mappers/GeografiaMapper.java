@@ -8,20 +8,20 @@ import org.springframework.stereotype.Component;
 public class GeografiaMapper {
 
   /** Reconstrói Geografia a partir da entity */
-  public Geografia rebuild(GeografiaEntity entity) {
+  public Geografia toDomain(GeografiaEntity entity) {
     if (entity == null) return null;
 
     return Geografia.rebuild(
         entity.getId(),
         entity.getNome(),
         entity.getNacionalidade(),
-        entity.getGeogrId() != null ? rebuild(entity.getGeogrId()) : null,
+        entity.getGeogrId(),
         entity.getPais(),
         entity.getNivelDetalhe(),
         entity.getNomeOficial(),
         entity.getFlagAlter(),
         entity.getNomeNorm(),
-        entity.getTipGeogCd(),
+        entity.getTpGeogCd(),
         entity.getFlgSituacao()
     );
   }
@@ -34,13 +34,13 @@ public class GeografiaMapper {
     entity.setId(geografia.getId());
     entity.setNome(geografia.getNome());
     entity.setNacionalidade(geografia.getNacionalidade());
-    entity.setGeogrId(geografia.getGeografiaPai() != null ? toEntity(geografia.getGeografiaPai()) : null);
+    entity.setGeogrId(geografia.getGeografiaPai());
     entity.setPais(geografia.getPais());
     entity.setNivelDetalhe(geografia.getNivelDetalhe());
     entity.setNomeOficial(geografia.getNomeOficial());
     entity.setFlagAlter(geografia.getFlagAlter());
     entity.setNomeNorm(geografia.getNomeNorm());
-    entity.setTipGeogCd(geografia.getTipoGeografia());
+    entity.setTpGeogCd(geografia.getTipoGeografia());
     entity.setFlgSituacao(geografia.getSituacao());
     return entity;
   }

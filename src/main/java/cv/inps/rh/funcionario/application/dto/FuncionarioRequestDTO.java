@@ -51,10 +51,10 @@ public class FuncionarioRequestDTO  {
   private String nacionalidade ;
   
   
-  private String naturalidadeId ;
+  private Integer naturalidadeId ;
   
   
-  private String nif ;
+  private Long nif ;
   
   
   private String numSegurado ;

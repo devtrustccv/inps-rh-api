@@ -57,7 +57,4 @@ public class RegimeTrabalhoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contrato_id", referencedColumnName = "id")
     private ContratoEntity contratoId;
-
-
-  
 }

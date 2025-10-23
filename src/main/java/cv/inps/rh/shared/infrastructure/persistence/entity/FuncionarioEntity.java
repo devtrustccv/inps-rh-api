@@ -25,6 +25,7 @@ import java.util.ArrayList;
 public class FuncionarioEntity extends AuditEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

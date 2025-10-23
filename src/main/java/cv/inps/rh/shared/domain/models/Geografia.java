@@ -8,7 +8,7 @@ public class Geografia {
   private final Long id;
   private final String nome;
   private final String nacionalidade;
-  private final Geografia geografiaPai;
+  private final Long geografiaPai;
   private final Long pais;
   private final Long nivelDetalhe;
   private final String nomeOficial;
@@ -21,7 +21,7 @@ public class Geografia {
       Long id,
       String nome,
       String nacionalidade,
-      Geografia geografiaPai,
+      Long geografiaPai,
       Long pais,
       Long nivelDetalhe,
       String nomeOficial,
@@ -48,7 +48,7 @@ public class Geografia {
       Long id,
       String nome,
       String nacionalidade,
-      Geografia geografiaPai,
+      Long geografiaPai,
       Long pais,
       Long nivelDetalhe,
       String nomeOficial,

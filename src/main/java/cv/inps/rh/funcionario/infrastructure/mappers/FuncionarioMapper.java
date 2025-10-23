@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.mappers.EstadoMapper;
@@ -35,7 +36,7 @@ public class FuncionarioMapper {
         entity.getNmPai(),
         entity.getEstadoCivil(),
         entity.getNacionalidade(),
-        entity.getLocNascId() != null ? geografiaMapper.rebuild(entity.getLocNascId()) : null,
+        entity.getLocNascId() != null ? geografiaMapper.toDomain(entity.getLocNascId()) : null,
         entity.getNif(),
         entity.getNuSegInps(),
         entity.getEntId(),
@@ -50,7 +51,6 @@ public class FuncionarioMapper {
     if (funcionario == null) return null;
 
     FuncionarioEntity entity = new FuncionarioEntity();
-    entity.setId(funcionario.getId());
     entity.setUuid(funcionario.getUuid().getValor());
     entity.setTipoDocumentoId(funcionario.getTipoDocumento() != null ? tipoDocumentoMapper.toEntity(funcionario.getTipoDocumento()) : null);
     entity.setNumDocumento(funcionario.getNumeroDocumento());
@@ -71,4 +71,30 @@ public class FuncionarioMapper {
     entity.setEstadoValidacao(funcionario.getEstadoValidacao().name());
     return entity;
   }
+
+  public FuncionarioResponseDTO toDTO(Funcionario funcionario) {
+    if (funcionario == null) return null;
+
+    var dto = new FuncionarioResponseDTO();
+    dto.setId(funcionario.getId() != null ? funcionario.getId() : null);
+    dto.setUuid(funcionario.getUuid() != null ? funcionario.getUuid().toString() : null);
+    dto.setTipoDocumentoId(funcionario.getTipoDocumento() != null ? funcionario.getTipoDocumento().getId().intValue() : null);
+    dto.setTipoDocumentoDesc(funcionario.getTipoDocumento() != null ? funcionario.getTipoDocumento().getNome() : null);
+    dto.setNumDocumento(funcionario.getNumeroDocumento());
+    dto.setNome(funcionario.getNomeCompleto());
+    dto.setUrlFoto(funcionario.getUrlFotografia());
+    dto.setDataNascimento(funcionario.getDataNascimento());
+    dto.setGenero(funcionario.getSexo());
+    dto.setNomeMae(funcionario.getNomeMae());
+    dto.setNomePai(funcionario.getNomePai());
+    dto.setEstadoCivil(funcionario.getEstadoCivil());
+    dto.setNacionalidade(funcionario.getNacionalidade());
+    dto.setNaturalidadeId(funcionario.getLocalNascimento() != null ? funcionario.getLocalNascimento().getId() : null);
+    dto.setNaturalidadeDesc(funcionario.getLocalNascimento() != null ? funcionario.getLocalNascimento().getNome() : null);
+    dto.setNif(funcionario.getNumeroFiscal() != null ? funcionario.getNumeroFiscal().toString() : null);
+    dto.setNumSegurado(funcionario.getNumeroSegurancaSocial());
+    return dto;
+  }
+
+
 }

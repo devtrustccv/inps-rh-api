@@ -8,7 +8,7 @@
     {
       "name": "id",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -164,7 +164,7 @@
     {
       "name": "naturalidadeId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
