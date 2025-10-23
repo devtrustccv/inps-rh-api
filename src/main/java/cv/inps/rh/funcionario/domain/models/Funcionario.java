@@ -17,7 +17,7 @@ public class Funcionario {
   private final TipoDocumento tipoDocumento;
   private final String numeroDocumento;
   private final String nomeCompleto;
-  private final String urlFotografia;
+  private final String fotografia;
   private final LocalDate dataNascimento;
   private final String sexo;
   private final String nomeMae;
@@ -38,7 +38,7 @@ public class Funcionario {
       TipoDocumento tipoDocumento,
       String numeroDocumento,
       String nomeCompleto,
-      String urlFotografia,
+      String fotografia,
       LocalDate dataNascimento,
       String sexo,
       String nomeMae,
@@ -58,7 +58,7 @@ public class Funcionario {
     this.tipoDocumento = tipoDocumento;
     this.numeroDocumento = numeroDocumento;
     this.nomeCompleto = nomeCompleto;
-    this.urlFotografia = urlFotografia;
+    this.fotografia = fotografia;
     this.dataNascimento = dataNascimento;
     this.sexo = sexo;
     this.nomeMae = nomeMae;
@@ -79,7 +79,7 @@ public class Funcionario {
       TipoDocumento tipoDocumento,
       String numeroDocumento,
       String nomeCompleto,
-      String urlFotografia,
+      String fotografia,
       LocalDate dataNascimento,
       String sexo,
       String nomeMae,
@@ -101,7 +101,7 @@ public class Funcionario {
         tipoDocumento,
         numeroDocumento,
         nomeCompleto,
-        urlFotografia,
+        fotografia,
         dataNascimento,
         sexo,
         nomeMae,
@@ -125,7 +125,7 @@ public class Funcionario {
       TipoDocumento tipoDocumento,
       String numeroDocumento,
       String nomeCompleto,
-      String urlFotografia,
+      String fotografia,
       LocalDate dataNascimento,
       String sexo,
       String nomeMae,
@@ -146,7 +146,7 @@ public class Funcionario {
         tipoDocumento,
         numeroDocumento,
         nomeCompleto,
-        urlFotografia,
+        fotografia,
         dataNascimento,
         sexo,
         nomeMae,

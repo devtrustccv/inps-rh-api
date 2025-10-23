@@ -29,7 +29,7 @@ public class FuncionarioMapper {
         entity.getTipoDocumentoId() != null ? tipoDocumentoMapper.toDomain(entity.getTipoDocumentoId()) : null,
         entity.getNumDocumento(),
         entity.getNome(),
-        entity.getUrlFotografia(),
+        entity.getFotografia(),
         entity.getDataNascimento(),
         entity.getSexo(),
         entity.getNmMae(),
@@ -55,7 +55,7 @@ public class FuncionarioMapper {
     entity.setTipoDocumentoId(funcionario.getTipoDocumento() != null ? tipoDocumentoMapper.toEntity(funcionario.getTipoDocumento()) : null);
     entity.setNumDocumento(funcionario.getNumeroDocumento());
     entity.setNome(funcionario.getNomeCompleto());
-    entity.setUrlFotografia(funcionario.getUrlFotografia());
+    entity.setFotografia(funcionario.getFotografia());
     entity.setDataNascimento(funcionario.getDataNascimento());
     entity.setSexo(funcionario.getSexo());
     entity.setNmMae(funcionario.getNomeMae());
@@ -82,7 +82,7 @@ public class FuncionarioMapper {
     dto.setTipoDocumentoDesc(funcionario.getTipoDocumento() != null ? funcionario.getTipoDocumento().getNome() : null);
     dto.setNumDocumento(funcionario.getNumeroDocumento());
     dto.setNome(funcionario.getNomeCompleto());
-    dto.setUrlFoto(funcionario.getUrlFotografia());
+    dto.setUrlFoto(funcionario.getFotografia());
     dto.setDataNascimento(funcionario.getDataNascimento());
     dto.setGenero(funcionario.getSexo());
     dto.setNomeMae(funcionario.getNomeMae());

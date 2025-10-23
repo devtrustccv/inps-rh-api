@@ -48,8 +48,8 @@ public class FuncionarioEntity extends AuditEntity {
     private String nome;
 
   
-    @Column(name="url_fotografia")
-    private String urlFotografia;
+    @Column(name="fotografia")
+    private String fotografia;
 
   
     @Column(name="data_nascimento")
