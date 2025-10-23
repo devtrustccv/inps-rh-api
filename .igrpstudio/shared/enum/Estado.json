@@ -14,14 +14,21 @@
       "name": "A",
       "attributes": [
         "A",
-        "Activo"
+        "Ativo"
       ]
     },
     {
       "name": "E",
       "attributes": [
         "E",
-        "Expirado"
+        "Eliminado"
+      ]
+    },
+    {
+      "name": "P",
+      "attributes": [
+        "P",
+        "Pendente"
       ]
     }
   ],

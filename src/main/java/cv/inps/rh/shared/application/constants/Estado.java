@@ -15,8 +15,9 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 public enum Estado implements IgrpEnum<String> {
 
   I("I", "Inactivo"),
-    A("A", "Activo"),
-    E("E", "Expirado")
+    A("A", "Ativo"),
+    E("E", "Eliminado"),
+    P("P", "Pendente")
   ;
 
   private final String code;
