@@ -41,10 +41,10 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
      LOGGER.info("Iniciando criação de funcionário: {}", dto);
 
-     TipoDocumento tipoDocumento = tipoDocumentoRepository.findById(dto.getTipoDocumentoId().longValue())
+     TipoDocumento tipoDocumento = tipoDocumentoRepository.findById(dto.getTipoDocumentoId())
          .orElseThrow(() -> IgrpResponseStatusException.badRequest("TipoDocumento não encontrado: " + dto.getTipoDocumentoId()));
 
-     Geografia localNascimento = geografiaRepository.findById(dto.getNaturalidadeId().longValue())
+     Geografia localNascimento = geografiaRepository.findById(dto.getNaturalidadeId())
          .orElseThrow(() -> IgrpResponseStatusException.badRequest("Geografia não encontrada: " + dto.getNaturalidadeId()));
 
 

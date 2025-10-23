@@ -1,24 +1,12 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "FuncionarioRequest",
+  "name": "DadosContratuaisReq",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "tipoDocumentoId",
-      "objectType": "java",
-      "type": "long",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "numDocumento",
+      "name": "tipoContrato",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -30,7 +18,7 @@
       "primaryKey": false
     },
     {
-      "name": "nome",
+      "name": "cargoPosicao",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -42,7 +30,7 @@
       "primaryKey": false
     },
     {
-      "name": "urlFoto",
+      "name": "direcao",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -54,19 +42,7 @@
       "primaryKey": false
     },
     {
-      "name": "dataNascimento",
-      "objectType": "java",
-      "type": "date",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "genero",
+      "name": "seccao",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -78,7 +54,7 @@
       "primaryKey": false
     },
     {
-      "name": "nomeMae",
+      "name": "centroCusto",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -90,7 +66,7 @@
       "primaryKey": false
     },
     {
-      "name": "nomePai",
+      "name": "carreira",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -102,7 +78,7 @@
       "primaryKey": false
     },
     {
-      "name": "estadoCivil",
+      "name": "categoria",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -114,7 +90,7 @@
       "primaryKey": false
     },
     {
-      "name": "nacionalidade",
+      "name": "escalaoReferencia",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -126,9 +102,9 @@
       "primaryKey": false
     },
     {
-      "name": "naturalidadeId",
+      "name": "tipoVinculoLaboral",
       "objectType": "java",
-      "type": "long",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -138,9 +114,9 @@
       "primaryKey": false
     },
     {
-      "name": "nif",
+      "name": "RegimeTrabalho",
       "objectType": "java",
-      "type": "long",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -150,7 +126,79 @@
       "primaryKey": false
     },
     {
-      "name": "numSegurado",
+      "name": "salario",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "moeda",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dataInicio",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dataFim",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "duracaoMeses",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "pais",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "ilha",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -162,5 +210,5 @@
       "primaryKey": false
     }
   ],
-  "id": "pjb2kk86vo"
+  "id": "4ds9r3wft9"
 }

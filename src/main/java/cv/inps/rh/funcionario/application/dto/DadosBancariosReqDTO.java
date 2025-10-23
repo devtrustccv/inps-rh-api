@@ -17,46 +17,25 @@ import java.time.LocalDate;
 
 
 @IgrpDTO
-public class FuncionarioRequestDTO  {
+public class DadosBancariosReqDTO  {
 
   
   
-  private Long tipoDocumentoId ;
+  private Long id ;
   
   
-  private String numDocumento ;
+  private Long entidadeBancariaId ;
   
   
-  private String nome ;
+  private String numConta ;
   
   
-  private String urlFoto ;
+  private String nib ;
   
   
-  private LocalDate dataNascimento ;
+  private LocalDate dataInicio ;
   
   
-  private String genero ;
-  
-  
-  private String nomeMae ;
-  
-  
-  private String nomePai ;
-  
-  
-  private String estadoCivil ;
-  
-  
-  private String nacionalidade ;
-  
-  
-  private Long naturalidadeId ;
-  
-  
-  private Long nif ;
-  
-  
-  private String numSegurado ;
+  private LocalDate dataFim ;
 
 }

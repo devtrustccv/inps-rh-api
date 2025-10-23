@@ -9,6 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -17,46 +18,19 @@ import java.time.LocalDate;
 
 
 @IgrpDTO
-public class FuncionarioRequestDTO  {
+public class EncargosDescontosDTO  {
 
   
   
-  private Long tipoDocumentoId ;
+  private String tipoEncargo ;
   
   
-  private String numDocumento ;
+  private BigDecimal valor ;
   
   
-  private String nome ;
+  private LocalDate dataInicio ;
   
   
-  private String urlFoto ;
-  
-  
-  private LocalDate dataNascimento ;
-  
-  
-  private String genero ;
-  
-  
-  private String nomeMae ;
-  
-  
-  private String nomePai ;
-  
-  
-  private String estadoCivil ;
-  
-  
-  private String nacionalidade ;
-  
-  
-  private Long naturalidadeId ;
-  
-  
-  private Long nif ;
-  
-  
-  private String numSegurado ;
+  private LocalDate dataFim ;
 
 }

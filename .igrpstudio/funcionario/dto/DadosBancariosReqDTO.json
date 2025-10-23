@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "AgregadoDependenteReq",
+  "name": "DadosBancariosReq",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
@@ -18,9 +18,9 @@
       "primaryKey": false
     },
     {
-      "name": "tipoDocumentoId",
+      "name": "entidadeBancariaId",
       "objectType": "java",
-      "type": "integer",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -30,19 +30,7 @@
       "primaryKey": false
     },
     {
-      "name": "numDocumento",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "nome",
+      "name": "numConta",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -54,7 +42,19 @@
       "primaryKey": false
     },
     {
-      "name": "dataNascimento",
+      "name": "nib",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dataInicio",
       "objectType": "java",
       "type": "date",
       "required": false,
@@ -66,45 +66,9 @@
       "primaryKey": false
     },
     {
-      "name": "genero",
+      "name": "dataFim",
       "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "dependente",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "agregada",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "grauParentesco",
-      "objectType": "java",
-      "type": "string",
+      "type": "date",
       "required": false,
       "before": false,
       "after": false,
@@ -114,5 +78,5 @@
       "primaryKey": false
     }
   ],
-  "id": "cna56q5qt2"
+  "id": "h4lj00zfxv"
 }

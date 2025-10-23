@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.time.LocalDate;
+
 
 @Data
 @NoArgsConstructor
@@ -17,34 +17,16 @@ import java.time.LocalDate;
 
 
 @IgrpDTO
-public class AgregadoDependenteReqDTO  {
+public class AnexoReqDTO  {
 
   
   
   private Long id ;
   
   
-  private Integer tipoDocumentoId ;
+  private Integer TipoDocumentoId ;
   
   
-  private String numDocumento ;
-  
-  
-  private String nome ;
-  
-  
-  private LocalDate dataNascimento ;
-  
-  
-  private String genero ;
-  
-  
-  private String dependente ;
-  
-  
-  private String agregada ;
-  
-  
-  private String grauParentesco ;
+  private String documento ;
 
 }
