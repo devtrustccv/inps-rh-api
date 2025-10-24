@@ -42,13 +42,13 @@ public class AgregadoDependenteRespDTO  {
   private String genero ;
   
   
+  private String grauParentesco ;
+  
+  
   private String dependente ;
   
   
   private String agregada ;
-  
-  
-  private String grauParentesco ;
   
   
   private String estado ;

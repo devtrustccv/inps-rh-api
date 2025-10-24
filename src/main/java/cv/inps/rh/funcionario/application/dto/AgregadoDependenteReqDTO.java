@@ -39,12 +39,12 @@ public class AgregadoDependenteReqDTO  {
   private String genero ;
   
   
+  private String grauParentesco ;
+  
+  
   private String dependente ;
   
   
   private String agregada ;
-  
-  
-  private String grauParentesco ;
 
 }

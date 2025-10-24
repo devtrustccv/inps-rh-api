@@ -6,6 +6,8 @@ import cv.inps.rh.funcionario.domain.models.Endereco;
 import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EnderecoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,7 @@ import java.util.List;
 public class EnderecoMapper {
 
   private final GeografiaMapper geografiaMapper;
+  private final EntityManager em;
 
   public Endereco toDomain(EnderecoEntity entity) {
     if (entity == null) return null;
@@ -37,18 +40,31 @@ public class EnderecoMapper {
     if (endereco == null) return null;
     EnderecoEntity entity = new EnderecoEntity();
 
-    if(endereco.getId() != null){
+    if (endereco.getId() != null) {
       entity.setId(endereco.getId());
     }
 
     entity.setUuid(endereco.getUuid().getValor());
-    entity.setPaisId(endereco.getPais() != null ? geografiaMapper.toEntity(endereco.getPais()) : null);
-    entity.setIlhaId(endereco.getIlha() != null ? geografiaMapper.toEntity(endereco.getIlha()) : null);
-    entity.setConcelhoId(endereco.getConcelho() != null ? geografiaMapper.toEntity(endereco.getConcelho()) : null);
-    entity.setFreguesiaId(endereco.getFreguesia() != null ? geografiaMapper.toEntity(endereco.getFreguesia()) : null);
-    entity.setZonaId(endereco.getZona() != null ? geografiaMapper.toEntity(endereco.getZona()) : null);
+
+    if (endereco.getPais() != null) {
+      entity.setPaisId(em.getReference(GeografiaEntity.class, endereco.getPais().getId()));
+    }
+    if (endereco.getIlha() != null) {
+      entity.setIlhaId(em.getReference(GeografiaEntity.class, endereco.getIlha().getId()));
+    }
+    if (endereco.getConcelho() != null) {
+      entity.setConcelhoId(em.getReference(GeografiaEntity.class, endereco.getConcelho().getId()));
+    }
+    if (endereco.getFreguesia() != null) {
+      entity.setFreguesiaId(em.getReference(GeografiaEntity.class, endereco.getFreguesia().getId()));
+    }
+    if (endereco.getZona() != null) {
+      entity.setZonaId(em.getReference(GeografiaEntity.class, endereco.getZona().getId()));
+    }
+
     entity.setMorada(endereco.getMorada());
     entity.setEstado(endereco.getEstado());
+
     return entity;
   }
 
@@ -120,6 +136,13 @@ public class EnderecoMapper {
     dto.setUuid(endereco.getUuid() != null ? endereco.getUuid().toString() : null);
 
     return dto;
+  }
+
+  public List<EnderecoRespDTO> toDTOList(List<Endereco> enderecos){
+    if(enderecos == null) return null;
+    return enderecos.stream()
+        .map(this::toDTO)
+        .collect(java.util.stream.Collectors.toList());
   }
 
 }

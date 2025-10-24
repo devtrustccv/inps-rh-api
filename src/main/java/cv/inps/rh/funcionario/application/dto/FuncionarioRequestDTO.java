@@ -9,6 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import cv.inps.rh.funcionario.application.dto.AgregadoDependenteReqDTO;
 import cv.inps.rh.funcionario.application.dto.ContactoReqDTO;
 import cv.inps.rh.funcionario.application.dto.EnderecoReqDTO;
 import java.time.LocalDate;
@@ -68,5 +69,8 @@ public class FuncionarioRequestDTO  {
   
   @Valid
   private List<EnderecoReqDTO> enderecos = new ArrayList<>();
+  
+  @Valid
+  private List<AgregadoDependenteReqDTO> familiares = new ArrayList<>();
 
 }

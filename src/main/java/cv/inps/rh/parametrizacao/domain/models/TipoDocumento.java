@@ -66,4 +66,17 @@ public class TipoDocumento {
         estado
     );
   }
+
+  public static TipoDocumento rebuild(
+      Long id
+  ) {
+    return new TipoDocumento(
+        id,
+        null,
+        null,
+        null,
+        null,
+        null
+    );
+  }
 }

@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +48,9 @@ public class DadosBancariosEntity extends AuditEntity {
     private LocalDate dataFim;
 
   
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
   
     @Column(name="obs", length=4000)

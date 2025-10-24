@@ -34,6 +34,7 @@ public class Funcionario {
 
   private List<Contacto>  contactos;
   private List<Endereco> enderecos;
+  private List<Familiar> familiares;
 
 
   private Funcionario(
@@ -57,7 +58,8 @@ public class Funcionario {
       Estado estado,
       Estado estadoValidacao,
       List<Contacto> contactos,
-      List<Endereco> enderecos
+      List<Endereco> enderecos,
+      List<Familiar> familiares
   ) {
     this.id = id;
     this.uuid = uuid;
@@ -80,6 +82,7 @@ public class Funcionario {
     this.estadoValidacao = estadoValidacao;
     this.contactos = contactos!=null? contactos : new ArrayList<>();
     this.enderecos = enderecos != null ? enderecos : new ArrayList<>();
+    this.familiares = familiares != null ? familiares : new ArrayList<>();
 
   }
 
@@ -125,6 +128,7 @@ public class Funcionario {
         Estado.A,
         Estado.P,
         null,
+        null,
         null
     );
   }
@@ -151,7 +155,8 @@ public class Funcionario {
       Estado estado,
       Estado estadoValidacao,
       List<Contacto> contactos,
-      List<Endereco> enderecos
+      List<Endereco> enderecos,
+      List<Familiar> familiares
   ) {
     return new Funcionario(
         id,
@@ -174,7 +179,8 @@ public class Funcionario {
         estado,
         estadoValidacao,
         contactos,
-        enderecos
+        enderecos,
+        familiares
     );
   }
 
@@ -220,6 +226,7 @@ public class Funcionario {
         colaboradorId,
         estado,
         estadoValidacao,
+        null,
         null,
         null
     );
@@ -307,5 +314,54 @@ public class Funcionario {
         .findFirst();
   }
 
+  /*************** familiares *********************/
+  public void syncFamiliares(List<Familiar> novosFamiliares) {
+    if (novosFamiliares == null) return;
+
+    // Adicionar ou atualizar
+    for (Familiar novo : novosFamiliares) {
+      addOrUpdateFamiliar(novo);
+    }
+
+    // Soft delete dos familiares que não estão mais na nova lista
+    for (Familiar existente : familiares) {
+      boolean aindaExiste = novosFamiliares.stream()
+          .anyMatch(f -> Objects.equals(f.getId(), existente.getId()));
+      if (!aindaExiste) {
+        existente.eliminar();
+      }
+    }
+  }
+
+  private void addOrUpdateFamiliar(Familiar familiar) {
+    if (familiar == null) return;
+
+    Optional<Familiar> existenteOpt = findFamiliarById(familiar.getId());
+    if (existenteOpt.isPresent()) {
+      Familiar existente = existenteOpt.get();
+      existente.update(
+          familiar.getNome(),
+          familiar.getDataNascimento(),
+          familiar.getSexo(),
+          familiar.getGrauParentesco(),
+          familiar.getDependencia(),
+          familiar.getMembroAgr(),
+          familiar.getNmPai(),
+          familiar.getNmMae(),
+          familiar.getNumDocumento(),
+          familiar.getTipoDocumento()
+      );
+    } else {
+      if(familiares == null) familiares = new ArrayList<>();
+      this.familiares.add(familiar);
+    }
+  }
+
+  private Optional<Familiar> findFamiliarById(Long id) {
+    if (id == null) return Optional.empty();
+    return this.familiares.stream()
+        .filter(f -> Objects.equals(f.getId(), id))
+        .findFirst();
+  }
 
 }

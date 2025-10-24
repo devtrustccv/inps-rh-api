@@ -20,6 +20,14 @@ public class TipoDocumentoMapper {
     );
   }
 
+  public TipoDocumento toDomain(Long idTipoDocumento) {
+    if (idTipoDocumento == null || idTipoDocumento < 0) return null;
+
+    return TipoDocumento.rebuild(
+        idTipoDocumento);
+  }
+
+
   public TipoDocumentoEntity toEntity(TipoDocumento tipoDocumento) {
     if (tipoDocumento == null) return null;
 
@@ -32,4 +40,6 @@ public class TipoDocumentoMapper {
     entity.setEstado(tipoDocumento.getEstado());
     return entity;
   }
+
+
 }

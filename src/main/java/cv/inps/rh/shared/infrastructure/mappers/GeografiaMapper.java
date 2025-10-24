@@ -51,41 +51,18 @@ public class GeografiaMapper {
    * Converte domínio Geografia para entity
    */
   public GeografiaEntity toEntity(Geografia geografia) {
-    if (geografia == null) return null;
-
     GeografiaEntity entity = new GeografiaEntity();
     entity.setId(geografia.getId());
-
-    if (geografia.getNome() != null)
-      entity.setNome(geografia.getNome());
-
-    if (geografia.getNacionalidade() != null)
-      entity.setNacionalidade(geografia.getNacionalidade());
-
-    if (geografia.getGeografiaPai() != null)
-      entity.setGeogrId(geografia.getGeografiaPai());
-
-    if (geografia.getPais() != null)
-      entity.setPais(geografia.getPais());
-
-    if (geografia.getNivelDetalhe() != null)
-      entity.setNivelDetalhe(geografia.getNivelDetalhe());
-
-    if (geografia.getNomeOficial() != null)
-      entity.setNomeOficial(geografia.getNomeOficial());
-
-    if (geografia.getFlagAlter() != null)
-      entity.setFlagAlter(geografia.getFlagAlter());
-
-    if (geografia.getNomeNorm() != null)
-      entity.setNomeNorm(geografia.getNomeNorm());
-
-    if (geografia.getTipoGeografia() != null)
-      entity.setTpGeogCd(geografia.getTipoGeografia());
-
-    if (geografia.getSituacao() != null)
-      entity.setFlgSituacao(geografia.getSituacao());
-
+    entity.setNome(geografia.getNome());
+    entity.setNacionalidade(geografia.getNacionalidade());
+    entity.setGeogrId(geografia.getGeografiaPai());
+    entity.setPais(geografia.getPais());
+    entity.setNivelDetalhe(geografia.getNivelDetalhe());
+    entity.setNomeOficial(geografia.getNomeOficial());
+    entity.setFlagAlter(geografia.getFlagAlter());
+    entity.setNomeNorm(geografia.getNomeNorm());
+    entity.setTpGeogCd(geografia.getTipoGeografia());
+    entity.setFlgSituacao(geografia.getSituacao());
     return entity;
   }
 

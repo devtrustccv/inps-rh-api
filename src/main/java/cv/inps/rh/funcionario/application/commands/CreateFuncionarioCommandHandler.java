@@ -6,6 +6,7 @@ import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContactoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.EnderecoMapper;
+import cv.inps.rh.funcionario.infrastructure.mappers.FamiliarMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.Geografia;
@@ -34,8 +35,9 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
   private final ContactoMapper contactoMapper;
   private final EnderecoMapper enderecoMapper;
+  private final FamiliarMapper familiarMapper;
 
-   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper) {
+   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper) {
 
      this.funcionarioMapper = funcionarioMapper;
      this.funcionarioRepository = funcionarioRepository;
@@ -43,6 +45,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
      this.geografiaRepository = geografiaRepository;
      this.contactoMapper = contactoMapper;
      this.enderecoMapper = enderecoMapper;
+     this.familiarMapper = familiarMapper;
    }
 
    @IgrpCommandHandler
@@ -80,9 +83,12 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
      var enderecos = enderecoMapper.toEnderecosDomain(dto.getEnderecos());
 
+     var familiares = familiarMapper.toFamiliaresDomain(dto.getFamiliares());
+
 
      funcionario.syncContacts(contactos);
      funcionario.syncEnderecos(enderecos);
+     funcionario.syncFamiliares(familiares);
 
      Funcionario saved = funcionarioRepository.save(funcionario);
 

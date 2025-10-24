@@ -7,8 +7,10 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
+import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,10 +30,14 @@ public class FamiliarEntity extends AuditEntity {
     private Long id;
 
   
+    @Column(name="uuid")
+    private UUID uuid;
+
+  
     @NotNull(message = "tpDocumento is mandatory")
 
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
     @JoinColumn(name = "tp_documento", referencedColumnName = "id")
     private TipoDocumentoEntity tpDocumento;
     @Column(name="num_documento")
@@ -43,15 +49,15 @@ public class FamiliarEntity extends AuditEntity {
 
   
     @Column(name="data_nascimento")
-    private String dataNascimento;
+    private LocalDate dataNascimento;
 
   
     @Column(name="sexo")
     private String sexo;
 
   
-    @Column(name="gpd_id")
-    private String gpdId;
+    @Column(name="gdp_id")
+    private String gdpId;
 
   
     @Column(name="dependencia")
@@ -70,12 +76,9 @@ public class FamiliarEntity extends AuditEntity {
     private String nmMae;
 
   
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
-
-  
-    @Column(name="uuid")
-    private UUID uuid;
+    private Estado estado;
 
      @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "fun_id")

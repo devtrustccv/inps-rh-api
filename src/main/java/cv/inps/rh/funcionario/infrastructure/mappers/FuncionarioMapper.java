@@ -4,6 +4,7 @@ import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDetailsDTO;
 import cv.inps.rh.funcionario.domain.models.Contacto;
 import cv.inps.rh.funcionario.domain.models.Endereco;
+import cv.inps.rh.funcionario.domain.models.Familiar;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.mappers.EstadoMapper;
@@ -26,6 +27,7 @@ public class FuncionarioMapper {
   private final EstadoMapper estadoMapper;
   private final ContactoMapper contactoMapper;
   private final EnderecoMapper enderecoMapper;
+  private final FamiliarMapper familiarMapper;
 
 
   /** Converts JPA entity to domain Funcionario */
@@ -41,6 +43,11 @@ public class FuncionarioMapper {
     List<Endereco> enderecos = entity.getEnderecos() != null
         ? entity.getEnderecos().stream()
         .map(enderecoMapper::toDomain)
+        .collect(Collectors.toCollection(ArrayList::new))
+        : new ArrayList<>();
+
+    List<Familiar> familiares = entity.getFamiliares()!=null
+        ? entity.getFamiliares().stream().map(familiarMapper::toDomain)
         .collect(Collectors.toCollection(ArrayList::new))
         : new ArrayList<>();
 
@@ -65,7 +72,8 @@ public class FuncionarioMapper {
         entity.getEstado(),
         estadoMapper.fromString(entity.getEstadoValidacao()),
         contactos,
-        enderecos
+        enderecos,
+        familiares
     );
   }
 
@@ -139,6 +147,14 @@ public class FuncionarioMapper {
       entity.setEnderecos(enderecosEntities);
     }
 
+    if(funcionario.getFamiliares() != null){
+      var familiaresEntities = funcionario.getFamiliares().stream()
+          .map(familiarMapper::toEntity)
+          .collect(Collectors.toList());
+
+      familiaresEntities.forEach(f -> f.setFunId(entity));
+      entity.setFamiliares(familiaresEntities);
+    }
 
     return entity;
   }
@@ -193,23 +209,18 @@ public class FuncionarioMapper {
 
     // ---- Contactos ----
     if (funcionario.getContactos() != null && !funcionario.getContactos().isEmpty()) {
-      dto.setContactos(
-          funcionario.getContactos().stream()
-              .map(contactoMapper::toDTO)
-              .toList()
-      );
+      dto.setContactos(contactoMapper.toDTOList(funcionario.getContactos()));
     }
 
     // ---- Endereços ----
     if (funcionario.getEnderecos() != null && !funcionario.getEnderecos().isEmpty()) {
-      dto.setEnderecos(
-          funcionario.getEnderecos().stream()
-              .map(enderecoMapper::toDTO)
-              .toList()
-      );
+      dto.setEnderecos(enderecoMapper.toDTOList(funcionario.getEnderecos()));
     }
 
 
+    if(funcionario.getFamiliares() != null && !funcionario.getFamiliares().isEmpty()){
+      dto.setFamiliares(familiarMapper.toResponseDTOList(funcionario.getFamiliares()));
+    }
 
     return dto;
   }

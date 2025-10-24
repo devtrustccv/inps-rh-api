@@ -78,6 +78,18 @@
       "primaryKey": false
     },
     {
+      "name": "grauParentesco",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "dependente",
       "objectType": "java",
       "type": "string",
@@ -91,18 +103,6 @@
     },
     {
       "name": "agregada",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "grauParentesco",
       "objectType": "java",
       "type": "string",
       "required": false,

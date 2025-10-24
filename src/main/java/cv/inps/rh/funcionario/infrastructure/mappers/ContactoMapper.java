@@ -53,6 +53,13 @@ public class ContactoMapper {
     return dto;
   }
 
+  public List<ContactoRespDTO> toDTOList(List<Contacto> contactos) {
+    if (contactos == null) return null;
+    return contactos.stream()
+        .map(this::toDTO)
+        .collect(Collectors.toList());
+  }
+
   public List<Contacto> toContactosDomain(List<ContactoReqDTO> reqDTOS){
     if(reqDTOS == null) return null;
     return reqDTOS.stream()

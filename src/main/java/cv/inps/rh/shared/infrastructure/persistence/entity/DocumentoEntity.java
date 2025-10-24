@@ -8,6 +8,7 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,8 +52,9 @@ public class DocumentoEntity extends AuditEntity {
     private String referenciaId;
 
   
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
      @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "fun_id")
