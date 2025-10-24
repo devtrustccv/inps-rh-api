@@ -7,7 +7,7 @@ import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
 import lombok.Getter;
 
 import java.time.LocalDate;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 public class Funcionario {
@@ -32,6 +32,8 @@ public class Funcionario {
   private final Estado estado;
   private final Estado estadoValidacao;
 
+  private List<Contacto>  contactos;
+
   private Funcionario(
       Long id,
       IdentificadorUnico uuid,
@@ -51,7 +53,8 @@ public class Funcionario {
       Long entidadeId,
       Long colaboradorId,
       Estado estado,
-      Estado estadoValidacao
+      Estado estadoValidacao,
+      List<Contacto> contactos
   ) {
     this.id = id;
     this.uuid = uuid;
@@ -72,6 +75,7 @@ public class Funcionario {
     this.colaboradorId = colaboradorId;
     this.estado = estado;
     this.estadoValidacao = estadoValidacao;
+    this.contactos = contactos!=null? contactos : new ArrayList<>();
   }
 
   // factory metodo para criar um funcionario
@@ -114,12 +118,60 @@ public class Funcionario {
         entidadeId,
         colaboradorId,
         Estado.A,
-        Estado.P
+        Estado.P,
+        null
     );
   }
 
   // Factory para reconstrução de repositorio
   public static Funcionario rebuild(
+      Long id,
+      UUID uuid,
+      TipoDocumento tipoDocumento,
+      String numeroDocumento,
+      String nomeCompleto,
+      String fotografia,
+      LocalDate dataNascimento,
+      String sexo,
+      String nomeMae,
+      String nomePai,
+      String estadoCivil,
+      String nacionalidade,
+      Geografia localNascimento,
+      Long numeroFiscal,
+      String numeroSegurancaSocial,
+      Long entidadeId,
+      Long colaboradorId,
+      Estado estado,
+      Estado estadoValidacao,
+      List<Contacto> contactos
+  ) {
+    return new Funcionario(
+        id,
+        IdentificadorUnico.from(uuid),
+        tipoDocumento,
+        numeroDocumento,
+        nomeCompleto,
+        fotografia,
+        dataNascimento,
+        sexo,
+        nomeMae,
+        nomePai,
+        estadoCivil,
+        nacionalidade,
+        localNascimento,
+        numeroFiscal,
+        numeroSegurancaSocial,
+        entidadeId,
+        colaboradorId,
+        estado,
+        estadoValidacao,
+        contactos
+    );
+  }
+
+
+  public static Funcionario rebuildLight(
       Long id,
       UUID uuid,
       TipoDocumento tipoDocumento,
@@ -159,8 +211,47 @@ public class Funcionario {
         entidadeId,
         colaboradorId,
         estado,
-        estadoValidacao
+        estadoValidacao,
+        null
     );
+  }
+
+
+  public void syncContacts(List<Contacto> newContacts) {
+    if(newContacts == null) return;
+
+    // Adicionar ou atualizar
+    for(Contacto newContact : newContacts) {
+      addOrUpdateContact(newContact);
+    }
+
+    // Soft delete dos contactos que não estão mais na nova lista
+    for(Contacto existing : contactos) {
+      boolean stillExists = newContacts.stream()
+          .anyMatch(c -> Objects.equals(c.getId(), existing.getId()));
+      if(!stillExists) {
+        existing.eliminar();
+      }
+    }
+  }
+
+  private void addOrUpdateContact(Contacto contacto) {
+    if(contacto == null) return;
+
+    Optional<Contacto> existingOpt = findContactById(contacto.getId());
+    if(existingOpt.isPresent()) {
+      Contacto existing = existingOpt.get();
+      existing.update(contacto.getTipoContacto(), contacto.getContacto());
+    } else {
+      this.contactos.add(contacto);
+    }
+  }
+
+  private Optional<Contacto> findContactById(Long id) {
+    if(id == null) return Optional.empty();
+    return this.contactos.stream()
+        .filter(c -> Objects.equals(c.getId(), id))
+        .findFirst();
   }
 
 }

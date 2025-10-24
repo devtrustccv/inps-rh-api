@@ -4,6 +4,7 @@ import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
+import cv.inps.rh.funcionario.infrastructure.mappers.ContactoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.Geografia;
@@ -27,12 +28,15 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
   private final TipoDocumentoRepository tipoDocumentoRepository;
   private final GeografiaRepository geografiaRepository;
 
-   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository) {
+  private final ContactoMapper contactoMapper;
+
+   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper) {
 
      this.funcionarioMapper = funcionarioMapper;
      this.funcionarioRepository = funcionarioRepository;
      this.tipoDocumentoRepository = tipoDocumentoRepository;
      this.geografiaRepository = geografiaRepository;
+     this.contactoMapper = contactoMapper;
    }
 
    @IgrpCommandHandler
@@ -62,9 +66,13 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
          localNascimento,
          dto.getNif(),
          dto.getNumSegurado(),
-         null, // entidadeId (preencher se houver lógica)
-         null  // colaboradorId (preencher se houver lógica)
+         1L, // entidadeId (preencher se houver lógica)
+         1L  // colaboradorId (preencher se houver lógica)
      );
+
+     var contactos = contactoMapper.toContactosDomain(dto.getContactos());
+
+     funcionario.syncContacts(contactos);
 
      Funcionario saved = funcionarioRepository.save(funcionario);
 

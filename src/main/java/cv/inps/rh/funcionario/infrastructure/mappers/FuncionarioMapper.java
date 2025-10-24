@@ -1,6 +1,7 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
+import cv.inps.rh.funcionario.domain.models.Contacto;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.mappers.EstadoMapper;
@@ -10,6 +11,10 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 @RequiredArgsConstructor
 public class FuncionarioMapper {
@@ -17,13 +22,47 @@ public class FuncionarioMapper {
   private final TipoDocumentoMapper tipoDocumentoMapper;
   private final GeografiaMapper geografiaMapper;
   private final EstadoMapper estadoMapper;
+  private final ContactoMapper contactoMapper;
 
 
   /** Converts JPA entity to domain Funcionario */
   public Funcionario toDomain(FuncionarioEntity entity) {
     if (entity == null) return null;
 
+    List<Contacto> contactos = entity.getContactos() != null
+        ? entity.getContactos().stream()
+        .map(contactoMapper::toDomain)
+        .collect(Collectors.toCollection(ArrayList::new))
+        : new ArrayList<>();
+
     return Funcionario.rebuild(
+        entity.getId(),
+        entity.getUuid(),
+        entity.getTipoDocumentoId() != null ? tipoDocumentoMapper.toDomain(entity.getTipoDocumentoId()) : null,
+        entity.getNumDocumento(),
+        entity.getNome(),
+        entity.getFotografia(),
+        entity.getDataNascimento(),
+        entity.getSexo(),
+        entity.getNmMae(),
+        entity.getNmPai(),
+        entity.getEstadoCivil(),
+        entity.getNacionalidade(),
+        entity.getLocNascId() != null ? geografiaMapper.toDomain(entity.getLocNascId()) : null,
+        entity.getNif(),
+        entity.getNuSegInps(),
+        entity.getEntId(),
+        entity.getIdColaborador(),
+        entity.getEstado(),
+        estadoMapper.fromString(entity.getEstadoValidacao()),
+        contactos
+    );
+  }
+
+  public Funcionario toDomainLigth(FuncionarioEntity entity) {
+    if (entity == null) return null;
+
+    return Funcionario.rebuildLight(
         entity.getId(),
         entity.getUuid(),
         entity.getTipoDocumentoId() != null ? tipoDocumentoMapper.toDomain(entity.getTipoDocumentoId()) : null,
@@ -45,6 +84,7 @@ public class FuncionarioMapper {
         estadoMapper.fromString(entity.getEstadoValidacao())
     );
   }
+
 
   /** Converts domain Funcionario to JPA entity */
   public FuncionarioEntity toEntity(Funcionario funcionario) {
@@ -69,6 +109,18 @@ public class FuncionarioMapper {
     entity.setIdColaborador(funcionario.getColaboradorId());
     entity.setEstado(funcionario.getEstado());
     entity.setEstadoValidacao(funcionario.getEstadoValidacao().name());
+
+
+    if (funcionario.getContactos() != null) {
+      var contactosEntities = funcionario.getContactos().stream()
+          .map(contactoMapper::toEntity)
+          .collect(Collectors.toList());
+
+       contactosEntities.forEach(c -> c.setFunId(entity)); // garante o relacionamento
+      entity.setContactos(contactosEntities);
+    }
+
+
     return entity;
   }
 

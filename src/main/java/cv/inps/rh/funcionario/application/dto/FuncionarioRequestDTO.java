@@ -9,7 +9,10 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import cv.inps.rh.funcionario.application.dto.ContactoReqDTO;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -58,5 +61,8 @@ public class FuncionarioRequestDTO  {
   
   
   private String numSegurado ;
+  
+  @Valid
+  private List<ContactoReqDTO> contactos = new ArrayList<>();
 
 }
