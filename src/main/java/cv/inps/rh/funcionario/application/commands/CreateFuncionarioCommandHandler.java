@@ -37,8 +37,9 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
   private final FormacaoFeitaMapper formacaoFeitaMapper;
   private final ExperienciaProfissionalMapper experienciaProfissionalMapper;
   private final DocumentoMapper documentoMapper;
+  private final DadosBancariosMapper dadosBancariosMapper;
 
-   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper) {
+   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper) {
 
      this.funcionarioMapper = funcionarioMapper;
      this.funcionarioRepository = funcionarioRepository;
@@ -51,6 +52,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
      this.formacaoFeitaMapper = formacaoFeitaMapper;
      this.experienciaProfissionalMapper = experienciaProfissionalMapper;
      this.documentoMapper = documentoMapper;
+     this.dadosBancariosMapper = dadosBancariosMapper;
    }
 
    @IgrpCommandHandler
@@ -98,6 +100,8 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
      var documentos = documentoMapper.toDocumentosDomain(dto.getAnexos());
 
+     var dadosBancarios = dadosBancariosMapper.toDadosBancariosDomain(dto.getDadosBancarios());
+
 
      funcionario.syncContacts(contactos);
      funcionario.syncEnderecos(enderecos);
@@ -106,6 +110,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
      funcionario.syncFormacoes(formacoesFeitas);
      funcionario.syncExperiencias(experienciasProfissionais);
      funcionario.syncDocumentos(documentos);
+     funcionario.syncDadosBancarios(dadosBancarios);
 
      Funcionario saved = funcionarioRepository.save(funcionario);
 

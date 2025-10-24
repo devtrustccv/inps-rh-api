@@ -28,6 +28,7 @@ public class FuncionarioMapper {
   private final FormacaoFeitaMapper formacaoFeitaMapper;
   private final ExperienciaProfissionalMapper experienciaProfissionalMapper;
   private final DocumentoMapper documentoMapper;
+  private final DadosBancariosMapper dadosBancariosMapper;
 
 
   /**
@@ -71,6 +72,9 @@ public class FuncionarioMapper {
     List<Documento> documentos = entity.getDocumentos()!=null ? entity.getDocumentos().stream()
         .map(documentoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
+    List<DadosBancarios> dadosBancarios = entity.getDadosBancarios()!=null ? entity.getDadosBancarios().stream()
+        .map(dadosBancariosMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
+
     return Funcionario.rebuild(
         entity.getId(),
         entity.getUuid(),
@@ -97,7 +101,8 @@ public class FuncionarioMapper {
         habilitacoesLiterarias,
         formacaoFeitas,
         experienciasProfissionais,
-        documentos
+        documentos,
+        dadosBancarios
     );
   }
 
@@ -223,6 +228,16 @@ public class FuncionarioMapper {
       entity.setDocumentos(documentosEntities);
     }
 
+    //dados bancarios
+    if(funcionario.getDadosBancarios() != null) {
+      var dadosBancariosEntities = funcionario.getDadosBancarios().stream()
+          .map(dadosBancariosMapper::toEntity)
+          .collect(Collectors.toList());
+      dadosBancariosEntities.forEach(d -> d.setFunId(entity));
+      entity.setDadosBancarios(dadosBancariosEntities);
+
+    }
+
     return entity;
   }
 
@@ -303,6 +318,10 @@ public class FuncionarioMapper {
 
     if(funcionario.getDocumentos()!=null && !funcionario.getDocumentos().isEmpty()) {
       dto.setAnexos(documentoMapper.toResponseDTOList(funcionario.getDocumentos()));
+    }
+
+    if(funcionario.getDadosBancarios()!=null && !funcionario.getDadosBancarios().isEmpty()) {
+      dto.setDadosBancarios(dadosBancariosMapper.toResponseDTOList(funcionario.getDadosBancarios()));
     }
 
     return dto;

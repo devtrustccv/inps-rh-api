@@ -86,7 +86,7 @@ public class DadosBancariosMapper {
     );
   }
 
-  public List<DadosBancarios> toDomainList(java.util.List<DadosBancariosReqDTO> dtos) {
+  public List<DadosBancarios> toDadosBancariosDomain(java.util.List<DadosBancariosReqDTO> dtos) {
     if (dtos == null) return null;
     return dtos.stream()
         .map(this::toDomain)
