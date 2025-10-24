@@ -1,3 +1,8 @@
+CREATE TABLE "ENTIDADE" (
+                            "ID" NUMBER,
+                            CONSTRAINT PK_ENTIDADE PRIMARY KEY ( id )
+);
+
 CREATE TABLE "INSTITUICOES" (
                                 "ID" NUMBER,
                                 "CODIGO" VARCHAR2(200 BYTE),
@@ -58,7 +63,8 @@ CREATE TABLE "INSTITUICOES" (
                                 "DT_RECUPERACAO" DATE,
                                 "RECUPERADO" NUMBER DEFAULT 0,
                                 "USR_RECUPERA_ID" NUMBER,
-                                "PROC_SALARIOS" NUMBER DEFAULT 3
+                                "PROC_SALARIOS" NUMBER DEFAULT 3,
+                                CONSTRAINT PK_INSTITUICOES PRIMARY KEY ( id )
 );
 
 
@@ -85,7 +91,8 @@ CREATE TABLE "RH_TIPO_MOVIMENTOS" (
                                       "ENT_ID" NUMBER,
                                       "TIPO_SAL" VARCHAR2(5 BYTE),
                                       "ACUMULADO" VARCHAR2(3 BYTE),
-                                      "ESTADO" VARCHAR2(10 BYTE) DEFAULT 'INACTIVO'
+                                      "ESTADO" VARCHAR2(10 BYTE) DEFAULT 'INACTIVO',
+                                      CONSTRAINT PK_TIPO_MOVIMENTOS PRIMARY KEY ( id )
 );
 
 CREATE TABLE "GLB_T_UPS" (
@@ -109,7 +116,8 @@ CREATE TABLE "GLB_T_UPS" (
                              "CODIGO" VARCHAR2(10 BYTE),
                              "COORDENADAS" VARCHAR2(32 BYTE),
                              "COORD_LATITUDE" VARCHAR2(32 BYTE),
-                             "COORD_LONGITUDE" VARCHAR2(32 BYTE)
+                             "COORD_LONGITUDE" VARCHAR2(32 BYTE),
+                             CONSTRAINT PK_UPS PRIMARY KEY ( id )
 );
 
 CREATE TABLE GLB_T_GEOGRAFIA (
@@ -795,7 +803,7 @@ SHOW ERRORS TRIGGER TRG_LOCAL_BALCAO;
 CREATE TABLE RH_T_SECAO (
                             ID                  NUMBER           NOT NULL,
                             NOME                VARCHAR2(200)    NOT NULL,
-                            INSTIT_ID           NUMBER           NOT NULL,  -- INPSSIGOF.INSTITUICOES.ID
+                            INSTIT_ID           NUMBER           NOT NULL,  -- INSTITUICOES.ID
                             ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E
                             DATA_REGISTO        DATE             NOT NULL,
                             USER_REGISTO_ID     NUMBER           NOT NULL,
@@ -806,7 +814,7 @@ CREATE TABLE RH_T_SECAO (
                             UUID RAW(16)    NOT NULL,
 
                             CONSTRAINT PK_SESSAO PRIMARY KEY (ID),
-    --CONSTRAINT FK_SESSAO_INSTIT FOREIGN KEY (INSTIT_ID) REFERENCES INPSSIGOF.INSTITUICOES (ID),
+                            CONSTRAINT FK_SESSAO_INSTIT FOREIGN KEY (INSTIT_ID) REFERENCES INSTITUICOES (ID),
                             CONSTRAINT CK_SECAO_ESTADO CHECK (ESTADO IN ('A','I','E'))
 );
 
@@ -1348,7 +1356,7 @@ SHOW ERRORS TRIGGER TRG_EXPERIENCIA_PROF;
    ========================================================= */
 CREATE TABLE RH_T_DADOS_BANCARIOS (
                                       ID                   NUMBER           NOT NULL,
-                                      ENT_ID               NUMBER           NOT NULL,          -- INPSSIGOF.ENTIDADE.ID
+                                      ENT_ID               NUMBER           NOT NULL,          -- ENTIDADE.ID
                                       NUM_CONTA            NUMBER(11,0),
                                       DATA_INICIO          DATE             NOT NULL,
                                       DATA_FIM             DATE,
@@ -1367,7 +1375,7 @@ CREATE TABLE RH_T_DADOS_BANCARIOS (
 
     -- Foreign Keys
                                       CONSTRAINT FK_BANCO_FUN   FOREIGN KEY (FUN_ID)  REFERENCES RH_T_FUNCIONARIOS (ID),
-    --CONSTRAINT FK_BANCO_ENT   FOREIGN KEY (ENT_ID)  REFERENCES INPSSIGOF.ENTIDADE (ID),
+                                      CONSTRAINT FK_BANCO_ENT   FOREIGN KEY (ENT_ID)  REFERENCES ENTIDADE (ID),
 
     -- Checks
                                       CONSTRAINT CK_DD_BANC_ESTADO  CHECK (ESTADO IN ('A','I','E','P')),
@@ -1557,7 +1565,7 @@ SHOW ERRORS TRIGGER TRG_CONTRATO;
    ========================================================= */
 CREATE TABLE RH_T_MOBILIDADE (
                                  ID                   NUMBER           NOT NULL,
-                                 INSTID_ID            NUMBER,                               -- FK -> INPSSIGOF.INSTITUICOES.ID
+                                 INSTID_ID            NUMBER,                               -- FK -> INSTITUICOES.ID
                                  LOCAL_TRAB_ID        NUMBER,                               -- FK -> RH_T_LOCAL_TRABALHO.ID
                                  SECAO_ID             NUMBER,                               -- FK -> RH_T_SECAO.ID
                                  FUN_ID               NUMBER           NOT NULL,            -- FK -> RH_T_FUNCIONARIOS.ID
@@ -1578,7 +1586,7 @@ CREATE TABLE RH_T_MOBILIDADE (
     -- Foreign Keys
                                  CONSTRAINT FK_MOB_FUN        FOREIGN KEY (FUN_ID)       REFERENCES RH_T_FUNCIONARIOS (ID),
                                  CONSTRAINT FK_MOB_CONTRAT    FOREIGN KEY (CONTRATO_ID)  REFERENCES RH_T_CONTRATO (ID),
-    --CONSTRAINT FK_MOB_INSTIT     FOREIGN KEY (INSTID_ID)    REFERENCES INPSSIGOF.INSTITUICOES (ID),
+                                 CONSTRAINT FK_MOB_INSTIT     FOREIGN KEY (INSTID_ID)    REFERENCES INSTITUICOES (ID),
                                  CONSTRAINT FK_MOB_LOCAL_TRAB FOREIGN KEY (LOCAL_TRAB_ID) REFERENCES RH_T_PARAM_LOCAL_TRAB (ID),
                                  CONSTRAINT FK_MOB_SECAO      FOREIGN KEY (SECAO_ID)     REFERENCES RH_T_SECAO (ID),
 
@@ -1753,7 +1761,7 @@ SHOW ERRORS TRIGGER TRG_REGIME_TRAB;
 CREATE TABLE RH_T_TIPOS_RELACIONAMENTO (
                                            ID                     NUMBER            NOT NULL,
                                            CARGO_ID               NUMBER            NOT NULL,  -- RH_T_PARAM_CARGO.ID
-                                           INSTIT_ID              NUMBER            NOT NULL,  -- INPSSIGOF.INSTITUICOES.ID
+                                           INSTIT_ID              NUMBER            NOT NULL,  -- INSTITUICOES.ID
                                            SECCAO_ID              NUMBER            NOT NULL,  -- RH_T_SECAO.ID
                                            CARR_PCC_ID            NUMBER            NOT NULL,  -- RH_T_PARAM_CARREIRA.ID
                                            CATEGORIA_ID           NUMBER,                      -- RH_T_PARAM_CATEGORIA.ID
@@ -1798,7 +1806,7 @@ CREATE TABLE RH_T_TIPOS_RELACIONAMENTO (
                                            CONSTRAINT FK_TIPREL_FUN            FOREIGN KEY (FUN_ID)            REFERENCES RH_T_FUNCIONARIOS (ID),
                                            CONSTRAINT FK_TIPREL_CARR_PCCS      FOREIGN KEY (CARR_PCC_ID)       REFERENCES RH_T_PARAM_CARREIRA (ID),
                                            CONSTRAINT FK_TIPREL_CARGO          FOREIGN KEY (CARGO_ID)          REFERENCES RH_T_PARAM_CARGO (ID),
-    --CONSTRAINT FK_TIPREL_INSTIT         FOREIGN KEY (INSTIT_ID)         REFERENCES INPSSIGOF.INSTITUICOES (ID),
+                                           CONSTRAINT FK_TIPREL_INSTIT         FOREIGN KEY (INSTIT_ID)         REFERENCES INSTITUICOES (ID),
                                            CONSTRAINT FK_TIPREL_SECCAO         FOREIGN KEY (SECCAO_ID)         REFERENCES RH_T_SECAO (ID),
                                            CONSTRAINT FK_TIPREL_ESCALAO        FOREIGN KEY (ESCALAO_ID)        REFERENCES RH_T_PARAM_ESCALAO (ID),
                                            CONSTRAINT FK_TIPREL_VINCULO        FOREIGN KEY (VINCULO_ID)        REFERENCES RH_T_PARAM_VINCULO (ID),
@@ -1917,7 +1925,7 @@ SHOW ERRORS TRIGGER TRG_REGIME_MODAL;
    ========================================================= */
 CREATE TABLE RH_T_DEF_REMUNERACOES (
                                        ID                   NUMBER            NOT NULL,
-                                       TM_ID                NUMBER            NOT NULL,          -- INPSSIGOF.RH_TIPOS_MOVIMENTO.ID
+                                       TM_ID                NUMBER            NOT NULL,          -- RH_TIPO_MOVIMENTOS.ID
                                        PERCENTAGEM          NUMBER,                              -- (%). Opcional
                                        VALOR                NUMBER            NOT NULL,          -- valor absoluto
                                        ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
@@ -1937,7 +1945,7 @@ CREATE TABLE RH_T_DEF_REMUNERACOES (
                                        CONSTRAINT PK_DEF_REMUN PRIMARY KEY (ID),
 
     -- Foreign Keys
-    --CONSTRAINT FK_DEFREM_TM      FOREIGN KEY (TM_ID)       REFERENCES INPSSIGOF.RH_TIPOS_MOVIMENTO (ID),
+                                       CONSTRAINT FK_DEFREM_TM      FOREIGN KEY (TM_ID)       REFERENCES RH_TIPO_MOVIMENTOS (ID),
                                        CONSTRAINT FK_DEFREM_FUN     FOREIGN KEY (FUN_ID)      REFERENCES RH_T_FUNCIONARIOS (ID),
                                        CONSTRAINT FK_DEFREM_CTR     FOREIGN KEY (CONTRATO_ID) REFERENCES RH_T_CONTRATO (ID),
 
@@ -2038,7 +2046,7 @@ SHOW ERRORS TRIGGER TRG_REMUN_TIPREL;
    ========================================================= */
 CREATE TABLE RH_T_DEF_PAGAMENTOS (
                                      ID                   NUMBER            NOT NULL,
-                                     TM_ID                NUMBER            NOT NULL,          -- INPSSIGOF.RH_TIPOS_MOVIMENTO.ID
+                                     TM_ID                NUMBER            NOT NULL,          -- RH_TIPO_MOVIMENTOS.ID
                                      VALOR                NUMBER            NOT NULL,
                                      DATA_INICIO          DATE              NOT NULL,
                                      DATA_FIM             DATE,
@@ -2058,7 +2066,7 @@ CREATE TABLE RH_T_DEF_PAGAMENTOS (
                                      CONSTRAINT PK_DEF_PAGAM PRIMARY KEY (ID),
 
     -- Foreign Keys
-    --CONSTRAINT FK_PAG_TM          FOREIGN KEY (TM_ID)       REFERENCES INPSSIGOF.RH_TIPOS_MOVIMENTO (ID),
+                                     CONSTRAINT FK_PAG_TM          FOREIGN KEY (TM_ID)       REFERENCES RH_TIPO_MOVIMENTOS (ID),
                                      CONSTRAINT FK_PAG_FUN         FOREIGN KEY (FUN_ID)      REFERENCES RH_T_FUNCIONARIOS (ID),
                                      CONSTRAINT FK_PAG_CONTRATO    FOREIGN KEY (CONTRATO_ID) REFERENCES RH_T_CONTRATO (ID),
                                      CONSTRAINT FK_PAG_TIPREL      FOREIGN KEY (TIPREL_ID)   REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
