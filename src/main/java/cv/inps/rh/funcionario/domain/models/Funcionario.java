@@ -35,6 +35,7 @@ public class Funcionario {
   private List<Contacto>  contactos;
   private List<Endereco> enderecos;
   private List<Familiar> familiares;
+  private List<HabilitacaoLiteraria> habilitacaoLiterarias;
 
 
   private Funcionario(
@@ -59,7 +60,8 @@ public class Funcionario {
       Estado estadoValidacao,
       List<Contacto> contactos,
       List<Endereco> enderecos,
-      List<Familiar> familiares
+      List<Familiar> familiares,
+      List<HabilitacaoLiteraria> habilitacaoLiterarias
   ) {
     this.id = id;
     this.uuid = uuid;
@@ -83,6 +85,7 @@ public class Funcionario {
     this.contactos = contactos!=null? contactos : new ArrayList<>();
     this.enderecos = enderecos != null ? enderecos : new ArrayList<>();
     this.familiares = familiares != null ? familiares : new ArrayList<>();
+    this.habilitacaoLiterarias = habilitacaoLiterarias != null ? habilitacaoLiterarias : new ArrayList<>();
 
   }
 
@@ -129,6 +132,7 @@ public class Funcionario {
         Estado.P,
         null,
         null,
+        null,
         null
     );
   }
@@ -156,7 +160,8 @@ public class Funcionario {
       Estado estadoValidacao,
       List<Contacto> contactos,
       List<Endereco> enderecos,
-      List<Familiar> familiares
+      List<Familiar> familiares,
+      List<HabilitacaoLiteraria> habilitacaoLiterarias
   ) {
     return new Funcionario(
         id,
@@ -180,7 +185,8 @@ public class Funcionario {
         estadoValidacao,
         contactos,
         enderecos,
-        familiares
+        familiares,
+        habilitacaoLiterarias
     );
   }
 
@@ -226,6 +232,7 @@ public class Funcionario {
         colaboradorId,
         estado,
         estadoValidacao,
+        null,
         null,
         null,
         null
@@ -363,5 +370,53 @@ public class Funcionario {
         .filter(f -> Objects.equals(f.getId(), id))
         .findFirst();
   }
+
+  /*************** habilitacoesLiterarias *********************/
+  public void syncHabilitacoes(List<HabilitacaoLiteraria> novasHabilitacoes) {
+    if (novasHabilitacoes == null) return;
+
+    // Adicionar ou atualizar
+    for (HabilitacaoLiteraria nova : novasHabilitacoes) {
+      addOrUpdateHabilitacao(nova);
+    }
+
+    // Soft delete das habilitações que não estão mais na nova lista
+    for (HabilitacaoLiteraria existente : habilitacaoLiterarias) {
+      boolean aindaExiste = novasHabilitacoes.stream()
+          .anyMatch(h -> Objects.equals(h.getId(), existente.getId()));
+      if (!aindaExiste) {
+        existente.eliminar();
+      }
+    }
+  }
+
+  private void addOrUpdateHabilitacao(HabilitacaoLiteraria habilitacao) {
+    if (habilitacao == null) return;
+
+    Optional<HabilitacaoLiteraria> existenteOpt = findHabilitacaoById(habilitacao.getId());
+    if (existenteOpt.isPresent()) {
+      HabilitacaoLiteraria existente = existenteOpt.get();
+      existente.update(
+          habilitacao.getPais(),
+          habilitacao.getEstabelecimento(),
+          habilitacao.getArea(),
+          habilitacao.getNomeCurso(),
+          habilitacao.getNivel(),
+          habilitacao.getDataInicio(),
+          habilitacao.getDataFim(),
+          habilitacao.getConcluido()
+      );
+    } else {
+      this.habilitacaoLiterarias.add(habilitacao);
+    }
+  }
+
+  private Optional<HabilitacaoLiteraria> findHabilitacaoById(Long id) {
+    if (id == null) return Optional.empty();
+    return this.habilitacaoLiterarias.stream()
+        .filter(h -> Objects.equals(h.getId(), id))
+        .findFirst();
+  }
+
 
 }

@@ -2,10 +2,7 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDetailsDTO;
-import cv.inps.rh.funcionario.domain.models.Contacto;
-import cv.inps.rh.funcionario.domain.models.Endereco;
-import cv.inps.rh.funcionario.domain.models.Familiar;
-import cv.inps.rh.funcionario.domain.models.Funcionario;
+import cv.inps.rh.funcionario.domain.models.*;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.mappers.EstadoMapper;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
@@ -28,6 +25,7 @@ public class FuncionarioMapper {
   private final ContactoMapper contactoMapper;
   private final EnderecoMapper enderecoMapper;
   private final FamiliarMapper familiarMapper;
+  private final HabilitacaoLiterariaMapper habilitacaoLiterariaMapper;
 
 
   /** Converts JPA entity to domain Funcionario */
@@ -48,6 +46,11 @@ public class FuncionarioMapper {
 
     List<Familiar> familiares = entity.getFamiliares()!=null
         ? entity.getFamiliares().stream().map(familiarMapper::toDomain)
+        .collect(Collectors.toCollection(ArrayList::new))
+        : new ArrayList<>();
+
+    List<HabilitacaoLiteraria> habilitacoesLiterarias = entity.getHabilitacoesLiterarias()!=null
+        ? entity.getHabilitacoesLiterarias().stream().map(habilitacaoLiterariaMapper::toDomain)
         .collect(Collectors.toCollection(ArrayList::new))
         : new ArrayList<>();
 
@@ -73,7 +76,8 @@ public class FuncionarioMapper {
         estadoMapper.fromString(entity.getEstadoValidacao()),
         contactos,
         enderecos,
-        familiares
+        familiares,
+        habilitacoesLiterarias
     );
   }
 
@@ -129,6 +133,7 @@ public class FuncionarioMapper {
     entity.setEstadoValidacao(funcionario.getEstadoValidacao().name());
 
 
+    //contactos
     if (funcionario.getContactos() != null) {
       var contactosEntities = funcionario.getContactos().stream()
           .map(contactoMapper::toEntity)
@@ -138,6 +143,7 @@ public class FuncionarioMapper {
       entity.setContactos(contactosEntities);
     }
 
+    //enderecos
     if(funcionario.getEnderecos() != null){
       var enderecosEntities = funcionario.getEnderecos().stream()
           .map(enderecoMapper::toEntity)
@@ -147,6 +153,7 @@ public class FuncionarioMapper {
       entity.setEnderecos(enderecosEntities);
     }
 
+    // familiares
     if(funcionario.getFamiliares() != null){
       var familiaresEntities = funcionario.getFamiliares().stream()
           .map(familiarMapper::toEntity)
@@ -154,6 +161,16 @@ public class FuncionarioMapper {
 
       familiaresEntities.forEach(f -> f.setFunId(entity));
       entity.setFamiliares(familiaresEntities);
+    }
+
+    // habilitacoes literarias
+    if(funcionario.getHabilitacaoLiterarias()!=null){
+      var habilitacoesLiterariasEntities = funcionario.getHabilitacaoLiterarias().stream()
+          .map(habilitacaoLiterariaMapper::toEntity)
+          .collect(Collectors.toList());
+
+      habilitacoesLiterariasEntities.forEach(h -> h.setFunId(entity));
+      entity.setHabilitacoesLiterarias(habilitacoesLiterariasEntities);
     }
 
     return entity;
@@ -220,6 +237,10 @@ public class FuncionarioMapper {
 
     if(funcionario.getFamiliares() != null && !funcionario.getFamiliares().isEmpty()){
       dto.setFamiliares(familiarMapper.toResponseDTOList(funcionario.getFamiliares()));
+    }
+
+    if(funcionario.getHabilitacaoLiterarias()!=null && !funcionario.getHabilitacaoLiterarias().isEmpty()){
+      dto.setHabilitacoesLiterarias(habilitacaoLiterariaMapper.toResponseDTOList(funcionario.getHabilitacaoLiterarias()));
     }
 
     return dto;

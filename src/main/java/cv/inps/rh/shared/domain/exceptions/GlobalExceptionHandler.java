@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
@@ -131,6 +133,8 @@ public class GlobalExceptionHandler {
 
     return problem;
   }
+
+
 
   private Throwable getRootCause(Throwable throwable) {
     Throwable cause = throwable.getCause();

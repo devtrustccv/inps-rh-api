@@ -18,9 +18,9 @@
       "primaryKey": false
     },
     {
-      "name": "pais",
+      "name": "paisId",
       "objectType": "java",
-      "type": "integer",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,

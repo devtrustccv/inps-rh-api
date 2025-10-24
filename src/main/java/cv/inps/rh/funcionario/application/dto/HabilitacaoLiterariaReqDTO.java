@@ -24,7 +24,7 @@ public class HabilitacaoLiterariaReqDTO  {
   private Long id ;
   
   
-  private Integer pais ;
+  private Long paisId ;
   
   
   private String estabelecimento ;

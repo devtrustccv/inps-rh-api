@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import cv.inps.rh.funcionario.application.dto.AgregadoDependenteReqDTO;
 import cv.inps.rh.funcionario.application.dto.ContactoReqDTO;
 import cv.inps.rh.funcionario.application.dto.EnderecoReqDTO;
+import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaReqDTO;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,5 +73,8 @@ public class FuncionarioRequestDTO  {
   
   @Valid
   private List<AgregadoDependenteReqDTO> familiares = new ArrayList<>();
+  
+  @Valid
+  private List<HabilitacaoLiterariaReqDTO> habilitacoesLiterarias = new ArrayList<>();
 
 }

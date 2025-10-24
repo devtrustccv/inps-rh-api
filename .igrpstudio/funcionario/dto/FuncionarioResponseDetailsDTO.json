@@ -250,6 +250,20 @@
       "primaryKey": false,
       "collectionType": "list",
       "module": "funcionario"
+    },
+    {
+      "name": "habilitacoesLiterarias",
+      "objectType": "dto",
+      "type": "HabilitacaoLiterariaResp",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
     }
   ],
   "id": "pjb2kk86vo_copy_copy"

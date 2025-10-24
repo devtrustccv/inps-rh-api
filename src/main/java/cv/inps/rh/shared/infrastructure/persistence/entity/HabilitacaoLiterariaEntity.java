@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,8 +64,9 @@ public class HabilitacaoLiterariaEntity extends AuditEntity {
     private Integer concluido;
 
   
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
   
     @Column(name="uuid")
