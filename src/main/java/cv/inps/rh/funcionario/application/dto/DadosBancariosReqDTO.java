@@ -27,10 +27,7 @@ public class DadosBancariosReqDTO  {
   private Long entidadeBancariaId ;
   
   
-  private String numConta ;
-  
-  
-  private String nib ;
+  private Long numConta ;
   
   
   private LocalDate dataInicio ;

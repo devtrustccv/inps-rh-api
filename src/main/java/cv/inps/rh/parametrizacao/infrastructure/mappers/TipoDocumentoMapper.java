@@ -1,4 +1,4 @@
-package cv.inps.rh.shared.infrastructure.mappers;
+package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
 import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;

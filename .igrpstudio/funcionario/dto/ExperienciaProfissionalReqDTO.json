@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "DadosBancariosReq",
+  "name": "ExperienciaProfissionalReq",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
@@ -18,7 +18,7 @@
       "primaryKey": false
     },
     {
-      "name": "entidadeBancariaId",
+      "name": "paisId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -30,9 +30,9 @@
       "primaryKey": false
     },
     {
-      "name": "numConta",
+      "name": "empresa",
       "objectType": "java",
-      "type": "long",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -42,7 +42,19 @@
       "primaryKey": false
     },
     {
-      "name": "dataInicio",
+      "name": "cargo",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dataEntrada",
       "objectType": "java",
       "type": "date",
       "required": false,
@@ -54,9 +66,21 @@
       "primaryKey": false
     },
     {
-      "name": "dataFim",
+      "name": "dataSaida",
       "objectType": "java",
       "type": "date",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "observacoes",
+      "objectType": "java",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -66,5 +90,5 @@
       "primaryKey": false
     }
   ],
-  "id": "h4lj00zfxv"
+  "id": "cee954sz19"
 }

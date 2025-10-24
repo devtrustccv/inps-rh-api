@@ -10,8 +10,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import cv.inps.rh.funcionario.application.dto.AgregadoDependenteRespDTO;
+import cv.inps.rh.funcionario.application.dto.AnexoRespDTO;
 import cv.inps.rh.funcionario.application.dto.ContactoRespDTO;
+import cv.inps.rh.funcionario.application.dto.DadosBancariosRespDTO;
 import cv.inps.rh.funcionario.application.dto.EnderecoRespDTO;
+import cv.inps.rh.funcionario.application.dto.ExperienciaProfissionalRespDTO;
+import cv.inps.rh.funcionario.application.dto.FormacaoProfissionalRespDTO;
 import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaRespDTO;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -88,5 +92,17 @@ public class FuncionarioResponseDetailsDTO  {
   
   @Valid
   private List<HabilitacaoLiterariaRespDTO> habilitacoesLiterarias = new ArrayList<>();
+  
+  @Valid
+  private List<FormacaoProfissionalRespDTO> formacoesFeitas = new ArrayList<>();
+  
+  @Valid
+  private List<ExperienciaProfissionalRespDTO> experienciasProfssionais = new ArrayList<>();
+  
+  @Valid
+  private List<DadosBancariosRespDTO> dadosBancarios = new ArrayList<>();
+  
+  @Valid
+  private List<AnexoRespDTO> anexos = new ArrayList<>();
 
 }

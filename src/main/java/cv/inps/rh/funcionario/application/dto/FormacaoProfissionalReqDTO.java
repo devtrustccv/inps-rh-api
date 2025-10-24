@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.time.LocalDate;
+
 
 @Data
 @NoArgsConstructor
@@ -17,25 +17,25 @@ import java.time.LocalDate;
 
 
 @IgrpDTO
-public class DadosBancariosRespDTO  {
+public class FormacaoProfissionalReqDTO  {
 
   
   
   private Long id ;
   
   
-  private Long entidadeBancariaId ;
+  private Long paisId ;
   
   
-  private String entidadeBancariaDesc ;
+  private String estabelecimento ;
   
   
-  private Long numConta ;
+  private String tipoFormacao ;
   
   
-  private LocalDate dataInicio ;
+  private String designacao ;
   
   
-  private LocalDate dataFim ;
+  private String nivel ;
 
 }

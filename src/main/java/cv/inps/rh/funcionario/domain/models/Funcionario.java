@@ -8,6 +8,7 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 public class Funcionario {
@@ -36,6 +37,11 @@ public class Funcionario {
   private List<Endereco> enderecos;
   private List<Familiar> familiares;
   private List<HabilitacaoLiteraria> habilitacaoLiterarias;
+  private List<FormacaoFeita> formacoes;
+  private List<ExperienciaProfissional> experiencias;
+  private List<Documento> documentos;
+  private List<DadosBancarios> dadosBancarios;
+
 
 
   private Funcionario(
@@ -61,7 +67,12 @@ public class Funcionario {
       List<Contacto> contactos,
       List<Endereco> enderecos,
       List<Familiar> familiares,
-      List<HabilitacaoLiteraria> habilitacaoLiterarias
+      List<HabilitacaoLiteraria> habilitacaoLiterarias,
+      List<FormacaoFeita> formacoes,
+      List<ExperienciaProfissional> experiencias,
+      List<Documento> documentos,
+      List<DadosBancarios> dadosBancarios
+
   ) {
     this.id = id;
     this.uuid = uuid;
@@ -86,6 +97,10 @@ public class Funcionario {
     this.enderecos = enderecos != null ? enderecos : new ArrayList<>();
     this.familiares = familiares != null ? familiares : new ArrayList<>();
     this.habilitacaoLiterarias = habilitacaoLiterarias != null ? habilitacaoLiterarias : new ArrayList<>();
+    this.formacoes = formacoes != null ? formacoes : new ArrayList<>();
+    this.experiencias = experiencias != null ? experiencias : new ArrayList<>();
+    this.documentos = documentos != null ? documentos : new ArrayList<>();
+    this.dadosBancarios = dadosBancarios!=null ? dadosBancarios : new ArrayList<>();
 
   }
 
@@ -133,6 +148,10 @@ public class Funcionario {
         null,
         null,
         null,
+        null,
+        null,
+        null,
+        null,
         null
     );
   }
@@ -161,7 +180,11 @@ public class Funcionario {
       List<Contacto> contactos,
       List<Endereco> enderecos,
       List<Familiar> familiares,
-      List<HabilitacaoLiteraria> habilitacaoLiterarias
+      List<HabilitacaoLiteraria> habilitacaoLiterarias,
+      List<FormacaoFeita> formacoes,
+      List<ExperienciaProfissional> experiencias,
+      List<Documento> documentos,
+      List<DadosBancarios> dadosBancarios
   ) {
     return new Funcionario(
         id,
@@ -186,7 +209,11 @@ public class Funcionario {
         contactos,
         enderecos,
         familiares,
-        habilitacaoLiterarias
+        habilitacaoLiterarias,
+        formacoes,
+        experiencias,
+        documentos,
+        dadosBancarios
     );
   }
 
@@ -232,6 +259,10 @@ public class Funcionario {
         colaboradorId,
         estado,
         estadoValidacao,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -417,6 +448,179 @@ public class Funcionario {
         .filter(h -> Objects.equals(h.getId(), id))
         .findFirst();
   }
+
+  /****** Formações ********************/
+  public void syncFormacoes(List<FormacaoFeita> novasFormacoes) {
+    if (novasFormacoes == null) return;
+
+    // Adicionar ou atualizar
+    for (FormacaoFeita nova : novasFormacoes) {
+      addOrUpdateFormacao(nova);
+    }
+
+    // Soft delete das formações que não estão mais na nova lista
+    for (FormacaoFeita existente : formacoes) {
+      boolean aindaExiste = novasFormacoes.stream()
+          .anyMatch(f -> f.getId() != null && f.getId().equals(existente.getId()));
+      if (!aindaExiste) {
+        existente.eliminar();
+      }
+    }
+  }
+
+  private void addOrUpdateFormacao(FormacaoFeita formacao) {
+    if (formacao == null) return;
+
+    var existenteOpt = formacoes.stream()
+        .filter(f -> f.getId() != null && f.getId().equals(formacao.getId()))
+        .findFirst();
+
+    if (existenteOpt.isPresent()) {
+      FormacaoFeita existente = existenteOpt.get();
+      existente.update(
+          formacao.getPais(),
+          formacao.getEstabelecimento(),
+          formacao.getTipoFormacao(),
+          formacao.getCurso(),
+          formacao.getNivel()
+      );
+    } else {
+      formacoes.add(formacao);
+    }
+  }
+
+
+  /****** Experiências Profissionais ********************/
+  public void syncExperiencias(List<ExperienciaProfissional> novasExperiencias) {
+    if (novasExperiencias == null) return;
+
+    // Adicionar ou atualizar
+    for (ExperienciaProfissional nova : novasExperiencias) {
+      addOrUpdateExperiencia(nova);
+    }
+
+    // Soft delete das experiências que não estão mais na nova lista
+    for (ExperienciaProfissional existente : experiencias) {
+      boolean aindaExiste = novasExperiencias.stream()
+          .anyMatch(e -> e.getId() != null && e.getId().equals(existente.getId()));
+      if (!aindaExiste) {
+        existente.eliminar();
+      }
+    }
+  }
+
+  private void addOrUpdateExperiencia(ExperienciaProfissional experiencia) {
+    if (experiencia == null) return;
+
+    var existenteOpt = experiencias.stream()
+        .filter(e -> e.getId() != null && e.getId().equals(experiencia.getId()))
+        .findFirst();
+
+    if (existenteOpt.isPresent()) {
+      ExperienciaProfissional existente = existenteOpt.get();
+      existente.update(
+          experiencia.getPais(),
+          experiencia.getEmpresa(),
+          experiencia.getCargo(),
+          experiencia.getDataInicio(),
+          experiencia.getDataFim(),
+          experiencia.getObservacao()
+      );
+    } else {
+      experiencias.add(experiencia);
+    }
+  }
+
+  /********* documentos *******/
+
+  /****** documentos *********************/
+  public void syncDocumentos(List<Documento> novosDocumentos) {
+    if (novosDocumentos == null) return;
+
+    // Adicionar ou atualizar
+    for (Documento novo : novosDocumentos) {
+      addOrUpdateDocumento(novo);
+    }
+
+    // Soft delete dos documentos que não estão mais na nova lista
+    for (Documento existente : documentos) {
+      boolean aindaExiste = novosDocumentos.stream()
+          .anyMatch(d -> Objects.equals(d.getId(), existente.getId()));
+      if (!aindaExiste) {
+        existente.eliminar();
+      }
+    }
+  }
+
+  private void addOrUpdateDocumento(Documento documento) {
+    if (documento == null) return;
+
+    Optional<Documento> existenteOpt = findDocumentoById(documento.getId());
+    if (existenteOpt.isPresent()) {
+      Documento existente = existenteOpt.get();
+      existente.update(
+          documento.getTipoDocumento(),
+          documento.getDocId(),
+          documento.getReferenciaName(),
+          documento.getReferenciaId()
+      );
+    } else {
+      this.documentos.add(documento);
+    }
+  }
+
+  private Optional<Documento> findDocumentoById(Long id) {
+    if (id == null) return Optional.empty();
+    return this.documentos.stream()
+        .filter(d -> Objects.equals(d.getId(), id))
+        .findFirst();
+  }
+
+  /****** DADOS BANCARIOS **************/
+
+  public void syncDadosBancarios(List<DadosBancarios> novosDados) {
+    if (novosDados == null) return;
+
+    // Adicionar ou atualizar
+    for (DadosBancarios novo : novosDados) {
+      addOrUpdateDadosBancarios(novo);
+    }
+
+    // Soft delete dos dados bancários que não estão mais na nova lista
+    for (DadosBancarios existente : dadosBancarios) {
+      boolean aindaExiste = novosDados.stream()
+          .anyMatch(d -> Objects.equals(d.getId(), existente.getId()));
+      if (!aindaExiste) {
+        existente.eliminar();
+      }
+    }
+  }
+
+  private void addOrUpdateDadosBancarios(DadosBancarios dados) {
+    if (dados == null) return;
+
+    Optional<DadosBancarios> existenteOpt = findDadosBancariosById(dados.getId());
+    if (existenteOpt.isPresent()) {
+      DadosBancarios existente = existenteOpt.get();
+      existente.update(
+          dados.getEntidade(),
+          dados.getNumConta(),
+          dados.getDataInicio(),
+          dados.getDataFim(),
+          dados.getObservacoes()
+      );
+    } else {
+      this.dadosBancarios.add(dados);
+    }
+  }
+
+  private Optional<DadosBancarios> findDadosBancariosById(Long id) {
+    if (id == null) return Optional.empty();
+    return this.dadosBancarios.stream()
+        .filter(d -> Objects.equals(d.getId(), id))
+        .findFirst();
+  }
+
 
 
 }

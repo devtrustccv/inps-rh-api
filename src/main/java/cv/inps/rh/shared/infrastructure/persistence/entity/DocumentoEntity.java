@@ -7,6 +7,7 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.UUID;
 import jakarta.validation.constraints.NotNull;
 import cv.inps.rh.shared.application.constants.Estado;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class DocumentoEntity extends AuditEntity {
 
   
     @Column(name="uuid")
-    private String uuid;
+    private UUID uuid;
 
   
     @NotNull(message = "tpDocumentoId is mandatory")

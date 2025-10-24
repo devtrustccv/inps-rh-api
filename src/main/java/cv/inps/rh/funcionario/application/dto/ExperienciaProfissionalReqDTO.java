@@ -17,25 +17,28 @@ import java.time.LocalDate;
 
 
 @IgrpDTO
-public class DadosBancariosRespDTO  {
+public class ExperienciaProfissionalReqDTO  {
 
   
   
   private Long id ;
   
   
-  private Long entidadeBancariaId ;
+  private Long paisId ;
   
   
-  private String entidadeBancariaDesc ;
+  private String empresa ;
   
   
-  private Long numConta ;
+  private String cargo ;
   
   
-  private LocalDate dataInicio ;
+  private LocalDate dataEntrada ;
   
   
-  private LocalDate dataFim ;
+  private LocalDate dataSaida ;
+  
+  
+  private String observacoes ;
 
 }

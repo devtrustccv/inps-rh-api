@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "DadosBancariosReq",
+  "name": "FormacaoProfissionalReq",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
@@ -18,7 +18,7 @@
       "primaryKey": false
     },
     {
-      "name": "entidadeBancariaId",
+      "name": "paisId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -30,9 +30,9 @@
       "primaryKey": false
     },
     {
-      "name": "numConta",
+      "name": "estabelecimento",
       "objectType": "java",
-      "type": "long",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -42,9 +42,9 @@
       "primaryKey": false
     },
     {
-      "name": "dataInicio",
+      "name": "tipoFormacao",
       "objectType": "java",
-      "type": "date",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -54,9 +54,21 @@
       "primaryKey": false
     },
     {
-      "name": "dataFim",
+      "name": "designacao",
       "objectType": "java",
-      "type": "date",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "nivel",
+      "objectType": "java",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -66,5 +78,5 @@
       "primaryKey": false
     }
   ],
-  "id": "h4lj00zfxv"
+  "id": "ujhy95inwr"
 }

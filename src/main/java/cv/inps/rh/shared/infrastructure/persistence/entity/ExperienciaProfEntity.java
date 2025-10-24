@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,15 +49,16 @@ public class ExperienciaProfEntity extends AuditEntity {
 
   
     @Column(name="data_fim")
-    private String dataFim;
+    private LocalDate dataFim;
 
   
     @Column(name="observacao")
     private String observacao;
 
   
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
   
     @Column(name="uuid")

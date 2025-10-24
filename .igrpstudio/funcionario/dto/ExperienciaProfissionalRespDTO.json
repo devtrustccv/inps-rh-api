@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "DadosBancariosResp",
+  "name": "ExperienciaProfissionalResp",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
@@ -18,19 +18,7 @@
       "primaryKey": false
     },
     {
-      "name": "entidadeBancariaId",
-      "objectType": "java",
-      "type": "long",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "entidadeBancariaDesc",
+      "name": "paisDesc",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -42,7 +30,7 @@
       "primaryKey": false
     },
     {
-      "name": "numConta",
+      "name": "paisId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -54,7 +42,43 @@
       "primaryKey": false
     },
     {
-      "name": "dataInicio",
+      "name": "uuid",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "empresa",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "cargo",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dataEntrada",
       "objectType": "java",
       "type": "date",
       "required": false,
@@ -66,7 +90,7 @@
       "primaryKey": false
     },
     {
-      "name": "dataFim",
+      "name": "dataSaida",
       "objectType": "java",
       "type": "date",
       "required": false,
@@ -76,7 +100,31 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "observacoes",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "estado",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
     }
   ],
-  "id": "h4lj00zfxv_copy"
+  "id": "cee954sz19_copy"
 }

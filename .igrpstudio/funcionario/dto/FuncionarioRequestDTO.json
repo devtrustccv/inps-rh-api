@@ -216,6 +216,62 @@
       "primaryKey": false,
       "collectionType": "list",
       "module": "funcionario"
+    },
+    {
+      "name": "formacoesFeitas",
+      "objectType": "dto",
+      "type": "FormacaoProfissionalReq",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
+    },
+    {
+      "name": "experienciasProfssionais",
+      "objectType": "dto",
+      "type": "ExperienciaProfissionalReq",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
+    },
+    {
+      "name": "dadosBancarios",
+      "objectType": "dto",
+      "type": "DadosBancariosReq",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
+    },
+    {
+      "name": "anexos",
+      "objectType": "dto",
+      "type": "AnexoReq",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
     }
   ],
   "id": "pjb2kk86vo"

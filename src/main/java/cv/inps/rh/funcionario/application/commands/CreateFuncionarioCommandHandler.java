@@ -34,8 +34,11 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
   private final EnderecoMapper enderecoMapper;
   private final FamiliarMapper familiarMapper;
   private final HabilitacaoLiterariaMapper habilitacaoLiterariaMapper;
+  private final FormacaoFeitaMapper formacaoFeitaMapper;
+  private final ExperienciaProfissionalMapper experienciaProfissionalMapper;
+  private final DocumentoMapper documentoMapper;
 
-   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper) {
+   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper) {
 
      this.funcionarioMapper = funcionarioMapper;
      this.funcionarioRepository = funcionarioRepository;
@@ -45,6 +48,9 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
      this.enderecoMapper = enderecoMapper;
      this.familiarMapper = familiarMapper;
      this.habilitacaoLiterariaMapper = habilitacaoLiterariaMapper;
+     this.formacaoFeitaMapper = formacaoFeitaMapper;
+     this.experienciaProfissionalMapper = experienciaProfissionalMapper;
+     this.documentoMapper = documentoMapper;
    }
 
    @IgrpCommandHandler
@@ -86,11 +92,20 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
      var habilitacoesLiterarias = habilitacaoLiterariaMapper.toHabilitacoesLiterariasDomain(dto.getHabilitacoesLiterarias());
 
+     var formacoesFeitas = formacaoFeitaMapper.toFormacoesFeitasDomain(dto.getFormacoesFeitas());
+
+     var experienciasProfissionais  = experienciaProfissionalMapper.toExperienciasProfissionaisDomain(dto.getExperienciasProfssionais());
+
+     var documentos = documentoMapper.toDocumentosDomain(dto.getAnexos());
+
 
      funcionario.syncContacts(contactos);
      funcionario.syncEnderecos(enderecos);
      funcionario.syncFamiliares(familiares);
      funcionario.syncHabilitacoes(habilitacoesLiterarias);
+     funcionario.syncFormacoes(formacoesFeitas);
+     funcionario.syncExperiencias(experienciasProfissionais);
+     funcionario.syncDocumentos(documentos);
 
      Funcionario saved = funcionarioRepository.save(funcionario);
 

@@ -3,12 +3,11 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import cv.inps.rh.funcionario.application.dto.AgregadoDependenteReqDTO;
 import cv.inps.rh.funcionario.application.dto.AgregadoDependenteRespDTO;
 import cv.inps.rh.funcionario.domain.models.Familiar;
-import cv.inps.rh.shared.infrastructure.mappers.TipoDocumentoMapper;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.TipoDocumentoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FamiliarEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

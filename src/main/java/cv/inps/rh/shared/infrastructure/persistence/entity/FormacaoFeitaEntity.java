@@ -8,6 +8,7 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,8 +51,9 @@ public class FormacaoFeitaEntity extends AuditEntity {
     private String nivel;
 
   
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
   
     @Column(name="uuid")
