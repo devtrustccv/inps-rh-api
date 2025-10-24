@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Repository
 @RequiredArgsConstructor
 public class FuncionarioRepositoryImpl implements FuncionarioRepository {
@@ -26,4 +28,13 @@ public class FuncionarioRepositoryImpl implements FuncionarioRepository {
 
     return mapper.toDomain(savedEntity);
   }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Optional<Funcionario> findById(Long id) {
+    return funcionarioEntityRepository.findById(id)
+        .map(mapper::toDomain);
+  }
+
+
 }

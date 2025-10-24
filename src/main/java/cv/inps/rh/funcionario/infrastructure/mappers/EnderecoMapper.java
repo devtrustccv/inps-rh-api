@@ -116,6 +116,9 @@ public class EnderecoMapper {
 
     dto.setMorada(endereco.getMorada());
 
+    dto.setEstado(endereco.getEstado() != null ? endereco.getEstado().getDescription() : null);
+    dto.setUuid(endereco.getUuid() != null ? endereco.getUuid().toString() : null);
+
     return dto;
   }
 

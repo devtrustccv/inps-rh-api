@@ -24,12 +24,15 @@ public class ContactoRespDTO  {
   private Long id ;
   
   
-  private Long tipoContactoId ;
+  private String uuid ;
   
   
-  private String tipoContactoDesc ;
+  private String tipoContacto ;
   
   
   private String contacto ;
+  
+  
+  private String estado ;
 
 }

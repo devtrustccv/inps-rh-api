@@ -18,6 +18,18 @@
       "primaryKey": false
     },
     {
+      "name": "uuid",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "pais",
       "objectType": "java",
       "type": "integer",
@@ -139,6 +151,18 @@
     },
     {
       "name": "morada",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "estado",
       "objectType": "java",
       "type": "string",
       "required": false,

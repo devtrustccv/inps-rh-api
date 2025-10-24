@@ -208,6 +208,34 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "contactos",
+      "objectType": "dto",
+      "type": "ContactoResp",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
+    },
+    {
+      "name": "enderecos",
+      "objectType": "dto",
+      "type": "EnderecoResp",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
     }
   ],
   "id": "pjb2kk86vo_copy_copy"

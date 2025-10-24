@@ -18,9 +18,9 @@
       "primaryKey": false
     },
     {
-      "name": "tipoContactoId",
+      "name": "uuid",
       "objectType": "java",
-      "type": "long",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -30,7 +30,7 @@
       "primaryKey": false
     },
     {
-      "name": "tipoContactoDesc",
+      "name": "tipoContacto",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -43,6 +43,18 @@
     },
     {
       "name": "contacto",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "estado",
       "objectType": "java",
       "type": "string",
       "required": false,

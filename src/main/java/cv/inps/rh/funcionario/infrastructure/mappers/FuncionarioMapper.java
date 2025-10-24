@@ -189,6 +189,28 @@ public class FuncionarioMapper {
     dto.setNaturalidadeDesc(funcionario.getLocalNascimento() != null ? funcionario.getLocalNascimento().getNome() : null);
     dto.setNif(funcionario.getNumeroFiscal() != null ? funcionario.getNumeroFiscal().toString() : null);
     dto.setNumSegurado(funcionario.getNumeroSegurancaSocial());
+
+
+    // ---- Contactos ----
+    if (funcionario.getContactos() != null && !funcionario.getContactos().isEmpty()) {
+      dto.setContactos(
+          funcionario.getContactos().stream()
+              .map(contactoMapper::toDTO)
+              .toList()
+      );
+    }
+
+    // ---- Endereços ----
+    if (funcionario.getEnderecos() != null && !funcionario.getEnderecos().isEmpty()) {
+      dto.setEnderecos(
+          funcionario.getEnderecos().stream()
+              .map(enderecoMapper::toDTO)
+              .toList()
+      );
+    }
+
+
+
     return dto;
   }
 

@@ -24,6 +24,9 @@ public class EnderecoRespDTO  {
   private Long id ;
   
   
+  private String uuid ;
+  
+  
   private Integer pais ;
   
   
@@ -55,5 +58,8 @@ public class EnderecoRespDTO  {
   
   
   private String morada ;
+  
+  
+  private String estado ;
 
 }

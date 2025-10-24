@@ -9,7 +9,11 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import cv.inps.rh.funcionario.application.dto.ContactoRespDTO;
+import cv.inps.rh.funcionario.application.dto.EnderecoRespDTO;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -70,5 +74,11 @@ public class FuncionarioResponseDetailsDTO  {
   
   
   private String numSegurado ;
+  
+  @Valid
+  private List<ContactoRespDTO> contactos = new ArrayList<>();
+  
+  @Valid
+  private List<EnderecoRespDTO> enderecos = new ArrayList<>();
 
 }
