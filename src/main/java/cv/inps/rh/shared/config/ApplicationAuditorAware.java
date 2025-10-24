@@ -28,7 +28,7 @@ public class ApplicationAuditorAware implements AuditorAware<String> {
     public String getPreferredUsername() {
 
     if ("development".equals(activeProfile) || "staging".equals(activeProfile)) {
-    return "";
+    return "local";
     }
 
     var authentication = SecurityContextHolder.getContext().getAuthentication();
