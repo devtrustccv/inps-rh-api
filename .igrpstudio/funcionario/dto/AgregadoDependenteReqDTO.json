@@ -20,7 +20,7 @@
     {
       "name": "tipoDocumentoId",
       "objectType": "java",
-      "type": "integer",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,

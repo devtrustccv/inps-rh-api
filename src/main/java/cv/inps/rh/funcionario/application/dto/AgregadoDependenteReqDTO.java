@@ -24,7 +24,7 @@ public class AgregadoDependenteReqDTO  {
   private Long id ;
   
   
-  private Integer tipoDocumentoId ;
+  private Long tipoDocumentoId ;
   
   
   private String numDocumento ;

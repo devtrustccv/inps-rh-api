@@ -24,7 +24,7 @@ public class AnexoReqDTO  {
   private Long id ;
   
   
-  private Integer TipoDocumentoId ;
+  private Long TipoDocumentoId ;
   
   
   private String documento ;
