@@ -1,6 +1,7 @@
-package cv.inps.rh.shared.domain.models;
+package cv.inps.rh.parametrizacao.domain.models;
 
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import lombok.Getter;
 
 import java.util.UUID;

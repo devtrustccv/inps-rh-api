@@ -3,7 +3,7 @@ package cv.inps.rh.funcionario.domain.models;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import cv.inps.rh.shared.domain.models.TipoDocumento;
+import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
 import lombok.Getter;
 
 import java.time.LocalDate;

@@ -1,7 +1,7 @@
-package cv.inps.rh.shared.infrastructure.persistence.repoImpl;
+package cv.inps.rh.parametrizacao.infrastructure.persistence.repository;
 
-import cv.inps.rh.shared.domain.models.TipoDocumento;
-import cv.inps.rh.shared.domain.repository.TipoDocumentoRepository;
+import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
+import cv.inps.rh.parametrizacao.domain.repository.TipoDocumentoRepository;
 import cv.inps.rh.shared.infrastructure.mappers.TipoDocumentoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoDocumentoEntityRepository;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,6 @@
 package cv.inps.rh.shared.infrastructure.mappers;
 
-import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import cv.inps.rh.shared.domain.models.TipoDocumento;
+import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import org.springframework.stereotype.Component;
 

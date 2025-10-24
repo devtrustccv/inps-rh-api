@@ -1,6 +1,6 @@
-package cv.inps.rh.shared.domain.repository;
+package cv.inps.rh.parametrizacao.domain.repository;
 
-import cv.inps.rh.shared.domain.models.TipoDocumento;
+import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
 
 import java.util.Optional;
 
