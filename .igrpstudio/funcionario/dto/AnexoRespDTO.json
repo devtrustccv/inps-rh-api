@@ -1,12 +1,12 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "SubsidioReq",
+  "name": "AnexoResp",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "tipoSubsidioId",
+      "name": "id",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -18,9 +18,9 @@
       "primaryKey": false
     },
     {
-      "name": "percentagem",
+      "name": "tipoDocumentoId",
       "objectType": "java",
-      "type": "decimal",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -30,9 +30,21 @@
       "primaryKey": false
     },
     {
-      "name": "valor",
+      "name": "tipoDocumentoDesc",
       "objectType": "java",
-      "type": "decimal",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "documento",
+      "objectType": "java",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -42,5 +54,5 @@
       "primaryKey": false
     }
   ],
-  "id": "b908abjqzk"
+  "id": "tzyth8gfwh_copy"
 }

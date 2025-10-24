@@ -18,9 +18,9 @@
       "primaryKey": false
     },
     {
-      "name": "tipoContaco",
+      "name": "tipoContactoId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,

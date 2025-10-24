@@ -24,7 +24,7 @@ public class ContactoReqDTO  {
   private Long id ;
   
   
-  private String tipoContaco ;
+  private Long tipoContactoId ;
   
   
   private String contacto ;

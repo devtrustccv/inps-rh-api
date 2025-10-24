@@ -1,12 +1,12 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "SubsidioReq",
+  "name": "EncargosDescontosResp",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "tipoSubsidioId",
+      "name": "tipoEncargoId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -18,9 +18,9 @@
       "primaryKey": false
     },
     {
-      "name": "percentagem",
+      "name": "tipoEncargoDesc",
       "objectType": "java",
-      "type": "decimal",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -40,7 +40,31 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "dataInicio",
+      "objectType": "java",
+      "type": "date",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dataFim",
+      "objectType": "java",
+      "type": "date",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
     }
   ],
-  "id": "b908abjqzk"
+  "id": "w4c2zd8crx_copy"
 }

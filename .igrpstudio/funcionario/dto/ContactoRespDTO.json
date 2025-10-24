@@ -1,12 +1,12 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "SubsidioReq",
+  "name": "ContactoResp",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "tipoSubsidioId",
+      "name": "id",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -18,9 +18,9 @@
       "primaryKey": false
     },
     {
-      "name": "percentagem",
+      "name": "tipoContactoId",
       "objectType": "java",
-      "type": "decimal",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -30,9 +30,21 @@
       "primaryKey": false
     },
     {
-      "name": "valor",
+      "name": "tipoContactoDesc",
       "objectType": "java",
-      "type": "decimal",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "contacto",
+      "objectType": "java",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -42,5 +54,5 @@
       "primaryKey": false
     }
   ],
-  "id": "b908abjqzk"
+  "id": "glafvk3tal_copy"
 }

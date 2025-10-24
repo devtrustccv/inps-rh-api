@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -18,19 +17,19 @@ import java.time.LocalDate;
 
 
 @IgrpDTO
-public class EncargosDescontosDTO  {
+public class SubsidioRespDTO  {
 
   
   
-  private String tipoEncargo ;
+  private Long tipoSubsidioId ;
+  
+  
+  private String tipoSubsidioDesc ;
+  
+  
+  private BigDecimal percentagem ;
   
   
   private BigDecimal valor ;
-  
-  
-  private LocalDate dataInicio ;
-  
-  
-  private LocalDate dataFim ;
 
 }

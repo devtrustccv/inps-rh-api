@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.math.BigDecimal;
+
 
 @Data
 @NoArgsConstructor
@@ -17,16 +17,43 @@ import java.math.BigDecimal;
 
 
 @IgrpDTO
-public class SubsidioReqDTO  {
+public class EnderecoRespDTO  {
 
   
   
-  private Long tipoSubsidioId ;
+  private Long id ;
   
   
-  private BigDecimal percentagem ;
+  private Integer pais ;
   
   
-  private BigDecimal valor ;
+  private String paisDesc ;
+  
+  
+  private Integer ilha ;
+  
+  
+  private String ilhaDesc ;
+  
+  
+  private Integer concelho ;
+  
+  
+  private String concelhoDesc ;
+  
+  
+  private Integer freguesia ;
+  
+  
+  private String freguesiaDesc ;
+  
+  
+  private Integer zona ;
+  
+  
+  private String zonaDesc ;
+  
+  
+  private String morada ;
 
 }

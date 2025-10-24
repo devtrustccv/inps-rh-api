@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -17,16 +17,40 @@ import java.math.BigDecimal;
 
 
 @IgrpDTO
-public class SubsidioReqDTO  {
+public class AgregadoDependenteRespDTO  {
 
   
   
-  private Long tipoSubsidioId ;
+  private Long id ;
   
   
-  private BigDecimal percentagem ;
+  private Long tipoDocumentoId ;
   
   
-  private BigDecimal valor ;
+  private String tipoDocumentoDesc ;
+  
+  
+  private String numDocumento ;
+  
+  
+  private String nome ;
+  
+  
+  private LocalDate dataNascimento ;
+  
+  
+  private String genero ;
+  
+  
+  private String dependente ;
+  
+  
+  private String agregada ;
+  
+  
+  private String grauParentesco ;
+  
+  
+  private String estado ;
 
 }
