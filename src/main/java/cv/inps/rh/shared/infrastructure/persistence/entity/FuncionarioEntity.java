@@ -136,6 +136,6 @@ private List<ExperienciaProfEntity> experienciasProfissionais = new ArrayList<>(
 private List<DadosBancariosEntity> dadosBancarios = new ArrayList<>();
 
 
-  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
 private List<DocumentoEntity> documentos = new ArrayList<>();
 }
