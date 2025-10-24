@@ -1,7 +1,9 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
+import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDetailsDTO;
 import cv.inps.rh.funcionario.domain.models.Contacto;
+import cv.inps.rh.funcionario.domain.models.Endereco;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.mappers.EstadoMapper;
@@ -23,6 +25,7 @@ public class FuncionarioMapper {
   private final GeografiaMapper geografiaMapper;
   private final EstadoMapper estadoMapper;
   private final ContactoMapper contactoMapper;
+  private final EnderecoMapper enderecoMapper;
 
 
   /** Converts JPA entity to domain Funcionario */
@@ -32,6 +35,12 @@ public class FuncionarioMapper {
     List<Contacto> contactos = entity.getContactos() != null
         ? entity.getContactos().stream()
         .map(contactoMapper::toDomain)
+        .collect(Collectors.toCollection(ArrayList::new))
+        : new ArrayList<>();
+
+    List<Endereco> enderecos = entity.getEnderecos() != null
+        ? entity.getEnderecos().stream()
+        .map(enderecoMapper::toDomain)
         .collect(Collectors.toCollection(ArrayList::new))
         : new ArrayList<>();
 
@@ -55,7 +64,8 @@ public class FuncionarioMapper {
         entity.getIdColaborador(),
         entity.getEstado(),
         estadoMapper.fromString(entity.getEstadoValidacao()),
-        contactos
+        contactos,
+        enderecos
     );
   }
 
@@ -120,6 +130,15 @@ public class FuncionarioMapper {
       entity.setContactos(contactosEntities);
     }
 
+    if(funcionario.getEnderecos() != null){
+      var enderecosEntities = funcionario.getEnderecos().stream()
+          .map(enderecoMapper::toEntity)
+          .collect(Collectors.toList());
+
+      enderecosEntities.forEach(e -> e.setFunId(entity));
+      entity.setEnderecos(enderecosEntities);
+    }
+
 
     return entity;
   }
@@ -128,6 +147,31 @@ public class FuncionarioMapper {
     if (funcionario == null) return null;
 
     var dto = new FuncionarioResponseDTO();
+    dto.setId(funcionario.getId() != null ? funcionario.getId() : null);
+    dto.setUuid(funcionario.getUuid() != null ? funcionario.getUuid().toString() : null);
+    dto.setTipoDocumentoId(funcionario.getTipoDocumento() != null ? funcionario.getTipoDocumento().getId().intValue() : null);
+    dto.setTipoDocumentoDesc(funcionario.getTipoDocumento() != null ? funcionario.getTipoDocumento().getNome() : null);
+    dto.setNumDocumento(funcionario.getNumeroDocumento());
+    dto.setNome(funcionario.getNomeCompleto());
+    dto.setUrlFoto(funcionario.getFotografia());
+    dto.setDataNascimento(funcionario.getDataNascimento());
+    dto.setGenero(funcionario.getSexo());
+    dto.setNomeMae(funcionario.getNomeMae());
+    dto.setNomePai(funcionario.getNomePai());
+    dto.setEstadoCivil(funcionario.getEstadoCivil());
+    dto.setNacionalidade(funcionario.getNacionalidade());
+    dto.setNaturalidadeId(funcionario.getLocalNascimento() != null ? funcionario.getLocalNascimento().getId() : null);
+    dto.setNaturalidadeDesc(funcionario.getLocalNascimento() != null ? funcionario.getLocalNascimento().getNome() : null);
+    dto.setNif(funcionario.getNumeroFiscal() != null ? funcionario.getNumeroFiscal().toString() : null);
+    dto.setNumSegurado(funcionario.getNumeroSegurancaSocial());
+    return dto;
+  }
+
+
+  public FuncionarioResponseDetailsDTO toResponseDetailsDTO(Funcionario funcionario) {
+    if (funcionario == null) return null;
+
+    var dto = new FuncionarioResponseDetailsDTO();
     dto.setId(funcionario.getId() != null ? funcionario.getId() : null);
     dto.setUuid(funcionario.getUuid() != null ? funcionario.getUuid().toString() : null);
     dto.setTipoDocumentoId(funcionario.getTipoDocumento() != null ? funcionario.getTipoDocumento().getId().intValue() : null);

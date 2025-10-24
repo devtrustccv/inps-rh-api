@@ -15,6 +15,7 @@ public class ContactoMapper {
     if(contacto == null) return null;
 
     ContactoEntity entity = new ContactoEntity();
+    entity.setId(contacto.getId());
     entity.setUuid(contacto.getUuid().getValor());
     entity.setTipoContacto(contacto.getTipoContacto());
     entity.setContacto(contacto.getContacto());

@@ -5,6 +5,7 @@ import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContactoMapper;
+import cv.inps.rh.funcionario.infrastructure.mappers.EnderecoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.Geografia;
@@ -18,6 +19,9 @@ import org.slf4j.LoggerFactory;
 
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 @Component
 public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFuncionarioCommand, ResponseEntity<FuncionarioResponseDTO>> {
 
@@ -29,14 +33,16 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
   private final GeografiaRepository geografiaRepository;
 
   private final ContactoMapper contactoMapper;
+  private final EnderecoMapper enderecoMapper;
 
-   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper) {
+   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper) {
 
      this.funcionarioMapper = funcionarioMapper;
      this.funcionarioRepository = funcionarioRepository;
      this.tipoDocumentoRepository = tipoDocumentoRepository;
      this.geografiaRepository = geografiaRepository;
      this.contactoMapper = contactoMapper;
+     this.enderecoMapper = enderecoMapper;
    }
 
    @IgrpCommandHandler
@@ -72,7 +78,11 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
      var contactos = contactoMapper.toContactosDomain(dto.getContactos());
 
+     var enderecos = enderecoMapper.toEnderecosDomain(dto.getEnderecos());
+
+
      funcionario.syncContacts(contactos);
+     funcionario.syncEnderecos(enderecos);
 
      Funcionario saved = funcionarioRepository.save(funcionario);
 

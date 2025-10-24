@@ -8,6 +8,7 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,14 +48,20 @@ public class EnderecoEntity extends AuditEntity {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "freguesia_id", referencedColumnName = "id")
+    private GeografiaEntity freguesiaId;
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "zona_id", referencedColumnName = "id")
     private GeografiaEntity zonaId;
     @Column(name="morada")
     private String morada;
 
   
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
   
     @Column(name="uuid")

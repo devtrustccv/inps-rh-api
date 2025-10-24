@@ -24,19 +24,19 @@ public class EnderecoReqDTO  {
   private Long id ;
   
   
-  private Integer pais ;
+  private Long paisId ;
   
   
-  private Integer ilha ;
+  private Long ilhaId ;
   
   
-  private Integer concelho ;
+  private Long concelhoId ;
   
   
-  private Integer freguesia ;
+  private Long freguesiaId ;
   
   
-  private Integer zona ;
+  private Long zonaId ;
   
   
   private String morada ;

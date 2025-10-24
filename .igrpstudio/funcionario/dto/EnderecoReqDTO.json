@@ -18,9 +18,9 @@
       "primaryKey": false
     },
     {
-      "name": "pais",
+      "name": "paisId",
       "objectType": "java",
-      "type": "integer",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -30,9 +30,9 @@
       "primaryKey": false
     },
     {
-      "name": "ilha",
+      "name": "ilhaId",
       "objectType": "java",
-      "type": "integer",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -42,9 +42,9 @@
       "primaryKey": false
     },
     {
-      "name": "concelho",
+      "name": "concelhoId",
       "objectType": "java",
-      "type": "integer",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -54,9 +54,9 @@
       "primaryKey": false
     },
     {
-      "name": "freguesia",
+      "name": "freguesiaId",
       "objectType": "java",
-      "type": "integer",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -66,9 +66,9 @@
       "primaryKey": false
     },
     {
-      "name": "zona",
+      "name": "zonaId",
       "objectType": "java",
-      "type": "integer",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,

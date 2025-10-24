@@ -15,10 +15,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import cv.igrp.framework.core.domain.QueryBus;
+import cv.inps.rh.funcionario.application.queries.*;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.funcionario.application.commands.*;
 import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
+import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDetailsDTO;
 
 @IgrpController
 @RestController
@@ -27,10 +31,11 @@ import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 public class FuncionarioController {
 
   
+  private final QueryBus queryBus;
   private final CommandBus commandBus;
 
-  public FuncionarioController(CommandBus commandBus) {
-          
+  public FuncionarioController(QueryBus queryBus, CommandBus commandBus) {
+          this.queryBus = queryBus;
           this.commandBus = commandBus;
   }
    @PostMapping(
@@ -61,6 +66,37 @@ public class FuncionarioController {
        ResponseEntity<FuncionarioResponseDTO> response = commandBus.send(command);
 
        return response;
+  }
+
+   @GetMapping(
+    value = "{id}"
+  )
+  @Operation(
+    summary = "GET method to handle operations for getFuncionarioById",
+    description = "GET method to handle operations for getFuncionarioById",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = FuncionarioResponseDetailsDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<FuncionarioResponseDetailsDTO> getFuncionarioById(
+    @PathVariable(value = "id") String id)
+  {
+
+      final var query = new GetFuncionarioByIdQuery(id);
+
+      ResponseEntity<FuncionarioResponseDetailsDTO> response = queryBus.handle(query);
+
+      return response;
   }
 
 }

@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import cv.inps.rh.funcionario.application.dto.ContactoReqDTO;
+import cv.inps.rh.funcionario.application.dto.EnderecoReqDTO;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,5 +65,8 @@ public class FuncionarioRequestDTO  {
   
   @Valid
   private List<ContactoReqDTO> contactos = new ArrayList<>();
+  
+  @Valid
+  private List<EnderecoReqDTO> enderecos = new ArrayList<>();
 
 }

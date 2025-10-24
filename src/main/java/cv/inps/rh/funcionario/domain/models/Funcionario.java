@@ -33,6 +33,8 @@ public class Funcionario {
   private final Estado estadoValidacao;
 
   private List<Contacto>  contactos;
+  private List<Endereco> enderecos;
+
 
   private Funcionario(
       Long id,
@@ -54,7 +56,8 @@ public class Funcionario {
       Long colaboradorId,
       Estado estado,
       Estado estadoValidacao,
-      List<Contacto> contactos
+      List<Contacto> contactos,
+      List<Endereco> enderecos
   ) {
     this.id = id;
     this.uuid = uuid;
@@ -76,6 +79,8 @@ public class Funcionario {
     this.estado = estado;
     this.estadoValidacao = estadoValidacao;
     this.contactos = contactos!=null? contactos : new ArrayList<>();
+    this.enderecos = enderecos != null ? enderecos : new ArrayList<>();
+
   }
 
   // factory metodo para criar um funcionario
@@ -119,6 +124,7 @@ public class Funcionario {
         colaboradorId,
         Estado.A,
         Estado.P,
+        null,
         null
     );
   }
@@ -144,7 +150,8 @@ public class Funcionario {
       Long colaboradorId,
       Estado estado,
       Estado estadoValidacao,
-      List<Contacto> contactos
+      List<Contacto> contactos,
+      List<Endereco> enderecos
   ) {
     return new Funcionario(
         id,
@@ -166,7 +173,8 @@ public class Funcionario {
         colaboradorId,
         estado,
         estadoValidacao,
-        contactos
+        contactos,
+        enderecos
     );
   }
 
@@ -212,11 +220,12 @@ public class Funcionario {
         colaboradorId,
         estado,
         estadoValidacao,
+        null,
         null
     );
   }
 
-
+ /****** contactos *********************/
   public void syncContacts(List<Contacto> newContacts) {
     if(newContacts == null) return;
 
@@ -253,5 +262,50 @@ public class Funcionario {
         .filter(c -> Objects.equals(c.getId(), id))
         .findFirst();
   }
+
+  /****** enderecos *********************/
+  public void syncEnderecos(List<Endereco> novosEnderecos) {
+    if (novosEnderecos == null) return;
+
+    // Adicionar ou atualizar
+    for (Endereco novo : novosEnderecos) {
+      addOrUpdateEndereco(novo);
+    }
+
+    // Soft delete dos endereços que não estão mais na nova lista
+    for (Endereco existente : enderecos) {
+      boolean aindaExiste = novosEnderecos.stream()
+          .anyMatch(e -> Objects.equals(e.getId(), existente.getId()));
+      if (!aindaExiste) {
+        existente.eliminar();
+      }
+    }
+  }
+
+  private void addOrUpdateEndereco(Endereco novo) {
+    if (novo == null) return;
+
+    Optional<Endereco> existenteOpt = findEnderecoById(novo.getId());
+    if (existenteOpt.isPresent()) {
+      Endereco existente = existenteOpt.get();
+      existente.update(
+          novo.getPais(),
+          novo.getIlha(),
+          novo.getConcelho(),
+          novo.getZona(),
+          novo.getMorada()
+      );
+    } else {
+      this.enderecos.add(novo);
+    }
+  }
+
+  private Optional<Endereco> findEnderecoById(Long id) {
+    if (id == null) return Optional.empty();
+    return this.enderecos.stream()
+        .filter(e -> Objects.equals(e.getId(), id))
+        .findFirst();
+  }
+
 
 }

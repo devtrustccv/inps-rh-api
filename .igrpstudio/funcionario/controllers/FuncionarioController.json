@@ -37,6 +37,34 @@
           }
         }
       }
+    },
+    {
+      "actionName": "getFuncionarioById",
+      "path": "{id}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "FuncionarioResponseDetails",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "69p09wi4e0-criarFuncionario"
