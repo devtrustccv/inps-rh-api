@@ -1,5 +1,6 @@
 CREATE TABLE "ENTIDADE" (
                             "ID" NUMBER,
+                            "NOME" VARCHAR2(255 BYTE),
                             CONSTRAINT PK_ENTIDADE PRIMARY KEY ( id )
 );
 
