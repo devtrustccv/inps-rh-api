@@ -1175,7 +1175,7 @@ SHOW ERRORS TRIGGER TRG_FAMILIAR;
 CREATE TABLE RH_T_HABILITACOES_LITERARIAS (
                                               ID                   NUMBER            NOT NULL,
                                               PAIS_ID              NUMBER            NOT NULL,          -- GLB_T_GEOGRAFIA.ID
-                                              ESTABLECIMENTO       VARCHAR2(200),
+                                              ESTABELECIMENTO       VARCHAR2(200),
                                               AREA                 VARCHAR2(100)     NOT NULL,          -- domínio: AREA_FORMACAO
                                               NOME_CURSO           VARCHAR2(200)     NOT NULL,
                                               NIVEL                VARCHAR2(20)      NOT NULL,          -- domínio: NIVEL_HABILITACOES
