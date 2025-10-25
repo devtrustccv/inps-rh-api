@@ -138,4 +138,8 @@ private List<DadosBancariosEntity> dadosBancarios = new ArrayList<>();
 
   @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
 private List<DocumentoEntity> documentos = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+private List<TiposRelacionamentoEntity> tiposrelacionamentos = new ArrayList<>();
 }

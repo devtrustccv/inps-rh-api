@@ -1,0 +1,31 @@
+{
+  "type": "enum",
+  "module": "shared",
+  "name": "FlgProcessa",
+  "values": [
+    {
+      "name": "SIM",
+      "attributes": [
+        "SIM",
+        "sim"
+      ]
+    },
+    {
+      "name": "NAO",
+      "attributes": [
+        "NAO",
+        "não"
+      ]
+    }
+  ],
+  "attributes": [
+    {
+      "type": "string",
+      "name": "Code"
+    },
+    {
+      "type": "string",
+      "name": "Description"
+    }
+  ]
+}

@@ -8,9 +8,12 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.time.LocalDate;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Getter
@@ -87,8 +90,9 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     private String flgProcessa;
 
   
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
   
     @Column(name="obs", length=4000)
@@ -111,11 +115,6 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     private LocalDate dataFimContrato;
 
   
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fun_id", referencedColumnName = "id")
-    private FuncionarioEntity funId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -171,5 +170,9 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     @Column(name="tp_contrato")
     private String tpContrato;
 
-  
+     @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "fun_id")
+   private FuncionarioEntity funId;
+
+
 }
