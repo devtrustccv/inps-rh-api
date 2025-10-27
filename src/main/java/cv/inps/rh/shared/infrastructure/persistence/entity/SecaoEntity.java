@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.UUID;
 import jakarta.validation.constraints.NotBlank;
+import cv.inps.rh.shared.application.constants.Estado;
 
 
 @Getter
@@ -39,8 +40,9 @@ public class SecaoEntity extends AuditEntity {
     private Long instId;
 
   
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
   
 }

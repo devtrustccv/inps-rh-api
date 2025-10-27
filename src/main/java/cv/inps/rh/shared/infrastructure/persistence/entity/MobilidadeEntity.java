@@ -8,6 +8,7 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotBlank;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
 
 
@@ -31,8 +32,9 @@ public class MobilidadeEntity extends AuditEntity {
     private String tipoSituacao;
 
   
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
   
     @Column(name="obs")

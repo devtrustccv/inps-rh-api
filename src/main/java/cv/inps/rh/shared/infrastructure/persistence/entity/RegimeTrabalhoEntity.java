@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
+import cv.inps.rh.shared.application.constants.Estado;
 
 
 @Getter
@@ -39,10 +40,6 @@ public class RegimeTrabalhoEntity extends AuditEntity {
     private LocalDate dataFim;
 
   
-    @Column(name="estado")
-    private String estado;
-
-  
     @Column(name="obs", length=4000)
     private String obs;
 
@@ -57,4 +54,9 @@ public class RegimeTrabalhoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contrato_id", referencedColumnName = "id")
     private ContratoEntity contratoId;
+    @Enumerated(EnumType.STRING)
+    @Column(name="estado")
+    private Estado estado;
+
+  
 }

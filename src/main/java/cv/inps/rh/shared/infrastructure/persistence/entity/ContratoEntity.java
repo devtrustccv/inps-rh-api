@@ -7,7 +7,8 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.time.LocalDate;
 import java.util.UUID;
 import java.util.List;
@@ -28,44 +29,45 @@ public class ContratoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-
-    @NotBlank(message = "estado is mandatory")
+  
+    @NotNull(message = "estado is mandatory")
+    @Enumerated(EnumType.STRING)
     @Column(name="estado", nullable = false)
-    private String estado;
+    private Estado estado;
 
-
+  
     @Column(name="data_inicio")
     private LocalDate dataInicio;
 
-
+  
     @Column(name="data_fim")
     private LocalDate dataFim;
 
-
+  
     @Column(name="duracao")
     private Integer duracao;
 
-
+  
     @Column(name="versao")
     private Integer versao;
 
-
+  
     @Column(name="tp_contrato")
     private String tpContrato;
 
-
+  
     @Column(name="situacao_laboral")
     private String situacaoLaboral;
 
-
+  
     @Column(name="obs")
     private String obs;
 
-
+  
     @Column(name="uuid")
     private UUID uuid;
 
-
+  
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -84,9 +86,7 @@ public class ContratoEntity extends AuditEntity {
 
 
   @OneToMany(mappedBy = "contratoId", fetch = FetchType.LAZY)
-private List<ContratoEntity> contratosFilhos = new ArrayList<>();
-
-  @ManyToOne(fetch = FetchType.LAZY)
+private List<ContratoEntity> contratosFilhos = new ArrayList<>();   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "contrato_id")
    private ContratoEntity contratoId;
 

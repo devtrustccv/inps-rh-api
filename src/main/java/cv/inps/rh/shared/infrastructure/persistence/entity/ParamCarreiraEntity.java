@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
+import cv.inps.rh.shared.application.constants.Estado;
 
 
 @Getter
@@ -25,18 +26,23 @@ public class ParamCarreiraEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotNull(message = "uuid is mandatory")
     @Column(name="uuid", nullable = false)
     private UUID uuid;
 
-  
+
     @Column(name="nome")
     private String nome;
 
-  
+
     @Column(name="codigo")
     private String codigo;
 
-  
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="estado")
+    private Estado estado;
+
+
 }

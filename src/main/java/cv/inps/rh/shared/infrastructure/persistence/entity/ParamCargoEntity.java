@@ -8,6 +8,7 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotBlank;
+import cv.inps.rh.shared.application.constants.Estado;
 
 
 @Getter
@@ -24,16 +25,16 @@ public class ParamCargoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @Column(name="uuid")
     private String uuid;
 
-  
+
     @NotBlank(message = "nome is mandatory")
     @Column(name="nome", nullable = false)
     private String nome;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -42,9 +43,10 @@ public class ParamCargoEntity extends AuditEntity {
     @Column(name="dirigente", length=1)
     private String dirigente;
 
-  
-    @Column(name="estado")
-    private String estado;
 
-  
+    @Enumerated(EnumType.STRING)
+    @Column(name="estado")
+    private Estado estado;
+
+
 }

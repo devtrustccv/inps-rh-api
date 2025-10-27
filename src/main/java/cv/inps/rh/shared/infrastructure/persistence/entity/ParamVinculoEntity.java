@@ -8,6 +8,7 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotBlank;
+import cv.inps.rh.shared.application.constants.Estado;
 
 
 @Getter
@@ -24,38 +25,39 @@ public class ParamVinculoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @Column(name="uuid")
     private String uuid;
 
-  
+
     @NotBlank(message = "codigo is mandatory")
     @Column(name="codigo", nullable = false)
     private String codigo;
 
-  
+
     @Column(name="nome")
     private String nome;
 
-  
+
     @Column(name="flg_carreira")
     private Integer flgCarreira;
 
-  
+
     @Column(name="flg_salario")
     private Integer flgSalario;
 
-  
+
     @Column(name="flg_contrato")
     private Integer flgContrato;
 
-  
+
     @Column(name="flg_tempo_servico")
     private Integer flgTempoServico;
 
-  
-    @Column(name="estado")
-    private String estado;
 
-  
+    @Enumerated(EnumType.STRING)
+    @Column(name="estado")
+    private Estado estado;
+
+
 }

@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import cv.inps.rh.shared.application.constants.Estado;
 
 
 @Getter
@@ -65,6 +66,11 @@ public class ParamEscalaoEntity extends AuditEntity {
   
     @Column(name="data_fim")
     private LocalDate dataFim;
+
+  
+    @Enumerated(EnumType.STRING)
+    @Column(name="estado")
+    private Estado estado;
 
   
 }

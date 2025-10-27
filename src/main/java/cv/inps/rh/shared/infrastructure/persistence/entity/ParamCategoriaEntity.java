@@ -7,7 +7,9 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.UUID;
 import jakarta.validation.constraints.NotBlank;
+import cv.inps.rh.shared.application.constants.Estado;
 
 
 @Getter
@@ -25,8 +27,13 @@ public class ParamCategoriaEntity extends AuditEntity {
     private Long id;
 
   
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "param_carr_id", referencedColumnName = "id")
+    private ParamCarreiraEntity paramCarrId;
     @Column(name="uuid")
-    private String uuid;
+    private UUID uuid;
 
   
     @NotBlank(message = "nome is mandatory")
@@ -36,6 +43,11 @@ public class ParamCategoriaEntity extends AuditEntity {
   
     @Column(name="codigo")
     private String codigo;
+
+  
+    @Enumerated(EnumType.STRING)
+    @Column(name="estado")
+    private Estado estado;
 
   
 }

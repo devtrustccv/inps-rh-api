@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import jakarta.validation.constraints.NotNull;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
 
 
@@ -40,8 +41,9 @@ public class CarreiraEntity extends AuditEntity {
     private String tipoSituacao;
 
   
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
   
     @Column(name="obs", length=4000)

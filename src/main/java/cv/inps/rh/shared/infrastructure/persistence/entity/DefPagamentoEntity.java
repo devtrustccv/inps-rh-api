@@ -10,6 +10,7 @@ import lombok.*;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
 
 
@@ -60,8 +61,9 @@ public class DefPagamentoEntity extends AuditEntity {
     private LocalDate dataFim;
 
   
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
   
     @Column(name="obs")

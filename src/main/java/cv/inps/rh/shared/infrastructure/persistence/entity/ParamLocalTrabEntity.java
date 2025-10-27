@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.UUID;
 import jakarta.validation.constraints.NotBlank;
+import cv.inps.rh.shared.application.constants.Estado;
 
 
 @Getter
@@ -49,8 +50,9 @@ public class ParamLocalTrabEntity extends AuditEntity {
     private Long ups;
 
   
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
   
 }
