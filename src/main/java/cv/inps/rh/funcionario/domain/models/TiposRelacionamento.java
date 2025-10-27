@@ -16,7 +16,7 @@ public class TiposRelacionamento {
   private final IdentificadorUnico uuid;
 
   private ParamCargo cargo;
-  private Instituicao instit;
+  private Long instituicaId;
   private ParamVinculo vinculo;
   private Secao seccao;
   private ParamCategoria categoria;
@@ -58,7 +58,7 @@ public class TiposRelacionamento {
       Long id,
       IdentificadorUnico uuid,
       ParamCargo cargo,
-      Instituicao instit,
+      Long instit,
       ParamVinculo vinculo,
       Secao seccao,
       ParamCategoria categoria,
@@ -92,7 +92,7 @@ public class TiposRelacionamento {
     this.id = id;
     this.uuid = uuid;
     this.cargo = cargo;
-    this.instit = instit;
+    this.instituicaId = instit;
     this.vinculo = vinculo;
     this.seccao = seccao;
     this.categoria = categoria;
@@ -127,7 +127,7 @@ public class TiposRelacionamento {
   // Factory para criar novo relacionamento
   public static TiposRelacionamento create(
       ParamCargo cargo,
-      Instituicao instit,
+      Long instit,
       ParamVinculo vinculo,
       Secao seccao,
       ParamCategoria categoria,
@@ -199,7 +199,7 @@ public class TiposRelacionamento {
       Long id,
       UUID uuid,
       ParamCargo cargo,
-      Instituicao instit,
+      Long instit,
       ParamVinculo vinculo,
       Secao seccao,
       ParamCategoria categoria,
