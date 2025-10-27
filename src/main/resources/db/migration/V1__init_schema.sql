@@ -1,157 +1,156 @@
-CREATE TABLE "ENTIDADE" (
-                            "ID" NUMBER,
-                            "NOME" VARCHAR2(255 BYTE),
-                            CONSTRAINT PK_ENTIDADE PRIMARY KEY ( id )
+CREATE TABLE "ENTIDADE" (	
+    "ID" NUMBER,
+    CONSTRAINT PK_ENTIDADE PRIMARY KEY ( id )
 );
 
-CREATE TABLE "INSTITUICOES" (
-                                "ID" NUMBER,
-                                "CODIGO" VARCHAR2(200 BYTE),
-                                "NOME" VARCHAR2(150 BYTE),
-                                "NIVEL" NUMBER,
-                                "NIVEL_DETALHE" NUMBER,
-                                "INSTIT_ID" NUMBER,
-                                "TEE_TEE_ID" NUMBER(10,0),
-                                "SIGLA" VARCHAR2(10 BYTE),
-                                "AMB_APL_ID" NUMBER,
-                                "ENT_ID" NUMBER,
-                                "TIPO" VARCHAR2(10 BYTE),
-                                "INSTIT_FUNCIONAL_ID" NUMBER,
-                                "PARTILHADO" VARCHAR2(3 BYTE),
-                                "INSTIT_INSTIT_REL" NUMBER,
-                                "INSTITUTO" NUMBER,
-                                "SEM_NIF" NUMBER DEFAULT 1,
-                                "INSTIT_EXECUTA" NUMBER,
-                                "TIPO_REGULARIZACAO" NUMBER DEFAULT 0,
-                                "ANO_REGULARIZACAO" NUMBER,
-                                "INVEST_DESC" VARCHAR2(500 BYTE),
-                                "INVEST_OBJECTIVOS" VARCHAR2(500 BYTE),
-                                "INVEST_RESULTADOS" VARCHAR2(500 BYTE),
-                                "INVEST_BENEFICIARIOS" VARCHAR2(500 BYTE),
-                                "INVEST_UNIDADE_RESULTS" VARCHAR2(100 BYTE),
-                                "INVEST_ESTADO_OBS" VARCHAR2(500 BYTE),
-                                "INVEST_ESTADO_INVEST_ID" NUMBER DEFAULT 0,
-                                "DATA_INICIO" DATE,
-                                "DATA_FIM" DATE,
-                                "CONCELHO_ID" VARCHAR2(20 BYTE),
-                                "ORC_POD_ID" NUMBER,
-                                "ORC_TP_ORC_ID" NUMBER,
-                                "ORC_REG_ID" NUMBER,
-                                "ORC_TP_INST_ID" NUMBER,
-                                "ORC_PRIOR_ID" NUMBER,
-                                "EXTRA_MUNICIPAL" NUMBER DEFAULT 0,
-                                "TIPO_INV" VARCHAR2(3 BYTE) DEFAULT 'CAP',
-                                "TIPO_ESTRUTURA" VARCHAR2(20 BYTE),
-                                "IMAGEM_AJUDA" VARCHAR2(200 BYTE),
-                                "INTROD_DESCENTRALIZADA" VARCHAR2(2 BYTE) DEFAULT 0,
-                                "EN_NOME" VARCHAR2(150 BYTE),
-                                "FR_NOME" VARCHAR2(150 BYTE),
-                                "CATIVO" NUMBER DEFAULT NULL,
-                                "CODIGO_V1" VARCHAR2(200 BYTE),
-                                "CODIGO_V2" VARCHAR2(200 BYTE),
-                                "CODIGO_V3" VARCHAR2(200 BYTE),
-                                "CODIGO_V4" VARCHAR2(200 BYTE),
-                                "CODIGO_V5" VARCHAR2(200 BYTE),
-                                "INSTIT_ID_V1" NUMBER,
-                                "INSTIT_ID_V2" NUMBER,
-                                "INSTIT_ID_V3" NUMBER(20,0),
-                                "INSTIT_ID_V4" NUMBER,
-                                "INSTIT_ID_V5" NUMBER,
-                                "NIVEL_CONTROLO" NUMBER,
-                                "EXTINTO" VARCHAR2(1 BYTE) DEFAULT 0,
-                                "ETAPAS" VARCHAR2(1 BYTE) DEFAULT 2,
-                                "CONTRATO_PROGRAMA" VARCHAR2(1 BYTE),
-                                "DT_RECUPERACAO" DATE,
-                                "RECUPERADO" NUMBER DEFAULT 0,
-                                "USR_RECUPERA_ID" NUMBER,
-                                "PROC_SALARIOS" NUMBER DEFAULT 3,
-                                CONSTRAINT PK_INSTITUICOES PRIMARY KEY ( id )
+CREATE TABLE "INSTITUICOES" (	
+    "ID" NUMBER, 
+    "CODIGO" VARCHAR2(200 BYTE), 
+    "NOME" VARCHAR2(150 BYTE), 
+    "NIVEL" NUMBER, 
+    "NIVEL_DETALHE" NUMBER, 
+    "INSTIT_ID" NUMBER, 
+    "TEE_TEE_ID" NUMBER(10,0), 
+    "SIGLA" VARCHAR2(10 BYTE), 
+    "AMB_APL_ID" NUMBER, 
+    "ENT_ID" NUMBER, 
+    "TIPO" VARCHAR2(10 BYTE), 
+    "INSTIT_FUNCIONAL_ID" NUMBER, 
+    "PARTILHADO" VARCHAR2(3 BYTE), 
+    "INSTIT_INSTIT_REL" NUMBER, 
+    "INSTITUTO" NUMBER, 
+    "SEM_NIF" NUMBER DEFAULT 1, 
+    "INSTIT_EXECUTA" NUMBER, 
+    "TIPO_REGULARIZACAO" NUMBER DEFAULT 0, 
+    "ANO_REGULARIZACAO" NUMBER, 
+    "INVEST_DESC" VARCHAR2(500 BYTE), 
+    "INVEST_OBJECTIVOS" VARCHAR2(500 BYTE), 
+    "INVEST_RESULTADOS" VARCHAR2(500 BYTE), 
+    "INVEST_BENEFICIARIOS" VARCHAR2(500 BYTE), 
+    "INVEST_UNIDADE_RESULTS" VARCHAR2(100 BYTE), 
+    "INVEST_ESTADO_OBS" VARCHAR2(500 BYTE), 
+    "INVEST_ESTADO_INVEST_ID" NUMBER DEFAULT 0, 
+    "DATA_INICIO" DATE, 
+    "DATA_FIM" DATE, 
+    "CONCELHO_ID" VARCHAR2(20 BYTE), 
+    "ORC_POD_ID" NUMBER, 
+    "ORC_TP_ORC_ID" NUMBER, 
+    "ORC_REG_ID" NUMBER, 
+    "ORC_TP_INST_ID" NUMBER, 
+    "ORC_PRIOR_ID" NUMBER, 
+    "EXTRA_MUNICIPAL" NUMBER DEFAULT 0, 
+    "TIPO_INV" VARCHAR2(3 BYTE) DEFAULT 'CAP', 
+    "TIPO_ESTRUTURA" VARCHAR2(20 BYTE), 
+    "IMAGEM_AJUDA" VARCHAR2(200 BYTE), 
+    "INTROD_DESCENTRALIZADA" VARCHAR2(2 BYTE) DEFAULT 0, 
+    "EN_NOME" VARCHAR2(150 BYTE), 
+    "FR_NOME" VARCHAR2(150 BYTE), 
+    "CATIVO" NUMBER DEFAULT NULL, 
+    "CODIGO_V1" VARCHAR2(200 BYTE), 
+    "CODIGO_V2" VARCHAR2(200 BYTE), 
+    "CODIGO_V3" VARCHAR2(200 BYTE), 
+    "CODIGO_V4" VARCHAR2(200 BYTE), 
+    "CODIGO_V5" VARCHAR2(200 BYTE), 
+    "INSTIT_ID_V1" NUMBER, 
+    "INSTIT_ID_V2" NUMBER, 
+    "INSTIT_ID_V3" NUMBER(20,0), 
+    "INSTIT_ID_V4" NUMBER, 
+    "INSTIT_ID_V5" NUMBER, 
+    "NIVEL_CONTROLO" NUMBER, 
+    "EXTINTO" VARCHAR2(1 BYTE) DEFAULT 0, 
+    "ETAPAS" VARCHAR2(1 BYTE) DEFAULT 2, 
+    "CONTRATO_PROGRAMA" VARCHAR2(1 BYTE), 
+    "DT_RECUPERACAO" DATE, 
+    "RECUPERADO" NUMBER DEFAULT 0, 
+    "USR_RECUPERA_ID" NUMBER, 
+    "PROC_SALARIOS" NUMBER DEFAULT 3,
+    CONSTRAINT PK_INSTITUICOES PRIMARY KEY ( id )
 );
 
 
 CREATE TABLE "RH_TIPO_MOVIMENTOS" (
-                                      "ID" NUMBER,
-                                      "DESCRICAO" VARCHAR2(100 BYTE),
-                                      "TIPO_PROCESSAMENTO" VARCHAR2(3 BYTE),
-                                      "VALOR" NUMBER,
-                                      "PERCENTAGEM" NUMBER,
-                                      "SHORT_DESC" VARCHAR2(6 BYTE),
-                                      "TIPO" VARCHAR2(3 BYTE),
-                                      "IAC_IAC_ID" NUMBER(10,0),
-                                      "COBRE_IMP" VARCHAR2(3 BYTE),
-                                      "SOCIAL" VARCHAR2(3 BYTE),
-                                      "CALCULO" VARCHAR2(15 BYTE),
-                                      "FAVOR_ESTADO" VARCHAR2(3 BYTE),
-                                      "IAC_IAC_REC_ID" NUMBER,
-                                      "ACTUALIZA_CONTA_CORRENTE" VARCHAR2(30 BYTE),
-                                      "TD_ID" NUMBER,
-                                      "TIPO_IUR" VARCHAR2(20 BYTE),
-                                      "AMB_APL_ID" NUMBER,
-                                      "RETENCAO" VARCHAR2(3 BYTE),
-                                      "CC_ID" NUMBER,
-                                      "ENT_ID" NUMBER,
-                                      "TIPO_SAL" VARCHAR2(5 BYTE),
-                                      "ACUMULADO" VARCHAR2(3 BYTE),
-                                      "ESTADO" VARCHAR2(10 BYTE) DEFAULT 'INACTIVO',
-                                      CONSTRAINT PK_TIPO_MOVIMENTOS PRIMARY KEY ( id )
+    "ID" NUMBER, 
+    "DESCRICAO" VARCHAR2(100 BYTE), 
+    "TIPO_PROCESSAMENTO" VARCHAR2(3 BYTE), 
+    "VALOR" NUMBER, 
+    "PERCENTAGEM" NUMBER, 
+    "SHORT_DESC" VARCHAR2(6 BYTE), 
+    "TIPO" VARCHAR2(3 BYTE), 
+    "IAC_IAC_ID" NUMBER(10,0), 
+    "COBRE_IMP" VARCHAR2(3 BYTE), 
+    "SOCIAL" VARCHAR2(3 BYTE), 
+    "CALCULO" VARCHAR2(15 BYTE), 
+    "FAVOR_ESTADO" VARCHAR2(3 BYTE), 
+    "IAC_IAC_REC_ID" NUMBER, 
+    "ACTUALIZA_CONTA_CORRENTE" VARCHAR2(30 BYTE), 
+    "TD_ID" NUMBER, 
+    "TIPO_IUR" VARCHAR2(20 BYTE), 
+    "AMB_APL_ID" NUMBER, 
+    "RETENCAO" VARCHAR2(3 BYTE), 
+    "CC_ID" NUMBER, 
+    "ENT_ID" NUMBER, 
+    "TIPO_SAL" VARCHAR2(5 BYTE), 
+    "ACUMULADO" VARCHAR2(3 BYTE), 
+    "ESTADO" VARCHAR2(10 BYTE) DEFAULT 'INACTIVO',
+    CONSTRAINT PK_TIPO_MOVIMENTOS PRIMARY KEY ( id )
 );
 
-CREATE TABLE "GLB_T_UPS" (
-                             "ID" NUMBER,
-                             "NOME" VARCHAR2(100 BYTE),
-                             "DT_INTRO" DATE,
-                             "DT_UPDATE" DATE,
-                             "ID_USER_UPDATE" NUMBER,
-                             "ID_DELEGACAO" NUMBER,
-                             "ID_GEOGRAFIA" NUMBER,
-                             "ID_USER_SIPSFIN" NUMBER,
-                             "COD_POSTAL" VARCHAR2(10 BYTE),
-                             "ENDERECO" VARCHAR2(200 BYTE),
-                             "ID_USER" NUMBER,
-                             "DT_INICIO" DATE DEFAULT TO_DATE(TO_CHAR(SYSDATE, 'YYYY-MM-DD'), 'YYYY-MM-DD'),
-                             "DT_FIM" DATE DEFAULT TO_DATE(TO_CHAR(SYSDATE, 'YYYY-MM-DD'), 'YYYY-MM-DD'),
-                             "ESTADO" VARCHAR2(1 BYTE),
-                             "ID_USER_INATIVA" NUMBER,
-                             "ABERTURA_ATENDIMENTO" VARCHAR2(5 BYTE),
-                             "FECHO_ATENDIMENTO" VARCHAR2(5 BYTE),
-                             "CODIGO" VARCHAR2(10 BYTE),
-                             "COORDENADAS" VARCHAR2(32 BYTE),
-                             "COORD_LATITUDE" VARCHAR2(32 BYTE),
-                             "COORD_LONGITUDE" VARCHAR2(32 BYTE),
-                             CONSTRAINT PK_UPS PRIMARY KEY ( id )
+CREATE TABLE "GLB_T_UPS" (	
+"ID" NUMBER, 
+"NOME" VARCHAR2(100 BYTE), 
+"DT_INTRO" DATE, 
+"DT_UPDATE" DATE, 
+"ID_USER_UPDATE" NUMBER, 
+"ID_DELEGACAO" NUMBER, 
+"ID_GEOGRAFIA" NUMBER, 
+"ID_USER_SIPSFIN" NUMBER, 
+"COD_POSTAL" VARCHAR2(10 BYTE), 
+"ENDERECO" VARCHAR2(200 BYTE), 
+"ID_USER" NUMBER, 
+"DT_INICIO" DATE DEFAULT TO_DATE(TO_CHAR(SYSDATE, 'YYYY-MM-DD'), 'YYYY-MM-DD'), 
+"DT_FIM" DATE DEFAULT TO_DATE(TO_CHAR(SYSDATE, 'YYYY-MM-DD'), 'YYYY-MM-DD'), 
+"ESTADO" VARCHAR2(1 BYTE), 
+"ID_USER_INATIVA" NUMBER, 
+"ABERTURA_ATENDIMENTO" VARCHAR2(5 BYTE), 
+"FECHO_ATENDIMENTO" VARCHAR2(5 BYTE), 
+"CODIGO" VARCHAR2(10 BYTE), 
+"COORDENADAS" VARCHAR2(32 BYTE), 
+"COORD_LATITUDE" VARCHAR2(32 BYTE), 
+"COORD_LONGITUDE" VARCHAR2(32 BYTE),
+    CONSTRAINT PK_UPS PRIMARY KEY ( id )
 );
 
 CREATE TABLE GLB_T_GEOGRAFIA (
-                                 "ID"            NUMBER,
-                                 "NOME"          VARCHAR2(100 BYTE),
-                                 "NACIONALIDADE" VARCHAR2(30 BYTE),
-                                 "GEOGR_ID"      NUMBER,
-                                 "PAIS"          NUMBER,
-                                 "NIVEL_DETALHE" NUMBER,
-                                 "NOME_OFICIAL"  VARCHAR2(300 BYTE),
-                                 "FLAG_ALTER"    VARCHAR2(1 BYTE),
-                                 "NOME_NORM"     VARCHAR2(300 BYTE),
-                                 "TP_GEOG_CD"    VARCHAR2(4 BYTE),
-                                 "FLG_SITUACAO"  VARCHAR2(1 BYTE),
-                                 CONSTRAINT PK_GEOGRAFIA PRIMARY KEY ( id )
+    "ID"            NUMBER,
+    "NOME"          VARCHAR2(100 BYTE),
+    "NACIONALIDADE" VARCHAR2(30 BYTE),
+    "GEOGR_ID"      NUMBER,
+    "PAIS"          NUMBER,
+    "NIVEL_DETALHE" NUMBER,
+    "NOME_OFICIAL"  VARCHAR2(300 BYTE),
+    "FLAG_ALTER"    VARCHAR2(1 BYTE),
+    "NOME_NORM"     VARCHAR2(300 BYTE),
+    "TP_GEOG_CD"    VARCHAR2(4 BYTE),
+    "FLG_SITUACAO"  VARCHAR2(1 BYTE),
+    CONSTRAINT PK_GEOGRAFIA PRIMARY KEY ( id )
 );
-
+   
 
 CREATE TABLE RH_T_DOMAINS (
-                              ID                  NUMBER           NOT NULL,
-                              DOMINIO             VARCHAR2(100)    NOT NULL,
-                              VALOR               VARCHAR2(100)    NOT NULL,
-                              DESCRICAO           VARCHAR2(200)    NOT NULL,
-                              REFERENCIA          VARCHAR2(100)    NOT NULL,
-                              ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL,
-                              DATA_REGISTO        DATE             NOT NULL,
-                              USER_REGISTO_ID     NUMBER           NOT NULL,
-                              USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
-                              USER_ALTERACAO_ID   NUMBER,
-                              USER_ALTERACAO_NAME VARCHAR2(200),
-                              DATA_ALTERACAO      DATE,
-                              CONSTRAINT PK_DOMAINS PRIMARY KEY (ID),
-                              CONSTRAINT CK_DOMAINS_ESTADO CHECK (ESTADO IN ('A','I','E'))
+  ID                  NUMBER           NOT NULL,
+  DOMINIO             VARCHAR2(100)    NOT NULL,
+  VALOR               VARCHAR2(100)    NOT NULL,
+  DESCRICAO           VARCHAR2(200)    NOT NULL,
+  REFERENCIA          VARCHAR2(100)    NOT NULL,
+  ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL,
+  DATA_REGISTO        DATE             NOT NULL,
+  USER_REGISTO_ID     NUMBER           NOT NULL,
+  USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID   NUMBER,
+  USER_ALTERACAO_NAME VARCHAR2(200),
+  DATA_ALTERACAO      DATE,
+  CONSTRAINT PK_DOMAINS PRIMARY KEY (ID),
+  CONSTRAINT CK_DOMAINS_ESTADO CHECK (ESTADO IN ('A','I','E'))
 );
 
 COMMENT ON TABLE RH_T_DOMAINS IS 'Domínios parametrizáveis do módulo RH (chave-valor).';
@@ -164,36 +163,35 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_DOMAINS.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_DOMAINS.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
-
+  
 END;
 /
-SHOW ERRORS TRIGGER TRG_DOMAIN;
 
 /* =========================================================
    2) RH_T_TIPOS_DOCUMENTOS
    ========================================================= */
 CREATE TABLE RH_T_TIPOS_DOCUMENTOS (
-                                       ID                  NUMBER           NOT NULL,
-                                       REFERENCIA          VARCHAR2(100),
-                                       CODIGO              VARCHAR2(50)     NOT NULL,
-                                       NOME                VARCHAR2(200)    NOT NULL,
-                                       ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL,  -- domínio STATUS
-                                       DATA_REGISTO        DATE             NOT NULL,
-                                       USER_REGISTO_ID     NUMBER           NOT NULL,
-                                       USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
-                                       USER_ALTERACAO_ID   NUMBER,
-                                       USER_ALTERACAO_NAME VARCHAR2(200),
-                                       DATA_ALTERACAO      DATE,
-                                       UUID RAW(16)    NOT NULL,
-                                       CONSTRAINT PK_TP_DOC PRIMARY KEY (ID),
-                                       CONSTRAINT CK_TP_DOC_ESTADO CHECK (ESTADO IN ('A','I','E'))
+  ID                  NUMBER           NOT NULL,
+  REFERENCIA          VARCHAR2(100),
+  CODIGO              VARCHAR2(50)     NOT NULL,
+  NOME                VARCHAR2(200)    NOT NULL,
+  ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL,  -- domínio STATUS
+  DATA_REGISTO        DATE             NOT NULL,
+  USER_REGISTO_ID     NUMBER           NOT NULL,
+  USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID   NUMBER,
+  USER_ALTERACAO_NAME VARCHAR2(200),
+  DATA_ALTERACAO      DATE,
+  UUID RAW(16)    NOT NULL,
+  CONSTRAINT PK_TP_DOC PRIMARY KEY (ID),
+  CONSTRAINT CK_TP_DOC_ESTADO CHECK (ESTADO IN ('A','I','E'))
 );
 
 COMMENT ON TABLE RH_T_TIPOS_DOCUMENTOS IS 'Tipos de documentos (BO, OS, OFA, etc.).';
@@ -207,36 +205,35 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_TIPO_DOCUMENTO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_TIPO_DOCUMENTO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
-
+  
 END;
 /
-SHOW ERRORS TRIGGER TRG_TIPO_DOCUMENTO;
 
 /* =========================================================
    3) RH_T_PARAM_NOTIFICACAO
    ========================================================= */
 CREATE TABLE RH_T_PARAM_NOTIFICACAO (
-                                        ID                  NUMBER           NOT NULL,
-                                        REFERENCIA          VARCHAR2(200)    NOT NULL,
-                                        ASSUNTO             VARCHAR2(200)    NOT NULL,
-                                        CORPO               VARCHAR2(4000)   NOT NULL,
-                                        ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL,  -- domínio STATUS
-                                        DATA_REGISTO        DATE             NOT NULL,
-                                        USER_REGISTO_ID     NUMBER           NOT NULL,
-                                        USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
-                                        USER_ALTERACAO_ID   NUMBER,
-                                        USER_ALTERACAO_NAME VARCHAR2(200),
-                                        DATA_ALTERACAO      DATE,
-                                        UUID RAW(16)    NOT NULL,
-                                        CONSTRAINT PK_PARAM_NOTIF PRIMARY KEY (ID),
-                                        CONSTRAINT CK_PARAM_NOTIF_ESTADO CHECK (ESTADO IN ('A','I','E'))
+  ID                  NUMBER           NOT NULL,
+  REFERENCIA          VARCHAR2(200)    NOT NULL,
+  ASSUNTO             VARCHAR2(200)    NOT NULL,
+  CORPO               VARCHAR2(4000)   NOT NULL,
+  ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL,  -- domínio STATUS
+  DATA_REGISTO        DATE             NOT NULL,
+  USER_REGISTO_ID     NUMBER           NOT NULL,
+  USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID   NUMBER,
+  USER_ALTERACAO_NAME VARCHAR2(200),
+  DATA_ALTERACAO      DATE,
+  UUID RAW(16)    NOT NULL,
+  CONSTRAINT PK_PARAM_NOTIF PRIMARY KEY (ID),
+  CONSTRAINT CK_PARAM_NOTIF_ESTADO CHECK (ESTADO IN ('A','I','E'))
 );
 
 COMMENT ON TABLE RH_T_PARAM_NOTIFICACAO IS 'Templates de notificação (assunto/corpo padronizados).';
@@ -250,41 +247,40 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_PARAM_NOTIF.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_PARAM_NOTIF.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
-
+  
 END;
 /
-SHOW ERRORS TRIGGER TRG_PARAM_NOTIF;
 
 /* =========================================================
    4) RH_T_PARAM_CONFIG
    ========================================================= */
 CREATE TABLE RH_T_PARAM_CONFIG (
-                                   ID                  NUMBER           NOT NULL,
-                                   TIPO_CONFIG         VARCHAR2(200)    NOT NULL,  -- ALERTA ou VALIDACAO
-                                   REFERENCIA          VARCHAR2(200)    NOT NULL,
-                                   DESCRICAO           VARCHAR2(400),
-                                   FLG_NOTIFICACAO     VARCHAR2(3)      DEFAULT 'NAO' NOT NULL,  -- SIM/NAO
-                                   FLG_ORDEM_SERVICO   VARCHAR2(3)      DEFAULT 'NAO' NOT NULL,  -- SIM/NAO
-                                   ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL,     -- domínio STATUS
-                                   DATA_REGISTO        DATE             NOT NULL,
-                                   USER_REGISTO_ID     NUMBER           NOT NULL,
-                                   USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
-                                   USER_ALTERACAO_ID   NUMBER,
-                                   USER_ALTERACAO_NAME VARCHAR2(200),
-                                   DATA_ALTERACAO      DATE,
-                                   UUID RAW(16)    NOT NULL,
-                                   CONSTRAINT PK_PARAM_CONFIG PRIMARY KEY (ID),
-                                   CONSTRAINT CK_PARAM_CONFIG_TIPO CHECK (UPPER(TIPO_CONFIG) IN ('ALERTA','VALIDACAO')),
-                                   CONSTRAINT CK_PARAM_CONFIG_FLAG_NOTIF CHECK (UPPER(FLG_NOTIFICACAO) IN ('SIM','NAO')),
-                                   CONSTRAINT CK_PARAM_CONFIG_FLAG_OS CHECK (UPPER(FLG_ORDEM_SERVICO) IN ('SIM','NAO')),
-                                   CONSTRAINT CK_PARAM_CONFIG_ESTADO CHECK (ESTADO IN ('A','I','E'))
+  ID                  NUMBER           NOT NULL,
+  TIPO_CONFIG         VARCHAR2(200)    NOT NULL,  -- ALERTA ou VALIDACAO
+  REFERENCIA          VARCHAR2(200)    NOT NULL,
+  DESCRICAO           VARCHAR2(400),
+  FLG_NOTIFICACAO     VARCHAR2(3)      DEFAULT 'NAO' NOT NULL,  -- SIM/NAO
+  FLG_ORDEM_SERVICO   VARCHAR2(3)      DEFAULT 'NAO' NOT NULL,  -- SIM/NAO
+  ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL,     -- domínio STATUS
+  DATA_REGISTO        DATE             NOT NULL,
+  USER_REGISTO_ID     NUMBER           NOT NULL,
+  USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID   NUMBER,
+  USER_ALTERACAO_NAME VARCHAR2(200),
+  DATA_ALTERACAO      DATE,
+  UUID RAW(16)    NOT NULL,
+  CONSTRAINT PK_PARAM_CONFIG PRIMARY KEY (ID),
+  CONSTRAINT CK_PARAM_CONFIG_TIPO CHECK (UPPER(TIPO_CONFIG) IN ('ALERTA','VALIDACAO')),
+  CONSTRAINT CK_PARAM_CONFIG_FLAG_NOTIF CHECK (UPPER(FLG_NOTIFICACAO) IN ('SIM','NAO')),
+  CONSTRAINT CK_PARAM_CONFIG_FLAG_OS CHECK (UPPER(FLG_ORDEM_SERVICO) IN ('SIM','NAO')),
+  CONSTRAINT CK_PARAM_CONFIG_ESTADO CHECK (ESTADO IN ('A','I','E'))
 );
 
 COMMENT ON TABLE RH_T_PARAM_CONFIG IS 'Parâmetros de configuração (alertas/validações e efeitos colaterais).';
@@ -298,45 +294,44 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_PARAM_CONFIG.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_PARAM_CONFIG.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
-
+  
 END;
 /
-SHOW ERRORS TRIGGER TRG_PARAM_CONFIG;
 
 /* =========================================================
    TABELA: RH_T_PARAM_VINCULO
    ========================================================= */
 CREATE TABLE RH_T_PARAM_VINCULO (
-                                    ID                  NUMBER              NOT NULL,
-                                    CODIGO              VARCHAR2(20 BYTE)   NOT NULL,
-                                    NOME                VARCHAR2(100 BYTE)  NOT NULL,
-                                    FLG_CARREIRA        NUMBER(1)           DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
-                                    FLG_SALARIO         NUMBER(1)           DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
-                                    FLG_CONTRATO        NUMBER(1)           DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
-                                    FLG_TEMPO_SERVICO   NUMBER(1)           DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
-                                    ESTADO              VARCHAR2(1)         DEFAULT 'A' NOT NULL, -- A/I
-                                    DATA_REGISTO        DATE                NOT NULL,
-                                    USER_REGISTO_ID     NUMBER              NOT NULL,
-                                    USER_REGISTO_NAME   VARCHAR2(200)       NOT NULL,
-                                    USER_ALTERACAO_ID   NUMBER,
-                                    USER_ALTERACAO_NAME VARCHAR2(200),
-                                    DATA_ALTERACAO      DATE,
-                                    UUID RAW(16)       NOT NULL,
-                                    CONSTRAINT PK_PARAM_VINCULO PRIMARY KEY (ID),
-                                    CONSTRAINT CK_PARAM_VINCULO_FLAGS CHECK (
-                                        FLG_CARREIRA     IN (0,1) AND
-                                        FLG_SALARIO      IN (0,1) AND
-                                        FLG_CONTRATO     IN (0,1) AND
-                                        FLG_TEMPO_SERVICO IN (0,1)
-                                        ),
-                                    CONSTRAINT CK_PARAM_VINCULO_ESTADO CHECK (ESTADO IN ('A','I','E'))
+  ID                  NUMBER              NOT NULL,
+  CODIGO              VARCHAR2(20 BYTE)   NOT NULL,
+  NOME                VARCHAR2(100 BYTE)  NOT NULL,
+  FLG_CARREIRA        NUMBER(1)           DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
+  FLG_SALARIO         NUMBER(1)           DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
+  FLG_CONTRATO        NUMBER(1)           DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
+  FLG_TEMPO_SERVICO   NUMBER(1)           DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
+  ESTADO              VARCHAR2(1)         DEFAULT 'A' NOT NULL, -- A/I
+  DATA_REGISTO        DATE                NOT NULL,
+  USER_REGISTO_ID     NUMBER              NOT NULL,
+  USER_REGISTO_NAME   VARCHAR2(200)       NOT NULL,
+  USER_ALTERACAO_ID   NUMBER,
+  USER_ALTERACAO_NAME VARCHAR2(200),
+  DATA_ALTERACAO      DATE,
+  UUID RAW(16)       NOT NULL,
+  CONSTRAINT PK_PARAM_VINCULO PRIMARY KEY (ID),
+  CONSTRAINT CK_PARAM_VINCULO_FLAGS CHECK (
+    FLG_CARREIRA     IN (0,1) AND
+    FLG_SALARIO      IN (0,1) AND
+    FLG_CONTRATO     IN (0,1) AND
+    FLG_TEMPO_SERVICO IN (0,1)
+  ),
+  CONSTRAINT CK_PARAM_VINCULO_ESTADO CHECK (ESTADO IN ('A','I','E'))
 );
 
 -- (Opcional) Comentários
@@ -353,9 +348,9 @@ CREATE INDEX IX_PARAM_VINC_UUID ON RH_T_PARAM_VINCULO (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_PARAM_VINCULO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (preenche ID/DATA_REGISTO e atualiza DATA_ALTERACAO)
@@ -365,51 +360,50 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_PARAM_VINCULO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_PARAM_VINCULO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_PARAM_VINCULO;
 /* =========================================================
    TABELA: RH_T_PARAM_CONTRATO
    ========================================================= */
 CREATE TABLE RH_T_PARAM_CONTRATO (
-                                     ID                    NUMBER            NOT NULL,
-                                     CODIGO                VARCHAR2(20)      NOT NULL,
-                                     NOME                  VARCHAR2(200)     NOT NULL,
-                                     NATUREZA              VARCHAR2(50)      NOT NULL,
-                                     FLG_RENOVAVEL         NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
-                                     DURACAO_RENOVAVEL     NUMBER,
-                                     MAX_RENOVACAO         NUMBER,
-                                     PRAZO_OBRIGATORIO     NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
-                                     PARAM_VINCULO_ID      NUMBER,                             -- FK -> RH_T_PARAM_VINCULO.ID
-                                     ESTADO                VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I
-                                     DATA_REGISTO          DATE              NOT NULL,
-                                     USER_REGISTO_ID       NUMBER            NOT NULL,
-                                     USER_REGISTO_NAME     VARCHAR2(200)     NOT NULL,
-                                     USER_ALTERACAO_ID     NUMBER,
-                                     USER_ALTERACAO_NAME   VARCHAR2(200),
-                                     DATA_ALTERACAO        DATE,
-                                     UUID RAW(16)     NOT NULL,
+  ID                    NUMBER            NOT NULL,
+  CODIGO                VARCHAR2(20)      NOT NULL,
+  NOME                  VARCHAR2(200)     NOT NULL,
+  NATUREZA              VARCHAR2(50)      NOT NULL,
+  FLG_RENOVAVEL         NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
+  DURACAO_RENOVAVEL     NUMBER,
+  MAX_RENOVACAO         NUMBER,
+  PRAZO_OBRIGATORIO     NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
+  PARAM_VINCULO_ID      NUMBER,                             -- FK -> RH_T_PARAM_VINCULO.ID
+  ESTADO                VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I
+  DATA_REGISTO          DATE              NOT NULL,
+  USER_REGISTO_ID       NUMBER            NOT NULL,
+  USER_REGISTO_NAME     VARCHAR2(200)     NOT NULL,
+  USER_ALTERACAO_ID     NUMBER,
+  USER_ALTERACAO_NAME   VARCHAR2(200),
+  DATA_ALTERACAO        DATE,
+  UUID RAW(16)     NOT NULL,
 
-                                     CONSTRAINT PK_PARAM_CONTRATO PRIMARY KEY (ID),
-                                     CONSTRAINT FK_PARAM_CONT_VINC FOREIGN KEY (PARAM_VINCULO_ID)
-                                         REFERENCES RH_T_PARAM_VINCULO (ID),
-                                     CONSTRAINT CK_PARAM_CONTR_ESTADO CHECK (ESTADO IN ('A','I','E')),
-                                     CONSTRAINT CK_PARAM_CONTR_FLAGS CHECK (
-                                         FLG_RENOVAVEL IN (0,1) AND PRAZO_OBRIGATORIO IN (0,1)
-                                         ),
-                                     CONSTRAINT CK_PARAM_CONTR_REGRAS_RENOV CHECK (
-                                         FLG_RENOVAVEL = 0
-                                             OR (FLG_RENOVAVEL = 1 AND DURACAO_RENOVAVEL IS NOT NULL AND MAX_RENOVACAO IS NOT NULL)
-                                         )
+  CONSTRAINT PK_PARAM_CONTRATO PRIMARY KEY (ID),
+  CONSTRAINT FK_PARAM_CONT_VINC FOREIGN KEY (PARAM_VINCULO_ID)
+    REFERENCES RH_T_PARAM_VINCULO (ID),
+  CONSTRAINT CK_PARAM_CONTR_ESTADO CHECK (ESTADO IN ('A','I','E')),
+  CONSTRAINT CK_PARAM_CONTR_FLAGS CHECK (
+    FLG_RENOVAVEL IN (0,1) AND PRAZO_OBRIGATORIO IN (0,1)
+  ),
+  CONSTRAINT CK_PARAM_CONTR_REGRAS_RENOV CHECK (
+    FLG_RENOVAVEL = 0
+    OR (FLG_RENOVAVEL = 1 AND DURACAO_RENOVAVEL IS NOT NULL AND MAX_RENOVACAO IS NOT NULL)
+  )
 );
 
 -- Comentários (opcionais)
@@ -430,9 +424,9 @@ CREATE INDEX IX_PARAM_CONTR_UUID ON RH_T_PARAM_CONTRATO (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_PARAM_CONTRATO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (ID/DATA_REGISTO em INSERT; DATA_ALTERACAO em UPDATE)
@@ -442,48 +436,47 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_PARAM_CONTRATO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_PARAM_CONTRATO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_PARAM_CONTRATO;
 
 CREATE TABLE RH_T_PARAM_SIT_LABORAL (
-                                        ID                       NUMBER            NOT NULL,
-                                        CODIGO                   VARCHAR2(20)      NOT NULL,
-                                        NOME                     VARCHAR2(200)     NOT NULL,
-                                        TIPO_SITUACAO            VARCHAR2(50)      NOT NULL,      -- domínio: SITUACAO_LABORAL
-                                        FLG_REMUNERACAO          NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
-                                        FLG_AFETA_CARREIRA       NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
-                                        FLG_CONTA_TEMP_SERVICO   NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
-                                        FLG_CESSA_VINCULO        NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
-                                        FLG_CESSA_PROGRESSAO     NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
-                                        FLG_ESTADO_CONTRATO      NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
-                                        ESTADO                   VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I
-                                        DATA_REGISTO             DATE              NOT NULL,
-                                        USER_REGISTO_ID          NUMBER            NOT NULL,
-                                        USER_REGISTO_NAME        VARCHAR2(200)     NOT NULL,
-                                        USER_ALTERACAO_ID        NUMBER,
-                                        USER_ALTERACAO_NAME      VARCHAR2(200),
-                                        DATA_ALTERACAO           DATE,
-                                        UUID RAW(16)     NOT NULL,
+  ID                       NUMBER            NOT NULL,
+  CODIGO                   VARCHAR2(20)      NOT NULL,
+  NOME                     VARCHAR2(200)     NOT NULL,
+  TIPO_SITUACAO            VARCHAR2(50)      NOT NULL,      -- domínio: SITUACAO_LABORAL
+  FLG_REMUNERACAO          NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
+  FLG_AFETA_CARREIRA       NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
+  FLG_CONTA_TEMP_SERVICO   NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
+  FLG_CESSA_VINCULO        NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
+  FLG_CESSA_PROGRESSAO     NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
+  FLG_ESTADO_CONTRATO      NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
+  ESTADO                   VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I
+  DATA_REGISTO             DATE              NOT NULL,
+  USER_REGISTO_ID          NUMBER            NOT NULL,
+  USER_REGISTO_NAME        VARCHAR2(200)     NOT NULL,
+  USER_ALTERACAO_ID        NUMBER,
+  USER_ALTERACAO_NAME      VARCHAR2(200),
+  DATA_ALTERACAO           DATE,
+  UUID RAW(16)     NOT NULL,
 
-                                        CONSTRAINT PK_PARAM_SITLAB PRIMARY KEY (ID),
-                                        CONSTRAINT CK_PARAM_SITLAB_FLAGS CHECK (
-                                            FLG_REMUNERACAO        IN (0,1) AND
-                                            FLG_AFETA_CARREIRA     IN (0,1) AND
-                                            FLG_CONTA_TEMP_SERVICO IN (0,1) AND
-                                            FLG_CESSA_VINCULO      IN (0,1) AND
-                                            FLG_CESSA_PROGRESSAO   IN (0,1) AND
-                                            FLG_ESTADO_CONTRATO    IN (0,1)
-                                            ),
-                                        CONSTRAINT CK_PARAM_SITLAB_ESTADO CHECK (ESTADO IN ('A','I','E'))
+  CONSTRAINT PK_PARAM_SITLAB PRIMARY KEY (ID),
+  CONSTRAINT CK_PARAM_SITLAB_FLAGS CHECK (
+    FLG_REMUNERACAO        IN (0,1) AND
+    FLG_AFETA_CARREIRA     IN (0,1) AND
+    FLG_CONTA_TEMP_SERVICO IN (0,1) AND
+    FLG_CESSA_VINCULO      IN (0,1) AND
+    FLG_CESSA_PROGRESSAO   IN (0,1) AND
+    FLG_ESTADO_CONTRATO    IN (0,1)
+  ),
+  CONSTRAINT CK_PARAM_SITLAB_ESTADO CHECK (ESTADO IN ('A','I','E'))
 );
 
 -- Comentários (opcionais)
@@ -496,9 +489,9 @@ CREATE INDEX IX_PARAM_SLAB_UUID ON RH_T_PARAM_SIT_LABORAL (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_PARAM_SIT_LABORAL
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -508,33 +501,32 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_PARAM_SIT_LABORAL.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_PARAM_SIT_LABORAL.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_PARAM_SIT_LABORAL;
 
 CREATE TABLE RH_T_PARAM_CARREIRA (
-                                     ID                  NUMBER           NOT NULL,
-                                     NOME                VARCHAR2(200)    NOT NULL,
-                                     CODIGO              VARCHAR2(100)    NOT NULL,
-                                     ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- domínio STATUS: A/I
-                                     DATA_REGISTO        DATE             NOT NULL,
-                                     USER_REGISTO_ID     NUMBER           NOT NULL,
-                                     USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
-                                     USER_ALTERACAO_ID   NUMBER,
-                                     USER_ALTERACAO_NAME VARCHAR2(200),
-                                     DATA_ALTERACAO      DATE,
-                                     UUID RAW(16)    NOT NULL,
+  ID                  NUMBER           NOT NULL,
+  NOME                VARCHAR2(200)    NOT NULL,
+  CODIGO              VARCHAR2(100)    NOT NULL,
+  ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- domínio STATUS: A/I
+  DATA_REGISTO        DATE             NOT NULL,
+  USER_REGISTO_ID     NUMBER           NOT NULL,
+  USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID   NUMBER,
+  USER_ALTERACAO_NAME VARCHAR2(200),
+  DATA_ALTERACAO      DATE,
+  UUID RAW(16)    NOT NULL,
 
-                                     CONSTRAINT PK_PARAM_CARREIRA PRIMARY KEY (ID),
-                                     CONSTRAINT CK_PARAM_CARREIRA_ESTADO CHECK (ESTADO IN ('A','I','E'))
+  CONSTRAINT PK_PARAM_CARREIRA PRIMARY KEY (ID),
+  CONSTRAINT CK_PARAM_CARREIRA_ESTADO CHECK (ESTADO IN ('A','I','E'))
 );
 
 -- Comentários (opcionais)
@@ -547,9 +539,9 @@ CREATE INDEX IX_PARAM_CARR_UUID ON RH_T_PARAM_CARREIRA (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_PARAM_CARREIRA
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (ID e DATA_REGISTO em INSERT; DATA_ALTERACAO em UPDATE)
@@ -559,37 +551,36 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_PARAM_CARREIRA.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_PARAM_CARREIRA.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
-
+ 
 END;
 /
-SHOW ERRORS TRIGGER TRG_PARAM_CARREIRA;
 /* =========================================================
    TABELA: RH_T_PARAM_CATEGORIA
    ========================================================= */
 CREATE TABLE RH_T_PARAM_CATEGORIA (
-                                      ID                   NUMBER           NOT NULL,
-                                      PARAM_CARR_ID        NUMBER,                               -- FK → RH_T_PARAM_CARREIRA.ID
-                                      NOME                 VARCHAR2(200)    NOT NULL,
-                                      ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E
-                                      DATA_REGISTO         DATE             NOT NULL,
-                                      USER_REGISTO_ID      NUMBER           NOT NULL,
-                                      USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                                      USER_ALTERACAO_ID    NUMBER,
-                                      USER_ALTERACAO_NAME  VARCHAR2(200),
-                                      DATA_ALTERACAO       DATE,
-                                      UUID                 VARCHAR2(100)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  PARAM_CARR_ID        NUMBER,                               -- FK → RH_T_PARAM_CARREIRA.ID
+  NOME                 VARCHAR2(200)    NOT NULL,
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  UUID                 VARCHAR2(100)    NOT NULL,
 
-                                      CONSTRAINT PK_PARAM_CATEG PRIMARY KEY (ID),
-                                      CONSTRAINT FK_PARAM_CATEG_CARR FOREIGN KEY (PARAM_CARR_ID) REFERENCES RH_T_PARAM_CARREIRA (ID),
-                                      CONSTRAINT CK_PARAM_CATEG_ESTADO CHECK (ESTADO IN ('A','I','E'))
+  CONSTRAINT PK_PARAM_CATEG PRIMARY KEY (ID),
+  CONSTRAINT FK_PARAM_CATEG_CARR FOREIGN KEY (PARAM_CARR_ID) REFERENCES RH_T_PARAM_CARREIRA (ID),
+  CONSTRAINT CK_PARAM_CATEG_ESTADO CHECK (ESTADO IN ('A','I','E'))
 );
 
 -- Índice
@@ -597,9 +588,9 @@ CREATE INDEX IX_PARAM_CATEG_UUID ON RH_T_PARAM_CATEGORIA (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_PARAM_CATEGORIA
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (somente para INSERT)
@@ -608,36 +599,35 @@ BEFORE INSERT ON RH_T_PARAM_CATEGORIA
 FOR EACH ROW
 BEGIN
   IF :NEW.ID IS NULL THEN
-SELECT SEQ_PARAM_CATEGORIA.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+    SELECT SEQ_PARAM_CATEGORIA.NEXTVAL INTO :NEW.ID FROM DUAL;
+  END IF;
 
   IF :NEW.DATA_REGISTO IS NULL THEN
     :NEW.DATA_REGISTO := SYSDATE;
-END IF;
+  END IF;
 END;
 /
-SHOW ERRORS TRIGGER TRG_PARAM_CATEGORIA;
 /
 /* =========================================================
    TABELA: RH_T_PARAM_CARGO
    ========================================================= */
 CREATE TABLE RH_T_PARAM_CARGO (
-                                  ID                  NUMBER           NOT NULL,
-                                  NOME                VARCHAR2(100)    NOT NULL,
-                                  PARAM_CARR_ID       NUMBER           NOT NULL,        -- FK -> RH_T_PARAM_CARREIRA.ID
-                                  DIRIGENTE           VARCHAR2(1),                      -- ex.: 'S' ou 'N' (opcional)
-                                  ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL,  -- A, I, E
-                                  DATA_REGISTO        DATE             NOT NULL,
-                                  USER_REGISTO_ID     NUMBER           NOT NULL,
-                                  USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
-                                  USER_ALTERACAO_ID   NUMBER,
-                                  USER_ALTERACAO_NAME VARCHAR2(200),
-                                  DATA_ALTERACAO      DATE,
-                                  UUID RAW(16)    NOT NULL,
+  ID                  NUMBER           NOT NULL,
+  NOME                VARCHAR2(100)    NOT NULL,
+  PARAM_CARR_ID       NUMBER           NOT NULL,        -- FK -> RH_T_PARAM_CARREIRA.ID
+  DIRIGENTE           VARCHAR2(1),                      -- ex.: 'S' ou 'N' (opcional)
+  ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL,  -- A, I, E
+  DATA_REGISTO        DATE             NOT NULL,
+  USER_REGISTO_ID     NUMBER           NOT NULL,
+  USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID   NUMBER,
+  USER_ALTERACAO_NAME VARCHAR2(200),
+  DATA_ALTERACAO      DATE,
+  UUID RAW(16)    NOT NULL,
 
-                                  CONSTRAINT PK_PARAM_CARGO PRIMARY KEY (ID),
-                                  CONSTRAINT FK_CARGO_CARR FOREIGN KEY (PARAM_CARR_ID) REFERENCES RH_T_PARAM_CARREIRA (ID),
-                                  CONSTRAINT CK_PARAM_CARGO_ESTADO CHECK (ESTADO IN ('A','I','E'))
+  CONSTRAINT PK_PARAM_CARGO PRIMARY KEY (ID),
+  CONSTRAINT FK_CARGO_CARR FOREIGN KEY (PARAM_CARR_ID) REFERENCES RH_T_PARAM_CARREIRA (ID),
+  CONSTRAINT CK_PARAM_CARGO_ESTADO CHECK (ESTADO IN ('A','I','E'))
 );
 
 -- Comentários (opcionais)
@@ -654,9 +644,9 @@ CREATE INDEX IX_PARAM_CARG_UUID ON RH_T_PARAM_CARGO (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_PARAM_CARGO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID e DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -666,44 +656,43 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_PARAM_CARGO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_PARAM_CARGO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_PARAM_CARGO;
 
 CREATE TABLE RH_T_PARAM_ESCALAO (
-                                    ID                   NUMBER            NOT NULL,
-                                    CODIGO               VARCHAR2(10),
-                                    PARAM_CARR_ID        NUMBER,                          -- FK -> RH_T_PARAM_CARREIRA.ID
-                                    PARAM_CATEGORIA_ID   NUMBER,                          -- FK -> RH_T_PARAM_CATEGORIA.ID
-                                    NIVEL_REFERENCIA     NUMBER,
-                                    ESCALAO              VARCHAR2(10),
-                                    VALOR                NUMBER,
-                                    DATA_INICIO          DATE,
-                                    DATA_FIM             DATE,
-                                    ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I
-                                    DATA_REGISTO         DATE,
-                                    USER_REGISTO_ID      NUMBER,
-                                    USER_REGISTO_NAME    VARCHAR2(200),
-                                    USER_ALTERACAO_ID    NUMBER,
-                                    USER_ALTERACAO_NAME  VARCHAR2(200),
-                                    DATA_ALTERACAO       DATE,
-                                    UUID RAW(16)    NOT NULL,
+  ID                   NUMBER            NOT NULL,
+  CODIGO               VARCHAR2(10),
+  PARAM_CARR_ID        NUMBER,                          -- FK -> RH_T_PARAM_CARREIRA.ID
+  PARAM_CATEGORIA_ID   NUMBER,                          -- FK -> RH_T_PARAM_CATEGORIA.ID
+  NIVEL_REFERENCIA     NUMBER,
+  ESCALAO              VARCHAR2(10),
+  VALOR                NUMBER,
+  DATA_INICIO          DATE,
+  DATA_FIM             DATE,
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I
+  DATA_REGISTO         DATE,
+  USER_REGISTO_ID      NUMBER,
+  USER_REGISTO_NAME    VARCHAR2(200),
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  UUID RAW(16)    NOT NULL,
 
-                                    CONSTRAINT PK_ESCALAO PRIMARY KEY (ID),
-                                    CONSTRAINT FK_ESC_CARR_PCCS FOREIGN KEY (PARAM_CARR_ID) REFERENCES RH_T_PARAM_CARREIRA (ID),
-                                    CONSTRAINT FK_ESC_CATEGORIA FOREIGN KEY (PARAM_CATEGORIA_ID) REFERENCES RH_T_PARAM_CATEGORIA (ID),
-                                    CONSTRAINT CK_ESCALAO_ESTADO CHECK (ESTADO IN ('A','I','E')),
-                                    CONSTRAINT CK_ESCALAO_PERIODO CHECK (
-                                        DATA_FIM IS NULL OR DATA_INICIO IS NULL OR DATA_FIM >= DATA_INICIO
-                                        )
+  CONSTRAINT PK_ESCALAO PRIMARY KEY (ID),
+  CONSTRAINT FK_ESC_CARR_PCCS FOREIGN KEY (PARAM_CARR_ID) REFERENCES RH_T_PARAM_CARREIRA (ID),
+  CONSTRAINT FK_ESC_CATEGORIA FOREIGN KEY (PARAM_CATEGORIA_ID) REFERENCES RH_T_PARAM_CATEGORIA (ID),
+  CONSTRAINT CK_ESCALAO_ESTADO CHECK (ESTADO IN ('A','I','E')),
+  CONSTRAINT CK_ESCALAO_PERIODO CHECK (
+    DATA_FIM IS NULL OR DATA_INICIO IS NULL OR DATA_FIM >= DATA_INICIO
+  )
 );
 
 -- Comentários (opcionais)
@@ -720,9 +709,9 @@ CREATE INDEX IX_PARAM_ESC_UUID ON RH_T_PARAM_ESCALAO (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_PARAM_ESCALAO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID e DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -732,41 +721,40 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_PARAM_ESCALAO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_PARAM_ESCALAO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_PARAM_ESCALAO;
 
 /* =========================================================
    TABELA: RH_T_PARAM_LOCAL_TRAB
    ========================================================= */
 CREATE TABLE RH_T_PARAM_LOCAL_TRAB (
-                                       ID                  NUMBER           NOT NULL,
-                                       NOME                VARCHAR2(200)    NOT NULL,
-                                       PAIS_ID             NUMBER           NOT NULL, -- GLB_T_GEOGRAFIA.ID
-                                       ILHA_ID             NUMBER,                    -- GLB_T_GEOGRAFIA.ID
-                                       UPS                 NUMBER           NOT NULL, -- SIPSGLOBAL.GLB_T_UPS.ID
-                                       ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E
-                                       DATA_REGISTO        DATE             NOT NULL,
-                                       USER_REGISTO_ID     NUMBER           NOT NULL,
-                                       USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
-                                       USER_ALTERACAO_ID   NUMBER,
-                                       USER_ALTERACAO_NAME VARCHAR2(200),
-                                       DATA_ALTERACAO      DATE,
-                                       UUID RAW(16)    NOT NULL,
+  ID                  NUMBER           NOT NULL,
+  NOME                VARCHAR2(200)    NOT NULL,
+  PAIS_ID             NUMBER           NOT NULL, -- GLB_T_GEOGRAFIA.ID
+  ILHA_ID             NUMBER,                    -- GLB_T_GEOGRAFIA.ID
+  UPS                 NUMBER           NOT NULL, -- SIPSGLOBAL.GLB_T_UPS.ID
+  ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E
+  DATA_REGISTO        DATE             NOT NULL,
+  USER_REGISTO_ID     NUMBER           NOT NULL,
+  USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID   NUMBER,
+  USER_ALTERACAO_NAME VARCHAR2(200),
+  DATA_ALTERACAO      DATE,
+  UUID RAW(16)    NOT NULL,
 
-                                       CONSTRAINT PK_LOCAL_BALCAO PRIMARY KEY (ID),
-                                       CONSTRAINT FK_LOCAL_PAIS      FOREIGN KEY (PAIS_ID) REFERENCES GLB_T_GEOGRAFIA (ID),
-                                       CONSTRAINT FK_LOCAL_ILHA      FOREIGN KEY (ILHA_ID) REFERENCES GLB_T_GEOGRAFIA (ID),
-    --CONSTRAINT FK_LOCAL_UPS       FOREIGN KEY (UPS)     REFERENCES SIPSGLOBAL.GLB_T_UPS (ID),
-                                       CONSTRAINT CK_LOCAL_ESTADO    CHECK (ESTADO IN ('A','I','E'))
+  CONSTRAINT PK_LOCAL_BALCAO PRIMARY KEY (ID),
+  CONSTRAINT FK_LOCAL_PAIS      FOREIGN KEY (PAIS_ID) REFERENCES GLB_T_GEOGRAFIA (ID),
+  CONSTRAINT FK_LOCAL_ILHA      FOREIGN KEY (ILHA_ID) REFERENCES GLB_T_GEOGRAFIA (ID),
+  --CONSTRAINT FK_LOCAL_UPS       FOREIGN KEY (UPS)     REFERENCES SIPSGLOBAL.GLB_T_UPS (ID),
+  CONSTRAINT CK_LOCAL_ESTADO    CHECK (ESTADO IN ('A','I','E'))
 );
 
 -- Índice (UUID)
@@ -774,9 +762,9 @@ CREATE INDEX IX_PARAM_LTRAB_UUID ON RH_T_PARAM_LOCAL_TRAB (UUID);
 
 -- Sequência (usando o nome fornecido)
 CREATE SEQUENCE SEQ_LOCAL_BANCAO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -786,37 +774,36 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_LOCAL_BANCAO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_LOCAL_BANCAO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_LOCAL_BALCAO;
 
 /* =========================================================
    TABELA: RH_T_SECAO
    ========================================================= */
 CREATE TABLE RH_T_SECAO (
-                            ID                  NUMBER           NOT NULL,
-                            NOME                VARCHAR2(200)    NOT NULL,
-                            INSTIT_ID           NUMBER           NOT NULL,  -- INSTITUICOES.ID
-                            ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E
-                            DATA_REGISTO        DATE             NOT NULL,
-                            USER_REGISTO_ID     NUMBER           NOT NULL,
-                            USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
-                            USER_ALTERACAO_ID   NUMBER,
-                            USER_ALTERACAO_NAME VARCHAR2(200),
-                            DATA_ALTERACAO      DATE,
-                            UUID RAW(16)    NOT NULL,
+  ID                  NUMBER           NOT NULL,
+  NOME                VARCHAR2(200)    NOT NULL,
+  INSTIT_ID           NUMBER           NOT NULL,  -- INSTITUICOES.ID
+  ESTADO              VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E
+  DATA_REGISTO        DATE             NOT NULL,
+  USER_REGISTO_ID     NUMBER           NOT NULL,
+  USER_REGISTO_NAME   VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID   NUMBER,
+  USER_ALTERACAO_NAME VARCHAR2(200),
+  DATA_ALTERACAO      DATE,
+  UUID RAW(16)    NOT NULL,
 
-                            CONSTRAINT PK_SESSAO PRIMARY KEY (ID),
-                            CONSTRAINT FK_SESSAO_INSTIT FOREIGN KEY (INSTIT_ID) REFERENCES INSTITUICOES (ID),
-                            CONSTRAINT CK_SECAO_ESTADO CHECK (ESTADO IN ('A','I','E'))
+  CONSTRAINT PK_SESSAO PRIMARY KEY (ID),
+  CONSTRAINT FK_SESSAO_INSTIT FOREIGN KEY (INSTIT_ID) REFERENCES INSTITUICOES (ID),
+  CONSTRAINT CK_SECAO_ESTADO CHECK (ESTADO IN ('A','I','E'))
 );
 
 -- Índice (UUID)
@@ -824,9 +811,9 @@ CREATE INDEX IX_SECAO_UUID ON RH_T_SECAO (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_SECAO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -836,53 +823,52 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_SECAO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_SECAO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_SESSAO;
 
 /* =========================================================
    TABELA: RH_T_FUNCIONARIOS
    ========================================================= */
 CREATE TABLE RH_T_FUNCIONARIOS (
-                                   ID                   NUMBER             NOT NULL,
-                                   TIPO_DOCUMENTO_ID    NUMBER             NOT NULL,  -- FK -> RH_T_TIPOS_DOCUMENTOS.ID
-                                   NUM_DOCUMENTO        VARCHAR2(50)       NOT NULL,
-                                   NOME                 VARCHAR2(200)      NOT NULL,
-                                   FOTOGRAFIA           VARCHAR2(4000),
-                                   DATA_NASCIMENTO      DATE               NOT NULL,
-                                   SEXO                 VARCHAR2(15)       NOT NULL,  -- domínio: GENERO
-                                   NM_MAE               VARCHAR2(200)      NOT NULL,
-                                   NM_PAI               VARCHAR2(200),
-                                   ESTADO_CIVIL         VARCHAR2(20)       NOT NULL,  -- domínio: ESTADO_CIVIL
-                                   NACIONALIDADE        VARCHAR2(70)       NOT NULL,  -- referência lógica a GLB_T_GEOGRAFIA
-                                   LOC_NASC_ID          NUMBER             NOT NULL,  -- FK -> GLB_T_GEOGRAFIA.ID (assumindo VARCHAR)
-                                   NIF                  NUMBER             NOT NULL,
-                                   NU_SEG_INPS          VARCHAR2(10),
-                                   ENT_ID               NUMBER,
-                                   ID_COLABORADOR       NUMBER             NOT NULL,
-                                   ESTADO               VARCHAR2(1)        DEFAULT 'A' NOT NULL, -- A/I/E
-                                   ESTADO_VALIDACAO     VARCHAR2(1)        NOT NULL,
-                                   DATA_REGISTO         DATE               NOT NULL,
-                                   USER_REGISTO_ID      NUMBER             NOT NULL,
-                                   USER_REGISTO_NAME    VARCHAR2(200)      NOT NULL,
-                                   USER_ALTERACAO_ID    NUMBER,
-                                   USER_ALTERACAO_NAME  VARCHAR2(200),
-                                   DATA_ALTERACAO       DATE,
-                                   UUID RAW(16)      NOT NULL,
+  ID                   NUMBER             NOT NULL,
+  TIPO_DOCUMENTO_ID    NUMBER             NOT NULL,  -- FK -> RH_T_TIPOS_DOCUMENTOS.ID
+  NUM_DOCUMENTO        VARCHAR2(50)       NOT NULL,
+  NOME                 VARCHAR2(200)      NOT NULL,
+  FOTOGRAFIA           VARCHAR2(4000),
+  DATA_NASCIMENTO      DATE               NOT NULL,
+  SEXO                 VARCHAR2(15)       NOT NULL,  -- domínio: GENERO
+  NM_MAE               VARCHAR2(200)      NOT NULL,
+  NM_PAI               VARCHAR2(200),
+  ESTADO_CIVIL         VARCHAR2(20)       NOT NULL,  -- domínio: ESTADO_CIVIL
+  NACIONALIDADE        VARCHAR2(70)       NOT NULL,  -- referência lógica a GLB_T_GEOGRAFIA
+  LOC_NASC_ID          NUMBER             NOT NULL,  -- FK -> GLB_T_GEOGRAFIA.ID (assumindo VARCHAR)
+  NIF                  NUMBER             NOT NULL,
+  NU_SEG_INPS          VARCHAR2(10),
+  ENT_ID               NUMBER,
+  ID_COLABORADOR       NUMBER             NOT NULL,
+  ESTADO               VARCHAR2(1)        DEFAULT 'A' NOT NULL, -- A/I/E
+  ESTADO_VALIDACAO     VARCHAR2(1)        NOT NULL,
+  DATA_REGISTO         DATE               NOT NULL,
+  USER_REGISTO_ID      NUMBER             NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)      NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  UUID RAW(16)      NOT NULL,
 
-                                   CONSTRAINT PK_FUN PRIMARY KEY (ID),
-                                   CONSTRAINT UQ_UNICO_DOC UNIQUE (TIPO_DOCUMENTO_ID, NUM_DOCUMENTO),
-                                   CONSTRAINT FK_FUN_TIPO_DOC  FOREIGN KEY (TIPO_DOCUMENTO_ID) REFERENCES RH_T_TIPOS_DOCUMENTOS (ID),
-                                   CONSTRAINT FK_FUN_LOCAL_NASC FOREIGN KEY (LOC_NASC_ID) REFERENCES GLB_T_GEOGRAFIA (ID),
-                                   CONSTRAINT CK_FUN_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
+  CONSTRAINT PK_FUN PRIMARY KEY (ID),
+  CONSTRAINT UQ_UNICO_DOC UNIQUE (TIPO_DOCUMENTO_ID, NUM_DOCUMENTO),
+  CONSTRAINT FK_FUN_TIPO_DOC  FOREIGN KEY (TIPO_DOCUMENTO_ID) REFERENCES RH_T_TIPOS_DOCUMENTOS (ID),
+  CONSTRAINT FK_FUN_LOCAL_NASC FOREIGN KEY (LOC_NASC_ID) REFERENCES GLB_T_GEOGRAFIA (ID),
+  CONSTRAINT CK_FUN_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- Comentários (opcionais)
@@ -902,9 +888,9 @@ CREATE INDEX IX_FUNC_UUID ON RH_T_FUNCIONARIOS (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_FUNCIONARIO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -914,41 +900,40 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_FUNCIONARIO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_FUNCIONARIO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
-
+  
 END;
 /
-SHOW ERRORS TRIGGER TRG_FUNCIONARIO;
 
 /* =========================================================
    TABELA: RH_T_DOCUMENTO_PESSOAL
    ========================================================= */
 
 CREATE TABLE RH_T_DOCUMENTO_PESSOAL (
-                                        ID                   NUMBER           NOT NULL,
-                                        NUM_DOCUMENTO        VARCHAR2(20)     NOT NULL,
-                                        TIPO_DOCUMENTO_ID    NUMBER           NOT NULL,  -- FK -> RH_T_TIPOS_DOCUMENTOS.ID
-                                        ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                        DATA_REGISTO         DATE             NOT NULL,
-                                        USER_REGISTO_ID      NUMBER           NOT NULL,
-                                        USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                                        USER_ALTERACAO_ID    NUMBER,
-                                        USER_ALTERACAO_NAME  VARCHAR2(200),
-                                        DATA_ALTERACAO       DATE,
-                                        FUN_ID               NUMBER           NOT NULL,  -- FK -> RH_T_FUNCIONARIO.ID
-                                        UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  NUM_DOCUMENTO        VARCHAR2(20)     NOT NULL,
+  TIPO_DOCUMENTO_ID    NUMBER           NOT NULL,  -- FK -> RH_T_TIPOS_DOCUMENTOS.ID
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  FUN_ID               NUMBER           NOT NULL,  -- FK -> RH_T_FUNCIONARIO.ID
+  UUID RAW(16)    NOT NULL,
 
-                                        CONSTRAINT PK_DOC_PESSOAL PRIMARY KEY (ID),
-                                        CONSTRAINT FK_DOC_FUN  FOREIGN KEY (FUN_ID) REFERENCES RH_T_FUNCIONARIOS (ID),
-                                        CONSTRAINT FK_DOC_TIPO FOREIGN KEY (TIPO_DOCUMENTO_ID) REFERENCES RH_T_TIPOS_DOCUMENTOS (ID),
-                                        CONSTRAINT CK_DOC_PESS_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
+  CONSTRAINT PK_DOC_PESSOAL PRIMARY KEY (ID),
+  CONSTRAINT FK_DOC_FUN  FOREIGN KEY (FUN_ID) REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_DOC_TIPO FOREIGN KEY (TIPO_DOCUMENTO_ID) REFERENCES RH_T_TIPOS_DOCUMENTOS (ID),
+  CONSTRAINT CK_DOC_PESS_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- (Opcional) Recomendada para evitar duplicidade do mesmo documento no mesmo funcionário:
@@ -959,9 +944,9 @@ CREATE INDEX IX_DOC_PESS_UUID ON RH_T_DOCUMENTO_PESSOAL (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_DOC_PESSOAL
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -971,40 +956,39 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_DOC_PESSOAL.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_DOC_PESSOAL.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
-
+ 
 END;
 /
-SHOW ERRORS TRIGGER TRG_DOC_PESSOAL;
 
 /* =========================================================
    TABELA: RH_T_CONTACTO
    ========================================================= */
 CREATE TABLE RH_T_CONTACTO (
-                               ID                   NUMBER            NOT NULL,
-                               TIPO_CONTACTO        VARCHAR2(50)      NOT NULL,  -- domínio: TP_CONTACTO (ex.: EMAIL, TELEMOVEL, TELEFONE, WHATSAPP)
-                               CONTACTO             VARCHAR2(100)     NOT NULL,
-                               ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
-                               DATA_REGISTO         DATE              NOT NULL,
-                               USER_REGISTO_ID      NUMBER            NOT NULL,
-                               USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
-                               USER_ALTERACAO_ID    NUMBER,
-                               USER_ALTERACAO_NAME  VARCHAR2(200),
-                               DATA_ALTERACAO       DATE,
-                               FUN_ID               NUMBER            NOT NULL,  -- FK -> RH_T_FUNCIONARIOS.ID
-                               UUID RAW(16)     NOT NULL,
+  ID                   NUMBER            NOT NULL,
+  TIPO_CONTACTO        VARCHAR2(50)      NOT NULL,  -- domínio: TP_CONTACTO (ex.: EMAIL, TELEMOVEL, TELEFONE, WHATSAPP)
+  CONTACTO             VARCHAR2(100)     NOT NULL,
+  ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE              NOT NULL,
+  USER_REGISTO_ID      NUMBER            NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  FUN_ID               NUMBER            NOT NULL,  -- FK -> RH_T_FUNCIONARIOS.ID
+  UUID RAW(16)     NOT NULL,
 
-                               CONSTRAINT PK_CONTACTO PRIMARY KEY (ID),
-                               CONSTRAINT FK_FUN_CONTATO FOREIGN KEY (FUN_ID)
-                                   REFERENCES RH_T_FUNCIONARIOS (ID),
-                               CONSTRAINT CK_CONTACTO_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
+  CONSTRAINT PK_CONTACTO PRIMARY KEY (ID),
+  CONSTRAINT FK_FUN_CONTATO FOREIGN KEY (FUN_ID)
+    REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT CK_CONTACTO_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- Comentários (opcionais)
@@ -1017,9 +1001,9 @@ CREATE INDEX IX_CONTAC_UUID ON RH_T_CONTACTO (UUID);
 
 -- Sequência (nome conforme solicitado)
 CREATE SEQUENCE SEQ_CONTATO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -1029,47 +1013,46 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_CONTATO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_CONTATO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_CONTATO;
 
 /* =========================================================
    TABELA: RH_T_ENDERECO
    ========================================================= */
 CREATE TABLE RH_T_ENDERECO (
-                               ID                   NUMBER           NOT NULL,
-                               PAIS_ID              NUMBER           NOT NULL,  -- GLB_T_GEOGRAFIA.ID
-                               ILHA_ID              NUMBER,                    -- GLB_T_GEOGRAFIA.ID
-                               CONCELHO_ID          NUMBER,                    -- GLB_T_GEOGRAFIA.ID
-                               FREGUESIA_ID         NUMBER,                    -- GLB_T_GEOGRAFIA.ID
-                               ZONA_ID              NUMBER,                    -- GLB_T_GEOGRAFIA.ID
-                               MORADA               VARCHAR2(200)    NOT NULL, -- texto livre da morada
-                               ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
-                               DATA_REGISTO         DATE             NOT NULL,
-                               USER_REGISTO_ID      NUMBER           NOT NULL,
-                               USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                               USER_ALTERACAO_ID    NUMBER,
-                               USER_ALTERACAO_NAME  VARCHAR2(200),
-                               DATA_ALTERACAO       DATE,
-                               FUN_ID               NUMBER           NOT NULL,  -- RH_T_FUNCIONARIOS.ID
-                               UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  PAIS_ID              NUMBER           NOT NULL,  -- GLB_T_GEOGRAFIA.ID
+  ILHA_ID              NUMBER,                    -- GLB_T_GEOGRAFIA.ID
+  CONCELHO_ID          NUMBER,                    -- GLB_T_GEOGRAFIA.ID
+  FREGUESIA_ID         NUMBER,                    -- GLB_T_GEOGRAFIA.ID
+  ZONA_ID              NUMBER,                    -- GLB_T_GEOGRAFIA.ID
+  MORADA               VARCHAR2(200)    NOT NULL, -- texto livre da morada
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  FUN_ID               NUMBER           NOT NULL,  -- RH_T_FUNCIONARIOS.ID
+  UUID RAW(16)    NOT NULL,
 
-                               CONSTRAINT PK_ENDERECO PRIMARY KEY (ID),
-                               CONSTRAINT FK_FUN_ENDERECO     FOREIGN KEY (FUN_ID)      REFERENCES RH_T_FUNCIONARIOS (ID),
-                               CONSTRAINT FK_END_PAIS         FOREIGN KEY (PAIS_ID)     REFERENCES GLB_T_GEOGRAFIA (ID),
-                               CONSTRAINT FK_END_ILHA         FOREIGN KEY (ILHA_ID)     REFERENCES GLB_T_GEOGRAFIA (ID),
-                               CONSTRAINT FK_END_CONCELHO     FOREIGN KEY (CONCELHO_ID) REFERENCES GLB_T_GEOGRAFIA (ID),
-                               CONSTRAINT FK_END_FREGUESIA    FOREIGN KEY (FREGUESIA_ID)REFERENCES GLB_T_GEOGRAFIA (ID),
-                               CONSTRAINT FK_END_ZONA         FOREIGN KEY (ZONA_ID)     REFERENCES GLB_T_GEOGRAFIA (ID),
-                               CONSTRAINT CK_END_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
+  CONSTRAINT PK_ENDERECO PRIMARY KEY (ID),
+  CONSTRAINT FK_FUN_ENDERECO     FOREIGN KEY (FUN_ID)      REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_END_PAIS         FOREIGN KEY (PAIS_ID)     REFERENCES GLB_T_GEOGRAFIA (ID),
+  CONSTRAINT FK_END_ILHA         FOREIGN KEY (ILHA_ID)     REFERENCES GLB_T_GEOGRAFIA (ID),
+  CONSTRAINT FK_END_CONCELHO     FOREIGN KEY (CONCELHO_ID) REFERENCES GLB_T_GEOGRAFIA (ID),
+  CONSTRAINT FK_END_FREGUESIA    FOREIGN KEY (FREGUESIA_ID)REFERENCES GLB_T_GEOGRAFIA (ID),
+  CONSTRAINT FK_END_ZONA         FOREIGN KEY (ZONA_ID)     REFERENCES GLB_T_GEOGRAFIA (ID),
+  CONSTRAINT CK_END_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- Índice (UUID)
@@ -1077,9 +1060,9 @@ CREATE INDEX IX_ENDER_UUID ON RH_T_ENDERECO (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_ENDERECO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -1089,48 +1072,47 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_ENDERECO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_ENDERECO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_ENDERECO;
 
 /* =========================================================
    TABELA: RH_T_FAMILIARES
    ========================================================= */
 CREATE TABLE RH_T_FAMILIARES (
-                                 ID                   NUMBER            NOT NULL,
-                                 TP_DOCUMENTO         NUMBER            NOT NULL,         -- FK -> RH_T_TIPO_DOCUMENTO.ID
-                                 NUM_DOCUMENTO        VARCHAR2(50)      NOT NULL,
-                                 NOME                 VARCHAR2(200)     NOT NULL,
-                                 DATA_NASCIMENTO      DATE              NOT NULL,
-                                 SEXO                 VARCHAR2(15)      NOT NULL,         -- domínio: GENERO
-                                 GDP_ID               VARCHAR2(15)      NOT NULL,         -- domínio: GRAUS_DE_PARENTESCO
-                                 DEPENDENCIA          VARCHAR2(15)      NOT NULL,         -- domínio: DEPENDENCIA
-                                 MEMBRO_AGR           VARCHAR2(15)      NOT NULL,         -- domínio: MEMBRO_AGR
-                                 NM_PAI               VARCHAR2(200),
-                                 NM_MAE               VARCHAR2(200),
-                                 ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL,  -- A/I/E/P
-                                 DATA_REGISTO         DATE              NOT NULL,
-                                 USER_REGISTO_ID      NUMBER            NOT NULL,
-                                 USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
-                                 USER_ALTERACAO_ID    NUMBER,
-                                 USER_ALTERACAO_NAME  VARCHAR2(200),
-                                 DATA_ALTERACAO       DATE,
-                                 FUN_ID               NUMBER            NOT NULL,         -- FK -> RH_T_FUNCIONARIOS.ID
-                                 UUID RAW(16)     NOT NULL,
+  ID                   NUMBER            NOT NULL,
+  TP_DOCUMENTO         NUMBER            NOT NULL,         -- FK -> RH_T_TIPO_DOCUMENTO.ID
+  NUM_DOCUMENTO        VARCHAR2(50)      NOT NULL,
+  NOME                 VARCHAR2(200)     NOT NULL,
+  DATA_NASCIMENTO      DATE              NOT NULL,
+  SEXO                 VARCHAR2(15)      NOT NULL,         -- domínio: GENERO
+  GDP_ID               VARCHAR2(15)      NOT NULL,         -- domínio: GRAUS_DE_PARENTESCO
+  DEPENDENCIA          VARCHAR2(15)      NOT NULL,         -- domínio: DEPENDENCIA
+  MEMBRO_AGR           VARCHAR2(15)      NOT NULL,         -- domínio: MEMBRO_AGR
+  NM_PAI               VARCHAR2(200),
+  NM_MAE               VARCHAR2(200),
+  ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL,  -- A/I/E/P
+  DATA_REGISTO         DATE              NOT NULL,
+  USER_REGISTO_ID      NUMBER            NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  FUN_ID               NUMBER            NOT NULL,         -- FK -> RH_T_FUNCIONARIOS.ID
+  UUID RAW(16)     NOT NULL,
 
-                                 CONSTRAINT PK_FAMILIAR PRIMARY KEY (ID),
-                                 CONSTRAINT UQ_UNIQ_FAM UNIQUE (NOME, NUM_DOCUMENTO, FUN_ID),
-                                 CONSTRAINT FK_FAM_TP_DOC        FOREIGN KEY (TP_DOCUMENTO) REFERENCES RH_T_TIPOS_DOCUMENTOS (ID),
-                                 CONSTRAINT FK_FUN_FAMILIAR_FK   FOREIGN KEY (FUN_ID)        REFERENCES RH_T_FUNCIONARIOS (ID),
-                                 CONSTRAINT CK_FAM_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
+  CONSTRAINT PK_FAMILIAR PRIMARY KEY (ID),
+  CONSTRAINT UQ_UNIQ_FAM UNIQUE (NOME, NUM_DOCUMENTO, FUN_ID),
+  CONSTRAINT FK_FAM_TP_DOC        FOREIGN KEY (TP_DOCUMENTO) REFERENCES RH_T_TIPOS_DOCUMENTOS (ID),
+  CONSTRAINT FK_FUN_FAMILIAR_FK   FOREIGN KEY (FUN_ID)        REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT CK_FAM_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- Comentários (opcionais)
@@ -1145,9 +1127,9 @@ CREATE INDEX IX_FAM_UUID ON RH_T_FAMILIARES (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_FAMILIAR
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -1157,46 +1139,45 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_FAMILIAR.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_FAMILIAR.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
-END;
+ END;
 /
-SHOW ERRORS TRIGGER TRG_FAMILIAR;
 
 /* =========================================================
    TABELA: RH_T_HABILITACOES_LITERARIAS
    ========================================================= */
 CREATE TABLE RH_T_HABILITACOES_LITERARIAS (
-                                              ID                   NUMBER            NOT NULL,
-                                              PAIS_ID              NUMBER            NOT NULL,          -- GLB_T_GEOGRAFIA.ID
-                                              ESTABELECIMENTO       VARCHAR2(200),
-                                              AREA                 VARCHAR2(100)     NOT NULL,          -- domínio: AREA_FORMACAO
-                                              NOME_CURSO           VARCHAR2(200)     NOT NULL,
-                                              NIVEL                VARCHAR2(20)      NOT NULL,          -- domínio: NIVEL_HABILITACOES
-                                              DATA_INICIO          DATE              NOT NULL,
-                                              DATA_FIM             DATE,
-                                              CONCLUIDO            NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
-                                              ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                              DATA_REGISTO         DATE              NOT NULL,
-                                              USER_REGISTO_ID      NUMBER            NOT NULL,
-                                              USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
-                                              USER_ALTERACAO_ID    NUMBER,
-                                              USER_ALTERACAO_NAME  VARCHAR2(200),
-                                              DATA_ALTERACAO       DATE,
-                                              FUN_ID               NUMBER            NOT NULL,          -- RH_T_FUNCIONARIOS.ID
-                                              UUID RAW(16)     NOT NULL,
+  ID                   NUMBER            NOT NULL,
+  PAIS_ID              NUMBER            NOT NULL,          -- GLB_T_GEOGRAFIA.ID
+  ESTABELECIMENTO      VARCHAR2(200),
+  AREA                 VARCHAR2(100)     NOT NULL,          -- domínio: AREA_FORMACAO
+  NOME_CURSO           VARCHAR2(200)     NOT NULL,
+  NIVEL                VARCHAR2(20)      NOT NULL,          -- domínio: NIVEL_HABILITACOES
+  DATA_INICIO          DATE              NOT NULL,
+  DATA_FIM             DATE,
+  CONCLUIDO            NUMBER(1)         DEFAULT 0 NOT NULL, -- 0=Não, 1=Sim
+  ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE              NOT NULL,
+  USER_REGISTO_ID      NUMBER            NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  FUN_ID               NUMBER            NOT NULL,          -- RH_T_FUNCIONARIOS.ID
+  UUID RAW(16)     NOT NULL,
 
-                                              CONSTRAINT PK_HABILIT_LIT PRIMARY KEY (ID),
-                                              CONSTRAINT FK_FUN_HABILIT_LIT  FOREIGN KEY (FUN_ID)   REFERENCES RH_T_FUNCIONARIOS (ID),
-                                              CONSTRAINT FK_HAB_LIT_PAIS     FOREIGN KEY (PAIS_ID)  REFERENCES GLB_T_GEOGRAFIA (ID),
-                                              CONSTRAINT CK_HAB_LIT_CONCL    CHECK (CONCLUIDO IN (0,1)),
-                                              CONSTRAINT CK_HAB_LIT_ESTADO   CHECK (ESTADO IN ('A','I','E','P'))
+  CONSTRAINT PK_HABILIT_LIT PRIMARY KEY (ID),
+  CONSTRAINT FK_FUN_HABILIT_LIT  FOREIGN KEY (FUN_ID)   REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_HAB_LIT_PAIS     FOREIGN KEY (PAIS_ID)  REFERENCES GLB_T_GEOGRAFIA (ID),
+  CONSTRAINT CK_HAB_LIT_CONCL    CHECK (CONCLUIDO IN (0,1)),
+  CONSTRAINT CK_HAB_LIT_ESTADO   CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- (Opcional) Caso queira exigir DATA_FIM quando CONCLUIDO=1:
@@ -1208,9 +1189,9 @@ CREATE INDEX IX_HAB_LIT_UUID ON RH_T_HABILITACOES_LITERARIAS (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_HABILIT_LIT
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -1220,46 +1201,45 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_HABILIT_LIT.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_HABILIT_LIT.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_HABILIT_LIT;
 
 /* =========================================================
    TABELA: RH_T_FORMACAO_FEITOS
    ========================================================= */
 CREATE TABLE RH_T_FORMACAO_FEITOS (
-                                      ID                   NUMBER            NOT NULL,
-                                      PAIS_ID              NUMBER            NOT NULL,          -- GLB_T_GEOGRAFIA.ID
-                                      ESTABELECIMENTO      VARCHAR2(200),
-                                      RHTPFOR              VARCHAR2(50),
-                                      CURSO                VARCHAR2(200),
-                                      NIVEL                VARCHAR2(10),
-                                      ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                      DATA_REGISTO         DATE              NOT NULL,
-                                      USER_REGISTO_ID      NUMBER            NOT NULL,
-                                      USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
-                                      USER_ALTERACAO_ID    NUMBER,
-                                      USER_ALTERACAO_NAME  VARCHAR2(200),
-                                      DATA_ALTERACAO       DATE,
-                                      FUN_ID               NUMBER            NOT NULL,          -- RH_T_FUNCIONARIOS.ID
-                                      UUID RAW(16)     NOT NULL,
+  ID                   NUMBER            NOT NULL,
+  PAIS_ID              NUMBER            NOT NULL,          -- GLB_T_GEOGRAFIA.ID
+  ESTABELECIMENTO      VARCHAR2(200),
+  RHTPFOR              VARCHAR2(50),
+  CURSO                VARCHAR2(200),
+  NIVEL                VARCHAR2(10),
+  ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE              NOT NULL,
+  USER_REGISTO_ID      NUMBER            NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  FUN_ID               NUMBER            NOT NULL,          -- RH_T_FUNCIONARIOS.ID
+  UUID RAW(16)     NOT NULL,
 
-                                      CONSTRAINT PK_FORM_FEITO PRIMARY KEY (ID),
+  CONSTRAINT PK_FORM_FEITO PRIMARY KEY (ID),
 
-    -- Foreign Keys
-                                      CONSTRAINT FK_FORM_FUN_ID  FOREIGN KEY (FUN_ID)  REFERENCES RH_T_FUNCIONARIOS (ID),
-                                      CONSTRAINT FK_FORM_PAIS_ID FOREIGN KEY (PAIS_ID) REFERENCES GLB_T_GEOGRAFIA (ID),
+  -- Foreign Keys
+  CONSTRAINT FK_FORM_FUN_ID  FOREIGN KEY (FUN_ID)  REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_FORM_PAIS_ID FOREIGN KEY (PAIS_ID) REFERENCES GLB_T_GEOGRAFIA (ID),
 
-    -- Checks
-                                      CONSTRAINT CK_FORM_FEITO_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
+  -- Checks
+  CONSTRAINT CK_FORM_FEITO_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- Índice (UUID)
@@ -1267,9 +1247,9 @@ CREATE INDEX IX_FORM_FEITO_UUID ON RH_T_FORMACAO_FEITOS (UUID);
 
 -- Sequência (usando o nome fornecido)
 CREATE SEQUENCE SEQ_FORMCACAO_FEITO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -1279,48 +1259,47 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_FORMCACAO_FEITO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_FORMCACAO_FEITO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_FORMACAO_FEITO;
 
 /* =========================================================
    TABELA: RH_T_EXPERIENCIA_PROF
    ========================================================= */
 CREATE TABLE RH_T_EXPERIENCIA_PROF (
-                                       ID                   NUMBER            NOT NULL,
-                                       PAIS_ID              NUMBER,                               -- GLB_T_GEOGRAFIA.ID
-                                       EMPRESA              VARCHAR2(200),
-                                       CARGO                VARCHAR2(200),
-                                       DATA_INICIO          DATE,
-                                       DATA_FIM             DATE,
-                                       OBS                  VARCHAR2(400),
-                                       ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                       DATA_REGISTO         DATE              NOT NULL,
-                                       USER_REGISTO_ID      NUMBER            NOT NULL,
-                                       USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
-                                       USER_ALTERACAO_ID    NUMBER,
-                                       USER_ALTERACAO_NAME  VARCHAR2(200),
-                                       DATA_ALTERACAO       DATE,
-                                       FUN_ID               NUMBER,                               -- RH_T_FUNCIONARIOS.ID
-                                       UUID RAW(16)     NOT NULL,
+  ID                   NUMBER            NOT NULL,
+  PAIS_ID              NUMBER,                               -- GLB_T_GEOGRAFIA.ID
+  EMPRESA              VARCHAR2(200),
+  CARGO                VARCHAR2(200),
+  DATA_INICIO          DATE,
+  DATA_FIM             DATE,
+  OBS                  VARCHAR2(400),
+  ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE              NOT NULL,
+  USER_REGISTO_ID      NUMBER            NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  FUN_ID               NUMBER,                               -- RH_T_FUNCIONARIOS.ID
+  UUID RAW(16)     NOT NULL,
 
-                                       CONSTRAINT PK_EXP_PROF PRIMARY KEY (ID),
+  CONSTRAINT PK_EXP_PROF PRIMARY KEY (ID),
 
-    -- Foreign Keys
-                                       CONSTRAINT FK_EXP_PROF_FUN   FOREIGN KEY (FUN_ID)  REFERENCES RH_T_FUNCIONARIOS (ID),
-                                       CONSTRAINT FK_EXP_PROF_PAIS  FOREIGN KEY (PAIS_ID) REFERENCES GLB_T_GEOGRAFIA (ID),
+  -- Foreign Keys
+  CONSTRAINT FK_EXP_PROF_FUN   FOREIGN KEY (FUN_ID)  REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_EXP_PROF_PAIS  FOREIGN KEY (PAIS_ID) REFERENCES GLB_T_GEOGRAFIA (ID),
 
-    -- Checks
-                                       CONSTRAINT CK_EXP_PROF_ESTADO  CHECK (ESTADO IN ('A','I','E','P')),
-                                       CONSTRAINT CK_EXP_PROF_PERIODO CHECK (DATA_FIM IS NULL OR DATA_INICIO IS NULL OR DATA_FIM >= DATA_INICIO)
+  -- Checks
+  CONSTRAINT CK_EXP_PROF_ESTADO  CHECK (ESTADO IN ('A','I','E','P')),
+  CONSTRAINT CK_EXP_PROF_PERIODO CHECK (DATA_FIM IS NULL OR DATA_INICIO IS NULL OR DATA_FIM >= DATA_INICIO)
 );
 
 -- Índice (UUID)
@@ -1328,9 +1307,9 @@ CREATE INDEX IX_EXP_PROF_UUID ON RH_T_EXPERIENCIA_PROF (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_EXPERIENCIA_PROF
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -1340,47 +1319,46 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_EXPERIENCIA_PROF.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_EXPERIENCIA_PROF.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_EXPERIENCIA_PROF;
 
 /* =========================================================
    TABELA: RH_T_DADOS_BANCARIOS
    ========================================================= */
 CREATE TABLE RH_T_DADOS_BANCARIOS (
-                                      ID                   NUMBER           NOT NULL,
-                                      ENT_ID               NUMBER           NOT NULL,          -- ENTIDADE.ID
-                                      NUM_CONTA            NUMBER(11,0),
-                                      DATA_INICIO          DATE             NOT NULL,
-                                      DATA_FIM             DATE,
-                                      FUN_ID               NUMBER           NOT NULL,          -- RH_T_FUNCIONARIOS.ID
-                                      ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                      DATA_REGISTO         DATE             NOT NULL,
-                                      USER_REGISTO_ID      NUMBER           NOT NULL,
-                                      USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                                      USER_ALTERACAO_ID    NUMBER,
-                                      USER_ALTERACAO_NAME  VARCHAR2(200),
-                                      DATA_ALTERACAO       DATE,
-                                      OBS                  VARCHAR2(400),
-                                      UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  ENT_ID               NUMBER           NOT NULL,          -- ENTIDADE.ID
+  NUM_CONTA            NUMBER(11,0),
+  DATA_INICIO          DATE             NOT NULL,
+  DATA_FIM             DATE,
+  FUN_ID               NUMBER           NOT NULL,          -- RH_T_FUNCIONARIOS.ID
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  OBS                  VARCHAR2(400),
+  UUID RAW(16)    NOT NULL,
 
-                                      CONSTRAINT PK_DADOS_BANCO PRIMARY KEY (ID),
+  CONSTRAINT PK_DADOS_BANCO PRIMARY KEY (ID),
 
-    -- Foreign Keys
-                                      CONSTRAINT FK_BANCO_FUN   FOREIGN KEY (FUN_ID)  REFERENCES RH_T_FUNCIONARIOS (ID),
-                                      CONSTRAINT FK_BANCO_ENT   FOREIGN KEY (ENT_ID)  REFERENCES ENTIDADE (ID),
+  -- Foreign Keys
+  CONSTRAINT FK_BANCO_FUN   FOREIGN KEY (FUN_ID)  REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_BANCO_ENT   FOREIGN KEY (ENT_ID)  REFERENCES ENTIDADE (ID),
 
-    -- Checks
-                                      CONSTRAINT CK_DD_BANC_ESTADO  CHECK (ESTADO IN ('A','I','E','P')),
-                                      CONSTRAINT CK_DD_BANC_PERIODO CHECK (DATA_FIM IS NULL OR DATA_FIM >= DATA_INICIO)
+  -- Checks
+  CONSTRAINT CK_DD_BANC_ESTADO  CHECK (ESTADO IN ('A','I','E','P')),
+  CONSTRAINT CK_DD_BANC_PERIODO CHECK (DATA_FIM IS NULL OR DATA_FIM >= DATA_INICIO)
 );
 
 -- Índice (UUID)
@@ -1388,9 +1366,9 @@ CREATE INDEX IX_DD_BANC_UUID ON RH_T_DADOS_BANCARIOS (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_DADOS_BANCO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -1400,45 +1378,44 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_DADOS_BANCO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_DADOS_BANCO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_DADOS_BANCARIOS;
 
 /* =========================================================
    TABELA: RH_T_DOCUMENTO
    ========================================================= */
 CREATE TABLE RH_T_DOCUMENTO (
-                                ID                   NUMBER           NOT NULL,
-                                TP_DOCUMENTO_ID      NUMBER           NOT NULL,            -- FK -> RH_T_TIPOS_DOCUMENTOS.ID
-                                DOC_ID               NUMBER           NOT NULL,
-                                FUN_ID               NUMBER           NOT NULL,            -- FK -> RH_T_FUNCIONARIOS.ID
-                                REFERENCIA_NAME      VARCHAR2(100)    NOT NULL,
-                                REFERENCIA_ID        NUMBER           NOT NULL,
-                                ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                DATA_REGISTO         DATE             NOT NULL,
-                                USER_REGISTO_ID      NUMBER           NOT NULL,
-                                USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                                USER_ALTERACAO_ID    NUMBER,
-                                USER_ALTERACAO_NAME  VARCHAR2(200),
-                                DATA_ALTERACAO       DATE,
-                                UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  TP_DOCUMENTO_ID      NUMBER           NOT NULL,            -- FK -> RH_T_TIPOS_DOCUMENTOS.ID
+  DOC_ID               NUMBER           NOT NULL,
+  FUN_ID               NUMBER           NOT NULL,            -- FK -> RH_T_FUNCIONARIOS.ID
+  REFERENCIA_NAME      VARCHAR2(100)    NOT NULL,
+  REFERENCIA_ID        NUMBER           NOT NULL,
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  UUID RAW(16)    NOT NULL,
 
-                                CONSTRAINT PK_DOCUMENTO_ID PRIMARY KEY (ID),
+  CONSTRAINT PK_DOCUMENTO_ID PRIMARY KEY (ID),
 
-    -- Foreign Keys
-                                CONSTRAINT FK_FUN_DOC_ID      FOREIGN KEY (FUN_ID)          REFERENCES RH_T_FUNCIONARIOS (ID),
-                                CONSTRAINT FK_DOC_TIPO_DOC    FOREIGN KEY (TP_DOCUMENTO_ID) REFERENCES RH_T_TIPOS_DOCUMENTOS (ID),
+  -- Foreign Keys
+  CONSTRAINT FK_FUN_DOC_ID      FOREIGN KEY (FUN_ID)          REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_DOC_TIPO_DOC    FOREIGN KEY (TP_DOCUMENTO_ID) REFERENCES RH_T_TIPOS_DOCUMENTOS (ID),
 
-    -- Checks
-                                CONSTRAINT CK_DOCUMENTO_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
+  -- Checks
+  CONSTRAINT CK_DOCUMENTO_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- Comentários (opcionais)
@@ -1453,9 +1430,9 @@ CREATE INDEX IX_DOCUM_UUID ON RH_T_DOCUMENTO (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_DOCUMENTO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -1465,62 +1442,61 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_DOCUMENTO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_DOCUMENTO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
-END;
+  END;
 /
-SHOW ERRORS TRIGGER TRG_DOCUMENTO;
 
 
 /* =========================================================
    TABELA: RH_T_CONTRATO
    ========================================================= */
 CREATE TABLE RH_T_CONTRATO (
-                               ID                   NUMBER           NOT NULL,
-                               ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL,     -- A/I/E/P
-                               DATA_REGISTO         DATE             NOT NULL,
-                               USER_REGISTO_ID      NUMBER           NOT NULL,
-                               USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                               USER_ALTERACAO_ID    NUMBER,
-                               USER_ALTERACAO_NAME  VARCHAR2(200),
-                               DATA_ALTERACAO       DATE,
+  ID                   NUMBER           NOT NULL,
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL,     -- A/I/E/P
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
 
-                               FUN_ID               NUMBER           NOT NULL,                  -- RH_T_FUNCIONARIOS.ID
-                               VINCULO_ID           NUMBER           NOT NULL,                  -- RH_T_PARAM_VINCULO.ID
-                               TP_CONTRATO_ID       NUMBER,                                    -- RH_T_PARAM_CONTRATO.ID (opcional)
-                               SITUACAO_LABORAL     VARCHAR2(50)     NOT NULL,                  -- domínio livre / tabela param
-                               DURACAO              NUMBER           NOT NULL,                  -- em meses (ex.)
-                               DATA_INICIO          DATE             NOT NULL,
-                               DATA_FIM             DATE,
-                               VERSAO               NUMBER           NOT NULL,
-                               CONTRATO_ID          NUMBER           NOT NULL,                  -- ponteiro p/ contrato “mestre” (self FK)
-                               TP_CONTRATO          VARCHAR2(20)     NOT NULL,                  -- domínio: TP_CONTRATO
-                               OBS                  VARCHAR2(400),
-                               UUID RAW(16)    NOT NULL,
+  FUN_ID               NUMBER           NOT NULL,                  -- RH_T_FUNCIONARIOS.ID
+  VINCULO_ID           NUMBER           NOT NULL,                  -- RH_T_PARAM_VINCULO.ID
+  TP_CONTRATO_ID       NUMBER,                                    -- RH_T_PARAM_CONTRATO.ID (opcional)
+  SITUACAO_LABORAL     VARCHAR2(50)     NOT NULL,                  -- domínio livre / tabela param
+  DURACAO              NUMBER           NOT NULL,                  -- em meses (ex.)
+  DATA_INICIO          DATE             NOT NULL,
+  DATA_FIM             DATE,
+  VERSAO               NUMBER           NOT NULL,
+  CONTRATO_ID          NUMBER           NOT NULL,                  -- ponteiro p/ contrato “mestre” (self FK)
+  TP_CONTRATO          VARCHAR2(20)     NOT NULL,                  -- domínio: TP_CONTRATO
+  OBS                  VARCHAR2(400),
+  UUID RAW(16)    NOT NULL,
 
-                               CONSTRAINT PK_CONTRATO PRIMARY KEY (ID),
+  CONSTRAINT PK_CONTRATO PRIMARY KEY (ID),
 
-    -- Unicidade por versão dentro do mesmo contrato “mestre”
-                               CONSTRAINT UQ_CONTRATO_VERSAO UNIQUE (CONTRATO_ID, VERSAO),
+  -- Unicidade por versão dentro do mesmo contrato “mestre”
+  CONSTRAINT UQ_CONTRATO_VERSAO UNIQUE (CONTRATO_ID, VERSAO),
 
-    -- Foreign Keys
-                               CONSTRAINT FK_CONTRATO_FUN      FOREIGN KEY (FUN_ID)        REFERENCES RH_T_FUNCIONARIOS (ID),
-                               CONSTRAINT FK_CONTRATO_VINC     FOREIGN KEY (VINCULO_ID)    REFERENCES RH_T_PARAM_VINCULO (ID),
-                               CONSTRAINT FK_CONTRATO_TP       FOREIGN KEY (TP_CONTRATO_ID)REFERENCES RH_T_PARAM_CONTRATO (ID),
-    -- Self-FK: CONTRATO_ID referencia o ID do contrato “mestre”
-                               CONSTRAINT FK_CONTR_CONTR_ID    FOREIGN KEY (CONTRATO_ID)   REFERENCES RH_T_CONTRATO (ID),
+  -- Foreign Keys
+  CONSTRAINT FK_CONTRATO_FUN      FOREIGN KEY (FUN_ID)        REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_CONTRATO_VINC     FOREIGN KEY (VINCULO_ID)    REFERENCES RH_T_PARAM_VINCULO (ID),
+  CONSTRAINT FK_CONTRATO_TP       FOREIGN KEY (TP_CONTRATO_ID)REFERENCES RH_T_PARAM_CONTRATO (ID),
+  -- Self-FK: CONTRATO_ID referencia o ID do contrato “mestre”
+  CONSTRAINT FK_CONTR_CONTR_ID    FOREIGN KEY (CONTRATO_ID)   REFERENCES RH_T_CONTRATO (ID),
 
-    -- Checks
-                               CONSTRAINT CK_CONTR_ESTADO   CHECK (ESTADO IN ('A','I','E','P')),
-                               CONSTRAINT CK_CONTR_DURACAO  CHECK (DURACAO >= 0),
-                               CONSTRAINT CK_CONTR_VERSAO   CHECK (VERSAO  >= 1),
-                               CONSTRAINT CK_CONTR_PERIODO  CHECK (DATA_FIM IS NULL OR DATA_FIM >= DATA_INICIO)
+  -- Checks
+  CONSTRAINT CK_CONTR_ESTADO   CHECK (ESTADO IN ('A','I','E','P')),
+  CONSTRAINT CK_CONTR_DURACAO  CHECK (DURACAO >= 0),
+  CONSTRAINT CK_CONTR_VERSAO   CHECK (VERSAO  >= 1),
+  CONSTRAINT CK_CONTR_PERIODO  CHECK (DATA_FIM IS NULL OR DATA_FIM >= DATA_INICIO)
 );
 
 -- Comentários (opcionais)
@@ -1536,9 +1512,9 @@ CREATE INDEX IX_CONTRAT_UUID ON RH_T_CONTRATO (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_CONTRATO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -1548,51 +1524,50 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_CONTRATO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_CONTRATO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_CONTRATO;
 
 /* =========================================================
    TABELA: RH_T_MOBILIDADE
    ========================================================= */
 CREATE TABLE RH_T_MOBILIDADE (
-                                 ID                   NUMBER           NOT NULL,
-                                 INSTID_ID            NUMBER,                               -- FK -> INSTITUICOES.ID
-                                 LOCAL_TRAB_ID        NUMBER,                               -- FK -> RH_T_LOCAL_TRABALHO.ID
-                                 SECAO_ID             NUMBER,                               -- FK -> RH_T_SECAO.ID
-                                 FUN_ID               NUMBER           NOT NULL,            -- FK -> RH_T_FUNCIONARIOS.ID
-                                 CONTRATO_ID          NUMBER           NOT NULL,            -- FK -> RH_T_CONTRATO.CONTRATO_ID
-                                 TIPO_SITUACAO        VARCHAR2(100),
-                                 ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                 DATA_REGISTO         DATE             NOT NULL,
-                                 USER_REGISTO_ID      NUMBER           NOT NULL,
-                                 USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                                 USER_ALTERACAO_ID    NUMBER,
-                                 USER_ALTERACAO_NAME  VARCHAR2(200),
-                                 DATA_ALTERACAO       DATE,
-                                 OBS                  VARCHAR2(400),
-                                 UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  INSTID_ID            NUMBER,                               -- FK -> INSTITUICOES.ID
+  LOCAL_TRAB_ID        NUMBER,                               -- FK -> RH_T_LOCAL_TRABALHO.ID
+  SECAO_ID             NUMBER,                               -- FK -> RH_T_SECAO.ID
+  FUN_ID               NUMBER           NOT NULL,            -- FK -> RH_T_FUNCIONARIOS.ID
+  CONTRATO_ID          NUMBER           NOT NULL,            -- FK -> RH_T_CONTRATO.CONTRATO_ID
+  TIPO_SITUACAO        VARCHAR2(100),
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  OBS                  VARCHAR2(400),
+  UUID RAW(16)    NOT NULL,
 
-                                 CONSTRAINT PK_MOBILIDADE PRIMARY KEY (ID),
+  CONSTRAINT PK_MOBILIDADE PRIMARY KEY (ID),
 
-    -- Foreign Keys
-                                 CONSTRAINT FK_MOB_FUN        FOREIGN KEY (FUN_ID)       REFERENCES RH_T_FUNCIONARIOS (ID),
-                                 CONSTRAINT FK_MOB_CONTRAT    FOREIGN KEY (CONTRATO_ID)  REFERENCES RH_T_CONTRATO (ID),
-                                 CONSTRAINT FK_MOB_INSTIT     FOREIGN KEY (INSTID_ID)    REFERENCES INSTITUICOES (ID),
-                                 CONSTRAINT FK_MOB_LOCAL_TRAB FOREIGN KEY (LOCAL_TRAB_ID) REFERENCES RH_T_PARAM_LOCAL_TRAB (ID),
-                                 CONSTRAINT FK_MOB_SECAO      FOREIGN KEY (SECAO_ID)     REFERENCES RH_T_SECAO (ID),
+  -- Foreign Keys
+  CONSTRAINT FK_MOB_FUN        FOREIGN KEY (FUN_ID)       REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_MOB_CONTRAT    FOREIGN KEY (CONTRATO_ID)  REFERENCES RH_T_CONTRATO (ID),
+  CONSTRAINT FK_MOB_INSTIT     FOREIGN KEY (INSTID_ID)    REFERENCES INSTITUICOES (ID),
+  CONSTRAINT FK_MOB_LOCAL_TRAB FOREIGN KEY (LOCAL_TRAB_ID) REFERENCES RH_T_PARAM_LOCAL_TRAB (ID),
+  CONSTRAINT FK_MOB_SECAO      FOREIGN KEY (SECAO_ID)     REFERENCES RH_T_SECAO (ID),
 
-    -- Checks
-                                 CONSTRAINT CK_MOB_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
+  -- Checks
+  CONSTRAINT CK_MOB_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- Índice (UUID)
@@ -1600,9 +1575,9 @@ CREATE INDEX IX_MOBILID_UUID ON RH_T_MOBILIDADE (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_MOBILIDADE
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -1612,54 +1587,53 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_MOBILIDADE.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_MOBILIDADE.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_MOBILIDADE;
 /* =========================================================
    TABELA: RH_T_CARREIRA
    ========================================================= */
 CREATE TABLE RH_T_CARREIRA (
-                               ID                   NUMBER           NOT NULL,
-                               CARGO_ID             NUMBER,                               -- FK -> RH_T_PARAM_CARGO.ID
-                               CARR_PCCS_ID         NUMBER,                               -- FK -> RH_T_PARAM_CARREIRA.ID
-                               CATEGORIA_ID         NUMBER,                               -- FK -> RH_T_PARAM_CATEGORIA.ID
-                               ESCALAO_ID           NUMBER,                               -- FK -> RH_T_PARAM_ESCALAO.ID
-                               SALARIO              NUMBER,
-                               FUN_ID               NUMBER,                               -- FK -> RH_T_FUNCIONARIO.ID
-                               CONTRATO_ID          NUMBER,                               -- FK -> RH_T_CONTRATO.CONTRATO_ID
-                               FLG_PROCESSA         NUMBER(1),                            -- domínio: SIM_NAO_NUMBER (0/1)
-                               ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
-                               TIPO_SITUACAO        VARCHAR2(100),
-                               DATA_REGISTO         DATE             NOT NULL,
-                               USER_REGISTO_ID      NUMBER           NOT NULL,
-                               USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                               USER_ALTERACAO_ID    NUMBER,
-                               USER_ALTERACAO_NAME  VARCHAR2(200),
-                               DATA_ALTERACAO       DATE,
-                               OBS                  VARCHAR2(400),
-                               UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  CARGO_ID             NUMBER,                               -- FK -> RH_T_PARAM_CARGO.ID
+  CARR_PCCS_ID         NUMBER,                               -- FK -> RH_T_PARAM_CARREIRA.ID
+  CATEGORIA_ID         NUMBER,                               -- FK -> RH_T_PARAM_CATEGORIA.ID
+  ESCALAO_ID           NUMBER,                               -- FK -> RH_T_PARAM_ESCALAO.ID
+  SALARIO              NUMBER,
+  FUN_ID               NUMBER,                               -- FK -> RH_T_FUNCIONARIO.ID
+  CONTRATO_ID          NUMBER,                               -- FK -> RH_T_CONTRATO.CONTRATO_ID
+  FLG_PROCESSA         NUMBER(1),                            -- domínio: SIM_NAO_NUMBER (0/1)
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
+  TIPO_SITUACAO        VARCHAR2(100),
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  OBS                  VARCHAR2(400),
+  UUID RAW(16)    NOT NULL,
 
-                               CONSTRAINT PK_CARREIRA PRIMARY KEY (ID),
+  CONSTRAINT PK_CARREIRA PRIMARY KEY (ID),
 
-    -- Foreign Keys
-                               CONSTRAINT FK_CARR_CARGO      FOREIGN KEY (CARGO_ID)     REFERENCES RH_T_PARAM_CARGO (ID),
-                               CONSTRAINT FK_CARR_CARR_PCCS  FOREIGN KEY (CARR_PCCS_ID) REFERENCES RH_T_PARAM_CARREIRA (ID),
-                               CONSTRAINT FK_CARR_CATEG      FOREIGN KEY (CATEGORIA_ID) REFERENCES RH_T_PARAM_CATEGORIA (ID),
-                               CONSTRAINT FK_CARR_ESCALAO    FOREIGN KEY (ESCALAO_ID)   REFERENCES RH_T_PARAM_ESCALAO (ID),
-                               CONSTRAINT FK_CARR_FUN        FOREIGN KEY (FUN_ID)       REFERENCES RH_T_FUNCIONARIOS (ID),
-                               CONSTRAINT FK_CARR_CONTRAT    FOREIGN KEY (CONTRATO_ID)  REFERENCES RH_T_CONTRATO (ID),
+  -- Foreign Keys
+  CONSTRAINT FK_CARR_CARGO      FOREIGN KEY (CARGO_ID)     REFERENCES RH_T_PARAM_CARGO (ID),
+  CONSTRAINT FK_CARR_CARR_PCCS  FOREIGN KEY (CARR_PCCS_ID) REFERENCES RH_T_PARAM_CARREIRA (ID),
+  CONSTRAINT FK_CARR_CATEG      FOREIGN KEY (CATEGORIA_ID) REFERENCES RH_T_PARAM_CATEGORIA (ID),
+  CONSTRAINT FK_CARR_ESCALAO    FOREIGN KEY (ESCALAO_ID)   REFERENCES RH_T_PARAM_ESCALAO (ID),
+  CONSTRAINT FK_CARR_FUN        FOREIGN KEY (FUN_ID)       REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_CARR_CONTRAT    FOREIGN KEY (CONTRATO_ID)  REFERENCES RH_T_CONTRATO (ID),
 
-    -- Checks
-                               CONSTRAINT CK_CARR_ESTADO     CHECK (ESTADO IN ('A','I','E','P')),
-                               CONSTRAINT CK_CARR_PROCESSA   CHECK (FLG_PROCESSA IN (0,1) OR FLG_PROCESSA IS NULL)
+  -- Checks
+  CONSTRAINT CK_CARR_ESTADO     CHECK (ESTADO IN ('A','I','E','P')),
+  CONSTRAINT CK_CARR_PROCESSA   CHECK (FLG_PROCESSA IN (0,1) OR FLG_PROCESSA IS NULL)
 );
 
 -- Índice (UUID)
@@ -1667,9 +1641,9 @@ CREATE INDEX IX_CARREIR_UUID ON RH_T_CARREIRA (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_CARREIRA
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID e DATA_REGISTO no INSERT; atualiza DATA_ALTERACAO no UPDATE)
@@ -1679,48 +1653,47 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_CARREIRA.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_CARREIRA.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_CARREIRA;
 
 /* =========================================================
    TABELA: RH_T_REGIME_TRAB
    ========================================================= */
 CREATE TABLE RH_T_REGIME_TRAB (
-                                  ID                   NUMBER           NOT NULL,
-                                  FUN_ID               NUMBER           NOT NULL,                 -- FK -> RH_T_FUNCIONARIOS.ID
-                                  CONTRATO_ID          NUMBER           NOT NULL,                 -- FK -> RH_T_CONTRATO.CONTRATO_ID
-                                  TIPREL_ID            NUMBER,                                    -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID (opcional)
-                                  TIPO_REGIME          VARCHAR2(50)     NOT NULL,                 -- domínio: REGIME_TRABALHO
-                                  DATA_FIM             DATE,
-                                  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL,     -- A/I/E/P
-                                  TIPO_SITUACAO        VARCHAR2(100),                              -- domínio: opcional
-                                  DATA_REGISTO         DATE             NOT NULL,
-                                  USER_REGISTO_ID      NUMBER           NOT NULL,
-                                  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                                  USER_ALTERACAO_ID    NUMBER,
-                                  USER_ALTERACAO_NAME  VARCHAR2(200),
-                                  DATA_ALTERACAO       DATE,
-                                  OBS                  VARCHAR2(400),
-                                  UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  FUN_ID               NUMBER           NOT NULL,                 -- FK -> RH_T_FUNCIONARIOS.ID
+  CONTRATO_ID          NUMBER           NOT NULL,                 -- FK -> RH_T_CONTRATO.CONTRATO_ID
+  TIPREL_ID            NUMBER,                                    -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID (opcional)
+  TIPO_REGIME          VARCHAR2(50)     NOT NULL,                 -- domínio: REGIME_TRABALHO
+  DATA_FIM             DATE,
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL,     -- A/I/E/P
+  TIPO_SITUACAO        VARCHAR2(100),                              -- domínio: opcional
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  OBS                  VARCHAR2(400),
+  UUID RAW(16)    NOT NULL,
 
-                                  CONSTRAINT PK_REGIME_TRAB PRIMARY KEY (ID),
+  CONSTRAINT PK_REGIME_TRAB PRIMARY KEY (ID),
 
-    -- Foreign Keys
-                                  CONSTRAINT FK_REGIME_FUN     FOREIGN KEY (FUN_ID)      REFERENCES RH_T_FUNCIONARIOS (ID),
-                                  CONSTRAINT FK_REGIME_CONTR   FOREIGN KEY (CONTRATO_ID) REFERENCES RH_T_CONTRATO (ID),
-    --CONSTRAINT FK_REGIME_TIPREL  FOREIGN KEY (TIPREL_ID)   REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
+  -- Foreign Keys
+  CONSTRAINT FK_REGIME_FUN     FOREIGN KEY (FUN_ID)      REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_REGIME_CONTR   FOREIGN KEY (CONTRATO_ID) REFERENCES RH_T_CONTRATO (ID),
+  --CONSTRAINT FK_REGIME_TIPREL  FOREIGN KEY (TIPREL_ID)   REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
 
-    -- Checks
-                                  CONSTRAINT CK_REGIME_ESTADO   CHECK (ESTADO IN ('A','I','E','P'))
+  -- Checks
+  CONSTRAINT CK_REGIME_ESTADO   CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- Índice (UUID)
@@ -1732,9 +1705,9 @@ CREATE INDEX IX_REGIM_TRAB_UUID ON RH_T_REGIME_TRAB (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_REGIME_TRAB
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID e DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -1744,89 +1717,88 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_REGIME_TRAB.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_REGIME_TRAB.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_REGIME_TRAB;
 
 /* =========================================================
    TABELA: RH_T_TIPOS_RELACIONAMENTO
    ========================================================= */
 CREATE TABLE RH_T_TIPOS_RELACIONAMENTO (
-                                           ID                     NUMBER            NOT NULL,
-                                           CARGO_ID               NUMBER            NOT NULL,  -- RH_T_PARAM_CARGO.ID
-                                           INSTIT_ID              NUMBER            NOT NULL,  -- INSTITUICOES.ID
-                                           SECCAO_ID              NUMBER            NOT NULL,  -- RH_T_SECAO.ID
-                                           CARR_PCC_ID            NUMBER            NOT NULL,  -- RH_T_PARAM_CARREIRA.ID
-                                           CATEGORIA_ID           NUMBER,                      -- RH_T_PARAM_CATEGORIA.ID
-                                           ESCALAO_ID             NUMBER            NOT NULL,  -- RH_T_PARAM_ESCALAO.ID
-                                           VINCULO_ID             NUMBER            NOT NULL,  -- RH_T_PARAM_VINCULO.ID
-                                           REGIME                 VARCHAR2(20)      NOT NULL,  -- domínio: REGIME_TRABALHO
-                                           SALARIO                NUMBER            NOT NULL,
-                                           MOEDA                  VARCHAR2(20)      NOT NULL,  -- domínio: MOEDA
-                                           DATA_INICIO            DATE              NOT NULL,
-                                           DATA_FIM               DATE,
-                                           LOC_TRAB_ID            NUMBER            NOT NULL,  -- RH_T_PARAM_LOCAL_TRAB.ID
-                                           ESTADO                 VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                           DATA_REGISTO           DATE              NOT NULL,
-                                           USER_REGISTO_ID        NUMBER            NOT NULL,
-                                           USER_REGISTO_NAME      VARCHAR2(200)     NOT NULL,
-                                           USER_ALTERACAO_ID      NUMBER,
-                                           USER_ALTERACAO_NAME    VARCHAR2(200),
-                                           DATA_ALTERACAO         DATE,
-                                           FUN_ID                 NUMBER            NOT NULL,  -- RH_T_FUNCIONARIOS.ID
-                                           CONTRATO_ID            NUMBER            NOT NULL,  -- RH_T_CONTRATO.CONTRATO_ID
-                                           CARREIRA_ID            NUMBER            NOT NULL,  -- RH_T_CARREIRA.ID
-                                           MOB_ID                 NUMBER            NOT NULL,  -- RH_T_MOBILIDADE.ID
-                                           REGIME_ID              NUMBER            NOT NULL,  -- RH_T_REGIME.ID
-                                           TIPO_CONTRATO_ID       NUMBER,                      -- RH_T_PARAM_CONTRATO.ID
-                                           TIPREL_ID              NUMBER,                      -- self FK: RH_T_TIPOS_RELACIONAMENTO.ID (registo anterior)
-                                           REFERENTE              VARCHAR2(50),
-                                           FLG_PROCESSA           VARCHAR2(3),                 -- domínio: SIM_NAO (SIM/NAO)
-                                           TIPO_SITUACAO          VARCHAR2(50),                -- domínio: TIPO_MOV_LABORAL
-                                           OBS                    VARCHAR2(300),
-                                           ULT_PROC               DATE,
-                                           MOTIVO_SIT_LAB         VARCHAR2(200),               -- domínio: MOTIVO_SIT_LABORAL
-                                           SITUAC_LABORAL_ID      NUMBER,                      -- RH_T_PARAM_SIT_LABORAL.ID
-                                           TP_CONTRATO            VARCHAR2(20)     NOT NULL,   -- domínio: TP_CONTRATO
-                                           DATA_INICIO_CONTRATO   DATE,
-                                           DATA_FIM_CONTRATO      DATE,
-                                           UUID RAW(16)    NOT NULL,
+  ID                     NUMBER            NOT NULL,
+  CARGO_ID               NUMBER            NOT NULL,  -- RH_T_PARAM_CARGO.ID
+  INSTIT_ID              NUMBER            NOT NULL,  -- INSTITUICOES.ID
+  SECCAO_ID              NUMBER            NOT NULL,  -- RH_T_SECAO.ID
+  CARR_PCC_ID            NUMBER            NOT NULL,  -- RH_T_PARAM_CARREIRA.ID
+  CATEGORIA_ID           NUMBER,                      -- RH_T_PARAM_CATEGORIA.ID
+  ESCALAO_ID             NUMBER            NOT NULL,  -- RH_T_PARAM_ESCALAO.ID
+  VINCULO_ID             NUMBER            NOT NULL,  -- RH_T_PARAM_VINCULO.ID
+  REGIME                 VARCHAR2(20)      NOT NULL,  -- domínio: REGIME_TRABALHO
+  SALARIO                NUMBER            NOT NULL,
+  MOEDA                  VARCHAR2(20)      NOT NULL,  -- domínio: MOEDA
+  DATA_INICIO            DATE              NOT NULL,
+  DATA_FIM               DATE,
+  LOC_TRAB_ID            NUMBER            NOT NULL,  -- RH_T_PARAM_LOCAL_TRAB.ID
+  ESTADO                 VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO           DATE              NOT NULL,
+  USER_REGISTO_ID        NUMBER            NOT NULL,
+  USER_REGISTO_NAME      VARCHAR2(200)     NOT NULL,
+  USER_ALTERACAO_ID      NUMBER,
+  USER_ALTERACAO_NAME    VARCHAR2(200),
+  DATA_ALTERACAO         DATE,
+  FUN_ID                 NUMBER            NOT NULL,  -- RH_T_FUNCIONARIOS.ID
+  CONTRATO_ID            NUMBER            NOT NULL,  -- RH_T_CONTRATO.CONTRATO_ID
+  CARREIRA_ID            NUMBER            NOT NULL,  -- RH_T_CARREIRA.ID
+  MOB_ID                 NUMBER            NOT NULL,  -- RH_T_MOBILIDADE.ID
+  REGIME_ID              NUMBER            NOT NULL,  -- RH_T_REGIME.ID
+  TIPO_CONTRATO_ID       NUMBER,                      -- RH_T_PARAM_CONTRATO.ID
+  TIPREL_ID              NUMBER,                      -- self FK: RH_T_TIPOS_RELACIONAMENTO.ID (registo anterior)
+  REFERENTE              VARCHAR2(50),
+  FLG_PROCESSA           VARCHAR2(3),                 -- domínio: SIM_NAO (SIM/NAO)
+  TIPO_SITUACAO          VARCHAR2(50),                -- domínio: TIPO_MOV_LABORAL
+  OBS                    VARCHAR2(300),
+  ULT_PROC               DATE,
+  MOTIVO_SIT_LAB         VARCHAR2(200),               -- domínio: MOTIVO_SIT_LABORAL
+  SITUAC_LABORAL_ID      NUMBER,                      -- RH_T_PARAM_SIT_LABORAL.ID
+  TP_CONTRATO            VARCHAR2(20)     NOT NULL,   -- domínio: TP_CONTRATO
+  DATA_INICIO_CONTRATO   DATE,
+  DATA_FIM_CONTRATO      DATE,
+  UUID RAW(16)    NOT NULL,
 
-                                           CONSTRAINT PK_TIPREL PRIMARY KEY (ID),
+  CONSTRAINT PK_TIPREL PRIMARY KEY (ID),
 
-    -- Foreign Keys (nomes seguindo a lista fornecida, ajustando typos)
-                                           CONSTRAINT FK_TIPREL_CONTRATO       FOREIGN KEY (CONTRATO_ID)       REFERENCES RH_T_CONTRATO (ID),
-                                           CONSTRAINT FK_TIPREL_FUN            FOREIGN KEY (FUN_ID)            REFERENCES RH_T_FUNCIONARIOS (ID),
-                                           CONSTRAINT FK_TIPREL_CARR_PCCS      FOREIGN KEY (CARR_PCC_ID)       REFERENCES RH_T_PARAM_CARREIRA (ID),
-                                           CONSTRAINT FK_TIPREL_CARGO          FOREIGN KEY (CARGO_ID)          REFERENCES RH_T_PARAM_CARGO (ID),
-                                           CONSTRAINT FK_TIPREL_INSTIT         FOREIGN KEY (INSTIT_ID)         REFERENCES INSTITUICOES (ID),
-                                           CONSTRAINT FK_TIPREL_SECCAO         FOREIGN KEY (SECCAO_ID)         REFERENCES RH_T_SECAO (ID),
-                                           CONSTRAINT FK_TIPREL_ESCALAO        FOREIGN KEY (ESCALAO_ID)        REFERENCES RH_T_PARAM_ESCALAO (ID),
-                                           CONSTRAINT FK_TIPREL_VINCULO        FOREIGN KEY (VINCULO_ID)        REFERENCES RH_T_PARAM_VINCULO (ID),
-                                           CONSTRAINT FK_TIPREL_LOCAL_TRAB     FOREIGN KEY (LOC_TRAB_ID)       REFERENCES RH_T_PARAM_LOCAL_TRAB (ID),
-                                           CONSTRAINT FK_TIPREL_TIPREL         FOREIGN KEY (TIPREL_ID)         REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
-                                           CONSTRAINT FK_TIPREL_REGIME         FOREIGN KEY (REGIME_ID)         REFERENCES RH_T_REGIME_TRAB (ID),
-                                           CONSTRAINT FK_TIPREL_CARREIRA       FOREIGN KEY (CARREIRA_ID)       REFERENCES RH_T_CARREIRA (ID),
-                                           CONSTRAINT FK_TIPREL_MOBILIDADE     FOREIGN KEY (MOB_ID)            REFERENCES RH_T_MOBILIDADE (ID),
-                                           CONSTRAINT FK_TIPREL_SITLAB         FOREIGN KEY (SITUAC_LABORAL_ID) REFERENCES RH_T_PARAM_SIT_LABORAL (ID),
-                                           CONSTRAINT FK_TIPREL_PARAM_CTR      FOREIGN KEY (TIPO_CONTRATO_ID)  REFERENCES RH_T_PARAM_CONTRATO (ID),
-                                           CONSTRAINT FK_TIPREL_CATEGORIA      FOREIGN KEY (CATEGORIA_ID)      REFERENCES RH_T_PARAM_CATEGORIA (ID),
+  -- Foreign Keys (nomes seguindo a lista fornecida, ajustando typos)
+  CONSTRAINT FK_TIPREL_CONTRATO       FOREIGN KEY (CONTRATO_ID)       REFERENCES RH_T_CONTRATO (ID),
+  CONSTRAINT FK_TIPREL_FUN            FOREIGN KEY (FUN_ID)            REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_TIPREL_CARR_PCCS      FOREIGN KEY (CARR_PCC_ID)       REFERENCES RH_T_PARAM_CARREIRA (ID),
+  CONSTRAINT FK_TIPREL_CARGO          FOREIGN KEY (CARGO_ID)          REFERENCES RH_T_PARAM_CARGO (ID),
+  CONSTRAINT FK_TIPREL_INSTIT         FOREIGN KEY (INSTIT_ID)         REFERENCES INSTITUICOES (ID),
+  CONSTRAINT FK_TIPREL_SECCAO         FOREIGN KEY (SECCAO_ID)         REFERENCES RH_T_SECAO (ID),
+  CONSTRAINT FK_TIPREL_ESCALAO        FOREIGN KEY (ESCALAO_ID)        REFERENCES RH_T_PARAM_ESCALAO (ID),
+  CONSTRAINT FK_TIPREL_VINCULO        FOREIGN KEY (VINCULO_ID)        REFERENCES RH_T_PARAM_VINCULO (ID),
+  CONSTRAINT FK_TIPREL_LOCAL_TRAB     FOREIGN KEY (LOC_TRAB_ID)       REFERENCES RH_T_PARAM_LOCAL_TRAB (ID),
+  CONSTRAINT FK_TIPREL_TIPREL         FOREIGN KEY (TIPREL_ID)         REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
+  CONSTRAINT FK_TIPREL_REGIME         FOREIGN KEY (REGIME_ID)         REFERENCES RH_T_REGIME_TRAB (ID),
+  CONSTRAINT FK_TIPREL_CARREIRA       FOREIGN KEY (CARREIRA_ID)       REFERENCES RH_T_CARREIRA (ID),
+  CONSTRAINT FK_TIPREL_MOBILIDADE     FOREIGN KEY (MOB_ID)            REFERENCES RH_T_MOBILIDADE (ID),
+  CONSTRAINT FK_TIPREL_SITLAB         FOREIGN KEY (SITUAC_LABORAL_ID) REFERENCES RH_T_PARAM_SIT_LABORAL (ID),
+  CONSTRAINT FK_TIPREL_PARAM_CTR      FOREIGN KEY (TIPO_CONTRATO_ID)  REFERENCES RH_T_PARAM_CONTRATO (ID),
+  CONSTRAINT FK_TIPREL_CATEGORIA      FOREIGN KEY (CATEGORIA_ID)      REFERENCES RH_T_PARAM_CATEGORIA (ID),
 
-    -- Checks
-                                           CONSTRAINT CK_TIPREL_ESTADO CHECK (ESTADO IN ('A','I','E','P')),
-                                           CONSTRAINT CK_TIPREL_PROCESSA CHECK (FLG_PROCESSA IN ('SIM','NAO') OR FLG_PROCESSA IS NULL),
-                                           CONSTRAINT CK_TIPREL_PERIODO CHECK (DATA_FIM IS NULL OR DATA_FIM >= DATA_INICIO),
-                                           CONSTRAINT CK_TIPREL_PERIODO_CTR CHECK (
-                                               DATA_INICIO_CONTRATO IS NULL OR DATA_FIM_CONTRATO IS NULL OR DATA_FIM_CONTRATO >= DATA_INICIO_CONTRATO
-                                               )
+  -- Checks
+  CONSTRAINT CK_TIPREL_ESTADO CHECK (ESTADO IN ('A','I','E','P')),
+  CONSTRAINT CK_TIPREL_PROCESSA CHECK (FLG_PROCESSA IN ('SIM','NAO') OR FLG_PROCESSA IS NULL),
+  CONSTRAINT CK_TIPREL_PERIODO CHECK (DATA_FIM IS NULL OR DATA_FIM >= DATA_INICIO),
+  CONSTRAINT CK_TIPREL_PERIODO_CTR CHECK (
+    DATA_INICIO_CONTRATO IS NULL OR DATA_FIM_CONTRATO IS NULL OR DATA_FIM_CONTRATO >= DATA_INICIO_CONTRATO
+  )
 );
 
 -- Índice (UUID)
@@ -1840,9 +1812,9 @@ CREATE INDEX IX_TP_RELAC_UUID ON RH_T_TIPOS_RELACIONAMENTO (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_TIP_REL
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -1852,40 +1824,39 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_TIP_REL.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_TIP_REL.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_TIPOS_RELACIONAMENTO;
 
 
 /* =========================================================
    TABELA: RH_T_REGIME_MODAL
    ========================================================= */
 CREATE TABLE RH_T_REGIME_MODAL (
-                                   ID                   NUMBER           NOT NULL,
-                                   REGIME_ID            NUMBER           NOT NULL,          -- FK -> RH_T_REGIME_TRAB.ID
-                                   MODALIDADE           VARCHAR2(50),
-                                   DIAS_SEMANA          VARCHAR2(50),
-                                   NUM_HORAS            NUMBER,
-                                   ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                   DATA_REGISTO         DATE             NOT NULL,
-                                   USER_REGISTO_ID      NUMBER           NOT NULL,
-                                   USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                                   USER_ALTERACAO_ID    NUMBER,
-                                   USER_ALTERACAO_NAME  VARCHAR2(200),
-                                   DATA_ALTERACAO       DATE,
-                                   UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  REGIME_ID            NUMBER           NOT NULL,          -- FK -> RH_T_REGIME_TRAB.ID
+  MODALIDADE           VARCHAR2(50),
+  DIAS_SEMANA          VARCHAR2(50),
+  NUM_HORAS            NUMBER,
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  UUID RAW(16)    NOT NULL,
 
-                                   CONSTRAINT PK_REGIME_MODAL PRIMARY KEY (ID),
-                                   CONSTRAINT FK_REGIME_MODAL_TRAB FOREIGN KEY (REGIME_ID) REFERENCES RH_T_REGIME_TRAB (ID),
-                                   CONSTRAINT CK_REGIM_MOD_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
+  CONSTRAINT PK_REGIME_MODAL PRIMARY KEY (ID),
+  CONSTRAINT FK_REGIME_MODAL_TRAB FOREIGN KEY (REGIME_ID) REFERENCES RH_T_REGIME_TRAB (ID),
+  CONSTRAINT CK_REGIM_MOD_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- Índice (UUID)
@@ -1893,9 +1864,9 @@ CREATE INDEX IX_REGIM_MOD_UUID ON RH_T_REGIME_MODAL (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_REGIME_MODAL
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO no INSERT; atualiza DATA_ALTERACAO no UPDATE)
@@ -1905,18 +1876,17 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_REGIME_MODAL.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_REGIME_MODAL.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
-
+  
 END;
 /
-SHOW ERRORS TRIGGER TRG_REGIME_MODAL;
 
 
 
@@ -1925,35 +1895,35 @@ SHOW ERRORS TRIGGER TRG_REGIME_MODAL;
    TABELA: RH_T_DEF_REMUNERACOES
    ========================================================= */
 CREATE TABLE RH_T_DEF_REMUNERACOES (
-                                       ID                   NUMBER            NOT NULL,
-                                       TM_ID                NUMBER            NOT NULL,          -- RH_TIPO_MOVIMENTOS.ID
-                                       PERCENTAGEM          NUMBER,                              -- (%). Opcional
-                                       VALOR                NUMBER            NOT NULL,          -- valor absoluto
-                                       ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                       DATA_REGISTO         DATE              NOT NULL,
-                                       USER_REGISTO_ID      NUMBER            NOT NULL,
-                                       USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
-                                       USER_ALTERACAO_ID    NUMBER,
-                                       USER_ALTERACAO_NAME  VARCHAR2(200),
-                                       DATA_ALTERACAO       DATE,
-                                       FUN_ID               NUMBER            NOT NULL,          -- RH_T_FUNCIONARIOS.ID
-                                       DATA_INICIO          DATE              NOT NULL,
-                                       DATA_FIM             DATE,
-                                       CONTRATO_ID          NUMBER            NOT NULL,          -- RH_T_CONTRATO.CONTRATO_ID
-                                       OBS                  VARCHAR2(400),
-                                       UUID RAW(16)     NOT NULL,
+  ID                   NUMBER            NOT NULL,
+  TM_ID                NUMBER            NOT NULL,          -- RH_TIPO_MOVIMENTOS.ID
+  PERCENTAGEM          NUMBER,                              -- (%). Opcional
+  VALOR                NUMBER            NOT NULL,          -- valor absoluto
+  ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE              NOT NULL,
+  USER_REGISTO_ID      NUMBER            NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  FUN_ID               NUMBER            NOT NULL,          -- RH_T_FUNCIONARIOS.ID
+  DATA_INICIO          DATE              NOT NULL,
+  DATA_FIM             DATE,
+  CONTRATO_ID          NUMBER            NOT NULL,          -- RH_T_CONTRATO.CONTRATO_ID
+  OBS                  VARCHAR2(400),
+  UUID RAW(16)     NOT NULL,
 
-                                       CONSTRAINT PK_DEF_REMUN PRIMARY KEY (ID),
+  CONSTRAINT PK_DEF_REMUN PRIMARY KEY (ID),
 
-    -- Foreign Keys
-                                       CONSTRAINT FK_DEFREM_TM      FOREIGN KEY (TM_ID)       REFERENCES RH_TIPO_MOVIMENTOS (ID),
-                                       CONSTRAINT FK_DEFREM_FUN     FOREIGN KEY (FUN_ID)      REFERENCES RH_T_FUNCIONARIOS (ID),
-                                       CONSTRAINT FK_DEFREM_CTR     FOREIGN KEY (CONTRATO_ID) REFERENCES RH_T_CONTRATO (ID),
+  -- Foreign Keys
+  CONSTRAINT FK_DEFREM_TM      FOREIGN KEY (TM_ID)       REFERENCES RH_TIPO_MOVIMENTOS (ID),
+  CONSTRAINT FK_DEFREM_FUN     FOREIGN KEY (FUN_ID)      REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_DEFREM_CTR     FOREIGN KEY (CONTRATO_ID) REFERENCES RH_T_CONTRATO (ID),
 
-    -- Checks
-                                       CONSTRAINT CK_DEFREM_ESTADO   CHECK (ESTADO IN ('A','I','E','P')),
-                                       CONSTRAINT CK_DEFREM_PERC     CHECK (PERCENTAGEM IS NULL OR (PERCENTAGEM >= 0 AND PERCENTAGEM <= 100)),
-                                       CONSTRAINT CK_DEFREM_PERIODO  CHECK (DATA_FIM IS NULL OR DATA_FIM >= DATA_INICIO)
+  -- Checks
+  CONSTRAINT CK_DEFREM_ESTADO   CHECK (ESTADO IN ('A','I','E','P')),
+  CONSTRAINT CK_DEFREM_PERC     CHECK (PERCENTAGEM IS NULL OR (PERCENTAGEM >= 0 AND PERCENTAGEM <= 100)),
+  CONSTRAINT CK_DEFREM_PERIODO  CHECK (DATA_FIM IS NULL OR DATA_FIM >= DATA_INICIO)
 );
 
 -- Índice (UUID)
@@ -1961,9 +1931,9 @@ CREATE INDEX IX_DEF_REM_UUID ON RH_T_DEF_REMUNERACOES (UUID);
 
 -- Sequência (conforme solicitado)
 CREATE SEQUENCE SEQ_DEF_PAG
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -1973,43 +1943,42 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_DEF_PAG.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_DEF_PAG.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
-
+  
 END;
 /
-SHOW ERRORS TRIGGER TRG_DEF_REMUNERACAO;
 
 /* =========================================================
    TABELA: RH_T_REMUN_TIPREL
    ========================================================= */
 CREATE TABLE RH_T_REMUN_TIPREL (
-                                   ID                   NUMBER           NOT NULL,
-                                   REM_ID               NUMBER           NOT NULL,  -- FK -> RH_T_DEF_REMUNERACOES.ID
-                                   TIPREL_ID            NUMBER           NOT NULL,  -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID
-                                   ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                   DATA_REGISTO         DATE             NOT NULL,
-                                   USER_REGISTO_ID      NUMBER           NOT NULL,
-                                   USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                                   USER_ALTERACAO_ID    NUMBER,
-                                   USER_ALTERACAO_NAME  VARCHAR2(200),
-                                   DATA_ALTERACAO       DATE,
-                                   OBS                  VARCHAR2(400),
-                                   UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  REM_ID               NUMBER           NOT NULL,  -- FK -> RH_T_DEF_REMUNERACOES.ID
+  TIPREL_ID            NUMBER           NOT NULL,  -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  OBS                  VARCHAR2(400),
+  UUID RAW(16)    NOT NULL,
 
-                                   CONSTRAINT PK_REMUN_TIPREL PRIMARY KEY (ID),
+  CONSTRAINT PK_REMUN_TIPREL PRIMARY KEY (ID),
 
-    -- Foreign Keys (ajustado para tabela RH_T_DEF_REMUNERACOES criada anteriormente)
-                                   CONSTRAINT FK_PEMUN_TIPREL  FOREIGN KEY (REM_ID) REFERENCES RH_T_DEF_REMUNERACOES (ID),
-                                   CONSTRAINT FK_TIPREL_REMUN  FOREIGN KEY (TIPREL_ID) REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
+  -- Foreign Keys (ajustado para tabela RH_T_DEF_REMUNERACOES criada anteriormente)
+  CONSTRAINT FK_PEMUN_TIPREL  FOREIGN KEY (REM_ID) REFERENCES RH_T_DEF_REMUNERACOES (ID),
+  CONSTRAINT FK_TIPREL_REMUN  FOREIGN KEY (TIPREL_ID) REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
 
-                                   CONSTRAINT CK_REM_TIPREL_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
+  CONSTRAINT CK_REM_TIPREL_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- Índice (UUID)
@@ -2017,9 +1986,9 @@ CREATE INDEX IX_REM_TIP_UUID ON RH_T_REMUN_TIPREL (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_REMUN_TIPREL
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -2029,52 +1998,51 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_REMUN_TIPREL.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_REMUN_TIPREL.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
-
+  
 END;
 /
-SHOW ERRORS TRIGGER TRG_REMUN_TIPREL;
 
 /* =========================================================
    TABELA: RH_T_DEF_PAGAMENTOS
    ========================================================= */
 CREATE TABLE RH_T_DEF_PAGAMENTOS (
-                                     ID                   NUMBER            NOT NULL,
-                                     TM_ID                NUMBER            NOT NULL,          -- RH_TIPO_MOVIMENTOS.ID
-                                     VALOR                NUMBER            NOT NULL,
-                                     DATA_INICIO          DATE              NOT NULL,
-                                     DATA_FIM             DATE,
-                                     ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                     DATA_REGISTO         DATE              NOT NULL,
-                                     USER_REGISTO_ID      NUMBER            NOT NULL,
-                                     USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
-                                     USER_ALTERACAO_ID    NUMBER,
-                                     USER_ALTERACAO_NAME  VARCHAR2(200),
-                                     DATA_ALTERACAO       DATE,
-                                     FUN_ID               NUMBER            NOT NULL,          -- RH_T_FUNCIONARIOS.ID
-                                     CONTRATO_ID          NUMBER            NOT NULL,          -- RH_T_CONTRATO.CONTRATO_ID
-                                     TIPREL_ID            NUMBER,                              -- RH_T_TIPOS_RELACIONAMENTO.ID (opcional)
-                                     OBS                  VARCHAR2(400),
-                                     UUID RAW(16)     NOT NULL,
+  ID                   NUMBER            NOT NULL,
+  TM_ID                NUMBER            NOT NULL,          -- RH_TIPO_MOVIMENTOS.ID
+  VALOR                NUMBER            NOT NULL,
+  DATA_INICIO          DATE              NOT NULL,
+  DATA_FIM             DATE,
+  ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE              NOT NULL,
+  USER_REGISTO_ID      NUMBER            NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  FUN_ID               NUMBER            NOT NULL,          -- RH_T_FUNCIONARIOS.ID
+  CONTRATO_ID          NUMBER            NOT NULL,          -- RH_T_CONTRATO.CONTRATO_ID
+  TIPREL_ID            NUMBER,                              -- RH_T_TIPOS_RELACIONAMENTO.ID (opcional)
+  OBS                  VARCHAR2(400),
+  UUID RAW(16)     NOT NULL,
 
-                                     CONSTRAINT PK_DEF_PAGAM PRIMARY KEY (ID),
+  CONSTRAINT PK_DEF_PAGAM PRIMARY KEY (ID),
 
-    -- Foreign Keys
-                                     CONSTRAINT FK_PAG_TM          FOREIGN KEY (TM_ID)       REFERENCES RH_TIPO_MOVIMENTOS (ID),
-                                     CONSTRAINT FK_PAG_FUN         FOREIGN KEY (FUN_ID)      REFERENCES RH_T_FUNCIONARIOS (ID),
-                                     CONSTRAINT FK_PAG_CONTRATO    FOREIGN KEY (CONTRATO_ID) REFERENCES RH_T_CONTRATO (ID),
-                                     CONSTRAINT FK_PAG_TIPREL      FOREIGN KEY (TIPREL_ID)   REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
+  -- Foreign Keys
+  CONSTRAINT FK_PAG_TM          FOREIGN KEY (TM_ID)       REFERENCES RH_TIPO_MOVIMENTOS (ID),
+  CONSTRAINT FK_PAG_FUN         FOREIGN KEY (FUN_ID)      REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_PAG_CONTRATO    FOREIGN KEY (CONTRATO_ID) REFERENCES RH_T_CONTRATO (ID),
+  CONSTRAINT FK_PAG_TIPREL      FOREIGN KEY (TIPREL_ID)   REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
 
-    -- Checks
-                                     CONSTRAINT CK_DEF_PAG_ESTADO  CHECK (ESTADO IN ('A','I','E','P')),
-                                     CONSTRAINT CK_DEF_PAG_PERIODO CHECK (DATA_FIM IS NULL OR DATA_FIM >= DATA_INICIO)
+  -- Checks
+  CONSTRAINT CK_DEF_PAG_ESTADO  CHECK (ESTADO IN ('A','I','E','P')),
+  CONSTRAINT CK_DEF_PAG_PERIODO CHECK (DATA_FIM IS NULL OR DATA_FIM >= DATA_INICIO)
 );
 
 -- Índice (UUID)
@@ -2082,9 +2050,9 @@ CREATE INDEX IX_DEF_PAG_UUID ON RH_T_DEF_PAGAMENTOS (UUID);
 
 -- Sequência (nome conforme solicitado)
 CREATE SEQUENCE SEQ_DEF_REM
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -2094,44 +2062,43 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_DEF_REM.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_DEF_REM.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_DEF_PAGAMENTOS;
 
 /* =========================================================
    TABELA: RH_T_PAG_TIPREL
    ========================================================= */
 CREATE TABLE RH_T_PAG_TIPREL (
-                                 ID                   NUMBER           NOT NULL,
-                                 PAG_ID               NUMBER           NOT NULL,  -- FK -> RH_T_DEF_PAGAMENTOS.ID
-                                 TIPREL_ID            NUMBER           NOT NULL,  -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID
-                                 ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                 DATA_REGISTO         DATE             NOT NULL,
-                                 USER_REGISTO_ID      NUMBER           NOT NULL,
-                                 USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                                 USER_ALTERACAO_ID    NUMBER,
-                                 USER_ALTERACAO_NAME  VARCHAR2(200),
-                                 DATA_ALTERACAO       DATE,
-                                 OBS                  VARCHAR2(400),
-                                 UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  PAG_ID               NUMBER           NOT NULL,  -- FK -> RH_T_DEF_PAGAMENTOS.ID
+  TIPREL_ID            NUMBER           NOT NULL,  -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  OBS                  VARCHAR2(400),
+  UUID RAW(16)    NOT NULL,
 
-                                 CONSTRAINT PK_PAG_TIPREL PRIMARY KEY (ID),
+  CONSTRAINT PK_PAG_TIPREL PRIMARY KEY (ID),
 
-    -- Foreign Keys (ajuste para o nome criado anteriormente: RH_T_DEF_PAGAMENTOS)
-                                 CONSTRAINT FK_DEF_PAG_TIPREL  FOREIGN KEY (PAG_ID)
-                                     REFERENCES RH_T_DEF_PAGAMENTOS (ID),
-                                 CONSTRAINT FK_DEF_TIPREL_PAG  FOREIGN KEY (TIPREL_ID)
-                                     REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
+  -- Foreign Keys (ajuste para o nome criado anteriormente: RH_T_DEF_PAGAMENTOS)
+  CONSTRAINT FK_DEF_PAG_TIPREL  FOREIGN KEY (PAG_ID)
+    REFERENCES RH_T_DEF_PAGAMENTOS (ID),
+  CONSTRAINT FK_DEF_TIPREL_PAG  FOREIGN KEY (TIPREL_ID)
+    REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
 
-                                 CONSTRAINT CK_PAG_TIPREL_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
+  CONSTRAINT CK_PAG_TIPREL_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- Índice (UUID)
@@ -2139,9 +2106,9 @@ CREATE INDEX IX_PAG_TIPREL_UUID ON RH_T_PAG_TIPREL (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_DEF_PAG_TIPREL
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID e DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -2151,41 +2118,40 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_DEF_PAG_TIPREL.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_DEF_PAG_TIPREL.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_PAG_TIPREL;
 /* =========================================================
    TABELA: RH_T_VALIDACAO
    ========================================================= */
 CREATE TABLE RH_T_VALIDACAO (
-                                ID                   NUMBER           NOT NULL,
-                                TIPO_ACCAO           VARCHAR2(20)     NOT NULL,  -- domínio: TIPO_ACAO
-                                REFERENCIA_NAME      VARCHAR2(100)    NOT NULL,  -- domínio: ACCAO_REFERENTE
-                                REFERENCIA_ID        NUMBER           NOT NULL,
-                                FUN_ID               NUMBER           NOT NULL,  -- FK -> RH_T_FUNCIONARIOS.ID
-                                TIPREL_ID            NUMBER,                    -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID (opcional)
-                                ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                DATA_REGISTO         DATE             NOT NULL,
-                                USER_REGISTO_ID      NUMBER           NOT NULL,
-                                USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                                USER_ALTERACAO_ID    NUMBER,
-                                USER_ALTERACAO_NAME  VARCHAR2(200),
-                                DATA_ALTERACAO       DATE,
-                                OBS                  VARCHAR2(400),
-                                UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  TIPO_ACCAO           VARCHAR2(20)     NOT NULL,  -- domínio: TIPO_ACAO
+  REFERENCIA_NAME      VARCHAR2(100)    NOT NULL,  -- domínio: ACCAO_REFERENTE
+  REFERENCIA_ID        NUMBER           NOT NULL,
+  FUN_ID               NUMBER           NOT NULL,  -- FK -> RH_T_FUNCIONARIOS.ID
+  TIPREL_ID            NUMBER,                    -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID (opcional)
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  OBS                  VARCHAR2(400),
+  UUID RAW(16)    NOT NULL,
 
-                                CONSTRAINT PK_VALIDACAO PRIMARY KEY (ID),
-                                CONSTRAINT FK_FUN_VALID_ID  FOREIGN KEY (FUN_ID)   REFERENCES RH_T_FUNCIONARIOS (ID),
-                                CONSTRAINT FK_VALID_TIPREL  FOREIGN KEY (TIPREL_ID) REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
-                                CONSTRAINT CK_VALID_ESTADO  CHECK (ESTADO IN ('A','I','E','P'))
+  CONSTRAINT PK_VALIDACAO PRIMARY KEY (ID),
+  CONSTRAINT FK_FUN_VALID_ID  FOREIGN KEY (FUN_ID)   REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_VALID_TIPREL  FOREIGN KEY (TIPREL_ID) REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
+  CONSTRAINT CK_VALID_ESTADO  CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- Índice (UUID)
@@ -2193,9 +2159,9 @@ CREATE INDEX IX_VALID_UUID ON RH_T_VALIDACAO (UUID);
 
 -- Sequência (conforme solicitado)
 CREATE SEQUENCE SEQ_LOG
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -2205,59 +2171,58 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_LOG.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_LOG.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_VALIDACAO;
 
 /* =========================================================
    TABELA: RH_T_PROCESSO_DISCIPLINAR
    ========================================================= */
 CREATE TABLE RH_T_PROCESSO_DISCIPLINAR (
-                                           ID                    NUMBER           NOT NULL,
-                                           TIPREL_ID             NUMBER           NOT NULL,         -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID
-                                           FUN_ID                NUMBER,                             -- FK -> RH_T_FUNCIONARIOS.ID
-                                           NUM_PROCESSO          VARCHAR2(50),
-                                           ENTIDADE              VARCHAR2(200),
-                                           TP_PROCESSO           VARCHAR2(50),
-                                           ESTADO                VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                           PENA_DISCP            VARCHAR2(50),
-                                           DATE_INIC_PD          DATE,
-                                           DATE_FIM_PD           DATE,
-                                           DATE_INIC_PENA        DATE,
-                                           DATE_FIM_PENA         DATE,
-                                           NUM_BO                VARCHAR2(50),
-                                           DATA_PUBL_BO          DATE,
-                                           NUM_ORDEM_SERV        VARCHAR2(50),
-                                           DATA_ORDEM_SERV       DATE,
-                                           NUM_OFA               VARCHAR2(50),
-                                           DATA_EMISS_OFA        DATE,
-                                           DATA_REGISTO          DATE             NOT NULL,
-                                           USER_REGISTO_ID       NUMBER           NOT NULL,
-                                           USER_REGISTO_NAME     VARCHAR2(200)    NOT NULL,
-                                           USER_ALTERACAO_ID     NUMBER,
-                                           USER_ALTERACAO_NAME   VARCHAR2(200),
-                                           DATA_ALTERACAO        DATE,
-                                           OBS                   VARCHAR2(400),
-                                           UUID RAW(16)    NOT NULL,
+  ID                    NUMBER           NOT NULL,
+  TIPREL_ID             NUMBER           NOT NULL,         -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID
+  FUN_ID                NUMBER,                             -- FK -> RH_T_FUNCIONARIOS.ID
+  NUM_PROCESSO          VARCHAR2(50),
+  ENTIDADE              VARCHAR2(200),
+  TP_PROCESSO           VARCHAR2(50),
+  ESTADO                VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
+  PENA_DISCP            VARCHAR2(50),
+  DATE_INIC_PD          DATE,
+  DATE_FIM_PD           DATE,
+  DATE_INIC_PENA        DATE,
+  DATE_FIM_PENA         DATE,
+  NUM_BO                VARCHAR2(50),
+  DATA_PUBL_BO          DATE,
+  NUM_ORDEM_SERV        VARCHAR2(50),
+  DATA_ORDEM_SERV       DATE,
+  NUM_OFA               VARCHAR2(50),
+  DATA_EMISS_OFA        DATE,
+  DATA_REGISTO          DATE             NOT NULL,
+  USER_REGISTO_ID       NUMBER           NOT NULL,
+  USER_REGISTO_NAME     VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID     NUMBER,
+  USER_ALTERACAO_NAME   VARCHAR2(200),
+  DATA_ALTERACAO        DATE,
+  OBS                   VARCHAR2(400),
+  UUID RAW(16)    NOT NULL,
 
-                                           CONSTRAINT PK_PROC_DISCP PRIMARY KEY (ID),
+  CONSTRAINT PK_PROC_DISCP PRIMARY KEY (ID),
 
-    -- Foreign Keys
-                                           CONSTRAINT FK_PROC_DISCC_FUN   FOREIGN KEY (FUN_ID)    REFERENCES RH_T_FUNCIONARIOS (ID),
-                                           CONSTRAINT FK_PROC_DISC_TIPREL FOREIGN KEY (TIPREL_ID) REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
+  -- Foreign Keys
+  CONSTRAINT FK_PROC_DISCC_FUN   FOREIGN KEY (FUN_ID)    REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_PROC_DISC_TIPREL FOREIGN KEY (TIPREL_ID) REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
 
-    -- Checks
-                                           CONSTRAINT CK_PROC_DISC_ESTADO   CHECK (ESTADO IN ('A','I','E','P')),
-                                           CONSTRAINT CK_PROC_DISC_PD       CHECK (DATE_FIM_PD   IS NULL OR DATE_INIC_PD   IS NULL OR DATE_FIM_PD   >= DATE_INIC_PD),
-                                           CONSTRAINT CK_PROC_DISC_PENA     CHECK (DATE_FIM_PENA IS NULL OR DATE_INIC_PENA IS NULL OR DATE_FIM_PENA >= DATE_INIC_PENA)
+  -- Checks
+  CONSTRAINT CK_PROC_DISC_ESTADO   CHECK (ESTADO IN ('A','I','E','P')),
+  CONSTRAINT CK_PROC_DISC_PD       CHECK (DATE_FIM_PD   IS NULL OR DATE_INIC_PD   IS NULL OR DATE_FIM_PD   >= DATE_INIC_PD),
+  CONSTRAINT CK_PROC_DISC_PENA     CHECK (DATE_FIM_PENA IS NULL OR DATE_INIC_PENA IS NULL OR DATE_FIM_PENA >= DATE_INIC_PENA)
 );
 
 -- Índice (UUID)
@@ -2265,9 +2230,9 @@ CREATE INDEX IX_PROC_DISC_UUID ON RH_T_PROCESSO_DISCIPLINAR (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_PROCESSO_DISCIP
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -2277,41 +2242,40 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_PROCESSO_DISCIP.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_PROCESSO_DISCIP.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_PROCESSO_DISCIPLINAR;
 
 /* =========================================================
    TABELA: RH_T_SUBSTITUICAO
    ========================================================= */
 CREATE TABLE RH_T_SUBSTITUICAO (
-                                   ID                   NUMBER           NOT NULL,
-                                   TIPREL_ID_PARA       NUMBER           NOT NULL,  -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID (quem substitui)
-                                   TIPREL_ID_DE         NUMBER           NOT NULL,  -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID (quem é substituído)
-                                   DATA_INICIO          DATE,
-                                   DATA_FIM             DATE,
-                                   MOTIVO               VARCHAR2(200),
-                                   OBS                  VARCHAR2(400),
-                                   UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  TIPREL_ID_PARA       NUMBER           NOT NULL,  -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID (quem substitui)
+  TIPREL_ID_DE         NUMBER           NOT NULL,  -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID (quem é substituído)
+  DATA_INICIO          DATE,
+  DATA_FIM             DATE,
+  MOTIVO               VARCHAR2(200),
+  OBS                  VARCHAR2(400),
+  UUID RAW(16)    NOT NULL,
 
-                                   CONSTRAINT PK_SUBSTITUICAO PRIMARY KEY (ID),
+  CONSTRAINT PK_SUBSTITUICAO PRIMARY KEY (ID),
 
-    -- Foreign Keys
-                                   CONSTRAINT FK_SUBSTIT_TIPRELDE     FOREIGN KEY (TIPREL_ID_DE)
-                                       REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
-                                   CONSTRAINT FK_SUBSTIT_TIPRELPARA   FOREIGN KEY (TIPREL_ID_PARA)
-                                       REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
+  -- Foreign Keys
+  CONSTRAINT FK_SUBSTIT_TIPRELDE     FOREIGN KEY (TIPREL_ID_DE)
+    REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
+  CONSTRAINT FK_SUBSTIT_TIPRELPARA   FOREIGN KEY (TIPREL_ID_PARA)
+    REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
 
-    -- Período válido
-                                   CONSTRAINT CK_SUBSTIT_PERIODO CHECK (DATA_FIM IS NULL OR DATA_INICIO IS NULL OR DATA_FIM >= DATA_INICIO)
+  -- Período válido
+  CONSTRAINT CK_SUBSTIT_PERIODO CHECK (DATA_FIM IS NULL OR DATA_INICIO IS NULL OR DATA_FIM >= DATA_INICIO)
 );
 
 -- Índice (UUID)
@@ -2319,9 +2283,9 @@ CREATE INDEX IX_SUBSTIT_UUID ON RH_T_SUBSTITUICAO (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_SUBSTITUICAO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID em INSERT; atualiza DATA_ALTERACAO se existir campo no futuro)
@@ -2331,45 +2295,44 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_SUBSTITUICAO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
-END IF;
+      SELECT SEQ_SUBSTITUICAO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
+  END IF;
 END;
 /
-SHOW ERRORS TRIGGER TRG_SUBSTITUICAO;
 
 /* =========================================================
    TABELA: RH_T_ORDEM_SERVICO
    ========================================================= */
 CREATE TABLE RH_T_ORDEM_SERVICO (
-                                    ID                   NUMBER           NOT NULL,
-                                    NU_ORDEM             VARCHAR2(50),
-                                    DESCRICAO            VARCHAR2(100)    NOT NULL,
-                                    REFERENTE            VARCHAR2(200)    NOT NULL,          -- objeto/assunto referente
-                                    FUN_ID               NUMBER           NOT NULL,          -- FK -> RH_T_FUNCIONARIOS.ID
-                                    CONTRATO_ID          NUMBER,                             -- FK -> RH_T_CONTRATO.CONTRATO_ID
-                                    TIPREL_ID            NUMBER,                             -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID
-                                    VALIDACAO_ID         NUMBER,                             -- FK -> RH_T_VALIDACAO.ID
-                                    ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                    DATA_REGISTO         DATE             NOT NULL,
-                                    USER_REGISTO_ID      NUMBER           NOT NULL,
-                                    USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                                    USER_ALTERACAO_ID    NUMBER,
-                                    USER_ALTERACAO_NAME  VARCHAR2(200),
-                                    DATA_ALTERACAO       DATE,
-                                    OBS                  VARCHAR2(400),
-                                    UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  NU_ORDEM             VARCHAR2(50),
+  DESCRICAO            VARCHAR2(100)    NOT NULL,
+  REFERENTE            VARCHAR2(200)    NOT NULL,          -- objeto/assunto referente
+  FUN_ID               NUMBER           NOT NULL,          -- FK -> RH_T_FUNCIONARIOS.ID
+  CONTRATO_ID          NUMBER,                             -- FK -> RH_T_CONTRATO.CONTRATO_ID
+  TIPREL_ID            NUMBER,                             -- FK -> RH_T_TIPOS_RELACIONAMENTO.ID
+  VALIDACAO_ID         NUMBER,                             -- FK -> RH_T_VALIDACAO.ID
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  OBS                  VARCHAR2(400),
+  UUID RAW(16)    NOT NULL,
 
-                                    CONSTRAINT PK_ORDEM_SERV PRIMARY KEY (ID),
+  CONSTRAINT PK_ORDEM_SERV PRIMARY KEY (ID),
 
-    -- Foreign Keys
-                                    CONSTRAINT FK_ODERM_FUN        FOREIGN KEY (FUN_ID)       REFERENCES RH_T_FUNCIONARIOS (ID),
-                                    CONSTRAINT FK_ODERM_CONTRATO   FOREIGN KEY (CONTRATO_ID)  REFERENCES RH_T_CONTRATO (ID),
-                                    CONSTRAINT FK_ORDEM_TIPREL     FOREIGN KEY (TIPREL_ID)    REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
-                                    CONSTRAINT FK_ORDEM_VALID      FOREIGN KEY (VALIDACAO_ID) REFERENCES RH_T_VALIDACAO (ID),
+  -- Foreign Keys
+  CONSTRAINT FK_ODERM_FUN        FOREIGN KEY (FUN_ID)       REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_ODERM_CONTRATO   FOREIGN KEY (CONTRATO_ID)  REFERENCES RH_T_CONTRATO (ID),
+  CONSTRAINT FK_ORDEM_TIPREL     FOREIGN KEY (TIPREL_ID)    REFERENCES RH_T_TIPOS_RELACIONAMENTO (ID),
+  CONSTRAINT FK_ORDEM_VALID      FOREIGN KEY (VALIDACAO_ID) REFERENCES RH_T_VALIDACAO (ID),
 
-    -- Checks
-                                    CONSTRAINT CK_ORDEM_SERV_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
+  -- Checks
+  CONSTRAINT CK_ORDEM_SERV_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- (Opcional) se NU_ORDEM for único no sistema:
@@ -2380,9 +2343,9 @@ CREATE INDEX IX_ORD_SERV_UUID ON RH_T_ORDEM_SERVICO (UUID);
 
 -- Sequência (mantido o nome fornecido)
 CREATE SEQUENCE SEQ_OREDEM_SERVICO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -2392,49 +2355,48 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_OREDEM_SERVICO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_OREDEM_SERVICO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_ORDEM_SERVICO;
 
 /* =========================================================
    TABELA: RH_T_SITUACAO_LABORAL
    ========================================================= */
-
+   
 CREATE TABLE RH_T_SITUACAO_LABORAL (
-                                       ID                   NUMBER           NOT NULL,
-                                       SITUACAO_LABORAL     VARCHAR2(50)     NOT NULL,  -- domínio: SITUACAO_LABORAL
-                                       MOTIVO_SIT_LAB       VARCHAR2(200),              -- domínio: MOTIVO_SIT_LABORAL
-                                       DATA_INICIO          DATE             NOT NULL,
-                                       DATA_FIM             DATE,
-                                       FUN_ID               NUMBER           NOT NULL,  -- FK -> RH_T_FUNCIONARIOS.ID
-                                       CONTRATO_ID          NUMBER           NOT NULL,  -- FK -> RH_T_CONTRATO.CONTRATO_ID
-                                       ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                       DATA_REGISTO         DATE             NOT NULL,
-                                       USER_REGISTO_ID      NUMBER           NOT NULL,
-                                       USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                                       USER_ALTERACAO_ID    NUMBER,
-                                       USER_ALTERACAO_NAME  VARCHAR2(200),
-                                       DATA_ALTERACAO       DATE,
-                                       OBS                  VARCHAR2(400),
-                                       UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  SITUACAO_LABORAL     VARCHAR2(50)     NOT NULL,  -- domínio: SITUACAO_LABORAL
+  MOTIVO_SIT_LAB       VARCHAR2(200),              -- domínio: MOTIVO_SIT_LABORAL
+  DATA_INICIO          DATE             NOT NULL,
+  DATA_FIM             DATE,
+  FUN_ID               NUMBER           NOT NULL,  -- FK -> RH_T_FUNCIONARIOS.ID
+  CONTRATO_ID          NUMBER           NOT NULL,  -- FK -> RH_T_CONTRATO.CONTRATO_ID
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  OBS                  VARCHAR2(400),
+  UUID RAW(16)    NOT NULL,
 
-                                       CONSTRAINT PK_SITUACAO_LABORAL PRIMARY KEY (ID),
+  CONSTRAINT PK_SITUACAO_LABORAL PRIMARY KEY (ID),
 
-    -- Foreign Keys (nomes conforme pedido; referências corrigidas)
-                                       CONSTRAINT FK_SITUACAO_TIPREL   FOREIGN KEY (FUN_ID)       REFERENCES RH_T_FUNCIONARIOS (ID),
-                                       CONSTRAINT FK_SITUACAO_CONTRAT  FOREIGN KEY (CONTRATO_ID)  REFERENCES RH_T_CONTRATO (ID),
+  -- Foreign Keys (nomes conforme pedido; referências corrigidas)
+  CONSTRAINT FK_SITUACAO_TIPREL   FOREIGN KEY (FUN_ID)       REFERENCES RH_T_FUNCIONARIOS (ID),
+  CONSTRAINT FK_SITUACAO_CONTRAT  FOREIGN KEY (CONTRATO_ID)  REFERENCES RH_T_CONTRATO (ID),
 
-    -- Checks
-                                       CONSTRAINT CK_SIT_LAB_ESTADO  CHECK (ESTADO IN ('A','I','E','P')),
-                                       CONSTRAINT CK_SIT_LAB_PERIODO CHECK (DATA_FIM IS NULL OR DATA_FIM >= DATA_INICIO)
+  -- Checks
+  CONSTRAINT CK_SIT_LAB_ESTADO  CHECK (ESTADO IN ('A','I','E','P')),
+  CONSTRAINT CK_SIT_LAB_PERIODO CHECK (DATA_FIM IS NULL OR DATA_FIM >= DATA_INICIO)
 );
 
 -- Índice (UUID)
@@ -2442,9 +2404,9 @@ CREATE INDEX IX_SIT_LAB_UUID ON RH_T_SITUACAO_LABORAL (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_SITUACAO_LABORAL
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -2454,36 +2416,35 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_SITUACAO_LABORAL.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_SITUACAO_LABORAL.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_SITUACAO_LABORAL;
 
 /* =========================================================
    TABELA: RH_T_ALERTA
    ========================================================= */
 CREATE TABLE RH_T_ALERTA (
-                             ID                   NUMBER           NOT NULL,
-                             REFERENCIA           VARCHAR2(100)    NOT NULL,
-                             DESCRICAO            VARCHAR2(200)    NOT NULL,
-                             ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
-                             DATA_REGISTO         DATE             NOT NULL,
-                             USER_REGISTO_ID      NUMBER           NOT NULL,
-                             USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
-                             USER_ALTERACAO_ID    NUMBER,
-                             USER_ALTERACAO_NAME  VARCHAR2(200),
-                             DATA_ALTERACAO       DATE,
-                             UUID RAW(16)    NOT NULL,
+  ID                   NUMBER           NOT NULL,
+  REFERENCIA           VARCHAR2(100)    NOT NULL,
+  DESCRICAO            VARCHAR2(200)    NOT NULL,
+  ESTADO               VARCHAR2(1)      DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  UUID RAW(16)    NOT NULL,
 
-                             CONSTRAINT PK_ALERTA PRIMARY KEY (ID),
-                             CONSTRAINT CK_ALERTA_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
+  CONSTRAINT PK_ALERTA PRIMARY KEY (ID),
+  CONSTRAINT CK_ALERTA_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- Índice (UUID)
@@ -2491,9 +2452,9 @@ CREATE INDEX IX_ALERTA_UUID ON RH_T_ALERTA (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_ALERTA
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -2503,41 +2464,40 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_ALERTA.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_ALERTA.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_ALERTA;
 
 /* =========================================================
    TABELA: RH_T_NOTIFICACAO
    ========================================================= */
 CREATE TABLE RH_T_NOTIFICACAO (
-                                  ID                   NUMBER            NOT NULL,
-                                  REFERENCIA           VARCHAR2(100)     NOT NULL,
-                                  MESSAGE              VARCHAR2(4000)    NOT NULL,
-                                  ASSUNTO              VARCHAR2(300)     NOT NULL,
-                                  EMAIL                VARCHAR2(200)     NOT NULL,
-                                  NOME_RECEPTOR        VARCHAR2(200)     NOT NULL,
-                                  DATA_ENVIO           DATE              NOT NULL,
-                                  URL                  VARCHAR2(400),
-                                  ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
-                                  DATA_REGISTO         DATE              NOT NULL,
-                                  USER_REGISTO_ID      NUMBER            NOT NULL,
-                                  USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
-                                  USER_ALTERACAO_ID    NUMBER,
-                                  USER_ALTERACAO_NAME  VARCHAR2(200),
-                                  DATA_ALTERACAO       DATE,
-                                  UUID RAW(16)     NOT NULL,
+  ID                   NUMBER            NOT NULL,
+  REFERENCIA           VARCHAR2(100)     NOT NULL,
+  MESSAGE              VARCHAR2(4000)    NOT NULL,
+  ASSUNTO              VARCHAR2(300)     NOT NULL,
+  EMAIL                VARCHAR2(200)     NOT NULL,
+  NOME_RECEPTOR        VARCHAR2(200)     NOT NULL,
+  DATA_ENVIO           DATE              NOT NULL,
+  URL                  VARCHAR2(400),
+  ESTADO               VARCHAR2(1)       DEFAULT 'A' NOT NULL, -- A/I/E/P
+  DATA_REGISTO         DATE              NOT NULL,
+  USER_REGISTO_ID      NUMBER            NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)     NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  UUID RAW(16)     NOT NULL,
 
-                                  CONSTRAINT PK_NOTIFICACAO PRIMARY KEY (ID),
-                                  CONSTRAINT CK_NOTIF_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
+  CONSTRAINT PK_NOTIFICACAO PRIMARY KEY (ID),
+  CONSTRAINT CK_NOTIF_ESTADO CHECK (ESTADO IN ('A','I','E','P'))
 );
 
 -- Índice (UUID)
@@ -2545,9 +2505,9 @@ CREATE INDEX IX_NOTIF_UUID ON RH_T_NOTIFICACAO (UUID);
 
 -- Sequência
 CREATE SEQUENCE SEQ_NOTIFICACAO
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
   NOCYCLE;
 
 -- Trigger (gera ID/DATA_REGISTO em INSERT; atualiza DATA_ALTERACAO em UPDATE)
@@ -2557,15 +2517,14 @@ FOR EACH ROW
 BEGIN
   IF INSERTING THEN
     IF :NEW.ID IS NULL THEN
-SELECT SEQ_NOTIFICACAO.NEXTVAL INTO :NEW.ID FROM DUAL;
-END IF;
+      SELECT SEQ_NOTIFICACAO.NEXTVAL INTO :NEW.ID FROM DUAL;
+    END IF;
 
     IF :NEW.DATA_REGISTO IS NULL THEN
       :NEW.DATA_REGISTO := SYSDATE;
-END IF;
-END IF;
+    END IF;
+  END IF;
 
 
 END;
 /
-SHOW ERRORS TRIGGER TRG_NOTIFICACAO;
