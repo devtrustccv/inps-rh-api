@@ -8,7 +8,7 @@
     {
       "name": "tipoContrato",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -20,7 +20,7 @@
     {
       "name": "cargoPosicao",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -44,7 +44,7 @@
     {
       "name": "seccao",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -68,7 +68,7 @@
     {
       "name": "carreira",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -80,7 +80,7 @@
     {
       "name": "categoria",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -92,7 +92,7 @@
     {
       "name": "escalaoReferencia",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -104,7 +104,7 @@
     {
       "name": "tipoVinculoLaboral",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -116,7 +116,7 @@
     {
       "name": "RegimeTrabalho",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -128,7 +128,7 @@
     {
       "name": "salario",
       "objectType": "java",
-      "type": "string",
+      "type": "decimal",
       "required": false,
       "before": false,
       "after": false,
@@ -152,7 +152,7 @@
     {
       "name": "dataInicio",
       "objectType": "java",
-      "type": "string",
+      "type": "date",
       "required": false,
       "before": false,
       "after": false,
@@ -164,7 +164,7 @@
     {
       "name": "dataFim",
       "objectType": "java",
-      "type": "string",
+      "type": "date",
       "required": false,
       "before": false,
       "after": false,
@@ -176,7 +176,7 @@
     {
       "name": "duracaoMeses",
       "objectType": "java",
-      "type": "string",
+      "type": "integer",
       "required": false,
       "before": false,
       "after": false,
@@ -188,7 +188,7 @@
     {
       "name": "pais",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -200,7 +200,7 @@
     {
       "name": "ilha",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,

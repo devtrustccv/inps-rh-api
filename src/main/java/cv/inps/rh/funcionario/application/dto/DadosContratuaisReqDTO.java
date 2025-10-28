@@ -9,7 +9,8 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -21,54 +22,54 @@ public class DadosContratuaisReqDTO  {
 
   
   
-  private String tipoContrato ;
+  private Long tipoContrato ;
   
   
-  private String cargoPosicao ;
+  private Long cargoPosicao ;
   
   
   private String direcao ;
   
   
-  private String seccao ;
+  private Long seccao ;
   
   
   private String centroCusto ;
   
   
-  private String carreira ;
+  private Long carreira ;
   
   
-  private String categoria ;
+  private Long categoria ;
   
   
-  private String escalaoReferencia ;
+  private Long escalaoReferencia ;
   
   
-  private String tipoVinculoLaboral ;
+  private Long tipoVinculoLaboral ;
   
   
-  private String RegimeTrabalho ;
+  private Long RegimeTrabalho ;
   
   
-  private String salario ;
+  private BigDecimal salario ;
   
   
   private String moeda ;
   
   
-  private String dataInicio ;
+  private LocalDate dataInicio ;
   
   
-  private String dataFim ;
+  private LocalDate dataFim ;
   
   
-  private String duracaoMeses ;
+  private Integer duracaoMeses ;
   
   
-  private String pais ;
+  private Long pais ;
   
   
-  private String ilha ;
+  private Long ilha ;
 
 }

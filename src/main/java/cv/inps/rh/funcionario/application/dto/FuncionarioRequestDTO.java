@@ -13,6 +13,7 @@ import cv.inps.rh.funcionario.application.dto.AgregadoDependenteReqDTO;
 import cv.inps.rh.funcionario.application.dto.AnexoReqDTO;
 import cv.inps.rh.funcionario.application.dto.ContactoReqDTO;
 import cv.inps.rh.funcionario.application.dto.DadosBancariosReqDTO;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.EnderecoReqDTO;
 import cv.inps.rh.funcionario.application.dto.ExperienciaProfissionalReqDTO;
 import cv.inps.rh.funcionario.application.dto.FormacaoProfissionalReqDTO;
@@ -92,5 +93,8 @@ public class FuncionarioRequestDTO  {
   
   @Valid
   private List<AnexoReqDTO> anexos = new ArrayList<>();
+  
+  @Valid
+  private DadosContratuaisReqDTO dadosContratuais ;
 
 }

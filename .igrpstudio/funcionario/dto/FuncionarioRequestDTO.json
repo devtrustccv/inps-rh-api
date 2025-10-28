@@ -272,6 +272,19 @@
       "primaryKey": false,
       "collectionType": "list",
       "module": "funcionario"
+    },
+    {
+      "name": "dadosContratuais",
+      "objectType": "dto",
+      "type": "DadosContratuaisReq",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "funcionario"
     }
   ],
   "id": "pjb2kk86vo"
