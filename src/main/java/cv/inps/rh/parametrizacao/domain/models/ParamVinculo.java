@@ -4,6 +4,8 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import lombok.Getter;
 
+import java.util.UUID;
+
 @Getter
 public class ParamVinculo {
 
@@ -39,6 +41,11 @@ public class ParamVinculo {
     this.estado = estado;
   }
 
+  private ParamVinculo(Long id) {
+    this.id = id;
+  }
+
+
   public static ParamVinculo create(
       String codigo,
       String nome,
@@ -53,7 +60,7 @@ public class ParamVinculo {
 
   public static ParamVinculo rebuild(
       Long id,
-      String uuid,
+      UUID uuid,
       String codigo,
       String nome,
       Integer flgCarreira,
@@ -63,6 +70,10 @@ public class ParamVinculo {
       Estado estado
   ) {
     return new ParamVinculo(id, IdentificadorUnico.from(uuid), codigo, nome, flgCarreira, flgSalario, flgContrato, flgTempoServico, estado);
+  }
+
+  public static ParamVinculo rebuild(Long id) {
+    return new ParamVinculo(id);
   }
 
   public void update(

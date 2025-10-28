@@ -7,6 +7,9 @@ import cv.inps.rh.shared.infrastructure.mappers.EstadoMapper;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.TipoDocumentoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +33,8 @@ public class FuncionarioMapper {
   private final DocumentoMapper documentoMapper;
   private final DadosBancariosMapper dadosBancariosMapper;
 
+
+  private final EntityManager entityManager;
 
   /**
    * Converts JPA entity to domain Funcionario
@@ -141,7 +146,8 @@ public class FuncionarioMapper {
 
     FuncionarioEntity entity = new FuncionarioEntity();
     entity.setUuid(funcionario.getUuid().getValor());
-    entity.setTipoDocumentoId(funcionario.getTipoDocumento() != null ? tipoDocumentoMapper.toEntity(funcionario.getTipoDocumento()) : null);
+    //entity.setTipoDocumentoId(funcionario.getTipoDocumento() != null ? tipoDocumentoMapper.toEntity(funcionario.getTipoDocumento()) : null);
+    entity.setTipoDocumentoId(entityManager.getReference(TipoDocumentoEntity.class, funcionario.getTipoDocumento().getId()));
     entity.setNumDocumento(funcionario.getNumeroDocumento());
     entity.setNome(funcionario.getNomeCompleto());
     entity.setFotografia(funcionario.getFotografia());
@@ -151,7 +157,8 @@ public class FuncionarioMapper {
     entity.setNmPai(funcionario.getNomePai());
     entity.setEstadoCivil(funcionario.getEstadoCivil());
     entity.setNacionalidade(funcionario.getNacionalidade());
-    entity.setLocNascId(funcionario.getLocalNascimento() != null ? geografiaMapper.toEntity(funcionario.getLocalNascimento()) : null);
+   // entity.setLocNascId(funcionario.getLocalNascimento() != null ? geografiaMapper.toEntity(funcionario.getLocalNascimento()) : null);
+    entity.setLocNascId(entityManager.getReference(GeografiaEntity.class, funcionario.getLocalNascimento().getId()));
     entity.setNif(funcionario.getNumeroFiscal());
     entity.setNuSegInps(funcionario.getNumeroSegurancaSocial());
     entity.setEntId(funcionario.getEntidadeId());

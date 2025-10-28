@@ -30,8 +30,4 @@ public class UpsEntity extends AuditEntity {
     private String nome;
 
   
-    @Column(name="codigo")
-    private String codigo;
-
-  
 }

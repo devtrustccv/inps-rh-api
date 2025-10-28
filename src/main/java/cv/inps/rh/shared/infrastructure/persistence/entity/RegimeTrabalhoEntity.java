@@ -10,6 +10,7 @@ import lombok.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import cv.inps.rh.shared.application.constants.Estado;
+import java.util.UUID;
 
 
 @Getter
@@ -54,9 +55,18 @@ public class RegimeTrabalhoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contrato_id", referencedColumnName = "id")
     private ContratoEntity contratoId;
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
+    private TiposRelacionamentoEntity tiprelId;
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
+
+  
+    @Column(name="uuid")
+    private UUID uuid;
 
   
 }

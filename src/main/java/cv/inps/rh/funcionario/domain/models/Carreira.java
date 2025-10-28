@@ -14,8 +14,9 @@ import java.util.UUID;
 @Getter
 public class Carreira {
 
-  private Long id;
-  private IdentificadorUnico uuid;
+  private final Long id;
+  private final IdentificadorUnico uuid;
+
   private BigDecimal salario;
   private Integer flgProcessa;
   private String tipoSituacao;
@@ -29,6 +30,7 @@ public class Carreira {
   private ParamCategoria categoria;
   private ParamCarreira carrPccs;
 
+  // Construtor privado
   private Carreira(Long id,
                    IdentificadorUnico uuid,
                    BigDecimal salario,
@@ -57,7 +59,7 @@ public class Carreira {
     this.carrPccs = carrPccs;
   }
 
-  // Criação de novo domínio
+  // Factory para criar nova carreira
   public static Carreira create(BigDecimal salario,
                                 Integer flgProcessa,
                                 String tipoSituacao,
@@ -69,11 +71,24 @@ public class Carreira {
                                 ParamEscalao escalao,
                                 ParamCategoria categoria,
                                 ParamCarreira carrPccs) {
-    return new Carreira(null, IdentificadorUnico.create(), salario, flgProcessa, tipoSituacao,
-        estado, obs, contrato, funcionario, cargo, escalao, categoria, carrPccs);
+    return new Carreira(
+        null,
+        IdentificadorUnico.create(),
+        salario,
+        flgProcessa,
+        tipoSituacao,
+        estado,
+        obs,
+        contrato,
+        funcionario,
+        cargo,
+        escalao,
+        categoria,
+        carrPccs
+    );
   }
 
-  // Reconstrução a partir da entity
+  // Reconstrução a partir do repositório
   public static Carreira rebuild(Long id,
                                  UUID uuid,
                                  BigDecimal salario,
@@ -87,8 +102,21 @@ public class Carreira {
                                  ParamEscalao escalao,
                                  ParamCategoria categoria,
                                  ParamCarreira carrPccs) {
-    return new Carreira(id, IdentificadorUnico.from(uuid), salario, flgProcessa, tipoSituacao,
-        estado, obs, contrato, funcionario, cargo, escalao, categoria, carrPccs);
+    return new Carreira(
+        id,
+        IdentificadorUnico.from(uuid),
+        salario,
+        flgProcessa,
+        tipoSituacao,
+        estado,
+        obs,
+        contrato,
+        funcionario,
+        cargo,
+        escalao,
+        categoria,
+        carrPccs
+    );
   }
 
   // Atualização parcial
@@ -114,5 +142,10 @@ public class Carreira {
     if (escalao != null) this.escalao = escalao;
     if (categoria != null) this.categoria = categoria;
     if (carrPccs != null) this.carrPccs = carrPccs;
+  }
+
+  // Soft delete
+  public void eliminar() {
+    this.estado = Estado.E;
   }
 }

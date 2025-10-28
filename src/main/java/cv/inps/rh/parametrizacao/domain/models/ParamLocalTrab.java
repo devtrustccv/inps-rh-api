@@ -72,6 +72,21 @@ public class ParamLocalTrab {
     );
   }
 
+  public static ParamLocalTrab rebuild(
+      Long id
+  ) {
+    return new ParamLocalTrab(
+        id,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+    );
+  }
+
+
   public void update(
       String nome,
       Geografia pais,

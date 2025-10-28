@@ -1,4 +1,4 @@
-package cv.inps.rh.funcionario.domain.models;
+package cv.inps.rh.shared.domain.models;
 
 import lombok.Getter;
 

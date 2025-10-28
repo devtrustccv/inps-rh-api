@@ -48,6 +48,13 @@ public class ParamEscalao {
     this.estado = estado;
   }
 
+
+  private ParamEscalao(
+      Long id
+  ) {
+    this.id = id;
+
+  }
   public static ParamEscalao create(
       String codigo,
       ParamCarreira paramCarreira,
@@ -100,6 +107,10 @@ public class ParamEscalao {
         dataFim,
         estado
     );
+  }
+
+  public static ParamEscalao rebuild(Long id) {
+    return new ParamEscalao(id);
   }
 
   public void update(

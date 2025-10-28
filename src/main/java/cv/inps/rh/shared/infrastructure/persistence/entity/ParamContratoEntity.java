@@ -7,6 +7,7 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.UUID;
 import jakarta.validation.constraints.NotBlank;
 import cv.inps.rh.shared.application.constants.Estado;
 
@@ -24,6 +25,10 @@ public class ParamContratoEntity extends AuditEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
+
+  
+    @Column(name="uuid")
+    private UUID uuid;
 
   
     @NotBlank(message = "codigo is mandatory")

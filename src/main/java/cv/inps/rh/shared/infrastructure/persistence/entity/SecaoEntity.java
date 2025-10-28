@@ -26,23 +26,25 @@ public class SecaoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
     @NotBlank(message = "nome is mandatory")
     @Column(name="nome", nullable = false)
     private String nome;
 
-  
-    @Column(name="inst_id")
-    private Long instId;
 
-  
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "inst_id", referencedColumnName = "id")
+    private InstituicaoEntity instId;
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
+
+
 }

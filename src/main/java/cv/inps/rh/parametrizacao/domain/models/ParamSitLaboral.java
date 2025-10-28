@@ -99,6 +99,24 @@ public class ParamSitLaboral {
     );
   }
 
+  public static ParamSitLaboral rebuild(
+      Long id
+  ) {
+    return new ParamSitLaboral(
+        id,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+    );
+  }
+
   public void update(
       String nome,
       String tipoSituacao,

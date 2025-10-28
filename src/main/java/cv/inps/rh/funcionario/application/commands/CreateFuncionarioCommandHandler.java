@@ -5,11 +5,13 @@ import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.TipoDocumentoMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
 import cv.inps.rh.shared.domain.repository.GeografiaRepository;
 import cv.inps.rh.parametrizacao.domain.repository.TipoDocumentoRepository;
+import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -39,7 +41,10 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
   private final DocumentoMapper documentoMapper;
   private final DadosBancariosMapper dadosBancariosMapper;
 
-   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper) {
+  private final GeografiaMapper geografiaMapper;
+  private final TipoDocumentoMapper tipoDocumentoMapper;
+
+   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper, GeografiaMapper geografiaMapper, TipoDocumentoMapper tipoDocumentoMapper) {
 
      this.funcionarioMapper = funcionarioMapper;
      this.funcionarioRepository = funcionarioRepository;
@@ -53,6 +58,8 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
      this.experienciaProfissionalMapper = experienciaProfissionalMapper;
      this.documentoMapper = documentoMapper;
      this.dadosBancariosMapper = dadosBancariosMapper;
+     this.geografiaMapper = geografiaMapper;
+     this.tipoDocumentoMapper = tipoDocumentoMapper;
    }
 
    @IgrpCommandHandler
@@ -61,12 +68,15 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
      LOGGER.info("Iniciando criação de funcionário: {}", dto);
 
-     TipoDocumento tipoDocumento = tipoDocumentoRepository.findById(dto.getTipoDocumentoId())
-         .orElseThrow(() -> IgrpResponseStatusException.badRequest("TipoDocumento não encontrado: " + dto.getTipoDocumentoId()));
+     /*TipoDocumento tipoDocumento = tipoDocumentoRepository.findById(dto.getTipoDocumentoId())
+         .orElseThrow(() -> IgrpResponseStatusException.badRequest("TipoDocumento não encontrado: " + dto.getTipoDocumentoId()));*/
 
-     Geografia localNascimento = geografiaRepository.findById(dto.getNaturalidadeId())
-         .orElseThrow(() -> IgrpResponseStatusException.badRequest("Geografia não encontrada: " + dto.getNaturalidadeId()));
+    /* Geografia localNascimento = geografiaRepository.findById(dto.getNaturalidadeId())
+         .orElseThrow(() -> IgrpResponseStatusException.badRequest("Geografia não encontrada: " + dto.getNaturalidadeId()));*/
 
+     TipoDocumento tipoDocumento = tipoDocumentoMapper.toDomain(dto.getTipoDocumentoId());
+
+     Geografia localNascimento = geografiaMapper.toDomain(dto.getNaturalidadeId());
 
      Funcionario funcionario = Funcionario.create(
          tipoDocumento,

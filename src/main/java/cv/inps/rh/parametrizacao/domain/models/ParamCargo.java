@@ -4,6 +4,8 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import lombok.Getter;
 
+import java.util.UUID;
+
 @Getter
 public class ParamCargo {
 
@@ -27,8 +29,12 @@ public class ParamCargo {
     return new ParamCargo(null, IdentificadorUnico.create(), nome, carreira, dirigente, estado);
   }
 
-  public static ParamCargo rebuild(Long id, String uuid, String nome, ParamCarreira carreira, String dirigente, Estado estado) {
+  public static ParamCargo rebuild(Long id, UUID uuid, String nome, ParamCarreira carreira, String dirigente, Estado estado) {
     return new ParamCargo(id, IdentificadorUnico.from(uuid), nome, carreira, dirigente, estado);
+  }
+
+  public static ParamCargo rebuild(Long id) {
+    return new ParamCargo(id, null, null, null, null, null);
   }
 
   public void update(String nome, ParamCarreira carreira, String dirigente) {

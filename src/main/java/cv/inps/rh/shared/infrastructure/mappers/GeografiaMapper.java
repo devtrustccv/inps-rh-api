@@ -50,7 +50,7 @@ public class GeografiaMapper {
   /**
    * Converte domínio Geografia para entity
    */
-  public GeografiaEntity toEntity(Geografia geografia) {
+  /*public GeografiaEntity toEntity(Geografia geografia) {
     GeografiaEntity entity = new GeografiaEntity();
     entity.setId(geografia.getId());
     entity.setNome(geografia.getNome());
@@ -64,6 +64,6 @@ public class GeografiaMapper {
     entity.setTpGeogCd(geografia.getTipoGeografia());
     entity.setFlgSituacao(geografia.getSituacao());
     return entity;
-  }
+  }*/
 
 }

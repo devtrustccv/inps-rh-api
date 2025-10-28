@@ -31,6 +31,10 @@ public class ParamCategoria {
     return new ParamCategoria(id, paramCarreira, IdentificadorUnico.from(uuid), nome, codigo, estado);
   }
 
+  public static ParamCategoria rebuild(Long id) {
+    return new ParamCategoria(id, null, null, null, null, null);
+  }
+
   public void update(String nome, String codigo, Estado estado) {
     this.nome = nome;
     this.codigo = codigo;

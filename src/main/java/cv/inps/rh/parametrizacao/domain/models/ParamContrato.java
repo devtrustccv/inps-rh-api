@@ -1,12 +1,14 @@
 package cv.inps.rh.parametrizacao.domain.models;
 
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import lombok.Getter;
 
 @Getter
 public class ParamContrato {
 
   private Long id;
+  private IdentificadorUnico uuid;
   private String codigo;
   private String nome;
   private String natureza;
@@ -18,6 +20,7 @@ public class ParamContrato {
 
   private ParamContrato(
       Long id,
+      IdentificadorUnico uuid,
       String codigo,
       String nome,
       String natureza,
@@ -28,6 +31,7 @@ public class ParamContrato {
       Estado estado
   ) {
     this.id = id;
+    this.uuid = uuid;
     this.codigo = codigo;
     this.nome = nome;
     this.natureza = natureza;
@@ -50,6 +54,7 @@ public class ParamContrato {
   ) {
     return new ParamContrato(
         null,
+        IdentificadorUnico.create(),
         codigo,
         nome,
         natureza,
@@ -63,6 +68,7 @@ public class ParamContrato {
 
   public static ParamContrato rebuild(
       Long id,
+      java.util.UUID uuid,
       String codigo,
       String nome,
       String natureza,
@@ -74,6 +80,7 @@ public class ParamContrato {
   ) {
     return new ParamContrato(
         id,
+        IdentificadorUnico.from(uuid),
         codigo,
         nome,
         natureza,
@@ -83,6 +90,10 @@ public class ParamContrato {
         paramVinculo,
         estado
     );
+  }
+
+  public static ParamContrato rebuild(Long id) {
+    return new ParamContrato(id, null, null, null, null, null, null, null, null, null);
   }
 
   public void update(
