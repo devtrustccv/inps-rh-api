@@ -71,11 +71,6 @@ public class ContratoEntity extends AuditEntity {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fun_id", referencedColumnName = "uuid")
-    private FuncionarioEntity funId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vinculo_id", referencedColumnName = "id")
     private ParamVinculoEntity vinculoId;
 
@@ -89,6 +84,10 @@ public class ContratoEntity extends AuditEntity {
 private List<ContratoEntity> contratosFilhos = new ArrayList<>();   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "contrato_id")
    private ContratoEntity contratoId;
+
+   @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "fun_id")
+   private FuncionarioEntity funId;
 
 
 }

@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 import jakarta.validation.constraints.NotNull;
 import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Getter
@@ -62,11 +64,6 @@ public class CarreiraEntity extends AuditEntity {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fun_id", referencedColumnName = "id")
-    private FuncionarioEntity funId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cargo_id", referencedColumnName = "id")
     private ParamCargoEntity cargoId;
 
@@ -83,5 +80,9 @@ public class CarreiraEntity extends AuditEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "carr_pccs_id", referencedColumnName = "id")
-    private ParamCarreiraEntity carrPccsId;
+    private ParamCarreiraEntity carrPccsId;   @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "fun_id")
+   private FuncionarioEntity funId;
+
+
 }

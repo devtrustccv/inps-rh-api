@@ -9,9 +9,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RegimeTrabalhoMapper {
 
-  private final FuncionarioMapper funcionarioMapper;
   private final ContratoMapper contratoMapper;
-  private final TiposRelacionamentoMapper tiposRelacionamentoMapper;
 
   // Entity -> Domain
   public RegimeTrabalho toDomain(RegimeTrabalhoEntity entity) {
@@ -25,9 +23,8 @@ public class RegimeTrabalhoMapper {
         entity.getDataFim(),
         entity.getObs(),
         entity.getEstado(),
-        funcionarioMapper.toDomain(entity.getFunId()),
         contratoMapper.toDomain(entity.getContratoId()),
-        tiposRelacionamentoMapper.toDomain(entity.getTiprelId())
+        null
     );
   }
 
@@ -43,10 +40,7 @@ public class RegimeTrabalhoMapper {
     entity.setDataFim(domain.getDataFim());
     entity.setObs(domain.getObs());
     entity.setEstado(domain.getEstado());
-
-    entity.setFunId(funcionarioMapper.toEntity(domain.getFuncionario()));
     entity.setContratoId(contratoMapper.toEntity(domain.getContrato()));
-    entity.setTiprelId(tiposRelacionamentoMapper.toEntity(domain.getTiprel()));
 
     return entity;
   }

@@ -142,4 +142,20 @@ private List<DocumentoEntity> documentos = new ArrayList<>();
 
   @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 private List<TiposRelacionamentoEntity> tiposrelacionamentos = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+private List<ContratoEntity> contratos = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+private List<CarreiraEntity> carreiras = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+private List<MobilidadeEntity> mobilidades = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+private List<RegimeTrabalhoEntity> regimesTrabalhos = new ArrayList<>();
 }

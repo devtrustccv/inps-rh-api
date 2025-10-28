@@ -10,6 +10,8 @@ import lombok.*;
 import jakarta.validation.constraints.NotBlank;
 import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Getter
@@ -48,11 +50,6 @@ public class MobilidadeEntity extends AuditEntity {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fun_id", referencedColumnName = "id")
-    private FuncionarioEntity funId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contrato_id", referencedColumnName = "id")
     private ContratoEntity contratoId;
 
@@ -69,5 +66,9 @@ public class MobilidadeEntity extends AuditEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instid_id", referencedColumnName = "id")
-    private InstituicaoEntity instidId;
+    private InstituicaoEntity instidId;   @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "fun_id")
+   private FuncionarioEntity funId;
+
+
 }

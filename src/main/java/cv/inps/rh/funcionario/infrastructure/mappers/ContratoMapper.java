@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ContratoMapper {
 
-  private final FuncionarioMapper funcionarioMapper;
   private final ParamVinculoMapper paramVinculoMapper;
   private final ParamContratoMapper paramContratoMapper;
 
@@ -37,7 +36,6 @@ public class ContratoMapper {
         entity.getTpContrato(),
         entity.getSituacaoLaboral(),
         entity.getObs(),
-        funcionarioMapper.toDomain(entity.getFunId()),
         paramVinculoMapper.toDomain(entity.getVinculoId()),
         paramContratoMapper.toDomain(entity.getTpContratoId()),
         contratosFilhos
@@ -59,7 +57,6 @@ public class ContratoMapper {
     entity.setTpContrato(domain.getTpContrato());
     entity.setSituacaoLaboral(domain.getSituacaoLaboral());
     entity.setObs(domain.getObs());
-    entity.setFunId(funcionarioMapper.toEntity(domain.getFuncionario()));
     entity.setVinculoId(paramVinculoMapper.toEntity(domain.getVinculo()));
     entity.setTpContratoId(paramContratoMapper.toEntity(domain.getTpContratoParam()));
 

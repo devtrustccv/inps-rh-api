@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CarreiraMapper {
 
-  private final FuncionarioMapper funcionarioMapper;
   private final ContratoMapper contratoMapper;
   private final ParamCargoMapper paramCargoMapper;
   private final ParamEscalaoMapper paramEscalaoMapper;
@@ -36,7 +35,6 @@ public class CarreiraMapper {
         entity.getEstado(),
         entity.getObs(),
         contratoMapper.toDomain(entity.getContratoId()),
-        funcionarioMapper.toDomain(entity.getFunId()),
         entity.getCargoId() != null ? paramCargoMapper.toDomain(entity.getCargoId()) : null,
         entity.getEscalaoId() != null ? paramEscalaoMapper.toDomain(entity.getEscalaoId()) : null,
         entity.getCategoriaId() != null ? paramCategoriaMapper.toDomain(entity.getCategoriaId()) : null,
@@ -57,7 +55,6 @@ public class CarreiraMapper {
     entity.setEstado(domain.getEstado());
     entity.setObs(domain.getObs());
     entity.setContratoId(contratoMapper.toEntity(domain.getContrato()));
-    entity.setFunId(funcionarioMapper.toEntity(domain.getFuncionario()));
 
     // By reference ou via mapper
     entity.setCargoId(domain.getCargo() != null

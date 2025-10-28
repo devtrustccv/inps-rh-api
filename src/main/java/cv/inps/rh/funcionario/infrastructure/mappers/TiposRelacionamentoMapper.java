@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TiposRelacionamentoMapper {
 
-  private final FuncionarioMapper funcionarioMapper;
   private final ContratoMapper contratoMapper;
   private final CarreiraMapper carreiraMapper;
   private final MobilidadeMapper mobilidadeMapper;
@@ -56,7 +55,6 @@ public class TiposRelacionamentoMapper {
         entity.getDataFim(),
         entity.getDataInicioContrato(),
         entity.getDataFimContrato(),
-        funcionarioMapper.toDomain(entity.getFunId()),
         contratoMapper.toDomain(entity.getContratoId()),
         carreiraMapper.toDomain(entity.getCarreiraId()),
         mobilidadeMapper.toDomain(entity.getMobId()),
@@ -97,12 +95,16 @@ public class TiposRelacionamentoMapper {
     entity.setDataFim(domain.getDataFim());
     entity.setDataInicioContrato(domain.getDataInicioContrato());
     entity.setDataFimContrato(domain.getDataFimContrato());
-    entity.setFunId(funcionarioMapper.toEntity(domain.getFuncionario()));
     entity.setContratoId(contratoMapper.toEntity(domain.getContrato()));
     entity.setCarreiraId(carreiraMapper.toEntity(domain.getCarreira()));
     entity.setMobId(mobilidadeMapper.toEntity(domain.getMobilidade()));
     entity.setLocTrabId(entityManager.getReference(ParamLocalTrabEntity.class, domain.getLocTrab().getId()));
-    entity.setRegimeId(regimeTrabalhoMapper.toEntity(domain.getRegimeTrabalho()));
+
+
+    var regimeTrabalho =regimeTrabalhoMapper.toEntity(domain.getRegimeTrabalho());
+    regimeTrabalho.setTiprelId(entity);
+    entity.setRegimeId(regimeTrabalho);
+
     entity.setTipoContratoId(entityManager.getReference(ParamContratoEntity.class, domain.getTipoContrato().getId()));
     entity.setReferente(domain.getReferente());
     entity.setUltProc(domain.getUltProc());

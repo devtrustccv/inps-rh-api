@@ -26,7 +26,6 @@ public class Contrato {
   private String situacaoLaboral;
   private String obs;
 
-  private Funcionario funcionario;
   private ParamVinculo vinculo;
   private ParamContrato tpContratoParam;
 
@@ -43,7 +42,6 @@ public class Contrato {
                    String tpContrato,
                    String situacaoLaboral,
                    String obs,
-                   Funcionario funcionario,
                    ParamVinculo vinculo,
                    ParamContrato tpContratoParam,
                    List<Contrato> contratosFilhos) {
@@ -57,7 +55,6 @@ public class Contrato {
     this.tpContrato = tpContrato;
     this.situacaoLaboral = situacaoLaboral;
     this.obs = obs;
-    this.funcionario = funcionario;
     this.vinculo = vinculo;
     this.tpContratoParam = tpContratoParam;
     this.contratosFilhos = contratosFilhos != null ? contratosFilhos : new ArrayList<>();
@@ -86,7 +83,6 @@ public class Contrato {
         tpContrato,
         situacaoLaboral,
         obs,
-        funcionario,
         vinculo,
         tpContratoParam,
         new ArrayList<>()
@@ -104,7 +100,6 @@ public class Contrato {
                                  String tpContrato,
                                  String situacaoLaboral,
                                  String obs,
-                                 Funcionario funcionario,
                                  ParamVinculo vinculo,
                                  ParamContrato tpContratoParam,
                                  List<Contrato> contratosFilhos) {
@@ -119,7 +114,6 @@ public class Contrato {
         tpContrato,
         situacaoLaboral,
         obs,
-        funcionario,
         vinculo,
         tpContratoParam,
         contratosFilhos
@@ -144,7 +138,6 @@ public class Contrato {
     if (tpContrato != null) this.tpContrato = tpContrato;
     if (situacaoLaboral != null) this.situacaoLaboral = situacaoLaboral;
     if (obs != null) this.obs = obs;
-    if (funcionario != null) this.funcionario = funcionario;
     if (vinculo != null) this.vinculo = vinculo;
     if (tpContratoParam != null) this.tpContratoParam = tpContratoParam;
   }

@@ -12,14 +12,12 @@ public class RegimeTrabalho {
 
   private final Long id;
   private final IdentificadorUnico uuid;
-
   private String tipoRegime;
   private String tipoSituacao;
   private LocalDate dataFim;
   private String obs;
   private Estado estado;
 
-  private Funcionario funcionario;
   private Contrato contrato;
   private TiposRelacionamento tiprel;
 
@@ -31,7 +29,6 @@ public class RegimeTrabalho {
                          LocalDate dataFim,
                          String obs,
                          Estado estado,
-                         Funcionario funcionario,
                          Contrato contrato,
                          TiposRelacionamento tiprel) {
     this.id = id;
@@ -41,7 +38,6 @@ public class RegimeTrabalho {
     this.dataFim = dataFim;
     this.obs = obs;
     this.estado = estado;
-    this.funcionario = funcionario;
     this.contrato = contrato;
     this.tiprel = tiprel;
   }
@@ -62,7 +58,6 @@ public class RegimeTrabalho {
         dataFim,
         obs,
         Estado.A,
-        funcionario,
         contrato,
         tiprel
     );
@@ -76,7 +71,6 @@ public class RegimeTrabalho {
                                        LocalDate dataFim,
                                        String obs,
                                        Estado estado,
-                                       Funcionario funcionario,
                                        Contrato contrato,
                                        TiposRelacionamento tiprel) {
     return new RegimeTrabalho(
@@ -87,7 +81,6 @@ public class RegimeTrabalho {
         dataFim,
         obs,
         estado,
-        funcionario,
         contrato,
         tiprel
     );
@@ -107,7 +100,6 @@ public class RegimeTrabalho {
     if (dataFim != null) this.dataFim = dataFim;
     if (obs != null) this.obs = obs;
     if (estado != null) this.estado = estado;
-    if (funcionario != null) this.funcionario = funcionario;
     if (contrato != null) this.contrato = contrato;
     if (tiprel != null) this.tiprel = tiprel;
   }

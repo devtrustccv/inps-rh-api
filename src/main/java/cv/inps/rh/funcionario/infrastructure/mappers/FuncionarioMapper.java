@@ -32,7 +32,11 @@ public class FuncionarioMapper {
   private final ExperienciaProfissionalMapper experienciaProfissionalMapper;
   private final DocumentoMapper documentoMapper;
   private final DadosBancariosMapper dadosBancariosMapper;
-
+  private final TiposRelacionamentoMapper tiposRelacionamentoMapper;
+  private final ContratoMapper contratoMapper;
+  private final CarreiraMapper carreiraMapper;
+  private final MobilidadeMapper mobilidadeMapper;
+  private final RegimeTrabalhoMapper regimeTrabalhoMapper;
 
   private final EntityManager entityManager;
 
@@ -80,6 +84,21 @@ public class FuncionarioMapper {
     List<DadosBancarios> dadosBancarios = entity.getDadosBancarios()!=null ? entity.getDadosBancarios().stream()
         .map(dadosBancariosMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
+    List<TiposRelacionamento> tiposRelacionamentos = entity.getTiposrelacionamentos()!=null ? entity.getTiposrelacionamentos().stream()
+        .map(tiposRelacionamentoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
+
+    List<Contrato> contratos = entity.getContratos()!=null ? entity.getContratos().stream()
+        .map(contratoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
+
+    List<Carreira> carreiras = entity.getCarreiras()!=null ? entity.getCarreiras().stream()
+        .map(carreiraMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
+
+    List<Mobilidade> mobilidades = entity.getMobilidades()!=null ? entity.getMobilidades().stream()
+        .map(mobilidadeMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
+
+    List<RegimeTrabalho> regimeTrabalhos = entity.getRegimesTrabalhos()!=null ? entity.getRegimesTrabalhos().stream()
+        .map(regimeTrabalhoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
+
     return Funcionario.rebuild(
         entity.getId(),
         entity.getUuid(),
@@ -107,7 +126,12 @@ public class FuncionarioMapper {
         formacaoFeitas,
         experienciasProfissionais,
         documentos,
-        dadosBancarios
+        dadosBancarios,
+        tiposRelacionamentos,
+        contratos,
+        carreiras,
+        mobilidades,
+        regimeTrabalhos
     );
   }
 
@@ -243,6 +267,52 @@ public class FuncionarioMapper {
       dadosBancariosEntities.forEach(d -> d.setFunId(entity));
       entity.setDadosBancarios(dadosBancariosEntities);
 
+    }
+
+    //tipos relacionamentos
+    if (funcionario.getTiposRelacionamentos() != null) {
+      var tiposRelacionamentosEntities = funcionario.getTiposRelacionamentos().stream()
+          .map(tiposRelacionamentoMapper::toEntity)
+          .collect(Collectors.toList());
+      tiposRelacionamentosEntities.forEach(t -> t.setFunId(entity));
+      entity.setTiposrelacionamentos(tiposRelacionamentosEntities);
+    }
+
+
+    // contratos
+    if(funcionario.getContratos()!=null) {
+      var contratosEntities = funcionario.getContratos().stream()
+          .map(contratoMapper::toEntity)
+          .collect(Collectors.toList());
+      contratosEntities.forEach(c -> c.setFunId(entity));
+      entity.setContratos(contratosEntities);
+    }
+
+    // carreiras
+    if(funcionario.getCarreiras()!=null) {
+      var carreirasEntities = funcionario.getCarreiras().stream()
+          .map(carreiraMapper::toEntity)
+          .collect(Collectors.toList());
+      carreirasEntities.forEach(c -> c.setFunId(entity));
+      entity.setCarreiras(carreirasEntities);
+    }
+
+    //mobilidades
+    if(funcionario.getMobilidades()!=null) {
+      var mobilidadesEntities = funcionario.getMobilidades().stream()
+          .map(mobilidadeMapper::toEntity)
+          .collect(Collectors.toList());
+      mobilidadesEntities.forEach(m -> m.setFunId(entity));
+      entity.setMobilidades(mobilidadesEntities);
+    }
+
+    //regimes trabalhos
+    if(funcionario.getRegimeTrabalhos()!=null) {
+      var regimeTrabalhosEntities = funcionario.getRegimeTrabalhos().stream()
+          .map(regimeTrabalhoMapper::toEntity)
+          .collect(Collectors.toList());
+      regimeTrabalhosEntities.forEach(r -> r.setFunId(entity));
+      entity.setRegimesTrabalhos(regimeTrabalhosEntities);
     }
 
     return entity;

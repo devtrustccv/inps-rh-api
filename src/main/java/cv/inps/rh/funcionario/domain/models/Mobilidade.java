@@ -7,7 +7,6 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.models.Instituicao;
 import lombok.Getter;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
@@ -16,7 +15,6 @@ public class Mobilidade {
   private final Long id;
   private final IdentificadorUnico uuid;
 
-  private Funcionario funcionario;
   private Contrato contrato;
   private ParamLocalTrab localTrab;
   private String tipoSituacao;
@@ -28,7 +26,6 @@ public class Mobilidade {
   // Construtor privado para rebuild/factory
   private Mobilidade(Long id,
                      IdentificadorUnico uuid,
-                     Funcionario funcionario,
                      Contrato contrato,
                      ParamLocalTrab localTrab,
                      String tipoSituacao,
@@ -38,7 +35,6 @@ public class Mobilidade {
                      String obs) {
     this.id = id;
     this.uuid = uuid;
-    this.funcionario = funcionario;
     this.contrato = contrato;
     this.localTrab = localTrab;
     this.tipoSituacao = tipoSituacao;
@@ -49,19 +45,15 @@ public class Mobilidade {
   }
 
   // Factory para criar nova mobilidade
-  public static Mobilidade create(Funcionario funcionario,
-                                  Contrato contrato,
+  public static Mobilidade create(Contrato contrato,
                                   ParamLocalTrab localTrab,
                                   String tipoSituacao,
                                   Secao secao,
                                   Instituicao instituicao,
-                                  String obs,
-                                  LocalDate dataInicio,
-                                  LocalDate dataFim) {
+                                  String obs) {
     return new Mobilidade(
         null,
         IdentificadorUnico.create(),
-        funcionario,
         contrato,
         localTrab,
         tipoSituacao,
@@ -75,7 +67,6 @@ public class Mobilidade {
   // Reconstrução a partir do repositório
   public static Mobilidade rebuild(Long id,
                                    UUID uuid,
-                                   Funcionario funcionario,
                                    Contrato contrato,
                                    ParamLocalTrab localTrab,
                                    String tipoSituacao,
@@ -86,7 +77,6 @@ public class Mobilidade {
     return new Mobilidade(
         id,
         IdentificadorUnico.from(uuid),
-        funcionario,
         contrato,
         localTrab,
         tipoSituacao,
@@ -105,10 +95,7 @@ public class Mobilidade {
                      Secao secao,
                      Instituicao instituicao,
                      Estado estado,
-                     String obs,
-                     LocalDate dataInicio,
-                     LocalDate dataFim) {
-    if (funcionario != null) this.funcionario = funcionario;
+                     String obs) {
     if (contrato != null) this.contrato = contrato;
     if (localTrab != null) this.localTrab = localTrab;
     if (tipoSituacao != null) this.tipoSituacao = tipoSituacao;

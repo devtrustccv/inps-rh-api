@@ -4,7 +4,6 @@ import cv.inps.rh.funcionario.domain.models.Mobilidade;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamLocalTrabMapper;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.SecaoMapper;
 import cv.inps.rh.shared.infrastructure.mappers.InstituicaoMapper;
-import cv.inps.rh.shared.infrastructure.persistence.entity.InstituicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MobilidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
@@ -16,12 +15,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class MobilidadeMapper {
 
-  private final FuncionarioMapper funcionarioMapper;
   private final ContratoMapper contratoMapper;
   private final SecaoMapper secaoMapper;
   private final InstituicaoMapper instituicaoMapper;
   private final ParamLocalTrabMapper paramLocalTrabMapper;
-
   private final EntityManager entityManager;
 
   // Entity -> Domain
@@ -31,7 +28,6 @@ public class MobilidadeMapper {
     return Mobilidade.rebuild(
         entity.getId(),
         entity.getUuid(),
-        funcionarioMapper.toDomain(entity.getFunId()),
         contratoMapper.toDomain(entity.getContratoId()),
         paramLocalTrabMapper.toDomain(entity.getLocalTrabId()),
         entity.getTipoSituacao(),
@@ -43,14 +39,12 @@ public class MobilidadeMapper {
   }
 
   // Domain -> Entity
-  // Domain -> Entity
   public MobilidadeEntity toEntity(Mobilidade domain) {
     if (domain == null) return null;
 
     MobilidadeEntity entity = new MobilidadeEntity();
     entity.setId(domain.getId());
     entity.setUuid(domain.getUuid().getValor());
-    entity.setFunId(funcionarioMapper.toEntity(domain.getFuncionario()));
     entity.setContratoId(contratoMapper.toEntity(domain.getContrato()));
     entity.setLocalTrabId(entityManager.getReference(
         ParamLocalTrabEntity.class,

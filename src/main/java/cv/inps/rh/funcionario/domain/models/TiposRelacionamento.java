@@ -12,7 +12,6 @@ import java.util.UUID;
 
 @Getter
 public class TiposRelacionamento {
-
   private final Long id;
   private final IdentificadorUnico uuid;
 
@@ -39,7 +38,6 @@ public class TiposRelacionamento {
   private LocalDate dataInicioContrato;
   private LocalDate dataFimContrato;
 
-  private Funcionario funcionario;
   private Contrato contrato;
   private Carreira carreira;
   private Mobilidade mobilidade;
@@ -77,7 +75,6 @@ public class TiposRelacionamento {
       LocalDate dataFim,
       LocalDate dataInicioContrato,
       LocalDate dataFimContrato,
-      Funcionario funcionario,
       Contrato contrato,
       Carreira carreira,
       Mobilidade mobilidade,
@@ -111,7 +108,6 @@ public class TiposRelacionamento {
     this.dataFim = dataFim;
     this.dataInicioContrato = dataInicioContrato;
     this.dataFimContrato = dataFimContrato;
-    this.funcionario = funcionario;
     this.contrato = contrato;
     this.carreira = carreira;
     this.mobilidade = mobilidade;
@@ -145,7 +141,6 @@ public class TiposRelacionamento {
       LocalDate dataFim,
       LocalDate dataInicioContrato,
       LocalDate dataFimContrato,
-      Funcionario funcionario,
       Contrato contrato,
       Carreira carreira,
       Mobilidade mobilidade,
@@ -180,7 +175,6 @@ public class TiposRelacionamento {
         dataFim,
         dataInicioContrato,
         dataFimContrato,
-        funcionario,
         contrato,
         carreira,
         mobilidade,
@@ -218,7 +212,6 @@ public class TiposRelacionamento {
       LocalDate dataFim,
       LocalDate dataInicioContrato,
       LocalDate dataFimContrato,
-      Funcionario funcionario,
       Contrato contrato,
       Carreira carreira,
       Mobilidade mobilidade,
@@ -253,7 +246,6 @@ public class TiposRelacionamento {
         dataFim,
         dataInicioContrato,
         dataFimContrato,
-        funcionario,
         contrato,
         carreira,
         mobilidade,
@@ -288,7 +280,6 @@ public class TiposRelacionamento {
       LocalDate dataFim,
       LocalDate dataInicioContrato,
       LocalDate dataFimContrato,
-      Funcionario funcionario,
       Contrato contrato,
       Carreira carreira,
       Mobilidade mobilidade,
@@ -320,7 +311,6 @@ public class TiposRelacionamento {
     if (dataFim != null) this.dataFim = dataFim;
     if (dataInicioContrato != null) this.dataInicioContrato = dataInicioContrato;
     if (dataFimContrato != null) this.dataFimContrato = dataFimContrato;
-    if (funcionario != null) this.funcionario = funcionario;
     if (contrato != null) this.contrato = contrato;
     if (carreira != null) this.carreira = carreira;
     if (mobilidade != null) this.mobilidade = mobilidade;

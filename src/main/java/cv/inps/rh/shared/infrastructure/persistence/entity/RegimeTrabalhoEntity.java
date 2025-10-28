@@ -11,6 +11,8 @@ import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Getter
@@ -27,29 +29,23 @@ public class RegimeTrabalhoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotBlank(message = "tipoRegime is mandatory")
     @Column(name="tipo_regime", nullable = false)
     private String tipoRegime;
 
-  
+
     @Column(name="tipo_situacao")
     private String tipoSituacao;
 
-  
+
     @Column(name="data_fim")
     private LocalDate dataFim;
 
-  
+
     @Column(name="obs", length=4000)
     private String obs;
 
-  
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fun_id", referencedColumnName = "id")
-    private FuncionarioEntity funId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -64,9 +60,13 @@ public class RegimeTrabalhoEntity extends AuditEntity {
     @Column(name="estado")
     private Estado estado;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
+     @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "fun_id")
+   private FuncionarioEntity funId;
+
+
 }

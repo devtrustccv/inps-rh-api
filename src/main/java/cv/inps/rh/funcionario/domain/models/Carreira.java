@@ -24,7 +24,6 @@ public class Carreira {
   private String obs;
 
   private Contrato contrato;
-  private Funcionario funcionario;
   private ParamCargo cargo;
   private ParamEscalao escalao;
   private ParamCategoria categoria;
@@ -39,7 +38,6 @@ public class Carreira {
                    Estado estado,
                    String obs,
                    Contrato contrato,
-                   Funcionario funcionario,
                    ParamCargo cargo,
                    ParamEscalao escalao,
                    ParamCategoria categoria,
@@ -52,7 +50,6 @@ public class Carreira {
     this.estado = estado;
     this.obs = obs;
     this.contrato = contrato;
-    this.funcionario = funcionario;
     this.cargo = cargo;
     this.escalao = escalao;
     this.categoria = categoria;
@@ -66,7 +63,6 @@ public class Carreira {
                                 Estado estado,
                                 String obs,
                                 Contrato contrato,
-                                Funcionario funcionario,
                                 ParamCargo cargo,
                                 ParamEscalao escalao,
                                 ParamCategoria categoria,
@@ -80,7 +76,6 @@ public class Carreira {
         estado,
         obs,
         contrato,
-        funcionario,
         cargo,
         escalao,
         categoria,
@@ -97,7 +92,6 @@ public class Carreira {
                                  Estado estado,
                                  String obs,
                                  Contrato contrato,
-                                 Funcionario funcionario,
                                  ParamCargo cargo,
                                  ParamEscalao escalao,
                                  ParamCategoria categoria,
@@ -111,7 +105,6 @@ public class Carreira {
         estado,
         obs,
         contrato,
-        funcionario,
         cargo,
         escalao,
         categoria,
@@ -126,7 +119,6 @@ public class Carreira {
                      Estado estado,
                      String obs,
                      Contrato contrato,
-                     Funcionario funcionario,
                      ParamCargo cargo,
                      ParamEscalao escalao,
                      ParamCategoria categoria,
@@ -137,7 +129,6 @@ public class Carreira {
     if (estado != null) this.estado = estado;
     if (obs != null) this.obs = obs;
     if (contrato != null) this.contrato = contrato;
-    if (funcionario != null) this.funcionario = funcionario;
     if (cargo != null) this.cargo = cargo;
     if (escalao != null) this.escalao = escalao;
     if (categoria != null) this.categoria = categoria;

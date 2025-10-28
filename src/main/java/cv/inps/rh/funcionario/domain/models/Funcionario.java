@@ -42,6 +42,11 @@ public class Funcionario {
   private List<Documento> documentos;
   private List<DadosBancarios> dadosBancarios;
 
+  private List<TiposRelacionamento> tiposRelacionamentos;
+  private List<Contrato> contratos;
+  private List<Carreira> carreiras;
+  private List<Mobilidade> mobilidades;
+  private List<RegimeTrabalho> regimeTrabalhos;
 
 
   private Funcionario(
@@ -71,7 +76,12 @@ public class Funcionario {
       List<FormacaoFeita> formacoes,
       List<ExperienciaProfissional> experiencias,
       List<Documento> documentos,
-      List<DadosBancarios> dadosBancarios
+      List<DadosBancarios> dadosBancarios,
+      List<TiposRelacionamento> tiposRelacionamentos,
+      List<Contrato> contratos,
+      List<Carreira> carreiras,
+      List<Mobilidade> mobilidades,
+      List<RegimeTrabalho> regimeTrabalhos
 
   ) {
     this.id = id;
@@ -101,6 +111,11 @@ public class Funcionario {
     this.experiencias = experiencias != null ? experiencias : new ArrayList<>();
     this.documentos = documentos != null ? documentos : new ArrayList<>();
     this.dadosBancarios = dadosBancarios!=null ? dadosBancarios : new ArrayList<>();
+    this.tiposRelacionamentos = tiposRelacionamentos!=null ? tiposRelacionamentos : new ArrayList<>();
+    this.contratos = contratos!=null ? contratos : new ArrayList<>();
+    this.carreiras = carreiras!=null ? carreiras : new ArrayList<>();
+    this.mobilidades = mobilidades!=null ? mobilidades : new ArrayList<>();
+    this.regimeTrabalhos = regimeTrabalhos!=null ? regimeTrabalhos : new ArrayList<>();
 
   }
 
@@ -152,6 +167,11 @@ public class Funcionario {
         null,
         null,
         null,
+        null,
+        null,
+        null,
+        null,
+        null,
         null
     );
   }
@@ -184,7 +204,12 @@ public class Funcionario {
       List<FormacaoFeita> formacoes,
       List<ExperienciaProfissional> experiencias,
       List<Documento> documentos,
-      List<DadosBancarios> dadosBancarios
+      List<DadosBancarios> dadosBancarios,
+      List<TiposRelacionamento> tiposRelacionamentos,
+      List<Contrato> contratos,
+      List<Carreira> carreiras,
+      List<Mobilidade> mobilidades,
+      List<RegimeTrabalho> regimeTrabalhos
   ) {
     return new Funcionario(
         id,
@@ -213,7 +238,12 @@ public class Funcionario {
         formacoes,
         experiencias,
         documentos,
-        dadosBancarios
+        dadosBancarios,
+        tiposRelacionamentos,
+        contratos,
+        carreiras,
+        mobilidades,
+        regimeTrabalhos
     );
   }
 
@@ -266,8 +296,25 @@ public class Funcionario {
         null,
         null,
         null,
+        null,
+        null,
+        null,
+        null,
+        null,
         null
+
     );
+  }
+
+
+  public void addTipoRelacionamento(TiposRelacionamento tipoRelacionamento) {
+    if(tiposRelacionamentos == null) tiposRelacionamentos = new ArrayList<>();
+    tiposRelacionamentos.add(tipoRelacionamento);
+  }
+
+  public void addDadosBancarios(DadosBancarios dadosBancarios) {
+    if(dadosBancarios == null) this.dadosBancarios = new ArrayList<>();
+    this.dadosBancarios.add(dadosBancarios);
   }
 
  /****** contactos *********************/
