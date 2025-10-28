@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.domain.models;
 import cv.inps.rh.parametrizacao.domain.models.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
+import cv.inps.rh.shared.domain.models.Instituicao;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -16,7 +17,7 @@ public class TiposRelacionamento {
   private final IdentificadorUnico uuid;
 
   private ParamCargo cargo;
-  private Long instituicaId;
+  private Instituicao instituicao;
   private ParamVinculo vinculo;
   private Secao seccao;
   private ParamCategoria categoria;
@@ -28,7 +29,7 @@ public class TiposRelacionamento {
   private String regime;
   private String tipoSituacao;
 
-  private TiposRelacionamento tiprelAnterior; // self-reference
+  private TiposRelacionamento tiprelAnterior;
   private String flgProcessa;
   private Estado estado;
   private String obs;
@@ -53,12 +54,12 @@ public class TiposRelacionamento {
   private ParamSitLaboral situacLaboral;
   private String tpContrato;
 
-  // Construtor privado para rebuild/factory
+  // Construtor privado
   private TiposRelacionamento(
       Long id,
       IdentificadorUnico uuid,
       ParamCargo cargo,
-      Long instit,
+      Instituicao instituicao,
       ParamVinculo vinculo,
       Secao seccao,
       ParamCategoria categoria,
@@ -92,7 +93,7 @@ public class TiposRelacionamento {
     this.id = id;
     this.uuid = uuid;
     this.cargo = cargo;
-    this.instituicaId = instit;
+    this.instituicao = instituicao;
     this.vinculo = vinculo;
     this.seccao = seccao;
     this.categoria = categoria;
@@ -127,7 +128,7 @@ public class TiposRelacionamento {
   // Factory para criar novo relacionamento
   public static TiposRelacionamento create(
       ParamCargo cargo,
-      Long instit,
+      Instituicao instituicao,
       ParamVinculo vinculo,
       Secao seccao,
       ParamCategoria categoria,
@@ -161,7 +162,7 @@ public class TiposRelacionamento {
         null,
         IdentificadorUnico.create(),
         cargo,
-        instit,
+        instituicao,
         vinculo,
         seccao,
         categoria,
@@ -199,7 +200,7 @@ public class TiposRelacionamento {
       Long id,
       UUID uuid,
       ParamCargo cargo,
-      Long instit,
+      Instituicao instituicao,
       ParamVinculo vinculo,
       Secao seccao,
       ParamCategoria categoria,
@@ -234,7 +235,7 @@ public class TiposRelacionamento {
         id,
         IdentificadorUnico.from(uuid),
         cargo,
-        instit,
+        instituicao,
         vinculo,
         seccao,
         categoria,
@@ -267,9 +268,74 @@ public class TiposRelacionamento {
     );
   }
 
+  public void update(
+      ParamCargo cargo,
+      Instituicao instituicao,
+      ParamVinculo vinculo,
+      Secao seccao,
+      ParamCategoria categoria,
+      ParamEscalao escalao,
+      ParamCarreira carrPcc,
+      BigDecimal salario,
+      String moeda,
+      String regime,
+      String tipoSituacao,
+      TiposRelacionamento tiprelAnterior,
+      String flgProcessa,
+      Estado estado,
+      String obs,
+      LocalDate dataInicio,
+      LocalDate dataFim,
+      LocalDate dataInicioContrato,
+      LocalDate dataFimContrato,
+      Funcionario funcionario,
+      Contrato contrato,
+      Carreira carreira,
+      Mobilidade mobilidade,
+      ParamLocalTrab locTrab,
+      RegimeTrabalho regimeTrabalho,
+      ParamContrato tipoContrato,
+      String referente,
+      LocalDate ultProc,
+      String motivoSitLab,
+      ParamSitLaboral situacLaboral,
+      String tpContrato
+  ) {
+    if (cargo != null) this.cargo = cargo;
+    if (instituicao != null) this.instituicao = instituicao;
+    if (vinculo != null) this.vinculo = vinculo;
+    if (seccao != null) this.seccao = seccao;
+    if (categoria != null) this.categoria = categoria;
+    if (escalao != null) this.escalao = escalao;
+    if (carrPcc != null) this.carrPcc = carrPcc;
+    if (salario != null) this.salario = salario;
+    if (moeda != null) this.moeda = moeda;
+    if (regime != null) this.regime = regime;
+    if (tipoSituacao != null) this.tipoSituacao = tipoSituacao;
+    if (tiprelAnterior != null) this.tiprelAnterior = tiprelAnterior;
+    if (flgProcessa != null) this.flgProcessa = flgProcessa;
+    if (estado != null) this.estado = estado;
+    if (obs != null) this.obs = obs;
+    if (dataInicio != null) this.dataInicio = dataInicio;
+    if (dataFim != null) this.dataFim = dataFim;
+    if (dataInicioContrato != null) this.dataInicioContrato = dataInicioContrato;
+    if (dataFimContrato != null) this.dataFimContrato = dataFimContrato;
+    if (funcionario != null) this.funcionario = funcionario;
+    if (contrato != null) this.contrato = contrato;
+    if (carreira != null) this.carreira = carreira;
+    if (mobilidade != null) this.mobilidade = mobilidade;
+    if (locTrab != null) this.locTrab = locTrab;
+    if (regimeTrabalho != null) this.regimeTrabalho = regimeTrabalho;
+    if (tipoContrato != null) this.tipoContrato = tipoContrato;
+    if (referente != null) this.referente = referente;
+    if (ultProc != null) this.ultProc = ultProc;
+    if (motivoSitLab != null) this.motivoSitLab = motivoSitLab;
+    if (situacLaboral != null) this.situacLaboral = situacLaboral;
+    if (tpContrato != null) this.tpContrato = tpContrato;
+  }
+
   // Soft delete
   public void eliminar() {
     this.estado = Estado.E;
   }
-
 }
