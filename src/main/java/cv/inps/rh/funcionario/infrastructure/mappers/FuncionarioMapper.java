@@ -34,6 +34,8 @@ public class FuncionarioMapper {
   private final CarreiraMapper carreiraMapper;
   private final MobilidadeMapper mobilidadeMapper;
   private final RegimeTrabalhoMapper regimeTrabalhoMapper;
+  private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
+  private final DefPagamentoMapper defPagamentoMapper;
 
   private final EntityManager entityManager;
 
@@ -96,6 +98,12 @@ public class FuncionarioMapper {
     List<RegimeTrabalho> regimeTrabalhos = entity.getRegimesTrabalhos()!=null ? entity.getRegimesTrabalhos().stream()
         .map(regimeTrabalhoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
+    List<DefinicaoRemuneracao> definicaoRemuneracoes = entity.getDefinicoesRenumeracoes()!=null ? entity.getDefinicoesRenumeracoes()
+        .stream().map(definicaoRemuneracaoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
+
+    List<DefPagamento> defPagamentos = entity.getDefinicoesPagamentos()!=null ? entity.getDefinicoesPagamentos()
+        .stream().map(defPagamentoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
+
     return Funcionario.rebuild(
         entity.getId(),
         entity.getUuid(),
@@ -128,7 +136,10 @@ public class FuncionarioMapper {
         contratos,
         carreiras,
         mobilidades,
-        regimeTrabalhos
+        regimeTrabalhos,
+        definicaoRemuneracoes,
+        defPagamentos
+
     );
   }
 
@@ -337,22 +348,61 @@ public class FuncionarioMapper {
 
 
     //tipos relacionamentos
+    Map<UUID, TiposRelacionamentoEntity> tiposRelacionamentosMap = new HashMap<>();
     if (funcionario.getTiposRelacionamentos() != null) {
       List<TiposRelacionamentoEntity> tiposEntities = funcionario.getTiposRelacionamentos().stream()
           .map(t -> {
             TiposRelacionamentoEntity tre = tiposRelacionamentoMapper.toEntity(t);
             tre.setFunId(entity);
 
-            // Pegar contrato do map (mesma instância que será persistida)
+            // pega as referências do mesmo mapa
             tre.setContratoId(contratosMap.get(t.getContrato().getUuid().getValor()));
             tre.setCarreiraId(carreirasMap.get(t.getCarreira().getUuid().getValor()));
             tre.setMobId(modilidadesMap.get(t.getMobilidade().getUuid().getValor()));
             tre.setRegimeId(regimesMap.get(t.getRegimeTrabalho().getUuid().getValor()));
+
+            tiposRelacionamentosMap.put(t.getUuid().getValor(), tre);
             return tre;
           })
           .toList();
-
       entity.setTiposrelacionamentos(tiposEntities);
+    }
+
+
+
+    //definicoes remuneracoes
+    if (funcionario.getDefinicaoRemuneracoes() != null) {
+      List<DefinicaoRemuneracaoEntity> definicaoRemuneracaoEntities = funcionario.getDefinicaoRemuneracoes().stream()
+          .map(d -> {
+            // Converte para entity usando o mapper
+            DefinicaoRemuneracaoEntity dre = definicaoRemuneracaoMapper.toEntity(d);
+            // Associa o funcionário
+              dre.setFunId(entity);
+            // Associa o contrato correto a partir do mapa
+              dre.setContratoId(contratosMap.get(d.getContrato().getUuid().getValor()));
+            return dre;
+          })
+          .toList();
+
+      entity.setDefinicoesRenumeracoes(definicaoRemuneracaoEntities);
+    }
+
+    // Definição pagamento
+    if (funcionario.getDefPagamentos() != null) {
+      List<DefPagamentoEntity> defPagamentosEntities = funcionario.getDefPagamentos().stream()
+          .map(d -> {
+            DefPagamentoEntity dpe = defPagamentoMapper.toEntity(d);
+            dpe.setFunId(entity);
+            // Associa o contrato correto a partir do map
+            dpe.setContratoId(contratosMap.get(d.getContrato().getUuid().getValor()));
+            // Se precisar associar o tipo de relacionamento
+              dpe.setTiprelId(
+                  tiposRelacionamentosMap.get(d.getTiprel().getUuid().getValor())
+              );
+            return dpe;
+          })
+          .toList();
+      entity.setDefinicoesPagamentos(defPagamentosEntities);
     }
 
 

@@ -9,7 +9,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotBlank;
 import cv.inps.rh.shared.application.constants.Estado;
-
 import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,45 +29,46 @@ public class MobilidadeEntity extends AuditEntity {
   private Long id;
 
 
-  @NotBlank(message = "tipoSituacao is mandatory")
-  @Column(name = "tipo_situacao", nullable = false)
-  private String tipoSituacao;
+    @NotBlank(message = "tipoSituacao is mandatory")
+    @Column(name="tipo_situacao", nullable = false)
+    private String tipoSituacao;
 
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "estado")
-  private Estado estado;
+    @Enumerated(EnumType.STRING)
+    @Column(name="estado")
+    private Estado estado;
 
 
-  @Column(name = "obs")
-  private String obs;
+    @Column(name="obs")
+    private String obs;
 
 
-  @Column(name = "uuid")
-  private UUID uuid;
+    @Column(name="uuid")
+    private UUID uuid;
 
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "contrato_id", referencedColumnName = "id")
-  private ContratoEntity contratoId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "local_trab_id", referencedColumnName = "id")
-  private ParamLocalTrabEntity localTrabId;
+    @JoinColumn(name = "contrato_id", referencedColumnName = "id")
+    private ContratoEntity contratoId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "secao_id", referencedColumnName = "id")
-  private SecaoEntity secaoId;
+    @JoinColumn(name = "local_trab_id", referencedColumnName = "id")
+    private ParamLocalTrabEntity localTrabId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "instid_id", referencedColumnName = "id")
-  private InstituicaoEntity instidId;
+    @JoinColumn(name = "secao_id", referencedColumnName = "id")
+    private SecaoEntity secaoId;
+
+
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "fun_id")
-  private FuncionarioEntity funId;
+    @JoinColumn(name = "instid_id", referencedColumnName = "id")
+    private InstituicaoEntity instidId;   @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "fun_id")
+   private FuncionarioEntity funId;
 
 
 }

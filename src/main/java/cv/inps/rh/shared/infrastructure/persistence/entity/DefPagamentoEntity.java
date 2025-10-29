@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Getter
@@ -30,15 +32,11 @@ public class DefPagamentoEntity extends AuditEntity {
 
   
     @NotNull(message = "tmId is mandatory")
-    @Column(name="tm_id", nullable = false)
-    private Long tmId;
-
-  
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fun_id", referencedColumnName = "id")
-    private FuncionarioEntity funId;
+    @JoinColumn(name = "tm_id", referencedColumnName = "id")
+    private TipoMovimentoEntity tmId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -73,5 +71,9 @@ public class DefPagamentoEntity extends AuditEntity {
     @Column(name="uuid")
     private UUID uuid;
 
-  
+     @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "fun_id")
+   private FuncionarioEntity funId;
+
+
 }

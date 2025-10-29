@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 import jakarta.validation.constraints.NotNull;
 import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Getter
@@ -53,15 +55,15 @@ public class DefinicaoRemuneracaoEntity extends AuditEntity {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fun_id", referencedColumnName = "id")
-    private FuncionarioEntity funId;
+    @JoinColumn(name = "contrato_id", referencedColumnName = "id")
+    private ContratoEntity contratoId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contrato_id", referencedColumnName = "id")
-    private ContratoEntity contratoId;
-    @Column(name="tm_id")
-    private Long tmId;
+    @JoinColumn(name = "tm_id", referencedColumnName = "id")
+    private TipoMovimentoEntity tmId;   @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "fun_id")
+   private FuncionarioEntity funId;
 
-  
+
 }

@@ -285,6 +285,34 @@
       "isUrl": false,
       "primaryKey": false,
       "module": "funcionario"
+    },
+    {
+      "name": "subsidios",
+      "objectType": "dto",
+      "type": "SubsidioReq",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
+    },
+    {
+      "name": "encargosDescontos",
+      "objectType": "dto",
+      "type": "EncargosDescontosReq",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
     }
   ],
   "id": "pjb2kk86vo"

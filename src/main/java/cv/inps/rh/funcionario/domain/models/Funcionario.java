@@ -50,6 +50,9 @@ public class Funcionario {
   private List<Mobilidade> mobilidades;
   private List<RegimeTrabalho> regimeTrabalhos;
 
+  private List<DefinicaoRemuneracao> definicaoRemuneracoes;
+  private List<DefPagamento> defPagamentos;
+
 
   private Funcionario(
       Long id,
@@ -83,7 +86,9 @@ public class Funcionario {
       List<Contrato> contratos,
       List<Carreira> carreiras,
       List<Mobilidade> mobilidades,
-      List<RegimeTrabalho> regimeTrabalhos
+      List<RegimeTrabalho> regimeTrabalhos,
+      List<DefinicaoRemuneracao> definicaoRemuneracoes,
+      List<DefPagamento> defPagamentos
 
   ) {
     this.id = id;
@@ -118,6 +123,8 @@ public class Funcionario {
     this.carreiras = carreiras != null ? carreiras : new ArrayList<>();
     this.mobilidades = mobilidades != null ? mobilidades : new ArrayList<>();
     this.regimeTrabalhos = regimeTrabalhos != null ? regimeTrabalhos : new ArrayList<>();
+    this.definicaoRemuneracoes = definicaoRemuneracoes != null ? definicaoRemuneracoes : new ArrayList<>();
+    this.defPagamentos = defPagamentos != null ? defPagamentos : new ArrayList<>();
 
   }
 
@@ -173,6 +180,8 @@ public class Funcionario {
         null,
         null,
         null,
+        null,
+        null,
         null
     );
   }
@@ -210,7 +219,10 @@ public class Funcionario {
       List<Contrato> contratos,
       List<Carreira> carreiras,
       List<Mobilidade> mobilidades,
-      List<RegimeTrabalho> regimeTrabalhos
+      List<RegimeTrabalho> regimeTrabalhos,
+      List<DefinicaoRemuneracao> definicaoRemuneracoes,
+      List<DefPagamento> defPagamentos
+
   ) {
     return new Funcionario(
         id,
@@ -244,7 +256,9 @@ public class Funcionario {
         contratos,
         carreiras,
         mobilidades,
-        regimeTrabalhos
+        regimeTrabalhos,
+        definicaoRemuneracoes,
+        defPagamentos
     );
   }
 
@@ -290,6 +304,8 @@ public class Funcionario {
         colaboradorId,
         estado,
         estadoValidacao,
+        null,
+        null,
         null,
         null,
         null,

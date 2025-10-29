@@ -7,12 +7,9 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
-
 import jakarta.validation.constraints.NotNull;
 import cv.inps.rh.shared.application.constants.Estado;
-
 import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,58 +30,59 @@ public class CarreiraEntity extends AuditEntity {
   private Long id;
 
 
-  @NotNull(message = "salario is mandatory")
-  @Column(name = "salario", nullable = false)
-  private BigDecimal salario;
+    @NotNull(message = "salario is mandatory")
+    @Column(name="salario", nullable = false)
+    private BigDecimal salario;
 
 
-  @Column(name = "flg_processa")
-  private Integer flgProcessa;
+    @Column(name="flg_processa")
+    private Integer flgProcessa;
 
 
-  @Column(name = "tipo_situacao")
-  private String tipoSituacao;
+    @Column(name="tipo_situacao")
+    private String tipoSituacao;
 
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "estado")
-  private Estado estado;
+    @Enumerated(EnumType.STRING)
+    @Column(name="estado")
+    private Estado estado;
 
 
-  @Column(name = "obs", length = 4000)
-  private String obs;
+    @Column(name="obs", length=4000)
+    private String obs;
 
 
-  @Column(name = "uuid")
-  private UUID uuid;
+    @Column(name="uuid")
+    private UUID uuid;
 
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "contrato_id", referencedColumnName = "id")
-  private ContratoEntity contratoId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "cargo_id", referencedColumnName = "id")
-  private ParamCargoEntity cargoId;
+    @JoinColumn(name = "contrato_id", referencedColumnName = "id")
+    private ContratoEntity contratoId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "escalao_id", referencedColumnName = "id")
-  private ParamEscalaoEntity escalaoId;
+    @JoinColumn(name = "cargo_id", referencedColumnName = "id")
+    private ParamCargoEntity cargoId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "categoria_id", referencedColumnName = "id")
-  private ParamCategoriaEntity categoriaId;
+    @JoinColumn(name = "escalao_id", referencedColumnName = "id")
+    private ParamEscalaoEntity escalaoId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "carr_pccs_id", referencedColumnName = "id")
-  private ParamCarreiraEntity carrPccsId;
+    @JoinColumn(name = "categoria_id", referencedColumnName = "id")
+    private ParamCategoriaEntity categoriaId;
+
+
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "fun_id")
-  private FuncionarioEntity funId;
+    @JoinColumn(name = "carr_pccs_id", referencedColumnName = "id")
+    private ParamCarreiraEntity carrPccsId;   @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "fun_id")
+   private FuncionarioEntity funId;
 
 
 }

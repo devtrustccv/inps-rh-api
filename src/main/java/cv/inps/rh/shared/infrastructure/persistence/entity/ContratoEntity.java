@@ -82,9 +82,7 @@ public class ContratoEntity extends AuditEntity {
 
 
   @OneToMany(mappedBy = "contratoId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-private List<ContratoEntity> contratosFilhos = new ArrayList<>();
-
-   @ManyToOne(fetch = FetchType.LAZY)
+private List<ContratoEntity> contratosFilhos = new ArrayList<>();   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "contrato_id")
    private ContratoEntity contratoId;
 
