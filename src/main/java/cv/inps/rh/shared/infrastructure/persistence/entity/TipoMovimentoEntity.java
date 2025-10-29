@@ -3,7 +3,6 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,7 +17,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "RH_TIPO_MOVIMENTOS")
-public class TipoMovimentoEntity extends AuditEntity {
+public class TipoMovimentoEntity  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

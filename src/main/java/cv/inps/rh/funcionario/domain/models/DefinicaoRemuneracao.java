@@ -6,6 +6,7 @@ import cv.inps.rh.shared.domain.models.TipoMovimento;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
@@ -19,6 +20,8 @@ public class DefinicaoRemuneracao {
   private Estado estado;
   private String obs;
   private TipoMovimento tipoMovimento;
+  private LocalDate dataInicio;
+  private LocalDate dataFim;
 
   // Construtor privado
   private DefinicaoRemuneracao(Long id,
@@ -28,7 +31,9 @@ public class DefinicaoRemuneracao {
                                BigDecimal valor,
                                Estado estado,
                                String obs,
-                               TipoMovimento tipoMovimento) {
+                               TipoMovimento tipoMovimento,
+                               LocalDate dataInicio,
+                               LocalDate dataFim) {
     this.id = id;
     this.uuid = uuid;
     this.contrato = contrato;
@@ -37,6 +42,8 @@ public class DefinicaoRemuneracao {
     this.estado = estado;
     this.obs = obs;
     this.tipoMovimento = tipoMovimento;
+    this.dataInicio = dataInicio;
+    this.dataFim = dataFim;
   }
 
   // Factory: criar nova definição
@@ -53,8 +60,9 @@ public class DefinicaoRemuneracao {
         valor,
         Estado.P,
         obs,
-        tipoMovimento
-    );
+        tipoMovimento,
+        LocalDate.now(),
+        LocalDate.now());
   }
 
   public void associate(Contrato contrato) {
@@ -69,7 +77,7 @@ public class DefinicaoRemuneracao {
                                              BigDecimal valor,
                                              Estado estado,
                                              String obs,
-                                             TipoMovimento tipoMovimento) {
+                                             TipoMovimento tipoMovimento,LocalDate dataInicio, LocalDate dataFim) {
     return new DefinicaoRemuneracao(
         id,
         IdentificadorUnico.from(uuid),
@@ -78,7 +86,9 @@ public class DefinicaoRemuneracao {
         valor,
         estado,
         obs,
-        tipoMovimento
+        tipoMovimento,
+        dataInicio,
+        dataFim
     );
   }
 

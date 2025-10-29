@@ -28,7 +28,9 @@ public class DefinicaoRemuneracaoMapper {
         entity.getValor(),
         entity.getEstado(),
         entity.getObs(),
-        tipoMovimentoMapper.toDomain(entity.getTmId())
+        tipoMovimentoMapper.toDomain(entity.getTmId()),
+        entity.getDataInicio(),
+        entity.getDataFim()
     );
   }
 
@@ -43,6 +45,8 @@ public class DefinicaoRemuneracaoMapper {
     entity.setValor(domain.getValor());
     entity.setEstado(domain.getEstado());
     entity.setObs(domain.getObs());
+    entity.setDataInicio(domain.getDataInicio());
+    entity.setDataFim(domain.getDataFim());
 
     if (domain.getTipoMovimento() != null) {
       entity.setTmId(entityManager.getReference(
