@@ -3,7 +3,6 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,7 +16,7 @@ import jakarta.validation.constraints.NotBlank;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "ENTIDADE")
-public class EntidadeEntity extends AuditEntity {
+public class EntidadeEntity  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
