@@ -32,5 +32,8 @@ public class EncargosDescontosReqDTO  {
   
   
   private LocalDate dataFim ;
+  
+  
+  private String observacoes ;
 
 }
