@@ -2,6 +2,8 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.funcionario.domain.models.DefPagamento;
+import cv.inps.rh.funcionario.domain.models.DefinicaoRemuneracao;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
@@ -11,10 +13,12 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
 import cv.inps.rh.shared.domain.models.Instituicao;
+import cv.inps.rh.shared.domain.models.TipoMovimento;
 import cv.inps.rh.shared.domain.repository.GeografiaRepository;
 import cv.inps.rh.parametrizacao.domain.repository.TipoDocumentoRepository;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.shared.infrastructure.mappers.InstituicaoMapper;
+import cv.inps.rh.shared.infrastructure.mappers.TipoMovimentoMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -22,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -57,8 +62,10 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
   private final ParamVinculoMapper paramVinculoMapper;
   private final ParamLocalTrabMapper paramLocalTrabMapper;
 
+  private final TipoMovimentoMapper tipoMovimentoMapper;
 
-   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper, GeografiaMapper geografiaMapper, TipoDocumentoMapper tipoDocumentoMapper, ParamCargoMapper paramCargoMapper, ParamContratoMapper paramContratoMapper, InstituicaoMapper instituicaoMapper, SecaoMapper secaoMapper, ParamCarreiraMapper paramCarreiraMapper, ParamCategoriaMapper paramCategoriaMapper, ParamEscalaoMapper paramEscalaoMapper, ParamVinculoMapper paramVinculoMapper, ParamLocalTrabMapper paramLocalTrabMapper) {
+
+   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper, GeografiaMapper geografiaMapper, TipoDocumentoMapper tipoDocumentoMapper, ParamCargoMapper paramCargoMapper, ParamContratoMapper paramContratoMapper, InstituicaoMapper instituicaoMapper, SecaoMapper secaoMapper, ParamCarreiraMapper paramCarreiraMapper, ParamCategoriaMapper paramCategoriaMapper, ParamEscalaoMapper paramEscalaoMapper, ParamVinculoMapper paramVinculoMapper, ParamLocalTrabMapper paramLocalTrabMapper, TipoMovimentoMapper tipoMovimentoMapper) {
 
      this.funcionarioMapper = funcionarioMapper;
      this.funcionarioRepository = funcionarioRepository;
@@ -83,6 +90,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
      this.paramEscalaoMapper = paramEscalaoMapper;
      this.paramVinculoMapper = paramVinculoMapper;
      this.paramLocalTrabMapper = paramLocalTrabMapper;
+     this.tipoMovimentoMapper = tipoMovimentoMapper;
    }
 
    @IgrpCommandHandler
@@ -145,8 +153,8 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
      funcionario.syncDocumentos(documentos);
      funcionario.syncDadosBancarios(dadosBancarios);
 
-     var dadosContratuais = dto.getDadosContratuais();
 
+     var dadosContratuais = dto.getDadosContratuais();
      var tipoContrato = paramContratoMapper.toDomain(dadosContratuais.getTipoContrato());
      var cargoPosicao = paramCargoMapper.toDomain(dadosContratuais.getCargoPosicao());
      var direcao = instituicaoMapper.toDomain(dadosContratuais.getDirecao());
@@ -159,6 +167,33 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
      var ilha = geografiaMapper.toDomain(dadosContratuais.getIlha());
      var localTrabalho = paramLocalTrabMapper.toDomain(dadosContratuais.getLocalTrabalho());
 
+
+     List<DefPagamento> defPagamentos = dto.getEncargosDescontos().stream()
+         .map(e -> {
+           TipoMovimento tipoMov = tipoMovimentoMapper.toDomain(e.getTipoEncargoId());
+           return DefPagamento.create(
+               null,           // id inicial, será persistido depois
+               e.getValor(),
+               tipoMov,
+               e.getDataInicio(),
+               e.getDataFim(),
+               e.getObservacoes()
+           );
+         })
+         .toList();
+
+     List<DefinicaoRemuneracao> defRemuneracoes = dto.getSubsidios().stream()
+         .map(s -> {
+           TipoMovimento tipoMov = tipoMovimentoMapper.toDomain(s.getTipoSubsidioId());
+           return DefinicaoRemuneracao.create(
+               null,
+               s.getPercentagem(),
+               s.getValor(),
+               s.getObservacoes(),
+               tipoMov
+           );
+         })
+         .toList();
 
      funcionario.adicionarDadosContratuais(tipoContrato,
          cargoPosicao,
@@ -177,7 +212,12 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
          dadosContratuais.getDuracaoMeses(),
          localTrabalho,
           pais,
-          ilha);
+          ilha,
+         defPagamentos,
+         defRemuneracoes);
+
+
+
 
      Funcionario saved = funcionarioRepository.save(funcionario);
 

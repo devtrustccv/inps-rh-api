@@ -21,6 +21,9 @@ public class SubsidioReqDTO  {
 
   
   
+  private String id ;
+  
+  
   private Long tipoSubsidioId ;
   
   
@@ -28,5 +31,8 @@ public class SubsidioReqDTO  {
   
   
   private BigDecimal valor ;
+  
+  
+  private String observacoes ;
 
 }

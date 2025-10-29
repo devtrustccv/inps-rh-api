@@ -21,6 +21,9 @@ public class SubsidioRespDTO  {
 
   
   
+  private Long id ;
+  
+  
   private Long tipoSubsidioId ;
   
   

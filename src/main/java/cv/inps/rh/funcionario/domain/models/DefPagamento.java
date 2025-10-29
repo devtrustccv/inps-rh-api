@@ -70,18 +70,17 @@ public class DefPagamento {
     );
   }
 
-  public static DefPagamento create(Contrato contrato,
-                                    TiposRelacionamento tiprel,
+  public static DefPagamento create( Long id,
                                     BigDecimal valor,
                                     TipoMovimento tipoMovimento,
                                     LocalDate dataInicio,
                                     LocalDate dataFim,
                                     String obs) {
     return new DefPagamento(
-        null,
+        id!=null && id>0 ? id : null ,
         IdentificadorUnico.create(),
-        contrato,
-        tiprel,
+        null,
+        null,
         valor,
         tipoMovimento,
         dataInicio,
@@ -89,6 +88,11 @@ public class DefPagamento {
         Estado.P,
         obs
     );
+  }
+
+  public void associate(Contrato contrato, TiposRelacionamento tiposRelacionamento) {
+    this.contrato = contrato;
+    this.tiprel = tiposRelacionamento;
   }
 
   public void update(BigDecimal valor,

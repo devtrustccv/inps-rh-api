@@ -22,6 +22,9 @@ public class EncargosDescontosReqDTO  {
 
   
   
+  private Long id ;
+  
+  
   private Long tipoEncargoId ;
   
   

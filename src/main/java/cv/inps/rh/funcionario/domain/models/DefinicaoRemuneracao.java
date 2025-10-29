@@ -40,21 +40,25 @@ public class DefinicaoRemuneracao {
   }
 
   // Factory: criar nova definição
-  public static DefinicaoRemuneracao create(Contrato contrato,
+  public static DefinicaoRemuneracao create(Long id,
                                             BigDecimal percentagem,
                                             BigDecimal valor,
                                             String obs,
                                             TipoMovimento tipoMovimento) {
     return new DefinicaoRemuneracao(
-        null,
+        id!=null && id>0 ? id : null ,
         IdentificadorUnico.create(),
-        contrato,
+        null,
         percentagem,
         valor,
         Estado.P,
         obs,
         tipoMovimento
     );
+  }
+
+  public void associate(Contrato contrato) {
+    this.contrato = contrato;
   }
 
   // Rebuild: reconstruir do repositório

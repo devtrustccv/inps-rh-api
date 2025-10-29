@@ -701,7 +701,9 @@ public class Funcionario {
                                         Integer duracaoMeses,
                                         ParamLocalTrab paramLocalTrab,
                                         Geografia pais,
-                                        Geografia ilha) {
+                                        Geografia ilha,
+                                        List<DefPagamento> pagamentos,
+                                        List<DefinicaoRemuneracao> remuneracoes) {
 
 
     var contrato = Contrato.create(dataInicio, dataFim,
@@ -720,7 +722,11 @@ public class Funcionario {
         regime, paramTipoContrato, null, null, "motivo", null,
         null);
 
+    pagamentos.forEach(p -> p.associate(contrato, tiposRelacionamento));
+    remuneracoes.forEach(r -> r.associate(contrato));
 
+    this.defPagamentos.addAll(pagamentos);
+    this.definicaoRemuneracoes.addAll(remuneracoes);
 
     tiposRelacionamentos.add(tiposRelacionamento);
     contratos.add(contrato);
