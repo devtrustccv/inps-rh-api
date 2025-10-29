@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotBlank;
 import cv.inps.rh.shared.application.constants.Estado;
+
 import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,52 +24,51 @@ import java.util.List;
 @Table(name = "RH_T_MOBILIDADE")
 public class MobilidadeEntity extends AuditEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", unique = true, nullable = false)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_mobilidade")
+  @SequenceGenerator(name = "seq_mobilidade", sequenceName = "SEQ_MOBILIDADE", allocationSize = 1)
+  private Long id;
 
-  
-    @NotBlank(message = "tipoSituacao is mandatory")
-    @Column(name="tipo_situacao", nullable = false)
-    private String tipoSituacao;
 
-  
-    @Enumerated(EnumType.STRING)
-    @Column(name="estado")
-    private Estado estado;
+  @NotBlank(message = "tipoSituacao is mandatory")
+  @Column(name = "tipo_situacao", nullable = false)
+  private String tipoSituacao;
 
-  
-    @Column(name="obs")
-    private String obs;
 
-  
-    @Column(name="uuid")
-    private UUID uuid;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "estado")
+  private Estado estado;
 
-  
+
+  @Column(name = "obs")
+  private String obs;
+
+
+  @Column(name = "uuid")
+  private UUID uuid;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contrato_id", referencedColumnName = "id")
-    private ContratoEntity contratoId;
+  @JoinColumn(name = "contrato_id", referencedColumnName = "id")
+  private ContratoEntity contratoId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "local_trab_id", referencedColumnName = "id")
-    private ParamLocalTrabEntity localTrabId;
+  @JoinColumn(name = "local_trab_id", referencedColumnName = "id")
+  private ParamLocalTrabEntity localTrabId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "secao_id", referencedColumnName = "id")
-    private SecaoEntity secaoId;
+  @JoinColumn(name = "secao_id", referencedColumnName = "id")
+  private SecaoEntity secaoId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "instid_id", referencedColumnName = "id")
-    private InstituicaoEntity instidId;   @ManyToOne(fetch = FetchType.LAZY)
-   @JoinColumn(name = "fun_id")
-   private FuncionarioEntity funId;
+  @JoinColumn(name = "instid_id", referencedColumnName = "id")
+  private InstituicaoEntity instidId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "fun_id")
+  private FuncionarioEntity funId;
 
 
 }

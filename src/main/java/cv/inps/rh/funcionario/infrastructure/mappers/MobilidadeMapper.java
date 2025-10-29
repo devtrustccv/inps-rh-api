@@ -45,7 +45,6 @@ public class MobilidadeMapper {
     MobilidadeEntity entity = new MobilidadeEntity();
     entity.setId(domain.getId());
     entity.setUuid(domain.getUuid().getValor());
-    entity.setContratoId(contratoMapper.toEntity(domain.getContrato()));
     entity.setLocalTrabId(entityManager.getReference(
         ParamLocalTrabEntity.class,
         domain.getLocalTrab().getId()

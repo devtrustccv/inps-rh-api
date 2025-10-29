@@ -17,21 +17,21 @@ import jakarta.validation.constraints.NotBlank;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "INSTITUICOES")
-public class InstituicaoEntity extends AuditEntity {
+public class InstituicaoEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotBlank(message = "nome is mandatory")
     @Column(name="nome", nullable = false)
     private String nome;
 
-  
+
     @Column(name="codigo")
     private String codigo;
 
-  
+
 }

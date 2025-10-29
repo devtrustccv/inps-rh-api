@@ -13,7 +13,6 @@ import java.util.UUID;
 
 @Getter
 public class Contrato {
-
   private final Long id;
   private final IdentificadorUnico uuid;
 
@@ -29,9 +28,12 @@ public class Contrato {
   private ParamVinculo vinculo;
   private ParamContrato tpContratoParam;
 
+  // 🔹 Mestre (null na primeira versão)
+  private Contrato contratoMestre;
+
+  // 🔹 Filhos (versões seguintes)
   private List<Contrato> contratosFilhos;
 
-  // Construtor privado
   private Contrato(Long id,
                    IdentificadorUnico uuid,
                    Estado estado,
@@ -44,7 +46,9 @@ public class Contrato {
                    String obs,
                    ParamVinculo vinculo,
                    ParamContrato tpContratoParam,
+                   Contrato contratoMestre,
                    List<Contrato> contratosFilhos) {
+
     this.id = id;
     this.uuid = uuid;
     this.estado = estado;
@@ -57,39 +61,37 @@ public class Contrato {
     this.obs = obs;
     this.vinculo = vinculo;
     this.tpContratoParam = tpContratoParam;
+    this.contratoMestre = contratoMestre;
     this.contratosFilhos = contratosFilhos != null ? contratosFilhos : new ArrayList<>();
   }
 
-  // Factory para criar novo contrato
-  public static Contrato create(Estado estado,
-                                LocalDate dataInicio,
+  // 🔹 Criar primeira versão (mestre)
+  public static Contrato create(LocalDate dataInicio,
                                 LocalDate dataFim,
                                 Integer duracao,
-                                Integer versao,
                                 String tpContrato,
                                 String situacaoLaboral,
-                                String obs,
-                                Funcionario funcionario,
                                 ParamVinculo vinculo,
                                 ParamContrato tpContratoParam) {
     return new Contrato(
         null,
         IdentificadorUnico.create(),
-        estado,
+        Estado.P,
         dataInicio,
         dataFim,
         duracao,
-        versao,
+        1,
         tpContrato,
         situacaoLaboral,
-        obs,
+        "NOVO_CONTRATO",
         vinculo,
         tpContratoParam,
-        new ArrayList<>()
+        null,               // sem contrato mestre
+        new ArrayList<>()   // ainda não tem filhos
     );
   }
 
-  // Reconstrução a partir do repositório
+  // Reconstrução a partir da entidade persistida ou query do banco
   public static Contrato rebuild(Long id,
                                  UUID uuid,
                                  Estado estado,
@@ -102,6 +104,7 @@ public class Contrato {
                                  String obs,
                                  ParamVinculo vinculo,
                                  ParamContrato tpContratoParam,
+                                 Contrato contratoMestre,
                                  List<Contrato> contratosFilhos) {
     return new Contrato(
         id,
@@ -116,8 +119,45 @@ public class Contrato {
         obs,
         vinculo,
         tpContratoParam,
+        contratoMestre,
         contratosFilhos
     );
+  }
+
+
+  // 🔹 Criar versão filha
+  public static Contrato createFilha(LocalDate dataInicio,
+                                     LocalDate dataFim,
+                                     Integer duracao,
+                                     Integer versao,
+                                     String tpContrato,
+                                     String situacaoLaboral,
+                                     ParamVinculo vinculo,
+                                     ParamContrato tpContratoParam,
+                                     Contrato contratoMestre) {
+    var filha = new Contrato(
+        null,
+        IdentificadorUnico.create(),
+        Estado.P,
+        dataInicio,
+        dataFim,
+        duracao,
+        versao,
+        tpContrato,
+        situacaoLaboral,
+        "VERSAO_FILHA",
+        vinculo,
+        tpContratoParam,
+        contratoMestre,
+        new ArrayList<>()
+    );
+
+    // adiciona a filha na lista do mestre
+    if (contratoMestre != null) {
+      contratoMestre.getContratosFilhos().add(filha);
+    }
+
+    return filha;
   }
 
   // Atualização parcial
@@ -128,7 +168,6 @@ public class Contrato {
                      String tpContrato,
                      String situacaoLaboral,
                      String obs,
-                     Funcionario funcionario,
                      ParamVinculo vinculo,
                      ParamContrato tpContratoParam) {
     if (dataInicio != null) this.dataInicio = dataInicio;
@@ -142,13 +181,9 @@ public class Contrato {
     if (tpContratoParam != null) this.tpContratoParam = tpContratoParam;
   }
 
-  // Adicionar contrato filho
-  public void addContratoFilho(Contrato contratoFilho) {
-    if (contratoFilho != null) this.contratosFilhos.add(contratoFilho);
-  }
-
   // Soft delete
   public void eliminar() {
     this.estado = Estado.E;
   }
+
 }

@@ -267,75 +267,94 @@ public class FuncionarioMapper {
     }
 
 
-    // contratos
-   /* if(funcionario.getContratos()!=null) {
-      var contratosEntities = funcionario.getContratos().stream()
-          .map(contratoMapper::toEntity)
-          .collect(Collectors.toList());
-      contratosEntities.forEach(c -> c.setFunId(entity));
-      entity.setContratos(contratosEntities);
-    }*/
 
-    /*Map<UUID, ContratoEntity> contratosMap = new HashMap<>();
+    // contratos
+    Map<UUID, ContratoEntity> contratosMap = new HashMap<>();
+//  Persistir contratos do funcionário
     if (funcionario.getContratos() != null) {
       List<ContratoEntity> contratosEntities = funcionario.getContratos().stream()
           .map(c -> {
-            var ce = contratoMapper.toEntity(c);
+            // Converter domínio → entity apenas 1 vez
+            ContratoEntity ce = contratoMapper.toEntity(c);
+
+            // Setar referência ao funcionário
             ce.setFunId(entity);
+
+            // Guardar no map pelo UUID
             contratosMap.put(c.getUuid().getValor(), ce);
+
             return ce;
           })
           .toList();
       entity.setContratos(contratosEntities);
-    }*/
+    }
 
     // carreiras
-   /* if(funcionario.getCarreiras()!=null) {
+    Map<UUID, CarreiraEntity> carreirasMap = new HashMap<>();
+    if(funcionario.getCarreiras()!=null) {
       var carreirasEntities = funcionario.getCarreiras().stream()
-          .map(carreiraMapper::toEntity)
-          .collect(Collectors.toList());
-      carreirasEntities.forEach(c -> c.setFunId(entity));
+          .map( c -> {
+            CarreiraEntity ce = carreiraMapper.toEntity(c);
+            ce.setFunId(entity);
+            ce.setContratoId(contratosMap.get(c.getContrato().getUuid().getValor()));
+
+            carreirasMap.put(c.getUuid().getValor(), ce);
+            return ce;
+          }).toList();
       entity.setCarreiras(carreirasEntities);
-    }*/
+    }
 
     //mobilidades
-    /*if(funcionario.getMobilidades()!=null) {
+    Map<UUID, MobilidadeEntity> modilidadesMap = new HashMap<>();
+    if (funcionario.getMobilidades() != null) {
       var mobilidadesEntities = funcionario.getMobilidades().stream()
-          .map(mobilidadeMapper::toEntity)
-          .collect(Collectors.toList());
-      mobilidadesEntities.forEach(m -> m.setFunId(entity));
+          .map(m -> {
+            MobilidadeEntity ce = mobilidadeMapper.toEntity(m);
+            ce.setFunId(entity);
+            ce.setContratoId(contratosMap.get(m.getContrato().getUuid().getValor()));
+            modilidadesMap.put(m.getUuid().getValor(), ce);
+            return ce;
+          }).toList();
       entity.setMobilidades(mobilidadesEntities);
-    }*/
+    }
+
 
     //regimes trabalhos
-    /*if(funcionario.getRegimeTrabalhos()!=null) {
+    Map<UUID, RegimeTrabalhoEntity> regimesMap = new HashMap<>();
+    if (funcionario.getRegimeTrabalhos() != null) {
       var regimeTrabalhosEntities = funcionario.getRegimeTrabalhos().stream()
-          .map(regimeTrabalhoMapper::toEntity)
-          .collect(Collectors.toList());
-      regimeTrabalhosEntities.forEach(r -> r.setFunId(entity));
+          .map(rt -> {
+            RegimeTrabalhoEntity entityRt = regimeTrabalhoMapper.toEntity(rt);
+            entityRt.setFunId(entity);
+            entityRt.setContratoId(contratosMap.get(rt.getContrato().getUuid().getValor()));
+            regimesMap.put(rt.getUuid().getValor(), entityRt);
+            return entityRt;
+          })
+          .toList();
+
       entity.setRegimesTrabalhos(regimeTrabalhosEntities);
-    }*/
+    }
+
 
     //tipos relacionamentos
-   /* if (funcionario.getTiposRelacionamentos() != null) {
-      var tiposRelacionamentosEntities = funcionario.getTiposRelacionamentos().stream()
-          .map(tiposRelacionamentoMapper::toEntity)
-          .collect(Collectors.toList());
-      tiposRelacionamentosEntities.forEach(t -> t.setFunId(entity));
-      entity.setTiposrelacionamentos(tiposRelacionamentosEntities);
-    }*/
-
-   /* if (funcionario.getTiposRelacionamentos() != null) {
+    if (funcionario.getTiposRelacionamentos() != null) {
       List<TiposRelacionamentoEntity> tiposEntities = funcionario.getTiposRelacionamentos().stream()
           .map(t -> {
             TiposRelacionamentoEntity tre = tiposRelacionamentoMapper.toEntity(t);
             tre.setFunId(entity);
+
+            // Pegar contrato do map (mesma instância que será persistida)
             tre.setContratoId(contratosMap.get(t.getContrato().getUuid().getValor()));
+            tre.setCarreiraId(carreirasMap.get(t.getCarreira().getUuid().getValor()));
+            tre.setMobId(modilidadesMap.get(t.getMobilidade().getUuid().getValor()));
+            tre.setRegimeId(regimesMap.get(t.getRegimeTrabalho().getUuid().getValor()));
             return tre;
           })
           .toList();
+
       entity.setTiposrelacionamentos(tiposEntities);
-    }*/
+    }
+
 
     return entity;
   }

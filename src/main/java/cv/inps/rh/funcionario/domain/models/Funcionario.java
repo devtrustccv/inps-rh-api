@@ -1,11 +1,13 @@
 package cv.inps.rh.funcionario.domain.models;
 
+import cv.inps.rh.parametrizacao.domain.models.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
+import cv.inps.rh.shared.domain.models.Instituicao;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,7 +35,7 @@ public class Funcionario {
   private final Estado estado;
   private final Estado estadoValidacao;
 
-  private List<Contacto>  contactos;
+  private List<Contacto> contactos;
   private List<Endereco> enderecos;
   private List<Familiar> familiares;
   private List<HabilitacaoLiteraria> habilitacaoLiterarias;
@@ -103,19 +105,19 @@ public class Funcionario {
     this.colaboradorId = colaboradorId;
     this.estado = estado;
     this.estadoValidacao = estadoValidacao;
-    this.contactos = contactos!=null? contactos : new ArrayList<>();
+    this.contactos = contactos != null ? contactos : new ArrayList<>();
     this.enderecos = enderecos != null ? enderecos : new ArrayList<>();
     this.familiares = familiares != null ? familiares : new ArrayList<>();
     this.habilitacaoLiterarias = habilitacaoLiterarias != null ? habilitacaoLiterarias : new ArrayList<>();
     this.formacoes = formacoes != null ? formacoes : new ArrayList<>();
     this.experiencias = experiencias != null ? experiencias : new ArrayList<>();
     this.documentos = documentos != null ? documentos : new ArrayList<>();
-    this.dadosBancarios = dadosBancarios!=null ? dadosBancarios : new ArrayList<>();
-    this.tiposRelacionamentos = tiposRelacionamentos!=null ? tiposRelacionamentos : new ArrayList<>();
-    this.contratos = contratos!=null ? contratos : new ArrayList<>();
-    this.carreiras = carreiras!=null ? carreiras : new ArrayList<>();
-    this.mobilidades = mobilidades!=null ? mobilidades : new ArrayList<>();
-    this.regimeTrabalhos = regimeTrabalhos!=null ? regimeTrabalhos : new ArrayList<>();
+    this.dadosBancarios = dadosBancarios != null ? dadosBancarios : new ArrayList<>();
+    this.tiposRelacionamentos = tiposRelacionamentos != null ? tiposRelacionamentos : new ArrayList<>();
+    this.contratos = contratos != null ? contratos : new ArrayList<>();
+    this.carreiras = carreiras != null ? carreiras : new ArrayList<>();
+    this.mobilidades = mobilidades != null ? mobilidades : new ArrayList<>();
+    this.regimeTrabalhos = regimeTrabalhos != null ? regimeTrabalhos : new ArrayList<>();
 
   }
 
@@ -137,7 +139,6 @@ public class Funcionario {
       Long entidadeId,
       Long colaboradorId
   ) {
-
 
 
     return new Funcionario(
@@ -308,39 +309,39 @@ public class Funcionario {
 
 
   public void addTipoRelacionamento(TiposRelacionamento tipoRelacionamento) {
-    if(tiposRelacionamentos == null) tiposRelacionamentos = new ArrayList<>();
+    if (tiposRelacionamentos == null) tiposRelacionamentos = new ArrayList<>();
     tiposRelacionamentos.add(tipoRelacionamento);
   }
 
   public void addDadosBancarios(DadosBancarios dadosBancarios) {
-    if(dadosBancarios == null) this.dadosBancarios = new ArrayList<>();
+    if (dadosBancarios == null) this.dadosBancarios = new ArrayList<>();
     this.dadosBancarios.add(dadosBancarios);
   }
 
- /****** contactos *********************/
+  /****** contactos *********************/
   public void syncContacts(List<Contacto> newContacts) {
-    if(newContacts == null) return;
+    if (newContacts == null) return;
 
     // Adicionar ou atualizar
-    for(Contacto newContact : newContacts) {
+    for (Contacto newContact : newContacts) {
       addOrUpdateContact(newContact);
     }
 
     // Soft delete dos contactos que não estão mais na nova lista
-    for(Contacto existing : contactos) {
+    for (Contacto existing : contactos) {
       boolean stillExists = newContacts.stream()
           .anyMatch(c -> Objects.equals(c.getId(), existing.getId()));
-      if(!stillExists) {
+      if (!stillExists) {
         existing.eliminar();
       }
     }
   }
 
   private void addOrUpdateContact(Contacto contacto) {
-    if(contacto == null) return;
+    if (contacto == null) return;
 
     Optional<Contacto> existingOpt = findContactById(contacto.getId());
-    if(existingOpt.isPresent()) {
+    if (existingOpt.isPresent()) {
       Contacto existing = existingOpt.get();
       existing.update(contacto.getTipoContacto(), contacto.getContacto());
     } else {
@@ -349,7 +350,7 @@ public class Funcionario {
   }
 
   private Optional<Contacto> findContactById(Long id) {
-    if(id == null) return Optional.empty();
+    if (id == null) return Optional.empty();
     return this.contactos.stream()
         .filter(c -> Objects.equals(c.getId(), id))
         .findFirst();
@@ -437,7 +438,7 @@ public class Funcionario {
           familiar.getTipoDocumento()
       );
     } else {
-      if(familiares == null) familiares = new ArrayList<>();
+      if (familiares == null) familiares = new ArrayList<>();
       this.familiares.add(familiar);
     }
   }
@@ -669,5 +670,47 @@ public class Funcionario {
   }
 
 
+  public void adicionarDadosContratuais(ParamContrato paramTipoContrato,
+                                        ParamCargo paramCargo, Instituicao direcao,
+                                        Secao seccao, String centroCusto,
+                                        ParamCarreira paramCarreira,
+                                        ParamCategoria paramCategoria,
+                                        ParamEscalao paramEscalao,
+                                        ParamVinculo paramVinculo,
+                                        String regimeTrabalho,
+                                        BigDecimal salario,
+                                        String moeda,
+                                        LocalDate dataInicio,
+                                        LocalDate dataFim,
+                                        Integer duracaoMeses,
+                                        ParamLocalTrab paramLocalTrab,
+                                        Geografia pais,
+                                        Geografia ilha) {
 
+
+    var contrato = Contrato.create(dataInicio, dataFim,
+        duracaoMeses, null, "situacao laboral",
+        paramVinculo, paramTipoContrato);
+
+    var carreira = Carreira.create(salario, null, "tipo situacao", "obs",contrato, paramCargo,paramEscalao, paramCategoria,paramCarreira);
+
+    var mobilidade = Mobilidade.create(contrato, paramLocalTrab ,"tipo siutacao",seccao, direcao,"obs");
+
+    var regime = RegimeTrabalho.create("tipo regime","tipo situacao regime",dataFim, "obs", contrato);
+
+    var tiposRelacionamento = TiposRelacionamento.create(paramCargo, direcao, paramVinculo, seccao, paramCategoria,
+        paramEscalao, paramCarreira, salario, moeda, regimeTrabalho, null, null,
+        dataInicio, dataFim, contrato, carreira, mobilidade, paramLocalTrab,
+        regime, paramTipoContrato, null, null, "motivo", null,
+        null);
+
+
+
+    tiposRelacionamentos.add(tiposRelacionamento);
+    contratos.add(contrato);
+    carreiras.add(carreira);
+    mobilidades.add(mobilidade);
+    regimeTrabalhos.add(regime);
+
+  }
 }

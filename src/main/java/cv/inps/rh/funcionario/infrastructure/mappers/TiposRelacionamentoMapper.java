@@ -76,18 +76,37 @@ public class TiposRelacionamentoMapper {
     TiposRelacionamentoEntity entity = new TiposRelacionamentoEntity();
     entity.setId(domain.getId());
     entity.setUuid(domain.getUuid().getValor());
-    entity.setCargoId(entityManager.getReference(ParamCargoEntity.class, domain.getCargo().getId()));
-    entity.setInstitId(entityManager.getReference(InstituicaoEntity.class, domain.getInstituicao().getId()));
-    entity.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, domain.getVinculo().getId()));
-    entity.setSeccaoId(entityManager.getReference(SecaoEntity.class, domain.getSeccao().getId()));
-    entity.setCategoriaId(entityManager.getReference(ParamCategoriaEntity.class, domain.getCategoria().getId()));
-    entity.setEscalaoId(entityManager.getReference(ParamEscalaoEntity.class, domain.getEscalao().getId()));
-    entity.setCarrPccId(entityManager.getReference(ParamCarreiraEntity.class, domain.getCarrPcc().getId()));
+
+    entity.setCargoId(getReferenceIfNotNull(ParamCargoEntity.class,
+        domain.getCargo() != null ? domain.getCargo().getId() : null));
+    entity.setInstitId(getReferenceIfNotNull(InstituicaoEntity.class,
+        domain.getInstituicao() != null ? domain.getInstituicao().getId() : null));
+    entity.setVinculoId(getReferenceIfNotNull(ParamVinculoEntity.class,
+        domain.getVinculo() != null ? domain.getVinculo().getId() : null));
+    entity.setSeccaoId(getReferenceIfNotNull(SecaoEntity.class,
+        domain.getSeccao() != null ? domain.getSeccao().getId() : null));
+    entity.setCategoriaId(getReferenceIfNotNull(ParamCategoriaEntity.class,
+        domain.getCategoria() != null ? domain.getCategoria().getId() : null));
+    entity.setEscalaoId(getReferenceIfNotNull(ParamEscalaoEntity.class,
+        domain.getEscalao() != null ? domain.getEscalao().getId() : null));
+    entity.setCarrPccId(getReferenceIfNotNull(ParamCarreiraEntity.class,
+        domain.getCarrPcc() != null ? domain.getCarrPcc().getId() : null));
+    entity.setLocTrabId(getReferenceIfNotNull(ParamLocalTrabEntity.class,
+        domain.getLocTrab() != null ? domain.getLocTrab().getId() : null));
+    entity.setSituacLaboralId(getReferenceIfNotNull(ParamSitLaboralEntity.class,
+        domain.getSituacLaboral() != null ? domain.getSituacLaboral().getId() : null));
+
+    var tipoContrato = getReferenceIfNotNull(ParamContratoEntity.class,
+        domain.getTipoContrato() != null ? domain.getTipoContrato().getId() : null);
+    entity.setTipoContratoId(tipoContrato);
+
+    entity.setTpContrato(tipoContrato != null ? tipoContrato.getNome() : null);
+
     entity.setSalario(domain.getSalario());
     entity.setMoeda(domain.getMoeda());
     entity.setRegime(domain.getRegime());
     entity.setTipoSituacao(domain.getTipoSituacao());
-    entity.setTiprelId(toEntity(domain.getTiprelAnterior()));
+    //entity.setTiprelId(toEntity(domain.getTiprelAnterior()));
     entity.setFlgProcessa(domain.getFlgProcessa());
     entity.setEstado(domain.getEstado());
     entity.setObs(domain.getObs());
@@ -95,24 +114,19 @@ public class TiposRelacionamentoMapper {
     entity.setDataFim(domain.getDataFim());
     entity.setDataInicioContrato(domain.getDataInicioContrato());
     entity.setDataFimContrato(domain.getDataFimContrato());
-    //entity.setContratoId(contratoMapper.toEntity(domain.getContrato()));
-    //entity.setCarreiraId(carreiraMapper.toEntity(domain.getCarreira()));
-    //entity.setMobId(mobilidadeMapper.toEntity(domain.getMobilidade()));
-    entity.setLocTrabId(entityManager.getReference(ParamLocalTrabEntity.class, domain.getLocTrab().getId()));
-
-
-   /* var regimeTrabalho =regimeTrabalhoMapper.toEntity(domain.getRegimeTrabalho());
-    regimeTrabalho.setTiprelId(entity);
-    entity.setRegimeId(regimeTrabalho);*/
-
-    entity.setTipoContratoId(entityManager.getReference(ParamContratoEntity.class, domain.getTipoContrato().getId()));
     entity.setReferente(domain.getReferente());
     entity.setUltProc(domain.getUltProc());
     entity.setMotivoSitLab(domain.getMotivoSitLab());
-    entity.setSituacLaboralId(entityManager.getReference(ParamSitLaboralEntity.class, domain.getSituacLaboral().getId()));
-    entity.setTpContrato(domain.getTpContrato());
 
     return entity;
   }
+
+
+
+  private <T> T getReferenceIfNotNull(Class<T> clazz, Object id) {
+    if (id == null) return null;
+    return entityManager.getReference(clazz, id);
+  }
+
 
 }

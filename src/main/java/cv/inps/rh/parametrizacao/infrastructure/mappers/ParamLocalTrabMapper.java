@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ParamLocalTrabMapper {
 
-  private GeografiaMapper geografiaMapper;
+  private final GeografiaMapper geografiaMapper;
   private final EntityManager entityManager;
 
 

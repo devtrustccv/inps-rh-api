@@ -54,7 +54,6 @@ public class CarreiraMapper {
     entity.setTipoSituacao(domain.getTipoSituacao());
     entity.setEstado(domain.getEstado());
     entity.setObs(domain.getObs());
-    entity.setContratoId(contratoMapper.toEntity(domain.getContrato()));
 
     // By reference ou via mapper
     entity.setCargoId(domain.getCargo() != null
