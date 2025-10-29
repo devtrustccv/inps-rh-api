@@ -23,8 +23,7 @@ public class RegimeTrabalhoMapper {
         entity.getDataFim(),
         entity.getObs(),
         entity.getEstado(),
-        contratoMapper.toDomain(entity.getContratoId()),
-        null
+        contratoMapper.toDomain(entity.getContratoId())
     );
   }
 

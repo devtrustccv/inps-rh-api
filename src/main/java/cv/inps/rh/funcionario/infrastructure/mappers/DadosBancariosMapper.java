@@ -43,7 +43,6 @@ public class DadosBancariosMapper {
     );
   }
 
-  // Domain -> Entity (apenas referência do EntityManager)
   public DadosBancariosEntity toEntity(DadosBancarios domain) {
     if (domain == null) return null;
 

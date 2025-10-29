@@ -108,15 +108,15 @@ public class FuncionarioEntity extends AuditEntity {
   
 
 
-  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 private List<ContactoEntity> contactos = new ArrayList<>();
 
 
-  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 private List<EnderecoEntity> enderecos = new ArrayList<>();
 
 
-  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 private List<FamiliarEntity> familiares = new ArrayList<>();
 
 
@@ -124,19 +124,19 @@ private List<FamiliarEntity> familiares = new ArrayList<>();
 private List<HabilitacaoLiterariaEntity> habilitacoesLiterarias = new ArrayList<>();
 
 
-  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 private List<FormacaoFeitaEntity> formacoesFeitas = new ArrayList<>();
 
 
-  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 private List<ExperienciaProfEntity> experienciasProfissionais = new ArrayList<>();
 
 
-  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 private List<DadosBancariosEntity> dadosBancarios = new ArrayList<>();
 
 
-  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 private List<DocumentoEntity> documentos = new ArrayList<>();
 
 

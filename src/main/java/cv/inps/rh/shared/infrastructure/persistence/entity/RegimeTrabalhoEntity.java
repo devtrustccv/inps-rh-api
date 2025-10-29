@@ -29,23 +29,27 @@ public class RegimeTrabalhoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-
+  
     @NotBlank(message = "tipoRegime is mandatory")
     @Column(name="tipo_regime", nullable = false)
     private String tipoRegime;
 
-
+  
     @Column(name="tipo_situacao")
     private String tipoSituacao;
 
-
+  
     @Column(name="data_fim")
     private LocalDate dataFim;
 
-
+  
     @Column(name="obs", length=4000)
     private String obs;
 
+  
+
+
+  
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -60,7 +64,7 @@ public class RegimeTrabalhoEntity extends AuditEntity {
     @Column(name="estado")
     private Estado estado;
 
-
+  
     @Column(name="uuid")
     private UUID uuid;
 

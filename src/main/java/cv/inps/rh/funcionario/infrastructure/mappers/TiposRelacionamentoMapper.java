@@ -47,7 +47,7 @@ public class TiposRelacionamentoMapper {
         entity.getMoeda(),
         entity.getRegime(),
         entity.getTipoSituacao(),
-        toDomain(entity.getTiprelId()),
+        null /*toDomain(entity.getTiprelId())*/,
         entity.getFlgProcessa(),
         entity.getEstado(),
         entity.getObs(),
@@ -95,15 +95,15 @@ public class TiposRelacionamentoMapper {
     entity.setDataFim(domain.getDataFim());
     entity.setDataInicioContrato(domain.getDataInicioContrato());
     entity.setDataFimContrato(domain.getDataFimContrato());
-    entity.setContratoId(contratoMapper.toEntity(domain.getContrato()));
-    entity.setCarreiraId(carreiraMapper.toEntity(domain.getCarreira()));
-    entity.setMobId(mobilidadeMapper.toEntity(domain.getMobilidade()));
+    //entity.setContratoId(contratoMapper.toEntity(domain.getContrato()));
+    //entity.setCarreiraId(carreiraMapper.toEntity(domain.getCarreira()));
+    //entity.setMobId(mobilidadeMapper.toEntity(domain.getMobilidade()));
     entity.setLocTrabId(entityManager.getReference(ParamLocalTrabEntity.class, domain.getLocTrab().getId()));
 
 
-    var regimeTrabalho =regimeTrabalhoMapper.toEntity(domain.getRegimeTrabalho());
+   /* var regimeTrabalho =regimeTrabalhoMapper.toEntity(domain.getRegimeTrabalho());
     regimeTrabalho.setTiprelId(entity);
-    entity.setRegimeId(regimeTrabalho);
+    entity.setRegimeId(regimeTrabalho);*/
 
     entity.setTipoContratoId(entityManager.getReference(ParamContratoEntity.class, domain.getTipoContrato().getId()));
     entity.setReferente(domain.getReferente());

@@ -68,7 +68,7 @@ public class DocumentoMapper {
     return Documento.create(
         dto.getId(),
         tipoDoc,
-        null, // todo resolveer depois
+        1L, // todo resolveer depois
         dto.getDocumento(),
         dto.getDocumento()
 

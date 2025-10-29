@@ -29,8 +29,7 @@ public class RegimeTrabalho {
                          LocalDate dataFim,
                          String obs,
                          Estado estado,
-                         Contrato contrato,
-                         TiposRelacionamento tiprel) {
+                         Contrato contrato) {
     this.id = id;
     this.uuid = uuid;
     this.tipoRegime = tipoRegime;
@@ -39,7 +38,6 @@ public class RegimeTrabalho {
     this.obs = obs;
     this.estado = estado;
     this.contrato = contrato;
-    this.tiprel = tiprel;
   }
 
   // Factory para criar novo regime
@@ -47,9 +45,7 @@ public class RegimeTrabalho {
                                       String tipoSituacao,
                                       LocalDate dataFim,
                                       String obs,
-                                      Funcionario funcionario,
-                                      Contrato contrato,
-                                      TiposRelacionamento tiprel) {
+                                      Contrato contrato) {
     return new RegimeTrabalho(
         null,
         IdentificadorUnico.create(),
@@ -58,9 +54,7 @@ public class RegimeTrabalho {
         dataFim,
         obs,
         Estado.A,
-        contrato,
-        tiprel
-    );
+        contrato);
   }
 
   // Rebuild a partir da Entity
@@ -71,8 +65,7 @@ public class RegimeTrabalho {
                                        LocalDate dataFim,
                                        String obs,
                                        Estado estado,
-                                       Contrato contrato,
-                                       TiposRelacionamento tiprel) {
+                                       Contrato contrato) {
     return new RegimeTrabalho(
         id,
         IdentificadorUnico.from(uuid),
@@ -81,8 +74,7 @@ public class RegimeTrabalho {
         dataFim,
         obs,
         estado,
-        contrato,
-        tiprel
+        contrato
     );
   }
 
@@ -92,16 +84,13 @@ public class RegimeTrabalho {
                      LocalDate dataFim,
                      String obs,
                      Estado estado,
-                     Funcionario funcionario,
-                     Contrato contrato,
-                     TiposRelacionamento tiprel) {
+                     Contrato contrato) {
     if (tipoRegime != null) this.tipoRegime = tipoRegime;
     if (tipoSituacao != null) this.tipoSituacao = tipoSituacao;
     if (dataFim != null) this.dataFim = dataFim;
     if (obs != null) this.obs = obs;
     if (estado != null) this.estado = estado;
     if (contrato != null) this.contrato = contrato;
-    if (tiprel != null) this.tiprel = tiprel;
   }
 
   // Soft delete

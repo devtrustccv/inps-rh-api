@@ -5,6 +5,7 @@ import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamContratoMapper;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.TipoDocumentoMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.Geografia;
@@ -43,8 +44,9 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
   private final GeografiaMapper geografiaMapper;
   private final TipoDocumentoMapper tipoDocumentoMapper;
+  private final ParamContratoMapper paramContratoMapper;
 
-   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper, GeografiaMapper geografiaMapper, TipoDocumentoMapper tipoDocumentoMapper) {
+   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper, GeografiaMapper geografiaMapper, TipoDocumentoMapper tipoDocumentoMapper, ParamContratoMapper paramContratoMapper) {
 
      this.funcionarioMapper = funcionarioMapper;
      this.funcionarioRepository = funcionarioRepository;
@@ -60,6 +62,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
      this.dadosBancariosMapper = dadosBancariosMapper;
      this.geografiaMapper = geografiaMapper;
      this.tipoDocumentoMapper = tipoDocumentoMapper;
+     this.paramContratoMapper = paramContratoMapper;
    }
 
    @IgrpCommandHandler
@@ -121,6 +124,11 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
      funcionario.syncExperiencias(experienciasProfissionais);
      funcionario.syncDocumentos(documentos);
      funcionario.syncDadosBancarios(dadosBancarios);
+
+     /*var dadosContratuais = dto.getDadosContratuais();
+
+     var tipoContrato = paramContratoMapper.toDomain(dadosContratuais.getTipoContrato());*/
+
 
      Funcionario saved = funcionarioRepository.save(funcionario);
 
