@@ -4,6 +4,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
@@ -17,6 +18,8 @@ public class Validacao {
   private Estado estado;
   private String obs;
   private TiposRelacionamento tiprel;
+  private LocalDate dataRegistro;
+  private String userRegistro;
 
   private Validacao(Long id,
                     IdentificadorUnico uuid,
@@ -25,7 +28,9 @@ public class Validacao {
                     Long referenciaId,
                     Estado estado,
                     String obs,
-                    TiposRelacionamento tiprel) {
+                    TiposRelacionamento tiprel,
+                    LocalDate dataRegistro,
+                    String userRegistro) {
     this.id = id;
     this.uuid = uuid;
     this.tipoAccao = tipoAccao;
@@ -34,6 +39,8 @@ public class Validacao {
     this.estado = estado;
     this.obs = obs;
     this.tiprel = tiprel;
+    this.dataRegistro = dataRegistro;
+    this.userRegistro = userRegistro;
   }
 
   public static Validacao create(String tipoAccao,
@@ -49,7 +56,9 @@ public class Validacao {
         referenciaId,
         Estado.P,
         obs,
-        tiprel
+        tiprel,
+        null,
+        null
     );
   }
 
@@ -60,7 +69,9 @@ public class Validacao {
                                   Long referenciaId,
                                   Estado estado,
                                   String obs,
-                                  TiposRelacionamento tiprel) {
+                                  TiposRelacionamento tiprel,
+                                  LocalDate dataRegistro,
+                                  String userRegistro) {
     return new Validacao(
         id,
         IdentificadorUnico.from(uuid),
@@ -69,7 +80,9 @@ public class Validacao {
         referenciaId,
         estado,
         obs,
-        tiprel
+        tiprel ,
+        dataRegistro,
+        userRegistro
     );
   }
 }

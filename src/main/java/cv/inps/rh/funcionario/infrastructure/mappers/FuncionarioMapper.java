@@ -412,11 +412,11 @@ public class FuncionarioMapper {
 
     //validacoes
     if(funcionario.getValidacoes()!=null) {
-      List<RhValidacaoEntity> validacaoEntities = funcionario.getValidacoes().stream()
+      List<ValidacaoEntity> validacaoEntities = funcionario.getValidacoes().stream()
           .map( v -> {
-            RhValidacaoEntity validacaoEntity = validacaoMapper.toEntity(v);
+            ValidacaoEntity validacaoEntity = validacaoMapper.toEntity(v);
             validacaoEntity.setReferenciaId(funcionario.getId());
-            validacaoEntity.setFunId(entity);
+            validacaoEntity.setFundId(entity);
             validacaoEntity.setTiprelId( tiposRelacionamentosMap.get(v.getTiprel().getUuid().getValor()));
 
             return validacaoEntity;

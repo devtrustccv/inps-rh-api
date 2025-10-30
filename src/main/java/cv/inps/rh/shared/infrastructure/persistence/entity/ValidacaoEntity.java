@@ -3,6 +3,7 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
@@ -25,20 +26,20 @@ public class ValidacaoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotBlank(message = "tipoAccao is mandatory")
     @Column(name="tipo_accao", nullable = false)
     private String tipoAccao;
 
-  
+
     @Column(name="referencia_name")
     private String referenciaName;
 
-  
+
     @Column(name="referencia_id")
     private Long referenciaId;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -50,15 +51,15 @@ public class ValidacaoEntity extends AuditEntity {
     @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
     private TiposRelacionamentoEntity tiprelId;
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
-  
+
     @Column(name="obs")
     private String obs;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
 }

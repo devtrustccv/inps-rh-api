@@ -65,6 +65,66 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getValicoesUtilizadores",
+      "path": "validacoes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaValidacoes",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "nomeColaborador",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "tipoOperacao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "referenciaName",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "69p09wi4e0-criarFuncionario"

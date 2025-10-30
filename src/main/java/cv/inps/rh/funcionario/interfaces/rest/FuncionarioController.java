@@ -23,6 +23,7 @@ import cv.inps.rh.funcionario.application.commands.*;
 import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDetailsDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperListaValidacoesDTO;
 
 @IgrpController
 @RestController
@@ -69,7 +70,7 @@ public class FuncionarioController {
   }
 
    @GetMapping(
-    value = "{id}"
+   value = "{id}"
   )
   @Operation(
     summary = "GET method to handle operations for getFuncionarioById",
@@ -95,6 +96,43 @@ public class FuncionarioController {
       final var query = new GetFuncionarioByIdQuery(id);
 
       ResponseEntity<FuncionarioResponseDetailsDTO> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @GetMapping(
+   value = "validacoes"
+  )
+  @Operation(
+    summary = "GET method to handle operations for getValicoesUtilizadores",
+    description = "GET method to handle operations for getValicoesUtilizadores",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = WrapperListaValidacoesDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<WrapperListaValidacoesDTO> getValicoesUtilizadores(
+    @RequestParam(value = "nomeColaborador", required = false) String nomeColaborador,
+    @RequestParam(value = "tipoOperacao", required = false) String tipoOperacao,
+    @RequestParam(value = "referenciaName", required = false) String referenciaName,
+    @RequestParam(value = "dataInicio", required = false) String dataInicio,
+    @RequestParam(value = "dataFim", required = false) String dataFim,
+    @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
+    @RequestParam(value = "pageSize", defaultValue = "20") String pageSize)
+  {
+
+      final var query = new GetValicoesUtilizadoresQuery(nomeColaborador, tipoOperacao, referenciaName, dataInicio, dataFim, pageNumber, pageSize);
+
+      ResponseEntity<WrapperListaValidacoesDTO> response = queryBus.handle(query);
 
       return response;
   }
