@@ -1,1 +1,149 @@
-{"type":"model","module":"shared","name":"MobilidadeEntity","tableName":"RH_T_MOBILIDADE","audit":true,"crud":false,"revision":false,"attributes":[{"name":"id","type":"long","length":255,"nullable":true,"unique":false,"primaryKey":true,"generationType":"IDENTITY","skipFieldRevision":false,"objectType":"java"},{"name":"tipo_situacao","type":"string","length":255,"nullable":false,"unique":false,"primaryKey":false,"skipFieldRevision":false},{"name":"estado","type":"Estado","length":255,"nullable":true,"unique":false,"primaryKey":false,"skipFieldRevision":false,"objectType":"enum","module":"shared"},{"name":"obs","type":"string","length":255,"nullable":true,"unique":false,"primaryKey":false,"skipFieldRevision":false},{"name":"uuid","type":"uuid","length":255,"nullable":true,"unique":false,"primaryKey":false,"skipFieldRevision":false,"objectType":"java"},{"name":"contrato_id","type":"relation","length":255,"nullable":true,"unique":false,"primaryKey":false,"skipFieldRevision":false,"relation":{"type":"ManyToOne","entity":"ContratoEntity","referencedColumnName":"id","cardinality":"oneWay","fetchType":"lazy","module":"shared","orphanRemoval":false}},{"name":"local_trab_id","type":"relation","length":255,"nullable":true,"unique":false,"primaryKey":false,"skipFieldRevision":false,"objectType":"java","relation":{"type":"ManyToOne","entity":"ParamLocalTrabEntity","referencedColumnName":"id","cardinality":"oneWay","fetchType":"lazy","module":"shared","orphanRemoval":false}},{"name":"secao_id","type":"relation","length":255,"nullable":true,"unique":false,"primaryKey":false,"skipFieldRevision":false,"relation":{"type":"ManyToOne","entity":"SecaoEntity","referencedColumnName":"id","cardinality":"oneWay","fetchType":"lazy","module":"shared","orphanRemoval":false}},{"name":"instid_id","type":"relation","length":255,"nullable":true,"unique":false,"primaryKey":false,"skipFieldRevision":false,"objectType":"java","relation":{"type":"ManyToOne","entity":"InstituicaoEntity","referencedColumnName":"id","cardinality":"oneWay","fetchType":"lazy","module":"shared","orphanRemoval":false}}],"id":"ulur1jbtkm","relationReference":[{"type":"OneToMany","entity":"FuncionarioEntity","fetchType":"lazy","fieldName":"fun_id","mappedBy":"mobilidades","module":"shared"}],"uniqueConstraints":[],"indexes":[]}
+{
+  "type": "model",
+  "module": "shared",
+  "name": "MobilidadeEntity",
+  "tableName": "RH_T_MOBILIDADE",
+  "audit": true,
+  "crud": false,
+  "revision": false,
+  "attributes": [
+    {
+      "name": "id",
+      "type": "long",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": true,
+      "generationType": "SEQUENCE",
+      "sequenceName": "SEQ_MOBILIDADE",
+      "skipFieldRevision": false,
+      "objectType": "java"
+    },
+    {
+      "name": "tipo_situacao",
+      "type": "string",
+      "length": 255,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false
+    },
+    {
+      "name": "estado",
+      "type": "Estado",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "enum",
+      "module": "shared"
+    },
+    {
+      "name": "obs",
+      "type": "string",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false
+    },
+    {
+      "name": "uuid",
+      "type": "uuid",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
+    },
+    {
+      "name": "contrato_id",
+      "type": "relation",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "relation": {
+        "type": "ManyToOne",
+        "entity": "ContratoEntity",
+        "referencedColumnName": "id",
+        "cardinality": "oneWay",
+        "fetchType": "lazy",
+        "module": "shared",
+        "orphanRemoval": false
+      }
+    },
+    {
+      "name": "local_trab_id",
+      "type": "relation",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java",
+      "relation": {
+        "type": "ManyToOne",
+        "entity": "ParamLocalTrabEntity",
+        "referencedColumnName": "id",
+        "cardinality": "oneWay",
+        "fetchType": "lazy",
+        "module": "shared",
+        "orphanRemoval": false
+      }
+    },
+    {
+      "name": "secao_id",
+      "type": "relation",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "relation": {
+        "type": "ManyToOne",
+        "entity": "SecaoEntity",
+        "referencedColumnName": "id",
+        "cardinality": "oneWay",
+        "fetchType": "lazy",
+        "module": "shared",
+        "orphanRemoval": false
+      }
+    },
+    {
+      "name": "instid_id",
+      "type": "relation",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java",
+      "relation": {
+        "type": "ManyToOne",
+        "entity": "InstituicaoEntity",
+        "referencedColumnName": "id",
+        "cardinality": "oneWay",
+        "fetchType": "lazy",
+        "module": "shared",
+        "orphanRemoval": false
+      }
+    }
+  ],
+  "id": "ulur1jbtkm",
+  "relationReference": [
+    {
+      "type": "OneToMany",
+      "entity": "FuncionarioEntity",
+      "fetchType": "lazy",
+      "fieldName": "fun_id",
+      "mappedBy": "mobilidades",
+      "module": "shared"
+    }
+  ],
+  "uniqueConstraints": [],
+  "indexes": []
+}
