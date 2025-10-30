@@ -23,30 +23,31 @@ import java.util.List;
 @Table(name = "RH_T_MOBILIDADE")
 public class MobilidadeEntity extends AuditEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_mobilidade")
-  @SequenceGenerator(name = "seq_mobilidade", sequenceName = "SEQ_MOBILIDADE", allocationSize = 1)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_mobilidade")
+    @SequenceGenerator(name = "seq_mobilidade", sequenceName = "SEQ_MOBILIDADE", allocationSize = 1)
+    @Column(name = "id", unique = true, nullable = false)
+    private Long id;
 
-
+  
     @NotBlank(message = "tipoSituacao is mandatory")
     @Column(name="tipo_situacao", nullable = false)
     private String tipoSituacao;
 
-
+  
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-
+  
     @Column(name="obs")
     private String obs;
 
-
+  
     @Column(name="uuid")
     private UUID uuid;
 
-
+  
 
 
   @ManyToOne(fetch = FetchType.LAZY)

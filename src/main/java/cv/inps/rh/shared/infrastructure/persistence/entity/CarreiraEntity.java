@@ -24,38 +24,39 @@ import java.util.List;
 @Table(name = "RH_T_CARREIRA")
 public class CarreiraEntity extends AuditEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_carreira")
-  @SequenceGenerator(name = "seq_carreira", sequenceName = "SEQ_CARREIRA", allocationSize = 1)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_carreira")
+    @SequenceGenerator(name = "seq_carreira", sequenceName = "SEQ_CARREIRA", allocationSize = 1)
+    @Column(name = "id", unique = true, nullable = false)
+    private Long id;
 
-
+  
     @NotNull(message = "salario is mandatory")
     @Column(name="salario", nullable = false)
     private BigDecimal salario;
 
-
+  
     @Column(name="flg_processa")
     private Integer flgProcessa;
 
-
+  
     @Column(name="tipo_situacao")
     private String tipoSituacao;
 
-
+  
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-
+  
     @Column(name="obs", length=4000)
     private String obs;
 
-
+  
     @Column(name="uuid")
     private UUID uuid;
 
-
+  
 
 
   @ManyToOne(fetch = FetchType.LAZY)

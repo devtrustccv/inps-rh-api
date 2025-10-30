@@ -8,9 +8,8 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotBlank;
-import java.time.LocalDate;
-import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,53 +20,44 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_T_REGIME_TRAB")
-public class RegimeTrabalhoEntity extends AuditEntity {
+@Table(name = "RH_T_VALIDACAO")
+public class RhValidacaoEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_regime_trab")
-    @SequenceGenerator(name = "seq_regime_trab", sequenceName = "SEQ_REGIME_TRAB", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
   
-    @NotBlank(message = "tipoRegime is mandatory")
-    @Column(name="tipo_regime", nullable = false)
-    private String tipoRegime;
+    @NotBlank(message = "tipoAccao is mandatory")
+    @Column(name="tipo_accao", nullable = false)
+    private String tipoAccao;
 
   
-    @Column(name="tipo_situacao")
-    private String tipoSituacao;
+    @Column(name="referencia_name")
+    private String referenciaName;
 
   
-    @Column(name="data_fim")
-    private LocalDate dataFim;
+    @Column(name="referencia_id")
+    private Long referenciaId;
 
   
-    @Column(name="obs", length=4000)
-    private String obs;
-
-  
-
-
-  
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contrato_id", referencedColumnName = "id")
-    private ContratoEntity contratoId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
     private TiposRelacionamentoEntity tiprelId;
-    @Enumerated(EnumType.STRING)
-    @Column(name="estado")
-    private Estado estado;
+    @Column(name="obs")
+    private String obs;
 
   
     @Column(name="uuid")
     private UUID uuid;
+
+  
+    @Enumerated(EnumType.STRING)
+    @Column(name="estado")
+    private Estado estado;
 
      @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "fun_id")

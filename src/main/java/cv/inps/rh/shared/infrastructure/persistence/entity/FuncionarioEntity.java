@@ -166,4 +166,8 @@ private List<DefinicaoRemuneracaoEntity> definicoesRenumeracoes = new ArrayList<
 
   @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 private List<DefPagamentoEntity> definicoesPagamentos = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+private List<RhValidacaoEntity> validacoes = new ArrayList<>();
 }
