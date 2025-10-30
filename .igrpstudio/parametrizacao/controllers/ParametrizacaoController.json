@@ -53,6 +53,195 @@
           }
         }
       }
+    },
+    {
+      "actionName": "getCarreirasAtivos",
+      "path": "carreiras/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "getCategoriasAtivos",
+      "path": "categorias/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "getParamContratosAtivos",
+      "path": "contratos/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "getEscaloesAtivos",
+      "path": "escalao/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "getLocalTrabalhoAtivos",
+      "path": "local-trabalho/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "getSituacaoLaboralAtivo",
+      "path": "situacao-laboral/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "getVinculosAtivos",
+      "path": "vinculos/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "getSeccoesAtivos",
+      "path": "seccoes/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "getTiposDocumentoAtivos",
+      "path": "tipo-documento/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "id": "3le3xt6arj-getCargos"

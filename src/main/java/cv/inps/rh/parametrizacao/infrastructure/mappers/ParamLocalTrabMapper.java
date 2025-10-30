@@ -1,5 +1,6 @@
 package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
+import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamLocalTrab;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
@@ -57,4 +58,14 @@ public class ParamLocalTrabMapper {
     if (id == null || id < 0) return null;
     return ParamLocalTrab.rebuild(id);
   }
+
+  public ParametrizacaoDTO toParametrizacaoDto(ParamLocalTrab domain) {
+    if (domain == null) return null;
+
+    ParametrizacaoDTO dto = new ParametrizacaoDTO();
+    dto.setLabel(domain.getNome());
+    dto.setValue(domain.getId());
+    return dto;
+  }
+
 }

@@ -1,5 +1,6 @@
 package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
+import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamCarreira;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
 import org.springframework.stereotype.Component;
@@ -33,5 +34,14 @@ public class ParamCarreiraMapper {
     entity.setCodigo(domain.getCodigo());
     entity.setEstado(domain.getEstado());
     return entity;
+  }
+
+
+  public ParametrizacaoDTO toParametrizacaoDto(ParamCarreira domain) {
+    if (domain == null) return null;
+    ParametrizacaoDTO dto = new ParametrizacaoDTO();
+    dto.setLabel(domain.getNome());
+    dto.setValue(domain.getId());
+    return dto;
   }
 }

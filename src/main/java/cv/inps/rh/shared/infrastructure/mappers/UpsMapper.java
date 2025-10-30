@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.mappers;
 
+import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.shared.domain.models.Ups;
 import cv.inps.rh.shared.infrastructure.persistence.entity.UpsEntity;
 import lombok.RequiredArgsConstructor;
@@ -19,5 +20,14 @@ public class UpsMapper {
     if (idUps == null) return null;
     return Ups
         .rebuild(idUps, null);
+  }
+
+  public ParametrizacaoDTO toParametrizacaoDto(Ups ups) {
+    if (ups == null) return null;
+
+    ParametrizacaoDTO dto = new ParametrizacaoDTO();
+    dto.setLabel(ups.getNome());
+    dto.setValue(ups.getId());
+    return dto;
   }
 }

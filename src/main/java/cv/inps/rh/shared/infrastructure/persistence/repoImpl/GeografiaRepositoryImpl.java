@@ -7,6 +7,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.GeografiaEntityRe
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,5 +21,13 @@ public class GeografiaRepositoryImpl implements GeografiaRepository {
   public Optional<Geografia> findById(Long id) {
     return geografiaEntityRepository.findById(id)
         .map(geografiaMapper::toDomain);
+  }
+
+  public List<Geografia> findByNivelDetalheAndGeogrId(Long nivelDetalhe, Long geogrId) {
+    return geografiaEntityRepository
+        .findByNivelDetalheAndGeogrId(nivelDetalhe, geogrId)
+        .stream()
+        .map(geografiaMapper::toDomain)
+        .toList();
   }
 }

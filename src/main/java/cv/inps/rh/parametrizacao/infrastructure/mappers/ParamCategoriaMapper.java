@@ -1,5 +1,6 @@
 package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
+import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamCategoria;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCategoriaEntity;
@@ -54,5 +55,14 @@ public class ParamCategoriaMapper {
   public ParamCategoria toDomain(Long idCategoria) {
     if (idCategoria == null || idCategoria < 0) return null;
     return ParamCategoria.rebuild(idCategoria);
+  }
+
+  public ParametrizacaoDTO toParametrizacaoDto(ParamCategoria domain) {
+    if (domain == null) return null;
+
+    ParametrizacaoDTO dto = new ParametrizacaoDTO();
+    dto.setLabel(domain.getNome());  // ou domain.getCodigo() se preferires
+    dto.setValue(domain.getId());
+    return dto;
   }
 }

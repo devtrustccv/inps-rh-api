@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.mappers;
 
+import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.shared.domain.models.Instituicao;
 import cv.inps.rh.shared.infrastructure.persistence.entity.InstituicaoEntity;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,15 @@ public class InstituicaoMapper {
     if (idInstituicao == null) return null;
     return Instituicao
         .rebuild(idInstituicao, null, null);
+  }
+
+  public ParametrizacaoDTO toParametrizacaoDto(Instituicao instituicao) {
+    if (instituicao == null) return null;
+
+    ParametrizacaoDTO dto = new ParametrizacaoDTO();
+    dto.setLabel(instituicao.getNome());
+    dto.setValue(instituicao.getId());
+    return dto;
   }
 
 }

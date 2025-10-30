@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.mappers;
 
+import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import org.springframework.stereotype.Component;
@@ -65,5 +66,15 @@ public class GeografiaMapper {
     entity.setFlgSituacao(geografia.getSituacao());
     return entity;
   }*/
+
+  public ParametrizacaoDTO toParametrizacaoDto(Geografia geografia) {
+    if (geografia == null) return null;
+
+    ParametrizacaoDTO dto = new ParametrizacaoDTO();
+    dto.setLabel(geografia.getNome());
+    dto.setValue(geografia.getId());
+    return dto;
+  }
+
 
 }

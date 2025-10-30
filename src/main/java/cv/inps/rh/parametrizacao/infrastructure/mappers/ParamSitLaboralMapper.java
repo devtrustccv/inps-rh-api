@@ -1,5 +1,6 @@
 package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
+import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamSitLaboral;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSitLaboralEntity;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,15 @@ public class ParamSitLaboralMapper {
   public ParamSitLaboral toDomain(Long id) {
     if (id == null || id < 0) return null;
     return ParamSitLaboral.rebuild(id);
+  }
+
+  public ParametrizacaoDTO toParametrizacaoDto(ParamSitLaboral domain) {
+    if (domain == null) return null;
+
+    ParametrizacaoDTO dto = new ParametrizacaoDTO();
+    dto.setLabel(domain.getNome());
+    dto.setValue(domain.getId());
+    return dto;
   }
 
 }

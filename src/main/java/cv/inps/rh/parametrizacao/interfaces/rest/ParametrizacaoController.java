@@ -98,4 +98,283 @@ public class ParametrizacaoController {
       return response;
   }
 
+   @GetMapping(
+   value = "carreiras/ativos"
+  )
+  @Operation(
+    summary = "GET method to handle operations for getCarreirasAtivos",
+    description = "GET method to handle operations for getCarreirasAtivos",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ParametrizacaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<List<ParametrizacaoDTO>> getCarreirasAtivos(
+    )
+  {
+
+      final var query = new GetCarreirasAtivosQuery();
+
+      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @GetMapping(
+   value = "categorias/ativos"
+  )
+  @Operation(
+    summary = "GET method to handle operations for getCategoriasAtivos",
+    description = "GET method to handle operations for getCategoriasAtivos",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ParametrizacaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<List<ParametrizacaoDTO>> getCategoriasAtivos(
+    )
+  {
+
+      final var query = new GetCategoriasAtivosQuery();
+
+      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @GetMapping(
+   value = "contratos/ativos"
+  )
+  @Operation(
+    summary = "GET method to handle operations for getParamContratosAtivos",
+    description = "GET method to handle operations for getParamContratosAtivos",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ParametrizacaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<List<ParametrizacaoDTO>> getParamContratosAtivos(
+    )
+  {
+
+      final var query = new GetParamContratosAtivosQuery();
+
+      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @GetMapping(
+   value = "escalao/ativos"
+  )
+  @Operation(
+    summary = "GET method to handle operations for getEscaloesAtivos",
+    description = "GET method to handle operations for getEscaloesAtivos",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ParametrizacaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<List<ParametrizacaoDTO>> getEscaloesAtivos(
+    )
+  {
+
+      final var query = new GetEscaloesAtivosQuery();
+
+      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @GetMapping(
+   value = "local-trabalho/ativos"
+  )
+  @Operation(
+    summary = "GET method to handle operations for getLocalTrabalhoAtivos",
+    description = "GET method to handle operations for getLocalTrabalhoAtivos",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ParametrizacaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<List<ParametrizacaoDTO>> getLocalTrabalhoAtivos(
+    )
+  {
+
+      final var query = new GetLocalTrabalhoAtivosQuery();
+
+      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @GetMapping(
+   value = "situacao-laboral/ativos"
+  )
+  @Operation(
+    summary = "GET method to handle operations for getSituacaoLaboralAtivo",
+    description = "GET method to handle operations for getSituacaoLaboralAtivo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ParametrizacaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<List<ParametrizacaoDTO>> getSituacaoLaboralAtivo(
+    )
+  {
+
+      final var query = new GetSituacaoLaboralAtivoQuery();
+
+      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @GetMapping(
+   value = "vinculos/ativos"
+  )
+  @Operation(
+    summary = "GET method to handle operations for getVinculosAtivos",
+    description = "GET method to handle operations for getVinculosAtivos",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ParametrizacaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<List<ParametrizacaoDTO>> getVinculosAtivos(
+    )
+  {
+
+      final var query = new GetVinculosAtivosQuery();
+
+      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @GetMapping(
+   value = "seccoes/ativos"
+  )
+  @Operation(
+    summary = "GET method to handle operations for getSeccoesAtivos",
+    description = "GET method to handle operations for getSeccoesAtivos",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ParametrizacaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<List<ParametrizacaoDTO>> getSeccoesAtivos(
+    )
+  {
+
+      final var query = new GetSeccoesAtivosQuery();
+
+      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @GetMapping(
+   value = "tipo-documento/ativos"
+  )
+  @Operation(
+    summary = "GET method to handle operations for getTiposDocumentoAtivos",
+    description = "GET method to handle operations for getTiposDocumentoAtivos",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ParametrizacaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<List<ParametrizacaoDTO>> getTiposDocumentoAtivos(
+    )
+  {
+
+      final var query = new GetTiposDocumentoAtivosQuery();
+
+      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+
+      return response;
+  }
+
 }

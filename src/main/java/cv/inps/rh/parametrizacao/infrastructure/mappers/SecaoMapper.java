@@ -1,5 +1,6 @@
 package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
+import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.Secao;
 import cv.inps.rh.shared.infrastructure.mappers.InstituicaoMapper;
 import cv.inps.rh.shared.infrastructure.mappers.UpsMapper;
@@ -49,6 +50,15 @@ public class SecaoMapper {
   public Secao toDomain(Long id) {
     if (id == null || id < 0) return null;
     return Secao.rebuild(id);
+  }
+
+  public ParametrizacaoDTO toParametrizacaoDto(Secao domain) {
+    if (domain == null) return null;
+
+    ParametrizacaoDTO dto = new ParametrizacaoDTO();
+    dto.setLabel(domain.getNome());
+    dto.setValue(domain.getId());
+    return dto;
   }
 
 }
