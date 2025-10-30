@@ -18,7 +18,7 @@ public class ParamCargoRepositoryImpl implements ParamCargoRepository {
   private final ParamCargoEntityRepository paramCargoEntityRepository;
 
   @Override
-  public List<ParamCargo> findAllByAtivo() {
+  public List<ParamCargo> findAllActive() {
     return paramCargoEntityRepository.findAllByEstado(Estado.A).stream()
         .map(paramCargoMapper::toDomain)
         .toList();

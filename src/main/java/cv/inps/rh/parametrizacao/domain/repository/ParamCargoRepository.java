@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface ParamCargoRepository {
 
-  List<ParamCargo> findAllByAtivo();
+  List<ParamCargo> findAllActive();
 }

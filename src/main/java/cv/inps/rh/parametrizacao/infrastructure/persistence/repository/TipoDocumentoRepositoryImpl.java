@@ -7,6 +7,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.TipoDocumentoEnti
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,5 +21,10 @@ public class TipoDocumentoRepositoryImpl implements TipoDocumentoRepository {
   public Optional<TipoDocumento> findById(Long id) {
     return tipoDocumentoEntityRepository.findById(id)
         .map(tipoDocumentoMapper::toDomain);
+  }
+
+  @Override
+  public List<TipoDocumento> findAllActive() {
+    return List.of();
   }
 }
