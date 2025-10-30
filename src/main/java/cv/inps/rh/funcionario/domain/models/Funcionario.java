@@ -52,7 +52,7 @@ public class Funcionario {
 
   private List<DefinicaoRemuneracao> definicaoRemuneracoes;
   private List<DefPagamento> defPagamentos;
-
+  private List<Validacao> validacoes;
 
   private Funcionario(
       Long id,
@@ -88,7 +88,8 @@ public class Funcionario {
       List<Mobilidade> mobilidades,
       List<RegimeTrabalho> regimeTrabalhos,
       List<DefinicaoRemuneracao> definicaoRemuneracoes,
-      List<DefPagamento> defPagamentos
+      List<DefPagamento> defPagamentos,
+      List<Validacao> validacoes
 
   ) {
     this.id = id;
@@ -125,6 +126,7 @@ public class Funcionario {
     this.regimeTrabalhos = regimeTrabalhos != null ? regimeTrabalhos : new ArrayList<>();
     this.definicaoRemuneracoes = definicaoRemuneracoes != null ? definicaoRemuneracoes : new ArrayList<>();
     this.defPagamentos = defPagamentos != null ? defPagamentos : new ArrayList<>();
+    this.validacoes = validacoes != null ? validacoes : new ArrayList<>();
 
   }
 
@@ -148,7 +150,9 @@ public class Funcionario {
   ) {
 
 
-    return new Funcionario(
+
+
+   var funcionario = new  Funcionario(
         null,
         IdentificadorUnico.create(),
         tipoDocumento,
@@ -182,8 +186,12 @@ public class Funcionario {
         null,
         null,
         null,
+        null,
         null
     );
+
+
+   return funcionario;
   }
 
   // Factory para reconstrução de repositorio
@@ -221,7 +229,8 @@ public class Funcionario {
       List<Mobilidade> mobilidades,
       List<RegimeTrabalho> regimeTrabalhos,
       List<DefinicaoRemuneracao> definicaoRemuneracoes,
-      List<DefPagamento> defPagamentos
+      List<DefPagamento> defPagamentos,
+      List<Validacao> validacoes
 
   ) {
     return new Funcionario(
@@ -258,7 +267,8 @@ public class Funcionario {
         mobilidades,
         regimeTrabalhos,
         definicaoRemuneracoes,
-        defPagamentos
+        defPagamentos,
+        validacoes
     );
   }
 
@@ -318,21 +328,17 @@ public class Funcionario {
         null,
         null,
         null,
+        null,
         null
-
     );
   }
 
 
-  public void addTipoRelacionamento(TiposRelacionamento tipoRelacionamento) {
-    if (tiposRelacionamentos == null) tiposRelacionamentos = new ArrayList<>();
-    tiposRelacionamentos.add(tipoRelacionamento);
+  public void adicionarValidacao(Validacao validacao) {
+    if (validacao == null) return;
+    this.validacoes.add(validacao);
   }
 
-  public void addDadosBancarios(DadosBancarios dadosBancarios) {
-    if (dadosBancarios == null) this.dadosBancarios = new ArrayList<>();
-    this.dadosBancarios.add(dadosBancarios);
-  }
 
   /****** contactos *********************/
   public void syncContacts(List<Contacto> newContacts) {
@@ -733,6 +739,10 @@ public class Funcionario {
     carreiras.add(carreira);
     mobilidades.add(mobilidade);
     regimeTrabalhos.add(regime);
+
+    var validacao = Validacao.create("INSERT", "REGISTO_COLABORADOR", null, "obs", tiposRelacionamento);
+    this.adicionarValidacao(validacao);
+
 
   }
 }

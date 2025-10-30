@@ -36,6 +36,7 @@ public class FuncionarioMapper {
   private final RegimeTrabalhoMapper regimeTrabalhoMapper;
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DefPagamentoMapper defPagamentoMapper;
+  private final ValidacaoMapper validacaoMapper;
 
   private final EntityManager entityManager;
 
@@ -104,6 +105,9 @@ public class FuncionarioMapper {
     List<DefPagamento> defPagamentos = entity.getDefinicoesPagamentos()!=null ? entity.getDefinicoesPagamentos()
         .stream().map(defPagamentoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
+    List<Validacao> validacoes = entity.getValidacoes()!=null ? entity.getValidacoes()
+        .stream().map(validacaoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
+
     return Funcionario.rebuild(
         entity.getId(),
         entity.getUuid(),
@@ -138,8 +142,8 @@ public class FuncionarioMapper {
         mobilidades,
         regimeTrabalhos,
         definicaoRemuneracoes,
-        defPagamentos
-
+        defPagamentos,
+        validacoes
     );
   }
 
@@ -404,6 +408,22 @@ public class FuncionarioMapper {
           .toList();
       entity.setDefinicoesPagamentos(defPagamentosEntities);
     }
+
+
+    //validacoes
+    if(funcionario.getValidacoes()!=null) {
+      List<RhValidacaoEntity> validacaoEntities = funcionario.getValidacoes().stream()
+          .map( v -> {
+            RhValidacaoEntity validacaoEntity = validacaoMapper.toEntity(v);
+            validacaoEntity.setReferenciaId(funcionario.getId());
+            validacaoEntity.setFunId(entity);
+            validacaoEntity.setTiprelId( tiposRelacionamentosMap.get(v.getTiprel().getUuid().getValor()));
+
+            return validacaoEntity;
+          }).toList();
+      entity.setValidacoes(validacaoEntities);
+    }
+
 
 
     return entity;
