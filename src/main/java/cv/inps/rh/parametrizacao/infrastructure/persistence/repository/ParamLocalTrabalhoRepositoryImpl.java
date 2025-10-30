@@ -7,6 +7,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamLocalTrabEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class ParamLocalTrabalhoRepositoryImpl implements ParamLocalTrabalhoRepos
   private final ParamLocalTrabEntityRepository paramLocalTrabEntityRepository;
   private final ParamLocalTrabMapper paramLocalTrabMapper;
 
+  @Transactional(readOnly = true)
   @Override
   public List<ParamLocalTrab> findAllActive() {
     return paramLocalTrabEntityRepository.findAllByEstado(Estado.A).stream().map(paramLocalTrabMapper::toDomain).toList();
