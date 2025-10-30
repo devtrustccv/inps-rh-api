@@ -416,7 +416,7 @@ public class FuncionarioMapper {
           .map( v -> {
             ValidacaoEntity validacaoEntity = validacaoMapper.toEntity(v);
             validacaoEntity.setReferenciaId(funcionario.getId());
-            validacaoEntity.setFundId(entity);
+            validacaoEntity.setFunId(entity);
             validacaoEntity.setTiprelId( tiposRelacionamentosMap.get(v.getTiprel().getUuid().getValor()));
 
             return validacaoEntity;
