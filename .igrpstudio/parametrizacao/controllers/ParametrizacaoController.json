@@ -1,0 +1,59 @@
+{
+  "type": "controller",
+  "name": "Parametrizacao",
+  "module": "parametrizacao",
+  "description": "Modulo parametrizacao",
+  "basePath": "api/v1/parametrizacao",
+  "actions": [
+    {
+      "actionName": "getDominios",
+      "path": "dominios",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Dominio",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "dominio",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getCargosAtivos",
+      "path": "cargos/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "id": "3le3xt6arj-getCargos"
+}
