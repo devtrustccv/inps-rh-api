@@ -1,5 +1,7 @@
 package cv.inps.rh.parametrizacao.application.queries;
 
+import cv.inps.rh.parametrizacao.domain.repository.ParamLocalTrabalhoRepository;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamLocalTrabMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -16,15 +18,22 @@ public class GetLocalTrabalhoAtivosQueryHandler implements QueryHandler<GetLocal
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetLocalTrabalhoAtivosQueryHandler.class);
 
+   private final ParamLocalTrabalhoRepository paramLocalTrabalhoRepository;
+   private final ParamLocalTrabMapper paramLocalTrabMapper;
 
-  public GetLocalTrabalhoAtivosQueryHandler() {
+  public GetLocalTrabalhoAtivosQueryHandler(ParamLocalTrabalhoRepository paramLocalTrabalhoRepository, ParamLocalTrabMapper paramLocalTrabMapper) {
 
+    this.paramLocalTrabalhoRepository = paramLocalTrabalhoRepository;
+    this.paramLocalTrabMapper = paramLocalTrabMapper;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<List<ParametrizacaoDTO>> handle(GetLocalTrabalhoAtivosQuery query) {
-    // TODO: Implement the query handling logic here
-    return null;
+     var paramLocalTrabalhos =  paramLocalTrabalhoRepository.findAllActive();
+     List<ParametrizacaoDTO> parametrizacoes = paramLocalTrabalhos.stream()
+         .map(paramLocalTrabMapper::toParametrizacaoDto)
+         .toList();
+     return ResponseEntity.ok(parametrizacoes);
   }
 
 }

@@ -1,5 +1,7 @@
 package cv.inps.rh.parametrizacao.application.queries;
 
+import cv.inps.rh.parametrizacao.domain.repository.ParamContratoRepository;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamContratoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -16,15 +18,22 @@ public class GetParamContratosAtivosQueryHandler implements QueryHandler<GetPara
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetParamContratosAtivosQueryHandler.class);
 
+  private final ParamContratoRepository paramContratoRepository;
+  private final ParamContratoMapper paramContratoMapper;
 
-  public GetParamContratosAtivosQueryHandler() {
+  public GetParamContratosAtivosQueryHandler(ParamContratoRepository paramContratoRepository, ParamContratoMapper paramContratoMapper) {
 
+    this.paramContratoRepository = paramContratoRepository;
+    this.paramContratoMapper = paramContratoMapper;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<List<ParametrizacaoDTO>> handle(GetParamContratosAtivosQuery query) {
-    // TODO: Implement the query handling logic here
-    return null;
+     var paramContratos =  paramContratoRepository.findAllActive();
+     List<ParametrizacaoDTO> parametrizacoes = paramContratos.stream()
+         .map(paramContratoMapper::toParametrizacaoDto)
+         .toList();
+     return ResponseEntity.ok(parametrizacoes);
   }
 
 }

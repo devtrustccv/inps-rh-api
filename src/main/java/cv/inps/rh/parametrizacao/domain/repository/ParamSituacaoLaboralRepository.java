@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ParamSituacaoLaboralRepository {
 
-  public ParamSitLaboral getSituacaoLaboralById(String id);
+  public ParamSitLaboral getSituacaoLaboralById(Long id);
 
   public List<ParamSitLaboral> findAllActive();
 

@@ -1,5 +1,7 @@
 package cv.inps.rh.parametrizacao.application.queries;
 
+import cv.inps.rh.parametrizacao.domain.repository.SecaoRepository;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.SecaoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -16,15 +18,23 @@ public class GetSeccoesAtivosQueryHandler implements QueryHandler<GetSeccoesAtiv
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetSeccoesAtivosQueryHandler.class);
 
+  private final SecaoRepository secaoRepository;
+  private final SecaoMapper secaoMapper;
 
-  public GetSeccoesAtivosQueryHandler() {
+  public GetSeccoesAtivosQueryHandler(SecaoRepository secaoRepository, SecaoMapper secaoMapper) {
 
+    this.secaoRepository = secaoRepository;
+    this.secaoMapper = secaoMapper;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<List<ParametrizacaoDTO>> handle(GetSeccoesAtivosQuery query) {
-    // TODO: Implement the query handling logic here
-    return null;
+    var secoes =  secaoRepository.findAllActive();
+    List<ParametrizacaoDTO> parametrizacoes = secoes.stream()
+        .map(secaoMapper::toParametrizacaoDto)
+        .toList();
+    return ResponseEntity.ok(parametrizacoes);
+
   }
 
 }

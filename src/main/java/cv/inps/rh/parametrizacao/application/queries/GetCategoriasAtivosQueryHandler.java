@@ -1,5 +1,7 @@
 package cv.inps.rh.parametrizacao.application.queries;
 
+import cv.inps.rh.parametrizacao.domain.repository.ParamCategoriaRepository;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamCategoriaMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -16,15 +18,24 @@ public class GetCategoriasAtivosQueryHandler implements QueryHandler<GetCategori
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetCategoriasAtivosQueryHandler.class);
 
+  private final ParamCategoriaRepository paramCategoriaRepository;
+  private final ParamCategoriaMapper paramCategoriaMapper;
 
-  public GetCategoriasAtivosQueryHandler() {
+  public GetCategoriasAtivosQueryHandler(ParamCategoriaRepository paramCategoriaRepository, ParamCategoriaMapper paramCategoriaMapper) {
 
+    this.paramCategoriaRepository = paramCategoriaRepository;
+    this.paramCategoriaMapper = paramCategoriaMapper;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<List<ParametrizacaoDTO>> handle(GetCategoriasAtivosQuery query) {
-    // TODO: Implement the query handling logic here
-    return null;
+     var paramCategorias =  paramCategoriaRepository.findAllActive();
+
+     List<ParametrizacaoDTO> parametrizacoesCategorias = paramCategorias.stream()
+         .map(paramCategoriaMapper::toParametrizacaoDto)
+         .toList();
+
+     return ResponseEntity.ok(parametrizacoesCategorias);
   }
 
 }

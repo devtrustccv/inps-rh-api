@@ -1,5 +1,7 @@
 package cv.inps.rh.parametrizacao.application.queries;
 
+import cv.inps.rh.parametrizacao.domain.repository.ParamEscalaoRepository;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamEscalaoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -16,15 +18,22 @@ public class GetEscaloesAtivosQueryHandler implements QueryHandler<GetEscaloesAt
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetEscaloesAtivosQueryHandler.class);
 
+  private final ParamEscalaoMapper paramEscalaoMapper;
+  private final ParamEscalaoRepository paramEscalaoRepository;
 
-  public GetEscaloesAtivosQueryHandler() {
+  public GetEscaloesAtivosQueryHandler(ParamEscalaoMapper paramEscalaoMapper, ParamEscalaoRepository paramEscalaoRepository) {
 
+    this.paramEscalaoMapper = paramEscalaoMapper;
+    this.paramEscalaoRepository = paramEscalaoRepository;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<List<ParametrizacaoDTO>> handle(GetEscaloesAtivosQuery query) {
-    // TODO: Implement the query handling logic here
-    return null;
+     var paramEscaloes =  paramEscalaoRepository.findAllActive();
+     List<ParametrizacaoDTO> parametrizacoes = paramEscaloes.stream()
+         .map(paramEscalaoMapper::toParametrizacaoDto)
+         .toList();
+     return ResponseEntity.ok(parametrizacoes);
   }
 
 }

@@ -1,5 +1,8 @@
 package cv.inps.rh.parametrizacao.application.queries;
 
+import cv.inps.rh.parametrizacao.domain.models.ParamCarreira;
+import cv.inps.rh.parametrizacao.domain.repository.ParamCarreiraRepository;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamCarreiraMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -16,15 +19,24 @@ public class GetCarreirasAtivosQueryHandler implements QueryHandler<GetCarreiras
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetCarreirasAtivosQueryHandler.class);
 
+  private final ParamCarreiraMapper paramCarreiraMapper;
+  private final ParamCarreiraRepository paramCarreiraRepository;
 
-  public GetCarreirasAtivosQueryHandler() {
+  public GetCarreirasAtivosQueryHandler(ParamCarreiraMapper paramCarreiraMapper, ParamCarreiraRepository paramCarreiraRepository) {
 
+    this.paramCarreiraMapper = paramCarreiraMapper;
+    this.paramCarreiraRepository = paramCarreiraRepository;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<List<ParametrizacaoDTO>> handle(GetCarreirasAtivosQuery query) {
-    // TODO: Implement the query handling logic here
-    return null;
+
+     var paramCarreiras =  paramCarreiraRepository.findAllActive();
+     List<ParametrizacaoDTO> parametrizacoes = paramCarreiras.stream()
+         .map(paramCarreiraMapper::toParametrizacaoDto)
+         .toList();
+
+     return ResponseEntity.ok(parametrizacoes);
   }
 
 }
