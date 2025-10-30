@@ -24,6 +24,7 @@ public class ValidacaoMapper {
     entity.setEstado(validacao.getEstado());
     entity.setUuid(validacao.getUuid().getValor());
     entity.setReferenciaName(validacao.getReferenciaName());
+    entity.setTipoAccao(validacao.getTipoAccao());
     //entity.setReferenciaId(); //sera setado depois na iteracao do agregado pai
 
     return  entity;
@@ -54,7 +55,7 @@ public class ValidacaoMapper {
     dto.setNomeColaborador(validacao.getUserRegistro());
     dto.setTipoOperacao(validacao.getTipoAccao());
     dto.setReferenciaName(validacao.getReferenciaName());
-    //dto.setDataOperacao(DateFormatter.localDateToString(validacao.getDataRegistro()));
+    dto.setDataOperacao(DateFormatter.localDateToString(validacao.getDataRegistro()));
     dto.setUtilizador(validacao.getUserRegistro());
 
     return dto;

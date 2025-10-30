@@ -409,13 +409,15 @@ public class FuncionarioMapper {
       entity.setDefinicoesPagamentos(defPagamentosEntities);
     }
 
+    System.out.println("entity id _:::::::::::::::::::::::::::::"+entity.getId());
+
 
     //validacoes
     if(funcionario.getValidacoes()!=null) {
       List<ValidacaoEntity> validacaoEntities = funcionario.getValidacoes().stream()
           .map( v -> {
             ValidacaoEntity validacaoEntity = validacaoMapper.toEntity(v);
-            validacaoEntity.setReferenciaId(funcionario.getId());
+            validacaoEntity.setReferenciaId(1L);
             validacaoEntity.setFunId(entity);
             validacaoEntity.setTiprelId( tiposRelacionamentosMap.get(v.getTiprel().getUuid().getValor()));
 

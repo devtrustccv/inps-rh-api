@@ -108,9 +108,24 @@ public class ContratoMapper {
   public Contrato toDomain(ContratoEntity entity) {
     if (entity == null) return null;
 
+    // Só mapear filhos de primeiro nível (não mapear netos)
     List<Contrato> filhos = entity.getContratosFilhos() != null
         ? entity.getContratosFilhos().stream()
-        .map(this::toDomain)
+        .map(filho -> Contrato.rebuild(
+            filho.getId(),
+            filho.getUuid(),
+            filho.getEstado(),
+            filho.getDataInicio(),
+            filho.getDataFim(),
+            filho.getDuracao(),
+            filho.getVersao(),
+            filho.getTpContrato(),
+            filho.getSituacaoLaboral(),
+            filho.getObs(),
+            paramVinculoMapper.toDomain(filho.getVinculoId()),
+            paramContratoMapper.toDomain(filho.getTpContratoId()),
+            null, // não mapeia contratoMestre aqui
+            new ArrayList<>())) // filhos de filhos = vazio
         .collect(Collectors.toList())
         : new ArrayList<>();
 
@@ -127,7 +142,7 @@ public class ContratoMapper {
         entity.getObs(),
         paramVinculoMapper.toDomain(entity.getVinculoId()),
         paramContratoMapper.toDomain(entity.getTpContratoId()),
-        null, // mestre será reconstruído automaticamente se necessário
+        null, // contrato mestre será tratado fora se necessário
         filhos
     );
   }
