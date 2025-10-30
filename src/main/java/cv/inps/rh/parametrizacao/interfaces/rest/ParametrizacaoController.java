@@ -6,11 +6,15 @@ package cv.inps.rh.parametrizacao.interfaces.rest;
 import cv.igrp.framework.stereotype.IgrpController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.parametrizacao.application.queries.*;
@@ -25,12 +29,12 @@ import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 @Tag(name = "Parametrizacao", description = "Modulo parametrizacao")
 public class ParametrizacaoController {
 
-
+  
   private final QueryBus queryBus;
 
   public ParametrizacaoController(QueryBus queryBus) {
           this.queryBus = queryBus;
-
+          
   }
    @GetMapping(
    value = "dominios"
@@ -51,7 +55,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<DominioDTO>> getDominios(
     @RequestParam(value = "dominio") String dominio)
   {
@@ -82,7 +86,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getCargosAtivos(
     )
   {
@@ -113,7 +117,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getCarreirasAtivos(
     )
   {
@@ -144,7 +148,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getCategoriasAtivos(
     )
   {
@@ -175,7 +179,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getParamContratosAtivos(
     )
   {
@@ -206,7 +210,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getEscaloesAtivos(
     )
   {
@@ -237,7 +241,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getLocalTrabalhoAtivos(
     )
   {
@@ -253,8 +257,8 @@ public class ParametrizacaoController {
    value = "situacao-laboral/ativos"
   )
   @Operation(
-    summary = "GET method to handle operations for getSituacaoLaboralAtivo",
-    description = "GET method to handle operations for getSituacaoLaboralAtivo",
+    summary = "GET method to handle operations for getParamSituacaoLaboralAtivo",
+    description = "GET method to handle operations for getParamSituacaoLaboralAtivo",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -268,8 +272,8 @@ public class ParametrizacaoController {
       )
     }
   )
-
-  public ResponseEntity<List<ParametrizacaoDTO>> getSituacaoLaboralAtivo(
+  
+  public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacaoLaboralAtivo(
     )
   {
 
@@ -299,7 +303,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getVinculosAtivos(
     )
   {
@@ -330,7 +334,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getSeccoesAtivos(
     )
   {
@@ -361,7 +365,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getTiposDocumentoAtivos(
     )
   {
