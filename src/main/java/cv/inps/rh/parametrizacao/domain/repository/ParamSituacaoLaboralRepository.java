@@ -4,7 +4,7 @@ import cv.inps.rh.parametrizacao.domain.models.ParamSitLaboral;
 
 import java.util.List;
 
-public interface SituacaoLaboralRepository {
+public interface ParamSituacaoLaboralRepository {
 
   public ParamSitLaboral getSituacaoLaboralById(String id);
 

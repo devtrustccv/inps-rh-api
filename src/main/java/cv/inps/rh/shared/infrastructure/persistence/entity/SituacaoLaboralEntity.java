@@ -3,6 +3,7 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
@@ -26,24 +27,24 @@ public class SituacaoLaboralEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotBlank(message = "situacaoLaboral is mandatory")
     @Column(name="situacao_laboral", nullable = false)
     private String situacaoLaboral;
 
-  
+
     @Column(name="motivo_sit_lab")
     private String motivoSitLab;
 
-  
+
     @Column(name="data_inicio")
     private LocalDate dataInicio;
 
-  
+
     @Column(name="data_fim")
     private LocalDate dataFim;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -55,15 +56,15 @@ public class SituacaoLaboralEntity extends AuditEntity {
     @JoinColumn(name = "contrato_id", referencedColumnName = "id")
     private ContratoEntity contratoId;
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
-  
+
     @Column(name="obs", length=4000)
     private String obs;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
 }
