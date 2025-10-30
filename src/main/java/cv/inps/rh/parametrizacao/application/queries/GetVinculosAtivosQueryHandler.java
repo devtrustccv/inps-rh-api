@@ -1,5 +1,7 @@
 package cv.inps.rh.parametrizacao.application.queries;
 
+import cv.inps.rh.parametrizacao.domain.repository.ParamVinculoRepository;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamVinculoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -16,15 +18,22 @@ public class GetVinculosAtivosQueryHandler implements QueryHandler<GetVinculosAt
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetVinculosAtivosQueryHandler.class);
 
+  private final ParamVinculoRepository paramVinculoRepository;
+  private final ParamVinculoMapper paramVinculoMapper;
 
-  public GetVinculosAtivosQueryHandler() {
+  public GetVinculosAtivosQueryHandler(ParamVinculoRepository paramVinculoRepository, ParamVinculoMapper paramVinculoMapper) {
 
+    this.paramVinculoRepository = paramVinculoRepository;
+    this.paramVinculoMapper = paramVinculoMapper;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<List<ParametrizacaoDTO>> handle(GetVinculosAtivosQuery query) {
-    // TODO: Implement the query handling logic here
-    return null;
+     var paramVinculos =  paramVinculoRepository.findAllActive();
+     List<ParametrizacaoDTO> parametrizacoes = paramVinculos.stream()
+         .map(paramVinculoMapper::toParametrizacaoDto)
+         .toList();
+     return ResponseEntity.ok(parametrizacoes);
   }
 
 }

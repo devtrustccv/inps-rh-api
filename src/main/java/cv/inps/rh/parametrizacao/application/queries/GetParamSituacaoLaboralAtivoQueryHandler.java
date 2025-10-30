@@ -1,5 +1,7 @@
 package cv.inps.rh.parametrizacao.application.queries;
 
+import cv.inps.rh.parametrizacao.domain.repository.ParamSituacaoLaboralRepository;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamSitLaboralMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -15,15 +17,22 @@ public class GetParamSituacaoLaboralAtivoQueryHandler implements QueryHandler<Ge
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetParamSituacaoLaboralAtivoQueryHandler.class);
 
+  private final ParamSituacaoLaboralRepository paramSituacaoLaboralRepository;
+  private final ParamSitLaboralMapper paramSitLaboralMapper;
 
-  public GetParamSituacaoLaboralAtivoQueryHandler() {
+  public GetParamSituacaoLaboralAtivoQueryHandler(ParamSituacaoLaboralRepository paramSituacaoLaboralRepository, ParamSitLaboralMapper paramSitLaboralMapper) {
 
+    this.paramSituacaoLaboralRepository = paramSituacaoLaboralRepository;
+    this.paramSitLaboralMapper = paramSitLaboralMapper;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<List<ParametrizacaoDTO>> handle(GetParamSituacaoLaboralAtivoQuery query) {
-    // TODO: Implement the query handling logic here
-    return null;
+      var paramSituacoes =  paramSituacaoLaboralRepository.findAllActive();
+      List<ParametrizacaoDTO> parametrizacoes = paramSituacoes.stream()
+          .map(paramSitLaboralMapper::toParametrizacaoDto)
+          .toList();
+      return ResponseEntity.ok(parametrizacoes);
   }
 
 }
