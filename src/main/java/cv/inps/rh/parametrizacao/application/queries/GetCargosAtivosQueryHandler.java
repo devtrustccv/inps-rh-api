@@ -1,5 +1,7 @@
 package cv.inps.rh.parametrizacao.application.queries;
 
+import cv.inps.rh.parametrizacao.domain.repository.ParamCargoRepository;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamCargoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -16,15 +18,25 @@ public class GetCargosAtivosQueryHandler implements QueryHandler<GetCargosAtivos
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetCargosAtivosQueryHandler.class);
 
+   private final ParamCargoRepository paramCargoRepository;
+   private final ParamCargoMapper paramCargoMapper;
 
-  public GetCargosAtivosQueryHandler() {
+  public GetCargosAtivosQueryHandler(ParamCargoRepository paramCargoRepository, ParamCargoMapper paramCargoMapper) {
 
+    this.paramCargoRepository = paramCargoRepository;
+    this.paramCargoMapper = paramCargoMapper;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<List<ParametrizacaoDTO>> handle(GetCargosAtivosQuery query) {
-    // TODO: Implement the query handling logic here
-    return null;
+    LOGGER.info("Handling query {}", query);
+    var paramCargos =  paramCargoRepository.findAllByAtivo();
+
+    List<ParametrizacaoDTO> parametrizacoes = paramCargos.stream()
+        .map(paramCargoMapper::toParametrizacaoDto)
+        .toList();
+
+    return ResponseEntity.ok(parametrizacoes);
   }
 
 }

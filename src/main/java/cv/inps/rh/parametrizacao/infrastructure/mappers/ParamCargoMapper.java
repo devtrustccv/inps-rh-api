@@ -1,5 +1,6 @@
 package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
+import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamCargo;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
@@ -54,5 +55,12 @@ public class ParamCargoMapper {
   public ParamCargo toDomain(Long idCargo) {
     if (idCargo == null || idCargo < 0) return null;
     return ParamCargo.rebuild(idCargo);
+  }
+
+  public ParametrizacaoDTO toParametrizacaoDto(ParamCargo paramCargo){
+     var parametrizacaoDTO = new ParametrizacaoDTO();
+     parametrizacaoDTO.setValue(paramCargo.getId());
+     parametrizacaoDTO.setLabel(paramCargo.getNome());
+     return parametrizacaoDTO;
   }
 }
