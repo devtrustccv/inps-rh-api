@@ -1,7 +1,7 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.ValidacaoResponseDTO;
-import cv.inps.rh.funcionario.domain.filters.ValidacoeFilters;
+import cv.inps.rh.funcionario.domain.filters.ValidacoesFilters;
 import cv.inps.rh.funcionario.domain.models.Validacao;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
@@ -62,15 +62,15 @@ public class ValidacaoMapper {
   }
 
 
-  public ValidacoeFilters toFilterDomain(String nomeColaborador,
-                                                String tipoAccao,
-                                                String referenciaName,
-                                                String dataInicio,
-                                                String dataFim,
-                                                Integer pageNumber,
-                                                Integer pageSize) {
+  public ValidacoesFilters toFilterDomain(String nomeColaborador,
+                                          String tipoAccao,
+                                          String referenciaName,
+                                          String dataInicio,
+                                          String dataFim,
+                                          Integer pageNumber,
+                                          Integer pageSize) {
 
-    return ValidacoeFilters.builder()
+    return ValidacoesFilters.builder()
         .nomeColaborador(nomeColaborador)
         .tipoAccao(tipoAccao)
         .referenciaName(referenciaName)

@@ -1,6 +1,9 @@
 package cv.inps.rh.shared.interfaces.rest;
 
+import cv.igrp.framework.core.data.EnumItem;
+import cv.igrp.framework.core.utils.object.EnumUtils;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.service.ParametrizacaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -55,6 +58,12 @@ public class ParametrizacaoController {
   @Operation(summary = "Lista entidades ativas")
   public ResponseEntity<List<ParametrizacaoDTO>> getEntidadesAtivas() {
     return ResponseEntity.ok(parametrizacaoService.getEntidades());
+  }
+
+  @GetMapping("/estados")
+  public ResponseEntity<List<EnumItem<String>>> getQualificacoes() {
+
+    return ResponseEntity.ok(EnumUtils.mapEnumToItems(Estado.class));
   }
 
 }

@@ -125,6 +125,75 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getListFuncionarios",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaFuncionario",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "nome",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direccao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "tipoVinculoLaboral",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        }
+      ]
     }
   ],
   "id": "69p09wi4e0-criarFuncionario"

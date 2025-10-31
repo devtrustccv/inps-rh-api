@@ -1,7 +1,10 @@
 package cv.inps.rh.funcionario.domain.repository;
 
+import cv.inps.rh.funcionario.domain.filters.FuncionarioFilters;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
+import cv.inps.rh.funcionario.domain.projections.FuncionarioList;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface FuncionarioRepository {
@@ -9,4 +12,6 @@ public interface FuncionarioRepository {
   Funcionario save(Funcionario funcionario);
 
   Optional<Funcionario> findById(Long id);
+
+  List<FuncionarioList> findAll(FuncionarioFilters filters);
 }

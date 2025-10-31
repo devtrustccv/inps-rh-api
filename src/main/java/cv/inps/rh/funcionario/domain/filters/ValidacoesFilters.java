@@ -1,6 +1,5 @@
 package cv.inps.rh.funcionario.domain.filters;
 
-import cv.inps.rh.funcionario.domain.models.TiposRelacionamento;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -8,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class ValidacoeFilters {
+public class ValidacoesFilters {
 
   private String nomeColaborador;
   private String tipoAccao;

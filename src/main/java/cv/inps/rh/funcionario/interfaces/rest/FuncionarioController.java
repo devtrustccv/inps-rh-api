@@ -24,6 +24,7 @@ import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDetailsDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaValidacoesDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperListaFuncionarioDTO;
 
 @IgrpController
 @RestController
@@ -133,6 +134,44 @@ public class FuncionarioController {
       final var query = new GetValicoesUtilizadoresQuery(nomeColaborador, tipoOperacao, referenciaName, dataInicio, dataFim, pageNumber, pageSize);
 
       ResponseEntity<WrapperListaValidacoesDTO> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @GetMapping(
+  )
+  @Operation(
+    summary = "GET method to handle operations for getListFuncionarios",
+    description = "GET method to handle operations for getListFuncionarios",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = WrapperListaFuncionarioDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<WrapperListaFuncionarioDTO> getListFuncionarios(
+    @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
+    @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
+    @RequestParam(value = "nome", required = false) String nome,
+    @RequestParam(value = "direccao", required = false) Long direccao,
+    @RequestParam(value = "seccao", required = false) Long seccao,
+    @RequestParam(value = "tipoVinculoLaboral", required = false) Long tipoVinculoLaboral,
+    @RequestParam(value = "dataInicio", required = false) String dataInicio,
+    @RequestParam(value = "dataFim", required = false) String dataFim,
+    @RequestParam(value = "estado", required = false) String estado)
+  {
+
+      final var query = new GetListFuncionariosQuery(pageNumber, pageSize, nome, direccao, seccao, tipoVinculoLaboral, dataInicio, dataFim, estado);
+
+      ResponseEntity<WrapperListaFuncionarioDTO> response = queryBus.handle(query);
 
       return response;
   }

@@ -1,14 +1,19 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.*;
+import cv.inps.rh.funcionario.domain.filters.FuncionarioFilters;
 import cv.inps.rh.funcionario.domain.models.*;
+import cv.inps.rh.funcionario.domain.projections.FuncionarioList;
+import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.TipoDocumentoMapper;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.mappers.EstadoMapper;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
-import cv.inps.rh.parametrizacao.infrastructure.mappers.TipoDocumentoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -575,6 +580,48 @@ public class FuncionarioMapper {
         })
         .toList();
    dto.setSubsidios(subsidiosList);
+
+    return dto;
+  }
+
+
+  public FuncionarioFilters toFilterDomain(String nome,
+                                           Long direcao,
+                                           Long seccao,
+                                           Long tipoVinculoLaboral,
+                                           String dataInicio,
+                                           String dataFim,
+                                           String estado,
+                                           Integer pageNumber,
+                                           Integer pageSize) {
+
+    return FuncionarioFilters.builder()
+        .nome(nome)
+        .direcao(direcao)
+        .seccao(seccao)
+        .tipoVinculoLaboral(tipoVinculoLaboral)
+        .dataInicio(StringUtils.hasText(dataInicio)  ? DateFormatter.stringToLocalDateTime(dataInicio) :null)
+        .dataFim(StringUtils.hasText(dataFim) ? DateFormatter.stringToLocalDateTime(dataFim) : null)
+        .estado(estado!=null ? Estado.fromCodeOrThrow(estado):null)
+        .pageNumber(pageNumber)
+        .pageSize(pageSize)
+        .build();
+  }
+
+  public static FuncionarioListDTO toDTO(FuncionarioList projection) {
+    if (projection == null) return null;
+
+    FuncionarioListDTO dto = new FuncionarioListDTO();
+    dto.setId(projection.getId());
+    dto.setUuid(projection.getUuid() != null ? projection.getUuid().toString() : null);
+    dto.setNome(projection.getNome());
+    dto.setCargo(projection.getCargo());
+    dto.setDataInicio(projection.getDataInicio() != null ? DateFormatter.localDateToString(projection.getDataInicio()) : null);
+    dto.setDireccao(projection.getDireccao());
+    dto.setSeccao(projection.getSeccao());
+    dto.setCarreiraCategoria(projection.getCarreiraCategoria());
+    dto.setEstadoRegisto(projection.getEstadoRegisto());
+    dto.setEstadoColaborador(projection.getEstadoColaborador());
 
     return dto;
   }
