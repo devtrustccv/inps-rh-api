@@ -320,6 +320,47 @@
       "primaryKey": false,
       "collectionType": "list",
       "module": "funcionario"
+    },
+    {
+      "name": "dadosContratuais",
+      "objectType": "dto",
+      "type": "DadosContratuaisResp",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "funcionario"
+    },
+    {
+      "name": "subsidios",
+      "objectType": "dto",
+      "type": "SubsidioResp",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
+    },
+    {
+      "name": "encargosDescontos",
+      "objectType": "dto",
+      "type": "EncargosDescontosResp",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
     }
   ],
   "id": "pjb2kk86vo_copy_copy"

@@ -13,10 +13,13 @@ import cv.inps.rh.funcionario.application.dto.AgregadoDependenteRespDTO;
 import cv.inps.rh.funcionario.application.dto.AnexoRespDTO;
 import cv.inps.rh.funcionario.application.dto.ContactoRespDTO;
 import cv.inps.rh.funcionario.application.dto.DadosBancariosRespDTO;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
+import cv.inps.rh.funcionario.application.dto.EncargosDescontosRespDTO;
 import cv.inps.rh.funcionario.application.dto.EnderecoRespDTO;
 import cv.inps.rh.funcionario.application.dto.ExperienciaProfissionalRespDTO;
 import cv.inps.rh.funcionario.application.dto.FormacaoProfissionalRespDTO;
 import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaRespDTO;
+import cv.inps.rh.funcionario.application.dto.SubsidioRespDTO;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,5 +107,14 @@ public class FuncionarioResponseDetailsDTO  {
   
   @Valid
   private List<AnexoRespDTO> anexos = new ArrayList<>();
+  
+  @Valid
+  private DadosContratuaisRespDTO dadosContratuais ;
+  
+  @Valid
+  private List<SubsidioRespDTO> subsidios = new ArrayList<>();
+  
+  @Valid
+  private List<EncargosDescontosRespDTO> encargosDescontos = new ArrayList<>();
 
 }

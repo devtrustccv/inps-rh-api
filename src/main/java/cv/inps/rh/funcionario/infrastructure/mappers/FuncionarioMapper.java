@@ -1,7 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
-import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
-import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDetailsDTO;
+import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.domain.models.*;
 import cv.inps.rh.shared.infrastructure.mappers.EstadoMapper;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
@@ -513,6 +512,69 @@ public class FuncionarioMapper {
     if(funcionario.getDadosBancarios()!=null && !funcionario.getDadosBancarios().isEmpty()) {
       dto.setDadosBancarios(dadosBancariosMapper.toResponseDTOList(funcionario.getDadosBancarios()));
     }
+
+    var tipoRelacionamentoAtual = funcionario.getTipoRelacionamentoAtual();
+    if(tipoRelacionamentoAtual!=null) {
+      var  dadosContratuaisRespDTO = new DadosContratuaisRespDTO();
+      dadosContratuaisRespDTO.setTipoContratoId(tipoRelacionamentoAtual.getContrato().getTpContratoParam().getId());
+      dadosContratuaisRespDTO.setTipoContratoDesc(tipoRelacionamentoAtual.getContrato().getTpContratoParam().getNome());
+      dadosContratuaisRespDTO.setCargoPosicaoId(tipoRelacionamentoAtual.getCargo().getId());
+      dadosContratuaisRespDTO.setCargoPosicaoDesc(tipoRelacionamentoAtual.getCargo().getNome());
+      dadosContratuaisRespDTO.setDirecaoId(tipoRelacionamentoAtual.getInstituicao().getId());
+      dadosContratuaisRespDTO.setDirecaoDesc(tipoRelacionamentoAtual.getInstituicao().getNome());
+      dadosContratuaisRespDTO.setSeccaoId(tipoRelacionamentoAtual.getSeccao().getId());
+      dadosContratuaisRespDTO.setSeccaoDesc(tipoRelacionamentoAtual.getSeccao().getNome());
+      //dadosContratuaisRespDTO.setCentroCusto(tipoRelacionamentoAtual.getce);
+
+      dadosContratuaisRespDTO.setCarreiraId(tipoRelacionamentoAtual.getCarrPcc().getId());
+      dadosContratuaisRespDTO.setCarreiraDesc(tipoRelacionamentoAtual.getCarrPcc().getNome());
+      dadosContratuaisRespDTO.setCategoriaId(tipoRelacionamentoAtual.getCategoria().getId());
+      dadosContratuaisRespDTO.setCategoriaDesc(tipoRelacionamentoAtual.getCategoria().getNome());
+      dadosContratuaisRespDTO.setEscalaoReferenciaId(tipoRelacionamentoAtual.getEscalao().getId());
+      dadosContratuaisRespDTO.setEscalaoReferenciaDesc(tipoRelacionamentoAtual.getEscalao().getCodigo());
+      dadosContratuaisRespDTO.setTipoVinculoLaboralId(tipoRelacionamentoAtual.getVinculo().getId());
+      dadosContratuaisRespDTO.setTipoVinculoLaboralDesc(tipoRelacionamentoAtual.getVinculo().getNome());
+      dadosContratuaisRespDTO.setSalario(tipoRelacionamentoAtual.getSalario());
+      dadosContratuaisRespDTO.setMoeda(tipoRelacionamentoAtual.getMoeda());
+      dadosContratuaisRespDTO.setDataInicio(tipoRelacionamentoAtual.getDataInicio());
+      dadosContratuaisRespDTO.setDataFim(tipoRelacionamentoAtual.getDataFim());
+      dadosContratuaisRespDTO.setDuracaoMeses(tipoRelacionamentoAtual.getContrato().getDuracao());
+      dadosContratuaisRespDTO.setLocalTrabalhoId(tipoRelacionamentoAtual.getLocTrab().getId());
+      dadosContratuaisRespDTO.setLocalTrabalhoDesc(tipoRelacionamentoAtual.getLocTrab().getNome());
+      dadosContratuaisRespDTO.setRegimeTrabalho(tipoRelacionamentoAtual.getRegime());
+      dto.setDadosContratuais(dadosContratuaisRespDTO);
+    }
+
+
+
+    List<EncargosDescontosRespDTO> encargosDescontosList = funcionario.getDefPagamentos() == null ?
+        List.of() : funcionario.getDefPagamentos().stream()
+        .map(d -> {
+          var encargosDescontosRespDTO = new EncargosDescontosRespDTO();
+          encargosDescontosRespDTO.setId(d.getId());
+          encargosDescontosRespDTO.setTipoEncargoId(d.getTipoMovimento().getId());
+          encargosDescontosRespDTO.setTipoEncargoDesc(d.getTipoMovimento().getDescricao());
+          encargosDescontosRespDTO.setValor(d.getValor());
+          encargosDescontosRespDTO.setDataInicio(d.getDataInicio());
+          encargosDescontosRespDTO.setDataFim(d.getDataFim());
+          return encargosDescontosRespDTO;
+        })
+        .toList();
+    dto.setEncargosDescontos(encargosDescontosList);
+
+    List<SubsidioRespDTO> subsidiosList = funcionario.getDefinicaoRemuneracoes() == null ?
+        List.of() : funcionario.getDefinicaoRemuneracoes().stream()
+        .map(d -> {
+          var subsidioRespDTO = new SubsidioRespDTO();
+          subsidioRespDTO.setId(d.getId());
+          subsidioRespDTO.setValor(d.getValor());
+          subsidioRespDTO.setPercentagem(d.getPercentagem());
+          subsidioRespDTO.setTipoSubsidioId(d.getTipoMovimento().getId());
+          subsidioRespDTO.setTipoSubsidioDesc(d.getTipoMovimento().getDescricao());
+          return subsidioRespDTO;
+        })
+        .toList();
+   dto.setSubsidios(subsidiosList);
 
     return dto;
   }

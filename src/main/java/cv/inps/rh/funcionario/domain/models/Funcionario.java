@@ -743,6 +743,23 @@ public class Funcionario {
     var validacao = Validacao.create("INSERT", "REGISTO_COLABORADOR", null, "obs", tiposRelacionamento);
     this.adicionarValidacao(validacao);
 
-
   }
+
+  public TiposRelacionamento getTipoRelacionamentoAtual() {
+    if (tiposRelacionamentos == null || tiposRelacionamentos.isEmpty()) {
+      return null;
+    }
+    return tiposRelacionamentos.stream()
+        .filter(t -> t.getContrato() != null)
+        .max(
+            Comparator.comparingInt((TiposRelacionamento t) -> t.getContrato().getVersao())
+                .thenComparing(
+                    t -> t.getContrato().getDataInicio(),
+                    Comparator.reverseOrder()
+                )
+        )
+        .orElse(null);
+  }
+
+
 }
