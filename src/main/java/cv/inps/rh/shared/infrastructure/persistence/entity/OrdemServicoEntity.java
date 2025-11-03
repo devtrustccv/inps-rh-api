@@ -8,6 +8,7 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotBlank;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
 
 
@@ -42,11 +43,6 @@ public class OrdemServicoEntity extends AuditEntity {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fun_id", referencedColumnName = "id")
-    private FuncionarioEntity funId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
     private TiposRelacionamentoEntity tiprelId;
 
@@ -59,8 +55,9 @@ public class OrdemServicoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "validacao_id", referencedColumnName = "id")
     private ValidacaoEntity validacaoId;
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
   
     @Column(name="obs", length=4000)

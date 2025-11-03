@@ -168,7 +168,7 @@ public class Funcionario {
         numeroSegurancaSocial,
         entidadeId,
         colaboradorId,
-        Estado.A,
+        Estado.P,
         Estado.P,
         null,
         null,
