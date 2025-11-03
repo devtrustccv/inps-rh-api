@@ -176,7 +176,7 @@
       "module": "funcionario"
     },
     {
-      "name": "enderecos",
+      "name": "endereco",
       "objectType": "dto",
       "type": "EnderecoReq",
       "required": false,
@@ -186,7 +186,7 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false,
-      "collectionType": "list",
+      "collectionType": "none",
       "module": "funcionario"
     },
     {

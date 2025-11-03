@@ -150,9 +150,7 @@ public class Funcionario {
   ) {
 
 
-
-
-   var funcionario = new  Funcionario(
+    var funcionario = new Funcionario(
         null,
         IdentificadorUnico.create(),
         tipoDocumento,
@@ -191,7 +189,7 @@ public class Funcionario {
     );
 
 
-   return funcionario;
+    return funcionario;
   }
 
   // Factory para reconstrução de repositorio
@@ -716,11 +714,11 @@ public class Funcionario {
         duracaoMeses, null, "situacao laboral",
         paramVinculo, paramTipoContrato);
 
-    var carreira = Carreira.create(salario, null, "tipo situacao", "obs",contrato, paramCargo,paramEscalao, paramCategoria,paramCarreira);
+    var carreira = Carreira.create(salario, null, "tipo situacao", "obs", contrato, paramCargo, paramEscalao, paramCategoria, paramCarreira);
 
-    var mobilidade = Mobilidade.create(contrato, paramLocalTrab ,"tipo siutacao",seccao, direcao,"obs");
+    var mobilidade = Mobilidade.create(contrato, paramLocalTrab, "tipo siutacao", seccao, direcao, "obs");
 
-    var regime = RegimeTrabalho.create("tipo regime","tipo situacao regime",dataFim, "obs", contrato);
+    var regime = RegimeTrabalho.create("tipo regime", "tipo situacao regime", dataFim, "obs", contrato);
 
     var tiposRelacionamento = TiposRelacionamento.create(paramCargo, direcao, paramVinculo, seccao, paramCategoria,
         paramEscalao, paramCarreira, salario, moeda, regimeTrabalho, null, null,
@@ -762,4 +760,7 @@ public class Funcionario {
   }
 
 
+  public void addEndereco(Endereco endereco) {
+    this.enderecos.add(endereco);
+  }
 }

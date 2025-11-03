@@ -88,7 +88,7 @@ public class FuncionarioResponseDetailsDTO  {
   private List<ContactoRespDTO> contactos = new ArrayList<>();
   
   @Valid
-  private List<EnderecoRespDTO> enderecos = new ArrayList<>();
+  private EnderecoRespDTO endereco ;
   
   @Valid
   private List<AgregadoDependenteRespDTO> familiares = new ArrayList<>();

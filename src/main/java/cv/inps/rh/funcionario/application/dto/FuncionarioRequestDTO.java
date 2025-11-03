@@ -76,7 +76,7 @@ public class FuncionarioRequestDTO  {
   private List<ContactoReqDTO> contactos = new ArrayList<>();
   
   @Valid
-  private List<EnderecoReqDTO> enderecos = new ArrayList<>();
+  private EnderecoReqDTO endereco ;
   
   @Valid
   private List<AgregadoDependenteReqDTO> familiares = new ArrayList<>();

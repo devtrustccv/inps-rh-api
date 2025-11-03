@@ -489,8 +489,11 @@ public class FuncionarioMapper {
     }
 
     // ---- Endereços ----
-    if (funcionario.getEnderecos() != null && !funcionario.getEnderecos().isEmpty()) {
+    /*if (funcionario.getEnderecos() != null && !funcionario.getEnderecos().isEmpty()) {
       dto.setEnderecos(enderecoMapper.toDTOList(funcionario.getEnderecos()));
+    }*/
+    if (funcionario.getEnderecos() != null && !funcionario.getEnderecos().isEmpty()) {
+      dto.setEndereco(enderecoMapper.toDTO(funcionario.getEnderecos().getFirst()));
     }
 
 

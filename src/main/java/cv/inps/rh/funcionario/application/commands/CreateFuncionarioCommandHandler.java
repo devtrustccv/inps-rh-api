@@ -129,7 +129,9 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
      var contactos = contactoMapper.toContactosDomain(dto.getContactos());
 
-     var enderecos = enderecoMapper.toEnderecosDomain(dto.getEnderecos());
+     //var enderecos = enderecoMapper.toEnderecosDomain(dto.getEnderecos());
+
+     var endereco = enderecoMapper.toDomain(dto.getEndereco());
 
      var familiares = familiarMapper.toFamiliaresDomain(dto.getFamiliares());
 
@@ -145,7 +147,8 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
 
      funcionario.syncContacts(contactos);
-     funcionario.syncEnderecos(enderecos);
+    // funcionario.syncEnderecos(enderecos);
+     funcionario.addEndereco(endereco);
      funcionario.syncFamiliares(familiares);
      funcionario.syncHabilitacoes(habilitacoesLiterarias);
      funcionario.syncFormacoes(formacoesFeitas);
