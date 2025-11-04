@@ -3,10 +3,10 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import cv.inps.rh.funcionario.application.dto.DadosBancariosReqDTO;
 import cv.inps.rh.funcionario.application.dto.DadosBancariosRespDTO;
 import cv.inps.rh.funcionario.domain.models.DadosBancarios;
-import cv.inps.rh.shared.domain.models.Entidade;
-import cv.inps.rh.shared.infrastructure.mappers.EntidadeMapper;
+import cv.inps.rh.shared.domain.models.Banco;
+import cv.inps.rh.shared.infrastructure.mappers.BancoMapper;
+import cv.inps.rh.shared.infrastructure.persistence.entity.BancoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DadosBancariosEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.EntidadeEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,21 +20,20 @@ public class DadosBancariosMapper {
 
   private final EntityManager entityManager;
 
-  private final EntidadeMapper entidadeMapper;
-
+   private final BancoMapper bancoMapper;
 
   // Entity -> Domain
   public DadosBancarios toDomain(DadosBancariosEntity entity) {
     if (entity == null) return null;
 
-    Entidade entidadeRef = entity.getEntId() != null
-        ? Entidade.rebuild(entity.getEntId().getId(), entity.getEntId().getNome())
+    Banco banco = entity.getRhbId() != null
+        ? bancoMapper.toDomain(entity.getRhbId())
         : null;
 
     return DadosBancarios.rebuild(
         entity.getId(),
         entity.getUuid(),
-        entidadeRef,
+        banco,
         entity.getNumConta(),
         entity.getDataInicio(),
         entity.getDataFim(),
@@ -52,10 +51,10 @@ public class DadosBancariosMapper {
     }
     entity.setUuid(domain.getUuid().getValor());
 
-    if (domain.getEntidade() != null) {
-      entity.setEntId(entityManager.getReference(
-          EntidadeEntity.class,
-          domain.getEntidade().getId()
+    if (domain.getBanco() != null) {
+      entity.setRhbId(entityManager.getReference(
+          BancoEntity.class,
+          domain.getBanco().getId()
       ));
     }
 
@@ -71,13 +70,13 @@ public class DadosBancariosMapper {
   public DadosBancarios toDomain(DadosBancariosReqDTO dto) {
     if (dto == null) return null;
 
-    Entidade entidade = dto.getEntidadeBancariaId() != null
-        ? entidadeMapper.toDomain(dto.getEntidadeBancariaId())
+    Banco banco = dto.getEntidadeBancariaId() != null
+        ? bancoMapper.toDomain(dto.getEntidadeBancariaId())
         : null;
 
     return DadosBancarios.create(
         dto.getId(),
-        entidade,
+        banco,
         dto.getNumConta(),
         dto.getDataInicio(),
         dto.getDataFim(),
@@ -97,8 +96,8 @@ public class DadosBancariosMapper {
 
     DadosBancariosRespDTO dto = new DadosBancariosRespDTO();
     dto.setId(domain.getId());
-    dto.setEntidadeBancariaId(domain.getEntidade() != null ? domain.getEntidade().getId() : null);
-    dto.setEntidadeBancariaDesc(domain.getEntidade() != null ? domain.getEntidade().getNome() : null);
+    dto.setEntidadeBancariaId(domain.getBanco() != null ? domain.getBanco().getId() : null);
+    dto.setEntidadeBancariaDesc(domain.getBanco() != null ? domain.getBanco().getNomeBanco() : null);
     dto.setNumConta(domain.getNumConta());
     dto.setDataInicio(domain.getDataInicio());
     dto.setDataFim(domain.getDataFim());

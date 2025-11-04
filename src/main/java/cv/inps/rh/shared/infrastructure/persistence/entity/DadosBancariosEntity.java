@@ -8,8 +8,11 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
+
 import cv.inps.rh.shared.application.constants.Estado;
+
 import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,45 +27,44 @@ import java.util.List;
 @Table(name = "RH_T_DADOS_BANCARIOS")
 public class DadosBancariosEntity extends AuditEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", unique = true, nullable = false)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", unique = true, nullable = false)
+  private Long id;
 
-  
-    @NotNull(message = "entId is mandatory")
 
+  @NotNull(message = "rhbId is mandatory")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "rhb_id", referencedColumnName = "id")
+  private BancoEntity rhbId;
+
+  @Column(name = "num_conta")
+  private Long numConta;
+
+
+  @Column(name = "data_inicio")
+  private LocalDate dataInicio;
+
+
+  @Column(name = "data_fim")
+  private LocalDate dataFim;
+
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "estado")
+  private Estado estado;
+
+
+  @Column(name = "obs", length = 4000)
+  private String obs;
+
+
+  @Column(name = "uuid")
+  private UUID uuid;
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ent_id", referencedColumnName = "id")
-    private EntidadeEntity entId;
-    @Column(name="num_conta")
-    private Long numConta;
-
-  
-    @Column(name="data_inicio")
-    private LocalDate dataInicio;
-
-  
-    @Column(name="data_fim")
-    private LocalDate dataFim;
-
-  
-    @Enumerated(EnumType.STRING)
-    @Column(name="estado")
-    private Estado estado;
-
-  
-    @Column(name="obs", length=4000)
-    private String obs;
-
-  
-    @Column(name="uuid")
-    private UUID uuid;
-
-     @ManyToOne(fetch = FetchType.LAZY)
-   @JoinColumn(name = "fun_id")
-   private FuncionarioEntity funId;
+  @JoinColumn(name = "fun_id")
+  private FuncionarioEntity funId;
 
 
 }

@@ -733,7 +733,7 @@ public class Funcionario {
     if (existenteOpt.isPresent()) {
       DadosBancarios existente = existenteOpt.get();
       existente.update(
-          dados.getEntidade(),
+          dados.getBanco(),
           dados.getNumConta(),
           dados.getDataInicio(),
           dados.getDataFim(),

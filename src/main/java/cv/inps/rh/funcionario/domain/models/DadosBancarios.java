@@ -1,6 +1,7 @@
 package cv.inps.rh.funcionario.domain.models;
 
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.models.Banco;
 import cv.inps.rh.shared.domain.models.Entidade;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import lombok.Getter;
@@ -12,7 +13,7 @@ public class DadosBancarios {
 
   private final Long id;
   private final IdentificadorUnico uuid;
-  private Entidade entidade;
+  private Banco banco;
   private Long numConta;
   private LocalDate dataInicio;
   private LocalDate dataFim;
@@ -22,7 +23,7 @@ public class DadosBancarios {
   private DadosBancarios(
       Long id,
       IdentificadorUnico uuid,
-      Entidade entidade,
+      Banco banco,
       Long numConta,
       LocalDate dataInicio,
       LocalDate dataFim,
@@ -31,7 +32,7 @@ public class DadosBancarios {
   ) {
     this.id = id;
     this.uuid = uuid;
-    this.entidade = entidade;
+    this.banco = banco;
     this.numConta = numConta;
     this.dataInicio = dataInicio;
     this.dataFim = dataFim;
@@ -42,7 +43,7 @@ public class DadosBancarios {
   // Factory para criar novo registro
   public static DadosBancarios create(
       Long id,
-      Entidade entidade,
+      Banco banco,
       Long numConta,
       LocalDate dataInicio,
       LocalDate dataFim,
@@ -51,7 +52,7 @@ public class DadosBancarios {
     return new DadosBancarios(
         id != null && id > 0 ? id : null,
         IdentificadorUnico.create(),
-        entidade,
+        banco,
         numConta,
         dataInicio,
         dataFim,
@@ -64,7 +65,7 @@ public class DadosBancarios {
   public static DadosBancarios rebuild(
       Long id,
       java.util.UUID uuid,
-      Entidade entidade,
+      Banco banco,
       Long numConta,
       LocalDate dataInicio,
       LocalDate dataFim,
@@ -74,7 +75,7 @@ public class DadosBancarios {
     return new DadosBancarios(
         id,
         IdentificadorUnico.from(uuid),
-        entidade,
+        banco,
         numConta,
         dataInicio,
         dataFim,
@@ -90,13 +91,13 @@ public class DadosBancarios {
 
   // Update parcial
   public void update(
-      Entidade entidade,
+      Banco banco,
       Long numConta,
       LocalDate dataInicio,
       LocalDate dataFim,
       String observacoes
   ) {
-    if (entidade != null) this.entidade = entidade;
+    if (banco != null) this.banco = banco;
     if (numConta != null) this.numConta = numConta;
     if (dataInicio != null) this.dataInicio = dataInicio;
     if (dataFim != null) this.dataFim = dataFim;
