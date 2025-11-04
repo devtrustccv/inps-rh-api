@@ -20,6 +20,7 @@ import cv.inps.rh.funcionario.application.dto.ExperienciaProfissionalReqDTO;
 import cv.inps.rh.funcionario.application.dto.FormacaoProfissionalReqDTO;
 import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaReqDTO;
 import cv.inps.rh.funcionario.application.dto.SubsidioReqDTO;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,6 +107,6 @@ public class FuncionarioRequestDTO  {
   private List<EncargosDescontosReqDTO> encargosDescontos = new ArrayList<>();
   
   
-  private boolean validado ;
+  private EstadoValidacao validar ;
 
 }

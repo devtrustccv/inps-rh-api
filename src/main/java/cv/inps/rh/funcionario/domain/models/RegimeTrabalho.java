@@ -53,7 +53,7 @@ public class RegimeTrabalho {
         tipoSituacao,
         dataFim,
         obs,
-        Estado.A,
+        Estado.P,
         contrato);
   }
 
@@ -94,5 +94,9 @@ public class RegimeTrabalho {
   // Soft delete
   public void eliminar() {
     this.estado = Estado.E;
+  }
+
+  public void mudarEstado(Estado estado) {
+    this.estado = estado;
   }
 }

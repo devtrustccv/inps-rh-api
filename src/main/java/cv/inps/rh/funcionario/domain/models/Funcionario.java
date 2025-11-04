@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.domain.models;
 
 import cv.inps.rh.parametrizacao.domain.models.*;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
@@ -33,8 +34,8 @@ public class Funcionario {
   private String numeroSegurancaSocial; // INPS
   private final Long entidadeId;
   private final Long colaboradorId;
-  private final Estado estado;
-  private final Estado estadoValidacao;
+  private Estado estado;
+  private Estado estadoValidacao;
 
   private List<Contacto> contactos;
   private List<Endereco> enderecos;
@@ -54,6 +55,7 @@ public class Funcionario {
   private List<DefinicaoRemuneracao> definicaoRemuneracoes;
   private List<DefPagamento> defPagamentos;
   private List<Validacao> validacoes;
+  private List<OrdemServico> ordensServicos;
 
   private Funcionario(
       Long id,
@@ -90,7 +92,8 @@ public class Funcionario {
       List<RegimeTrabalho> regimeTrabalhos,
       List<DefinicaoRemuneracao> definicaoRemuneracoes,
       List<DefPagamento> defPagamentos,
-      List<Validacao> validacoes
+      List<Validacao> validacoes,
+      List<OrdemServico> ordensServicos
 
   ) {
     this.id = id;
@@ -128,6 +131,8 @@ public class Funcionario {
     this.definicaoRemuneracoes = definicaoRemuneracoes != null ? definicaoRemuneracoes : new ArrayList<>();
     this.defPagamentos = defPagamentos != null ? defPagamentos : new ArrayList<>();
     this.validacoes = validacoes != null ? validacoes : new ArrayList<>();
+    this.ordensServicos = ordensServicos != null ? ordensServicos : new ArrayList<>();
+
 
   }
 
@@ -186,6 +191,7 @@ public class Funcionario {
         null,
         null,
         null,
+        null,
         null
     );
 
@@ -229,7 +235,8 @@ public class Funcionario {
       List<RegimeTrabalho> regimeTrabalhos,
       List<DefinicaoRemuneracao> definicaoRemuneracoes,
       List<DefPagamento> defPagamentos,
-      List<Validacao> validacoes
+      List<Validacao> validacoes,
+      List<OrdemServico> ordensServicos
 
   ) {
     return new Funcionario(
@@ -267,70 +274,11 @@ public class Funcionario {
         regimeTrabalhos,
         definicaoRemuneracoes,
         defPagamentos,
-        validacoes
+        validacoes,
+        ordensServicos
     );
   }
 
-
-  public static Funcionario rebuildLight(
-      Long id,
-      UUID uuid,
-      TipoDocumento tipoDocumento,
-      String numeroDocumento,
-      String nomeCompleto,
-      String fotografia,
-      LocalDate dataNascimento,
-      String sexo,
-      String nomeMae,
-      String nomePai,
-      String estadoCivil,
-      String nacionalidade,
-      Geografia localNascimento,
-      Long numeroFiscal,
-      String numeroSegurancaSocial,
-      Long entidadeId,
-      Long colaboradorId,
-      Estado estado,
-      Estado estadoValidacao
-  ) {
-    return new Funcionario(
-        id,
-        IdentificadorUnico.from(uuid),
-        tipoDocumento,
-        numeroDocumento,
-        nomeCompleto,
-        fotografia,
-        dataNascimento,
-        sexo,
-        nomeMae,
-        nomePai,
-        estadoCivil,
-        nacionalidade,
-        localNascimento,
-        numeroFiscal,
-        numeroSegurancaSocial,
-        entidadeId,
-        colaboradorId,
-        estado,
-        estadoValidacao,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-    );
-  }
 
   public void update(
       TipoDocumento tipoDocumento,
@@ -356,22 +304,22 @@ public class Funcionario {
       List<DadosBancarios> dadosBancarios
   ) {
     // campos simples
-    if(tipoDocumento != null) this.tipoDocumento = tipoDocumento;
-    if(numeroDocumento != null) this.numeroDocumento = numeroDocumento;
-    if(nomeCompleto != null) this.nomeCompleto = nomeCompleto;
-    if(fotografia != null) this.fotografia = fotografia;
-    if(dataNascimento != null) this.dataNascimento = dataNascimento;
-    if(sexo != null) this.sexo = sexo;
-    if(nomeMae != null) this.nomeMae = nomeMae;
-    if(nomePai != null) this.nomePai = nomePai;
-    if(estadoCivil != null) this.estadoCivil = estadoCivil;
-    if(nacionalidade != null) this.nacionalidade = nacionalidade;
-    if(localNascimento != null) this.localNascimento = localNascimento;
-    if(numeroFiscal != null) this.numeroFiscal = numeroFiscal;
-    if(numeroSegurancaSocial != null) this.numeroSegurancaSocial = numeroSegurancaSocial;
+    if (tipoDocumento != null) this.tipoDocumento = tipoDocumento;
+    if (numeroDocumento != null) this.numeroDocumento = numeroDocumento;
+    if (nomeCompleto != null) this.nomeCompleto = nomeCompleto;
+    if (fotografia != null) this.fotografia = fotografia;
+    if (dataNascimento != null) this.dataNascimento = dataNascimento;
+    if (sexo != null) this.sexo = sexo;
+    if (nomeMae != null) this.nomeMae = nomeMae;
+    if (nomePai != null) this.nomePai = nomePai;
+    if (estadoCivil != null) this.estadoCivil = estadoCivil;
+    if (nacionalidade != null) this.nacionalidade = nacionalidade;
+    if (localNascimento != null) this.localNascimento = localNascimento;
+    if (numeroFiscal != null) this.numeroFiscal = numeroFiscal;
+    if (numeroSegurancaSocial != null) this.numeroSegurancaSocial = numeroSegurancaSocial;
 
 
-    if(endereco != null) {
+    if (endereco != null) {
       enderecos.getFirst().update(
           endereco.getPais(),
           endereco.getIlha(),
@@ -390,9 +338,86 @@ public class Funcionario {
     syncExperiencias(experiencias);
     syncDocumentos(documentos);
     syncDadosBancarios(dadosBancarios);
+
+  }
+
+  public void validar(EstadoValidacao estadoValidacao) {
+
+    if (estadoValidacao == null) return;
+    Estado estado = null;
+
+    if (estadoValidacao.equals(EstadoValidacao.SIM)) {
+      estado = Estado.A;
+      var tipoRelacionamento = getTipoRelacionamentoAtual();
+      var validacao = getValidacao();
+
+      var ordemServico = OrdemServico.create("Registo de colaborador " + nomeCompleto, "REGISTO_COLABORADOR",
+          this.getId(), tipoRelacionamento.getContrato().getId(), tipoRelacionamento.getId(), validacao.getId());
+
+      this.ordensServicos.add(ordemServico);
+    } else {
+      estado = Estado.I;
+
+    }
+
+    this.mudarEstado(estado);
+
+  }
+
+  private void mudarEstado(Estado estado) {
+
+    this.estado = estado;
+    this.estadoValidacao = estado;
+
+    if (this.tiposRelacionamentos != null && !this.tiposRelacionamentos.isEmpty()) {
+      this.tiposRelacionamentos.forEach(t -> t.mudarEstado(estado));
+    }
+
+    if (this.contratos != null && !this.contratos.isEmpty()) {
+      this.contratos.forEach(c -> c.mudarEstado(estado));
+    }
+
+    if (this.mobilidades != null && !this.mobilidades.isEmpty()) {
+      this.mobilidades.forEach(m -> m.mudarEstado(estado));
+    }
+
+    if (this.regimeTrabalhos != null && !this.regimeTrabalhos.isEmpty()) {
+      this.regimeTrabalhos.forEach(rt -> rt.mudarEstado(estado));
+    }
+
+    if (this.defPagamentos != null && !this.defPagamentos.isEmpty()) {
+      this.defPagamentos.forEach(dp -> dp.mudarEstado(estado));
+    }
+
+    if (this.definicaoRemuneracoes != null && !this.definicaoRemuneracoes.isEmpty()) {
+      this.definicaoRemuneracoes.forEach(dr -> dr.mudarEstado(estado));
+    }
+
+    if (this.carreiras != null && !this.carreiras.isEmpty()) {
+      this.carreiras.forEach(c -> c.mudarEstado(estado));
+    }
+
+    if (this.validacoes != null && !this.validacoes.isEmpty()) {
+      mudarEstadoValidacaoDomain(estado);
+    }
   }
 
 
+  private Validacao getValidacao() {
+    return this.validacoes.stream()
+        .filter(v -> "REGISTO_COLABORADOR".equals(v.getReferenciaName()))
+        .filter(v -> "INSERT".equals(v.getTipoAccao()))
+        .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("Validacao nao encontrada"));
+  }
+
+
+  private void mudarEstadoValidacaoDomain(Estado estado) {
+      validacoes.stream()
+          .filter(v -> "REGISTO_COLABORADOR".equals(v.getReferenciaName()) && "INSERT".equals(v.getTipoAccao()))
+          .findFirst()
+          .ifPresent(v -> v.mudarEstado(estado));
+
+  }
 
   public void adicionarValidacao(Validacao validacao) {
     if (validacao == null) return;
@@ -839,8 +864,6 @@ public class Funcionario {
   }
 
 
-
-
   public void adicionarDadosContratuais(ParamContrato paramTipoContrato,
                                         ParamCargo paramCargo, Instituicao direcao,
                                         Secao seccao, String centroCusto,
@@ -924,7 +947,7 @@ public class Funcionario {
     TiposRelacionamento tiposRelacionamentoAtual = getTipoRelacionamentoAtual();
 
     var contrato = getContratoById(tiposRelacionamentoAtual.getContrato().getId());
-    contrato.update(dataInicio, dataFim, duracaoMeses,null, "situacao laboralLLLLLLLLLL",
+    contrato.update(dataInicio, dataFim, duracaoMeses, null, "situacao laboralLLLLLLLLLL",
         paramVinculo, paramTipoContrato);
 
     var carreira = getCarreiraById(tiposRelacionamentoAtual.getCarreira().getId());
@@ -983,28 +1006,28 @@ public class Funcionario {
 
   }
 
-  public Contrato getContratoById(Long id){
+  public Contrato getContratoById(Long id) {
     return contratos.stream()
         .filter(c -> c.getId().equals(id))
-        .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("contrato nao encontrado com id: "+id));
+        .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("contrato nao encontrado com id: " + id));
   }
 
-  public Carreira getCarreiraById(Long id){
+  public Carreira getCarreiraById(Long id) {
     return carreiras.stream()
         .filter(c -> c.getId().equals(id))
-        .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("carreira nao encontrado com id: "+id));
+        .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("carreira nao encontrado com id: " + id));
   }
 
-  public Mobilidade getMobilidadeById(Long id){
+  public Mobilidade getMobilidadeById(Long id) {
     return mobilidades.stream()
         .filter(c -> c.getId().equals(id))
-        .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("mobilidade nao encontrado com id: "+id));
+        .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("mobilidade nao encontrado com id: " + id));
   }
 
-  public RegimeTrabalho getRegimeById(Long id){
+  public RegimeTrabalho getRegimeById(Long id) {
     return regimeTrabalhos.stream()
         .filter(c -> c.getId().equals(id))
-        .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("regime nao encontrado com id: "+id));
+        .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("regime nao encontrado com id: " + id));
   }
 
   public TiposRelacionamento getTipoRelacionamentoAtual() {

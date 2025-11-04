@@ -41,6 +41,7 @@ public class FuncionarioMapper {
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DefPagamentoMapper defPagamentoMapper;
   private final ValidacaoMapper validacaoMapper;
+  private final OrdemServicoMapper ordemServicoMapper;
 
   private final EntityManager entityManager;
 
@@ -112,6 +113,9 @@ public class FuncionarioMapper {
     List<Validacao> validacoes = entity.getValidacoes()!=null ? entity.getValidacoes()
         .stream().map(validacaoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
+    /*List<OrdemServicoEntity> = entity.getOrdemServicos()!=null ? entity.getValidacoes()
+        .stream().map(ordemServicoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();*/
+
     return Funcionario.rebuild(
         entity.getId(),
         entity.getUuid(),
@@ -147,33 +151,8 @@ public class FuncionarioMapper {
         regimeTrabalhos,
         definicaoRemuneracoes,
         defPagamentos,
-        validacoes
-    );
-  }
-
-  public Funcionario toDomainLigth(FuncionarioEntity entity) {
-    if (entity == null) return null;
-
-    return Funcionario.rebuildLight(
-        entity.getId(),
-        entity.getUuid(),
-        entity.getTipoDocumentoId() != null ? tipoDocumentoMapper.toDomain(entity.getTipoDocumentoId()) : null,
-        entity.getNumDocumento(),
-        entity.getNome(),
-        entity.getFotografia(),
-        entity.getDataNascimento(),
-        entity.getSexo(),
-        entity.getNmMae(),
-        entity.getNmPai(),
-        entity.getEstadoCivil(),
-        entity.getNacionalidade(),
-        entity.getLocNascId() != null ? geografiaMapper.toDomain(entity.getLocNascId()) : null,
-        entity.getNif(),
-        entity.getNuSegInps(),
-        entity.getEntId(),
-        entity.getIdColaborador(),
-        entity.getEstado(),
-        estadoMapper.fromString(entity.getEstadoValidacao())
+        validacoes,
+        null
     );
   }
 
@@ -418,6 +397,13 @@ public class FuncionarioMapper {
           }).collect(Collectors.toCollection(ArrayList::new));;
       entity.setValidacoes(validacaoEntities);
     }
+
+    //ordem servico
+    if(funcionario.getOrdensServicos()!=null && !funcionario.getOrdensServicos().isEmpty()) {
+      List<OrdemServicoEntity> ordemServicoEntities = funcionario.getOrdensServicos().stream()
+          .map(ordemServicoMapper::toEntity).collect(Collectors.toCollection(ArrayList::new));
+      entity.setOrdemServicos(ordemServicoEntities);
+     }
 
 
     return entity;

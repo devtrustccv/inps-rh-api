@@ -322,4 +322,8 @@ public class TiposRelacionamento {
   public void eliminar() {
     this.estado = Estado.E;
   }
+
+  public void mudarEstado(Estado estado) {
+    this.estado = estado;
+  }
 }

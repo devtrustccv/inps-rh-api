@@ -315,16 +315,17 @@
       "module": "funcionario"
     },
     {
-      "name": "validado",
-      "objectType": "java",
-      "type": "boolean",
+      "name": "validar",
+      "objectType": "enum",
+      "type": "EstadoValidacao",
       "required": false,
       "before": false,
       "after": false,
       "positive": false,
       "isEmail": false,
       "isUrl": false,
-      "primaryKey": false
+      "primaryKey": false,
+      "module": "shared"
     }
   ],
   "id": "pjb2kk86vo"

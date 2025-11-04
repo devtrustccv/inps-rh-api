@@ -85,4 +85,8 @@ public class Validacao {
         userRegistro
     );
   }
+
+  public void mudarEstado(Estado estado) {
+    this.estado = estado;
+  }
 }

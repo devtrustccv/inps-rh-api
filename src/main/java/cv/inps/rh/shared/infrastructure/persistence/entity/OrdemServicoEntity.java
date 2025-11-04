@@ -10,6 +10,8 @@ import lombok.*;
 import jakarta.validation.constraints.NotBlank;
 import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Getter
@@ -67,5 +69,9 @@ public class OrdemServicoEntity extends AuditEntity {
     @Column(name="uuid")
     private UUID uuid;
 
-  
+     @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "fun_id")
+   private FuncionarioEntity funId;
+
+
 }

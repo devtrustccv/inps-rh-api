@@ -4,6 +4,8 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import lombok.Getter;
 
+import java.util.UUID;
+
 @Getter
 public class OrdemServico {
 
@@ -19,7 +21,7 @@ public class OrdemServico {
   private IdentificadorUnico uuid;
 
   private OrdemServico(Long id, String descricao, String referente, Long funId,
-                       Long contratoId, Long tiprelId, Long validacaoId) {
+                       Long contratoId, Long tiprelId, Long validacaoId, Estado estado, String obs, IdentificadorUnico uuid) {
     this.id = id;
     this.descricao = descricao;
     this.referente = referente;
@@ -27,16 +29,19 @@ public class OrdemServico {
     this.contratoId = contratoId;
     this.tiprelId = tiprelId;
     this.validacaoId = validacaoId;
+    this.estado = estado;
+    this.obs = obs;
+    this.uuid = uuid;
   }
 
   public static OrdemServico create(String descricao, String referente,
                                     Long funId, Long contratoId, Long tiprelId, Long validacaoId) {
-    return new OrdemServico(null, descricao, referente, funId, contratoId, tiprelId, validacaoId);
+    return new OrdemServico(null, descricao, referente, funId, contratoId, tiprelId, validacaoId, Estado.A, "obs", IdentificadorUnico.create());
   }
 
   public static OrdemServico rebuild(Long id, String descricao, String referente,
-                                     Long funId, Long contratoId, Long tiprelId, Long validacaoId) {
-    return new OrdemServico(id, descricao, referente, funId, contratoId, tiprelId, validacaoId);
+                                     Long funId, Long contratoId, Long tiprelId, Long validacaoId, Estado estado, String obs, UUID uuid) {
+    return new OrdemServico(id, descricao, referente, funId, contratoId, tiprelId, validacaoId, estado, obs, IdentificadorUnico.from(uuid));
   }
 
 }

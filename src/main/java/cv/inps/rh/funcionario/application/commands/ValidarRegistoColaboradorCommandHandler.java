@@ -8,6 +8,7 @@ import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.*;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.shared.domain.models.TipoMovimento;
@@ -85,34 +86,34 @@ public class ValidarRegistoColaboradorCommandHandler implements CommandHandler<V
      var funcionario = funcionarioRepository.findById(command.getId())
          .orElseThrow(() -> IgrpResponseStatusException.notFound("funcionario nao encontrado com id" + command.getId()));
 
+      var validacao = dto.getValidar();
 
-     TipoDocumento tipoDocumento = tipoDocumentoMapper.toDomain(dto.getTipoDocumentoId());
-     Geografia localNascimento = geografiaMapper.toDomain(dto.getNaturalidadeId());
+       TipoDocumento tipoDocumento = tipoDocumentoMapper.toDomain(dto.getTipoDocumentoId());
+       Geografia localNascimento = geografiaMapper.toDomain(dto.getNaturalidadeId());
 
-     funcionario.update(
-         tipoDocumento,
-         dto.getNumDocumento(),
-         dto.getNome(),
-         dto.getUrlFoto(),
-         dto.getDataNascimento(),
-         dto.getGenero(),
-         dto.getNomeMae(),
-         dto.getNomePai(),
-         dto.getEstadoCivil(),
-         dto.getNacionalidade(),
-         localNascimento,
-         dto.getNif(),
-         dto.getNumSegurado(),
-         contactoMapper.toContactosDomain(dto.getContactos()),
-         enderecoMapper.toDomain(dto.getEndereco()),
-         familiarMapper.toFamiliaresDomain(dto.getFamiliares()),
-         habilitacaoLiterariaMapper.toHabilitacoesLiterariasDomain(dto.getHabilitacoesLiterarias()),
-         formacaoFeitaMapper.toFormacoesFeitasDomain(dto.getFormacoesFeitas()),
-         experienciaProfissionalMapper.toExperienciasProfissionaisDomain(dto.getExperienciasProfssionais()),
-         documentoMapper.toDocumentosDomain(dto.getAnexos()),
-         dadosBancariosMapper.toDadosBancariosDomain(dto.getDadosBancarios())
-     );
-
+       funcionario.update(
+           tipoDocumento,
+           dto.getNumDocumento(),
+           dto.getNome(),
+           dto.getUrlFoto(),
+           dto.getDataNascimento(),
+           dto.getGenero(),
+           dto.getNomeMae(),
+           dto.getNomePai(),
+           dto.getEstadoCivil(),
+           dto.getNacionalidade(),
+           localNascimento,
+           dto.getNif(),
+           dto.getNumSegurado(),
+           contactoMapper.toContactosDomain(dto.getContactos()),
+           enderecoMapper.toDomain(dto.getEndereco()),
+           familiarMapper.toFamiliaresDomain(dto.getFamiliares()),
+           habilitacaoLiterariaMapper.toHabilitacoesLiterariasDomain(dto.getHabilitacoesLiterarias()),
+           formacaoFeitaMapper.toFormacoesFeitasDomain(dto.getFormacoesFeitas()),
+           experienciaProfissionalMapper.toExperienciasProfissionaisDomain(dto.getExperienciasProfssionais()),
+           documentoMapper.toDocumentosDomain(dto.getAnexos()),
+           dadosBancariosMapper.toDadosBancariosDomain(dto.getDadosBancarios())
+       );
 
 
        var dados = dto.getDadosContratuais();
@@ -178,6 +179,10 @@ public class ValidarRegistoColaboradorCommandHandler implements CommandHandler<V
            defPagamentos,
            defRemuneracoes
        );
+
+       if(validacao!=null){
+         funcionario.validar(validacao);
+       }
 
 
      funcionarioRepository.save(funcionario);
