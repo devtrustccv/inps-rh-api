@@ -88,20 +88,17 @@ public class Mobilidade {
   }
 
   // Atualização parcial
-  public void update(Funcionario funcionario,
-                     Contrato contrato,
+  public void update(Contrato contrato,
                      ParamLocalTrab localTrab,
                      String tipoSituacao,
                      Secao secao,
                      Instituicao instituicao,
-                     Estado estado,
                      String obs) {
     if (contrato != null) this.contrato = contrato;
     if (localTrab != null) this.localTrab = localTrab;
     if (tipoSituacao != null) this.tipoSituacao = tipoSituacao;
     if (secao != null) this.secao = secao;
     if (instituicao != null) this.instituicao = instituicao;
-    if (estado != null) this.estado = estado;
     if (obs != null) this.obs = obs;
 
   }

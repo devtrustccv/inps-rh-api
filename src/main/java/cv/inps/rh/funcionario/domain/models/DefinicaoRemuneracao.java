@@ -96,12 +96,10 @@ public class DefinicaoRemuneracao {
   public void update(BigDecimal percentagem,
                      BigDecimal valor,
                      String obs,
-                     Estado estado,
                      TipoMovimento tipoMovimento) {
     if (percentagem != null) this.percentagem = percentagem;
     if (valor != null) this.valor = valor;
     if (obs != null) this.obs = obs;
-    if (estado != null) this.estado = estado;
     if (tipoMovimento != null) this.tipoMovimento = tipoMovimento;
   }
 

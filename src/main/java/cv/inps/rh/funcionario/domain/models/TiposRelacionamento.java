@@ -270,7 +270,6 @@ public class TiposRelacionamento {
       String tipoSituacao,
       TiposRelacionamento tiprelAnterior,
       String flgProcessa,
-      Estado estado,
       String obs,
       LocalDate dataInicio,
       LocalDate dataFim,
@@ -301,7 +300,6 @@ public class TiposRelacionamento {
     if (tipoSituacao != null) this.tipoSituacao = tipoSituacao;
     if (tiprelAnterior != null) this.tiprelAnterior = tiprelAnterior;
     if (flgProcessa != null) this.flgProcessa = flgProcessa;
-    if (estado != null) this.estado = estado;
     if (obs != null) this.obs = obs;
     if (dataInicio != null) this.dataInicio = dataInicio;
     if (dataFim != null) this.dataFim = dataFim;

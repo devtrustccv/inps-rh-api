@@ -104,5 +104,8 @@ public class FuncionarioRequestDTO  {
   
   @Valid
   private List<EncargosDescontosReqDTO> encargosDescontos = new ArrayList<>();
+  
+  
+  private boolean validado ;
 
 }

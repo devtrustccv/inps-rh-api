@@ -21,7 +21,7 @@ public class SubsidioReqDTO  {
 
   
   
-  private String id ;
+  private Long id ;
   
   
   private Long tipoSubsidioId ;

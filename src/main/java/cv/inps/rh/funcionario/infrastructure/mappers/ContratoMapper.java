@@ -25,55 +25,37 @@ public class ContratoMapper {
   public ContratoEntity toEntity(Contrato domain) {
     if (domain == null) return null;
 
-    ContratoEntity entity = new ContratoEntity();
-    if (domain.getId() != null && domain.getId() > 0) {
-      entity.setId(domain.getId());
-    }
+    ContratoEntity entity;
 
+    if (domain.getId() != null && domain.getId() > 0) {
+      entity = entityManager.getReference(ContratoEntity.class, domain.getId());
+    } else {
+      entity = new ContratoEntity();
+
+    }
+    //entity.setContratoId(entity);
     entity.setUuid(domain.getUuid().getValor());
     entity.setEstado(domain.getEstado());
     entity.setDataInicio(domain.getDataInicio());
     entity.setDataFim(domain.getDataFim());
     entity.setDuracao(domain.getDuracao());
     entity.setVersao(domain.getVersao());
-
+    entity.setTpContrato("afwgfwgeg");
     entity.setSituacaoLaboral(domain.getSituacaoLaboral());
     entity.setObs(domain.getObs());
 
     entity.setVinculoId(entityManager.getReference(
-        ParamVinculoEntity.class,
-        domain.getVinculo().getId()
-    ));
+        ParamVinculoEntity.class, domain.getVinculo().getId()));
+    var paramContrato = entityManager.getReference(
+        ParamContratoEntity.class, domain.getTpContratoParam().getId());
+    entity.setTpContratoId(paramContrato);
 
-    var tipoContrato = entityManager.getReference(
-        ParamContratoEntity.class,
-        domain.getTpContratoParam().getId());
-
-   entity.setTpContratoId(entityManager.getReference(
-        ParamContratoEntity.class,
-        domain.getTpContratoParam().getId()
-    ));
-
-    entity.setTpContrato(tipoContrato.getNome());
-
-    // 🔹 Contratos filhos
-    if (domain.getContratosFilhos() != null) {
+    if (domain.getContratosFilhos() != null && !domain.getContratosFilhos().isEmpty()) {
       List<ContratoEntity> filhos = domain.getContratosFilhos().stream()
           .map(this::toInternalEntity)
           .peek(f -> f.setContratoId(entity)) // cada filho aponta para o mestre
           .collect(Collectors.toList());
       entity.setContratosFilhos(filhos);
-    }
-
-    // 🔹 Contrato mestre (self-FK na primeira versão será preenchido automaticamente pelo Hibernate)
-    if (domain.getContratoMestre() != null) {
-      entity.setContratoId(entityManager.getReference(
-          ContratoEntity.class,
-          domain.getContratoMestre().getId()
-      ));
-    } else {
-      // primeira versão → self-FK
-      entity.setContratoId(entity); // agora Hibernate já conhece o ID
     }
 
     return entity;
@@ -83,6 +65,7 @@ public class ContratoMapper {
     if (domain == null) return null;
 
     ContratoEntity entity = new ContratoEntity();
+    entity.setId(domain.getId() != null && domain.getId() > 0 ? domain.getId() : null);
     entity.setUuid(domain.getUuid().getValor());
     entity.setEstado(domain.getEstado());
     entity.setDataInicio(domain.getDataInicio());
@@ -94,13 +77,9 @@ public class ContratoMapper {
     entity.setObs(domain.getObs());
 
     entity.setVinculoId(entityManager.getReference(
-        ParamVinculoEntity.class,
-        domain.getVinculo().getId()
-    ));
+        ParamVinculoEntity.class, domain.getVinculo().getId()));
     entity.setTpContratoId(entityManager.getReference(
-        ParamContratoEntity.class,
-        domain.getTpContratoParam().getId()
-    ));
+        ParamContratoEntity.class, domain.getTpContratoParam().getId()));
 
     return entity;
   }
@@ -108,9 +87,7 @@ public class ContratoMapper {
   public Contrato toDomain(ContratoEntity entity) {
     if (entity == null) return null;
 
-    // Só mapear filhos de primeiro nível (não mapear netos)
-    List<Contrato> filhos = entity.getContratosFilhos() != null
-        ? entity.getContratosFilhos().stream()
+    List<Contrato> filhos = entity.getContratosFilhos().stream()
         .map(filho -> Contrato.rebuild(
             filho.getId(),
             filho.getUuid(),
@@ -124,10 +101,9 @@ public class ContratoMapper {
             filho.getObs(),
             paramVinculoMapper.toDomain(filho.getVinculoId()),
             paramContratoMapper.toDomain(filho.getTpContratoId()),
-            null, // não mapeia contratoMestre aqui
-            new ArrayList<>())) // filhos de filhos = vazio
-        .collect(Collectors.toList())
-        : new ArrayList<>();
+            null // contratosFilhos já tratados
+        ))
+        .toList();
 
     return Contrato.rebuild(
         entity.getId(),
@@ -142,7 +118,6 @@ public class ContratoMapper {
         entity.getObs(),
         paramVinculoMapper.toDomain(entity.getVinculoId()),
         paramContratoMapper.toDomain(entity.getTpContratoId()),
-        null, // contrato mestre será tratado fora se necessário
         filhos
     );
   }

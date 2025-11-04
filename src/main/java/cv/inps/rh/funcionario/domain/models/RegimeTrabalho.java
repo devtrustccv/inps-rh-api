@@ -83,13 +83,11 @@ public class RegimeTrabalho {
                      String tipoSituacao,
                      LocalDate dataFim,
                      String obs,
-                     Estado estado,
                      Contrato contrato) {
     if (tipoRegime != null) this.tipoRegime = tipoRegime;
     if (tipoSituacao != null) this.tipoSituacao = tipoSituacao;
     if (dataFim != null) this.dataFim = dataFim;
     if (obs != null) this.obs = obs;
-    if (estado != null) this.estado = estado;
     if (contrato != null) this.contrato = contrato;
   }
 

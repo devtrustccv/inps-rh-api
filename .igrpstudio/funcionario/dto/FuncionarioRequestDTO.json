@@ -313,6 +313,18 @@
       "primaryKey": false,
       "collectionType": "list",
       "module": "funcionario"
+    },
+    {
+      "name": "validado",
+      "objectType": "java",
+      "type": "boolean",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
     }
   ],
   "id": "pjb2kk86vo"

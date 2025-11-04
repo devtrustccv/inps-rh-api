@@ -39,7 +39,7 @@ public class Endereco {
     var updatedId = id != null && id > 0 ? id : null;
 
     return new Endereco(
-        updatedId,
+        null,
         IdentificadorUnico.create(),
         pais,
         ilha,

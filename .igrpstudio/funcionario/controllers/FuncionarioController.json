@@ -194,6 +194,45 @@
           "isRequired": false
         }
       ]
+    },
+    {
+      "actionName": "validarRegistoColaborador",
+      "path": "{id}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "FuncionarioRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "long",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "69p09wi4e0-criarFuncionario"

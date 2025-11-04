@@ -184,9 +184,12 @@ public class FuncionarioMapper {
   public FuncionarioEntity toEntity(Funcionario funcionario) {
     if (funcionario == null) return null;
 
-    FuncionarioEntity entity = new FuncionarioEntity();
+    FuncionarioEntity entity= new FuncionarioEntity();;
+    entity.setId(funcionario.getId() != null && funcionario.getId() > 0 ? funcionario.getId() : null);
+
+    System.out.println("entity id 1_:::::::::::::::::::::::::::::"+entity.getId());
+    System.out.println("entity id _:::::::::::::::::::::::::::::"+entity.getId());
     entity.setUuid(funcionario.getUuid().getValor());
-    //entity.setTipoDocumentoId(funcionario.getTipoDocumento() != null ? tipoDocumentoMapper.toEntity(funcionario.getTipoDocumento()) : null);
     entity.setTipoDocumentoId(entityManager.getReference(TipoDocumentoEntity.class, funcionario.getTipoDocumento().getId()));
     entity.setNumDocumento(funcionario.getNumeroDocumento());
     entity.setNome(funcionario.getNomeCompleto());
@@ -197,7 +200,6 @@ public class FuncionarioMapper {
     entity.setNmPai(funcionario.getNomePai());
     entity.setEstadoCivil(funcionario.getEstadoCivil());
     entity.setNacionalidade(funcionario.getNacionalidade());
-   // entity.setLocNascId(funcionario.getLocalNascimento() != null ? geografiaMapper.toEntity(funcionario.getLocalNascimento()) : null);
     entity.setLocNascId(entityManager.getReference(GeografiaEntity.class, funcionario.getLocalNascimento().getId()));
     entity.setNif(funcionario.getNumeroFiscal());
     entity.setNuSegInps(funcionario.getNumeroSegurancaSocial());
@@ -228,7 +230,7 @@ public class FuncionarioMapper {
     }
 
     // familiares
-    if (funcionario.getFamiliares() != null) {
+   if (funcionario.getFamiliares() != null) {
       var familiaresEntities = funcionario.getFamiliares().stream()
           .map(familiarMapper::toEntity)
           .collect(Collectors.toList());
@@ -282,29 +284,20 @@ public class FuncionarioMapper {
           .collect(Collectors.toList());
       dadosBancariosEntities.forEach(d -> d.setFunId(entity));
       entity.setDadosBancarios(dadosBancariosEntities);
-
     }
-
-
 
     // contratos
     Map<UUID, ContratoEntity> contratosMap = new HashMap<>();
-//  Persistir contratos do funcionário
     if (funcionario.getContratos() != null) {
       List<ContratoEntity> contratosEntities = funcionario.getContratos().stream()
           .map(c -> {
-            // Converter domínio → entity apenas 1 vez
             ContratoEntity ce = contratoMapper.toEntity(c);
-
-            // Setar referência ao funcionário
             ce.setFunId(entity);
-
-            // Guardar no map pelo UUID
+            System.out.println("ce.getFunId().getId() = " + ce.getFunId().getId());
             contratosMap.put(c.getUuid().getValor(), ce);
-
             return ce;
           })
-          .toList();
+          .collect(Collectors.toCollection(ArrayList::new));;
       entity.setContratos(contratosEntities);
     }
 
@@ -319,7 +312,7 @@ public class FuncionarioMapper {
 
             carreirasMap.put(c.getUuid().getValor(), ce);
             return ce;
-          }).toList();
+          }) .collect(Collectors.toCollection(ArrayList::new));;
       entity.setCarreiras(carreirasEntities);
     }
 
@@ -333,7 +326,7 @@ public class FuncionarioMapper {
             ce.setContratoId(contratosMap.get(m.getContrato().getUuid().getValor()));
             modilidadesMap.put(m.getUuid().getValor(), ce);
             return ce;
-          }).toList();
+          }) .collect(Collectors.toCollection(ArrayList::new));;
       entity.setMobilidades(mobilidadesEntities);
     }
 
@@ -348,8 +341,7 @@ public class FuncionarioMapper {
             entityRt.setContratoId(contratosMap.get(rt.getContrato().getUuid().getValor()));
             regimesMap.put(rt.getUuid().getValor(), entityRt);
             return entityRt;
-          })
-          .toList();
+          }).collect(Collectors.toCollection(ArrayList::new));
 
       entity.setRegimesTrabalhos(regimeTrabalhosEntities);
     }
@@ -371,8 +363,7 @@ public class FuncionarioMapper {
 
             tiposRelacionamentosMap.put(t.getUuid().getValor(), tre);
             return tre;
-          })
-          .toList();
+          }) .collect(Collectors.toCollection(ArrayList::new));;
       entity.setTiposrelacionamentos(tiposEntities);
     }
 
@@ -389,8 +380,7 @@ public class FuncionarioMapper {
             // Associa o contrato correto a partir do mapa
               dre.setContratoId(contratosMap.get(d.getContrato().getUuid().getValor()));
             return dre;
-          })
-          .toList();
+          }).collect(Collectors.toCollection(ArrayList::new));;
 
       entity.setDefinicoesRenumeracoes(definicaoRemuneracaoEntities);
     }
@@ -408,8 +398,7 @@ public class FuncionarioMapper {
                   tiposRelacionamentosMap.get(d.getTiprel().getUuid().getValor())
               );
             return dpe;
-          })
-          .toList();
+          }).collect(Collectors.toCollection(ArrayList::new));;
       entity.setDefinicoesPagamentos(defPagamentosEntities);
     }
 
@@ -426,10 +415,9 @@ public class FuncionarioMapper {
             validacaoEntity.setTiprelId( tiposRelacionamentosMap.get(v.getTiprel().getUuid().getValor()));
 
             return validacaoEntity;
-          }).toList();
+          }).collect(Collectors.toCollection(ArrayList::new));;
       entity.setValidacoes(validacaoEntities);
     }
-
 
 
     return entity;

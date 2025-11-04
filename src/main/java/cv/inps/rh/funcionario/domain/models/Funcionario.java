@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.domain.models;
 
 import cv.inps.rh.parametrizacao.domain.models.*;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.models.Instituicao;
@@ -17,19 +18,19 @@ public class Funcionario {
 
   private final Long id;
   private final IdentificadorUnico uuid;
-  private final TipoDocumento tipoDocumento;
-  private final String numeroDocumento;
-  private final String nomeCompleto;
-  private final String fotografia;
-  private final LocalDate dataNascimento;
-  private final String sexo;
-  private final String nomeMae;
-  private final String nomePai;
-  private final String estadoCivil;
-  private final String nacionalidade;
-  private final Geografia localNascimento;
-  private final Long numeroFiscal; // NIF
-  private final String numeroSegurancaSocial; // INPS
+  private TipoDocumento tipoDocumento;
+  private String numeroDocumento;
+  private String nomeCompleto;
+  private String fotografia;
+  private LocalDate dataNascimento;
+  private String sexo;
+  private String nomeMae;
+  private String nomePai;
+  private String estadoCivil;
+  private String nacionalidade;
+  private Geografia localNascimento;
+  private Long numeroFiscal; // NIF
+  private String numeroSegurancaSocial; // INPS
   private final Long entidadeId;
   private final Long colaboradorId;
   private final Estado estado;
@@ -330,6 +331,67 @@ public class Funcionario {
         null
     );
   }
+
+  public void update(
+      TipoDocumento tipoDocumento,
+      String numeroDocumento,
+      String nomeCompleto,
+      String fotografia,
+      LocalDate dataNascimento,
+      String sexo,
+      String nomeMae,
+      String nomePai,
+      String estadoCivil,
+      String nacionalidade,
+      Geografia localNascimento,
+      Long numeroFiscal,
+      String numeroSegurancaSocial,
+      List<Contacto> contactos,
+      Endereco endereco,
+      List<Familiar> familiares,
+      List<HabilitacaoLiteraria> habilitacoes,
+      List<FormacaoFeita> formacoes,
+      List<ExperienciaProfissional> experiencias,
+      List<Documento> documentos,
+      List<DadosBancarios> dadosBancarios
+  ) {
+    // campos simples
+    if(tipoDocumento != null) this.tipoDocumento = tipoDocumento;
+    if(numeroDocumento != null) this.numeroDocumento = numeroDocumento;
+    if(nomeCompleto != null) this.nomeCompleto = nomeCompleto;
+    if(fotografia != null) this.fotografia = fotografia;
+    if(dataNascimento != null) this.dataNascimento = dataNascimento;
+    if(sexo != null) this.sexo = sexo;
+    if(nomeMae != null) this.nomeMae = nomeMae;
+    if(nomePai != null) this.nomePai = nomePai;
+    if(estadoCivil != null) this.estadoCivil = estadoCivil;
+    if(nacionalidade != null) this.nacionalidade = nacionalidade;
+    if(localNascimento != null) this.localNascimento = localNascimento;
+    if(numeroFiscal != null) this.numeroFiscal = numeroFiscal;
+    if(numeroSegurancaSocial != null) this.numeroSegurancaSocial = numeroSegurancaSocial;
+
+
+    if(endereco != null) {
+      enderecos.getFirst().update(
+          endereco.getPais(),
+          endereco.getIlha(),
+          endereco.getConcelho(),
+          endereco.getZona(),
+          endereco.getMorada()
+      );
+    }
+
+    // listas / relacionamentos
+    syncContacts(contactos);
+    //syncEnderecos(enderecos);
+    syncFamiliares(familiares);
+    syncHabilitacoes(habilitacoes);
+    syncFormacoes(formacoes);
+    syncExperiencias(experiencias);
+    syncDocumentos(documentos);
+    syncDadosBancarios(dadosBancarios);
+  }
+
 
 
   public void adicionarValidacao(Validacao validacao) {
@@ -689,6 +751,95 @@ public class Funcionario {
         .findFirst();
   }
 
+  /****** DefPagamentos *********************/
+  public void syncDefPagamentos(List<DefPagamento> novosDefPagamentos) {
+    if (novosDefPagamentos == null) return;
+
+    // Adicionar ou atualizar
+    for (DefPagamento novo : novosDefPagamentos) {
+      addOrUpdateDefPagamento(novo);
+    }
+
+    for (DefPagamento existente : defPagamentos) {
+      boolean aindaExiste = novosDefPagamentos.stream()
+          .anyMatch(p -> Objects.equals(p.getId(), existente.getId()));
+      if (!aindaExiste) {
+        existente.delete();
+      }
+    }
+  }
+
+  private void addOrUpdateDefPagamento(DefPagamento novo) {
+    if (novo == null) return;
+
+    Optional<DefPagamento> existenteOpt = findDefPagamentoById(novo.getId());
+    if (existenteOpt.isPresent()) {
+      DefPagamento existente = existenteOpt.get();
+      existente.update(
+          novo.getValor(),
+          novo.getTipoMovimento(),
+          novo.getDataInicio(),
+          novo.getDataFim(),
+          novo.getObs()
+      );
+    } else {
+      defPagamentos.add(novo);
+    }
+  }
+
+  private Optional<DefPagamento> findDefPagamentoById(Long id) {
+    if (id == null) return Optional.empty();
+    return this.defPagamentos.stream()
+        .filter(p -> Objects.equals(p.getId(), id))
+        .findFirst();
+  }
+
+
+  /****** DefinicaoRemuneracoes *********************/
+  public void syncDefinicaoRemuneracoes(List<DefinicaoRemuneracao> novasDefinicoes) {
+    if (novasDefinicoes == null) return;
+
+    // Adicionar ou atualizar
+    for (DefinicaoRemuneracao nova : novasDefinicoes) {
+      addOrUpdateDefinicaoRemuneracao(nova);
+    }
+
+    // Soft delete das definições que não estão mais na nova lista
+    for (DefinicaoRemuneracao existente : definicaoRemuneracoes) {
+      boolean aindaExiste = novasDefinicoes.stream()
+          .anyMatch(r -> Objects.equals(r.getId(), existente.getId()));
+      if (!aindaExiste) {
+        existente.eliminar();
+      }
+    }
+  }
+
+  private void addOrUpdateDefinicaoRemuneracao(DefinicaoRemuneracao nova) {
+    if (nova == null) return;
+
+    Optional<DefinicaoRemuneracao> existenteOpt = findDefinicaoRemuneracaoById(nova.getId());
+    if (existenteOpt.isPresent()) {
+      DefinicaoRemuneracao existente = existenteOpt.get();
+      existente.update(
+          nova.getPercentagem(),
+          nova.getValor(),
+          nova.getObs(),
+          nova.getTipoMovimento()
+      );
+    } else {
+      definicaoRemuneracoes.add(nova);
+    }
+  }
+
+  private Optional<DefinicaoRemuneracao> findDefinicaoRemuneracaoById(Long id) {
+    if (id == null) return Optional.empty();
+    return this.definicaoRemuneracoes.stream()
+        .filter(r -> Objects.equals(r.getId(), id))
+        .findFirst();
+  }
+
+
+
 
   public void adicionarDadosContratuais(ParamContrato paramTipoContrato,
                                         ParamCargo paramCargo, Instituicao direcao,
@@ -726,11 +877,18 @@ public class Funcionario {
         regime, paramTipoContrato, null, null, "motivo", null,
         null);
 
-    pagamentos.forEach(p -> p.associate(contrato, tiposRelacionamento));
-    remuneracoes.forEach(r -> r.associate(contrato));
+    if (pagamentos != null && !pagamentos.isEmpty()) {
+      pagamentos.forEach(p -> p.associate(contrato, tiposRelacionamento));
+      this.syncDefPagamentos(pagamentos);
+    }
 
-    this.defPagamentos.addAll(pagamentos);
-    this.definicaoRemuneracoes.addAll(remuneracoes);
+    if (remuneracoes != null && !remuneracoes.isEmpty()) {
+      remuneracoes.forEach(r -> r.associate(contrato));
+      this.syncDefinicaoRemuneracoes(remuneracoes);
+    }
+
+    /*this.defPagamentos.addAll(pagamentos);
+    this.definicaoRemuneracoes.addAll(remuneracoes);*/
 
     tiposRelacionamentos.add(tiposRelacionamento);
     contratos.add(contrato);
@@ -741,6 +899,112 @@ public class Funcionario {
     var validacao = Validacao.create("INSERT", "REGISTO_COLABORADOR", null, "obs", tiposRelacionamento);
     this.adicionarValidacao(validacao);
 
+  }
+
+
+  public void atualizarDadosContratuais(ParamContrato paramTipoContrato,
+                                        ParamCargo paramCargo, Instituicao direcao,
+                                        Secao seccao, String centroCusto,
+                                        ParamCarreira paramCarreira,
+                                        ParamCategoria paramCategoria,
+                                        ParamEscalao paramEscalao,
+                                        ParamVinculo paramVinculo,
+                                        String regimeTrabalho,
+                                        BigDecimal salario,
+                                        String moeda,
+                                        LocalDate dataInicio,
+                                        LocalDate dataFim,
+                                        Integer duracaoMeses,
+                                        ParamLocalTrab paramLocalTrab,
+                                        Geografia pais,
+                                        Geografia ilha,
+                                        List<DefPagamento> pagamentos,
+                                        List<DefinicaoRemuneracao> remuneracoes) {
+
+    TiposRelacionamento tiposRelacionamentoAtual = getTipoRelacionamentoAtual();
+
+    var contrato = getContratoById(tiposRelacionamentoAtual.getContrato().getId());
+    contrato.update(dataInicio, dataFim, duracaoMeses,null, "situacao laboralLLLLLLLLLL",
+        paramVinculo, paramTipoContrato);
+
+    var carreira = getCarreiraById(tiposRelacionamentoAtual.getCarreira().getId());
+    carreira.update(salario, null, "tipo situacaoadadas", "obs", contrato, paramCargo, paramEscalao, paramCategoria, paramCarreira);
+
+    var mobilidade = getMobilidadeById(tiposRelacionamentoAtual.getMobilidade().getId());
+    mobilidade.update(contrato, paramLocalTrab, "tipo siutacaojjjjjjjjj", seccao, direcao, "obs");
+
+
+    var regime = getRegimeById(tiposRelacionamentoAtual.getRegimeTrabalho().getId());
+    regime.update("tipo regime", "tipo situacao regimerrrrrrrrrrrrr", dataFim, "obssssss", contrato);
+
+
+    tiposRelacionamentoAtual.update(
+        paramCargo,               // ParamCargo cargo
+        direcao,                  // Instituicao instituicao
+        paramVinculo,             // ParamVinculo vinculo
+        seccao,                   // Secao seccao
+        paramCategoria,           // ParamCategoria categoria
+        paramEscalao,             // ParamEscalao escalao
+        paramCarreira,            // ParamCarreira carrPcc
+        salario,                  // BigDecimal salario
+        moeda,                    // String moeda
+        regimeTrabalho, // String regime (exemplo se RegimeTrabalho tiver getRegime)
+        null,                     // String tipoSituacao
+        null,                     // TiposRelacionamento tiprelAnterior
+        null,                     // String flgProcessa
+        "Atualizacao de contrato",// String obs
+        dataInicio,               // LocalDate dataInicio
+        dataFim,                  // LocalDate dataFim
+        contrato.getDataInicio(), // LocalDate dataInicioContrato
+        contrato.getDataFim(),    // LocalDate dataFimContrato
+        contrato,                 // Contrato contrato
+        carreira,                 // Carreira carreira
+        mobilidade,               // Mobilidade mobilidade
+        paramLocalTrab,           // ParamLocalTrab locTrab
+        regime,                    // RegimeTrabalho regimeTrabalho
+        paramTipoContrato,             // ParamContrato tipoContrato
+        null,                     // String referente
+        null,                     // LocalDate ultProc
+        "Atualizacao motivada",   // String motivoSitLab
+        null,                     // ParamSitLaboral situacLaboral
+        null                      // String tpContrato
+    );
+
+
+    if (pagamentos != null && !pagamentos.isEmpty()) {
+      pagamentos.forEach(p -> p.associate(contrato, tiposRelacionamentoAtual));
+      this.syncDefPagamentos(pagamentos);
+    }
+
+    if (remuneracoes != null && !remuneracoes.isEmpty()) {
+      remuneracoes.forEach(r -> r.associate(contrato));
+      this.syncDefinicaoRemuneracoes(remuneracoes);
+    }
+
+  }
+
+  public Contrato getContratoById(Long id){
+    return contratos.stream()
+        .filter(c -> c.getId().equals(id))
+        .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("contrato nao encontrado com id: "+id));
+  }
+
+  public Carreira getCarreiraById(Long id){
+    return carreiras.stream()
+        .filter(c -> c.getId().equals(id))
+        .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("carreira nao encontrado com id: "+id));
+  }
+
+  public Mobilidade getMobilidadeById(Long id){
+    return mobilidades.stream()
+        .filter(c -> c.getId().equals(id))
+        .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("mobilidade nao encontrado com id: "+id));
+  }
+
+  public RegimeTrabalho getRegimeById(Long id){
+    return regimeTrabalhos.stream()
+        .filter(c -> c.getId().equals(id))
+        .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("regime nao encontrado com id: "+id));
   }
 
   public TiposRelacionamento getTipoRelacionamentoAtual() {

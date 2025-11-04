@@ -99,13 +99,16 @@ public class DefPagamento {
                      TipoMovimento tipoMovimento,
                      LocalDate dataInicio,
                      LocalDate dataFim,
-                     Estado estado,
                      String obs) {
     if (valor != null) this.valor = valor;
     if (tipoMovimento != null) this.tipoMovimento = tipoMovimento;
     if (dataInicio != null) this.dataInicio = dataInicio;
     if (dataFim != null) this.dataFim = dataFim;
-    if (estado != null) this.estado = estado;
     if (obs != null) this.obs = obs;
   }
+
+  public void delete() {
+    this.estado = Estado.E;
+  }
+
 }

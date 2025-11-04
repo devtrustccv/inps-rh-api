@@ -41,7 +41,7 @@ public class ValidacaoMapper {
         entity.getEstado(),
         entity.getObs(),
         tiposRelacionamentoMapper.toDomain(entity.getTiprelId()),
-        entity.getCreatedDate().toLocalDate(),
+        entity.getCreatedDate()!=null ? entity.getCreatedDate().toLocalDate() : null,
         entity.getCreatedBy()
     );
   }

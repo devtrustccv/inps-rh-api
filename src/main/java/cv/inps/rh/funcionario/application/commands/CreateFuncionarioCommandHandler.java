@@ -175,7 +175,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
          .map(e -> {
            TipoMovimento tipoMov = tipoMovimentoMapper.toDomain(e.getTipoEncargoId());
            return DefPagamento.create(
-               null,           // id inicial, será persistido depois
+               e.getId(),           // id inicial, será persistido depois
                e.getValor(),
                tipoMov,
                e.getDataInicio(),
@@ -189,7 +189,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
          .map(s -> {
            TipoMovimento tipoMov = tipoMovimentoMapper.toDomain(s.getTipoSubsidioId());
            return DefinicaoRemuneracao.create(
-               null,
+               s.getId(),
                s.getPercentagem(),
                s.getValor(),
                s.getObservacoes(),

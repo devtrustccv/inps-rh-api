@@ -25,6 +25,7 @@ import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDetailsDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaValidacoesDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaFuncionarioDTO;
+import java.util.Map;
 
 @IgrpController
 @RestController
@@ -174,6 +175,37 @@ public class FuncionarioController {
       ResponseEntity<WrapperListaFuncionarioDTO> response = queryBus.handle(query);
 
       return response;
+  }
+
+   @PutMapping(
+   value = "{id}"
+  )
+  @Operation(
+    summary = "PUT method to handle operations for validarRegistoColaborador",
+    description = "PUT method to handle operations for validarRegistoColaborador",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> validarRegistoColaborador(@Valid @RequestBody FuncionarioRequestDTO validarRegistoColaboradorRequest
+    , @PathVariable(value = "id") Long id)
+  {
+
+      final var command = new ValidarRegistoColaboradorCommand(validarRegistoColaboradorRequest, id);
+
+       ResponseEntity<Map<String, ?>> response = commandBus.send(command);
+
+       return response;
   }
 
 }

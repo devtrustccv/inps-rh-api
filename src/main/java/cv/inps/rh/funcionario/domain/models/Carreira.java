@@ -115,7 +115,6 @@ public class Carreira {
   public void update(BigDecimal salario,
                      Integer flgProcessa,
                      String tipoSituacao,
-                     Estado estado,
                      String obs,
                      Contrato contrato,
                      ParamCargo cargo,
