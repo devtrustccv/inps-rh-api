@@ -28,7 +28,6 @@ public class ValidarRegistoColaboradorCommandHandler implements CommandHandler<V
    private static final Logger LOGGER = LoggerFactory.getLogger(ValidarRegistoColaboradorCommandHandler.class);
 
   private final FuncionarioRepository funcionarioRepository;
-  private final FuncionarioMapper funcionarioMapper;
   private final TipoDocumentoMapper tipoDocumentoMapper;
   private final GeografiaMapper geografiaMapper;
 
@@ -52,10 +51,9 @@ public class ValidarRegistoColaboradorCommandHandler implements CommandHandler<V
   private final ParamLocalTrabMapper paramLocalTrabMapper;
   private final TipoMovimentoMapper tipoMovimentoMapper;
 
-   public ValidarRegistoColaboradorCommandHandler(FuncionarioRepository funcionarioRepository, FuncionarioMapper funcionarioMapper, TipoDocumentoMapper tipoDocumentoMapper, GeografiaMapper geografiaMapper, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper, ParamCargoMapper paramCargoMapper, ParamContratoMapper paramContratoMapper, InstituicaoMapper instituicaoMapper, SecaoMapper secaoMapper, ParamCarreiraMapper paramCarreiraMapper, ParamCategoriaMapper paramCategoriaMapper, ParamEscalaoMapper paramEscalaoMapper, ParamVinculoMapper paramVinculoMapper, ParamLocalTrabMapper paramLocalTrabMapper, TipoMovimentoMapper tipoMovimentoMapper) {
+   public ValidarRegistoColaboradorCommandHandler(FuncionarioRepository funcionarioRepository, TipoDocumentoMapper tipoDocumentoMapper, GeografiaMapper geografiaMapper, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper, ParamCargoMapper paramCargoMapper, ParamContratoMapper paramContratoMapper, InstituicaoMapper instituicaoMapper, SecaoMapper secaoMapper, ParamCarreiraMapper paramCarreiraMapper, ParamCategoriaMapper paramCategoriaMapper, ParamEscalaoMapper paramEscalaoMapper, ParamVinculoMapper paramVinculoMapper, ParamLocalTrabMapper paramLocalTrabMapper, TipoMovimentoMapper tipoMovimentoMapper) {
 
      this.funcionarioRepository = funcionarioRepository;
-     this.funcionarioMapper = funcionarioMapper;
      this.tipoDocumentoMapper = tipoDocumentoMapper;
      this.geografiaMapper = geografiaMapper;
      this.contactoMapper = contactoMapper;
