@@ -60,6 +60,12 @@ public class ParametrizacaoController {
     return ResponseEntity.ok(parametrizacaoService.getEntidades());
   }
 
+  @GetMapping("/bancos/ativos")
+  @Operation(summary = "Lista bancos ativos")
+  public ResponseEntity<List<ParametrizacaoDTO>> getBancosAtivos() {
+    return ResponseEntity.ok(parametrizacaoService.getBancos());
+  }
+
   @GetMapping("/estados")
   public ResponseEntity<List<EnumItem<String>>> getQualificacoes() {
 

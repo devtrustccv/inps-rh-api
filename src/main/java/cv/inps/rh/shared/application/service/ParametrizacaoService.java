@@ -1,14 +1,8 @@
 package cv.inps.rh.shared.application.service;
 
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
-import cv.inps.rh.shared.domain.repository.EntidadeRepository;
-import cv.inps.rh.shared.domain.repository.GeografiaRepository;
-import cv.inps.rh.shared.domain.repository.InstituicaoRepository;
-import cv.inps.rh.shared.domain.repository.TipoMovimentoRepository;
-import cv.inps.rh.shared.infrastructure.mappers.EntidadeMapper;
-import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
-import cv.inps.rh.shared.infrastructure.mappers.InstituicaoMapper;
-import cv.inps.rh.shared.infrastructure.mappers.TipoMovimentoMapper;
+import cv.inps.rh.shared.domain.repository.*;
+import cv.inps.rh.shared.infrastructure.mappers.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +16,13 @@ public class ParametrizacaoService {
   private final GeografiaRepository geografiaRepository;
   private final InstituicaoRepository instituicaoRepository;
   private final EntidadeRepository entidadeRepository;
+  private final BancoRepository bancoRepository;
 
   private final TipoMovimentoMapper tipoMovimentoMapper;
   private final InstituicaoMapper instituicaoMapper;
   private final GeografiaMapper geografiaMapper;
   private final EntidadeMapper entidadeMapper;
+  private final BancoMapper bancoMapper;
 
 
   public List<ParametrizacaoDTO> getTiposMovimentos(){
@@ -46,5 +42,10 @@ public class ParametrizacaoService {
   public List<ParametrizacaoDTO> getEntidades(){
    return entidadeRepository.findAllActive().stream().map(entidadeMapper::toParametrizacaoDto).toList();
   }
+
+  public List<ParametrizacaoDTO> getBancos(){
+    return bancoRepository.findAllActive().stream().map(bancoMapper::toParametrizacaoDto).toList();
+  }
+
 
 }

@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.mappers;
 
+import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.shared.domain.models.Banco;
 import cv.inps.rh.shared.domain.models.Entidade;
 import cv.inps.rh.shared.infrastructure.persistence.entity.BancoEntity;
@@ -45,6 +46,16 @@ public class BancoMapper {
   public Banco toDomain(Long id) {
     if (id == null) return null;
     return Banco.rebuild(id);
+  }
+
+
+  public ParametrizacaoDTO toParametrizacaoDto(Banco banco) {
+    if (banco == null) return null;
+
+    ParametrizacaoDTO dto = new ParametrizacaoDTO();
+    dto.setLabel(banco.getNomeBanco());
+    dto.setValue(banco.getId());
+    return dto;
   }
 
 

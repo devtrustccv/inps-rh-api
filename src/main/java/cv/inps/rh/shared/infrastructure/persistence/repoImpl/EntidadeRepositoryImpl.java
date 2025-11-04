@@ -6,6 +6,7 @@ import cv.inps.rh.shared.infrastructure.mappers.EntidadeMapper;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EntidadeEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
