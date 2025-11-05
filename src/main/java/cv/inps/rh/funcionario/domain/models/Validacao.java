@@ -20,6 +20,8 @@ public class Validacao {
   private TiposRelacionamento tiprel;
   private LocalDate dataRegistro;
   private String userRegistro;
+  Long idFuncionario;
+  UUID uuidFuncionario;
 
   private Validacao(Long id,
                     IdentificadorUnico uuid,
@@ -30,7 +32,9 @@ public class Validacao {
                     String obs,
                     TiposRelacionamento tiprel,
                     LocalDate dataRegistro,
-                    String userRegistro) {
+                    String userRegistro,
+                    Long idFuncionario,
+                    UUID uuidFuncionario) {
     this.id = id;
     this.uuid = uuid;
     this.tipoAccao = tipoAccao;
@@ -41,6 +45,8 @@ public class Validacao {
     this.tiprel = tiprel;
     this.dataRegistro = dataRegistro;
     this.userRegistro = userRegistro;
+    this.idFuncionario = idFuncionario;
+    this.uuidFuncionario = uuidFuncionario;
   }
 
   public static Validacao create(String tipoAccao,
@@ -58,7 +64,9 @@ public class Validacao {
         obs,
         tiprel,
         null,
-        null
+        null,
+        null,
+      null
     );
   }
 
@@ -71,7 +79,9 @@ public class Validacao {
                                   String obs,
                                   TiposRelacionamento tiprel,
                                   LocalDate dataRegistro,
-                                  String userRegistro) {
+                                  String userRegistro,
+                                   Long idFuncionario,
+                                   UUID uuidFuncionario) {
     return new Validacao(
         id,
         IdentificadorUnico.from(uuid),
@@ -82,7 +92,9 @@ public class Validacao {
         obs,
         tiprel ,
         dataRegistro,
-        userRegistro
+        userRegistro,
+        idFuncionario,
+        uuidFuncionario
     );
   }
 

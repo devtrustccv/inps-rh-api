@@ -30,11 +30,11 @@ public class FuncionarioEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
     @NotNull(message = "tipoDocumentoId is mandatory")
 
 
@@ -44,39 +44,39 @@ public class FuncionarioEntity extends AuditEntity {
     @Column(name="num_documento")
     private String numDocumento;
 
-  
+
     @Column(name="nome")
     private String nome;
 
-  
+
     @Column(name="fotografia")
     private String fotografia;
 
-  
+
     @Column(name="data_nascimento")
     private LocalDate dataNascimento;
 
-  
+
     @Column(name="sexo")
     private String sexo;
 
-  
+
     @Column(name="nm_mae")
     private String nmMae;
 
-  
+
     @Column(name="nm_pai")
     private String nmPai;
 
-  
+
     @Column(name="estado_civil")
     private String estadoCivil;
 
-  
+
     @Column(name="nacionalidade")
     private String nacionalidade;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -85,28 +85,28 @@ public class FuncionarioEntity extends AuditEntity {
     @Column(name="nif")
     private Long nif;
 
-  
+
     @Column(name="nu_seg_inps")
     private String nuSegInps;
 
-  
+
     @Column(name="ent_id")
     private Long entId;
 
-  
+
     @Column(name="id_colaborador")
     private Long idColaborador;
 
-  
+
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
+
     @Column(name="estado_validacao", length=1)
     private String estadoValidacao;
 
-  
+
 
 
   @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
@@ -175,4 +175,7 @@ private List<ValidacaoEntity> validacoes = new ArrayList<>();
 
   @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 private List<OrdemServicoEntity> ordemServicos = new ArrayList<>();
+
+  @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  private List<SituacaoLaboralEntity> situacoesLaborais = new ArrayList<>();
 }

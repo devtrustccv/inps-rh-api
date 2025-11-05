@@ -42,8 +42,12 @@ public class ValidacaoMapper {
         entity.getObs(),
         tiposRelacionamentoMapper.toDomain(entity.getTiprelId()),
         entity.getCreatedDate()!=null ? entity.getCreatedDate().toLocalDate() : null,
-        entity.getCreatedBy()
+        entity.getCreatedBy(),
+        entity.getFunId().getId(),
+        entity.getUuid()
     );
+
+
   }
 
   public ValidacaoResponseDTO toDto(Validacao validacao) {
@@ -57,6 +61,9 @@ public class ValidacaoMapper {
     dto.setReferenciaName(validacao.getReferenciaName());
     dto.setDataOperacao(DateFormatter.localDateToString(validacao.getDataRegistro()));
     dto.setUtilizador(validacao.getUserRegistro());
+
+    dto.setIdFuncionario(validacao.getIdFuncionario());
+    dto.setUuidFuncionario(validacao.getUuidFuncionario()!= null ? validacao.getUuidFuncionario().toString(): null);
 
     return dto;
   }

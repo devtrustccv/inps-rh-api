@@ -43,6 +43,8 @@ public class FuncionarioMapper {
   private final ValidacaoMapper validacaoMapper;
   private final OrdemServicoMapper ordemServicoMapper;
 
+  private final SituacaoLaboralMapper situacaoLaboralMapper;
+
   private final EntityManager entityManager;
 
   /**
@@ -116,6 +118,9 @@ public class FuncionarioMapper {
     /*List<OrdemServicoEntity> = entity.getOrdemServicos()!=null ? entity.getValidacoes()
         .stream().map(ordemServicoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();*/
 
+    List<SituacaoLaboral> situacaoLaborais = entity.getSituacoesLaborais()!=null ? entity.getSituacoesLaborais()
+        .stream().map(situacaoLaboralMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
+
     return Funcionario.rebuild(
         entity.getId(),
         entity.getUuid(),
@@ -152,7 +157,8 @@ public class FuncionarioMapper {
         definicaoRemuneracoes,
         defPagamentos,
         validacoes,
-        null
+        null,
+        situacaoLaborais
     );
   }
 
@@ -381,8 +387,6 @@ public class FuncionarioMapper {
       entity.setDefinicoesPagamentos(defPagamentosEntities);
     }
 
-    System.out.println("entity id _:::::::::::::::::::::::::::::"+entity.getId());
-
 
     //validacoes
     if(funcionario.getValidacoes()!=null) {
@@ -404,6 +408,23 @@ public class FuncionarioMapper {
           .map(ordemServicoMapper::toEntity).collect(Collectors.toCollection(ArrayList::new));
       entity.setOrdemServicos(ordemServicoEntities);
      }
+
+
+    // situacao laboral
+    if (funcionario.getSituacoesLaborais() != null) {
+      List<SituacaoLaboralEntity> situacaoLaboralEntities = funcionario.getSituacoesLaborais().stream()
+          .map(s -> {
+            SituacaoLaboralEntity sle = situacaoLaboralMapper.toEntity(s);
+            // Associa o funcionário
+            sle.setFunId(entity);
+            // Associa o contrato correto
+            sle.setContratoId(contratosMap.get(s.getContrato().getUuid().getValor()));
+            return sle;
+          })
+          .collect(Collectors.toCollection(ArrayList::new));
+
+      entity.setSituacoesLaborais(situacaoLaboralEntities);
+    }
 
 
     return entity;

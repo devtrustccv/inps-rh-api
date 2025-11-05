@@ -56,6 +56,7 @@ public class Funcionario {
   private List<DefPagamento> defPagamentos;
   private List<Validacao> validacoes;
   private List<OrdemServico> ordensServicos;
+  private List<SituacaoLaboral> situacoesLaborais;
 
   private Funcionario(
       Long id,
@@ -93,7 +94,8 @@ public class Funcionario {
       List<DefinicaoRemuneracao> definicaoRemuneracoes,
       List<DefPagamento> defPagamentos,
       List<Validacao> validacoes,
-      List<OrdemServico> ordensServicos
+      List<OrdemServico> ordensServicos,
+      List<SituacaoLaboral> situacoesLaborais
 
   ) {
     this.id = id;
@@ -132,7 +134,7 @@ public class Funcionario {
     this.defPagamentos = defPagamentos != null ? defPagamentos : new ArrayList<>();
     this.validacoes = validacoes != null ? validacoes : new ArrayList<>();
     this.ordensServicos = ordensServicos != null ? ordensServicos : new ArrayList<>();
-
+    this.situacoesLaborais = situacoesLaborais != null ? situacoesLaborais : new ArrayList<>();
 
   }
 
@@ -192,8 +194,11 @@ public class Funcionario {
         null,
         null,
         null,
+        null,
         null
     );
+
+
 
 
     return funcionario;
@@ -236,7 +241,8 @@ public class Funcionario {
       List<DefinicaoRemuneracao> definicaoRemuneracoes,
       List<DefPagamento> defPagamentos,
       List<Validacao> validacoes,
-      List<OrdemServico> ordensServicos
+      List<OrdemServico> ordensServicos,
+      List<SituacaoLaboral> situacoesLaborais
 
   ) {
     return new Funcionario(
@@ -275,7 +281,8 @@ public class Funcionario {
         definicaoRemuneracoes,
         defPagamentos,
         validacoes,
-        ordensServicos
+        ordensServicos,
+        situacoesLaborais
     );
   }
 
@@ -888,6 +895,8 @@ public class Funcionario {
         duracaoMeses, null, "situacao laboral",
         paramVinculo, paramTipoContrato);
 
+    var situacaoLaboral = SituacaoLaboral.create("situacaolab", "NOVO_CONTRATO",contrato , "obs");
+
     var carreira = Carreira.create(salario, null, "tipo situacao", "obs", contrato, paramCargo, paramEscalao, paramCategoria, paramCarreira);
 
     var mobilidade = Mobilidade.create(contrato, paramLocalTrab, "tipo siutacao", seccao, direcao, "obs");
@@ -918,6 +927,7 @@ public class Funcionario {
     carreiras.add(carreira);
     mobilidades.add(mobilidade);
     regimeTrabalhos.add(regime);
+    situacoesLaborais.add(situacaoLaboral);
 
     var validacao = Validacao.create("INSERT", "REGISTO_COLABORADOR", null, "obs", tiposRelacionamento);
     this.adicionarValidacao(validacao);

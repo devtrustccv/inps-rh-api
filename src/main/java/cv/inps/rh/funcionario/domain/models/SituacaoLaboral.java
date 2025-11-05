@@ -45,8 +45,6 @@ public class SituacaoLaboral {
   public static SituacaoLaboral create(
       String situacaoLaboral,
       String motivoSitLab,
-      LocalDate dataInicio,
-      LocalDate dataFim,
       Contrato contrato,
       String obs
   ) {
@@ -54,7 +52,7 @@ public class SituacaoLaboral {
       throw new IllegalArgumentException("situacaoLaboral is mandatory");
     }
     return new SituacaoLaboral(
-        null, situacaoLaboral, motivoSitLab, dataInicio, dataFim, contrato, Estado.P, obs, IdentificadorUnico.create()
+        null, situacaoLaboral, motivoSitLab, contrato.getDataInicio(), contrato.getDataFim(), contrato, Estado.P, obs, IdentificadorUnico.create()
     );
   }
 

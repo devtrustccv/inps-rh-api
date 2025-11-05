@@ -55,6 +55,9 @@ public class SituacaoLaboralEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contrato_id", referencedColumnName = "id")
     private ContratoEntity contratoId;
+
+
+   @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 

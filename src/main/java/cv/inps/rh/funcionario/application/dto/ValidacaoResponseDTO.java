@@ -19,26 +19,29 @@ import lombok.AllArgsConstructor;
 @IgrpDTO
 public class ValidacaoResponseDTO  {
 
-  
-  
+
+  private long idFuncionario;
+
+  private String uuidFuncionario;
+
   private Long id ;
-  
-  
+
+
   private String uuid ;
-  
-  
+
+
   private String nomeColaborador ;
-  
-  
+
+
   private String tipoOperacao ;
-  
-  
+
+
   private String referenciaName ;
-  
-  
+
+
   private String dataOperacao ;
-  
-  
+
+
   private String utilizador ;
 
 }
