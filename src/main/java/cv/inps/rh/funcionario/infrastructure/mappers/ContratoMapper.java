@@ -1,6 +1,9 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import cv.inps.rh.funcionario.application.dto.ContratoListDTO;
+import cv.inps.rh.funcionario.domain.filters.ContratoFilter;
 import cv.inps.rh.funcionario.domain.models.Contrato;
+import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamContratoMapper;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamVinculoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
@@ -10,7 +13,6 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -101,7 +103,9 @@ public class ContratoMapper {
             filho.getObs(),
             paramVinculoMapper.toDomain(filho.getVinculoId()),
             paramContratoMapper.toDomain(filho.getTpContratoId()),
-            null // contratosFilhos já tratados
+            null, // contratosFilhos já tratados,
+            null,
+            null
         ))
         .toList();
 
@@ -118,8 +122,40 @@ public class ContratoMapper {
         entity.getObs(),
         paramVinculoMapper.toDomain(entity.getVinculoId()),
         paramContratoMapper.toDomain(entity.getTpContratoId()),
-        filhos
+        filhos,
+        entity.getFunId().getId(),
+        entity.getFunId().getUuid()
     );
+  }
+
+  public ContratoListDTO toDTO(Contrato contrato) {
+    if (contrato == null) return null;
+
+    var dto = new ContratoListDTO();
+    dto.setId(contrato.getId());
+    dto.setUuid(contrato.getUuid() != null ? contrato.getUuid().getValor().toString() : null);
+    dto.setFuncionarioId(contrato.getIdFuncionario());
+    dto.setUuidFuncionario(contrato.getUuidFuncionario() != null ? contrato.getUuidFuncionario().toString() : null);
+    dto.setSituacao(contrato.getSituacaoLaboral());
+    dto.setTipoVinculo(contrato.getVinculo() != null ? contrato.getVinculo().getNome() : null);
+    dto.setDataInicio(contrato.getDataInicio() != null ? DateFormatter.localDateToString(contrato.getDataInicio()) : null);
+    dto.setDataFim(contrato.getDataFim() != null ? DateFormatter.localDateToString(contrato.getDataFim()) : null);
+    dto.setDuracao(contrato.getDuracao() != null ? contrato.getDuracao().toString() : null);
+    dto.setEstado(contrato.getEstado() != null ? contrato.getEstado().name() : null);
+    dto.setEstadoDesc(contrato.getEstado() != null ? contrato.getEstado().getDescription() : null);
+
+    return dto;
+  }
+
+  public ContratoFilter toFilterDomain(Long vinculo,
+                                       Integer pageNumber,
+                                       Integer pageSize ) {
+
+    return ContratoFilter.builder()
+        .vinculo(vinculo)
+        .pageNumber(pageNumber)
+        .pageSize(pageSize)
+        .build();
   }
 
 }

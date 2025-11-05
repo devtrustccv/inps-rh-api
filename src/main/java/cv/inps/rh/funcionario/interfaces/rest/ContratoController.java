@@ -19,27 +19,27 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.funcionario.application.queries.*;
 
-import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperListContratoDTO;
 
 @IgrpController
 @RestController
 @RequestMapping(path = "api/v1/funcionarios")
-@Tag(name = "Carreiras", description = "Gestao carreiras funcionario")
-public class CarreirasController {
+@Tag(name = "Contrato", description = "Gestao Contratos")
+public class ContratoController {
 
   
   private final QueryBus queryBus;
 
-  public CarreirasController(QueryBus queryBus) {
+  public ContratoController(QueryBus queryBus) {
           this.queryBus = queryBus;
           
   }
    @GetMapping(
-   value = "carreiras"
+   value = "contratos"
   )
   @Operation(
-    summary = "GET method to handle operations for getCarreiraList",
-    description = "GET method to handle operations for getCarreiraList",
+    summary = "GET method to handle operations for getListContratos",
+    description = "GET method to handle operations for getListContratos",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -47,24 +47,22 @@ public class CarreirasController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = WrapperCarreiraListDTO.class,
+                  implementation = WrapperListContratoDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<WrapperCarreiraListDTO> getCarreiraList(
-    @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
+  public ResponseEntity<WrapperListContratoDTO> getListContratos(
+    @RequestParam(value = "vinculo", required = false) Long vinculo,
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
-    @RequestParam(value = "dataInicio", required = false) String dataInicio,
-    @RequestParam(value = "dataFim", required = false) String dataFim,
-    @RequestParam(value = "tipoCarreira", required = false) String tipoCarreira)
+    @RequestParam(value = "pageSize", defaultValue = "20") String pageSize)
   {
 
-      final var query = new GetCarreiraListQuery(pageSize, pageNumber, dataInicio, dataFim, tipoCarreira);
+      final var query = new GetListContratosQuery(vinculo, pageNumber, pageSize);
 
-      ResponseEntity<WrapperCarreiraListDTO> response = queryBus.handle(query);
+      ResponseEntity<WrapperListContratoDTO> response = queryBus.handle(query);
 
       return response;
   }

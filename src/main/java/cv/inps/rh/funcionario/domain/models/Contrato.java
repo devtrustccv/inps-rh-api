@@ -29,11 +29,13 @@ public class Contrato {
   private ParamVinculo vinculo;
   private ParamContrato tpContratoParam;
 
-  // 🔹 Mestre (null na primeira versão)
-  private Contrato contratoMestre;
 
   // 🔹 Filhos (versões seguintes)
   private List<Contrato> contratosFilhos;
+
+
+  private Long idFuncionario;
+  private UUID uuidFuncionario;
 
   private Contrato(Long id,
                    IdentificadorUnico uuid,
@@ -47,7 +49,9 @@ public class Contrato {
                    String obs,
                    ParamVinculo vinculo,
                    ParamContrato tpContratoParam,
-                   List<Contrato> contratosFilhos) {
+                   List<Contrato> contratosFilhos,
+                   Long idFuncionario,
+                   UUID uuidFuncionario) {
 
     this.id = id;
     this.uuid = uuid;
@@ -61,8 +65,9 @@ public class Contrato {
     this.obs = obs;
     this.vinculo = vinculo;
     this.tpContratoParam = tpContratoParam;
-    this.contratoMestre = contratoMestre;
     this.contratosFilhos = contratosFilhos != null ? contratosFilhos : new ArrayList<>();
+    this.idFuncionario = idFuncionario;
+    this.uuidFuncionario = uuidFuncionario;
   }
 
   // 🔹 Criar primeira versão (mestre)
@@ -73,7 +78,7 @@ public class Contrato {
                                 String situacaoLaboral,
                                 ParamVinculo vinculo,
                                 ParamContrato tpContratoParam) {
-    var contrato =  new Contrato(
+    var contrato = new Contrato(
         null,
         IdentificadorUnico.create(),
         Estado.P,
@@ -86,7 +91,9 @@ public class Contrato {
         "NOVO_CONTRATO",
         vinculo,
         tpContratoParam,
-        new ArrayList<>()   // ainda não tem filhos
+        new ArrayList<>(),  // ainda não tem filhos
+        null,
+        null
     );
 
     return contrato;
@@ -106,8 +113,10 @@ public class Contrato {
                                  String obs,
                                  ParamVinculo vinculo,
                                  ParamContrato tpContratoParam,
-                                 List<Contrato> contratosFilhos) {
-     var contrato = new Contrato(
+                                 List<Contrato> contratosFilhos,
+                                 Long idFuncionario,
+                                 UUID uuidFuncionario) {
+    var contrato = new Contrato(
         id,
         IdentificadorUnico.from(uuid),
         estado,
@@ -120,23 +129,24 @@ public class Contrato {
         obs,
         vinculo,
         tpContratoParam,
-        contratosFilhos
+        contratosFilhos,
+        idFuncionario,
+        uuidFuncionario
     );
 
-     return contrato;
+    return contrato;
   }
 
 
   // 🔹 Criar versão filha
   public void createFilha(LocalDate dataInicio,
-                                     LocalDate dataFim,
-                                     Integer duracao,
-                                     Integer versao,
-                                     String tpContrato,
-                                     String situacaoLaboral,
-                                     ParamVinculo vinculo,
-                                     ParamContrato tpContratoParam,
-                                     Contrato contratoMestre) {
+                          LocalDate dataFim,
+                          Integer duracao,
+                          Integer versao,
+                          String tpContrato,
+                          String situacaoLaboral,
+                          ParamVinculo vinculo,
+                          ParamContrato tpContratoParam) {
     var filha = new Contrato(
         null,
         IdentificadorUnico.create(),
@@ -150,11 +160,13 @@ public class Contrato {
         "VERSAO_FILHA",
         vinculo,
         tpContratoParam,
-        new ArrayList<>()
+        new ArrayList<>(),
+        null,
+        null
     );
 
-      contratoMestre.getContratosFilhos().add(filha);
 
+    this.contratosFilhos.add(filha);
 
   }
 
