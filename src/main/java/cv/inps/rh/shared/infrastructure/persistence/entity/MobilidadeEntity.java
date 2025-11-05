@@ -10,6 +10,7 @@ import lombok.*;
 import jakarta.validation.constraints.NotBlank;
 import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,7 +68,15 @@ public class MobilidadeEntity extends AuditEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instid_id", referencedColumnName = "id")
-    private InstituicaoEntity instidId;   @ManyToOne(fetch = FetchType.LAZY)
+    private InstituicaoEntity instidId;
+    @Column(name="data_inicio")
+    private LocalDate dataInicio;
+
+  
+    @Column(name="data_fim")
+    private LocalDate dataFim;
+
+     @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "fun_id")
    private FuncionarioEntity funId;
 

@@ -606,7 +606,7 @@ public class FuncionarioMapper {
         .build();
   }
 
-  public static FuncionarioListDTO toDTO(FuncionarioList projection) {
+  public FuncionarioListDTO toDTO(FuncionarioList projection) {
     if (projection == null) return null;
 
     FuncionarioListDTO dto = new FuncionarioListDTO();

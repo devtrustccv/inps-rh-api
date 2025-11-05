@@ -7,6 +7,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.models.Instituicao;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
@@ -22,6 +23,8 @@ public class Mobilidade {
   private Instituicao instituicao;
   private Estado estado;
   private String obs;
+  private LocalDate dataInicio;
+  private LocalDate dataFim;
 
   // Construtor privado para rebuild/factory
   private Mobilidade(Long id,
@@ -32,7 +35,9 @@ public class Mobilidade {
                      Secao secao,
                      Instituicao instituicao,
                      Estado estado,
-                     String obs) {
+                     String obs,
+                     LocalDate dataInicio,
+                     LocalDate dataFim) {
     this.id = id;
     this.uuid = uuid;
     this.contrato = contrato;
@@ -42,6 +47,8 @@ public class Mobilidade {
     this.instituicao = instituicao;
     this.estado = estado;
     this.obs = obs;
+    this.dataInicio = dataInicio;
+    this.dataFim = dataFim;
   }
 
   // Factory para criar nova mobilidade
@@ -50,7 +57,9 @@ public class Mobilidade {
                                   String tipoSituacao,
                                   Secao secao,
                                   Instituicao instituicao,
-                                  String obs) {
+                                  String obs,
+                                  LocalDate dataInicio,
+                                  LocalDate dataFim) {
     return new Mobilidade(
         null,
         IdentificadorUnico.create(),
@@ -60,7 +69,9 @@ public class Mobilidade {
         secao,
         instituicao,
         Estado.A,
-        obs
+        obs,
+        dataInicio,
+        dataFim
     );
   }
 
@@ -73,7 +84,9 @@ public class Mobilidade {
                                    Secao secao,
                                    Instituicao instituicao,
                                    Estado estado,
-                                   String obs) {
+                                   String obs,
+                                   LocalDate dataInicio,
+                                   LocalDate dataFim) {
     return new Mobilidade(
         id,
         IdentificadorUnico.from(uuid),
@@ -83,25 +96,32 @@ public class Mobilidade {
         secao,
         instituicao,
         estado,
-        obs
+        obs,
+        dataInicio,
+        dataFim
     );
   }
 
-  // Atualização parcial
+
   public void update(Contrato contrato,
                      ParamLocalTrab localTrab,
                      String tipoSituacao,
                      Secao secao,
                      Instituicao instituicao,
-                     String obs) {
+                     String obs,
+                     LocalDate dataInicio,
+                     LocalDate dataFim) {
     if (contrato != null) this.contrato = contrato;
     if (localTrab != null) this.localTrab = localTrab;
     if (tipoSituacao != null) this.tipoSituacao = tipoSituacao;
     if (secao != null) this.secao = secao;
     if (instituicao != null) this.instituicao = instituicao;
     if (obs != null) this.obs = obs;
+    if (dataInicio != null) this.dataInicio = dataInicio;
+    if (dataFim != null) this.dataFim = dataFim;
 
   }
+
 
   // Soft delete
   public void eliminar() {

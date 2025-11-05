@@ -1,0 +1,60 @@
+{
+  "type": "controller",
+  "name": "Mobilidade",
+  "module": "funcionario",
+  "description": "GEstao mobilidade",
+  "basePath": "api/v1/funcionarios",
+  "actions": [
+    {
+      "actionName": "getListMobilidades",
+      "path": "mobilidades",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListMobilidade",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "tipoMobilidade",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "tunlfcyaeu"
+}

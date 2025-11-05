@@ -50,7 +50,7 @@ public class GetListFuncionariosQueryHandler implements QueryHandler<GetListFunc
     long totalElements = funcionarios.isEmpty() ? 0 : funcionarios.getFirst().getTotalCount();
 
     List<FuncionarioListDTO> content = funcionarios.stream()
-        .map(FuncionarioMapper::toDTO)
+        .map(funcionarioMapper::toDTO)
         .toList();
 
     WrapperListaFuncionarioDTO wrapper = new WrapperListaFuncionarioDTO();

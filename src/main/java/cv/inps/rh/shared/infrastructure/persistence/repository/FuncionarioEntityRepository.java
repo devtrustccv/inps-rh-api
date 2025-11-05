@@ -31,7 +31,7 @@ public interface FuncionarioEntityRepository extends
             SELECT * FROM (
                 SELECT
                     F.ID AS id,
-                    F.UUID AS uuid,
+                    RAWTOHEX(F.UUID) AS uuid,
                     F.NOME AS nome,
                     CAR.NOME AS cargo,
                     C.DATA_INICIO AS dataInicio,
