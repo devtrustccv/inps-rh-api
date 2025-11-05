@@ -1,14 +1,21 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import cv.inps.rh.funcionario.application.dto.CarreiraListDTO;
+import cv.inps.rh.funcionario.domain.filters.CarreiraFilter;
 import cv.inps.rh.funcionario.domain.models.Carreira;
+import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamCargoMapper;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamCarreiraMapper;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamCategoriaMapper;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamEscalaoMapper;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -71,5 +78,47 @@ public class CarreiraMapper {
 
     return entity;
   }
+
+  public CarreiraFilter toFilterDomain(String tipoCarreira,
+                                       String dataInicio,
+                                       String dataFim,
+                                       Integer pageNumber,
+                                       Integer pageSize) {
+
+    return CarreiraFilter.builder()
+        .tipoCarreira(StringUtils.hasText(tipoCarreira) ? tipoCarreira : null)
+        .dataInicio(StringUtils.hasText(dataInicio) ? DateFormatter.stringToLocalDate(dataInicio) : null)
+        .dataFim(StringUtils.hasText(dataFim) ? DateFormatter.stringToLocalDate(dataFim) : null)
+        .pageNumber(pageNumber)
+        .pageSize(pageSize)
+        .build();
+
+  }
+
+
+  public  CarreiraListDTO toDTO(cv.inps.rh.funcionario.domain.projections.CarreiraList projection) {
+    if (projection == null) return null;
+
+    var dto = new CarreiraListDTO();
+    dto.setId(projection.getId());
+    dto.setUuid(projection.getUuid());
+    dto.setIdFuncionario(projection.getIdFuncionario());
+    dto.setUuidFuncionario(projection.getUuidFuncionario());
+    dto.setTipoCarreira(projection.getTipoCarreira());
+    dto.setVinculo(projection.getVinculo());
+    dto.setCarreira(projection.getCarreira());
+    dto.setCargo(projection.getCargo());
+    dto.setEscalao(projection.getEscalao());
+    dto.setSalario(projection.getSalario());
+    dto.setSituacaoLaboral(projection.getSituacaoLaboral());
+    dto.setDataInicio(projection.getDataInicio());
+    dto.setDataFim(projection.getDataFim());
+    dto.setProcessamento(projection.getProcessamento());
+    dto.setEstado(projection.getEstado() != null ? projection.getEstado() : null);
+    dto.setEstadoDesc(projection.getEstado() != null ? Estado.fromCodeOrThrow(projection.getEstado()).getDescription() : null);
+
+    return dto;
+  }
+
 
 }

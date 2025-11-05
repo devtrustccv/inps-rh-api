@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.domain.filters;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -10,8 +11,8 @@ import java.time.LocalDateTime;
 public class CarreiraFilter {
 
   private String tipoCarreira;
-  private LocalDateTime dataInicio;
-  private LocalDateTime dataFim;
+  private LocalDate dataInicio;
+  private LocalDate dataFim;
   private Integer pageNumber;
   private Integer pageSize;
 }
