@@ -1,6 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.persistence.repository;
 
-import cv.inps.rh.funcionario.domain.filters.ValidacoesFilters;
+import cv.inps.rh.funcionario.domain.filters.ValidacoesFilter;
 import cv.inps.rh.funcionario.domain.models.Validacao;
 import cv.inps.rh.funcionario.domain.repository.ValidacaoRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.ValidacaoMapper;
@@ -25,7 +25,7 @@ public class ValidacaoRepositoryImpl implements ValidacaoRepository {
 
   @Override
   @Transactional(readOnly = true)
-  public List<Validacao> findAll(ValidacoesFilters filters) {
+  public List<Validacao> findAll(ValidacoesFilter filters) {
 
     int pageNumber = filters.getPageNumber() != null ? filters.getPageNumber() : 0;
     int pageSize = filters.getPageSize() != null ? filters.getPageSize() : 20;

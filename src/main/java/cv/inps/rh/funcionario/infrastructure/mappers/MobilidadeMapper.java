@@ -1,8 +1,7 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.MobilidadeListDTO;
-import cv.inps.rh.funcionario.domain.filters.FuncionarioFilters;
-import cv.inps.rh.funcionario.domain.filters.MobilidadeFilters;
+import cv.inps.rh.funcionario.domain.filters.MobilidadeFilter;
 import cv.inps.rh.funcionario.domain.models.Mobilidade;
 import cv.inps.rh.funcionario.domain.projections.MobilidadeList;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
@@ -75,13 +74,13 @@ public class MobilidadeMapper {
   }
 
 
-  public MobilidadeFilters toFilterDomain(String tipoMobilidade,
-                                          String dataInicio,
-                                          String dataFim,
-                                          Integer pageNumber,
-                                          Integer pageSize) {
+  public MobilidadeFilter toFilterDomain(String tipoMobilidade,
+                                         String dataInicio,
+                                         String dataFim,
+                                         Integer pageNumber,
+                                         Integer pageSize) {
 
-    return MobilidadeFilters.builder()
+    return MobilidadeFilter.builder()
         .tipoMobilidade(tipoMobilidade)
         .dataInicio(StringUtils.hasText(dataInicio)  ? DateFormatter.stringToLocalDateTime(dataInicio) :null)
         .dataFim(StringUtils.hasText(dataFim) ? DateFormatter.stringToLocalDateTime(dataFim) : null)

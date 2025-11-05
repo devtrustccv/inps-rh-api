@@ -1,11 +1,10 @@
 package cv.inps.rh.funcionario.infrastructure.persistence.repository;
 
-import cv.inps.rh.funcionario.domain.filters.FuncionarioFilters;
+import cv.inps.rh.funcionario.domain.filters.FuncionarioFilter;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.funcionario.domain.projections.FuncionarioList;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -41,7 +40,7 @@ public class FuncionarioRepositoryImpl implements FuncionarioRepository {
 
   @Transactional(readOnly = true)
   @Override
-  public List<FuncionarioList> findAll(FuncionarioFilters filters) {
+  public List<FuncionarioList> findAll(FuncionarioFilter filters) {
     int pageNumber = filters.getPageNumber() != null ? filters.getPageNumber() : 0;
     int pageSize = filters.getPageSize() != null ? filters.getPageSize() : 50;
     int offset = pageNumber * pageSize;

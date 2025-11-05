@@ -4,7 +4,7 @@ import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.funcionario.application.dto.FuncionarioListDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaFuncionarioDTO;
-import cv.inps.rh.funcionario.domain.filters.FuncionarioFilters;
+import cv.inps.rh.funcionario.domain.filters.FuncionarioFilter;
 import cv.inps.rh.funcionario.domain.projections.FuncionarioList;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
@@ -33,7 +33,7 @@ public class GetListFuncionariosQueryHandler implements QueryHandler<GetListFunc
   public ResponseEntity<WrapperListaFuncionarioDTO> handle(GetListFuncionariosQuery query) {
     LOGGER.info("Handling GetListFuncionariosQuery: {}", query);
 
-    FuncionarioFilters filters = funcionarioMapper.toFilterDomain(
+    FuncionarioFilter filters = funcionarioMapper.toFilterDomain(
         query.getNome(),
         query.getDireccao(),
         query.getSeccao(),

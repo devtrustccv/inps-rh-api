@@ -1,7 +1,7 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.*;
-import cv.inps.rh.funcionario.domain.filters.FuncionarioFilters;
+import cv.inps.rh.funcionario.domain.filters.FuncionarioFilter;
 import cv.inps.rh.funcionario.domain.models.*;
 import cv.inps.rh.funcionario.domain.projections.FuncionarioList;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
@@ -583,17 +583,17 @@ public class FuncionarioMapper {
   }
 
 
-  public FuncionarioFilters toFilterDomain(String nome,
-                                           Long direcao,
-                                           Long seccao,
-                                           Long tipoVinculoLaboral,
-                                           String dataInicio,
-                                           String dataFim,
-                                           String estado,
-                                           Integer pageNumber,
-                                           Integer pageSize) {
+  public FuncionarioFilter toFilterDomain(String nome,
+                                          Long direcao,
+                                          Long seccao,
+                                          Long tipoVinculoLaboral,
+                                          String dataInicio,
+                                          String dataFim,
+                                          String estado,
+                                          Integer pageNumber,
+                                          Integer pageSize) {
 
-    return FuncionarioFilters.builder()
+    return FuncionarioFilter.builder()
         .nome(nome)
         .direcao(direcao)
         .seccao(seccao)

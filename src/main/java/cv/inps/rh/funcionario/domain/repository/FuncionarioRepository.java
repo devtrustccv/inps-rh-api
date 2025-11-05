@@ -1,6 +1,6 @@
 package cv.inps.rh.funcionario.domain.repository;
 
-import cv.inps.rh.funcionario.domain.filters.FuncionarioFilters;
+import cv.inps.rh.funcionario.domain.filters.FuncionarioFilter;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.funcionario.domain.projections.FuncionarioList;
 
@@ -13,5 +13,5 @@ public interface FuncionarioRepository {
 
   Optional<Funcionario> findById(Long id);
 
-  List<FuncionarioList> findAll(FuncionarioFilters filters);
+  List<FuncionarioList> findAll(FuncionarioFilter filters);
 }

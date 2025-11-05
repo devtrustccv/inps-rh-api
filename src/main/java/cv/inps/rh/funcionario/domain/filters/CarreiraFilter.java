@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class MobilidadeFilters {
+public class CarreiraFilter {
 
-  private String tipoMobilidade;
+  private String tipoCarreira;
   private LocalDateTime dataInicio;
   private LocalDateTime dataFim;
   private Integer pageNumber;

@@ -1,9 +1,7 @@
 package cv.inps.rh.funcionario.application.queries;
 
-import cv.inps.rh.funcionario.application.dto.FuncionarioListDTO;
 import cv.inps.rh.funcionario.application.dto.MobilidadeListDTO;
-import cv.inps.rh.funcionario.application.dto.WrapperListaFuncionarioDTO;
-import cv.inps.rh.funcionario.domain.filters.MobilidadeFilters;
+import cv.inps.rh.funcionario.domain.filters.MobilidadeFilter;
 import cv.inps.rh.funcionario.domain.projections.MobilidadeList;
 import cv.inps.rh.funcionario.domain.repository.MobilidadeRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.MobilidadeMapper;
@@ -11,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +35,7 @@ public class GetListMobilidadesQueryHandler implements QueryHandler<GetListMobil
      LOGGER.info("Handling GetListMobilidadesQuery: {}", query);
 
      // Converte os parâmetros da query para o domain filter
-     MobilidadeFilters filters = mobilidadeMapper.toFilterDomain(
+     MobilidadeFilter filters = mobilidadeMapper.toFilterDomain(
          query.getTipoMobilidade(),
          query.getDataInicio(),
          query.getDataFim(),
