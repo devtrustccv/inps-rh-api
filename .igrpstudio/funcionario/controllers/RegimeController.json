@@ -1,0 +1,55 @@
+{
+  "type": "controller",
+  "name": "Regime",
+  "module": "funcionario",
+  "description": "Gestao Regimes",
+  "basePath": "api/v1/funcionarios",
+  "actions": [
+    {
+      "actionName": "getListRegimes",
+      "path": "regimes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperRegimeList",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "tipoRegime",
+          "isRequired": false
+        }
+      ]
+    }
+  ],
+  "id": "exldkjz2ka"
+}

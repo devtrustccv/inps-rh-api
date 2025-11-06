@@ -9,6 +9,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotBlank;
 import java.util.UUID;
+import cv.inps.rh.shared.application.constants.Estado;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Getter
@@ -36,20 +39,20 @@ public class RegimeModalidadeEntity extends AuditEntity {
 
   
     @Column(name="num_horas")
-    private String numHoras;
+    private Integer numHoras;
 
   
     @Column(name="uuid")
     private UUID uuid;
 
   
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "regime_id", referencedColumnName = "id")
-    private RegimeTrabalhoEntity regimeId;
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
-  
+     @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "regime_id")
+   private RegimeTrabalhoEntity regimeId;
+
+
 }
