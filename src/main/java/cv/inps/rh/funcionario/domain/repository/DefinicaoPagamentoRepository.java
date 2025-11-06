@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface DefinicaoPagamentoRepository {
 
-  public List<DefPagamento> findAll(PagamentoDescontoFilter);
+  public List<DefPagamento> findAll(PagamentoDescontoFilter filter);
 }
