@@ -38,4 +38,7 @@ public interface TipoMovimentoEntityRepository extends
   )
   List<TipoMovimentoEntity> findLimited(@Param("limit") int limit);
 
+
+  List<TipoMovimentoEntity> findAllByTipo(String tipo);
+
 }

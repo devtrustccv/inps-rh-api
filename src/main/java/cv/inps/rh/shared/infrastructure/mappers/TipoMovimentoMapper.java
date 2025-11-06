@@ -16,13 +16,14 @@ public class TipoMovimentoMapper {
   public TipoMovimento toDomain(TipoMovimentoEntity tipoMovimentoEntity){
     if (tipoMovimentoEntity == null) return null;
     return TipoMovimento
-        .rebuild(tipoMovimentoEntity.getId(), tipoMovimentoEntity.getDescricao(), tipoMovimentoEntity.getValor(), tipoMovimentoEntity.getPercentagem());
+        .rebuild(tipoMovimentoEntity.getId(), tipoMovimentoEntity.getDescricao(), tipoMovimentoEntity.getValor(), tipoMovimentoEntity.getPercentagem(),
+            tipoMovimentoEntity.getTipo());
   }
 
   public TipoMovimento toDomain(Long idTipoMovimento) {
     if (idTipoMovimento == null) return null;
     return TipoMovimento
-        .rebuild(idTipoMovimento, null, null, null);
+        .rebuild(idTipoMovimento, null, null, null, null);
   }
 
   public ParametrizacaoDTO toParametrizacaoDto(TipoMovimento tipoMovimento) {

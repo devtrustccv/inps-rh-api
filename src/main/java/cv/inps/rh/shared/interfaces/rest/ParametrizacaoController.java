@@ -29,14 +29,14 @@ public class ParametrizacaoController {
 
   @GetMapping("/tipo-movimento-desconto/ativos")
   @Operation(summary = "Lista tipos de movimento de desconto ativos")
-  public ResponseEntity<List<ParametrizacaoDTO>> getTiposMovimentoDescontoAtivos() {
-    return ResponseEntity.ok(parametrizacaoService.getTiposMovimentos());
+  public ResponseEntity<List<ParametrizacaoDTO>> getTiposMovimentoPagamentosDescontoAtivos() {
+    return ResponseEntity.ok(parametrizacaoService.getTiposMovimentosPagamentosDesconto());
   }
 
   @GetMapping("/tipo-movimento-renumeracao/ativos")
   @Operation(summary = "Lista tipos de movimento de remuneração ativos")
   public ResponseEntity<List<ParametrizacaoDTO>> getTiposMovimentoRemuneracaoAtivos() {
-    return ResponseEntity.ok(parametrizacaoService.getTiposMovimentos());
+    return ResponseEntity.ok(parametrizacaoService.getTiposMovimentosRenumeracao());
   }
 
   @GetMapping("/instituicoes/ativos")

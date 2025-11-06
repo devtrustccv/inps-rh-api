@@ -10,6 +10,6 @@ public interface TipoMovimentoRepository {
 
   public List<TipoMovimento> findAllTipoMovimentoRenumeracao();
 
-  public List<TipoMovimento> findAllTipoMovimentoDesconto();
+  public List<TipoMovimento> findAllTipoMovimentoPagamentoDesconto();
 
 }

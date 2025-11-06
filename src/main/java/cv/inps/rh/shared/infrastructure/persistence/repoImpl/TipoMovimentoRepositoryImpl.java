@@ -29,15 +29,14 @@ public class TipoMovimentoRepositoryImpl implements TipoMovimentoRepository {
 
   @Override
   public List<TipoMovimento> findAllTipoMovimentoRenumeracao() {
-    // todo implementar depois
 
-    return List.of();
+    return tipoMovimentoEntityRepository.findAllByTipo("REM").
+        stream().map(tipoMovimentoMapper::toDomain).toList();
 
   }
 
   @Override
-  public List<TipoMovimento> findAllTipoMovimentoDesconto() {
-    // todo implementar depois
-    return List.of();
-  }
+  public List<TipoMovimento> findAllTipoMovimentoPagamentoDesconto() {
+    return tipoMovimentoEntityRepository.findAllByTipo("PAG").
+        stream().map(tipoMovimentoMapper::toDomain).toList();  }
 }

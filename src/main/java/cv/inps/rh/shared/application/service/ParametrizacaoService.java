@@ -28,6 +28,14 @@ public class ParametrizacaoService {
   public List<ParametrizacaoDTO> getTiposMovimentos(){
     return tipoMovimentoRepository.findAll().stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
+
+  public List<ParametrizacaoDTO> getTiposMovimentosRenumeracao(){
+    return tipoMovimentoRepository.findAllTipoMovimentoRenumeracao().stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
+  }
+
+  public List<ParametrizacaoDTO> getTiposMovimentosPagamentosDesconto(){
+    return tipoMovimentoRepository.findAllTipoMovimentoPagamentoDesconto().stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
+  }
   public List<ParametrizacaoDTO> getInstituicoes(){
     return instituicaoRepository.findAllActive().stream().map(instituicaoMapper::toParametrizacaoDto).toList();
   }
