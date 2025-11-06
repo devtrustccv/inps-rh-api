@@ -1,12 +1,16 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import cv.inps.rh.funcionario.domain.filters.RenumeracaoFilter;
 import cv.inps.rh.funcionario.domain.models.DefinicaoRemuneracao;
+import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.mappers.TipoMovimentoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 @RequiredArgsConstructor
@@ -56,4 +60,21 @@ public class DefinicaoRemuneracaoMapper {
     }
     return entity;
   }
+
+  public RenumeracaoFilter toFilterDomain(String estado,
+                                          String dataInicio,
+                                          String dataFim,
+                                          Integer pageNumber,
+                                          Integer pageSize) {
+
+    return RenumeracaoFilter.builder()
+        .estado(StringUtils.hasText(estado) ? Estado.fromCodeOrThrow(estado) : null)
+        .dataInicio(StringUtils.hasText(dataInicio) ? DateFormatter.stringToLocalDate(dataInicio) : null)
+        .dataFim(StringUtils.hasText(dataFim) ? DateFormatter.stringToLocalDate(dataFim) : null)
+        .pageNumber(pageNumber)
+        .pageSize(pageSize)
+        .build();
+
+  }
+
 }
