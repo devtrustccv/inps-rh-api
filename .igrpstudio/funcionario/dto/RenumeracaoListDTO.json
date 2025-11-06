@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "AbonosSusbidiosList",
+  "name": "RenumeracaoList",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [

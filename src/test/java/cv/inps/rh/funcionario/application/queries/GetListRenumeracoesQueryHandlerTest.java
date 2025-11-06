@@ -13,10 +13,10 @@ import org.springframework.http.ResponseEntity;
 import cv.inps.rh.funcionario.application.queries.*;
 
 @ExtendWith(MockitoExtension.class)
-public class GetListAbonosSubsidiosQueryHandlerTest {
+public class GetListRenumeracoesQueryHandlerTest {
 
   @InjectMocks
-  private GetListAbonosSubsidiosQueryHandler getListAbonosSubsidiosQueryHandler;
+  private GetListRenumeracoesQueryHandler getListRenumeracoesQueryHandler;
 
   @BeforeEach
   void setUp() {
@@ -24,14 +24,14 @@ public class GetListAbonosSubsidiosQueryHandlerTest {
   }
 
   @Test
-  void testHandleGetListAbonosSubsidiosQuery() {
+  void testHandleGetListRenumeracoesQuery() {
     // TODO: Implement unit test for handle method
     // Example:
     // Given
-    // GetListAbonosSubsidiosQuery query = new GetListAbonosSubsidiosQuery(...);
+    // GetListRenumeracoesQuery query = new GetListRenumeracoesQuery(...);
     //
     // When
-    // ResponseEntity<WrapperListAbonoSubsidiosDTO> response = getListAbonosSubsidiosQueryHandler.handle(query);
+    // ResponseEntity<WrapperListAbonoSubsidiosDTO> response = getListRenumeracoesQueryHandler.handle(query);
     //
     // Then
     // assertNotNull(response);

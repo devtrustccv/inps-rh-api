@@ -19,27 +19,27 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.funcionario.application.queries.*;
 
-import cv.inps.rh.funcionario.application.dto.WrapperListAbonoSubsidiosDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperListRenumeracaoDTO;
 
 @IgrpController
 @RestController
 @RequestMapping(path = "api/v1/funcionarios")
-@Tag(name = "AbonoSubsidio", description = "gest abonos subsidios")
-public class AbonoSubsidioController {
+@Tag(name = "Renumeracao", description = "gest abonos subsidios")
+public class RenumeracaoController {
 
   
   private final QueryBus queryBus;
 
-  public AbonoSubsidioController(QueryBus queryBus) {
+  public RenumeracaoController(QueryBus queryBus) {
           this.queryBus = queryBus;
           
   }
    @GetMapping(
-   value = "abonos-subsidios"
+   value = "renumeracoes"
   )
   @Operation(
-    summary = "GET method to handle operations for getListAbonosSubsidios",
-    description = "GET method to handle operations for getListAbonosSubsidios",
+    summary = "GET method to handle operations for getListRenumeracoes",
+    description = "GET method to handle operations for getListRenumeracoes",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -47,14 +47,14 @@ public class AbonoSubsidioController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = WrapperListAbonoSubsidiosDTO.class,
+                  implementation = WrapperListRenumeracaoDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<WrapperListAbonoSubsidiosDTO> getListAbonosSubsidios(
+  public ResponseEntity<WrapperListRenumeracaoDTO> getListRenumeracoes(
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
     @RequestParam(value = "dataFim", required = false) String dataFim,
@@ -62,9 +62,9 @@ public class AbonoSubsidioController {
     @RequestParam(value = "estado", required = false) String estado)
   {
 
-      final var query = new GetListAbonosSubsidiosQuery(pageSize, pageNumber, dataFim, dataInicio, estado);
+      final var query = new GetListRenumeracoesQuery(pageSize, pageNumber, dataFim, dataInicio, estado);
 
-      ResponseEntity<WrapperListAbonoSubsidiosDTO> response = queryBus.handle(query);
+      ResponseEntity<WrapperListRenumeracaoDTO> response = queryBus.handle(query);
 
       return response;
   }

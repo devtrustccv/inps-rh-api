@@ -9,36 +9,21 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-
-
+import cv.inps.rh.funcionario.application.dto.RenumeracaoListDTO;
+import cv.inps.rh.shared.application.dto.PageDTO;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.EqualsAndHashCode;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 
-
+@EqualsAndHashCode(callSuper = true)
 @IgrpDTO
-public class AbonosSusbidiosListDTO  {
+public class WrapperListRenumeracaoDTO extends PageDTO {
 
   
-  
-  private Long id ;
-  
-  
-  private String uuid ;
-  
-  
-  private String estado ;
-  
-  
-  private String estadoDesc ;
-  
-  
-  private String movimento ;
-  
-  
-  private String valor ;
-  
-  
-  private String ultimoPRoc ;
+  @Valid
+  private List<RenumeracaoListDTO> content = new ArrayList<>();
 
 }

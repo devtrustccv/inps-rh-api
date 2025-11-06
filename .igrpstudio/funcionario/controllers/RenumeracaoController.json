@@ -1,13 +1,13 @@
 {
   "type": "controller",
-  "name": "AbonoSubsidio",
+  "name": "Renumeracao",
   "module": "funcionario",
   "description": "gest abonos subsidios",
   "basePath": "api/v1/funcionarios",
   "actions": [
     {
-      "actionName": "getListAbonosSubsidios",
-      "path": "abonos-subsidios",
+      "actionName": "getListRenumeracoes",
+      "path": "renumeracoes",
       "method": "GET",
       "responses": {
         "200": {
@@ -15,7 +15,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "WrapperListAbonoSubsidios",
+                "type": "WrapperListRenumeracao",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -56,5 +56,5 @@
       ]
     }
   ],
-  "id": "ixh1ofde84-getListAbonosSubsidios"
+  "id": "ixh1ofde84-getListAbonosSubsidios-getListAbonosSubsidios-getListRenumeracoes"
 }

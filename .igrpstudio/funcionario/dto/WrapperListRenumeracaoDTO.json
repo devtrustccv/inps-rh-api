@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "WrapperListAbonoSubsidios",
+  "name": "WrapperListRenumeracao",
   "template": "classic",
   "enableCustonValidation": false,
   "extends": {
@@ -12,7 +12,7 @@
     {
       "name": "content",
       "objectType": "dto",
-      "type": "AbonosSusbidiosList",
+      "type": "RenumeracaoList",
       "required": false,
       "before": false,
       "after": false,

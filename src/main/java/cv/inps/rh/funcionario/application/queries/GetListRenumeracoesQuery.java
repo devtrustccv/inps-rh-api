@@ -11,7 +11,7 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetListAbonosSubsidiosQuery implements Query {
+public class GetListRenumeracoesQuery implements Query {
 
   @NotBlank(message = "The field <pageSize> is required")
   private String pageSize;
