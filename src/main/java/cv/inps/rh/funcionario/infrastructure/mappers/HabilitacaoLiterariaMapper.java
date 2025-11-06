@@ -106,7 +106,7 @@ public class HabilitacaoLiterariaMapper {
     HabilitacaoLiterariaRespDTO dto = new HabilitacaoLiterariaRespDTO();
 
     dto.setId(domain.getId());
-    dto.setPais(domain.getPais() != null ? domain.getPais().getId().intValue() : null); // converte Long -> Integer
+    dto.setPaisId(domain.getPais() != null ? domain.getPais().getId().intValue() : null); // converte Long -> Integer
     dto.setPaisDesc(domain.getPais() != null ? domain.getPais().getNome() : null);
     dto.setEstabelecimento(domain.getEstabelecimento());
     dto.setArea(domain.getArea());

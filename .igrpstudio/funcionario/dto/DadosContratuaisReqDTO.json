@@ -6,7 +6,7 @@
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "tipoContrato",
+      "name": "tipoContratoId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -18,7 +18,7 @@
       "primaryKey": false
     },
     {
-      "name": "cargoPosicao",
+      "name": "cargoPosicaoId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -30,7 +30,7 @@
       "primaryKey": false
     },
     {
-      "name": "direcao",
+      "name": "direcaoId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -42,7 +42,7 @@
       "primaryKey": false
     },
     {
-      "name": "seccao",
+      "name": "seccaoId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -66,7 +66,7 @@
       "primaryKey": false
     },
     {
-      "name": "carreira",
+      "name": "carreiraId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -78,7 +78,7 @@
       "primaryKey": false
     },
     {
-      "name": "categoria",
+      "name": "categoriaId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -90,7 +90,7 @@
       "primaryKey": false
     },
     {
-      "name": "escalaoReferencia",
+      "name": "escalaoReferenciaId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -102,7 +102,7 @@
       "primaryKey": false
     },
     {
-      "name": "tipoVinculoLaboral",
+      "name": "tipoVinculoLaboralId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -186,7 +186,7 @@
       "primaryKey": false
     },
     {
-      "name": "pais",
+      "name": "localTrabalhoId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -198,7 +198,19 @@
       "primaryKey": false
     },
     {
-      "name": "ilha",
+      "name": "paisId",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "ilhaId",
       "objectType": "java",
       "type": "long",
       "required": false,

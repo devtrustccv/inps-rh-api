@@ -105,28 +105,28 @@ public class EnderecoMapper {
     dto.setId(endereco.getId());
 
     if (endereco.getPais() != null) {
-      dto.setPais(endereco.getPais().getId() != null ? endereco.getPais().getId().intValue() : null);
+      dto.setPaisId(endereco.getPais().getId() != null ? endereco.getPais().getId().intValue() : null);
       dto.setPaisDesc(endereco.getPais().getNome());
     }
 
     if (endereco.getIlha() != null) {
-      dto.setIlha(endereco.getIlha().getId() != null ? endereco.getIlha().getId().intValue() : null);
+      dto.setIlhaId(endereco.getIlha().getId() != null ? endereco.getIlha().getId().intValue() : null);
       dto.setIlhaDesc(endereco.getIlha().getNome());
     }
 
     if (endereco.getConcelho() != null) {
-      dto.setConcelho(endereco.getConcelho().getId() != null ? endereco.getConcelho().getId().intValue() : null);
+      dto.setConcelhoId(endereco.getConcelho().getId() != null ? endereco.getConcelho().getId().intValue() : null);
       dto.setConcelhoDesc(endereco.getConcelho().getNome());
     }
 
     if (endereco.getFreguesia() != null) {
-      dto.setFreguesia(endereco.getFreguesia().getId() != null ? endereco.getFreguesia().getId().intValue() : null);
+      dto.setFreguesiaId(endereco.getFreguesia().getId() != null ? endereco.getFreguesia().getId().intValue() : null);
       dto.setFreguesiaDesc(endereco.getFreguesia().getNome());
     }
 
 
     if (endereco.getZona() != null) {
-      dto.setZona(endereco.getZona().getId() != null ? endereco.getZona().getId().intValue() : null);
+      dto.setZonaId(endereco.getZona().getId() != null ? endereco.getZona().getId().intValue() : null);
       dto.setZonaDesc(endereco.getZona().getNome());
     }
 

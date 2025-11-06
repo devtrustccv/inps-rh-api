@@ -158,17 +158,17 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
 
      var dadosContratuais = dto.getDadosContratuais();
-     var tipoContrato = paramContratoMapper.toDomain(dadosContratuais.getTipoContrato());
-     var cargoPosicao = paramCargoMapper.toDomain(dadosContratuais.getCargoPosicao());
-     var direcao = instituicaoMapper.toDomain(dadosContratuais.getDirecao());
-     var seccao = secaoMapper.toDomain(dadosContratuais.getSeccao());
-     var carreira  = paramCarreiraMapper.toDomain(dadosContratuais.getCarreira());
-     var categoria = paramCategoriaMapper.toDomain(dadosContratuais.getCategoria());
-     var escalao = paramEscalaoMapper.toDomain(dadosContratuais.getEscalaoReferencia());
-     var vinculo = paramVinculoMapper.toDomain(dadosContratuais.getTipoVinculoLaboral());
-     var pais = geografiaMapper.toDomain(dadosContratuais.getPais());
-     var ilha = geografiaMapper.toDomain(dadosContratuais.getIlha());
-     var localTrabalho = paramLocalTrabMapper.toDomain(dadosContratuais.getLocalTrabalho());
+     var tipoContrato = paramContratoMapper.toDomain(dadosContratuais.getTipoContratoId());
+     var cargoPosicao = paramCargoMapper.toDomain(dadosContratuais.getCargoPosicaoId());
+     var direcao = instituicaoMapper.toDomain(dadosContratuais.getDirecaoId());
+     var seccao = secaoMapper.toDomain(dadosContratuais.getSeccaoId());
+     var carreira  = paramCarreiraMapper.toDomain(dadosContratuais.getCarreiraId());
+     var categoria = paramCategoriaMapper.toDomain(dadosContratuais.getCategoriaId());
+     var escalao = paramEscalaoMapper.toDomain(dadosContratuais.getEscalaoReferenciaId());
+     var vinculo = paramVinculoMapper.toDomain(dadosContratuais.getTipoVinculoLaboralId());
+     var pais = geografiaMapper.toDomain(dadosContratuais.getPaisId());
+     var ilha = geografiaMapper.toDomain(dadosContratuais.getIlhaId());
+     var localTrabalho = paramLocalTrabMapper.toDomain(dadosContratuais.getLocalTrabalhoId());
 
 
      List<DefPagamento> defPagamentos = dto.getEncargosDescontos().stream()

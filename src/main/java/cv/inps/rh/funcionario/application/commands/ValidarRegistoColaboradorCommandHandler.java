@@ -118,17 +118,17 @@ public class ValidarRegistoColaboradorCommandHandler implements CommandHandler<V
 
        var dados = dto.getDadosContratuais();
 
-       var tipoContrato = paramContratoMapper.toDomain(dados.getTipoContrato());
-       var paramCargo = paramCargoMapper.toDomain(dados.getCargoPosicao());
-       var direcao = instituicaoMapper.toDomain(dados.getDirecao());
-       var seccao = secaoMapper.toDomain(dados.getSeccao());
-       var paramCarreira = paramCarreiraMapper.toDomain(dados.getCarreira());
-       var paramCategoria = paramCategoriaMapper.toDomain(dados.getCategoria());
-       var paramEscalao = paramEscalaoMapper.toDomain(dados.getEscalaoReferencia());
-       var paramVinculo = paramVinculoMapper.toDomain(dados.getTipoVinculoLaboral());
-       Geografia pais = geografiaMapper.toDomain(dados.getPais());
-       Geografia ilha = geografiaMapper.toDomain(dados.getIlha());
-       var localTrabalho = paramLocalTrabMapper.toDomain(dados.getLocalTrabalho());
+       var tipoContrato = paramContratoMapper.toDomain(dados.getTipoContratoId());
+       var paramCargo = paramCargoMapper.toDomain(dados.getCargoPosicaoId());
+       var direcao = instituicaoMapper.toDomain(dados.getDirecaoId());
+       var seccao = secaoMapper.toDomain(dados.getSeccaoId());
+       var paramCarreira = paramCarreiraMapper.toDomain(dados.getCarreiraId());
+       var paramCategoria = paramCategoriaMapper.toDomain(dados.getCategoriaId());
+       var paramEscalao = paramEscalaoMapper.toDomain(dados.getEscalaoReferenciaId());
+       var paramVinculo = paramVinculoMapper.toDomain(dados.getTipoVinculoLaboralId());
+       Geografia pais = geografiaMapper.toDomain(dados.getPaisId());
+       Geografia ilha = geografiaMapper.toDomain(dados.getIlhaId());
+       var localTrabalho = paramLocalTrabMapper.toDomain(dados.getLocalTrabalhoId());
 
        List<DefPagamento> defPagamentos = dto.getEncargosDescontos().stream()
            .map(e -> {

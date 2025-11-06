@@ -73,7 +73,7 @@ public class DadosContratuaisRespDTO  {
   private String tipoVinculoLaboralDesc ;
   
   
-  private String RegimeTrabalho ;
+  private String regimeTrabalho ;
   
   
   private BigDecimal salario ;
@@ -97,9 +97,15 @@ public class DadosContratuaisRespDTO  {
   private String localTrabalhoDesc ;
   
   
-  private String pais ;
+  private Long paisId ;
   
   
-  private String ilha ;
+  private String paisDesc ;
+  
+  
+  private Long ilhaId ;
+  
+  
+  private String ilhaDesc ;
 
 }
