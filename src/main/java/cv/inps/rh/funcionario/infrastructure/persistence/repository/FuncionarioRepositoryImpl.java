@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.funcionario.domain.projections.FuncionarioList;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -33,9 +34,8 @@ public class FuncionarioRepositoryImpl implements FuncionarioRepository {
 
   @Transactional(readOnly = true)
   @Override
-  public Optional<Funcionario> findById(Long id) {
-    return funcionarioEntityRepository.findById(id)
-        .map(mapper::toDomain);
+  public Optional<Funcionario> findById(IdentificadorUnico id) {
+    return funcionarioEntityRepository.findByUuid(id.getValor()).map(mapper::toDomain);
   }
 
   @Transactional(readOnly = true)

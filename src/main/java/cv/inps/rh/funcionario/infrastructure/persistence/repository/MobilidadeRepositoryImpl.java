@@ -1,15 +1,18 @@
 package cv.inps.rh.funcionario.infrastructure.persistence.repository;
 
 import cv.inps.rh.funcionario.domain.filters.MobilidadeFilter;
+import cv.inps.rh.funcionario.domain.models.Mobilidade;
 import cv.inps.rh.funcionario.domain.projections.MobilidadeList;
 import cv.inps.rh.funcionario.domain.repository.MobilidadeRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.MobilidadeMapper;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MobilidadeEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -33,6 +36,14 @@ public class MobilidadeRepositoryImpl implements MobilidadeRepository {
         startRow,
         endRow
     );
+
+  }
+
+  @Transactional(readOnly = true)
+  @Override
+  public Optional<Mobilidade> getMobilidadeById(IdentificadorUnico id) {
+    return mobilidadeEntityRepository.findByUuid(id.getValor())
+        .map(mobilidadeMapper::toDomain);
 
   }
 }

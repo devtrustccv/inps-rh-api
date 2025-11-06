@@ -198,7 +198,7 @@ public class FuncionarioController {
   )
   
   public ResponseEntity<Map<String, ?>> validarRegistoColaborador(@Valid @RequestBody FuncionarioRequestDTO validarRegistoColaboradorRequest
-    , @PathVariable(value = "id") Long id)
+    , @PathVariable(value = "id") String id)
   {
 
       final var command = new ValidarRegistoColaboradorCommand(validarRegistoColaboradorRequest, id);

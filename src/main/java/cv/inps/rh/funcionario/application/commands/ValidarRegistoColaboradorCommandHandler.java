@@ -11,6 +11,7 @@ import cv.inps.rh.parametrizacao.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.Geografia;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.models.TipoMovimento;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.shared.infrastructure.mappers.InstituicaoMapper;
@@ -83,7 +84,8 @@ public class ValidarRegistoColaboradorCommandHandler implements CommandHandler<V
      var dto = command.getFuncionariorequest();
      LOGGER.info("Iniciando atualização de funcionário: {}", dto);
 
-     var funcionario = funcionarioRepository.findById(command.getId())
+     var id = IdentificadorUnico.from(command.getId());
+     var funcionario = funcionarioRepository.findById(id)
          .orElseThrow(() -> IgrpResponseStatusException.notFound("funcionario nao encontrado com id" + command.getId()));
 
       var validacao = dto.getValidar();

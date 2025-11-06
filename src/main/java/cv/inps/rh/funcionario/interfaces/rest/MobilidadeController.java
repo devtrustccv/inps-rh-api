@@ -18,8 +18,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.funcionario.application.queries.*;
-
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.inps.rh.funcionario.application.commands.*;
 import cv.inps.rh.funcionario.application.dto.WrapperListMobilidadeDTO;
+import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
 
 @IgrpController
 @RestController
@@ -29,10 +31,11 @@ public class MobilidadeController {
 
   
   private final QueryBus queryBus;
+  private final CommandBus commandBus;
 
-  public MobilidadeController(QueryBus queryBus) {
+  public MobilidadeController(QueryBus queryBus, CommandBus commandBus) {
           this.queryBus = queryBus;
-          
+          this.commandBus = commandBus;
   }
    @GetMapping(
    value = "mobilidades"
@@ -67,6 +70,68 @@ public class MobilidadeController {
       ResponseEntity<WrapperListMobilidadeDTO> response = queryBus.handle(query);
 
       return response;
+  }
+
+   @GetMapping(
+   value = "mobilidades/{id}"
+  )
+  @Operation(
+    summary = "GET method to handle operations for getMobilidadeById",
+    description = "GET method to handle operations for getMobilidadeById",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = MobilidadeDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<MobilidadeDTO> getMobilidadeById(
+    @PathVariable(value = "id") String id)
+  {
+
+      final var query = new GetMobilidadeByIdQuery(id);
+
+      ResponseEntity<MobilidadeDTO> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @PostMapping(
+   value = "mobilidades/{id}"
+  )
+  @Operation(
+    summary = "POST method to handle operations for saveMobilidade",
+    description = "POST method to handle operations for saveMobilidade",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = MobilidadeDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<MobilidadeDTO> saveMobilidade(@Valid @RequestBody MobilidadeDTO saveMobilidadeRequest
+    , @PathVariable(value = "id") String id)
+  {
+
+      final var command = new SaveMobilidadeCommand(saveMobilidadeRequest, id);
+
+       ResponseEntity<MobilidadeDTO> response = commandBus.send(command);
+
+       return response;
   }
 
 }

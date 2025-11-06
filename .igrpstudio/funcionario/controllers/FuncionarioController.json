@@ -229,11 +229,11 @@
       "pathVariables": [
         {
           "name": "id",
-          "type": "long",
+          "type": "string",
           "isRequired": true
         }
       ]
     }
   ],
-  "id": "69p09wi4e0-criarFuncionario"
+  "id": "69p09wi4e0-criarFuncionario-validarRegistoColaborador"
 }

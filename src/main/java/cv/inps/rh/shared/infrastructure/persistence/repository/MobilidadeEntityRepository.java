@@ -66,6 +66,9 @@ public interface MobilidadeEntityRepository extends
       @Param("startRow") int startRow,
       @Param("endRow") int endRow
   );
+
+  Optional<MobilidadeEntity> findByUuid(UUID uuid);
+
 }
 
 
