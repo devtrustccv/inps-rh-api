@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.domain.models;
 
+import cv.inps.rh.funcionario.application.dto.RenumeracaoListDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.models.TipoMovimento;
@@ -23,7 +24,7 @@ public class DefinicaoRemuneracao {
   private LocalDate dataInicio;
   private LocalDate dataFim;
 
-  // Construtor privado
+
   private DefinicaoRemuneracao(Long id,
                                IdentificadorUnico uuid,
                                Contrato contrato,
@@ -111,4 +112,5 @@ public class DefinicaoRemuneracao {
   public void mudarEstado(Estado estado) {
     this.estado = estado;
   }
+
 }

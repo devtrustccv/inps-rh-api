@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import cv.inps.rh.funcionario.application.dto.PagamentosDescontoListDTO;
 import cv.inps.rh.funcionario.domain.filters.PagamentoDescontoFilter;
 import cv.inps.rh.funcionario.domain.models.DefPagamento;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
@@ -83,5 +84,22 @@ public class DefPagamentoMapper {
         .pageSize(pageSize)
         .build();
 
+  }
+
+  public PagamentosDescontoListDTO toDTO(DefPagamento domain) {
+    if (domain == null) return null;
+
+    var dto = new PagamentosDescontoListDTO();
+    dto.setId(domain.getId() != null ? domain.getId().toString() : null);
+    dto.setUuid(domain.getUuid() != null ? domain.getUuid().getValor().toString() : null);
+    dto.setMovimento(domain.getTipoMovimento() != null ? domain.getTipoMovimento().getDescricao() : null);
+    dto.setValor(domain.getValor() != null ? domain.getValor().toPlainString() : null);
+    dto.setEstado(domain.getEstado() != null ? domain.getEstado().name() : null);
+    dto.setEstadoDesc(domain.getEstado() != null ? domain.getEstado().getDescription() : null);
+    dto.setDataInicio(domain.getDataInicio() != null ? domain.getDataInicio().toString() : null);
+    dto.setDataFim(domain.getDataFim() != null ? domain.getDataFim().toString() : null);
+    dto.setUltimoProc(domain.getDataInicio() != null ? domain.getDataInicio().toString() : null);
+
+    return dto;
   }
 }

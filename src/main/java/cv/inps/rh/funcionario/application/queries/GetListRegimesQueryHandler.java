@@ -45,11 +45,9 @@ public class GetListRegimesQueryHandler implements QueryHandler<GetListRegimesQu
          Integer.parseInt(query.getPageSize())
      );
 
-     System.out.println(filter.getEstado());
-     System.out.println(filter.getTipoRegime());
+
      List<RegimeTrabalho> regimes = regimeRepository.findAll(filter);
 
-     System.out.println(regimes);
 
      var content = regimes.stream()
          .map(regimeTrabalhoMapper::toDTO)
@@ -60,7 +58,7 @@ public class GetListRegimesQueryHandler implements QueryHandler<GetListRegimesQu
      int pageSize = filter.getPageSize() != null ? filter.getPageSize() : 20;
      int totalPages = (int) Math.ceil((double) totalElements / pageSize);
 
-     // Montar wrapper DTO
+
      var wrapper = new WrapperRegimeListDTO();
      wrapper.setContent(content);
      wrapper.setPageNumber(pageNumber);

@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import cv.inps.rh.funcionario.application.dto.RenumeracaoListDTO;
 import cv.inps.rh.funcionario.domain.filters.RenumeracaoFilter;
 import cv.inps.rh.funcionario.domain.models.DefinicaoRemuneracao;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
@@ -76,5 +77,21 @@ public class DefinicaoRemuneracaoMapper {
         .build();
 
   }
+
+  public RenumeracaoListDTO toDTO(DefinicaoRemuneracao domain) {
+    if (domain == null) return null;
+
+    RenumeracaoListDTO dto = new RenumeracaoListDTO();
+    dto.setId(domain.getId());
+    dto.setUuid(domain.getUuid().getValor().toString());
+    dto.setEstado(domain.getEstado() != null ? domain.getEstado().name() : null);
+    dto.setEstadoDesc(domain.getEstado() != null ? domain.getEstado().getDescription() : null);
+    dto.setMovimento(domain.getTipoMovimento() != null ? domain.getTipoMovimento().getDescricao() : null);
+    dto.setValor(domain.getValor() != null ? domain.getValor().toPlainString() : null);
+    dto.setUltimoPRoc(domain.getDataInicio() != null ? domain.getDataInicio().toString() : null);
+
+    return dto;
+  }
+
 
 }
