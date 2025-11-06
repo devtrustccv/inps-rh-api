@@ -1,0 +1,60 @@
+{
+  "type": "controller",
+  "name": "AbonoSubsidio",
+  "module": "funcionario",
+  "description": "gest abonos subsidios",
+  "basePath": "api/v1/funcionarios",
+  "actions": [
+    {
+      "actionName": "getListAbonosSubsidios",
+      "path": "abonos-subsidios",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListAbonoSubsidios",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        }
+      ]
+    }
+  ],
+  "id": "ixh1ofde84-getListAbonosSubsidios"
+}
