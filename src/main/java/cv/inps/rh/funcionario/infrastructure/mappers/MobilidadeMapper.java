@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
 import cv.inps.rh.funcionario.application.dto.MobilidadeListDTO;
 import cv.inps.rh.funcionario.domain.filters.MobilidadeFilter;
 import cv.inps.rh.funcionario.domain.models.Mobilidade;
@@ -82,14 +83,14 @@ public class MobilidadeMapper {
 
     return MobilidadeFilter.builder()
         .tipoMobilidade(tipoMobilidade)
-        .dataInicio(StringUtils.hasText(dataInicio)  ? DateFormatter.stringToLocalDateTime(dataInicio) :null)
+        .dataInicio(StringUtils.hasText(dataInicio) ? DateFormatter.stringToLocalDateTime(dataInicio) : null)
         .dataFim(StringUtils.hasText(dataFim) ? DateFormatter.stringToLocalDateTime(dataFim) : null)
         .pageNumber(pageNumber)
         .pageSize(pageSize)
         .build();
   }
 
-  public MobilidadeListDTO mobilidadeListDTO(MobilidadeList mobilidadeList){
+  public MobilidadeListDTO mobilidadeListDTO(MobilidadeList mobilidadeList) {
     MobilidadeListDTO dto = new MobilidadeListDTO();
     dto.setId(mobilidadeList.getId());
     dto.setIdFuncionario(mobilidadeList.getIdFuncionario());
@@ -102,8 +103,19 @@ public class MobilidadeMapper {
     dto.setDataFim(mobilidadeList.getDataFim());
     dto.setProcessamento(mobilidadeList.getProcessamento());
     dto.setEstado(mobilidadeList.getEstado());
-    dto.setEstadoDesc(mobilidadeList.getEstado()!=null ? Estado.fromCodeOrThrow(mobilidadeList.getEstado()).getDescription() : null);
+    dto.setEstadoDesc(mobilidadeList.getEstado() != null ? Estado.fromCodeOrThrow(mobilidadeList.getEstado()).getDescription() : null);
     return dto;
+  }
+
+  public MobilidadeDTO mobilidadeDTO(Mobilidade mobilidade) {
+
+    var dto = new MobilidadeDTO();
+    dto.setDirrecaoAntes(mobilidade.getInstituicao().getNome());
+    dto.setSeccaoAntes(mobilidade.getSecao().getNome());
+    dto.setLocalTrabalhoAntes(mobilidade.getLocalTrab().getNome());
+
+    return dto;
+
   }
 
 }

@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.ErrorResponseException;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class IgrpResponseStatusException extends ErrorResponseException {
@@ -38,7 +39,12 @@ public class IgrpResponseStatusException extends ErrorResponseException {
   public static <T> IgrpResponseStatusException of(HttpStatus status, String title, T details) {
     var problemDetail = ProblemDetail.forStatus(status);
     problemDetail.setTitle(title);
-    problemDetail.setProperties(Map.of("details", details));
+
+    // usando HashMap para aceitar null
+    var props = new HashMap<String, Object>();
+    props.put("details", details);
+    problemDetail.setProperties(props);
+
     return new IgrpResponseStatusException(status, problemDetail, null);
   }
 

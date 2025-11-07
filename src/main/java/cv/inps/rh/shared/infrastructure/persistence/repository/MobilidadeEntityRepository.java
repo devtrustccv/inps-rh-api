@@ -32,8 +32,8 @@ public interface MobilidadeEntityRepository extends
           SELECT
               M.ID AS id,
               F.ID AS idFuncionario,
-              RAWTOHEX(M.UUID) AS uuid,
-              RAWTOHEX(F.UUID) AS uuidFuncionario,
+              M.UUID AS uuid,
+              F.UUID AS uuidFuncionario,
               CAR.NOME AS cargo,
               DIR.NOME AS direccao,
               SEC.NOME AS seccao,

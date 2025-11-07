@@ -1,5 +1,9 @@
 package cv.inps.rh.funcionario.application.queries;
 
+import cv.inps.rh.funcionario.domain.repository.MobilidadeRepository;
+import cv.inps.rh.funcionario.infrastructure.mappers.MobilidadeMapper;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -15,15 +19,25 @@ public class GetMobilidadeByIdQueryHandler implements QueryHandler<GetMobilidade
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetMobilidadeByIdQueryHandler.class);
 
+  private final MobilidadeRepository mobilidadeRepository;
+  private final MobilidadeMapper mobilidadeMapper;
 
-  public GetMobilidadeByIdQueryHandler() {
+  public GetMobilidadeByIdQueryHandler(MobilidadeRepository mobilidadeRepository, MobilidadeMapper mobilidadeMapper) {
 
+    this.mobilidadeRepository = mobilidadeRepository;
+    this.mobilidadeMapper = mobilidadeMapper;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<MobilidadeDTO> handle(GetMobilidadeByIdQuery query) {
-    // TODO: Implement the query handling logic here
-    return null;
+
+     IdentificadorUnico id = IdentificadorUnico.from(query.getId());
+     LOGGER.info("Handling GetMobilidadeByIdQuery: {}", query);
+
+     var mobilidade = mobilidadeRepository.getMobilidadeById(id).orElseThrow(
+         () -> IgrpResponseStatusException.notFound("mobilidade nao encontrada com id"+query.getId())
+     );
+    return ResponseEntity.ok(mobilidadeMapper.mobilidadeDTO(mobilidade));
   }
 
 }
