@@ -9,7 +9,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
 import cv.inps.rh.shared.application.constants.Estado;
-
 import java.time.LocalDate;
 import java.util.UUID;
 import java.util.List;
@@ -25,71 +24,71 @@ import java.util.ArrayList;
 @Table(name = "RH_T_CONTRATO")
 public class ContratoEntity extends AuditEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_contrato")
-  @SequenceGenerator(name = "seq_contrato", sequenceName = "SEQ_CONTRATO", allocationSize = 1)
-  @Column(name = "id", unique = true, nullable = false)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_contrato")
+    @SequenceGenerator(name = "seq_contrato", sequenceName = "SEQ_CONTRATO", allocationSize = 1)
+    @Column(name = "id", unique = true, nullable = false)
+    private Long id;
 
+  
+    @NotNull(message = "estado is mandatory")
+    @Enumerated(EnumType.STRING)
+    @Column(name="estado", nullable = false)
+    private Estado estado;
 
-  @NotNull(message = "estado is mandatory")
-  @Enumerated(EnumType.STRING)
-  @Column(name = "estado", nullable = false)
-  private Estado estado;
+  
+    @Column(name="data_inicio")
+    private LocalDate dataInicio;
 
+  
+    @Column(name="data_fim")
+    private LocalDate dataFim;
 
-  @Column(name = "data_inicio")
-  private LocalDate dataInicio;
+  
+    @Column(name="duracao")
+    private Integer duracao;
 
+  
+    @Column(name="versao")
+    private Integer versao;
 
-  @Column(name = "data_fim")
-  private LocalDate dataFim;
+  
+    @Column(name="tp_contrato")
+    private String tpContrato;
 
+  
+    @Column(name="situacao_laboral")
+    private String situacaoLaboral;
 
-  @Column(name = "duracao")
-  private Integer duracao;
+  
+    @Column(name="obs")
+    private String obs;
 
+  
+    @Column(name="uuid")
+    private UUID uuid;
 
-  @Column(name = "versao")
-  private Integer versao;
-
-
-  @Column(name = "tp_contrato")
-  private String tpContrato;
-
-
-  @Column(name = "situacao_laboral")
-  private String situacaoLaboral;
-
-
-  @Column(name = "obs")
-  private String obs;
-
-
-  @Column(name = "uuid")
-  private UUID uuid;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "vinculo_id", referencedColumnName = "id")
-  private ParamVinculoEntity vinculoId;
+  
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "tp_contrato_id", referencedColumnName = "id")
-  private ParamContratoEntity tpContratoId;
+    @JoinColumn(name = "vinculo_id", referencedColumnName = "id")
+    private ParamVinculoEntity vinculoId;
 
-
-  @OneToMany(mappedBy = "contratoId", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-  private List<ContratoEntity> contratosFilhos = new ArrayList<>();
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "contrato_id")
-  private ContratoEntity contratoId;
+    @JoinColumn(name = "tp_contrato_id", referencedColumnName = "id")
+    private ParamContratoEntity tpContratoId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "fun_id")
-  private FuncionarioEntity funId;
+
+  @OneToMany(mappedBy = "contratoId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+private List<ContratoEntity> contratosFilhos = new ArrayList<>();   @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "contrato_id")
+   private ContratoEntity contratoId;
+
+   @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "fun_id")
+   private FuncionarioEntity funId;
 
 
 }

@@ -109,6 +109,9 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
      Geografia localNascimento = geografiaMapper.toDomain(dto.getNaturalidadeId());
 
+     var endereco = enderecoMapper.toDomain(dto.getEndereco());
+
+
      Funcionario funcionario = Funcionario.create(
          tipoDocumento,
          dto.getNumDocumento(),
@@ -124,14 +127,11 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
          dto.getNif(),
          dto.getNumSegurado(),
          1L, // entidadeId (preencher se houver lógica)
-         1L  // colaboradorId (preencher se houver lógica)
+         1L , // colaboradorId (preencher se houver lógica)
+         endereco
      );
 
      var contactos = contactoMapper.toContactosDomain(dto.getContactos());
-
-     //var enderecos = enderecoMapper.toEnderecosDomain(dto.getEnderecos());
-
-     var endereco = enderecoMapper.toDomain(dto.getEndereco());
 
      var familiares = familiarMapper.toFamiliaresDomain(dto.getFamiliares());
 
@@ -147,8 +147,6 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
 
      funcionario.syncContacts(contactos);
-    // funcionario.syncEnderecos(enderecos);
-     funcionario.addEndereco(endereco);
      funcionario.syncFamiliares(familiares);
      funcionario.syncHabilitacoes(habilitacoesLiterarias);
      funcionario.syncFormacoes(formacoesFeitas);

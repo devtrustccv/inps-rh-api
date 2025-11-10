@@ -10,8 +10,6 @@ import lombok.*;
 import jakarta.validation.constraints.NotNull;
 import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Getter
@@ -28,7 +26,7 @@ public class EnderecoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotNull(message = "paisId is mandatory")
 
 
@@ -58,18 +56,18 @@ public class EnderecoEntity extends AuditEntity {
     @Column(name="morada")
     private String morada;
 
-  
+
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-     @ManyToOne(fetch = FetchType.LAZY)
-   @JoinColumn(name = "fun_id")
-   private FuncionarioEntity funId;
 
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinColumn(name = "fun_id", unique = true, referencedColumnName = "id")
+    private FuncionarioEntity funId;
 }

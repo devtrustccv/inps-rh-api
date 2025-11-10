@@ -59,11 +59,9 @@ public class FuncionarioMapper {
         .collect(Collectors.toCollection(ArrayList::new))
         : new ArrayList<>();
 
-    List<Endereco> enderecos = entity.getEnderecos() != null
-        ? entity.getEnderecos().stream()
-        .map(enderecoMapper::toDomain)
-        .collect(Collectors.toCollection(ArrayList::new))
-        : new ArrayList<>();
+    Endereco endereco = entity.getEndereco() != null
+        ? enderecoMapper.toDomain(entity.getEndereco())
+        : null;
 
     List<Familiar> familiares = entity.getFamiliares() != null
         ? entity.getFamiliares().stream().map(familiarMapper::toDomain)
@@ -142,7 +140,7 @@ public class FuncionarioMapper {
         entity.getEstado(),
         estadoMapper.fromString(entity.getEstadoValidacao()),
         contactos,
-        enderecos,
+        endereco,
         familiares,
         habilitacoesLiterarias,
         formacaoFeitas,
@@ -204,14 +202,11 @@ public class FuncionarioMapper {
       entity.setContactos(contactosEntities);
     }
 
-    //enderecos
-    if (funcionario.getEnderecos() != null) {
-      var enderecosEntities = funcionario.getEnderecos().stream()
-          .map(enderecoMapper::toEntity)
-          .collect(Collectors.toList());
-
-      enderecosEntities.forEach(e -> e.setFunId(entity));
-      entity.setEnderecos(enderecosEntities);
+    //endereco
+    if (funcionario.getEndereco() != null) {
+      var enderecoEntity = enderecoMapper.toEntity(funcionario.getEndereco());
+      enderecoEntity.setFunId(entity);
+      entity.setEndereco(enderecoEntity);
     }
 
     // familiares
@@ -487,8 +482,8 @@ public class FuncionarioMapper {
     /*if (funcionario.getEnderecos() != null && !funcionario.getEnderecos().isEmpty()) {
       dto.setEnderecos(enderecoMapper.toDTOList(funcionario.getEnderecos()));
     }*/
-    if (funcionario.getEnderecos() != null && !funcionario.getEnderecos().isEmpty()) {
-      dto.setEndereco(enderecoMapper.toDTO(funcionario.getEnderecos().getFirst()));
+    if (funcionario.getEndereco() != null) {
+      dto.setEndereco(enderecoMapper.toDTO(funcionario.getEndereco()));
     }
 
 

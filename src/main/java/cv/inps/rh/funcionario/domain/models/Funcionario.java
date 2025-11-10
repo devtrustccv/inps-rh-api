@@ -38,7 +38,7 @@ public class Funcionario {
   private Estado estadoValidacao;
 
   private List<Contacto> contactos;
-  private List<Endereco> enderecos;
+  private Endereco endereco;
   private List<Familiar> familiares;
   private List<HabilitacaoLiteraria> habilitacaoLiterarias;
   private List<FormacaoFeita> formacoes;
@@ -57,6 +57,8 @@ public class Funcionario {
   private List<Validacao> validacoes;
   private List<OrdemServico> ordensServicos;
   private List<SituacaoLaboral> situacoesLaborais;
+
+  private DocumentoPessoal documentoPessoal;
 
   private Funcionario(
       Long id,
@@ -79,7 +81,7 @@ public class Funcionario {
       Estado estado,
       Estado estadoValidacao,
       List<Contacto> contactos,
-      List<Endereco> enderecos,
+      Endereco endereco,
       List<Familiar> familiares,
       List<HabilitacaoLiteraria> habilitacaoLiterarias,
       List<FormacaoFeita> formacoes,
@@ -118,7 +120,7 @@ public class Funcionario {
     this.estado = estado;
     this.estadoValidacao = estadoValidacao;
     this.contactos = contactos != null ? contactos : new ArrayList<>();
-    this.enderecos = enderecos != null ? enderecos : new ArrayList<>();
+    this.endereco = endereco;
     this.familiares = familiares != null ? familiares : new ArrayList<>();
     this.habilitacaoLiterarias = habilitacaoLiterarias != null ? habilitacaoLiterarias : new ArrayList<>();
     this.formacoes = formacoes != null ? formacoes : new ArrayList<>();
@@ -154,7 +156,8 @@ public class Funcionario {
       Long numeroFiscal,
       String numeroSegurancaSocial,
       Long entidadeId,
-      Long colaboradorId
+      Long colaboradorId,
+      Endereco endereco
   ) {
 
 
@@ -179,7 +182,7 @@ public class Funcionario {
         Estado.P,
         Estado.P,
         null,
-        null,
+        endereco,
         null,
         null,
         null,
@@ -226,7 +229,7 @@ public class Funcionario {
       Estado estado,
       Estado estadoValidacao,
       List<Contacto> contactos,
-      List<Endereco> enderecos,
+      Endereco endereco,
       List<Familiar> familiares,
       List<HabilitacaoLiteraria> habilitacaoLiterarias,
       List<FormacaoFeita> formacoes,
@@ -266,7 +269,7 @@ public class Funcionario {
         estado,
         estadoValidacao,
         contactos,
-        enderecos,
+        endereco,
         familiares,
         habilitacaoLiterarias,
         formacoes,
@@ -327,7 +330,7 @@ public class Funcionario {
 
 
     if (endereco != null) {
-      enderecos.getFirst().update(
+      this.endereco.update(
           endereco.getPais(),
           endereco.getIlha(),
           endereco.getConcelho(),
@@ -338,7 +341,6 @@ public class Funcionario {
 
     // listas / relacionamentos
     syncContacts(contactos);
-    //syncEnderecos(enderecos);
     syncFamiliares(familiares);
     syncHabilitacoes(habilitacoes);
     syncFormacoes(formacoes);
@@ -467,50 +469,6 @@ public class Funcionario {
     if (id == null) return Optional.empty();
     return this.contactos.stream()
         .filter(c -> Objects.equals(c.getId(), id))
-        .findFirst();
-  }
-
-  /****** enderecos *********************/
-  public void syncEnderecos(List<Endereco> novosEnderecos) {
-    if (novosEnderecos == null) return;
-
-    // Adicionar ou atualizar
-    for (Endereco novo : novosEnderecos) {
-      addOrUpdateEndereco(novo);
-    }
-
-    // Soft delete dos endereços que não estão mais na nova lista
-    for (Endereco existente : enderecos) {
-      boolean aindaExiste = novosEnderecos.stream()
-          .anyMatch(e -> Objects.equals(e.getId(), existente.getId()));
-      if (!aindaExiste) {
-        existente.eliminar();
-      }
-    }
-  }
-
-  private void addOrUpdateEndereco(Endereco novo) {
-    if (novo == null) return;
-
-    Optional<Endereco> existenteOpt = findEnderecoById(novo.getId());
-    if (existenteOpt.isPresent()) {
-      Endereco existente = existenteOpt.get();
-      existente.update(
-          novo.getPais(),
-          novo.getIlha(),
-          novo.getConcelho(),
-          novo.getZona(),
-          novo.getMorada()
-      );
-    } else {
-      this.enderecos.add(novo);
-    }
-  }
-
-  private Optional<Endereco> findEnderecoById(Long id) {
-    if (id == null) return Optional.empty();
-    return this.enderecos.stream()
-        .filter(e -> Objects.equals(e.getId(), id))
         .findFirst();
   }
 
@@ -1057,7 +1015,4 @@ public class Funcionario {
   }
 
 
-  public void addEndereco(Endereco endereco) {
-    this.enderecos.add(endereco);
-  }
 }
