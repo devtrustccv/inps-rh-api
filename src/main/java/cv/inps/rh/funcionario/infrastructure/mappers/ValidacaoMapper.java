@@ -44,7 +44,7 @@ public class ValidacaoMapper {
         entity.getCreatedDate()!=null ? entity.getCreatedDate().toLocalDate() : null,
         entity.getCreatedBy(),
         entity.getFunId().getId(),
-        entity.getUuid()
+        entity.getFunId().getUuid()
     );
 
 
