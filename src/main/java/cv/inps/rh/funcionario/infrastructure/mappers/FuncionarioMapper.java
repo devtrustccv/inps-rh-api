@@ -42,7 +42,7 @@ public class FuncionarioMapper {
   private final DefPagamentoMapper defPagamentoMapper;
   private final ValidacaoMapper validacaoMapper;
   private final OrdemServicoMapper ordemServicoMapper;
-
+ private final DocumentoPessoalMapper documentoPessoalMapper;
   private final SituacaoLaboralMapper situacaoLaboralMapper;
 
   private final EntityManager entityManager;
@@ -61,6 +61,10 @@ public class FuncionarioMapper {
 
     Endereco endereco = entity.getEndereco() != null
         ? enderecoMapper.toDomain(entity.getEndereco())
+        : null;
+
+    DocumentoPessoal documentoPessoal = entity.getDocumentoPessoal()!= null
+        ? documentoPessoalMapper.toDomain(entity.getDocumentoPessoal())
         : null;
 
     List<Familiar> familiares = entity.getFamiliares() != null
@@ -156,7 +160,8 @@ public class FuncionarioMapper {
         defPagamentos,
         validacoes,
         null,
-        situacaoLaborais
+        situacaoLaborais,
+        documentoPessoal
     );
   }
 
@@ -207,6 +212,13 @@ public class FuncionarioMapper {
       var enderecoEntity = enderecoMapper.toEntity(funcionario.getEndereco());
       enderecoEntity.setFunId(entity);
       entity.setEndereco(enderecoEntity);
+    }
+
+    //documento pessoal
+    if (funcionario.getDocumentoPessoal() != null) {
+      var documentoPessoalEntity = documentoPessoalMapper.toEntity(funcionario.getDocumentoPessoal());
+      documentoPessoalEntity.setFunId(entity);
+      entity.setDocumentoPessoal(documentoPessoalEntity);
     }
 
     // familiares

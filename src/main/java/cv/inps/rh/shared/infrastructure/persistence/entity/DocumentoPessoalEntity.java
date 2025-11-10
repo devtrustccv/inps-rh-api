@@ -8,6 +8,7 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotBlank;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
 
 
@@ -25,26 +26,29 @@ public class DocumentoPessoalEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-
+  
     @NotBlank(message = "numDocumento is mandatory")
     @Column(name="num_documento", nullable = false)
     private String numDocumento;
 
-
+  
 
 
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_documento_id", referencedColumnName = "id")
     private TipoDocumentoEntity tipoDocumentoId;
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
-
+  
     @Column(name="uuid")
     private UUID uuid;
 
+  
 
 
+  
     @OneToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "fun_id", unique = true, referencedColumnName = "id")
     private FuncionarioEntity funId;

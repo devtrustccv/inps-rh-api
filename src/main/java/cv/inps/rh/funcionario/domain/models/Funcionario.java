@@ -97,7 +97,8 @@ public class Funcionario {
       List<DefPagamento> defPagamentos,
       List<Validacao> validacoes,
       List<OrdemServico> ordensServicos,
-      List<SituacaoLaboral> situacoesLaborais
+      List<SituacaoLaboral> situacoesLaborais,
+      DocumentoPessoal documentoPessoal
 
   ) {
     this.id = id;
@@ -137,6 +138,7 @@ public class Funcionario {
     this.validacoes = validacoes != null ? validacoes : new ArrayList<>();
     this.ordensServicos = ordensServicos != null ? ordensServicos : new ArrayList<>();
     this.situacoesLaborais = situacoesLaborais != null ? situacoesLaborais : new ArrayList<>();
+    this.documentoPessoal = documentoPessoal;
 
   }
 
@@ -160,6 +162,7 @@ public class Funcionario {
       Endereco endereco
   ) {
 
+    var documentoPessoal = DocumentoPessoal.create(numeroDocumento, tipoDocumento);
 
     var funcionario = new Funcionario(
         null,
@@ -198,14 +201,15 @@ public class Funcionario {
         null,
         null,
         null,
-        null
+        null,
+        documentoPessoal
     );
-
 
 
 
     return funcionario;
   }
+
 
   // Factory para reconstrução de repositorio
   public static Funcionario rebuild(
@@ -245,7 +249,8 @@ public class Funcionario {
       List<DefPagamento> defPagamentos,
       List<Validacao> validacoes,
       List<OrdemServico> ordensServicos,
-      List<SituacaoLaboral> situacoesLaborais
+      List<SituacaoLaboral> situacoesLaborais,
+      DocumentoPessoal documentoPessoal
 
   ) {
     return new Funcionario(
@@ -285,7 +290,8 @@ public class Funcionario {
         defPagamentos,
         validacoes,
         ordensServicos,
-        situacoesLaborais
+        situacoesLaborais,
+        documentoPessoal
     );
   }
 
