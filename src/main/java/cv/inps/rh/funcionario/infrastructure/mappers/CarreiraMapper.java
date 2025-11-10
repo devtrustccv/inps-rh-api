@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import cv.inps.rh.funcionario.application.dto.CarreiraListDTO;
 import cv.inps.rh.funcionario.domain.filters.CarreiraFilter;
 import cv.inps.rh.funcionario.domain.models.Carreira;
+import cv.inps.rh.funcionario.domain.projections.CarreiraList;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamCargoMapper;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamCarreiraMapper;
@@ -96,7 +97,7 @@ public class CarreiraMapper {
   }
 
 
-  public  CarreiraListDTO toDTO(cv.inps.rh.funcionario.domain.projections.CarreiraList projection) {
+  public  CarreiraListDTO toDTO(CarreiraList projection) {
     if (projection == null) return null;
 
     var dto = new CarreiraListDTO();
