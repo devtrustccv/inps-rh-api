@@ -58,5 +58,10 @@ public class FuncionarioRepositoryImpl implements FuncionarioRepository {
     );
   }
 
+  @Override
+  public Optional<Funcionario> findFuncionarioWithContratos(IdentificadorUnico id) {
+    return funcionarioEntityRepository.findFuncionarioWithContratos(id.getValor()).map(mapper::toDomain);
+  }
+
 
 }

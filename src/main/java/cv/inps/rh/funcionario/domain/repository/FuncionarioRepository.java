@@ -15,4 +15,6 @@ public interface FuncionarioRepository {
   Optional<Funcionario> findById(IdentificadorUnico id);
 
   List<FuncionarioList> findAll(FuncionarioFilter filters);
+
+  Optional<Funcionario> findFuncionarioWithContratos(IdentificadorUnico id);
 }

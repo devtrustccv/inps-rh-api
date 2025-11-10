@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.domain.filters;
 
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class CarreiraFilter {
 
+  private IdentificadorUnico idFuncionario;
   private String tipoCarreira;
   private LocalDate dataInicio;
   private LocalDate dataFim;

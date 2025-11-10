@@ -80,6 +80,9 @@ public interface FuncionarioEntityRepository extends
 
 
     Optional<FuncionarioEntity> findByUuid(UUID uuid);
+
+  @Query("SELECT f FROM FuncionarioEntity f LEFT JOIN FETCH f.contratos WHERE f.uuid = :uuid")
+  Optional<FuncionarioEntity> findFuncionarioWithContratos(@Param("uuid") UUID uuid);
 }
 
 

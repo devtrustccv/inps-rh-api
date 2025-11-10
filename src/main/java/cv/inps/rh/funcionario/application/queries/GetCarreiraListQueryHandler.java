@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.queries;
 import cv.inps.rh.funcionario.application.dto.CarreiraListDTO;
 import cv.inps.rh.funcionario.domain.projections.CarreiraList;
 import cv.inps.rh.funcionario.domain.repository.CarreiraRepository;
+import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.CarreiraMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,23 +25,32 @@ public class GetCarreiraListQueryHandler implements QueryHandler<GetCarreiraList
   private final CarreiraRepository carreiraRepository;
   private final CarreiraMapper carreiraMapper;
 
-  public GetCarreiraListQueryHandler(CarreiraRepository carreiraRepository, CarreiraMapper carreiraMapper) {
+  private final FuncionarioRepository funcionarioRepository;
+
+  public GetCarreiraListQueryHandler(CarreiraRepository carreiraRepository, CarreiraMapper carreiraMapper, FuncionarioRepository funcionarioRepository) {
 
     this.carreiraRepository = carreiraRepository;
     this.carreiraMapper = carreiraMapper;
+    this.funcionarioRepository = funcionarioRepository;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<WrapperCarreiraListDTO> handle(GetCarreiraListQuery query) {
+
+
+    LOGGER.info("Handling GetCarreiraListQuery: {}", query);
+
+
      var filter = carreiraMapper.toFilterDomain(
          query.getTipoCarreira(),
          query.getDataInicio(),
          query.getDataFim(),
          Integer.parseInt(query.getPageNumber()),
-         Integer.parseInt(query.getPageSize())
+         Integer.parseInt(query.getPageSize()),
+         query.getIdFuncionario()
      );
 
-     List<CarreiraList> list = carreiraRepository.findAll(filter);
+     List<CarreiraList> list = carreiraRepository.findAllWithProjection(filter);
 
      long total = list.isEmpty() ? 0 : list.get(0).getTotalCount();
 

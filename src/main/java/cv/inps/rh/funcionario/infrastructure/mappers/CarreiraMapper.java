@@ -10,6 +10,7 @@ import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamCarreiraMapper;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamCategoriaMapper;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamEscalaoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -84,9 +85,11 @@ public class CarreiraMapper {
                                        String dataInicio,
                                        String dataFim,
                                        Integer pageNumber,
-                                       Integer pageSize) {
+                                       Integer pageSize,
+                                       String idFuncionario) {
 
     return CarreiraFilter.builder()
+        .idFuncionario(IdentificadorUnico.from(idFuncionario))
         .tipoCarreira(StringUtils.hasText(tipoCarreira) ? tipoCarreira : null)
         .dataInicio(StringUtils.hasText(dataInicio) ? DateFormatter.stringToLocalDate(dataInicio) : null)
         .dataFim(StringUtils.hasText(dataFim) ? DateFormatter.stringToLocalDate(dataFim) : null)
@@ -120,6 +123,31 @@ public class CarreiraMapper {
 
     return dto;
   }
+
+
+  /*public  CarreiraListDTO toDTO(Carreira carreira) {
+    if (carreira == null) return null;
+
+    var dto = new CarreiraListDTO();
+    dto.setId(carreira.getId());
+    dto.setUuid(carreira.getUuid().toString());
+    dto.setIdFuncionario(projection.getIdFuncionario());
+    dto.setUuidFuncionario(projection.getUuidFuncionario());
+    dto.setTipoCarreira(carreira.getTipoSituacao());
+    dto.setVinculo(carreira.ge);
+    dto.setCarreira(carreira.getCarrPccs() != null ? carreira.getCarrPccs().getNome() : null);
+    dto.setCargo(carreira.getCargo()!=null ? carreira.getCargo().getNome() : null);
+    dto.setEscalao(carreira.getEscalao()!=null ? carreira.getEscalao().getEscalao() : null);
+    dto.setSalario(projection.getSalario());
+    dto.setSituacaoLaboral(projection.getSituacaoLaboral());
+    dto.setDataInicio(projection.getDataInicio());
+    dto.setDataFim(projection.getDataFim());
+    dto.setProcessamento(projection.getProcessamento());
+    dto.setEstado(projection.getEstado() != null ? projection.getEstado() : null);
+    dto.setEstadoDesc(projection.getEstado() != null ? Estado.fromCodeOrThrow(projection.getEstado()).getDescription() : null);
+
+    return dto;
+  }*/
 
 
 }

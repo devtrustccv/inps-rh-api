@@ -166,6 +166,8 @@ public class FuncionarioMapper {
   }
 
 
+
+
   /**
    * Converts domain Funcionario to JPA entity
    */

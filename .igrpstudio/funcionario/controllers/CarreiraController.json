@@ -52,9 +52,14 @@
           "type": "string",
           "name": "tipoCarreira",
           "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "idFuncionario",
+          "isRequired": true
         }
       ]
     }
   ],
-  "id": "hgbnpfs107-getCarreiraList-getCarreiraList"
+  "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList"
 }

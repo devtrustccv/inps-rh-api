@@ -59,10 +59,11 @@ public class CarreiraController {
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
     @RequestParam(value = "dataFim", required = false) String dataFim,
-    @RequestParam(value = "tipoCarreira", required = false) String tipoCarreira)
+    @RequestParam(value = "tipoCarreira", required = false) String tipoCarreira,
+    @RequestParam(value = "idFuncionario") String idFuncionario)
   {
 
-      final var query = new GetCarreiraListQuery(pageSize, pageNumber, dataInicio, dataFim, tipoCarreira);
+      final var query = new GetCarreiraListQuery(pageSize, pageNumber, dataInicio, dataFim, tipoCarreira, idFuncionario);
 
       ResponseEntity<WrapperCarreiraListDTO> response = queryBus.handle(query);
 

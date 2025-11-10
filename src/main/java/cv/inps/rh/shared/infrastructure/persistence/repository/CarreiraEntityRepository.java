@@ -33,7 +33,7 @@ public interface CarreiraEntityRepository extends
         SELECT * FROM (
             SELECT
                 C.ID AS id,
-                RAWTOHEX(C.UUID) AS uuid,
+                C.UUID AS uuid,
                 F.ID AS idFuncionario,
                 RAWTOHEX(F.UUID) AS uuidFuncionario,
                 C.TIPO_SITUACAO AS tipoCarreira,
@@ -59,6 +59,7 @@ public interface CarreiraEntityRepository extends
             WHERE (:tipoCarreira IS NULL OR C.TIPO_SITUACAO = :tipoCarreira)
               AND (:dataInicio IS NULL OR TR.DATA_INICIO >= :dataInicio)
               AND (:dataFim IS NULL OR TR.DATA_FIM <= :dataFim)
+              AND uuid = :uuid
         ) tmp
         WHERE rn BETWEEN :startRow AND :endRow
         """, nativeQuery = true)
@@ -67,11 +68,44 @@ public interface CarreiraEntityRepository extends
       @Param("dataInicio") LocalDate dataInicio,
       @Param("dataFim") LocalDate dataFim,
       @Param("startRow") Long startRow,
-      @Param("endRow") Long endRow
+      @Param("endRow") Long endRow,
+      @Param("uuid") UUID idFuncionario
+  );
+
+  @Query(value = """
+    SELECT * FROM (
+        SELECT
+            c.*,
+            ROW_NUMBER() OVER(ORDER BY tr.DATA_INICIO DESC) AS rn,
+            COUNT(*) OVER() AS total_count
+        FROM RH_T_CARREIRA c
+        JOIN RH_T_FUNCIONARIOS f ON f.ID = c.FUN_ID
+        LEFT JOIN RH_T_TIPOS_RELACIONAMENTO tr ON tr.CARREIRA_ID = c.ID
+        LEFT JOIN RH_T_PARAM_CARGO car ON car.ID = tr.CARGO_ID
+        LEFT JOIN RH_T_PARAM_ESCALAO esc ON esc.ID = tr.ESCALAO_ID
+        LEFT JOIN RH_T_PARAM_VINCULO vin ON vin.ID = tr.VINCULO_ID
+        LEFT JOIN RH_T_PARAM_CARREIRA carr ON carr.ID = tr.CARR_PCC_ID
+        WHERE (:tipoCarreira IS NULL OR c.TIPO_SITUACAO = :tipoCarreira)
+          AND (:dataInicio IS NULL OR tr.DATA_INICIO >= :dataInicio)
+          AND (:dataFim IS NULL OR tr.DATA_FIM <= :dataFim)
+          AND f.UUID = :uuid
+    ) tmp
+    WHERE rn BETWEEN :startRow AND :endRow
+    """, nativeQuery = true)
+  List<CarreiraEntity> findCarreirasNative(
+      @Param("tipoCarreira") String tipoCarreira,
+      @Param("dataInicio") LocalDate dataInicio,
+      @Param("dataFim") LocalDate dataFim,
+      @Param("startRow") Long startRow,
+      @Param("endRow") Long endRow,
+      @Param("uuid") UUID idFuncionario
   );
 
 
-  }
+
+
+
+}
 
 
 

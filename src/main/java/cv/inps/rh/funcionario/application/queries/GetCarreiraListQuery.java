@@ -23,5 +23,7 @@ public class GetCarreiraListQuery implements Query {
   private String dataFim;
   @NotBlank(message = "The field <tipoCarreira> is required")
   private String tipoCarreira;
+  @NotBlank(message = "The field <idFuncionario> is required")
+  private String idFuncionario;
 
 }
