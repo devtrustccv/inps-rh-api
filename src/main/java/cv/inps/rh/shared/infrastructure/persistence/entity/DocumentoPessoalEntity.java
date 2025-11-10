@@ -25,12 +25,12 @@ public class DocumentoPessoalEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotBlank(message = "numDocumento is mandatory")
     @Column(name="num_documento", nullable = false)
     private String numDocumento;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -39,14 +39,13 @@ public class DocumentoPessoalEntity extends AuditEntity {
     @Column(name="estado")
     private String estado;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
 
 
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fun_id", referencedColumnName = "id")
+    @OneToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinColumn(name = "fun_id", unique = true, referencedColumnName = "id")
     private FuncionarioEntity funId;
 }
