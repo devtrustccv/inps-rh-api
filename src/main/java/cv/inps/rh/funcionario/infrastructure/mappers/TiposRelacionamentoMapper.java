@@ -29,7 +29,6 @@ public class TiposRelacionamentoMapper {
 
   private final EntityManager entityManager;
 
-  // Entity -> Domain
   public TiposRelacionamento toDomain(TiposRelacionamentoEntity entity) {
     if (entity == null) return null;
 
@@ -70,7 +69,6 @@ public class TiposRelacionamentoMapper {
     );
   }
 
-  // Domain -> Entity
   public TiposRelacionamentoEntity toEntity(TiposRelacionamento domain) {
     if (domain == null) return null;
 
