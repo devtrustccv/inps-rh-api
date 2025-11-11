@@ -52,6 +52,8 @@ public class TiposRelacionamento {
   private ParamSitLaboral situacLaboral;
   private String tpContrato;
 
+  private Integer estadoActividadeAdm;
+
   // Construtor privado
   private TiposRelacionamento(
       Long id,
@@ -85,7 +87,8 @@ public class TiposRelacionamento {
       LocalDate ultProc,
       String motivoSitLab,
       ParamSitLaboral situacLaboral,
-      String tpContrato
+      String tpContrato,
+      Integer estadoActividadeAdm
   ) {
     this.id = id;
     this.uuid = uuid;
@@ -119,6 +122,7 @@ public class TiposRelacionamento {
     this.motivoSitLab = motivoSitLab;
     this.situacLaboral = situacLaboral;
     this.tpContrato = tpContrato;
+    this.estadoActividadeAdm = estadoActividadeAdm;
   }
 
   // Factory para criar novo relacionamento
@@ -181,7 +185,8 @@ public class TiposRelacionamento {
         ultProc,
         motivoSitLab,
         situacLaboral,
-        tpContrato
+        tpContrato,
+        1
     );
   }
 
@@ -218,7 +223,8 @@ public class TiposRelacionamento {
       LocalDate ultProc,
       String motivoSitLab,
       ParamSitLaboral situacLaboral,
-      String tpContrato
+      String tpContrato,
+      Integer estadoActividadeAdm
   ) {
     return new TiposRelacionamento(
         id,
@@ -252,7 +258,8 @@ public class TiposRelacionamento {
         ultProc,
         motivoSitLab,
         situacLaboral,
-        tpContrato
+        tpContrato,
+        estadoActividadeAdm
     );
   }
 

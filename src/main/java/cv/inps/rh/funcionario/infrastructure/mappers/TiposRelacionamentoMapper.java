@@ -65,7 +65,8 @@ public class TiposRelacionamentoMapper {
         entity.getUltProc(),
         entity.getMotivoSitLab(),
         paramSitLaboralMapper.toDomain(entity.getSituacLaboralId()),
-        entity.getTpContrato()
+        entity.getTpContrato(),
+        entity.getEstActAdm()
     );
   }
 
@@ -117,6 +118,8 @@ public class TiposRelacionamentoMapper {
     entity.setReferente(domain.getReferente());
     entity.setUltProc(domain.getUltProc());
     entity.setMotivoSitLab(domain.getMotivoSitLab());
+
+    entity.setEstActAdm(domain.getEstadoActividadeAdm());
 
     return entity;
   }
