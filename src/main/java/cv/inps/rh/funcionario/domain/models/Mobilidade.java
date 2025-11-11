@@ -68,7 +68,7 @@ public class Mobilidade {
         tipoSituacao,
         secao,
         instituicao,
-        Estado.A,
+        Estado.P,
         obs,
         dataInicio,
         dataFim

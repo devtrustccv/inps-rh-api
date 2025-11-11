@@ -54,7 +54,7 @@ public class FormacaoFeita {
         tipoFormacao,
         curso,
         nivel,
-        Estado.A
+        Estado.P
     );
   }
 

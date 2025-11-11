@@ -61,7 +61,7 @@ public class ExperienciaProfissional {
         dataInicio,
         dataFim,
         observacao,
-        Estado.A
+        Estado.P
     );
   }
 

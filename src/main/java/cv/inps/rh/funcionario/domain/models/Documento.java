@@ -49,7 +49,7 @@ public class Documento {
         docId,
         referenciaName,
         referenciaId,
-        Estado.A
+        Estado.P
     );
   }
 

@@ -30,7 +30,7 @@ public class Contacto {
         IdentificadorUnico.create(),
         tipoContacto,
         contacto,
-        Estado.A
+        Estado.P
     );
   }
 

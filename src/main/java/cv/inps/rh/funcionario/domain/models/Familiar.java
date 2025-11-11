@@ -78,7 +78,7 @@ public class Familiar {
         membroAgr,
         nmPai,
         nmMae,
-        Estado.A
+        Estado.P
     );
   }
 

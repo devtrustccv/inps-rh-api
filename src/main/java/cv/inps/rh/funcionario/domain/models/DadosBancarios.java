@@ -56,7 +56,7 @@ public class DadosBancarios {
         numConta,
         dataInicio,
         dataFim,
-        Estado.A,
+        Estado.P,
         observacoes
     );
   }
