@@ -46,6 +46,6 @@ public class CarreiraRepositoryImpl implements CarreiraRepository {
          filters.getDataFim(),
          startRow,
          endRow,
-         filters.getIdFuncionario().getValor()).stream().map( carreiraMapper::toDomain ).toList();
+         filters.getIdFuncionario().toString()).stream().map( carreiraMapper::toDomain ).toList();
   }
 }

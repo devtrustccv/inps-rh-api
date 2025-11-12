@@ -35,7 +35,7 @@ public interface CarreiraEntityRepository extends
                 C.ID AS id,
                 C.UUID AS uuid,
                 F.ID AS idFuncionario,
-                RAWTOHEX(F.UUID) AS uuidFuncionario,
+                F.UUID AS uuidFuncionario,
                 C.TIPO_SITUACAO AS tipoCarreira,
                 VIN.NOME AS vinculo,
                 CARR.NOME AS carreira,
@@ -48,7 +48,7 @@ public interface CarreiraEntityRepository extends
                 TR.FLG_PROCESSA AS processamento,
                 C.ESTADO AS estado,
                 COUNT(*) OVER() AS total_count,
-                ROW_NUMBER() OVER(ORDER BY TR.DATA_INICIO DESC) AS rn
+                ROW_NUMBER() OVER(ORDER BY TR.DATA_INICIO DESC NULLS LAST) AS rn
             FROM RH_T_CARREIRA C
             JOIN RH_T_FUNCIONARIOS F ON F.ID = C.FUN_ID
             LEFT JOIN RH_T_TIPOS_RELACIONAMENTO TR ON TR.CARREIRA_ID = C.ID
@@ -59,7 +59,7 @@ public interface CarreiraEntityRepository extends
             WHERE (:tipoCarreira IS NULL OR C.TIPO_SITUACAO = :tipoCarreira)
               AND (:dataInicio IS NULL OR TR.DATA_INICIO >= :dataInicio)
               AND (:dataFim IS NULL OR TR.DATA_FIM <= :dataFim)
-              AND uuid = :uuid
+              AND F.UUID = :uuid
         ) tmp
         WHERE rn BETWEEN :startRow AND :endRow
         """, nativeQuery = true)
@@ -98,7 +98,7 @@ public interface CarreiraEntityRepository extends
       @Param("dataFim") LocalDate dataFim,
       @Param("startRow") Long startRow,
       @Param("endRow") Long endRow,
-      @Param("uuid") UUID idFuncionario
+      @Param("uuid") String idFuncionario
   );
 
 
