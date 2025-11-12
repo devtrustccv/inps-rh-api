@@ -25,6 +25,12 @@ public class DadosPessoaisRespDTO  {
 
   
   
+  private Long id ;
+  
+  
+  private String uuid ;
+  
+  
   private Long tipoDocumentoId ;
   
   
