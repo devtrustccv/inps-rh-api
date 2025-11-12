@@ -1,0 +1,91 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "FuncionarioResponse2",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "dadosPessoais",
+      "objectType": "dto",
+      "type": "DadosPessoaisResp",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "funcionario"
+    },
+    {
+      "name": "familiares",
+      "objectType": "dto",
+      "type": "AgregadoDependenteResp",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
+    },
+    {
+      "name": "dadosAcademicosProf",
+      "objectType": "dto",
+      "type": "DadosAcademicosProfResponse",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "funcionario"
+    },
+    {
+      "name": "dadosContratuais",
+      "objectType": "dto",
+      "type": "DadosContratuaisResp2",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "funcionario"
+    },
+    {
+      "name": "dadosBancarios",
+      "objectType": "dto",
+      "type": "DadosBancariosResp",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
+    },
+    {
+      "name": "anexos",
+      "objectType": "dto",
+      "type": "AnexoResp",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
+    }
+  ],
+  "id": "c3uxj04bbj_copy"
+}
