@@ -11,7 +11,6 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepos
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.community.dialect.Oracle12cDialect;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
@@ -74,9 +73,13 @@ public class ParamVinculoService {
     var size = Integer.parseInt(tamanho);
     var pageable = PageRequest.of(page, size);
 
+    var data = repository.findAll(pageable);
+    if (data.isEmpty())
+      return List.of();
+
     var domain = domainEntityRepository.getActiveDomainByCode(Domains.SIM_NAO_NUMBER.name());
 
-    return repository.findAll(pageable).stream()
+    return data.stream()
         .map(e -> {
           var response = new VinculoLaboralResponseDTO();
           response.setId(e.getUuid().toString());
