@@ -3,9 +3,11 @@ package cv.inps.rh.configuracao.domain.service;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.VinculoLaboralRequestDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoLaboralResponseDTO;
+import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class ParamVinculoService {
 
   private final ParamVinculoEntityRepository repository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
+  private final DomainEntityRepository domainEntityRepository;
 
   public VinculoLaboralResponseDTO create(VinculoLaboralRequestDTO dto) {
 
@@ -71,16 +74,18 @@ public class ParamVinculoService {
     var size = Integer.parseInt(tamanho);
     var pageable = PageRequest.of(page, size);
 
+    var domain = domainEntityRepository.getActiveDomainByCode(Domains.SIM_NAO_NUMBER.name());
+
     return repository.findAll(pageable).stream()
         .map(e -> {
           var response = new VinculoLaboralResponseDTO();
           response.setId(e.getUuid().toString());
           response.setCodigo(e.getCodigo());
           response.setDescricao(e.getNome());
-          response.setContrato(e.getFlgContrato().toString());
-          response.setCarreira(e.getFlgCarreira().toString());
-          response.setRemuneracao(e.getFlgSalario().toString());
-          response.setTempoServico(e.getFlgTempoServico().toString());
+          response.setContrato(domain.get(e.getFlgContrato().toString()));
+          response.setCarreira(domain.get(e.getFlgCarreira().toString()));
+          response.setRemuneracao(domain.get(e.getFlgSalario().toString()));
+          response.setTempoServico(domain.get(e.getFlgTempoServico().toString()));
           response.setEstado(e.getEstado().getCode());
           response.setDescricaoEstado(e.getEstado().getDescription());
           return response;

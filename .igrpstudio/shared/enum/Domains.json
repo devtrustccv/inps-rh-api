@@ -1,0 +1,24 @@
+{
+  "type": "enum",
+  "module": "shared",
+  "name": "Domains",
+  "values": [
+    {
+      "name": "SIM_NAO_NUMBER",
+      "attributes": [
+        "SIM_NAO_NUMBER",
+        "SIM_NAO_NUMBER"
+      ]
+    }
+  ],
+  "attributes": [
+    {
+      "type": "string",
+      "name": "Code"
+    },
+    {
+      "type": "string",
+      "name": "Description"
+    }
+  ]
+}
