@@ -218,7 +218,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
      LOGGER.info("Funcionário criado com sucesso: {}", saved.getNomeCompleto());
 
-     var responseDTO = funcionarioMapper.toResponse2DTO(saved);
+     var responseDTO = funcionarioMapper.toResponseDTO(saved);
 
      return ResponseEntity.ok(responseDTO);
 

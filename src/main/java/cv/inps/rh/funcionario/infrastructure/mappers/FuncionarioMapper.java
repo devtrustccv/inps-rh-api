@@ -483,7 +483,7 @@ public class FuncionarioMapper {
 
 
 
-  public FuncionarioResponseDTO toResponse2DTO(Funcionario funcionario) {
+  public FuncionarioResponseDTO toResponseDTO(Funcionario funcionario) {
     if (funcionario == null) return null;
 
     var dto = new FuncionarioResponseDTO();
@@ -499,10 +499,16 @@ public class FuncionarioMapper {
     dadosPessoais.setNomePai(funcionario.getNomePai());
     dadosPessoais.setEstadoCivil(funcionario.getEstadoCivil());
     dadosPessoais.setNacionalidade(funcionario.getNacionalidade());
+    dadosPessoais.setTipoDocumentoId(funcionario.getTipoDocumento().getId());
     dadosPessoais.setNumDocumento(funcionario.getNumeroDocumento());
     dadosPessoais.setNif(funcionario.getNumeroFiscal() != null ? funcionario.getNumeroFiscal() : null);
     dadosPessoais.setNumSegurado(funcionario.getNumeroSegurancaSocial());
     dadosPessoais.setUrlFoto(funcionario.getFotografia());
+    dadosPessoais.setNaturalidadeId(funcionario.getLocalNascimento().getId());
+    dadosPessoais.setNaturalidadeDesc(funcionario.getLocalNascimento().getNome());
+    dadosPessoais.setEndereco(enderecoMapper.toDTO(funcionario.getEndereco()));
+    dadosPessoais.setContactos(contactoMapper.toDTOList(funcionario.getContactos()));
+
     dto.setDadosPessoais(dadosPessoais);
 
     // ---- Familiares ----
@@ -530,14 +536,14 @@ public class FuncionarioMapper {
 
     // ---- Dados Contratuais ----
     if (funcionario.getTipoRelacionamentoAtual() != null) {
-      dto.setDadosContratuais(this.dadosContratuaisResp2DTO(funcionario));
+      dto.setDadosContratuais(this.dadosContratuaisRespDTO(funcionario));
     }
 
     return dto;
   }
 
 
-  private DadosContratuaisRespDTO dadosContratuaisResp2DTO(Funcionario funcionario) {
+  private DadosContratuaisRespDTO dadosContratuaisRespDTO(Funcionario funcionario) {
     if (funcionario.getTipoRelacionamentoAtual() == null) return null;
 
     var tipoRelacionamentoAtual = funcionario.getTipoRelacionamentoAtual();

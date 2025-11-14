@@ -32,7 +32,7 @@ public class GetFuncionarioByIdQueryHandler implements QueryHandler<GetFuncionar
      var funcionario = funcionarioRepository.findById(IdentificadorUnico.from(query.getId()))
          .orElseThrow(() -> IgrpResponseStatusException.notFound("funcionario nao encontrado com id"+query.getId()));
 
-     return ResponseEntity.ok(funcionarioMapper.toResponse2DTO(funcionario));
+     return ResponseEntity.ok(funcionarioMapper.toResponseDTO(funcionario));
 
   }
 
