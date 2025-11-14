@@ -1,5 +1,8 @@
-/* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. *//*
+
+*/
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. *//*
+
 
 package cv.inps.rh.configuracao.interfaces.rest;
 
@@ -289,3 +292,4 @@ public class ConfiguracaoController {
   }
 
 }
+*/

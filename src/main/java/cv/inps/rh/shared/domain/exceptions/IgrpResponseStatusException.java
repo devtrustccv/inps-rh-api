@@ -59,6 +59,10 @@ public class IgrpResponseStatusException extends ErrorResponseException {
     return of(HttpStatus.BAD_REQUEST, title);
   }
 
+  public static <T>IgrpResponseStatusException badRequest(String title, T details) {
+    return of(HttpStatus.BAD_REQUEST, title, details);
+  }
+
   public static IgrpResponseStatusException serviceUnavailable(String title) {
     return of(HttpStatus.SERVICE_UNAVAILABLE, title);
   }
