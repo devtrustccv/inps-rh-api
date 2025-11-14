@@ -8,28 +8,21 @@ import cv.inps.rh.funcionario.domain.models.DefinicaoRemuneracao;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
-import cv.inps.rh.parametrizacao.domain.models.ParamCarreira;
-import cv.inps.rh.parametrizacao.infrastructure.mappers.*;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
-import cv.inps.rh.shared.domain.models.Instituicao;
+import cv.inps.rh.parametrizacao.domain.repository.TipoDocumentoRepository;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.*;
+import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.shared.domain.models.TipoMovimento;
 import cv.inps.rh.shared.domain.repository.GeografiaRepository;
-import cv.inps.rh.parametrizacao.domain.repository.TipoDocumentoRepository;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.shared.infrastructure.mappers.InstituicaoMapper;
 import cv.inps.rh.shared.infrastructure.mappers.TipoMovimentoMapper;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Component
 public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFuncionarioCommand, ResponseEntity<FuncionarioResponse2DTO>> {
