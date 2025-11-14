@@ -1,4 +1,4 @@
-package cv.inps.rh.configuracao.domain.service;
+package cv.inps.rh.configuracao.domain.service.configurationengine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -19,11 +19,11 @@ public abstract class ConfigurationProcess<T> {
     this.type = type;
   }
 
-  protected abstract Object doCreate(T payload);
+  protected abstract Object create(T payload);
 
-  protected abstract Object doUpdate(String id, T payload);
+  protected abstract Object update(String id, T payload);
 
-  public final Object create(T payload) {
+  /*public final Object create(T payload) {
     validate(payload);
     return doCreate(payload);
   }
@@ -31,7 +31,7 @@ public abstract class ConfigurationProcess<T> {
   public final Object update(String id, T payload) {
     validate(payload);
     return doUpdate(id, payload);
-  }
+  }*/
 
   public abstract List<Object> list(Map<String, String> filters);
 

@@ -1,4 +1,4 @@
-package cv.inps.rh.configuracao.domain.service;
+package cv.inps.rh.configuracao.domain.service.configurationengine;
 
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

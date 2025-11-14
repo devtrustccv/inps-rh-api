@@ -1,8 +1,11 @@
 package cv.inps.rh.configuracao.domain.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.VinculoLaboralRequestDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoLaboralResponseDTO;
+import cv.inps.rh.configuracao.domain.service.configurationengine.ConfigurationProcess;
+import cv.inps.rh.configuracao.domain.service.configurationengine.ConfigurationServiceBeanNames;
 import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -11,25 +14,32 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepos
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.util.Utils;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-@Service
-@RequiredArgsConstructor
-public class ParamVinculoService {
+@Service(ConfigurationServiceBeanNames.PARAM_VINCULO)
+public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequestDTO> {
 
   private final ParamVinculoEntityRepository repository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final DomainEntityRepository domainEntityRepository;
 
-  public VinculoLaboralResponseDTO create(VinculoLaboralRequestDTO dto) {
+  public ParamVinculoService(Validator validator, ObjectMapper jsonMapper, ParamVinculoEntityRepository repository, TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository, DomainEntityRepository domainEntityRepository) {
+    super(validator, jsonMapper, VinculoLaboralRequestDTO.class);
+    this.repository = repository;
+    this.tiposRelacionamentoEntityRepository = tiposRelacionamentoEntityRepository;
+    this.domainEntityRepository = domainEntityRepository;
+  }
 
+  @Override
+  public Object create(VinculoLaboralRequestDTO dto) {
     var e = new ParamVinculoEntity();
     e.setUuid(UuidCreator.getTimeOrderedEpoch());
     e.setCodigo(dto.getCodigo());
@@ -45,16 +55,15 @@ public class ParamVinculoService {
 
   @NotNull
   private VinculoLaboralResponseDTO buildResponse(VinculoLaboralRequestDTO dto, ParamVinculoEntity e) {
-
     var response = new VinculoLaboralResponseDTO();
     BeanUtils.copyProperties(dto, response);
     response.setId(e.getUuid().toString());
     response.setEstado(e.getEstado().getCode());
     response.setDescricaoEstado(e.getEstado().getDescription());
-
     return response;
   }
 
+  @Override
   public VinculoLaboralResponseDTO update(String uuid, VinculoLaboralRequestDTO dto) {
 
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
@@ -68,13 +77,10 @@ public class ParamVinculoService {
     return buildResponse(dto, saved);
   }
 
-  public List<VinculoLaboralResponseDTO> getAll(String pagina, String tamanho) {
+  @Override
+  public List<Object> list(Map<String, String> filters) {
 
-    var page = Integer.parseInt(pagina);
-    var size = Integer.parseInt(tamanho);
-    var pageable = PageRequest.of(page, size);
-
-    var data = repository.findAll(pageable);
+    var data = repository.findAll();
     if (data.isEmpty())
       return List.of();
 
@@ -94,9 +100,10 @@ public class ParamVinculoService {
           response.setDescricaoEstado(e.getEstado().getDescription());
           return response;
         })
-        .toList();
+        .collect(Collectors.toList());
   }
 
+  @Override
   public void delete(String uuid) {
 
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));

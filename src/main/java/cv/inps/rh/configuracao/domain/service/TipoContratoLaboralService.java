@@ -1,8 +1,11 @@
 package cv.inps.rh.configuracao.domain.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.TipoContratoLaboralRequestDTO;
 import cv.inps.rh.configuracao.application.dto.TipoContratoLaboralResponseDTO;
+import cv.inps.rh.configuracao.domain.service.configurationengine.ConfigurationProcess;
+import cv.inps.rh.configuracao.domain.service.configurationengine.ConfigurationServiceBeanNames;
 import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -11,27 +14,34 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoEntityRep
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamContratoEntityRepository;
 import cv.inps.rh.shared.util.Utils;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
-@Service
-@RequiredArgsConstructor
-public class TipoContratoLaboralService {
+@Service(ConfigurationServiceBeanNames.TIPO_CONTRATO_LABORAL)
+public class TipoContratoLaboralService extends ConfigurationProcess<TipoContratoLaboralRequestDTO> {
 
   private final ParamContratoEntityRepository repository;
   private final ContratoEntityRepository contratoEntityRepository;
   private final DomainEntityRepository domainEntityRepository;
 
-  public TipoContratoLaboralResponseDTO create(TipoContratoLaboralRequestDTO dto) {
+  public TipoContratoLaboralService(Validator validator, ObjectMapper jsonMapper, ParamContratoEntityRepository repository, ContratoEntityRepository contratoEntityRepository, DomainEntityRepository domainEntityRepository) {
+    super(validator, jsonMapper, TipoContratoLaboralRequestDTO.class);
+    this.repository = repository;
+    this.contratoEntityRepository = contratoEntityRepository;
+    this.domainEntityRepository = domainEntityRepository;
+  }
 
+  @Override
+  public TipoContratoLaboralResponseDTO create(TipoContratoLaboralRequestDTO dto) {
     var e = new ParamContratoEntity();
     e.setUuid(UuidCreator.getTimeOrderedEpoch());
     e.setEstado(Estado.A);
@@ -47,6 +57,7 @@ public class TipoContratoLaboralService {
     return buildResponse(dto, saved);
   }
 
+  @Override
   public TipoContratoLaboralResponseDTO update(String uuid, TipoContratoLaboralRequestDTO dto) {
 
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
@@ -77,13 +88,14 @@ public class TipoContratoLaboralService {
     return response;
   }
 
-  public List<TipoContratoLaboralResponseDTO> getAll(String pagina, String tamanho) {
+  @Override
+  public List<Object> list(Map<String, String> filters) {
 
-    var page = Integer.parseInt(pagina);
+   /* var page = Integer.parseInt(pagina);
     var size = Integer.parseInt(tamanho);
-    var pageable = PageRequest.of(page, size);
+    var pageable = PageRequest.of(page, size);*/
 
-    var data = repository.findAll(pageable);
+    var data = repository.findAll();
     if (data.isEmpty())
       return List.of();
 
@@ -105,9 +117,10 @@ public class TipoContratoLaboralService {
           ofNullable(e.getPrazoObrigatorio()).ifPresent(x -> r.setPrazo(yesNo.get(x.toString())));
           return r;
         })
-        .toList();
+        .collect(Collectors.toList());
   }
 
+  @Override
   public void delete(String uuid) {
 
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
