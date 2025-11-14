@@ -13,7 +13,7 @@ import cv.inps.rh.funcionario.application.dto.AgregadoDependenteRespDTO;
 import cv.inps.rh.funcionario.application.dto.AnexoRespDTO;
 import cv.inps.rh.funcionario.application.dto.DadosAcademicosProfResponseDTO;
 import cv.inps.rh.funcionario.application.dto.DadosBancariosRespDTO;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisResp2DTO;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.application.dto.DadosPessoaisRespDTO;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ import java.util.List;
 
 
 @IgrpDTO
-public class FuncionarioResponse2DTO  {
+public class FuncionarioResponseDTO  {
 
   
   @Valid
@@ -37,7 +37,7 @@ public class FuncionarioResponse2DTO  {
   private DadosAcademicosProfResponseDTO dadosAcademicosProf ;
   
   @Valid
-  private DadosContratuaisResp2DTO dadosContratuais ;
+  private DadosContratuaisRespDTO dadosContratuais ;
   
   @Valid
   private List<DadosBancariosRespDTO> dadosBancarios = new ArrayList<>();

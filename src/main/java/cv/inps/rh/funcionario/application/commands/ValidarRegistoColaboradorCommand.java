@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.FuncionarioRequest2DTO;
+import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
 
 @Data
 @NoArgsConstructor
@@ -13,7 +13,7 @@ import cv.inps.rh.funcionario.application.dto.FuncionarioRequest2DTO;
 public class ValidarRegistoColaboradorCommand implements Command {
 
   
-  private FuncionarioRequest2DTO funcionariorequest2;
+  private FuncionarioRequestDTO funcionariorequest;
   @NotBlank(message = "The field <id> is required")
   private String id;
 

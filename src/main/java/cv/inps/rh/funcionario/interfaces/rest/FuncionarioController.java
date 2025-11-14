@@ -20,8 +20,8 @@ import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.funcionario.application.queries.*;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.funcionario.application.commands.*;
-import cv.inps.rh.funcionario.application.dto.FuncionarioRequest2DTO;
-import cv.inps.rh.funcionario.application.dto.FuncionarioResponse2DTO;
+import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
+import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaValidacoesDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaFuncionarioDTO;
 import java.util.Map;
@@ -53,20 +53,20 @@ public class FuncionarioController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = FuncionarioResponse2DTO.class,
+                  implementation = FuncionarioResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<FuncionarioResponse2DTO> createFuncionario(@Valid @RequestBody FuncionarioRequest2DTO createFuncionarioRequest
+  public ResponseEntity<FuncionarioResponseDTO> createFuncionario(@Valid @RequestBody FuncionarioRequestDTO createFuncionarioRequest
     )
   {
 
       final var command = new CreateFuncionarioCommand(createFuncionarioRequest);
 
-       ResponseEntity<FuncionarioResponse2DTO> response = commandBus.send(command);
+       ResponseEntity<FuncionarioResponseDTO> response = commandBus.send(command);
 
        return response;
   }
@@ -84,20 +84,20 @@ public class FuncionarioController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = FuncionarioResponse2DTO.class,
+                  implementation = FuncionarioResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<FuncionarioResponse2DTO> getFuncionarioById(
+  public ResponseEntity<FuncionarioResponseDTO> getFuncionarioById(
     @PathVariable(value = "id") String id)
   {
 
       final var query = new GetFuncionarioByIdQuery(id);
 
-      ResponseEntity<FuncionarioResponse2DTO> response = queryBus.handle(query);
+      ResponseEntity<FuncionarioResponseDTO> response = queryBus.handle(query);
 
       return response;
   }
@@ -197,7 +197,7 @@ public class FuncionarioController {
     }
   )
   
-  public ResponseEntity<Map<String, ?>> validarRegistoColaborador(@Valid @RequestBody FuncionarioRequest2DTO validarRegistoColaboradorRequest
+  public ResponseEntity<Map<String, ?>> validarRegistoColaborador(@Valid @RequestBody FuncionarioRequestDTO validarRegistoColaboradorRequest
     , @PathVariable(value = "id") String id)
   {
 

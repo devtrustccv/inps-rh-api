@@ -1,14 +1,14 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "FuncionarioResponse2",
+  "name": "FuncionarioRequest",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
     {
       "name": "dadosPessoais",
       "objectType": "dto",
-      "type": "DadosPessoaisResp",
+      "type": "DadosPessoaisReq",
       "required": false,
       "before": false,
       "after": false,
@@ -21,7 +21,7 @@
     {
       "name": "familiares",
       "objectType": "dto",
-      "type": "AgregadoDependenteResp",
+      "type": "AgregadoDependenteReq",
       "required": false,
       "before": false,
       "after": false,
@@ -35,7 +35,7 @@
     {
       "name": "dadosAcademicosProf",
       "objectType": "dto",
-      "type": "DadosAcademicosProfResponse",
+      "type": "DadosAcademicosProfReq",
       "required": false,
       "before": false,
       "after": false,
@@ -48,7 +48,7 @@
     {
       "name": "dadosContratuais",
       "objectType": "dto",
-      "type": "DadosContratuaisResp2",
+      "type": "DadosContratuaisReq",
       "required": false,
       "before": false,
       "after": false,
@@ -61,7 +61,7 @@
     {
       "name": "dadosBancarios",
       "objectType": "dto",
-      "type": "DadosBancariosResp",
+      "type": "DadosBancariosReq",
       "required": false,
       "before": false,
       "after": false,
@@ -75,7 +75,7 @@
     {
       "name": "anexos",
       "objectType": "dto",
-      "type": "AnexoResp",
+      "type": "AnexoReq",
       "required": false,
       "before": false,
       "after": false,
@@ -85,7 +85,20 @@
       "primaryKey": false,
       "collectionType": "list",
       "module": "funcionario"
+    },
+    {
+      "name": "validar",
+      "objectType": "enum",
+      "type": "EstadoValidacao",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "shared"
     }
   ],
-  "id": "c3uxj04bbj_copy"
+  "id": "c3uxj04bbj"
 }

@@ -9,8 +9,8 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO;
-import cv.inps.rh.funcionario.application.dto.SubsidioReqDTO;
+import cv.inps.rh.funcionario.application.dto.EncargosDescontosRespDTO;
+import cv.inps.rh.funcionario.application.dto.SubsidioRespDTO;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import java.util.List;
 
 
 @IgrpDTO
-public class DadosContratuaisReq2DTO  {
+public class DadosContratuaisRespDTO  {
 
   
   
@@ -80,9 +80,36 @@ public class DadosContratuaisReq2DTO  {
   private Long ilhaId ;
   
   @Valid
-  private List<SubsidioReqDTO> subsidios = new ArrayList<>();
+  private List<SubsidioRespDTO> subsidios = new ArrayList<>();
   
   @Valid
-  private List<EncargosDescontosReqDTO> encargosDescontos = new ArrayList<>();
+  private List<EncargosDescontosRespDTO> encargosDescontos = new ArrayList<>();
+  
+  
+  private String tipoContratoDesc ;
+  
+  
+  private String cargoPosicaoDesc ;
+  
+  
+  private String direcaoDesc ;
+  
+  
+  private String seccaoDesc ;
+  
+  
+  private String carreiraDesc ;
+  
+  
+  private String categoriaDesc ;
+  
+  
+  private String escalaoReferenciaDesc ;
+  
+  
+  private String tipoVinculoLaboralDesc ;
+  
+  
+  private String localTrabalhoDesc ;
 
 }

@@ -81,7 +81,7 @@ public class ValidarRegistoColaboradorCommandHandler implements CommandHandler<V
    @IgrpCommandHandler
    public ResponseEntity<Map<String, ?>> handle(ValidarRegistoColaboradorCommand command) {
 
-     var dto = command.getFuncionariorequest2();
+     var dto = command.getFuncionariorequest();
      LOGGER.info("Iniciando atualização de funcionário: {}", dto);
 
      var id = IdentificadorUnico.from(command.getId());

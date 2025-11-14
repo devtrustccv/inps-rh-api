@@ -2,7 +2,7 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.funcionario.application.dto.FuncionarioResponse2DTO;
+import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.domain.models.DefPagamento;
 import cv.inps.rh.funcionario.domain.models.DefinicaoRemuneracao;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFuncionarioCommand, ResponseEntity<FuncionarioResponse2DTO>> {
+public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFuncionarioCommand, ResponseEntity<FuncionarioResponseDTO>> {
 
    private static final Logger LOGGER = LoggerFactory.getLogger(CreateFuncionarioCommandHandler.class);
 
@@ -88,8 +88,8 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
    }
 
    @IgrpCommandHandler
-   public ResponseEntity<FuncionarioResponse2DTO> handle(CreateFuncionarioCommand command) {
-     var dto = command.getFuncionariorequest2();
+   public ResponseEntity<FuncionarioResponseDTO> handle(CreateFuncionarioCommand command) {
+     var dto = command.getFuncionariorequest();
 
      LOGGER.info("Iniciando criação de funcionário: {}", dto);
 
