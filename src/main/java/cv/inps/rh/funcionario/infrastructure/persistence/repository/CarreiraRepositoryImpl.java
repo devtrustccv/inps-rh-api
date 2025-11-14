@@ -31,7 +31,7 @@ public class CarreiraRepositoryImpl implements CarreiraRepository {
         filters.getDataFim(),
         startRow,
         endRow,
-        filters.getIdFuncionario().getValor()
+        filters.getIdFuncionario().getValor().toString()
     );
   }
 

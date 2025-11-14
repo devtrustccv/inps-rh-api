@@ -69,7 +69,7 @@ public interface CarreiraEntityRepository extends
       @Param("dataFim") LocalDate dataFim,
       @Param("startRow") Long startRow,
       @Param("endRow") Long endRow,
-      @Param("uuid") UUID idFuncionario
+      @Param("uuid")String idFuncionario
   );
 
   @Query(value = """
