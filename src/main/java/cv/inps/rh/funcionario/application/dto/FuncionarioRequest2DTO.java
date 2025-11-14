@@ -15,6 +15,7 @@ import cv.inps.rh.funcionario.application.dto.DadosAcademicosProfReqDTO;
 import cv.inps.rh.funcionario.application.dto.DadosBancariosReqDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReq2DTO;
 import cv.inps.rh.funcionario.application.dto.DadosPessoaisReqDTO;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,5 +45,8 @@ public class FuncionarioRequest2DTO  {
   
   @Valid
   private List<AnexoReqDTO> anexos = new ArrayList<>();
+  
+  
+  private EstadoValidacao validar ;
 
 }

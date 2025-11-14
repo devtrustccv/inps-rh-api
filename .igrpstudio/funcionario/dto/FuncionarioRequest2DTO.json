@@ -85,6 +85,19 @@
       "primaryKey": false,
       "collectionType": "list",
       "module": "funcionario"
+    },
+    {
+      "name": "validar",
+      "objectType": "enum",
+      "type": "EstadoValidacao",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "shared"
     }
   ],
   "id": "c3uxj04bbj"

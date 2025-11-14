@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
+import cv.inps.rh.funcionario.application.dto.FuncionarioRequest2DTO;
 
 @Data
 @NoArgsConstructor
@@ -13,6 +13,6 @@ import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
 public class CreateFuncionarioCommand implements Command {
 
   
-  private FuncionarioRequestDTO funcionariorequest;
+  private FuncionarioRequest2DTO funcionariorequest2;
 
 }

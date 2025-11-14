@@ -84,5 +84,32 @@ public class DadosContratuaisResp2DTO  {
   
   @Valid
   private List<EncargosDescontosRespDTO> encargosDescontos = new ArrayList<>();
+  
+  
+  private String tipoContratoDesc ;
+  
+  
+  private String cargoPosicaoDesc ;
+  
+  
+  private String direcaoDesc ;
+  
+  
+  private String seccaoDesc ;
+  
+  
+  private String carreiraDesc ;
+  
+  
+  private String categoriaDesc ;
+  
+  
+  private String escalaoReferenciaDesc ;
+  
+  
+  private String tipoVinculoLaboralDesc ;
+  
+  
+  private String localTrabalhoDesc ;
 
 }
