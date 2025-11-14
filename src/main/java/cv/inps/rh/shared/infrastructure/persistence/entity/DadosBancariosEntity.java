@@ -25,7 +25,8 @@ import java.util.List;
 public class DadosBancariosEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_dados_banco")
+    @SequenceGenerator(name = "seq_dados_banco", sequenceName = "SEQ_DADOS_BANCO", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

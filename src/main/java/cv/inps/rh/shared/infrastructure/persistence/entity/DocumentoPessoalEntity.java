@@ -22,7 +22,8 @@ import java.util.UUID;
 public class DocumentoPessoalEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_doc_pessoal")
+    @SequenceGenerator(name = "seq_doc_pessoal", sequenceName = "SEQ_DOC_PESSOAL", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

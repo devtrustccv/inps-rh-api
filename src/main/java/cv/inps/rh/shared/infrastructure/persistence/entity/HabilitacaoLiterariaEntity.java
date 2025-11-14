@@ -25,7 +25,8 @@ import java.util.List;
 public class HabilitacaoLiterariaEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_habilit_lit")
+    @SequenceGenerator(name = "seq_habilit_lit", sequenceName = "SEQ_HABILIT_LIT", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

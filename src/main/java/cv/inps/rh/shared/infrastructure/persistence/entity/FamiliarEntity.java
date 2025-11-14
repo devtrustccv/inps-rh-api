@@ -25,7 +25,8 @@ import java.util.List;
 public class FamiliarEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_familiar")
+    @SequenceGenerator(name = "seq_familiar", sequenceName = "SEQ_FAMILIAR", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

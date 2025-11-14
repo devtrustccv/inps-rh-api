@@ -26,7 +26,8 @@ import java.util.List;
 public class DefPagamentoEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_def_rem")
+    @SequenceGenerator(name = "seq_def_rem", sequenceName = "SEQ_DEF_REM", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
