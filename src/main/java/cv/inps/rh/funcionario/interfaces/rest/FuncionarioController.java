@@ -239,4 +239,35 @@ public class FuncionarioController {
        return response;
   }
 
+   @PatchMapping(
+   value = "estado-colaborador"
+  )
+  @Operation(
+    summary = "PATCH method to handle operations for mudarEstadoColaborador",
+    description = "PATCH method to handle operations for mudarEstadoColaborador",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = AtivarInativarColaboradorDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<AtivarInativarColaboradorDTO> mudarEstadoColaborador(@Valid @RequestBody AtivarInativarColaboradorDTO mudarEstadoColaboradorRequest
+    )
+  {
+
+      final var command = new MudarEstadoColaboradorCommand(mudarEstadoColaboradorRequest);
+
+       ResponseEntity<AtivarInativarColaboradorDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
 }
