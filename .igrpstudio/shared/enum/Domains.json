@@ -9,6 +9,13 @@
         "SIM_NAO_NUMBER",
         "SIM_NAO_NUMBER"
       ]
+    },
+    {
+      "name": "NATUREZA_VINCULO",
+      "attributes": [
+        "NATUREZA_VINCULO",
+        "NATUREZA_VINCULO"
+      ]
     }
   ],
   "attributes": [

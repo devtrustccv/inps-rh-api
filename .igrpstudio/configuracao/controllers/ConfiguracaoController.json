@@ -140,7 +140,143 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "saveTipoContratoLaboral",
+      "path": "tipoContratoLaboral",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "collectionType": "none",
+              "name": "data",
+              "type": "TipoContratoLaboralRequest",
+              "objectType": "dto",
+              "module": "configuracao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "TipoContratoLaboralRequest",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "configuracao"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "updateTipoContratoLaboral",
+      "path": "tipoContratoLaboral/{tipoContratoLaboralId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "TipoContratoLaboralRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "configuracao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "TipoContratoLaboralRequest",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "configuracao"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "tipoContratoLaboralId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "listTipoContratoLaboral",
+      "path": "tipoContratoLaboral",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "TipoContratoLaboralResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "configuracao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pagina",
+          "value": "0",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "tamanho",
+          "value": "20",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "deleteTipoContratoLaboral",
+      "path": "tipoContratoLaboral/{tipoContratoLaboralId}",
+      "method": "DELETE",
+      "responses": {
+        "204": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "tipoContratoLaboralId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "ht4q197a9c-updateVinculoLaboral-listVinculoLaboral"
+  "id": "ht4q197a9c-updateVincghuloLaboral-listVinculoLaboral-saveVinculoLaboral"
 }

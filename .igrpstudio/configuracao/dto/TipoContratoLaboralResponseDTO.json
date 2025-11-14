@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "configuracao",
-  "name": "VinculoLaboralResponse",
+  "name": "TipoContratoLaboralResponse",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
@@ -30,9 +30,9 @@
       "primaryKey": false
     }
   ],
-  "id": "o182eru0pk_copyasdas",
+  "id": "o182eru0pkasdas_copy_copy",
   "extends": {
-    "name": "VinculoLaboralRequest",
+    "name": "TipoContratoLaboralRequest",
     "module": "configuracao"
   }
 }

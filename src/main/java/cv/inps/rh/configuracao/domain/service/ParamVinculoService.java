@@ -10,6 +10,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
+import cv.inps.rh.shared.util.Utils;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
@@ -33,10 +34,10 @@ public class ParamVinculoService {
     e.setUuid(UuidCreator.getTimeOrderedEpoch());
     e.setCodigo(dto.getCodigo());
     e.setNome(dto.getDescricao());
-    e.setFlgContrato(parseFlag(dto.getContrato()));
-    e.setFlgCarreira(parseFlag(dto.getCarreira()));
-    e.setFlgSalario(parseFlag(dto.getRemuneracao()));
-    e.setFlgTempoServico(parseFlag(dto.getTempoServico()));
+    e.setFlgContrato(Utils.parseFlag(dto.getContrato()));
+    e.setFlgCarreira(Utils.parseFlag(dto.getCarreira()));
+    e.setFlgSalario(Utils.parseFlag(dto.getRemuneracao()));
+    e.setFlgTempoServico(Utils.parseFlag(dto.getTempoServico()));
     e.setEstado(Estado.A);
     var saved = repository.save(e);
     return buildResponse(dto, saved);
@@ -59,10 +60,10 @@ public class ParamVinculoService {
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
     e.setCodigo(dto.getCodigo());
     e.setNome(dto.getDescricao().trim());
-    e.setFlgContrato(parseFlag(dto.getContrato()));
-    e.setFlgCarreira(parseFlag(dto.getCarreira()));
-    e.setFlgSalario(parseFlag(dto.getRemuneracao()));
-    e.setFlgTempoServico(parseFlag(dto.getTempoServico()));
+    e.setFlgContrato(Utils.parseFlag(dto.getContrato()));
+    e.setFlgCarreira(Utils.parseFlag(dto.getCarreira()));
+    e.setFlgSalario(Utils.parseFlag(dto.getRemuneracao()));
+    e.setFlgTempoServico(Utils.parseFlag(dto.getTempoServico()));
     var saved = repository.save(e);
     return buildResponse(dto, saved);
   }
@@ -101,13 +102,9 @@ public class ParamVinculoService {
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
 
     if (tiposRelacionamentoEntityRepository.existsByVinculoId(e))
-      throw IgrpResponseStatusException.conflict("Delete is only allowed if there are no related records in another tables!");
+      throw IgrpResponseStatusException.conflictByAnotherTableDependency();
 
     e.setEstado(Estado.E);
     repository.save(e);
-  }
-
-  private Integer parseFlag(String value) {
-    return value != null ? Integer.parseInt(value) : null;
   }
 }

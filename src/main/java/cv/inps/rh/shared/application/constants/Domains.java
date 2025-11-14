@@ -16,7 +16,9 @@ import java.util.stream.Collectors;
 
 public enum Domains implements IgrpEnum<String> {
 
-  SIM_NAO_NUMBER("SIM_NAO_NUMBER", "SIM_NAO_NUMBER");
+  SIM_NAO_NUMBER("SIM_NAO_NUMBER", "SIM_NAO_NUMBER"),
+    NATUREZA_VINCULO("NATUREZA_VINCULO", "NATUREZA_VINCULO")
+  ;
 
   private final String code;
   private final String description;
@@ -37,35 +39,33 @@ public enum Domains implements IgrpEnum<String> {
   }
 
   /**
-   * Pre-built maps for fast lookup.
-   */
+  * Pre-built maps for fast lookup.
+  */
   private static final Map<String, Domains> CODE_MAP = Arrays.stream(values())
-      .collect(Collectors.toMap(Domains::getCode, Function.identity()));
+          .collect(Collectors.toMap(Domains::getCode, Function.identity()));
 
   /**
-   * Attempts to find the enum value associated with the given code.
-   *
-   * @param code The code to look up
-   * @return An Optional containing the enum value if found, empty Optional otherwise
-   */
+  * Attempts to find the enum value associated with the given code.
+  * @param code The code to look up
+  * @return An Optional containing the enum value if found, empty Optional otherwise
+  */
   public static Optional<Domains> fromCode(String code) {
     return Optional.ofNullable(CODE_MAP.get(code));
   }
 
   /**
-   * Finds the enum value associated with the given code or throws an exception if not found.
-   *
-   * @param code The code to look up
-   * @return The enum value for the given code
-   * @throws IllegalArgumentException if no enum value exists for the given code
-   */
+  * Finds the enum value associated with the given code or throws an exception if not found.
+  * @param code The code to look up
+  * @return The enum value for the given code
+  * @throws IllegalArgumentException if no enum value exists for the given code
+  */
   public static Domains fromCodeOrThrow(String code) {
     return fromCode(code).orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.BAD_REQUEST, "Invalid Domains for this code: " + code));
   }
 
   /**
-   * Returns a map of code to description.
-   */
+  * Returns a map of code to description.
+  */
   public static Map<String, String> codeDescriptionMap() {
     return CODE_MAP.values().stream().collect(Collectors.toMap(Domains::getCode, Domains::getDescription));
   }

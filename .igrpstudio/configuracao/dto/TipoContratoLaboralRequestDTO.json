@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "configuracao",
-  "name": "VinculoLaboralRequest",
+  "name": "TipoContratoLaboralRequest",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
@@ -30,7 +30,7 @@
       "primaryKey": false
     },
     {
-      "name": "contrato",
+      "name": "natureza",
       "objectType": "java",
       "type": "string",
       "required": true,
@@ -42,10 +42,10 @@
       "primaryKey": false
     },
     {
-      "name": "carreira",
+      "name": "renovavel",
       "objectType": "java",
       "type": "string",
-      "required": true,
+      "required": false,
       "before": false,
       "after": false,
       "positive": false,
@@ -54,10 +54,10 @@
       "primaryKey": false
     },
     {
-      "name": "remuneracao",
+      "name": "duracao",
       "objectType": "java",
-      "type": "string",
-      "required": true,
+      "type": "integer",
+      "required": false,
       "before": false,
       "after": false,
       "positive": false,
@@ -66,10 +66,22 @@
       "primaryKey": false
     },
     {
-      "name": "tempoServico",
+      "name": "maxNumeroRenovacao",
+      "objectType": "java",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "prazo",
       "objectType": "java",
       "type": "string",
-      "required": true,
+      "required": false,
       "before": false,
       "after": false,
       "positive": false,
@@ -90,5 +102,5 @@
       "primaryKey": false
     }
   ],
-  "id": "o182eru0pkasdas"
+  "id": "o182eru0pkasdas_copy"
 }

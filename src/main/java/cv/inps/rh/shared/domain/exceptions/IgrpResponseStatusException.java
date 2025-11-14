@@ -6,7 +6,6 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.ErrorResponseException;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class IgrpResponseStatusException extends ErrorResponseException {
 
@@ -68,5 +67,9 @@ public class IgrpResponseStatusException extends ErrorResponseException {
     var problemDetail = ProblemDetail.forStatus(HttpStatus.CONFLICT);
     problemDetail.setTitle(title);
     return new IgrpResponseStatusException(HttpStatus.CONFLICT, problemDetail, null);
+  }
+
+  public static IgrpResponseStatusException conflictByAnotherTableDependency() {
+    return conflict("Delete is only allowed if there are no related records in other tables!");
   }
 }

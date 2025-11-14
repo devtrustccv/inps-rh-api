@@ -25,6 +25,8 @@ public class ListVinculoLaboralQueryHandler implements QueryHandler<ListVinculoL
   @IgrpQueryHandler
   public ResponseEntity<List<VinculoLaboralResponseDTO>> handle(ListVinculoLaboralQuery query) {
 
+    // TODO 13/11/2025 23:20 verify filters here
+
     LOGGER.debug("Page: {}, Size: {}", query.getPagina(), query.getTamanho());
 
     var response = paramVinculoService.getAll(query.getPagina(), query.getTamanho());
