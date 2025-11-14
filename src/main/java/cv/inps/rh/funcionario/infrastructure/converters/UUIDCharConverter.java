@@ -12,13 +12,13 @@ public class UUIDCharConverter implements AttributeConverter<UUID, String> {
 
   @Override
   public String convertToDatabaseColumn(UUID attribute) {
-    System.out.println("convertToDatabaseColumn: " + attribute);
+    //System.out.println("convertToDatabaseColumn: " + attribute);
     return attribute != null ? attribute.toString() : null;
   }
 
   @Override
   public UUID convertToEntityAttribute(String dbData) {
-    System.out.println("convertToEntityAttribute: " + dbData);
+    //System.out.println("convertToEntityAttribute: " + dbData);
 
     if (!StringUtils.hasText(dbData)) {
       return null;
