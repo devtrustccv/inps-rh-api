@@ -1,0 +1,26 @@
+{
+  "type": "dto",
+  "module": "configuracao",
+  "name": "SituacaoLaboralResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "SituacaoLaboralRequest",
+    "module": "configuracao"
+  },
+  "attributes": [
+    {
+      "name": "id",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "hl1lm9puke"
+}

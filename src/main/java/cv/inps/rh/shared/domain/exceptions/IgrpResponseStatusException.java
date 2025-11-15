@@ -6,7 +6,6 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.ErrorResponseException;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class IgrpResponseStatusException extends ErrorResponseException {
 
@@ -60,6 +59,10 @@ public class IgrpResponseStatusException extends ErrorResponseException {
     return of(HttpStatus.BAD_REQUEST, title);
   }
 
+  public static <T>IgrpResponseStatusException badRequest(String title, T details) {
+    return of(HttpStatus.BAD_REQUEST, title, details);
+  }
+
   public static IgrpResponseStatusException serviceUnavailable(String title) {
     return of(HttpStatus.SERVICE_UNAVAILABLE, title);
   }
@@ -68,5 +71,9 @@ public class IgrpResponseStatusException extends ErrorResponseException {
     var problemDetail = ProblemDetail.forStatus(HttpStatus.CONFLICT);
     problemDetail.setTitle(title);
     return new IgrpResponseStatusException(HttpStatus.CONFLICT, problemDetail, null);
+  }
+
+  public static IgrpResponseStatusException conflictByAnotherTableDependency() {
+    return conflict("Delete is only allowed if there are no related records in other tables!");
   }
 }

@@ -3,13 +3,17 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import java.util.UUID;
-import jakarta.validation.constraints.NotBlank;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.config.AuditEntity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.UUID;
 
 
 @Getter
@@ -22,11 +26,12 @@ import cv.inps.rh.shared.application.constants.Estado;
 public class ParamCategoriaEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "seq_param_categoria", sequenceName = "SEQ_PARAM_CATEGORIA", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_param_categoria")
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -35,19 +40,19 @@ public class ParamCategoriaEntity extends AuditEntity {
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
     @NotBlank(message = "nome is mandatory")
     @Column(name="nome", nullable = false)
     private String nome;
 
-  
+
     @Column(name="codigo")
     private String codigo;
 
-  
+
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
+
 }

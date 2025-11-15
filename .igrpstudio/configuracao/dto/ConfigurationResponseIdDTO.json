@@ -1,0 +1,22 @@
+{
+  "type": "dto",
+  "module": "configuracao",
+  "name": "ConfigurationResponseId",
+  "template": "record",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "id",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "hiufrzwi78"
+}
