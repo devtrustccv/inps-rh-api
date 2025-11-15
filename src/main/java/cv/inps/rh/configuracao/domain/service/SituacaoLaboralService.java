@@ -13,6 +13,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSitLaboralEntity
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSitLaboralEntityRepository;
 import jakarta.validation.Validator;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -58,7 +59,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
   }
 
   @Override
-  public void update(String uuid, SituacaoLaboralRequestDTO dto) {
+  public Object update(String uuid, SituacaoLaboralRequestDTO dto) {
 
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
     e.setFlgAfetaCarreira(ConfigurationUtils.parseFlag(dto.getCarreira()));
@@ -73,7 +74,38 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
       e.setEstado(Estado.valueOf(dto.getEstado()));
 
     repository.save(e);
+
+    return "";
   }
+
+  @Override
+  public Object read(String uuid) {
+
+    var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
+
+    var domain = domainEntityRepository.getActiveDomainByCode(Domains.SIM_NAO_NUMBER.name());
+    var type = domainEntityRepository.getActiveDomainByCode(Domains.SITUACAO_LABORAL.name());
+    var contractStatus = domainEntityRepository.getActiveDomainByCode(Domains.ESTADO_CONTRATO.name());
+
+    return buildResponse(e, domain, type, contractStatus);
+  }
+
+  @NotNull
+  private Object buildResponse(ParamSitLaboralEntity e, Map<String, String> domain, Map<String, String> type, Map<String, String> contractStatus) {
+    var response = new SituacaoLaboralResponseDTO();
+    response.setId(e.getUuid().toString());
+    response.setCodigo(e.getCodigo());
+    response.setDescricao(e.getNome());
+    response.setTipo(type.get(e.getTipoSituacao()));
+    response.setRemuneracao(domain.get(e.getFlgRenumeracao().toString()));
+    response.setCarreira(domain.get(e.getFlgAfetaCarreira().toString()));
+    response.setTempoServico(domain.get(e.getFlgContaTempServico().toString()));
+    response.setProgressaoPromocao(domain.get(e.getFlgCessaProgressao().toString()));
+    response.setEstadoContrato(contractStatus.get(e.getFlgEstadoContrato().toString()));
+    response.setEstado(e.getEstado().getCode());
+    return response;
+  }
+
 
   @Override
   public List<Object> list(Map<String, String> filters) {
@@ -89,20 +121,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     var contractStatus = domainEntityRepository.getActiveDomainByCode(Domains.ESTADO_CONTRATO.name());
 
     return data.stream()
-        .map(e -> {
-          var response = new SituacaoLaboralResponseDTO();
-          response.setId(e.getUuid().toString());
-          response.setCodigo(e.getCodigo());
-          response.setDescricao(e.getNome());
-          response.setTipo(type.get(e.getTipoSituacao()));
-          response.setRemuneracao(domain.get(e.getFlgRenumeracao().toString()));
-          response.setCarreira(domain.get(e.getFlgAfetaCarreira().toString()));
-          response.setTempoServico(domain.get(e.getFlgContaTempServico().toString()));
-          response.setProgressaoPromocao(domain.get(e.getFlgCessaProgressao().toString()));
-          response.setEstadoContrato(contractStatus.get(e.getFlgEstadoContrato().toString()));
-          response.setEstado(e.getEstado().getCode());
-          return response;
-        })
+        .map(e -> buildResponse(e, domain, type, contractStatus))
         .collect(Collectors.toList());
   }
 

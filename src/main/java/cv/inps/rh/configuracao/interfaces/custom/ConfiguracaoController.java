@@ -74,8 +74,14 @@ public class ConfiguracaoController {
 
   @PutMapping("/{id}")
   public ResponseEntity<Object> update(@PathVariable String id, @RequestBody Object request, @RequestParam ConfigurationType configurationType) {
-   configuration.update(id, request, configurationType.getCode());
+    configuration.update(id, request, configurationType.getCode());
     return ResponseEntity.ok().build();
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<Object> read(@PathVariable String id, @RequestParam ConfigurationType configurationType) {
+    var data = configuration.read(id, configurationType.getCode());
+    return ResponseEntity.ok(data);
   }
 
   @GetMapping

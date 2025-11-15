@@ -15,6 +15,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepos
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import jakarta.validation.Validator;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -53,7 +54,7 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
   }
 
   @Override
-  public void update(String uuid, VinculoLaboralRequestDTO dto) {
+  public Object update(String uuid, VinculoLaboralRequestDTO dto) {
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
     e.setCodigo(dto.getCodigo());
     e.setNome(dto.getDescricao().trim());
@@ -64,6 +65,32 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     if (StringUtils.hasText(dto.getEstado()))
       e.setEstado(Estado.valueOf(dto.getEstado()));
     repository.save(e);
+    return "";
+  }
+
+  @Override
+  public Object read(String uuid) {
+
+    var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
+
+    var domain = domainEntityRepository.getActiveDomainByCode(Domains.SIM_NAO_NUMBER.name());
+
+    return buildResponse(e, domain);
+  }
+
+  @NotNull
+  private Object buildResponse(ParamVinculoEntity e, Map<String, String> domain) {
+    var response = new VinculoLaboralResponseDTO();
+    response.setId(e.getUuid().toString());
+    response.setCodigo(e.getCodigo());
+    response.setDescricao(e.getNome());
+    response.setContrato(domain.get(e.getFlgContrato().toString()));
+    response.setCarreira(domain.get(e.getFlgCarreira().toString()));
+    response.setRemuneracao(domain.get(e.getFlgSalario().toString()));
+    response.setTempoServico(domain.get(e.getFlgTempoServico().toString()));
+    response.setEstado(e.getEstado().getCode());
+    response.setDescricaoEstado(e.getEstado().getDescription());
+    return response;
   }
 
   @Override
@@ -78,19 +105,7 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     var domain = domainEntityRepository.getActiveDomainByCode(Domains.SIM_NAO_NUMBER.name());
 
     return data.stream()
-        .map(e -> {
-          var response = new VinculoLaboralResponseDTO();
-          response.setId(e.getUuid().toString());
-          response.setCodigo(e.getCodigo());
-          response.setDescricao(e.getNome());
-          response.setContrato(domain.get(e.getFlgContrato().toString()));
-          response.setCarreira(domain.get(e.getFlgCarreira().toString()));
-          response.setRemuneracao(domain.get(e.getFlgSalario().toString()));
-          response.setTempoServico(domain.get(e.getFlgTempoServico().toString()));
-          response.setEstado(e.getEstado().getCode());
-          response.setDescricaoEstado(e.getEstado().getDescription());
-          return response;
-        })
+        .map(e -> buildResponse(e, domain))
         .collect(Collectors.toList());
   }
 

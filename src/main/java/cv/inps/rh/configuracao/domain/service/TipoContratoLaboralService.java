@@ -15,6 +15,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoEntityRep
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamContratoEntityRepository;
 import jakarta.validation.Validator;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -58,7 +59,7 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
   }
 
   @Override
-  public void update(String uuid, TipoContratoLaboralRequestDTO dto) {
+  public Object update(String uuid, TipoContratoLaboralRequestDTO dto) {
 
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
     e.setCodigo(dto.getCodigo());
@@ -71,6 +72,35 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
     if (StringUtils.hasText(dto.getEstado()))
       e.setEstado(Estado.valueOf(dto.getEstado()));
     repository.save(e);
+    return "";
+  }
+
+  @Override
+  public Object read(String uuid) {
+
+    var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
+
+    var nature = domainEntityRepository.getActiveDomainByCode(Domains.NATUREZA_VINCULO.name());
+    var yesNo = domainEntityRepository.getActiveDomainByCode(Domains.SIM_NAO_NUMBER.name());
+
+    return buildResponse(e, nature, yesNo);
+  }
+
+  @NotNull
+  private Object buildResponse(ParamContratoEntity e, Map<String, String> nature, Map<String, String> yesNo) {
+    var r = new TipoContratoLaboralResponseDTO();
+    r.setId(e.getUuid().toString());
+    r.setCodigo(e.getCodigo());
+    r.setDescricao(e.getNome());
+    r.setNatureza(nature.get(e.getNatureza()));
+    r.setDuracao(e.getDuracaoRenovavel());
+    r.setMaxNumeroRenovacao(e.getMaxRenovacao());
+    r.setEstado(e.getEstado().getCode());
+    r.setDescricaoEstado(e.getEstado().getDescription());
+    ofNullable(e.getFlgRenovavel()).ifPresent(y -> r.setRenovavel(yesNo.get(y.toString())));
+    ofNullable(e.getPrazoObrigatorio()).ifPresent(x -> r.setPrazo(yesNo.get(x.toString())));
+
+    return r;
   }
 
   @Override
@@ -86,20 +116,7 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
     var yesNo = domainEntityRepository.getActiveDomainByCode(Domains.SIM_NAO_NUMBER.name());
 
     return data.stream()
-        .map(e -> {
-          var r = new TipoContratoLaboralResponseDTO();
-          r.setId(e.getUuid().toString());
-          r.setCodigo(e.getCodigo());
-          r.setDescricao(e.getNome());
-          r.setNatureza(nature.get(e.getNatureza()));
-          r.setDuracao(e.getDuracaoRenovavel());
-          r.setMaxNumeroRenovacao(e.getMaxRenovacao());
-          r.setEstado(e.getEstado().getCode());
-          r.setDescricaoEstado(e.getEstado().getDescription());
-          ofNullable(e.getFlgRenovavel()).ifPresent(y -> r.setRenovavel(yesNo.get(y.toString())));
-          ofNullable(e.getPrazoObrigatorio()).ifPresent(x -> r.setPrazo(yesNo.get(x.toString())));
-          return r;
-        })
+        .map(e -> buildResponse(e, nature, yesNo))
         .collect(Collectors.toList());
   }
 

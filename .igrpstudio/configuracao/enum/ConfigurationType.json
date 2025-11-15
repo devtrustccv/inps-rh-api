@@ -23,6 +23,13 @@
         "tipo_contrato_laboral_type",
         "PARAM_TIPO_CONTRATO_LABORAL"
       ]
+    },
+    {
+      "name": "PARAM_CARREIRA",
+      "attributes": [
+        "carreira_type",
+        "PARAM_CARREIRA"
+      ]
     }
   ],
   "attributes": [

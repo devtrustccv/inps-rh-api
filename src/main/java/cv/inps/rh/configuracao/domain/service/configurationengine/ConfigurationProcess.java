@@ -33,7 +33,9 @@ public abstract class ConfigurationProcess<T> {
 
   protected abstract Object create(T payload);
 
-  protected abstract void update(String id, T payload);
+  protected abstract Object update(String id, T payload);
+
+  protected abstract Object read(String id);
 
   public abstract List<Object> list(Map<String, String> filters);
 

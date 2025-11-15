@@ -19,7 +19,7 @@ public class Configuration implements IConfiguration {
   @Override
   public Object create(Object payload, String configurationType) {
 
-    LOGGER.debug("CREATE CONFIGURATION TYPE: {}, PAYLOAD: {}", configurationType, payload);
+    LOGGER.debug("CREATE - CONFIGURATION TYPE: {}, PAYLOAD: {}", configurationType, payload);
 
     return serviceProcessFactory.getServiceProcess(configurationType).doCreate(payload);
   }
@@ -27,15 +27,23 @@ public class Configuration implements IConfiguration {
   @Override
   public void update(String id, Object payload, String configurationType) {
 
-    LOGGER.debug("UPDATE CONFIGURATION TYPE: {}, PAYLOAD: {}", configurationType, payload);
+    LOGGER.debug("UPDATE - CONFIGURATION TYPE: {}, ID: {}, PAYLOAD: {}", configurationType, id, payload);
 
     serviceProcessFactory.getServiceProcess(configurationType).doUpdate(id, payload);
   }
 
   @Override
+  public Object read(String id, String configurationType) {
+
+    LOGGER.debug("READ - CONFIGURATION TYPE: {}, ID: {}", configurationType, id);
+
+    return serviceProcessFactory.getServiceProcess(configurationType).read(id);
+  }
+
+  @Override
   public List<Object> list(Map<String, String> filters, String configurationType) {
 
-    LOGGER.debug("LIST CONFIGURATION TYPE: {}, FILTERS: {}", configurationType, filters);
+    LOGGER.debug("LIST - CONFIGURATION TYPE: {}, FILTERS: {}", configurationType, filters);
 
     return serviceProcessFactory.getServiceProcess(configurationType).list(filters);
   }
@@ -43,7 +51,7 @@ public class Configuration implements IConfiguration {
   @Override
   public void delete(String id, String configurationType) {
 
-    LOGGER.debug("DELETE CONFIGURATION TYPE: {}, ID: {}", configurationType, id);
+    LOGGER.debug("DELETE - CONFIGURATION TYPE: {}, ID: {}", configurationType, id);
 
     serviceProcessFactory.getServiceProcess(configurationType).delete(id);
   }

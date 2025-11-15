@@ -3,13 +3,17 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import jakarta.validation.constraints.NotNull;
-import java.util.UUID;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.config.AuditEntity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.UUID;
 
 
 @Getter
@@ -22,7 +26,8 @@ import cv.inps.rh.shared.application.constants.Estado;
 public class ParamCarreiraEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "seq_param_carreira", sequenceName = "SEQ_PARAM_CARREIRA", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_param_carreira")
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
