@@ -4,6 +4,7 @@
 package cv.inps.rh.configuracao.interfaces.custom;
 
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.configuracao.application.constants.ConfigurationType;
 import cv.inps.rh.configuracao.application.dto.TipoContratoLaboralRequestDTO;
 import cv.inps.rh.configuracao.application.dto.TipoContratoLaboralResponseDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoLaboralRequestDTO;
@@ -65,29 +66,27 @@ public class ConfiguracaoController {
           )
       )
   })
-  public ResponseEntity<Object> create(
-      @RequestBody Map<String, Object> request,
-      @RequestParam String configurationType
+  public ResponseEntity<Object> create(@RequestBody Map<String, Object> request, @RequestParam ConfigurationType configurationType
   ) {
-    var data = configuration.create(request, configurationType);
+    var data = configuration.create(request, configurationType.getCode());
     return ResponseEntity.status(HttpStatus.CREATED).body(data);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<Object> update(@PathVariable String id, @RequestBody Object request, @RequestParam String configurationType) {
-    var data = configuration.update(id, request, configurationType);
+  public ResponseEntity<Object> update(@PathVariable String id, @RequestBody Object request, @RequestParam ConfigurationType configurationType) {
+    var data = configuration.update(id, request, configurationType.getCode());
     return ResponseEntity.ok(data);
   }
 
   @GetMapping
-  public ResponseEntity<List<Object>> list(@RequestParam Map<String, String> params, @RequestParam String configurationType) {
-    var data = configuration.list(params, configurationType);
+  public ResponseEntity<List<Object>> list(@RequestParam Map<String, String> params, @RequestParam ConfigurationType configurationType) {
+    var data = configuration.list(params, configurationType.getCode());
     return ResponseEntity.ok(data);
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> delete(@PathVariable String id, @RequestParam String configurationType) {
-    configuration.delete(id, configurationType);
+  public ResponseEntity<Void> delete(@PathVariable String id, @RequestParam ConfigurationType configurationType) {
+    configuration.delete(id, configurationType.getCode());
     return ResponseEntity.noContent().build();
   }
 

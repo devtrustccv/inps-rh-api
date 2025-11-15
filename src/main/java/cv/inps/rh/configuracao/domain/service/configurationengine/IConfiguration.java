@@ -7,7 +7,7 @@ public interface IConfiguration {
 
   Object create(Object objectBody, String configurationType);
 
-  Object update(String id, Object objectBody, String configurationType);
+  void update(String id, Object objectBody, String configurationType);
 
   List<Object> list(Map<String, String> filters, String configurationType);
 

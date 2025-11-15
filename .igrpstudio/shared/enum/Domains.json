@@ -16,6 +16,20 @@
         "NATUREZA_VINCULO",
         "NATUREZA_VINCULO"
       ]
+    },
+    {
+      "name": "SITUACAO_LABORAL",
+      "attributes": [
+        "SITUACAO_LABORAL",
+        "SITUACAO_LABORAL"
+      ]
+    },
+    {
+      "name": "ESTADO_CONTRATO",
+      "attributes": [
+        "ESTADO_CONTRATO",
+        "ESTADO_CONTRATO"
+      ]
     }
   ],
   "attributes": [

@@ -2,10 +2,11 @@ package cv.inps.rh.configuracao.domain.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoLaboralRequestDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoLaboralResponseDTO;
+import cv.inps.rh.configuracao.domain.ConfigurationUtils;
 import cv.inps.rh.configuracao.domain.service.configurationengine.ConfigurationProcess;
-import cv.inps.rh.configuracao.domain.service.configurationengine.ConfigurationServiceBeanNames;
 import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -13,18 +14,16 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
-import cv.inps.rh.shared.util.Utils;
 import jakarta.validation.Validator;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Service(ConfigurationServiceBeanNames.PARAM_VINCULO)
+@Service("param_vinculo_type")
 public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequestDTO> {
 
   private final ParamVinculoEntityRepository repository;
@@ -44,43 +43,35 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     e.setUuid(UuidCreator.getTimeOrderedEpoch());
     e.setCodigo(dto.getCodigo());
     e.setNome(dto.getDescricao());
-    e.setFlgContrato(Utils.parseFlag(dto.getContrato()));
-    e.setFlgCarreira(Utils.parseFlag(dto.getCarreira()));
-    e.setFlgSalario(Utils.parseFlag(dto.getRemuneracao()));
-    e.setFlgTempoServico(Utils.parseFlag(dto.getTempoServico()));
+    e.setFlgContrato(ConfigurationUtils.parseFlag(dto.getContrato()));
+    e.setFlgCarreira(ConfigurationUtils.parseFlag(dto.getCarreira()));
+    e.setFlgSalario(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
+    e.setFlgTempoServico(ConfigurationUtils.parseFlag(dto.getTempoServico()));
     e.setEstado(Estado.A);
-    var saved = repository.save(e);
-    return buildResponse(dto, saved);
-  }
-
-  @NotNull
-  private VinculoLaboralResponseDTO buildResponse(VinculoLaboralRequestDTO dto, ParamVinculoEntity e) {
-    var response = new VinculoLaboralResponseDTO();
-    BeanUtils.copyProperties(dto, response);
-    response.setId(e.getUuid().toString());
-    response.setEstado(e.getEstado().getCode());
-    response.setDescricaoEstado(e.getEstado().getDescription());
-    return response;
+    repository.save(e);
+    return new ConfigurationResponseIdDTO(e.getUuid().toString());
   }
 
   @Override
-  public VinculoLaboralResponseDTO update(String uuid, VinculoLaboralRequestDTO dto) {
-
+  public void update(String uuid, VinculoLaboralRequestDTO dto) {
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
     e.setCodigo(dto.getCodigo());
     e.setNome(dto.getDescricao().trim());
-    e.setFlgContrato(Utils.parseFlag(dto.getContrato()));
-    e.setFlgCarreira(Utils.parseFlag(dto.getCarreira()));
-    e.setFlgSalario(Utils.parseFlag(dto.getRemuneracao()));
-    e.setFlgTempoServico(Utils.parseFlag(dto.getTempoServico()));
-    var saved = repository.save(e);
-    return buildResponse(dto, saved);
+    e.setFlgContrato(ConfigurationUtils.parseFlag(dto.getContrato()));
+    e.setFlgCarreira(ConfigurationUtils.parseFlag(dto.getCarreira()));
+    e.setFlgSalario(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
+    e.setFlgTempoServico(ConfigurationUtils.parseFlag(dto.getTempoServico()));
+    if (StringUtils.hasText(dto.getEstado()))
+      e.setEstado(Estado.valueOf(dto.getEstado()));
+    repository.save(e);
   }
 
   @Override
   public List<Object> list(Map<String, String> filters) {
 
-    var data = repository.findAll();
+    var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
+
+    var data = repository.findAll(pageable);
     if (data.isEmpty())
       return List.of();
 

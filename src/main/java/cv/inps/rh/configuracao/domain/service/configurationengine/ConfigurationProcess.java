@@ -21,7 +21,9 @@ public abstract class ConfigurationProcess<T> {
 
   protected abstract Object create(T payload);
 
-  protected abstract Object update(String id, T payload);
+  protected abstract void update(String id, T payload);
+
+  // TODO 15/11/2025 15:07 apply validations for the request classes
 
   /*public final Object create(T payload) {
     validate(payload);

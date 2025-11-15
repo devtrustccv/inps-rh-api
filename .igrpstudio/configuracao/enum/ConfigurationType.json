@@ -1,0 +1,38 @@
+{
+  "type": "enum",
+  "module": "configuracao",
+  "name": "ConfigurationType",
+  "values": [
+    {
+      "name": "PARAM_VINCULO",
+      "attributes": [
+        "param_vinculo_type",
+        "PARAM_VINCULO"
+      ]
+    },
+    {
+      "name": "PARAM_SITUACAO_LABORAL",
+      "attributes": [
+        "situacao_laboral_type",
+        "PARAM_SITUACAO_LABORAL"
+      ]
+    },
+    {
+      "name": "PARAM_TIPO_CONTRATO_LABORAL",
+      "attributes": [
+        "tipo_contrato_laboral_type",
+        "PARAM_TIPO_CONTRATO_LABORAL"
+      ]
+    }
+  ],
+  "attributes": [
+    {
+      "type": "string",
+      "name": "Code"
+    },
+    {
+      "type": "string",
+      "name": "Description"
+    }
+  ]
+}

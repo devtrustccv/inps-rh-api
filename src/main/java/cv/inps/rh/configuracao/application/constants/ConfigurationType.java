@@ -1,7 +1,7 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
 
-package cv.inps.rh.shared.application.constants;
+package cv.inps.rh.configuracao.application.constants;
 
 import cv.igrp.framework.core.domain.IgrpEnum;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -14,18 +14,17 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
-public enum Domains implements IgrpEnum<String> {
+public enum ConfigurationType implements IgrpEnum<String> {
 
-  SIM_NAO_NUMBER("SIM_NAO_NUMBER", "SIM_NAO_NUMBER"),
-    NATUREZA_VINCULO("NATUREZA_VINCULO", "NATUREZA_VINCULO"),
-    SITUACAO_LABORAL("SITUACAO_LABORAL", "SITUACAO_LABORAL"),
-    ESTADO_CONTRATO("ESTADO_CONTRATO", "ESTADO_CONTRATO")
+  PARAM_VINCULO("param_vinculo_type", "PARAM_VINCULO"),
+    PARAM_SITUACAO_LABORAL("situacao_laboral_type", "PARAM_SITUACAO_LABORAL"),
+    PARAM_TIPO_CONTRATO_LABORAL("tipo_contrato_laboral_type", "PARAM_TIPO_CONTRATO_LABORAL")
   ;
 
   private final String code;
   private final String description;
 
-  Domains(String code, String description) {
+  ConfigurationType(String code, String description) {
     this.code = code;
     this.description = description;
   }
@@ -43,15 +42,15 @@ public enum Domains implements IgrpEnum<String> {
   /**
   * Pre-built maps for fast lookup.
   */
-  private static final Map<String, Domains> CODE_MAP = Arrays.stream(values())
-          .collect(Collectors.toMap(Domains::getCode, Function.identity()));
+  private static final Map<String, ConfigurationType> CODE_MAP = Arrays.stream(values())
+          .collect(Collectors.toMap(ConfigurationType::getCode, Function.identity()));
 
   /**
   * Attempts to find the enum value associated with the given code.
   * @param code The code to look up
   * @return An Optional containing the enum value if found, empty Optional otherwise
   */
-  public static Optional<Domains> fromCode(String code) {
+  public static Optional<ConfigurationType> fromCode(String code) {
     return Optional.ofNullable(CODE_MAP.get(code));
   }
 
@@ -61,15 +60,15 @@ public enum Domains implements IgrpEnum<String> {
   * @return The enum value for the given code
   * @throws IllegalArgumentException if no enum value exists for the given code
   */
-  public static Domains fromCodeOrThrow(String code) {
-    return fromCode(code).orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.BAD_REQUEST, "Invalid Domains for this code: " + code));
+  public static ConfigurationType fromCodeOrThrow(String code) {
+    return fromCode(code).orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.BAD_REQUEST, "Invalid ConfigurationType for this code: " + code));
   }
 
   /**
   * Returns a map of code to description.
   */
   public static Map<String, String> codeDescriptionMap() {
-    return CODE_MAP.values().stream().collect(Collectors.toMap(Domains::getCode, Domains::getDescription));
+    return CODE_MAP.values().stream().collect(Collectors.toMap(ConfigurationType::getCode, ConfigurationType::getDescription));
   }
 
 }

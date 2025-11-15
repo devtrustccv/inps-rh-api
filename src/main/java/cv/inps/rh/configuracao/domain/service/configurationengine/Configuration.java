@@ -17,19 +17,19 @@ public class Configuration implements IConfiguration {
   private final ConfigurationFactory serviceProcessFactory;
 
   @Override
-  public Object create(Object objectBody, String configurationType) {
+  public Object create(Object payload, String configurationType) {
 
-    LOGGER.debug("CONFIGURATION TYPE: {}, PAYLOAD: {}", configurationType, objectBody);
+    LOGGER.debug("CONFIGURATION TYPE: {}, PAYLOAD: {}", configurationType, payload);
 
-    return serviceProcessFactory.getServiceProcess(configurationType).create(objectBody);
+    return serviceProcessFactory.getServiceProcess(configurationType).create(payload);
   }
 
   @Override
-  public Object update(String id, Object objectBody, String configurationType) {
+  public void update(String id, Object payload, String configurationType) {
 
-    LOGGER.debug("CONFIGURATION TYPE: {}, PAYLOAD: {}", configurationType, objectBody);
+    LOGGER.debug("CONFIGURATION TYPE: {}, PAYLOAD: {}", configurationType, payload);
 
-    return serviceProcessFactory.getServiceProcess(configurationType).update(id, objectBody);
+    serviceProcessFactory.getServiceProcess(configurationType).update(id, payload);
   }
 
   @Override
