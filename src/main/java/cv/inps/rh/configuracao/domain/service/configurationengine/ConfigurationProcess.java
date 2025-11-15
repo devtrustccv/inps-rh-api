@@ -19,21 +19,21 @@ public abstract class ConfigurationProcess<T> {
     this.type = type;
   }
 
+  public final Object doCreate(T payload) {
+    var value = jsonMapper.convertValue(payload, type);
+    validate(value);
+    return create(value);
+  }
+
+  public final void doUpdate(String id, T payload) {
+    var value = jsonMapper.convertValue(payload, type);
+    validate(value);
+    update(id, value);
+  }
+
   protected abstract Object create(T payload);
 
   protected abstract void update(String id, T payload);
-
-  // TODO 15/11/2025 15:07 apply validations for the request classes
-
-  /*public final Object create(T payload) {
-    validate(payload);
-    return doCreate(payload);
-  }
-
-  public final Object update(String id, T payload) {
-    validate(payload);
-    return doUpdate(id, payload);
-  }*/
 
   public abstract List<Object> list(Map<String, String> filters);
 
@@ -49,7 +49,7 @@ public abstract class ConfigurationProcess<T> {
           .map(v -> v.getPropertyPath() + ": " + v.getMessage())
           .toList();
 
-      throw IgrpResponseStatusException.badRequest("Validation failed", errors);
+      throw IgrpResponseStatusException.badRequest("Validation errors", errors);
     }
   }
 

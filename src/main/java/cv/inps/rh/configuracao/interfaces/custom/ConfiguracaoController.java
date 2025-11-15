@@ -74,8 +74,8 @@ public class ConfiguracaoController {
 
   @PutMapping("/{id}")
   public ResponseEntity<Object> update(@PathVariable String id, @RequestBody Object request, @RequestParam ConfigurationType configurationType) {
-    var data = configuration.update(id, request, configurationType.getCode());
-    return ResponseEntity.ok(data);
+   configuration.update(id, request, configurationType.getCode());
+    return ResponseEntity.ok().build();
   }
 
   @GetMapping
