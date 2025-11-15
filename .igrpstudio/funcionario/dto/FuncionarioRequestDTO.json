@@ -6,165 +6,9 @@
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "tipoDocumentoId",
-      "objectType": "java",
-      "type": "long",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "numDocumento",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "nome",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "urlFoto",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "dataNascimento",
-      "objectType": "java",
-      "type": "date",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "genero",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "nomeMae",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "nomePai",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "estadoCivil",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "nacionalidade",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "naturalidadeId",
-      "objectType": "java",
-      "type": "long",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "nif",
-      "objectType": "java",
-      "type": "long",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "numSegurado",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "contactos",
+      "name": "dadosPessoais",
       "objectType": "dto",
-      "type": "ContactoReq",
+      "type": "DadosPessoaisReq",
       "required": false,
       "before": false,
       "after": false,
@@ -172,21 +16,6 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false,
-      "collectionType": "list",
-      "module": "funcionario"
-    },
-    {
-      "name": "endereco",
-      "objectType": "dto",
-      "type": "EnderecoReq",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false,
-      "collectionType": "none",
       "module": "funcionario"
     },
     {
@@ -204,9 +33,9 @@
       "module": "funcionario"
     },
     {
-      "name": "habilitacoesLiterarias",
+      "name": "dadosAcademicosProf",
       "objectType": "dto",
-      "type": "HabilitacaoLiterariaReq",
+      "type": "DadosAcademicosProfReq",
       "required": false,
       "before": false,
       "after": false,
@@ -214,13 +43,12 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false,
-      "collectionType": "list",
       "module": "funcionario"
     },
     {
-      "name": "formacoesFeitas",
+      "name": "dadosContratuais",
       "objectType": "dto",
-      "type": "FormacaoProfissionalReq",
+      "type": "DadosContratuaisReq",
       "required": false,
       "before": false,
       "after": false,
@@ -228,21 +56,6 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false,
-      "collectionType": "list",
-      "module": "funcionario"
-    },
-    {
-      "name": "experienciasProfssionais",
-      "objectType": "dto",
-      "type": "ExperienciaProfissionalReq",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false,
-      "collectionType": "list",
       "module": "funcionario"
     },
     {
@@ -274,47 +87,6 @@
       "module": "funcionario"
     },
     {
-      "name": "dadosContratuais",
-      "objectType": "dto",
-      "type": "DadosContratuaisReq",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false,
-      "module": "funcionario"
-    },
-    {
-      "name": "subsidios",
-      "objectType": "dto",
-      "type": "SubsidioReq",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false,
-      "collectionType": "list",
-      "module": "funcionario"
-    },
-    {
-      "name": "encargosDescontos",
-      "objectType": "dto",
-      "type": "EncargosDescontosReq",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false,
-      "collectionType": "list",
-      "module": "funcionario"
-    },
-    {
       "name": "validar",
       "objectType": "enum",
       "type": "EstadoValidacao",
@@ -328,5 +100,5 @@
       "module": "shared"
     }
   ],
-  "id": "pjb2kk86vo"
+  "id": "c3uxj04bbj"
 }

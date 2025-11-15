@@ -179,11 +179,12 @@ private List<OrdemServicoEntity> ordemServicos = new ArrayList<>();
   @OneToMany(mappedBy = "funId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 private List<SituacaoLaboralEntity> situacoesLaborais = new ArrayList<>();
 
-  @OneToOne(mappedBy = "funId", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-   private EnderecoEntity endereco;
 
-   @OneToOne(mappedBy = "funId", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-   private DocumentoPessoalEntity documentoPessoal;
+  @OneToOne(mappedBy = "funId", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  private EnderecoEntity endereco;
+
+  @OneToOne(mappedBy = "funId", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+  private DocumentoPessoalEntity documentoPessoal;
 
 
 }

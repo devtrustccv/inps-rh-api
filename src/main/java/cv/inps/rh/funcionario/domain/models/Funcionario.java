@@ -1004,7 +1004,7 @@ public class Funcionario {
         .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("regime nao encontrado com id: " + id));
   }
 
-  public TiposRelacionamento getTipoRelacionamentoAtual() {
+  /*public TiposRelacionamento getTipoRelacionamentoAtual() {
     if (tiposRelacionamentos == null || tiposRelacionamentos.isEmpty()) {
       return null;
     }
@@ -1018,7 +1018,38 @@ public class Funcionario {
                 )
         )
         .orElse(null);
+  }*/
+
+  public TiposRelacionamento getTipoRelacionamentoAtual() {
+    if (tiposRelacionamentos == null || tiposRelacionamentos.isEmpty()) {
+      return null;
+    }
+    // 1. Filtra os com estadoActividadeAdm = 0
+    List<TiposRelacionamento> ativos = tiposRelacionamentos.stream()
+        .filter(t -> t.getEstadoActividadeAdm() != null && t.getEstadoActividadeAdm() == 0)
+        .toList();
+
+    // Caso existam estadoActividadeAdm = 0
+    if (!ativos.isEmpty()) {
+      return ativos.stream()
+          .max(Comparator.comparing(TiposRelacionamento::getDataInicio))
+          .orElse(null);
+    }
+
+    // 2. Não existiram 0 → procurar estadoActividadeAdm = 1
+    List<TiposRelacionamento> inativos = tiposRelacionamentos.stream()
+        .filter(t -> t.getEstadoActividadeAdm() != null && t.getEstadoActividadeAdm() == 1)
+        .toList();
+
+    if (!inativos.isEmpty()) {
+      return inativos.stream()
+          .max(Comparator.comparing(TiposRelacionamento::getDataInicio))
+          .orElse(null);
+    }
+
+    return null;
   }
+
 
 
 }

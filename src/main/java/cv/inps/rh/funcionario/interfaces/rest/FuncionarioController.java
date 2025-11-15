@@ -22,7 +22,6 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.funcionario.application.commands.*;
 import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
-import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDetailsDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaValidacoesDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaFuncionarioDTO;
 import java.util.Map;
@@ -85,20 +84,20 @@ public class FuncionarioController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = FuncionarioResponseDetailsDTO.class,
+                  implementation = FuncionarioResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<FuncionarioResponseDetailsDTO> getFuncionarioById(
+  public ResponseEntity<FuncionarioResponseDTO> getFuncionarioById(
     @PathVariable(value = "id") String id)
   {
 
       final var query = new GetFuncionarioByIdQuery(id);
 
-      ResponseEntity<FuncionarioResponseDetailsDTO> response = queryBus.handle(query);
+      ResponseEntity<FuncionarioResponseDTO> response = queryBus.handle(query);
 
       return response;
   }
@@ -234,6 +233,37 @@ public class FuncionarioController {
   {
 
       final var command = new ValidacaoColaboradorCommand(validacaoColaboradorRequest, id);
+
+       ResponseEntity<AtivarInativarColaboradorDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
+   @PatchMapping(
+   value = "estado-colaborador"
+  )
+  @Operation(
+    summary = "PATCH method to handle operations for mudarEstadoColaborador",
+    description = "PATCH method to handle operations for mudarEstadoColaborador",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = AtivarInativarColaboradorDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<AtivarInativarColaboradorDTO> mudarEstadoColaborador(@Valid @RequestBody AtivarInativarColaboradorDTO mudarEstadoColaboradorRequest
+    )
+  {
+
+      final var command = new MudarEstadoColaboradorCommand(mudarEstadoColaboradorRequest);
 
        ResponseEntity<AtivarInativarColaboradorDTO> response = commandBus.send(command);
 

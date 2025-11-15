@@ -2,33 +2,27 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.domain.models.DefPagamento;
 import cv.inps.rh.funcionario.domain.models.DefinicaoRemuneracao;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
-import cv.inps.rh.parametrizacao.domain.models.ParamCarreira;
-import cv.inps.rh.parametrizacao.infrastructure.mappers.*;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
-import cv.inps.rh.shared.domain.models.Instituicao;
+import cv.inps.rh.parametrizacao.domain.repository.TipoDocumentoRepository;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.*;
+import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.shared.domain.models.TipoMovimento;
 import cv.inps.rh.shared.domain.repository.GeografiaRepository;
-import cv.inps.rh.parametrizacao.domain.repository.TipoDocumentoRepository;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.shared.infrastructure.mappers.InstituicaoMapper;
 import cv.inps.rh.shared.infrastructure.mappers.TipoMovimentoMapper;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Component
 public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFuncionarioCommand, ResponseEntity<FuncionarioResponseDTO>> {
@@ -105,44 +99,44 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
     /* Geografia localNascimento = geografiaRepository.findById(dto.getNaturalidadeId())
          .orElseThrow(() -> IgrpResponseStatusException.badRequest("Geografia não encontrada: " + dto.getNaturalidadeId()));*/
 
-     TipoDocumento tipoDocumento = tipoDocumentoMapper.toDomain(dto.getTipoDocumentoId());
+     var dadosPessoais = dto.getDadosPessoais();
+     TipoDocumento tipoDocumento = tipoDocumentoMapper.toDomain(dadosPessoais.getTipoDocumentoId());
 
-     Geografia localNascimento = geografiaMapper.toDomain(dto.getNaturalidadeId());
+     Geografia localNascimento = geografiaMapper.toDomain(dadosPessoais.getNaturalidadeId());
 
-     var endereco = enderecoMapper.toDomain(dto.getEndereco());
+     var endereco = enderecoMapper.toDomain(dadosPessoais.getEndereco());
 
 
      Funcionario funcionario = Funcionario.create(
          tipoDocumento,
-         dto.getNumDocumento(),
-         dto.getNome(),
-         dto.getUrlFoto(),
-         dto.getDataNascimento(),
-         dto.getGenero(),
-         dto.getNomeMae(),
-         dto.getNomePai(),
-         dto.getEstadoCivil(),
-         dto.getNacionalidade(),
+         dadosPessoais.getNumDocumento(),
+         dadosPessoais.getNome(),
+         dadosPessoais.getUrlFoto(),
+         dadosPessoais.getDataNascimento(),
+         dadosPessoais.getGenero(),
+         dadosPessoais.getNomeMae(),
+         dadosPessoais.getNomePai(),
+         dadosPessoais.getEstadoCivil(),
+         dadosPessoais.getNacionalidade(),
          localNascimento,
-         dto.getNif(),
-         dto.getNumSegurado(),
+         dadosPessoais.getNif(),
+         dadosPessoais.getNumSegurado(),
          1L, // entidadeId (preencher se houver lógica)
          1L , // colaboradorId (preencher se houver lógica)
          endereco
      );
 
-     var contactos = contactoMapper.toContactosDomain(dto.getContactos());
+     var contactos = contactoMapper.toContactosDomain(dto.getDadosPessoais().getContactos());
 
      var familiares = familiarMapper.toFamiliaresDomain(dto.getFamiliares());
 
-     var habilitacoesLiterarias = habilitacaoLiterariaMapper.toHabilitacoesLiterariasDomain(dto.getHabilitacoesLiterarias());
-
-     var formacoesFeitas = formacaoFeitaMapper.toFormacoesFeitasDomain(dto.getFormacoesFeitas());
-
-     var experienciasProfissionais  = experienciaProfissionalMapper.toExperienciasProfissionaisDomain(dto.getExperienciasProfssionais());
+     var dadosAcademicosProf = dto.getDadosAcademicosProf();
+     var habilitacoesLiterarias = habilitacaoLiterariaMapper.toHabilitacoesLiterariasDomain(dadosAcademicosProf.getHabilitacoesLiterarias());
+     var formacoesFeitas = formacaoFeitaMapper.toFormacoesFeitasDomain(dadosAcademicosProf.getFormacoesFeitas());
+     var experienciasProfissionais  = experienciaProfissionalMapper
+         .toExperienciasProfissionaisDomain(dadosAcademicosProf.getExperienciasProfssionais());
 
      var documentos = documentoMapper.toDocumentosDomain(dto.getAnexos());
-
      var dadosBancarios = dadosBancariosMapper.toDadosBancariosDomain(dto.getDadosBancarios());
 
 
@@ -169,7 +163,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
      var localTrabalho = paramLocalTrabMapper.toDomain(dadosContratuais.getLocalTrabalhoId());
 
 
-     List<DefPagamento> defPagamentos = dto.getEncargosDescontos().stream()
+     List<DefPagamento> defPagamentos =dadosContratuais.getEncargosDescontos().stream()
          .map(e -> {
            TipoMovimento tipoMov = tipoMovimentoMapper.toDomain(e.getTipoEncargoId());
            return DefPagamento.create(
@@ -183,7 +177,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
          })
          .toList();
 
-     List<DefinicaoRemuneracao> defRemuneracoes = dto.getSubsidios().stream()
+     List<DefinicaoRemuneracao> defRemuneracoes = dadosContratuais.getSubsidios().stream()
          .map(s -> {
            TipoMovimento tipoMov = tipoMovimentoMapper.toDomain(s.getTipoSubsidioId());
            return DefinicaoRemuneracao.create(
@@ -224,7 +218,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
      LOGGER.info("Funcionário criado com sucesso: {}", saved.getNomeCompleto());
 
-     FuncionarioResponseDTO responseDTO = funcionarioMapper.toDTO(saved);
+     var responseDTO = funcionarioMapper.toResponseDTO(saved);
 
      return ResponseEntity.ok(responseDTO);
 

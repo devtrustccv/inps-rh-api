@@ -25,7 +25,8 @@ import java.util.List;
 public class SituacaoLaboralEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_situacao_laboral")
+    @SequenceGenerator(name = "seq_situacao_laboral", sequenceName = "SEQ_SITUACAO_LABORAL", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

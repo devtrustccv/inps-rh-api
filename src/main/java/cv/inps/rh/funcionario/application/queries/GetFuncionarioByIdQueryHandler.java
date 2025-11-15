@@ -1,21 +1,19 @@
 package cv.inps.rh.funcionario.application.queries;
 
+import cv.igrp.framework.core.domain.QueryHandler;
+import cv.igrp.framework.stereotype.IgrpQueryHandler;
+import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cv.igrp.framework.core.domain.QueryHandler;
-import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDetailsDTO;
-
 @Component
-public class GetFuncionarioByIdQueryHandler implements QueryHandler<GetFuncionarioByIdQuery, ResponseEntity<FuncionarioResponseDetailsDTO>>{
+public class GetFuncionarioByIdQueryHandler implements QueryHandler<GetFuncionarioByIdQuery, ResponseEntity<FuncionarioResponseDTO>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetFuncionarioByIdQueryHandler.class);
 
@@ -29,12 +27,12 @@ public class GetFuncionarioByIdQueryHandler implements QueryHandler<GetFuncionar
   }
 
    @IgrpQueryHandler
-  public ResponseEntity<FuncionarioResponseDetailsDTO> handle(GetFuncionarioByIdQuery query) {
+  public ResponseEntity<FuncionarioResponseDTO> handle(GetFuncionarioByIdQuery query) {
     // TODO: Implement the query handling logic here
      var funcionario = funcionarioRepository.findById(IdentificadorUnico.from(query.getId()))
          .orElseThrow(() -> IgrpResponseStatusException.notFound("funcionario nao encontrado com id"+query.getId()));
 
-     return ResponseEntity.ok(funcionarioMapper.toResponseDetailsDTO(funcionario));
+     return ResponseEntity.ok(funcionarioMapper.toResponseDTO(funcionario));
 
   }
 

@@ -9,8 +9,12 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import cv.inps.rh.funcionario.application.dto.EncargosDescontosRespDTO;
+import cv.inps.rh.funcionario.application.dto.SubsidioRespDTO;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -25,25 +29,13 @@ public class DadosContratuaisRespDTO  {
   private Long tipoContratoId ;
   
   
-  private String tipoContratoDesc ;
-  
-  
   private Long cargoPosicaoId ;
-  
-  
-  private String cargoPosicaoDesc ;
   
   
   private Long direcaoId ;
   
   
-  private String direcaoDesc ;
-  
-  
   private Long seccaoId ;
-  
-  
-  private String seccaoDesc ;
   
   
   private String centroCusto ;
@@ -52,28 +44,16 @@ public class DadosContratuaisRespDTO  {
   private Long carreiraId ;
   
   
-  private String carreiraDesc ;
-  
-  
   private Long categoriaId ;
-  
-  
-  private String categoriaDesc ;
   
   
   private Long escalaoReferenciaId ;
   
   
-  private String escalaoReferenciaDesc ;
-  
-  
   private Long tipoVinculoLaboralId ;
   
   
-  private String tipoVinculoLaboralDesc ;
-  
-  
-  private String regimeTrabalho ;
+  private String RegimeTrabalho ;
   
   
   private BigDecimal salario ;
@@ -94,18 +74,42 @@ public class DadosContratuaisRespDTO  {
   private Long localTrabalhoId ;
   
   
-  private String localTrabalhoDesc ;
-  
-  
   private Long paisId ;
-  
-  
-  private String paisDesc ;
   
   
   private Long ilhaId ;
   
+  @Valid
+  private List<SubsidioRespDTO> subsidios = new ArrayList<>();
   
-  private String ilhaDesc ;
+  @Valid
+  private List<EncargosDescontosRespDTO> encargosDescontos = new ArrayList<>();
+  
+  
+  private String tipoContratoDesc ;
+  
+  
+  private String cargoPosicaoDesc ;
+  
+  
+  private String direcaoDesc ;
+  
+  
+  private String seccaoDesc ;
+  
+  
+  private String carreiraDesc ;
+  
+  
+  private String categoriaDesc ;
+  
+  
+  private String escalaoReferenciaDesc ;
+  
+  
+  private String tipoVinculoLaboralDesc ;
+  
+  
+  private String localTrabalhoDesc ;
 
 }

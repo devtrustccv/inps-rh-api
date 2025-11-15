@@ -24,7 +24,8 @@ import java.util.List;
 public class ValidacaoEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_log")
+    @SequenceGenerator(name = "seq_log", sequenceName = "SEQ_LOG", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

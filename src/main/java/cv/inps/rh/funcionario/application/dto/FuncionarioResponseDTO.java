@@ -9,7 +9,14 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.time.LocalDate;
+import cv.inps.rh.funcionario.application.dto.AgregadoDependenteRespDTO;
+import cv.inps.rh.funcionario.application.dto.AnexoRespDTO;
+import cv.inps.rh.funcionario.application.dto.DadosAcademicosProfResponseDTO;
+import cv.inps.rh.funcionario.application.dto.DadosBancariosRespDTO;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
+import cv.inps.rh.funcionario.application.dto.DadosPessoaisRespDTO;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -20,55 +27,22 @@ import java.time.LocalDate;
 public class FuncionarioResponseDTO  {
 
   
+  @Valid
+  private DadosPessoaisRespDTO dadosPessoais ;
   
-  private Long id ;
+  @Valid
+  private List<AgregadoDependenteRespDTO> familiares = new ArrayList<>();
   
+  @Valid
+  private DadosAcademicosProfResponseDTO dadosAcademicosProf ;
   
-  private String uuid ;
+  @Valid
+  private DadosContratuaisRespDTO dadosContratuais ;
   
+  @Valid
+  private List<DadosBancariosRespDTO> dadosBancarios = new ArrayList<>();
   
-  private Integer tipoDocumentoId ;
-  
-  
-  private String tipoDocumentoDesc ;
-  
-  
-  private String numDocumento ;
-  
-  
-  private String nome ;
-  
-  
-  private String urlFoto ;
-  
-  
-  private LocalDate dataNascimento ;
-  
-  
-  private String genero ;
-  
-  
-  private String nomeMae ;
-  
-  
-  private String nomePai ;
-  
-  
-  private String estadoCivil ;
-  
-  
-  private String nacionalidade ;
-  
-  
-  private Long naturalidadeId ;
-  
-  
-  private String naturalidadeDesc ;
-  
-  
-  private String nif ;
-  
-  
-  private String numSegurado ;
+  @Valid
+  private List<AnexoRespDTO> anexos = new ArrayList<>();
 
 }

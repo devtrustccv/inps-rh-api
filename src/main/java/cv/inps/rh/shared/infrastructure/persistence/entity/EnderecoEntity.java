@@ -22,11 +22,12 @@ import java.util.UUID;
 public class EnderecoEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_endereco")
+    @SequenceGenerator(name = "seq_endereco", sequenceName = "SEQ_ENDERECO", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-
+  
     @NotNull(message = "paisId is mandatory")
 
 
@@ -56,17 +57,19 @@ public class EnderecoEntity extends AuditEntity {
     @Column(name="morada")
     private String morada;
 
-
+  
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-
+  
     @Column(name="uuid")
     private UUID uuid;
 
+  
 
 
+  
     @OneToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "fun_id", unique = true, referencedColumnName = "id")
     private FuncionarioEntity funId;

@@ -24,7 +24,8 @@ import java.util.List;
 public class DocumentoEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_documento")
+    @SequenceGenerator(name = "seq_documento", sequenceName = "SEQ_DOCUMENTO", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

@@ -90,29 +90,32 @@ public class ValidarRegistoColaboradorCommandHandler implements CommandHandler<V
 
       var validacao = dto.getValidar();
 
-       TipoDocumento tipoDocumento = tipoDocumentoMapper.toDomain(dto.getTipoDocumentoId());
-       Geografia localNascimento = geografiaMapper.toDomain(dto.getNaturalidadeId());
+       var dadosPessoais = dto.getDadosPessoais();
+       TipoDocumento tipoDocumento = tipoDocumentoMapper.toDomain(dadosPessoais.getTipoDocumentoId());
+       Geografia localNascimento = geografiaMapper.toDomain(dadosPessoais.getNaturalidadeId());
+
+       var dadosAcademicos = dto.getDadosAcademicosProf();
 
        funcionario.update(
            tipoDocumento,
-           dto.getNumDocumento(),
-           dto.getNome(),
-           dto.getUrlFoto(),
-           dto.getDataNascimento(),
-           dto.getGenero(),
-           dto.getNomeMae(),
-           dto.getNomePai(),
-           dto.getEstadoCivil(),
-           dto.getNacionalidade(),
+           dadosPessoais.getNumDocumento(),
+           dadosPessoais.getNome(),
+           dadosPessoais.getUrlFoto(),
+           dadosPessoais.getDataNascimento(),
+           dadosPessoais.getGenero(),
+           dadosPessoais.getNomeMae(),
+           dadosPessoais.getNomePai(),
+           dadosPessoais.getEstadoCivil(),
+           dadosPessoais.getNacionalidade(),
            localNascimento,
-           dto.getNif(),
-           dto.getNumSegurado(),
-           contactoMapper.toContactosDomain(dto.getContactos()),
-           enderecoMapper.toDomain(dto.getEndereco()),
+           dadosPessoais.getNif(),
+           dadosPessoais.getNumSegurado(),
+           contactoMapper.toContactosDomain(dadosPessoais.getContactos()),
+           enderecoMapper.toDomain(dadosPessoais.getEndereco()),
            familiarMapper.toFamiliaresDomain(dto.getFamiliares()),
-           habilitacaoLiterariaMapper.toHabilitacoesLiterariasDomain(dto.getHabilitacoesLiterarias()),
-           formacaoFeitaMapper.toFormacoesFeitasDomain(dto.getFormacoesFeitas()),
-           experienciaProfissionalMapper.toExperienciasProfissionaisDomain(dto.getExperienciasProfssionais()),
+           habilitacaoLiterariaMapper.toHabilitacoesLiterariasDomain(dadosAcademicos.getHabilitacoesLiterarias()),
+           formacaoFeitaMapper.toFormacoesFeitasDomain(dadosAcademicos.getFormacoesFeitas()),
+           experienciaProfissionalMapper.toExperienciasProfissionaisDomain(dadosAcademicos.getExperienciasProfssionais()),
            documentoMapper.toDocumentosDomain(dto.getAnexos()),
            dadosBancariosMapper.toDadosBancariosDomain(dto.getDadosBancarios())
        );
@@ -132,7 +135,7 @@ public class ValidarRegistoColaboradorCommandHandler implements CommandHandler<V
        Geografia ilha = geografiaMapper.toDomain(dados.getIlhaId());
        var localTrabalho = paramLocalTrabMapper.toDomain(dados.getLocalTrabalhoId());
 
-       List<DefPagamento> defPagamentos = dto.getEncargosDescontos().stream()
+       List<DefPagamento> defPagamentos = dados.getEncargosDescontos().stream()
            .map(e -> {
              TipoMovimento tipoMov = tipoMovimentoMapper.toDomain(e.getTipoEncargoId());
              return DefPagamento.create(
@@ -146,7 +149,7 @@ public class ValidarRegistoColaboradorCommandHandler implements CommandHandler<V
            })
            .toList();
 
-       List<DefinicaoRemuneracao> defRemuneracoes = dto.getSubsidios().stream()
+       List<DefinicaoRemuneracao> defRemuneracoes = dados.getSubsidios().stream()
            .map(s -> {
              TipoMovimento tipoMov = tipoMovimentoMapper.toDomain(s.getTipoSubsidioId());
              return DefinicaoRemuneracao.create(

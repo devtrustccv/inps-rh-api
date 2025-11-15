@@ -34,6 +34,9 @@ public class DadosPessoaisRespDTO  {
   private Long tipoDocumentoId ;
   
   
+  private String tipoDocumentoDesc ;
+  
+  
   private String numDocumento ;
   
   
@@ -62,6 +65,9 @@ public class DadosPessoaisRespDTO  {
   
   
   private Long naturalidadeId ;
+  
+  
+  private String naturalidadeDesc ;
   
   
   private Long nif ;

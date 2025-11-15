@@ -9,8 +9,12 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO;
+import cv.inps.rh.funcionario.application.dto.SubsidioReqDTO;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -74,5 +78,11 @@ public class DadosContratuaisReqDTO  {
   
   
   private Long ilhaId ;
+  
+  @Valid
+  private List<SubsidioReqDTO> subsidios = new ArrayList<>();
+  
+  @Valid
+  private List<EncargosDescontosReqDTO> encargosDescontos = new ArrayList<>();
 
 }
