@@ -6,7 +6,7 @@ import cv.inps.rh.configuracao.application.dto.CarreiraRequestDTO;
 import cv.inps.rh.configuracao.application.dto.CarreiraResponseDTO;
 import cv.inps.rh.configuracao.application.dto.CategoriaCarreiraResponseDTO;
 import cv.inps.rh.configuracao.domain.ConfigurationUtils;
-import cv.inps.rh.configuracao.domain.service.configurationengine.ConfigurationProcess;
+import cv.inps.rh.configuracao.domain.service.engine.ConfigurationProcess;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;

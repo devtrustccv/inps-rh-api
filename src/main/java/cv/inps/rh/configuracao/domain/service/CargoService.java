@@ -6,7 +6,7 @@ import cv.inps.rh.configuracao.application.dto.CargoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.CargoResponseDTO;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.domain.ConfigurationUtils;
-import cv.inps.rh.configuracao.domain.service.configurationengine.ConfigurationProcess;
+import cv.inps.rh.configuracao.domain.service.engine.ConfigurationProcess;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCargoEntityRepository;
