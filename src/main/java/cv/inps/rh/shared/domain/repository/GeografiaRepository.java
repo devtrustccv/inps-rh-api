@@ -9,5 +9,5 @@ public interface GeografiaRepository {
 
   Optional<Geografia> findById(Long id);
 
-  public List<Geografia> findByNivelDetalheAndGeogrId(Long nivelDetalhe, Long geogrId);
+  List<Geografia> findByNivelDetalheAndGeogrId(Long nivelDetalhe, Long geogrId);
 }

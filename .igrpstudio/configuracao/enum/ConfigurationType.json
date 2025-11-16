@@ -44,6 +44,13 @@
         "escalao_type",
         "PARAM_ESCALAO"
       ]
+    },
+    {
+      "name": "PARAM_LOCAL_TRABALHO",
+      "attributes": [
+        "local_trabalho_type",
+        "PARAM_LOCAL_TRABALHO"
+      ]
     }
   ],
   "attributes": [
