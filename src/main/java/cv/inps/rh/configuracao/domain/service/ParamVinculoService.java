@@ -89,7 +89,7 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     response.setRemuneracao(domain.get(e.getFlgSalario().toString()));
     response.setTempoServico(domain.get(e.getFlgTempoServico().toString()));
     response.setEstado(e.getEstado().getCode());
-    response.setDescricaoEstado(e.getEstado().getDescription());
+    response.setEstadoDescricao(e.getEstado().getDescription());
     return response;
   }
 

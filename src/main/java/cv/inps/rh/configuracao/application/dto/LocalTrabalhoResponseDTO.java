@@ -27,4 +27,7 @@ public class LocalTrabalhoResponseDTO extends LocalTrabalhoRequestDTO {
 
   private String ilhaId ;
 
+
+  private String estadoDescricao ;
+
 }

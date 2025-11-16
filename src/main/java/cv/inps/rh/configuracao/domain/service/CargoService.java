@@ -124,6 +124,7 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
     ofNullable(cargo.getParamCarrId()).map(c -> c.getUuid().toString()).ifPresent(response::setCarreiraId);
     response.setDirigente(cargo.getDirigente());
     response.setEstado(cargo.getEstado().getCode());
+    response.setEstadoDescricao(cargo.getEstado().getDescription());
     return response;
   }
 

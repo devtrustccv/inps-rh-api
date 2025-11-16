@@ -153,6 +153,7 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
     dto.setPais(country.getNome());
     dto.setPaisId(country.getId().toString());
     dto.setEstado(e.getEstado().name());
+    dto.setEstadoDescricao(e.getEstado().getDescription());
     dto.setUps(e.getUps().toString());
 
     ofNullable(e.getIlhaId()).ifPresent(island -> {

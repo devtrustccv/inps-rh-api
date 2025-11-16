@@ -103,6 +103,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     response.setProgressaoPromocao(domain.get(e.getFlgCessaProgressao().toString()));
     response.setEstadoContrato(contractStatus.get(e.getFlgEstadoContrato().toString()));
     response.setEstado(e.getEstado().getCode());
+    response.setEstadoDescricao(e.getEstado().getDescription());
     return response;
   }
 

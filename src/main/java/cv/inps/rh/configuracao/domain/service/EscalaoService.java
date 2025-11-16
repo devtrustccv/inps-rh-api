@@ -164,12 +164,12 @@ public class EscalaoService extends ConfigurationProcess<EscalaoRequestDTO> {
     dto.setDataInicio(e.getDataInicio());
     dto.setDataFim(e.getDataFim());
     dto.setCarreiraId(e.getParamCarrId().getUuid().toString());
+    dto.setEstado(e.getEstado().getCode());
+    dto.setEstadoDescricao(e.getEstado().getDescription());
 
     ofNullable(e.getParamCategoriaId())
         .map(c -> c.getUuid().toString())
         .ifPresent(dto::setCategoriaId);
-
-    dto.setEstado(e.getEstado().getCode());
 
     return dto;
   }

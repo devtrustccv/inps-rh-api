@@ -21,4 +21,7 @@ public class EscalaoResponseDTO extends EscalaoRequestDTO {
 
   private String id ;
 
+
+  private String estadoDescricao ;
+
 }

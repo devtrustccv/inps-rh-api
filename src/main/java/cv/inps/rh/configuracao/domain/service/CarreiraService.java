@@ -70,6 +70,8 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
     var response = new CarreiraResponseDTO();
     response.setId(e.getUuid().toString());
     response.setCategorias(category);
+    response.setEstadoDescricao(e.getEstado().getDescription());
+    response.setEstado(e.getEstado().getCode());
     return response;
   }
 
@@ -122,6 +124,8 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
     var response = new CarreiraResponseDTO();
     response.setId(c.getUuid().toString());
     response.setDescricao(c.getNome());
+    response.setEstadoDescricao(c.getEstado().getDescription());
+    response.setEstado(c.getEstado().getCode());
 
     var mapped = categoriaRepository.findAllByEstadoAndParamCarrId(Estado.A, c)
         .stream().map(cat -> {
@@ -148,6 +152,8 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
           var dto = new CarreiraResponseDTO();
           dto.setId(c.getUuid().toString());
           dto.setDescricao(c.getNome());
+          dto.setEstadoDescricao(c.getEstado().getDescription());
+          dto.setEstado(c.getEstado().getCode());
           dto.setCategorias(List.of());
           return dto;
         })
@@ -157,12 +163,12 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
   @Override
   public void delete(String uuid) {
 
-    var carreira = carreiraRepository.findByUuidOrThrow(UUID.fromString(uuid));
+    var e = carreiraRepository.findByUuidOrThrow(UUID.fromString(uuid));
 
-    if (tiposRelacionamentoRepository.existsByCarrPccId(carreira))
+    if (tiposRelacionamentoRepository.existsByCarrPccId(e))
       throw IgrpResponseStatusException.conflictByAnotherTableDependency();
 
-    carreira.setEstado(Estado.E);
-    carreiraRepository.save(carreira);
+    e.setEstado(Estado.E);
+    carreiraRepository.save(e);
   }
 }
