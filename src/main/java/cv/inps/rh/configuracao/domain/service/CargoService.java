@@ -9,6 +9,7 @@ import cv.inps.rh.configuracao.domain.ConfigurationUtils;
 import cv.inps.rh.configuracao.domain.service.engine.ConfigurationProcess;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCargoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCarreiraEntityRepository;
 import jakarta.persistence.criteria.Predicate;
@@ -48,7 +49,8 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
     var cargo = new ParamCargoEntity();
     cargo.setUuid(UuidCreator.getTimeOrderedEpoch());
     cargo.setEstado(Estado.A);
-    cargo.setNome(dto.getDescricao().trim());
+    cargo.setNome(dto.getDescricao());
+    cargo.setNomeNormalizado(ConfigurationUtils.normalizeAndSetToLowerCaseText(dto.getDescricao()));
     cargo.setDirigente(dto.getDirigente());
 
     if (StringUtils.hasText(dto.getCarreiraId())) {
@@ -66,6 +68,7 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
 
     var cargo = cargoRepository.findByUuidOrThrow(UUID.fromString(uuid));
     cargo.setNome(dto.getDescricao());
+    cargo.setNomeNormalizado(ConfigurationUtils.normalizeAndSetToLowerCaseText(dto.getDescricao()));
     cargo.setDirigente(dto.getDirigente());
 
     if (StringUtils.hasText(dto.getEstado()))
@@ -94,16 +97,15 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
     var cargo = filters.getOrDefault("cargo", null);
-    var status = filters.containsKey("estado")
-        ? Estado.valueOf(filters.get("estado"))
+    var status = filters.containsKey(ParamCargoEntity_.ESTADO)
+        ? Estado.valueOf(filters.get(ParamCargoEntity_.ESTADO))
         : Estado.A;
 
-    Specification<ParamCargoEntity> spec = (root, query, cb) -> {
+    Specification<ParamCargoEntity> spec = (root, _, cb) -> {
       var predicates = new ArrayList<Predicate>();
-      predicates.add(cb.equal(root.get("estado"), status));
+      predicates.add(cb.equal(root.get(ParamCargoEntity_.estado), status));
       if (StringUtils.hasText(cargo))
-        // TODO 16/11/2025 15:21 add normalized field to search here
-        predicates.add(cb.like(cb.lower(root.get("nome")), "%" + cargo.toLowerCase() + "%"));
+        predicates.add(cb.like(cb.lower(root.get(ParamCargoEntity_.nomeNormalizado)), "%" + cargo.toLowerCase() + "%"));
       return cb.and(predicates.toArray(new Predicate[0]));
     };
 

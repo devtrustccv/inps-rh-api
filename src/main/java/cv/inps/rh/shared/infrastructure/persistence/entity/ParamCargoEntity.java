@@ -40,6 +40,9 @@ public class ParamCargoEntity extends AuditEntity {
     @Column(name="nome", nullable = false)
     private String nome;
 
+  @Column(name = "nome_normalizado", nullable = false)
+  private String nomeNormalizado;
+
 
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "param_carr_id", referencedColumnName = "id")

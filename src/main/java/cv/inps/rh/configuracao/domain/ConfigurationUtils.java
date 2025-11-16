@@ -3,7 +3,10 @@ package cv.inps.rh.configuracao.domain;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.util.StringUtils;
 
+import java.text.Normalizer;
 import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class ConfigurationUtils {
 
@@ -20,6 +23,18 @@ public class ConfigurationUtils {
         Integer.parseInt(page),
         Integer.parseInt(size)
     );
+  }
+
+
+  public static String normalizeAndSetToLowerCaseText(String input) {
+
+    if (Objects.isNull(input))
+      return null;
+
+    var normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+    var pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+
+    return pattern.matcher(normalized).replaceAll("").toLowerCase();
   }
 
 }
