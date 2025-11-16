@@ -159,7 +159,7 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
 
     var carreira = carreiraRepository.findByUuidOrThrow(UUID.fromString(uuid));
 
-    if (tiposRelacionamentoRepository.existsByCategoriaId(carreira))
+    if (tiposRelacionamentoRepository.existsByCarrPccId(carreira))
       throw IgrpResponseStatusException.conflictByAnotherTableDependency();
 
     carreira.setEstado(Estado.E);

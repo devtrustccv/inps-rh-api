@@ -19,8 +19,9 @@ public enum ConfigurationType implements IgrpEnum<String> {
   PARAM_VINCULO("param_vinculo_type", "PARAM_VINCULO"),
     PARAM_SITUACAO_LABORAL("situacao_laboral_type", "PARAM_SITUACAO_LABORAL"),
     PARAM_TIPO_CONTRATO_LABORAL("tipo_contrato_laboral_type", "PARAM_TIPO_CONTRATO_LABORAL"),
-  PARAM_CARREIRA("carreira_type", "PARAM_CARREIRA"),
-  PARAM_CARGO("cargo_type", "PARAM_CARGO")
+    PARAM_CARREIRA("carreira_type", "PARAM_CARREIRA"),
+    PARAM_CARGO("cargo_type", "PARAM_CARGO"),
+    PARAM_ESCALAO("escalao_type", "PARAM_ESCALAO")
   ;
 
   private final String code;

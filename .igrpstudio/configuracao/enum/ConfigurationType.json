@@ -37,6 +37,13 @@
         "cargo_type",
         "PARAM_CARGO"
       ]
+    },
+    {
+      "name": "PARAM_ESCALAO",
+      "attributes": [
+        "escalao_type",
+        "PARAM_ESCALAO"
+      ]
     }
   ],
   "attributes": [
