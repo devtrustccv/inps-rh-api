@@ -51,6 +51,13 @@
         "local_trabalho_type",
         "PARAM_LOCAL_TRABALHO"
       ]
+    },
+    {
+      "name": "PARAM_SECCAO",
+      "attributes": [
+        "seccao_type",
+        "PARAM_SECCAO"
+      ]
     }
   ],
   "attributes": [

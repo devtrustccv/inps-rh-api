@@ -26,4 +26,6 @@ public interface TiposRelacionamentoEntityRepository extends
 
   boolean existsByLocTrabId(ParamLocalTrabEntity localTrabEntity);
 
+  boolean existsBySeccaoId(SecaoEntity section);
+
 }
