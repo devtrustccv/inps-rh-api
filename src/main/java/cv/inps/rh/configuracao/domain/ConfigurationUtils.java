@@ -1,13 +1,14 @@
 package cv.inps.rh.configuracao.domain;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.util.StringUtils;
 
 import java.util.Map;
 
 public class ConfigurationUtils {
 
   public static Integer parseFlag(String value) {
-    return value != null ? Integer.parseInt(value) : null;
+    return StringUtils.hasText(value) ? Integer.parseInt(value) : null;
   }
 
   public static PageRequest buildDefaultPageRequest(Map<String, String> filters) {

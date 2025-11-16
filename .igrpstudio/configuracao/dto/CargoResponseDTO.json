@@ -1,0 +1,26 @@
+{
+  "type": "dto",
+  "module": "configuracao",
+  "name": "CargoResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "id",
+      "objectType": "java",
+      "type": "string",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "a35psqxygt_copy",
+  "extends": {
+    "name": "CargoRequest",
+    "module": "configuracao"
+  }
+}

@@ -30,6 +30,13 @@
         "carreira_type",
         "PARAM_CARREIRA"
       ]
+    },
+    {
+      "name": "PARAM_CARGO",
+      "attributes": [
+        "cargo_type",
+        "PARAM_CARGO"
+      ]
     }
   ],
   "attributes": [
