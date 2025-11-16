@@ -11,15 +11,17 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCargoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCarreiraEntityRepository;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -91,11 +93,25 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
-    var data = cargoRepository.findAllByEstado(Estado.A, pageable);
+    var cargo = filters.getOrDefault("cargo", null);
+    var status = filters.containsKey("estado")
+        ? Estado.valueOf(filters.get("estado"))
+        : Estado.A;
+
+    Specification<ParamCargoEntity> spec = (root, query, cb) -> {
+      var predicates = new ArrayList<Predicate>();
+      predicates.add(cb.equal(root.get("estado"), status));
+      if (StringUtils.hasText(cargo))
+        // TODO 16/11/2025 15:21 add normalized field to search here
+        predicates.add(cb.like(cb.lower(root.get("nome")), "%" + cargo.toLowerCase() + "%"));
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
+
+    var data = cargoRepository.findAll(spec, pageable);
 
     return data.stream()
         .map(this::buildResponse)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @NotNull
