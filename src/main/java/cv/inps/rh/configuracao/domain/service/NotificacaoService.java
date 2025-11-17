@@ -1,6 +1,7 @@
 package cv.inps.rh.configuracao.domain.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.NotificacaoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.NotificacaoResponseDTO;
@@ -39,14 +40,14 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
   public Object create(NotificacaoRequestDTO dto) {
 
     var entity = new ParamNotificacaoEntity();
-    // TODO 17/11/2025 15:33 add uuid field here ?
+    entity.setUuid(UuidCreator.getTimeOrderedEpoch());
     entity.setReferencia(dto.getReferencia());
     entity.setAssunto(dto.getAssunto());
     entity.setCorpo(dto.getCorpo());
     entity.setEstado(Estado.A.getCode());
     notificacaoRepository.save(entity);
 
-    return new ConfigurationResponseIdDTO(entity.getId().toString());
+    return new ConfigurationResponseIdDTO(entity.getUuid().toString());
   }
 
   @Override
@@ -71,17 +72,16 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
   public List<Object> list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
-    var referencia = filters.get("referencia");
-    var estado = filters.getOrDefault("estado", "A");
+    var reference = filters.get("referencia");
+    var estado = filters.containsKey("estado") ? filters.get("estado") : Estado.A.getCode();
 
     Specification<ParamNotificacaoEntity> spec = (root, _, cb) -> {
 
       var predicates = new ArrayList<Predicate>();
       predicates.add(cb.equal(root.get("estado"), estado));
 
-      if (StringUtils.hasText(referencia)) {
-        predicates.add(cb.like(cb.lower(root.get("referencia")), referencia));
-      }
+      if (StringUtils.hasText(reference))
+        predicates.add(cb.like(cb.lower(root.get("referencia")), reference));
 
       return cb.and(predicates.toArray(new Predicate[0]));
     };
