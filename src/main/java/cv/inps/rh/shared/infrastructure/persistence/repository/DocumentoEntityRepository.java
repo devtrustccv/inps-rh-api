@@ -19,6 +19,6 @@ public interface DocumentoEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "DocumentoEntity not found for id: " + id));
   }
 
-  boolean existByTpDocumentoId(TipoDocumentoEntity tpDocumentoId);
+  boolean existsByTpDocumentoId(TipoDocumentoEntity tpDocumentoId);
 
 }

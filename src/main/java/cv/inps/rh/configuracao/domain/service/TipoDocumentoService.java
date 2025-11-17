@@ -113,7 +113,7 @@ public class TipoDocumentoService extends ConfigurationProcess<TipoDocumentoRequ
 
     var entity = tipoDocumentoRepository.findByUuidOrThrow(UUID.fromString(uuid));
 
-    if (documentoEntityRepository.existByTpDocumentoId(entity))
+    if (documentoEntityRepository.existsByTpDocumentoId(entity))
       throw IgrpResponseStatusException.conflictByAnotherTableDependency();
 
     entity.setEstado(Estado.E);
