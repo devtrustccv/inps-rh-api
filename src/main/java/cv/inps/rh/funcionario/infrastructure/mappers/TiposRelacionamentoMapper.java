@@ -105,7 +105,7 @@ public class TiposRelacionamentoMapper {
     entity.setMoeda(domain.getMoeda());
     entity.setRegime(domain.getRegime());
     entity.setTipoSituacao(domain.getTipoSituacao());
-    //entity.setTiprelId(toEntity(domain.getTiprelAnterior()));
+    entity.setTiprelId(domain.getTiprelAnterior()!=null ? getReferenceIfNotNull(TiposRelacionamentoEntity.class, domain.getTiprelAnterior().getId()) : null);
     entity.setFlgProcessa(domain.getFlgProcessa());
     entity.setEstado(domain.getEstado());
     entity.setObs(domain.getObs());
