@@ -1067,6 +1067,13 @@ public class Funcionario {
         .orElse(null);
   }
 
+  public TiposRelacionamento getTipoRelacionamentoByContratoId(IdentificadorUnico contratoId) {
+    return tiposRelacionamentos.stream()
+        .filter(t -> t.getContrato() != null && t.getContrato().getUuid() != null && t.getContrato().getUuid().equals(contratoId))
+        .findFirst()
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("tipo relacionamento nao encontrado com contrato id: " + contratoId));
+  }
+
 
   public void alterarSituacaoLaboral(
                                       ParamSitLaboral paramSitLaboral,
