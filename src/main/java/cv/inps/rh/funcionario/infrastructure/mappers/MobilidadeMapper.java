@@ -35,7 +35,6 @@ public class MobilidadeMapper {
     return Mobilidade.rebuild(
         entity.getId(),
         entity.getUuid(),
-        contratoMapper.toDomain(entity.getContratoId()),
         paramLocalTrabMapper.toDomain(entity.getLocalTrabId()),
         entity.getTipoSituacao(),
         secaoMapper.toDomain(entity.getSecaoId()),

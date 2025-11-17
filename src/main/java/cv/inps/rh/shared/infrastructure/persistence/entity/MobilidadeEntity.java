@@ -52,11 +52,6 @@ public class MobilidadeEntity extends AuditEntity {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contrato_id", referencedColumnName = "id")
-    private ContratoEntity contratoId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "local_trab_id", referencedColumnName = "id")
     private ParamLocalTrabEntity localTrabId;
 

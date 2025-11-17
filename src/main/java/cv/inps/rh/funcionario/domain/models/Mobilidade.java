@@ -16,7 +16,6 @@ public class Mobilidade {
   private final Long id;
   private final IdentificadorUnico uuid;
 
-  private Contrato contrato;
   private ParamLocalTrab localTrab;
   private String tipoSituacao;
   private Secao secao;
@@ -29,7 +28,6 @@ public class Mobilidade {
   // Construtor privado para rebuild/factory
   private Mobilidade(Long id,
                      IdentificadorUnico uuid,
-                     Contrato contrato,
                      ParamLocalTrab localTrab,
                      String tipoSituacao,
                      Secao secao,
@@ -40,7 +38,6 @@ public class Mobilidade {
                      LocalDate dataFim) {
     this.id = id;
     this.uuid = uuid;
-    this.contrato = contrato;
     this.localTrab = localTrab;
     this.tipoSituacao = tipoSituacao;
     this.secao = secao;
@@ -52,8 +49,7 @@ public class Mobilidade {
   }
 
   // Factory para criar nova mobilidade
-  public static Mobilidade create(Contrato contrato,
-                                  ParamLocalTrab localTrab,
+  public static Mobilidade create(ParamLocalTrab localTrab,
                                   String tipoSituacao,
                                   Secao secao,
                                   Instituicao instituicao,
@@ -63,7 +59,6 @@ public class Mobilidade {
     return new Mobilidade(
         null,
         IdentificadorUnico.create(),
-        contrato,
         localTrab,
         tipoSituacao,
         secao,
@@ -78,7 +73,6 @@ public class Mobilidade {
   // Reconstrução a partir do repositório
   public static Mobilidade rebuild(Long id,
                                    UUID uuid,
-                                   Contrato contrato,
                                    ParamLocalTrab localTrab,
                                    String tipoSituacao,
                                    Secao secao,
@@ -90,7 +84,6 @@ public class Mobilidade {
     return new Mobilidade(
         id,
         IdentificadorUnico.from(uuid),
-        contrato,
         localTrab,
         tipoSituacao,
         secao,
@@ -103,15 +96,13 @@ public class Mobilidade {
   }
 
 
-  public void update(Contrato contrato,
-                     ParamLocalTrab localTrab,
+  public void update(ParamLocalTrab localTrab,
                      String tipoSituacao,
                      Secao secao,
                      Instituicao instituicao,
                      String obs,
                      LocalDate dataInicio,
                      LocalDate dataFim) {
-    if (contrato != null) this.contrato = contrato;
     if (localTrab != null) this.localTrab = localTrab;
     if (tipoSituacao != null) this.tipoSituacao = tipoSituacao;
     if (secao != null) this.secao = secao;

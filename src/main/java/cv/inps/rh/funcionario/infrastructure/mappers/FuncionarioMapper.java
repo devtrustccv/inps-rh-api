@@ -315,7 +315,6 @@ public class FuncionarioMapper {
           .map(m -> {
             MobilidadeEntity ce = mobilidadeMapper.toEntity(m);
             ce.setFunId(entity);
-            ce.setContratoId(contratosMap.get(m.getContrato().getUuid().getValor()));
             modilidadesMap.put(m.getUuid().getValor(), ce);
             return ce;
           }) .collect(Collectors.toCollection(ArrayList::new));;
@@ -330,7 +329,6 @@ public class FuncionarioMapper {
           .map(rt -> {
             RegimeTrabalhoEntity entityRt = regimeTrabalhoMapper.toEntity(rt);
             entityRt.setFunId(entity);
-            entityRt.setContratoId(contratosMap.get(rt.getContrato().getUuid().getValor()));
             regimesMap.put(rt.getUuid().getValor(), entityRt);
             return entityRt;
           }).collect(Collectors.toCollection(ArrayList::new));

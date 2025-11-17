@@ -63,7 +63,6 @@ public class SaveMobilidadeCommandHandler implements CommandHandler<SaveMobilida
     if (atual.getMobilidade() != null) {
       mobilidade = atual.getMobilidade();
       mobilidade.update(
-          atual.getContrato(),
           novoLocalTrab,
           dto.getTipoMobilidade() != null ? String.valueOf(dto.getTipoMobilidade()) : mobilidade.getTipoSituacao(),
           novaSeccao,
@@ -74,7 +73,6 @@ public class SaveMobilidadeCommandHandler implements CommandHandler<SaveMobilida
       );
     } else {
       mobilidade = Mobilidade.create(
-          atual.getContrato(),
           novoLocalTrab,
           dto.getTipoMobilidade() != null ? String.valueOf(dto.getTipoMobilidade()) : null,
           novaSeccao,

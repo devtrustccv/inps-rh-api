@@ -867,9 +867,9 @@ public class Funcionario {
 
     var carreira = Carreira.create(salario, null, "tipo situacao", "obs", paramCargo, paramEscalao, paramCategoria, paramCarreira);
 
-    var mobilidade = Mobilidade.create(contrato, paramLocalTrab, "tipo siutacao", seccao, direcao, "obs",dataInicio, dataFim);
+    var mobilidade = Mobilidade.create(paramLocalTrab, "tipo siutacao", seccao, direcao, "obs",dataInicio, dataFim);
 
-    var regime = RegimeTrabalho.create("tipo regime", "tipo situacao regime", dataFim, "obs", contrato);
+    var regime = RegimeTrabalho.create("tipo regime", "tipo situacao regime", dataFim, "obs");
 
     var tiposRelacionamento = TiposRelacionamento.create(paramCargo, direcao, paramVinculo, seccao, paramCategoria,
         paramEscalao, paramCarreira, salario, moeda, regimeTrabalho, tiposRelacionamentoAtual, null,
@@ -928,7 +928,7 @@ public class Funcionario {
     carreira.update(salario, null, "tipo situacaoadadas", "obs", paramCargo, paramEscalao, paramCategoria, paramCarreira);
 
     var mobilidade = getMobilidadeById(tiposRelacionamentoAtual.getMobilidade().getId());
-    mobilidade.update(contrato, paramLocalTrab, "tipo siutacaojjjjjjjjj", seccao, direcao, "obs", dataInicio, dataFim);
+    mobilidade.update( paramLocalTrab, "tipo siutacaojjjjjjjjj", seccao, direcao, "obs", dataInicio, dataFim);
 
 
     var regime = getRegimeById(tiposRelacionamentoAtual.getRegimeTrabalho().getId());

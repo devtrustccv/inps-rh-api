@@ -23,7 +23,6 @@ public class RegimeTrabalho {
   private Long idFuncionario;
   private UUID uuidFuncionario;
 
-  private Contrato contrato;
   private TiposRelacionamento tiprel;
 
 
@@ -36,7 +35,6 @@ public class RegimeTrabalho {
                          LocalDate dataFim,
                          String obs,
                          Estado estado,
-                         Contrato contrato,
                          List<RegimeModalidade> regimeModalidades ,
                          Long idFuncionario,
                          UUID uuidFuncionario) {
@@ -47,7 +45,6 @@ public class RegimeTrabalho {
     this.dataFim = dataFim;
     this.obs = obs;
     this.estado = estado;
-    this.contrato = contrato;
     this.regimeModalidades = regimeModalidades!=null ? regimeModalidades : new ArrayList<>();
 
     this.idFuncionario = idFuncionario;
@@ -58,8 +55,7 @@ public class RegimeTrabalho {
   public static RegimeTrabalho create(String tipoRegime,
                                       String tipoSituacao,
                                       LocalDate dataFim,
-                                      String obs,
-                                      Contrato contrato) {
+                                      String obs) {
     return new RegimeTrabalho(
         null,
         IdentificadorUnico.create(),
@@ -68,7 +64,6 @@ public class RegimeTrabalho {
         dataFim,
         obs,
         Estado.P,
-        contrato,
         null,
         null,
         null
@@ -83,7 +78,6 @@ public class RegimeTrabalho {
                                        LocalDate dataFim,
                                        String obs,
                                        Estado estado,
-                                       Contrato contrato,
                                        List<RegimeModalidade> regimeModalidades,
                                        Long idFuncionario,
                                        UUID uuidFuncionario) {
@@ -95,7 +89,6 @@ public class RegimeTrabalho {
         dataFim,
         obs,
         estado,
-        contrato,
         regimeModalidades,
         idFuncionario,
         uuidFuncionario
@@ -112,7 +105,6 @@ public class RegimeTrabalho {
     if (tipoSituacao != null) this.tipoSituacao = tipoSituacao;
     if (dataFim != null) this.dataFim = dataFim;
     if (obs != null) this.obs = obs;
-    if (contrato != null) this.contrato = contrato;
   }
 
   // Soft delete

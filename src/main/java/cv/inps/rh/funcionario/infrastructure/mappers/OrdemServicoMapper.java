@@ -19,7 +19,6 @@ public class OrdemServicoMapper {
      entity.setDescricao(domain.getDescricao());
      entity.setReferente(domain.getReferente());
      entity.setFunId(entityManager.getReference(FuncionarioEntity.class,domain.getFunId()));
-     entity.setContratoId(entityManager.getReference(ContratoEntity.class,domain.getContratoId()));
      entity.setTiprelId(entityManager.getReference(TiposRelacionamentoEntity.class,domain.getTiprelId()));
      entity.setValidacaoId(entityManager.getReference(ValidacaoEntity.class,domain.getValidacaoId()));
      entity.setEstado(domain.getEstado());

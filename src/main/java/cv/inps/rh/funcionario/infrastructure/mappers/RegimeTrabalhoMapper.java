@@ -39,7 +39,6 @@ public class RegimeTrabalhoMapper {
         entity.getDataFim(),
         entity.getObs(),
         entity.getEstado(),
-        contratoMapper.toDomain(entity.getContratoId()),
         modalidades,
         entity.getFunId().getId(),
         entity.getFunId().getUuid()
