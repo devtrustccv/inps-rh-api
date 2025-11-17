@@ -9,8 +9,10 @@ import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
+import cv.inps.rh.parametrizacao.domain.repository.ParamSituacaoLaboralRepository;
 import cv.inps.rh.parametrizacao.domain.repository.TipoDocumentoRepository;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.*;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.shared.domain.models.TipoMovimento;
 import cv.inps.rh.shared.domain.repository.GeografiaRepository;
@@ -58,8 +60,10 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
   private final TipoMovimentoMapper tipoMovimentoMapper;
 
+  private final ParamSituacaoLaboralRepository paramSituacaoLaboralRepository;
 
-   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper, GeografiaMapper geografiaMapper, TipoDocumentoMapper tipoDocumentoMapper, ParamCargoMapper paramCargoMapper, ParamContratoMapper paramContratoMapper, InstituicaoMapper instituicaoMapper, SecaoMapper secaoMapper, ParamCarreiraMapper paramCarreiraMapper, ParamCategoriaMapper paramCategoriaMapper, ParamEscalaoMapper paramEscalaoMapper, ParamVinculoMapper paramVinculoMapper, ParamLocalTrabMapper paramLocalTrabMapper, TipoMovimentoMapper tipoMovimentoMapper) {
+
+   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper, GeografiaMapper geografiaMapper, TipoDocumentoMapper tipoDocumentoMapper, ParamCargoMapper paramCargoMapper, ParamContratoMapper paramContratoMapper, InstituicaoMapper instituicaoMapper, SecaoMapper secaoMapper, ParamCarreiraMapper paramCarreiraMapper, ParamCategoriaMapper paramCategoriaMapper, ParamEscalaoMapper paramEscalaoMapper, ParamVinculoMapper paramVinculoMapper, ParamLocalTrabMapper paramLocalTrabMapper, TipoMovimentoMapper tipoMovimentoMapper, ParamSituacaoLaboralRepository paramSituacaoLaboralRepository) {
 
      this.funcionarioMapper = funcionarioMapper;
      this.funcionarioRepository = funcionarioRepository;
@@ -85,6 +89,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
      this.paramVinculoMapper = paramVinculoMapper;
      this.paramLocalTrabMapper = paramLocalTrabMapper;
      this.tipoMovimentoMapper = tipoMovimentoMapper;
+     this.paramSituacaoLaboralRepository = paramSituacaoLaboralRepository;
    }
 
    @IgrpCommandHandler
@@ -162,6 +167,9 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
      var ilha = geografiaMapper.toDomain(dadosContratuais.getIlhaId());
      var localTrabalho = paramLocalTrabMapper.toDomain(dadosContratuais.getLocalTrabalhoId());
 
+     var paramSituacaoLaboral = paramSituacaoLaboralRepository.findByNomeActivo()
+         .orElseThrow(() -> IgrpResponseStatusException.badRequest("ParamSituacaoLaboral com nome 'ATIVO'"));
+
 
      List<DefPagamento> defPagamentos =dadosContratuais.getEncargosDescontos().stream()
          .map(e -> {
@@ -199,6 +207,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
          categoria,
         escalao,
         vinculo,
+        paramSituacaoLaboral,
         dadosContratuais.getRegimeTrabalho(),
         dadosContratuais.getSalario(),
         dadosContratuais.getMoeda(),
@@ -210,7 +219,8 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
          ilha,
         defPagamentos,
         defRemuneracoes,
-        "REGISTO_COLABORADOR");
+        "REGISTO_COLABORADOR",
+        null);
 
 
 

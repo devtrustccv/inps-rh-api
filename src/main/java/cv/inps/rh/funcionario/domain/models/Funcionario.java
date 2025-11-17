@@ -842,6 +842,7 @@ public class Funcionario {
                                         ParamCategoria paramCategoria,
                                         ParamEscalao paramEscalao,
                                         ParamVinculo paramVinculo,
+                                        ParamSitLaboral paramSitLaboral,
                                         String regimeTrabalho,
                                         BigDecimal salario,
                                         String moeda,
@@ -853,39 +854,36 @@ public class Funcionario {
                                         Geografia ilha,
                                         List<DefPagamento> pagamentos,
                                         List<DefinicaoRemuneracao> remuneracoes,
-                                        String validacaoReferencia) {
+                                        String validacaoReferencia,
+                                        TiposRelacionamento tiposRelacionamentoAtual) {
 
 
     var contrato = Contrato.create(dataInicio, dataFim,
         duracaoMeses, null, "situacao laboral",
         paramVinculo, paramTipoContrato);
 
-    var situacaoLaboral = SituacaoLaboral.create("situacaolab", "NOVO_CONTRATO",contrato , "obs");
+    var situacaoLaboral = SituacaoLaboral.create
+        (paramSitLaboral, "NOVO_CONTRATO", "obs", dataInicio, dataFim);
 
-    var carreira = Carreira.create(salario, null, "tipo situacao", "obs", contrato, paramCargo, paramEscalao, paramCategoria, paramCarreira);
+    var carreira = Carreira.create(salario, null, "tipo situacao", "obs", paramCargo, paramEscalao, paramCategoria, paramCarreira);
 
     var mobilidade = Mobilidade.create(contrato, paramLocalTrab, "tipo siutacao", seccao, direcao, "obs",dataInicio, dataFim);
 
     var regime = RegimeTrabalho.create("tipo regime", "tipo situacao regime", dataFim, "obs", contrato);
 
     var tiposRelacionamento = TiposRelacionamento.create(paramCargo, direcao, paramVinculo, seccao, paramCategoria,
-        paramEscalao, paramCarreira, salario, moeda, regimeTrabalho, null, null,
+        paramEscalao, paramCarreira, salario, moeda, regimeTrabalho, tiposRelacionamentoAtual, null,
         dataInicio, dataFim, contrato, carreira, mobilidade, paramLocalTrab,
         regime, paramTipoContrato, null, null, "motivo", null,
         null, "obs","NOVO_CONTRATO");
 
     if (pagamentos != null && !pagamentos.isEmpty()) {
-      pagamentos.forEach(p -> p.associate(contrato, tiposRelacionamento));
       this.syncDefPagamentos(pagamentos);
     }
 
     if (remuneracoes != null && !remuneracoes.isEmpty()) {
-      remuneracoes.forEach(r -> r.associate(contrato));
       this.syncDefinicaoRemuneracoes(remuneracoes);
     }
-
-    /*this.defPagamentos.addAll(pagamentos);
-    this.definicaoRemuneracoes.addAll(remuneracoes);*/
 
     tiposRelacionamentos.add(tiposRelacionamento);
     contratos.add(contrato);
@@ -894,7 +892,7 @@ public class Funcionario {
     regimeTrabalhos.add(regime);
     situacoesLaborais.add(situacaoLaboral);
 
-    var validacao = Validacao.create("INSERT", validacaoReferencia != null ? validacaoReferencia : "REGISTO_COLABORADOR", null, "obs", tiposRelacionamento);
+    var validacao = Validacao.create("INSERT", validacaoReferencia, null, "obs", tiposRelacionamento);
     this.adicionarValidacao(validacao);
 
   }
@@ -927,7 +925,7 @@ public class Funcionario {
         paramVinculo, paramTipoContrato);
 
     var carreira = getCarreiraById(tiposRelacionamentoAtual.getCarreira().getId());
-    carreira.update(salario, null, "tipo situacaoadadas", "obs", contrato, paramCargo, paramEscalao, paramCategoria, paramCarreira);
+    carreira.update(salario, null, "tipo situacaoadadas", "obs", paramCargo, paramEscalao, paramCategoria, paramCarreira);
 
     var mobilidade = getMobilidadeById(tiposRelacionamentoAtual.getMobilidade().getId());
     mobilidade.update(contrato, paramLocalTrab, "tipo siutacaojjjjjjjjj", seccao, direcao, "obs", dataInicio, dataFim);
@@ -971,12 +969,10 @@ public class Funcionario {
 
 
     if (pagamentos != null && !pagamentos.isEmpty()) {
-      pagamentos.forEach(p -> p.associate(contrato, tiposRelacionamentoAtual));
       this.syncDefPagamentos(pagamentos);
     }
 
     if (remuneracoes != null && !remuneracoes.isEmpty()) {
-      remuneracoes.forEach(r -> r.associate(contrato));
       this.syncDefinicaoRemuneracoes(remuneracoes);
     }
 
@@ -989,6 +985,7 @@ public class Funcionario {
                                     ParamCategoria paramCategoria,
                                     ParamEscalao paramEscalao,
                                     ParamVinculo paramVinculo,
+                                    ParamSitLaboral paramSitLaboral,
                                     String regimeTrabalho,
                                     BigDecimal salario,
                                     String moeda,
@@ -1002,7 +999,13 @@ public class Funcionario {
                                     List<DefinicaoRemuneracao> remuneracoes) {
 
     TiposRelacionamento atual = getTipoRelacionamentoAtual();
-    atual.fechar();
+    if(atual!= null) {
+      atual.fechar();
+      var dataFimContrato = atual.getContrato().getDataFim();
+      atual.getCarreira().fechar(dataFimContrato);
+      atual.getMobilidade().fechar(dataFimContrato);
+      atual.getRegimeTrabalho().fechar(dataFimContrato);
+    }
 
     adicionarDadosContratuais(paramTipoContrato,
         paramCargo,
@@ -1013,6 +1016,7 @@ public class Funcionario {
         paramCategoria,
         paramEscalao,
         paramVinculo,
+        paramSitLaboral,
         regimeTrabalho,
         salario,
         moeda,
@@ -1024,7 +1028,8 @@ public class Funcionario {
         ilha,
         pagamentos,
         remuneracoes,
-        "NOVO_CONTRATO");
+        "NOVO_CONTRATO",
+        atual);
   }
 
   public Contrato getContratoById(Long id) {
@@ -1063,7 +1068,9 @@ public class Funcionario {
   }
 
 
-  public void alterarSituacaoLaboral(String situacaoLaboral,
+  public void alterarSituacaoLaboral(
+                                      ParamSitLaboral paramSitLaboral,
+                                      String situacaoLaboral,
                                      String motivo,
                                      String observacao,
                                      Estado novoEstado) {
@@ -1087,7 +1094,7 @@ public class Funcionario {
 
     this.tiposRelacionamentos.add(tiposRelacionamento);
 
-    var situacaoLaboralAtual = SituacaoLaboral.create(situacaoLaboral, motivo, atual.getContrato(), observacao);
+    var situacaoLaboralAtual = SituacaoLaboral.create(paramSitLaboral, motivo, observacao, null, null);
 
     this.situacoesLaborais.add(situacaoLaboralAtual);
 

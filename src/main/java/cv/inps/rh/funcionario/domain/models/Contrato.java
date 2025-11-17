@@ -196,4 +196,7 @@ public class Contrato {
     this.estado = estado;
   }
 
+  public void fechar(LocalDate dataFim) {
+    this.dataFim = dataFim;
+  }
 }

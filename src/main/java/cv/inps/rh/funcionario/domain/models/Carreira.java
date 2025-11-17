@@ -9,6 +9,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
@@ -23,7 +24,6 @@ public class Carreira {
   private Estado estado;
   private String obs;
 
-  private Contrato contrato;
   private ParamCargo cargo;
   private ParamEscalao escalao;
   private ParamCategoria categoria;
@@ -37,7 +37,6 @@ public class Carreira {
                    String tipoSituacao,
                    Estado estado,
                    String obs,
-                   Contrato contrato,
                    ParamCargo cargo,
                    ParamEscalao escalao,
                    ParamCategoria categoria,
@@ -49,7 +48,6 @@ public class Carreira {
     this.tipoSituacao = tipoSituacao;
     this.estado = estado;
     this.obs = obs;
-    this.contrato = contrato;
     this.cargo = cargo;
     this.escalao = escalao;
     this.categoria = categoria;
@@ -61,7 +59,6 @@ public class Carreira {
                                 Integer flgProcessa,
                                 String tipoSituacao,
                                 String obs,
-                                Contrato contrato,
                                 ParamCargo cargo,
                                 ParamEscalao escalao,
                                 ParamCategoria categoria,
@@ -74,7 +71,6 @@ public class Carreira {
         tipoSituacao,
         Estado.P,
         obs,
-        contrato,
         cargo,
         escalao,
         categoria,
@@ -90,7 +86,6 @@ public class Carreira {
                                  String tipoSituacao,
                                  Estado estado,
                                  String obs,
-                                 Contrato contrato,
                                  ParamCargo cargo,
                                  ParamEscalao escalao,
                                  ParamCategoria categoria,
@@ -103,7 +98,6 @@ public class Carreira {
         tipoSituacao,
         estado,
         obs,
-        contrato,
         cargo,
         escalao,
         categoria,
@@ -116,7 +110,6 @@ public class Carreira {
                      Integer flgProcessa,
                      String tipoSituacao,
                      String obs,
-                     Contrato contrato,
                      ParamCargo cargo,
                      ParamEscalao escalao,
                      ParamCategoria categoria,
@@ -124,9 +117,7 @@ public class Carreira {
     if (salario != null) this.salario = salario;
     if (flgProcessa != null) this.flgProcessa = flgProcessa;
     if (tipoSituacao != null) this.tipoSituacao = tipoSituacao;
-    if (estado != null) this.estado = estado;
     if (obs != null) this.obs = obs;
-    if (contrato != null) this.contrato = contrato;
     if (cargo != null) this.cargo = cargo;
     if (escalao != null) this.escalao = escalao;
     if (categoria != null) this.categoria = categoria;
@@ -141,4 +132,8 @@ public class Carreira {
   public void mudarEstado(Estado estado) {
     this.estado = estado;
   }
+
+    public void fechar(LocalDate dataFimContrato) {
+      //this.dataFim = dataFimContrato;
+    }
 }

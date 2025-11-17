@@ -30,4 +30,6 @@ public interface ParamSitLaboralEntityRepository extends JpaRepository<ParamSitL
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "ParamSitLaboralEntity not found for id: " + uuid));
   }
 
+  List<ParamSitLaboralEntity> findAllByNome(final String nome);
+
 }

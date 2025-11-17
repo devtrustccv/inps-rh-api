@@ -28,7 +28,6 @@ public class DefinicaoRemuneracaoMapper {
     return DefinicaoRemuneracao.rebuild(
         entity.getId(),
         entity.getUuid(),
-        contratoMapper.toDomain(entity.getContratoId()),
         entity.getPercentagem(),
         entity.getValor(),
         entity.getEstado(),

@@ -28,8 +28,6 @@ public class DefPagamentoMapper {
     return DefPagamento.rebuild(
         entity.getId(),
         entity.getUuid(),
-        contratoMapper.toDomain(entity.getContratoId()),
-        tiprelMapper.toDomain(entity.getTiprelId()),
         entity.getValor(),
         tipoMovimentoMapper.toDomain(entity.getTmId()),
         entity.getDataInicio(),
@@ -49,13 +47,6 @@ public class DefPagamentoMapper {
     entity.setEstado(domain.getEstado());
     entity.setObs(domain.getObs());
 
-   /* if (domain.getContrato() != null) {
-      entity.setContratoId(contratoMapper.toEntity(domain.getContrato()));
-    }
-
-    if (domain.getTiprel() != null) {
-      entity.setTiprelId(tiprelMapper.toEntity(domain.getTiprel()));
-    }*/
 
     if (domain.getTipoMovimento() != null) {
       entity.setTmId(entityManager.getReference(

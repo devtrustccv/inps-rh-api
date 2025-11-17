@@ -57,11 +57,6 @@ public class DefinicaoRemuneracaoEntity extends AuditEntity {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contrato_id", referencedColumnName = "id")
-    private ContratoEntity contratoId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tm_id", referencedColumnName = "id")
     private TipoMovimentoEntity tmId;
     @Column(name="data_inicio")

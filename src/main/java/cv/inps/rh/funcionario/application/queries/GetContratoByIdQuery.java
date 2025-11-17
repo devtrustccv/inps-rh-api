@@ -15,5 +15,7 @@ public class GetContratoByIdQuery implements Query {
 
   @NotBlank(message = "The field <contratoId> is required")
   private String contratoId;
+  @NotBlank(message = "The field <id> is required")
+  private String id;
 
 }

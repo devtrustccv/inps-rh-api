@@ -14,8 +14,6 @@ public class DefPagamento {
 
   private final Long id;
   private final IdentificadorUnico uuid;
-  private Contrato contrato;
-  private TiposRelacionamento tiprel;
   private BigDecimal valor;
   private TipoMovimento tipoMovimento;
   private LocalDate dataInicio;
@@ -26,8 +24,6 @@ public class DefPagamento {
   // Construtores privados
   private DefPagamento(Long id,
                        IdentificadorUnico uuid,
-                       Contrato contrato,
-                       TiposRelacionamento tiprel,
                        BigDecimal valor,
                        TipoMovimento tipoMovimento,
                        LocalDate dataInicio,
@@ -36,8 +32,6 @@ public class DefPagamento {
                        String obs) {
     this.id = id;
     this.uuid = uuid;
-    this.contrato = contrato;
-    this.tiprel = tiprel;
     this.valor = valor;
     this.tipoMovimento = tipoMovimento;
     this.dataInicio = dataInicio;
@@ -48,8 +42,6 @@ public class DefPagamento {
 
   public static DefPagamento rebuild(Long id,
                                      UUID uuid,
-                                     Contrato contrato,
-                                     TiposRelacionamento tiprel,
                                      BigDecimal valor,
                                      TipoMovimento tipoMovimento,
                                      LocalDate dataInicio,
@@ -59,8 +51,6 @@ public class DefPagamento {
     return new DefPagamento(
         id,
         IdentificadorUnico.from(uuid),
-        contrato,
-        tiprel,
         valor,
         tipoMovimento,
         dataInicio,
@@ -79,8 +69,6 @@ public class DefPagamento {
     return new DefPagamento(
         id!=null && id>0 ? id : null ,
         IdentificadorUnico.create(),
-        null,
-        null,
         valor,
         tipoMovimento,
         dataInicio,
@@ -90,10 +78,6 @@ public class DefPagamento {
     );
   }
 
-  public void associate(Contrato contrato, TiposRelacionamento tiposRelacionamento) {
-    this.contrato = contrato;
-    this.tiprel = tiposRelacionamento;
-  }
 
   public void update(BigDecimal valor,
                      TipoMovimento tipoMovimento,

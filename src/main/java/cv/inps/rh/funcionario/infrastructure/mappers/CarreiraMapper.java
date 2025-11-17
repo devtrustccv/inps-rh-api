@@ -43,7 +43,6 @@ public class CarreiraMapper {
         entity.getTipoSituacao(),
         entity.getEstado(),
         entity.getObs(),
-        contratoMapper.toDomain(entity.getContratoId()),
         entity.getCargoId() != null ? paramCargoMapper.toDomain(entity.getCargoId()) : null,
         entity.getEscalaoId() != null ? paramEscalaoMapper.toDomain(entity.getEscalaoId()) : null,
         entity.getCategoriaId() != null ? paramCategoriaMapper.toDomain(entity.getCategoriaId()) : null,

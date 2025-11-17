@@ -134,7 +134,7 @@
     },
     {
       "actionName": "getContratoById",
-      "path": "contratos/{contratoId}",
+      "path": "{id}/contratos/{contratoId}",
       "method": "GET",
       "responses": {
         "200": {
@@ -155,6 +155,11 @@
       "pathVariables": [
         {
           "name": "contratoId",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "id",
           "type": "string",
           "isRequired": true
         }
@@ -236,5 +241,5 @@
       ]
     }
   ],
-  "id": "zt8ilwt31b-getListContratos-getListContratos-validarContrato-validarContrato"
+  "id": "zt8ilwt31b-getListContratos-getListContratos-validarContrato-validarContrato-getContratoById"
 }

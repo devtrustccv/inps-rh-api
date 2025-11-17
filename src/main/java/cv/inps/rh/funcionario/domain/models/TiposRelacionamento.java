@@ -327,11 +327,6 @@ public class TiposRelacionamento {
     if (tpContrato != null) this.tpContrato = tpContrato;
   }
 
-  // Soft delete
-  public void eliminar() {
-    this.estado = Estado.E;
-  }
-
   public void mudarEstado(Estado estado) {
     this.estado = estado;
   }

@@ -302,8 +302,6 @@ public class FuncionarioMapper {
           .map( c -> {
             CarreiraEntity ce = carreiraMapper.toEntity(c);
             ce.setFunId(entity);
-            ce.setContratoId(contratosMap.get(c.getContrato().getUuid().getValor()));
-
             carreirasMap.put(c.getUuid().getValor(), ce);
             return ce;
           }) .collect(Collectors.toCollection(ArrayList::new));;
@@ -371,8 +369,6 @@ public class FuncionarioMapper {
             DefinicaoRemuneracaoEntity dre = definicaoRemuneracaoMapper.toEntity(d);
             // Associa o funcionário
               dre.setFunId(entity);
-            // Associa o contrato correto a partir do mapa
-              dre.setContratoId(contratosMap.get(d.getContrato().getUuid().getValor()));
             return dre;
           }).collect(Collectors.toCollection(ArrayList::new));;
 
@@ -385,12 +381,6 @@ public class FuncionarioMapper {
           .map(d -> {
             DefPagamentoEntity dpe = defPagamentoMapper.toEntity(d);
             dpe.setFunId(entity);
-            // Associa o contrato correto a partir do map
-            dpe.setContratoId(contratosMap.get(d.getContrato().getUuid().getValor()));
-            // Se precisar associar o tipo de relacionamento
-              dpe.setTiprelId(
-                  tiposRelacionamentosMap.get(d.getTiprel().getUuid().getValor())
-              );
             return dpe;
           }).collect(Collectors.toCollection(ArrayList::new));;
       entity.setDefinicoesPagamentos(defPagamentosEntities);
@@ -427,7 +417,6 @@ public class FuncionarioMapper {
             // Associa o funcionário
             sle.setFunId(entity);
             // Associa o contrato correto
-            sle.setContratoId(contratosMap.get(s.getContrato().getUuid().getValor()));
             return sle;
           })
           .collect(Collectors.toCollection(ArrayList::new));
@@ -607,6 +596,9 @@ public class FuncionarioMapper {
 
     return dadosContratuaisRespDTO;
   }
+
+
+
 
 
 

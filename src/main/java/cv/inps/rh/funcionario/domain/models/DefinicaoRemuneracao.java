@@ -15,7 +15,6 @@ public class DefinicaoRemuneracao {
 
   private final Long id;
   private final IdentificadorUnico uuid;
-  private Contrato contrato;
   private BigDecimal percentagem;
   private BigDecimal valor;
   private Estado estado;
@@ -27,7 +26,6 @@ public class DefinicaoRemuneracao {
 
   private DefinicaoRemuneracao(Long id,
                                IdentificadorUnico uuid,
-                               Contrato contrato,
                                BigDecimal percentagem,
                                BigDecimal valor,
                                Estado estado,
@@ -37,7 +35,6 @@ public class DefinicaoRemuneracao {
                                LocalDate dataFim) {
     this.id = id;
     this.uuid = uuid;
-    this.contrato = contrato;
     this.percentagem = percentagem;
     this.valor = valor;
     this.estado = estado;
@@ -56,7 +53,6 @@ public class DefinicaoRemuneracao {
     return new DefinicaoRemuneracao(
         id!=null && id>0 ? id : null ,
         IdentificadorUnico.create(),
-        null,
         percentagem,
         valor,
         Estado.P,
@@ -66,14 +62,9 @@ public class DefinicaoRemuneracao {
         LocalDate.now());
   }
 
-  public void associate(Contrato contrato) {
-    this.contrato = contrato;
-  }
-
   // Rebuild: reconstruir do repositório
   public static DefinicaoRemuneracao rebuild(Long id,
                                              UUID uuid,
-                                             Contrato contrato,
                                              BigDecimal percentagem,
                                              BigDecimal valor,
                                              Estado estado,
@@ -82,7 +73,6 @@ public class DefinicaoRemuneracao {
     return new DefinicaoRemuneracao(
         id,
         IdentificadorUnico.from(uuid),
-        contrato,
         percentagem,
         valor,
         estado,

@@ -3,6 +3,8 @@ package cv.inps.rh.funcionario.application.commands;
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.parametrizacao.domain.repository.ParamSituacaoLaboralRepository;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -41,6 +43,8 @@ public class NovoContratoCommandHandler implements CommandHandler<NovoContratoCo
   private final TipoMovimentoMapper tipoMovimentoMapper;
   private final FuncionarioMapper funcionarioMapper;
 
+  private final ParamSituacaoLaboralRepository paramSituacaoLaboralRepository;
+
   public NovoContratoCommandHandler(FuncionarioRepository funcionarioRepository,
                                     ParamContratoMapper paramContratoMapper,
                                     ParamCargoMapper paramCargoMapper,
@@ -52,7 +56,7 @@ public class NovoContratoCommandHandler implements CommandHandler<NovoContratoCo
                                     ParamVinculoMapper paramVinculoMapper,
                                     GeografiaMapper geografiaMapper,
                                     ParamLocalTrabMapper paramLocalTrabMapper,
-                                    TipoMovimentoMapper tipoMovimentoMapper, FuncionarioMapper funcionarioMapper) {
+                                    TipoMovimentoMapper tipoMovimentoMapper, FuncionarioMapper funcionarioMapper, ParamSituacaoLaboralRepository paramSituacaoLaboralRepository) {
     this.funcionarioRepository = funcionarioRepository;
     this.paramContratoMapper = paramContratoMapper;
     this.paramCargoMapper = paramCargoMapper;
@@ -66,6 +70,7 @@ public class NovoContratoCommandHandler implements CommandHandler<NovoContratoCo
     this.paramLocalTrabMapper = paramLocalTrabMapper;
     this.tipoMovimentoMapper = tipoMovimentoMapper;
     this.funcionarioMapper = funcionarioMapper;
+    this.paramSituacaoLaboralRepository = paramSituacaoLaboralRepository;
   }
 
   @IgrpCommandHandler
@@ -88,6 +93,9 @@ public class NovoContratoCommandHandler implements CommandHandler<NovoContratoCo
      var pais = geografiaMapper.toDomain(dados.getPaisId());
      var ilha = geografiaMapper.toDomain(dados.getIlhaId());
      var localTrabalho = paramLocalTrabMapper.toDomain(dados.getLocalTrabalhoId());
+
+    var paramSituacaoLaboral = paramSituacaoLaboralRepository.findByNomeActivo()
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest("ParamSituacaoLaboral com nome 'ATIVO'"));
 
      List<DefPagamento> defPagamentos = dados.getEncargosDescontos().stream()
          .map(e -> {
@@ -126,6 +134,7 @@ public class NovoContratoCommandHandler implements CommandHandler<NovoContratoCo
          categoria,
          escalao,
          vinculo,
+         paramSituacaoLaboral,
          dados.getRegimeTrabalho(),
          dados.getSalario(),
          dados.getMoeda(),

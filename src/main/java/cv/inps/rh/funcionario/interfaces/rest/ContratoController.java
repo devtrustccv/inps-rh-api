@@ -138,7 +138,7 @@ public class ContratoController {
   }
 
    @GetMapping(
-   value = "contratos/{contratoId}"
+   value = "{id}/contratos/{contratoId}"
   )
   @Operation(
     summary = "GET method to handle operations for getContratoById",
@@ -158,10 +158,10 @@ public class ContratoController {
   )
   
   public ResponseEntity<DadosContratuaisRespDTO> getContratoById(
-    @PathVariable(value = "contratoId") String contratoId)
+    @PathVariable(value = "contratoId") String contratoId,@PathVariable(value = "id") String id)
   {
 
-      final var query = new GetContratoByIdQuery(contratoId);
+      final var query = new GetContratoByIdQuery(contratoId, id);
 
       ResponseEntity<DadosContratuaisRespDTO> response = queryBus.handle(query);
 

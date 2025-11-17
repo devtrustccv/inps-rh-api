@@ -131,4 +131,8 @@ public class Mobilidade {
   public void mudarEstado(Estado estado) {
     this.estado = estado;
   }
+
+    public void fechar(LocalDate dataFimContrato) {
+      this.dataFim = dataFimContrato;
+    }
 }

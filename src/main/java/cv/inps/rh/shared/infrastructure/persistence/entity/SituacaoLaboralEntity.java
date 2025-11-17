@@ -7,7 +7,7 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
@@ -31,11 +31,12 @@ public class SituacaoLaboralEntity extends AuditEntity {
     private Long id;
 
   
-    @NotBlank(message = "situacaoLaboral is mandatory")
-    @Column(name="situacao_laboral", nullable = false)
-    private String situacaoLaboral;
+    @NotNull(message = "situacaoLaboralId is mandatory")
 
-  
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "situacao_laboral_id", referencedColumnName = "id")
+    private ParamSitLaboralEntity situacaoLaboralId;
     @Column(name="motivo_sit_lab")
     private String motivoSitLab;
 
@@ -48,11 +49,6 @@ public class SituacaoLaboralEntity extends AuditEntity {
     private LocalDate dataFim;
 
   
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contrato_id", referencedColumnName = "id")
-    private ContratoEntity contratoId;
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;

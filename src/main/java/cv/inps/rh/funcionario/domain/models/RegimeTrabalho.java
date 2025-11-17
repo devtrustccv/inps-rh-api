@@ -178,4 +178,7 @@ public class RegimeTrabalho {
         .sum();
   }
 
+    public void fechar(LocalDate dataFimContrato) {
+      this.dataFim = dataFimContrato;
+    }
 }

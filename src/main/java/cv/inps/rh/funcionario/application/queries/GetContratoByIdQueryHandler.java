@@ -1,5 +1,8 @@
 package cv.inps.rh.funcionario.application.queries;
 
+import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
+import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -15,15 +18,23 @@ public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoById
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetContratoByIdQueryHandler.class);
 
+  private final FuncionarioMapper funcionarioMapper;
+  private final FuncionarioRepository funcionarioRepository;
 
-  public GetContratoByIdQueryHandler() {
+  public GetContratoByIdQueryHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository) {
 
+    this.funcionarioMapper = funcionarioMapper;
+    this.funcionarioRepository = funcionarioRepository;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<DadosContratuaisRespDTO> handle(GetContratoByIdQuery query) {
-    // TODO: Implement the query handling logic here
-    return null;
+
+     var idFuncionario = IdentificadorUnico.from(query.getId());
+
+     var funcionario = funcionarioRepository.findById(idFuncionario).orElseThrow();
+
+     return null;
   }
 
 }
