@@ -4,6 +4,7 @@ import cv.inps.rh.funcionario.domain.filters.ContratoFilter;
 import cv.inps.rh.funcionario.domain.models.Contrato;
 import cv.inps.rh.funcionario.domain.repository.ContratoRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContratoMapper;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoEntityRepository;
 import jakarta.persistence.EntityManager;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -51,6 +53,12 @@ public class ContratoRepositoryImpl implements ContratoRepository {
   @Override
   public java.util.Optional<Contrato> findById(Long id) {
     return contratoEntityRepository.findById(id)
+        .map(contratoMapper::toDomain);
+  }
+
+  @Override
+  public Optional<Contrato> findByUuid(IdentificadorUnico id) {
+    return contratoEntityRepository.findByUuid(id.getValor())
         .map(contratoMapper::toDomain);
   }
 }

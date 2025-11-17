@@ -69,6 +69,7 @@
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-jpamodelgen</artifactId>
+            <version>6.6.29.Final</version>
             <scope>provided</scope>
         </dependency>
 
@@ -212,6 +213,7 @@
                         <path>
                             <groupId>org.hibernate.orm</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
+                            <version>6.6.29.Final</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

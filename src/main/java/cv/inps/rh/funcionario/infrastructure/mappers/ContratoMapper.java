@@ -1,8 +1,10 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.ContratoListDTO;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.domain.filters.ContratoFilter;
 import cv.inps.rh.funcionario.domain.models.Contrato;
+import cv.inps.rh.funcionario.domain.models.TiposRelacionamento;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamContratoMapper;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamVinculoMapper;
@@ -161,7 +163,7 @@ public class ContratoMapper {
         .build();
   }
 
-  public cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO toRespDTO(Contrato contrato) {
+  public DadosContratuaisRespDTO toRespDTO(Contrato contrato) {
     if (contrato == null) return null;
 
     var dto = new cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO();
@@ -175,31 +177,27 @@ public class ContratoMapper {
     return dto;
   }
 
-  public cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO toRespDTO(
-      cv.inps.rh.funcionario.domain.models.Contrato contrato,
-      cv.inps.rh.funcionario.domain.models.TiposRelacionamento tr) {
-    var dto = toRespDTO(contrato);
-    if (dto == null) dto = new cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO();
+  public DadosContratuaisRespDTO toRespDTO(TiposRelacionamento tr) {
+    var dto = toRespDTO(tr.getContrato());
+    if (dto == null) dto = new DadosContratuaisRespDTO();
 
-    if (tr != null) {
-      dto.setCargoPosicaoId(tr.getCargo() != null ? tr.getCargo().getId() : null);
-      dto.setCargoPosicaoDesc(tr.getCargo() != null ? tr.getCargo().getNome() : null);
-      dto.setDirecaoId(tr.getInstituicao() != null ? tr.getInstituicao().getId() : null);
-      dto.setDirecaoDesc(tr.getInstituicao() != null ? tr.getInstituicao().getNome() : null);
-      dto.setSeccaoId(tr.getSeccao() != null ? tr.getSeccao().getId() : null);
-      dto.setSeccaoDesc(tr.getSeccao() != null ? tr.getSeccao().getNome() : null);
-      dto.setCarreiraId(tr.getCarrPcc() != null ? tr.getCarrPcc().getId() : null);
-      dto.setCarreiraDesc(tr.getCarrPcc() != null ? tr.getCarrPcc().getNome() : null);
-      dto.setCategoriaId(tr.getCategoria() != null ? tr.getCategoria().getId() : null);
-      dto.setCategoriaDesc(tr.getCategoria() != null ? tr.getCategoria().getNome() : null);
-      dto.setEscalaoReferenciaId(tr.getEscalao() != null ? tr.getEscalao().getId() : null);
-      dto.setEscalaoReferenciaDesc(tr.getEscalao() != null ? tr.getEscalao().getEscalao() : null);
-      dto.setLocalTrabalhoId(tr.getLocTrab() != null ? tr.getLocTrab().getId() : null);
-      dto.setLocalTrabalhoDesc(tr.getLocTrab() != null ? tr.getLocTrab().getNome() : null);
-      dto.setSalario(tr.getSalario());
-      dto.setMoeda(tr.getMoeda());
-      dto.setRegimeTrabalho(tr.getRegime());
-    }
+    dto.setCargoPosicaoId(tr.getCargo() != null ? tr.getCargo().getId() : null);
+    dto.setCargoPosicaoDesc(tr.getCargo() != null ? tr.getCargo().getNome() : null);
+    dto.setDirecaoId(tr.getInstituicao() != null ? tr.getInstituicao().getId() : null);
+    dto.setDirecaoDesc(tr.getInstituicao() != null ? tr.getInstituicao().getNome() : null);
+    dto.setSeccaoId(tr.getSeccao() != null ? tr.getSeccao().getId() : null);
+    dto.setSeccaoDesc(tr.getSeccao() != null ? tr.getSeccao().getNome() : null);
+    dto.setCarreiraId(tr.getCarrPcc() != null ? tr.getCarrPcc().getId() : null);
+    dto.setCarreiraDesc(tr.getCarrPcc() != null ? tr.getCarrPcc().getNome() : null);
+    dto.setCategoriaId(tr.getCategoria() != null ? tr.getCategoria().getId() : null);
+    dto.setCategoriaDesc(tr.getCategoria() != null ? tr.getCategoria().getNome() : null);
+    dto.setEscalaoReferenciaId(tr.getEscalao() != null ? tr.getEscalao().getId() : null);
+    dto.setEscalaoReferenciaDesc(tr.getEscalao() != null ? tr.getEscalao().getEscalao() : null);
+    dto.setLocalTrabalhoId(tr.getLocTrab() != null ? tr.getLocTrab().getId() : null);
+    dto.setLocalTrabalhoDesc(tr.getLocTrab() != null ? tr.getLocTrab().getNome() : null);
+    dto.setSalario(tr.getSalario());
+    dto.setMoeda(tr.getMoeda());
+    dto.setRegimeTrabalho(tr.getRegime());
 
     return dto;
   }
