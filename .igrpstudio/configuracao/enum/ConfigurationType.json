@@ -58,6 +58,13 @@
         "seccao_type",
         "PARAM_SECCAO"
       ]
+    },
+    {
+      "name": "PARAM_TIPO_DOCUMENTO",
+      "attributes": [
+        "tipo_documento_type",
+        "PARAM_TIPO_DOCUMENTO"
+      ]
     }
   ],
   "attributes": [

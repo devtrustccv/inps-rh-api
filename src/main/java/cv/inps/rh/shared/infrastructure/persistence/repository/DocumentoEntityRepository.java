@@ -1,24 +1,24 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
-import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import org.springframework.stereotype.Repository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
-import java.util.Optional;
-
+import org.springframework.stereotype.Repository;
 
 
 @Repository
 public interface DocumentoEntityRepository extends
     JpaRepository<DocumentoEntity, Long>,
-    JpaSpecificationExecutor<DocumentoEntity>
-{
+    JpaSpecificationExecutor<DocumentoEntity> {
 
-      default DocumentoEntity findByIdOrThrow(Long id) {
-          return this.findById(id)
-          .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"DocumentoEntity not found for id: " + id));
-      }
+  default DocumentoEntity findByIdOrThrow(Long id) {
+    return this.findById(id)
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "DocumentoEntity not found for id: " + id));
+  }
+
+  boolean existByTpDocumentoId(TipoDocumentoEntity tpDocumentoId);
 
 }
