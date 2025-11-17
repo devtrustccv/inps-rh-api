@@ -899,6 +899,7 @@ public class Funcionario {
   }
 
 
+
   public void atualizarDadosContratuais(ParamContrato paramTipoContrato,
                                         ParamCargo paramCargo, Instituicao direcao,
                                         Secao seccao, String centroCusto,
@@ -980,6 +981,50 @@ public class Funcionario {
 
   }
 
+  public void registrarNovoContrato(ParamContrato paramTipoContrato,
+                                    ParamCargo paramCargo, Instituicao direcao,
+                                    Secao seccao, String centroCusto,
+                                    ParamCarreira paramCarreira,
+                                    ParamCategoria paramCategoria,
+                                    ParamEscalao paramEscalao,
+                                    ParamVinculo paramVinculo,
+                                    String regimeTrabalho,
+                                    BigDecimal salario,
+                                    String moeda,
+                                    LocalDate dataInicio,
+                                    LocalDate dataFim,
+                                    Integer duracaoMeses,
+                                    ParamLocalTrab paramLocalTrab,
+                                    Geografia pais,
+                                    Geografia ilha,
+                                    List<DefPagamento> pagamentos,
+                                    List<DefinicaoRemuneracao> remuneracoes) {
+
+    TiposRelacionamento atual = getTipoRelacionamentoAtual();
+    atual.fechar();
+
+    adicionarDadosContratuais(paramTipoContrato,
+        paramCargo,
+        direcao,
+        seccao,
+        centroCusto,
+        paramCarreira,
+        paramCategoria,
+        paramEscalao,
+        paramVinculo,
+        regimeTrabalho,
+        salario,
+        moeda,
+        dataInicio,
+        dataFim,
+        duracaoMeses,
+        paramLocalTrab,
+        pais,
+        ilha,
+        pagamentos,
+        remuneracoes);
+  }
+
   public Contrato getContratoById(Long id) {
     return contratos.stream()
         .filter(c -> c.getId().equals(id))
@@ -1029,7 +1074,7 @@ public class Funcionario {
     if (atual == null) {
       throw IgrpResponseStatusException.badRequest("tiposRelacionamento atual nao encontrado");
     }
-    atual.mudarEstadoActividadeAdm(0);
+    atual.fechar();
 
 
     var tiposRelacionamento = TiposRelacionamento.create(atual.getCargo(), atual.getInstituicao(), atual.getVinculo(), atual.getSeccao(),

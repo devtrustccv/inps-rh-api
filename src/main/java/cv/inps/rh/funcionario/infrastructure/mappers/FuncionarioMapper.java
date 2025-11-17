@@ -543,7 +543,7 @@ public class FuncionarioMapper {
   }
 
 
-  private DadosContratuaisRespDTO dadosContratuaisRespDTO(Funcionario funcionario) {
+  public DadosContratuaisRespDTO dadosContratuaisRespDTO(Funcionario funcionario) {
     if (funcionario.getTipoRelacionamentoAtual() == null) return null;
 
     var tipoRelacionamentoAtual = funcionario.getTipoRelacionamentoAtual();

@@ -336,9 +336,8 @@ public class TiposRelacionamento {
     this.estado = estado;
   }
 
-  public void mudarEstadoActividadeAdm(Integer estadoActividadeAdm) {
-    this.estadoActividadeAdm = estadoActividadeAdm;
+  public void fechar() {
+    this.estadoActividadeAdm = 0;
+    this.dataFim = LocalDate.now();
   }
-
-
 }
