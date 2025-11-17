@@ -65,6 +65,13 @@
         "tipo_documento_type",
         "PARAM_TIPO_DOCUMENTO"
       ]
+    },
+    {
+      "name": "PARAM_NOTIFICACAO",
+      "attributes": [
+        "notificacao_type",
+        "PARAM_NOTIFICACAO"
+      ]
     }
   ],
   "attributes": [
