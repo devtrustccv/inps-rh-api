@@ -36,6 +36,7 @@ public class GetListContratosQueryHandler implements QueryHandler<GetListContrat
 
      var filters = contratoMapper.toFilterDomain(
          query.getVinculo(),
+         query.getIdFuncionario(),
          Integer.parseInt(query.getPageNumber()),
          Integer.parseInt(query.getPageSize())
      );

@@ -6,6 +6,7 @@ import cv.inps.rh.funcionario.domain.models.Contrato;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamContratoMapper;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamVinculoMapper;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
@@ -148,10 +149,12 @@ public class ContratoMapper {
   }
 
   public ContratoFilter toFilterDomain(Long vinculo,
+                                       String idFuncionario,
                                        Integer pageNumber,
                                        Integer pageSize ) {
 
     return ContratoFilter.builder()
+        .idFuncionario(IdentificadorUnico.from(idFuncionario))
         .vinculo(vinculo)
         .pageNumber(pageNumber)
         .pageSize(pageSize)
