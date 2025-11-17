@@ -27,6 +27,11 @@
       },
       "requestParams": [
         {
+          "type": "string",
+          "name": "idFuncionario",
+          "isRequired": true
+        },
+        {
           "type": "long",
           "name": "vinculo",
           "isRequired": false
@@ -46,5 +51,5 @@
       ]
     }
   ],
-  "id": "zt8ilwt31b-getListContratos"
+  "id": "zt8ilwt31b-getListContratos-getListContratos"
 }

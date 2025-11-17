@@ -1,0 +1,38 @@
+{
+  "type": "enum",
+  "module": "funcionario",
+  "name": "SITUACAOLABORAL",
+  "values": [
+    {
+      "name": "ATIVO",
+      "attributes": [
+        "ATIVO",
+        "ativo"
+      ]
+    },
+    {
+      "name": "SUSPENSO",
+      "attributes": [
+        "SUSPENSO",
+        "suspenso"
+      ]
+    },
+    {
+      "name": "CESSADO",
+      "attributes": [
+        "CESSADO",
+        "cessado"
+      ]
+    }
+  ],
+  "attributes": [
+    {
+      "type": "string",
+      "name": "Code"
+    },
+    {
+      "type": "string",
+      "name": "Description"
+    }
+  ]
+}

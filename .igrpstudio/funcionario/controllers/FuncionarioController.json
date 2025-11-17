@@ -274,41 +274,7 @@
           "isRequired": true
         }
       ]
-    },
-    {
-      "actionName": "mudarEstadoColaborador",
-      "path": "estado-colaborador",
-      "method": "PATCH",
-      "requestBody": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "AtivarInativarColaborador",
-              "collectionType": "none",
-              "name": "data",
-              "objectType": "dto",
-              "module": "funcionario"
-            }
-          }
-        }
-      },
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "AtivarInativarColaborador",
-                "objectType": "dto",
-                "name": "data",
-                "collectionType": "none",
-                "module": "funcionario"
-              }
-            }
-          }
-        }
-      }
     }
   ],
-  "id": "69p09wi4e0-criarFuncionario-validarRegistoColaborador-createFuncionario-validarRegistoColaborador-createFuncionario-getFuncionarioById-createFuncionario-validarRegistoColaborador"
+  "id": "69p09wi4e0-criarFuncionario-validarRegistoColaborador-createFuncionario-validarRegistoColaborador-createFuncionario-getFuncionarioById-createFuncionario-validarRegistoColaborador-mudarEstadoColaborador"
 }

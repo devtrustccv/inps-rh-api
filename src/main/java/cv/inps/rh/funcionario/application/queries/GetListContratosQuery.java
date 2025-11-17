@@ -13,6 +13,8 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class GetListContratosQuery implements Query {
 
+  @NotBlank(message = "The field <idFuncionario> is required")
+  private String idFuncionario;
   @NotNull(message = "The field <vinculo> is required")
   private Long vinculo;
   @NotBlank(message = "The field <pageNumber> is required")

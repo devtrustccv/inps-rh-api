@@ -27,12 +27,12 @@ import cv.inps.rh.funcionario.application.dto.WrapperListContratoDTO;
 @Tag(name = "Contrato", description = "Gestao Contratos")
 public class ContratoController {
 
-  
+
   private final QueryBus queryBus;
 
   public ContratoController(QueryBus queryBus) {
           this.queryBus = queryBus;
-          
+
   }
    @GetMapping(
    value = "contratos"
@@ -53,14 +53,15 @@ public class ContratoController {
       )
     }
   )
-  
+
   public ResponseEntity<WrapperListContratoDTO> getListContratos(
+    @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "vinculo", required = false) Long vinculo,
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize)
   {
 
-      final var query = new GetListContratosQuery(vinculo, pageNumber, pageSize);
+      final var query = new GetListContratosQuery(idFuncionario, vinculo, pageNumber, pageSize);
 
       ResponseEntity<WrapperListContratoDTO> response = queryBus.handle(query);
 

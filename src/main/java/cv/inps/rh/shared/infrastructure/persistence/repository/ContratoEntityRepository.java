@@ -34,6 +34,7 @@ public interface ContratoEntityRepository extends
                 LEFT JOIN rh_t_param_contrato tc ON tc.id = ce.tp_contrato_id
                 LEFT JOIN rh_t_param_vinculo vi ON vi.id = ce.vinculo_id
                 WHERE (:vinculo IS NULL OR ce.vinculo_id = :vinculo)
+                and fi.uuid = :funcionarioId
                 ORDER BY ce.data_inicio DESC
             ) ce
             WHERE ROWNUM <= :endRow
@@ -42,6 +43,7 @@ public interface ContratoEntityRepository extends
         """, nativeQuery = true)
   List<ContratoEntity> findAllWithPagination(
       @Param("vinculo") Long vinculo,
+      @Param("funcionarioId") String funcionarioId,
       @Param("startRow") int startRow,
       @Param("endRow") int endRow
   );

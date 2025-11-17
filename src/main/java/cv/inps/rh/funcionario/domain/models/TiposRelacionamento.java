@@ -151,7 +151,9 @@ public class TiposRelacionamento {
       LocalDate ultProc,
       String motivoSitLab,
       ParamSitLaboral situacLaboral,
-      String tpContrato
+      String tpContrato,
+      String obs,
+      String tipoSituacao
   ) {
     return new TiposRelacionamento(
         null,
@@ -166,11 +168,11 @@ public class TiposRelacionamento {
         salario,
         moeda,
         regime,
-        "INICIO",
+        tipoSituacao,
         tiprelAnterior,
         flgProcessa,
         Estado.P,
-        "NOVO_CONTRATO",
+        obs,
         dataInicio,
         dataFim,
         dataInicio,
@@ -333,4 +335,10 @@ public class TiposRelacionamento {
   public void mudarEstado(Estado estado) {
     this.estado = estado;
   }
+
+  public void mudarEstadoActividadeAdm(Integer estadoActividadeAdm) {
+    this.estadoActividadeAdm = estadoActividadeAdm;
+  }
+
+
 }

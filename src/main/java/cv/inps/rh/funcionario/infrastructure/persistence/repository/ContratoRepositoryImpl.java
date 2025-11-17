@@ -36,6 +36,7 @@ public class ContratoRepositoryImpl implements ContratoRepository {
 
     List<ContratoEntity> entities = contratoEntityRepository.findAllWithPagination(
         filters.getVinculo(),
+        filters.getIdFuncionario().toString(),
         startRow,
         endRow
     );

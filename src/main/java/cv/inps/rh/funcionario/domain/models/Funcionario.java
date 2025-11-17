@@ -871,7 +871,7 @@ public class Funcionario {
         paramEscalao, paramCarreira, salario, moeda, regimeTrabalho, null, null,
         dataInicio, dataFim, contrato, carreira, mobilidade, paramLocalTrab,
         regime, paramTipoContrato, null, null, "motivo", null,
-        null);
+        null, "obs","NOVO_CONTRATO");
 
     if (pagamentos != null && !pagamentos.isEmpty()) {
       pagamentos.forEach(p -> p.associate(contrato, tiposRelacionamento));
@@ -1004,22 +1004,6 @@ public class Funcionario {
         .findFirst().orElseThrow(() -> IgrpResponseStatusException.notFound("regime nao encontrado com id: " + id));
   }
 
-  /*public TiposRelacionamento getTipoRelacionamentoAtual() {
-    if (tiposRelacionamentos == null || tiposRelacionamentos.isEmpty()) {
-      return null;
-    }
-    return tiposRelacionamentos.stream()
-        .filter(t -> t.getContrato() != null)
-        .max(
-            Comparator.comparingInt((TiposRelacionamento t) -> t.getContrato().getVersao())
-                .thenComparing(
-                    t -> t.getContrato().getDataInicio(),
-                    Comparator.reverseOrder()
-                )
-        )
-        .orElse(null);
-  }*/
-
   public TiposRelacionamento getTipoRelacionamentoAtual() {
     if (tiposRelacionamentos == null || tiposRelacionamentos.isEmpty()) {
       return null;
@@ -1043,11 +1027,49 @@ public class Funcionario {
 
     if (!inativos.isEmpty()) {
       return inativos.stream()
-          .max(Comparator.comparing(TiposRelacionamento::getDataInicio))
+          .max(Comparator.comparing(TiposRelacionamento::getDataFim))
           .orElse(null);
     }
 
     return null;
+  }
+
+  public void alterarSituacaoLaboral(String situacaoLaboral,
+                                     String motivo,
+                                     String observacao,
+                                     Estado novoEstado) {
+
+    if (this.estado.equals(novoEstado)) {
+      throw IgrpResponseStatusException.badRequest("funcionario ja esta no estado: " + estado);
+    }
+
+    TiposRelacionamento atual = getTipoRelacionamentoAtual();
+    if (atual == null) {
+      throw IgrpResponseStatusException.badRequest("tiposRelacionamento atual nao encontrado");
+    }
+    atual.mudarEstadoActividadeAdm(0);
+
+
+    var tiposRelacionamento = TiposRelacionamento.create(atual.getCargo(), atual.getInstituicao(), atual.getVinculo(), atual.getSeccao(),
+        atual.getCategoria(), atual.getEscalao(), atual.getCarrPcc(), atual.getSalario(), atual.getMoeda(), atual.getRegime(), atual, null,
+        atual.getDataInicio(), atual.getDataFim(), atual.getContrato(), atual.getCarreira(), atual.getMobilidade(), atual.getLocTrab(),
+        atual.getRegimeTrabalho(), atual.getTipoContrato(), "SITUACAO_LABORAL", null, "motivo", null,
+        null,"MUDANCA_SITUACAO_LAB", observacao);
+
+    this.tiposRelacionamentos.add(tiposRelacionamento);
+
+    var situacaoLaboralAtual = SituacaoLaboral.create(situacaoLaboral, motivo, atual.getContrato(), observacao);
+
+    this.situacoesLaborais.add(situacaoLaboralAtual);
+
+    var validacao = Validacao.create("UPDATE", "ESTADO_COLABORADOR", 1L, observacao, tiposRelacionamento);
+
+    this.adicionarValidacao(validacao);
+
+    this.mudarEstado(novoEstado);
+
+
+
   }
 
 

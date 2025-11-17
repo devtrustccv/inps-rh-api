@@ -33,7 +33,7 @@ import cv.inps.rh.funcionario.application.dto.AtivarInativarColaboradorDTO;
 @Tag(name = "Funcionario", description = "gestao de funcionarios")
 public class FuncionarioController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -59,7 +59,7 @@ public class FuncionarioController {
       )
     }
   )
-  
+
   public ResponseEntity<FuncionarioResponseDTO> createFuncionario(@Valid @RequestBody FuncionarioRequestDTO createFuncionarioRequest
     )
   {
@@ -90,7 +90,7 @@ public class FuncionarioController {
       )
     }
   )
-  
+
   public ResponseEntity<FuncionarioResponseDTO> getFuncionarioById(
     @PathVariable(value = "id") String id)
   {
@@ -121,7 +121,7 @@ public class FuncionarioController {
       )
     }
   )
-  
+
   public ResponseEntity<WrapperListaValidacoesDTO> getValicoesUtilizadores(
     @RequestParam(value = "nomeColaborador", required = false) String nomeColaborador,
     @RequestParam(value = "tipoOperacao", required = false) String tipoOperacao,
@@ -157,7 +157,7 @@ public class FuncionarioController {
       )
     }
   )
-  
+
   public ResponseEntity<WrapperListaFuncionarioDTO> getListFuncionarios(
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
@@ -196,7 +196,7 @@ public class FuncionarioController {
       )
     }
   )
-  
+
   public ResponseEntity<Map<String, ?>> validarRegistoColaborador(@Valid @RequestBody FuncionarioRequestDTO validarRegistoColaboradorRequest
     , @PathVariable(value = "id") String id)
   {
@@ -227,43 +227,12 @@ public class FuncionarioController {
       )
     }
   )
-  
+
   public ResponseEntity<AtivarInativarColaboradorDTO> validacaoColaborador(@Valid @RequestBody AtivarInativarColaboradorDTO validacaoColaboradorRequest
     , @PathVariable(value = "id") String id)
   {
 
       final var command = new ValidacaoColaboradorCommand(validacaoColaboradorRequest, id);
-
-       ResponseEntity<AtivarInativarColaboradorDTO> response = commandBus.send(command);
-
-       return response;
-  }
-
-   @PatchMapping(
-   value = "estado-colaborador"
-  )
-  @Operation(
-    summary = "PATCH method to handle operations for mudarEstadoColaborador",
-    description = "PATCH method to handle operations for mudarEstadoColaborador",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "",
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = AtivarInativarColaboradorDTO.class,
-                  type = "object")
-          )
-      )
-    }
-  )
-  
-  public ResponseEntity<AtivarInativarColaboradorDTO> mudarEstadoColaborador(@Valid @RequestBody AtivarInativarColaboradorDTO mudarEstadoColaboradorRequest
-    )
-  {
-
-      final var command = new MudarEstadoColaboradorCommand(mudarEstadoColaboradorRequest);
 
        ResponseEntity<AtivarInativarColaboradorDTO> response = commandBus.send(command);
 
