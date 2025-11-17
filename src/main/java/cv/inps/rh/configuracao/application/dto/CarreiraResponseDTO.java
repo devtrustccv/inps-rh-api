@@ -30,4 +30,10 @@ public class CarreiraResponseDTO  {
   @Valid
   private List<CategoriaCarreiraResponseDTO> categorias = new ArrayList<>();
 
+
+  private String estado ;
+
+
+  private String estadoDescricao ;
+
 }

@@ -9,7 +9,7 @@ import cv.inps.rh.configuracao.application.dto.TipoContratoLaboralRequestDTO;
 import cv.inps.rh.configuracao.application.dto.TipoContratoLaboralResponseDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoLaboralRequestDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoLaboralResponseDTO;
-import cv.inps.rh.configuracao.domain.service.configurationengine.IConfiguration;
+import cv.inps.rh.configuracao.domain.service.engine.IConfiguration;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

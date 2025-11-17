@@ -1,4 +1,4 @@
-package cv.inps.rh.configuracao.domain.service.configurationengine;
+package cv.inps.rh.configuracao.domain.service.engine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -43,16 +43,13 @@ public abstract class ConfigurationProcess<T> {
 
   private void validate(T payload) {
 
-    var violations = validator.validate(payload);
+    var errors = validator.validate(payload)
+        .stream()
+        .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+        .toList();
 
-    if (!violations.isEmpty()) {
-
-      var errors = violations.stream()
-          .map(v -> v.getPropertyPath() + ": " + v.getMessage())
-          .toList();
-
+    if (!errors.isEmpty())
       throw IgrpResponseStatusException.badRequest("Validation errors", errors);
-    }
   }
 
 }

@@ -1,9 +1,7 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +20,12 @@ public interface TiposRelacionamentoEntityRepository extends
 
   boolean existsByVinculoId(ParamVinculoEntity vinculoId);
 
-  boolean existsByCategoriaId(ParamCarreiraEntity categoriaId);
+  boolean existsByCarrPccId(ParamCarreiraEntity categoriaId);
+
+  boolean existsByEscalaoId(ParamEscalaoEntity escalaoId);
+
+  boolean existsByLocTrabId(ParamLocalTrabEntity localTrabEntity);
+
+  boolean existsBySeccaoId(SecaoEntity section);
 
 }
