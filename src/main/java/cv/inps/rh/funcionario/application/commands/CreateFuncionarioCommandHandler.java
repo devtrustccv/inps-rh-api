@@ -190,26 +190,27 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
          })
          .toList();
 
-     funcionario.adicionarDadosContratuais(tipoContrato,
-         cargoPosicao,
-         direcao,
-         seccao,
-         dadosContratuais.getCentroCusto(),
-          carreira,
-          categoria,
-         escalao,
-         vinculo,
-         dadosContratuais.getRegimeTrabalho(),
-         dadosContratuais.getSalario(),
-         dadosContratuais.getMoeda(),
-         dadosContratuais.getDataInicio(),
-         dadosContratuais.getDataFim(),
-         dadosContratuais.getDuracaoMeses(),
-         localTrabalho,
-          pais,
-          ilha,
-         defPagamentos,
-         defRemuneracoes);
+    funcionario.adicionarDadosContratuais(tipoContrato,
+        cargoPosicao,
+        direcao,
+        seccao,
+        dadosContratuais.getCentroCusto(),
+         carreira,
+         categoria,
+        escalao,
+        vinculo,
+        dadosContratuais.getRegimeTrabalho(),
+        dadosContratuais.getSalario(),
+        dadosContratuais.getMoeda(),
+        dadosContratuais.getDataInicio(),
+        dadosContratuais.getDataFim(),
+        dadosContratuais.getDuracaoMeses(),
+        localTrabalho,
+         pais,
+         ilha,
+        defPagamentos,
+        defRemuneracoes,
+        "REGISTO_COLABORADOR");
 
 
 

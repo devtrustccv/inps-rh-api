@@ -852,7 +852,8 @@ public class Funcionario {
                                         Geografia pais,
                                         Geografia ilha,
                                         List<DefPagamento> pagamentos,
-                                        List<DefinicaoRemuneracao> remuneracoes) {
+                                        List<DefinicaoRemuneracao> remuneracoes,
+                                        String validacaoReferencia) {
 
 
     var contrato = Contrato.create(dataInicio, dataFim,
@@ -893,7 +894,7 @@ public class Funcionario {
     regimeTrabalhos.add(regime);
     situacoesLaborais.add(situacaoLaboral);
 
-    var validacao = Validacao.create("INSERT", "REGISTO_COLABORADOR", null, "obs", tiposRelacionamento);
+    var validacao = Validacao.create("INSERT", validacaoReferencia != null ? validacaoReferencia : "REGISTO_COLABORADOR", null, "obs", tiposRelacionamento);
     this.adicionarValidacao(validacao);
 
   }
@@ -1022,7 +1023,8 @@ public class Funcionario {
         pais,
         ilha,
         pagamentos,
-        remuneracoes);
+        remuneracoes,
+        "NOVO_CONTRATO");
   }
 
   public Contrato getContratoById(Long id) {
