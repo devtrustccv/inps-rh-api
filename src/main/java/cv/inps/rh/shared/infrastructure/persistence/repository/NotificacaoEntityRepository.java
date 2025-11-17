@@ -1,24 +1,22 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
-import cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import org.springframework.stereotype.Repository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
-import java.util.Optional;
-import java.util.UUID;
+import org.springframework.stereotype.Repository;
 
 
 @Repository
 public interface NotificacaoEntityRepository extends
     JpaRepository<NotificacaoEntity, Long>,
-    JpaSpecificationExecutor<NotificacaoEntity>
-{
+    JpaSpecificationExecutor<NotificacaoEntity> {
 
-      default NotificacaoEntity findByIdOrThrow(Long id) {
-          return this.findById(id)
-          .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"NotificacaoEntity not found for id: " + id));
-      }
+  default NotificacaoEntity findByIdOrThrow(Long id) {
+    return this.findById(id)
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "NotificacaoEntity not found for id: " + id));
+  }
+
 
 }

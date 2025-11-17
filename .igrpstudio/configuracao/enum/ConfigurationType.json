@@ -30,6 +30,48 @@
         "carreira_type",
         "PARAM_CARREIRA"
       ]
+    },
+    {
+      "name": "PARAM_CARGO",
+      "attributes": [
+        "cargo_type",
+        "PARAM_CARGO"
+      ]
+    },
+    {
+      "name": "PARAM_ESCALAO",
+      "attributes": [
+        "escalao_type",
+        "PARAM_ESCALAO"
+      ]
+    },
+    {
+      "name": "PARAM_LOCAL_TRABALHO",
+      "attributes": [
+        "local_trabalho_type",
+        "PARAM_LOCAL_TRABALHO"
+      ]
+    },
+    {
+      "name": "PARAM_SECCAO",
+      "attributes": [
+        "seccao_type",
+        "PARAM_SECCAO"
+      ]
+    },
+    {
+      "name": "PARAM_TIPO_DOCUMENTO",
+      "attributes": [
+        "tipo_documento_type",
+        "PARAM_TIPO_DOCUMENTO"
+      ]
+    },
+    {
+      "name": "PARAM_NOTIFICACAO",
+      "attributes": [
+        "notificacao_type",
+        "PARAM_NOTIFICACAO"
+      ]
     }
   ],
   "attributes": [

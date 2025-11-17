@@ -5,8 +5,8 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.SituacaoLaboralRequestDTO;
 import cv.inps.rh.configuracao.application.dto.SituacaoLaboralResponseDTO;
-import cv.inps.rh.configuracao.domain.ConfigurationUtils;
-import cv.inps.rh.configuracao.domain.service.configurationengine.ConfigurationProcess;
+import cv.inps.rh.configuracao.domain.service.engine.ConfigurationProcess;
+import cv.inps.rh.configuracao.domain.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSitLaboralEntity;
@@ -103,6 +103,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     response.setProgressaoPromocao(domain.get(e.getFlgCessaProgressao().toString()));
     response.setEstadoContrato(contractStatus.get(e.getFlgEstadoContrato().toString()));
     response.setEstado(e.getEstado().getCode());
+    response.setEstadoDescricao(e.getEstado().getDescription());
     return response;
   }
 

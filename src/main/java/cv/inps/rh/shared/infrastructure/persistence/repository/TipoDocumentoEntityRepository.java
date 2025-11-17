@@ -1,12 +1,12 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import org.springframework.stereotype.Repository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,4 +26,10 @@ public interface TipoDocumentoEntityRepository extends
 
   List<TipoDocumentoEntity> findAllByEstado(Estado estado);
 
+  Optional<TipoDocumentoEntity> findByUuid(UUID uuid);
+
+  default TipoDocumentoEntity findByUuidOrThrow(UUID uuid) {
+    return findByUuid(uuid)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("TipoDocumentoEntity not found for id: " + uuid));
+  }
 }

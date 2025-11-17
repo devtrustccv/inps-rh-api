@@ -1,4 +1,4 @@
-package cv.inps.rh.configuracao.domain.service.configurationengine;
+package cv.inps.rh.configuracao.domain.service.engine;
 
 import java.util.List;
 import java.util.Map;

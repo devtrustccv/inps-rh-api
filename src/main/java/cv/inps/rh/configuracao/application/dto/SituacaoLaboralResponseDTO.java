@@ -20,4 +20,7 @@ public class SituacaoLaboralResponseDTO extends SituacaoLaboralRequestDTO {
 
   private String id ;
 
+
+  private String estadoDescricao ;
+
 }
