@@ -49,6 +49,47 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "novoContrato",
+      "path": "contratos/{idFuncionario}",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "DadosContratuaisReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DadosContratuaisResp",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "zt8ilwt31b-getListContratos-getListContratos"

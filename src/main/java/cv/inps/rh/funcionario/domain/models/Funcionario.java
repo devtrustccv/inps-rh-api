@@ -1008,31 +1008,13 @@ public class Funcionario {
     if (tiposRelacionamentos == null || tiposRelacionamentos.isEmpty()) {
       return null;
     }
-    // 1. Filtra os com estadoActividadeAdm = 0
-    List<TiposRelacionamento> ativos = tiposRelacionamentos.stream()
-        .filter(t -> t.getEstadoActividadeAdm() != null && t.getEstadoActividadeAdm() == 0)
-        .toList();
 
-    // Caso existam estadoActividadeAdm = 0
-    if (!ativos.isEmpty()) {
-      return ativos.stream()
-          .max(Comparator.comparing(TiposRelacionamento::getDataInicio))
-          .orElse(null);
-    }
-
-    // 2. Não existiram 0 → procurar estadoActividadeAdm = 1
-    List<TiposRelacionamento> inativos = tiposRelacionamentos.stream()
+    return tiposRelacionamentos.stream()
         .filter(t -> t.getEstadoActividadeAdm() != null && t.getEstadoActividadeAdm() == 1)
-        .toList();
-
-    if (!inativos.isEmpty()) {
-      return inativos.stream()
-          .max(Comparator.comparing(TiposRelacionamento::getDataFim))
-          .orElse(null);
-    }
-
-    return null;
+        .max(Comparator.comparing(TiposRelacionamento::getDataInicio))
+        .orElse(null);
   }
+
 
   public void alterarSituacaoLaboral(String situacaoLaboral,
                                      String motivo,

@@ -18,8 +18,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.funcionario.application.queries.*;
-
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.inps.rh.funcionario.application.commands.*;
 import cv.inps.rh.funcionario.application.dto.WrapperListContratoDTO;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 
 @IgrpController
 @RestController
@@ -27,12 +30,13 @@ import cv.inps.rh.funcionario.application.dto.WrapperListContratoDTO;
 @Tag(name = "Contrato", description = "Gestao Contratos")
 public class ContratoController {
 
-
+  
   private final QueryBus queryBus;
+  private final CommandBus commandBus;
 
-  public ContratoController(QueryBus queryBus) {
+  public ContratoController(QueryBus queryBus, CommandBus commandBus) {
           this.queryBus = queryBus;
-
+          this.commandBus = commandBus;
   }
    @GetMapping(
    value = "contratos"
@@ -53,7 +57,7 @@ public class ContratoController {
       )
     }
   )
-
+  
   public ResponseEntity<WrapperListContratoDTO> getListContratos(
     @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "vinculo", required = false) Long vinculo,
@@ -66,6 +70,37 @@ public class ContratoController {
       ResponseEntity<WrapperListContratoDTO> response = queryBus.handle(query);
 
       return response;
+  }
+
+   @PostMapping(
+   value = "contratos/{idFuncionario}"
+  )
+  @Operation(
+    summary = "POST method to handle operations for novoContrato",
+    description = "POST method to handle operations for novoContrato",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DadosContratuaisRespDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<DadosContratuaisRespDTO> novoContrato(@Valid @RequestBody DadosContratuaisReqDTO novoContratoRequest
+    , @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var command = new NovoContratoCommand(novoContratoRequest, idFuncionario);
+
+       ResponseEntity<DadosContratuaisRespDTO> response = commandBus.send(command);
+
+       return response;
   }
 
 }
