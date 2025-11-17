@@ -46,4 +46,11 @@ public class ContratoRepositoryImpl implements ContratoRepository {
         .toList();
 
   }
+
+  @Transactional(readOnly = true)
+  @Override
+  public java.util.Optional<Contrato> findById(Long id) {
+    return contratoEntityRepository.findById(id)
+        .map(contratoMapper::toDomain);
+  }
 }
