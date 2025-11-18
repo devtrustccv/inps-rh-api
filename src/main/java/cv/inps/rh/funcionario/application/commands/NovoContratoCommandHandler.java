@@ -81,7 +81,9 @@ public class NovoContratoCommandHandler implements CommandHandler<NovoContratoCo
      DadosContratuaisReqDTO dados = command.getNovocontrato().getDadosContratuais();
      var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
 
-     var funcionario = funcionarioRepository.findById(idFunc).orElseThrow();
+     var funcionario = funcionarioRepository.findById(idFunc).orElseThrow(
+         () -> IgrpResponseStatusException.notFound("Funcionario com id '%s' não encontrado".formatted(idFunc))
+     );
 
      var tipoContrato = paramContratoMapper.toDomain(dados.getTipoContratoId());
      var cargoPosicao = paramCargoMapper.toDomain(dados.getCargoPosicaoId());
