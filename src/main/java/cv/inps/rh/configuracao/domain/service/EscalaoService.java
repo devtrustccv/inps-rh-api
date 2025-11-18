@@ -20,6 +20,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
+@Transactional
 @Service("escalao_type")
 public class EscalaoService extends ConfigurationProcess<EscalaoRequestDTO> {
 

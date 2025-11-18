@@ -16,6 +16,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCategoriaEnt
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Transactional
 @Service("carreira_type")
 public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
 

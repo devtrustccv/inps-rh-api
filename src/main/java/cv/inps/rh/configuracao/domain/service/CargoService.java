@@ -17,6 +17,7 @@ import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 
+@Transactional
 @Service("cargo_type")
 public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
 
@@ -104,8 +106,10 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
     Specification<ParamCargoEntity> spec = (root, _, cb) -> {
       var predicates = new ArrayList<Predicate>();
       predicates.add(cb.equal(root.get(ParamCargoEntity_.estado), status));
-      if (StringUtils.hasText(cargo))
-        predicates.add(cb.like(cb.lower(root.get(ParamCargoEntity_.nomeNormalizado)), "%" + cargo.toLowerCase() + "%"));
+      if (StringUtils.hasText(cargo)) {
+        var normalizedVal = "%" + ConfigurationUtils.normalizeAndSetToLowerCaseText(cargo) + "%";
+        predicates.add(cb.like(cb.lower(root.get(ParamCargoEntity_.nomeNormalizado)), normalizedVal));
+      }
       return cb.and(predicates.toArray(new Predicate[0]));
     };
 
