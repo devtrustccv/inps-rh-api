@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.funcionario.application.dto.NovoContratoDTO;
 
 @Data
 @NoArgsConstructor
@@ -13,7 +13,7 @@ import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 public class NovoContratoCommand implements Command {
 
   
-  private DadosContratuaisReqDTO dadoscontratuaisreq;
+  private NovoContratoDTO novocontrato;
   @NotBlank(message = "The field <idFuncionario> is required")
   private String idFuncionario;
 

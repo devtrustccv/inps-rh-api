@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.RenovarContratoReqDTO;
+import cv.inps.rh.funcionario.application.dto.RenovacaoContratoDTO;
 
 @Data
 @NoArgsConstructor
@@ -13,6 +13,6 @@ import cv.inps.rh.funcionario.application.dto.RenovarContratoReqDTO;
 public class RenovarContratoCommand implements Command {
 
   
-  private RenovarContratoReqDTO renovarcontratoreq;
+  private RenovacaoContratoDTO renovacaocontrato;
 
 }

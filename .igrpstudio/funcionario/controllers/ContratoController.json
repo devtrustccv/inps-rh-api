@@ -58,7 +58,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "DadosContratuaisReq",
+              "type": "NovoContrato",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
@@ -86,47 +86,6 @@
       "pathVariables": [
         {
           "name": "idFuncionario",
-          "type": "string",
-          "isRequired": true
-        }
-      ]
-    },
-    {
-      "actionName": "validarContrato",
-      "path": "validar-contrato/{contratoId}",
-      "method": "POST",
-      "requestBody": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "ValidarContrato",
-              "collectionType": "none",
-              "name": "data",
-              "objectType": "dto",
-              "module": "funcionario"
-            }
-          }
-        }
-      },
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "ValidarContrato",
-                "objectType": "dto",
-                "name": "data",
-                "collectionType": "none",
-                "module": "funcionario"
-              }
-            }
-          }
-        }
-      },
-      "pathVariables": [
-        {
-          "name": "contratoId",
           "type": "string",
           "isRequired": true
         }
@@ -173,7 +132,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "RenovarContratoReq",
+              "type": "RenovacaoContrato",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
@@ -188,7 +147,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "RenovarContratoReq",
+                "type": "RenovacaoContrato",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -198,48 +157,7 @@
           }
         }
       }
-    },
-    {
-      "actionName": "validarRenovacaoContrato",
-      "path": "validar-renovacao-contrato/{contratoId}",
-      "method": "POST",
-      "requestBody": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "ValidarRenovacaoContrato",
-              "collectionType": "none",
-              "name": "data",
-              "objectType": "dto",
-              "module": "funcionario"
-            }
-          }
-        }
-      },
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "ValidarRenovacaoContrato",
-                "objectType": "dto",
-                "name": "data",
-                "collectionType": "none",
-                "module": "funcionario"
-              }
-            }
-          }
-        }
-      },
-      "pathVariables": [
-        {
-          "name": "contratoId",
-          "type": "string",
-          "isRequired": true
-        }
-      ]
     }
   ],
-  "id": "zt8ilwt31b-getListContratos-getListContratos-validarContrato-validarContrato-getContratoById-getContratoById"
+  "id": "zt8ilwt31b-getListContratos-getListContratos-validarContrato-validarContrato-getContratoById-getContratoById-novoContrato-validarContrato-novoContrato-renovarContrato"
 }

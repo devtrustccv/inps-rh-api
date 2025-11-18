@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "ValidarContrato",
+  "name": "NovoContrato",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [

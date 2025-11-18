@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "ValidarRenovacaoContrato",
+  "name": "RenovacaoContrato",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [

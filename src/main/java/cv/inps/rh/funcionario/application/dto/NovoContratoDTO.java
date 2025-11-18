@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.RenovarContratoReqDTO;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 
 @Data
@@ -18,13 +18,13 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 
 
 @IgrpDTO
-public class ValidarRenovacaoContratoDTO  {
+public class NovoContratoDTO  {
 
   
   
-  private EstadoValidacao validacao ;
+  private EstadoValidacao validar ;
   
   @Valid
-  private RenovarContratoReqDTO dadosRenovacao ;
+  private DadosContratuaisReqDTO dadosContratuais ;
 
 }

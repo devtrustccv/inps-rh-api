@@ -21,11 +21,9 @@ import cv.inps.rh.funcionario.application.queries.*;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.funcionario.application.commands.*;
 import cv.inps.rh.funcionario.application.dto.WrapperListContratoDTO;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.funcionario.application.dto.NovoContratoDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
-import cv.inps.rh.funcionario.application.dto.ValidarContratoDTO;
-import cv.inps.rh.funcionario.application.dto.RenovarContratoReqDTO;
-import cv.inps.rh.funcionario.application.dto.ValidarRenovacaoContratoDTO;
+import cv.inps.rh.funcionario.application.dto.RenovacaoContratoDTO;
 
 @IgrpController
 @RestController
@@ -95,44 +93,13 @@ public class ContratoController {
     }
   )
   
-  public ResponseEntity<DadosContratuaisRespDTO> novoContrato(@Valid @RequestBody DadosContratuaisReqDTO novoContratoRequest
+  public ResponseEntity<DadosContratuaisRespDTO> novoContrato(@Valid @RequestBody NovoContratoDTO novoContratoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
       final var command = new NovoContratoCommand(novoContratoRequest, idFuncionario);
 
        ResponseEntity<DadosContratuaisRespDTO> response = commandBus.send(command);
-
-       return response;
-  }
-
-   @PostMapping(
-   value = "validar-contrato/{contratoId}"
-  )
-  @Operation(
-    summary = "POST method to handle operations for validarContrato",
-    description = "POST method to handle operations for validarContrato",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "",
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = ValidarContratoDTO.class,
-                  type = "object")
-          )
-      )
-    }
-  )
-  
-  public ResponseEntity<ValidarContratoDTO> validarContrato(@Valid @RequestBody ValidarContratoDTO validarContratoRequest
-    , @PathVariable(value = "contratoId") String contratoId)
-  {
-
-      final var command = new ValidarContratoCommand(validarContratoRequest, contratoId);
-
-       ResponseEntity<ValidarContratoDTO> response = commandBus.send(command);
 
        return response;
   }
@@ -181,51 +148,20 @@ public class ContratoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = RenovarContratoReqDTO.class,
+                  implementation = RenovacaoContratoDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<RenovarContratoReqDTO> renovarContrato(@Valid @RequestBody RenovarContratoReqDTO renovarContratoRequest
+  public ResponseEntity<RenovacaoContratoDTO> renovarContrato(@Valid @RequestBody RenovacaoContratoDTO renovarContratoRequest
     )
   {
 
       final var command = new RenovarContratoCommand(renovarContratoRequest);
 
-       ResponseEntity<RenovarContratoReqDTO> response = commandBus.send(command);
-
-       return response;
-  }
-
-   @PostMapping(
-   value = "validar-renovacao-contrato/{contratoId}"
-  )
-  @Operation(
-    summary = "POST method to handle operations for validarRenovacaoContrato",
-    description = "POST method to handle operations for validarRenovacaoContrato",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "",
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = ValidarRenovacaoContratoDTO.class,
-                  type = "object")
-          )
-      )
-    }
-  )
-  
-  public ResponseEntity<ValidarRenovacaoContratoDTO> validarRenovacaoContrato(@Valid @RequestBody ValidarRenovacaoContratoDTO validarRenovacaoContratoRequest
-    , @PathVariable(value = "contratoId") String contratoId)
-  {
-
-      final var command = new ValidarRenovacaoContratoCommand(validarRenovacaoContratoRequest, contratoId);
-
-       ResponseEntity<ValidarRenovacaoContratoDTO> response = commandBus.send(command);
+       ResponseEntity<RenovacaoContratoDTO> response = commandBus.send(command);
 
        return response;
   }

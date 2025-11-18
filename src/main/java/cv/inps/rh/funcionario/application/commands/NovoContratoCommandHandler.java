@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.commands;
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.funcionario.application.dto.NovoContratoDTO;
 import cv.inps.rh.parametrizacao.domain.repository.ParamSituacaoLaboralRepository;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import org.springframework.http.ResponseEntity;
@@ -77,7 +78,7 @@ public class NovoContratoCommandHandler implements CommandHandler<NovoContratoCo
   public ResponseEntity<DadosContratuaisRespDTO> handle(NovoContratoCommand command) {
      LOGGER.info("Novo contrato para funcionario: {}", command.getIdFuncionario());
 
-     DadosContratuaisReqDTO dados = command.getDadoscontratuaisreq();
+     DadosContratuaisReqDTO dados = command.getNovocontrato().getDadosContratuais();
      var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
 
      var funcionario = funcionarioRepository.findById(idFunc).orElseThrow();
@@ -151,6 +152,7 @@ public class NovoContratoCommandHandler implements CommandHandler<NovoContratoCo
      funcionarioRepository.save(funcionario);
 
      var resp = funcionarioMapper.dadosContratuaisRespDTO(funcionario);
+
      return ResponseEntity.ok(resp);
   }
 
