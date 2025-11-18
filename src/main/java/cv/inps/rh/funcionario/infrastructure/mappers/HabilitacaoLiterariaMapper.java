@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaReqDTO;
 import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaRespDTO;
 import cv.inps.rh.funcionario.domain.models.HabilitacaoLiteraria;
@@ -49,8 +50,8 @@ public class HabilitacaoLiterariaMapper {
     if (domain == null) return null;
 
     HabilitacaoLiterariaEntity entity = new HabilitacaoLiterariaEntity();
-    if(domain.getId() !=null && domain.getId()>0)
-     entity.setId(domain.getId());
+    if (domain.getId() != null && domain.getId() > 0)
+      entity.setId(domain.getId());
 
     entity.setUuid(domain.getUuid().getValor());
 
@@ -124,6 +125,34 @@ public class HabilitacaoLiterariaMapper {
     return domains.stream()
         .map(this::toResponseDTO)
         .toList();
+  }
+
+
+  public HabilitacaoLiterariaEntity toEntity(HabilitacaoLiterariaReqDTO dto) {
+    if (dto == null) {
+      return null;
+    }
+    HabilitacaoLiterariaEntity e = new HabilitacaoLiterariaEntity();
+
+    // ID (caso update)
+    if (dto.getId() != null && dto.getId() > 0)
+      e.setId(dto.getId());
+
+    // Referência para país
+    if (dto.getPaisId() != null) {
+      e.setPaisId(entityManager.getReference(GeografiaEntity.class, dto.getPaisId()));
+    }
+    e.setEstabelecimento(dto.getEstabelecimento());
+    e.setArea(dto.getArea());
+    e.setNomeCurso(dto.getCurso());
+    e.setNivel(dto.getGrauAcademico());
+    e.setDataInicio(dto.getDataInicio());
+    e.setDataFim(dto.getDataTermino());
+    e.setConcluido(dto.getConcluido());
+    e.setUuid(UuidCreator.getTimeOrderedEpoch());
+
+
+    return e;
   }
 
 

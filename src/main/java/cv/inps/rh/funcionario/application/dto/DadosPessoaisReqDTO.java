@@ -23,49 +23,50 @@ import java.util.List;
 @IgrpDTO
 public class DadosPessoaisReqDTO  {
 
-  
-  
+
+  private Long idColaborador;
+
   private Long tipoDocumentoId ;
-  
-  
+
+
   private String numDocumento ;
-  
-  
+
+
   private String nome ;
-  
-  
+
+
   private String urlFoto ;
-  
-  
+
+
   private LocalDate dataNascimento ;
-  
-  
+
+
   private String genero ;
-  
-  
+
+
   private String nomeMae ;
-  
-  
+
+
   private String nomePai ;
-  
-  
+
+
   private String estadoCivil ;
-  
-  
+
+
   private String nacionalidade ;
-  
-  
+
+
   private Long naturalidadeId ;
-  
-  
+
+
   private Long nif ;
-  
-  
+
+
   private String numSegurado ;
-  
+
   @Valid
   private List<ContactoReqDTO> contactos = new ArrayList<>();
-  
+
   @Valid
   private EnderecoReqDTO endereco ;
 

@@ -1,8 +1,10 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.EnderecoReqDTO;
 import cv.inps.rh.funcionario.application.dto.EnderecoRespDTO;
 import cv.inps.rh.funcionario.domain.models.Endereco;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EnderecoEntity;
@@ -143,6 +145,26 @@ public class EnderecoMapper {
     return enderecos.stream()
         .map(this::toDTO)
         .collect(java.util.stream.Collectors.toList());
+  }
+
+
+  public EnderecoEntity toEntity(EnderecoReqDTO dto) {
+    if (dto == null) {
+      return null;
+    }
+    EnderecoEntity e = new EnderecoEntity();
+    e.setPaisId(ref(GeografiaEntity.class, dto.getPaisId()));
+    e.setIlhaId(ref(GeografiaEntity.class, dto.getIlhaId()));
+    e.setConcelhoId(ref(GeografiaEntity.class, dto.getConcelhoId()));
+    e.setFreguesiaId(ref(GeografiaEntity.class, dto.getFreguesiaId()));
+    e.setZonaId(ref(GeografiaEntity.class, dto.getZonaId()));
+    e.setMorada(dto.getMorada());
+    e.setUuid(UuidCreator.getTimeOrderedEpoch());
+    return e;
+  }
+
+  private <T> T ref(Class<T> type, Long id) {
+    return id == null ? null : em.getReference(type, id);
   }
 
 }

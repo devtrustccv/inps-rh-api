@@ -120,5 +120,28 @@ public class ExperienciaProfissionalMapper {
         .toList();
   }
 
+  public ExperienciaProfEntity toEntity(ExperienciaProfissionalReqDTO dto) {
+    if (dto == null) {
+      return null;
+    }
+
+    ExperienciaProfEntity e = new ExperienciaProfEntity();
+
+    if(dto.getId() !=null && dto.getId()>0)
+      e.setId(dto.getId());
+
+    if (dto.getPaisId() != null) {
+      e.setPaisId(entityManager.getReference(GeografiaEntity.class, dto.getPaisId()));
+    }
+
+    e.setEmpresa(dto.getEmpresa());
+    e.setCargo(dto.getCargo());
+    e.setDataInicio(dto.getDataEntrada());
+    e.setDataFim(dto.getDataSaida());
+    e.setObservacao(dto.getObservacoes());
+
+    return e;
+  }
+
 
 }

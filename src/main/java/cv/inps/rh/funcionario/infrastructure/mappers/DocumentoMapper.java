@@ -102,5 +102,20 @@ public class DocumentoMapper {
         .toList();
   }
 
+  public DocumentoEntity toEntity(AnexoReqDTO dto) {
+    if (dto == null) return null;
+    DocumentoEntity entity = new DocumentoEntity();
+    entity.setTpDocumentoId(entityManager.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
+    entity.setReferenciaName(dto.getDocumento());
+    entity.setReferenciaId(dto.getDocumento());
+    entity.setDocId(1L);
+    return entity;
+  }
+
+  public java.util.List<DocumentoEntity> toEntities(java.util.List<AnexoReqDTO> dtos) {
+    if (dtos == null) return null;
+    return dtos.stream().map(this::toEntity).toList();
+  }
+
 
 }

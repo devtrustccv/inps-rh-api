@@ -6,6 +6,18 @@
   "enableCustonValidation": false,
   "attributes": [
     {
+      "name": "idColaborador",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "tipoDocumentoId",
       "objectType": "java",
       "type": "long",

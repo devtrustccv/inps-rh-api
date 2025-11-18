@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.ContactoReqDTO;
 import cv.inps.rh.funcionario.application.dto.ContactoRespDTO;
 import cv.inps.rh.funcionario.domain.models.Contacto;
@@ -65,6 +66,20 @@ public class ContactoMapper {
     return reqDTOS.stream()
         .map(this::toDomain)
         .collect(Collectors.toList());
+  }
+
+  public ContactoEntity toEntity(ContactoReqDTO dto) {
+    if (dto == null) return null;
+    ContactoEntity entity = new ContactoEntity();
+    entity.setTipoContacto(dto.getTipoContacto());
+    entity.setContacto(dto.getContacto());
+    entity.setUuid(UuidCreator.getTimeOrderedEpoch());
+    return entity;
+  }
+
+  public java.util.List<ContactoEntity> toEntities(java.util.List<ContactoReqDTO> dtos) {
+    if (dtos == null) return null;
+    return dtos.stream().map(this::toEntity).collect(Collectors.toList());
   }
 
 }

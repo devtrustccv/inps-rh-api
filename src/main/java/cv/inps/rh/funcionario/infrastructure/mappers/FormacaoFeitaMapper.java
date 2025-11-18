@@ -116,6 +116,27 @@ public class FormacaoFeitaMapper {
         .collect(Collectors.toList());
   }
 
+  public FormacaoFeitaEntity toEntity(FormacaoProfissionalReqDTO dto) {
+    if (dto == null) {
+      return null;
+    }
+    FormacaoFeitaEntity e = new FormacaoFeitaEntity();
+
+    if(dto.getId() !=null && dto.getId()>0)
+     e.setId(dto.getId());
+
+    // Referência ao país
+    if (dto.getPaisId() != null) {
+      e.setPaisId(entityManager.getReference(GeografiaEntity.class, dto.getPaisId()));
+    }
+
+    e.setEstabelecimento(dto.getEstabelecimento());
+    e.setRhtpfor(dto.getTipoFormacao());
+    e.setCurso(dto.getDesignacao());
+    e.setNivel(dto.getNivel());
+
+    return e;
+  }
 
 
 }

@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.commands;
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
+import cv.inps.rh.funcionario.application.service.DossierService;
 import cv.inps.rh.funcionario.domain.models.DefPagamento;
 import cv.inps.rh.funcionario.domain.models.DefinicaoRemuneracao;
 import cv.inps.rh.funcionario.domain.models.Funcionario;
@@ -62,8 +63,9 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
   private final ParamSituacaoLaboralRepository paramSituacaoLaboralRepository;
 
+  private final DossierService dossierService;
 
-   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper, GeografiaMapper geografiaMapper, TipoDocumentoMapper tipoDocumentoMapper, ParamCargoMapper paramCargoMapper, ParamContratoMapper paramContratoMapper, InstituicaoMapper instituicaoMapper, SecaoMapper secaoMapper, ParamCarreiraMapper paramCarreiraMapper, ParamCategoriaMapper paramCategoriaMapper, ParamEscalaoMapper paramEscalaoMapper, ParamVinculoMapper paramVinculoMapper, ParamLocalTrabMapper paramLocalTrabMapper, TipoMovimentoMapper tipoMovimentoMapper, ParamSituacaoLaboralRepository paramSituacaoLaboralRepository) {
+   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper, GeografiaMapper geografiaMapper, TipoDocumentoMapper tipoDocumentoMapper, ParamCargoMapper paramCargoMapper, ParamContratoMapper paramContratoMapper, InstituicaoMapper instituicaoMapper, SecaoMapper secaoMapper, ParamCarreiraMapper paramCarreiraMapper, ParamCategoriaMapper paramCategoriaMapper, ParamEscalaoMapper paramEscalaoMapper, ParamVinculoMapper paramVinculoMapper, ParamLocalTrabMapper paramLocalTrabMapper, TipoMovimentoMapper tipoMovimentoMapper, ParamSituacaoLaboralRepository paramSituacaoLaboralRepository, DossierService dossierService) {
 
      this.funcionarioMapper = funcionarioMapper;
      this.funcionarioRepository = funcionarioRepository;
@@ -90,6 +92,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
      this.paramLocalTrabMapper = paramLocalTrabMapper;
      this.tipoMovimentoMapper = tipoMovimentoMapper;
      this.paramSituacaoLaboralRepository = paramSituacaoLaboralRepository;
+     this.dossierService = dossierService;
    }
 
    @IgrpCommandHandler
@@ -104,7 +107,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
     /* Geografia localNascimento = geografiaRepository.findById(dto.getNaturalidadeId())
          .orElseThrow(() -> IgrpResponseStatusException.badRequest("Geografia não encontrada: " + dto.getNaturalidadeId()));*/
 
-     var dadosPessoais = dto.getDadosPessoais();
+    /* var dadosPessoais = dto.getDadosPessoais();
      TipoDocumento tipoDocumento = tipoDocumentoMapper.toDomain(dadosPessoais.getTipoDocumentoId());
 
      Geografia localNascimento = geografiaMapper.toDomain(dadosPessoais.getNaturalidadeId());
@@ -231,7 +234,9 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
      var responseDTO = funcionarioMapper.toResponseDTO(saved);
 
-     return ResponseEntity.ok(responseDTO);
+     return ResponseEntity.ok(responseDTO);*/
+
+     return ResponseEntity.ok(dossierService.saveDossierColaborador(command));
 
    }
 

@@ -110,4 +110,20 @@ public class DadosBancariosMapper {
     return domains.stream().map(this::toResponseDTO).collect(Collectors.toList());
   }
 
+  public DadosBancariosEntity toEntity(DadosBancariosReqDTO dto) {
+    if (dto == null) return null;
+    DadosBancariosEntity entity = new DadosBancariosEntity();
+    if (dto.getEntidadeBancariaId() != null) {
+      entity.setRhbId(entityManager.getReference(BancoEntity.class, dto.getEntidadeBancariaId()));
+    }
+    entity.setNumConta(dto.getNumConta());
+    entity.setDataInicio(dto.getDataInicio());
+    entity.setDataFim(dto.getDataFim());
+    return entity;
+  }
+
+  public java.util.List<DadosBancariosEntity> toEntities(java.util.List<DadosBancariosReqDTO> dtos) {
+    if (dtos == null) return null;
+    return dtos.stream().map(this::toEntity).collect(Collectors.toList());
+  }
 }

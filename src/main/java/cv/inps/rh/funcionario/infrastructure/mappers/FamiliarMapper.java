@@ -114,6 +114,27 @@ public class FamiliarMapper {
     return dto;
   }
 
+  public FamiliarEntity toEntity(AgregadoDependenteReqDTO dto) {
+    if (dto == null) return null;
+    FamiliarEntity entity = new FamiliarEntity();
+    if (dto.getTipoDocumentoId() != null) {
+      entity.setTpDocumento(em.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
+    }
+    entity.setNumDocumento(dto.getNumDocumento());
+    entity.setNome(dto.getNome());
+    entity.setDataNascimento(dto.getDataNascimento());
+    entity.setSexo(dto.getGenero());
+    entity.setGdpId(dto.getGrauParentesco());
+    entity.setDependencia(dto.getDependente());
+    entity.setMembroAgr(dto.getAgregada());
+    return entity;
+  }
+
+  public java.util.List<FamiliarEntity> toEntities(java.util.List<AgregadoDependenteReqDTO> dtos) {
+    if (dtos == null) return null;
+    return dtos.stream().map(this::toEntity).toList();
+  }
+
 
   public List<AgregadoDependenteRespDTO> toResponseDTOList(List<Familiar> familiares) {
     if (familiares == null) return null;
