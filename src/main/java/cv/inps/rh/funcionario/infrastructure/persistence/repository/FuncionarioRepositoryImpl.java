@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.domain.models.Funcionario;
 import cv.inps.rh.funcionario.domain.projections.FuncionarioList;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import lombok.RequiredArgsConstructor;
@@ -61,6 +62,11 @@ public class FuncionarioRepositoryImpl implements FuncionarioRepository {
   @Override
   public Optional<Funcionario> findFuncionarioWithContratos(IdentificadorUnico id) {
     return funcionarioEntityRepository.findFuncionarioWithContratos(id.getValor()).map(mapper::toDomain);
+  }
+
+  @Override
+  public boolean hasActiveContrato(IdentificadorUnico id) {
+    return funcionarioEntityRepository.hasActiveContrato(id.getValor(), Estado.A);
   }
 
 

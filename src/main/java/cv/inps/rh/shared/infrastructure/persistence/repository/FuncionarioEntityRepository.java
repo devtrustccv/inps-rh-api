@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import cv.inps.rh.shared.application.constants.Estado;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -83,6 +84,11 @@ public interface FuncionarioEntityRepository extends
 
   @Query("SELECT f FROM FuncionarioEntity f LEFT JOIN FETCH f.contratos WHERE f.uuid = :uuid")
   Optional<FuncionarioEntity> findFuncionarioWithContratos(@Param("uuid") UUID uuid);
+
+  @Query("SELECT (COUNT(c) > 0) FROM ContratoEntity c WHERE c.funId.uuid = :funId AND c.estado = :estado")
+  boolean hasActiveContrato(@Param("funId") UUID publicId, @Param("estado") Estado estado);
+
+
 }
 
 

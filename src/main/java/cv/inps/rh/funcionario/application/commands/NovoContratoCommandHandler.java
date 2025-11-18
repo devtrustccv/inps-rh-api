@@ -76,10 +76,15 @@ public class NovoContratoCommandHandler implements CommandHandler<NovoContratoCo
 
   @IgrpCommandHandler
   public ResponseEntity<DadosContratuaisRespDTO> handle(NovoContratoCommand command) {
-     LOGGER.info("Novo contrato para funcionario: {}", command.getIdFuncionario());
+     LOGGER.info("Novo contrato para funcionario: {}", command);
+
+    var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
+
+     if(funcionarioRepository.hasActiveContrato(idFunc)){
+       throw IgrpResponseStatusException.badRequest("Funcionario com id '%s' já possui um contrato ativo".formatted(idFunc));
+     }
 
      DadosContratuaisReqDTO dados = command.getNovocontrato().getDadosContratuais();
-     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
 
      var funcionario = funcionarioRepository.findById(idFunc).orElseThrow(
          () -> IgrpResponseStatusException.notFound("Funcionario com id '%s' não encontrado".formatted(idFunc))
