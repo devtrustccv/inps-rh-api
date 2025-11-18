@@ -10,6 +10,9 @@ import java.util.regex.Pattern;
 
 public class ConfigurationUtils {
 
+  private ConfigurationUtils() {
+  }
+
   public static Integer parseFlag(String value) {
     return StringUtils.hasText(value) ? Integer.parseInt(value) : null;
   }
@@ -24,7 +27,6 @@ public class ConfigurationUtils {
         Integer.parseInt(size)
     );
   }
-
 
   public static String normalizeAndSetToLowerCaseText(String input) {
 
