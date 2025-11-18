@@ -17,6 +17,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.ParamContratoEnti
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
+@Transactional
 @Service("tipo_contrato_laboral_type")
 public class TipoContratoLaboralService extends ConfigurationProcess<TipoContratoLaboralRequestDTO> {
 

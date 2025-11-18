@@ -15,6 +15,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSitLaboralEn
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Transactional
 @Service("situacao_laboral_type")
 public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboralRequestDTO> {
 
