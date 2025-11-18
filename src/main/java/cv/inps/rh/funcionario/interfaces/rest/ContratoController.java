@@ -166,4 +166,35 @@ public class ContratoController {
        return response;
   }
 
+   @PutMapping(
+   value = "{id}/contratos/{contratoId}"
+  )
+  @Operation(
+    summary = "PUT method to handle operations for validarContrato",
+    description = "PUT method to handle operations for validarContrato",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DadosContratuaisRespDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<DadosContratuaisRespDTO> validarContrato(@Valid @RequestBody NovoContratoDTO validarContratoRequest
+    , @PathVariable(value = "id") String id,@PathVariable(value = "contratoId") String contratoId)
+  {
+
+      final var command = new ValidarContratoCommand(validarContratoRequest, id, contratoId);
+
+       ResponseEntity<DadosContratuaisRespDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
 }

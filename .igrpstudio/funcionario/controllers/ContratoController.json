@@ -157,6 +157,52 @@
           }
         }
       }
+    },
+    {
+      "actionName": "validarContrato",
+      "path": "{id}/contratos/{contratoId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "NovoContrato",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DadosContratuaisResp",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "contratoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "zt8ilwt31b-getListContratos-getListContratos-validarContrato-validarContrato-getContratoById-getContratoById-novoContrato-validarContrato-novoContrato-renovarContrato"
