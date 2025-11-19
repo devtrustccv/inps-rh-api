@@ -6,6 +6,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -100,8 +101,8 @@ public class ValidarRegistoColaboradorService {
 
     if(registroColaborador.getValidar()!=null){
       var estado = registroColaborador.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
+      mudaEstado(funcionario, estado);
     }
-
 
     funcionarioEntityRepository.save(funcionario);
 
@@ -111,4 +112,28 @@ public class ValidarRegistoColaboradorService {
     );
 
   }
+
+  private void mudaEstado (FuncionarioEntity funcionarioEntity, Estado estado ){
+    funcionarioEntity.setEstado(estado);
+    funcionarioEntity.setEstadoValidacao(estado.name());
+    funcionarioEntity.getEndereco().setEstado(estado);
+    funcionarioEntity.getContactos().forEach(c -> c.setEstado(estado));
+    funcionarioEntity.getFamiliares().forEach(f -> f.setEstado(estado));
+    funcionarioEntity.getDocumentos().forEach(d -> d.setEstado(estado));
+    funcionarioEntity.getDadosBancarios().forEach(b -> b.setEstado(estado));
+    funcionarioEntity.getHabilitacoesLiterarias().forEach(h -> h.setEstado(estado));
+    funcionarioEntity.getFormacoesFeitas().forEach(f -> f.setEstado(estado));
+    funcionarioEntity.getExperienciasProfissionais().forEach(e -> e.setEstado(estado));
+    funcionarioEntity.getDefinicoesRenumeracoes().forEach(r -> r.setEstado(estado));
+    funcionarioEntity.getDefinicoesPagamentos().forEach(p -> p.setEstado(estado));
+
+    var tiposRelacionamento = funcionarioMapper.getTipoRelacionamentoAtual(funcionarioEntity);
+    tiposRelacionamento.setEstado(estado);
+    tiposRelacionamento.getContratoId().setEstado(estado);
+    tiposRelacionamento.getMobId().setEstado(estado);
+    tiposRelacionamento.getCarreiraId().setEstado(estado);
+    tiposRelacionamento.getRegimeId().setEstado(estado);
+
+  }
+
 }
