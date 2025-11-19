@@ -22,7 +22,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DossierService {
 
-  private final EnderecoMapper enderecoMapper;
   private final ContactoMapper contactoMapper;
   private final FamiliarMapper familiarMapper;
   private final HabilitacaoLiterariaMapper habilitationLiterariaMapper;
@@ -32,6 +31,12 @@ public class DossierService {
   private final DadosBancariosMapper dadosBancariosMapper;
   private final ContratuaisEntityMapper contratuaisEntityMapper;
   private final FuncionarioMapper funcionarioMapper;
+  private final ContratoMapper contratoMapper;
+  private final CarreiraMapper carreiraMapper;
+  private final MobilidadeMapper mobilidadeMapper;
+  private final RegimeTrabalhoMapper regimeTrabalhoMapper;
+  private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
+  private final DefPagamentoMapper defPagamentoMapper;
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
@@ -48,12 +53,6 @@ public class DossierService {
     var dadosPessoais = dto.getDadosPessoais();
 
     FuncionarioEntity fun = funcionarioMapper.toEntity(dadosPessoais, Estado.P);
-
-    if (dadosPessoais.getEndereco() != null) {
-      var e = enderecoMapper.toEntity(dadosPessoais.getEndereco(), Estado.P);
-      e.setFunId(fun);
-      fun.setEndereco(e);
-    }
 
     if (dadosPessoais.getContactos() != null) {
       var list = dadosPessoais.getContactos().stream().map(c -> {
@@ -126,24 +125,24 @@ public class DossierService {
       throw IgrpResponseStatusException.badRequest("Dados contratuais obrigatórios");
     }
 
-    var contrato = contratuaisEntityMapper.toContrato(dc, Estado.P);
+    var contrato = contratoMapper.toContrato(dc, Estado.P);
     contrato.setFunId(fun);
     contrato.setVersao(1);
     fun.setContratos(java.util.List.of(contrato));
 
-    var carreira = contratuaisEntityMapper.toCarreira(dc, Estado.P);
+    var carreira = carreiraMapper.toCarreira(dc, Estado.P);
     if (carreira != null) {
       carreira.setFunId(fun);
       fun.setCarreiras(java.util.List.of(carreira));
     }
 
-    var regime = contratuaisEntityMapper.toRegime(dc, Estado.P);
+    var regime = regimeTrabalhoMapper.toRegime(dc, Estado.P);
     if (regime != null) {
       regime.setFunId(fun);
       fun.setRegimesTrabalhos(java.util.List.of(regime));
     }
 
-    var mobilidade = contratuaisEntityMapper.toMobilidade(dc, Estado.P);
+    var mobilidade = mobilidadeMapper.toMobilidade(dc, Estado.P);
     if (mobilidade != null) {
       mobilidade.setFunId(fun);
       fun.setMobilidades(java.util.List.of(mobilidade));
@@ -151,14 +150,14 @@ public class DossierService {
 
     if (dc.getSubsidios() != null && !dc.getSubsidios().isEmpty()) {
       var remList = dc.getSubsidios().stream()
-          .map(s -> contratuaisEntityMapper.toDefinicaoRemuneracao(s, fun, Estado.P))
+          .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, fun, Estado.P))
           .toList();
       fun.setDefinicoesRenumeracoes(remList);
     }
 
     if (dc.getEncargosDescontos() != null && !dc.getEncargosDescontos().isEmpty()) {
       var pagList = dc.getEncargosDescontos().stream()
-          .map(e -> contratuaisEntityMapper.toDefPagamento(e, fun, Estado.P))
+          .map(e -> defPagamentoMapper.toDefPagamento(e, fun, Estado.P))
           .toList();
       fun.setDefinicoesPagamentos(pagList);
     }
@@ -175,7 +174,8 @@ public class DossierService {
 
     var param = paramSitLaboralEntityRepository.findAllByNome("ATIVO").getFirst();
     if(param == null){
-      throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO. Verifique se o parametro esta cadastrado no banco de dados e tente novamente.");
+      throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO. " +
+          "Verifique se o parametro esta cadastrado no banco de dados e tente novamente.");
     }
 
     var sl = contratuaisEntityMapper.toSituacaoLaboralInicial(dc, param, Estado.P);

@@ -156,5 +156,42 @@ public class HabilitacaoLiterariaMapper {
     return e;
   }
 
+  public java.util.List<HabilitacaoLiterariaEntity> syncHabilitacoes(List<HabilitacaoLiterariaEntity> existingList,
+                               java.util.List<HabilitacaoLiterariaReqDTO> newList) {
+    if (newList == null) return existingList;
+    for (HabilitacaoLiterariaReqDTO dto : newList) {
+      HabilitacaoLiterariaEntity found = null;
+      if (dto.getId() != null) {
+        for (HabilitacaoLiterariaEntity h : existingList) {
+          if (java.util.Objects.equals(h.getId(), dto.getId())) { found = h; break; }
+        }
+      }
+      if (found != null) {
+        if (dto.getPaisId() != null) {
+          found.setPaisId(entityManager.getReference(GeografiaEntity.class, dto.getPaisId()));
+        }
+        found.setEstabelecimento(dto.getEstabelecimento());
+        found.setArea(dto.getArea());
+        found.setNomeCurso(dto.getCurso());
+        found.setNivel(dto.getGrauAcademico());
+        found.setDataInicio(dto.getDataInicio());
+        found.setDataFim(dto.getDataTermino());
+        found.setConcluido(dto.getConcluido());
+      } else {
+        HabilitacaoLiterariaEntity novo = toEntity(dto, Estado.P);
+        existingList.add(novo);
+      }
+    }
+    // Soft delete
+    for (HabilitacaoLiterariaEntity existing : existingList) {
+      boolean stillExists = newList.stream()
+          .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
+      if (!stillExists) {
+        existing.setEstado(Estado.E);
+      }
+    }
+    return existingList;
+  }
+
 
 }

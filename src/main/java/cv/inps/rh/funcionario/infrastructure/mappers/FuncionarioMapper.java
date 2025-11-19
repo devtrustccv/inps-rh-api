@@ -8,6 +8,7 @@ import cv.inps.rh.funcionario.domain.projections.FuncionarioList;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.TipoDocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.mappers.EstadoMapper;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -45,6 +46,8 @@ public class FuncionarioMapper {
   private final OrdemServicoMapper ordemServicoMapper;
   private final DocumentoPessoalMapper documentoPessoalMapper;
   private final SituacaoLaboralMapper situacaoLaboralMapper;
+  private final ContratuaisEntityMapper contratuaisEntityMapper;
+
 
   private final EntityManager entityManager;
 
@@ -429,6 +432,8 @@ public class FuncionarioMapper {
     }
 
 
+
+
     return entity;
   }
 
@@ -702,10 +707,7 @@ public class FuncionarioMapper {
     if (entity.getTiposrelacionamentos() != null && !entity.getTiposrelacionamentos().isEmpty()) {
 
       //getting tipoRelaciomento atual
-      var tr = entity.getTiposrelacionamentos().stream()
-          .filter(t -> t.getEstActAdm() != null && t.getEstActAdm() == 1)
-          .max(Comparator.comparing(TiposRelacionamentoEntity::getDataInicio))
-          .orElse(null);
+      var tr = getTipoRelacionamentoAtual(entity);
 
       if (tr != null) {
         DadosContratuaisRespDTO dcr = new DadosContratuaisRespDTO();
@@ -879,7 +881,64 @@ public class FuncionarioMapper {
     docPessoal.setNumDocumento(dadosPessoais.getNumDocumento());
     fun.setDocumentoPessoal(docPessoal);
 
+    if (dadosPessoais.getEndereco() != null) {
+      var e = enderecoMapper.toEntity(dadosPessoais.getEndereco(), Estado.P);
+      e.setFunId(fun);
+      fun.setEndereco(e);
+    }
+
+
     return fun;
   }
+
+  public FuncionarioEntity toUpdateEntity(FuncionarioEntity funParam, DadosPessoaisReqDTO dadosPessoais) {
+    if (dadosPessoais == null) return null;
+    if(funParam == null) return null;
+
+    var tipoDocumento = entityManager.getReference(TipoDocumentoEntity.class, dadosPessoais.getTipoDocumentoId());
+
+    funParam.setIdColaborador(dadosPessoais.getIdColaborador());
+    funParam.setTipoDocumentoId(tipoDocumento);
+    funParam.setNumDocumento(dadosPessoais.getNumDocumento());
+    funParam.setNome(dadosPessoais.getNome());
+    funParam.setFotografia(dadosPessoais.getUrlFoto());
+    funParam.setDataNascimento(dadosPessoais.getDataNascimento());
+    funParam.setSexo(dadosPessoais.getGenero());
+    funParam.setNmMae(dadosPessoais.getNomeMae());
+    funParam.setNmPai(dadosPessoais.getNomePai());
+    funParam.setEstadoCivil(dadosPessoais.getEstadoCivil());
+    funParam.setNacionalidade(dadosPessoais.getNacionalidade());
+    funParam.setLocNascId(entityManager.getReference(GeografiaEntity.class, dadosPessoais.getNaturalidadeId()));
+    funParam.setNif(dadosPessoais.getNif());
+    funParam.setNuSegInps(dadosPessoais.getNumSegurado());
+
+    DocumentoPessoalEntity docPessoal = funParam.getDocumentoPessoal()!=null ? funParam.getDocumentoPessoal() : new DocumentoPessoalEntity();
+    docPessoal.setFunId(funParam);
+    docPessoal.setTipoDocumentoId(tipoDocumento);
+    docPessoal.setNumDocumento(dadosPessoais.getNumDocumento());
+    funParam.setDocumentoPessoal(docPessoal);
+
+
+    EnderecoEntity e = funParam.getEndereco()!=null ?
+        enderecoMapper.toUpdateEntity(funParam.getEndereco(), dadosPessoais.getEndereco())
+        : enderecoMapper.toEntity(dadosPessoais.getEndereco(), Estado.P);
+
+
+    e.setFunId(funParam);
+
+    return funParam;
+
+  }
+
+  public TiposRelacionamentoEntity getTipoRelacionamentoAtual(FuncionarioEntity entity) {
+
+   return entity.getTiposrelacionamentos().stream()
+        .filter(t -> t.getEstActAdm() != null && t.getEstActAdm() == 1)
+        .max(Comparator.comparing(TiposRelacionamentoEntity::getDataInicio))
+        .orElse(null);
+
+  }
+
+
 
 }

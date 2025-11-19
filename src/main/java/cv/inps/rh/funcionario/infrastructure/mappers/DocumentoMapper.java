@@ -114,5 +114,38 @@ public class DocumentoMapper {
     return entity;
   }
 
+  public java.util.List<DocumentoEntity> syncDocumentos(java.util.List<DocumentoEntity> existingList,
+                             java.util.List<AnexoReqDTO> newList) {
+    if (newList == null) return existingList;
+    for (AnexoReqDTO dto : newList) {
+      DocumentoEntity found = null;
+      if (dto.getId() != null) {
+        for (DocumentoEntity d : existingList) {
+          if (java.util.Objects.equals(d.getId(), dto.getId())) { found = d; break; }
+        }
+      }
+      if (found != null) {
+        if (dto.getTipoDocumentoId() != null) {
+          found.setTpDocumentoId(entityManager.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
+        }
+        found.setReferenciaName(dto.getDocumento());
+        found.setReferenciaId(dto.getDocumento());
+      } else {
+        DocumentoEntity novo = toEntity(dto, Estado.P);
+        existingList.add(novo);
+      }
+    }
+
+    // Soft delete for removed items
+    for (DocumentoEntity existing : existingList) {
+      boolean stillExists = newList.stream()
+          .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
+      if (!stillExists) {
+        existing.setEstado(Estado.E);
+      }
+    }
+    return existingList;
+  }
+
 
 }

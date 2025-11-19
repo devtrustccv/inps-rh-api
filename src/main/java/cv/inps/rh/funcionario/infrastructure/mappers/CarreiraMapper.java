@@ -1,6 +1,8 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.CarreiraListDTO;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.domain.filters.CarreiraFilter;
 import cv.inps.rh.funcionario.domain.models.Carreira;
 import cv.inps.rh.funcionario.domain.projections.CarreiraList;
@@ -148,5 +150,32 @@ public class CarreiraMapper {
     return dto;
   }*/
 
+  public CarreiraEntity toCarreira(DadosContratuaisReqDTO dc, Estado estado) {
+    if (dc == null) return null;
+    var ce = new CarreiraEntity();
+    ce.setCargoId(entityManager.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
+    ce.setEscalaoId(entityManager.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
+    ce.setCategoriaId(entityManager.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
+    ce.setCarrPccsId(entityManager.getReference(ParamCarreiraEntity.class, dc.getCarreiraId()));
+    ce.setSalario(dc.getSalario());
+    ce.setFlgProcessa(1);
+    ce.setTipoSituacao("NOVO_CONTRATO");
+    ce.setObs("NOVO_CONTRATO");
+    ce.setUuid(UuidCreator.getTimeOrderedEpoch());
+    ce.setEstado(estado);
+    return ce;
+  }
 
+
+  public void toUpdateEntity(CarreiraEntity carreira, DadosContratuaisReqDTO dc) {
+    if (dc == null) return;
+    carreira.setCargoId(entityManager.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
+    carreira.setEscalaoId(entityManager.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
+    carreira.setCategoriaId(entityManager.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
+    carreira.setCarrPccsId(entityManager.getReference(ParamCarreiraEntity.class, dc.getCarreiraId()));
+    carreira.setSalario(dc.getSalario());
+    carreira.setFlgProcessa(1);
+    carreira.setTipoSituacao("NOVO_CONTRATO");
+    carreira.setObs("NOVO_CONTRATO");
+  }
 }

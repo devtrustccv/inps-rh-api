@@ -164,6 +164,20 @@ public class EnderecoMapper {
     return e;
   }
 
+  public EnderecoEntity toUpdateEntity(EnderecoEntity e, EnderecoReqDTO dto) {
+    if (dto == null) {
+      return null;
+    }
+    e.setPaisId(ref(GeografiaEntity.class, dto.getPaisId()));
+    e.setIlhaId(ref(GeografiaEntity.class, dto.getIlhaId()));
+    e.setConcelhoId(ref(GeografiaEntity.class, dto.getConcelhoId()));
+    e.setFreguesiaId(ref(GeografiaEntity.class, dto.getFreguesiaId()));
+    e.setZonaId(ref(GeografiaEntity.class, dto.getZonaId()));
+    e.setMorada(dto.getMorada());
+    return e;
+  }
+
+
   private <T> T ref(Class<T> type, Long id) {
     return id == null ? null : em.getReference(type, id);
   }

@@ -9,6 +9,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ContactoEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -77,6 +78,52 @@ public class ContactoMapper {
     entity.setUuid(UuidCreator.getTimeOrderedEpoch());
     entity.setEstado(estado);
     return entity;
+  }
+
+  public List<ContactoEntity> syncContactos(List<ContactoEntity> existingList,
+                                            List<ContactoReqDTO> newList) {
+
+    if (newList == null) return existingList; // nada a fazer
+
+    for (ContactoReqDTO dto : newList) {
+      addOrUpdate(existingList, dto);
+    }
+
+    // Soft delete dos que não vêm mais na nova lista
+    for (ContactoEntity existing : existingList) {
+      boolean stillExists = newList.stream()
+          .anyMatch(dto -> Objects.equals(dto.getId(), existing.getId()));
+      if (!stillExists) {
+        // Se tiver campo de soft delete:
+        existing.setEstado(Estado.E);
+      }
+    }
+
+    return existingList;
+  }
+
+  private void addOrUpdate(List<ContactoEntity> existingList, ContactoReqDTO dto) {
+    if (dto == null) return;
+
+    ContactoEntity found = findById(existingList, dto.getId());
+
+    if (found != null) {
+      // atualizar
+      found.setTipoContacto(dto.getTipoContacto());
+      found.setContacto(dto.getContacto());
+    } else {
+      // adicionar
+      ContactoEntity novo = this.toEntity(dto, Estado.P);
+      existingList.add(novo);
+    }
+  }
+
+  private ContactoEntity findById(List<ContactoEntity> list, Long id) {
+    if (id == null) return null;
+    return list.stream()
+        .filter(c -> Objects.equals(c.getId(), id))
+        .findFirst()
+        .orElse(null);
   }
 
 

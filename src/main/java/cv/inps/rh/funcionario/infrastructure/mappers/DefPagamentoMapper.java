@@ -1,5 +1,7 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO;
 import cv.inps.rh.funcionario.application.dto.PagamentosDescontoListDTO;
 import cv.inps.rh.funcionario.domain.filters.PagamentoDescontoFilter;
 import cv.inps.rh.funcionario.domain.models.DefPagamento;
@@ -7,6 +9,7 @@ import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.mappers.TipoMovimentoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefPagamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -93,4 +96,64 @@ public class DefPagamentoMapper {
 
     return dto;
   }
+
+  public java.util.List<DefPagamentoEntity> syncPagamentos(
+      java.util.List<DefPagamentoEntity> existingList,
+      java.util.List<cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO> newList) {
+    if (newList == null) return existingList;
+    for (cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO dto : newList) {
+      DefPagamentoEntity found = null;
+      if (dto.getId() != null) {
+        for (DefPagamentoEntity e : existingList) {
+          if (java.util.Objects.equals(e.getId(), dto.getId())) { found = e; break; }
+        }
+      }
+      if (found != null) {
+        if (dto.getTipoEncargoId() != null) {
+          found.setTmId(entityManager.getReference(TipoMovimentoEntity.class, dto.getTipoEncargoId()));
+        }
+        found.setValor(dto.getValor());
+        found.setDataInicio(dto.getDataInicio());
+        found.setDataFim(dto.getDataFim());
+        found.setObs(dto.getObservacoes());
+      } else {
+        DefPagamentoEntity novo = new DefPagamentoEntity();
+        if (dto.getTipoEncargoId() != null) {
+          novo.setTmId(entityManager.getReference(TipoMovimentoEntity.class, dto.getTipoEncargoId()));
+        }
+        novo.setValor(dto.getValor());
+        novo.setDataInicio(dto.getDataInicio());
+        novo.setDataFim(dto.getDataFim());
+        novo.setObs(dto.getObservacoes());
+        novo.setEstado(Estado.P);
+        existingList.add(novo);
+      }
+    }
+    for (DefPagamentoEntity existing : existingList) {
+      boolean stillExists = newList.stream()
+          .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
+      if (!stillExists) {
+        existing.setEstado(Estado.E);
+      }
+    }
+    return existingList;
+  }
+
+
+  public DefPagamentoEntity toDefPagamento(EncargosDescontosReqDTO e, FuncionarioEntity fun, Estado estado) {
+    if (e == null) return null;
+    var dp = new DefPagamentoEntity();
+    if (e.getTipoEncargoId() != null) {
+      dp.setTmId(em.getReference(TipoMovimentoEntity.class, e.getTipoEncargoId()));
+    }
+    dp.setValor(e.getValor());
+    dp.setDataInicio(e.getDataInicio());
+    dp.setDataFim(e.getDataFim());
+    dp.setObs(e.getObservacoes());
+    dp.setEstado(estado);
+    dp.setUuid(UuidCreator.getTimeOrderedEpoch());
+    dp.setFunId(fun);
+    return dp;
+  }
+
 }

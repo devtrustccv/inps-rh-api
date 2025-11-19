@@ -1,5 +1,7 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.RegimeListDTO;
 import cv.inps.rh.funcionario.domain.filters.RegimeFilter;
 import cv.inps.rh.funcionario.domain.models.RegimeModalidade;
@@ -100,6 +102,27 @@ public class RegimeTrabalhoMapper {
        return RegimeFilter.builder().tipoRegime(tipoRegime).estado(StringUtils.hasText(estado) ? Estado.fromCodeOrThrow(estado) : null)
            .pageNumber(pageNumber)
            .pageSize(pageSize).build();
+  }
+
+  public RegimeTrabalhoEntity toRegime(DadosContratuaisReqDTO dc, Estado estado) {
+    if (dc == null) return null;
+    var re = new RegimeTrabalhoEntity();
+    re.setTipoRegime(dc.getRegimeTrabalho());
+    re.setTipoSituacao("NOVO_CONTRATO");
+    re.setDataFim(dc.getDataFim());
+    re.setObs(null);
+    re.setEstado(Estado.P);
+    re.setUuid(UuidCreator.getTimeOrderedEpoch());
+    re.setEstado(estado);
+    return re;
+  }
+
+  public void toUpdateEntity(RegimeTrabalhoEntity regime, DadosContratuaisReqDTO dc) {
+    if (dc == null) return ;
+    regime.setTipoRegime(dc.getRegimeTrabalho());
+    regime.setTipoSituacao("NOVO_CONTRATO");
+    regime.setDataFim(dc.getDataFim());
+    regime.setObs(null);
   }
 
 }

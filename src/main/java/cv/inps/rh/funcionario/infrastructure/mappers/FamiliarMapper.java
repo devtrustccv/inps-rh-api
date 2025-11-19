@@ -132,6 +132,43 @@ public class FamiliarMapper {
     return entity;
   }
 
+  public java.util.List<FamiliarEntity> syncFamiliares(java.util.List<FamiliarEntity> existingList,
+                             java.util.List<AgregadoDependenteReqDTO> newList) {
+    if (newList == null) return existingList;
+    for (AgregadoDependenteReqDTO dto : newList) {
+      FamiliarEntity found = null;
+      if (dto.getId() != null) {
+        for (FamiliarEntity f : existingList) {
+          if (java.util.Objects.equals(f.getId(), dto.getId())) { found = f; break; }
+        }
+      }
+      if (found != null) {
+        if (dto.getTipoDocumentoId() != null) {
+          found.setTpDocumento(em.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
+        }
+        found.setNumDocumento(dto.getNumDocumento());
+        found.setNome(dto.getNome());
+        found.setDataNascimento(dto.getDataNascimento());
+        found.setSexo(dto.getGenero());
+        found.setGdpId(dto.getGrauParentesco());
+        found.setDependencia(dto.getDependente());
+        found.setMembroAgr(dto.getAgregada());
+      } else {
+        FamiliarEntity novo = toEntity(dto, Estado.P);
+        existingList.add(novo);
+      }
+    }
+    // Soft delete
+    for (FamiliarEntity existing : existingList) {
+      boolean stillExists = newList.stream()
+          .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
+      if (!stillExists) {
+        existing.setEstado(Estado.E);
+      }
+    }
+    return existingList;
+  }
+
 
 
   public List<AgregadoDependenteRespDTO> toResponseDTOList(List<Familiar> familiares) {

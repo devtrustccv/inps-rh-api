@@ -18,20 +18,7 @@ public class ContratuaisEntityMapper {
   @PersistenceContext
   private EntityManager em;
 
-  public ContratoEntity toContrato(DadosContratuaisReqDTO dc, Estado estado) {
-    if (dc == null) return null;
-    var c = new ContratoEntity();
-    c.setEstado(estado);
-    c.setDataInicio(dc.getDataInicio());
-    c.setDataFim(dc.getDataFim());
-    c.setDuracao(dc.getDuracaoMeses());
-    c.setTpContrato("NOVO_CONTRATO");
-    c.setSituacaoLaboral("INICIO");
-    c.setObs("NOVO_CONTRATO");
-    c.setTpContratoId(em.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
-    c.setVinculoId(em.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
-    return c;
-  }
+
 
   public TiposRelacionamentoEntity toRelacionamento(DadosContratuaisReqDTO dc, Estado estado) {
     if (dc == null) return null;
@@ -62,84 +49,31 @@ public class ContratuaisEntityMapper {
     return tr;
   }
 
-  public CarreiraEntity toCarreira(DadosContratuaisReqDTO dc, Estado estado) {
-    if (dc == null) return null;
-    var ce = new CarreiraEntity();
-    ce.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
-    ce.setEscalaoId(em.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
-    ce.setCategoriaId(em.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
-    ce.setCarrPccsId(em.getReference(ParamCarreiraEntity.class, dc.getCarreiraId()));
-    ce.setSalario(dc.getSalario());
-    ce.setFlgProcessa(1);
-    ce.setTipoSituacao("NOVO_CONTRATO");
-    ce.setEstado(Estado.P);
-    ce.setObs("NOVO_CONTRATO");
-    ce.setUuid(UuidCreator.getTimeOrderedEpoch());
-    ce.setEstado(estado);
-    return ce;
+  public void toUpdateRelacionamento(TiposRelacionamentoEntity tr, DadosContratuaisReqDTO dc) {
+    if (dc == null) return ;
+    tr.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
+    tr.setInstitId(em.getReference(InstituicaoEntity.class, dc.getDirecaoId()));
+    tr.setVinculoId(em.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
+    tr.setSeccaoId(em.getReference(SecaoEntity.class, dc.getSeccaoId()));
+    tr.setCategoriaId(em.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
+    tr.setEscalaoId(em.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
+    tr.setCarrPccId(em.getReference(ParamCarreiraEntity.class, dc.getCarreiraId()));
+    tr.setSalario(dc.getSalario());
+    tr.setMoeda(dc.getMoeda());
+    tr.setRegime(dc.getRegimeTrabalho());
+    tr.setTipoSituacao("NOVO_CONTRATO");
+    tr.setFlgProcessa("S");
+    tr.setObs("NOVO_CONTRATO");
+    tr.setDataInicio(dc.getDataInicio());
+    tr.setDataFim(null);
+    tr.setDataInicioContrato(dc.getDataInicio());
+    tr.setDataFimContrato(dc.getDataFim());
+    tr.setLocTrabId(em.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));
+    tr.setTipoContratoId(em.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
+    tr.setReferente("REGISTO_COLABORADOR");
+    tr.setTpContrato("INICIAL");
   }
 
-  public RegimeTrabalhoEntity toRegime(DadosContratuaisReqDTO dc, Estado estado) {
-    if (dc == null) return null;
-    var re = new RegimeTrabalhoEntity();
-    re.setTipoRegime(dc.getRegimeTrabalho());
-    re.setTipoSituacao("NOVO_CONTRATO");
-    re.setDataFim(dc.getDataFim());
-    re.setObs(null);
-    re.setEstado(Estado.P);
-    re.setUuid(UuidCreator.getTimeOrderedEpoch());
-    re.setEstado(estado);
-    return re;
-  }
-
-  public MobilidadeEntity toMobilidade(DadosContratuaisReqDTO dc, Estado estado) {
-    if (dc == null) return null;
-    var me = new MobilidadeEntity();
-    me.setTipoSituacao("NOVO_CONTRATO");
-    me.setEstado(Estado.P);
-    me.setObs("NOVO_CONTRATO");
-    me.setUuid(UuidCreator.getTimeOrderedEpoch());
-    me.setLocalTrabId(em.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));
-    me.setSecaoId(em.getReference(SecaoEntity.class, dc.getSeccaoId()));
-    me.setInstidId(em.getReference(InstituicaoEntity.class, dc.getDirecaoId()));
-    me.setDataInicio(dc.getDataInicio());
-    me.setDataFim(dc.getDataFim());
-    me.setEstado(estado);
-    return me;
-  }
-
-  public DefinicaoRemuneracaoEntity toDefinicaoRemuneracao(SubsidioReqDTO s, FuncionarioEntity fun, Estado estado) {
-    if (s == null) return null;
-    var de = new DefinicaoRemuneracaoEntity();
-    de.setPercentagem(s.getPercentagem());
-    de.setValor(s.getValor());
-    de.setEstado(estado);
-    de.setObs(s.getObservacoes());
-    de.setDataInicio(LocalDate.now());
-    de.setDataFim(LocalDate.now());
-    if (s.getTipoSubsidioId() != null) {
-      de.setTmId(em.getReference(TipoMovimentoEntity.class, s.getTipoSubsidioId()));
-    }
-    de.setFunId(fun);
-    de.setUuid(UuidCreator.getTimeOrderedEpoch());
-    return de;
-  }
-
-  public DefPagamentoEntity toDefPagamento(EncargosDescontosReqDTO e, FuncionarioEntity fun, Estado estado) {
-    if (e == null) return null;
-    var dp = new DefPagamentoEntity();
-    if (e.getTipoEncargoId() != null) {
-      dp.setTmId(em.getReference(TipoMovimentoEntity.class, e.getTipoEncargoId()));
-    }
-    dp.setValor(e.getValor());
-    dp.setDataInicio(e.getDataInicio());
-    dp.setDataFim(e.getDataFim());
-    dp.setObs(e.getObservacoes());
-    dp.setEstado(estado);
-    dp.setUuid(UuidCreator.getTimeOrderedEpoch());
-    dp.setFunId(fun);
-    return dp;
-  }
 
   public ValidacaoEntity toValidacaoInsert(String referenciaName, Long funId, Estado estado) {
     var v = new ValidacaoEntity();
@@ -163,4 +97,9 @@ public class ContratuaisEntityMapper {
     sl.setUuid(UuidCreator.getTimeOrderedEpoch());
     return sl;
   }
+
+
+
+
+
 }

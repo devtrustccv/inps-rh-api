@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -122,6 +123,43 @@ public class DadosBancariosMapper {
     entity.setDataFim(dto.getDataFim());
     entity.setEstado(estado);
     return entity;
+  }
+
+  public java.util.List<DadosBancariosEntity> syncBancarios(java.util.List<DadosBancariosEntity> existingList,
+                            java.util.List<DadosBancariosReqDTO> newList) {
+    if (newList == null) return existingList;
+
+    for (DadosBancariosReqDTO dto : newList) {
+      DadosBancariosEntity found = null;
+      if (dto.getId() != null) {
+        for (DadosBancariosEntity b : existingList) {
+          if (Objects.equals(b.getId(), dto.getId())) {
+            found = b;
+            break;
+          }
+        }
+      }
+      if (found != null) {
+        if (dto.getEntidadeBancariaId() != null) {
+          found.setRhbId(entityManager.getReference(BancoEntity.class, dto.getEntidadeBancariaId()));
+        }
+        found.setNumConta(dto.getNumConta());
+        found.setDataInicio(dto.getDataInicio());
+        found.setDataFim(dto.getDataFim());
+      } else {
+        DadosBancariosEntity novo = toEntity(dto, Estado.P);
+        existingList.add(novo);
+      }
+    }
+    // Soft delete
+    for (DadosBancariosEntity existing : existingList) {
+      boolean stillExists = newList.stream()
+          .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
+      if (!stillExists) {
+        existing.setEstado(Estado.E);
+      }
+    }
+    return existingList;
   }
 
 

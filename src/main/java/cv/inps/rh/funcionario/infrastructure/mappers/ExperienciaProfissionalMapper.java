@@ -145,5 +145,41 @@ public class ExperienciaProfissionalMapper {
     return e;
   }
 
+  public java.util.List<ExperienciaProfEntity> syncExperiencias(java.util.List<ExperienciaProfEntity> existingList,
+                               java.util.List<ExperienciaProfissionalReqDTO> newList) {
+    if (newList == null) return existingList;
+    for (ExperienciaProfissionalReqDTO dto : newList) {
+      ExperienciaProfEntity found = null;
+      if (dto.getId() != null) {
+        for (ExperienciaProfEntity e : existingList) {
+          if (java.util.Objects.equals(e.getId(), dto.getId())) { found = e; break; }
+        }
+      }
+      if (found != null) {
+        if (dto.getPaisId() != null) {
+          found.setPaisId(entityManager.getReference(GeografiaEntity.class, dto.getPaisId()));
+        }
+        found.setEmpresa(dto.getEmpresa());
+        found.setCargo(dto.getCargo());
+        found.setDataInicio(dto.getDataEntrada());
+        found.setDataFim(dto.getDataSaida());
+        found.setObservacao(dto.getObservacoes());
+      } else {
+        ExperienciaProfEntity novo = toEntity(dto, Estado.P);
+        existingList.add(novo);
+      }
+    }
+
+    // Soft delete
+    for (ExperienciaProfEntity existing : existingList) {
+      boolean stillExists = newList.stream()
+          .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
+      if (!stillExists) {
+        existing.setEstado(Estado.E);
+      }
+    }
+    return existingList;
+  }
+
 
 }

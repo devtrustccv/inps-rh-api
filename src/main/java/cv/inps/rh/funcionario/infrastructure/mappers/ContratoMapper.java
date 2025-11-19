@@ -1,6 +1,7 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.ContratoListDTO;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.domain.filters.ContratoFilter;
 import cv.inps.rh.funcionario.domain.models.Contrato;
@@ -8,6 +9,7 @@ import cv.inps.rh.funcionario.domain.models.TiposRelacionamento;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamContratoMapper;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamVinculoMapper;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamContratoEntity;
@@ -201,5 +203,37 @@ public class ContratoMapper {
 
     return dto;
   }
+
+
+  public ContratoEntity toContrato(DadosContratuaisReqDTO dc, Estado estado) {
+    if (dc == null) return null;
+    var c = new ContratoEntity();
+    c.setEstado(estado);
+    c.setDataInicio(dc.getDataInicio());
+    c.setDataFim(dc.getDataFim());
+    c.setDuracao(dc.getDuracaoMeses());
+    c.setTpContrato("NOVO_CONTRATO");
+    c.setSituacaoLaboral("INICIO");
+    c.setObs("NOVO_CONTRATO");
+    c.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
+    c.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
+    return c;
+  }
+
+  public ContratoEntity toUpdateEntity(ContratoEntity entity, DadosContratuaisReqDTO dc) {
+    if (dc == null) return null;
+    entity.setDataInicio(dc.getDataInicio());
+    entity.setDataFim(dc.getDataFim());
+    entity.setDuracao(dc.getDuracaoMeses());
+    entity.setTpContrato("NOVO_CONTRATO");
+    entity.setSituacaoLaboral("INICIO");
+    entity.setObs("NOVO_CONTRATO");
+    entity.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
+    entity.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
+    return entity;
+  }
+
+
+
 
 }

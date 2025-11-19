@@ -140,5 +140,39 @@ public class FormacaoFeitaMapper {
     return e;
   }
 
+  public java.util.List<FormacaoFeitaEntity> syncFormacoes(java.util.List<FormacaoFeitaEntity> existingList,
+                            java.util.List<FormacaoProfissionalReqDTO> newList) {
+    if (newList == null) return existingList;
+    for (FormacaoProfissionalReqDTO dto : newList) {
+      FormacaoFeitaEntity found = null;
+      if (dto.getId() != null) {
+        for (FormacaoFeitaEntity f : existingList) {
+          if (java.util.Objects.equals(f.getId(), dto.getId())) { found = f; break; }
+        }
+      }
+      if (found != null) {
+        if (dto.getPaisId() != null) {
+          found.setPaisId(entityManager.getReference(GeografiaEntity.class, dto.getPaisId()));
+        }
+        found.setEstabelecimento(dto.getEstabelecimento());
+        found.setRhtpfor(dto.getTipoFormacao());
+        found.setCurso(dto.getDesignacao());
+        found.setNivel(dto.getNivel());
+      } else {
+        FormacaoFeitaEntity novo = toEntity(dto, Estado.P);
+        existingList.add(novo);
+      }
+    }
+    // Soft delete
+    for (FormacaoFeitaEntity existing : existingList) {
+      boolean stillExists = newList.stream()
+          .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
+      if (!stillExists) {
+        existing.setEstado(Estado.E);
+      }
+    }
+    return existingList;
+  }
+
 
 }
