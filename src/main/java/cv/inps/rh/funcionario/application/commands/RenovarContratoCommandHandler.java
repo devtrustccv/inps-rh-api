@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.commands;
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.application.dto.RenovacaoContratoDTO;
+import cv.inps.rh.funcionario.application.service.RenovacaoContratoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -15,14 +16,17 @@ public class RenovarContratoCommandHandler implements CommandHandler<RenovarCont
 
    private static final Logger LOGGER = LoggerFactory.getLogger(RenovarContratoCommandHandler.class);
 
-   public RenovarContratoCommandHandler() {
+   private final RenovacaoContratoService renovacaoContratoService;
 
+   public RenovarContratoCommandHandler(RenovacaoContratoService renovacaoContratoService) {
+
+     this.renovacaoContratoService = renovacaoContratoService;
    }
 
    @IgrpCommandHandler
    public ResponseEntity<RenovacaoContratoDTO> handle(RenovarContratoCommand command) {
-      // TODO: Implement the command handling logic here
-      return null;
+
+      return ResponseEntity.ok(renovacaoContratoService.renovarContrato(command));
    }
 
 }

@@ -29,6 +29,7 @@ public class ValidarContratoService {
   private final RegimeTrabalhoMapper regimeTrabalhoMapper;
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DefPagamentoMapper defPagamentoMapper;
+  private final FuncionarioRules funcionarioRules;
 
 
   @Transactional
@@ -42,7 +43,7 @@ public class ValidarContratoService {
         () -> IgrpResponseStatusException.notFound("Funcionario com id '%s' não encontrado".formatted(idFunc))
     );
 
-    var tiposRelacionamento = dadosContratuaisMapper.getTipoRelacionamentoAtual(funcionario);
+    var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
     dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, dto.getDadosContratuais());
 
     var dc = dto.getDadosContratuais();
@@ -79,7 +80,7 @@ public class ValidarContratoService {
 
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {
 
-    var tr = dadosContratuaisMapper.getTipoRelacionamentoAtual(funcionarioEntity);
+    var tr = funcionarioRules.getTipoRelacionamentoAtual(funcionarioEntity);
     if (tr != null) {
       tr.setEstado(estado);
 

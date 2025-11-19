@@ -1,8 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
-import cv.inps.rh.funcionario.application.dto.ContratoListDTO;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
+import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.domain.filters.ContratoFilter;
 import cv.inps.rh.funcionario.domain.models.Contrato;
 import cv.inps.rh.funcionario.domain.models.TiposRelacionamento;
@@ -219,6 +217,30 @@ public class ContratoMapper {
     c.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
     return c;
   }
+  public ContratoEntity toRenovarContrato(RenovarContratoReqDTO dc, Estado estado) {
+    if (dc == null) return null;
+    var c = new ContratoEntity();
+    c.setEstado(estado);
+    c.setDataInicio(dc.getDataInicio());
+    c.setDataFim(dc.getDataFim());
+    c.setDuracao(dc.getDuracaoMeses());
+    c.setTpContrato("RENOVACAO_CONTRATO");
+    c.setSituacaoLaboral("RENOVACAO_CONTRATO");
+    c.setObs("RENOVACAO_CONTRATO");
+    c.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
+    c.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoId()));
+    return c;
+  }
+
+  public RenovarContratoReqDTO toRenovacaoContratoReqDTO(ContratoEntity contratoEntity) {
+    var renovacaoContrato = new RenovarContratoReqDTO();
+    renovacaoContrato.setDataInicio(contratoEntity.getDataInicio());
+    renovacaoContrato.setDataFim(contratoEntity.getDataFim());
+    renovacaoContrato.setDuracaoMeses(contratoEntity.getDuracao());
+    renovacaoContrato.setTipoContratoId(contratoEntity.getTpContratoId().getId());
+    renovacaoContrato.setTipoVinculoId(contratoEntity.getVinculoId().getId());
+    return renovacaoContrato;
+  }
 
   public ContratoEntity toUpdateEntity(ContratoEntity entity, DadosContratuaisReqDTO dc) {
     if (dc == null) return null;
@@ -229,7 +251,6 @@ public class ContratoMapper {
     entity.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
     return entity;
   }
-
 
 
 

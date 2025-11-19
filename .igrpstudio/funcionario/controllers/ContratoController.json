@@ -126,7 +126,7 @@
     },
     {
       "actionName": "renovarContrato",
-      "path": "renovacao-contrato",
+      "path": "{id}/renovacao-contrato",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -156,7 +156,14 @@
             }
           }
         }
-      }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     },
     {
       "actionName": "validarContrato",
@@ -205,5 +212,5 @@
       ]
     }
   ],
-  "id": "zt8ilwt31b-getListContratos-getListContratos-validarContrato-validarContrato-getContratoById-getContratoById-novoContrato-validarContrato-novoContrato-renovarContrato"
+  "id": "zt8ilwt31b-getListContratos-getListContratos-validarContrato-validarContrato-getContratoById-getContratoById-novoContrato-validarContrato-novoContrato-renovarContrato-renovarContrato"
 }

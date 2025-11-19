@@ -2,19 +2,28 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.*;
+import cv.inps.rh.funcionario.application.service.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
+import java.util.UUID;
 
 @Component
 public class DadosContratuaisMapper {
 
   @PersistenceContext
   private EntityManager em;
+
+  private final FuncionarioRules funcionarioRules;
+
+  public DadosContratuaisMapper(FuncionarioRules funcionarioRules) {
+    this.funcionarioRules = funcionarioRules;
+  }
 
 
   public TiposRelacionamentoEntity toRelacionamento(DadosContratuaisReqDTO dc, Estado estado) {
@@ -104,7 +113,7 @@ public class DadosContratuaisMapper {
       return null;
     }
 
-    var tr = getTipoRelacionamentoAtual(entity);
+    var tr = funcionarioRules.getTipoRelacionamentoAtual(entity);
     if (tr == null) return null;
 
     DadosContratuaisRespDTO dcr = new DadosContratuaisRespDTO();
@@ -178,16 +187,42 @@ public class DadosContratuaisMapper {
   }
 
 
-  public TiposRelacionamentoEntity getTipoRelacionamentoAtual(FuncionarioEntity entity) {
+  public TiposRelacionamentoEntity clone(TiposRelacionamentoEntity original) {
 
-    return entity.getTiposrelacionamentos().stream()
-        .filter(t -> t.getEstActAdm() != null && t.getEstActAdm() == 1)
-        .max(Comparator.comparing(TiposRelacionamentoEntity::getDataInicio))
-        .orElse(null);
+    TiposRelacionamentoEntity clone = new TiposRelacionamentoEntity();
+    clone.setUuid(IdentificadorUnico.create().getValor());
+    clone.setCargoId(original.getCargoId());
+    clone.setInstitId(original.getInstitId());
+    clone.setVinculoId(original.getVinculoId());
+    clone.setSeccaoId(original.getSeccaoId());
+    clone.setCategoriaId(original.getCategoriaId());
+    clone.setEscalaoId(original.getEscalaoId());
+    clone.setCarrPccId(original.getCarrPccId());
+    clone.setSalario(original.getSalario());
+    clone.setMoeda(original.getMoeda());
+    clone.setRegime(original.getRegime());
+    clone.setTipoSituacao(original.getTipoSituacao());
+    clone.setCarreiraId(original.getCarreiraId());
+    clone.setMobId(original.getMobId());
+    clone.setRegimeId(original.getRegimeId());
+    clone.setTipoContratoId(original.getTipoContratoId());
+    clone.setTpContrato(original.getTpContrato());
+    clone.setTiprelId(original); // se quiser referenciar o anterior
+    clone.setContratoId(original.getContratoId());
+    clone.setEstado(original.getEstado());
+    clone.setDataInicio(original.getDataInicio());
+    clone.setEstActAdm(original.getEstActAdm());
+    clone.setFunId(original.getFunId());
+    clone.setObs(original.getObs());
+    clone.setLocTrabId(original.getLocTrabId());
+    clone.setSituacLaboralId(original.getSituacLaboralId());
+    clone.setReferente(original.getReferente());
+    clone.setUltProc(original.getUltProc());
+    clone.setMotivoSitLab(original.getMotivoSitLab());
+    clone.setFlgProcessa(original.getFlgProcessa());
 
+    return clone;
   }
-
-
 
 
 }

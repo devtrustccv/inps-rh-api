@@ -136,7 +136,7 @@ public class ContratoController {
   }
 
    @PostMapping(
-   value = "renovacao-contrato"
+   value = "{id}/renovacao-contrato"
   )
   @Operation(
     summary = "POST method to handle operations for renovarContrato",
@@ -156,10 +156,10 @@ public class ContratoController {
   )
   
   public ResponseEntity<RenovacaoContratoDTO> renovarContrato(@Valid @RequestBody RenovacaoContratoDTO renovarContratoRequest
-    )
+    , @PathVariable(value = "id") String id)
   {
 
-      final var command = new RenovarContratoCommand(renovarContratoRequest);
+      final var command = new RenovarContratoCommand(renovarContratoRequest, id);
 
        ResponseEntity<RenovacaoContratoDTO> response = commandBus.send(command);
 

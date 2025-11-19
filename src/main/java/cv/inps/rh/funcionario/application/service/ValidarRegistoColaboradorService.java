@@ -35,6 +35,7 @@ public class ValidarRegistoColaboradorService {
   private final MobilidadeMapper mobilidadeMapper;
   private final RegimeTrabalhoMapper regimeTrabalhoMapper;
   private final DadosContratuaisMapper dadosContratuaisMapper;
+  private final FuncionarioRules funcionarioRules;
 
 
 
@@ -64,7 +65,7 @@ public class ValidarRegistoColaboradorService {
     var documentos = documentoMapper.syncDocumentos(funcionario.getDocumentos(), registroColaborador.getAnexos());
     var dadosBancarios = dadosBancariosMapper.syncBancarios(funcionario.getDadosBancarios(), registroColaborador.getDadosBancarios());
 
-    var tiposRelacionamento = dadosContratuaisMapper.getTipoRelacionamentoAtual(funcionario);
+    var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
     dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, registroColaborador.getDadosContratuais());
 
 
@@ -158,7 +159,7 @@ public class ValidarRegistoColaboradorService {
     var pagamentos = funcionarioEntity.getDefinicoesPagamentos();
     if (pagamentos != null) pagamentos.forEach(p -> { if (p != null) p.setEstado(estado); });
 
-    var tr = dadosContratuaisMapper.getTipoRelacionamentoAtual(funcionarioEntity);
+    var tr = funcionarioRules.getTipoRelacionamentoAtual(funcionarioEntity);
     if (tr != null) {
       tr.setEstado(estado);
 

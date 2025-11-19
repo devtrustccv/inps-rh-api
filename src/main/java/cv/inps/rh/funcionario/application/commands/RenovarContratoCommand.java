@@ -14,5 +14,7 @@ public class RenovarContratoCommand implements Command {
 
   
   private RenovacaoContratoDTO renovacaocontrato;
+  @NotBlank(message = "The field <id> is required")
+  private String id;
 
 }

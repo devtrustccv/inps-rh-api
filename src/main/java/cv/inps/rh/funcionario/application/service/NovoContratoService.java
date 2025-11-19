@@ -27,6 +27,7 @@ public class NovoContratoService {
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DefPagamentoMapper defPagamentoMapper;
   private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
+  private final FuncionarioRules funcionarioRules;
 
 
   @Transactional
@@ -53,7 +54,7 @@ public class NovoContratoService {
     String tipoSituacao = isPrimeiroContrato ? "INICIO" : "CONTINUIDADE";
 
     if(!isPrimeiroContrato){
-      var tipoRelacionamentoAtual = dadosContratuaisMapper.getTipoRelacionamentoAtual(funcionario);
+      var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
       tipoRelacionamentoAtual.setEstActAdm(0);
       var contratoAtual = tipoRelacionamentoAtual.getContratoId();
 
