@@ -107,8 +107,11 @@ public class ValidarRegistoColaboradorService {
         ordemServicoEntity.setFunId(funcionario);
         ordemServicoEntity.setTiprelId(tiposRelacionamento);
         ordemServicoEntity.setReferente("REGISTO_COLABORADOR");
+        ordemServicoEntity.setDescricao("Registro de colaborador");
+        ordemServicoEntity.setNuOrdem("1"); // todo fix later
         ordemServicoEntity.setEstado(Estado.A);
-        funcionario.setOrdemServicos(java.util.List.of(ordemServicoEntity));
+        funcionario.getOrdemServicos().add(ordemServicoEntity);
+
       }
       mudaEstado(funcionario, estado);
     }
@@ -185,10 +188,10 @@ public class ValidarRegistoColaboradorService {
         .ifPresent(v -> v.setEstado(estado));
 
 
-    funcionarioEntity.getOrdemServicos()
+    funcionarioEntity.getSituacoesLaborais()
         .stream()
         .filter(o -> o.getEstado() == Estado.P)
-        .findFirst().ifPresent(ordemServicoEntity -> ordemServicoEntity.setEstado(estado));
+        .findFirst().ifPresent(situacaoLaboralEntity -> situacaoLaboralEntity.setEstado(estado));
 
 
   }
