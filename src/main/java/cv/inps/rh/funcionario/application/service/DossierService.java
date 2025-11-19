@@ -28,6 +28,7 @@ public class DossierService {
   private final DocumentoMapper documentoMapper;
   private final DadosBancariosMapper dadosBancariosMapper;
   private final ContratuaisEntityMapper contratuaisEntityMapper;
+  private final FuncionarioMapper funcionarioMapper;
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
@@ -203,6 +204,7 @@ public class DossierService {
     tr.setRegimeId(regime);
     tr.setMobId(mobilidade);
     tr.setFlgProcessa("NAO");
+    tr.setEstActAdm(1);
     fun.setTiposrelacionamentos(java.util.List.of(tr));
 
     var param = paramSitLaboralEntityRepository.findAllByNome("ATIVO").getFirst();
@@ -212,7 +214,6 @@ public class DossierService {
     fun.setSituacoesLaborais(java.util.List.of(sl));
 
 
-
     var valid = contratuaisEntityMapper.toValidacaoInsert("REGISTO_COLABORADOR", 1L); //todo resolve id later
     valid.setEstado(Estado.P);
     valid.setFunId(fun);
@@ -220,21 +221,7 @@ public class DossierService {
     fun.setValidacoes(java.util.List.of(valid));
 
     FuncionarioEntity saved = funcionarioEntityRepository.save(fun);
-
-    FuncionarioResponseDTO response = new FuncionarioResponseDTO();
-    DadosPessoaisRespDTO dp = new DadosPessoaisRespDTO();
-    dp.setId(saved.getId());
-    dp.setUuid(saved.getUuid() != null ? saved.getUuid().toString() : null);
-    dp.setNome(saved.getNome());
-    dp.setDataNascimento(saved.getDataNascimento());
-    dp.setGenero(saved.getSexo());
-    dp.setEstadoCivil(saved.getEstadoCivil());
-    dp.setNacionalidade(saved.getNacionalidade());
-    dp.setTipoDocumentoId(saved.getTipoDocumentoId() != null ? saved.getTipoDocumentoId().getId() : null);
-    dp.setNumDocumento(saved.getNumDocumento());
-    response.setDadosPessoais(dp);
-
-    return response;
+    return funcionarioMapper.toResponseDTO(saved);
   }
 
 

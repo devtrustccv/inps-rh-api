@@ -42,7 +42,7 @@ public class FuncionarioMapper {
   private final DefPagamentoMapper defPagamentoMapper;
   private final ValidacaoMapper validacaoMapper;
   private final OrdemServicoMapper ordemServicoMapper;
- private final DocumentoPessoalMapper documentoPessoalMapper;
+  private final DocumentoPessoalMapper documentoPessoalMapper;
   private final SituacaoLaboralMapper situacaoLaboralMapper;
 
   private final EntityManager entityManager;
@@ -63,7 +63,7 @@ public class FuncionarioMapper {
         ? enderecoMapper.toDomain(entity.getEndereco())
         : null;
 
-    DocumentoPessoal documentoPessoal = entity.getDocumentoPessoal()!= null
+    DocumentoPessoal documentoPessoal = entity.getDocumentoPessoal() != null
         ? documentoPessoalMapper.toDomain(entity.getDocumentoPessoal())
         : null;
 
@@ -82,45 +82,45 @@ public class FuncionarioMapper {
             .collect(Collectors.toCollection(ArrayList::new))
         : new ArrayList<>();
 
-    List<ExperienciaProfissional> experienciasProfissionais = entity.getExperienciasProfissionais()!=null?
+    List<ExperienciaProfissional> experienciasProfissionais = entity.getExperienciasProfissionais() != null ?
         entity.getExperienciasProfissionais().stream().map(experienciaProfissionalMapper::toDomain)
             .collect(Collectors.toCollection(ArrayList::new))
         : new ArrayList<>();
 
-    List<Documento> documentos = entity.getDocumentos()!=null ? entity.getDocumentos().stream()
+    List<Documento> documentos = entity.getDocumentos() != null ? entity.getDocumentos().stream()
         .map(documentoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
-    List<DadosBancarios> dadosBancarios = entity.getDadosBancarios()!=null ? entity.getDadosBancarios().stream()
+    List<DadosBancarios> dadosBancarios = entity.getDadosBancarios() != null ? entity.getDadosBancarios().stream()
         .map(dadosBancariosMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
-    List<TiposRelacionamento> tiposRelacionamentos = entity.getTiposrelacionamentos()!=null ? entity.getTiposrelacionamentos().stream()
+    List<TiposRelacionamento> tiposRelacionamentos = entity.getTiposrelacionamentos() != null ? entity.getTiposrelacionamentos().stream()
         .map(tiposRelacionamentoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
-    List<Contrato> contratos = entity.getContratos()!=null ? entity.getContratos().stream()
+    List<Contrato> contratos = entity.getContratos() != null ? entity.getContratos().stream()
         .map(contratoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
-    List<Carreira> carreiras = entity.getCarreiras()!=null ? entity.getCarreiras().stream()
+    List<Carreira> carreiras = entity.getCarreiras() != null ? entity.getCarreiras().stream()
         .map(carreiraMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
-    List<Mobilidade> mobilidades = entity.getMobilidades()!=null ? entity.getMobilidades().stream()
+    List<Mobilidade> mobilidades = entity.getMobilidades() != null ? entity.getMobilidades().stream()
         .map(mobilidadeMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
-    List<RegimeTrabalho> regimeTrabalhos = entity.getRegimesTrabalhos()!=null ? entity.getRegimesTrabalhos().stream()
+    List<RegimeTrabalho> regimeTrabalhos = entity.getRegimesTrabalhos() != null ? entity.getRegimesTrabalhos().stream()
         .map(regimeTrabalhoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
-    List<DefinicaoRemuneracao> definicaoRemuneracoes = entity.getDefinicoesRenumeracoes()!=null ? entity.getDefinicoesRenumeracoes()
+    List<DefinicaoRemuneracao> definicaoRemuneracoes = entity.getDefinicoesRenumeracoes() != null ? entity.getDefinicoesRenumeracoes()
         .stream().map(definicaoRemuneracaoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
-    List<DefPagamento> defPagamentos = entity.getDefinicoesPagamentos()!=null ? entity.getDefinicoesPagamentos()
+    List<DefPagamento> defPagamentos = entity.getDefinicoesPagamentos() != null ? entity.getDefinicoesPagamentos()
         .stream().map(defPagamentoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
-    List<Validacao> validacoes = entity.getValidacoes()!=null ? entity.getValidacoes()
+    List<Validacao> validacoes = entity.getValidacoes() != null ? entity.getValidacoes()
         .stream().map(validacaoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
     /*List<OrdemServicoEntity> = entity.getOrdemServicos()!=null ? entity.getValidacoes()
         .stream().map(ordemServicoMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();*/
 
-    List<SituacaoLaboral> situacaoLaborais = entity.getSituacoesLaborais()!=null ? entity.getSituacoesLaborais()
+    List<SituacaoLaboral> situacaoLaborais = entity.getSituacoesLaborais() != null ? entity.getSituacoesLaborais()
         .stream().map(situacaoLaboralMapper::toDomain).collect(Collectors.toList()) : new ArrayList<>();
 
     return Funcionario.rebuild(
@@ -166,19 +166,18 @@ public class FuncionarioMapper {
   }
 
 
-
-
   /**
    * Converts domain Funcionario to JPA entity
    */
   public FuncionarioEntity toEntity(Funcionario funcionario) {
     if (funcionario == null) return null;
 
-    FuncionarioEntity entity= new FuncionarioEntity();;
+    FuncionarioEntity entity = new FuncionarioEntity();
+    ;
     entity.setId(funcionario.getId() != null && funcionario.getId() > 0 ? funcionario.getId() : null);
 
-    System.out.println("entity id 1_:::::::::::::::::::::::::::::"+entity.getId());
-    System.out.println("entity id _:::::::::::::::::::::::::::::"+entity.getId());
+    System.out.println("entity id 1_:::::::::::::::::::::::::::::" + entity.getId());
+    System.out.println("entity id _:::::::::::::::::::::::::::::" + entity.getId());
     entity.setUuid(funcionario.getUuid().getValor());
     entity.setTipoDocumentoId(entityManager.getReference(TipoDocumentoEntity.class, funcionario.getTipoDocumento().getId()));
     entity.setNumDocumento(funcionario.getNumeroDocumento());
@@ -224,7 +223,7 @@ public class FuncionarioMapper {
     }
 
     // familiares
-   if (funcionario.getFamiliares() != null) {
+    if (funcionario.getFamiliares() != null) {
       var familiaresEntities = funcionario.getFamiliares().stream()
           .map(familiarMapper::toEntity)
           .collect(Collectors.toList());
@@ -244,7 +243,7 @@ public class FuncionarioMapper {
     }
 
     // formacoes feitas
-    if(funcionario.getFormacoes() != null) {
+    if (funcionario.getFormacoes() != null) {
       var formacoesEntities = funcionario.getFormacoes().stream()
           .map(formacaoFeitaMapper::toEntity)
           .collect(Collectors.toList());
@@ -254,7 +253,7 @@ public class FuncionarioMapper {
     }
 
     // experiencias profissionais
-    if(funcionario.getExperiencias() != null) {
+    if (funcionario.getExperiencias() != null) {
       var experienciasEntities = funcionario.getExperiencias().stream()
           .map(experienciaProfissionalMapper::toEntity)
           .collect(Collectors.toList());
@@ -263,7 +262,7 @@ public class FuncionarioMapper {
     }
 
     //documentos
-    if(funcionario.getDocumentos() != null) {
+    if (funcionario.getDocumentos() != null) {
       var documentosEntities = funcionario.getDocumentos().stream()
           .map(documentoMapper::toEntity)
           .collect(Collectors.toList());
@@ -272,7 +271,7 @@ public class FuncionarioMapper {
     }
 
     //dados bancarios
-    if(funcionario.getDadosBancarios() != null) {
+    if (funcionario.getDadosBancarios() != null) {
       var dadosBancariosEntities = funcionario.getDadosBancarios().stream()
           .map(dadosBancariosMapper::toEntity)
           .collect(Collectors.toList());
@@ -291,20 +290,22 @@ public class FuncionarioMapper {
             contratosMap.put(c.getUuid().getValor(), ce);
             return ce;
           })
-          .collect(Collectors.toCollection(ArrayList::new));;
+          .collect(Collectors.toCollection(ArrayList::new));
+      ;
       entity.setContratos(contratosEntities);
     }
 
     // carreiras
     Map<UUID, CarreiraEntity> carreirasMap = new HashMap<>();
-    if(funcionario.getCarreiras()!=null) {
+    if (funcionario.getCarreiras() != null) {
       var carreirasEntities = funcionario.getCarreiras().stream()
-          .map( c -> {
+          .map(c -> {
             CarreiraEntity ce = carreiraMapper.toEntity(c);
             ce.setFunId(entity);
             carreirasMap.put(c.getUuid().getValor(), ce);
             return ce;
-          }) .collect(Collectors.toCollection(ArrayList::new));;
+          }).collect(Collectors.toCollection(ArrayList::new));
+      ;
       entity.setCarreiras(carreirasEntities);
     }
 
@@ -317,7 +318,8 @@ public class FuncionarioMapper {
             ce.setFunId(entity);
             modilidadesMap.put(m.getUuid().getValor(), ce);
             return ce;
-          }) .collect(Collectors.toCollection(ArrayList::new));;
+          }).collect(Collectors.toCollection(ArrayList::new));
+      ;
       entity.setMobilidades(mobilidadesEntities);
     }
 
@@ -353,10 +355,10 @@ public class FuncionarioMapper {
 
             tiposRelacionamentosMap.put(t.getUuid().getValor(), tre);
             return tre;
-          }) .collect(Collectors.toCollection(ArrayList::new));;
+          }).collect(Collectors.toCollection(ArrayList::new));
+      ;
       entity.setTiposrelacionamentos(tiposEntities);
     }
-
 
 
     //definicoes remuneracoes
@@ -366,9 +368,10 @@ public class FuncionarioMapper {
             // Converte para entity usando o mapper
             DefinicaoRemuneracaoEntity dre = definicaoRemuneracaoMapper.toEntity(d);
             // Associa o funcionário
-              dre.setFunId(entity);
+            dre.setFunId(entity);
             return dre;
-          }).collect(Collectors.toCollection(ArrayList::new));;
+          }).collect(Collectors.toCollection(ArrayList::new));
+      ;
 
       entity.setDefinicoesRenumeracoes(definicaoRemuneracaoEntities);
     }
@@ -380,31 +383,33 @@ public class FuncionarioMapper {
             DefPagamentoEntity dpe = defPagamentoMapper.toEntity(d);
             dpe.setFunId(entity);
             return dpe;
-          }).collect(Collectors.toCollection(ArrayList::new));;
+          }).collect(Collectors.toCollection(ArrayList::new));
+      ;
       entity.setDefinicoesPagamentos(defPagamentosEntities);
     }
 
 
     //validacoes
-    if(funcionario.getValidacoes()!=null) {
+    if (funcionario.getValidacoes() != null) {
       List<ValidacaoEntity> validacaoEntities = funcionario.getValidacoes().stream()
-          .map( v -> {
+          .map(v -> {
             ValidacaoEntity validacaoEntity = validacaoMapper.toEntity(v);
             validacaoEntity.setReferenciaId(1L);
             validacaoEntity.setFunId(entity);
-            validacaoEntity.setTiprelId( tiposRelacionamentosMap.get(v.getTiprel().getUuid().getValor()));
+            validacaoEntity.setTiprelId(tiposRelacionamentosMap.get(v.getTiprel().getUuid().getValor()));
 
             return validacaoEntity;
-          }).collect(Collectors.toCollection(ArrayList::new));;
+          }).collect(Collectors.toCollection(ArrayList::new));
+      ;
       entity.setValidacoes(validacaoEntities);
     }
 
     //ordem servico
-    if(funcionario.getOrdensServicos()!=null && !funcionario.getOrdensServicos().isEmpty()) {
+    if (funcionario.getOrdensServicos() != null && !funcionario.getOrdensServicos().isEmpty()) {
       List<OrdemServicoEntity> ordemServicoEntities = funcionario.getOrdensServicos().stream()
           .map(ordemServicoMapper::toEntity).collect(Collectors.toCollection(ArrayList::new));
       entity.setOrdemServicos(ordemServicoEntities);
-     }
+    }
 
 
     // situacao laboral
@@ -442,9 +447,9 @@ public class FuncionarioMapper {
         .direcao(direcao)
         .seccao(seccao)
         .tipoVinculoLaboral(tipoVinculoLaboral)
-        .dataInicio(StringUtils.hasText(dataInicio)  ? DateFormatter.stringToLocalDateTime(dataInicio) :null)
+        .dataInicio(StringUtils.hasText(dataInicio) ? DateFormatter.stringToLocalDateTime(dataInicio) : null)
         .dataFim(StringUtils.hasText(dataFim) ? DateFormatter.stringToLocalDateTime(dataFim) : null)
-        .estado(estado!=null ? Estado.fromCodeOrThrow(estado):null)
+        .estado(estado != null ? Estado.fromCodeOrThrow(estado) : null)
         .pageNumber(pageNumber)
         .pageSize(pageSize)
         .build();
@@ -467,7 +472,6 @@ public class FuncionarioMapper {
 
     return dto;
   }
-
 
 
   public FuncionarioResponseDTO toResponseDTO(Funcionario funcionario) {
@@ -529,13 +533,260 @@ public class FuncionarioMapper {
     return dto;
   }
 
+  public FuncionarioResponseDTO toResponseDTO(FuncionarioEntity entity) {
+    if (entity == null) return null;
+
+    FuncionarioResponseDTO dto = new FuncionarioResponseDTO();
+
+    DadosPessoaisRespDTO dadosPessoais = new DadosPessoaisRespDTO();
+    dadosPessoais.setId(entity.getId());
+    dadosPessoais.setUuid(entity.getUuid() != null ? entity.getUuid().toString() : null);
+    dadosPessoais.setNome(entity.getNome());
+    dadosPessoais.setDataNascimento(entity.getDataNascimento());
+    dadosPessoais.setGenero(entity.getSexo());
+    dadosPessoais.setNomeMae(entity.getNmMae());
+    dadosPessoais.setNomePai(entity.getNmPai());
+    dadosPessoais.setEstadoCivil(entity.getEstadoCivil());
+    dadosPessoais.setNacionalidade(entity.getNacionalidade());
+    dadosPessoais.setTipoDocumentoId(entity.getTipoDocumentoId() != null ? entity.getTipoDocumentoId().getId() : null);
+    dadosPessoais.setNumDocumento(entity.getNumDocumento());
+    dadosPessoais.setNif(entity.getNif() != null ? entity.getNif() : null);
+    dadosPessoais.setNumSegurado(entity.getNuSegInps());
+    if (entity.getLocNascId() != null) {
+      dadosPessoais.setNaturalidadeId(entity.getLocNascId().getId());
+      dadosPessoais.setNaturalidadeDesc(entity.getLocNascId().getNome());
+    }
+
+    if (entity.getEndereco() != null) {
+      EnderecoRespDTO er = new EnderecoRespDTO();
+      er.setId(entity.getEndereco().getId());
+      if (entity.getEndereco().getPaisId() != null) {
+        er.setPaisId(entity.getEndereco().getPaisId().getId() != null ? entity.getEndereco().getPaisId().getId().intValue() : null);
+        er.setPaisDesc(entity.getEndereco().getPaisId().getNome());
+      }
+      if (entity.getEndereco().getIlhaId() != null) {
+        er.setIlhaId(entity.getEndereco().getIlhaId().getId() != null ? entity.getEndereco().getIlhaId().getId().intValue() : null);
+        er.setIlhaDesc(entity.getEndereco().getIlhaId().getNome());
+      }
+      if (entity.getEndereco().getConcelhoId() != null) {
+        er.setConcelhoId(entity.getEndereco().getConcelhoId().getId() != null ? entity.getEndereco().getConcelhoId().getId().intValue() : null);
+        er.setConcelhoDesc(entity.getEndereco().getConcelhoId().getNome());
+      }
+      if (entity.getEndereco().getFreguesiaId() != null) {
+        er.setFreguesiaId(entity.getEndereco().getFreguesiaId().getId() != null ? entity.getEndereco().getFreguesiaId().getId().intValue() : null);
+        er.setFreguesiaDesc(entity.getEndereco().getFreguesiaId().getNome());
+      }
+      if (entity.getEndereco().getZonaId() != null) {
+        er.setZonaId(entity.getEndereco().getZonaId().getId() != null ? entity.getEndereco().getZonaId().getId().intValue() : null);
+        er.setZonaDesc(entity.getEndereco().getZonaId().getNome());
+      }
+      er.setMorada(entity.getEndereco().getMorada());
+      er.setEstado(entity.getEndereco().getEstado() != null ? entity.getEndereco().getEstado().getDescription() : null);
+      er.setUuid(entity.getEndereco().getUuid() != null ? entity.getEndereco().getUuid().toString() : null);
+      dadosPessoais.setEndereco(er);
+    }
+
+    if (entity.getContactos() != null) {
+      List<ContactoRespDTO> contactos = entity.getContactos().stream().map(c -> {
+        ContactoRespDTO cr = new ContactoRespDTO();
+        cr.setId(c.getId());
+        cr.setUuid(c.getUuid() != null ? c.getUuid().toString() : null);
+        cr.setTipoContacto(c.getTipoContacto());
+        cr.setContacto(c.getContacto());
+        cr.setEstado(c.getEstado() != null ? c.getEstado().getDescription() : null);
+        return cr;
+      }).toList();
+      dadosPessoais.setContactos(contactos);
+    }
+    dto.setDadosPessoais(dadosPessoais);
+
+    if (entity.getFamiliares() != null) {
+      List<AgregadoDependenteRespDTO> familiares = entity.getFamiliares().stream().map(f -> {
+        AgregadoDependenteRespDTO fr = new AgregadoDependenteRespDTO();
+        fr.setId(f.getId());
+        fr.setTipoDocumentoId(f.getTpDocumento() != null ? f.getTpDocumento().getId() : null);
+        fr.setTipoDocumentoDesc(f.getTpDocumento() != null ? f.getTpDocumento().getNome() : null);
+        fr.setNumDocumento(f.getNumDocumento());
+        fr.setNome(f.getNome());
+        fr.setDataNascimento(f.getDataNascimento());
+        fr.setGenero(f.getSexo());
+        fr.setGrauParentesco(f.getGdpId());
+        fr.setDependente(f.getDependencia());
+        fr.setAgregada(f.getMembroAgr());
+        fr.setEstado(f.getEstado() != null ? f.getEstado().name() : null);
+        return fr;
+      }).toList();
+      dto.setFamiliares(familiares);
+    }
+
+    DadosAcademicosProfResponseDTO dap = new DadosAcademicosProfResponseDTO();
+    if (entity.getHabilitacoesLiterarias() != null) {
+      List<HabilitacaoLiterariaRespDTO> habs = entity.getHabilitacoesLiterarias().stream().map(h -> {
+        HabilitacaoLiterariaRespDTO hr = new HabilitacaoLiterariaRespDTO();
+        hr.setId(h.getId());
+        hr.setPaisId(h.getPaisId() != null ? h.getPaisId().getId() != null ? h.getPaisId().getId().intValue() : null : null);
+        hr.setPaisDesc(h.getPaisId() != null ? h.getPaisId().getNome() : null);
+        hr.setEstabelecimento(h.getEstabelecimento());
+        hr.setArea(h.getArea());
+        hr.setDataInicio(h.getDataInicio());
+        hr.setDataTermino(h.getDataFim());
+        hr.setConcluido(h.getConcluido());
+        return hr;
+      }).toList();
+      dap.setHabilitacoesLiterarias(habs);
+    }
+
+    if (entity.getFormacoesFeitas() != null) {
+      List<FormacaoProfissionalRespDTO> forms = entity.getFormacoesFeitas().stream().map(f -> {
+        FormacaoProfissionalRespDTO fr = new FormacaoProfissionalRespDTO();
+        fr.setId(f.getId());
+        fr.setUuid(f.getUuid() != null ? f.getUuid().toString() : null);
+        fr.setPaisId(f.getPaisId() != null ? f.getPaisId().getId() : null);
+        fr.setPaisDesc(f.getPaisId() != null ? f.getPaisId().getNome() : null);
+        fr.setEstabelecimento(f.getEstabelecimento());
+        fr.setTipoFormacao(f.getRhtpfor());
+        fr.setDesignacao(f.getCurso());
+        fr.setNivel(f.getNivel());
+        fr.setEstado(f.getEstado() != null ? f.getEstado().name() : null);
+        return fr;
+      }).toList();
+      dap.setFormacoesFeitas(forms);
+    }
+
+    if (entity.getExperienciasProfissionais() != null) {
+       List<ExperienciaProfissionalRespDTO> exps = entity.getExperienciasProfissionais().stream().map(e -> {
+        ExperienciaProfissionalRespDTO er = new ExperienciaProfissionalRespDTO();
+        er.setId(e.getId());
+        er.setPaisId(e.getPaisId() != null ? e.getPaisId().getId() : null);
+        er.setPaisDesc(e.getPaisId() != null ? e.getPaisId().getNome() : null);
+        er.setUuid(e.getUuid() != null ? e.getUuid().toString() : null);
+        er.setEmpresa(e.getEmpresa());
+        er.setCargo(e.getCargo());
+        er.setDataEntrada(e.getDataInicio());
+        er.setDataSaida(e.getDataFim());
+        er.setObservacoes(e.getObservacao());
+        er.setEstado(e.getEstado() != null ? e.getEstado().name() : null);
+        return er;
+      }).toList();
+      dap.setExperienciasProfssionais(exps);
+    }
+    dto.setDadosAcademicosProf(dap);
+
+    if (entity.getDocumentos() != null) {
+       List<AnexoRespDTO> anexos = entity.getDocumentos().stream().map(d -> {
+        AnexoRespDTO ar = new AnexoRespDTO();
+        ar.setId(d.getId());
+        ar.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
+        ar.setTipoDocumentoDesc(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getNome() : null);
+        ar.setDocumento(d.getReferenciaName());
+        return ar;
+      }).toList();
+      dto.setAnexos(anexos);
+    }
+
+    if (entity.getDadosBancarios() != null) {
+       List<DadosBancariosRespDTO> bancos = entity.getDadosBancarios().stream().map(b -> {
+        DadosBancariosRespDTO br = new DadosBancariosRespDTO();
+        br.setId(b.getId());
+        br.setEntidadeBancariaId(b.getRhbId() != null ? b.getRhbId().getId() : null);
+        br.setEntidadeBancariaDesc(b.getRhbId() != null ? b.getRhbId().getNmBanco() : null);
+        br.setNumConta(b.getNumConta());
+        br.setDataInicio(b.getDataInicio());
+        br.setDataFim(b.getDataFim());
+        return br;
+      }).toList();
+      dto.setDadosBancarios(bancos);
+    }
+
+    if (entity.getTiposrelacionamentos() != null && !entity.getTiposrelacionamentos().isEmpty()) {
+
+      //getting tipoRelaciomento atual
+      var tr = entity.getTiposrelacionamentos().stream()
+          .filter(t -> t.getEstActAdm() != null && t.getEstActAdm() == 1)
+          .max(Comparator.comparing(TiposRelacionamentoEntity::getDataInicio))
+          .orElse(null);
+
+      if (tr != null) {
+        DadosContratuaisRespDTO dcr = new DadosContratuaisRespDTO();
+
+        dcr.setTipoContratoId(tr.getTipoContratoId() != null ? tr.getTipoContratoId().getId() : null);
+        dcr.setTipoContratoDesc(tr.getTipoContratoId() != null ? tr.getTipoContratoId().getNome() : null);
+
+        dcr.setCargoPosicaoId(tr.getCargoId() != null ? tr.getCargoId().getId() : null);
+        dcr.setCargoPosicaoDesc(tr.getCargoId() != null ? tr.getCargoId().getNome() : null);
+
+        dcr.setDirecaoId(tr.getInstitId() != null ? tr.getInstitId().getId() : null);
+        dcr.setDirecaoDesc(tr.getInstitId() != null ? tr.getInstitId().getNome() : null);
+
+        dcr.setSeccaoId(tr.getSeccaoId() != null ? tr.getSeccaoId().getId() : null);
+        dcr.setSeccaoDesc(tr.getSeccaoId() != null ? tr.getSeccaoId().getNome() : null);
+
+        dcr.setCarreiraId(tr.getCarrPccId() != null ? tr.getCarrPccId().getId() : null);
+        dcr.setCarreiraDesc(tr.getCarrPccId() != null ? tr.getCarrPccId().getNome() : null);
+
+        dcr.setCategoriaId(tr.getCategoriaId() != null ? tr.getCategoriaId().getId() : null);
+        dcr.setCategoriaDesc(tr.getCategoriaId() != null ? tr.getCategoriaId().getNome() : null);
+
+        dcr.setEscalaoReferenciaId(tr.getEscalaoId() != null ? tr.getEscalaoId().getId() : null);
+        dcr.setEscalaoReferenciaDesc(tr.getEscalaoId() != null ? tr.getEscalaoId().getEscalao() : null);
+
+        dcr.setLocalTrabalhoId(tr.getLocTrabId() != null ? tr.getLocTrabId().getId() : null);
+        dcr.setLocalTrabalhoDesc(tr.getLocTrabId() != null ? tr.getLocTrabId().getNome() : null);
+
+        dcr.setRegimeTrabalho(tr.getRegime());
+        dcr.setSalario(tr.getSalario());
+        dcr.setMoeda(tr.getMoeda());
+        dcr.setDataInicio(tr.getDataInicioContrato());
+        dcr.setDataFim(tr.getDataFimContrato());
+
+        if (tr.getContratoId() != null)
+          dcr.setDuracaoMeses(tr.getContratoId().getDuracao());
+
+        // Subsídios
+        if (entity.getDefinicoesRenumeracoes() != null) {
+          List<SubsidioRespDTO> subs = entity.getDefinicoesRenumeracoes().stream()
+              .map(s -> {
+                SubsidioRespDTO sr = new SubsidioRespDTO();
+                sr.setId(s.getId());
+                sr.setTipoSubsidioId(s.getTmId() != null ? s.getTmId().getId() : null);
+                sr.setPercentagem(s.getPercentagem());
+                sr.setValor(s.getValor());
+                return sr;
+              }).toList();
+
+          dcr.setSubsidios(subs);
+        }
+
+        // Encargos / descontos
+        if (entity.getDefinicoesPagamentos() != null) {
+          List<EncargosDescontosRespDTO> encs = entity.getDefinicoesPagamentos().stream()
+              .map(e -> {
+                EncargosDescontosRespDTO er = new EncargosDescontosRespDTO();
+                er.setId(e.getId());
+                er.setTipoEncargoId(e.getTmId() != null ? e.getTmId().getId() : null);
+                er.setValor(e.getValor());
+                er.setDataInicio(e.getDataInicio());
+                er.setDataFim(e.getDataFim());
+                return er;
+              }).toList();
+
+          dcr.setEncargosDescontos(encs);
+        }
+
+        dto.setDadosContratuais(dcr);
+      }
+    }
+
+    return dto;
+  }
+
 
   public DadosContratuaisRespDTO dadosContratuaisRespDTO(Funcionario funcionario) {
     if (funcionario.getTipoRelacionamentoAtual() == null) return null;
 
     var tipoRelacionamentoAtual = funcionario.getTipoRelacionamentoAtual();
 
-    var  dadosContratuaisRespDTO = new DadosContratuaisRespDTO();
+    var dadosContratuaisRespDTO = new DadosContratuaisRespDTO();
     dadosContratuaisRespDTO.setTipoContratoId(tipoRelacionamentoAtual.getContrato().getTpContratoParam().getId());
     dadosContratuaisRespDTO.setTipoContratoDesc(tipoRelacionamentoAtual.getContrato().getTpContratoParam().getNome());
     dadosContratuaisRespDTO.setCargoPosicaoId(tipoRelacionamentoAtual.getCargo().getId());
@@ -594,13 +845,6 @@ public class FuncionarioMapper {
 
     return dadosContratuaisRespDTO;
   }
-
-
-
-
-
-
-
 
 
 }
