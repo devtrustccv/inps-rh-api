@@ -153,16 +153,6 @@ public class DossierService {
       fun.setDefinicoesPagamentos(pagList);
     }
 
-    var tr = contratuaisEntityMapper.toRelacionamento(dc, Estado.P);
-    tr.setFunId(fun);
-    tr.setContratoId(contrato);
-    tr.setCarreiraId(carreira);
-    tr.setRegimeId(regime);
-    tr.setMobId(mobilidade);
-    tr.setFlgProcessa("NAO");
-    tr.setEstActAdm(1);
-    fun.setTiposrelacionamentos(java.util.List.of(tr));
-
     var param = paramSitLaboralEntityRepository.findAllByNome("ATIVO").getFirst();
     if(param == null){
       throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO. " +
@@ -172,6 +162,19 @@ public class DossierService {
     var sl = contratuaisEntityMapper.toSituacaoLaboralInicial(dc, param, Estado.P);
     sl.setFunId(fun);
     fun.setSituacoesLaborais(java.util.List.of(sl));
+
+    var tr = contratuaisEntityMapper.toRelacionamento(dc, Estado.P);
+    tr.setFunId(fun);
+    tr.setContratoId(contrato);
+    tr.setCarreiraId(carreira);
+    tr.setRegimeId(regime);
+    tr.setMobId(mobilidade);
+    tr.setFlgProcessa("NAO");
+    tr.setEstActAdm(1);
+    //tr.setSituacLaboralId(sl);
+    fun.setTiposrelacionamentos(java.util.List.of(tr));
+
+
 
 
     var valid = contratuaisEntityMapper.toValidacaoInsert("REGISTO_COLABORADOR", 1L, Estado.P); //todo resolve id later

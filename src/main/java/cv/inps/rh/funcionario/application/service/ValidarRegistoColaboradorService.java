@@ -7,6 +7,7 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -101,6 +102,14 @@ public class ValidarRegistoColaboradorService {
 
     if(registroColaborador.getValidar()!=null){
       var estado = registroColaborador.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
+      if(estado.equals(Estado.A)){
+        OrdemServicoEntity ordemServicoEntity = new OrdemServicoEntity();
+        ordemServicoEntity.setFunId(funcionario);
+        ordemServicoEntity.setTiprelId(tiposRelacionamento);
+        ordemServicoEntity.setReferente("REGISTO_COLABORADOR");
+        ordemServicoEntity.setEstado(Estado.A);
+        funcionario.setOrdemServicos(java.util.List.of(ordemServicoEntity));
+      }
       mudaEstado(funcionario, estado);
     }
 
