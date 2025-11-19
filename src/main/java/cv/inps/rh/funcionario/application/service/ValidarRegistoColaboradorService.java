@@ -175,13 +175,10 @@ public class ValidarRegistoColaboradorService {
       if (regime != null) regime.setEstado(estado);
     }
 
-    /*funcionarioEntity.getValidacoes().stream()
-        .filter(v -> "REGISTO_COLABORADOR".equals(v.getReferenciaName()) && "INSERT".equals(v.getTipoAccao()))
-        .findFirst()
-        .ifPresent(v -> v.setEstado(estado));*/
 
     funcionarioEntity.getValidacoes().stream()
         .filter(v -> v.getEstado() == Estado.P)
+        .filter(v -> "REGISTO_COLABORADOR".equals(v.getReferenciaName()) && "INSERT".equals(v.getTipoAccao()))
         .findFirst()
         .ifPresent(v -> v.setEstado(estado));
 

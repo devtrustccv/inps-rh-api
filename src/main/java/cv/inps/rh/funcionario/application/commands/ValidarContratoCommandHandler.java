@@ -22,7 +22,7 @@ public class ValidarContratoCommandHandler implements CommandHandler<ValidarCont
 
   @IgrpCommandHandler
   public ResponseEntity<DadosContratuaisRespDTO> handle(ValidarContratoCommand command) {
-    return contratoService.validarContrato(command);
+    return contratoService.validar(command);
   }
 
 }

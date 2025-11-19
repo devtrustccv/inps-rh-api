@@ -88,7 +88,7 @@ public class DadosContratuaisMapper {
     sl.setSituacaoLaboralId(param);
     sl.setMotivoSitLab(null);
     sl.setDataInicio(dc.getDataInicio());
-    sl.setDataFim(null);
+    sl.setDataFim(dc.getDataFim());
     sl.setEstado(estado);
     sl.setObs("NOVO_CONTRATO");
     sl.setUuid(UuidCreator.getTimeOrderedEpoch());

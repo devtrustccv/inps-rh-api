@@ -225,9 +225,6 @@ public class ContratoMapper {
     entity.setDataInicio(dc.getDataInicio());
     entity.setDataFim(dc.getDataFim());
     entity.setDuracao(dc.getDuracaoMeses());
-    entity.setTpContrato("NOVO_CONTRATO");
-    entity.setSituacaoLaboral("INICIO");
-    entity.setObs("NOVO_CONTRATO");
     entity.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
     entity.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
     return entity;
