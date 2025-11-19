@@ -88,6 +88,9 @@ public interface FuncionarioEntityRepository extends
   @Query("SELECT (COUNT(c) > 0) FROM ContratoEntity c WHERE c.funId.uuid = :funId AND c.estado = :estado")
   boolean hasActiveContrato(@Param("funId") UUID publicId, @Param("estado") Estado estado);
 
+  @Query("SELECT (COUNT(c) > 0) FROM ContratoEntity c WHERE c.funId.uuid = :funId AND c.estado = 'A'")
+  boolean hasActiveContrato(@Param("funId") UUID publicId);
+
 
 }
 

@@ -8,7 +8,6 @@ import cv.inps.rh.funcionario.domain.projections.FuncionarioList;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.TipoDocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.mappers.EstadoMapper;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
@@ -47,10 +46,11 @@ public class FuncionarioMapper {
   private final OrdemServicoMapper ordemServicoMapper;
   private final DocumentoPessoalMapper documentoPessoalMapper;
   private final SituacaoLaboralMapper situacaoLaboralMapper;
-  private final ContratuaisEntityMapper contratuaisEntityMapper;
+  private final DadosContratuaisMapper contratuaisEntityMapper;
 
 
   private final EntityManager entityManager;
+  private final DadosContratuaisMapper dadosContratuaisMapper;
 
   /**
    * Converts JPA entity to domain Funcionario
@@ -433,8 +433,6 @@ public class FuncionarioMapper {
     }
 
 
-
-
     return entity;
   }
 
@@ -539,7 +537,6 @@ public class FuncionarioMapper {
 
     return dto;
   }
-
 
 
   public DadosContratuaisRespDTO dadosContratuaisRespDTO(Funcionario funcionario) {
@@ -777,82 +774,10 @@ public class FuncionarioMapper {
     }
 
     if (entity.getTiposrelacionamentos() != null && !entity.getTiposrelacionamentos().isEmpty()) {
-      //getting tipoRelaciomento atual
-      var tr = getTipoRelacionamentoAtual(entity);
-
-      if (tr != null) {
-        DadosContratuaisRespDTO dcr = new DadosContratuaisRespDTO();
-
-        dcr.setTipoContratoId(tr.getTipoContratoId() != null ? tr.getTipoContratoId().getId() : null);
-        dcr.setTipoContratoDesc(tr.getTipoContratoId() != null ? tr.getTipoContratoId().getNome() : null);
-
-        dcr.setCargoPosicaoId(tr.getCargoId() != null ? tr.getCargoId().getId() : null);
-        dcr.setCargoPosicaoDesc(tr.getCargoId() != null ? tr.getCargoId().getNome() : null);
-
-        dcr.setDirecaoId(tr.getInstitId() != null ? tr.getInstitId().getId() : null);
-        dcr.setDirecaoDesc(tr.getInstitId() != null ? tr.getInstitId().getNome() : null);
-
-        dcr.setSeccaoId(tr.getSeccaoId() != null ? tr.getSeccaoId().getId() : null);
-        dcr.setSeccaoDesc(tr.getSeccaoId() != null ? tr.getSeccaoId().getNome() : null);
-
-        dcr.setCarreiraId(tr.getCarrPccId() != null ? tr.getCarrPccId().getId() : null);
-        dcr.setCarreiraDesc(tr.getCarrPccId() != null ? tr.getCarrPccId().getNome() : null);
-
-        dcr.setCategoriaId(tr.getCategoriaId() != null ? tr.getCategoriaId().getId() : null);
-        dcr.setCategoriaDesc(tr.getCategoriaId() != null ? tr.getCategoriaId().getNome() : null);
-
-        dcr.setEscalaoReferenciaId(tr.getEscalaoId() != null ? tr.getEscalaoId().getId() : null);
-        dcr.setEscalaoReferenciaDesc(tr.getEscalaoId() != null ? tr.getEscalaoId().getEscalao() : null);
-
-        dcr.setLocalTrabalhoId(tr.getLocTrabId() != null ? tr.getLocTrabId().getId() : null);
-        dcr.setLocalTrabalhoDesc(tr.getLocTrabId() != null ? tr.getLocTrabId().getNome() : null);
-
-        dcr.setTipoVinculoLaboralId(tr.getVinculoId() != null ? tr.getVinculoId().getId() : null);
-        dcr.setTipoVinculoLaboralDesc(tr.getVinculoId() != null ? tr.getVinculoId().getNome() : null);
-
-        dcr.setRegimeTrabalho(tr.getRegime());
-        dcr.setSalario(tr.getSalario());
-        dcr.setMoeda(tr.getMoeda());
-        dcr.setDataInicio(tr.getDataInicioContrato());
-        dcr.setDataFim(tr.getDataFimContrato());
-
-        if (tr.getContratoId() != null)
-          dcr.setDuracaoMeses(tr.getContratoId().getDuracao());
-
-        // Subsídios
-        if (entity.getDefinicoesRenumeracoes() != null) {
-          List<SubsidioRespDTO> subs = entity.getDefinicoesRenumeracoes().stream()
-              .map(s -> {
-                SubsidioRespDTO sr = new SubsidioRespDTO();
-                sr.setId(s.getId());
-                sr.setTipoSubsidioId(s.getTmId() != null ? s.getTmId().getId() : null);
-                sr.setPercentagem(s.getPercentagem());
-                sr.setValor(s.getValor());
-                return sr;
-              }).toList();
-
-          dcr.setSubsidios(subs);
-        }
-
-        // Encargos / descontos
-        if (entity.getDefinicoesPagamentos() != null) {
-          List<EncargosDescontosRespDTO> encs = entity.getDefinicoesPagamentos().stream()
-              .map(e -> {
-                EncargosDescontosRespDTO er = new EncargosDescontosRespDTO();
-                er.setId(e.getId());
-                er.setTipoEncargoId(e.getTmId() != null ? e.getTmId().getId() : null);
-                er.setValor(e.getValor());
-                er.setDataInicio(e.getDataInicio());
-                er.setDataFim(e.getDataFim());
-                return er;
-              }).toList();
-
-          dcr.setEncargosDescontos(encs);
-        }
-
-        dto.setDadosContratuais(dcr);
-      }
+      var dcr = dadosContratuaisMapper.dadosContratuaisRespDTO(entity);
+      dto.setDadosContratuais(dcr);
     }
+
 
     return dto;
   }
@@ -865,8 +790,8 @@ public class FuncionarioMapper {
 
     fun.setIdColaborador(dadosPessoais.getIdColaborador());
     fun.setUuid(UuidCreator.getTimeOrderedEpoch());
-    fun.setEstado(estado!=null ? estado : Estado.P);
-    fun.setEstadoValidacao(estado!=null ? estado.name(): "P");
+    fun.setEstado(estado != null ? estado : Estado.P);
+    fun.setEstadoValidacao(estado != null ? estado.name() : "P");
     fun.setTipoDocumentoId(tipoDocumento);
     fun.setNumDocumento(dadosPessoais.getNumDocumento());
     fun.setNome(dadosPessoais.getNome());
@@ -882,7 +807,7 @@ public class FuncionarioMapper {
     fun.setNuSegInps(dadosPessoais.getNumSegurado());
 
     DocumentoPessoalEntity docPessoal = new DocumentoPessoalEntity();
-    docPessoal.setEstado(estado!=null ? estado : Estado.P);
+    docPessoal.setEstado(estado != null ? estado : Estado.P);
     docPessoal.setFunId(fun);
     docPessoal.setTipoDocumentoId(tipoDocumento);
     docPessoal.setNumDocumento(dadosPessoais.getNumDocumento());
@@ -909,7 +834,7 @@ public class FuncionarioMapper {
 
   public FuncionarioEntity toUpdateEntity(FuncionarioEntity funParam, DadosPessoaisReqDTO dadosPessoais) {
     if (dadosPessoais == null) return null;
-    if(funParam == null) return null;
+    if (funParam == null) return null;
 
     var tipoDocumento = entityManager.getReference(TipoDocumentoEntity.class, dadosPessoais.getTipoDocumentoId());
 
@@ -928,17 +853,16 @@ public class FuncionarioMapper {
     funParam.setNif(dadosPessoais.getNif());
     funParam.setNuSegInps(dadosPessoais.getNumSegurado());
 
-    DocumentoPessoalEntity docPessoal = funParam.getDocumentoPessoal()!=null ? funParam.getDocumentoPessoal() : new DocumentoPessoalEntity();
+    DocumentoPessoalEntity docPessoal = funParam.getDocumentoPessoal() != null ? funParam.getDocumentoPessoal() : new DocumentoPessoalEntity();
     docPessoal.setFunId(funParam);
     docPessoal.setTipoDocumentoId(tipoDocumento);
     docPessoal.setNumDocumento(dadosPessoais.getNumDocumento());
-    docPessoal.setUuid(funParam.getDocumentoPessoal()!=null ? funParam.getDocumentoPessoal().getUuid() : IdentificadorUnico.create().getValor());
-    docPessoal.setEstado(funParam.getDocumentoPessoal()!=null ? funParam.getDocumentoPessoal().getEstado() : Estado.P);
+    docPessoal.setUuid(funParam.getDocumentoPessoal() != null ? funParam.getDocumentoPessoal().getUuid() : IdentificadorUnico.create().getValor());
+    docPessoal.setEstado(funParam.getDocumentoPessoal() != null ? funParam.getDocumentoPessoal().getEstado() : Estado.P);
     funParam.setDocumentoPessoal(docPessoal);
 
 
-
-    EnderecoEntity e = funParam.getEndereco()!=null ?
+    EnderecoEntity e = funParam.getEndereco() != null ?
         enderecoMapper.toUpdateEntity(funParam.getEndereco(), dadosPessoais.getEndereco())
         : enderecoMapper.toEntity(dadosPessoais.getEndereco(), Estado.P);
 
@@ -949,14 +873,6 @@ public class FuncionarioMapper {
 
   }
 
-  public TiposRelacionamentoEntity getTipoRelacionamentoAtual(FuncionarioEntity entity) {
-
-   return entity.getTiposrelacionamentos().stream()
-        .filter(t -> t.getEstActAdm() != null && t.getEstActAdm() == 1)
-        .max(Comparator.comparing(TiposRelacionamentoEntity::getDataInicio))
-        .orElse(null);
-
-  }
 
 
 

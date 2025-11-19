@@ -9,8 +9,6 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +34,7 @@ public class ValidarRegistoColaboradorService {
   private final CarreiraMapper carreiraMapper;
   private final MobilidadeMapper mobilidadeMapper;
   private final RegimeTrabalhoMapper regimeTrabalhoMapper;
-  private final ContratuaisEntityMapper contratuaisEntityMapper;
+  private final DadosContratuaisMapper dadosContratuaisMapper;
 
 
 
@@ -66,8 +64,8 @@ public class ValidarRegistoColaboradorService {
     var documentos = documentoMapper.syncDocumentos(funcionario.getDocumentos(), registroColaborador.getAnexos());
     var dadosBancarios = dadosBancariosMapper.syncBancarios(funcionario.getDadosBancarios(), registroColaborador.getDadosBancarios());
 
-    var tiposRelacionamento = funcionarioMapper.getTipoRelacionamentoAtual(funcionario);
-    contratuaisEntityMapper.toUpdateRelacionamento(tiposRelacionamento, registroColaborador.getDadosContratuais());
+    var tiposRelacionamento = dadosContratuaisMapper.getTipoRelacionamentoAtual(funcionario);
+    dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, registroColaborador.getDadosContratuais());
 
 
     var dc = registroColaborador.getDadosContratuais();
@@ -160,7 +158,7 @@ public class ValidarRegistoColaboradorService {
     var pagamentos = funcionarioEntity.getDefinicoesPagamentos();
     if (pagamentos != null) pagamentos.forEach(p -> { if (p != null) p.setEstado(estado); });
 
-    var tr = funcionarioMapper.getTipoRelacionamentoAtual(funcionarioEntity);
+    var tr = dadosContratuaisMapper.getTipoRelacionamentoAtual(funcionarioEntity);
     if (tr != null) {
       tr.setEstado(estado);
 

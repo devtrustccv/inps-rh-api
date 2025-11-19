@@ -165,7 +165,7 @@ public class NovoContratoCommandHandler implements CommandHandler<NovoContratoCo
 
      var resp = funcionarioMapper.dadosContratuaisRespDTO(funcionario);
 
-     return ResponseEntity.ok(resp);
-  }*/
+     return ResponseEntity.ok(resp);*/
+  }
 
 }

@@ -18,14 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class RegistarColaboradorService {
 
-  private final ContactoMapper contactoMapper;
   private final FamiliarMapper familiarMapper;
   private final HabilitacaoLiterariaMapper habilitationLiterariaMapper;
   private final FormacaoFeitaMapper formacaoFeitaMapper;
   private final ExperienciaProfissionalMapper experienciaProfissionalMapper;
   private final DocumentoMapper documentoMapper;
   private final DadosBancariosMapper dadosBancariosMapper;
-  private final ContratuaisEntityMapper contratuaisEntityMapper;
+  private final DadosContratuaisMapper contratuaisEntityMapper;
   private final FuncionarioMapper funcionarioMapper;
   private final ContratoMapper contratoMapper;
   private final CarreiraMapper carreiraMapper;

@@ -1,23 +1,20 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import com.github.f4b6a3.uuid.UuidCreator;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
-import cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO;
-import cv.inps.rh.funcionario.application.dto.SubsidioReqDTO;
+import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
+import java.util.Comparator;
 
 @Component
-public class ContratuaisEntityMapper {
+public class DadosContratuaisMapper {
 
   @PersistenceContext
   private EntityManager em;
-
 
 
   public TiposRelacionamentoEntity toRelacionamento(DadosContratuaisReqDTO dc, Estado estado) {
@@ -98,6 +95,97 @@ public class ContratuaisEntityMapper {
     return sl;
   }
 
+
+  public DadosContratuaisRespDTO dadosContratuaisRespDTO(FuncionarioEntity entity) {
+    if (entity == null) return null;
+
+    // Tem tipo relacionamento?
+    if (entity.getTiposrelacionamentos() == null || entity.getTiposrelacionamentos().isEmpty()) {
+      return null;
+    }
+
+    var tr = getTipoRelacionamentoAtual(entity);
+    if (tr == null) return null;
+
+    DadosContratuaisRespDTO dcr = new DadosContratuaisRespDTO();
+
+    dcr.setTipoContratoId(tr.getTipoContratoId() != null ? tr.getTipoContratoId().getId() : null);
+    dcr.setTipoContratoDesc(tr.getTipoContratoId() != null ? tr.getTipoContratoId().getNome() : null);
+
+    dcr.setCargoPosicaoId(tr.getCargoId() != null ? tr.getCargoId().getId() : null);
+    dcr.setCargoPosicaoDesc(tr.getCargoId() != null ? tr.getCargoId().getNome() : null);
+
+    dcr.setDirecaoId(tr.getInstitId() != null ? tr.getInstitId().getId() : null);
+    dcr.setDirecaoDesc(tr.getInstitId() != null ? tr.getInstitId().getNome() : null);
+
+    dcr.setSeccaoId(tr.getSeccaoId() != null ? tr.getSeccaoId().getId() : null);
+    dcr.setSeccaoDesc(tr.getSeccaoId() != null ? tr.getSeccaoId().getNome() : null);
+
+    dcr.setCarreiraId(tr.getCarrPccId() != null ? tr.getCarrPccId().getId() : null);
+    dcr.setCarreiraDesc(tr.getCarrPccId() != null ? tr.getCarrPccId().getNome() : null);
+
+    dcr.setCategoriaId(tr.getCategoriaId() != null ? tr.getCategoriaId().getId() : null);
+    dcr.setCategoriaDesc(tr.getCategoriaId() != null ? tr.getCategoriaId().getNome() : null);
+
+    dcr.setEscalaoReferenciaId(tr.getEscalaoId() != null ? tr.getEscalaoId().getId() : null);
+    dcr.setEscalaoReferenciaDesc(tr.getEscalaoId() != null ? tr.getEscalaoId().getEscalao() : null);
+
+    dcr.setLocalTrabalhoId(tr.getLocTrabId() != null ? tr.getLocTrabId().getId() : null);
+    dcr.setLocalTrabalhoDesc(tr.getLocTrabId() != null ? tr.getLocTrabId().getNome() : null);
+
+    dcr.setTipoVinculoLaboralId(tr.getVinculoId() != null ? tr.getVinculoId().getId() : null);
+    dcr.setTipoVinculoLaboralDesc(tr.getVinculoId() != null ? tr.getVinculoId().getNome() : null);
+
+    dcr.setRegimeTrabalho(tr.getRegime());
+    dcr.setSalario(tr.getSalario());
+    dcr.setMoeda(tr.getMoeda());
+    dcr.setDataInicio(tr.getDataInicioContrato());
+    dcr.setDataFim(tr.getDataFimContrato());
+
+    if (tr.getContratoId() != null)
+      dcr.setDuracaoMeses(tr.getContratoId().getDuracao());
+
+    // Subsídios
+    if (entity.getDefinicoesRenumeracoes() != null) {
+      var subs = entity.getDefinicoesRenumeracoes().stream().map(s -> {
+        SubsidioRespDTO sr = new SubsidioRespDTO();
+        sr.setId(s.getId());
+        sr.setTipoSubsidioId(s.getTmId() != null ? s.getTmId().getId() : null);
+        sr.setPercentagem(s.getPercentagem());
+        sr.setValor(s.getValor());
+        return sr;
+      }).toList();
+
+      dcr.setSubsidios(subs);
+    }
+
+    // Encargos / descontos
+    if (entity.getDefinicoesPagamentos() != null) {
+      var encs = entity.getDefinicoesPagamentos().stream().map(e -> {
+        EncargosDescontosRespDTO er = new EncargosDescontosRespDTO();
+        er.setId(e.getId());
+        er.setTipoEncargoId(e.getTmId() != null ? e.getTmId().getId() : null);
+        er.setValor(e.getValor());
+        er.setDataInicio(e.getDataInicio());
+        er.setDataFim(e.getDataFim());
+        return er;
+      }).toList();
+
+      dcr.setEncargosDescontos(encs);
+    }
+
+    return dcr;
+  }
+
+
+  public TiposRelacionamentoEntity getTipoRelacionamentoAtual(FuncionarioEntity entity) {
+
+    return entity.getTiposrelacionamentos().stream()
+        .filter(t -> t.getEstActAdm() != null && t.getEstActAdm() == 1)
+        .max(Comparator.comparing(TiposRelacionamentoEntity::getDataInicio))
+        .orElse(null);
+
+  }
 
 
 
