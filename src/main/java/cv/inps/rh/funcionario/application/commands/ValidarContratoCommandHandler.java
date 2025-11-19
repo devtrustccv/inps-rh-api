@@ -2,9 +2,8 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.funcionario.application.dto.NovoContratoDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
-import cv.inps.rh.funcionario.application.service.ContratoService;
+import cv.inps.rh.funcionario.application.service.ValidarContratoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -15,9 +14,9 @@ public class ValidarContratoCommandHandler implements CommandHandler<ValidarCont
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ValidarContratoCommandHandler.class);
 
-  private final ContratoService contratoService;
+  private final ValidarContratoService contratoService;
 
-  public ValidarContratoCommandHandler(ContratoService contratoService) {
+  public ValidarContratoCommandHandler(ValidarContratoService contratoService) {
     this.contratoService = contratoService;
   }
 

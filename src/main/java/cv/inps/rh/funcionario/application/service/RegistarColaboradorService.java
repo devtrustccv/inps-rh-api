@@ -1,7 +1,6 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.CreateFuncionarioCommand;
-import cv.inps.rh.funcionario.application.commands.ValidarRegistoColaboradorCommand;
 import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -11,16 +10,13 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntity
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSitLaboralEntityRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-
 @Service
 @RequiredArgsConstructor
-public class DossierService {
+public class RegistarColaboradorService {
 
   private final ContactoMapper contactoMapper;
   private final FamiliarMapper familiarMapper;

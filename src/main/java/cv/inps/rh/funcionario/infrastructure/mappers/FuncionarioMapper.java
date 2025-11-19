@@ -777,12 +777,10 @@ public class FuncionarioMapper {
     }
 
     if (entity.getTiposrelacionamentos() != null && !entity.getTiposrelacionamentos().isEmpty()) {
-       System.out.println("----> entity.getTiposrelacionamentos() != null && !entity.getTiposrelacionamentos().isEmpty()");
       //getting tipoRelaciomento atual
       var tr = getTipoRelacionamentoAtual(entity);
 
       if (tr != null) {
-        System.out.println("trrrrrrrrrrrrr"+tr);
         DadosContratuaisRespDTO dcr = new DadosContratuaisRespDTO();
 
         dcr.setTipoContratoId(tr.getTipoContratoId() != null ? tr.getTipoContratoId().getId() : null);

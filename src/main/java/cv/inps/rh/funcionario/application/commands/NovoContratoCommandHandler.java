@@ -4,6 +4,7 @@ import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.NovoContratoDTO;
+import cv.inps.rh.funcionario.application.service.NovoContratoService;
 import cv.inps.rh.parametrizacao.domain.repository.ParamSituacaoLaboralRepository;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import org.springframework.http.ResponseEntity;
@@ -43,8 +44,9 @@ public class NovoContratoCommandHandler implements CommandHandler<NovoContratoCo
   private final ParamLocalTrabMapper paramLocalTrabMapper;
   private final TipoMovimentoMapper tipoMovimentoMapper;
   private final FuncionarioMapper funcionarioMapper;
-
   private final ParamSituacaoLaboralRepository paramSituacaoLaboralRepository;
+
+  private final NovoContratoService novoContratoService;
 
   public NovoContratoCommandHandler(FuncionarioRepository funcionarioRepository,
                                     ParamContratoMapper paramContratoMapper,
@@ -57,7 +59,7 @@ public class NovoContratoCommandHandler implements CommandHandler<NovoContratoCo
                                     ParamVinculoMapper paramVinculoMapper,
                                     GeografiaMapper geografiaMapper,
                                     ParamLocalTrabMapper paramLocalTrabMapper,
-                                    TipoMovimentoMapper tipoMovimentoMapper, FuncionarioMapper funcionarioMapper, ParamSituacaoLaboralRepository paramSituacaoLaboralRepository) {
+                                    TipoMovimentoMapper tipoMovimentoMapper, FuncionarioMapper funcionarioMapper, ParamSituacaoLaboralRepository paramSituacaoLaboralRepository, NovoContratoService novoContratoService) {
     this.funcionarioRepository = funcionarioRepository;
     this.paramContratoMapper = paramContratoMapper;
     this.paramCargoMapper = paramCargoMapper;
@@ -72,13 +74,16 @@ public class NovoContratoCommandHandler implements CommandHandler<NovoContratoCo
     this.tipoMovimentoMapper = tipoMovimentoMapper;
     this.funcionarioMapper = funcionarioMapper;
     this.paramSituacaoLaboralRepository = paramSituacaoLaboralRepository;
+    this.novoContratoService = novoContratoService;
   }
 
   @IgrpCommandHandler
   public ResponseEntity<DadosContratuaisRespDTO> handle(NovoContratoCommand command) {
      LOGGER.info("Novo contrato para funcionario: {}", command);
 
-    var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
+     return ResponseEntity.ok(novoContratoService.registrar(command));
+
+    /*var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
 
      if(funcionarioRepository.hasActiveContrato(idFunc)){
        throw IgrpResponseStatusException.badRequest("Funcionario com id '%s' já possui um contrato ativo".formatted(idFunc));
@@ -161,6 +166,6 @@ public class NovoContratoCommandHandler implements CommandHandler<NovoContratoCo
      var resp = funcionarioMapper.dadosContratuaisRespDTO(funcionario);
 
      return ResponseEntity.ok(resp);
-  }
+  }*/
 
 }

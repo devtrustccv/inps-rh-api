@@ -2,19 +2,10 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.funcionario.application.service.DossierService;
 import cv.inps.rh.funcionario.application.service.ValidarRegistoColaboradorService;
-import cv.inps.rh.funcionario.domain.models.DefPagamento;
-import cv.inps.rh.funcionario.domain.models.DefinicaoRemuneracao;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
-import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.*;
-import cv.inps.rh.shared.application.constants.EstadoValidacao;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.domain.models.Geografia;
-import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import cv.inps.rh.shared.domain.models.TipoMovimento;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.shared.infrastructure.mappers.InstituicaoMapper;
 import cv.inps.rh.shared.infrastructure.mappers.TipoMovimentoMapper;
@@ -23,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Map;
 
 @Component

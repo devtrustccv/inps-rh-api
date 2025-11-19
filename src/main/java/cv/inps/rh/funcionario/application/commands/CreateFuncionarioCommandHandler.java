@@ -3,19 +3,12 @@ package cv.inps.rh.funcionario.application.commands;
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
-import cv.inps.rh.funcionario.application.service.DossierService;
-import cv.inps.rh.funcionario.domain.models.DefPagamento;
-import cv.inps.rh.funcionario.domain.models.DefinicaoRemuneracao;
-import cv.inps.rh.funcionario.domain.models.Funcionario;
+import cv.inps.rh.funcionario.application.service.RegistarColaboradorService;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
-import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
 import cv.inps.rh.parametrizacao.domain.repository.ParamSituacaoLaboralRepository;
 import cv.inps.rh.parametrizacao.domain.repository.TipoDocumentoRepository;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.*;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.domain.models.Geografia;
-import cv.inps.rh.shared.domain.models.TipoMovimento;
 import cv.inps.rh.shared.domain.repository.GeografiaRepository;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.shared.infrastructure.mappers.InstituicaoMapper;
@@ -24,8 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFuncionarioCommand, ResponseEntity<FuncionarioResponseDTO>> {
@@ -63,9 +54,9 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
 
   private final ParamSituacaoLaboralRepository paramSituacaoLaboralRepository;
 
-  private final DossierService dossierService;
+  private final RegistarColaboradorService dossierService;
 
-   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper, GeografiaMapper geografiaMapper, TipoDocumentoMapper tipoDocumentoMapper, ParamCargoMapper paramCargoMapper, ParamContratoMapper paramContratoMapper, InstituicaoMapper instituicaoMapper, SecaoMapper secaoMapper, ParamCarreiraMapper paramCarreiraMapper, ParamCategoriaMapper paramCategoriaMapper, ParamEscalaoMapper paramEscalaoMapper, ParamVinculoMapper paramVinculoMapper, ParamLocalTrabMapper paramLocalTrabMapper, TipoMovimentoMapper tipoMovimentoMapper, ParamSituacaoLaboralRepository paramSituacaoLaboralRepository, DossierService dossierService) {
+   public CreateFuncionarioCommandHandler(FuncionarioMapper funcionarioMapper, FuncionarioRepository funcionarioRepository, TipoDocumentoRepository tipoDocumentoRepository, GeografiaRepository geografiaRepository, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper, GeografiaMapper geografiaMapper, TipoDocumentoMapper tipoDocumentoMapper, ParamCargoMapper paramCargoMapper, ParamContratoMapper paramContratoMapper, InstituicaoMapper instituicaoMapper, SecaoMapper secaoMapper, ParamCarreiraMapper paramCarreiraMapper, ParamCategoriaMapper paramCategoriaMapper, ParamEscalaoMapper paramEscalaoMapper, ParamVinculoMapper paramVinculoMapper, ParamLocalTrabMapper paramLocalTrabMapper, TipoMovimentoMapper tipoMovimentoMapper, ParamSituacaoLaboralRepository paramSituacaoLaboralRepository, RegistarColaboradorService dossierService) {
 
      this.funcionarioMapper = funcionarioMapper;
      this.funcionarioRepository = funcionarioRepository;
