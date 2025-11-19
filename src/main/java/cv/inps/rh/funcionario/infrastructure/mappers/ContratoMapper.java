@@ -252,6 +252,17 @@ public class ContratoMapper {
     return entity;
   }
 
+  public ContratoEntity toUpdateEntity(ContratoEntity entity, RenovarContratoReqDTO dc) {
+    if (dc == null) return null;
+    entity.setDataInicio(dc.getDataInicio());
+    entity.setDataFim(dc.getDataFim());
+    entity.setDuracao(dc.getDuracaoMeses());
+    entity.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
+    entity.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoId()));
+    return entity;
+  }
+
+
 
 
 }

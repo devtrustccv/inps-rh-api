@@ -197,4 +197,35 @@ public class ContratoController {
        return response;
   }
 
+   @PostMapping(
+   value = "{id}/validar-renovacao-contrato"
+  )
+  @Operation(
+    summary = "POST method to handle operations for validarRenovacaoContrato",
+    description = "POST method to handle operations for validarRenovacaoContrato",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = RenovacaoContratoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<RenovacaoContratoDTO> validarRenovacaoContrato(@Valid @RequestBody RenovacaoContratoDTO validarRenovacaoContratoRequest
+    , @PathVariable(value = "id") String id)
+  {
+
+      final var command = new ValidarRenovacaoContratoCommand(validarRenovacaoContratoRequest, id);
+
+       ResponseEntity<RenovacaoContratoDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
 }
