@@ -1,6 +1,7 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.CreateFuncionarioCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarRegistoColaboradorCommand;
 import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -14,6 +15,8 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -223,6 +226,7 @@ public class DossierService {
     FuncionarioEntity saved = funcionarioEntityRepository.save(fun);
     return funcionarioMapper.toResponseDTO(saved);
   }
+
 
 
 }

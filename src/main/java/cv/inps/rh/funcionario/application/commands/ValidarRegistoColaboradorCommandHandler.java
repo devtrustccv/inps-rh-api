@@ -2,6 +2,8 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.funcionario.application.service.DossierService;
+import cv.inps.rh.funcionario.application.service.ValidarRegistoColaboradorService;
 import cv.inps.rh.funcionario.domain.models.DefPagamento;
 import cv.inps.rh.funcionario.domain.models.DefinicaoRemuneracao;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
@@ -27,7 +29,7 @@ import java.util.Map;
 @Component
 public class ValidarRegistoColaboradorCommandHandler implements CommandHandler<ValidarRegistoColaboradorCommand, ResponseEntity<Map<String, ?>>> {
 
-   private static final Logger LOGGER = LoggerFactory.getLogger(ValidarRegistoColaboradorCommandHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ValidarRegistoColaboradorCommandHandler.class);
 
   private final FuncionarioRepository funcionarioRepository;
   private final TipoDocumentoMapper tipoDocumentoMapper;
@@ -53,38 +55,55 @@ public class ValidarRegistoColaboradorCommandHandler implements CommandHandler<V
   private final ParamLocalTrabMapper paramLocalTrabMapper;
   private final TipoMovimentoMapper tipoMovimentoMapper;
 
-   public ValidarRegistoColaboradorCommandHandler(FuncionarioRepository funcionarioRepository, TipoDocumentoMapper tipoDocumentoMapper, GeografiaMapper geografiaMapper, ContactoMapper contactoMapper, EnderecoMapper enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper, FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper, ParamCargoMapper paramCargoMapper, ParamContratoMapper paramContratoMapper, InstituicaoMapper instituicaoMapper, SecaoMapper secaoMapper, ParamCarreiraMapper paramCarreiraMapper, ParamCategoriaMapper paramCategoriaMapper, ParamEscalaoMapper paramEscalaoMapper, ParamVinculoMapper paramVinculoMapper, ParamLocalTrabMapper paramLocalTrabMapper, TipoMovimentoMapper tipoMovimentoMapper) {
+  private final ValidarRegistoColaboradorService dossierService;
 
-     this.funcionarioRepository = funcionarioRepository;
-     this.tipoDocumentoMapper = tipoDocumentoMapper;
-     this.geografiaMapper = geografiaMapper;
-     this.contactoMapper = contactoMapper;
-     this.enderecoMapper = enderecoMapper;
-     this.familiarMapper = familiarMapper;
-     this.habilitacaoLiterariaMapper = habilitacaoLiterariaMapper;
-     this.formacaoFeitaMapper = formacaoFeitaMapper;
-     this.experienciaProfissionalMapper = experienciaProfissionalMapper;
-     this.documentoMapper = documentoMapper;
-     this.dadosBancariosMapper = dadosBancariosMapper;
-     this.paramCargoMapper = paramCargoMapper;
-     this.paramContratoMapper = paramContratoMapper;
-     this.instituicaoMapper = instituicaoMapper;
-     this.secaoMapper = secaoMapper;
-     this.paramCarreiraMapper = paramCarreiraMapper;
-     this.paramCategoriaMapper = paramCategoriaMapper;
-     this.paramEscalaoMapper = paramEscalaoMapper;
-     this.paramVinculoMapper = paramVinculoMapper;
-     this.paramLocalTrabMapper = paramLocalTrabMapper;
-     this.tipoMovimentoMapper = tipoMovimentoMapper;
-   }
+  public ValidarRegistoColaboradorCommandHandler(FuncionarioRepository funcionarioRepository, TipoDocumentoMapper
+                                                     tipoDocumentoMapper, GeografiaMapper geografiaMapper, ContactoMapper contactoMapper, EnderecoMapper
+                                                     enderecoMapper, FamiliarMapper familiarMapper, HabilitacaoLiterariaMapper habilitacaoLiterariaMapper,
+                                                 FormacaoFeitaMapper formacaoFeitaMapper, ExperienciaProfissionalMapper
+                                                     experienciaProfissionalMapper, DocumentoMapper documentoMapper, DadosBancariosMapper dadosBancariosMapper,
+                                                 ParamCargoMapper paramCargoMapper, ParamContratoMapper paramContratoMapper,
+                                                 InstituicaoMapper instituicaoMapper, SecaoMapper secaoMapper,
+                                                 ParamCarreiraMapper paramCarreiraMapper, ParamCategoriaMapper
+                                                     paramCategoriaMapper, ParamEscalaoMapper paramEscalaoMapper,
+                                                 ParamVinculoMapper paramVinculoMapper, ParamLocalTrabMapper paramLocalTrabMapper,
+                                                 TipoMovimentoMapper tipoMovimentoMapper, ValidarRegistoColaboradorService dossierService) {
 
-   @IgrpCommandHandler
-   public ResponseEntity<Map<String, ?>> handle(ValidarRegistoColaboradorCommand command) {
+    this.funcionarioRepository = funcionarioRepository;
+    this.tipoDocumentoMapper = tipoDocumentoMapper;
+    this.geografiaMapper = geografiaMapper;
+    this.contactoMapper = contactoMapper;
+    this.enderecoMapper = enderecoMapper;
+    this.familiarMapper = familiarMapper;
+    this.habilitacaoLiterariaMapper = habilitacaoLiterariaMapper;
+    this.formacaoFeitaMapper = formacaoFeitaMapper;
+    this.experienciaProfissionalMapper = experienciaProfissionalMapper;
+    this.documentoMapper = documentoMapper;
+    this.dadosBancariosMapper = dadosBancariosMapper;
+    this.paramCargoMapper = paramCargoMapper;
+    this.paramContratoMapper = paramContratoMapper;
+    this.instituicaoMapper = instituicaoMapper;
+    this.secaoMapper = secaoMapper;
+    this.paramCarreiraMapper = paramCarreiraMapper;
+    this.paramCategoriaMapper = paramCategoriaMapper;
+    this.paramEscalaoMapper = paramEscalaoMapper;
+    this.paramVinculoMapper = paramVinculoMapper;
+    this.paramLocalTrabMapper = paramLocalTrabMapper;
+    this.tipoMovimentoMapper = tipoMovimentoMapper;
+    this.dossierService = dossierService;
+  }
 
-     var dto = command.getFuncionariorequest();
-     LOGGER.info("Iniciando atualização de funcionário: {}", dto);
+  @IgrpCommandHandler
+  public ResponseEntity<Map<String, ?>> handle(ValidarRegistoColaboradorCommand command) {
 
-     var id = IdentificadorUnico.from(command.getId());
+
+    LOGGER.info("Iniciando atualização/validacao de funcionário: {}", command);
+
+    return ResponseEntity.ok(dossierService.validarRegistoColaborador(command));
+
+    /*
+    var dto = command.getFuncionariorequest();
+    var id = IdentificadorUnico.from(command.getId());
      var funcionario = funcionarioRepository.findById(id)
          .orElseThrow(() -> IgrpResponseStatusException.notFound("funcionario nao encontrado com id" + command.getId()));
 
@@ -192,9 +211,9 @@ public class ValidarRegistoColaboradorCommandHandler implements CommandHandler<V
 
      funcionarioRepository.save(funcionario);
 
-     return ResponseEntity.ok(Map.of());
+     return ResponseEntity.ok(Map.of());*/
 
-   }
+  }
 
 
 }
