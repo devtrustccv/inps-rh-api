@@ -113,27 +113,57 @@ public class ValidarRegistoColaboradorService {
 
   }
 
-  private void mudaEstado (FuncionarioEntity funcionarioEntity, Estado estado ){
+  private void mudaEstado(FuncionarioEntity funcionarioEntity, Estado estado) {
+    if (funcionarioEntity == null) return;
     funcionarioEntity.setEstado(estado);
-    funcionarioEntity.setEstadoValidacao(estado.name());
-    funcionarioEntity.getEndereco().setEstado(estado);
-    funcionarioEntity.getContactos().forEach(c -> c.setEstado(estado));
-    funcionarioEntity.getFamiliares().forEach(f -> f.setEstado(estado));
-    funcionarioEntity.getDocumentos().forEach(d -> d.setEstado(estado));
-    funcionarioEntity.getDadosBancarios().forEach(b -> b.setEstado(estado));
-    funcionarioEntity.getHabilitacoesLiterarias().forEach(h -> h.setEstado(estado));
-    funcionarioEntity.getFormacoesFeitas().forEach(f -> f.setEstado(estado));
-    funcionarioEntity.getExperienciasProfissionais().forEach(e -> e.setEstado(estado));
-    funcionarioEntity.getDefinicoesRenumeracoes().forEach(r -> r.setEstado(estado));
-    funcionarioEntity.getDefinicoesPagamentos().forEach(p -> p.setEstado(estado));
+    funcionarioEntity.setEstadoValidacao(estado != null ? estado.name() : null);
 
-    var tiposRelacionamento = funcionarioMapper.getTipoRelacionamentoAtual(funcionarioEntity);
-    tiposRelacionamento.setEstado(estado);
-    tiposRelacionamento.getContratoId().setEstado(estado);
-    tiposRelacionamento.getMobId().setEstado(estado);
-    tiposRelacionamento.getCarreiraId().setEstado(estado);
-    tiposRelacionamento.getRegimeId().setEstado(estado);
+    var endereco = funcionarioEntity.getEndereco();
+    if (endereco != null) endereco.setEstado(estado);
 
+    var contactos = funcionarioEntity.getContactos();
+    if (contactos != null) contactos.forEach(c -> { if (c != null) c.setEstado(estado); });
+
+    var familiares = funcionarioEntity.getFamiliares();
+    if (familiares != null) familiares.forEach(f -> { if (f != null) f.setEstado(estado); });
+
+    var documentos = funcionarioEntity.getDocumentos();
+    if (documentos != null) documentos.forEach(d -> { if (d != null) d.setEstado(estado); });
+
+    var bancarios = funcionarioEntity.getDadosBancarios();
+    if (bancarios != null) bancarios.forEach(b -> { if (b != null) b.setEstado(estado); });
+
+    var habilitacoes = funcionarioEntity.getHabilitacoesLiterarias();
+    if (habilitacoes != null) habilitacoes.forEach(h -> { if (h != null) h.setEstado(estado); });
+
+    var formacoes = funcionarioEntity.getFormacoesFeitas();
+    if (formacoes != null) formacoes.forEach(f -> { if (f != null) f.setEstado(estado); });
+
+    var experiencias = funcionarioEntity.getExperienciasProfissionais();
+    if (experiencias != null) experiencias.forEach(e -> { if (e != null) e.setEstado(estado); });
+
+    var remuneracoes = funcionarioEntity.getDefinicoesRenumeracoes();
+    if (remuneracoes != null) remuneracoes.forEach(r -> { if (r != null) r.setEstado(estado); });
+
+    var pagamentos = funcionarioEntity.getDefinicoesPagamentos();
+    if (pagamentos != null) pagamentos.forEach(p -> { if (p != null) p.setEstado(estado); });
+
+    var tr = funcionarioMapper.getTipoRelacionamentoAtual(funcionarioEntity);
+    if (tr != null) {
+      tr.setEstado(estado);
+
+      var contrato = tr.getContratoId();
+      if (contrato != null) contrato.setEstado(estado);
+
+      var mob = tr.getMobId();
+      if (mob != null) mob.setEstado(estado);
+
+      var carreira = tr.getCarreiraId();
+      if (carreira != null) carreira.setEstado(estado);
+
+      var regime = tr.getRegimeId();
+      if (regime != null) regime.setEstado(estado);
+    }
   }
 
 }
