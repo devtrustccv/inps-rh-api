@@ -72,6 +72,8 @@ public class ContratuaisEntityMapper {
     tr.setTipoContratoId(em.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
     tr.setReferente("REGISTO_COLABORADOR");
     tr.setTpContrato("INICIAL");
+
+    System.out.println("tr.getFlgProcessa() ========= " + tr.getFlgProcessa());
   }
 
 

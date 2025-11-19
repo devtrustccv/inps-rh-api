@@ -9,6 +9,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -34,9 +35,8 @@ public class ValidarRegistoColaboradorService {
   private final ContratuaisEntityMapper contratuaisEntityMapper;
 
 
-  @PersistenceContext
-  private EntityManager entityManager;
 
+  @Transactional
   public Map<String, ?> validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
 
     var registroColaborador = command.getFuncionariorequest();

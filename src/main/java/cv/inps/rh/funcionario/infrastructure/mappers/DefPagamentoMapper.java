@@ -144,7 +144,7 @@ public class DefPagamentoMapper {
     if (e == null) return null;
     var dp = new DefPagamentoEntity();
     if (e.getTipoEncargoId() != null) {
-      dp.setTmId(em.getReference(TipoMovimentoEntity.class, e.getTipoEncargoId()));
+      dp.setTmId(entityManager.getReference(TipoMovimentoEntity.class, e.getTipoEncargoId()));
     }
     dp.setValor(e.getValor());
     dp.setDataInicio(e.getDataInicio());

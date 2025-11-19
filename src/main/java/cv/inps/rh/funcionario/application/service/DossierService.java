@@ -54,15 +54,6 @@ public class DossierService {
 
     FuncionarioEntity fun = funcionarioMapper.toEntity(dadosPessoais, Estado.P);
 
-    if (dadosPessoais.getContactos() != null) {
-      var list = dadosPessoais.getContactos().stream().map(c -> {
-        var ce = contactoMapper.toEntity(c, Estado.P);
-        ce.setFunId(fun);
-        return ce;
-      }).toList();
-      fun.setContactos(list);
-    }
-
     if (dto.getFamiliares() != null) {
       var list = dto.getFamiliares().stream().map(f -> {
         var fe = familiarMapper.toEntity(f, Estado.P);
