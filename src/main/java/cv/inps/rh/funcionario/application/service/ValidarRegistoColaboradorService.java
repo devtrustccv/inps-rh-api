@@ -173,6 +173,24 @@ public class ValidarRegistoColaboradorService {
       var regime = tr.getRegimeId();
       if (regime != null) regime.setEstado(estado);
     }
+
+    /*funcionarioEntity.getValidacoes().stream()
+        .filter(v -> "REGISTO_COLABORADOR".equals(v.getReferenciaName()) && "INSERT".equals(v.getTipoAccao()))
+        .findFirst()
+        .ifPresent(v -> v.setEstado(estado));*/
+
+    funcionarioEntity.getValidacoes().stream()
+        .filter(v -> v.getEstado() == Estado.P)
+        .findFirst()
+        .ifPresent(v -> v.setEstado(estado));
+
+
+    funcionarioEntity.getOrdemServicos()
+        .stream()
+        .filter(o -> o.getEstado() == Estado.P)
+        .findFirst().ifPresent(ordemServicoEntity -> ordemServicoEntity.setEstado(estado));
+
+
   }
 
 }
