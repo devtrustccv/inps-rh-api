@@ -62,7 +62,6 @@ public class ContratuaisEntityMapper {
     tr.setMoeda(dc.getMoeda());
     tr.setRegime(dc.getRegimeTrabalho());
     tr.setTipoSituacao("NOVO_CONTRATO");
-    tr.setFlgProcessa("S");
     tr.setObs("NOVO_CONTRATO");
     tr.setDataInicio(dc.getDataInicio());
     tr.setDataFim(null);
@@ -73,7 +72,6 @@ public class ContratuaisEntityMapper {
     tr.setReferente("REGISTO_COLABORADOR");
     tr.setTpContrato("INICIAL");
 
-    System.out.println("tr.getFlgProcessa() ========= " + tr.getFlgProcessa());
   }
 
 
