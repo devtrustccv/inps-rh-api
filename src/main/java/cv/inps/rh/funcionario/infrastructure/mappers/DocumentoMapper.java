@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.application.dto.AnexoRespDTO;
 import cv.inps.rh.funcionario.domain.models.Documento;
 import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.TipoDocumentoMapper;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import jakarta.persistence.EntityManager;
@@ -102,19 +103,15 @@ public class DocumentoMapper {
         .toList();
   }
 
-  public DocumentoEntity toEntity(AnexoReqDTO dto) {
+  public DocumentoEntity toEntity(AnexoReqDTO dto, Estado estado) {
     if (dto == null) return null;
     DocumentoEntity entity = new DocumentoEntity();
     entity.setTpDocumentoId(entityManager.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
     entity.setReferenciaName(dto.getDocumento());
     entity.setReferenciaId(dto.getDocumento());
+    entity.setEstado(estado);
     entity.setDocId(1L);
     return entity;
-  }
-
-  public java.util.List<DocumentoEntity> toEntities(java.util.List<AnexoReqDTO> dtos) {
-    if (dtos == null) return null;
-    return dtos.stream().map(this::toEntity).toList();
   }
 
 

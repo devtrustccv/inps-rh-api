@@ -18,10 +18,10 @@ public class ContratuaisEntityMapper {
   @PersistenceContext
   private EntityManager em;
 
-  public ContratoEntity toContrato(DadosContratuaisReqDTO dc) {
+  public ContratoEntity toContrato(DadosContratuaisReqDTO dc, Estado estado) {
     if (dc == null) return null;
     var c = new ContratoEntity();
-    c.setEstado(Estado.P);
+    c.setEstado(estado);
     c.setDataInicio(dc.getDataInicio());
     c.setDataFim(dc.getDataFim());
     c.setDuracao(dc.getDuracaoMeses());
@@ -33,7 +33,7 @@ public class ContratuaisEntityMapper {
     return c;
   }
 
-  public TiposRelacionamentoEntity toRelacionamento(DadosContratuaisReqDTO dc) {
+  public TiposRelacionamentoEntity toRelacionamento(DadosContratuaisReqDTO dc, Estado estado) {
     if (dc == null) return null;
     var tr = new TiposRelacionamentoEntity();
     tr.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
@@ -58,10 +58,11 @@ public class ContratuaisEntityMapper {
     tr.setReferente("REGISTO_COLABORADOR");
     tr.setTpContrato("INICIAL");
     tr.setUuid(UuidCreator.getTimeOrderedEpoch());
+    tr.setEstado(estado);
     return tr;
   }
 
-  public CarreiraEntity toCarreira(DadosContratuaisReqDTO dc) {
+  public CarreiraEntity toCarreira(DadosContratuaisReqDTO dc, Estado estado) {
     if (dc == null) return null;
     var ce = new CarreiraEntity();
     ce.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
@@ -74,10 +75,11 @@ public class ContratuaisEntityMapper {
     ce.setEstado(Estado.P);
     ce.setObs("NOVO_CONTRATO");
     ce.setUuid(UuidCreator.getTimeOrderedEpoch());
+    ce.setEstado(estado);
     return ce;
   }
 
-  public RegimeTrabalhoEntity toRegime(DadosContratuaisReqDTO dc) {
+  public RegimeTrabalhoEntity toRegime(DadosContratuaisReqDTO dc, Estado estado) {
     if (dc == null) return null;
     var re = new RegimeTrabalhoEntity();
     re.setTipoRegime(dc.getRegimeTrabalho());
@@ -86,10 +88,11 @@ public class ContratuaisEntityMapper {
     re.setObs(null);
     re.setEstado(Estado.P);
     re.setUuid(UuidCreator.getTimeOrderedEpoch());
+    re.setEstado(estado);
     return re;
   }
 
-  public MobilidadeEntity toMobilidade(DadosContratuaisReqDTO dc) {
+  public MobilidadeEntity toMobilidade(DadosContratuaisReqDTO dc, Estado estado) {
     if (dc == null) return null;
     var me = new MobilidadeEntity();
     me.setTipoSituacao("NOVO_CONTRATO");
@@ -101,15 +104,16 @@ public class ContratuaisEntityMapper {
     me.setInstidId(em.getReference(InstituicaoEntity.class, dc.getDirecaoId()));
     me.setDataInicio(dc.getDataInicio());
     me.setDataFim(dc.getDataFim());
+    me.setEstado(estado);
     return me;
   }
 
-  public DefinicaoRemuneracaoEntity toDefinicaoRemuneracao(SubsidioReqDTO s, FuncionarioEntity fun) {
+  public DefinicaoRemuneracaoEntity toDefinicaoRemuneracao(SubsidioReqDTO s, FuncionarioEntity fun, Estado estado) {
     if (s == null) return null;
     var de = new DefinicaoRemuneracaoEntity();
     de.setPercentagem(s.getPercentagem());
     de.setValor(s.getValor());
-    de.setEstado(Estado.P);
+    de.setEstado(estado);
     de.setObs(s.getObservacoes());
     de.setDataInicio(LocalDate.now());
     de.setDataFim(LocalDate.now());
@@ -121,7 +125,7 @@ public class ContratuaisEntityMapper {
     return de;
   }
 
-  public DefPagamentoEntity toDefPagamento(EncargosDescontosReqDTO e, FuncionarioEntity fun) {
+  public DefPagamentoEntity toDefPagamento(EncargosDescontosReqDTO e, FuncionarioEntity fun, Estado estado) {
     if (e == null) return null;
     var dp = new DefPagamentoEntity();
     if (e.getTipoEncargoId() != null) {
@@ -131,30 +135,30 @@ public class ContratuaisEntityMapper {
     dp.setDataInicio(e.getDataInicio());
     dp.setDataFim(e.getDataFim());
     dp.setObs(e.getObservacoes());
-    dp.setEstado(Estado.P);
+    dp.setEstado(estado);
     dp.setUuid(UuidCreator.getTimeOrderedEpoch());
     dp.setFunId(fun);
     return dp;
   }
 
-  public ValidacaoEntity toValidacaoInsert(String referenciaName, Long funId) {
+  public ValidacaoEntity toValidacaoInsert(String referenciaName, Long funId, Estado estado) {
     var v = new ValidacaoEntity();
     v.setTipoAccao("INSERT");
     v.setReferenciaName(referenciaName);
     v.setReferenciaId(funId);
-    v.setEstado(Estado.P);
+    v.setEstado(estado);
     v.setObs(null);
     v.setUuid(UuidCreator.getTimeOrderedEpoch());
     return v;
   }
 
-  public SituacaoLaboralEntity toSituacaoLaboralInicial(DadosContratuaisReqDTO dc, ParamSitLaboralEntity param) {
+  public SituacaoLaboralEntity toSituacaoLaboralInicial(DadosContratuaisReqDTO dc, ParamSitLaboralEntity param, Estado estado) {
     var sl = new SituacaoLaboralEntity();
     sl.setSituacaoLaboralId(param);
     sl.setMotivoSitLab(null);
     sl.setDataInicio(dc.getDataInicio());
     sl.setDataFim(null);
-    sl.setEstado(Estado.P);
+    sl.setEstado(estado);
     sl.setObs("NOVO_CONTRATO");
     sl.setUuid(UuidCreator.getTimeOrderedEpoch());
     return sl;

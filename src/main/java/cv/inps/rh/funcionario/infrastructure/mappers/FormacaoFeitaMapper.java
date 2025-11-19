@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import cv.inps.rh.funcionario.application.dto.FormacaoProfissionalReqDTO;
 import cv.inps.rh.funcionario.application.dto.FormacaoProfissionalRespDTO;
 import cv.inps.rh.funcionario.domain.models.FormacaoFeita;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FormacaoFeitaEntity;
@@ -116,7 +117,7 @@ public class FormacaoFeitaMapper {
         .collect(Collectors.toList());
   }
 
-  public FormacaoFeitaEntity toEntity(FormacaoProfissionalReqDTO dto) {
+  public FormacaoFeitaEntity toEntity(FormacaoProfissionalReqDTO dto, Estado estado) {
     if (dto == null) {
       return null;
     }
@@ -134,6 +135,7 @@ public class FormacaoFeitaMapper {
     e.setRhtpfor(dto.getTipoFormacao());
     e.setCurso(dto.getDesignacao());
     e.setNivel(dto.getNivel());
+    e.setEstado(estado);
 
     return e;
   }

@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import cv.inps.rh.funcionario.application.dto.DadosBancariosReqDTO;
 import cv.inps.rh.funcionario.application.dto.DadosBancariosRespDTO;
 import cv.inps.rh.funcionario.domain.models.DadosBancarios;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.Banco;
 import cv.inps.rh.shared.infrastructure.mappers.BancoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.BancoEntity;
@@ -110,7 +111,7 @@ public class DadosBancariosMapper {
     return domains.stream().map(this::toResponseDTO).collect(Collectors.toList());
   }
 
-  public DadosBancariosEntity toEntity(DadosBancariosReqDTO dto) {
+  public DadosBancariosEntity toEntity(DadosBancariosReqDTO dto, Estado estado) {
     if (dto == null) return null;
     DadosBancariosEntity entity = new DadosBancariosEntity();
     if (dto.getEntidadeBancariaId() != null) {
@@ -119,11 +120,9 @@ public class DadosBancariosMapper {
     entity.setNumConta(dto.getNumConta());
     entity.setDataInicio(dto.getDataInicio());
     entity.setDataFim(dto.getDataFim());
+    entity.setEstado(estado);
     return entity;
   }
 
-  public java.util.List<DadosBancariosEntity> toEntities(java.util.List<DadosBancariosReqDTO> dtos) {
-    if (dtos == null) return null;
-    return dtos.stream().map(this::toEntity).collect(Collectors.toList());
-  }
+
 }

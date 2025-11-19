@@ -148,7 +148,7 @@ public class EnderecoMapper {
   }
 
 
-  public EnderecoEntity toEntity(EnderecoReqDTO dto) {
+  public EnderecoEntity toEntity(EnderecoReqDTO dto, Estado estado) {
     if (dto == null) {
       return null;
     }
@@ -160,6 +160,7 @@ public class EnderecoMapper {
     e.setZonaId(ref(GeografiaEntity.class, dto.getZonaId()));
     e.setMorada(dto.getMorada());
     e.setUuid(UuidCreator.getTimeOrderedEpoch());
+    e.setEstado(estado);
     return e;
   }
 

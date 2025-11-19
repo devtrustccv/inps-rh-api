@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.domain.filters.FuncionarioFilter;
 import cv.inps.rh.funcionario.domain.models.*;
@@ -846,5 +847,39 @@ public class FuncionarioMapper {
     return dadosContratuaisRespDTO;
   }
 
+
+  public FuncionarioEntity toEntity(DadosPessoaisReqDTO dadosPessoais, Estado estado) {
+    if (dadosPessoais == null) return null;
+    FuncionarioEntity fun = new FuncionarioEntity();
+
+    var tipoDocumento = entityManager.getReference(TipoDocumentoEntity.class, dadosPessoais.getTipoDocumentoId());
+
+    fun.setIdColaborador(dadosPessoais.getIdColaborador());
+    fun.setUuid(UuidCreator.getTimeOrderedEpoch());
+    fun.setEstado(estado!=null ? estado : Estado.P);
+    fun.setEstadoValidacao(estado!=null ? estado.name(): "P");
+    fun.setTipoDocumentoId(tipoDocumento);
+    fun.setNumDocumento(dadosPessoais.getNumDocumento());
+    fun.setNome(dadosPessoais.getNome());
+    fun.setFotografia(dadosPessoais.getUrlFoto());
+    fun.setDataNascimento(dadosPessoais.getDataNascimento());
+    fun.setSexo(dadosPessoais.getGenero());
+    fun.setNmMae(dadosPessoais.getNomeMae());
+    fun.setNmPai(dadosPessoais.getNomePai());
+    fun.setEstadoCivil(dadosPessoais.getEstadoCivil());
+    fun.setNacionalidade(dadosPessoais.getNacionalidade());
+    fun.setLocNascId(entityManager.getReference(GeografiaEntity.class, dadosPessoais.getNaturalidadeId()));
+    fun.setNif(dadosPessoais.getNif());
+    fun.setNuSegInps(dadosPessoais.getNumSegurado());
+
+    DocumentoPessoalEntity docPessoal = new DocumentoPessoalEntity();
+    docPessoal.setEstado(estado!=null ? estado : Estado.P);
+    docPessoal.setFunId(fun);
+    docPessoal.setTipoDocumentoId(tipoDocumento);
+    docPessoal.setNumDocumento(dadosPessoais.getNumDocumento());
+    fun.setDocumentoPessoal(docPessoal);
+
+    return fun;
+  }
 
 }

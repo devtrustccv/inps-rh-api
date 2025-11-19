@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import cv.inps.rh.funcionario.application.dto.ExperienciaProfissionalReqDTO;
 import cv.inps.rh.funcionario.application.dto.ExperienciaProfissionalRespDTO;
 import cv.inps.rh.funcionario.domain.models.ExperienciaProfissional;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.Geografia;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ExperienciaProfEntity;
@@ -120,7 +121,7 @@ public class ExperienciaProfissionalMapper {
         .toList();
   }
 
-  public ExperienciaProfEntity toEntity(ExperienciaProfissionalReqDTO dto) {
+  public ExperienciaProfEntity toEntity(ExperienciaProfissionalReqDTO dto, Estado estado) {
     if (dto == null) {
       return null;
     }
@@ -139,6 +140,7 @@ public class ExperienciaProfissionalMapper {
     e.setDataInicio(dto.getDataEntrada());
     e.setDataFim(dto.getDataSaida());
     e.setObservacao(dto.getObservacoes());
+    e.setEstado(estado);
 
     return e;
   }

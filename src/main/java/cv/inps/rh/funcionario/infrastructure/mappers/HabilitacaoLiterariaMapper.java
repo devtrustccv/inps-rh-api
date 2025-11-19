@@ -128,7 +128,7 @@ public class HabilitacaoLiterariaMapper {
   }
 
 
-  public HabilitacaoLiterariaEntity toEntity(HabilitacaoLiterariaReqDTO dto) {
+  public HabilitacaoLiterariaEntity toEntity(HabilitacaoLiterariaReqDTO dto, Estado estado) {
     if (dto == null) {
       return null;
     }
@@ -150,6 +150,7 @@ public class HabilitacaoLiterariaMapper {
     e.setDataFim(dto.getDataTermino());
     e.setConcluido(dto.getConcluido());
     e.setUuid(UuidCreator.getTimeOrderedEpoch());
+    e.setEstado(estado);
 
 
     return e;

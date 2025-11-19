@@ -4,6 +4,7 @@ import cv.inps.rh.funcionario.application.dto.AgregadoDependenteReqDTO;
 import cv.inps.rh.funcionario.application.dto.AgregadoDependenteRespDTO;
 import cv.inps.rh.funcionario.domain.models.Familiar;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.TipoDocumentoMapper;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FamiliarEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import jakarta.persistence.EntityManager;
@@ -114,7 +115,7 @@ public class FamiliarMapper {
     return dto;
   }
 
-  public FamiliarEntity toEntity(AgregadoDependenteReqDTO dto) {
+  public FamiliarEntity toEntity(AgregadoDependenteReqDTO dto, Estado estado) {
     if (dto == null) return null;
     FamiliarEntity entity = new FamiliarEntity();
     if (dto.getTipoDocumentoId() != null) {
@@ -127,13 +128,10 @@ public class FamiliarMapper {
     entity.setGdpId(dto.getGrauParentesco());
     entity.setDependencia(dto.getDependente());
     entity.setMembroAgr(dto.getAgregada());
+    entity.setEstado(estado);
     return entity;
   }
 
-  public java.util.List<FamiliarEntity> toEntities(java.util.List<AgregadoDependenteReqDTO> dtos) {
-    if (dtos == null) return null;
-    return dtos.stream().map(this::toEntity).toList();
-  }
 
 
   public List<AgregadoDependenteRespDTO> toResponseDTOList(List<Familiar> familiares) {

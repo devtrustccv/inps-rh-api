@@ -47,43 +47,17 @@ public class DossierService {
 
     var dadosPessoais = dto.getDadosPessoais();
 
-    FuncionarioEntity fun = new FuncionarioEntity();
-    fun.setIdColaborador(dadosPessoais.getIdColaborador());
-    fun.setUuid(UuidCreator.getTimeOrderedEpoch());
-    fun.setEstado(Estado.P);
-    fun.setEstadoValidacao("P");
-    fun.setTipoDocumentoId(entityManager.getReference(TipoDocumentoEntity.class, dadosPessoais.getTipoDocumentoId()));
-    fun.setNumDocumento(dadosPessoais.getNumDocumento());
-    fun.setNome(dadosPessoais.getNome());
-    fun.setFotografia(dadosPessoais.getUrlFoto());
-    fun.setDataNascimento(dadosPessoais.getDataNascimento());
-    fun.setSexo(dadosPessoais.getGenero());
-    fun.setNmMae(dadosPessoais.getNomeMae());
-    fun.setNmPai(dadosPessoais.getNomePai());
-    fun.setEstadoCivil(dadosPessoais.getEstadoCivil());
-    fun.setNacionalidade(dadosPessoais.getNacionalidade());
-    fun.setLocNascId(entityManager.getReference(GeografiaEntity.class, dadosPessoais.getNaturalidadeId()));
-    fun.setNif(dadosPessoais.getNif());
-    fun.setNuSegInps(dadosPessoais.getNumSegurado());
-
-    DocumentoPessoalEntity docPessoal = new DocumentoPessoalEntity();
-    docPessoal.setEstado(Estado.P);
-    docPessoal.setFunId(fun);
-    docPessoal.setTipoDocumentoId(entityManager.getReference(TipoDocumentoEntity.class, dadosPessoais.getTipoDocumentoId()));
-    docPessoal.setNumDocumento(dadosPessoais.getNumDocumento());
-    fun.setDocumentoPessoal(docPessoal);
+    FuncionarioEntity fun = funcionarioMapper.toEntity(dadosPessoais, Estado.P);
 
     if (dadosPessoais.getEndereco() != null) {
-      var e = enderecoMapper.toEntity(dadosPessoais.getEndereco());
-      e.setEstado(Estado.P);
+      var e = enderecoMapper.toEntity(dadosPessoais.getEndereco(), Estado.P);
       e.setFunId(fun);
       fun.setEndereco(e);
     }
 
     if (dadosPessoais.getContactos() != null) {
       var list = dadosPessoais.getContactos().stream().map(c -> {
-        var ce = contactoMapper.toEntity(c);
-        ce.setEstado(Estado.P);
+        var ce = contactoMapper.toEntity(c, Estado.P);
         ce.setFunId(fun);
         return ce;
       }).toList();
@@ -92,8 +66,7 @@ public class DossierService {
 
     if (dto.getFamiliares() != null) {
       var list = dto.getFamiliares().stream().map(f -> {
-        var fe = familiarMapper.toEntity(f);
-        fe.setEstado(Estado.P);
+        var fe = familiarMapper.toEntity(f, Estado.P);
         fe.setFunId(fun);
         return fe;
       }).toList();
@@ -104,8 +77,7 @@ public class DossierService {
       var da = dto.getDadosAcademicosProf();
       if (da.getHabilitacoesLiterarias() != null) {
         var list = da.getHabilitacoesLiterarias().stream().map(h -> {
-          var he = habilitationLiterariaMapper.toEntity(h);
-          he.setEstado(Estado.P);
+          var he = habilitationLiterariaMapper.toEntity(h, Estado.P);
           he.setFunId(fun);
           return he;
         }).toList();
@@ -114,8 +86,7 @@ public class DossierService {
 
       if (da.getFormacoesFeitas() != null) {
         var list = da.getFormacoesFeitas().stream().map(f -> {
-          var fe = formacaoFeitaMapper.toEntity(f);
-          fe.setEstado(Estado.P);
+          var fe = formacaoFeitaMapper.toEntity(f, Estado.P);
           fe.setFunId(fun);
           return fe;
         }).toList();
@@ -124,8 +95,7 @@ public class DossierService {
 
       if (da.getExperienciasProfssionais() != null) {
         var list = da.getExperienciasProfssionais().stream().map(e -> {
-          var ee = experienciaProfissionalMapper.toEntity(e);
-          ee.setEstado(Estado.P);
+          var ee = experienciaProfissionalMapper.toEntity(e, Estado.P);
           ee.setFunId(fun);
           return ee;
         }).toList();
@@ -135,8 +105,7 @@ public class DossierService {
 
     if (dto.getAnexos() != null) {
       var list = dto.getAnexos().stream().map(a -> {
-        var de = documentoMapper.toEntity(a);
-        de.setEstado(Estado.P);
+        var de = documentoMapper.toEntity(a, Estado.P);
         de.setFunId(fun);
         return de;
       }).toList();
@@ -145,8 +114,7 @@ public class DossierService {
 
     if (dto.getDadosBancarios() != null) {
       var list = dto.getDadosBancarios().stream().map(b -> {
-        var be = dadosBancariosMapper.toEntity(b);
-        be.setEstado(Estado.P);
+        var be = dadosBancariosMapper.toEntity(b, Estado.P);
         be.setFunId(fun);
         return be;
       }).toList();
@@ -158,49 +126,44 @@ public class DossierService {
       throw IgrpResponseStatusException.badRequest("Dados contratuais obrigatórios");
     }
 
-    var contrato = contratuaisEntityMapper.toContrato(dc);
-    contrato.setEstado(Estado.P);
+    var contrato = contratuaisEntityMapper.toContrato(dc, Estado.P);
     contrato.setFunId(fun);
     contrato.setVersao(1);
     fun.setContratos(java.util.List.of(contrato));
 
-    var carreira = contratuaisEntityMapper.toCarreira(dc);
+    var carreira = contratuaisEntityMapper.toCarreira(dc, Estado.P);
     if (carreira != null) {
-      carreira.setEstado(Estado.P);
       carreira.setFunId(fun);
       fun.setCarreiras(java.util.List.of(carreira));
     }
 
-    var regime = contratuaisEntityMapper.toRegime(dc);
+    var regime = contratuaisEntityMapper.toRegime(dc, Estado.P);
     if (regime != null) {
-      regime.setEstado(Estado.P);
       regime.setFunId(fun);
       fun.setRegimesTrabalhos(java.util.List.of(regime));
     }
 
-    var mobilidade = contratuaisEntityMapper.toMobilidade(dc);
+    var mobilidade = contratuaisEntityMapper.toMobilidade(dc, Estado.P);
     if (mobilidade != null) {
-      mobilidade.setEstado(Estado.P);
       mobilidade.setFunId(fun);
       fun.setMobilidades(java.util.List.of(mobilidade));
     }
 
     if (dc.getSubsidios() != null && !dc.getSubsidios().isEmpty()) {
       var remList = dc.getSubsidios().stream()
-          .map(s -> contratuaisEntityMapper.toDefinicaoRemuneracao(s, fun))
+          .map(s -> contratuaisEntityMapper.toDefinicaoRemuneracao(s, fun, Estado.P))
           .toList();
       fun.setDefinicoesRenumeracoes(remList);
     }
 
     if (dc.getEncargosDescontos() != null && !dc.getEncargosDescontos().isEmpty()) {
       var pagList = dc.getEncargosDescontos().stream()
-          .map(e -> contratuaisEntityMapper.toDefPagamento(e, fun))
+          .map(e -> contratuaisEntityMapper.toDefPagamento(e, fun, Estado.P))
           .toList();
       fun.setDefinicoesPagamentos(pagList);
     }
 
-    var tr = contratuaisEntityMapper.toRelacionamento(dc);
-    tr.setEstado(Estado.P);
+    var tr = contratuaisEntityMapper.toRelacionamento(dc, Estado.P);
     tr.setFunId(fun);
     tr.setContratoId(contrato);
     tr.setCarreiraId(carreira);
@@ -211,14 +174,16 @@ public class DossierService {
     fun.setTiposrelacionamentos(java.util.List.of(tr));
 
     var param = paramSitLaboralEntityRepository.findAllByNome("ATIVO").getFirst();
-    var sl = contratuaisEntityMapper.toSituacaoLaboralInicial(dc, param);
-    sl.setEstado(Estado.P);
+    if(param == null){
+      throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO. Verifique se o parametro esta cadastrado no banco de dados e tente novamente.");
+    }
+
+    var sl = contratuaisEntityMapper.toSituacaoLaboralInicial(dc, param, Estado.P);
     sl.setFunId(fun);
     fun.setSituacoesLaborais(java.util.List.of(sl));
 
 
-    var valid = contratuaisEntityMapper.toValidacaoInsert("REGISTO_COLABORADOR", 1L); //todo resolve id later
-    valid.setEstado(Estado.P);
+    var valid = contratuaisEntityMapper.toValidacaoInsert("REGISTO_COLABORADOR", 1L, Estado.P); //todo resolve id later
     valid.setFunId(fun);
     valid.setTiprelId(tr);
     fun.setValidacoes(java.util.List.of(valid));
