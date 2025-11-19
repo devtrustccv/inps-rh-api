@@ -213,6 +213,7 @@ public class ContratoMapper {
     c.setTpContrato("NOVO_CONTRATO");
     c.setSituacaoLaboral("INICIO");
     c.setObs("NOVO_CONTRATO");
+    c.setUuid(IdentificadorUnico.create().getValor());
     c.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
     c.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
     return c;
@@ -227,6 +228,7 @@ public class ContratoMapper {
     c.setTpContrato("RENOVACAO_CONTRATO");
     c.setSituacaoLaboral("RENOVACAO_CONTRATO");
     c.setObs("RENOVACAO_CONTRATO");
+    c.setUuid(IdentificadorUnico.create().getValor());
     c.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
     c.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoId()));
     return c;

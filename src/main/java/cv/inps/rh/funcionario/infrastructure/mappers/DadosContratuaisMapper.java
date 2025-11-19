@@ -187,6 +187,80 @@ public class DadosContratuaisMapper {
   }
 
 
+  public DadosContratuaisRespDTO dadosContratuaisRespDTO2(TiposRelacionamentoEntity tiposRelacionamento) {
+    if (tiposRelacionamento == null) return null;
+
+    DadosContratuaisRespDTO dcr = new DadosContratuaisRespDTO();
+
+    dcr.setTipoContratoId(tiposRelacionamento.getTipoContratoId() != null ? tiposRelacionamento.getTipoContratoId().getId() : null);
+    dcr.setTipoContratoDesc(tiposRelacionamento.getTipoContratoId() != null ? tiposRelacionamento.getTipoContratoId().getNome() : null);
+
+    dcr.setCargoPosicaoId(tiposRelacionamento.getCargoId() != null ? tiposRelacionamento.getCargoId().getId() : null);
+    dcr.setCargoPosicaoDesc(tiposRelacionamento.getCargoId() != null ? tiposRelacionamento.getCargoId().getNome() : null);
+
+    dcr.setDirecaoId(tiposRelacionamento.getInstitId() != null ? tiposRelacionamento.getInstitId().getId() : null);
+    dcr.setDirecaoDesc(tiposRelacionamento.getInstitId() != null ? tiposRelacionamento.getInstitId().getNome() : null);
+
+    dcr.setSeccaoId(tiposRelacionamento.getSeccaoId() != null ? tiposRelacionamento.getSeccaoId().getId() : null);
+    dcr.setSeccaoDesc(tiposRelacionamento.getSeccaoId() != null ? tiposRelacionamento.getSeccaoId().getNome() : null);
+
+    dcr.setCarreiraId(tiposRelacionamento.getCarrPccId() != null ? tiposRelacionamento.getCarrPccId().getId() : null);
+    dcr.setCarreiraDesc(tiposRelacionamento.getCarrPccId() != null ? tiposRelacionamento.getCarrPccId().getNome() : null);
+
+    dcr.setCategoriaId(tiposRelacionamento.getCategoriaId() != null ? tiposRelacionamento.getCategoriaId().getId() : null);
+    dcr.setCategoriaDesc(tiposRelacionamento.getCategoriaId() != null ? tiposRelacionamento.getCategoriaId().getNome() : null);
+
+    dcr.setEscalaoReferenciaId(tiposRelacionamento.getEscalaoId() != null ? tiposRelacionamento.getEscalaoId().getId() : null);
+    dcr.setEscalaoReferenciaDesc(tiposRelacionamento.getEscalaoId() != null ? tiposRelacionamento.getEscalaoId().getEscalao() : null);
+
+    dcr.setLocalTrabalhoId(tiposRelacionamento.getLocTrabId() != null ? tiposRelacionamento.getLocTrabId().getId() : null);
+    dcr.setLocalTrabalhoDesc(tiposRelacionamento.getLocTrabId() != null ? tiposRelacionamento.getLocTrabId().getNome() : null);
+
+    dcr.setTipoVinculoLaboralId(tiposRelacionamento.getVinculoId() != null ? tiposRelacionamento.getVinculoId().getId() : null);
+    dcr.setTipoVinculoLaboralDesc(tiposRelacionamento.getVinculoId() != null ? tiposRelacionamento.getVinculoId().getNome() : null);
+
+    dcr.setRegimeTrabalho(tiposRelacionamento.getRegime());
+    dcr.setSalario(tiposRelacionamento.getSalario());
+    dcr.setMoeda(tiposRelacionamento.getMoeda());
+    dcr.setDataInicio(tiposRelacionamento.getDataInicioContrato());
+    dcr.setDataFim(tiposRelacionamento.getDataFimContrato());
+
+    if (tiposRelacionamento.getContratoId() != null)
+      dcr.setDuracaoMeses(tiposRelacionamento.getContratoId().getDuracao());
+
+    // Subsídios
+    if (tiposRelacionamento.getFunId().getDefinicoesRenumeracoes() != null) {
+      var subs = tiposRelacionamento.getFunId().getDefinicoesRenumeracoes().stream().map(s -> {
+        SubsidioRespDTO sr = new SubsidioRespDTO();
+        sr.setId(s.getId());
+        sr.setTipoSubsidioId(s.getTmId() != null ? s.getTmId().getId() : null);
+        sr.setPercentagem(s.getPercentagem());
+        sr.setValor(s.getValor());
+        return sr;
+      }).toList();
+
+      dcr.setSubsidios(subs);
+    }
+
+    // Encargos / descontos
+    if (tiposRelacionamento.getFunId().getDefinicoesPagamentos() != null) {
+      var encs = tiposRelacionamento.getFunId().getDefinicoesPagamentos().stream().map(e -> {
+        EncargosDescontosRespDTO er = new EncargosDescontosRespDTO();
+        er.setId(e.getId());
+        er.setTipoEncargoId(e.getTmId() != null ? e.getTmId().getId() : null);
+        er.setValor(e.getValor());
+        er.setDataInicio(e.getDataInicio());
+        er.setDataFim(e.getDataFim());
+        return er;
+      }).toList();
+
+      dcr.setEncargosDescontos(encs);
+    }
+
+    return dcr;
+  }
+
+
   public TiposRelacionamentoEntity clone(TiposRelacionamentoEntity original) {
 
     TiposRelacionamentoEntity clone = new TiposRelacionamentoEntity();

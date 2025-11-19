@@ -3,49 +3,58 @@ package cv.inps.rh.funcionario.application.queries;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
+import cv.inps.rh.funcionario.application.service.FuncionarioRules;
 import cv.inps.rh.funcionario.domain.repository.ContratoRepository;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
 import cv.inps.rh.funcionario.domain.repository.TipoRelacionamentoRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContratoMapper;
+import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
+import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
+import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoByIdQuery, ResponseEntity<DadosContratuaisRespDTO>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetContratoByIdQueryHandler.class);
 
-  private final FuncionarioRepository funcionarioRepository;
-  private final ContratoRepository contratoRepository;
-  private final ContratoMapper contratoMapper;
+  private final FuncionarioEntityRepository funcionarioEntityRepository;
+  private final DadosContratuaisMapper dadosContratuaisMapper;
+  private final FuncionarioRules funcionarioRoles;
 
-  public GetContratoByIdQueryHandler(FuncionarioRepository funcionarioRepository, ContratoRepository contratoRepository, ContratoMapper contratoMapper) {
-    this.funcionarioRepository = funcionarioRepository;
-    this.contratoRepository = contratoRepository;
-    this.contratoMapper = contratoMapper;
+  public GetContratoByIdQueryHandler(FuncionarioEntityRepository funcionarioEntityRepository, DadosContratuaisMapper dadosContratuaisMapper, FuncionarioRules funcionarioRoles) {
+
+    this.funcionarioEntityRepository = funcionarioEntityRepository;
+    this.dadosContratuaisMapper = dadosContratuaisMapper;
+    this.funcionarioRoles = funcionarioRoles;
   }
 
 
+  @Transactional(readOnly = true)
   @IgrpQueryHandler
   public ResponseEntity<DadosContratuaisRespDTO> handle(GetContratoByIdQuery query) {
     LOGGER.info("Handling GetContratoByIdQuery: {}", query);
-    var contratoId = IdentificadorUnico.from(query.getContratoId());
 
-    var funcionarioId = IdentificadorUnico.from(query.getId());
+    var contratoId = IdentificadorUnico.from(query.getContratoId()).getValor();
 
-    var funcionario = funcionarioRepository.findById(funcionarioId).orElseThrow(
-                () -> IgrpResponseStatusException.notFound("funcionario nao encontrado com id" + query.getId())
+    var idFunc = IdentificadorUnico.from(query.getId());
+
+    var funcionario = funcionarioEntityRepository.findByUuid(idFunc.getValor()).orElseThrow(
+        () -> IgrpResponseStatusException.notFound("Funcionario com id '%s' não encontrado".formatted(idFunc))
     );
 
-    var tipoRelacionamento = funcionario.getTipoRelacionamentoByContratoId(contratoId);
+    var dadosContratuais = funcionarioRoles.getTipoRelacionamentoByContratoId(funcionario, contratoId);
+    if (dadosContratuais == null)
+      throw IgrpResponseStatusException.notFound("Contrato com id '%s' não encontrado".formatted(contratoId));
 
-    var dto = contratoMapper.toRespDTO(tipoRelacionamento);
+    return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO2(dadosContratuais));
 
-    return ResponseEntity.ok(dto);
 
 
   }

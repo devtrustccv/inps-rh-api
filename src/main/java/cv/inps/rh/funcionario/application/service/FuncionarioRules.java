@@ -6,6 +6,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEn
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
+import java.util.UUID;
 
 @Component
 public class FuncionarioRules {
@@ -40,6 +41,17 @@ public class FuncionarioRules {
         .findFirst()
         .orElse(null);
   }
+
+  public TiposRelacionamentoEntity getTipoRelacionamentoByContratoId(FuncionarioEntity fun, UUID contratoId) {
+    if (fun == null || contratoId == null) return null;
+
+    return fun.getTiposrelacionamentos().stream()
+        .filter(tr -> tr.getContratoId() != null
+            && tr.getContratoId().getUuid().equals(contratoId))
+        .findFirst()
+        .orElse(null);
+  }
+
 
 
 }
