@@ -2,6 +2,8 @@ package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidarRegistoColaboradorCommand;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
+import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
@@ -95,6 +97,10 @@ public class ValidarRegistoColaboradorService {
     funcionario.setHabilitacoesLiterarias(habilitacoesLiterarias);
     funcionario.setFormacoesFeitas(formacoesFeitas);
     funcionario.setExperienciasProfissionais(experienciasProfissionais);
+
+    if(registroColaborador.getValidar()!=null){
+      var estado = registroColaborador.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
+    }
 
 
     funcionarioEntityRepository.save(funcionario);
