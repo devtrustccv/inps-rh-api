@@ -15,6 +15,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import cv.inps.rh.shared.infrastructure.persistence.entity.MobilidadeEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.application.constants.Estado;
 
 @Service
 @RequiredArgsConstructor
@@ -26,38 +36,60 @@ public class MobilidadeReadService {
   public WrapperListMobilidadeDTO getListMobilidade(GetListMobilidadesQuery query) {
 
     int pageNumber = query.getPageNumber() != null ? Integer.parseInt(query.getPageNumber()) : 0;
-    int pageSize = query.getPageSize() != null ? Integer.parseInt(query.getPageSize()) : 50;
-    int startRow = pageNumber * pageSize + 1;
-    int endRow = (pageNumber + 1) * pageSize;
+    int pageSize = query.getPageSize() != null ? Integer.parseInt(query.getPageSize()) : 20;
 
-    var dataInicio = StringUtils.hasText(query.getDataInicio()) ? DateFormatter.stringToLocalDate(query.getDataInicio()) : null;
-    var dataFim = StringUtils.hasText(query.getDataFim()) ? DateFormatter.stringToLocalDate(query.getDataFim()) : null;
+    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).getValor();
 
-    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).toString();
+    Specification<MobilidadeEntity> spec = (root, cq, cb) -> {
+      List<Predicate> predicates = new java.util.ArrayList<>();
 
-    var mobilidades = mobilidadeEntityRepository.findAllMobilidades(
-        idFuncionario,
-        query.getTipoMobilidade(),
-        dataInicio,
-        dataFim,
-        startRow,
-        endRow
-    );
+      Join<MobilidadeEntity, FuncionarioEntity> fun = root.join("funId");
+      predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
 
-    long totalElements = mobilidades.isEmpty() ? 0 : mobilidades.getFirst().getTotalCount();
+      if (StringUtils.hasText(query.getTipoMobilidade())) {
+        predicates.add(cb.equal(root.get("tipoSituacao"), query.getTipoMobilidade()));
+      }
 
-    List<MobilidadeListDTO> content = mobilidades.stream()
-        .map(mobilidadeMapper::mobilidadeListDTO)
-        .toList();
+      if (StringUtils.hasText(query.getDataInicio())) {
+        var di = DateFormatter.stringToLocalDate(query.getDataInicio());
+        predicates.add(cb.greaterThanOrEqualTo(root.get("dataInicio"), di));
+      }
+      if (StringUtils.hasText(query.getDataFim())) {
+        var df = DateFormatter.stringToLocalDate(query.getDataFim());
+        predicates.add(cb.lessThanOrEqualTo(root.get("dataFim"), df));
+      }
+
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
+
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
+    Page<MobilidadeEntity> page = mobilidadeEntityRepository.findAll(spec, pageable);
+
+    List<MobilidadeListDTO> content = page.getContent().stream().map(m -> {
+      MobilidadeListDTO dto = new MobilidadeListDTO();
+      dto.setId(m.getId());
+      dto.setIdFuncionario(m.getFunId() != null ? m.getFunId().getId() : null);
+      dto.setUuid(m.getUuid() != null ? m.getUuid().toString() : null);
+      dto.setUuidFuncionario(m.getFunId() != null && m.getFunId().getUuid() != null ? m.getFunId().getUuid().toString() : null);
+      dto.setDireccao(m.getInstidId() != null ? m.getInstidId().getNome() : null);
+      dto.setSeccao(m.getSecaoId() != null ? m.getSecaoId().getNome() : null);
+      dto.setLocalTrabalho(m.getLocalTrabId() != null ? m.getLocalTrabId().getNome() : null);
+      dto.setDataInicio(DateFormatter.localDateToString(m.getDataInicio()));
+      dto.setDataFim(DateFormatter.localDateToString(m.getDataFim()));
+      dto.setProcessamento(null);
+      dto.setEstado(m.getEstado() != null ? m.getEstado().getCode() : null);
+      dto.setEstadoDesc(m.getEstado() != null ? m.getEstado().getDescription() : null);
+      return dto;
+    }).toList();
 
     var wrapper = new WrapperListMobilidadeDTO();
     wrapper.setContent(content);
-    wrapper.setPageNumber(pageNumber);
-    wrapper.setPageSize(pageSize);
-    wrapper.setTotalElements(totalElements);
-    wrapper.setTotalPages((int) Math.ceil((double) totalElements / pageSize));
-    wrapper.setFirst(pageNumber == 0);
-    wrapper.setLast(pageNumber + 1 >= wrapper.getTotalPages());
+    wrapper.setPageNumber(page.getNumber());
+    wrapper.setPageSize(page.getSize());
+    wrapper.setTotalElements(page.getTotalElements());
+    wrapper.setTotalPages(page.getTotalPages());
+    wrapper.setFirst(page.isFirst());
+    wrapper.setLast(page.isLast());
 
     return wrapper;
   }
