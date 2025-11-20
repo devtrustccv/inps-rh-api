@@ -69,6 +69,8 @@ public class FuncionarioReadService {
         predicates.add(cb.equal(root.get("estadoValidacao"), query.getEstado()));
       }
 
+      predicates.add(cb.equal(tr.get("estActAdm"), 1));
+
       Join<TiposRelacionamentoEntity, ContratoEntity> con = tr.join("contratoId", jakarta.persistence.criteria.JoinType.LEFT);
       if (StringUtils.hasText(query.getDataInicio())) {
         var di = DateFormatter.stringToLocalDate(query.getDataInicio());
