@@ -28,6 +28,11 @@
       "requestParams": [
         {
           "type": "string",
+          "name": "idFuncionario",
+          "isRequired": true
+        },
+        {
+          "type": "string",
           "name": "pageSize",
           "value": "20",
           "isRequired": true
@@ -56,5 +61,5 @@
       ]
     }
   ],
-  "id": "ixh1ofde84-getListAbonosSubsidios-getListAbonosSubsidios-getListRenumeracoes"
+  "id": "ixh1ofde84-getListAbonosSubsidios-getListAbonosSubsidios-getListRenumeracoes-getListRenumeracoes"
 }

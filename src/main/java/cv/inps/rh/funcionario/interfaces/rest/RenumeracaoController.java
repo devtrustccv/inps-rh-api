@@ -38,8 +38,8 @@ public class RenumeracaoController {
    value = "renumeracoes"
   )
   @Operation(
-    summary = "GET method to handle operations for getListRenumeracoes",
-    description = "GET method to handle operations for getListRenumeracoes",
+    summary = "GET method to handle operations for Get list renumeracoes",
+    description = "GET method to handle operations for Get list renumeracoes",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -55,6 +55,7 @@ public class RenumeracaoController {
   )
   
   public ResponseEntity<WrapperListRenumeracaoDTO> getListRenumeracoes(
+    @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
     @RequestParam(value = "dataFim", required = false) String dataFim,
@@ -62,7 +63,7 @@ public class RenumeracaoController {
     @RequestParam(value = "estado", required = false) String estado)
   {
 
-      final var query = new GetListRenumeracoesQuery(pageSize, pageNumber, dataFim, dataInicio, estado);
+      final var query = new GetListRenumeracoesQuery(idFuncionario, pageSize, pageNumber, dataFim, dataInicio, estado);
 
       ResponseEntity<WrapperListRenumeracaoDTO> response = queryBus.handle(query);
 

@@ -13,6 +13,8 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class GetListRenumeracoesQuery implements Query {
 
+  @NotBlank(message = "The field <idFuncionario> is required")
+  private String idFuncionario;
   @NotBlank(message = "The field <pageSize> is required")
   private String pageSize;
   @NotBlank(message = "The field <pageNumber> is required")

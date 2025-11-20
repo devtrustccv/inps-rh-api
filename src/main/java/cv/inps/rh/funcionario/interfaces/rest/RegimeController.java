@@ -38,8 +38,8 @@ public class RegimeController {
    value = "regimes"
   )
   @Operation(
-    summary = "GET method to handle operations for getListRegimes",
-    description = "GET method to handle operations for getListRegimes",
+    summary = "GET method to handle operations for Get list regimes",
+    description = "GET method to handle operations for Get list regimes",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -55,13 +55,14 @@ public class RegimeController {
   )
   
   public ResponseEntity<WrapperRegimeListDTO> getListRegimes(
+    @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
     @RequestParam(value = "estado", required = false) String estado,
     @RequestParam(value = "tipoRegime", required = false) String tipoRegime)
   {
 
-      final var query = new GetListRegimesQuery(pageSize, pageNumber, estado, tipoRegime);
+      final var query = new GetListRegimesQuery(idFuncionario, pageSize, pageNumber, estado, tipoRegime);
 
       ResponseEntity<WrapperRegimeListDTO> response = queryBus.handle(query);
 
