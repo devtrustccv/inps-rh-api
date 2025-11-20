@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 
 @Data
 @NoArgsConstructor
@@ -21,7 +21,7 @@ public class AtivarInativarColaboradorDTO  {
 
   
   
-  private String validar ;
+  private EstadoValidacao validar ;
   
   
   private String situacaoLaboral ;
