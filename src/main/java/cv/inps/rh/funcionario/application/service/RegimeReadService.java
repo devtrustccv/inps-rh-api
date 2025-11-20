@@ -19,6 +19,8 @@ import jakarta.persistence.criteria.Predicate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import jakarta.persistence.criteria.Join;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +39,9 @@ public class RegimeReadService {
 
     Specification<RegimeTrabalhoEntity> spec = (root, cq, cb) -> {
       List<Predicate> predicates = new java.util.ArrayList<>();
+
+      Join<RegimeTrabalhoEntity, FuncionarioEntity> fun = root.join("funId");
+      predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
 
       if (StringUtils.hasText(query.getTipoRegime())) {
         predicates.add(cb.equal(root.get("tipoRegime"), query.getTipoRegime()));
