@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public class CarreiraReadService {
   private final CarreiraMapper carreiraMapper;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
 
+  @Transactional(readOnly = true)
   public WrapperCarreiraListDTO list(GetCarreiraListQuery query) {
 
     var pageNumber = Integer.parseInt(query.getPageNumber());
