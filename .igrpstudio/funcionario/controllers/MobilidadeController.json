@@ -28,6 +28,11 @@
       "requestParams": [
         {
           "type": "string",
+          "name": "idFuncionario",
+          "isRequired": true
+        },
+        {
+          "type": "string",
           "name": "dataInicio",
           "isRequired": false
         },
@@ -125,5 +130,5 @@
       ]
     }
   ],
-  "id": "tunlfcyaeu"
+  "id": "tunlfcyaeu-getListMobilidades"
 }

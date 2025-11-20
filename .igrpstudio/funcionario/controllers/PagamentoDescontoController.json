@@ -28,6 +28,11 @@
       "requestParams": [
         {
           "type": "string",
+          "name": "idFuncionario",
+          "isRequired": true
+        },
+        {
+          "type": "string",
           "name": "pageNumber",
           "value": "0",
           "isRequired": true
@@ -56,5 +61,5 @@
       ]
     }
   ],
-  "id": "qkvwaje0e4-getListPagamentosDesconto"
+  "id": "qkvwaje0e4-getListPagamentosDesconto-getListPagamentosDesconto"
 }

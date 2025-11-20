@@ -41,8 +41,8 @@ public class MobilidadeController {
    value = "mobilidades"
   )
   @Operation(
-    summary = "GET method to handle operations for getListMobilidades",
-    description = "GET method to handle operations for getListMobilidades",
+    summary = "GET method to handle operations for Get list mobilidades",
+    description = "GET method to handle operations for Get list mobilidades",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -58,6 +58,7 @@ public class MobilidadeController {
   )
   
   public ResponseEntity<WrapperListMobilidadeDTO> getListMobilidades(
+    @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
     @RequestParam(value = "dataFim", required = false) String dataFim,
     @RequestParam(value = "tipoMobilidade", required = false) String tipoMobilidade,
@@ -65,7 +66,7 @@ public class MobilidadeController {
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize)
   {
 
-      final var query = new GetListMobilidadesQuery(dataInicio, dataFim, tipoMobilidade, pageNumber, pageSize);
+      final var query = new GetListMobilidadesQuery(idFuncionario, dataInicio, dataFim, tipoMobilidade, pageNumber, pageSize);
 
       ResponseEntity<WrapperListMobilidadeDTO> response = queryBus.handle(query);
 
@@ -76,8 +77,8 @@ public class MobilidadeController {
    value = "mobilidades/{id}"
   )
   @Operation(
-    summary = "GET method to handle operations for getMobilidadeById",
-    description = "GET method to handle operations for getMobilidadeById",
+    summary = "GET method to handle operations for Get mobilidade by id",
+    description = "GET method to handle operations for Get mobilidade by id",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -107,8 +108,8 @@ public class MobilidadeController {
    value = "mobilidades/{id}"
   )
   @Operation(
-    summary = "POST method to handle operations for saveMobilidade",
-    description = "POST method to handle operations for saveMobilidade",
+    summary = "POST method to handle operations for Save mobilidade",
+    description = "POST method to handle operations for Save mobilidade",
     responses = {
       @ApiResponse(
           responseCode = "200",

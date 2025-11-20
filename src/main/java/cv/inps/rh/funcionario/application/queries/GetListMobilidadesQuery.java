@@ -13,6 +13,8 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class GetListMobilidadesQuery implements Query {
 
+  @NotBlank(message = "The field <idFuncionario> is required")
+  private String idFuncionario;
   @NotBlank(message = "The field <dataInicio> is required")
   private String dataInicio;
   @NotBlank(message = "The field <dataFim> is required")

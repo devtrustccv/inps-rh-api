@@ -38,8 +38,8 @@ public class PagamentoDescontoController {
    value = "pagamentos-descontos"
   )
   @Operation(
-    summary = "GET method to handle operations for getListPagamentosDesconto",
-    description = "GET method to handle operations for getListPagamentosDesconto",
+    summary = "GET method to handle operations for Get list pagamentos desconto",
+    description = "GET method to handle operations for Get list pagamentos desconto",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -55,6 +55,7 @@ public class PagamentoDescontoController {
   )
   
   public ResponseEntity<WrapperListPagamentosDescontoDTO> getListPagamentosDesconto(
+    @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
@@ -62,7 +63,7 @@ public class PagamentoDescontoController {
     @RequestParam(value = "estado", required = false) String estado)
   {
 
-      final var query = new GetListPagamentosDescontoQuery(pageNumber, pageSize, dataInicio, dataFim, estado);
+      final var query = new GetListPagamentosDescontoQuery(idFuncionario, pageNumber, pageSize, dataInicio, dataFim, estado);
 
       ResponseEntity<WrapperListPagamentosDescontoDTO> response = queryBus.handle(query);
 

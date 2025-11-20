@@ -51,15 +51,17 @@ public interface MobilidadeEntityRepository extends
               LEFT JOIN RH_T_SECAO SEC ON SEC.ID = TR.SECCAO_ID
               LEFT JOIN RH_T_PARAM_LOCAL_TRAB LOC ON LOC.ID = TR.LOC_TRAB_ID
               LEFT JOIN RH_T_PARAM_CARGO CAR ON CAR.ID = TR.CARGO_ID
-          WHERE 1=1
+          WHERE F.UUID = :idFuncionario
               AND (:tipoMobilidade IS NULL OR M.TIPO_SITUACAO = :tipoMobilidade)
               AND (:dataInicio IS NULL OR M.DATA_INICIO >= :dataInicio)
               AND (:dataFim IS NULL OR M.DATA_FIM <= :dataFim)
+
       )
       WHERE rn BETWEEN :startRow AND :endRow
       """,
       nativeQuery = true)
   List<MobilidadeList> findAllMobilidades(
+      @Param("idFuncionario") String idFuncionario,
       @Param("tipoMobilidade") String tipoMobilidade,
       @Param("dataInicio") LocalDate dataInicio,
       @Param("dataFim") LocalDate dataFim,

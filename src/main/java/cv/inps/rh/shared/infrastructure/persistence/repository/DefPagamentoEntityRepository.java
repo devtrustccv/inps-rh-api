@@ -35,8 +35,8 @@ public interface DefPagamentoEntityRepository extends
                 FROM RH_T_DEF_PAGAMENTOS dp
                 LEFT JOIN rh_t_funcionarios f ON f.id = dp.fun_id
                 LEFT JOIN rh_tipo_movimentos tm ON tm.id = dp.tm_id
-                LEFT JOIN RH_T_CONTRATO c ON c.id = dp.contrato_id
                 WHERE tm.tipo = 'PAG'
+                  AND f.uuid = :idFuncionario
                   AND (:estado IS NULL OR dp.estado = :estado)
                   AND (:dataInicio IS NULL OR dp.data_inicio >= :dataInicio)
                   AND (:dataFim IS NULL OR dp.data_fim <= :dataFim)
@@ -47,6 +47,7 @@ public interface DefPagamentoEntityRepository extends
         WHERE rnum >= :startRow
         """, nativeQuery = true)
   List<DefPagamentoEntity> findAllWithFilter(
+      @Param("idFuncionario") String idFuncionario,
       @Param("estado") String estado,
       @Param("dataInicio") LocalDate dataInicio,
       @Param("dataFim") LocalDate dataFim,

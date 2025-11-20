@@ -33,8 +33,10 @@ public class MobilidadeReadService {
     var dataInicio = StringUtils.hasText(query.getDataInicio()) ? DateFormatter.stringToLocalDate(query.getDataInicio()) : null;
     var dataFim = StringUtils.hasText(query.getDataFim()) ? DateFormatter.stringToLocalDate(query.getDataFim()) : null;
 
+    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).toString();
 
     var mobilidades = mobilidadeEntityRepository.findAllMobilidades(
+        idFuncionario,
         query.getTipoMobilidade(),
         dataInicio,
         dataFim,
