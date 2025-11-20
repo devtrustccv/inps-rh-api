@@ -10,6 +10,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Join;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,39 +28,43 @@ public class ContratoReadService {
   private final ContratoMapper contratoMapper;
   private final ContratoEntityRepository contratoEntityRepository;
 
+  @Transactional(readOnly = true)
   public WrapperListContratoDTO listaContratos(GetListContratosQuery query) {
 
-    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).toString();
+    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).getValor();
 
     int pageNumber = query.getPageNumber() != null ? Integer.parseInt(query.getPageNumber()) : 0;
     int pageSize = query.getPageSize() != null ? Integer.parseInt(query.getPageSize()) : 10;
 
-    int startRow = pageNumber * pageSize + 1;
-    int endRow = (pageNumber + 1) * pageSize;
+    Specification<ContratoEntity> spec = (root, cq, cb) -> {
+      List<Predicate> predicates = new java.util.ArrayList<>();
 
-    var contratos = contratoEntityRepository.findAllWithPagination(
-        query.getVinculo(),
-        idFuncionario,
-        startRow,
-        endRow
-    );
+      Join<ContratoEntity, FuncionarioEntity> fun = root.join("funId");
+      predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
 
-    var content = contratos.stream()
+      if (query.getVinculo() != null) {
+        Join<ContratoEntity, ParamVinculoEntity> vinc = root.join("vinculoId");
+        predicates.add(cb.equal(vinc.get("id"), query.getVinculo()));
+      }
+
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
+
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
+    Page<ContratoEntity> page = contratoEntityRepository.findAll(spec, pageable);
+
+    var content = page.getContent().stream()
         .map(contratoMapper::toDTO)
         .toList();
 
-    long totalElements = content.size();
-    var totalPages = (int) Math.ceil((double) totalElements / pageSize);
-
-    // Montar wrapper DTO
     var wrapper = new WrapperListContratoDTO();
     wrapper.setContent(content);
-    wrapper.setPageNumber(pageNumber);
-    wrapper.setPageSize(pageSize);
-    wrapper.setTotalElements(totalElements);
-    wrapper.setTotalPages(totalPages);
-    wrapper.setFirst(true);
-    wrapper.setLast(pageNumber + 1 >= totalPages);
+    wrapper.setPageNumber(page.getNumber());
+    wrapper.setPageSize(page.getSize());
+    wrapper.setTotalElements(page.getTotalElements());
+    wrapper.setTotalPages(page.getTotalPages());
+    wrapper.setFirst(page.isFirst());
+    wrapper.setLast(page.isLast());
 
     return wrapper;
 
