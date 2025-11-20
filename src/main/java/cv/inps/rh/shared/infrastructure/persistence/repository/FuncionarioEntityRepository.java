@@ -6,6 +6,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
@@ -92,6 +93,19 @@ public interface FuncionarioEntityRepository extends
 
   @Query("SELECT (COUNT(c) > 0) FROM ContratoEntity c WHERE c.funId.uuid = :funId AND c.estado = 'A'")
   boolean hasActiveContrato(@Param("funId") UUID publicId);
+
+
+  @EntityGraph(attributePaths = {
+      "tiposrelacionamentos",
+      "tiposrelacionamentos.contratoId",
+      "tiposrelacionamentos.cargoId",
+      "tiposrelacionamentos.institId",
+      "tiposrelacionamentos.seccaoId",
+      "tiposrelacionamentos.carrPccId",
+      "tiposrelacionamentos.categoriaId"
+  })
+  org.springframework.data.domain.Page<FuncionarioEntity> findAll(org.springframework.data.jpa.domain.Specification<FuncionarioEntity> spec,
+                                                                  org.springframework.data.domain.Pageable pageable);
 
 
 }
