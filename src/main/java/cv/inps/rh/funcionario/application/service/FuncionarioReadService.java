@@ -16,8 +16,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FuncionarioReadService {
 
-  private FuncionarioEntityRepository funcionarioEntityRepository;
-  private FuncionarioMapper funcionarioMapper;
+  private final FuncionarioEntityRepository funcionarioEntityRepository;
+  private final FuncionarioMapper funcionarioMapper;
 
 
   public WrapperListaFuncionarioDTO getListFuncionarios(GetListFuncionariosQuery query) {
