@@ -26,7 +26,7 @@ public class TipoMovimentoMapper {
         .rebuild(idTipoMovimento, null, null, null, null);
   }
 
-  public ParametrizacaoDTO toParametrizacaoDto(TipoMovimento tipoMovimento) {
+  public ParametrizacaoDTO toParametrizacaoDto(TipoMovimentoEntity tipoMovimento) {
     if (tipoMovimento == null) return null;
 
     ParametrizacaoDTO dto = new ParametrizacaoDTO();

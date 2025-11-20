@@ -1,8 +1,8 @@
 package cv.inps.rh.shared.application.service;
 
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
-import cv.inps.rh.shared.domain.repository.*;
 import cv.inps.rh.shared.infrastructure.mappers.*;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +12,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ParametrizacaoService {
 
-  private final TipoMovimentoRepository tipoMovimentoRepository;
-  private final GeografiaRepository geografiaRepository;
-  private final InstituicaoRepository instituicaoRepository;
-  private final EntidadeRepository entidadeRepository;
-  private final BancoRepository bancoRepository;
+  private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
+  private final GeografiaEntityRepository geografiaEntityRepository;;
+  private final InstituicaoEntityRepository instituicaoEntityRepository;
+  private final BancoEntityRepository bancoEntityRepository;
+  private final EntidadeEntityRepository entidadeEntityRepository;
 
   private final TipoMovimentoMapper tipoMovimentoMapper;
   private final InstituicaoMapper instituicaoMapper;
@@ -26,33 +26,33 @@ public class ParametrizacaoService {
 
 
   public List<ParametrizacaoDTO> getTiposMovimentos(){
-    return tipoMovimentoRepository.findAll().stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
+    return tipoMovimentoEntityRepository.findAll().stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
 
   public List<ParametrizacaoDTO> getTiposMovimentosRenumeracao(){
-    return tipoMovimentoRepository.findAllTipoMovimentoRenumeracao().stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
+    return tipoMovimentoEntityRepository.findAllByTipo("REM").stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
 
   public List<ParametrizacaoDTO> getTiposMovimentosPagamentosDesconto(){
-    return tipoMovimentoRepository.findAllTipoMovimentoPagamentoDesconto().stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
+    return tipoMovimentoEntityRepository.findAllByTipo("PAG").stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
   public List<ParametrizacaoDTO> getInstituicoes(){
-    return instituicaoRepository.findAllActive().stream().map(instituicaoMapper::toParametrizacaoDto).toList();
+    return instituicaoEntityRepository.findAll().stream().map(instituicaoMapper::toParametrizacaoDto).toList();
   }
 
   public List<ParametrizacaoDTO> getGeografias(Long nivelDetalhe, Long geogrId) {
-    return geografiaRepository.findByNivelDetalheAndGeogrId(nivelDetalhe, geogrId)
+    return geografiaEntityRepository.findByNivelDetalheAndGeogrId(nivelDetalhe, geogrId)
         .stream()
         .map(geografiaMapper::toParametrizacaoDto)
         .toList();
   }
 
   public List<ParametrizacaoDTO> getEntidades(){
-   return entidadeRepository.findAllActive().stream().map(entidadeMapper::toParametrizacaoDto).toList();
+   return entidadeEntityRepository.findAll().stream().map(entidadeMapper::toParametrizacaoDto).toList();
   }
 
   public List<ParametrizacaoDTO> getBancos(){
-    return bancoRepository.findAllActive().stream().map(bancoMapper::toParametrizacaoDto).toList();
+    return bancoEntityRepository.findAll().stream().map(bancoMapper::toParametrizacaoDto).toList();
   }
 
 

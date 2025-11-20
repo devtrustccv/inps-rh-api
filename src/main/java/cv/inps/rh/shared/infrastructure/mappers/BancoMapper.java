@@ -49,11 +49,11 @@ public class BancoMapper {
   }
 
 
-  public ParametrizacaoDTO toParametrizacaoDto(Banco banco) {
+  public ParametrizacaoDTO toParametrizacaoDto(BancoEntity banco) {
     if (banco == null) return null;
 
     ParametrizacaoDTO dto = new ParametrizacaoDTO();
-    dto.setLabel(banco.getNomeBanco());
+    dto.setLabel(banco.getNmBanco());
     dto.setValue(banco.getId());
     return dto;
   }

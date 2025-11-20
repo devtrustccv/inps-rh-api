@@ -67,7 +67,7 @@ public class GeografiaMapper {
     return entity;
   }*/
 
-  public ParametrizacaoDTO toParametrizacaoDto(Geografia geografia) {
+  public ParametrizacaoDTO toParametrizacaoDto(GeografiaEntity geografia) {
     if (geografia == null) return null;
 
     ParametrizacaoDTO dto = new ParametrizacaoDTO();

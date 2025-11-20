@@ -22,7 +22,7 @@ public class InstituicaoMapper {
         .rebuild(idInstituicao, null, null);
   }
 
-  public ParametrizacaoDTO toParametrizacaoDto(Instituicao instituicao) {
+  public ParametrizacaoDTO toParametrizacaoDto(InstituicaoEntity instituicao) {
     if (instituicao == null) return null;
 
     ParametrizacaoDTO dto = new ParametrizacaoDTO();

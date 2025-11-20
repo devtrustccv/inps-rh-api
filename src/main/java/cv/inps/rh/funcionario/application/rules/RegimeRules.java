@@ -1,6 +1,5 @@
 package cv.inps.rh.funcionario.application.rules;
 
-import cv.inps.rh.funcionario.domain.models.RegimeModalidade;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeModalidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeTrabalhoEntity;
 import org.springframework.stereotype.Component;

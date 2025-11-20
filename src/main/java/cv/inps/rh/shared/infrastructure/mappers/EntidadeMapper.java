@@ -24,7 +24,7 @@ public class EntidadeMapper {
     return Entidade.rebuild(id, null);
   }
 
-  public ParametrizacaoDTO toParametrizacaoDto(Entidade entidade) {
+  public ParametrizacaoDTO toParametrizacaoDto(EntidadeEntity entidade) {
     if (entidade == null) return null;
 
     ParametrizacaoDTO dto = new ParametrizacaoDTO();
