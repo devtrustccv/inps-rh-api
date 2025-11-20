@@ -1,0 +1,49 @@
+{
+  "type": "controller",
+  "name": "ProcessoDisciplinar",
+  "module": "funcionario",
+  "description": "Gestão de Processos Disciplinares",
+  "basePath": "processo-disciplinar",
+  "actions": [
+    {
+      "actionName": "novoProcessoDisciplinar",
+      "path": "processo-disciplinar/{funcionarioId}",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ProcessoDisciplinarRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "2d8lf4vnyr-novoProcessoDisciplinar"
+}
