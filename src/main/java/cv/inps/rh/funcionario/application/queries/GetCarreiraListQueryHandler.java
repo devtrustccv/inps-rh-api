@@ -1,6 +1,7 @@
 package cv.inps.rh.funcionario.application.queries;
 
 import cv.inps.rh.funcionario.application.dto.CarreiraListDTO;
+import cv.inps.rh.funcionario.application.service.CarreiraReadService;
 import cv.inps.rh.funcionario.domain.projections.CarreiraList;
 import cv.inps.rh.funcionario.domain.repository.CarreiraRepository;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
@@ -27,11 +28,14 @@ public class GetCarreiraListQueryHandler implements QueryHandler<GetCarreiraList
 
   private final FuncionarioRepository funcionarioRepository;
 
-  public GetCarreiraListQueryHandler(CarreiraRepository carreiraRepository, CarreiraMapper carreiraMapper, FuncionarioRepository funcionarioRepository) {
+  private final CarreiraReadService carreiraReadService;
+
+  public GetCarreiraListQueryHandler(CarreiraRepository carreiraRepository, CarreiraMapper carreiraMapper, FuncionarioRepository funcionarioRepository, CarreiraReadService carreiraReadService) {
 
     this.carreiraRepository = carreiraRepository;
     this.carreiraMapper = carreiraMapper;
     this.funcionarioRepository = funcionarioRepository;
+    this.carreiraReadService = carreiraReadService;
   }
 
    @IgrpQueryHandler
@@ -40,8 +44,9 @@ public class GetCarreiraListQueryHandler implements QueryHandler<GetCarreiraList
 
     LOGGER.info("Handling GetCarreiraListQuery: {}", query);
 
+    return ResponseEntity.ok(carreiraReadService.list(query));
 
-     var filter = carreiraMapper.toFilterDomain(
+    /* var filter = carreiraMapper.toFilterDomain(
          query.getTipoCarreira(),
          query.getDataInicio(),
          query.getDataFim(),
@@ -67,7 +72,7 @@ public class GetCarreiraListQueryHandler implements QueryHandler<GetCarreiraList
      wrapper.setFirst(filter.getPageNumber() == 0);
      wrapper.setLast(filter.getPageNumber() + 1 >= wrapper.getTotalPages());
 
-     return ResponseEntity.ok(wrapper);
+     return ResponseEntity.ok(wrapper);*/
   }
 
 }

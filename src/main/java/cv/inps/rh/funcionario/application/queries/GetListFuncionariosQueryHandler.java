@@ -4,6 +4,7 @@ import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.funcionario.application.dto.FuncionarioListDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaFuncionarioDTO;
+import cv.inps.rh.funcionario.application.service.FuncionarioReadService;
 import cv.inps.rh.funcionario.domain.filters.FuncionarioFilter;
 import cv.inps.rh.funcionario.domain.projections.FuncionarioList;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
@@ -23,17 +24,22 @@ public class GetListFuncionariosQueryHandler implements QueryHandler<GetListFunc
   private final FuncionarioRepository funcionarioRepository;
   private final FuncionarioMapper funcionarioMapper;
 
-  public GetListFuncionariosQueryHandler(FuncionarioRepository funcionarioRepository, FuncionarioMapper funcionarioMapper) {
+  private final FuncionarioReadService funcionarioReadService;
+
+  public GetListFuncionariosQueryHandler(FuncionarioRepository funcionarioRepository, FuncionarioMapper funcionarioMapper, FuncionarioReadService funcionarioReadService) {
 
     this.funcionarioRepository = funcionarioRepository;
     this.funcionarioMapper = funcionarioMapper;
+    this.funcionarioReadService = funcionarioReadService;
   }
 
   @IgrpQueryHandler
   public ResponseEntity<WrapperListaFuncionarioDTO> handle(GetListFuncionariosQuery query) {
     LOGGER.info("Handling GetListFuncionariosQuery: {}", query);
 
-    FuncionarioFilter filters = funcionarioMapper.toFilterDomain(
+    return ResponseEntity.ok(funcionarioReadService.getListFuncionarios(query));
+
+    /*FuncionarioFilter filters = funcionarioMapper.toFilterDomain(
         query.getNome(),
         query.getDireccao(),
         query.getSeccao(),
@@ -62,7 +68,7 @@ public class GetListFuncionariosQueryHandler implements QueryHandler<GetListFunc
     wrapper.setFirst(filters.getPageNumber() == 0);
     wrapper.setLast(filters.getPageNumber() + 1 >= wrapper.getTotalPages());
 
-    return ResponseEntity.ok(wrapper);
+    return ResponseEntity.ok(wrapper);*/
 
   }
 }

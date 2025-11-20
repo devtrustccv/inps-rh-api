@@ -24,7 +24,7 @@ public class DefinicaoPagamentoRepositoryImpl implements DefinicaoPagamentoRepos
   @Override
   public List<DefPagamento> findAll(PagamentoDescontoFilter filters) {
 
-    int pageNumber = filters.getPageNumber() != null && filters.getPageNumber() > 0 ? filters.getPageNumber() : 1;
+   /* int pageNumber = filters.getPageNumber() != null && filters.getPageNumber() > 0 ? filters.getPageNumber() : 1;
     int pageSize = filters.getPageSize() != null && filters.getPageSize() > 0 ? filters.getPageSize() : 20;
     int startRow = (pageNumber - 1) * pageSize + 1;
     int endRow = pageNumber * pageSize;
@@ -38,6 +38,7 @@ public class DefinicaoPagamentoRepositoryImpl implements DefinicaoPagamentoRepos
         endRow
     );
 
-    return entities.stream().map(defPagamentoMapper::toDomain).toList();
+    return entities.stream().map(defPagamentoMapper::toDomain).toList();*/
+    return  null;
   }
 }

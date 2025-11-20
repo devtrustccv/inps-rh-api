@@ -22,7 +22,7 @@ public class DefinicaoRenumeracaoRepositoryImpl implements DefinicaoRenumeracaoR
   @Transactional(readOnly = true)
   @Override
   public List<DefinicaoRemuneracao> findAll(RenumeracaoFilter filters) {
-
+   /*
     int pageNumber = filters.getPageNumber() != null && filters.getPageNumber() > 0 ? filters.getPageNumber() : 1;
     int pageSize = filters.getPageSize() != null && filters.getPageSize() > 0 ? filters.getPageSize() : 20;
     int startRow = (pageNumber - 1) * pageSize + 1;
@@ -37,6 +37,7 @@ public class DefinicaoRenumeracaoRepositoryImpl implements DefinicaoRenumeracaoR
         endRow
     );
 
-    return entities.stream().map(definicaoRemuneracaoMapper::toDomain).toList();
+    return entities.stream().map(definicaoRemuneracaoMapper::toDomain).toList();*/
+    return null;
   }
 }

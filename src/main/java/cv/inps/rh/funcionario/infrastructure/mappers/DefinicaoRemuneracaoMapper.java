@@ -83,15 +83,16 @@ public class DefinicaoRemuneracaoMapper {
 
   }
 
-  public RenumeracaoListDTO toDTO(DefinicaoRemuneracao domain) {
+
+  public RenumeracaoListDTO toDTO(DefinicaoRemuneracaoEntity domain) {
     if (domain == null) return null;
 
     RenumeracaoListDTO dto = new RenumeracaoListDTO();
     dto.setId(domain.getId());
-    dto.setUuid(domain.getUuid().getValor().toString());
+    dto.setUuid(domain.getUuid().toString());
     dto.setEstado(domain.getEstado() != null ? domain.getEstado().name() : null);
     dto.setEstadoDesc(domain.getEstado() != null ? domain.getEstado().getDescription() : null);
-    dto.setMovimento(domain.getTipoMovimento() != null ? domain.getTipoMovimento().getDescricao() : null);
+    dto.setMovimento(domain.getTmId() != null ? domain.getTmId().getDescricao() : null);
     dto.setValor(domain.getValor() != null ? domain.getValor().toPlainString() : null);
     dto.setUltimoPRoc(domain.getDataInicio() != null ? domain.getDataInicio().toString() : null);
 

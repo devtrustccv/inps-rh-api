@@ -120,6 +120,17 @@ public class MobilidadeMapper {
 
   }
 
+  public MobilidadeDTO mobilidadeDTO(MobilidadeEntity mobilidade) {
+
+    var dto = new MobilidadeDTO();
+    dto.setDirrecaoAntes(mobilidade.getInstidId().getNome());
+    dto.setSeccaoAntes(mobilidade.getSecaoId().getNome() != null ? mobilidade.getSecaoId().getNome() : "");
+    dto.setLocalTrabalhoAntes(mobilidade.getLocalTrabId().getNome());
+
+    return dto;
+
+  }
+
   public MobilidadeEntity toMobilidade(DadosContratuaisReqDTO dc, Estado estado) {
     if (dc == null) return null;
     var me = new MobilidadeEntity();

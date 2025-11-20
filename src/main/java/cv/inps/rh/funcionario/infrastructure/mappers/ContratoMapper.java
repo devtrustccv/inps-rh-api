@@ -131,16 +131,17 @@ public class ContratoMapper {
     );
   }
 
-  public ContratoListDTO toDTO(Contrato contrato) {
+
+  public ContratoListDTO toDTO(ContratoEntity contrato) {
     if (contrato == null) return null;
 
     var dto = new ContratoListDTO();
     dto.setId(contrato.getId());
-    dto.setUuid(contrato.getUuid() != null ? contrato.getUuid().getValor().toString() : null);
-    dto.setFuncionarioId(contrato.getIdFuncionario());
-    dto.setUuidFuncionario(contrato.getUuidFuncionario() != null ? contrato.getUuidFuncionario().toString() : null);
+    dto.setUuid(contrato.getUuid() != null ? contrato.getUuid().toString() : null);
+    dto.setFuncionarioId(contrato.getFunId().getId());
+    dto.setUuidFuncionario(contrato.getFunId() != null ? contrato.getFunId().toString() : null);
     dto.setSituacao(contrato.getSituacaoLaboral());
-    dto.setTipoVinculo(contrato.getVinculo() != null ? contrato.getVinculo().getNome() : null);
+    dto.setTipoVinculo(contrato.getVinculoId() != null ? contrato.getVinculoId().getNome() : null);
     dto.setDataInicio(contrato.getDataInicio() != null ? DateFormatter.localDateToString(contrato.getDataInicio()) : null);
     dto.setDataFim(contrato.getDataFim() != null ? DateFormatter.localDateToString(contrato.getDataFim()) : null);
     dto.setDuracao(contrato.getDuracao() != null ? contrato.getDuracao().toString() : null);

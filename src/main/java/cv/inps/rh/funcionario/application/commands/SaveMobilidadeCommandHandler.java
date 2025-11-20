@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.commands;
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
+import cv.inps.rh.funcionario.application.service.NovaMobilidadeService;
 import cv.inps.rh.funcionario.domain.models.Mobilidade;
 import cv.inps.rh.funcionario.domain.models.TiposRelacionamento;
 import cv.inps.rh.funcionario.domain.repository.FuncionarioRepository;
@@ -30,21 +31,28 @@ public class SaveMobilidadeCommandHandler implements CommandHandler<SaveMobilida
   private final SecaoMapper secaoMapper;
   private final ParamLocalTrabMapper paramLocalTrabMapper;
 
+  private final NovaMobilidadeService novaMobilidadeService;
+
   public SaveMobilidadeCommandHandler(FuncionarioRepository funcionarioRepository,
                                       MobilidadeMapper mobilidadeMapper,
                                       InstituicaoMapper instituicaoMapper,
                                       SecaoMapper secaoMapper,
-                                      ParamLocalTrabMapper paramLocalTrabMapper) {
+                                      ParamLocalTrabMapper paramLocalTrabMapper, NovaMobilidadeService novaMobilidadeService) {
     this.funcionarioRepository = funcionarioRepository;
     this.mobilidadeMapper = mobilidadeMapper;
     this.instituicaoMapper = instituicaoMapper;
     this.secaoMapper = secaoMapper;
     this.paramLocalTrabMapper = paramLocalTrabMapper;
+    this.novaMobilidadeService = novaMobilidadeService;
   }
 
   @IgrpCommandHandler
   public ResponseEntity<MobilidadeDTO> handle(SaveMobilidadeCommand command) {
-    var dto = command.getMobilidade();
+
+    return ResponseEntity.ok(novaMobilidadeService.save(command));
+
+
+    /*var dto = command.getMobilidade();
     var funcionarioId = IdentificadorUnico.from(command.getId());
 
     var funcionario = funcionarioRepository.findById(funcionarioId)
@@ -124,7 +132,7 @@ public class SaveMobilidadeCommandHandler implements CommandHandler<SaveMobilida
 
     funcionarioRepository.save(funcionario);
 
-    return ResponseEntity.ok(mobilidadeMapper.mobilidadeDTO(mobilidade));
+    return ResponseEntity.ok(mobilidadeMapper.mobilidadeDTO(mobilidade));*/
   }
 
 }

@@ -1,4 +1,4 @@
-package cv.inps.rh.funcionario.application.service;
+package cv.inps.rh.funcionario.application.rules;
 
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;

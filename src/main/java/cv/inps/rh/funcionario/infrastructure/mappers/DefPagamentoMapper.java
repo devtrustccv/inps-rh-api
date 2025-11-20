@@ -80,22 +80,24 @@ public class DefPagamentoMapper {
 
   }
 
-  public PagamentosDescontoListDTO toDTO(DefPagamento domain) {
-    if (domain == null) return null;
+  public PagamentosDescontoListDTO toDTO(DefPagamentoEntity defPagamentoEntity) {
+    if (defPagamentoEntity == null) return null;
 
     var dto = new PagamentosDescontoListDTO();
-    dto.setId(domain.getId() != null ? domain.getId().toString() : null);
-    dto.setUuid(domain.getUuid() != null ? domain.getUuid().getValor().toString() : null);
-    dto.setMovimento(domain.getTipoMovimento() != null ? domain.getTipoMovimento().getDescricao() : null);
-    dto.setValor(domain.getValor() != null ? domain.getValor().toPlainString() : null);
-    dto.setEstado(domain.getEstado() != null ? domain.getEstado().name() : null);
-    dto.setEstadoDesc(domain.getEstado() != null ? domain.getEstado().getDescription() : null);
-    dto.setDataInicio(domain.getDataInicio() != null ? domain.getDataInicio().toString() : null);
-    dto.setDataFim(domain.getDataFim() != null ? domain.getDataFim().toString() : null);
-    dto.setUltimoProc(domain.getDataInicio() != null ? domain.getDataInicio().toString() : null);
+    dto.setId(defPagamentoEntity.getId() != null ? defPagamentoEntity.getId().toString() : null);
+    dto.setUuid(defPagamentoEntity.getUuid() != null ? defPagamentoEntity.getUuid().toString() : null);
+    dto.setMovimento(defPagamentoEntity.getTmId() != null ? defPagamentoEntity.getTmId().getDescricao() : null);
+    dto.setValor(defPagamentoEntity.getValor() != null ? defPagamentoEntity.getValor().toPlainString() : null);
+    dto.setEstado(defPagamentoEntity.getEstado() != null ? defPagamentoEntity.getEstado().name() : null);
+    dto.setEstadoDesc(defPagamentoEntity.getEstado() != null ? defPagamentoEntity.getEstado().getDescription() : null);
+    dto.setDataInicio(defPagamentoEntity.getDataInicio() != null ? defPagamentoEntity.getDataInicio().toString() : null);
+    dto.setDataFim(defPagamentoEntity.getDataFim() != null ? defPagamentoEntity.getDataFim().toString() : null);
+    dto.setUltimoProc(defPagamentoEntity.getDataInicio() != null ? defPagamentoEntity.getDataInicio().toString() : null);
 
     return dto;
   }
+
+
 
   public java.util.List<DefPagamentoEntity> syncPagamentos(
       java.util.List<DefPagamentoEntity> existingList,

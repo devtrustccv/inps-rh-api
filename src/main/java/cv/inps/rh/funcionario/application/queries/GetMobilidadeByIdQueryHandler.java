@@ -1,18 +1,15 @@
 package cv.inps.rh.funcionario.application.queries;
 
-import cv.inps.rh.funcionario.domain.repository.MobilidadeRepository;
-import cv.inps.rh.funcionario.infrastructure.mappers.MobilidadeMapper;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import org.springframework.context.event.EventListener;
+import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
+import cv.inps.rh.funcionario.application.service.MobilidadeReadService;
+import cv.inps.rh.funcionario.domain.repository.MobilidadeRepository;
+import cv.inps.rh.funcionario.infrastructure.mappers.MobilidadeMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
-import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
 
 @Component
 public class GetMobilidadeByIdQueryHandler implements QueryHandler<GetMobilidadeByIdQuery, ResponseEntity<MobilidadeDTO>>{
@@ -22,22 +19,26 @@ public class GetMobilidadeByIdQueryHandler implements QueryHandler<GetMobilidade
   private final MobilidadeRepository mobilidadeRepository;
   private final MobilidadeMapper mobilidadeMapper;
 
-  public GetMobilidadeByIdQueryHandler(MobilidadeRepository mobilidadeRepository, MobilidadeMapper mobilidadeMapper) {
+  private final MobilidadeReadService mobilidadeReadService
+      ;
+  public GetMobilidadeByIdQueryHandler(MobilidadeRepository mobilidadeRepository, MobilidadeMapper mobilidadeMapper, MobilidadeReadService mobilidadeReadService) {
 
     this.mobilidadeRepository = mobilidadeRepository;
     this.mobilidadeMapper = mobilidadeMapper;
+    this.mobilidadeReadService = mobilidadeReadService;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<MobilidadeDTO> handle(GetMobilidadeByIdQuery query) {
 
-     IdentificadorUnico id = IdentificadorUnico.from(query.getId());
-     LOGGER.info("Handling GetMobilidadeByIdQuery: {}", query);
 
+     LOGGER.info("Handling GetMobilidadeByIdQuery: {}", query);
+     return ResponseEntity.ok(mobilidadeReadService.getMobilidade(query));
+    /* IdentificadorUnico id = IdentificadorUnico.from(query.getId());
      var mobilidade = mobilidadeRepository.getMobilidadeById(id).orElseThrow(
          () -> IgrpResponseStatusException.notFound("mobilidade nao encontrada com id"+query.getId())
      );
-    return ResponseEntity.ok(mobilidadeMapper.mobilidadeDTO(mobilidade));
+    return ResponseEntity.ok(mobilidadeMapper.mobilidadeDTO(mobilidade));*/
   }
 
 }

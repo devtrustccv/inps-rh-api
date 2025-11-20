@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.RegimeListDTO;
+import cv.inps.rh.funcionario.application.rules.RegimeRules;
 import cv.inps.rh.funcionario.domain.filters.RegimeFilter;
 import cv.inps.rh.funcionario.domain.models.RegimeModalidade;
 import cv.inps.rh.funcionario.domain.models.RegimeTrabalho;
@@ -22,6 +23,7 @@ public class RegimeTrabalhoMapper {
 
   private final ContratoMapper contratoMapper;
   private final RegimeModalidadeMapper regimeModalidadeMapper;
+  private final RegimeRules regimeRules;
 
   // Entity -> Domain
   public RegimeTrabalho toDomain(RegimeTrabalhoEntity entity) {
@@ -70,22 +72,23 @@ public class RegimeTrabalhoMapper {
     return entity;
   }
 
-  public RegimeListDTO toDTO(RegimeTrabalho regime) {
+
+  public RegimeListDTO toDTO(RegimeTrabalhoEntity regime) {
     if (regime == null) return null;
 
     RegimeListDTO dto = new RegimeListDTO();
 
     dto.setId(regime.getId());
-    dto.setUuid(regime.getUuid().getValor().toString());
+    dto.setUuid(regime.getUuid().toString());
 
-    dto.setIdFuncionario(regime.getIdFuncionario());
-    dto.setUuidFuncionario(regime.getUuidFuncionario()!= null ? regime.getUuidFuncionario().toString() : null);
+    dto.setIdFuncionario(regime.getFunId().getId());
+    dto.setUuidFuncionario(regime.getFunId()!= null ? regime.getFunId().getUuid().toString() : null);
 
     dto.setTipoRegime(regime.getTipoRegime());
     dto.setDataInicio(null); // todo tirar duvidas com analise, nao existe na base de dados
     dto.setDataFim(regime.getDataFim() != null ? regime.getDataFim().toString() : null);
-    dto.setModalidade(regime.getDiasSemanaAgrupados());
-    dto.setNumHoras(String.valueOf(regime.getTotalHoras()));
+    dto.setModalidade(regimeRules.getDiasSemanaAgrupados(regime));
+    dto.setNumHoras(String.valueOf(regimeRules.getTotalHoras(regime)));
 
     if (regime.getEstado() != null) {
       dto.setEstado(regime.getEstado().getCode());
@@ -94,7 +97,6 @@ public class RegimeTrabalhoMapper {
 
     return dto;
   }
-
   public RegimeFilter toFilterDomain(String tipoRegime,
                                            String estado,
                                           Integer pageNumber,

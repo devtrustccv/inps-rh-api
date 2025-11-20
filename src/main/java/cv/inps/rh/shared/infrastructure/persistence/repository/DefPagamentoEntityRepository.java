@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,8 +48,8 @@ public interface DefPagamentoEntityRepository extends
         """, nativeQuery = true)
   List<DefPagamentoEntity> findAllWithFilter(
       @Param("estado") String estado,
-      @Param("dataInicio") java.sql.Date dataInicio,
-      @Param("dataFim") java.sql.Date dataFim,
+      @Param("dataInicio") LocalDate dataInicio,
+      @Param("dataFim") LocalDate dataFim,
       @Param("startRow") int startRow,
       @Param("endRow") int endRow
   );

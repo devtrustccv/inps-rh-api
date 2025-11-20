@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.queries;
 import cv.inps.rh.funcionario.application.dto.CarreiraListDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListContratoDTO;
+import cv.inps.rh.funcionario.application.service.RegimeReadService;
 import cv.inps.rh.funcionario.domain.models.RegimeTrabalho;
 import cv.inps.rh.funcionario.domain.projections.CarreiraList;
 import cv.inps.rh.funcionario.domain.repository.RegimeRepository;
@@ -27,10 +28,13 @@ public class GetListRegimesQueryHandler implements QueryHandler<GetListRegimesQu
   private final RegimeTrabalhoMapper regimeTrabalhoMapper;
   private final RegimeRepository regimeRepository;
 
-  public GetListRegimesQueryHandler(RegimeTrabalhoMapper regimeTrabalhoMapper, RegimeRepository regimeRepository) {
+  private final RegimeReadService regimeReadService;
+
+  public GetListRegimesQueryHandler(RegimeTrabalhoMapper regimeTrabalhoMapper, RegimeRepository regimeRepository, RegimeReadService regimeReadService) {
 
     this.regimeTrabalhoMapper = regimeTrabalhoMapper;
     this.regimeRepository = regimeRepository;
+    this.regimeReadService = regimeReadService;
   }
 
    @IgrpQueryHandler
@@ -38,7 +42,8 @@ public class GetListRegimesQueryHandler implements QueryHandler<GetListRegimesQu
 
     LOGGER.info("Handling GetListRegimesQuery: {}", query);
 
-     var filter = regimeTrabalhoMapper.toFilterDomain(
+    return ResponseEntity.ok(regimeReadService.listRegime(query));
+     /*var filter = regimeTrabalhoMapper.toFilterDomain(
          query.getTipoRegime(),
          query.getEstado(),
          Integer.parseInt(query.getPageNumber()),
@@ -68,7 +73,7 @@ public class GetListRegimesQueryHandler implements QueryHandler<GetListRegimesQu
      wrapper.setFirst(pageNumber == 0);
      wrapper.setLast(pageNumber + 1 >= totalPages);
 
-     return ResponseEntity.ok(wrapper);
+     return ResponseEntity.ok(wrapper);*/
   }
 
 }

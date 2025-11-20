@@ -4,6 +4,7 @@ import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.funcionario.application.dto.WrapperListRenumeracaoDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperRegimeListDTO;
+import cv.inps.rh.funcionario.application.service.RenumeracoesReadService;
 import cv.inps.rh.funcionario.domain.models.DefinicaoRemuneracao;
 import cv.inps.rh.funcionario.domain.models.RegimeTrabalho;
 import cv.inps.rh.funcionario.domain.repository.DefinicaoRenumeracaoRepository;
@@ -23,10 +24,13 @@ public class GetListRenumeracoesQueryHandler implements QueryHandler<GetListRenu
   private final DefinicaoRenumeracaoRepository definicaoRenumeracaoRepository;
   private final DefinicaoRemuneracaoMapper definicaoRenumeracaoMapper;
 
-  public GetListRenumeracoesQueryHandler(DefinicaoRenumeracaoRepository definicaoRenumeracaoRepository, DefinicaoRemuneracaoMapper definicaoRenumeracaoMapper) {
+  private final RenumeracoesReadService renumeracoesReadService;
+
+  public GetListRenumeracoesQueryHandler(DefinicaoRenumeracaoRepository definicaoRenumeracaoRepository, DefinicaoRemuneracaoMapper definicaoRenumeracaoMapper, RenumeracoesReadService renumeracoesReadService) {
 
     this.definicaoRenumeracaoRepository = definicaoRenumeracaoRepository;
     this.definicaoRenumeracaoMapper = definicaoRenumeracaoMapper;
+    this.renumeracoesReadService = renumeracoesReadService;
   }
 
    @IgrpQueryHandler
@@ -34,7 +38,9 @@ public class GetListRenumeracoesQueryHandler implements QueryHandler<GetListRenu
 
     LOGGER.info("Handling GetListRenumeracoesQuery: {}", query);
 
-     var filter = definicaoRenumeracaoMapper.toFilterDomain(
+    return ResponseEntity.ok(renumeracoesReadService.getListRenumeracoes(query));
+
+     /*var filter = definicaoRenumeracaoMapper.toFilterDomain(
          query.getEstado(),
          query.getDataInicio(),
          query.getDataFim(),
@@ -64,7 +70,7 @@ public class GetListRenumeracoesQueryHandler implements QueryHandler<GetListRenu
      wrapper.setFirst(pageNumber == 0);
      wrapper.setLast(pageNumber + 1 >= totalPages);
 
-     return ResponseEntity.ok(wrapper);
+     return ResponseEntity.ok(wrapper);*/
   }
 
 }

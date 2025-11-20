@@ -1,6 +1,7 @@
 package cv.inps.rh.funcionario.application.queries;
 
 import cv.inps.rh.funcionario.application.dto.MobilidadeListDTO;
+import cv.inps.rh.funcionario.application.service.MobilidadeReadService;
 import cv.inps.rh.funcionario.domain.filters.MobilidadeFilter;
 import cv.inps.rh.funcionario.domain.projections.MobilidadeList;
 import cv.inps.rh.funcionario.domain.repository.MobilidadeRepository;
@@ -24,49 +25,21 @@ public class GetListMobilidadesQueryHandler implements QueryHandler<GetListMobil
   private final MobilidadeRepository mobilidadeRepository;
   private final MobilidadeMapper mobilidadeMapper;
 
-  public GetListMobilidadesQueryHandler(MobilidadeRepository mobilidadeRepository, MobilidadeMapper mobilidadeMapper) {
+  private final MobilidadeReadService mobilidadeReadService;
+
+  public GetListMobilidadesQueryHandler(MobilidadeRepository mobilidadeRepository, MobilidadeMapper mobilidadeMapper, MobilidadeReadService mobilidadeReadService) {
 
     this.mobilidadeRepository = mobilidadeRepository;
     this.mobilidadeMapper = mobilidadeMapper;
+    this.mobilidadeReadService = mobilidadeReadService;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<WrapperListMobilidadeDTO> handle(GetListMobilidadesQuery query) {
      LOGGER.info("Handling GetListMobilidadesQuery: {}", query);
 
-     // Converte os parâmetros da query para o domain filter
-     MobilidadeFilter filters = mobilidadeMapper.toFilterDomain(
-         query.getTipoMobilidade(),
-         query.getDataInicio(),
-         query.getDataFim(),
-         Integer.parseInt(query.getPageNumber()),
-         Integer.parseInt(query.getPageSize())
-     );
+     return ResponseEntity.ok(mobilidadeReadService.getListMobilidade(query));
 
-     int pageNumber = filters.getPageNumber() != null ? filters.getPageNumber() : 0;
-     int pageSize = filters.getPageSize() != null ? filters.getPageSize() : 50;
-     int startRow = pageNumber * pageSize + 1;
-     int endRow = (pageNumber + 1) * pageSize;
-
-     // Chama o repository com a query nativa
-     List<MobilidadeList> mobilidades = mobilidadeRepository.findAll(filters);
-
-     long totalElements = mobilidades.isEmpty() ? 0 : mobilidades.getFirst().getTotalCount();
-
-     List<MobilidadeListDTO> content = mobilidades.stream()
-         .map(mobilidadeMapper::mobilidadeListDTO)
-         .toList();
-
-     var wrapper = new WrapperListMobilidadeDTO();
-     wrapper.setContent(content);
-     wrapper.setPageNumber(filters.getPageNumber());
-     wrapper.setPageSize(filters.getPageSize());
-     wrapper.setTotalElements(totalElements);
-     wrapper.setTotalPages((int) Math.ceil((double) totalElements / filters.getPageSize()));
-     wrapper.setFirst(filters.getPageNumber() == 0);
-     wrapper.setLast(filters.getPageNumber() + 1 >= wrapper.getTotalPages());
-
-     return ResponseEntity.ok(wrapper);
 
   }
 
