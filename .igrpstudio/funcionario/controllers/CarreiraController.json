@@ -1,6 +1,6 @@
 {
   "type": "controller",
-  "name": "Carreiras",
+  "name": "Carreira",
   "module": "funcionario",
   "description": "Gestao carreiras funcionario",
   "basePath": "api/v1/funcionarios",
@@ -61,5 +61,5 @@
       ]
     }
   ],
-  "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList"
+  "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList"
 }

@@ -38,8 +38,8 @@ public class CarreiraController {
    value = "carreiras"
   )
   @Operation(
-    summary = "GET method to handle operations for getCarreiraList",
-    description = "GET method to handle operations for getCarreiraList",
+    summary = "GET method to handle operations for Get carreira list",
+    description = "GET method to handle operations for Get carreira list",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -55,15 +55,15 @@ public class CarreiraController {
   )
   
   public ResponseEntity<WrapperCarreiraListDTO> getCarreiraList(
+    @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
     @RequestParam(value = "dataFim", required = false) String dataFim,
-    @RequestParam(value = "tipoCarreira", required = false) String tipoCarreira,
-    @RequestParam(value = "idFuncionario") String idFuncionario)
+    @RequestParam(value = "tipoCarreira", required = false) String tipoCarreira)
   {
 
-      final var query = new GetCarreiraListQuery(pageSize, pageNumber, dataInicio, dataFim, tipoCarreira, idFuncionario);
+      final var query = new GetCarreiraListQuery(idFuncionario, pageSize, pageNumber, dataInicio, dataFim, tipoCarreira);
 
       ResponseEntity<WrapperCarreiraListDTO> response = queryBus.handle(query);
 
