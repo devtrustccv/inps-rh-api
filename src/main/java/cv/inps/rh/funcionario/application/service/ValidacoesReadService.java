@@ -4,14 +4,20 @@ import cv.inps.rh.funcionario.application.dto.WrapperListaValidacoesDTO;
 import cv.inps.rh.funcionario.application.queries.GetValicoesUtilizadoresQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.ValidacaoMapper;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 
 @Service
 @RequiredArgsConstructor
@@ -20,44 +26,56 @@ public class ValidacoesReadService {
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final ValidacaoMapper validacaoMapper;
 
+  @Transactional(readOnly = true)
   public WrapperListaValidacoesDTO listaValidacoes(GetValicoesUtilizadoresQuery query) {
 
     int pageNumber = query.getPageNumber() != null ? Integer.parseInt(query.getPageNumber()) : 0;
     int pageSize = query.getPageSize() != null ? Integer.parseInt(query.getPageSize()) : 20;
 
-    int startRow = pageNumber * pageSize + 1;
-    int endRow = startRow + pageSize - 1;
+    Specification<ValidacaoEntity> spec = (root, cq, cb) -> {
+      java.util.List<Predicate> predicates = new java.util.ArrayList<>();
 
-    var dataInicio = StringUtils.hasText(query.getDataInicio()) ? DateFormatter.stringToLocalDateTime(query.getDataInicio()) : null;
-    var dataFim = StringUtils.hasText(query.getDataFim()) ? DateFormatter.stringToLocalDateTime(query.getDataFim()) : null;
+      if (StringUtils.hasText(query.getNomeColaborador())) {
+        Join<ValidacaoEntity, FuncionarioEntity> fun = root.join("funId", jakarta.persistence.criteria.JoinType.LEFT);
+        predicates.add(cb.like(cb.lower(fun.get("nome")), "%" + query.getNomeColaborador().toLowerCase() + "%"));
+      }
 
-    var validacoes = validacaoEntityRepository.findAllWithFilters(
-        query.getNomeColaborador(),
-        query.getTipoOperacao(),
-        query.getReferenciaName(),
-        dataInicio,
-        dataFim,
-        startRow,
-        endRow
-    );
+      if (StringUtils.hasText(query.getTipoOperacao())) {
+        predicates.add(cb.equal(root.get("tipoAccao"), query.getTipoOperacao()));
+      }
 
-    var content = validacoes.stream()
+      if (StringUtils.hasText(query.getReferenciaName())) {
+        predicates.add(cb.equal(root.get("referenciaName"), query.getReferenciaName()));
+      }
+
+      if (StringUtils.hasText(query.getDataInicio())) {
+        var di = DateFormatter.stringToLocalDateTime(query.getDataInicio());
+        predicates.add(cb.greaterThanOrEqualTo(root.get("createdDate"), di));
+      }
+      if (StringUtils.hasText(query.getDataFim())) {
+        var df = DateFormatter.stringToLocalDateTime(query.getDataFim());
+        predicates.add(cb.lessThanOrEqualTo(root.get("createdDate"), df));
+      }
+
+      if (cq != null) { cq.distinct(true); }
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
+
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, "id"));
+    Page<ValidacaoEntity> page = validacaoEntityRepository.findAll(spec, pageable);
+
+    var content = page.getContent().stream()
         .map(validacaoMapper::toDto)
         .toList();
 
-    // Paginação
-    long totalElements = content.size();
-    int totalPages = (int) Math.ceil((double) totalElements / pageSize);
-
-    // Montar wrapper DTO
     var wrapper = new WrapperListaValidacoesDTO();
     wrapper.setContent(content);
-    wrapper.setPageNumber(pageNumber);
-    wrapper.setPageSize(pageSize);
-    wrapper.setTotalElements(totalElements);
-    wrapper.setTotalPages(totalPages);
-    wrapper.setFirst(pageNumber == 0);
-    wrapper.setLast(pageNumber + 1 >= totalPages);
+    wrapper.setPageNumber(page.getNumber());
+    wrapper.setPageSize(page.getSize());
+    wrapper.setTotalElements(page.getTotalElements());
+    wrapper.setTotalPages(page.getTotalPages());
+    wrapper.setFirst(page.isFirst());
+    wrapper.setLast(page.isLast());
 
     return wrapper;
   }
