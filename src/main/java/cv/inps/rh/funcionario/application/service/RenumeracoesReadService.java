@@ -4,13 +4,25 @@ import cv.inps.rh.funcionario.application.dto.WrapperListRenumeracaoDTO;
 import cv.inps.rh.funcionario.application.queries.GetListRenumeracoesQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 
 @Service
 @RequiredArgsConstructor
@@ -19,41 +31,57 @@ public class RenumeracoesReadService {
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
 
+  @Transactional(readOnly = true)
   public WrapperListRenumeracaoDTO getListRenumeracoes(GetListRenumeracoesQuery query) {
 
     int pageNumber = query.getPageNumber() != null ? Integer.parseInt(query.getPageNumber()) : 0;
     int pageSize = query.getPageSize() != null ? Integer.parseInt(query.getPageSize()) : 20;
 
-    int startRow = (pageNumber - 1) * pageSize + 1;
-    int endRow = pageNumber * pageSize;
+    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).getValor();
 
-    var dataInicio = StringUtils.hasText(query.getDataInicio()) ? DateFormatter.stringToLocalDate(query.getDataInicio()) : null;
-    var dataFim = StringUtils.hasText(query.getDataFim()) ? DateFormatter.stringToLocalDate(query.getDataFim()) : null;
+    Specification<DefinicaoRemuneracaoEntity> spec = (root, cq, cb) -> {
+      List<Predicate> predicates = new java.util.ArrayList<>();
 
-    List<DefinicaoRemuneracaoEntity> renumeracoes = definicaoRemuneracaoEntityRepository.findAllWithFilter(
-        query.getEstado() != null ? query.getEstado() : null,
-        dataInicio,
-        dataFim,
-        startRow,
-        endRow
-    );
+      Join<DefinicaoRemuneracaoEntity, TipoMovimentoEntity> tm = root.join("tmId");
+      predicates.add(cb.equal(tm.get("tipo"), "REM"));
 
-    var content = renumeracoes.stream()
+      Join<DefinicaoRemuneracaoEntity, FuncionarioEntity> fun = root.join("funId");
+      predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
+
+      if (StringUtils.hasText(query.getEstado())) {
+        try {
+          Estado estado = Estado.fromCodeOrThrow(query.getEstado());
+          predicates.add(cb.equal(root.get("estado"), estado));
+        } catch (Exception ignored) {}
+      }
+
+      if (StringUtils.hasText(query.getDataInicio())) {
+        var di = DateFormatter.stringToLocalDate(query.getDataInicio());
+        predicates.add(cb.greaterThanOrEqualTo(root.get("dataInicio"), di));
+      }
+      if (StringUtils.hasText(query.getDataFim())) {
+        var df = DateFormatter.stringToLocalDate(query.getDataFim());
+        predicates.add(cb.lessThanOrEqualTo(root.get("dataFim"), df));
+      }
+
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
+
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
+    Page<DefinicaoRemuneracaoEntity> page = definicaoRemuneracaoEntityRepository.findAll(spec, pageable);
+
+    var content = page.getContent().stream()
         .map(definicaoRemuneracaoMapper::toDTO)
         .toList();
 
-    long totalElements = content.size();
-    int totalPages = (int) Math.ceil((double) totalElements / pageSize);
-
-
     var wrapper = new WrapperListRenumeracaoDTO();
     wrapper.setContent(content);
-    wrapper.setPageNumber(pageNumber);
-    wrapper.setPageSize(pageSize);
-    wrapper.setTotalElements(totalElements);
-    wrapper.setTotalPages(totalPages);
-    wrapper.setFirst(pageNumber == 0);
-    wrapper.setLast(pageNumber + 1 >= totalPages);
+    wrapper.setPageNumber(page.getNumber());
+    wrapper.setPageSize(page.getSize());
+    wrapper.setTotalElements(page.getTotalElements());
+    wrapper.setTotalPages(page.getTotalPages());
+    wrapper.setFirst(page.isFirst());
+    wrapper.setLast(page.isLast());
 
     return wrapper;
   }
