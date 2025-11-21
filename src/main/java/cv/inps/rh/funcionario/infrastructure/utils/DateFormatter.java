@@ -6,13 +6,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 public class DateFormatter {
 
-  private static final List<DateTimeFormatter> DATE_TIME_FORMATTERS = Arrays.asList(
+  private static final List<DateTimeFormatter> DATE_TIME_FORMATTERS = List.of(
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
       DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"),
       DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"),
@@ -20,7 +19,7 @@ public class DateFormatter {
       DateTimeFormatter.ISO_LOCAL_DATE_TIME
   );
 
-  private static final List<DateTimeFormatter> DATE_FORMATTERS = Arrays.asList(
+  private static final List<DateTimeFormatter> DATE_FORMATTERS = List.of(
       DateTimeFormatter.ofPattern("dd-MM-yyyy"),
       DateTimeFormatter.ofPattern("yyyy-MM-dd"),
       DateTimeFormatter.ofPattern("yyyy/MM/dd"),
@@ -64,13 +63,13 @@ public class DateFormatter {
 
   public static String localDateTimeToString(LocalDateTime dateTime) {
     return Optional.ofNullable(dateTime)
-        .map(DATE_TIME_FORMATTERS.get(0)::format)
+        .map(DATE_TIME_FORMATTERS.getFirst()::format)
         .orElse("");
   }
 
   public static String localDateToString(LocalDate date) {
     return Optional.ofNullable(date)
-        .map(DATE_FORMATTERS.get(0)::format)
+        .map(DATE_FORMATTERS.getFirst()::format)
         .orElse("");
   }
 

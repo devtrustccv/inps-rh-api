@@ -2,7 +2,7 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.funcionario.application.service.ProcessoDisciplinarService;
+import cv.inps.rh.funcionario.application.service.processodisciplinar.ProcessoDisciplinarWriteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +14,9 @@ public class NovoProcessoDisciplinarCommandHandler implements CommandHandler<Nov
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NovoProcessoDisciplinarCommandHandler.class);
 
-  private final ProcessoDisciplinarService processoDisciplinarService;
+  private final ProcessoDisciplinarWriteService processoDisciplinarService;
 
-  public NovoProcessoDisciplinarCommandHandler(ProcessoDisciplinarService processoDisciplinarService) {
+  public NovoProcessoDisciplinarCommandHandler(ProcessoDisciplinarWriteService processoDisciplinarService) {
     this.processoDisciplinarService = processoDisciplinarService;
   }
 

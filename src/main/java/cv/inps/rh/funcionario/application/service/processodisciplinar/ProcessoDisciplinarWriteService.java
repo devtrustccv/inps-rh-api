@@ -1,4 +1,4 @@
-package cv.inps.rh.funcionario.application.service;
+package cv.inps.rh.funcionario.application.service.processodisciplinar;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.ProcessoDisciplinarRequestDTO;
@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class ProcessoDisciplinarService {
+public class ProcessoDisciplinarWriteService {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ProcessoDisciplinarEntityRepository processoDisciplinarEntityRepository;

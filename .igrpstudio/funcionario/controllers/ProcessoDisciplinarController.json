@@ -7,7 +7,7 @@
   "actions": [
     {
       "actionName": "novoProcessoDisciplinar",
-      "path": "processo-disciplinar/{funcionarioId}",
+      "path": "{funcionarioId}",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -31,6 +31,34 @@
                 "type": "string",
                 "name": "data",
                 "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getProcessosFuncionario",
+      "path": "{funcionarioId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ProcessoDisciplinarResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "funcionario"
               }
             }
           }

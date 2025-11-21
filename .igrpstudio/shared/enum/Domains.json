@@ -30,6 +30,13 @@
         "ESTADO_CONTRATO",
         "ESTADO_CONTRATO"
       ]
+    },
+    {
+      "name": "TP_PROCESSO_DISC",
+      "attributes": [
+        "TP_PROCESSO_DISC",
+        "TP_PROCESSO_DISC"
+      ]
     }
   ],
   "attributes": [
