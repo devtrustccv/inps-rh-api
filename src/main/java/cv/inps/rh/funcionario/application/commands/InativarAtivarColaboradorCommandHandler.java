@@ -13,20 +13,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class InativarAtivarColaboradorCommandHandler implements CommandHandler<InativarAtivarColaboradorCommand, ResponseEntity<AtivarInativarColaboradorDTO>> {
 
-   private static final Logger LOGGER = LoggerFactory.getLogger(InativarAtivarColaboradorCommandHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(InativarAtivarColaboradorCommandHandler.class);
 
-   private final MudarSituacaoLaboralColaboradorService inativarAtivarColaborarService;
+  private final MudarSituacaoLaboralColaboradorService inativarAtivarColaborarService;
 
-   public InativarAtivarColaboradorCommandHandler(MudarSituacaoLaboralColaboradorService inativarAtivarColaborarService) {
-      this.inativarAtivarColaborarService = inativarAtivarColaborarService;
-   }
+  public InativarAtivarColaboradorCommandHandler(MudarSituacaoLaboralColaboradorService inativarAtivarColaborarService) {
+    this.inativarAtivarColaborarService = inativarAtivarColaborarService;
+  }
 
-   @IgrpCommandHandler
-   public ResponseEntity<AtivarInativarColaboradorDTO> handle(InativarAtivarColaboradorCommand command) {
+  @IgrpCommandHandler
+  public ResponseEntity<AtivarInativarColaboradorDTO> handle(InativarAtivarColaboradorCommand command) {
 
-     LOGGER.info("Iniciando inativacao/ativacao de funcionario: {}", command);
+    LOGGER.info("Iniciando inativacao/ativacao de funcionario: {}", command);
 
-      return ResponseEntity.ok(inativarAtivarColaborarService.execute(command));
-   }
+    inativarAtivarColaborarService.execute(command);
+
+    return ResponseEntity.ok().build();
+  }
 
 }

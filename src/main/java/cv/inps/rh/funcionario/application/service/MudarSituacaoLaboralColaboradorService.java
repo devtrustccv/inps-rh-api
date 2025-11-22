@@ -2,7 +2,6 @@ package cv.inps.rh.funcionario.application.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.InativarAtivarColaboradorCommand;
-import cv.inps.rh.funcionario.application.dto.AtivarInativarColaboradorDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -37,7 +36,7 @@ public class MudarSituacaoLaboralColaboradorService {
   private final DadosContratuaisMapper dadosContratuaisMapper;
 
   @Transactional
-  public AtivarInativarColaboradorDTO execute(InativarAtivarColaboradorCommand command) {
+  public void execute(InativarAtivarColaboradorCommand command) {
 
     var dto = command.getAtivarinativarcolaborador();
     if (!List.of("ATIVO", "CESSADO").contains(dto.getSituacaoLaboral()))
@@ -115,7 +114,5 @@ public class MudarSituacaoLaboralColaboradorService {
       defRemuneracao.setDataFim(LocalDate.now());
       definicaoRemuneracaoEntityRepository.save(defRemuneracao);
     }
-
-    return dto;
   }
 }
