@@ -3,14 +3,7 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
-import cv.inps.rh.funcionario.application.dto.MobilidadeListDTO;
-
-import cv.inps.rh.funcionario.domain.projections.MobilidadeList;
-import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
-import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamLocalTrabMapper;
-import cv.inps.rh.parametrizacao.infrastructure.mappers.SecaoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.infrastructure.mappers.InstituicaoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.InstituicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MobilidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity;
@@ -18,31 +11,12 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 @Component
 @RequiredArgsConstructor
 public class MobilidadeMapper {
 
   private final EntityManager entityManager;
-
-  public MobilidadeListDTO mobilidadeListDTO(MobilidadeList mobilidadeList) {
-    MobilidadeListDTO dto = new MobilidadeListDTO();
-    dto.setId(mobilidadeList.getId());
-    dto.setIdFuncionario(mobilidadeList.getIdFuncionario());
-    dto.setUuid(mobilidadeList.getUuid());
-    dto.setUuidFuncionario(mobilidadeList.getUuidFuncionario());
-    dto.setDireccao(mobilidadeList.getDireccao());
-    dto.setSeccao(mobilidadeList.getSeccao());
-    dto.setLocalTrabalho(mobilidadeList.getLocalTrabalho());
-    dto.setDataInicio(mobilidadeList.getDataInicio());
-    dto.setDataFim(mobilidadeList.getDataFim());
-    dto.setProcessamento(mobilidadeList.getProcessamento());
-    dto.setEstado(mobilidadeList.getEstado());
-    dto.setEstadoDesc(mobilidadeList.getEstado() != null ? Estado.fromCodeOrThrow(mobilidadeList.getEstado()).getDescription() : null);
-    return dto;
-  }
-
 
   public MobilidadeDTO mobilidadeDTO(MobilidadeEntity mobilidade) {
 
@@ -71,7 +45,7 @@ public class MobilidadeMapper {
   }
 
   public void toUpdateEntity(MobilidadeEntity mobilidade, DadosContratuaisReqDTO dc) {
-    if (dc == null) return ;
+    if (dc == null) return;
     mobilidade.setTipoSituacao("NOVO_CONTRATO");
     mobilidade.setObs("NOVO_CONTRATO");
     mobilidade.setLocalTrabId(entityManager.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));

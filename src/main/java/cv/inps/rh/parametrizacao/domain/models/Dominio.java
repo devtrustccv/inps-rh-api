@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 public class Dominio {
 
-  private Long id;
+  private final Long id;
   private String dominio;
   private String valor;
   private String descricao;
@@ -33,7 +33,6 @@ public class Dominio {
     return new Dominio(id, dominio, valor, descricao, referencia, estado);
   }
 
-  // Método de atualização
   public void update(String dominio, String valor, String descricao, String referencia, Estado estado) {
     if (dominio != null && !dominio.isBlank()) {
       this.dominio = dominio;

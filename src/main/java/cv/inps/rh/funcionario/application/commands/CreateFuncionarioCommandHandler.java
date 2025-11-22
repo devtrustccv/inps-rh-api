@@ -12,23 +12,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFuncionarioCommand, ResponseEntity<FuncionarioResponseDTO>> {
 
-   private static final Logger LOGGER = LoggerFactory.getLogger(CreateFuncionarioCommandHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CreateFuncionarioCommandHandler.class);
 
   private final RegistarColaboradorService dossierService;
 
-   public CreateFuncionarioCommandHandler(RegistarColaboradorService dossierService) {
+  public CreateFuncionarioCommandHandler(RegistarColaboradorService dossierService) {
+    this.dossierService = dossierService;
+  }
 
-     this.dossierService = dossierService;
-   }
+  @IgrpCommandHandler
+  public ResponseEntity<FuncionarioResponseDTO> handle(CreateFuncionarioCommand command) {
 
-   @IgrpCommandHandler
-   public ResponseEntity<FuncionarioResponseDTO> handle(CreateFuncionarioCommand command) {
-     var dto = command.getFuncionariorequest();
+    LOGGER.debug("Handling CreateFuncionarioCommand: {}", command);
 
-     LOGGER.info("Iniciando criação de funcionário: {}", dto);
+    return ResponseEntity.ok(dossierService.saveDossierColaborador(command));
 
-     return ResponseEntity.ok(dossierService.saveDossierColaborador(command));
-
-   }
+  }
 
 }

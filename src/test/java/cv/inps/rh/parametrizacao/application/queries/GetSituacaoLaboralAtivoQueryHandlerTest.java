@@ -14,12 +14,12 @@ public class GetSituacaoLaboralAtivoQueryHandlerTest {
 
   @BeforeEach
   void setUp() {
-    // TODO: Initialize mock dependencies if needed
+
   }
 
   @Test
   void testHandleGetSituacaoLaboralAtivoQuery() {
-    // TODO: Implement unit test for handle method
+
     // Example:
     // Given
     // GetSituacaoLaboralAtivoQuery query = new GetSituacaoLaboralAtivoQuery(...);

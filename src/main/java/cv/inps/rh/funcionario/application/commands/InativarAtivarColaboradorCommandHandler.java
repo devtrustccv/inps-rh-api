@@ -2,13 +2,12 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.funcionario.application.service.InativarAtivarColaborarService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import cv.inps.rh.funcionario.application.dto.AtivarInativarColaboradorDTO;
+import cv.inps.rh.funcionario.application.service.MudarSituacaoLaboralColaboradorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import cv.inps.rh.funcionario.application.dto.AtivarInativarColaboradorDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 //todo change this classe name to MudarSituacaoLaboralColaboradorCommandHandler
 @Component
@@ -16,9 +15,9 @@ public class InativarAtivarColaboradorCommandHandler implements CommandHandler<I
 
    private static final Logger LOGGER = LoggerFactory.getLogger(InativarAtivarColaboradorCommandHandler.class);
 
-   private final InativarAtivarColaborarService inativarAtivarColaborarService;
+   private final MudarSituacaoLaboralColaboradorService inativarAtivarColaborarService;
 
-   public InativarAtivarColaboradorCommandHandler(InativarAtivarColaborarService inativarAtivarColaborarService) {
+   public InativarAtivarColaboradorCommandHandler(MudarSituacaoLaboralColaboradorService inativarAtivarColaborarService) {
       this.inativarAtivarColaborarService = inativarAtivarColaborarService;
    }
 

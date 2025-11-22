@@ -4,8 +4,9 @@ import cv.inps.rh.funcionario.domain.projections.FuncionarioList;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import io.gsonfire.util.Mapper;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -107,8 +108,7 @@ public interface FuncionarioEntityRepository extends
       "tiposrelacionamentos.carrPccId",
       "tiposrelacionamentos.categoriaId"
   })
-  org.springframework.data.domain.Page<FuncionarioEntity> findAll(org.springframework.data.jpa.domain.Specification<FuncionarioEntity> spec,
-                                                                  @NotNull org.springframework.data.domain.Pageable pageable);
+  org.springframework.data.domain.Page<FuncionarioEntity> findAll(Specification<FuncionarioEntity> spec, @NotNull Pageable pageable);
 
 
 }

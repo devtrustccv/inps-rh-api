@@ -120,7 +120,7 @@ public class ValidarRegistoColaboradorService {
 
     return java.util.Map.of(
         "id", funcionario.getId(),
-        "uuid", funcionario.getUuid() != null ? funcionario.getUuid().toString() : null
+        "uuid", funcionario.getUuid()
     );
 
   }

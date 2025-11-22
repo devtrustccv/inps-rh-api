@@ -14,12 +14,12 @@ public class NovoProcessoDisciplinarCommandHandlerTest {
 
     @BeforeEach
     void setUp() {
-      // TODO: initialize mock dependencies if needed
+
     }
 
     @Test
     void testHandle() {
-        // TODO: Implement unit test for handle method
+
         // Example:
         // Given
         // NovoProcessoDisciplinarCommand command = new NovoProcessoDisciplinarCommand(...);

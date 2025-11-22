@@ -5,24 +5,15 @@ import cv.inps.rh.funcionario.application.dto.AtivarInativarColaboradorDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
-import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.application.constants.EstadoValidacao;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSitLaboralEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.SituacaoLaboralEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSitLaboralEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-
-//todo change this classe name to MudarSituacaoLaboralColaboradorService
 @Service
 @RequiredArgsConstructor
-public class InativarAtivarColaborarService {
+public class MudarSituacaoLaboralColaboradorService {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;

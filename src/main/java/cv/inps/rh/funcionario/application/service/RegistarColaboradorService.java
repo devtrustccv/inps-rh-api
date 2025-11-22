@@ -1,11 +1,12 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.CreateFuncionarioCommand;
-import cv.inps.rh.funcionario.application.dto.*;
+import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
+import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSitLaboralEntityRepository;
 import jakarta.persistence.EntityManager;
@@ -150,8 +151,7 @@ public class RegistarColaboradorService {
 
     var param = paramSitLaboralEntityRepository.findAllByNome("ATIVO").getFirst();
     if(param == null){
-      throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO. " +
-          "Verifique se o parametro esta cadastrado no banco de dados e tente novamente.");
+      throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO. Verifique se o parametro esta cadastrado no banco de dados e tente novamente.");
     }
 
     var sl = contratuaisEntityMapper.toSituacaoLaboralInicial(dc, param, Estado.P);
@@ -168,9 +168,6 @@ public class RegistarColaboradorService {
     tr.setEstActAdm(1);
     //tr.setSituacLaboralId(sl);
     fun.setTiposrelacionamentos(java.util.List.of(tr));
-
-
-
 
     var valid = contratuaisEntityMapper.toValidacaoInsert("REGISTO_COLABORADOR", 1L, Estado.P); //todo resolve id later
     valid.setFunId(fun);
