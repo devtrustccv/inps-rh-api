@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
+//todo change this classe name to MudarSituacaoLaboralColaboradorService
 @Service
 @RequiredArgsConstructor
 public class InativarAtivarColaborarService {

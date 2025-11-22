@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import cv.inps.rh.funcionario.application.dto.AtivarInativarColaboradorDTO;
 
+//todo change this classe name to MudarSituacaoLaboralColaboradorCommandHandler
 @Component
 public class InativarAtivarColaboradorCommandHandler implements CommandHandler<InativarAtivarColaboradorCommand, ResponseEntity<AtivarInativarColaboradorDTO>> {
 

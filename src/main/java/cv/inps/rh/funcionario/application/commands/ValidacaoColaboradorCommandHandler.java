@@ -8,11 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+//todo change this classe name to ValidarSituacaoLaboralColaboradorCommandHandler
 @Component
 public class ValidacaoColaboradorCommandHandler implements CommandHandler<ValidacaoColaboradorCommand, ResponseEntity<AtivarInativarColaboradorDTO>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ValidacaoColaboradorCommandHandler.class);
 
+  // todo create service class to handle bussness logic
 
   public ValidacaoColaboradorCommandHandler() {
 
