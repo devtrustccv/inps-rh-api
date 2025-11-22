@@ -1,20 +1,19 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.funcionario.domain.projections.CarreiraList;
-import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 
 @Repository
@@ -103,7 +102,7 @@ public interface CarreiraEntityRepository extends
 
 
 
-
+  CarreiraEntity findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity fun, Estado estado);
 
 }
 

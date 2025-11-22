@@ -1,7 +1,10 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import com.github.f4b6a3.uuid.UuidCreator;
-import cv.inps.rh.funcionario.application.dto.*;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
+import cv.inps.rh.funcionario.application.dto.EncargosDescontosRespDTO;
+import cv.inps.rh.funcionario.application.dto.SubsidioRespDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
@@ -100,7 +103,6 @@ public class DadosContratuaisMapper {
     sl.setUuid(UuidCreator.getTimeOrderedEpoch());
     return sl;
   }
-
 
   public DadosContratuaisRespDTO dadosContratuaisRespDTO(FuncionarioEntity entity) {
     if (entity == null) return null;
