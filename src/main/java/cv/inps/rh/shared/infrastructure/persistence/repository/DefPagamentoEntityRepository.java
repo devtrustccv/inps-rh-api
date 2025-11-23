@@ -54,6 +54,6 @@ public interface DefPagamentoEntityRepository extends
       @Param("endRow") int endRow
   );
 
-  DefPagamentoEntity findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity fun, Estado estado);
+  List<DefPagamentoEntity> findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity fun, Estado estado);
 
 }

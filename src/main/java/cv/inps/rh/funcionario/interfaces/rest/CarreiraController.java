@@ -3,23 +3,21 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.funcionario.application.commands.NovaCarreiraCommand;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
+import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.funcionario.application.queries.*;
-
-import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
@@ -27,19 +25,20 @@ import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
 @Tag(name = "Carreira", description = "Gestao carreiras funcionario")
 public class CarreiraController {
 
-  
-  private final QueryBus queryBus;
 
-  public CarreiraController(QueryBus queryBus) {
+  private final QueryBus queryBus;
+  private final CommandBus commandBus;
+
+  public CarreiraController(QueryBus queryBus, CommandBus commandBus) {
           this.queryBus = queryBus;
-          
+          this.commandBus = commandBus;
   }
    @GetMapping(
    value = "carreiras"
   )
   @Operation(
-    summary = "GET method to handle operations for Get carreira list",
-    description = "GET method to handle operations for Get carreira list",
+    summary = "Get carreira list",
+    description = "Get carreira list",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -53,7 +52,7 @@ public class CarreiraController {
       )
     }
   )
-  
+
   public ResponseEntity<WrapperCarreiraListDTO> getCarreiraList(
     @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
@@ -68,6 +67,37 @@ public class CarreiraController {
       ResponseEntity<WrapperCarreiraListDTO> response = queryBus.handle(query);
 
       return response;
+  }
+
+   @PostMapping(
+   value = "{funcionarioId}"
+  )
+  @Operation(
+    summary = "Nova carreira",
+    description = "Nova carreira",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> novaCarreira(@Valid @RequestBody DadosContratuaisReqDTO novaCarreiraRequest
+    , @PathVariable(value = "funcionarioId") String funcionarioId)
+  {
+
+      final var command = new NovaCarreiraCommand(novaCarreiraRequest, funcionarioId);
+
+       ResponseEntity<String> response = commandBus.send(command);
+
+       return response;
   }
 
 }

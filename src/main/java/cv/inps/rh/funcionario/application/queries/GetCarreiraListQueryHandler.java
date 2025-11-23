@@ -3,7 +3,7 @@ package cv.inps.rh.funcionario.application.queries;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
-import cv.inps.rh.funcionario.application.service.CarreiraReadService;
+import cv.inps.rh.funcionario.application.service.carreira.CarreiraReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;

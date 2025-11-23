@@ -1,4 +1,4 @@
-package cv.inps.rh.funcionario.application.service;
+package cv.inps.rh.funcionario.application.service.carreira;
 
 import cv.inps.rh.funcionario.application.dto.CarreiraListDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;

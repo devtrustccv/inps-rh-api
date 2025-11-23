@@ -47,8 +47,8 @@ public class MudarSituacaoLaboralColaboradorService {
     var isAtivo = dto.getSituacaoLaboral().equals("ATIVO");
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
-    funcionario.setEstado(isAtivo ? Estado.A : Estado.I);
-    funcionarioEntityRepository.save(funcionario);
+   /* funcionario.setEstado(isAtivo ? Estado.A : Estado.I);
+    funcionarioEntityRepository.save(funcionario);*/
 
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
     if (tipoRelacionamentoAtual == null)
@@ -110,12 +110,17 @@ public class MudarSituacaoLaboralColaboradorService {
       mobilidadeEntityRepository.save(mobilidade);
 
       var defPagamento = defPagamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
-      defPagamento.setDataFim(now);
-      defPagamentoEntityRepository.save(defPagamento);
+      defPagamento.forEach(obj->{
+        obj.setDataFim(now);
+        defPagamentoEntityRepository.save(obj);
+      });
 
       var defRemuneracao = definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
-      defRemuneracao.setDataFim(now);
-      definicaoRemuneracaoEntityRepository.save(defRemuneracao);
+      defRemuneracao.forEach(obj->{
+        obj.setDataFim(now);
+        definicaoRemuneracaoEntityRepository.save(obj);
+      });
+
     }
   }
 }

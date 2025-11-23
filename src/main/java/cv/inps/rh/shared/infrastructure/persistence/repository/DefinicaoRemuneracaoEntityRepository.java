@@ -53,6 +53,8 @@ public interface DefinicaoRemuneracaoEntityRepository extends
       @Param("endRow") int endRow
   );
 
-  DefinicaoRemuneracaoEntity findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity fun, Estado estado);
+  List<DefinicaoRemuneracaoEntity> findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity fun, Estado estado);
+
+
 
 }

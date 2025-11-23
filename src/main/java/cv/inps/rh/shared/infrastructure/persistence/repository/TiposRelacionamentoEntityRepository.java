@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -37,4 +38,5 @@ public interface TiposRelacionamentoEntityRepository extends
     return this.findByUuid(uuid).orElseThrow(() -> IgrpResponseStatusException.notFound("TiposRelacionamentoEntity not found for id: " + uuid));
   }
 
+  TiposRelacionamentoEntity findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity funcionario, Estado estado);
 }
