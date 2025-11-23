@@ -5,6 +5,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -108,9 +109,7 @@ public interface FuncionarioEntityRepository extends
       "tiposrelacionamentos.carrPccId",
       "tiposrelacionamentos.categoriaId"
   })
-  org.springframework.data.domain.Page<FuncionarioEntity> findAll(Specification<FuncionarioEntity> spec, @NotNull Pageable pageable);
-
-
+  Page<FuncionarioEntity> findAll(Specification<FuncionarioEntity> spec, @NotNull Pageable pageable);
 }
 
 

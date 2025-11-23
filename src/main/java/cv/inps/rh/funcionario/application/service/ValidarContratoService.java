@@ -6,7 +6,6 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
@@ -38,9 +37,7 @@ public class ValidarContratoService {
 
     var idFunc = IdentificadorUnico.from(command.getId());
 
-    var funcionario = funcionarioEntityRepository.findByUuid(idFunc.getValor()).orElseThrow(
-        () -> IgrpResponseStatusException.notFound("Funcionario com id '%s' não encontrado".formatted(idFunc))
-    );
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.getValor());
 
     var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
     dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, dto.getDadosContratuais());

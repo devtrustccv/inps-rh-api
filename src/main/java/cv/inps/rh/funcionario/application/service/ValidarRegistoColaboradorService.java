@@ -5,7 +5,6 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
@@ -44,10 +43,10 @@ public class ValidarRegistoColaboradorService {
   public Map<String, ?> validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
 
     var registroColaborador = command.getFuncionariorequest();
+
     var funcionarioPublicId = IdentificadorUnico.from(command.getId()).getValor();
 
-    var funcionario = funcionarioEntityRepository.findByUuid(funcionarioPublicId)
-        .orElseThrow(() -> IgrpResponseStatusException.notFound("funcionario nao encontrado com id" + command.getId()));
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
     var dadosPessoaisReqDTO = registroColaborador.getDadosPessoais();
     funcionario = funcionarioMapper.toUpdateEntity(funcionario, dadosPessoaisReqDTO);

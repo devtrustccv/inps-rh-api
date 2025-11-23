@@ -38,9 +38,7 @@ public class NovoContratoService {
 
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
 
-    var funcionario = funcionarioEntityRepository.findByUuid(idFunc.getValor()).orElseThrow(
-        () -> IgrpResponseStatusException.notFound("Funcionario com id '%s' não encontrado".formatted(idFunc))
-    );
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.getValor());
 
     boolean temContratoAtivo = funcionario.getContratos().stream()
         .anyMatch(c -> c.getEstado() == Estado.A);
@@ -60,8 +58,7 @@ public class NovoContratoService {
       var contratoAtual = tipoRelacionamentoAtual.getContratoId();
 
       if(tipoRelacionamentoAtual.getCarreiraId()!=null){
-       // tipoRelacionamentoAtual.getCarreiraId().setDataFim(contratoAtual.getDataFim());
-        //todo adicionar data fim no entity
+       tipoRelacionamentoAtual.getCarreiraId().setDataFim(contratoAtual.getDataFim());
       }
       if(tipoRelacionamentoAtual.getRegimeId()!=null && tipoRelacionamentoAtual.getRegimeId().getDataFim()==null){
         tipoRelacionamentoAtual.getRegimeId().setDataFim(contratoAtual.getDataFim());

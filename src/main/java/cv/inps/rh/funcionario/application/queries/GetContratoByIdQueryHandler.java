@@ -40,17 +40,12 @@ public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoById
 
     var idFunc = IdentificadorUnico.from(query.getId());
 
-    var funcionario = funcionarioEntityRepository.findByUuid(idFunc.getValor()).orElseThrow(
-        () -> IgrpResponseStatusException.notFound("Funcionario com id '%s' não encontrado".formatted(idFunc))
-    );
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.getValor());
 
     var dadosContratuais = funcionarioRoles.getTipoRelacionamentoByContratoId(funcionario, contratoId);
     if (dadosContratuais == null)
       throw IgrpResponseStatusException.notFound("Contrato com id '%s' não encontrado".formatted(contratoId));
 
     return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO2(dadosContratuais));
-
-
-
   }
 }

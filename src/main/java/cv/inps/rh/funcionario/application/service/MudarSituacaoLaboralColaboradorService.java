@@ -53,8 +53,11 @@ public class MudarSituacaoLaboralColaboradorService {
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
     if (tipoRelacionamentoAtual == null)
       throw IgrpResponseStatusException.badRequest("funcionario nao possui tipo de relacionamento ativo");
+
+    var now = LocalDate.now();
+
     tipoRelacionamentoAtual.setEstActAdm(0);
-    tipoRelacionamentoAtual.setDataFim(LocalDate.now());
+    tipoRelacionamentoAtual.setDataFim(now);
     tipoRelacionamentoAtual.setObs(dto.getObservacao());
     tipoRelacionamentoAtual.setMotivoSitLab(dto.getMotivo());
     tipoRelacionamentoEntityRepository.save(tipoRelacionamentoAtual);
@@ -63,7 +66,7 @@ public class MudarSituacaoLaboralColaboradorService {
 
     var tipoRelacionamentoNovo = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
     tipoRelacionamentoNovo.setEstActAdm(1);
-    tipoRelacionamentoNovo.setDataInicio(LocalDate.now());
+    tipoRelacionamentoNovo.setDataInicio(now);
     tipoRelacionamentoNovo.setEstado(Estado.P);
     tipoRelacionamentoNovo.setTipoSituacao("SITUACAO_LABORAL");
     tipoRelacionamentoNovo.setReferente("MUDANCA_SITUACAO_LAB");
@@ -95,23 +98,23 @@ public class MudarSituacaoLaboralColaboradorService {
 
       // TODO 22/11/2025 20:50 validate this conditions for funcionario and Estado.A and data fim NULL
 
-      contract.setDataFim(LocalDate.now());
+      contract.setDataFim(now);
       contratoEntityRepository.save(contract);
 
       var carreira = carreiraEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
-      carreira.setDataFim(LocalDate.now());
+      carreira.setDataFim(now);
       carreiraEntityRepository.save(carreira);
 
       var mobilidade = mobilidadeEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
-      mobilidade.setDataFim(LocalDate.now());
+      mobilidade.setDataFim(now);
       mobilidadeEntityRepository.save(mobilidade);
 
       var defPagamento = defPagamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
-      defPagamento.setDataFim(LocalDate.now());
+      defPagamento.setDataFim(now);
       defPagamentoEntityRepository.save(defPagamento);
 
       var defRemuneracao = definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
-      defRemuneracao.setDataFim(LocalDate.now());
+      defRemuneracao.setDataFim(now);
       definicaoRemuneracaoEntityRepository.save(defRemuneracao);
     }
   }
