@@ -18,9 +18,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
-public class NovaMobilidadeService {
+public class MobilidadeWriteService {
 
   private final FuncionarioRules funcionarioRules;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
@@ -47,9 +49,8 @@ public class NovaMobilidadeService {
 
     tipoRelacionamentoAtual.setEstActAdm(0);
     tipoRelacionamentoAtual.setEstado(Estado.P);
-    tipoRelacionamentoAtual.setDataFim(
-        tipoRelacionamentoAtual.getMobId().getDataInicio().minusDays(1)
-    );
+    tipoRelacionamentoAtual.setDataFim(LocalDate.now());
+    tipoRelacionamentoAtual.getMobId().setDataFim(mobilidadeDto.getDataInicio().minusDays(1));
 
     novoTipoRelacionamento.setEstActAdm(1);
     novoTipoRelacionamento.setMobId(novaMobilidade);
@@ -65,6 +66,7 @@ public class NovaMobilidadeService {
     funcionario.getValidacoes().add(valid);
 
     funcionarioEntityRepository.save(funcionario);
+
 
     return mobilidadeDto;
 
@@ -84,6 +86,11 @@ public class NovaMobilidadeService {
     me.setDataFim(mobilidadeDTO.getDataFim());
     me.setEstado(Estado.P);
     return me;
+  }
+
+
+  public MobilidadeDTO validar(){
+    return null;
   }
 
 }
