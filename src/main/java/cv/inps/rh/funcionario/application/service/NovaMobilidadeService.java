@@ -46,6 +46,7 @@ public class NovaMobilidadeService {
     var novoTipoRelacionamento = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
 
     tipoRelacionamentoAtual.setEstActAdm(0);
+    tipoRelacionamentoAtual.setEstado(Estado.P);
     tipoRelacionamentoAtual.setDataFim(
         tipoRelacionamentoAtual.getMobId().getDataInicio().minusDays(1)
     );
@@ -62,6 +63,8 @@ public class NovaMobilidadeService {
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
     funcionario.getValidacoes().add(valid);
+
+    funcionarioEntityRepository.save(funcionario);
 
     return mobilidadeDto;
 
