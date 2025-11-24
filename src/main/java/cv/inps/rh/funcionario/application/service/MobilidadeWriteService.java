@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.SaveMobilidadeCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarMobilidadeCommand;
 import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
@@ -90,7 +91,13 @@ public class MobilidadeWriteService {
   }
 
 
-  public MobilidadeDTO validar(){
+  public MobilidadeDTO validarMobilidade(ValidarMobilidadeCommand command){
+
+    var idFunc = IdentificadorUnico.from(command.getId());
+
+    var mobilidadeDto = command.getMobilidade();
+
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.getValor());
     return null;
   }
 

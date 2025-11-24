@@ -135,4 +135,35 @@ public class MobilidadeController {
        return response;
   }
 
+   @PutMapping(
+   value = "{id}/mobilidades/{mobilidadeId}"
+  )
+  @Operation(
+    summary = "Validar mobilidade",
+    description = "Validar mobilidade",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = MobilidadeDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<MobilidadeDTO> validarMobilidade(@Valid @RequestBody MobilidadeDTO validarMobilidadeRequest
+    , @PathVariable(value = "id") String id,@PathVariable(value = "mobilidadeId") String mobilidadeId)
+  {
+
+      final var command = new ValidarMobilidadeCommand(validarMobilidadeRequest, id, mobilidadeId);
+
+       ResponseEntity<MobilidadeDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
 }
