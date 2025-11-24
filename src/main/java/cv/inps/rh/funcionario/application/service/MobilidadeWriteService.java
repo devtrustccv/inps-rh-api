@@ -76,6 +76,11 @@ public class MobilidadeWriteService {
 
   private MobilidadeEntity createMobilidade(MobilidadeDTO mobilidadeDTO){
      if (mobilidadeDTO == null) return null;
+
+     if(mobilidadeDTO.getLocalTrabalhoDepois() == null || mobilidadeDTO.getSeccaoDepois() == null || mobilidadeDTO.getDirecaoDepois() == null){
+       throw IgrpResponseStatusException.badRequest("Local de trabalho, seção e direção são obrigatórios");
+     }
+
     var me = new MobilidadeEntity();
     me.setTipoSituacao(mobilidadeDTO.getTipoMobilidade());
     me.setObs("MOBILIDADE");
@@ -94,11 +99,17 @@ public class MobilidadeWriteService {
     me.setTipoSituacao(mobilidadeDTO.getTipoMobilidade());
     me.setObs(me.getObs());
     me.setUuid(me.getUuid());
-    me.setLocalTrabId(entityManager.getReference(ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDepois()));
-    me.setSecaoId(entityManager.getReference(SecaoEntity.class, mobilidadeDTO.getSeccaoDepois()));
-    me.setInstidId(entityManager.getReference(InstituicaoEntity.class, mobilidadeDTO.getDirecaoDepois()));
+    me.setLocalTrabId(mobilidadeDTO.getLocalTrabalhoDepois()!=null ?
+        entityManager.getReference(ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDepois()): me.getLocalTrabId());
+
+    me.setSecaoId(mobilidadeDTO.getSeccaoDepois()!=null ?
+        entityManager.getReference(SecaoEntity.class, mobilidadeDTO.getSeccaoDepois()): me.getSecaoId());
+
+    me.setInstidId(mobilidadeDTO.getDirecaoDepois()!=null ?
+        entityManager.getReference(InstituicaoEntity.class, mobilidadeDTO.getDirecaoDepois()): me.getInstidId());
+
     me.setDataInicio(mobilidadeDTO.getDataInicio());
-    me.setDataFim(mobilidadeDTO.getDataFim());
+    me.setDataFim(mobilidadeDTO.getDataFim()!=null ? mobilidadeDTO.getDataFim() : me.getDataFim());
     me.setEstado(me.getEstado());
     return me;
   }

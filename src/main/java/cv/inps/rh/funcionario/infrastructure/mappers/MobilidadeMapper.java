@@ -24,6 +24,9 @@ public class MobilidadeMapper {
     dto.setDirrecaoAntes(mobilidade.getInstidId().getNome());
     dto.setSeccaoAntes(mobilidade.getSecaoId().getNome() != null ? mobilidade.getSecaoId().getNome() : "");
     dto.setLocalTrabalhoAntes(mobilidade.getLocalTrabId().getNome());
+    dto.setTipoMobilidade(mobilidade.getTipoSituacao());
+    dto.setDataInicio(mobilidade.getDataInicio());
+    dto.setDataFim(mobilidade.getDataFim());
 
     return dto;
 
