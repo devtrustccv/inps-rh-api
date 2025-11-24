@@ -12,6 +12,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MobilidadeEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class MobilidadeReadService {
   private final MobilidadeEntityRepository mobilidadeEntityRepository;
   private final MobilidadeMapper mobilidadeMapper;
 
+  @Transactional(readOnly = true)
   public WrapperListMobilidadeDTO getListMobilidade(GetListMobilidadesQuery query) {
 
     int pageNumber = query.getPageNumber() != null ? Integer.parseInt(query.getPageNumber()) : 0;
@@ -94,6 +96,7 @@ public class MobilidadeReadService {
     return wrapper;
   }
 
+  @Transactional(readOnly = true)
   public MobilidadeDTO getMobilidade(GetMobilidadeByIdQuery query) {
 
     IdentificadorUnico id = IdentificadorUnico.from(query.getId());

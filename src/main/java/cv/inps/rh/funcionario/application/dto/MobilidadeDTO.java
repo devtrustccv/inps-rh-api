@@ -25,7 +25,7 @@ public class MobilidadeDTO  {
   private EstadoValidacao validar ;
   
   
-  private Long tipoMobilidade ;
+  private String tipoMobilidade ;
   
   
   private LocalDate dataInicio ;

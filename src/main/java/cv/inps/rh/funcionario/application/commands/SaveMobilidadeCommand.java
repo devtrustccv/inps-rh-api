@@ -14,7 +14,7 @@ public class SaveMobilidadeCommand implements Command {
 
   
   private MobilidadeDTO mobilidade;
-  @NotBlank(message = "The field <id> is required")
-  private String id;
+  @NotBlank(message = "The field <idFuncionario> is required")
+  private String idFuncionario;
 
 }

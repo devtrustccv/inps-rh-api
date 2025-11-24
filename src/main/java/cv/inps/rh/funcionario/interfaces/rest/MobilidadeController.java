@@ -41,8 +41,8 @@ public class MobilidadeController {
    value = "mobilidades"
   )
   @Operation(
-    summary = "GET method to handle operations for Get list mobilidades",
-    description = "GET method to handle operations for Get list mobilidades",
+    summary = "Get list mobilidades",
+    description = "Get list mobilidades",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -77,8 +77,8 @@ public class MobilidadeController {
    value = "mobilidades/{id}"
   )
   @Operation(
-    summary = "GET method to handle operations for Get mobilidade by id",
-    description = "GET method to handle operations for Get mobilidade by id",
+    summary = "Get mobilidade by id",
+    description = "Get mobilidade by id",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -105,11 +105,11 @@ public class MobilidadeController {
   }
 
    @PostMapping(
-   value = "mobilidades/{id}"
+   value = "mobilidades/{idFuncionario}"
   )
   @Operation(
-    summary = "POST method to handle operations for Save mobilidade",
-    description = "POST method to handle operations for Save mobilidade",
+    summary = "Save mobilidade",
+    description = "Save mobilidade",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -125,10 +125,10 @@ public class MobilidadeController {
   )
   
   public ResponseEntity<MobilidadeDTO> saveMobilidade(@Valid @RequestBody MobilidadeDTO saveMobilidadeRequest
-    , @PathVariable(value = "id") String id)
+    , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
-      final var command = new SaveMobilidadeCommand(saveMobilidadeRequest, id);
+      final var command = new SaveMobilidadeCommand(saveMobilidadeRequest, idFuncionario);
 
        ResponseEntity<MobilidadeDTO> response = commandBus.send(command);
 

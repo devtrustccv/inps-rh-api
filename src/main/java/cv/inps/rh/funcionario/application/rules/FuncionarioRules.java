@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.application.rules;
 
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
@@ -49,6 +50,20 @@ public class FuncionarioRules {
                       && tr.getContratoId().getUuid().equals(contratoId))
         .findFirst()
         .orElse(null);
+  }
+
+
+  public boolean temValidacaoPendente(FuncionarioEntity fun, String tipoAccao, String referenciaName) {
+
+    if (fun == null || fun.getValidacoes() == null || fun.getValidacoes().isEmpty())
+      return false;
+
+    return fun.getValidacoes().stream()
+        .anyMatch(v ->
+            v.getEstado() == Estado.P &&
+                tipoAccao.equals(v.getTipoAccao()) &&
+                referenciaName.equals(v.getReferenciaName())
+        );
   }
 
 }

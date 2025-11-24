@@ -90,7 +90,7 @@
     },
     {
       "actionName": "saveMobilidade",
-      "path": "mobilidades/{id}",
+      "path": "mobilidades/{idFuncionario}",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -123,12 +123,12 @@
       },
       "pathVariables": [
         {
-          "name": "id",
+          "name": "idFuncionario",
           "type": "string",
           "isRequired": true
         }
       ]
     }
   ],
-  "id": "tunlfcyaeu-getListMobilidades"
+  "id": "tunlfcyaeu-getListMobilidades-saveMobilidade"
 }
