@@ -2,12 +2,14 @@ package cv.inps.rh.funcionario.application.service.carreira;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.funcionario.application.dto.ValidacaoCarreiraDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.CarreiraMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RemuneracaoTiprelEntity;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -68,7 +71,9 @@ public class CarreiraWriteService {
       defPagamentoEntityRepository.save(obj);
     });
 
-    // TODO 23/11/2025 17:39 inativar ultima carreira ?
+    var carreiraAtual = relacionamentoAtual.getCarreiraId();
+    carreiraAtual.setDataFim(currentDate);
+    carreiraEntityRepository.save(carreiraAtual);
 
     var novaCarreira = Objects.requireNonNull(carreiraMapper.toCarreira(dto, Estado.P));
     novaCarreira.setFunId(funcionario);
@@ -115,9 +120,8 @@ public class CarreiraWriteService {
 
     var remun = new RemuneracaoTiprelEntity();
     remun.setEstado(Estado.P.name());
-    //remun.setObs(); todo obs null ?
     remun.setUuid(UuidCreator.getTimeOrderedEpoch());
-    remun.setRemId(salario); // TODO 23/11/2025 18:08 is this correct ?
+    remun.setRemId(salario);
     remun.setTiprelId(novoRelacionamento);
     remuneracaoTiprelEntityRepository.save(remun);
 
@@ -138,21 +142,25 @@ public class CarreiraWriteService {
   }
 
   @NotNull
-  private static DefinicaoRemuneracaoEntity getSalarioDefinicaoRemuneracaoEntity(DadosContratuaisReqDTO dto, FuncionarioEntity funcionario) {
+  private DefinicaoRemuneracaoEntity getSalarioDefinicaoRemuneracaoEntity(DadosContratuaisReqDTO dto, FuncionarioEntity funcionario) {
     var salario = new DefinicaoRemuneracaoEntity();
     salario.setValor(dto.getSalario());
     salario.setEstado(Estado.P);
-    //salario.setCarreira id todo: nao tem campo na tabela
     salario.setObs("MOBILIDADE- || TIPO_CARREIRA");
     salario.setDataInicio(dto.getDataInicio());
-    // salario.setTmId(entityManager.getReference(TipoMovimentoEntity.class, s.getTipoSubsidioId())); todo qual colocar neste caso ?
     salario.setDataFim(dto.getDataFim());
     salario.setFunId(funcionario);
     salario.setUuid(UuidCreator.getTimeOrderedEpoch());
     return salario;
   }
 
-  private void validarCarreira(String funcionarioId, String validacao, DadosContratuaisReqDTO dto) {
+  public void validarCarreira(String funcionarioId, ValidacaoCarreiraDTO dto) {
+
+    var validacao = dto.getValidacao();
+    if (!List.of("S", "N").contains(validacao))
+      throw IgrpResponseStatusException.badRequest("Código de validação inválida: " + validacao + ". Deve ser S ou N.");
+
+    var dados = dto.getDados();
 
     var estado = validacao.equals("S") ? Estado.A : Estado.I;
 

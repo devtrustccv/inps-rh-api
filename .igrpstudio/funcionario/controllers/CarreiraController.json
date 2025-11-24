@@ -98,7 +98,51 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "validarCarreira",
+      "path": "{funcionarioId}/validar/{carreiraId}",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "collectionType": "none",
+              "name": "data",
+              "type": "ValidacaoCarreira",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "carreiraId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList"
+  "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-validarCarreira"
 }

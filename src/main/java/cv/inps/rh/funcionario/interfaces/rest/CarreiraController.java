@@ -7,7 +7,9 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.funcionario.application.commands.NovaCarreiraCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarCarreiraCommand;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.funcionario.application.dto.ValidacaoCarreiraDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
 import io.swagger.v3.oas.annotations.Operation;
@@ -94,6 +96,37 @@ public class CarreiraController {
   {
 
       final var command = new NovaCarreiraCommand(novaCarreiraRequest, funcionarioId);
+
+       ResponseEntity<String> response = commandBus.send(command);
+
+       return response;
+  }
+
+   @PostMapping(
+   value = "{funcionarioId}/validar/{carreiraId}"
+  )
+  @Operation(
+    summary = "Validar carreira",
+    description = "Validar carreira",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> validarCarreira(@Valid @RequestBody ValidacaoCarreiraDTO validarCarreiraRequest
+    , @PathVariable(value = "funcionarioId") String funcionarioId,@PathVariable(value = "carreiraId") String carreiraId)
+  {
+
+      final var command = new ValidarCarreiraCommand(validarCarreiraRequest, funcionarioId, carreiraId);
 
        ResponseEntity<String> response = commandBus.send(command);
 

@@ -1,0 +1,35 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "ValidacaoCarreira",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "validacao",
+      "objectType": "java",
+      "type": "string",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dados",
+      "objectType": "dto",
+      "type": "DadosContratuaisReq",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "funcionario"
+    }
+  ],
+  "id": "kza817q182"
+}

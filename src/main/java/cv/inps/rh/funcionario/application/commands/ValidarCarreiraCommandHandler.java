@@ -10,22 +10,22 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public class NovaCarreiraCommandHandler implements CommandHandler<NovaCarreiraCommand, ResponseEntity<String>> {
+public class ValidarCarreiraCommandHandler implements CommandHandler<ValidarCarreiraCommand, ResponseEntity<String>> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(NovaCarreiraCommandHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ValidarCarreiraCommandHandler.class);
 
   private final CarreiraWriteService carreiraWriteService;
 
-  public NovaCarreiraCommandHandler(CarreiraWriteService carreiraWriteService) {
+  public ValidarCarreiraCommandHandler(CarreiraWriteService carreiraWriteService) {
     this.carreiraWriteService = carreiraWriteService;
   }
 
   @IgrpCommandHandler
-  public ResponseEntity<String> handle(NovaCarreiraCommand command) {
+  public ResponseEntity<String> handle(ValidarCarreiraCommand command) {
 
-    LOGGER.info("Nova carreira para funcionario: {}", command);
+    LOGGER.info("Validar carreira para funcionario: {}", command);
 
-    carreiraWriteService.novaCarreira(command.getFuncionarioId(), command.getDadoscontratuaisreq());
+    carreiraWriteService.validarCarreira(command.getFuncionarioId(), command.getValidacaocarreira());
 
     return ResponseEntity.ok().build();
   }
