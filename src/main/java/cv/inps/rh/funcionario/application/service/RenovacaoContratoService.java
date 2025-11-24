@@ -9,6 +9,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class RenovacaoContratoService {
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final DadosContratuaisMapper  dadosContratuaisMapper;
   private final FuncionarioRules funcionarioRules;
+  private final EntityManager entityManager;
 
   public RenovacaoContratoDTO renovarContrato(RenovarContratoCommand command) {
 
@@ -64,10 +66,12 @@ public class RenovacaoContratoService {
     var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","RENOVACAO_CONTRATO", Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
-    valid.setReferenciaId(1L); //todo resolve id later
+    //valid.setReferenciaId(1L); //todo resolve id later
     funcionario.getValidacoes().add(valid);
 
     funcionarioEntityRepository.save(funcionario);
+    entityManager.flush();
+    valid.setReferenciaId(novoContrato.getId());
 
     var renovacaoContratoReqDTO = contratoMapper.toRenovacaoContratoReqDTO(novoContrato);
 

@@ -10,6 +10,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSitLaboralEntityRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,8 @@ public class NovoContratoService {
   private final DefPagamentoMapper defPagamentoMapper;
   private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
   private final FuncionarioRules funcionarioRules;
+  private final EntityManager entityManager;
+
 
 
   @Transactional
@@ -136,10 +139,12 @@ public class NovoContratoService {
     var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","CONTRATO", Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(tr);
-    valid.setReferenciaId(1L); //todo resolve id later
+    //valid.setReferenciaId(1L); //todo resolve id later
     funcionario.getValidacoes().add(valid);
 
     FuncionarioEntity saved = funcionarioEntityRepository.save(funcionario);
+    entityManager.flush();
+    valid.setReferenciaId(contrato.getId());
 
     return dadosContratuaisMapper.dadosContratuaisRespDTO(saved);
   }

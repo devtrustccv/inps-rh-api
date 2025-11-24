@@ -65,16 +65,9 @@ public class MobilidadeWriteService {
     valid.setTiprelId(novoTipoRelacionamento);
     funcionario.getValidacoes().add(valid);
 
-    // -----------------------------------
-    // PRIMEIRO SAVE + FLUSH (gera IDs)
-    // -----------------------------------
-    funcionarioEntityRepository.saveAndFlush(funcionario);
-
-    // Agora a mobilidade já tem ID
-    valid.setReferenciaId(novaMobilidade.getId());
-
-    // Hibernate deteta alteração e faz UPDATE
     funcionarioEntityRepository.save(funcionario);
+    entityManager.flush();
+    valid.setReferenciaId(novaMobilidade.getId());
 
     return mobilidadeDto;
 
