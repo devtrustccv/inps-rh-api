@@ -133,7 +133,7 @@ public class NovoContratoService {
     funcionario.getTiposrelacionamentos().add(tr);
 
 
-    var valid = dadosContratuaisMapper.toValidacaoInsert("CONTRATO", 1L, Estado.P); //todo resolve id later
+    var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","CONTRATO", 1L, Estado.P); //todo resolve id later
     valid.setFunId(funcionario);
     valid.setTiprelId(tr);
     funcionario.getValidacoes().add(valid);

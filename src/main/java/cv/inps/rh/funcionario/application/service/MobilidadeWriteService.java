@@ -48,19 +48,20 @@ public class MobilidadeWriteService {
     var novoTipoRelacionamento = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
 
     tipoRelacionamentoAtual.setEstActAdm(0);
-    tipoRelacionamentoAtual.setEstado(Estado.P);
     tipoRelacionamentoAtual.setDataFim(LocalDate.now());
     tipoRelacionamentoAtual.getMobId().setDataFim(mobilidadeDto.getDataInicio().minusDays(1));
 
     novoTipoRelacionamento.setEstActAdm(1);
     novoTipoRelacionamento.setMobId(novaMobilidade);
+    novoTipoRelacionamento.setEstado(Estado.P);
+    novoTipoRelacionamento.setTipoSituacao(mobilidadeDto.getTipoMobilidade());
 
     funcionario.getTiposrelacionamentos().add(novoTipoRelacionamento);
     funcionario.getMobilidades().add(novaMobilidade);
 
 
 
-    var valid = dadosContratuaisMapper.toValidacaoInsert("MOBILIDADE", 1L, Estado.P); //todo resolve id later
+    var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","MOBILIDADE", 1L, Estado.P); //todo resolve id later
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
     funcionario.getValidacoes().add(valid);
