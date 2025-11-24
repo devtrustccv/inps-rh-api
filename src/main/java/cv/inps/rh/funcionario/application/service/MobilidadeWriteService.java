@@ -128,6 +128,13 @@ public class MobilidadeWriteService {
           .findFirst()
           .ifPresent(v -> v.setEstado(estado));
 
+      if(estado.equals(Estado.I)){
+        var remuneracoes = funcionario.getDefinicoesRenumeracoes();
+        if (remuneracoes != null) remuneracoes.forEach(r -> { if (r != null) r.setEstado(estado); });
+
+        var descontos = funcionario.getDefinicoesPagamentos();
+        if (descontos != null) descontos.forEach(d -> { if (d != null) d.setEstado(estado); });
+      }
 
       if(estado.equals(Estado.A)){
         OrdemServicoEntity ordemServicoEntity = new OrdemServicoEntity();
