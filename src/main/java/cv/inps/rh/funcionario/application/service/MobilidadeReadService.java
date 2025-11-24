@@ -104,6 +104,10 @@ public class MobilidadeReadService {
         () -> IgrpResponseStatusException.notFound("mobilidade nao encontrada com id"+query.getId())
     );
 
-    return mobilidadeMapper.mobilidadeDTO(mobilidade);
+    var mobilidadteDto = mobilidadeMapper.mobilidadeDTO(mobilidade);
+
+
+
+    return mobilidadteDto;
   }
 }

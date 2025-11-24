@@ -60,13 +60,21 @@ public class MobilidadeWriteService {
 
 
 
-    var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","MOBILIDADE", 1L, Estado.P); //todo resolve id later
+    var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","MOBILIDADE", Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
     funcionario.getValidacoes().add(valid);
 
-    funcionarioEntityRepository.save(funcionario);
+    // -----------------------------------
+    // PRIMEIRO SAVE + FLUSH (gera IDs)
+    // -----------------------------------
+    funcionarioEntityRepository.saveAndFlush(funcionario);
 
+    // Agora a mobilidade já tem ID
+    valid.setReferenciaId(novaMobilidade.getId());
+
+    // Hibernate deteta alteração e faz UPDATE
+    funcionarioEntityRepository.save(funcionario);
 
     return mobilidadeDto;
 

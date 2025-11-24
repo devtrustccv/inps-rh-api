@@ -9,6 +9,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSitLaboralEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,8 @@ public class RegistarColaboradorService {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
+
+  private final ValidacaoEntityRepository validacaoRepository;
 
 
   @PersistenceContext
@@ -169,12 +172,17 @@ public class RegistarColaboradorService {
     //tr.setSituacLaboralId(sl);
     fun.setTiposrelacionamentos(java.util.List.of(tr));
 
-    var valid = contratuaisEntityMapper.toValidacaoInsert("INSERT","REGISTO_COLABORADOR", 1L, Estado.P); //todo resolve id later
+    var valid = contratuaisEntityMapper.toValidacaoInsert("INSERT","REGISTO_COLABORADOR", Estado.P); //todo resolve id later
     valid.setFunId(fun);
     valid.setTiprelId(tr);
     fun.setValidacoes(java.util.List.of(valid));
 
+
     FuncionarioEntity saved = funcionarioEntityRepository.save(fun);
+
+    valid.setReferenciaId(saved.getId());
+    validacaoRepository.save(valid);
+
     return funcionarioMapper.toResponseDTO(saved);
   }
 

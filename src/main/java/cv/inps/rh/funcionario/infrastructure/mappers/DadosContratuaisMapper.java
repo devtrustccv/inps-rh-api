@@ -81,11 +81,11 @@ public class DadosContratuaisMapper {
   }
 
 
-  public ValidacaoEntity toValidacaoInsert(String TipoAccao, String referenciaName, Long referenciaId, Estado estado) {
+  public ValidacaoEntity toValidacaoInsert(String TipoAccao, String referenciaName, Estado estado) {
     var v = new ValidacaoEntity();
     v.setTipoAccao(TipoAccao);
     v.setReferenciaName(referenciaName);
-    v.setReferenciaId(referenciaId);
+    v.setReferenciaId(null);
     v.setEstado(estado);
     v.setObs(null);
     v.setUuid(UuidCreator.getTimeOrderedEpoch());
