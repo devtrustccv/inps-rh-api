@@ -7,12 +7,10 @@ import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import cv.inps.rh.shared.infrastructure.persistence.entity.InstituicaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.MobilidadeEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -90,6 +88,21 @@ public class MobilidadeWriteService {
     return me;
   }
 
+  private MobilidadeEntity updateMobilidade(MobilidadeEntity me ,MobilidadeDTO mobilidadeDTO){
+    if (mobilidadeDTO == null) return null;
+    me.setTipoSituacao(mobilidadeDTO.getTipoMobilidade());
+    me.setObs(me.getObs());
+    me.setUuid(me.getUuid());
+    me.setLocalTrabId(entityManager.getReference(ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDepois()));
+    me.setSecaoId(entityManager.getReference(SecaoEntity.class, mobilidadeDTO.getSeccaoDepois()));
+    me.setInstidId(entityManager.getReference(InstituicaoEntity.class, mobilidadeDTO.getDirecaoDepois()));
+    me.setDataInicio(mobilidadeDTO.getDataInicio());
+    me.setDataFim(mobilidadeDTO.getDataFim());
+    me.setEstado(me.getEstado());
+    return me;
+  }
+
+
 
   public MobilidadeDTO validarMobilidade(ValidarMobilidadeCommand command){
 
@@ -98,7 +111,41 @@ public class MobilidadeWriteService {
     var mobilidadeDto = command.getMobilidade();
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.getValor());
-    return null;
+
+    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+
+    var mobilidade = updateMobilidade(tipoRelacionamentoAtual.getMobId(),mobilidadeDto);
+
+    if(mobilidadeDto.getValidar()!=null) {
+      var estado = mobilidadeDto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
+
+       mobilidade.setEstado(estado);
+       tipoRelacionamentoAtual.setEstado(estado);
+
+      funcionario.getValidacoes().stream()
+          .filter(v -> v.getEstado() == Estado.P)
+          .filter(v -> "MOBILIDADE".equals(v.getReferenciaName()) && "INSERT".equals(v.getTipoAccao()))
+          .findFirst()
+          .ifPresent(v -> v.setEstado(estado));
+
+
+      if(estado.equals(Estado.A)){
+        OrdemServicoEntity ordemServicoEntity = new OrdemServicoEntity();
+        ordemServicoEntity.setFunId(funcionario);
+        ordemServicoEntity.setTiprelId(tipoRelacionamentoAtual);
+        ordemServicoEntity.setReferente("MOBILIDADE");
+        ordemServicoEntity.setDescricao("Mobilidae do colaborador - "+funcionario.getNome());
+        ordemServicoEntity.setNuOrdem("1"); // todo fix later
+        ordemServicoEntity.setEstado(Estado.A);
+        funcionario.getOrdemServicos().add(ordemServicoEntity);
+      }
+
+    }
+
+    funcionarioEntityRepository.save(funcionario);
+
+
+    return mobilidadeDto;
   }
 
 }
