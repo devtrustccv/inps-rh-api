@@ -12,6 +12,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntity
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
@@ -25,6 +26,7 @@ public class RenovacaoContratoService {
   private final FuncionarioRules funcionarioRules;
   private final EntityManager entityManager;
 
+  @Transactional
   public RenovacaoContratoDTO renovarContrato(RenovarContratoCommand command) {
 
     var dto = command.getRenovacaocontrato();
