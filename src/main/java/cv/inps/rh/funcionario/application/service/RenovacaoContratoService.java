@@ -68,7 +68,7 @@ public class RenovacaoContratoService {
     var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","RENOVACAO_CONTRATO", Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
-    //valid.setReferenciaId(1L); //todo resolve id later
+    valid.setReferenciaId(1L);
     funcionario.getValidacoes().add(valid);
 
     funcionarioEntityRepository.save(funcionario);
