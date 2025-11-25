@@ -1,0 +1,51 @@
+{
+  "type": "controller",
+  "name": "Substituicao",
+  "module": "funcionario",
+  "description": "gestao substituicoes",
+  "basePath": "api/v1/funcionarios",
+  "actions": [
+    {
+      "actionName": "registarSubstituicao",
+      "path": "substituicoes/{idFuncionario}",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "Substituicao",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Substituicao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "alqrgnd0ly-registarSubstituicao"
+}

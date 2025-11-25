@@ -43,7 +43,7 @@ public class SubstituicaoEntity extends AuditEntity {
 
   
     @Column(name="data_fim")
-    private String dataFim;
+    private LocalDate dataFim;
 
   
     @Column(name="motivo", length=200)
