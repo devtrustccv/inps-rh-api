@@ -62,6 +62,7 @@ public class MobilidadeWriteService {
 
     var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","MOBILIDADE", Estado.P);
     valid.setFunId(funcionario);
+    valid.setReferenciaId(1L);
     valid.setTiprelId(novoTipoRelacionamento);
     funcionario.getValidacoes().add(valid);
 
