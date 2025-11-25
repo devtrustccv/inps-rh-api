@@ -54,6 +54,47 @@
           "isRequired": false
         }
       ]
+    },
+    {
+      "actionName": "adicionarRegimeTrabalho",
+      "path": "{idFuncionario}/regimes",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "RegimeTrabalho",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "RegimeTrabalho",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "exldkjz2ka-getListRegimes"

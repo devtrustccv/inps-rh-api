@@ -18,8 +18,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.funcionario.application.queries.*;
-
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.inps.rh.funcionario.application.commands.*;
 import cv.inps.rh.funcionario.application.dto.WrapperRegimeListDTO;
+import cv.inps.rh.funcionario.application.dto.RegimeTrabalhoDTO;
 
 @IgrpController
 @RestController
@@ -29,17 +31,18 @@ public class RegimeController {
 
   
   private final QueryBus queryBus;
+  private final CommandBus commandBus;
 
-  public RegimeController(QueryBus queryBus) {
+  public RegimeController(QueryBus queryBus, CommandBus commandBus) {
           this.queryBus = queryBus;
-          
+          this.commandBus = commandBus;
   }
    @GetMapping(
    value = "regimes"
   )
   @Operation(
-    summary = "GET method to handle operations for Get list regimes",
-    description = "GET method to handle operations for Get list regimes",
+    summary = "Get list regimes",
+    description = "Get list regimes",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -67,6 +70,37 @@ public class RegimeController {
       ResponseEntity<WrapperRegimeListDTO> response = queryBus.handle(query);
 
       return response;
+  }
+
+   @PostMapping(
+   value = "{idFuncionario}/regimes"
+  )
+  @Operation(
+    summary = "Adicionar regime trabalho",
+    description = "Adicionar regime trabalho",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = RegimeTrabalhoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<RegimeTrabalhoDTO> adicionarRegimeTrabalho(@Valid @RequestBody RegimeTrabalhoDTO adicionarRegimeTrabalhoRequest
+    , @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var command = new AdicionarRegimeTrabalhoCommand(adicionarRegimeTrabalhoRequest, idFuncionario);
+
+       ResponseEntity<RegimeTrabalhoDTO> response = commandBus.send(command);
+
+       return response;
   }
 
 }

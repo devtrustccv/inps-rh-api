@@ -40,6 +40,10 @@ public class RegimeTrabalhoEntity extends AuditEntity {
     private String tipoSituacao;
 
   
+    @Column(name="data_inicio")
+    private LocalDate dataInicio;
+
+  
     @Column(name="data_fim")
     private LocalDate dataFim;
 

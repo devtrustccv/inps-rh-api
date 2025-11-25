@@ -1,0 +1,30 @@
+package cv.inps.rh.funcionario.application.commands;
+
+import cv.igrp.framework.core.domain.CommandHandler;
+import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.funcionario.application.service.RegimeWriteService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import cv.inps.rh.funcionario.application.dto.RegimeTrabalhoDTO;
+
+@Component
+public class AdicionarRegimeTrabalhoCommandHandler implements CommandHandler<AdicionarRegimeTrabalhoCommand, ResponseEntity<RegimeTrabalhoDTO>> {
+
+   private static final Logger LOGGER = LoggerFactory.getLogger(AdicionarRegimeTrabalhoCommandHandler.class);
+
+   private final RegimeWriteService regimeWriteService;
+   public AdicionarRegimeTrabalhoCommandHandler(RegimeWriteService regimeWriteService) {
+
+     this.regimeWriteService = regimeWriteService;
+   }
+
+   @IgrpCommandHandler
+   public ResponseEntity<RegimeTrabalhoDTO> handle(AdicionarRegimeTrabalhoCommand command) {
+
+      return ResponseEntity.ok(regimeWriteService.adicionarRegimeTrabalho(command));
+   }
+
+}
