@@ -65,15 +65,16 @@ public class RenovacaoContratoService {
     novoTipoRelacionamento.setContratoId(novoContrato);
     funcionario.getTiposrelacionamentos().add(novoTipoRelacionamento);
 
+    funcionarioEntityRepository.save(funcionario);
+    entityManager.flush();
+
     var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","RENOVACAO_CONTRATO", Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
-    valid.setReferenciaId(1L);
+    valid.setReferenciaId(novoContrato.getId());
     funcionario.getValidacoes().add(valid);
 
     funcionarioEntityRepository.save(funcionario);
-    entityManager.flush();
-    valid.setReferenciaId(novoContrato.getId());
 
     var renovacaoContratoReqDTO = contratoMapper.toRenovacaoContratoReqDTO(novoContrato);
 
