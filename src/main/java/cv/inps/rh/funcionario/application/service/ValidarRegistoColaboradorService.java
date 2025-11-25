@@ -192,4 +192,13 @@ public class ValidarRegistoColaboradorService {
 
   }
 
+
+  //TODO 1.4-Caso for alterado o valor do salário ou data inicio de função ou data fim de função,
+  // deve fazer atualização na tabela RH_T_DEF_REMUNERACAO  onde o TM_ID=GET_MOVIMENTO_SALL e TIPREL_ID=ID de RH_T_TIPOS_RELACIONAMENTO
+  //•	VALOR = novo valor de salario do formulario
+  //•	DATA_INICIO = Data inicio de função
+  //•	DATA_FIM =  Data fim de função
+
+  //TODO mudar estado de RH_T_REMU_TIPREL e RH_T_PAG_TIPREL
+
 }
