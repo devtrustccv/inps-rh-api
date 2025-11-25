@@ -103,4 +103,35 @@ public class RegimeController {
        return response;
   }
 
+   @PutMapping(
+   value = "{idFuncionario}/regimes/{regimeId}"
+  )
+  @Operation(
+    summary = "Validar regime trabalho",
+    description = "Validar regime trabalho",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = RegimeTrabalhoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<RegimeTrabalhoDTO> validarRegimeTrabalho(@Valid @RequestBody RegimeTrabalhoDTO validarRegimeTrabalhoRequest
+    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "regimeId") String regimeId)
+  {
+
+      final var command = new ValidarRegimeTrabalhoCommand(validarRegimeTrabalhoRequest, idFuncionario, regimeId);
+
+       ResponseEntity<RegimeTrabalhoDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
 }

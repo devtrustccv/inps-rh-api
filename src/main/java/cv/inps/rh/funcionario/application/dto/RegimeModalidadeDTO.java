@@ -21,6 +21,9 @@ public class RegimeModalidadeDTO  {
 
   
   
+  private Long id ;
+  
+  
   private String modalidade ;
   
   

@@ -95,6 +95,52 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "validarRegimeTrabalho",
+      "path": "{idFuncionario}/regimes/{regimeId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "RegimeTrabalho",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "RegimeTrabalho",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "regimeId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "exldkjz2ka-getListRegimes"
