@@ -91,7 +91,42 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "listaSubstituicao",
+      "path": "substituicoes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "SubstituicaoSumary",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "alqrgnd0ly-registarSubstituicao"
+  "id": "alqrgnd0ly-registarSubstituicao-listaSubstituicao"
 }
