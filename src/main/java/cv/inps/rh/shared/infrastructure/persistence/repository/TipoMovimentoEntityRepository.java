@@ -41,4 +41,6 @@ public interface TipoMovimentoEntityRepository extends
 
   List<TipoMovimentoEntity> findAllByTipo(String tipo);
 
+  Optional<TipoMovimentoEntity> findByShortDescAndAmbAplId(String shortDesc, Long ambApplId);
+
 }

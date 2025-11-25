@@ -7,7 +7,8 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
 
 
@@ -26,9 +27,10 @@ public class RemuneracaoTiprelEntity extends AuditEntity {
     private Long id;
 
   
-    @NotBlank(message = "estado is mandatory")
+    @NotNull(message = "estado is mandatory")
+    @Enumerated(EnumType.STRING)
     @Column(name="estado", nullable = false)
-    private String estado;
+    private Estado estado;
 
   
     @Column(name="obs", length=4000)

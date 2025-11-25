@@ -12,6 +12,8 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Component
@@ -99,6 +101,19 @@ public class DefPagamentoMapper {
     dp.setEstado(estado);
     dp.setUuid(UuidCreator.getTimeOrderedEpoch());
     dp.setFunId(fun);
+    return dp;
+  }
+
+  public DefPagamentoEntity createPagamento(BigDecimal valor, TipoMovimentoEntity tmId, LocalDate dataInicio, LocalDate dataFim, FuncionarioEntity fun) {
+    var dp = new DefPagamentoEntity();
+    dp.setValor(valor);
+    dp.setDataInicio(dataInicio);
+    dp.setDataFim(dataFim);
+    dp.setEstado(Estado.P);
+    dp.setObs(null);
+    dp.setTmId(tmId);
+    dp.setFunId(fun);
+    dp.setUuid(UuidCreator.getTimeOrderedEpoch());
     return dp;
   }
 

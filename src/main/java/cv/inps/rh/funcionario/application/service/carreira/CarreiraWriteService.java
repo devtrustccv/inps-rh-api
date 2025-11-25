@@ -119,7 +119,7 @@ public class CarreiraWriteService {
     // TODO 23/11/2025 18:14 2 registo de IUR e INPS de DefPagamentoEntity
 
     var remun = new RemuneracaoTiprelEntity();
-    remun.setEstado(Estado.P.name());
+    remun.setEstado(Estado.P);
     remun.setUuid(UuidCreator.getTimeOrderedEpoch());
     remun.setRemId(salario);
     remun.setTiprelId(novoRelacionamento);
@@ -188,7 +188,7 @@ public class CarreiraWriteService {
 
     var remuneracoes = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(relacionamento, Estado.P.name());
     remuneracoes.forEach(obj -> {
-      obj.setEstado(estado.name());
+      obj.setEstado(estado);
       remuneracaoTiprelEntityRepository.save(obj);
     });
 

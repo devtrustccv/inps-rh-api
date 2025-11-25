@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import com.ctc.wstx.io.BaseInputSource;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.RenumeracaoListDTO;
 import cv.inps.rh.funcionario.application.dto.SubsidioReqDTO;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -43,9 +45,9 @@ public class DefinicaoRemuneracaoMapper {
   }
 
   public java.util.List<DefinicaoRemuneracaoEntity> syncRemuneracoes(List<DefinicaoRemuneracaoEntity> existingList,
-                                                                      List<cv.inps.rh.funcionario.application.dto.SubsidioReqDTO> newList) {
+                                                                      List<SubsidioReqDTO> newList) {
     if (newList == null) return existingList;
-    for (cv.inps.rh.funcionario.application.dto.SubsidioReqDTO dto : newList) {
+    for (SubsidioReqDTO dto : newList) {
       DefinicaoRemuneracaoEntity found = null;
       if (dto.getId() != null) {
         for (DefinicaoRemuneracaoEntity e : existingList) {
@@ -94,6 +96,21 @@ public class DefinicaoRemuneracaoMapper {
     if (s.getTipoSubsidioId() != null) {
       de.setTmId(entityManager.getReference(TipoMovimentoEntity.class, s.getTipoSubsidioId()));
     }
+    de.setFunId(fun);
+    de.setUuid(UuidCreator.getTimeOrderedEpoch());
+    return de;
+  }
+
+  public DefinicaoRemuneracaoEntity createRenumeracao(BigDecimal valor, TipoMovimentoEntity tmId,
+                                                      LocalDate dataInicio, LocalDate dataFim, FuncionarioEntity fun) {
+    var de = new DefinicaoRemuneracaoEntity();
+    de.setPercentagem(null);
+    de.setValor(valor);
+    de.setEstado(Estado.P);
+    de.setObs(null);
+    de.setDataInicio(dataInicio);
+    de.setDataFim(dataFim);
+    de.setTmId(tmId);
     de.setFunId(fun);
     de.setUuid(UuidCreator.getTimeOrderedEpoch());
     return de;

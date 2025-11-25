@@ -1,20 +1,24 @@
 package cv.inps.rh.funcionario.application.service;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.CreateFuncionarioCommand;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSitLaboralEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +44,10 @@ public class RegistarColaboradorService {
 
   private final ValidacaoEntityRepository validacaoRepository;
 
+  private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
+
+  private final RemuneracaoTiprelEntityRepository renumeracaoTiprelEntityRepository;
+  private final PagTiprelEntityRepository pagTiprelEntityRepository;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -138,6 +146,17 @@ public class RegistarColaboradorService {
       fun.setMobilidades(java.util.List.of(mobilidade));
     }
 
+
+    var tipoMovimentoSalario = tipoMovimentoEntityRepository.findByShortDescAndAmbAplId("SALL", 30L)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento SALARIO nao encontrado."));
+
+    var tipoMovimentoInps = tipoMovimentoEntityRepository.findByShortDescAndAmbAplId("INPS", 30L)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento INPS nao encontrado."));
+
+    var tipoMovimentoIUR = tipoMovimentoEntityRepository.findByShortDescAndAmbAplId("IUR", 30L)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento IUR nao encontrado."));
+
+    /***********************RENUMERACOES ********************************/
     if (dc.getSubsidios() != null && !dc.getSubsidios().isEmpty()) {
       var remList = dc.getSubsidios().stream()
           .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, fun, Estado.P))
@@ -145,6 +164,14 @@ public class RegistarColaboradorService {
       fun.setDefinicoesRenumeracoes(remList);
     }
 
+    var renumeracaoSalario = definicaoRemuneracaoMapper
+        .createRenumeracao(dc.getSalario(), tipoMovimentoSalario, dc.getDataInicio(), dc.getDataFim(), fun);
+    var renumeracaoInps = definicaoRemuneracaoMapper
+        .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dc.getDataInicio(), dc.getDataFim(), fun);
+    fun.getDefinicoesRenumeracoes().addAll(List.of(renumeracaoSalario, renumeracaoInps));
+
+
+    /***********************PAGAMENTOS DESCONTOS ********************************/
     if (dc.getEncargosDescontos() != null && !dc.getEncargosDescontos().isEmpty()) {
       var pagList = dc.getEncargosDescontos().stream()
           .map(e -> defPagamentoMapper.toDefPagamento(e, fun, Estado.P))
@@ -152,9 +179,17 @@ public class RegistarColaboradorService {
       fun.setDefinicoesPagamentos(pagList);
     }
 
+    var pagamentoDescontoIUR = defPagamentoMapper.createPagamento(BigDecimal.ZERO,
+        tipoMovimentoIUR, dc.getDataInicio(), dc.getDataFim(), fun);
+    var pagamentoDescontoINPS = defPagamentoMapper.createPagamento(BigDecimal.ZERO,
+        tipoMovimentoInps, dc.getDataInicio(), dc.getDataFim(), fun);
+
+    fun.getDefinicoesPagamentos().addAll(List.of(pagamentoDescontoIUR, pagamentoDescontoINPS));
+
+
     var param = paramSitLaboralEntityRepository.findAllByNome("ATIVO").getFirst();
-    if(param == null){
-      throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO. Verifique se o parametro esta cadastrado no banco de dados e tente novamente.");
+    if (param == null) {
+      throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO.");
     }
 
     var sl = contratuaisEntityMapper.toSituacaoLaboralInicial(dc, param, Estado.P);
@@ -172,7 +207,8 @@ public class RegistarColaboradorService {
     //tr.setSituacLaboralId(sl);
     fun.setTiposrelacionamentos(java.util.List.of(tr));
 
-    var valid = contratuaisEntityMapper.toValidacaoInsert("INSERT","REGISTO_COLABORADOR", Estado.P); //todo resolve id later
+
+    var valid = contratuaisEntityMapper.toValidacaoInsert("INSERT", "REGISTO_COLABORADOR", Estado.P); //todo resolve id later
     valid.setFunId(fun);
     valid.setTiprelId(tr);
     fun.setValidacoes(java.util.List.of(valid));
@@ -183,9 +219,115 @@ public class RegistarColaboradorService {
     valid.setReferenciaId(saved.getId());
     validacaoRepository.save(valid);
 
+
+    // Percorre todas as remunerações e cria RemuneracaoTiprelEntity
+    List<RemuneracaoTiprelEntity> listTiprel = saved.getDefinicoesRenumeracoes().stream()
+        .map(rem -> {
+          RemuneracaoTiprelEntity r = new RemuneracaoTiprelEntity();
+          r.setRemId(rem);
+          r.setTiprelId(tr); // tr = TiposRelacionamentoEntity
+          r.setUuid(UuidCreator.getTimeOrderedEpoch());
+          r.setEstado(Estado.P);
+          return r;
+        })
+        .toList();
+
+    // Salva todas em batch
+    renumeracaoTiprelEntityRepository.saveAll(listTiprel);
+
+
+    // Percorre todas as definições de pagamento e cria PagTiprelEntity
+    List<PagTiprelEntity> listPagTiprel = saved.getDefinicoesPagamentos().stream()
+        .map(pag -> {
+          PagTiprelEntity p = new PagTiprelEntity();
+          p.setPagId(pag);
+          p.setTiprelId(tr); // tr = TiposRelacionamentoEntity
+          p.setUuid(UuidCreator.getTimeOrderedEpoch());
+          p.setEstado(Estado.P);
+          return p;
+        })
+        .toList();
+    // Salva todas em batch
+    pagTiprelEntityRepository.saveAll(listPagTiprel);
+
+
     return funcionarioMapper.toResponseDTO(saved);
   }
 
+
+  private void validarDadosContratuais(DadosContratuaisReqDTO dc) {
+
+    // -----------------------------
+    // OBRIGATÓRIOS BÁSICOS
+    // -----------------------------
+    if (dc.getTipoContratoId() == null)
+      throw IgrpResponseStatusException.badRequest("Tipo de contrato é obrigatório.");
+
+    if (dc.getCargoPosicaoId() == null)
+      throw IgrpResponseStatusException.badRequest("Cargo/posição é obrigatório.");
+
+    if (dc.getDirecaoId() == null)
+      throw IgrpResponseStatusException.badRequest("Direção é obrigatória.");
+
+    if (dc.getSeccaoId() == null)
+      throw IgrpResponseStatusException.badRequest("Seção é obrigatória.");
+
+    if (dc.getLocalTrabalhoId() == null)
+      throw IgrpResponseStatusException.badRequest("Local de trabalho é obrigatório.");
+
+    if (dc.getPaisId() == null)
+      throw IgrpResponseStatusException.badRequest("País é obrigatório.");
+
+    if (dc.getIlhaId() == null)
+      throw IgrpResponseStatusException.badRequest("Ilha é obrigatória.");
+
+    if (dc.getMoeda() == null || dc.getMoeda().isBlank())
+      throw IgrpResponseStatusException.badRequest("Moeda é obrigatória.");
+
+    if (dc.getDataInicio() == null)
+      throw IgrpResponseStatusException.badRequest("Data de início é obrigatória.");
+
+
+    // -----------------------------
+    // REGRAS DE DATAS
+    // -----------------------------
+    var hoje = LocalDate.now();
+
+    if (dc.getDataInicio().isAfter(hoje))
+      throw IgrpResponseStatusException.badRequest("Data início não pode ser maior que a data atual.");
+
+    if (dc.getDataFim() != null && dc.getDataInicio().isAfter(dc.getDataFim()))
+      throw IgrpResponseStatusException.badRequest("Data início não pode ser superior à data fim.");
+
+
+    // -----------------------------
+    // OBRIGATÓRIOS POR TIPO DE VÍNCULO
+    // -----------------------------
+    var vinculo = entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId());
+
+    // flgCarreira = 1 → carreira, categoria, escalão obrigatórios
+    if (vinculo.getFlgCarreira() != null && vinculo.getFlgCarreira() == 1) {
+
+      if (dc.getCarreiraId() == null)
+        throw IgrpResponseStatusException.badRequest("Carreira é obrigatória para este tipo de vínculo.");
+
+      if (dc.getCategoriaId() == null)
+        throw IgrpResponseStatusException.badRequest("Categoria é obrigatória para este tipo de vínculo.");
+
+      if (dc.getEscalaoReferenciaId() == null)
+        throw IgrpResponseStatusException.badRequest("Escalão é obrigatório para este tipo de vínculo.");
+
+      // Salário automático
+      var escalao = entityManager.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId());
+      dc.setSalario(escalao.getValor());
+    }
+
+    // flgSalario = 1 → salário é obrigatório
+    if (vinculo.getFlgSalario() != null && vinculo.getFlgSalario() == 1) {
+      if (dc.getSalario() == null)
+        throw IgrpResponseStatusException.badRequest("Salário é obrigatório para este tipo de vínculo.");
+    }
+  }
 
 
 }

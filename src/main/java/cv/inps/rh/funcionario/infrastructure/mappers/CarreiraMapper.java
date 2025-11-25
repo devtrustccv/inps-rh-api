@@ -70,10 +70,20 @@ public class CarreiraMapper {
   public CarreiraEntity toCarreira(DadosContratuaisReqDTO dc, Estado estado) {
     if (dc == null) return null;
     var ce = new CarreiraEntity();
-    ce.setCargoId(entityManager.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
-    ce.setEscalaoId(entityManager.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
-    ce.setCategoriaId(entityManager.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
-    ce.setCarrPccsId(entityManager.getReference(ParamCarreiraEntity.class, dc.getCarreiraId()));
+
+    ce.setCargoId(dc.getCargoPosicaoId() != null
+            ? entityManager.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId())
+            : null);
+    ce.setEscalaoId(dc.getEscalaoReferenciaId() != null
+            ? entityManager.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId())
+            : null);
+    ce.setCategoriaId(dc.getCategoriaId() != null
+            ? entityManager.getReference(ParamCategoriaEntity.class, dc.getCategoriaId())
+            : null);
+    ce.setCarrPccsId(dc.getCarreiraId() != null
+            ? entityManager.getReference(ParamCarreiraEntity.class, dc.getCarreiraId())
+            : null);
+
     ce.setSalario(dc.getSalario());
     ce.setFlgProcessa(1);
     ce.setTipoSituacao("NOVO_CONTRATO");
