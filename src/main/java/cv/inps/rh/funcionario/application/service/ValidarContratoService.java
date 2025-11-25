@@ -35,7 +35,7 @@ public class ValidarContratoService {
 
     var dto = command.getNovocontrato();
 
-    var idFunc = IdentificadorUnico.from(command.getId());
+    var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.getValor());
 

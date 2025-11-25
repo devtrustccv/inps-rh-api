@@ -39,7 +39,7 @@ public class SubstituicaoController {
           this.commandBus = commandBus;
   }
    @PostMapping(
-   value = "substituicoes/{idFuncionario}"
+   value = "{idFuncionario}/substituicoes"
   )
   @Operation(
     summary = "Registar substituicao",
@@ -70,7 +70,7 @@ public class SubstituicaoController {
   }
 
    @PutMapping(
-   value = "{id}/substituicoes/{substituicaoId}"
+   value = "{idFuncionario}/substituicoes/{substituicaoId}"
   )
   @Operation(
     summary = "Validar substituicao",
@@ -90,10 +90,10 @@ public class SubstituicaoController {
   )
   
   public ResponseEntity<SubstituicaoDTO> validarSubstituicao(@Valid @RequestBody SubstituicaoDTO validarSubstituicaoRequest
-    , @PathVariable(value = "id") String id,@PathVariable(value = "substituicaoId") String substituicaoId)
+    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "substituicaoId") String substituicaoId)
   {
 
-      final var command = new ValidarSubstituicaoCommand(validarSubstituicaoRequest, id, substituicaoId);
+      final var command = new ValidarSubstituicaoCommand(validarSubstituicaoRequest, idFuncionario, substituicaoId);
 
        ResponseEntity<SubstituicaoDTO> response = commandBus.send(command);
 

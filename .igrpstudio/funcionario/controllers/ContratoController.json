@@ -52,7 +52,7 @@
     },
     {
       "actionName": "novoContrato",
-      "path": "contratos/{idFuncionario}",
+      "path": "{idFuncionario}/contratos",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -126,7 +126,7 @@
     },
     {
       "actionName": "renovarContrato",
-      "path": "{id}/renovacao-contrato",
+      "path": "{idFuncionario}/renovacao-contrato",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -159,7 +159,7 @@
       },
       "pathVariables": [
         {
-          "name": "id",
+          "name": "idFuncionario",
           "type": "string",
           "isRequired": true
         }
@@ -167,7 +167,7 @@
     },
     {
       "actionName": "validarContrato",
-      "path": "{id}/contratos/{contratoId}",
+      "path": "{idFuncionario}/contratos/{contratoId}",
       "method": "PUT",
       "requestBody": {
         "content": {
@@ -200,7 +200,7 @@
       },
       "pathVariables": [
         {
-          "name": "id",
+          "name": "idFuncionario",
           "type": "string",
           "isRequired": true
         },
@@ -213,7 +213,7 @@
     },
     {
       "actionName": "validarRenovacaoContrato",
-      "path": "{id}/validar-renovacao-contrato",
+      "path": "{idFuncionario}/validar-renovacao-contrato",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -246,12 +246,12 @@
       },
       "pathVariables": [
         {
-          "name": "id",
+          "name": "idFuncionario",
           "type": "string",
           "isRequired": true
         }
       ]
     }
   ],
-  "id": "zt8ilwt31b-getListContratos-getListContratos-validarContrato-validarContrato-getContratoById-getContratoById-novoContrato-validarContrato-novoContrato-renovarContrato-renovarContrato"
+  "id": "zt8ilwt31b-getListContratos-getListContratos-validarContrato-validarContrato-getContratoById-getContratoById-novoContrato-validarContrato-novoContrato-renovarContrato-renovarContrato-novoContrato-validarContrato-renovarContrato-validarRenovacaoContrato"
 }

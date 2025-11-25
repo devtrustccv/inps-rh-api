@@ -86,7 +86,7 @@ public class SubstituicaoWriteService {
     substituicao.setTiprelIdPara(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto));
 
 
-    var idFuncionarioSubstituido = IdentificadorUnico.from(command.getId()).getValor();
+    var idFuncionarioSubstituido = IdentificadorUnico.from(command.getIdFuncionario()).getValor();
     var funcionarioSubstituido = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituido).orElseThrow(
         () -> IgrpResponseStatusException.badRequest("Funcionário não encontrado:: "+idFuncionarioSubstituido)
     );

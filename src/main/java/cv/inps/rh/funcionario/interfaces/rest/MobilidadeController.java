@@ -105,7 +105,7 @@ public class MobilidadeController {
   }
 
    @PostMapping(
-   value = "mobilidades/{idFuncionario}"
+   value = "{idFuncionario}/mobilidades"
   )
   @Operation(
     summary = "Save mobilidade",
@@ -136,7 +136,7 @@ public class MobilidadeController {
   }
 
    @PutMapping(
-   value = "{id}/mobilidades/{mobilidadeId}"
+   value = "{idFuncionario}/mobilidades/{mobilidadeId}"
   )
   @Operation(
     summary = "Validar mobilidade",
@@ -156,10 +156,10 @@ public class MobilidadeController {
   )
   
   public ResponseEntity<MobilidadeDTO> validarMobilidade(@Valid @RequestBody MobilidadeDTO validarMobilidadeRequest
-    , @PathVariable(value = "id") String id,@PathVariable(value = "mobilidadeId") String mobilidadeId)
+    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "mobilidadeId") String mobilidadeId)
   {
 
-      final var command = new ValidarMobilidadeCommand(validarMobilidadeRequest, id, mobilidadeId);
+      final var command = new ValidarMobilidadeCommand(validarMobilidadeRequest, idFuncionario, mobilidadeId);
 
        ResponseEntity<MobilidadeDTO> response = commandBus.send(command);
 

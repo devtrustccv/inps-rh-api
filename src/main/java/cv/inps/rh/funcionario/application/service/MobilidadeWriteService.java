@@ -118,7 +118,7 @@ public class MobilidadeWriteService {
 
   public MobilidadeDTO validarMobilidade(ValidarMobilidadeCommand command){
 
-    var idFunc = IdentificadorUnico.from(command.getId());
+    var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
 
     var mobilidadeDto = command.getMobilidade();
 

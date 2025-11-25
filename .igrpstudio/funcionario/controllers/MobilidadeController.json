@@ -90,7 +90,7 @@
     },
     {
       "actionName": "saveMobilidade",
-      "path": "mobilidades/{idFuncionario}",
+      "path": "{idFuncionario}/mobilidades",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -131,7 +131,7 @@
     },
     {
       "actionName": "validarMobilidade",
-      "path": "{id}/mobilidades/{mobilidadeId}",
+      "path": "{idFuncionario}/mobilidades/{mobilidadeId}",
       "method": "PUT",
       "requestBody": {
         "content": {
@@ -164,7 +164,7 @@
       },
       "pathVariables": [
         {
-          "name": "id",
+          "name": "idFuncionario",
           "type": "string",
           "isRequired": true
         },
@@ -176,5 +176,5 @@
       ]
     }
   ],
-  "id": "tunlfcyaeu-getListMobilidades-saveMobilidade"
+  "id": "tunlfcyaeu-getListMobilidades-saveMobilidade-saveMobilidade-validarMobilidade"
 }

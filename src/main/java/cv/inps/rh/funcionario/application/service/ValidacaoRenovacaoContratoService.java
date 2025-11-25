@@ -29,7 +29,7 @@ public class ValidacaoRenovacaoContratoService {
 
     var dto = command.getRenovacaocontrato();
 
-    var idFunc = IdentificadorUnico.from(command.getId());
+    var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.getValor());
 

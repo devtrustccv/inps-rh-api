@@ -14,8 +14,8 @@ public class ValidarSubstituicaoCommand implements Command {
 
   
   private SubstituicaoDTO substituicao;
-  @NotBlank(message = "The field <id> is required")
-  private String id;
+  @NotBlank(message = "The field <idFuncionario> is required")
+  private String idFuncionario;
   @NotBlank(message = "The field <substituicaoId> is required")
   private String substituicaoId;
 

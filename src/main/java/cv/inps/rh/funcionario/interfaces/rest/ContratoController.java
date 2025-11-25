@@ -43,8 +43,8 @@ public class ContratoController {
    value = "contratos"
   )
   @Operation(
-    summary = "GET method to handle operations for getListContratos",
-    description = "GET method to handle operations for getListContratos",
+    summary = "Get list contratos",
+    description = "Get list contratos",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -74,11 +74,11 @@ public class ContratoController {
   }
 
    @PostMapping(
-   value = "contratos/{idFuncionario}"
+   value = "{idFuncionario}/contratos"
   )
   @Operation(
-    summary = "POST method to handle operations for novoContrato",
-    description = "POST method to handle operations for novoContrato",
+    summary = "Novo contrato",
+    description = "Novo contrato",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -108,8 +108,8 @@ public class ContratoController {
    value = "{id}/contratos/{contratoId}"
   )
   @Operation(
-    summary = "GET method to handle operations for getContratoById",
-    description = "GET method to handle operations for getContratoById",
+    summary = "Get contrato by id",
+    description = "Get contrato by id",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -136,11 +136,11 @@ public class ContratoController {
   }
 
    @PostMapping(
-   value = "{id}/renovacao-contrato"
+   value = "{idFuncionario}/renovacao-contrato"
   )
   @Operation(
-    summary = "POST method to handle operations for renovarContrato",
-    description = "POST method to handle operations for renovarContrato",
+    summary = "Renovar contrato",
+    description = "Renovar contrato",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -156,10 +156,10 @@ public class ContratoController {
   )
   
   public ResponseEntity<RenovacaoContratoDTO> renovarContrato(@Valid @RequestBody RenovacaoContratoDTO renovarContratoRequest
-    , @PathVariable(value = "id") String id)
+    , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
-      final var command = new RenovarContratoCommand(renovarContratoRequest, id);
+      final var command = new RenovarContratoCommand(renovarContratoRequest, idFuncionario);
 
        ResponseEntity<RenovacaoContratoDTO> response = commandBus.send(command);
 
@@ -167,11 +167,11 @@ public class ContratoController {
   }
 
    @PutMapping(
-   value = "{id}/contratos/{contratoId}"
+   value = "{idFuncionario}/contratos/{contratoId}"
   )
   @Operation(
-    summary = "PUT method to handle operations for validarContrato",
-    description = "PUT method to handle operations for validarContrato",
+    summary = "Validar contrato",
+    description = "Validar contrato",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -187,10 +187,10 @@ public class ContratoController {
   )
   
   public ResponseEntity<DadosContratuaisRespDTO> validarContrato(@Valid @RequestBody NovoContratoDTO validarContratoRequest
-    , @PathVariable(value = "id") String id,@PathVariable(value = "contratoId") String contratoId)
+    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "contratoId") String contratoId)
   {
 
-      final var command = new ValidarContratoCommand(validarContratoRequest, id, contratoId);
+      final var command = new ValidarContratoCommand(validarContratoRequest, idFuncionario, contratoId);
 
        ResponseEntity<DadosContratuaisRespDTO> response = commandBus.send(command);
 
@@ -198,11 +198,11 @@ public class ContratoController {
   }
 
    @PostMapping(
-   value = "{id}/validar-renovacao-contrato"
+   value = "{idFuncionario}/validar-renovacao-contrato"
   )
   @Operation(
-    summary = "POST method to handle operations for validarRenovacaoContrato",
-    description = "POST method to handle operations for validarRenovacaoContrato",
+    summary = "Validar renovacao contrato",
+    description = "Validar renovacao contrato",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -218,10 +218,10 @@ public class ContratoController {
   )
   
   public ResponseEntity<RenovacaoContratoDTO> validarRenovacaoContrato(@Valid @RequestBody RenovacaoContratoDTO validarRenovacaoContratoRequest
-    , @PathVariable(value = "id") String id)
+    , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
-      final var command = new ValidarRenovacaoContratoCommand(validarRenovacaoContratoRequest, id);
+      final var command = new ValidarRenovacaoContratoCommand(validarRenovacaoContratoRequest, idFuncionario);
 
        ResponseEntity<RenovacaoContratoDTO> response = commandBus.send(command);
 

@@ -7,7 +7,7 @@
   "actions": [
     {
       "actionName": "registarSubstituicao",
-      "path": "substituicoes/{idFuncionario}",
+      "path": "{idFuncionario}/substituicoes",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -48,7 +48,7 @@
     },
     {
       "actionName": "validarSubstituicao",
-      "path": "{id}/substituicoes/{substituicaoId}",
+      "path": "{idFuncionario}/substituicoes/{substituicaoId}",
       "method": "PUT",
       "requestBody": {
         "content": {
@@ -81,7 +81,7 @@
       },
       "pathVariables": [
         {
-          "name": "id",
+          "name": "idFuncionario",
           "type": "string",
           "isRequired": true
         },
@@ -128,5 +128,5 @@
       ]
     }
   ],
-  "id": "alqrgnd0ly-registarSubstituicao-listaSubstituicao"
+  "id": "alqrgnd0ly-registarSubstituicao-listaSubstituicao-registarSubstituicao-validarSubstituicao"
 }

@@ -14,8 +14,8 @@ public class ValidarContratoCommand implements Command {
 
   
   private NovoContratoDTO novocontrato;
-  @NotBlank(message = "The field <id> is required")
-  private String id;
+  @NotBlank(message = "The field <idFuncionario> is required")
+  private String idFuncionario;
   @NotBlank(message = "The field <contratoId> is required")
   private String contratoId;
 
