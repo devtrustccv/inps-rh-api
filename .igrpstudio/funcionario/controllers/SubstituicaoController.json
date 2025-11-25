@@ -45,6 +45,52 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "validarSubstituicao",
+      "path": "{id}/substituicoes/{substituicaoId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "Substituicao",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Substituicao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "substituicaoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "alqrgnd0ly-registarSubstituicao"

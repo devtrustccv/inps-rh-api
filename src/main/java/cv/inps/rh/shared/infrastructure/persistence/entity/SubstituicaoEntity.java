@@ -10,6 +10,7 @@ import lombok.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.UUID;
+import cv.inps.rh.shared.application.constants.Estado;
 
 
 @Getter
@@ -56,6 +57,11 @@ public class SubstituicaoEntity extends AuditEntity {
   
     @Column(name="uuid")
     private UUID uuid;
+
+  
+    @Enumerated(EnumType.STRING)
+    @Column(name="estado")
+    private Estado estado;
 
   
 }

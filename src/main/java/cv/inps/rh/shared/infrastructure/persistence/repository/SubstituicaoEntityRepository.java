@@ -21,4 +21,5 @@ public interface SubstituicaoEntityRepository extends
           .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"SubstituicaoEntity not found for id: " + id));
       }
 
+    Optional<SubstituicaoEntity> findByUuid(UUID idSusbtituicao);
 }

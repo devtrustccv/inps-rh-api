@@ -63,4 +63,35 @@ public class SubstituicaoController {
        return response;
   }
 
+   @PutMapping(
+   value = "{id}/substituicoes/{substituicaoId}"
+  )
+  @Operation(
+    summary = "Validar substituicao",
+    description = "Validar substituicao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = SubstituicaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<SubstituicaoDTO> validarSubstituicao(@Valid @RequestBody SubstituicaoDTO validarSubstituicaoRequest
+    , @PathVariable(value = "id") String id,@PathVariable(value = "substituicaoId") String substituicaoId)
+  {
+
+      final var command = new ValidarSubstituicaoCommand(validarSubstituicaoRequest, id, substituicaoId);
+
+       ResponseEntity<SubstituicaoDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
 }
