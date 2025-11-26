@@ -129,6 +129,9 @@ public class ValidarRegistoColaboradorService {
     funcionarioEntity.setEstado(estado);
     funcionarioEntity.setEstadoValidacao(estado != null ? estado.name() : null);
 
+    var documentoPessoal = funcionarioEntity.getDocumentoPessoal();
+    if (documentoPessoal != null) documentoPessoal.setEstado(estado);
+
     var endereco = funcionarioEntity.getEndereco();
     if (endereco != null) endereco.setEstado(estado);
 

@@ -26,6 +26,10 @@ import cv.inps.rh.funcionario.application.dto.WrapperListaValidacoesDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaFuncionarioDTO;
 import java.util.Map;
 import cv.inps.rh.funcionario.application.dto.AtivarInativarColaboradorDTO;
+import cv.inps.rh.funcionario.application.dto.ValidacaoDadosPessoaisDTO;
+import cv.inps.rh.funcionario.application.dto.ValidarDadosAcademicosDTO;
+import cv.inps.rh.funcionario.application.dto.ValidarAgregadosDependentesDTO;
+import cv.inps.rh.funcionario.application.dto.ValidarDadosBancariosDTO;
 
 @IgrpController
 @RestController
@@ -44,8 +48,8 @@ public class FuncionarioController {
    @PostMapping(
   )
   @Operation(
-    summary = "POST method to handle operations for Create funcionario",
-    description = "POST method to handle operations for Create funcionario",
+    summary = "Create funcionario",
+    description = "Create funcionario",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -75,8 +79,8 @@ public class FuncionarioController {
    value = "{id}"
   )
   @Operation(
-    summary = "GET method to handle operations for Get funcionario by id",
-    description = "GET method to handle operations for Get funcionario by id",
+    summary = "Get funcionario by id",
+    description = "Get funcionario by id",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -106,8 +110,8 @@ public class FuncionarioController {
    value = "validacoes"
   )
   @Operation(
-    summary = "GET method to handle operations for Get valicoes utilizadores",
-    description = "GET method to handle operations for Get valicoes utilizadores",
+    summary = "Get valicoes utilizadores",
+    description = "Get valicoes utilizadores",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -142,8 +146,8 @@ public class FuncionarioController {
    @GetMapping(
   )
   @Operation(
-    summary = "GET method to handle operations for Get list funcionarios",
-    description = "GET method to handle operations for Get list funcionarios",
+    summary = "Get list funcionarios",
+    description = "Get list funcionarios",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -181,8 +185,8 @@ public class FuncionarioController {
    value = "{id}"
   )
   @Operation(
-    summary = "PUT method to handle operations for Validar registo colaborador",
-    description = "PUT method to handle operations for Validar registo colaborador",
+    summary = "Validar registo colaborador",
+    description = "Validar registo colaborador",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -212,8 +216,8 @@ public class FuncionarioController {
    value = "validacao-colaborador/{id}"
   )
   @Operation(
-    summary = "PATCH method to handle operations for Validacao colaborador",
-    description = "PATCH method to handle operations for Validacao colaborador",
+    summary = "Validacao colaborador",
+    description = "Validacao colaborador",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -243,8 +247,8 @@ public class FuncionarioController {
    value = "status/{id}"
   )
   @Operation(
-    summary = "PATCH method to handle operations for Inativar ativar colaborador",
-    description = "PATCH method to handle operations for Inativar ativar colaborador",
+    summary = "Inativar ativar colaborador",
+    description = "Inativar ativar colaborador",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -266,6 +270,130 @@ public class FuncionarioController {
       final var command = new InativarAtivarColaboradorCommand(inativarAtivarColaboradorRequest, id);
 
        ResponseEntity<AtivarInativarColaboradorDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
+   @PutMapping(
+   value = "{idFuncionario}/dados-pessoais"
+  )
+  @Operation(
+    summary = "Valida dados pessoais",
+    description = "Valida dados pessoais",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ValidacaoDadosPessoaisDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<ValidacaoDadosPessoaisDTO> validaDadosPessoais(@Valid @RequestBody ValidacaoDadosPessoaisDTO validaDadosPessoaisRequest
+    , @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var command = new ValidaDadosPessoaisCommand(validaDadosPessoaisRequest, idFuncionario);
+
+       ResponseEntity<ValidacaoDadosPessoaisDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
+   @PutMapping(
+   value = "{idFuncionario}/dados-academicos"
+  )
+  @Operation(
+    summary = "Validar dados academicos",
+    description = "Validar dados academicos",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ValidarDadosAcademicosDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<ValidarDadosAcademicosDTO> validarDadosAcademicos(@Valid @RequestBody ValidarDadosAcademicosDTO validarDadosAcademicosRequest
+    , @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var command = new ValidarDadosAcademicosCommand(validarDadosAcademicosRequest, idFuncionario);
+
+       ResponseEntity<ValidarDadosAcademicosDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
+   @PutMapping(
+   value = "{idFuncionario}/familiares"
+  )
+  @Operation(
+    summary = "Validar dados familiares",
+    description = "Validar dados familiares",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ValidarAgregadosDependentesDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<ValidarAgregadosDependentesDTO> validarDadosFamiliares(@Valid @RequestBody ValidarAgregadosDependentesDTO validarDadosFamiliaresRequest
+    , @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var command = new ValidarDadosFamiliaresCommand(validarDadosFamiliaresRequest, idFuncionario);
+
+       ResponseEntity<ValidarAgregadosDependentesDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
+   @PutMapping(
+   value = "{idFuncionario}/dados-bancarios"
+  )
+  @Operation(
+    summary = "Validar dados bancarios",
+    description = "Validar dados bancarios",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ValidarDadosBancariosDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<ValidarDadosBancariosDTO> validarDadosBancarios(@Valid @RequestBody ValidarDadosBancariosDTO validarDadosBancariosRequest
+    , @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var command = new ValidarDadosBancariosCommand(validarDadosBancariosRequest, idFuncionario);
+
+       ResponseEntity<ValidarDadosBancariosDTO> response = commandBus.send(command);
 
        return response;
   }
