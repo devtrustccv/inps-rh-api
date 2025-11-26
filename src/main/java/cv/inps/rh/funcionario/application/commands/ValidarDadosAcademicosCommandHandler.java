@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.funcionario.application.service.ValidarDadosAcademicosService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -14,14 +15,17 @@ public class ValidarDadosAcademicosCommandHandler implements CommandHandler<Vali
 
    private static final Logger LOGGER = LoggerFactory.getLogger(ValidarDadosAcademicosCommandHandler.class);
 
-   public ValidarDadosAcademicosCommandHandler() {
+   private final ValidarDadosAcademicosService validarDadosAcademicosService;
 
+   public ValidarDadosAcademicosCommandHandler(ValidarDadosAcademicosService validarDadosAcademicosService) {
+
+     this.validarDadosAcademicosService = validarDadosAcademicosService;
    }
 
    @IgrpCommandHandler
    public ResponseEntity<ValidarDadosAcademicosDTO> handle(ValidarDadosAcademicosCommand command) {
-      // TODO: Implement the command handling logic here
-      return null;
+      LOGGER.info("ValidarDadosAcademicosCommandHandler.handle: {}", command);
+      return ResponseEntity.ok(validarDadosAcademicosService.executar(command));
    }
 
 }
