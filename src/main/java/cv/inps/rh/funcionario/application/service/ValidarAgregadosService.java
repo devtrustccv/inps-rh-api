@@ -1,11 +1,11 @@
 package cv.inps.rh.funcionario.application.service;
 
-import cv.inps.rh.funcionario.application.commands.ValidaDadosPessoaisCommand;
-import cv.inps.rh.funcionario.application.commands.ValidarDadosAcademicosCommand;
-import cv.inps.rh.funcionario.application.dto.ValidacaoDadosPessoaisDTO;
-import cv.inps.rh.funcionario.application.dto.ValidarDadosAcademicosDTO;
+import cv.inps.rh.funcionario.application.commands.ValidarDadosFamiliaresCommand;
+import cv.inps.rh.funcionario.application.dto.ValidarAgregadosDependentesDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
-import cv.inps.rh.funcionario.infrastructure.mappers.*;
+import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
+import cv.inps.rh.funcionario.infrastructure.mappers.FamiliarMapper;
+import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -19,29 +19,26 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class ValidarDadosAcademicosService {
-
+public class ValidarAgregadosService {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final FuncionarioMapper funcionarioMapper;
   private final FuncionarioRules funcionarioRules;
   private final DadosContratuaisMapper contratuaisEntityMapper;
   private final ValidacaoEntityRepository validacaoEntityRepository;
-  private final HabilitacaoLiterariaMapper habilitacaoLiterariaMapper;
-  private final FormacaoFeitaMapper formacaoFeitaMapper;
-  private final ExperienciaProfissionalMapper experienciaProfissionalMapper;
+  private final FamiliarMapper familiarMapper;
 
   @Transactional
-  public ValidarDadosAcademicosDTO executar(ValidarDadosAcademicosCommand command) {
+  public ValidarAgregadosDependentesDTO executar(ValidarDadosFamiliaresCommand command) {
 
-    var dto = command.getValidardadosacademicos();
-    var dadosAcademicosProfReqDTO = dto.getDadosAcademicosProf();
+    var dto = command.getValidaragregadosdependentes();
+    var agregadoDependenteReqDTO = dto.getFamiliares();
     var estadoValidacao = dto.getValidar();
 
     var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).getValor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
-    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario, "UPDATE", "DADOS_ACADEMICOS");
+    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario, "UPDATE", "FAMILIA");
 
     // 1) Se tem pendentes mas não enviou validar → erro
     if (temPendentes && estadoValidacao == null) {
@@ -50,14 +47,8 @@ public class ValidarDadosAcademicosService {
       );
     }
 
-
-    var habilitacoesLiterarias = habilitacaoLiterariaMapper.syncHabilitacoes(funcionario.getHabilitacoesLiterarias(), dadosAcademicosProfReqDTO.getHabilitacoesLiterarias());
-    var formacoesFeitas = formacaoFeitaMapper.syncFormacoes(funcionario.getFormacoesFeitas(), dadosAcademicosProfReqDTO.getFormacoesFeitas());
-    var experienciasProfissionais = experienciaProfissionalMapper.syncExperiencias(funcionario.getExperienciasProfissionais(), dadosAcademicosProfReqDTO.getExperienciasProfssionais());
-
-    funcionario.setHabilitacoesLiterarias(habilitacoesLiterarias);
-    funcionario.setFormacoesFeitas(formacoesFeitas);
-    funcionario.setExperienciasProfissionais(experienciasProfissionais);
+    var familiares = familiarMapper.syncFamiliares(funcionario.getFamiliares(), agregadoDependenteReqDTO);
+    funcionario.setFamiliares(familiares);
 
     if (temPendentes) {
 
@@ -74,7 +65,7 @@ public class ValidarDadosAcademicosService {
     var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
 
     var validacao = contratuaisEntityMapper
-        .toValidacaoInsert("UPDATE", "DADOS_ACADEMICOS", Estado.P);
+        .toValidacaoInsert("UPDATE", "FAMILIA", Estado.P);
 
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRel);
@@ -91,25 +82,20 @@ public class ValidarDadosAcademicosService {
 
     return dto;
 
+
   }
 
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado novoEstado) {
+    if (funcionarioEntity == null) return;
 
-    var habilitacoes = funcionarioEntity.getHabilitacoesLiterarias();
-    if (habilitacoes != null) habilitacoes.forEach(h -> { if (h != null) h.setEstado(novoEstado); });
-
-    var formacoes = funcionarioEntity.getFormacoesFeitas();
-    if (formacoes != null) formacoes.forEach(f -> { if (f != null) f.setEstado(novoEstado); });
-
-    var experiencias = funcionarioEntity.getExperienciasProfissionais();
-    if (experiencias != null) experiencias.forEach(e -> { if (e != null) e.setEstado(novoEstado); });
+    var familiares = funcionarioEntity.getFamiliares();
+    if (familiares != null) familiares.forEach(f -> { if (f != null) f.setEstado(novoEstado); });
 
     funcionarioEntity.getValidacoes().stream()
         .filter(v -> v.getEstado() == Estado.P)
-        .filter(v -> "DADOS_ACADEMICOS".equals(v.getReferenciaName()) && "UPDATE".equals(v.getTipoAccao()))
+        .filter(v -> "FAMILIA".equals(v.getReferenciaName()) && "UPDATE".equals(v.getTipoAccao()))
         .findFirst()
         .ifPresent(v -> v.setEstado(novoEstado));
-
 
   }
 }

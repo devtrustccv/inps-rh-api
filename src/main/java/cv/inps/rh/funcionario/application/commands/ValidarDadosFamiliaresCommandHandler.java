@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.funcionario.application.service.ValidarAgregadosService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -14,14 +15,16 @@ public class ValidarDadosFamiliaresCommandHandler implements CommandHandler<Vali
 
    private static final Logger LOGGER = LoggerFactory.getLogger(ValidarDadosFamiliaresCommandHandler.class);
 
-   public ValidarDadosFamiliaresCommandHandler() {
+   private final ValidarAgregadosService validarAgregadosService;
+   public ValidarDadosFamiliaresCommandHandler(ValidarAgregadosService validarAgregadosService) {
 
+     this.validarAgregadosService = validarAgregadosService;
    }
 
    @IgrpCommandHandler
    public ResponseEntity<ValidarAgregadosDependentesDTO> handle(ValidarDadosFamiliaresCommand command) {
-      // TODO: Implement the command handling logic here
-      return null;
+      LOGGER.info("Handling validar dados familiares command with request: {}", command);
+      return ResponseEntity.ok(validarAgregadosService.executar(command));
    }
 
 }

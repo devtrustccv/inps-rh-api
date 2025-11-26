@@ -29,7 +29,8 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false,
-      "module": "funcionario"
+      "module": "funcionario",
+      "collectionType": "list"
     }
   ],
   "id": "m5e8os4da6"

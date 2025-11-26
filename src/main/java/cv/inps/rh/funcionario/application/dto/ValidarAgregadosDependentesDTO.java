@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import cv.inps.rh.funcionario.application.dto.AgregadoDependenteReqDTO;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -25,6 +27,6 @@ public class ValidarAgregadosDependentesDTO  {
   private EstadoValidacao validar ;
   
   @Valid
-  private AgregadoDependenteReqDTO familiares ;
+  private List<AgregadoDependenteReqDTO> familiares = new ArrayList<>();
 
 }
