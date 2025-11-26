@@ -211,6 +211,7 @@ public class RegistarColaboradorService {
     var valid = contratuaisEntityMapper.toValidacaoInsert("INSERT", "REGISTO_COLABORADOR", Estado.P); //todo resolve id later
     valid.setFunId(fun);
     valid.setTiprelId(tr);
+    valid.setReferenciaId(1L);
     fun.setValidacoes(java.util.List.of(valid));
 
 

@@ -19,38 +19,44 @@ import lombok.AllArgsConstructor;
 @IgrpDTO
 public class ContratoListDTO  {
 
-  
-  
+
+
   private Long id ;
-  
-  
+
+
   private String uuid ;
-  
-  
+
+
   private Long funcionarioId ;
-  
-  
+
+
   private String uuidFuncionario ;
-  
-  
+
+
   private String situacao ;
-  
-  
+
+
   private String tipoVinculo ;
-  
-  
+
+
   private String dataInicio ;
-  
-  
+
+
   private String dataFim ;
-  
-  
+
+
   private String duracao ;
-  
-  
+
+
   private String estado ;
-  
-  
+
+
   private String estadoDesc ;
+
+  private Integer versao;
+
+  private boolean inicial;
+
+  private boolean atual;
 
 }

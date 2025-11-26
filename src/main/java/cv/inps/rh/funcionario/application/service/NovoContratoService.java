@@ -139,7 +139,7 @@ public class NovoContratoService {
     var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","CONTRATO", Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(tr);
-    //valid.setReferenciaId(1L); //todo resolve id later
+    valid.setReferenciaId(1L); //todo resolve id later
     funcionario.getValidacoes().add(valid);
 
     FuncionarioEntity saved = funcionarioEntityRepository.save(funcionario);

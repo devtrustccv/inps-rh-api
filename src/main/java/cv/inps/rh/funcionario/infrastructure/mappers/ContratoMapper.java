@@ -39,6 +39,9 @@ public class ContratoMapper {
     dto.setDuracao(contrato.getDuracao() != null ? contrato.getDuracao().toString() : null);
     dto.setEstado(contrato.getEstado() != null ? contrato.getEstado().name() : null);
     dto.setEstadoDesc(contrato.getEstado() != null ? contrato.getEstado().getDescription() : null);
+    dto.setVersao(contrato.getVersao());
+    dto.setInicial(contrato.getVersao() == 1);
+    dto.setAtual(contrato.getEstado() == Estado.A);
 
     return dto;
   }

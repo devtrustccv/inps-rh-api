@@ -84,6 +84,7 @@ public class RegimeWriteService {
     var validacao = dadosContratuaisMapper.toValidacaoInsert("INSERT", "REGIME", Estado.P);
     validacao.setFunId(funcionario);
     validacao.setTiprelId(novoTipoRelacionamento);
+    validacao.setReferenciaId(1L);
     funcionario.getValidacoes().add(validacao);
 
     // Salvar tudo (cascade)
