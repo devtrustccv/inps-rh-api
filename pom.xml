@@ -5,14 +5,14 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.7</version>
+        <version>3.5.8</version>
         <relativePath/>
     </parent>
     <groupId>cv.inps</groupId>
     <artifactId>rh-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>RHINPSSERVICE</name>
-    <description></description>
+    <description>RH INPS Service</description>
     <url/>
     <licenses>
         <license/>
@@ -69,8 +69,6 @@
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-jpamodelgen</artifactId>
-            <version>6.6.29.Final</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -87,12 +85,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -124,11 +116,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
         </dependency>
@@ -157,7 +144,6 @@
             <artifactId>uuid-creator</artifactId>
             <version>6.1.1</version>
         </dependency>
-
 
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
@@ -213,7 +199,6 @@
                         <path>
                             <groupId>org.hibernate.orm</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
-                            <version>6.6.29.Final</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

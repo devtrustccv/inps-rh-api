@@ -1,0 +1,62 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "NovoPagamentoRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "NovoRemuneracaoRequest",
+    "module": "funcionario"
+  },
+  "attributes": [
+    {
+      "name": "entidade",
+      "objectType": "java",
+      "type": "string",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "nif",
+      "objectType": "java",
+      "type": "integer",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "banco",
+      "objectType": "java",
+      "type": "string",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "nib",
+      "objectType": "java",
+      "type": "string",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "4gi98dqou5"
+}
