@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 
 @Repository
@@ -54,6 +56,13 @@ public interface DefinicaoRemuneracaoEntityRepository extends
   );
 
   List<DefinicaoRemuneracaoEntity> findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity fun, Estado estado);
+
+
+  Optional<DefinicaoRemuneracaoEntity> findByUuid(UUID uuid);
+
+  default DefinicaoRemuneracaoEntity findByUuidOrThrow(UUID uuid) {
+    return this.findByUuid(uuid).orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "DefinicaoRemuneracaoEntity not found for id: " + uuid));
+  }
 
 
 

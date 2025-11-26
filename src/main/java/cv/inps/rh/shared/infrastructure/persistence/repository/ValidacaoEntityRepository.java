@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 
 @Repository
@@ -53,6 +55,11 @@ public interface ValidacaoEntityRepository extends
       @Param("endRow") int endRow
   );
 
-
   ValidacaoEntity findByTiprelIdAndEstadoAndReferenciaName(TiposRelacionamentoEntity relacionamento, Estado estado, String referenciaName);
+
+  Optional<ValidacaoEntity> findByUuid(UUID uuid);
+
+  default ValidacaoEntity findByUuidOrThrow(UUID uuid) {
+    return this.findByUuid(uuid).orElseThrow(() -> IgrpResponseStatusException.notFound("ValidacaoEntity not found for id: " + uuid));
+  }
 }

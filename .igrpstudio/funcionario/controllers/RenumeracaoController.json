@@ -62,7 +62,7 @@
     },
     {
       "actionName": "AdicionarNovoRemuneracao",
-      "path": "{funcionarioId}",
+      "path": "{funcionarioId}/remuneracao",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -101,7 +101,7 @@
     },
     {
       "actionName": "adicionarNovoPagamento",
-      "path": "{funcionarioId}",
+      "path": "{funcionarioId}/pagamento",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -137,7 +137,71 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "validarNovoRemuneracao",
+      "path": "validar-remuneracao",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ValidarRemuneracaoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "validarNovoPagamento",
+      "path": "validar-pagamento",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ValidarPagamentoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
     }
   ],
-  "id": "ixh1ofde84-getListAbonosSubsidios-getListAbonosSubsidios-getListRenumeracoes-getListRenumeracoes"
+  "id": "ixh1ofde84-getListAbonosSubsidios-getListAbonosSubsidios-getListRenumeracoes-getListRenumeracoes-validarNovoRemuneracao-AdicionarNovoRemuneracao-adicionarNovoPagamento-validarNovoRemuneracao-validarNovoRemuneracaoCopy"
 }

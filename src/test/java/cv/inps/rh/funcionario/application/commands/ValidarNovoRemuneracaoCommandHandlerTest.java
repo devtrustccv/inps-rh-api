@@ -7,10 +7,10 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class RegistarSubstituicaoCommandHandlerTest {
+public class ValidarNovoRemuneracaoCommandHandlerTest {
 
     @InjectMocks
-    private RegistarSubstituicaoCommandHandler registarSubstituicaoCommandHandler;
+    private ValidarNovoRemuneracaoCommandHandler validarNovoRemuneracaoCommandHandler;
 
     @BeforeEach
     void setUp() {
@@ -22,10 +22,10 @@ public class RegistarSubstituicaoCommandHandlerTest {
         // TODO: Implement unit test for handle method
         // Example:
         // Given
-        // RegistarSubstituicaoCommand command = new RegistarSubstituicaoCommand(...);
+        // ValidarNovoRemuneracaoCommand command = new ValidarNovoRemuneracaoCommand(...);
         //
         // When
-        // ResponseEntity<SubstituicaoDTO> response = registarSubstituicaoCommandHandler.handle(command);
+        // ResponseEntity<String> response = validarNovoRemuneracaoCommandHandler.handle(command);
         //
         // Then
         // assertNotNull(response);

@@ -1,6 +1,8 @@
 package cv.inps.rh.funcionario.application.service.remuneracao;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.funcionario.application.commands.ValidarNovoPagamentoCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarNovoRemuneracaoCommand;
 import cv.inps.rh.funcionario.application.dto.NovoPagamentoRequestDTO;
 import cv.inps.rh.funcionario.application.dto.NovoRemuneracaoRequestDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
@@ -12,6 +14,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.DefPagamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,8 +40,8 @@ public class RenumeracoesWriteService {
     var remuneracao = new DefinicaoRemuneracaoEntity();
     remuneracao.setPercentagem(request.getPercentagem());
     remuneracao.setValor(request.getValor());
-    remuneracao.setEstado(Estado.P);
     remuneracao.setObs(request.getObservacao());
+    remuneracao.setEstado(Estado.P);
     remuneracao.setUuid(UuidCreator.getTimeOrderedEpoch());
     remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(request.getMovimentoId())));
     remuneracao.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
@@ -88,5 +91,55 @@ public class RenumeracoesWriteService {
     validacaoEntityRepository.save(validation);
   }
 
+  public void validarNovoRemuneracao(ValidarNovoRemuneracaoCommand command) {
 
+    var data = command.getValidarremuneracaorequest();
+    var request = data.getDados();
+
+    ValidationUtil.validateDecision(data.getValidacao());
+
+    var estado = data.getValidacao().equals("S") ? Estado.A : Estado.I;
+
+    var remuneracao = definicaoRemuneracaoEntityRepository.findByUuidOrThrow(UUID.fromString(data.getRemuneracaoId()));
+    remuneracao.setValor(request.getValor());
+    remuneracao.setPercentagem(request.getPercentagem());
+    remuneracao.setObs(request.getObservacao());
+    remuneracao.setEstado(estado);
+    remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(request.getMovimentoId())));
+    remuneracao.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
+    remuneracao.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
+    definicaoRemuneracaoEntityRepository.save(remuneracao);
+
+    var validation = validacaoEntityRepository.findByUuidOrThrow(UUID.fromString(data.getValidacaoId()));
+    validation.setEstado(estado);
+    validacaoEntityRepository.save(validation);
+  }
+
+  public void validarNovoPagamento(ValidarNovoPagamentoCommand command) {
+
+    var data = command.getValidarpagamentorequest();
+    var request = data.getDados();
+
+    ValidationUtil.validateDecision(data.getValidacao());
+
+    var estado = data.getValidacao().equals("S") ? Estado.A : Estado.I;
+
+    var pagamento = defPagamentoEntityRepository.findByUuidOrThrow(UUID.fromString(data.getPagamentoId()));
+    pagamento.setPercentagem(request.getPercentagem());
+    pagamento.setValor(request.getValor());
+    pagamento.setEstado(estado);
+    pagamento.setObs(request.getObservacao());
+    pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(request.getMovimentoId())));
+    pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
+    pagamento.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
+    pagamento.setNib(request.getNib());
+    pagamento.setBanco(request.getBanco());
+    pagamento.setNif(request.getNif());
+    pagamento.setEntidade(request.getEntidade());
+    defPagamentoEntityRepository.save(pagamento);
+
+    var validation = validacaoEntityRepository.findByUuidOrThrow(UUID.fromString(data.getValidacaoId()));
+    validation.setEstado(estado);
+    validacaoEntityRepository.save(validation);
+  }
 }
