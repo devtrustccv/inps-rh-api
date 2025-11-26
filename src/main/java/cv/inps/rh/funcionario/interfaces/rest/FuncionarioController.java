@@ -30,6 +30,10 @@ import cv.inps.rh.funcionario.application.dto.ValidacaoDadosPessoaisDTO;
 import cv.inps.rh.funcionario.application.dto.ValidarDadosAcademicosDTO;
 import cv.inps.rh.funcionario.application.dto.ValidarAgregadosDependentesDTO;
 import cv.inps.rh.funcionario.application.dto.ValidarDadosBancariosDTO;
+import cv.inps.rh.funcionario.application.dto.DadosPessoaisRespDTO;
+import cv.inps.rh.funcionario.application.dto.DadosAcademicosProfResponseDTO;
+import cv.inps.rh.funcionario.application.dto.AgregadoDependenteRespDTO;
+import cv.inps.rh.funcionario.application.dto.DadosBancariosRespDTO;
 
 @IgrpController
 @RestController
@@ -396,6 +400,130 @@ public class FuncionarioController {
        ResponseEntity<ValidarDadosBancariosDTO> response = commandBus.send(command);
 
        return response;
+  }
+
+   @GetMapping(
+   value = "{idFuncionario}/dados-pessoais"
+  )
+  @Operation(
+    summary = "Get dados pessoais",
+    description = "Get dados pessoais",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DadosPessoaisRespDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<DadosPessoaisRespDTO> getDadosPessoais(
+    @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var query = new GetDadosPessoaisQuery(idFuncionario);
+
+      ResponseEntity<DadosPessoaisRespDTO> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @GetMapping(
+   value = "{idFuncionario}/dados-academicos"
+  )
+  @Operation(
+    summary = "Get dados academicos",
+    description = "Get dados academicos",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DadosAcademicosProfResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<DadosAcademicosProfResponseDTO> getDadosAcademicos(
+    @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var query = new GetDadosAcademicosQuery(idFuncionario);
+
+      ResponseEntity<DadosAcademicosProfResponseDTO> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @GetMapping(
+   value = "{idFuncionario}/familiares"
+  )
+  @Operation(
+    summary = "Get dados familiares",
+    description = "Get dados familiares",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = AgregadoDependenteRespDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<AgregadoDependenteRespDTO> getDadosFamiliares(
+    @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var query = new GetDadosFamiliaresQuery(idFuncionario);
+
+      ResponseEntity<AgregadoDependenteRespDTO> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @GetMapping(
+   value = "{idFuncionario}/dados-bancarios"
+  )
+  @Operation(
+    summary = "Get dados bancarios",
+    description = "Get dados bancarios",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DadosBancariosRespDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<DadosBancariosRespDTO> getDadosBancarios(
+    @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var query = new GetDadosBancariosQuery(idFuncionario);
+
+      ResponseEntity<DadosBancariosRespDTO> response = queryBus.handle(query);
+
+      return response;
   }
 
 }
