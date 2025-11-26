@@ -136,7 +136,7 @@ public class ContratoController {
   }
 
    @PostMapping(
-   value = "{idFuncionario}/renovacao-contrato"
+   value = "{idFuncionario}/renovacao-contrato/{contratoId}"
   )
   @Operation(
     summary = "Renovar contrato",
@@ -156,10 +156,10 @@ public class ContratoController {
   )
   
   public ResponseEntity<RenovacaoContratoDTO> renovarContrato(@Valid @RequestBody RenovacaoContratoDTO renovarContratoRequest
-    , @PathVariable(value = "idFuncionario") String idFuncionario)
+    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "contratoId") String contratoId)
   {
 
-      final var command = new RenovarContratoCommand(renovarContratoRequest, idFuncionario);
+      final var command = new RenovarContratoCommand(renovarContratoRequest, idFuncionario, contratoId);
 
        ResponseEntity<RenovacaoContratoDTO> response = commandBus.send(command);
 
@@ -198,7 +198,7 @@ public class ContratoController {
   }
 
    @PostMapping(
-   value = "{idFuncionario}/validar-renovacao-contrato"
+   value = "{idFuncionario}/validar-renovacao-contrato/{contratoId}"
   )
   @Operation(
     summary = "Validar renovacao contrato",
@@ -218,10 +218,10 @@ public class ContratoController {
   )
   
   public ResponseEntity<RenovacaoContratoDTO> validarRenovacaoContrato(@Valid @RequestBody RenovacaoContratoDTO validarRenovacaoContratoRequest
-    , @PathVariable(value = "idFuncionario") String idFuncionario)
+    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "contratoId") String contratoId)
   {
 
-      final var command = new ValidarRenovacaoContratoCommand(validarRenovacaoContratoRequest, idFuncionario);
+      final var command = new ValidarRenovacaoContratoCommand(validarRenovacaoContratoRequest, idFuncionario, contratoId);
 
        ResponseEntity<RenovacaoContratoDTO> response = commandBus.send(command);
 
