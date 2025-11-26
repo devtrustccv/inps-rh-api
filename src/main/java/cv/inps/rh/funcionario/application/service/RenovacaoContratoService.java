@@ -43,6 +43,10 @@ public class RenovacaoContratoService {
     if (contratoAtual == null)
       throw IgrpResponseStatusException.notFound("Funcionario com id '%s' não possui contrato ativo".formatted(idFunc));
 
+    var validacaoPendente = funcionarioRules.temValidacaoPendente(funcionario, "INSERT", "RENOVACAO_CONTRATO");
+    if (validacaoPendente)
+      throw IgrpResponseStatusException.conflict("Funcionario com id '%s' possui uma validação pendente de renovação de contrato".formatted(idFunc));
+
     var novoContrato = contratoMapper.toRenovarContrato(dto.getDadosRenovacao(), Estado.P);
     novoContrato.setContratoId(contratoPai);
     novoContrato.setVersao(contratoAtual.getVersao() + 1);
