@@ -8,9 +8,9 @@ import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.funcionario.application.commands.AdicionarNovoPagamentoCommand;
 import cv.inps.rh.funcionario.application.commands.AdicionarNovoRemuneracaoCommand;
-import cv.inps.rh.funcionario.application.dto.NovoPagamentoRequestDTO;
-import cv.inps.rh.funcionario.application.dto.NovoRemuneracaoRequestDTO;
-import cv.inps.rh.funcionario.application.dto.WrapperListRenumeracaoDTO;
+import cv.inps.rh.funcionario.application.commands.ValidarNovoPagamentoCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarNovoRemuneracaoCommand;
+import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.application.queries.GetListRenumeracoesQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -72,7 +72,7 @@ public class RenumeracaoController {
   }
 
    @PostMapping(
-   value = "{funcionarioId}"
+   value = "{funcionarioId}/remuneracao"
   )
   @Operation(
     summary = "Adicionar novo remuneracao",
@@ -103,7 +103,7 @@ public class RenumeracaoController {
   }
 
    @PostMapping(
-   value = "{funcionarioId}"
+   value = "{funcionarioId}/pagamento"
   )
   @Operation(
     summary = "Adicionar novo pagamento",
@@ -127,6 +127,68 @@ public class RenumeracaoController {
   {
 
       final var command = new AdicionarNovoPagamentoCommand(adicionarNovoPagamentoRequest, funcionarioId);
+
+       ResponseEntity<String> response = commandBus.send(command);
+
+       return response;
+  }
+
+   @PostMapping(
+   value = "validar-remuneracao"
+  )
+  @Operation(
+    summary = "Validar novo remuneracao",
+    description = "Validar novo remuneracao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> validarNovoRemuneracao(@Valid @RequestBody ValidarRemuneracaoRequestDTO validarNovoRemuneracaoRequest
+    )
+  {
+
+      final var command = new ValidarNovoRemuneracaoCommand(validarNovoRemuneracaoRequest);
+
+       ResponseEntity<String> response = commandBus.send(command);
+
+       return response;
+  }
+
+   @PostMapping(
+   value = "validar-pagamento"
+  )
+  @Operation(
+    summary = "Validar novo pagamento",
+    description = "Validar novo pagamento",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> validarNovoPagamento(@Valid @RequestBody ValidarPagamentoRequestDTO validarNovoPagamentoRequest
+    )
+  {
+
+      final var command = new ValidarNovoPagamentoCommand(validarNovoPagamentoRequest);
 
        ResponseEntity<String> response = commandBus.send(command);
 

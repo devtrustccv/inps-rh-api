@@ -7,25 +7,25 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class RegistarSubstituicaoCommandHandlerTest {
+public class ValidarNovoPagamentoCommandHandlerTest {
 
     @InjectMocks
-    private RegistarSubstituicaoCommandHandler registarSubstituicaoCommandHandler;
+    private ValidarNovoPagamentoCommandHandler validarNovoPagamentoCommandHandler;
 
     @BeforeEach
     void setUp() {
-      // TODO: initialize mock dependencies if needed
+
     }
 
     @Test
     void testHandle() {
-        // TODO: Implement unit test for handle method
+
         // Example:
         // Given
-        // RegistarSubstituicaoCommand command = new RegistarSubstituicaoCommand(...);
+        // ValidarNovoPagamentoCommand command = new ValidarNovoPagamentoCommand(...);
         //
         // When
-        // ResponseEntity<SubstituicaoDTO> response = registarSubstituicaoCommandHandler.handle(command);
+        // ResponseEntity<String> response = validarNovoPagamentoCommandHandler.handle(command);
         //
         // Then
         // assertNotNull(response);
