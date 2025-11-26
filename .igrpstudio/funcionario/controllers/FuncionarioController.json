@@ -315,7 +315,48 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "validaDadosPessoais",
+      "path": "{idFuncionario}/dados-pessoais",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ValidacaoDadosPessoais",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ValidacaoDadosPessoais",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "69p09wi4e0-criarFuncionario-validarRegistoColaborador-createFuncionario-validarRegistoColaborador-createFuncionario-getFuncionarioById-createFuncionario-validarRegistoColaborador-mudarEstadoColaborador"
+  "id": "69p09wi4e0-criarFuncionario-validarRegistoColaborador-createFuncionario-validarRegistoColaborador-createFuncionario-getFuncionarioById-createFuncionario-validarRegistoColaborador-mudarEstadoColaborador-validaDadosPessoais"
 }

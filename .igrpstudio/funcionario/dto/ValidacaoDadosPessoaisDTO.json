@@ -1,0 +1,36 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "ValidacaoDadosPessoais",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "validar",
+      "objectType": "enum",
+      "type": "EstadoValidacao",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "shared"
+    },
+    {
+      "name": "dadosPessoais",
+      "objectType": "dto",
+      "type": "DadosPessoaisReq",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "funcionario"
+    }
+  ],
+  "id": "kcdo0491wz"
+}
