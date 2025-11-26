@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.application.queries;
 
+import cv.inps.rh.funcionario.application.service.FamiliaresReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -10,20 +11,24 @@ import org.springframework.stereotype.Component;
 
 import cv.inps.rh.funcionario.application.dto.AgregadoDependenteRespDTO;
 
+import java.util.List;
+
 @Component
-public class GetDadosFamiliaresQueryHandler implements QueryHandler<GetDadosFamiliaresQuery, ResponseEntity<AgregadoDependenteRespDTO>>{
+public class GetDadosFamiliaresQueryHandler implements QueryHandler<GetDadosFamiliaresQuery, ResponseEntity<List<AgregadoDependenteRespDTO>>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetDadosFamiliaresQueryHandler.class);
 
+  private final FamiliaresReadService familiaresReadService;
 
-  public GetDadosFamiliaresQueryHandler() {
+  public GetDadosFamiliaresQueryHandler(FamiliaresReadService familiaresReadService) {
 
+    this.familiaresReadService = familiaresReadService;
   }
 
    @IgrpQueryHandler
-  public ResponseEntity<AgregadoDependenteRespDTO> handle(GetDadosFamiliaresQuery query) {
-    // TODO: Implement the query handling logic here
-    return null;
+  public ResponseEntity<List<AgregadoDependenteRespDTO>> handle(GetDadosFamiliaresQuery query) {
+
+    return ResponseEntity.ok(familiaresReadService.getFamiliares(query));
   }
 
 }

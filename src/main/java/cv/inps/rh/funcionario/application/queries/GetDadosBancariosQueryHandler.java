@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.application.queries;
 
+import cv.inps.rh.funcionario.application.service.DadosBancariosReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -10,20 +11,24 @@ import org.springframework.stereotype.Component;
 
 import cv.inps.rh.funcionario.application.dto.DadosBancariosRespDTO;
 
+import java.util.List;
+
 @Component
-public class GetDadosBancariosQueryHandler implements QueryHandler<GetDadosBancariosQuery, ResponseEntity<DadosBancariosRespDTO>>{
+public class GetDadosBancariosQueryHandler implements QueryHandler<GetDadosBancariosQuery, ResponseEntity<List<DadosBancariosRespDTO>>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetDadosBancariosQueryHandler.class);
 
+  private final DadosBancariosReadService dadosBancariosReadService;
 
-  public GetDadosBancariosQueryHandler() {
+  public GetDadosBancariosQueryHandler(DadosBancariosReadService dadosBancariosReadService) {
 
+    this.dadosBancariosReadService = dadosBancariosReadService;
   }
 
    @IgrpQueryHandler
-  public ResponseEntity<DadosBancariosRespDTO> handle(GetDadosBancariosQuery query) {
-    // TODO: Implement the query handling logic here
-    return null;
+  public ResponseEntity<List<DadosBancariosRespDTO>> handle(GetDadosBancariosQuery query) {
+
+    return ResponseEntity.ok(dadosBancariosReadService.getDadosBancarios(query));
   }
 
 }

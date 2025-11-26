@@ -32,6 +32,7 @@ import cv.inps.rh.funcionario.application.dto.ValidarAgregadosDependentesDTO;
 import cv.inps.rh.funcionario.application.dto.ValidarDadosBancariosDTO;
 import cv.inps.rh.funcionario.application.dto.DadosPessoaisRespDTO;
 import cv.inps.rh.funcionario.application.dto.DadosAcademicosProfResponseDTO;
+import java.util.List;
 import cv.inps.rh.funcionario.application.dto.AgregadoDependenteRespDTO;
 import cv.inps.rh.funcionario.application.dto.DadosBancariosRespDTO;
 
@@ -484,13 +485,13 @@ public class FuncionarioController {
     }
   )
   
-  public ResponseEntity<AgregadoDependenteRespDTO> getDadosFamiliares(
+  public ResponseEntity<List<AgregadoDependenteRespDTO>> getDadosFamiliares(
     @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
       final var query = new GetDadosFamiliaresQuery(idFuncionario);
 
-      ResponseEntity<AgregadoDependenteRespDTO> response = queryBus.handle(query);
+      ResponseEntity<List<AgregadoDependenteRespDTO>> response = queryBus.handle(query);
 
       return response;
   }
@@ -515,13 +516,13 @@ public class FuncionarioController {
     }
   )
   
-  public ResponseEntity<DadosBancariosRespDTO> getDadosBancarios(
+  public ResponseEntity<List<DadosBancariosRespDTO>> getDadosBancarios(
     @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
       final var query = new GetDadosBancariosQuery(idFuncionario);
 
-      ResponseEntity<DadosBancariosRespDTO> response = queryBus.handle(query);
+      ResponseEntity<List<DadosBancariosRespDTO>> response = queryBus.handle(query);
 
       return response;
   }

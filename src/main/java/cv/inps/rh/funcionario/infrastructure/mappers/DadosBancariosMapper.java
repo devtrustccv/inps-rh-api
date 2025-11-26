@@ -74,5 +74,18 @@ public class DadosBancariosMapper {
     return existingList;
   }
 
+  public List<DadosBancariosRespDTO> toDadosBancariosRespDTOList(List<DadosBancariosEntity> entities) {
+    return entities.stream().map(b -> {
+      DadosBancariosRespDTO br = new DadosBancariosRespDTO();
+      br.setId(b.getId());
+      br.setEntidadeBancariaId(b.getRhbId() != null ? b.getRhbId().getId() : null);
+      br.setEntidadeBancariaDesc(b.getRhbId() != null ? b.getRhbId().getNmBanco() : null);
+      br.setNumConta(b.getNumConta());
+      br.setDataInicio(b.getDataInicio());
+      br.setDataFim(b.getDataFim());
+      return br;
+    }).toList();
+  }
+
 
 }

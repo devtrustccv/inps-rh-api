@@ -549,7 +549,7 @@
                 "type": "AgregadoDependenteResp",
                 "objectType": "dto",
                 "name": "data",
-                "collectionType": "none",
+                "collectionType": "list",
                 "module": "funcionario"
               }
             }
@@ -577,7 +577,7 @@
                 "type": "DadosBancariosResp",
                 "objectType": "dto",
                 "name": "data",
-                "collectionType": "none",
+                "collectionType": "list",
                 "module": "funcionario"
               }
             }
@@ -593,5 +593,5 @@
       ]
     }
   ],
-  "id": "69p09wi4e0-criarFuncionario-validarRegistoColaborador-createFuncionario-validarRegistoColaborador-createFuncionario-getFuncionarioById-createFuncionario-validarRegistoColaborador-mudarEstadoColaborador-validaDadosPessoais"
+  "id": "69p09wi4e0-criarFuncionario-validarRegistoColaborador-createFuncionario-validarRegistoColaborador-createFuncionario-getFuncionarioById-createFuncionario-validarRegistoColaborador-mudarEstadoColaborador-validaDadosPessoais-getDadosFamiliares-getDadosBancarios"
 }

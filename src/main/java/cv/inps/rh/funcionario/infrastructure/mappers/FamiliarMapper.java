@@ -1,12 +1,15 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.AgregadoDependenteReqDTO;
+import cv.inps.rh.funcionario.application.dto.AgregadoDependenteRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FamiliarEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -70,8 +73,21 @@ public class FamiliarMapper {
   }
 
 
-
-
-
-
+  public List<AgregadoDependenteRespDTO> toAgregadoDependenteRespDTOList(List<FamiliarEntity> familiares) {
+   return familiares.stream().map(f -> {
+      AgregadoDependenteRespDTO fr = new AgregadoDependenteRespDTO();
+      fr.setId(f.getId());
+      fr.setTipoDocumentoId(f.getTpDocumento() != null ? f.getTpDocumento().getId() : null);
+      fr.setTipoDocumentoDesc(f.getTpDocumento() != null ? f.getTpDocumento().getNome() : null);
+      fr.setNumDocumento(f.getNumDocumento());
+      fr.setNome(f.getNome());
+      fr.setDataNascimento(f.getDataNascimento());
+      fr.setGenero(f.getSexo());
+      fr.setGrauParentesco(f.getGdpId());
+      fr.setDependente(f.getDependencia());
+      fr.setAgregada(f.getMembroAgr());
+      fr.setEstado(f.getEstado() != null ? f.getEstado().name() : null);
+      return fr;
+    }).toList();
+  }
 }
