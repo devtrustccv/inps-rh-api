@@ -5,15 +5,15 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.ValidacaoDadosPessoaisDTO;
+import cv.inps.rh.funcionario.application.dto.ValidarDadosAcademicosDTO;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ValidaDadosPessoaisCommand implements Command {
+public class ValidarDadosAcademicosCommand implements Command {
 
   
-  private ValidacaoDadosPessoaisDTO validacaodadospessoais;
+  private ValidarDadosAcademicosDTO validardadosacademicos;
   @NotBlank(message = "The field <idFuncionario> is required")
   private String idFuncionario;
 

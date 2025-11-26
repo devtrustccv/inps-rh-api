@@ -27,6 +27,9 @@ import cv.inps.rh.funcionario.application.dto.WrapperListaFuncionarioDTO;
 import java.util.Map;
 import cv.inps.rh.funcionario.application.dto.AtivarInativarColaboradorDTO;
 import cv.inps.rh.funcionario.application.dto.ValidacaoDadosPessoaisDTO;
+import cv.inps.rh.funcionario.application.dto.ValidarDadosAcademicosDTO;
+import cv.inps.rh.funcionario.application.dto.ValidarAgregadosDependentesDTO;
+import cv.inps.rh.funcionario.application.dto.ValidarDadosBancariosDTO;
 
 @IgrpController
 @RestController
@@ -34,7 +37,7 @@ import cv.inps.rh.funcionario.application.dto.ValidacaoDadosPessoaisDTO;
 @Tag(name = "Funcionario", description = "gestao de funcionarios")
 public class FuncionarioController {
 
-
+  
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -60,7 +63,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<FuncionarioResponseDTO> createFuncionario(@Valid @RequestBody FuncionarioRequestDTO createFuncionarioRequest
     )
   {
@@ -91,7 +94,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<FuncionarioResponseDTO> getFuncionarioById(
     @PathVariable(value = "id") String id)
   {
@@ -122,7 +125,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<WrapperListaValidacoesDTO> getValicoesUtilizadores(
     @RequestParam(value = "nomeColaborador", required = false) String nomeColaborador,
     @RequestParam(value = "tipoOperacao", required = false) String tipoOperacao,
@@ -158,7 +161,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<WrapperListaFuncionarioDTO> getListFuncionarios(
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
@@ -197,7 +200,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<Map<String, ?>> validarRegistoColaborador(@Valid @RequestBody FuncionarioRequestDTO validarRegistoColaboradorRequest
     , @PathVariable(value = "id") String id)
   {
@@ -228,7 +231,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<AtivarInativarColaboradorDTO> validacaoColaborador(@Valid @RequestBody AtivarInativarColaboradorDTO validacaoColaboradorRequest
     , @PathVariable(value = "id") String id)
   {
@@ -259,7 +262,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<AtivarInativarColaboradorDTO> inativarAtivarColaborador(@Valid @RequestBody AtivarInativarColaboradorDTO inativarAtivarColaboradorRequest
     , @PathVariable(value = "id") String id)
   {
@@ -290,7 +293,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<ValidacaoDadosPessoaisDTO> validaDadosPessoais(@Valid @RequestBody ValidacaoDadosPessoaisDTO validaDadosPessoaisRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
@@ -298,6 +301,99 @@ public class FuncionarioController {
       final var command = new ValidaDadosPessoaisCommand(validaDadosPessoaisRequest, idFuncionario);
 
        ResponseEntity<ValidacaoDadosPessoaisDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
+   @PutMapping(
+   value = "{idFuncionario}/dados-academicos"
+  )
+  @Operation(
+    summary = "Validar dados academicos",
+    description = "Validar dados academicos",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ValidarDadosAcademicosDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<ValidarDadosAcademicosDTO> validarDadosAcademicos(@Valid @RequestBody ValidarDadosAcademicosDTO validarDadosAcademicosRequest
+    , @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var command = new ValidarDadosAcademicosCommand(validarDadosAcademicosRequest, idFuncionario);
+
+       ResponseEntity<ValidarDadosAcademicosDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
+   @PutMapping(
+   value = "{idFuncionario}/familiares"
+  )
+  @Operation(
+    summary = "Validar dados familiares",
+    description = "Validar dados familiares",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ValidarAgregadosDependentesDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<ValidarAgregadosDependentesDTO> validarDadosFamiliares(@Valid @RequestBody ValidarAgregadosDependentesDTO validarDadosFamiliaresRequest
+    , @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var command = new ValidarDadosFamiliaresCommand(validarDadosFamiliaresRequest, idFuncionario);
+
+       ResponseEntity<ValidarAgregadosDependentesDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
+   @PutMapping(
+   value = "{idFuncionario}/dados-bancarios"
+  )
+  @Operation(
+    summary = "Validar dados bancarios",
+    description = "Validar dados bancarios",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ValidarDadosBancariosDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<ValidarDadosBancariosDTO> validarDadosBancarios(@Valid @RequestBody ValidarDadosBancariosDTO validarDadosBancariosRequest
+    , @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var command = new ValidarDadosBancariosCommand(validarDadosBancariosRequest, idFuncionario);
+
+       ResponseEntity<ValidarDadosBancariosDTO> response = commandBus.send(command);
 
        return response;
   }
