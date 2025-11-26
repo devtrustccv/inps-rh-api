@@ -81,21 +81,19 @@ public class RegimeWriteService {
       }
     }
 
+    funcionarioEntityRepository.save(funcionario);
+    entityManager.flush();
+
     // Criar validação
     var validacao = dadosContratuaisMapper.toValidacaoInsert("INSERT", "REGIME", Estado.P);
     validacao.setFunId(funcionario);
     validacao.setTiprelId(novoTipoRelacionamento);
-    validacao.setReferenciaId(1L);
+    validacao.setReferenciaId(regimeTrabalho.getId());
     funcionario.getValidacoes().add(validacao);
 
     // Salvar tudo (cascade)
     funcionarioEntityRepository.save(funcionario);
 
-    // Gerar IDs (regime e modalidades)
-    entityManager.flush();
-
-    // Agora já podes definir a referência
-    validacao.setReferenciaId(regimeTrabalho.getId());
 
     return dto;
   }

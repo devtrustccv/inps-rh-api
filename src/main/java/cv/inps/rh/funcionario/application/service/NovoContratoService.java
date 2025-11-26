@@ -135,16 +135,17 @@ public class NovoContratoService {
     //tr.setSituacLaboralId(sl);
     funcionario.getTiposrelacionamentos().add(tr);
 
+    funcionarioEntityRepository.save(funcionario);
+    entityManager.flush();
+
 
     var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","CONTRATO", Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(tr);
-    valid.setReferenciaId(1L); //todo resolve id later
+    valid.setReferenciaId(contrato.getId());
     funcionario.getValidacoes().add(valid);
 
     FuncionarioEntity saved = funcionarioEntityRepository.save(funcionario);
-    entityManager.flush();
-    valid.setReferenciaId(contrato.getId());
 
     return dadosContratuaisMapper.dadosContratuaisRespDTO(saved);
   }

@@ -58,17 +58,19 @@ public class MobilidadeWriteService {
     funcionario.getTiposrelacionamentos().add(novoTipoRelacionamento);
     funcionario.getMobilidades().add(novaMobilidade);
 
+    funcionarioEntityRepository.save(funcionario);
+    entityManager.flush();
 
-
+    // Cria validação agora que os IDs existem
     var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","MOBILIDADE", Estado.P);
     valid.setFunId(funcionario);
-    valid.setReferenciaId(1L);
+    valid.setReferenciaId(novaMobilidade.getId());
     valid.setTiprelId(novoTipoRelacionamento);
     funcionario.getValidacoes().add(valid);
 
+    // Salva validação
     funcionarioEntityRepository.save(funcionario);
-    entityManager.flush();
-    valid.setReferenciaId(novaMobilidade.getId());
+
 
     return mobilidadeDto;
 
