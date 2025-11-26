@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.RegimeListDTO;
 import cv.inps.rh.funcionario.application.rules.RegimeRules;
+import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeTrabalhoEntity;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class RegimeTrabalhoMapper {
     dto.setUuidFuncionario(regime.getFunId()!= null ? regime.getFunId().getUuid().toString() : null);
 
     dto.setTipoRegime(regime.getTipoRegime());
-    dto.setDataInicio(null); // todo tirar duvidas com analise, nao existe na base de dados
+    dto.setDataInicio(DateFormatter.localDateToString(regime.getDataInicio()));
     dto.setDataFim(regime.getDataFim() != null ? regime.getDataFim().toString() : null);
     dto.setModalidade(regimeRules.getDiasSemanaAgrupados(regime));
     dto.setNumHoras(String.valueOf(regimeRules.getTotalHoras(regime)));

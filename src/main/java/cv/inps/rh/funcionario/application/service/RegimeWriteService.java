@@ -76,7 +76,6 @@ public class RegimeWriteService {
         modalidade.setNumHoras(mod.getNumeroHoras());
         modalidade.setUuid(IdentificadorUnico.create().getValor());
         modalidade.setRegimeId(regimeTrabalho);
-
         regimeTrabalho.getModalidades().add(modalidade);
       }
     }
