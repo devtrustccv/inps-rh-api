@@ -67,6 +67,73 @@ public class FuncionarioMapper {
   }
 
 
+  public DadosPessoaisRespDTO toDadosPessoaisRespDTO(FuncionarioEntity entity) {
+    if (entity == null) return null;
+
+    DadosPessoaisRespDTO dadosPessoais = new DadosPessoaisRespDTO();
+    dadosPessoais.setId(entity.getId());
+    dadosPessoais.setUuid(entity.getUuid() != null ? entity.getUuid().toString() : null);
+    dadosPessoais.setNome(entity.getNome());
+    dadosPessoais.setDataNascimento(entity.getDataNascimento());
+    dadosPessoais.setGenero(entity.getSexo());
+    dadosPessoais.setNomeMae(entity.getNmMae());
+    dadosPessoais.setNomePai(entity.getNmPai());
+    dadosPessoais.setEstadoCivil(entity.getEstadoCivil());
+    dadosPessoais.setNacionalidade(entity.getNacionalidade());
+    dadosPessoais.setTipoDocumentoId(entity.getTipoDocumentoId() != null ? entity.getTipoDocumentoId().getId() : null);
+    dadosPessoais.setNumDocumento(entity.getNumDocumento());
+    dadosPessoais.setNif(entity.getNif() != null ? entity.getNif() : null);
+    dadosPessoais.setNumSegurado(entity.getNuSegInps());
+    if (entity.getLocNascId() != null) {
+      dadosPessoais.setNaturalidadeId(entity.getLocNascId().getId());
+      dadosPessoais.setNaturalidadeDesc(entity.getLocNascId().getNome());
+    }
+
+    if (entity.getEndereco() != null) {
+      EnderecoRespDTO er = new EnderecoRespDTO();
+      er.setId(entity.getEndereco().getId());
+      if (entity.getEndereco().getPaisId() != null) {
+        er.setPaisId(entity.getEndereco().getPaisId().getId() != null ? entity.getEndereco().getPaisId().getId().intValue() : null);
+        er.setPaisDesc(entity.getEndereco().getPaisId().getNome());
+      }
+      if (entity.getEndereco().getIlhaId() != null) {
+        er.setIlhaId(entity.getEndereco().getIlhaId().getId() != null ? entity.getEndereco().getIlhaId().getId().intValue() : null);
+        er.setIlhaDesc(entity.getEndereco().getIlhaId().getNome());
+      }
+      if (entity.getEndereco().getConcelhoId() != null) {
+        er.setConcelhoId(entity.getEndereco().getConcelhoId().getId() != null ? entity.getEndereco().getConcelhoId().getId().intValue() : null);
+        er.setConcelhoDesc(entity.getEndereco().getConcelhoId().getNome());
+      }
+      if (entity.getEndereco().getFreguesiaId() != null) {
+        er.setFreguesiaId(entity.getEndereco().getFreguesiaId().getId() != null ? entity.getEndereco().getFreguesiaId().getId().intValue() : null);
+        er.setFreguesiaDesc(entity.getEndereco().getFreguesiaId().getNome());
+      }
+      if (entity.getEndereco().getZonaId() != null) {
+        er.setZonaId(entity.getEndereco().getZonaId().getId() != null ? entity.getEndereco().getZonaId().getId().intValue() : null);
+        er.setZonaDesc(entity.getEndereco().getZonaId().getNome());
+      }
+      er.setMorada(entity.getEndereco().getMorada());
+      er.setEstado(entity.getEndereco().getEstado() != null ? entity.getEndereco().getEstado().getDescription() : null);
+      er.setUuid(entity.getEndereco().getUuid() != null ? entity.getEndereco().getUuid().toString() : null);
+      dadosPessoais.setEndereco(er);
+    }
+
+    if (entity.getContactos() != null) {
+      List<ContactoRespDTO> contactos = entity.getContactos().stream().map(c -> {
+        ContactoRespDTO cr = new ContactoRespDTO();
+        cr.setId(c.getId());
+        cr.setUuid(c.getUuid() != null ? c.getUuid().toString() : null);
+        cr.setTipoContacto(c.getTipoContacto());
+        cr.setContacto(c.getContacto());
+        cr.setEstado(c.getEstado() != null ? c.getEstado().getDescription() : null);
+        return cr;
+      }).toList();
+      dadosPessoais.setContactos(contactos);
+    }
+
+    return dadosPessoais;
+  }
+
 
   //new implementation
   public FuncionarioResponseDTO toResponseDTO(FuncionarioEntity entity) {

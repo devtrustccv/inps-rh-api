@@ -1,12 +1,16 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.FormacaoProfissionalReqDTO;
+import cv.inps.rh.funcionario.application.dto.FormacaoProfissionalRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FormacaoFeitaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import jakarta.persistence.EntityManager;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -73,4 +77,19 @@ public class FormacaoFeitaMapper {
   }
 
 
+  public List<FormacaoProfissionalRespDTO> toFormacaoFeitaRespDTOList(List<FormacaoFeitaEntity> formacoesFeitas) {
+    return formacoesFeitas.stream().map(f -> {
+      FormacaoProfissionalRespDTO fr = new FormacaoProfissionalRespDTO();
+      fr.setId(f.getId());
+      fr.setUuid(f.getUuid() != null ? f.getUuid().toString() : null);
+      fr.setPaisId(f.getPaisId() != null ? f.getPaisId().getId() : null);
+      fr.setPaisDesc(f.getPaisId() != null ? f.getPaisId().getNome() : null);
+      fr.setEstabelecimento(f.getEstabelecimento());
+      fr.setTipoFormacao(f.getRhtpfor());
+      fr.setDesignacao(f.getCurso());
+      fr.setNivel(f.getNivel());
+      fr.setEstado(f.getEstado() != null ? f.getEstado().name() : null);
+      return fr;
+    }).toList();
+  }
 }

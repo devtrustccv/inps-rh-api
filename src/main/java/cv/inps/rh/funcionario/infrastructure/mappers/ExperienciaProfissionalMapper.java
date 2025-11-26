@@ -1,12 +1,16 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.ExperienciaProfissionalReqDTO;
+import cv.inps.rh.funcionario.application.dto.ExperienciaProfissionalRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ExperienciaProfEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import jakarta.persistence.EntityManager;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -75,4 +79,20 @@ public class ExperienciaProfissionalMapper {
   }
 
 
+  public List<ExperienciaProfissionalRespDTO> toExperienciaProfissionalRespDTOList(List<ExperienciaProfEntity> experienciasProfissionais) {
+    return experienciasProfissionais.stream().map(e -> {
+      ExperienciaProfissionalRespDTO er = new ExperienciaProfissionalRespDTO();
+      er.setId(e.getId());
+      er.setPaisId(e.getPaisId() != null ? e.getPaisId().getId() : null);
+      er.setPaisDesc(e.getPaisId() != null ? e.getPaisId().getNome() : null);
+      er.setUuid(e.getUuid() != null ? e.getUuid().toString() : null);
+      er.setEmpresa(e.getEmpresa());
+      er.setCargo(e.getCargo());
+      er.setDataEntrada(e.getDataInicio());
+      er.setDataSaida(e.getDataFim());
+      er.setObservacoes(e.getObservacao());
+      er.setEstado(e.getEstado() != null ? e.getEstado().name() : null);
+      return er;
+    }).toList();
+  }
 }

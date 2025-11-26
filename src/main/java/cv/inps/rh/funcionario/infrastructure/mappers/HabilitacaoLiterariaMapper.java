@@ -2,10 +2,12 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaReqDTO;
+import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.HabilitacaoLiterariaEntity;
 import jakarta.persistence.EntityManager;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -84,4 +86,20 @@ public class HabilitacaoLiterariaMapper {
   }
 
 
+    public List<HabilitacaoLiterariaRespDTO> toHabilitacaoLiterariaRespDTOList(List<HabilitacaoLiterariaEntity> habilitacoesLiterarias) {
+      return habilitacoesLiterarias.stream().map(h -> {
+        HabilitacaoLiterariaRespDTO hr = new HabilitacaoLiterariaRespDTO();
+        hr.setId(h.getId());
+        hr.setPaisId(h.getPaisId() != null ? h.getPaisId().getId() != null ? h.getPaisId().getId().intValue() : null : null);
+        hr.setPaisDesc(h.getPaisId() != null ? h.getPaisId().getNome() : null);
+        hr.setEstabelecimento(h.getEstabelecimento());
+        hr.setArea(h.getArea());
+        hr.setCurso(h.getNomeCurso());
+        hr.setGrauAcademico(h.getNivel());
+        hr.setDataInicio(h.getDataInicio());
+        hr.setDataTermino(h.getDataFim());
+        hr.setConcluido(h.getConcluido());
+        return hr;
+      }).toList();
+    }
 }

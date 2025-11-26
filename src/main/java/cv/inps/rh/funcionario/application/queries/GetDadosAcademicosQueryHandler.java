@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.application.queries;
 
+import cv.inps.rh.funcionario.application.service.DadosAcademicosReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -15,15 +16,17 @@ public class GetDadosAcademicosQueryHandler implements QueryHandler<GetDadosAcad
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetDadosAcademicosQueryHandler.class);
 
+  private final DadosAcademicosReadService dadosAcademicosReadService;
 
-  public GetDadosAcademicosQueryHandler() {
+  public GetDadosAcademicosQueryHandler(DadosAcademicosReadService dadosAcademicosReadService) {
 
+    this.dadosAcademicosReadService = dadosAcademicosReadService;
   }
 
    @IgrpQueryHandler
   public ResponseEntity<DadosAcademicosProfResponseDTO> handle(GetDadosAcademicosQuery query) {
-    // TODO: Implement the query handling logic here
-    return null;
+
+    return ResponseEntity.ok(dadosAcademicosReadService.getDadosAcademicos(query));
   }
 
 }
