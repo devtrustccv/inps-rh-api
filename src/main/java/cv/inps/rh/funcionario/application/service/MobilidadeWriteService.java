@@ -12,6 +12,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class MobilidadeWriteService {
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final EntityManager entityManager;
+  private final ValidacaoEntityRepository validacaoEntityRepository;
 
   @Transactional
   public MobilidadeDTO save(SaveMobilidadeCommand command) {
@@ -58,18 +60,21 @@ public class MobilidadeWriteService {
     funcionario.getTiposrelacionamentos().add(novoTipoRelacionamento);
     funcionario.getMobilidades().add(novaMobilidade);
 
-    funcionarioEntityRepository.save(funcionario);
-    entityManager.flush();
 
     // Cria validação agora que os IDs existem
     var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","MOBILIDADE", Estado.P);
     valid.setFunId(funcionario);
-    valid.setReferenciaId(novaMobilidade.getId());
     valid.setTiprelId(novoTipoRelacionamento);
     funcionario.getValidacoes().add(valid);
 
     // Salva validação
     funcionarioEntityRepository.save(funcionario);
+
+    validacaoEntityRepository.findById(valid.getId())
+        .ifPresent(e -> {
+          e.setReferenciaId(novaMobilidade.getId());
+          validacaoEntityRepository.save(e);
+        });
 
 
     return mobilidadeDto;

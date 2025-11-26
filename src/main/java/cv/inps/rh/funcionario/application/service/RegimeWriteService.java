@@ -12,6 +12,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeModalidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeTrabalhoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class RegimeWriteService {
   private final FuncionarioRules funcionarioRules;
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final EntityManager entityManager;
+  private final ValidacaoEntityRepository validacaoEntityRepository;
 
 
   @Transactional
@@ -80,19 +82,22 @@ public class RegimeWriteService {
       }
     }
 
-    funcionarioEntityRepository.save(funcionario);
-    entityManager.flush();
 
     // Criar validação
     var validacao = dadosContratuaisMapper.toValidacaoInsert("INSERT", "REGIME", Estado.P);
     validacao.setFunId(funcionario);
     validacao.setTiprelId(novoTipoRelacionamento);
-    validacao.setReferenciaId(regimeTrabalho.getId());
     funcionario.getValidacoes().add(validacao);
 
     // Salvar tudo (cascade)
     funcionarioEntityRepository.save(funcionario);
 
+
+    validacaoEntityRepository.findById(validacao.getId())
+        .ifPresent(e -> {
+          e.setReferenciaId(regimeTrabalho.getId());
+          validacaoEntityRepository.save(e);
+        });
 
     return dto;
   }

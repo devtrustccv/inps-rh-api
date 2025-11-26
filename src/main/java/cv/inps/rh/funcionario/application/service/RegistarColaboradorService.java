@@ -42,7 +42,7 @@ public class RegistarColaboradorService {
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
 
- // private final ValidacaoEntityRepository validacaoRepository;
+ private final ValidacaoEntityRepository validacaoEntityRepository;
 
   private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
 
@@ -208,17 +208,18 @@ public class RegistarColaboradorService {
     fun.setTiposrelacionamentos(java.util.List.of(tr));
 
 
-    FuncionarioEntity saved = funcionarioEntityRepository.save(fun);
-    entityManager.flush();
-
     var valid = contratuaisEntityMapper.toValidacaoInsert("INSERT", "REGISTO_COLABORADOR", Estado.P); //todo resolve id later
     valid.setFunId(fun);
     valid.setTiprelId(tr);
-    valid.setReferenciaId(saved.getId());
     fun.setValidacoes(java.util.List.of(valid));
 
-    saved.getValidacoes().add(valid);
-    funcionarioEntityRepository.save(saved);
+    FuncionarioEntity saved = funcionarioEntityRepository.save(fun);
+
+    validacaoEntityRepository.findById(valid.getId())
+        .ifPresent(e -> {
+          e.setReferenciaId(saved.getId());
+          validacaoEntityRepository.save(e);
+        });
 
 
     // Percorre todas as remunerações e cria RemuneracaoTiprelEntity

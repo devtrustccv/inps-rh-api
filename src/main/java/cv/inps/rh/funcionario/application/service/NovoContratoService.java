@@ -10,6 +10,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSitLaboralEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class NovoContratoService {
   private final FuncionarioRules funcionarioRules;
   private final EntityManager entityManager;
 
+  private final ValidacaoEntityRepository validacaoEntityRepository;
 
 
   @Transactional
@@ -135,17 +137,19 @@ public class NovoContratoService {
     //tr.setSituacLaboralId(sl);
     funcionario.getTiposrelacionamentos().add(tr);
 
-    funcionarioEntityRepository.save(funcionario);
-    entityManager.flush();
-
 
     var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","CONTRATO", Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(tr);
-    valid.setReferenciaId(contrato.getId());
     funcionario.getValidacoes().add(valid);
 
     FuncionarioEntity saved = funcionarioEntityRepository.save(funcionario);
+
+    validacaoEntityRepository.findById(valid.getId())
+        .ifPresent(e -> {
+          e.setReferenciaId(contrato.getId());
+          validacaoEntityRepository.save(e);
+        });
 
     return dadosContratuaisMapper.dadosContratuaisRespDTO(saved);
   }

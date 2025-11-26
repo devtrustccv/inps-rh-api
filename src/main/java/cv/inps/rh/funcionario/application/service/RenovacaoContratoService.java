@@ -9,6 +9,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class RenovacaoContratoService {
   private final DadosContratuaisMapper  dadosContratuaisMapper;
   private final FuncionarioRules funcionarioRules;
   private final EntityManager entityManager;
+  private final ValidacaoEntityRepository validacaoEntityRepository;
 
   @Transactional
   public RenovacaoContratoDTO renovarContrato(RenovarContratoCommand command) {
@@ -69,16 +71,19 @@ public class RenovacaoContratoService {
     novoTipoRelacionamento.setContratoId(novoContrato);
     funcionario.getTiposrelacionamentos().add(novoTipoRelacionamento);
 
-    funcionarioEntityRepository.save(funcionario);
-    entityManager.flush();
 
     var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","RENOVACAO_CONTRATO", Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
-    valid.setReferenciaId(novoContrato.getId());
     funcionario.getValidacoes().add(valid);
 
     funcionarioEntityRepository.save(funcionario);
+
+    validacaoEntityRepository.findById(valid.getId())
+        .ifPresent(e -> {
+          e.setReferenciaId(novoContrato.getId());
+          validacaoEntityRepository.save(e);
+        });
 
     var renovacaoContratoReqDTO = contratoMapper.toRenovacaoContratoReqDTO(novoContrato);
 
