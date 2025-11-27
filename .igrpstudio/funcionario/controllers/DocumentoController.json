@@ -1,0 +1,43 @@
+{
+  "type": "controller",
+  "name": "Documento",
+  "module": "funcionario",
+  "description": "Guardar documentos",
+  "basePath": "documento",
+  "actions": [
+    {
+      "actionName": "saveOrdemServico",
+      "path": "{funcionarioId}",
+      "method": "POST",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "file",
+          "name": "ordemServico",
+          "isRequired": true
+        }
+      ],
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "54n1gwv2hz"
+}
