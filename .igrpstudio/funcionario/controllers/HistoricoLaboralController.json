@@ -3,11 +3,11 @@
   "name": "HistoricoLaboral",
   "module": "funcionario",
   "description": "Gestão de Histórico Laboral",
-  "basePath": "historico-laboral",
+  "basePath": "api/v1/funcionarios",
   "actions": [
     {
       "actionName": "getHistoricoLaboral",
-      "path": "{funcionarioId}",
+      "path": "{funcionarioId}/historico-laboral",
       "method": "GET",
       "responses": {
         "200": {
@@ -71,7 +71,48 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "validarHistoricoLaboral",
+      "path": "{idFuncionario}/historico-laboral",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ValidarNovoHistoricoLaboral",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ValidarNovoHistoricoLaboral",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "yr7hgkcuf8-getHistoricoLaboral"
+  "id": "yr7hgkcuf8-getHistoricoLaboral-getHistoricoLaboral"
 }
