@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.funcionario.application.service.historicolaboral.HistoricoLaboralWriteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -14,14 +15,15 @@ public class ValidarHistoricoLaboralCommandHandler implements CommandHandler<Val
 
    private static final Logger LOGGER = LoggerFactory.getLogger(ValidarHistoricoLaboralCommandHandler.class);
 
-   public ValidarHistoricoLaboralCommandHandler() {
-
+   private final HistoricoLaboralWriteService historicoLaboralWriteService;
+   public ValidarHistoricoLaboralCommandHandler(HistoricoLaboralWriteService historicoLaboralWriteService) {
+      this.historicoLaboralWriteService = historicoLaboralWriteService;
    }
 
    @IgrpCommandHandler
    public ResponseEntity<ValidarNovoHistoricoLaboralDTO> handle(ValidarHistoricoLaboralCommand command) {
-      // TODO: Implement the command handling logic here
-      return null;
+      LOGGER.info("ValidarHistoricoLaboralCommandHandler.handle: {}", command);
+      return ResponseEntity.ok(historicoLaboralWriteService.validar(command));
    }
 
 }
