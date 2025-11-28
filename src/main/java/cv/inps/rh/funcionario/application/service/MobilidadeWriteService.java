@@ -68,7 +68,7 @@ public class MobilidadeWriteService {
     funcionario.getValidacoes().add(valid);
 
     // Salva validação
-    funcionarioEntityRepository.save(funcionario);
+    funcionarioEntityRepository.saveAndFlush(funcionario);
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {

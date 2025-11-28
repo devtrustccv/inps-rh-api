@@ -90,7 +90,7 @@ public class RegimeWriteService {
     funcionario.getValidacoes().add(validacao);
 
     // Salvar tudo (cascade)
-    funcionarioEntityRepository.save(funcionario);
+    funcionarioEntityRepository.saveAndFlush(funcionario);
 
 
     validacaoEntityRepository.findById(validacao.getId())

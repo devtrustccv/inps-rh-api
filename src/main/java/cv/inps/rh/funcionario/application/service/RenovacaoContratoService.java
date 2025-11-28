@@ -77,7 +77,7 @@ public class RenovacaoContratoService {
     valid.setTiprelId(novoTipoRelacionamento);
     funcionario.getValidacoes().add(valid);
 
-    funcionarioEntityRepository.save(funcionario);
+    funcionarioEntityRepository.saveAndFlush(funcionario);
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {
