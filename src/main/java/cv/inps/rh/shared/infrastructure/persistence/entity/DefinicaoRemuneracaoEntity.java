@@ -8,7 +8,6 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
-import jakarta.validation.constraints.NotNull;
 import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
 import java.time.LocalDate;
@@ -32,8 +31,7 @@ public class DefinicaoRemuneracaoEntity extends AuditEntity {
     private Long id;
 
   
-    @NotNull(message = "percentagem is mandatory")
-    @Column(name="percentagem", nullable = false)
+    @Column(name="percentagem")
     private BigDecimal percentagem;
 
   

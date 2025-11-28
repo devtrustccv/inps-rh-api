@@ -341,6 +341,7 @@ public class FuncionarioMapper {
     docPessoal.setFunId(fun);
     docPessoal.setTipoDocumentoId(tipoDocumento);
     docPessoal.setNumDocumento(dadosPessoais.getNumDocumento());
+    docPessoal.setUuid(UuidCreator.getTimeOrderedEpoch());
     fun.setDocumentoPessoal(docPessoal);
 
     if (dadosPessoais.getEndereco() != null) {

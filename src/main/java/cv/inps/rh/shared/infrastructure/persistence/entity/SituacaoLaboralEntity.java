@@ -64,9 +64,6 @@ public class SituacaoLaboralEntity extends AuditEntity {
     private UUID uuid;
 
 
-    @Column(name="contratoid")
-    private Long contratoId;
-
      @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "fun_id")
    private FuncionarioEntity funId;
