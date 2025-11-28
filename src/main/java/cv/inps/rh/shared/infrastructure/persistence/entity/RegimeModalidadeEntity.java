@@ -24,7 +24,8 @@ import java.util.List;
 public class RegimeModalidadeEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_regime_modal")
+    @SequenceGenerator(name = "seq_regime_modal", sequenceName = "SEQ_REGIME_MODAL", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

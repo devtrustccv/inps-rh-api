@@ -22,7 +22,8 @@ import java.util.UUID;
 public class RemuneracaoTiprelEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_remun_tiprel")
+    @SequenceGenerator(name = "seq_remun_tiprel", sequenceName = "SEQ_REMUN_TIPREL", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

@@ -23,34 +23,34 @@ public class BancoEntity  {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-    @NotBlank(message = "cdBanco is mandatory")
+
+    @NotBlank(message = "cdBanco is mRandatory")
     @Column(name="cd_banco", nullable = false)
     private String cdBanco;
 
-  
+
     @Column(name="sigla")
     private String sigla;
 
-  
+
     @Column(name="nm_banco")
     private String nmBanco;
 
-  
+
     @Column(name="nu_conta")
     private Long nuConta;
 
-  
+
     @Column(name="ent_id")
     private Long entId;
 
-  
+
     @Column(name="nib")
     private String nib;
 
-  
+
     @Column(name="tm_id")
     private Long tmId;
 
-  
+
 }

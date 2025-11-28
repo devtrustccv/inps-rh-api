@@ -22,7 +22,8 @@ import java.util.UUID;
 public class PagTiprelEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_def_pag_tiprel")
+    @SequenceGenerator(name = "seq_def_pag_tiprel", sequenceName = "SEQ_DEF_PAG_TIPREL", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
