@@ -18,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -66,7 +68,7 @@ public class RegistarColaboradorService {
         var fe = familiarMapper.toEntity(f, Estado.P);
         fe.setFunId(fun);
         return fe;
-      }).toList();
+      }).collect(Collectors.toList());
       fun.setFamiliares(list);
     }
 
@@ -77,7 +79,7 @@ public class RegistarColaboradorService {
           var he = habilitationLiterariaMapper.toEntity(h, Estado.P);
           he.setFunId(fun);
           return he;
-        }).toList();
+        }).collect(Collectors.toList());
         fun.setHabilitacoesLiterarias(list);
       }
 
@@ -86,7 +88,7 @@ public class RegistarColaboradorService {
           var fe = formacaoFeitaMapper.toEntity(f, Estado.P);
           fe.setFunId(fun);
           return fe;
-        }).toList();
+        }).collect(Collectors.toList());
         fun.setFormacoesFeitas(list);
       }
 
@@ -95,7 +97,7 @@ public class RegistarColaboradorService {
           var ee = experienciaProfissionalMapper.toEntity(e, Estado.P);
           ee.setFunId(fun);
           return ee;
-        }).toList();
+        }).collect(Collectors.toList());
         fun.setExperienciasProfissionais(list);
       }
     }
@@ -105,7 +107,7 @@ public class RegistarColaboradorService {
         var de = documentoMapper.toEntity(a, Estado.P);
         de.setFunId(fun);
         return de;
-      }).toList();
+      }).collect(Collectors.toList());
       fun.setDocumentos(list);
     }
 
@@ -114,7 +116,7 @@ public class RegistarColaboradorService {
         var be = dadosBancariosMapper.toEntity(b, Estado.P);
         be.setFunId(fun);
         return be;
-      }).toList();
+      }).collect(Collectors.toList());
       fun.setDadosBancarios(list);
     }
 
@@ -126,24 +128,24 @@ public class RegistarColaboradorService {
     var contrato = contratoMapper.toContrato(dc, Estado.P);
     contrato.setFunId(fun);
     contrato.setVersao(1);
-    fun.setContratos(java.util.List.of(contrato));
+    fun.setContratos(new ArrayList<>(List.of(contrato)));
 
     var carreira = carreiraMapper.toCarreira(dc, Estado.P);
     if (carreira != null) {
       carreira.setFunId(fun);
-      fun.setCarreiras(java.util.List.of(carreira));
+      fun.setCarreiras(new ArrayList<>(List.of(carreira)));
     }
 
     var regime = regimeTrabalhoMapper.toRegime(dc, Estado.P);
     if (regime != null) {
       regime.setFunId(fun);
-      fun.setRegimesTrabalhos(java.util.List.of(regime));
+      fun.setRegimesTrabalhos(new ArrayList<>(List.of(regime)));
     }
 
     var mobilidade = mobilidadeMapper.toMobilidade(dc, Estado.P);
     if (mobilidade != null) {
       mobilidade.setFunId(fun);
-      fun.setMobilidades(java.util.List.of(mobilidade));
+      fun.setMobilidades(new ArrayList<>(List.of(mobilidade)));
     }
 
 
@@ -160,7 +162,7 @@ public class RegistarColaboradorService {
     if (dc.getSubsidios() != null && !dc.getSubsidios().isEmpty()) {
       var remList = dc.getSubsidios().stream()
           .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, fun, Estado.P))
-          .toList();
+          .collect(Collectors.toList());
       fun.setDefinicoesRenumeracoes(remList);
     }
 
@@ -168,14 +170,14 @@ public class RegistarColaboradorService {
         .createRenumeracao(dc.getSalario(), tipoMovimentoSalario, dc.getDataInicio(), dc.getDataFim(), fun);
     var renumeracaoInps = definicaoRemuneracaoMapper
         .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dc.getDataInicio(), dc.getDataFim(), fun);
-    fun.getDefinicoesRenumeracoes().addAll(List.of(renumeracaoSalario, renumeracaoInps));
+    fun.getDefinicoesRenumeracoes().addAll(new ArrayList<>(List.of(renumeracaoSalario, renumeracaoInps)));
 
 
     /***********************PAGAMENTOS DESCONTOS ********************************/
     if (dc.getEncargosDescontos() != null && !dc.getEncargosDescontos().isEmpty()) {
       var pagList = dc.getEncargosDescontos().stream()
           .map(e -> defPagamentoMapper.toDefPagamento(e, fun, Estado.P))
-          .toList();
+          .collect(Collectors.toList());
       fun.setDefinicoesPagamentos(pagList);
     }
 
@@ -184,7 +186,7 @@ public class RegistarColaboradorService {
     var pagamentoDescontoINPS = defPagamentoMapper.createPagamento(BigDecimal.ZERO,
         tipoMovimentoInps, dc.getDataInicio(), dc.getDataFim(), fun);
 
-    fun.getDefinicoesPagamentos().addAll(List.of(pagamentoDescontoIUR, pagamentoDescontoINPS));
+    fun.getDefinicoesPagamentos().addAll(new ArrayList<>(List.of(pagamentoDescontoIUR, pagamentoDescontoINPS)));
 
 
     var param = paramSitLaboralEntityRepository.findAllByNome("ATIVO").getFirst();
@@ -194,7 +196,7 @@ public class RegistarColaboradorService {
 
     var sl = contratuaisEntityMapper.toSituacaoLaboralInicial(dc, param, Estado.P);
     sl.setFunId(fun);
-    fun.setSituacoesLaborais(java.util.List.of(sl));
+    fun.setSituacoesLaborais(new ArrayList<>(List.of(sl)));
 
     var tr = contratuaisEntityMapper.toRelacionamento(dc, Estado.P);
     tr.setFunId(fun);
@@ -205,15 +207,15 @@ public class RegistarColaboradorService {
     tr.setFlgProcessa("NAO");
     tr.setEstActAdm(1);
     //tr.setSituacLaboralId(sl);
-    fun.setTiposrelacionamentos(java.util.List.of(tr));
+    fun.setTiposrelacionamentos(new ArrayList<>(List.of(tr)));
 
 
     var valid = contratuaisEntityMapper.toValidacaoInsert("INSERT", "REGISTO_COLABORADOR", Estado.P); //todo resolve id later
     valid.setFunId(fun);
     valid.setTiprelId(tr);
-    fun.setValidacoes(java.util.List.of(valid));
+    fun.setValidacoes(new ArrayList<>(List.of(valid)));
 
-    FuncionarioEntity saved = funcionarioEntityRepository.save(fun);
+    FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(fun);
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {
@@ -232,7 +234,7 @@ public class RegistarColaboradorService {
           r.setEstado(Estado.P);
           return r;
         })
-        .toList();
+        .collect(Collectors.toList());
 
     // Salva todas em batch
     renumeracaoTiprelEntityRepository.saveAll(listTiprel);
@@ -248,7 +250,7 @@ public class RegistarColaboradorService {
           p.setEstado(Estado.P);
           return p;
         })
-        .toList();
+        .collect(Collectors.toList());
     // Salva todas em batch
     pagTiprelEntityRepository.saveAll(listPagTiprel);
 

@@ -143,7 +143,7 @@ public class NovoContratoService {
     valid.setTiprelId(tr);
     funcionario.getValidacoes().add(valid);
 
-    FuncionarioEntity saved = funcionarioEntityRepository.save(funcionario);
+    FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {

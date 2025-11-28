@@ -20,13 +20,13 @@ public class NovoPagamentoRequestDTO extends NovoRemuneracaoRequestDTO {
 
   @NotBlank(message = "The field <entidade> is required")
 
-  private String entidade ;
+  private Long entidade ;
   @NotNull(message = "The field <nif> is required")
 
   private Integer nif ;
   @NotBlank(message = "The field <banco> is required")
 
-  private String banco ;
+  private Long banco ;
   @NotBlank(message = "The field <nib> is required")
 
   private String nib ;

@@ -10,11 +10,10 @@ import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
-import cv.inps.rh.shared.infrastructure.persistence.entity.DefPagamentoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.ValidationUtil;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +31,7 @@ public class RenumeracoesWriteService {
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final FuncionarioRules funcionarioRules;
+  private final EntityManager entityManager;
 
   public void novoRemuneracao(String funcionarioId, NovoRemuneracaoRequestDTO request) {
 
@@ -75,9 +75,12 @@ public class RenumeracoesWriteService {
     pagamento.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
     pagamento.setFunId(funcionario);
     pagamento.setNib(request.getNib());
-    pagamento.setBanco(request.getBanco());
+    var banco = entityManager.getReference(BancoEntity.class, request.getBanco());
+    pagamento.setRhbId(banco);
     pagamento.setNif(request.getNif());
-    pagamento.setEntidade(request.getEntidade());
+    var entidade = entityManager.getReference(EntidadeEntity.class, request.getEntidade());
+    pagamento.setNmEntidade(entidade.getNome());
+    pagamento.setEntId(entidade);
     pagamento = defPagamentoEntityRepository.save(pagamento);
 
     var validation = new ValidacaoEntity();
@@ -133,9 +136,12 @@ public class RenumeracoesWriteService {
     pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     pagamento.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
     pagamento.setNib(request.getNib());
-    pagamento.setBanco(request.getBanco());
+    var banco = entityManager.getReference(BancoEntity.class, request.getBanco());
+    pagamento.setRhbId(banco);
     pagamento.setNif(request.getNif());
-    pagamento.setEntidade(request.getEntidade());
+    var entidade = entityManager.getReference(EntidadeEntity.class, request.getEntidade());
+    pagamento.setNmEntidade(entidade.getNome());
+    pagamento.setEntId(entidade);
     defPagamentoEntityRepository.save(pagamento);
 
     var validation = validacaoEntityRepository.findByUuidOrThrow(UUID.fromString(data.getValidacaoId()));
