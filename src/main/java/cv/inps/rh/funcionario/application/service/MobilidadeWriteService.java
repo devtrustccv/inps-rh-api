@@ -122,8 +122,7 @@ public class MobilidadeWriteService {
     return me;
   }
 
-
-
+  @Transactional
   public MobilidadeDTO validarMobilidade(ValidarMobilidadeCommand command){
 
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
