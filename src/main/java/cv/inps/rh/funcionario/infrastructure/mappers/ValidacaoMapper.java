@@ -17,7 +17,7 @@ public class ValidacaoMapper {
     var dto = new ValidacaoResponseDTO();
     dto.setId(validacao.getId());
     dto.setUuid(validacao.getUuid() != null ? validacao.getUuid().toString() : null);
-    dto.setNomeColaborador(validacao.getCreatedBy());
+    dto.setNomeColaborador(validacao.getFunId().getNome());
     dto.setTipoOperacao(validacao.getTipoAccao());
     dto.setReferenciaName(validacao.getReferenciaName());
     dto.setDataOperacao(DateFormatter.localDateTimeToString((validacao.getCreatedDate())));
