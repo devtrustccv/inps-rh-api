@@ -81,6 +81,7 @@ public class MobilidadeReadService {
       dto.setProcessamento(null);
       dto.setEstado(m.getEstado() != null ? m.getEstado().getCode() : null);
       dto.setEstadoDesc(m.getEstado() != null ? m.getEstado().getDescription() : null);
+      dto.setTipoMobilidade(m.getTipoSituacao());
       return dto;
     }).toList();
 
