@@ -52,6 +52,7 @@ public class RenovacaoContratoService {
     var novoContrato = contratoMapper.toRenovarContrato(dto.getDadosRenovacao(), Estado.P);
     novoContrato.setContratoId(contratoPai);
     novoContrato.setVersao(contratoAtual.getVersao() + 1);
+    novoContrato.setFunId(funcionario);
     funcionario.getContratos().add(novoContrato);
 
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
