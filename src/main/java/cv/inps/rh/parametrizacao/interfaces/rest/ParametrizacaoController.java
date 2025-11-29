@@ -40,8 +40,8 @@ public class ParametrizacaoController {
    value = "dominios"
   )
   @Operation(
-    summary = "GET method to handle operations for getDominios",
-    description = "GET method to handle operations for getDominios",
+    summary = "Get dominios",
+    description = "Get dominios",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -57,22 +57,22 @@ public class ParametrizacaoController {
   )
   
   public ResponseEntity<List<DominioDTO>> getDominios(
-    @RequestParam(value = "dominio") String dominio)
+    @RequestParam(value = "dominio") String dominio,
+    @RequestParam(value = "referencia", required = false) String referencia)
   {
 
-      final var query = new GetDominiosQuery(dominio);
+      final var query = new GetDominiosQuery(dominio, referencia);
 
-      ResponseEntity<List<DominioDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
    value = "cargos/ativos"
   )
   @Operation(
-    summary = "GET method to handle operations for getCargosAtivos",
-    description = "GET method to handle operations for getCargosAtivos",
+    summary = "Get cargos ativos",
+    description = "Get cargos ativos",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -93,17 +93,16 @@ public class ParametrizacaoController {
 
       final var query = new GetCargosAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
    value = "carreiras/ativos"
   )
   @Operation(
-    summary = "GET method to handle operations for getCarreirasAtivos",
-    description = "GET method to handle operations for getCarreirasAtivos",
+    summary = "Get carreiras ativos",
+    description = "Get carreiras ativos",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -124,17 +123,16 @@ public class ParametrizacaoController {
 
       final var query = new GetCarreirasAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
    value = "categorias/ativos"
   )
   @Operation(
-    summary = "GET method to handle operations for getCategoriasAtivos",
-    description = "GET method to handle operations for getCategoriasAtivos",
+    summary = "Get categorias ativos",
+    description = "Get categorias ativos",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -155,17 +153,16 @@ public class ParametrizacaoController {
 
       final var query = new GetCategoriasAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
    value = "contratos/ativos"
   )
   @Operation(
-    summary = "GET method to handle operations for getParamContratosAtivos",
-    description = "GET method to handle operations for getParamContratosAtivos",
+    summary = "Get param contratos ativos",
+    description = "Get param contratos ativos",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -186,17 +183,16 @@ public class ParametrizacaoController {
 
       final var query = new GetParamContratosAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
    value = "escalao/ativos"
   )
   @Operation(
-    summary = "GET method to handle operations for getEscaloesAtivos",
-    description = "GET method to handle operations for getEscaloesAtivos",
+    summary = "Get escaloes ativos",
+    description = "Get escaloes ativos",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -217,17 +213,16 @@ public class ParametrizacaoController {
 
       final var query = new GetEscaloesAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
    value = "local-trabalho/ativos"
   )
   @Operation(
-    summary = "GET method to handle operations for getLocalTrabalhoAtivos",
-    description = "GET method to handle operations for getLocalTrabalhoAtivos",
+    summary = "Get local trabalho ativos",
+    description = "Get local trabalho ativos",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -248,17 +243,16 @@ public class ParametrizacaoController {
 
       final var query = new GetLocalTrabalhoAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
    value = "situacao-laboral/ativos"
   )
   @Operation(
-    summary = "GET method to handle operations for getParamSituacaoLaboralAtivo",
-    description = "GET method to handle operations for getParamSituacaoLaboralAtivo",
+    summary = "Get param situacao laboral ativo",
+    description = "Get param situacao laboral ativo",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -279,17 +273,16 @@ public class ParametrizacaoController {
 
       final var query = new GetParamSituacaoLaboralAtivoQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
    value = "vinculos/ativos"
   )
   @Operation(
-    summary = "GET method to handle operations for getVinculosAtivos",
-    description = "GET method to handle operations for getVinculosAtivos",
+    summary = "Get vinculos ativos",
+    description = "Get vinculos ativos",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -310,17 +303,16 @@ public class ParametrizacaoController {
 
       final var query = new GetVinculosAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
    value = "seccoes/ativos"
   )
   @Operation(
-    summary = "GET method to handle operations for getSeccoesAtivos",
-    description = "GET method to handle operations for getSeccoesAtivos",
+    summary = "Get seccoes ativos",
+    description = "Get seccoes ativos",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -341,17 +333,16 @@ public class ParametrizacaoController {
 
       final var query = new GetSeccoesAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
    value = "tipo-documento/ativos"
   )
   @Operation(
-    summary = "GET method to handle operations for getTiposDocumentoAtivos",
-    description = "GET method to handle operations for getTiposDocumentoAtivos",
+    summary = "Get tipos documento ativos",
+    description = "Get tipos documento ativos",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -372,9 +363,8 @@ public class ParametrizacaoController {
 
       final var query = new GetTiposDocumentoAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
 }

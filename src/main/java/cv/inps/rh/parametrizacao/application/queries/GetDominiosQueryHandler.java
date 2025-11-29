@@ -1,19 +1,18 @@
 package cv.inps.rh.parametrizacao.application.queries;
 
-import cv.inps.rh.parametrizacao.domain.models.Dominio;
-import cv.inps.rh.parametrizacao.domain.repository.DomainsRepository;
-import cv.inps.rh.parametrizacao.infrastructure.mappers.DomainsMapper;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cv.igrp.framework.core.domain.QueryHandler;
-import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import cv.igrp.framework.core.domain.QueryHandler;
+import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.parametrizacao.application.dto.DominioDTO;
-import org.springframework.stereotype.Repository;
+import cv.inps.rh.parametrizacao.domain.models.Dominio;
+import cv.inps.rh.parametrizacao.domain.repository.DomainsRepository;
+import cv.inps.rh.parametrizacao.infrastructure.mappers.DomainsMapper;
 
 @Component
 public class GetDominiosQueryHandler implements QueryHandler<GetDominiosQuery, ResponseEntity<List<DominioDTO>>>{
@@ -32,8 +31,9 @@ public class GetDominiosQueryHandler implements QueryHandler<GetDominiosQuery, R
    @IgrpQueryHandler
   public ResponseEntity<List<DominioDTO>> handle(GetDominiosQuery query) {
      String dominioParam = query.getDominio();
+     String referenciaParam = query.getReferencia();
 
-     List<Dominio> dominios = domainsRepository.findAllByDominio(dominioParam);
+     List<Dominio> dominios = domainsRepository.findAllByDominio(dominioParam, referenciaParam);
 
      List<DominioDTO> dtos = dominios.stream()
          .map(domainsMapper::toDto)
