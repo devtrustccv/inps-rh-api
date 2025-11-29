@@ -4,6 +4,7 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -50,8 +51,8 @@ public class CarreiraResponseDTO  {
 
   private String processaSalarioNestaCarreira ;
 
-
-  private List<String> encargos = new ArrayList<>();
+  @Valid
+  private List<EncargosDescontosReqDTO> encargos = new ArrayList<>();
 
 
   private String estado ;

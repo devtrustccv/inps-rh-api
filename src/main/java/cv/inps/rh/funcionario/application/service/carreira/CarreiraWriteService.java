@@ -128,6 +128,7 @@ public class CarreiraWriteService {
           .toList();
       defPagamentoEntityRepository.saveAll(pagList);
     }
+
     var remun = new RemuneracaoTiprelEntity();
     remun.setEstado(Estado.P);
     remun.setUuid(UuidCreator.getTimeOrderedEpoch());

@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.service.carreira;
 
 import cv.inps.rh.funcionario.application.dto.CarreiraListDTO;
 import cv.inps.rh.funcionario.application.dto.CarreiraResponseDTO;
+import cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
@@ -9,6 +10,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,6 +34,7 @@ import java.util.UUID;
 public class CarreiraReadService {
 
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
+  private final DefPagamentoEntityRepository defPagamentoEntityRepository;
 
   @Transactional(readOnly = true)
   public WrapperCarreiraListDTO list(GetCarreiraListQuery query) {
@@ -133,6 +137,23 @@ public class CarreiraReadService {
       dto.setEstado(car.getEstado().getCode());
       dto.setEstadoDesc(car.getEstado().getDescription());
     }
+
+    var encargos = new ArrayList<EncargosDescontosReqDTO>();
+
+    var data = defPagamentoEntityRepository.findByFunIdAndEstado(fun, tr.getEstado());
+    data.forEach(obj -> {
+      var row = new EncargosDescontosReqDTO();
+      row.setId(obj.getId());
+      row.setTipoEncargoId(obj.getTmId() != null ? obj.getTmId().getId() : null);
+      row.setValor(obj.getValor());
+      row.setDataInicio(obj.getDataInicio());
+      row.setDataFim(obj.getDataFim());
+      row.setObservacoes(obj.getObs());
+      encargos.add(row);
+    });
+
+    dto.setEncargos(encargos);
+
     return dto;
   }
 }

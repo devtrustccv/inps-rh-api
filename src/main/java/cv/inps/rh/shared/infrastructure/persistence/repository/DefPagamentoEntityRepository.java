@@ -56,6 +56,7 @@ public interface DefPagamentoEntityRepository extends
   );
 
   List<DefPagamentoEntity> findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity fun, Estado estado);
+  List<DefPagamentoEntity> findByFunIdAndEstado(FuncionarioEntity fun, Estado estado);
 
   Optional<DefPagamentoEntity> findByUuid(UUID uuid);
 

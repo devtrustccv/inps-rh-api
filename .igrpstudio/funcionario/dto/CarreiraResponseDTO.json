@@ -127,8 +127,8 @@
     },
     {
       "name": "encargos",
-      "objectType": "java",
-      "type": "string",
+      "objectType": "dto",
+      "type": "EncargosDescontosReq",
       "required": false,
       "before": false,
       "after": false,
@@ -136,7 +136,8 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false,
-      "collectionType": "list"
+      "collectionType": "list",
+      "module": "funcionario"
     },
     {
       "name": "estado",
