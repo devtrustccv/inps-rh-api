@@ -113,6 +113,7 @@ public class CarreiraWriteService {
     definicaoRemuneracaoEntityRepository.save(salario);
 
     var renumeracaoIur = definicaoRemuneracaoMapper.createRenumeracao(BigDecimal.ZERO, tipoMovimentoIUR, dto.getDataInicio(), dto.getDataFim(), funcionario);
+    definicaoRemuneracaoEntityRepository.save(renumeracaoIur);
     var renumeracaoInps = definicaoRemuneracaoMapper.createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dto.getDataInicio(), dto.getDataFim(), funcionario);
     definicaoRemuneracaoEntityRepository.save(renumeracaoInps);
 
