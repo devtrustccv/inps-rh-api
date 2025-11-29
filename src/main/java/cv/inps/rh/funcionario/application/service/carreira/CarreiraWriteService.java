@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.ValidacaoCarreiraDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.CarreiraMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper;
@@ -20,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +45,7 @@ public class CarreiraWriteService {
   private final DadosContratuaisMapper contratuaisEntityMapper;
   private final DefPagamentoMapper defPagamentoMapper;
   private final FuncionarioRules funcionarioRules;
+  private final TipoMovimentoHelper tipoMovimentoHelper;
 
   public void novaCarreira(String funcionarioId, DadosContratuaisReqDTO dto) {
 
@@ -95,17 +98,26 @@ public class CarreiraWriteService {
           .map(s -> {
             var obj = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
             obj.setObs("MOBILIDADE- || TIPO_CARREIRA");
-            //obj.setCarreira id todo: nao tem campo na tabela
             return obj;
           })
           .toList();
       definicaoRemuneracaoEntityRepository.saveAll(remList);
     }
 
+    var tipoMovimentoSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
+    var tipoMovimentoInps = tipoMovimentoHelper.getTipoMovimentoEntityInps();
+    var tipoMovimentoIUR = tipoMovimentoHelper.getTipoMovimentoEntityIur();
+
     var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario);
+    salario.setTmId(tipoMovimentoSalario);
     definicaoRemuneracaoEntityRepository.save(salario);
 
+    var renumeracaoIur = definicaoRemuneracaoMapper.createRenumeracao(BigDecimal.ZERO, tipoMovimentoIUR, dto.getDataInicio(), dto.getDataFim(), funcionario);
+    var renumeracaoInps = definicaoRemuneracaoMapper.createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dto.getDataInicio(), dto.getDataFim(), funcionario);
+    definicaoRemuneracaoEntityRepository.save(renumeracaoInps);
+
     if (dto.getEncargosDescontos() != null && !dto.getEncargosDescontos().isEmpty()) {
+
       var pagList = dto.getEncargosDescontos().stream()
           .map(e -> {
             var def = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
@@ -115,9 +127,6 @@ public class CarreiraWriteService {
           .toList();
       defPagamentoEntityRepository.saveAll(pagList);
     }
-
-    // TODO 23/11/2025 18:14 2 registo de IUR e INPS de DefPagamentoEntity
-
     var remun = new RemuneracaoTiprelEntity();
     remun.setEstado(Estado.P);
     remun.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -137,8 +146,6 @@ public class CarreiraWriteService {
     validation.setUuid(UuidCreator.getTimeOrderedEpoch());
     validation.setFunId(funcionario);
     validacaoEntityRepository.save(validation);
-
-    // TODO 23/11/2025 18:25 save log e log detalhe ?
   }
 
   @NotNull
