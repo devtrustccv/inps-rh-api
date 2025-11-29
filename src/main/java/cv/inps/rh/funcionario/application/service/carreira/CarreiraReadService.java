@@ -1,15 +1,14 @@
 package cv.inps.rh.funcionario.application.service.carreira;
 
 import cv.inps.rh.funcionario.application.dto.CarreiraListDTO;
+import cv.inps.rh.funcionario.application.dto.CarreiraResponseDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
-import cv.inps.rh.funcionario.infrastructure.mappers.CarreiraMapper;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -24,13 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.UUID;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class CarreiraReadService {
 
-  private final CarreiraEntityRepository carreiraEntityRepository;
-  private final CarreiraMapper carreiraMapper;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
 
   @Transactional(readOnly = true)
@@ -105,9 +104,35 @@ public class CarreiraReadService {
     wrapper.setTotalPages(page.getTotalPages());
     wrapper.setFirst(page.isFirst());
     wrapper.setLast(page.isLast());
-
     return wrapper;
+  }
 
+  public CarreiraResponseDTO getCarreiraById(String carreiraId) {
 
+    var tr = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(UUID.fromString(carreiraId));
+    var car = tr.getCarreiraId();
+    var fun = tr.getFunId();
+    var vinc = tr.getVinculoId();
+    var carrPcc = tr.getCarrPccId();
+    var esc = tr.getEscalaoId();
+    var categoria = tr.getCategoriaId();
+
+    var dto = new CarreiraResponseDTO();
+    dto.setMoeda(tr.getMoeda());
+    dto.setFuncionarioId(fun != null && fun.getUuid() != null ? fun.getUuid().toString() : null);
+    dto.setCarreiraId(carrPcc != null ? carrPcc.getUuid().toString() : null);
+    dto.setTipoCarreiraId(car.getCarrPccsId().getUuid().toString());
+    dto.setEscalaoId(esc != null ? esc.getEscalao() : null);
+    dto.setSalario(car.getSalario().toString());
+    dto.setTipoVinculoLaboral(vinc != null ? vinc.getNome() : null);
+    dto.setDataInicio(DateFormatter.localDateToString(tr.getDataInicio()));
+    dto.setDataFim(DateFormatter.localDateToString(tr.getDataFim()));
+    dto.setProcessaSalarioNestaCarreira(tr.getFlgProcessa());
+    dto.setCategoriaId(categoria != null ? categoria.getUuid().toString() : null);
+    if (car.getEstado() != null) {
+      dto.setEstado(car.getEstado().getCode());
+      dto.setEstadoDesc(car.getEstado().getDescription());
+    }
+    return dto;
   }
 }

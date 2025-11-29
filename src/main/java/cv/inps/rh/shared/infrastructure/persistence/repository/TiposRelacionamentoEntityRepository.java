@@ -43,4 +43,5 @@ public interface TiposRelacionamentoEntityRepository extends
   TiposRelacionamentoEntity findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity funcionario, Estado estado);
 
   Page<TiposRelacionamentoEntity> findByFunId_UuidAndEstado(UUID funcionarioId, Estado estado, Pageable pageable);
+  TiposRelacionamentoEntity findByCarreiraId_uuid(UUID carreiraId);
 }

@@ -8,9 +8,11 @@ import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.funcionario.application.commands.NovaCarreiraCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarCarreiraCommand;
+import cv.inps.rh.funcionario.application.dto.CarreiraResponseDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.ValidacaoCarreiraDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
+import cv.inps.rh.funcionario.application.queries.GetCarreiraByIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -66,9 +68,8 @@ public class CarreiraController {
 
       final var query = new GetCarreiraListQuery(idFuncionario, pageSize, pageNumber, dataInicio, dataFim, tipoCarreira);
 
-      ResponseEntity<WrapperCarreiraListDTO> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @PostMapping(
@@ -97,9 +98,8 @@ public class CarreiraController {
 
       final var command = new NovaCarreiraCommand(novaCarreiraRequest, funcionarioId);
 
-       ResponseEntity<String> response = commandBus.send(command);
+      return commandBus.send(command);
 
-       return response;
   }
 
    @PostMapping(
@@ -128,9 +128,38 @@ public class CarreiraController {
 
       final var command = new ValidarCarreiraCommand(validarCarreiraRequest, funcionarioId, carreiraId);
 
-       ResponseEntity<String> response = commandBus.send(command);
+      return commandBus.send(command);
 
-       return response;
+  }
+
+   @GetMapping(
+   value = "carreira/{carreiraId}"
+  )
+  @Operation(
+    summary = "Get carreira by id",
+    description = "Get carreira by id",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = CarreiraResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<CarreiraResponseDTO> getCarreiraById(
+    @PathVariable(value = "carreiraId") String carreiraId)
+  {
+
+      final var query = new GetCarreiraByIdQuery(carreiraId);
+
+      return queryBus.handle(query);
+
   }
 
 }

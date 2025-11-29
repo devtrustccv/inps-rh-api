@@ -142,7 +142,35 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getCarreiraById",
+      "path": "carreira/{carreiraId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "CarreiraResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "carreiraId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-validarCarreira"
+  "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-validarCarreira-getCarreiraById"
 }
