@@ -56,6 +56,7 @@ public interface DefinicaoRemuneracaoEntityRepository extends
   );
 
   List<DefinicaoRemuneracaoEntity> findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity fun, Estado estado);
+  List<DefinicaoRemuneracaoEntity> findByFunIdAndEstado(FuncionarioEntity fun, Estado estado);
 
 
   Optional<DefinicaoRemuneracaoEntity> findByUuid(UUID uuid);

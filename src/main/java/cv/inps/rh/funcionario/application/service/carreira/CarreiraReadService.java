@@ -1,9 +1,6 @@
 package cv.inps.rh.funcionario.application.service.carreira;
 
-import cv.inps.rh.funcionario.application.dto.CarreiraListDTO;
-import cv.inps.rh.funcionario.application.dto.CarreiraResponseDTO;
-import cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO;
-import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
+import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.shared.application.service.DominioService;
@@ -12,6 +9,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
@@ -34,6 +32,7 @@ public class CarreiraReadService {
 
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
+  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final DominioService dominioService;
 
   @Transactional(readOnly = true)
@@ -159,10 +158,20 @@ public class CarreiraReadService {
       row.setObservacoes(obj.getObs());
       encargos.add(row);
     });
-
     dto.setEncargos(encargos);
 
-    // TODO 30/11/2025 10:58 add subsidios
+    var subsidios = new ArrayList<SubsidioReqDTO>();
+    var subsidioDBData = definicaoRemuneracaoEntityRepository.findByFunIdAndEstado(fun, tr.getEstado());
+    subsidioDBData.forEach(obj -> {
+      var row = new SubsidioReqDTO();
+      row.setId(obj.getId());
+      row.setTipoSubsidioId(obj.getTmId() != null ? obj.getTmId().getId() : null);
+      row.setValor(obj.getValor());
+      row.setPercentagem(obj.getPercentagem());
+      row.setObservacoes(obj.getObs());
+      subsidios.add(row);
+    });
+    dto.setSubsidios(subsidios);
 
     return dto;
   }
