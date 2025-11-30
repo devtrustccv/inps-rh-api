@@ -51,6 +51,9 @@ public class CarreiraWriteService {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
 
+    if (carreiraEntityRepository.existsByFunIdAndEstado(funcionario, Estado.P))
+      throw IgrpResponseStatusException.conflict("Existe um registo de carreira por validar!");
+
     var currentDate = LocalDate.now();
     var currentDateMinusOneDay = currentDate.minusDays(1);
 
