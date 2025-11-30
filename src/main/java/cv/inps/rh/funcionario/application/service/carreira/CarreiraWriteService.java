@@ -11,16 +11,15 @@ import cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.RemuneracaoTiprelEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.ValidationUtil;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -47,6 +46,7 @@ public class CarreiraWriteService {
   private final DefPagamentoMapper defPagamentoMapper;
   private final FuncionarioRules funcionarioRules;
   private final TipoMovimentoHelper tipoMovimentoHelper;
+  private final EntityManager entityManager;
 
   public void novaCarreira(String funcionarioId, DadosContratuaisReqDTO dto) {
 
@@ -251,5 +251,59 @@ public class CarreiraWriteService {
     var validation = validacaoEntityRepository.findByTiprelIdAndEstadoAndReferenciaName(relacionamentoAtual, Estado.P, "CARREIRA");
     validation.setEstado(Estado.E);
     validacaoEntityRepository.save(validation);
+  }
+
+  public void atualizarCarreira(String carreiraId, String funcionarioId, DadosContratuaisReqDTO dto) {
+
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
+    var carreira = carreiraEntityRepository.findByUuidOrThrow(UUID.fromString(carreiraId));
+
+    if (carreira.getFunId().getId().equals(funcionario.getId()))
+      throw IgrpResponseStatusException.badRequest("Carreira não pertence a este funcionário");
+
+    if (!carreira.getEstado().equals(Estado.P))
+      throw IgrpResponseStatusException.badRequest("Carreira só pode ser atualiza no estado pendente");
+
+    if (!CollectionUtils.isEmpty(dto.getSubsidios())) {
+      var remList = dto.getSubsidios().stream()
+          .map(s -> {
+            DefinicaoRemuneracaoEntity obj;
+            if (s.getId() == null) {
+              obj = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
+              obj.setObs("MOBILIDADE- || TIPO_CARREIRA");
+            } else {
+              obj = definicaoRemuneracaoEntityRepository.findByIdOrThrow(s.getId());
+              obj.setPercentagem(s.getPercentagem());
+              obj.setValor(s.getValor());
+              obj.setObs(s.getObservacoes());
+              if (s.getTipoSubsidioId() != null)
+                obj.setTmId(entityManager.getReference(TipoMovimentoEntity.class, s.getTipoSubsidioId()));
+            }
+            return obj;
+          })
+          .toList();
+      definicaoRemuneracaoEntityRepository.saveAll(remList);
+    }
+
+    if (CollectionUtils.isEmpty(dto.getEncargosDescontos()))
+      return;
+
+    var pagList = dto.getEncargosDescontos().stream()
+        .map(e -> {
+          DefPagamentoEntity obj;
+          if (e.getId() == null) {
+            obj = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
+            obj.setObs("MOBILIDADE- || TIPO_CARREIRA");
+          } else {
+            obj = defPagamentoEntityRepository.findByIdOrThrow(e.getId());
+            obj.setValor(e.getValor());
+            obj.setObs(e.getObservacoes());
+            if (e.getTipoEncargoId() != null)
+              obj.setTmId(entityManager.getReference(TipoMovimentoEntity.class, e.getTipoEncargoId()));
+          }
+          return obj;
+        })
+        .toList();
+    defPagamentoEntityRepository.saveAll(pagList);
   }
 }
