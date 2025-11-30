@@ -169,6 +169,7 @@ public class CarreiraWriteService {
     if (!List.of("S", "N").contains(validacao))
       throw IgrpResponseStatusException.badRequest("Código de validação inválida: " + validacao + ". Deve ser S ou N.");
 
+    // TODO 30/11/2025 11:04 check this
     var dados = dto.getDados();
 
     var estado = validacao.equals("S") ? Estado.A : Estado.I;

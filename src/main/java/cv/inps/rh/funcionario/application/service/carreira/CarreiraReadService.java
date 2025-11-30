@@ -6,6 +6,7 @@ import cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
+import cv.inps.rh.shared.application.service.DominioService;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
@@ -15,9 +16,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamen
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -35,6 +34,7 @@ public class CarreiraReadService {
 
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
+  private final DominioService dominioService;
 
   @Transactional(readOnly = true)
   public WrapperCarreiraListDTO list(GetCarreiraListQuery query) {
@@ -68,11 +68,13 @@ public class CarreiraReadService {
       return cb.and(predicates.toArray(new Predicate[0]));
     };
 
-    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
-    Page<TiposRelacionamentoEntity> page = tiposRelacionamentoEntityRepository.findAll(spec, pageable);
+    var pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
+    var page = tiposRelacionamentoEntityRepository.findAll(spec, pageable);
+
+    var tipoMovimentoLaboralDomain = dominioService.getTipoMovimentoLaboralDomain();
 
     List<CarreiraListDTO> content = page.getContent().stream().map(tr -> {
-      CarreiraListDTO dto = new CarreiraListDTO();
+      var dto = new CarreiraListDTO();
       var car = tr.getCarreiraId();
       var fun = tr.getFunId();
       var vinc = tr.getVinculoId();
@@ -85,7 +87,6 @@ public class CarreiraReadService {
       dto.setUuid(car != null && car.getUuid() != null ? car.getUuid().toString() : null);
       dto.setIdFuncionario(fun != null ? fun.getId() : null);
       dto.setUuidFuncionario(fun != null && fun.getUuid() != null ? fun.getUuid().toString() : null);
-      dto.setTipoCarreira(car != null ? car.getTipoSituacao() : null);
       dto.setVinculo(vinc != null ? vinc.getNome() : null);
       dto.setCarreira(carrPcc != null ? carrPcc.getNome() : null);
       dto.setCargo(cargo != null ? cargo.getNome() : null);
@@ -97,6 +98,12 @@ public class CarreiraReadService {
       dto.setProcessamento(tr.getFlgProcessa());
       dto.setEstado(car != null && car.getEstado() != null ? car.getEstado().getCode() : null);
       dto.setEstadoDesc(car != null && car.getEstado() != null ? car.getEstado().getDescription() : null);
+
+      if (car != null) {
+        dto.setTipoCarreira(car.getTipoSituacao());
+        dto.setTipoCarreiraDesc(tipoMovimentoLaboralDomain.getOrDefault(car.getTipoSituacao(), car.getTipoSituacao()));
+      }
+
       return dto;
     }).toList();
 
@@ -154,6 +161,8 @@ public class CarreiraReadService {
     });
 
     dto.setEncargos(encargos);
+
+    // TODO 30/11/2025 10:58 add subsidios
 
     return dto;
   }
