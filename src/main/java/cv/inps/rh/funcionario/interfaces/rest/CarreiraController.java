@@ -3,27 +3,26 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.funcionario.application.commands.EliminarCarreiraCommand;
+import cv.inps.rh.funcionario.application.commands.NovaCarreiraCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarCarreiraCommand;
+import cv.inps.rh.funcionario.application.dto.CarreiraResponseDTO;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.funcionario.application.dto.ValidacaoCarreiraDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
+import cv.inps.rh.funcionario.application.queries.GetCarreiraByIdQuery;
+import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.funcionario.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.funcionario.application.commands.*;
-import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
-import cv.inps.rh.funcionario.application.dto.ValidacaoCarreiraDTO;
-import cv.inps.rh.funcionario.application.dto.CarreiraResponseDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
@@ -31,7 +30,7 @@ import cv.inps.rh.funcionario.application.dto.CarreiraResponseDTO;
 @Tag(name = "Carreira", description = "Gestao carreiras funcionario")
 public class CarreiraController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -58,7 +57,7 @@ public class CarreiraController {
       )
     }
   )
-  
+
   public ResponseEntity<WrapperCarreiraListDTO> getCarreiraList(
     @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
@@ -93,7 +92,7 @@ public class CarreiraController {
       )
     }
   )
-  
+
   public ResponseEntity<String> novaCarreira(@Valid @RequestBody DadosContratuaisReqDTO novaCarreiraRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId)
   {
@@ -123,7 +122,7 @@ public class CarreiraController {
       )
     }
   )
-  
+
   public ResponseEntity<String> validarCarreira(@Valid @RequestBody ValidacaoCarreiraDTO validarCarreiraRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId,@PathVariable(value = "carreiraId") String carreiraId)
   {
@@ -153,7 +152,7 @@ public class CarreiraController {
       )
     }
   )
-  
+
   public ResponseEntity<CarreiraResponseDTO> getCarreiraById(
     @PathVariable(value = "carreiraId") String carreiraId)
   {
@@ -161,6 +160,36 @@ public class CarreiraController {
       final var query = new GetCarreiraByIdQuery(carreiraId);
 
       return queryBus.handle(query);
+
+  }
+
+   @DeleteMapping(
+   value = "carreiras/{carreiraId}"
+  )
+  @Operation(
+    summary = "Eliminar carreira",
+    description = "Eliminar carreira",
+    responses = {
+      @ApiResponse(
+          responseCode = "204",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> eliminarCarreira(
+    @PathVariable(value = "carreiraId") String carreiraId)
+  {
+
+      final var command = new EliminarCarreiraCommand(carreiraId);
+
+      return commandBus.send(command);
 
   }
 

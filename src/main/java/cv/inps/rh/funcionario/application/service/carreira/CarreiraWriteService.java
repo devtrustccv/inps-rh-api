@@ -16,6 +16,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RemuneracaoTiprelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -33,6 +33,7 @@ import java.util.UUID;
 public class CarreiraWriteService {
 
   private final CarreiraEntityRepository carreiraEntityRepository;
+  private final ContratoEntityRepository contratoEntityRepository;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
@@ -54,10 +55,12 @@ public class CarreiraWriteService {
     if (carreiraEntityRepository.existsByFunIdAndEstado(funcionario, Estado.P))
       throw IgrpResponseStatusException.conflict("Existe um registo de carreira por validar!");
 
+    if (!contratoEntityRepository.existsByFunIdAndEstado(funcionario, Estado.A))
+      throw IgrpResponseStatusException.conflict("Este funcionário não possui um contrato ativo");
+
     var currentDate = LocalDate.now();
     var currentDateMinusOneDay = currentDate.minusDays(1);
 
-    // TODO 23/11/2025 17:39 criar novo contrato ?
     var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario);
 
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
@@ -140,7 +143,6 @@ public class CarreiraWriteService {
     remuneracaoTiprelEntityRepository.save(remun);
 
     var mobilidade = mobilidadeEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
-    // TODO 23/11/2025 18:24 use this mobilidade or create new one ?
 
     var validation = new ValidacaoEntity();
     validation.setTipoAccao("INSERT");
@@ -168,14 +170,12 @@ public class CarreiraWriteService {
 
   public void validarCarreira(String funcionarioId, ValidacaoCarreiraDTO dto) {
 
-    var validacao = dto.getValidacao();
-    if (!List.of("S", "N").contains(validacao))
-      throw IgrpResponseStatusException.badRequest("Código de validação inválida: " + validacao + ". Deve ser S ou N.");
+    ValidationUtil.validateDecision(dto.getValidacao());
 
     // TODO 30/11/2025 11:04 check this
     var dados = dto.getDados();
 
-    var estado = validacao.equals("S") ? Estado.A : Estado.I;
+    var estado = dto.getValidacao().equals("S") ? Estado.A : Estado.I;
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
 
@@ -207,6 +207,49 @@ public class CarreiraWriteService {
 
     var validation = validacaoEntityRepository.findByTiprelIdAndEstadoAndReferenciaName(relacionamento, Estado.P, "CARREIRA");
     validation.setEstado(estado);
+    validacaoEntityRepository.save(validation);
+  }
+
+  public void eliminarCareira(String carreiraId) {
+
+    var carreira = carreiraEntityRepository.findByUuidOrThrow(UUID.fromString(carreiraId));
+    if (!Estado.P.equals(carreira.getEstado()))
+      throw IgrpResponseStatusException.badRequest("Esta carreira não se encontra no estado pendente");
+
+    var funcionario = Objects.requireNonNull(carreira.getFunId());
+
+    carreira.setEstado(Estado.E);
+    carreiraEntityRepository.save(carreira);
+
+    var relacionamentoAtual = tiposRelacionamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
+    tiposRelacionamentoEntityRepository.save(relacionamentoAtual);
+
+    var defRemuneracao = definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
+    defRemuneracao.forEach(obj -> {
+      obj.setEstado(Estado.E);
+      definicaoRemuneracaoEntityRepository.save(obj);
+    });
+
+    var defPagamento = defPagamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
+    defPagamento.forEach(obj -> {
+      obj.setEstado(Estado.E);
+      defPagamentoEntityRepository.save(obj);
+    });
+
+    definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P).
+        forEach(obj -> {
+          obj.setEstado(Estado.E);
+          definicaoRemuneracaoEntityRepository.save(obj);
+        });
+
+    remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(relacionamentoAtual, Estado.P.name())
+        .forEach(remun -> {
+          remun.setEstado(Estado.E);
+          remuneracaoTiprelEntityRepository.save(remun);
+        });
+
+    var validation = validacaoEntityRepository.findByTiprelIdAndEstadoAndReferenciaName(relacionamentoAtual, Estado.P, "CARREIRA");
+    validation.setEstado(Estado.E);
     validacaoEntityRepository.save(validation);
   }
 }

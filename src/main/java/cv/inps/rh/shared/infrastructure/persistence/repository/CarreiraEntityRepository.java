@@ -14,6 +14,8 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 
 @Repository
@@ -102,6 +104,12 @@ public interface CarreiraEntityRepository extends
   CarreiraEntity findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity fun, Estado estado);
 
   boolean existsByFunIdAndEstado(FuncionarioEntity fun, Estado estado);
+
+  Optional<CarreiraEntity> findByUuid(UUID uuid);
+
+  default CarreiraEntity findByUuidOrThrow(UUID uuid) {
+    return this.findByUuid(uuid).orElseThrow(() -> IgrpResponseStatusException.notFound("CarreiraEntity not found for id: " + uuid));
+  }
 
 }
 
