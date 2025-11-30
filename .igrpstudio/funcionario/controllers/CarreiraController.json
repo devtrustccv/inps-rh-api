@@ -196,6 +196,50 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "atualizarCarreira",
+      "path": "{funcionarioId}/carreiras/{carreiraId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "collectionType": "none",
+              "name": "data",
+              "type": "DadosContratuaisReq",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "carreiraId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-validarCarreira-getCarreiraById-getCarreiraById-novaCarreira-validarCarreira"

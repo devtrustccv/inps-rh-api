@@ -6,6 +6,7 @@ package cv.inps.rh.funcionario.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.funcionario.application.commands.AtualizarCarreiraCommand;
 import cv.inps.rh.funcionario.application.commands.EliminarCarreiraCommand;
 import cv.inps.rh.funcionario.application.commands.NovaCarreiraCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarCarreiraCommand;
@@ -188,6 +189,36 @@ public class CarreiraController {
   {
 
       final var command = new EliminarCarreiraCommand(carreiraId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PutMapping(
+   value = "{funcionarioId}/carreiras/{carreiraId}"
+  )
+  @Operation(
+    summary = "Atualizar carreira",
+    description = "Atualizar carreira",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> atualizarCarreira(@Valid @RequestBody DadosContratuaisReqDTO atualizarCarreiraRequest
+    , @PathVariable(value = "funcionarioId") String funcionarioId,@PathVariable(value = "carreiraId") String carreiraId)
+  {
+
+      final var command = new AtualizarCarreiraCommand(atualizarCarreiraRequest, funcionarioId, carreiraId);
 
       return commandBus.send(command);
 
