@@ -18,9 +18,21 @@
       "primaryKey": false
     },
     {
-      "name": "tipoCarreiraId",
+      "name": "tipoCarreira",
       "objectType": "java",
       "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "cargoId",
+      "objectType": "java",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -32,7 +44,7 @@
     {
       "name": "carreiraId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -44,7 +56,7 @@
     {
       "name": "categoriaId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -56,7 +68,7 @@
     {
       "name": "escalaoId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,

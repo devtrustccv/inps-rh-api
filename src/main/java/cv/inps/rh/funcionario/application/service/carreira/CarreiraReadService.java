@@ -124,15 +124,16 @@ public class CarreiraReadService {
     var dto = new CarreiraResponseDTO();
     dto.setMoeda(tr.getMoeda());
     dto.setFuncionarioId(fun != null && fun.getUuid() != null ? fun.getUuid().toString() : null);
-    dto.setCarreiraId(carrPcc != null ? carrPcc.getUuid().toString() : null);
-    dto.setTipoCarreiraId(car.getCarrPccsId().getUuid().toString());
-    dto.setEscalaoId(esc != null ? esc.getEscalao() : null);
+    dto.setTipoCarreira(car.getTipoSituacao());
+    dto.setCargoId(tr.getCargoId() != null ? tr.getCargoId().getId() : null);
+    dto.setCarreiraId(carrPcc != null ? carrPcc.getId() : null);
+    dto.setEscalaoId(esc != null ? esc.getId() : null);
     dto.setSalario(car.getSalario().toString());
     dto.setTipoVinculoLaboral(vinc != null ? vinc.getNome() : null);
     dto.setDataInicio(DateFormatter.localDateToString(tr.getDataInicio()));
     dto.setDataFim(DateFormatter.localDateToString(tr.getDataFim()));
     dto.setProcessaSalarioNestaCarreira(tr.getFlgProcessa());
-    dto.setCategoriaId(categoria != null ? categoria.getUuid().toString() : null);
+    dto.setCategoriaId(categoria != null ? categoria.getId() : null);
     if (car.getEstado() != null) {
       dto.setEstado(car.getEstado().getCode());
       dto.setEstadoDesc(car.getEstado().getDescription());
