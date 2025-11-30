@@ -62,7 +62,7 @@
     },
     {
       "actionName": "novaCarreira",
-      "path": "{funcionarioId}",
+      "path": "{funcionarioId}/carreiras",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -101,7 +101,7 @@
     },
     {
       "actionName": "validarCarreira",
-      "path": "{funcionarioId}/validar/{carreiraId}",
+      "path": "{funcionarioId}/carreiras/{carreiraId}/validar",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -145,7 +145,7 @@
     },
     {
       "actionName": "getCarreiraById",
-      "path": "carreira/{carreiraId}",
+      "path": "carreiras/{carreiraId}",
       "method": "GET",
       "responses": {
         "200": {
@@ -172,5 +172,5 @@
       ]
     }
   ],
-  "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-validarCarreira-getCarreiraById"
+  "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-validarCarreira-getCarreiraById-getCarreiraById-novaCarreira-validarCarreira"
 }

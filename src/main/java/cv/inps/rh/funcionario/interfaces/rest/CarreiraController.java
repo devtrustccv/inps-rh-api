@@ -3,25 +3,27 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import cv.inps.rh.funcionario.application.commands.NovaCarreiraCommand;
-import cv.inps.rh.funcionario.application.commands.ValidarCarreiraCommand;
-import cv.inps.rh.funcionario.application.dto.CarreiraResponseDTO;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
-import cv.inps.rh.funcionario.application.dto.ValidacaoCarreiraDTO;
-import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
-import cv.inps.rh.funcionario.application.queries.GetCarreiraByIdQuery;
-import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import cv.igrp.framework.core.domain.QueryBus;
+import cv.inps.rh.funcionario.application.queries.*;
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.inps.rh.funcionario.application.commands.*;
+import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.funcionario.application.dto.ValidacaoCarreiraDTO;
+import cv.inps.rh.funcionario.application.dto.CarreiraResponseDTO;
 
 @IgrpController
 @RestController
@@ -29,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Carreira", description = "Gestao carreiras funcionario")
 public class CarreiraController {
 
-
+  
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -56,7 +58,7 @@ public class CarreiraController {
       )
     }
   )
-
+  
   public ResponseEntity<WrapperCarreiraListDTO> getCarreiraList(
     @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
@@ -73,7 +75,7 @@ public class CarreiraController {
   }
 
    @PostMapping(
-   value = "{funcionarioId}"
+   value = "{funcionarioId}/carreiras"
   )
   @Operation(
     summary = "Nova carreira",
@@ -91,7 +93,7 @@ public class CarreiraController {
       )
     }
   )
-
+  
   public ResponseEntity<String> novaCarreira(@Valid @RequestBody DadosContratuaisReqDTO novaCarreiraRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId)
   {
@@ -103,7 +105,7 @@ public class CarreiraController {
   }
 
    @PostMapping(
-   value = "{funcionarioId}/validar/{carreiraId}"
+   value = "{funcionarioId}/carreiras/{carreiraId}/validar"
   )
   @Operation(
     summary = "Validar carreira",
@@ -121,7 +123,7 @@ public class CarreiraController {
       )
     }
   )
-
+  
   public ResponseEntity<String> validarCarreira(@Valid @RequestBody ValidacaoCarreiraDTO validarCarreiraRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId,@PathVariable(value = "carreiraId") String carreiraId)
   {
@@ -133,7 +135,7 @@ public class CarreiraController {
   }
 
    @GetMapping(
-   value = "carreira/{carreiraId}"
+   value = "carreiras/{carreiraId}"
   )
   @Operation(
     summary = "Get carreira by id",
@@ -151,7 +153,7 @@ public class CarreiraController {
       )
     }
   )
-
+  
   public ResponseEntity<CarreiraResponseDTO> getCarreiraById(
     @PathVariable(value = "carreiraId") String carreiraId)
   {
