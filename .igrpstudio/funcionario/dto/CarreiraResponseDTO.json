@@ -138,7 +138,7 @@
       "primaryKey": false
     },
     {
-      "name": "encargos",
+      "name": "encargosDescontos",
       "objectType": "dto",
       "type": "EncargosDescontosReq",
       "required": false,

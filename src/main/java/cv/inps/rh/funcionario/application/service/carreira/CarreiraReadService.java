@@ -158,7 +158,7 @@ public class CarreiraReadService {
       row.setObservacoes(obj.getObs());
       encargos.add(row);
     });
-    dto.setEncargos(encargos);
+    dto.setEncargosDescontos(encargos);
 
     var subsidios = new ArrayList<SubsidioReqDTO>();
     var subsidioDBData = definicaoRemuneracaoEntityRepository.findByFunIdAndEstado(fun, tr.getEstado());
