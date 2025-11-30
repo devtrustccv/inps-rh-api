@@ -146,8 +146,13 @@ public class CarreiraReadService {
     }
 
     var encargos = new ArrayList<EncargosDescontosReqDTO>();
+    var paymentsNotNeedInDetails = List.of("INPS", "IUR");
 
-    var data = defPagamentoEntityRepository.findByFunIdAndEstado(fun, tr.getEstado());
+    var data = defPagamentoEntityRepository.findByFunIdAndEstado(fun, tr.getEstado())
+        .stream()
+        .filter(obj -> !paymentsNotNeedInDetails.contains(obj.getTmId().getTipo()))
+        .toList();
+
     data.forEach(obj -> {
       var row = new EncargosDescontosReqDTO();
       row.setId(obj.getId());
