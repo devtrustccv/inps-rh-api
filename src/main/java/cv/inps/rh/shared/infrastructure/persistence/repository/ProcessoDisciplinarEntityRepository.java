@@ -8,20 +8,26 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 
 @Repository
 public interface ProcessoDisciplinarEntityRepository extends
     JpaRepository<ProcessoDisciplinarEntity, Long>,
-    JpaSpecificationExecutor<ProcessoDisciplinarEntity>
-{
+    JpaSpecificationExecutor<ProcessoDisciplinarEntity> {
 
-      default ProcessoDisciplinarEntity findByIdOrThrow(Long id) {
-          return this.findById(id)
-          .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"ProcessoDisciplinarEntity not found for id: " + id));
-      }
+  default ProcessoDisciplinarEntity findByIdOrThrow(Long id) {
+    return this.findById(id)
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "ProcessoDisciplinarEntity not found for id: " + id));
+  }
 
-      List<ProcessoDisciplinarEntity> findByFunId_Uuid(UUID uuid);
+  List<ProcessoDisciplinarEntity> findByFunId_Uuid(UUID uuid);
+
+  Optional<ProcessoDisciplinarEntity> findByUuid(UUID uuid);
+
+  default ProcessoDisciplinarEntity findByUuidOrThrow(UUID uuid) {
+    return this.findByUuid(uuid).orElseThrow(() -> IgrpResponseStatusException.notFound("ProcessoDisciplinarEntity not found for id: " + uuid));
+  }
 
 }

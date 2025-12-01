@@ -47,4 +47,23 @@ public class ProcessoDisciplinarReadService {
         .toList();
   }
 
+  public ProcessoDisciplinarResponseDTO getProcessoDisciplinarById(String processoDisciplinarId) {
+
+    var obj = processoDisciplinarEntityRepository.findByUuidOrThrow(UUID.fromString(processoDisciplinarId));
+
+    var processType = domainEntityRepository.getActiveDomainByCode(Domains.TP_PROCESSO_DISC.name());
+
+    var response = new ProcessoDisciplinarResponseDTO();
+    response.setProcessoDisciplinarId(obj.getUuid().toString());
+    response.setProcessoDisciplinar(processType.get(obj.getTpProcesso()));
+    response.setDataInicio(DateFormatter.localDateToString(obj.getDateInicPd()));
+    response.setDataFim(DateFormatter.localDateToString(obj.getDateFimPd()));
+    ofNullable(obj.getTiprelId()).ifPresent(r -> {
+      ofNullable(r.getInstitId()).ifPresent(i -> response.setDirecao(i.getNome()));
+      ofNullable(r.getSeccaoId()).ifPresent(s -> response.setSeccao(s.getNome()));
+      ofNullable(r.getVinculoId()).ifPresent(v -> response.setVinculo(v.getNome()));
+    });
+    return response;
+  }
+
 }

@@ -71,6 +71,34 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getProcessoDisciplinarById",
+      "path": "{processoDisciplinarId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ProcessoDisciplinarResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "processoDisciplinarId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "2d8lf4vnyr-novoProcessoDisciplinar"

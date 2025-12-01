@@ -9,6 +9,7 @@ import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.funcionario.application.commands.NovoProcessoDisciplinarCommand;
 import cv.inps.rh.funcionario.application.dto.ProcessoDisciplinarRequestDTO;
 import cv.inps.rh.funcionario.application.dto.ProcessoDisciplinarResponseDTO;
+import cv.inps.rh.funcionario.application.queries.GetProcessoDisciplinarByIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetProcessosFuncionarioQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,8 +40,8 @@ public class ProcessoDisciplinarController {
    value = "{funcionarioId}"
   )
   @Operation(
-    summary = "POST method to handle operations for Novo processo disciplinar",
-    description = "POST method to handle operations for Novo processo disciplinar",
+    summary = "Novo processo disciplinar",
+    description = "Novo processo disciplinar",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -61,17 +62,16 @@ public class ProcessoDisciplinarController {
 
       final var command = new NovoProcessoDisciplinarCommand(novoProcessoDisciplinarRequest, funcionarioId);
 
-       ResponseEntity<String> response = commandBus.send(command);
+      return commandBus.send(command);
 
-       return response;
   }
 
    @GetMapping(
    value = "{funcionarioId}"
   )
   @Operation(
-    summary = "GET method to handle operations for Get processos funcionario",
-    description = "GET method to handle operations for Get processos funcionario",
+    summary = "Get processos funcionario",
+    description = "Get processos funcionario",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -92,9 +92,38 @@ public class ProcessoDisciplinarController {
 
       final var query = new GetProcessosFuncionarioQuery(funcionarioId);
 
-      ResponseEntity<List<ProcessoDisciplinarResponseDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
+  }
+
+   @GetMapping(
+   value = "{processoDisciplinarId}"
+  )
+  @Operation(
+    summary = "Get processo disciplinar by id",
+    description = "Get processo disciplinar by id",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ProcessoDisciplinarResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<ProcessoDisciplinarResponseDTO> getProcessoDisciplinarById(
+    @PathVariable(value = "processoDisciplinarId") String processoDisciplinarId)
+  {
+
+      final var query = new GetProcessoDisciplinarByIdQuery(processoDisciplinarId);
+
+      return queryBus.handle(query);
+
   }
 
 }
