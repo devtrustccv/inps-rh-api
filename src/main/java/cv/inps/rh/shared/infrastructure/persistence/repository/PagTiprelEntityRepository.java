@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PagTiprelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -23,6 +24,6 @@ public interface PagTiprelEntityRepository extends
           .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"PagTiprelEntity not found for id: " + id));
       }
 
-  List<PagTiprelEntity> findByTiprelIdAndEstado(TiposRelacionamentoEntity relacionamento, String estado);
+  List<PagTiprelEntity> findByTiprelIdAndEstado(TiposRelacionamentoEntity tiprelId, Estado estado);
 
 }

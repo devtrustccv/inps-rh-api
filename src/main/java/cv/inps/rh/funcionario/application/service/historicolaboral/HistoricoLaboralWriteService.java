@@ -92,7 +92,7 @@ public class HistoricoLaboralWriteService {
         remuneracaoTiprelEntityRepository.save(rt);
       }
 
-      var pagTiprels = pagTiprelEntityRepository.findByTiprelIdAndEstado(relacionamentoPendente, Estado.P.name());
+      var pagTiprels = pagTiprelEntityRepository.findByTiprelIdAndEstado(relacionamentoPendente, Estado.P);
       for (var pt : pagTiprels) {
         pt.setEstado(estadoFinal);
         pagTiprelEntityRepository.save(pt);
@@ -151,7 +151,7 @@ public class HistoricoLaboralWriteService {
       rt.setEstado(Estado.I);
       remuneracaoTiprelEntityRepository.save(rt);
     }
-    var pagAssocAtivos = pagTiprelEntityRepository.findByTiprelIdAndEstado(trAtual, Estado.A.name());
+    var pagAssocAtivos = pagTiprelEntityRepository.findByTiprelIdAndEstado(trAtual, Estado.A);
     for (var pt : pagAssocAtivos) {
       pt.setEstado(Estado.I);
       pagTiprelEntityRepository.save(pt);
