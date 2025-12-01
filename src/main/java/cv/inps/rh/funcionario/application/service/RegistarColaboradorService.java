@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.application.commands.CreateFuncionarioCommand;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
+import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -50,6 +51,8 @@ public class RegistarColaboradorService {
 
   private final RemuneracaoTiprelEntityRepository renumeracaoTiprelEntityRepository;
   private final PagTiprelEntityRepository pagTiprelEntityRepository;
+
+  private final TipoMovimentoHelper tipoMovimentoHelper;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -148,15 +151,9 @@ public class RegistarColaboradorService {
       fun.setMobilidades(new ArrayList<>(List.of(mobilidade)));
     }
 
-
-    var tipoMovimentoSalario = tipoMovimentoEntityRepository.findByShortDescAndAmbAplId("SALL", 30L)
-        .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento SALARIO nao encontrado."));
-
-    var tipoMovimentoInps = tipoMovimentoEntityRepository.findByShortDescAndAmbAplId("INPS", 30L)
-        .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento INPS nao encontrado."));
-
-    var tipoMovimentoIUR = tipoMovimentoEntityRepository.findByShortDescAndAmbAplId("IUR", 30L)
-        .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento IUR nao encontrado."));
+    var tipoMovimentoSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
+    var tipoMovimentoInps = tipoMovimentoHelper.getTipoMovimentoEntityInps();
+    var tipoMovimentoIUR =  tipoMovimentoHelper.getTipoMovimentoEntityIur();
 
     /***********************RENUMERACOES ********************************/
     if (dc.getSubsidios() != null && !dc.getSubsidios().isEmpty()) {

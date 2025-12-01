@@ -6,11 +6,15 @@ package cv.inps.rh.funcionario.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.funcionario.application.commands.AtualizarCarreiraCommand;
+import cv.inps.rh.funcionario.application.commands.EliminarCarreiraCommand;
 import cv.inps.rh.funcionario.application.commands.NovaCarreiraCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarCarreiraCommand;
+import cv.inps.rh.funcionario.application.dto.CarreiraResponseDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.ValidacaoCarreiraDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
+import cv.inps.rh.funcionario.application.queries.GetCarreiraByIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -66,13 +70,12 @@ public class CarreiraController {
 
       final var query = new GetCarreiraListQuery(idFuncionario, pageSize, pageNumber, dataInicio, dataFim, tipoCarreira);
 
-      ResponseEntity<WrapperCarreiraListDTO> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @PostMapping(
-   value = "{funcionarioId}"
+   value = "{funcionarioId}/carreiras"
   )
   @Operation(
     summary = "Nova carreira",
@@ -97,13 +100,12 @@ public class CarreiraController {
 
       final var command = new NovaCarreiraCommand(novaCarreiraRequest, funcionarioId);
 
-       ResponseEntity<String> response = commandBus.send(command);
+      return commandBus.send(command);
 
-       return response;
   }
 
    @PostMapping(
-   value = "{funcionarioId}/validar/{carreiraId}"
+   value = "{funcionarioId}/carreiras/{carreiraId}/validar"
   )
   @Operation(
     summary = "Validar carreira",
@@ -128,9 +130,98 @@ public class CarreiraController {
 
       final var command = new ValidarCarreiraCommand(validarCarreiraRequest, funcionarioId, carreiraId);
 
-       ResponseEntity<String> response = commandBus.send(command);
+      return commandBus.send(command);
 
-       return response;
+  }
+
+   @GetMapping(
+   value = "carreiras/{carreiraId}"
+  )
+  @Operation(
+    summary = "Get carreira by id",
+    description = "Get carreira by id",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = CarreiraResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<CarreiraResponseDTO> getCarreiraById(
+    @PathVariable(value = "carreiraId") String carreiraId)
+  {
+
+      final var query = new GetCarreiraByIdQuery(carreiraId);
+
+      return queryBus.handle(query);
+
+  }
+
+   @DeleteMapping(
+   value = "carreiras/{carreiraId}"
+  )
+  @Operation(
+    summary = "Eliminar carreira",
+    description = "Eliminar carreira",
+    responses = {
+      @ApiResponse(
+          responseCode = "204",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> eliminarCarreira(
+    @PathVariable(value = "carreiraId") String carreiraId)
+  {
+
+      final var command = new EliminarCarreiraCommand(carreiraId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PutMapping(
+   value = "{funcionarioId}/carreiras/{carreiraId}"
+  )
+  @Operation(
+    summary = "Atualizar carreira",
+    description = "Atualizar carreira",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> atualizarCarreira(@Valid @RequestBody DadosContratuaisReqDTO atualizarCarreiraRequest
+    , @PathVariable(value = "funcionarioId") String funcionarioId,@PathVariable(value = "carreiraId") String carreiraId)
+  {
+
+      final var command = new AtualizarCarreiraCommand(atualizarCarreiraRequest, funcionarioId, carreiraId);
+
+      return commandBus.send(command);
+
   }
 
 }

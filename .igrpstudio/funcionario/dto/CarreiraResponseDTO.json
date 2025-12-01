@@ -1,48 +1,12 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "CarreiraList",
+  "name": "CarreiraResponse",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "id",
-      "objectType": "java",
-      "type": "long",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "uuid",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "idFuncionario",
-      "objectType": "java",
-      "type": "long",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "uuidFuncionario",
+      "name": "tipoVinculoLaboral",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -66,9 +30,9 @@
       "primaryKey": false
     },
     {
-      "name": "tipoCarreiraDesc",
+      "name": "cargoId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -78,9 +42,9 @@
       "primaryKey": false
     },
     {
-      "name": "vinculo",
+      "name": "carreiraId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -90,9 +54,9 @@
       "primaryKey": false
     },
     {
-      "name": "carreira",
+      "name": "categoriaId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -102,21 +66,9 @@
       "primaryKey": false
     },
     {
-      "name": "cargo",
+      "name": "escalaoId",
       "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "escalao",
-      "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -138,7 +90,7 @@
       "primaryKey": false
     },
     {
-      "name": "situacaoLaboral",
+      "name": "moeda",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -152,7 +104,7 @@
     {
       "name": "dataInicio",
       "objectType": "java",
-      "type": "date",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -164,7 +116,7 @@
     {
       "name": "dataFim",
       "objectType": "java",
-      "type": "date",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -174,7 +126,7 @@
       "primaryKey": false
     },
     {
-      "name": "processamento",
+      "name": "processaSalarioNestaCarreira",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -184,6 +136,20 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "encargosDescontos",
+      "objectType": "dto",
+      "type": "EncargosDescontosReq",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
     },
     {
       "name": "estado",
@@ -208,7 +174,33 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "funcionarioId",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "subsidios",
+      "objectType": "dto",
+      "type": "SubsidioReq",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
     }
   ],
-  "id": "xl1qfu69t6"
+  "id": "ixr8ll4i74"
 }

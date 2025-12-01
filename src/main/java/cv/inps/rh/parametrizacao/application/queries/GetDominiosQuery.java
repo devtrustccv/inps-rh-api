@@ -15,5 +15,7 @@ public class GetDominiosQuery implements Query {
 
   @NotBlank(message = "The field <dominio> is required")
   private String dominio;
+  @NotBlank(message = "The field <referencia> is required")
+  private String referencia;
 
 }

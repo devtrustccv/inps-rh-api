@@ -1,37 +1,39 @@
 package cv.inps.rh.funcionario.application.service.carreira;
 
-import cv.inps.rh.funcionario.application.dto.CarreiraListDTO;
-import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
+import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
-import cv.inps.rh.funcionario.infrastructure.mappers.CarreiraMapper;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
+import cv.inps.rh.shared.application.service.DominioService;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class CarreiraReadService {
 
-  private final CarreiraEntityRepository carreiraEntityRepository;
-  private final CarreiraMapper carreiraMapper;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
+  private final DefPagamentoEntityRepository defPagamentoEntityRepository;
+  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
+  private final DominioService dominioService;
 
   @Transactional(readOnly = true)
   public WrapperCarreiraListDTO list(GetCarreiraListQuery query) {
@@ -65,11 +67,13 @@ public class CarreiraReadService {
       return cb.and(predicates.toArray(new Predicate[0]));
     };
 
-    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
-    Page<TiposRelacionamentoEntity> page = tiposRelacionamentoEntityRepository.findAll(spec, pageable);
+    var pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
+    var page = tiposRelacionamentoEntityRepository.findAll(spec, pageable);
+
+    var tipoMovimentoLaboralDomain = dominioService.getTipoMovimentoLaboralDomain();
 
     List<CarreiraListDTO> content = page.getContent().stream().map(tr -> {
-      CarreiraListDTO dto = new CarreiraListDTO();
+      var dto = new CarreiraListDTO();
       var car = tr.getCarreiraId();
       var fun = tr.getFunId();
       var vinc = tr.getVinculoId();
@@ -82,7 +86,6 @@ public class CarreiraReadService {
       dto.setUuid(car != null && car.getUuid() != null ? car.getUuid().toString() : null);
       dto.setIdFuncionario(fun != null ? fun.getId() : null);
       dto.setUuidFuncionario(fun != null && fun.getUuid() != null ? fun.getUuid().toString() : null);
-      dto.setTipoCarreira(car != null ? car.getTipoSituacao() : null);
       dto.setVinculo(vinc != null ? vinc.getNome() : null);
       dto.setCarreira(carrPcc != null ? carrPcc.getNome() : null);
       dto.setCargo(cargo != null ? cargo.getNome() : null);
@@ -94,6 +97,12 @@ public class CarreiraReadService {
       dto.setProcessamento(tr.getFlgProcessa());
       dto.setEstado(car != null && car.getEstado() != null ? car.getEstado().getCode() : null);
       dto.setEstadoDesc(car != null && car.getEstado() != null ? car.getEstado().getDescription() : null);
+
+      if (car != null) {
+        dto.setTipoCarreira(car.getTipoSituacao());
+        dto.setTipoCarreiraDesc(tipoMovimentoLaboralDomain.getOrDefault(car.getTipoSituacao(), car.getTipoSituacao()));
+      }
+
       return dto;
     }).toList();
 
@@ -105,9 +114,70 @@ public class CarreiraReadService {
     wrapper.setTotalPages(page.getTotalPages());
     wrapper.setFirst(page.isFirst());
     wrapper.setLast(page.isLast());
-
     return wrapper;
+  }
 
+  public CarreiraResponseDTO getCarreiraById(String carreiraId) {
 
+    var tr = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(UUID.fromString(carreiraId));
+    var car = tr.getCarreiraId();
+    var fun = tr.getFunId();
+    var vinc = tr.getVinculoId();
+    var carrPcc = tr.getCarrPccId();
+    var esc = tr.getEscalaoId();
+    var categoria = tr.getCategoriaId();
+
+    var dto = new CarreiraResponseDTO();
+    dto.setMoeda(tr.getMoeda());
+    dto.setFuncionarioId(fun != null && fun.getUuid() != null ? fun.getUuid().toString() : null);
+    dto.setTipoCarreira(car.getTipoSituacao());
+    dto.setCargoId(tr.getCargoId() != null ? tr.getCargoId().getId() : null);
+    dto.setCarreiraId(carrPcc != null ? carrPcc.getId() : null);
+    dto.setEscalaoId(esc != null ? esc.getId() : null);
+    dto.setSalario(car.getSalario().toString());
+    dto.setTipoVinculoLaboral(vinc != null ? vinc.getNome() : null);
+    dto.setDataInicio(DateFormatter.localDateToString(tr.getDataInicio()));
+    dto.setDataFim(DateFormatter.localDateToString(tr.getDataFim()));
+    dto.setProcessaSalarioNestaCarreira(tr.getFlgProcessa());
+    dto.setCategoriaId(categoria != null ? categoria.getId() : null);
+    if (car.getEstado() != null) {
+      dto.setEstado(car.getEstado().getCode());
+      dto.setEstadoDesc(car.getEstado().getDescription());
+    }
+
+    var encargos = new ArrayList<EncargosDescontosReqDTO>();
+    var paymentsNotNeedInDetails = List.of("INPS", "IUR");
+
+    var data = defPagamentoEntityRepository.findByFunIdAndEstado(fun, tr.getEstado())
+        .stream()
+        .filter(obj -> !paymentsNotNeedInDetails.contains(obj.getTmId().getTipo()))
+        .toList();
+
+    data.forEach(obj -> {
+      var row = new EncargosDescontosReqDTO();
+      row.setId(obj.getId());
+      row.setTipoEncargoId(obj.getTmId() != null ? obj.getTmId().getId() : null);
+      row.setValor(obj.getValor());
+      row.setDataInicio(obj.getDataInicio());
+      row.setDataFim(obj.getDataFim());
+      row.setObservacoes(obj.getObs());
+      encargos.add(row);
+    });
+    dto.setEncargosDescontos(encargos);
+
+    var subsidios = new ArrayList<SubsidioReqDTO>();
+    var subsidioDBData = definicaoRemuneracaoEntityRepository.findByFunIdAndEstado(fun, tr.getEstado());
+    subsidioDBData.forEach(obj -> {
+      var row = new SubsidioReqDTO();
+      row.setId(obj.getId());
+      row.setTipoSubsidioId(obj.getTmId() != null ? obj.getTmId().getId() : null);
+      row.setValor(obj.getValor());
+      row.setPercentagem(obj.getPercentagem());
+      row.setObservacoes(obj.getObs());
+      subsidios.add(row);
+    });
+    dto.setSubsidios(subsidios);
+
+    return dto;
   }
 }

@@ -12,6 +12,8 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 @Component
 @RequiredArgsConstructor
 public class MobilidadeMapper {
@@ -21,9 +23,16 @@ public class MobilidadeMapper {
   public MobilidadeDTO mobilidadeDTO(MobilidadeEntity mobilidade) {
 
     var dto = new MobilidadeDTO();
-    dto.setDirrecaoAntes(mobilidade.getInstidId().getNome());
-    dto.setSeccaoAntes(mobilidade.getSecaoId().getNome() != null ? mobilidade.getSecaoId().getNome() : "");
-    dto.setLocalTrabalhoAntes(mobilidade.getLocalTrabId().getNome());
+
+    if (Objects.nonNull(mobilidade.getInstidId()))
+      dto.setDirrecaoAntes(mobilidade.getInstidId().getNome());
+
+    if (Objects.nonNull(mobilidade.getSecaoId()))
+      dto.setSeccaoAntes(mobilidade.getSecaoId().getNome() != null ? mobilidade.getSecaoId().getNome() : "");
+
+    if (Objects.nonNull(mobilidade.getLocalTrabId()))
+      dto.setLocalTrabalhoAntes(mobilidade.getLocalTrabId().getNome());
+
     dto.setTipoMobilidade(mobilidade.getTipoSituacao());
     dto.setDataInicio(mobilidade.getDataInicio());
     dto.setDataFim(mobilidade.getDataFim());

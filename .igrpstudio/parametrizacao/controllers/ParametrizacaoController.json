@@ -30,6 +30,11 @@
           "type": "string",
           "name": "dominio",
           "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "referencia",
+          "isRequired": false
         }
       ]
     },
@@ -244,5 +249,5 @@
       }
     }
   ],
-  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo"
+  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios"
 }

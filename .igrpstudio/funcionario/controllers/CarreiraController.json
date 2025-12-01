@@ -62,7 +62,7 @@
     },
     {
       "actionName": "novaCarreira",
-      "path": "{funcionarioId}",
+      "path": "{funcionarioId}/carreiras",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -101,7 +101,7 @@
     },
     {
       "actionName": "validarCarreira",
-      "path": "{funcionarioId}/validar/{carreiraId}",
+      "path": "{funcionarioId}/carreiras/{carreiraId}/validar",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -142,7 +142,105 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getCarreiraById",
+      "path": "carreiras/{carreiraId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "CarreiraResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "carreiraId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "eliminarCarreira",
+      "path": "carreiras/{carreiraId}",
+      "method": "DELETE",
+      "responses": {
+        "204": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "carreiraId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "atualizarCarreira",
+      "path": "{funcionarioId}/carreiras/{carreiraId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "collectionType": "none",
+              "name": "data",
+              "type": "DadosContratuaisReq",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "carreiraId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-validarCarreira"
+  "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-validarCarreira-getCarreiraById-getCarreiraById-novaCarreira-validarCarreira"
 }

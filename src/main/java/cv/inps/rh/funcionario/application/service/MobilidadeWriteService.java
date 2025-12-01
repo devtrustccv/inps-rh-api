@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -85,7 +86,7 @@ public class MobilidadeWriteService {
   private MobilidadeEntity createMobilidade(MobilidadeDTO mobilidadeDTO){
      if (mobilidadeDTO == null) return null;
 
-     if(mobilidadeDTO.getLocalTrabalhoDepois() == null || mobilidadeDTO.getSeccaoDepois() == null || mobilidadeDTO.getDirecaoDepois() == null){
+     if(mobilidadeDTO.getLocalTrabalhoDepois() == null && mobilidadeDTO.getSeccaoDepois() == null && mobilidadeDTO.getDirecaoDepois() == null){
        throw IgrpResponseStatusException.badRequest("Local de trabalho, seção e direção são obrigatórios");
      }
 
@@ -93,9 +94,12 @@ public class MobilidadeWriteService {
     me.setTipoSituacao(mobilidadeDTO.getTipoMobilidade());
     me.setObs("MOBILIDADE");
     me.setUuid(UuidCreator.getTimeOrderedEpoch());
-    me.setLocalTrabId(entityManager.getReference(ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDepois()));
-    me.setSecaoId(entityManager.getReference(SecaoEntity.class, mobilidadeDTO.getSeccaoDepois()));
-    me.setInstidId(entityManager.getReference(InstituicaoEntity.class, mobilidadeDTO.getDirecaoDepois()));
+    if(Objects.nonNull(mobilidadeDTO.getLocalTrabalhoDepois()))
+      me.setLocalTrabId(entityManager.getReference(ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDepois()));
+    if(Objects.nonNull(mobilidadeDTO.getSeccaoDepois()))
+      me.setSecaoId(entityManager.getReference(SecaoEntity.class, mobilidadeDTO.getSeccaoDepois()));
+    if(Objects.nonNull(mobilidadeDTO.getDirecaoDepois()))
+      me.setInstidId(entityManager.getReference(InstituicaoEntity.class, mobilidadeDTO.getDirecaoDepois()));
     me.setDataInicio(mobilidadeDTO.getDataInicio());
     me.setDataFim(mobilidadeDTO.getDataFim());
     me.setEstado(Estado.P);

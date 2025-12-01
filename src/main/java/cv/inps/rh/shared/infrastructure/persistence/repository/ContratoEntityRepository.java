@@ -1,8 +1,9 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamContratoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -54,5 +55,7 @@ public interface ContratoEntityRepository extends
   boolean existsByTpContratoId(ParamContratoEntity tipoContrato);
 
   Optional<ContratoEntity> findByUuid(UUID uuid);
+
+  boolean existsByFunIdAndEstado(FuncionarioEntity fun, Estado estado);
 
 }
