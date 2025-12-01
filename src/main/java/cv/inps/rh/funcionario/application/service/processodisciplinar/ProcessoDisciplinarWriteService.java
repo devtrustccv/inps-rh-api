@@ -27,6 +27,24 @@ public class ProcessoDisciplinarWriteService {
     var process = new ProcessoDisciplinarEntity();
     process.setTiprelId(tiposRelacionamentoEntityRepository.findByUuidOrThrow(UUID.fromString(request.getVinculoReferente())));
     process.setFunId(funcionario);
+    process.setUuid(UuidCreator.getTimeOrderedEpoch());
+    populateEntity(request, process);
+
+    return processoDisciplinarEntityRepository.save(process).getUuid();
+  }
+
+
+  public void updateProcessoDisciplinar(String processoDisciplinarId, ProcessoDisciplinarRequestDTO request) {
+
+    var process = processoDisciplinarEntityRepository.findByUuidOrThrow(UUID.fromString(processoDisciplinarId));
+
+    process.setTiprelId(tiposRelacionamentoEntityRepository.findByUuidOrThrow(UUID.fromString(request.getVinculoReferente())));
+    populateEntity(request, process);
+
+    processoDisciplinarEntityRepository.save(process);
+  }
+
+  private void populateEntity(ProcessoDisciplinarRequestDTO request, ProcessoDisciplinarEntity process) {
     process.setNumProceso(request.getNumeroProcesso());
     process.setEntidade(request.getEntidade());
     process.setTpProcesso(request.getTipoProcesso());
@@ -42,9 +60,5 @@ public class ProcessoDisciplinarWriteService {
     process.setDataEmissOfa(DateFormatter.stringToLocalDate(request.getDataEmissaoOfa()));
     process.setNumOrdemServ(request.getNumeroOrdemServico());
     process.setNumOfa(request.getNumeroOfa());
-    process.setUuid(UuidCreator.getTimeOrderedEpoch());
-
-    return processoDisciplinarEntityRepository.save(process).getUuid();
   }
-
 }

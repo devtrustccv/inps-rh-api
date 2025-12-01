@@ -7,6 +7,7 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.funcionario.application.commands.NovoProcessoDisciplinarCommand;
+import cv.inps.rh.funcionario.application.commands.UpdateProcessoDisciplinarCommand;
 import cv.inps.rh.funcionario.application.dto.ProcessoDisciplinarRequestDTO;
 import cv.inps.rh.funcionario.application.dto.ProcessoDisciplinarResponseDTO;
 import cv.inps.rh.funcionario.application.queries.GetProcessoDisciplinarByIdQuery;
@@ -123,6 +124,36 @@ public class ProcessoDisciplinarController {
       final var query = new GetProcessoDisciplinarByIdQuery(processoDisciplinarId);
 
       return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "{processoDisciplinarId}"
+  )
+  @Operation(
+    summary = "Update processo disciplinar",
+    description = "Update processo disciplinar",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> updateProcessoDisciplinar(@Valid @RequestBody ProcessoDisciplinarRequestDTO updateProcessoDisciplinarRequest
+    , @PathVariable(value = "processoDisciplinarId") String processoDisciplinarId)
+  {
+
+      final var command = new UpdateProcessoDisciplinarCommand(updateProcessoDisciplinarRequest, processoDisciplinarId);
+
+      return commandBus.send(command);
 
   }
 
