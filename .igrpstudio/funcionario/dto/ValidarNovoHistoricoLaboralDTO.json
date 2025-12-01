@@ -54,6 +54,30 @@
       "isUrl": false,
       "primaryKey": false,
       "module": "funcionario"
+    },
+    {
+      "name": "tipoOrdemServico",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "gerarOrdemServico",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
     }
   ],
   "id": "l6xt20qblf"

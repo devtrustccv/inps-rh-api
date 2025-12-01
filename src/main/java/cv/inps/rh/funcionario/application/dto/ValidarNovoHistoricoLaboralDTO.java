@@ -32,5 +32,11 @@ public class ValidarNovoHistoricoLaboralDTO  {
   
   @Valid
   private DadosContratuaisReqDTO dadosContratuais ;
+  
+  
+  private String tipoOrdemServico ;
+  
+  
+  private String gerarOrdemServico ;
 
 }
