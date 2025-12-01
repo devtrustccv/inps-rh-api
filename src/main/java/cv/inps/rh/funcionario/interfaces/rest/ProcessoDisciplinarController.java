@@ -6,6 +6,7 @@ package cv.inps.rh.funcionario.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.funcionario.application.commands.DeleteProcessoDisciplinarCommand;
 import cv.inps.rh.funcionario.application.commands.NovoProcessoDisciplinarCommand;
 import cv.inps.rh.funcionario.application.commands.UpdateProcessoDisciplinarCommand;
 import cv.inps.rh.funcionario.application.dto.ProcessoDisciplinarRequestDTO;
@@ -152,6 +153,36 @@ public class ProcessoDisciplinarController {
   {
 
       final var command = new UpdateProcessoDisciplinarCommand(updateProcessoDisciplinarRequest, processoDisciplinarId);
+
+      return commandBus.send(command);
+
+  }
+
+   @DeleteMapping(
+   value = "{processoDisciplinarId}"
+  )
+  @Operation(
+    summary = "Delete processo disciplinar",
+    description = "Delete processo disciplinar",
+    responses = {
+      @ApiResponse(
+          responseCode = "204",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> deleteProcessoDisciplinar(
+    @PathVariable(value = "processoDisciplinarId") String processoDisciplinarId)
+  {
+
+      final var command = new DeleteProcessoDisciplinarCommand(processoDisciplinarId);
 
       return commandBus.send(command);
 

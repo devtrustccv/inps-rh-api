@@ -22,7 +22,7 @@ public interface ProcessoDisciplinarEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "ProcessoDisciplinarEntity not found for id: " + id));
   }
 
-  List<ProcessoDisciplinarEntity> findByFunId_Uuid(UUID uuid);
+  List<ProcessoDisciplinarEntity> findByFunId_UuidAndEstadoNot(UUID uuid, String estado);
 
   Optional<ProcessoDisciplinarEntity> findByUuid(UUID uuid);
 

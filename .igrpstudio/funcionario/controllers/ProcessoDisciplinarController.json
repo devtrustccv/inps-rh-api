@@ -138,6 +138,32 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "deleteProcessoDisciplinar",
+      "path": "{processoDisciplinarId}",
+      "method": "DELETE",
+      "responses": {
+        "204": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "processoDisciplinarId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "2d8lf4vnyr-novoProcessoDisciplinar"

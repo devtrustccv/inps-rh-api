@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.service.processodisciplinar;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.ProcessoDisciplinarRequestDTO;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ProcessoDisciplinarEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessoDisciplinarEntityRepository;
@@ -60,5 +61,11 @@ public class ProcessoDisciplinarWriteService {
     process.setDataEmissOfa(DateFormatter.stringToLocalDate(request.getDataEmissaoOfa()));
     process.setNumOrdemServ(request.getNumeroOrdemServico());
     process.setNumOfa(request.getNumeroOfa());
+  }
+
+  public void deleteProcessoDisciplinar(String processoDisciplinarId) {
+    var process = processoDisciplinarEntityRepository.findByUuidOrThrow(UUID.fromString(processoDisciplinarId));
+    process.setEstado(Estado.E.name());
+    processoDisciplinarEntityRepository.save(process);
   }
 }
