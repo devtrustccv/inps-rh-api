@@ -122,10 +122,11 @@ public class SubstituicaoController {
   
   public ResponseEntity<List<SubstituicaoSumaryDTO>> listaSubstituicao(
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
-    @RequestParam(value = "pageSize", defaultValue = "20") String pageSize)
+    @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
+    @RequestParam(value = "idFuncionario") String idFuncionario)
   {
 
-      final var query = new ListaSubstituicaoQuery(pageNumber, pageSize);
+      final var query = new ListaSubstituicaoQuery(pageNumber, pageSize, idFuncionario);
 
       ResponseEntity<List<SubstituicaoSumaryDTO>> response = queryBus.handle(query);
 

@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.service;
 import cv.inps.rh.funcionario.application.dto.SubstituicaoSumaryDTO;
 import cv.inps.rh.funcionario.application.queries.ListaSubstituicaoQuery;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SubstituicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoEntityRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,11 @@ public class SubstituicaoReadService {
 
     Pageable pageable = PageRequest.of(page, size);
 
-    return substituicaoEntityRepository.findAll(pageable)
+    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).getValor();
+
+
+    return substituicaoEntityRepository
+        .findByTiprelIdDe_FunId_Uuid(idFuncionario, pageable)
         .map(this::toDto)
         .getContent();
   }

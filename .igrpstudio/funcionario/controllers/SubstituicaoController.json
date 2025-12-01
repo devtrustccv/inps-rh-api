@@ -124,9 +124,14 @@
           "name": "pageSize",
           "value": "20",
           "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "idFuncionario",
+          "isRequired": true
         }
       ]
     }
   ],
-  "id": "alqrgnd0ly-registarSubstituicao-listaSubstituicao-registarSubstituicao-validarSubstituicao"
+  "id": "alqrgnd0ly-registarSubstituicao-listaSubstituicao-registarSubstituicao-validarSubstituicao-listaSubstituicao"
 }

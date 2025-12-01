@@ -17,5 +17,7 @@ public class ListaSubstituicaoQuery implements Query {
   private String pageNumber;
   @NotBlank(message = "The field <pageSize> is required")
   private String pageSize;
+  @NotBlank(message = "The field <idFuncionario> is required")
+  private String idFuncionario;
 
 }

@@ -2,6 +2,8 @@ package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.shared.infrastructure.persistence.entity.SubstituicaoEntity;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -22,4 +24,7 @@ public interface SubstituicaoEntityRepository extends
       }
 
     Optional<SubstituicaoEntity> findByUuid(UUID idSusbtituicao);
+
+  Page<SubstituicaoEntity> findByTiprelIdDe_FunId_Uuid(UUID funUUid, Pageable pageable);
+
 }
