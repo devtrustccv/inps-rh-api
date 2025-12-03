@@ -10,6 +10,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSitLaboralEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.SituacaoLaboralEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class NovoContratoService {
   private final EntityManager entityManager;
 
   private final ValidacaoEntityRepository validacaoEntityRepository;
+  private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
 
 
   @Transactional
@@ -121,9 +123,7 @@ public class NovoContratoService {
           "Verifique se o parametro esta cadastrado no banco de dados e tente novamente.");
     }
 
-    var sl = dadosContratuaisMapper.toSituacaoLaboralInicial(dc, param, Estado.P);
-    sl.setFunId(funcionario);
-    funcionario.getSituacoesLaborais().add(sl);
+
 
 
     var tr = dadosContratuaisMapper.toRelacionamento(dc, Estado.P);
@@ -144,6 +144,10 @@ public class NovoContratoService {
     funcionario.getValidacoes().add(valid);
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+
+    var sl = dadosContratuaisMapper.toSituacaoLaboralInicial(dc, param, Estado.P);
+    sl.setContrVinculoId(contrato);
+    situacaoLaboralEntityRepository.save(sl);
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {

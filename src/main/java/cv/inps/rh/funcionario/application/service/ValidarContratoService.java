@@ -9,6 +9,7 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.SituacaoLaboralEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,8 @@ public class ValidarContratoService {
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DefPagamentoMapper defPagamentoMapper;
   private final FuncionarioRules funcionarioRules;
+  private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
+
 
 
   @Transactional
@@ -81,7 +84,12 @@ public class ValidarContratoService {
       tr.setEstado(estado);
 
       var contrato = tr.getContratoId();
-      if (contrato != null) contrato.setEstado(estado);
+      if (contrato != null) {
+        contrato.setEstado(estado);
+        contrato.getSituacoesLaborais().stream()
+            .filter(o -> o.getEstado() == Estado.P)
+            .findFirst().ifPresent(situacaoLaboralEntity -> situacaoLaboralEntity.setEstado(estado));
+      }
 
       var mob = tr.getMobId();
       if (mob != null) mob.setEstado(estado);
@@ -91,6 +99,7 @@ public class ValidarContratoService {
 
       var regime = tr.getRegimeId();
       if (regime != null) regime.setEstado(estado);
+
     }
 
     funcionarioEntity.getValidacoes().stream()
@@ -100,9 +109,7 @@ public class ValidarContratoService {
         .ifPresent(v -> v.setEstado(estado));
 
 
-    funcionarioEntity.getSituacoesLaborais()
-        .stream()
-        .filter(o -> o.getEstado() == Estado.P)
-        .findFirst().ifPresent(situacaoLaboralEntity -> situacaoLaboralEntity.setEstado(estado));
+
+
   }
 }

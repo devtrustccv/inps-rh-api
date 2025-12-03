@@ -53,7 +53,6 @@ public class ContratoMapper {
     c.setDataInicio(dc.getDataInicio());
     c.setDataFim(dc.getDataFim());
     c.setDuracao(dc.getDuracaoMeses());
-    c.setTpContrato("NOVO_CONTRATO");
     c.setSituacaoLaboral("INICIO");
     c.setObs("NOVO_CONTRATO");
     c.setUuid(IdentificadorUnico.create().getValor());
@@ -68,7 +67,6 @@ public class ContratoMapper {
     c.setDataInicio(dc.getDataInicio());
     c.setDataFim(dc.getDataFim());
     c.setDuracao(dc.getDuracaoMeses());
-    c.setTpContrato("RENOVACAO_CONTRATO");
     c.setSituacaoLaboral("RENOVACAO_CONTRATO");
     c.setObs("RENOVACAO_CONTRATO");
     c.setUuid(IdentificadorUnico.create().getValor());

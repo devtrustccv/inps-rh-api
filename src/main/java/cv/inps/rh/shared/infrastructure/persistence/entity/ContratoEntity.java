@@ -21,7 +21,7 @@ import java.util.ArrayList;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_T_CONTRATO")
+@Table(name = "RH_T_CONTRATO_VINCULO")
 public class ContratoEntity extends AuditEntity {
 
     @Id
@@ -53,10 +53,6 @@ public class ContratoEntity extends AuditEntity {
     private Integer versao;
 
   
-    @Column(name="tp_contrato")
-    private String tpContrato;
-
-  
     @Column(name="situacao_laboral")
     private String situacaoLaboral;
 
@@ -82,7 +78,11 @@ public class ContratoEntity extends AuditEntity {
 
 
   @OneToMany(mappedBy = "contratoId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-private List<ContratoEntity> contratosFilhos = new ArrayList<>();   @ManyToOne(fetch = FetchType.LAZY)
+private List<ContratoEntity> contratosFilhos = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "contrVinculoId", fetch = FetchType.LAZY)
+private List<SituacaoLaboralEntity> situacoesLaborais = new ArrayList<>();   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "contrato_id")
    private ContratoEntity contratoId;
 

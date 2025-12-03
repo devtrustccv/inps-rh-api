@@ -54,6 +54,8 @@ public class RegistarColaboradorService {
 
   private final TipoMovimentoHelper tipoMovimentoHelper;
 
+  private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
+
   @PersistenceContext
   private EntityManager entityManager;
 
@@ -191,9 +193,7 @@ public class RegistarColaboradorService {
       throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO.");
     }
 
-    var sl = contratuaisEntityMapper.toSituacaoLaboralInicial(dc, param, Estado.P);
-    sl.setFunId(fun);
-    fun.setSituacoesLaborais(new ArrayList<>(List.of(sl)));
+
 
     var tr = contratuaisEntityMapper.toRelacionamento(dc, Estado.P);
     tr.setFunId(fun);
@@ -211,8 +211,13 @@ public class RegistarColaboradorService {
     valid.setFunId(fun);
     valid.setTiprelId(tr);
     fun.setValidacoes(new ArrayList<>(List.of(valid)));
-
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(fun);
+
+
+    var sl = contratuaisEntityMapper.toSituacaoLaboralInicial(dc, param, Estado.P);
+    sl.setContrVinculoId(contrato);
+    situacaoLaboralEntityRepository.save(sl);
+
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {

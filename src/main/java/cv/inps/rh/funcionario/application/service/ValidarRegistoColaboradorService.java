@@ -167,7 +167,12 @@ public class ValidarRegistoColaboradorService {
       tr.setEstado(estado);
 
       var contrato = tr.getContratoId();
-      if (contrato != null) contrato.setEstado(estado);
+      if (contrato != null) {
+        contrato.setEstado(estado);
+        contrato.getSituacoesLaborais().stream()
+            .filter(o -> o.getEstado() == Estado.P)
+            .findFirst().ifPresent(situacaoLaboralEntity -> situacaoLaboralEntity.setEstado(estado));
+      }
 
       var mob = tr.getMobId();
       if (mob != null) mob.setEstado(estado);
@@ -185,12 +190,6 @@ public class ValidarRegistoColaboradorService {
         .filter(v -> "REGISTO_COLABORADOR".equals(v.getReferenciaName()) && "INSERT".equals(v.getTipoAccao()))
         .findFirst()
         .ifPresent(v -> v.setEstado(estado));
-
-
-    funcionarioEntity.getSituacoesLaborais()
-        .stream()
-        .filter(o -> o.getEstado() == Estado.P)
-        .findFirst().ifPresent(situacaoLaboralEntity -> situacaoLaboralEntity.setEstado(estado));
 
 
   }
