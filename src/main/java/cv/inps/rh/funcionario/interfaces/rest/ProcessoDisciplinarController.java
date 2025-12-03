@@ -26,7 +26,7 @@ import java.util.List;
 
 @IgrpController
 @RestController
-@RequestMapping(path = "processo-disciplinar")
+@RequestMapping(path = "api/v1/funcionarios")
 @Tag(name = "ProcessoDisciplinar", description = "Gestão de Processos Disciplinares")
 public class ProcessoDisciplinarController {
 
@@ -39,7 +39,7 @@ public class ProcessoDisciplinarController {
           this.commandBus = commandBus;
   }
    @PostMapping(
-   value = "{funcionarioId}"
+   value = "{funcionarioId}/processo-disciplinar"
   )
   @Operation(
     summary = "Novo processo disciplinar",
@@ -69,7 +69,7 @@ public class ProcessoDisciplinarController {
   }
 
    @GetMapping(
-   value = "{funcionarioId}"
+   value = "{funcionarioId}/processo-disciplinar"
   )
   @Operation(
     summary = "Get processos funcionario",
@@ -99,7 +99,7 @@ public class ProcessoDisciplinarController {
   }
 
    @GetMapping(
-   value = "{processoDisciplinarId}"
+   value = "processo-disciplinar/{processoDisciplinarId}"
   )
   @Operation(
     summary = "Get processo disciplinar by id",
@@ -129,7 +129,7 @@ public class ProcessoDisciplinarController {
   }
 
    @PutMapping(
-   value = "{processoDisciplinarId}"
+   value = "processo-disciplinar/{processoDisciplinarId}"
   )
   @Operation(
     summary = "Update processo disciplinar",
@@ -159,7 +159,7 @@ public class ProcessoDisciplinarController {
   }
 
    @DeleteMapping(
-   value = "{processoDisciplinarId}"
+   value = "processo-disciplinar/{processoDisciplinarId}"
   )
   @Operation(
     summary = "Delete processo disciplinar",

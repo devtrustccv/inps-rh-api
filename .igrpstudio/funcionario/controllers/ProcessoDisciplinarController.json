@@ -3,11 +3,11 @@
   "name": "ProcessoDisciplinar",
   "module": "funcionario",
   "description": "Gestão de Processos Disciplinares",
-  "basePath": "processo-disciplinar",
+  "basePath": "api/v1/funcionarios",
   "actions": [
     {
       "actionName": "novoProcessoDisciplinar",
-      "path": "{funcionarioId}",
+      "path": "{funcionarioId}/processo-disciplinar",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -46,7 +46,7 @@
     },
     {
       "actionName": "getProcessosFuncionario",
-      "path": "{funcionarioId}",
+      "path": "{funcionarioId}/processo-disciplinar",
       "method": "GET",
       "responses": {
         "200": {
@@ -74,7 +74,7 @@
     },
     {
       "actionName": "getProcessoDisciplinarById",
-      "path": "{processoDisciplinarId}",
+      "path": "processo-disciplinar/{processoDisciplinarId}",
       "method": "GET",
       "responses": {
         "200": {
@@ -102,7 +102,7 @@
     },
     {
       "actionName": "updateProcessoDisciplinar",
-      "path": "{processoDisciplinarId}",
+      "path": "processo-disciplinar/{processoDisciplinarId}",
       "method": "PUT",
       "requestBody": {
         "content": {
@@ -141,7 +141,7 @@
     },
     {
       "actionName": "deleteProcessoDisciplinar",
-      "path": "{processoDisciplinarId}",
+      "path": "processo-disciplinar/{processoDisciplinarId}",
       "method": "DELETE",
       "responses": {
         "204": {
@@ -166,5 +166,5 @@
       ]
     }
   ],
-  "id": "2d8lf4vnyr-novoProcessoDisciplinar"
+  "id": "2d8lf4vnyr-novoProcessoDisciplinar-novoProcessoDisciplinar-getProcessosFuncionario-novoProcessoDisciplinar-getProcessosFuncionario-getProcessoDisciplinarById-updateProcessoDisciplinar-deleteProcessoDisciplinar"
 }
