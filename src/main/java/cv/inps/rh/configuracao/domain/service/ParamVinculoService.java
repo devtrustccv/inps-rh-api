@@ -23,7 +23,6 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Transactional
 @Service("param_vinculo_type")
@@ -108,7 +107,7 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
 
     return data.stream()
         .map(e -> buildResponse(e, domain))
-        .collect(Collectors.toList());
+        .toList();
   }
 
   @Override

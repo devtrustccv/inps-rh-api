@@ -4,37 +4,29 @@ import cv.inps.rh.funcionario.application.dto.FuncionarioListDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaFuncionarioDTO;
 import cv.inps.rh.funcionario.application.queries.GetListFuncionariosQuery;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
-import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.InstituicaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 
 @Service
 @RequiredArgsConstructor
 public class FuncionarioReadService {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
-  private final FuncionarioMapper funcionarioMapper;
   private final FuncionarioRules funcionarioRules;
-
 
   @Transactional(readOnly = true)
   public WrapperListaFuncionarioDTO getListFuncionarios(GetListFuncionariosQuery query) {
@@ -43,47 +35,44 @@ public class FuncionarioReadService {
     var pageSize = Integer.parseInt(query.getPageSize());
 
     Specification<FuncionarioEntity> spec = (root, cq, cb) -> {
-      List<Predicate> predicates = new java.util.ArrayList<>();
 
+      List<Predicate> predicates = new java.util.ArrayList<>();
       if (StringUtils.hasText(query.getNome())) {
         var nome = query.getNome().toLowerCase();
-        predicates.add(cb.like(cb.lower(root.get("nome")), "%" + nome + "%"));
+        predicates.add(cb.like(cb.lower(root.get(FuncionarioEntity_.nome)), "%" + nome + "%"));
       }
 
-      Join<FuncionarioEntity, TiposRelacionamentoEntity> tr = root.join("tiposrelacionamentos", jakarta.persistence.criteria.JoinType.LEFT);
+      Join<FuncionarioEntity, TiposRelacionamentoEntity> tr = root.join(FuncionarioEntity_.tiposrelacionamentos, jakarta.persistence.criteria.JoinType.LEFT);
 
       if (query.getDireccao() != null) {
-        Join<TiposRelacionamentoEntity, InstituicaoEntity> dir = tr.join("institId", jakarta.persistence.criteria.JoinType.LEFT);
-        predicates.add(cb.equal(dir.get("id"), query.getDireccao()));
+        Join<TiposRelacionamentoEntity, InstituicaoEntity> dir = tr.join(TiposRelacionamentoEntity_.institId, jakarta.persistence.criteria.JoinType.LEFT);
+        predicates.add(cb.equal(dir.get(InstituicaoEntity_.id), query.getDireccao()));
       }
       if (query.getSeccao() != null) {
-        Join<TiposRelacionamentoEntity, SecaoEntity> sec = tr.join("seccaoId", jakarta.persistence.criteria.JoinType.LEFT);
-        predicates.add(cb.equal(sec.get("id"), query.getSeccao()));
-      }
-      if (query.getTipoVinculoLaboral() != null) {
-        Join<TiposRelacionamentoEntity, ParamVinculoEntity> vinc = tr.join("vinculoId", jakarta.persistence.criteria.JoinType.LEFT);
-        predicates.add(cb.equal(vinc.get("id"), query.getTipoVinculoLaboral()));
+        Join<TiposRelacionamentoEntity, SecaoEntity> sec = tr.join(TiposRelacionamentoEntity_.seccaoId, jakarta.persistence.criteria.JoinType.LEFT);
+        predicates.add(cb.equal(sec.get(SecaoEntity_.id), query.getSeccao()));
       }
 
-      if (StringUtils.hasText(query.getEstado())) {
-        predicates.add(cb.equal(root.get("estadoValidacao"), query.getEstado()));
-      }
+      if (StringUtils.hasText(query.getEstado()))
+        predicates.add(cb.equal(root.get(FuncionarioEntity_.estadoValidacao), query.getEstado()));
 
-      predicates.add(cb.equal(tr.get("estActAdm"), 1));
-
-      Join<TiposRelacionamentoEntity, ContratoEntity> con = tr.join("contratoId", jakarta.persistence.criteria.JoinType.LEFT);
+      Join<TiposRelacionamentoEntity, ContratoEntity> con = tr.join(TiposRelacionamentoEntity_.contrVinculoId, jakarta.persistence.criteria.JoinType.LEFT);
       if (StringUtils.hasText(query.getDataInicio())) {
         var di = DateFormatter.stringToLocalDate(query.getDataInicio());
-        predicates.add(cb.greaterThanOrEqualTo(con.get("dataInicio"), di));
+        predicates.add(cb.greaterThanOrEqualTo(con.get(ContratoEntity_.dataInicio), di));
       }
       if (StringUtils.hasText(query.getDataFim())) {
         var df = DateFormatter.stringToLocalDate(query.getDataFim());
-        predicates.add(cb.lessThanOrEqualTo(con.get("dataInicio"), df));
+        predicates.add(cb.lessThanOrEqualTo(con.get(ContratoEntity_.dataInicio), df));
       }
 
-      if (cq != null) {
+      if (query.getTipoVinculoLaboral() != null)
+        predicates.add(cb.equal(con.join(ContratoEntity_.vinculoId).get(ParamVinculoEntity_.id), query.getTipoVinculoLaboral()));
+
+      if (cq != null)
         cq.distinct(true);
-      }
+
+      predicates.add(cb.equal(tr.get(TiposRelacionamentoEntity_.estActAdm), 1));
       return cb.and(predicates.toArray(new Predicate[0]));
     };
 
@@ -113,7 +102,7 @@ public class FuncionarioReadService {
       return dto;
     }).toList();
 
-    WrapperListaFuncionarioDTO wrapper = new WrapperListaFuncionarioDTO();
+    var wrapper = new WrapperListaFuncionarioDTO();
     wrapper.setContent(content);
     wrapper.setPageNumber(page.getNumber());
     wrapper.setPageSize(page.getSize());

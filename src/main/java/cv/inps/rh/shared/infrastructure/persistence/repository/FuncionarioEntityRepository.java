@@ -102,7 +102,7 @@ public interface FuncionarioEntityRepository extends
   @NotNull
   @EntityGraph(attributePaths = {
       "tiposrelacionamentos",
-      "tiposrelacionamentos.contratoId",
+      "tiposrelacionamentos.contrVinculoId",
       "tiposrelacionamentos.cargoId",
       "tiposrelacionamentos.institId",
       "tiposrelacionamentos.seccaoId",
