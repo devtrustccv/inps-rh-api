@@ -3,17 +3,13 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.igrp.framework.stereotype.IgrpEntity;
-import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.config.AuditEntity;
+import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import lombok.*;
 import java.util.UUID;
+import jakarta.validation.constraints.NotBlank;
+import cv.inps.rh.shared.application.constants.Estado;
 
 
 @Getter
@@ -26,24 +22,24 @@ import java.util.UUID;
 public class ParamLocalTrabEntity extends AuditEntity {
 
     @Id
-    @SequenceGenerator(name = "seq_local_bancao", sequenceName = "SEQ_LOCAL_BANCAO", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_local_bancao")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-
+  
     @Column(name="uuid")
     private UUID uuid;
 
-
+  
     @NotBlank(message = "nome is mandatory")
     @Column(name="nome", nullable = false)
     private String nome;
 
-  @Column(name="nome_normalizado", nullable = false)
-  private String nomeNormalizado;
+  
+    @Column(name="nome_normalizado")
+    private String nomeNormalizado;
 
-
+  
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -54,13 +50,13 @@ public class ParamLocalTrabEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ilha_id", referencedColumnName = "id")
     private GeografiaEntity ilhaId;
-    @Column(name="ups")
-    private Long ups;
+    @Column(name="ups_id")
+    private Long upsId;
 
-
+  
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-
+  
 }

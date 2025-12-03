@@ -24,7 +24,8 @@ import java.util.List;
 public class ContactoEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_contato")
+    @SequenceGenerator(name = "seq_contato", sequenceName = "SEQ_CONTATO", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

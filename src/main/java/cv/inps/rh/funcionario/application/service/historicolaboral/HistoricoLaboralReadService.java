@@ -42,7 +42,7 @@ public class HistoricoLaboralReadService {
           var response = new HistoricoLaboralResponseDTO();
           response.setUltimoMovimento(DateFormatter.localDateToString(obj.getUltProc()));
           ofNullable(obj.getTipoSituacao()).ifPresent(response::setTipoSituacao);
-          ofNullable(obj.getTpContrato()).ifPresent(response::setTipoContrato);
+          ofNullable(obj.getContrVinculoId().getTpContratoId().getNome()).ifPresent(response::setTipoContrato);
           ofNullable(obj.getContrVinculoId().getVinculoId()).map(ParamVinculoEntity::getNome).ifPresent(response::setVinculo);
           ofNullable(obj.getSeccaoId()).map(SecaoEntity::getInstId).map(InstituicaoEntity::getNome).ifPresent(response::setDirecao);
           ofNullable(obj.getSeccaoId()).map(SecaoEntity::getNome).ifPresent(response::setSeccao);

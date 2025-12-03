@@ -23,7 +23,8 @@ import cv.inps.rh.shared.application.constants.Estado;
 public class SubstituicaoEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_substituicao")
+    @SequenceGenerator(name = "seq_substituicao", sequenceName = "SEQ_SUBSTITUICAO", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

@@ -57,7 +57,7 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
     entity.setEstado(Estado.A);
     entity.setNome(dto.getLocal());
     entity.setNomeNormalizado(ConfigurationUtils.normalizeAndSetToLowerCaseText(dto.getLocal()));
-    entity.setUps(Long.valueOf(dto.getUps()));
+    entity.setUpsId(Long.valueOf(dto.getUps()));
     entity.setPaisId(geografiaRepository.findByIdOrThrow(Long.valueOf(dto.getPais())));
 
     if (StringUtils.hasText(dto.getIlha())) {
@@ -76,7 +76,7 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
     var entity = localRepository.findByUuidOrThrow(UUID.fromString(uuid));
     entity.setNome(dto.getLocal());
     entity.setNomeNormalizado(ConfigurationUtils.normalizeAndSetToLowerCaseText(dto.getLocal()));
-    entity.setUps(Long.valueOf(dto.getUps()));
+    entity.setUpsId(Long.valueOf(dto.getUps()));
     entity.setPaisId(geografiaRepository.findByIdOrThrow(Long.valueOf(dto.getPais())));
 
     if (StringUtils.hasText(dto.getEstado()))
@@ -104,7 +104,7 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
     var workPlace = filters.get("local");
-    var ups = filters.get(ParamLocalTrabEntity_.UPS);
+    var ups = filters.get(ParamLocalTrabEntity_.UPS_ID);
 
     var estado = filters.containsKey(ParamLocalTrabEntity_.ESTADO)
         ? Estado.valueOf(filters.get(ParamLocalTrabEntity_.ESTADO))
@@ -121,7 +121,7 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
       }
 
       if (StringUtils.hasText(ups))
-        predicates.add(cb.equal(root.get(ParamLocalTrabEntity_.ups), Long.valueOf(ups)));
+        predicates.add(cb.equal(root.get(ParamLocalTrabEntity_.upsId), Long.valueOf(ups)));
 
       return cb.and(predicates.toArray(new Predicate[0]));
     };
@@ -156,7 +156,7 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
     dto.setPaisId(country.getId().toString());
     dto.setEstado(e.getEstado().name());
     dto.setEstadoDescricao(e.getEstado().getDescription());
-    dto.setUps(e.getUps().toString());
+    dto.setUps(e.getUpsId().toString());
 
     ofNullable(e.getIlhaId()).ifPresent(island -> {
       dto.setIlhaId(island.getId().toString());

@@ -26,7 +26,7 @@ public class ParamLocalTrabMapper {
         entity.getNome(),
         geografiaMapper.toDomain(entity.getPaisId()),
         geografiaMapper.toDomain(entity.getIlhaId()),
-        entity.getUps(),
+        entity.getUpsId(),
         entity.getEstado()
     );
   }
@@ -48,7 +48,7 @@ public class ParamLocalTrabMapper {
       entity.setIlhaId(entityManager.getReference(GeografiaEntity.class, domain.getIlha().getId()));
     }
 
-    entity.setUps(domain.getUps());
+    entity.setUpsId(domain.getUps());
     entity.setEstado(domain.getEstado());
 
     return entity;

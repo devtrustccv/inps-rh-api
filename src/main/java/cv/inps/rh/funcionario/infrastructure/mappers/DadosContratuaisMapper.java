@@ -47,7 +47,6 @@ public class DadosContratuaisMapper {
     tr.setDataFimContrato(dc.getDataFim());
     tr.setLocTrabId(em.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));
     tr.setReferente("REGISTO_COLABORADOR");
-    tr.setTpContrato("INICIAL");
     tr.setUuid(UuidCreator.getTimeOrderedEpoch());
     tr.setEstado(estado);
     return tr;
@@ -72,7 +71,6 @@ public class DadosContratuaisMapper {
     tr.setDataFimContrato(dc.getDataFim());
     tr.setLocTrabId(em.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));
     tr.setReferente("REGISTO_COLABORADOR");
-    tr.setTpContrato("INICIAL");
 
   }
 
@@ -273,7 +271,6 @@ public class DadosContratuaisMapper {
     clone.setCarreiraId(original.getCarreiraId());
     clone.setMobId(original.getMobId());
     clone.setRegimeId(original.getRegimeId());
-    clone.setTpContrato(original.getTpContrato());
     clone.setTiprelId(original); // se quiser referenciar o anterior
     clone.setContrVinculoId(original.getContrVinculoId());
     clone.setEstado(original.getEstado());

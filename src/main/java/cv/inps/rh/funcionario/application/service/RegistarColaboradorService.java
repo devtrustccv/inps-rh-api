@@ -139,7 +139,7 @@ public class RegistarColaboradorService {
     var carreira = carreiraMapper.toCarreira(dc, Estado.P);
     if (carreira != null) {
       carreira.setContrVinculoId(contrato);
-      carreiraEntityRepository.save(carreira);
+      contrato.setCarreiras(new ArrayList<>(List.of(carreira)));
     }
 
     var regime = regimeTrabalhoMapper.toRegime(dc, Estado.P);

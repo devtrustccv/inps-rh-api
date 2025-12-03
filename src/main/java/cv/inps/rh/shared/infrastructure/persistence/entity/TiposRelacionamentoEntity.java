@@ -159,10 +159,6 @@ public class TiposRelacionamentoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "situac_laboral_id", referencedColumnName = "id")
     private ParamSitLaboralEntity situacLaboralId;
-    @Column(name="tp_contrato")
-    private String tpContrato;
-
-  
     @Column(name="est_act_adm")
     private Integer estActAdm;
 

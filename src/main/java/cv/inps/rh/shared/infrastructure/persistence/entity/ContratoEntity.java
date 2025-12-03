@@ -30,41 +30,41 @@ public class ContratoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotNull(message = "estado is mandatory")
     @Enumerated(EnumType.STRING)
     @Column(name="estado", nullable = false)
     private Estado estado;
 
-  
+
     @Column(name="data_inicio")
     private LocalDate dataInicio;
 
-  
+
     @Column(name="data_fim")
     private LocalDate dataFim;
 
-  
+
     @Column(name="duracao")
     private Integer duracao;
 
-  
+
     @Column(name="versao")
     private Integer versao;
 
-  
+
     @Column(name="situacao_laboral")
     private String situacaoLaboral;
 
-  
+
     @Column(name="obs")
     private String obs;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -86,7 +86,9 @@ private List<SituacaoLaboralEntity> situacoesLaborais = new ArrayList<>();
 
 
   @OneToMany(mappedBy = "contrVinculoId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-private List<CarreiraEntity> carreiras = new ArrayList<>();   @ManyToOne(fetch = FetchType.LAZY)
+private List<CarreiraEntity> carreiras = new ArrayList<>();
+
+  @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "contrato_id")
    private ContratoEntity contratoId;
 
