@@ -3,25 +3,22 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.funcionario.application.commands.AdicionarRegimeTrabalhoCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarRegimeTrabalhoCommand;
+import cv.inps.rh.funcionario.application.dto.RegimeTrabalhoDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperRegimeListDTO;
+import cv.inps.rh.funcionario.application.queries.GetListRegimesQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.funcionario.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.funcionario.application.commands.*;
-import cv.inps.rh.funcionario.application.dto.WrapperRegimeListDTO;
-import cv.inps.rh.funcionario.application.dto.RegimeTrabalhoDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
@@ -29,7 +26,7 @@ import cv.inps.rh.funcionario.application.dto.RegimeTrabalhoDTO;
 @Tag(name = "Regime", description = "Gestao Regimes")
 public class RegimeController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -56,7 +53,7 @@ public class RegimeController {
       )
     }
   )
-  
+
   public ResponseEntity<WrapperRegimeListDTO> getListRegimes(
     @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
@@ -91,7 +88,7 @@ public class RegimeController {
       )
     }
   )
-  
+
   public ResponseEntity<RegimeTrabalhoDTO> adicionarRegimeTrabalho(@Valid @RequestBody RegimeTrabalhoDTO adicionarRegimeTrabalhoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
@@ -122,7 +119,7 @@ public class RegimeController {
       )
     }
   )
-  
+
   public ResponseEntity<RegimeTrabalhoDTO> validarRegimeTrabalho(@Valid @RequestBody RegimeTrabalhoDTO validarRegimeTrabalhoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "regimeId") String regimeId)
   {

@@ -3,25 +3,23 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.funcionario.application.commands.SaveMobilidadeCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarMobilidadeCommand;
+import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperListMobilidadeDTO;
+import cv.inps.rh.funcionario.application.queries.GetListMobilidadesQuery;
+import cv.inps.rh.funcionario.application.queries.GetMobilidadeByIdQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.funcionario.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.funcionario.application.commands.*;
-import cv.inps.rh.funcionario.application.dto.WrapperListMobilidadeDTO;
-import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
@@ -29,7 +27,7 @@ import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
 @Tag(name = "Mobilidade", description = "GEstao mobilidade")
 public class MobilidadeController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -56,7 +54,7 @@ public class MobilidadeController {
       )
     }
   )
-  
+
   public ResponseEntity<WrapperListMobilidadeDTO> getListMobilidades(
     @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
@@ -92,7 +90,7 @@ public class MobilidadeController {
       )
     }
   )
-  
+
   public ResponseEntity<MobilidadeDTO> getMobilidadeById(
     @PathVariable(value = "id") String id)
   {
@@ -123,7 +121,7 @@ public class MobilidadeController {
       )
     }
   )
-  
+
   public ResponseEntity<MobilidadeDTO> saveMobilidade(@Valid @RequestBody MobilidadeDTO saveMobilidadeRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
@@ -154,7 +152,7 @@ public class MobilidadeController {
       )
     }
   )
-  
+
   public ResponseEntity<MobilidadeDTO> validarMobilidade(@Valid @RequestBody MobilidadeDTO validarMobilidadeRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "mobilidadeId") String mobilidadeId)
   {

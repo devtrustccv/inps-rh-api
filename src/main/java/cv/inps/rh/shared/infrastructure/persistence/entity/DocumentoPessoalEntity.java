@@ -3,12 +3,16 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import jakarta.validation.constraints.NotBlank;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.config.AuditEntity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.UUID;
 
 
@@ -27,12 +31,12 @@ public class DocumentoPessoalEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotBlank(message = "numDocumento is mandatory")
     @Column(name="num_documento", nullable = false)
     private String numDocumento;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -42,14 +46,14 @@ public class DocumentoPessoalEntity extends AuditEntity {
     @Column(name="estado")
     private Estado estado;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
 
 
-  
+
+
     @OneToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "fun_id", unique = true, referencedColumnName = "id")
     private FuncionarioEntity funId;

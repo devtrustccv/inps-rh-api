@@ -35,7 +35,7 @@ public class RenovacaoContratoService {
 
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
 
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.getValor());
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
     var contratoPai = funcionarioRules.getPrimeiroContrato(funcionario);
     if (contratoPai == null)

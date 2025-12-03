@@ -4,12 +4,10 @@ import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.application.dto.RenovacaoContratoDTO;
 import cv.inps.rh.funcionario.application.service.RenovacaoContratoService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import cv.inps.rh.funcionario.application.dto.RenovarContratoReqDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 @Component
 public class RenovarContratoCommandHandler implements CommandHandler<RenovarContratoCommand, ResponseEntity<RenovacaoContratoDTO>> {

@@ -4,10 +4,10 @@ import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.application.service.ValidarContratoService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ValidarContratoCommandHandler implements CommandHandler<ValidarContratoCommand, ResponseEntity<DadosContratuaisRespDTO>> {

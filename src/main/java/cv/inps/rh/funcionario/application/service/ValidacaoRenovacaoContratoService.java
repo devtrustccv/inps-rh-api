@@ -31,7 +31,7 @@ public class ValidacaoRenovacaoContratoService {
 
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
 
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.getValor());
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
     var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
 

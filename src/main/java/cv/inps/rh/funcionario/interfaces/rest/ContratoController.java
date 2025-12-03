@@ -3,27 +3,27 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.funcionario.application.commands.NovoContratoCommand;
+import cv.inps.rh.funcionario.application.commands.RenovarContratoCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarContratoCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarRenovacaoContratoCommand;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
+import cv.inps.rh.funcionario.application.dto.NovoContratoDTO;
+import cv.inps.rh.funcionario.application.dto.RenovacaoContratoDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperListContratoDTO;
+import cv.inps.rh.funcionario.application.queries.GetContratoByIdQuery;
+import cv.inps.rh.funcionario.application.queries.GetListContratosQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.funcionario.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.funcionario.application.commands.*;
-import cv.inps.rh.funcionario.application.dto.WrapperListContratoDTO;
-import cv.inps.rh.funcionario.application.dto.NovoContratoDTO;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
-import cv.inps.rh.funcionario.application.dto.RenovacaoContratoDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
@@ -31,7 +31,7 @@ import cv.inps.rh.funcionario.application.dto.RenovacaoContratoDTO;
 @Tag(name = "Contrato", description = "Gestao Contratos")
 public class ContratoController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -58,7 +58,7 @@ public class ContratoController {
       )
     }
   )
-  
+
   public ResponseEntity<WrapperListContratoDTO> getListContratos(
     @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "vinculo", required = false) Long vinculo,
@@ -92,7 +92,7 @@ public class ContratoController {
       )
     }
   )
-  
+
   public ResponseEntity<DadosContratuaisRespDTO> novoContrato(@Valid @RequestBody NovoContratoDTO novoContratoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
@@ -123,7 +123,7 @@ public class ContratoController {
       )
     }
   )
-  
+
   public ResponseEntity<DadosContratuaisRespDTO> getContratoById(
     @PathVariable(value = "contratoId") String contratoId,@PathVariable(value = "id") String id)
   {
@@ -154,7 +154,7 @@ public class ContratoController {
       )
     }
   )
-  
+
   public ResponseEntity<RenovacaoContratoDTO> renovarContrato(@Valid @RequestBody RenovacaoContratoDTO renovarContratoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "contratoId") String contratoId)
   {
@@ -185,7 +185,7 @@ public class ContratoController {
       )
     }
   )
-  
+
   public ResponseEntity<DadosContratuaisRespDTO> validarContrato(@Valid @RequestBody NovoContratoDTO validarContratoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "contratoId") String contratoId)
   {
@@ -216,7 +216,7 @@ public class ContratoController {
       )
     }
   )
-  
+
   public ResponseEntity<RenovacaoContratoDTO> validarRenovacaoContrato(@Valid @RequestBody RenovacaoContratoDTO validarRenovacaoContratoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "contratoId") String contratoId)
   {

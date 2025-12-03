@@ -7,16 +7,16 @@ import lombok.Getter;
 @Getter
 public class ParamContrato {
 
-  private Long id;
-  private IdentificadorUnico uuid;
-  private String codigo;
+  private final Long id;
+  private final IdentificadorUnico uuid;
+  private final String codigo;
   private String nome;
   private String natureza;
   private Integer flgRenovavel;
   private Integer duracaoRenovavel;
   private Integer prazoObrigatorio;
-  private ParamVinculo paramVinculo;
-  private Estado estado;
+  private final ParamVinculo paramVinculo;
+  private final Estado estado;
 
   private ParamContrato(
       Long id,

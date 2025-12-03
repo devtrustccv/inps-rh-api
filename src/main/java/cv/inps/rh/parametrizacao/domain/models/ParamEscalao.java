@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @Getter
 public class ParamEscalao {
 
-  private Long id;
+  private final Long id;
   private IdentificadorUnico uuid;
   private String codigo;
   private ParamCarreira paramCarreira;

@@ -6,7 +6,6 @@ import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamContratoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamContratoEntityRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

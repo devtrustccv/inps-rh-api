@@ -4,13 +4,11 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.ContactoReqDTO;
-import cv.inps.rh.funcionario.application.dto.EnderecoReqDTO;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;

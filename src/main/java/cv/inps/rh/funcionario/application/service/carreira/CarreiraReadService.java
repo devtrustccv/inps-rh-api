@@ -41,7 +41,7 @@ public class CarreiraReadService {
     var pageNumber = Integer.parseInt(query.getPageNumber());
     var pageSize = Integer.parseInt(query.getPageSize());
 
-    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).getValor();
+    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
 
     Specification<TiposRelacionamentoEntity> spec = (root, cq, cb) -> {
       List<Predicate> predicates = new java.util.ArrayList<>();

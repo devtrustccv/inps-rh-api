@@ -3,23 +3,20 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.funcionario.application.dto.WrapperListPagamentosDescontoDTO;
+import cv.inps.rh.funcionario.application.queries.GetListPagamentosDescontoQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.funcionario.application.queries.*;
-
-import cv.inps.rh.funcionario.application.dto.WrapperListPagamentosDescontoDTO;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @IgrpController
 @RestController
@@ -27,12 +24,12 @@ import cv.inps.rh.funcionario.application.dto.WrapperListPagamentosDescontoDTO;
 @Tag(name = "PagamentoDesconto", description = "gest pagamantos descontos")
 public class PagamentoDescontoController {
 
-  
+
   private final QueryBus queryBus;
 
   public PagamentoDescontoController(QueryBus queryBus) {
           this.queryBus = queryBus;
-          
+
   }
    @GetMapping(
    value = "pagamentos-descontos"
@@ -53,7 +50,7 @@ public class PagamentoDescontoController {
       )
     }
   )
-  
+
   public ResponseEntity<WrapperListPagamentosDescontoDTO> getListPagamentosDesconto(
     @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,

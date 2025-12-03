@@ -2,37 +2,15 @@ package cv.inps.rh.parametrizacao.domain.models;
 
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import lombok.Getter;
 
 import java.util.UUID;
 
-@Getter
-public class TipoDocumento {
+public record TipoDocumento(Long id, IdentificadorUnico uuid, String referencia, String codigo,
+                            String nome, Estado estado) {
 
-  private final Long id;
-  private final IdentificadorUnico uuid;
-  private final String referencia;
-  private final String codigo;
-  private final String nome;
-  private final Estado estado;
-
-  private TipoDocumento(
-      Long id,
-      IdentificadorUnico uuid,
-      String referencia,
-      String codigo,
-      String nome,
-      Estado estado
-  ) {
-    this.id = id;
-    this.uuid = uuid;
-    this.referencia = referencia;
-    this.codigo = codigo;
-    this.nome = nome;
-    this.estado = estado;
-  }
-
-  /** Factory para criar um novo TipoDocumento */
+  /**
+   * Factory para criar um novo TipoDocumento
+   */
   public static TipoDocumento create(
       String referencia,
       String codigo,

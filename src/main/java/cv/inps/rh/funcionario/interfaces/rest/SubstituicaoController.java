@@ -3,26 +3,24 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.funcionario.application.commands.RegistarSubstituicaoCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarSubstituicaoCommand;
+import cv.inps.rh.funcionario.application.dto.SubstituicaoDTO;
+import cv.inps.rh.funcionario.application.dto.SubstituicaoSumaryDTO;
+import cv.inps.rh.funcionario.application.queries.ListaSubstituicaoQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.funcionario.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.funcionario.application.commands.*;
-import cv.inps.rh.funcionario.application.dto.SubstituicaoDTO;
 import java.util.List;
-import cv.inps.rh.funcionario.application.dto.SubstituicaoSumaryDTO;
 
 @IgrpController
 @RestController
@@ -30,7 +28,7 @@ import cv.inps.rh.funcionario.application.dto.SubstituicaoSumaryDTO;
 @Tag(name = "Substituicao", description = "gestao substituicoes")
 public class SubstituicaoController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -57,7 +55,7 @@ public class SubstituicaoController {
       )
     }
   )
-  
+
   public ResponseEntity<SubstituicaoDTO> registarSubstituicao(@Valid @RequestBody SubstituicaoDTO registarSubstituicaoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
@@ -88,7 +86,7 @@ public class SubstituicaoController {
       )
     }
   )
-  
+
   public ResponseEntity<SubstituicaoDTO> validarSubstituicao(@Valid @RequestBody SubstituicaoDTO validarSubstituicaoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "substituicaoId") String substituicaoId)
   {
@@ -119,7 +117,7 @@ public class SubstituicaoController {
       )
     }
   )
-  
+
   public ResponseEntity<List<SubstituicaoSumaryDTO>> listaSubstituicao(
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,

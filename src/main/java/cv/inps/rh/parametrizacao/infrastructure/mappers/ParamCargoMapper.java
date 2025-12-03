@@ -39,7 +39,7 @@ public class ParamCargoMapper {
 
     ParamCargoEntity entity = new ParamCargoEntity();
     entity.setId(domain.getId());
-    entity.setUuid(domain.getUuid().getValor());
+    entity.setUuid(domain.getUuid().valor());
     entity.setNome(domain.getNome());
     entity.setDirigente(domain.getDirigente());
     entity.setEstado(domain.getEstado());

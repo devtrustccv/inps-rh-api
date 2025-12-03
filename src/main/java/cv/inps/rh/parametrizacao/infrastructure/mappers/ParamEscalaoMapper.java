@@ -54,7 +54,7 @@ public class ParamEscalaoMapper {
 
     ParamEscalaoEntity entity = new ParamEscalaoEntity();
     entity.setId(domain.getId());
-    entity.setUuid(domain.getUuid() != null ? domain.getUuid().getValor() : null);
+    entity.setUuid(domain.getUuid() != null ? domain.getUuid().valor() : null);
     entity.setCodigo(domain.getCodigo());
     entity.setNivelReferencia(domain.getNivelReferencia());
     entity.setEscalao(domain.getEscalao());

@@ -29,11 +29,11 @@ public class SubstituicaoReadService {
 
     Pageable pageable = PageRequest.of(page, size);
 
-    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).getValor();
+    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
 
 
     return substituicaoEntityRepository
-        .findByTiprelIdDe_FunId_Uuid(idFuncionario, pageable)
+        .findBySubstituidoTiprelId_FunId_Uuid(idFuncionario, pageable)
         .map(this::toDto)
         .getContent();
   }
@@ -49,15 +49,15 @@ public class SubstituicaoReadService {
     dto.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);
 
     dto.setColaboradorSustituido(
-        e.getTiprelIdDe() != null ? e.getTiprelIdDe().getFunId().getNome() : null
+        e.getSubstitutoTiprelId() != null ? e.getSubstitutoTiprelId().getFunId().getNome() : null
     );
 
     dto.setColaboradorSustituto(
-        e.getTiprelIdPara() != null ? e.getTiprelIdPara().getFunId().getNome(): null
+        e.getSubstituidoTiprelId() != null ? e.getSubstituidoTiprelId().getFunId().getNome(): null
     );
 
     dto.setCargo(
-        e.getTiprelIdDe() != null ? e.getTiprelIdDe().getCargoId().getNome() : null
+        e.getSubstitutoTiprelId() != null ? e.getSubstitutoTiprelId().getCargoId().getNome() : null
     );
 
     dto.setDataInicio(

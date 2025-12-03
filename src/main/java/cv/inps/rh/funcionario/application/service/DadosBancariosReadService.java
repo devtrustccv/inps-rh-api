@@ -20,7 +20,7 @@ public class DadosBancariosReadService {
 
   @Transactional(readOnly = true)
   public List<DadosBancariosRespDTO> getDadosBancarios(GetDadosBancariosQuery query) {
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getIdFuncionario()).getValor());
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getIdFuncionario()).valor());
     return dadosBancariosMapper.toDadosBancariosRespDTOList(funcionario.getDadosBancarios());
   }
 }

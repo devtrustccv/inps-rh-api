@@ -1,8 +1,6 @@
 package cv.inps.rh.funcionario.application.service;
 
-import cv.inps.rh.funcionario.application.commands.ValidaDadosPessoaisCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarDadosAcademicosCommand;
-import cv.inps.rh.funcionario.application.dto.ValidacaoDadosPessoaisDTO;
 import cv.inps.rh.funcionario.application.dto.ValidarDadosAcademicosDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
@@ -38,7 +36,7 @@ public class ValidarDadosAcademicosService {
     var dadosAcademicosProfReqDTO = dto.getDadosAcademicosProf();
     var estadoValidacao = dto.getValidar();
 
-    var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).getValor();
+    var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
     boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario, "UPDATE", "DADOS_ACADEMICOS");

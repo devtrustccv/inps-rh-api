@@ -3,14 +3,18 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
+import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
-import lombok.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDate;
 import java.util.UUID;
-import cv.inps.rh.shared.application.constants.Estado;
 
 
 @Getter
@@ -28,41 +32,41 @@ public class SubstituicaoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotNull(message = "tiprelIdPara is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tiprel_id_para", referencedColumnName = "id")
-    private TiposRelacionamentoEntity tiprelIdPara;
+    @JoinColumn(name = "substituido_tiprel_id", referencedColumnName = "id")
+    private TiposRelacionamentoEntity substituidoTiprelId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tiprel_id_de", referencedColumnName = "id")
-    private TiposRelacionamentoEntity tiprelIdDe;
+    @JoinColumn(name = "substituto_tiprel_id", referencedColumnName = "id")
+    private TiposRelacionamentoEntity substitutoTiprelId;
     @Column(name="data_inicio")
     private LocalDate dataInicio;
 
-  
+
     @Column(name="data_fim")
     private LocalDate dataFim;
 
-  
+
     @Column(name="motivo", length=200)
     private String motivo;
 
-  
+
     @Column(name="obs", length=4000)
     private String obs;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
+
 }

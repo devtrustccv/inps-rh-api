@@ -4,13 +4,12 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.AgregadoDependenteReqDTO;
-import cv.inps.rh.shared.application.constants.EstadoValidacao;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,10 +21,10 @@ import java.util.List;
 @IgrpDTO
 public class ValidarAgregadosDependentesDTO  {
 
-  
-  
+
+
   private EstadoValidacao validar ;
-  
+
   @Valid
   private List<AgregadoDependenteReqDTO> familiares = new ArrayList<>();
 

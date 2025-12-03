@@ -33,7 +33,7 @@ public class ParamSitLaboralMapper {
 
     ParamSitLaboralEntity entity = new ParamSitLaboralEntity();
     entity.setId(domain.getId());
-    entity.setUuid(domain.getUuid() != null ? domain.getUuid().getValor() : null);
+    entity.setUuid(domain.getUuid() != null ? domain.getUuid().valor() : null);
     entity.setCodigo(domain.getCodigo());
     entity.setNome(domain.getNome());
     entity.setTipoSituacao(domain.getTipoSituacao());

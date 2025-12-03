@@ -3,15 +3,17 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import java.util.UUID;
-import jakarta.validation.constraints.NotNull;
 import cv.inps.rh.shared.application.constants.Estado;
-import java.util.ArrayList;
-import java.util.List;
+import cv.inps.rh.shared.config.AuditEntity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.UUID;
 
 
 @Getter
@@ -29,11 +31,11 @@ public class DocumentoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
     @NotNull(message = "tpDocumentoId is mandatory")
 
 
@@ -43,18 +45,18 @@ public class DocumentoEntity extends AuditEntity {
     @Column(name="doc_id")
     private Long docId;
 
-  
 
 
-  
+
+
     @Column(name="referencia_name")
     private String referenciaName;
 
-  
+
     @Column(name="referencia_id")
     private String referenciaId;
 
-  
+
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;

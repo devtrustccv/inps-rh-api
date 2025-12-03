@@ -13,7 +13,7 @@ import java.util.List;
 public class ParametrizacaoService {
 
   private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
-  private final GeografiaEntityRepository geografiaEntityRepository;;
+  private final GeografiaEntityRepository geografiaEntityRepository;
   private final InstituicaoEntityRepository instituicaoEntityRepository;
   private final BancoEntityRepository bancoEntityRepository;
   private final EntidadeEntityRepository entidadeEntityRepository;

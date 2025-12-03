@@ -4,11 +4,10 @@
 package cv.inps.rh.configuracao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 
 @Data
@@ -20,25 +19,25 @@ import lombok.AllArgsConstructor;
 public class VinculoLaboralRequestDTO  {
 
   @NotBlank(message = "The field <codigo> is required")
-  
+
   private String codigo ;
   @NotBlank(message = "The field <descricao> is required")
-  
+
   private String descricao ;
   @NotBlank(message = "The field <contrato> is required")
-  
+
   private String contrato ;
   @NotBlank(message = "The field <carreira> is required")
-  
+
   private String carreira ;
   @NotBlank(message = "The field <remuneracao> is required")
-  
+
   private String remuneracao ;
   @NotBlank(message = "The field <tempoServico> is required")
-  
+
   private String tempoServico ;
-  
-  
+
+
   private String estado ;
 
 }

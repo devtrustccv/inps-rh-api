@@ -3,11 +3,15 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
+import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
-import lombok.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.UUID;
 
 
@@ -25,22 +29,22 @@ public class AlertaEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotBlank(message = "referencia is mandatory")
     @Column(name="referencia", nullable = false)
     private String referencia;
 
-  
+
     @Column(name="descricao")
     private String descricao;
 
-  
+
     @Column(name="estado")
     private String estado;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
 }

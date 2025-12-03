@@ -1,7 +1,6 @@
 package cv.inps.rh.funcionario.domain.projections;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 public interface FuncionarioList {
   Long getId();

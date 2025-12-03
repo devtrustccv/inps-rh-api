@@ -29,7 +29,7 @@ public class ParamCarreiraMapper {
 
     ParamCarreiraEntity entity = new ParamCarreiraEntity();
     entity.setId(domain.getId());
-    entity.setUuid(domain.getUuid().getValor());
+    entity.setUuid(domain.getUuid().valor());
     entity.setNome(domain.getNome());
     entity.setCodigo(domain.getCodigo());
     entity.setEstado(domain.getEstado());

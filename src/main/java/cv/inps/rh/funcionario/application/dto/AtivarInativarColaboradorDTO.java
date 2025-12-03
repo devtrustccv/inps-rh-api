@@ -4,12 +4,10 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.shared.application.constants.EstadoValidacao;
 
 @Data
 @NoArgsConstructor
@@ -19,17 +17,17 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 @IgrpDTO
 public class AtivarInativarColaboradorDTO  {
 
-  
-  
+
+
   private EstadoValidacao validar ;
-  
-  
+
+
   private String situacaoLaboral ;
-  
-  
+
+
   private String motivo ;
-  
-  
+
+
   private String observacao ;
 
 }

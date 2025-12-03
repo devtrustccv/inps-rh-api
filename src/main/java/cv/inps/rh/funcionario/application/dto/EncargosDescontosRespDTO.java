@@ -4,11 +4,10 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -20,23 +19,23 @@ import java.time.LocalDate;
 @IgrpDTO
 public class EncargosDescontosRespDTO  {
 
-  
-  
+
+
   private Long id ;
-  
-  
+
+
   private Long tipoEncargoId ;
-  
-  
+
+
   private String tipoEncargoDesc ;
-  
-  
+
+
   private BigDecimal valor ;
-  
-  
+
+
   private LocalDate dataInicio ;
-  
-  
+
+
   private LocalDate dataFim ;
 
 }

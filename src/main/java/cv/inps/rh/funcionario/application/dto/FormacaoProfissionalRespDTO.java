@@ -4,11 +4,9 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 
 @Data
@@ -19,32 +17,32 @@ import lombok.AllArgsConstructor;
 @IgrpDTO
 public class FormacaoProfissionalRespDTO  {
 
-  
-  
+
+
   private Long id ;
-  
-  
+
+
   private String uuid ;
-  
-  
+
+
   private Long paisId ;
-  
-  
+
+
   private String paisDesc ;
-  
-  
+
+
   private String estabelecimento ;
-  
-  
+
+
   private String tipoFormacao ;
-  
-  
+
+
   private String designacao ;
-  
-  
+
+
   private String nivel ;
-  
-  
+
+
   private String estado ;
 
 }

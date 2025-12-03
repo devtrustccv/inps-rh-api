@@ -2,13 +2,12 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.funcionario.application.dto.ValidarDadosBancariosDTO;
 import cv.inps.rh.funcionario.application.service.ValidarDadosBancariosService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import cv.inps.rh.funcionario.application.dto.ValidarDadosBancariosDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ValidarDadosBancariosCommandHandler implements CommandHandler<ValidarDadosBancariosCommand, ResponseEntity<ValidarDadosBancariosDTO>> {

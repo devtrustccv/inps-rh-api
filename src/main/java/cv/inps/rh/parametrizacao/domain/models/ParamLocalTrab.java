@@ -8,13 +8,13 @@ import lombok.Getter;
 @Getter
 public class ParamLocalTrab {
 
-  private Long id;
-  private IdentificadorUnico uuid;
+  private final Long id;
+  private final IdentificadorUnico uuid;
   private String nome;
   private Geografia pais;
   private Geografia ilha;
   private Long ups;
-  private Estado estado;
+  private final Estado estado;
 
   private ParamLocalTrab(
       Long id,

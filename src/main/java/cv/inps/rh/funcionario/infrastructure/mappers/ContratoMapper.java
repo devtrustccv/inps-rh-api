@@ -55,7 +55,7 @@ public class ContratoMapper {
     c.setDuracao(dc.getDuracaoMeses());
     c.setSituacaoLaboral("INICIO");
     c.setObs("NOVO_CONTRATO");
-    c.setUuid(IdentificadorUnico.create().getValor());
+    c.setUuid(IdentificadorUnico.create().valor());
     c.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
     c.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
     return c;
@@ -69,7 +69,7 @@ public class ContratoMapper {
     c.setDuracao(dc.getDuracaoMeses());
     c.setSituacaoLaboral("RENOVACAO_CONTRATO");
     c.setObs("RENOVACAO_CONTRATO");
-    c.setUuid(IdentificadorUnico.create().getValor());
+    c.setUuid(IdentificadorUnico.create().valor());
     c.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
     c.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoId()));
     return c;

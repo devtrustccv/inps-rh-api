@@ -32,7 +32,7 @@ public class GetFuncionarioByIdQueryHandler implements QueryHandler<GetFuncionar
 
     LOGGER.info("Handling GetFuncionarioByIdQuery: {}", query);
 
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getId()).getValor());
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getId()).valor());
 
     return ResponseEntity.ok(funcionarioMapper.toResponseDTO(funcionario));
 

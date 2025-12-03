@@ -7,9 +7,9 @@ import lombok.Getter;
 @Getter
 public class ParamSitLaboral {
 
-  private Long id;
-  private IdentificadorUnico uuid;
-  private String codigo;
+  private final Long id;
+  private final IdentificadorUnico uuid;
+  private final String codigo;
   private String nome;
   private String tipoSituacao;
   private Integer flgRenumeracao;
@@ -17,7 +17,7 @@ public class ParamSitLaboral {
   private Integer flgContaTempServico;
   private Integer flgCessaProgressao;
   private Integer flgEstadoContrato;
-  private Estado estado;
+  private final Estado estado;
 
   private ParamSitLaboral(
       Long id,

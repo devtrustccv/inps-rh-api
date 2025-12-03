@@ -4,6 +4,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeModalidadeEntit
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeTrabalhoEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -27,7 +28,7 @@ public class RegimeRules {
 
     return regimeTrabalhoEntity.getModalidades().stream()
         .map(RegimeModalidadeEntity::getNumHoras)
-        .filter(n -> n != null)
+        .filter(Objects::nonNull)
         .mapToInt(Integer::intValue)
         .sum();
   }

@@ -1,6 +1,5 @@
 package cv.inps.rh.funcionario.application.service;
 
-import cv.igrp.framework.core.domain.Command;
 import cv.inps.rh.funcionario.application.commands.RegistarSubstituicaoCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarSubstituicaoCommand;
 import cv.inps.rh.funcionario.application.dto.SubstituicaoDTO;
@@ -32,30 +31,30 @@ public class SubstituicaoWriteService {
 
     var dto = command.getSubstituicao();
 
-    var idFuncionarioSubstituto = IdentificadorUnico.from(dto.getColaboradorSubstituto()).getValor();
+    var idFuncionarioSubstituto = IdentificadorUnico.from(dto.getColaboradorSubstituto()).valor();
     var funcionarioSubstituto = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituto).orElseThrow(
         () -> IgrpResponseStatusException.badRequest("Funcionário não encontrado:: "+idFuncionarioSubstituto)
     );
 
-    var idFuncionarioSubstituido = IdentificadorUnico.from(command.getIdFuncionario()).getValor();
+    var idFuncionarioSubstituido = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionarioSubstituido = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituido).orElseThrow(
         () -> IgrpResponseStatusException.badRequest("Funcionário não encontrado:: "+idFuncionarioSubstituido)
     );
 
 
     var substituicao = new SubstituicaoEntity();
-    substituicao.setTiprelIdDe(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido));
-    substituicao.setTiprelIdPara(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto));
+    substituicao.setSubstitutoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido));
+    substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto));
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());
     substituicao.setObs(dto.getObs());
-    substituicao.setUuid(IdentificadorUnico.create().getValor());
+    substituicao.setUuid(IdentificadorUnico.create().valor());
     substituicao.setEstado(Estado.P);
     substituicaoEntityRepository.save(substituicao);
 
     var validacao = dadosContratuaisMapper.toValidacaoInsert("INSERT","SUBSTITUICAO", Estado.P);
     validacao.setFunId(funcionarioSubstituido);
-    validacao.setTiprelId(substituicao.getTiprelIdDe());
+    validacao.setTiprelId(substituicao.getSubstitutoTiprelId());
     validacao.setFunId(funcionarioSubstituido);
     validacao.setReferenciaId(substituicao.getId());
 
@@ -70,9 +69,9 @@ public class SubstituicaoWriteService {
   public SubstituicaoDTO validar(ValidarSubstituicaoCommand command) {
     var dto = command.getSubstituicao();
 
-    var idSusbtituicao = IdentificadorUnico.from(command.getSubstituicaoId()).getValor();
+    var idSusbtituicao = IdentificadorUnico.from(command.getSubstituicaoId()).valor();
 
-    var idFuncionarioSubstituto = IdentificadorUnico.from(dto.getColaboradorSubstituto()).getValor();
+    var idFuncionarioSubstituto = IdentificadorUnico.from(dto.getColaboradorSubstituto()).valor();
     var funcionarioSubstituto = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituto).orElseThrow(
         () -> IgrpResponseStatusException.badRequest("Funcionário não encontrado:: "+idFuncionarioSubstituto)
     );
@@ -83,10 +82,10 @@ public class SubstituicaoWriteService {
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());
     substituicao.setObs(dto.getObs());
-    substituicao.setTiprelIdPara(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto));
+    substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto));
 
 
-    var idFuncionarioSubstituido = IdentificadorUnico.from(command.getIdFuncionario()).getValor();
+    var idFuncionarioSubstituido = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionarioSubstituido = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituido).orElseThrow(
         () -> IgrpResponseStatusException.badRequest("Funcionário não encontrado:: "+idFuncionarioSubstituido)
     );

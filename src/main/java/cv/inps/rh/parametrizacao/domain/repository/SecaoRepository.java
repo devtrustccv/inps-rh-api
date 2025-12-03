@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface SecaoRepository {
 
-  public List<Secao> findAllActive();
+  List<Secao> findAllActive();
 }

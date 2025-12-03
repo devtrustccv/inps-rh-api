@@ -38,7 +38,7 @@ public class MobilidadeWriteService {
 
     var mobilidadeDto = command.getMobilidade();
 
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.getValor());
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
     if (funcionarioRules.temValidacaoPendente(funcionario, "INSERT", "MOBILIDADE")){
       throw IgrpResponseStatusException.badRequest("Funcionário tem uma mobilidade pendente por validar");
@@ -133,7 +133,7 @@ public class MobilidadeWriteService {
 
     var mobilidadeDto = command.getMobilidade();
 
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.getValor());
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
 

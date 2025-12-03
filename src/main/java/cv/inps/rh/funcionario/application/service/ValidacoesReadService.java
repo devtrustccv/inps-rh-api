@@ -4,20 +4,20 @@ import cv.inps.rh.funcionario.application.dto.WrapperListaValidacoesDTO;
 import cv.inps.rh.funcionario.application.queries.GetValicoesUtilizadoresQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.ValidacaoMapper;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 
 @Service
 @RequiredArgsConstructor

@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface ParamVinculoRepository {
 
-  public List<ParamVinculo> findAllActive();
+  List<ParamVinculo> findAllActive();
 }

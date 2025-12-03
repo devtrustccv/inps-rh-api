@@ -158,7 +158,7 @@ public class RegistarColaboradorService {
     var tipoMovimentoInps = tipoMovimentoHelper.getTipoMovimentoEntityInps();
     var tipoMovimentoIUR =  tipoMovimentoHelper.getTipoMovimentoEntityIur();
 
-    /***********************RENUMERACOES ********************************/
+    /********************RENUMERACOES ********************************/
     if (dc.getSubsidios() != null && !dc.getSubsidios().isEmpty()) {
       var remList = dc.getSubsidios().stream()
           .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, fun, Estado.P))
@@ -173,7 +173,7 @@ public class RegistarColaboradorService {
     fun.getDefinicoesRenumeracoes().addAll(new ArrayList<>(List.of(renumeracaoSalario, renumeracaoInps)));
 
 
-    /***********************PAGAMENTOS DESCONTOS ********************************/
+    /********************PAGAMENTOS DESCONTOS ********************************/
     if (dc.getEncargosDescontos() != null && !dc.getEncargosDescontos().isEmpty()) {
       var pagList = dc.getEncargosDescontos().stream()
           .map(e -> defPagamentoMapper.toDefPagamento(e, fun, Estado.P))

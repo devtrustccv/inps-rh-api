@@ -5,21 +5,21 @@ import cv.inps.rh.funcionario.application.queries.GetListContratosQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContratoMapper;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoEntityRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Join;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoEntityRepository;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +31,7 @@ public class ContratoReadService {
   @Transactional(readOnly = true)
   public WrapperListContratoDTO listaContratos(GetListContratosQuery query) {
 
-    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).getValor();
+    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
 
     int pageNumber = query.getPageNumber() != null ? Integer.parseInt(query.getPageNumber()) : 0;
     int pageSize = query.getPageSize() != null ? Integer.parseInt(query.getPageSize()) : 10;

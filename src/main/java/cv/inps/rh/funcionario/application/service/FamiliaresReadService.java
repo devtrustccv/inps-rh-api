@@ -20,7 +20,7 @@ public class FamiliaresReadService {
 
   @Transactional(readOnly = true)
   public List<AgregadoDependenteRespDTO> getFamiliares(GetDadosFamiliaresQuery query) {
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getIdFuncionario()).getValor());
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getIdFuncionario()).valor());
     return familiarMapper.toAgregadoDependenteRespDTOList(funcionario.getFamiliares());
   }
 

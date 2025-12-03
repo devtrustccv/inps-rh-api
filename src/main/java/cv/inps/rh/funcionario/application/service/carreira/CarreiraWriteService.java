@@ -199,7 +199,7 @@ public class CarreiraWriteService {
       defPagamentoEntityRepository.save(obj);
     });
 
-    var remuneracoes = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(relacionamento, Estado.P.name());
+    var remuneracoes = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(relacionamento, Estado.P);
     remuneracoes.forEach(obj -> {
       obj.setEstado(estado);
       remuneracaoTiprelEntityRepository.save(obj);
@@ -242,7 +242,7 @@ public class CarreiraWriteService {
           definicaoRemuneracaoEntityRepository.save(obj);
         });
 
-    remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(relacionamentoAtual, Estado.P.name())
+    remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(relacionamentoAtual, Estado.P)
         .forEach(remun -> {
           remun.setEstado(Estado.E);
           remuneracaoTiprelEntityRepository.save(remun);

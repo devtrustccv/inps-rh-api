@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RemuneracaoTiprelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
@@ -22,5 +23,5 @@ public interface RemuneracaoTiprelEntityRepository extends
           .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"RemuneracaoTiprelEntity not found for id: " + id));
       }
 
-  List<RemuneracaoTiprelEntity> findByTiprelIdAndEstado(TiposRelacionamentoEntity relacionamento, String estado);
+  List<RemuneracaoTiprelEntity> findByTiprelIdAndEstado(TiposRelacionamentoEntity relacionamento, Estado estado);
 }

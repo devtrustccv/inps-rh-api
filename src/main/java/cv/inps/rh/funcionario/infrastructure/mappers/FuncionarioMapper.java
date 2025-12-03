@@ -53,7 +53,7 @@ public class FuncionarioMapper {
 
     FuncionarioListDTO dto = new FuncionarioListDTO();
     dto.setId(projection.getId());
-    dto.setUuid(projection.getUuid() != null ? projection.getUuid().toString() : null);
+    dto.setUuid(projection.getUuid() != null ? projection.getUuid() : null);
     dto.setNome(projection.getNome());
     dto.setCargo(projection.getCargo());
     dto.setDataInicio(projection.getDataInicio() != null ? DateFormatter.localDateToString(projection.getDataInicio()) : null);
@@ -388,7 +388,7 @@ public class FuncionarioMapper {
     docPessoal.setFunId(funParam);
     docPessoal.setTipoDocumentoId(tipoDocumento);
     docPessoal.setNumDocumento(dadosPessoais.getNumDocumento());
-    docPessoal.setUuid(funParam.getDocumentoPessoal() != null ? funParam.getDocumentoPessoal().getUuid() : IdentificadorUnico.create().getValor());
+    docPessoal.setUuid(funParam.getDocumentoPessoal() != null ? funParam.getDocumentoPessoal().getUuid() : IdentificadorUnico.create().valor());
     docPessoal.setEstado(funParam.getDocumentoPessoal() != null ? funParam.getDocumentoPessoal().getEstado() : Estado.P);
     funParam.setDocumentoPessoal(docPessoal);
 

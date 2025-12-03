@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface ParamEscalaoRepository {
 
-  public List<ParamEscalao> findAllActive();
+  List<ParamEscalao> findAllActive();
 }

@@ -36,7 +36,7 @@ public class RegimeWriteService {
 
     // Carregar dados do comando
     var dto = command.getRegimetrabalho();
-    var idFuncionario = IdentificadorUnico.from(command.getIdFuncionario()).getValor();
+    var idFuncionario = IdentificadorUnico.from(command.getIdFuncionario()).valor();
 
     // Buscar funcionário
     var funcionario = funcionarioEntityRepository.findByUuid(idFuncionario)
@@ -53,7 +53,7 @@ public class RegimeWriteService {
     regimeTrabalho.setDataInicio(dto.getDataInicio());
     regimeTrabalho.setDataFim(dto.getDataFim());
     regimeTrabalho.setEstado(Estado.P);
-    regimeTrabalho.setUuid(IdentificadorUnico.create().getValor());
+    regimeTrabalho.setUuid(IdentificadorUnico.create().valor());
 
     // Criar novo relacionamento
     var novoTipoRelacionamento = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
@@ -76,7 +76,7 @@ public class RegimeWriteService {
         modalidade.setModalidade(mod.getModalidade());
         modalidade.setDiasSemana(mod.getDiasSemana());
         modalidade.setNumHoras(mod.getNumeroHoras());
-        modalidade.setUuid(IdentificadorUnico.create().getValor());
+        modalidade.setUuid(IdentificadorUnico.create().valor());
         modalidade.setRegimeId(regimeTrabalho);
         regimeTrabalho.getModalidades().add(modalidade);
       }
@@ -106,7 +106,7 @@ public class RegimeWriteService {
   public RegimeTrabalhoDTO validar(ValidarRegimeTrabalhoCommand command) {
 
     var dto = command.getRegimetrabalho();
-    var idFuncionario = IdentificadorUnico.from(command.getIdFuncionario()).getValor();
+    var idFuncionario = IdentificadorUnico.from(command.getIdFuncionario()).valor();
 
     var funcionario = funcionarioEntityRepository.findByUuid(idFuncionario)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Funcionário não encontrado"));
@@ -123,7 +123,7 @@ public class RegimeWriteService {
     regime.setDataInicio(dto.getDataInicio());
     regime.setDataFim(dto.getDataFim());
 
-    /************************ SINCRONIZAÇÃO DAS MODALIDADES ************************/
+    /********************* SINCRONIZAÇÃO DAS MODALIDADES ************************/
 
     var existentes = regime.getModalidades();
     var recebidos = dto.getRegimeModalidade();
@@ -148,7 +148,7 @@ public class RegimeWriteService {
         } else {
 
           var novo = new RegimeModalidadeEntity();
-          novo.setUuid(IdentificadorUnico.create().getValor());
+          novo.setUuid(IdentificadorUnico.create().valor());
           novo.setModalidade(modDto.getModalidade());
           novo.setDiasSemana(modDto.getDiasSemana());
           novo.setNumHoras(modDto.getNumeroHoras());
@@ -165,7 +165,7 @@ public class RegimeWriteService {
       rem.setEstado(Estado.I);
     }
 
-    /************************ VALIDAÇÃO ************************/
+    /********************* VALIDAÇÃO ************************/
 
     if (dto.getValidar() != null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;

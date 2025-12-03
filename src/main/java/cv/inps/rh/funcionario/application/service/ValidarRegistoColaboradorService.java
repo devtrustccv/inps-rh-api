@@ -44,7 +44,7 @@ public class ValidarRegistoColaboradorService {
 
     var registroColaborador = command.getFuncionariorequest();
 
-    var funcionarioPublicId = IdentificadorUnico.from(command.getId()).getValor();
+    var funcionarioPublicId = IdentificadorUnico.from(command.getId()).valor();
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 

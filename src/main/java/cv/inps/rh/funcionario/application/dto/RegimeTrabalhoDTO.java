@@ -4,13 +4,12 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.RegimeModalidadeDTO;
-import cv.inps.rh.shared.application.constants.EstadoValidacao;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,19 +22,19 @@ import java.util.List;
 @IgrpDTO
 public class RegimeTrabalhoDTO  {
 
-  
-  
+
+
   private EstadoValidacao validar ;
-  
-  
+
+
   private String tipoRegime ;
-  
-  
+
+
   private LocalDate dataInicio ;
-  
-  
+
+
   private LocalDate dataFim ;
-  
+
   @Valid
   private List<RegimeModalidadeDTO> regimeModalidade = new ArrayList<>();
 

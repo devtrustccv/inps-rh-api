@@ -35,7 +35,7 @@ public class ValidarAgregadosService {
     var agregadoDependenteReqDTO = dto.getFamiliares();
     var estadoValidacao = dto.getValidar();
 
-    var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).getValor();
+    var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
     boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario, "UPDATE", "FAMILIA");

@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface ParamLocalTrabalhoRepository {
 
-  public List<ParamLocalTrab> findAllActive();
+  List<ParamLocalTrab> findAllActive();
 }

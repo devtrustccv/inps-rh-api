@@ -3,36 +3,41 @@ package cv.inps.rh.shared.domain.models;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 
-import java.util.Objects;
 import java.util.UUID;
 
 /**
  * Generic Value Object representing a unique identifier in the domain.
  * Immutable and value-based equality.
+ *
+ * @param valor -- GETTER --
+ *              Returns the raw UUID value.
  */
 
-public class IdentificadorUnico {
+public record IdentificadorUnico(UUID valor) {
 
-  private final UUID valor;
-
-  private IdentificadorUnico(UUID valor) {
+  public IdentificadorUnico {
     if (valor == null) {
       throw IgrpResponseStatusException.badRequest("O identificador não pode ser nulo.");
     }
-    this.valor = valor;
   }
 
-  /** Creates a new time-ordered unique identifier. */
+  /**
+   * Creates a new time-ordered unique identifier.
+   */
   public static IdentificadorUnico create() {
     return new IdentificadorUnico(UuidCreator.getTimeOrdered());
   }
 
-  /** Rebuilds from an existing UUID. */
+  /**
+   * Rebuilds from an existing UUID.
+   */
   public static IdentificadorUnico from(UUID uuid) {
     return new IdentificadorUnico(uuid);
   }
 
-  /** Rebuilds from a String representation of a UUID. */
+  /**
+   * Rebuilds from a String representation of a UUID.
+   */
   public static IdentificadorUnico from(String uuidString) {
     if (uuidString == null || uuidString.isBlank()) {
       throw IgrpResponseStatusException.badRequest("UUID string não pode ser nula ou vazia.");
@@ -46,25 +51,10 @@ public class IdentificadorUnico {
     }
   }
 
-  /** Returns the raw UUID value. */
-  public UUID getValor() {
-    return valor;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof IdentificadorUnico that)) return false;
-    return valor.equals(that.valor);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(valor);
-  }
-
-  @Override
-  public String toString() {
-    return valor.toString();
+    if (!(o instanceof IdentificadorUnico(UUID valor1))) return false;
+    return valor.equals(valor1);
   }
 }

@@ -37,7 +37,7 @@ public class RenumeracoesReadService {
     int pageNumber = query.getPageNumber() != null ? Integer.parseInt(query.getPageNumber()) : 0;
     int pageSize = query.getPageSize() != null ? Integer.parseInt(query.getPageSize()) : 20;
 
-    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).getValor();
+    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
 
     Specification<DefinicaoRemuneracaoEntity> spec = (root, cq, cb) -> {
       List<Predicate> predicates = new java.util.ArrayList<>();

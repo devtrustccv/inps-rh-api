@@ -9,7 +9,7 @@ import java.util.UUID;
 @Getter
 public class ParamVinculo {
 
-  private Long id;
+  private final Long id;
   private IdentificadorUnico uuid;
   private String codigo;
   private String nome;

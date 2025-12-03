@@ -36,16 +36,16 @@ public class ParamLocalTrabMapper {
 
     ParamLocalTrabEntity entity = new ParamLocalTrabEntity();
     entity.setId(domain.getId());
-    entity.setUuid(domain.getUuid() != null ? domain.getUuid().getValor() : null);
+    entity.setUuid(domain.getUuid() != null ? domain.getUuid().valor() : null);
     entity.setNome(domain.getNome());
 
     // Lazy referência — só obtém se existir ID
-    if (domain.getPais() != null && domain.getPais().getId() != null) {
-      entity.setPaisId(entityManager.getReference(GeografiaEntity.class, domain.getPais().getId()));
+    if (domain.getPais() != null && domain.getPais().id() != null) {
+      entity.setPaisId(entityManager.getReference(GeografiaEntity.class, domain.getPais().id()));
     }
 
-    if (domain.getIlha() != null && domain.getIlha().getId() != null) {
-      entity.setIlhaId(entityManager.getReference(GeografiaEntity.class, domain.getIlha().getId()));
+    if (domain.getIlha() != null && domain.getIlha().id() != null) {
+      entity.setIlhaId(entityManager.getReference(GeografiaEntity.class, domain.getIlha().id()));
     }
 
     entity.setUpsId(domain.getUps());

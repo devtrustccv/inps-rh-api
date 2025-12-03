@@ -19,7 +19,7 @@ public class DadosPessoaisReadService {
   @Transactional(readOnly = true)
   public DadosPessoaisRespDTO getDadosPessoais(GetDadosPessoaisQuery query) {
 
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getIdFuncionario()).getValor());
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getIdFuncionario()).valor());
     return funcionarioMapper.toDadosPessoaisRespDTO(funcionario);
 
   }

@@ -7,9 +7,9 @@ import lombok.Getter;
 @Getter
 public class ParamCategoria {
 
-  private Long id;
-  private ParamCarreira paramCarreira;
-  private IdentificadorUnico uuid;
+  private final Long id;
+  private final ParamCarreira paramCarreira;
+  private final IdentificadorUnico uuid;
   private String nome;
   private String codigo;
   private Estado estado;

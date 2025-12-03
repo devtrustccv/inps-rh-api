@@ -4,11 +4,9 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 
 @Data
@@ -19,14 +17,14 @@ import lombok.AllArgsConstructor;
 @IgrpDTO
 public class ContactoReqDTO  {
 
-  
-  
+
+
   private Long id ;
-  
-  
+
+
   private String tipoContacto ;
-  
-  
+
+
   private String contacto ;
 
 }

@@ -8,8 +8,6 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.RemuneracaoTiprelEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.PagTiprelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PagTiprelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RemuneracaoTiprelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -52,7 +50,7 @@ public class NovoContratoService {
 
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
 
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.getValor());
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
     boolean temContratoAtivo = funcionario.getContratos().stream()
         .anyMatch(c -> c.getEstado() == Estado.A);
@@ -83,7 +81,7 @@ public class NovoContratoService {
       }
     }
 
-    /************ adicionar novo contrato **************/
+    /********* adicionar novo contrato **************/
     var dc = dto.getDadosContratuais();
     if (dc == null) {
       throw IgrpResponseStatusException.badRequest("Dados contratuais obrigatórios");

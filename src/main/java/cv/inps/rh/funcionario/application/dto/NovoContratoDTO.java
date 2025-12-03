@@ -4,13 +4,11 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
-import cv.inps.rh.shared.application.constants.EstadoValidacao;
 
 @Data
 @NoArgsConstructor
@@ -20,10 +18,10 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 @IgrpDTO
 public class NovoContratoDTO  {
 
-  
-  
+
+
   private EstadoValidacao validar ;
-  
+
   @Valid
   private DadosContratuaisReqDTO dadosContratuais ;
 

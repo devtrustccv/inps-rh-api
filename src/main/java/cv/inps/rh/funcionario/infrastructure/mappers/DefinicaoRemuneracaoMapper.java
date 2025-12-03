@@ -1,11 +1,8 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
-import com.ctc.wstx.io.BaseInputSource;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.RenumeracaoListDTO;
 import cv.inps.rh.funcionario.application.dto.SubsidioReqDTO;
-
-import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.mappers.TipoMovimentoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;
@@ -14,7 +11,6 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

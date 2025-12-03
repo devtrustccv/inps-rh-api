@@ -36,11 +36,11 @@ public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoById
   public ResponseEntity<DadosContratuaisRespDTO> handle(GetContratoByIdQuery query) {
     LOGGER.info("Handling GetContratoByIdQuery: {}", query);
 
-    var contratoId = IdentificadorUnico.from(query.getContratoId()).getValor();
+    var contratoId = IdentificadorUnico.from(query.getContratoId()).valor();
 
     var idFunc = IdentificadorUnico.from(query.getId());
 
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.getValor());
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
     var dadosContratuais = funcionarioRoles.getTipoRelacionamentoByContratoId(funcionario, contratoId);
     if (dadosContratuais == null)

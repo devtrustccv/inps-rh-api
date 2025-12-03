@@ -6,7 +6,6 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FormacaoFeitaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import jakarta.persistence.EntityManager;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

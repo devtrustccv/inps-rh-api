@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface ParamContratoRepository {
 
-  public List<ParamContrato> findAllActive();
+  List<ParamContrato> findAllActive();
 }

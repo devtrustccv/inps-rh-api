@@ -4,11 +4,9 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 
 @Data
@@ -19,35 +17,35 @@ import lombok.AllArgsConstructor;
 @IgrpDTO
 public class FuncionarioListDTO  {
 
-  
-  
+
+
   private Long id ;
-  
-  
+
+
   private String uuid ;
-  
-  
+
+
   private String nome ;
-  
-  
+
+
   private String cargo ;
-  
-  
+
+
   private String dataInicio ;
-  
-  
+
+
   private String direccao ;
-  
-  
+
+
   private String seccao ;
-  
-  
+
+
   private String carreiraCategoria ;
-  
-  
+
+
   private String estadoRegisto ;
-  
-  
+
+
   private String estadoColaborador ;
 
 }

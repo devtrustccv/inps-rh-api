@@ -5,8 +5,11 @@ package cv.inps.rh.shared.infrastructure.persistence.entity;
 
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
-import lombok.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 @Getter

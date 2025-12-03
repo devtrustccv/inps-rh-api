@@ -42,7 +42,7 @@ public class MudarSituacaoLaboralColaboradorService {
     if (!List.of("ATIVO", "CESSADO").contains(dto.getSituacaoLaboral()))
       throw IgrpResponseStatusException.badRequest("Situacao laboral inválida: " + dto.getSituacaoLaboral());
 
-    var funcionarioPublicId = IdentificadorUnico.from(command.getId()).getValor();
+    var funcionarioPublicId = IdentificadorUnico.from(command.getId()).valor();
 
     var isAtivo = dto.getSituacaoLaboral().equals("ATIVO");
 

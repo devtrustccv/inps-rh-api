@@ -33,12 +33,12 @@ public class TipoDocumentoMapper {
     if (tipoDocumento == null) return null;
 
     TipoDocumentoEntity entity = new TipoDocumentoEntity();
-    entity.setId(tipoDocumento.getId());
-    entity.setUuid(tipoDocumento.getUuid().getValor());
-    entity.setReferencia(tipoDocumento.getReferencia());
-    entity.setCodigo(tipoDocumento.getCodigo());
-    entity.setNome(tipoDocumento.getNome());
-    entity.setEstado(tipoDocumento.getEstado());
+    entity.setId(tipoDocumento.id());
+    entity.setUuid(tipoDocumento.uuid().valor());
+    entity.setReferencia(tipoDocumento.referencia());
+    entity.setCodigo(tipoDocumento.codigo());
+    entity.setNome(tipoDocumento.nome());
+    entity.setEstado(tipoDocumento.estado());
     return entity;
   }
 
@@ -46,8 +46,8 @@ public class TipoDocumentoMapper {
     if (domain == null) return null;
 
     ParametrizacaoDTO dto = new ParametrizacaoDTO();
-    dto.setLabel(domain.getNome());
-    dto.setValue(domain.getId());
+    dto.setLabel(domain.nome());
+    dto.setValue(domain.id());
     return dto;
   }
 

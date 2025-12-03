@@ -4,11 +4,9 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 
 @Data
@@ -19,32 +17,32 @@ import lombok.AllArgsConstructor;
 @IgrpDTO
 public class PagamentosDescontoListDTO  {
 
-  
-  
+
+
   private String id ;
-  
-  
+
+
   private String uuid ;
-  
-  
+
+
   private String movimento ;
-  
-  
+
+
   private String estado ;
-  
-  
+
+
   private String estadoDesc ;
-  
-  
+
+
   private String valor ;
-  
-  
+
+
   private String dataInicio ;
-  
-  
+
+
   private String dataFim ;
-  
-  
+
+
   private String ultimoProc ;
 
 }

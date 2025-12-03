@@ -2,8 +2,8 @@ package cv.inps.rh.funcionario.application.service.historicolaboral;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.ValidarHistoricoLaboralCommand;
-import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +52,7 @@ public class HistoricoLaboralWriteService {
 
     var dto = command.getValidarnovohistoricolaboral();
 
-    var idFuncionario = IdentificadorUnico.from(command.getIdFuncionario()).getValor();
+    var idFuncionario = IdentificadorUnico.from(command.getIdFuncionario()).valor();
 
     var funcionario = funcionarioEntityRepository.findByUuid(idFuncionario)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Funcionário não encontrado"));
@@ -87,7 +86,7 @@ public class HistoricoLaboralWriteService {
       }
 
       var remTiprels = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(relacionamentoPendente,
-          Estado.P.name());
+          Estado.P);
       for (var rt : remTiprels) {
         rt.setEstado(estadoFinal);
         remuneracaoTiprelEntityRepository.save(rt);
@@ -147,7 +146,7 @@ public class HistoricoLaboralWriteService {
     trAtual.setEstado(Estado.I);
     tiposRelacionamentoEntityRepository.save(trAtual);
 
-    var remAssocAtivos = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(trAtual, Estado.A.name());
+    var remAssocAtivos = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(trAtual, Estado.A);
     for (var rt : remAssocAtivos) {
       rt.setEstado(Estado.I);
       remuneracaoTiprelEntityRepository.save(rt);

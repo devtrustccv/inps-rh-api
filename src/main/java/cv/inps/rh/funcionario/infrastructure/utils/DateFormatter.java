@@ -75,7 +75,7 @@ public class DateFormatter {
 
   public static String localDateTimeToLocalDateString(LocalDateTime dateTime) {
     return Optional.ofNullable(dateTime)
-        .map(localDateTime -> localDateTime.toLocalDate().format(DATE_FORMATTERS.get(0)))
+        .map(localDateTime -> localDateTime.toLocalDate().format(DATE_FORMATTERS.getFirst()))
         .orElse("");
   }
 

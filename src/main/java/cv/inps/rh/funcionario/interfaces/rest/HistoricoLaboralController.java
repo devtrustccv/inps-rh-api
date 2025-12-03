@@ -3,25 +3,21 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.funcionario.application.commands.ValidarHistoricoLaboralCommand;
+import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
+import cv.inps.rh.funcionario.application.queries.GetHistoricoLaboralQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.funcionario.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.funcionario.application.commands.*;
-import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
-import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
@@ -29,7 +25,7 @@ import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 @Tag(name = "HistoricoLaboral", description = "Gestão de Histórico Laboral")
 public class HistoricoLaboralController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -56,7 +52,7 @@ public class HistoricoLaboralController {
       )
     }
   )
-  
+
   public ResponseEntity<WrapperHistLaboralResponseDTO> getHistoricoLaboral(
     @RequestParam(value = "referencia", required = false) String referencia,
     @RequestParam(value = "tipoSituacao", required = false) String tipoSituacao,
@@ -93,7 +89,7 @@ public class HistoricoLaboralController {
       )
     }
   )
-  
+
   public ResponseEntity<ValidarNovoHistoricoLaboralDTO> validarHistoricoLaboral(@Valid @RequestBody ValidarNovoHistoricoLaboralDTO validarHistoricoLaboralRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {

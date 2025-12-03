@@ -4,11 +4,9 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 
 @Data
@@ -19,47 +17,47 @@ import lombok.AllArgsConstructor;
 @IgrpDTO
 public class EnderecoRespDTO  {
 
-  
-  
+
+
   private Long id ;
-  
-  
+
+
   private String uuid ;
-  
-  
+
+
   private Integer paisId ;
-  
-  
+
+
   private String paisDesc ;
-  
-  
+
+
   private Integer ilhaId ;
-  
-  
+
+
   private String ilhaDesc ;
-  
-  
+
+
   private Integer concelhoId ;
-  
-  
+
+
   private String concelhoDesc ;
-  
-  
+
+
   private Integer freguesiaId ;
-  
-  
+
+
   private String freguesiaDesc ;
-  
-  
+
+
   private Integer zonaId ;
-  
-  
+
+
   private String zonaDesc ;
-  
-  
+
+
   private String morada ;
-  
-  
+
+
   private String estado ;
 
 }

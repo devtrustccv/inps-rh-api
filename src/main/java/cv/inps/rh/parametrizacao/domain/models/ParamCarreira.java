@@ -9,11 +9,11 @@ import java.util.UUID;
 @Getter
 public class ParamCarreira {
 
-  private Long id;
-  private IdentificadorUnico uuid;
+  private final Long id;
+  private final IdentificadorUnico uuid;
   private String nome;
   private String codigo;
-  private Estado estado;
+  private final Estado estado;
 
   private ParamCarreira(Long id, IdentificadorUnico uuid, String nome, String codigo, Estado estado) {
     this.id = id;

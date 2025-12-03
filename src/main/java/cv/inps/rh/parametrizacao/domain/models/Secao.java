@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public class Secao {
 
-  private Long id;
+  private final Long id;
   private IdentificadorUnico uuid;
   private String nome;
   private Instituicao instId;

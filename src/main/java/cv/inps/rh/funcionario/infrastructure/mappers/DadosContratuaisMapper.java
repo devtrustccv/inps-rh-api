@@ -257,7 +257,7 @@ public class DadosContratuaisMapper {
   public TiposRelacionamentoEntity clone(TiposRelacionamentoEntity original) {
 
     TiposRelacionamentoEntity clone = new TiposRelacionamentoEntity();
-    clone.setUuid(IdentificadorUnico.create().getValor());
+    clone.setUuid(IdentificadorUnico.create().valor());
     clone.setCargoId(original.getCargoId());
     clone.setInstitId(original.getInstitId());
     clone.setSeccaoId(original.getSeccaoId());

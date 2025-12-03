@@ -4,11 +4,9 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 
 @Data
@@ -19,38 +17,38 @@ import lombok.AllArgsConstructor;
 @IgrpDTO
 public class RegimeListDTO  {
 
-  
-  
+
+
   private Long id ;
-  
-  
+
+
   private String uuid ;
-  
-  
+
+
   private Long idFuncionario ;
-  
-  
+
+
   private String uuidFuncionario ;
-  
-  
+
+
   private String tipoRegime ;
-  
-  
+
+
   private String dataInicio ;
-  
-  
+
+
   private String dataFim ;
-  
-  
+
+
   private String modalidade ;
-  
-  
+
+
   private String numHoras ;
-  
-  
+
+
   private String estado ;
-  
-  
+
+
   private String estadoDesc ;
 
 }

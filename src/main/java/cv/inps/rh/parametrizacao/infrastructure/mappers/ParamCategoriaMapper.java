@@ -39,7 +39,7 @@ public class ParamCategoriaMapper {
 
     ParamCategoriaEntity entity = new ParamCategoriaEntity();
     entity.setId(domain.getId());
-    entity.setUuid(domain.getUuid().getValor());
+    entity.setUuid(domain.getUuid().valor());
     entity.setNome(domain.getNome());
     entity.setCodigo(domain.getCodigo());
     entity.setEstado(domain.getEstado());

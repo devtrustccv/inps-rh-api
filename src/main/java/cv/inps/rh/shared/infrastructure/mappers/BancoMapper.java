@@ -2,7 +2,6 @@ package cv.inps.rh.shared.infrastructure.mappers;
 
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.shared.domain.models.Banco;
-import cv.inps.rh.shared.domain.models.Entidade;
 import cv.inps.rh.shared.infrastructure.persistence.entity.BancoEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

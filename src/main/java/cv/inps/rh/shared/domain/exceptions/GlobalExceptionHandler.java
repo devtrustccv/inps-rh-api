@@ -1,23 +1,21 @@
 package cv.inps.rh.shared.domain.exceptions;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus; 
-import org.springframework.http.ProblemDetail; 
-import org.springframework.http.converter.HttpMessageNotReadableException; 
-import org.springframework.web.bind.MethodArgumentNotValidException; 
-import org.springframework.web.bind.annotation.ControllerAdvice; 
-import org.springframework.web.bind.annotation.ExceptionHandler; 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
-import jakarta.persistence.EntityNotFoundException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
@@ -119,8 +117,8 @@ public class GlobalExceptionHandler {
     return problem;
   }
 
-  @ExceptionHandler(DataIntegrityViolationException.class) 
-  public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex) { 
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex) {
 
     Throwable rootCause = getRootCause(ex);
 
@@ -133,19 +131,20 @@ public class GlobalExceptionHandler {
       problem.setDetail(ex.getMostSpecificCause().getMessage());
     }
 
-    return problem; 
-  } 
- 
+    return problem;
+  }
+
   @ExceptionHandler(JpaObjectRetrievalFailureException.class)
   public ProblemDetail handleJpaObjectRetrievalFailure(JpaObjectRetrievalFailureException ex) {
     LOGGER.error(ex.getMessage(), ex);
     var problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
     problem.setTitle("Entity not found");
-    var detail = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
+    ex.getMostSpecificCause();
+    var detail = ex.getMostSpecificCause().getMessage();
     problem.setDetail(detail);
     return problem;
   }
- 
+
   @ExceptionHandler(EntityNotFoundException.class)
   public ProblemDetail handleEntityNotFound(EntityNotFoundException ex) {
     LOGGER.error(ex.getMessage(), ex);

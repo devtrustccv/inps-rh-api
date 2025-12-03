@@ -26,8 +26,8 @@ public class UpsMapper {
     if (ups == null) return null;
 
     ParametrizacaoDTO dto = new ParametrizacaoDTO();
-    dto.setLabel(ups.getNome());
-    dto.setValue(ups.getId());
+    dto.setLabel(ups.nome());
+    dto.setValue(ups.id());
     return dto;
   }
 }

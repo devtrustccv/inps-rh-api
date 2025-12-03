@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public class Banco {
 
-  private Long id;
+  private final Long id;
   private String codigoBanco;
   private String sigla;
   private String nomeBanco;

@@ -23,12 +23,10 @@ public class SpringQueryBus implements QueryBus {
       Type[] interfaces = targetClass.getGenericInterfaces();
 
       for (Type iface : interfaces) {
-        if (iface instanceof ParameterizedType) {
-          ParameterizedType pt = (ParameterizedType) iface;
+        if (iface instanceof ParameterizedType pt) {
           Type actualType = pt.getActualTypeArguments()[0];
-          if (actualType instanceof Class<?>) {
-          Class<?> queryType = (Class<?>) actualType;
-          handlers.put((Class<? extends Query>) queryType, handler);
+          if (actualType instanceof Class<?> queryType) {
+            handlers.put((Class<? extends Query>) queryType, handler);
         }
       }
     }

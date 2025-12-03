@@ -1,10 +1,7 @@
 package cv.inps.rh.shared.infrastructure.mappers;
 
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
-import cv.inps.rh.shared.domain.models.Geografia;
-import cv.inps.rh.shared.domain.models.Instituicao;
 import cv.inps.rh.shared.domain.models.TipoMovimento;
-import cv.inps.rh.shared.infrastructure.persistence.entity.InstituicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

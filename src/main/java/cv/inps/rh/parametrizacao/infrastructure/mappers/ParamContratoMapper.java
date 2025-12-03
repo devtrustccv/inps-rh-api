@@ -44,7 +44,7 @@ public class ParamContratoMapper {
 
     ParamContratoEntity entity = new ParamContratoEntity();
     entity.setId(domain.getId());
-    entity.setUuid(domain.getUuid().getValor());
+    entity.setUuid(domain.getUuid().valor());
     entity.setCodigo(domain.getCodigo());
     entity.setNome(domain.getNome());
     entity.setNatureza(domain.getNatureza());
