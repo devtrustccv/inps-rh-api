@@ -116,7 +116,7 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
 
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
 
-    if (tiposRelacionamentoEntityRepository.existsByContrVinculoIdVinculoId(e))
+    if (tiposRelacionamentoEntityRepository.existsByContrVinculoId_VinculoId(e))
       throw IgrpResponseStatusException.conflictByAnotherTableDependency();
 
     e.setEstado(Estado.E);
