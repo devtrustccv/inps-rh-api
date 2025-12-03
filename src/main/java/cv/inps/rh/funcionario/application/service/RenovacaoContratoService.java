@@ -69,7 +69,7 @@ public class RenovacaoContratoService {
     novoTipoRelacionamento.setObs("RENOVACAO_CONTRATO");
     novoTipoRelacionamento.setTipoSituacao("RENOVACAO");
     novoTipoRelacionamento.setReferente("CONTRATO");
-    novoTipoRelacionamento.setContratoId(novoContrato);
+    novoTipoRelacionamento.setContrVinculoId(novoContrato);
     funcionario.getTiposrelacionamentos().add(novoTipoRelacionamento);
 
 

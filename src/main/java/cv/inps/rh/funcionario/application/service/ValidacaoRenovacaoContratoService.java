@@ -35,7 +35,7 @@ public class ValidacaoRenovacaoContratoService {
 
     var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
 
-    var contrato = tiposRelacionamento.getContratoId();
+    var contrato = tiposRelacionamento.getContrVinculoId().getContratoId();
 
     if (contrato == null) {
       throw IgrpResponseStatusException.badRequest("Funcionario com id '%s' não possui contrato ativo".formatted(idFunc));
@@ -65,7 +65,7 @@ public class ValidacaoRenovacaoContratoService {
     if (tr != null) {
       tr.setEstado(estado);
 
-      var contrato = tr.getContratoId();
+      var contrato = tr.getContrVinculoId().getContratoId();
       if (contrato != null) contrato.setEstado(estado);
 
       //todo perguntar analise se devo mudar o estado do mob, carreira e regime

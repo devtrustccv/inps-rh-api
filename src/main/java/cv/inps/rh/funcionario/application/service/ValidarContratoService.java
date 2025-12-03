@@ -47,7 +47,7 @@ public class ValidarContratoService {
 
     var dc = dto.getDadosContratuais();
 
-    var contrato = tiposRelacionamento.getContratoId();
+    var contrato = tiposRelacionamento.getContrVinculoId();
     contratoMapper.toUpdateEntity(contrato, dc);
 
     var mobilidade = tiposRelacionamento.getMobId();
@@ -83,7 +83,7 @@ public class ValidarContratoService {
     if (tr != null) {
       tr.setEstado(estado);
 
-      var contrato = tr.getContratoId();
+      var contrato = tr.getContrVinculoId();
       if (contrato != null) {
         contrato.setEstado(estado);
         contrato.getSituacoesLaborais().stream()

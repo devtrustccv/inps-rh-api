@@ -132,8 +132,8 @@ public class HistoricoLaboralWriteService {
 
     if (dto.getTipoAlteracao() != null && requiresActiveContract(dto.getTipoAlteracao())) {
       var trAtualContrato = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
-      if (trAtualContrato == null || trAtualContrato.getContratoId() == null
-          || trAtualContrato.getContratoId().getEstado() != Estado.A) {
+      if (trAtualContrato == null || trAtualContrato.getContrVinculoId() == null
+          || trAtualContrato.getContrVinculoId().getEstado() != Estado.A) {
         throw IgrpResponseStatusException.badRequest("Não existe contrato activo associado ao colaborador");
       }
     }
@@ -187,7 +187,7 @@ public class HistoricoLaboralWriteService {
     trNovo.setObs(dto.getTipoAlteracao());
     dadosContratuaisMapper.toUpdateRelacionamento(trNovo, dc);
 
-    var contratoAtual = trAtual.getContratoId();
+    var contratoAtual = trAtual.getContrVinculoId();
     var novoContrato = dto.getTipoAlteracao() != null && dto.getTipoAlteracao().equalsIgnoreCase("CONVERSAO_CONTRATO")
         ? contratoMapper.toContrato(dc, Estado.P)
         : null;
@@ -198,16 +198,16 @@ public class HistoricoLaboralWriteService {
       novoContrato.setEstado(Estado.P);
       novoContrato.setFunId(funcionario);
       funcionario.getContratos().add(novoContrato);
-      trNovo.setContratoId(novoContrato);
+      trNovo.setContrVinculoId(novoContrato);
     } else {
-      trNovo.setContratoId(contratoAtual);
+      trNovo.setContrVinculoId(contratoAtual);
     }
 
     var novaCarreira = carreiraMapper.toCarreira(dc, Estado.P);
     if (novaCarreira != null) {
       novaCarreira.setTipoSituacao("INICIO");
       novaCarreira.setObs(dto.getTipoAlteracao());
-      novaCarreira.setContrVinculoId(trNovo.getContratoId());
+      novaCarreira.setContrVinculoId(trNovo.getContrVinculoId());
       carreiraEntityRepository.save(novaCarreira);
       trNovo.setCarreiraId(novaCarreira);
     }

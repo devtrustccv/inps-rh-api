@@ -76,7 +76,7 @@ public class CarreiraReadService {
       var dto = new CarreiraListDTO();
       var car = tr.getCarreiraId();
       var fun = tr.getFunId();
-      var vinc = tr.getVinculoId();
+      var vinc = tr.getContrVinculoId().getVinculoId();
       var carrPcc = tr.getCarrPccId();
       var cargo = tr.getCargoId();
       var esc = tr.getEscalaoId();
@@ -122,7 +122,7 @@ public class CarreiraReadService {
     var tr = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(UUID.fromString(carreiraId));
     var car = tr.getCarreiraId();
     var fun = tr.getFunId();
-    var vinc = tr.getVinculoId();
+    var vinc = tr.getContrVinculoId().getVinculoId();
     var carrPcc = tr.getCarrPccId();
     var esc = tr.getEscalaoId();
     var categoria = tr.getCategoriaId();

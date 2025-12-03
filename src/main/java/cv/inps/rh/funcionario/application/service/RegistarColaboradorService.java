@@ -198,7 +198,7 @@ public class RegistarColaboradorService {
 
     var tr = contratuaisEntityMapper.toRelacionamento(dc, Estado.P);
     tr.setFunId(fun);
-    tr.setContratoId(contrato);
+    tr.setContrVinculoId(contrato);
     tr.setCarreiraId(carreira);
     tr.setRegimeId(regime);
     tr.setMobId(mobilidade);

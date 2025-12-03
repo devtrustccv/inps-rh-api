@@ -31,7 +31,6 @@ public class DadosContratuaisMapper {
     var tr = new TiposRelacionamentoEntity();
     tr.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
     tr.setInstitId(em.getReference(InstituicaoEntity.class, dc.getDirecaoId()));
-    tr.setVinculoId(em.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
     tr.setSeccaoId(em.getReference(SecaoEntity.class, dc.getSeccaoId()));
     tr.setCategoriaId(em.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
     tr.setEscalaoId(em.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
@@ -47,7 +46,6 @@ public class DadosContratuaisMapper {
     tr.setDataInicioContrato(dc.getDataInicio());
     tr.setDataFimContrato(dc.getDataFim());
     tr.setLocTrabId(em.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));
-    tr.setTipoContratoId(em.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
     tr.setReferente("REGISTO_COLABORADOR");
     tr.setTpContrato("INICIAL");
     tr.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -59,7 +57,6 @@ public class DadosContratuaisMapper {
     if (dc == null) return ;
     tr.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
     tr.setInstitId(em.getReference(InstituicaoEntity.class, dc.getDirecaoId()));
-    tr.setVinculoId(em.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
     tr.setSeccaoId(em.getReference(SecaoEntity.class, dc.getSeccaoId()));
     tr.setCategoriaId(em.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
     tr.setEscalaoId(em.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
@@ -74,7 +71,6 @@ public class DadosContratuaisMapper {
     tr.setDataInicioContrato(dc.getDataInicio());
     tr.setDataFimContrato(dc.getDataFim());
     tr.setLocTrabId(em.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));
-    tr.setTipoContratoId(em.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
     tr.setReferente("REGISTO_COLABORADOR");
     tr.setTpContrato("INICIAL");
 
@@ -117,8 +113,8 @@ public class DadosContratuaisMapper {
 
     DadosContratuaisRespDTO dcr = new DadosContratuaisRespDTO();
 
-    dcr.setTipoContratoId(tr.getTipoContratoId() != null ? tr.getTipoContratoId().getId() : null);
-    dcr.setTipoContratoDesc(tr.getTipoContratoId() != null ? tr.getTipoContratoId().getNome() : null);
+    dcr.setTipoContratoId(tr.getContrVinculoId() != null ? tr.getContrVinculoId().getTpContratoId().getId() : null);
+    dcr.setTipoContratoDesc(tr.getContrVinculoId() != null ? tr.getContrVinculoId().getTpContratoId().getNome() : null);
 
     dcr.setCargoPosicaoId(tr.getCargoId() != null ? tr.getCargoId().getId() : null);
     dcr.setCargoPosicaoDesc(tr.getCargoId() != null ? tr.getCargoId().getNome() : null);
@@ -141,8 +137,8 @@ public class DadosContratuaisMapper {
     dcr.setLocalTrabalhoId(tr.getLocTrabId() != null ? tr.getLocTrabId().getId() : null);
     dcr.setLocalTrabalhoDesc(tr.getLocTrabId() != null ? tr.getLocTrabId().getNome() : null);
 
-    dcr.setTipoVinculoLaboralId(tr.getVinculoId() != null ? tr.getVinculoId().getId() : null);
-    dcr.setTipoVinculoLaboralDesc(tr.getVinculoId() != null ? tr.getVinculoId().getNome() : null);
+    dcr.setTipoVinculoLaboralId(tr.getContrVinculoId() != null ? tr.getContrVinculoId().getVinculoId().getId() : null);
+    dcr.setTipoVinculoLaboralDesc(tr.getContrVinculoId() != null ? tr.getContrVinculoId().getVinculoId().getNome() : null);
 
     dcr.setRegimeTrabalho(tr.getRegime());
     dcr.setSalario(tr.getSalario());
@@ -150,8 +146,8 @@ public class DadosContratuaisMapper {
     dcr.setDataInicio(tr.getDataInicioContrato());
     dcr.setDataFim(tr.getDataFimContrato());
 
-    if (tr.getContratoId() != null)
-      dcr.setDuracaoMeses(tr.getContratoId().getDuracao());
+    if (tr.getContrVinculoId() != null)
+      dcr.setDuracaoMeses(tr.getContrVinculoId().getDuracao());
 
     // Subsídios
     if (entity.getDefinicoesRenumeracoes() != null) {
@@ -191,8 +187,8 @@ public class DadosContratuaisMapper {
 
     DadosContratuaisRespDTO dcr = new DadosContratuaisRespDTO();
 
-    dcr.setTipoContratoId(tiposRelacionamento.getTipoContratoId() != null ? tiposRelacionamento.getTipoContratoId().getId() : null);
-    dcr.setTipoContratoDesc(tiposRelacionamento.getTipoContratoId() != null ? tiposRelacionamento.getTipoContratoId().getNome() : null);
+    dcr.setTipoContratoId(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getTpContratoId().getId() : null);
+    dcr.setTipoContratoDesc(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getTpContratoId().getNome() : null);
 
     dcr.setCargoPosicaoId(tiposRelacionamento.getCargoId() != null ? tiposRelacionamento.getCargoId().getId() : null);
     dcr.setCargoPosicaoDesc(tiposRelacionamento.getCargoId() != null ? tiposRelacionamento.getCargoId().getNome() : null);
@@ -215,8 +211,8 @@ public class DadosContratuaisMapper {
     dcr.setLocalTrabalhoId(tiposRelacionamento.getLocTrabId() != null ? tiposRelacionamento.getLocTrabId().getId() : null);
     dcr.setLocalTrabalhoDesc(tiposRelacionamento.getLocTrabId() != null ? tiposRelacionamento.getLocTrabId().getNome() : null);
 
-    dcr.setTipoVinculoLaboralId(tiposRelacionamento.getVinculoId() != null ? tiposRelacionamento.getVinculoId().getId() : null);
-    dcr.setTipoVinculoLaboralDesc(tiposRelacionamento.getVinculoId() != null ? tiposRelacionamento.getVinculoId().getNome() : null);
+    dcr.setTipoVinculoLaboralId(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getVinculoId().getId() : null);
+    dcr.setTipoVinculoLaboralDesc(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getVinculoId().getNome() : null);
 
     dcr.setRegimeTrabalho(tiposRelacionamento.getRegime());
     dcr.setSalario(tiposRelacionamento.getSalario());
@@ -224,8 +220,8 @@ public class DadosContratuaisMapper {
     dcr.setDataInicio(tiposRelacionamento.getDataInicioContrato());
     dcr.setDataFim(tiposRelacionamento.getDataFimContrato());
 
-    if (tiposRelacionamento.getContratoId() != null)
-      dcr.setDuracaoMeses(tiposRelacionamento.getContratoId().getDuracao());
+    if (tiposRelacionamento.getContrVinculoId() != null)
+      dcr.setDuracaoMeses(tiposRelacionamento.getContrVinculoId().getDuracao());
 
     // Subsídios
     if (tiposRelacionamento.getFunId().getDefinicoesRenumeracoes() != null) {
@@ -266,7 +262,6 @@ public class DadosContratuaisMapper {
     clone.setUuid(IdentificadorUnico.create().getValor());
     clone.setCargoId(original.getCargoId());
     clone.setInstitId(original.getInstitId());
-    clone.setVinculoId(original.getVinculoId());
     clone.setSeccaoId(original.getSeccaoId());
     clone.setCategoriaId(original.getCategoriaId());
     clone.setEscalaoId(original.getEscalaoId());
@@ -278,10 +273,9 @@ public class DadosContratuaisMapper {
     clone.setCarreiraId(original.getCarreiraId());
     clone.setMobId(original.getMobId());
     clone.setRegimeId(original.getRegimeId());
-    clone.setTipoContratoId(original.getTipoContratoId());
     clone.setTpContrato(original.getTpContrato());
     clone.setTiprelId(original); // se quiser referenciar o anterior
-    clone.setContratoId(original.getContratoId());
+    clone.setContrVinculoId(original.getContrVinculoId());
     clone.setEstado(original.getEstado());
     clone.setDataInicio(original.getDataInicio());
     clone.setEstActAdm(original.getEstActAdm());

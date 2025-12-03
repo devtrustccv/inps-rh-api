@@ -104,7 +104,7 @@ public class FuncionarioReadService {
         var carreira = trAtual.getCarrPccId() != null ? trAtual.getCarrPccId().getNome() : null;
         var categoria = trAtual.getCategoriaId() != null ? trAtual.getCategoriaId().getNome() : null;
         dto.setCarreiraCategoria(carreira != null && categoria != null ? carreira + "/" + categoria : carreira);
-        var contrato = trAtual.getContratoId();
+        var contrato = trAtual.getContrVinculoId();
         dto.setDataInicio(contrato != null ? DateFormatter.localDateToString(contrato.getDataInicio()) : null);
       }
 

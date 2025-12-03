@@ -92,7 +92,7 @@ public class CarreiraWriteService {
     var novoRelacionamento = contratuaisEntityMapper.toRelacionamento(dto, Estado.P);
     novoRelacionamento.setObs("MOBILIDADE- || TIPO_CARREIRA");
     novoRelacionamento.setDataInicio(currentDate);
-    novoRelacionamento.setContratoId(contratoAtual);
+    novoRelacionamento.setContrVinculoId(contratoAtual);
     novoRelacionamento.setCarreiraId(novaCarreira);
     novoRelacionamento.setFunId(funcionario);
     novoRelacionamento.setEstActAdm(1);

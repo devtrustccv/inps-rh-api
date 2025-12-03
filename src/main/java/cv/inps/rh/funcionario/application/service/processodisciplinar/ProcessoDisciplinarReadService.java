@@ -48,7 +48,7 @@ public class ProcessoDisciplinarReadService {
     ofNullable(obj.getTiprelId()).ifPresent(r -> {
       ofNullable(r.getInstitId()).ifPresent(i -> response.setDirecao(i.getNome()));
       ofNullable(r.getSeccaoId()).ifPresent(s -> response.setSeccao(s.getNome()));
-      ofNullable(r.getVinculoId()).ifPresent(v -> response.setVinculo(v.getNome()));
+      ofNullable(r.getContrVinculoId().getVinculoId()).ifPresent(v -> response.setVinculo(v.getNome()));
     });
     return response;
   }

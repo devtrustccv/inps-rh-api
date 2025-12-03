@@ -81,7 +81,7 @@ public class MudarSituacaoLaboralColaboradorService {
     sl.setDataFim(contract.getDataFim());
     sl.setEstado(Estado.P);
     sl.setUuid(UuidCreator.getTimeOrderedEpoch());
-    sl.setContrVinculoId(tipoRelacionamentoNovo.getContratoId());
+    sl.setContrVinculoId(tipoRelacionamentoNovo.getContrVinculoId());
     situacaoLaboralEntityRepository.save(sl);
 
     var validation = new ValidacaoEntity();

@@ -45,11 +45,6 @@ public class TiposRelacionamentoEntity extends AuditEntity {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vinculo_id", referencedColumnName = "id")
-    private ParamVinculoEntity vinculoId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seccao_id", referencedColumnName = "id")
     private SecaoEntity seccaoId;
 
@@ -120,8 +115,8 @@ public class TiposRelacionamentoEntity extends AuditEntity {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contrato_id", referencedColumnName = "id")
-    private ContratoEntity contratoId;
+    @JoinColumn(name = "contr_vinculo_id", referencedColumnName = "id")
+    private ContratoEntity contrVinculoId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -147,11 +142,6 @@ public class TiposRelacionamentoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "regime_id", referencedColumnName = "id")
     private RegimeTrabalhoEntity regimeId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tipo_contrato_id", referencedColumnName = "id")
-    private ParamContratoEntity tipoContratoId;
     @Column(name="referente")
     private String referente;
 

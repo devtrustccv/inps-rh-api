@@ -46,8 +46,8 @@ public class FuncionarioRules {
     if (fun == null || contratoId == null) return null;
 
     return fun.getTiposrelacionamentos().stream()
-        .filter(tr -> tr.getContratoId() != null
-                      && tr.getContratoId().getUuid().equals(contratoId))
+        .filter(tr -> tr.getContrVinculoId() != null
+                      && tr.getContrVinculoId().getUuid().equals(contratoId))
         .findFirst()
         .orElse(null);
   }

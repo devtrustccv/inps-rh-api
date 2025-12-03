@@ -69,7 +69,7 @@ public class NovoContratoService {
     if (!isPrimeiroContrato) {
       var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
       tipoRelacionamentoAtual.setEstActAdm(0);
-      var contratoAtual = tipoRelacionamentoAtual.getContratoId();
+      var contratoAtual = tipoRelacionamentoAtual.getContrVinculoId();
       var fim = contratoAtual != null && contratoAtual.getDataFim() != null ? contratoAtual.getDataFim()
           : LocalDate.now();
       tipoRelacionamentoAtual.setDataFim(fim);
@@ -138,7 +138,7 @@ public class NovoContratoService {
 
     var tr = dadosContratuaisMapper.toRelacionamento(dc, Estado.P);
     tr.setFunId(funcionario);
-    tr.setContratoId(contrato);
+    tr.setContrVinculoId(contrato);
     tr.setCarreiraId(carreira);
     tr.setRegimeId(regime);
     tr.setMobId(mobilidade);
