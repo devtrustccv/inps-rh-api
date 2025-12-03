@@ -24,7 +24,7 @@ public interface TiposRelacionamentoEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "TiposRelacionamentoEntity not found for id: " + id));
   }
 
-  boolean existsByVinculoId(ParamVinculoEntity vinculoId);
+  boolean existsByContrVinculoIdVinculoId(ParamVinculoEntity contrVinculoIdVinculoId);
 
   boolean existsByCarrPccId(ParamCarreiraEntity categoriaId);
 
