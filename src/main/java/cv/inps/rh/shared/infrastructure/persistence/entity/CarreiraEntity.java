@@ -82,8 +82,8 @@ public class CarreiraEntity extends AuditEntity {
     private LocalDate dataFim;
 
      @ManyToOne(fetch = FetchType.LAZY)
-   @JoinColumn(name = "fun_id")
-   private FuncionarioEntity funId;
+   @JoinColumn(name = "contr_vinculo_id")
+   private ContratoEntity contrVinculoId;
 
 
 }

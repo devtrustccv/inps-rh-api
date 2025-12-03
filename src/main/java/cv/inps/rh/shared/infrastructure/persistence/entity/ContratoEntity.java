@@ -81,8 +81,12 @@ public class ContratoEntity extends AuditEntity {
 private List<ContratoEntity> contratosFilhos = new ArrayList<>();
 
 
-  @OneToMany(mappedBy = "contrVinculoId", fetch = FetchType.LAZY)
-private List<SituacaoLaboralEntity> situacoesLaborais = new ArrayList<>();   @ManyToOne(fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "contrVinculoId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+private List<SituacaoLaboralEntity> situacoesLaborais = new ArrayList<>();
+
+
+  @OneToMany(mappedBy = "contrVinculoId", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+private List<CarreiraEntity> carreiras = new ArrayList<>();   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "contrato_id")
    private ContratoEntity contratoId;
 

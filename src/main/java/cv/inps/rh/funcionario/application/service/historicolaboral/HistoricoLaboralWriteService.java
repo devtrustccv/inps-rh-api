@@ -36,6 +36,7 @@ public class HistoricoLaboralWriteService {
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DefPagamentoMapper defPagamentoMapper;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
+  private final CarreiraEntityRepository carreiraEntityRepository;
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
   private final RemuneracaoTiprelEntityRepository remuneracaoTiprelEntityRepository;
@@ -204,10 +205,10 @@ public class HistoricoLaboralWriteService {
 
     var novaCarreira = carreiraMapper.toCarreira(dc, Estado.P);
     if (novaCarreira != null) {
-      novaCarreira.setFunId(funcionario);
       novaCarreira.setTipoSituacao("INICIO");
       novaCarreira.setObs(dto.getTipoAlteracao());
-      funcionario.getCarreiras().add(novaCarreira);
+      novaCarreira.setContrVinculoId(trNovo.getContratoId());
+      carreiraEntityRepository.save(novaCarreira);
       trNovo.setCarreiraId(novaCarreira);
     }
 

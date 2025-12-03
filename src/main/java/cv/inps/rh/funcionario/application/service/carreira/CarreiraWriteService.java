@@ -52,7 +52,7 @@ public class CarreiraWriteService {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
 
-    if (carreiraEntityRepository.existsByFunIdAndEstado(funcionario, Estado.P))
+    if (carreiraEntityRepository.existsByContrVinculoIdFunIdAndEstado(funcionario, Estado.P))
       throw IgrpResponseStatusException.conflict("Existe um registo de carreira por validar!");
 
     if (!contratoEntityRepository.existsByFunIdAndEstado(funcionario, Estado.A))
@@ -85,7 +85,7 @@ public class CarreiraWriteService {
     carreiraEntityRepository.save(carreiraAtual);
 
     var novaCarreira = Objects.requireNonNull(carreiraMapper.toCarreira(dto, Estado.P));
-    novaCarreira.setFunId(funcionario);
+    //novaCarreira.setFunId(funcionario);
     novaCarreira.setObs("CARREIRA");
     carreiraEntityRepository.save(novaCarreira);
 
@@ -179,7 +179,7 @@ public class CarreiraWriteService {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
 
-    var carreira = carreiraEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
+    var carreira = carreiraEntityRepository.findByContrVinculoIdFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
     carreira.setEstado(estado);
     carreiraEntityRepository.save(carreira);
 
@@ -216,7 +216,7 @@ public class CarreiraWriteService {
     if (!Estado.P.equals(carreira.getEstado()))
       throw IgrpResponseStatusException.badRequest("Esta carreira não se encontra no estado pendente");
 
-    var funcionario = Objects.requireNonNull(carreira.getFunId());
+    var funcionario = Objects.requireNonNull(carreira.getContrVinculoId()).getFunId();
 
     carreira.setEstado(Estado.E);
     carreiraEntityRepository.save(carreira);
@@ -258,7 +258,7 @@ public class CarreiraWriteService {
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
     var carreira = carreiraEntityRepository.findByUuidOrThrow(UUID.fromString(carreiraId));
 
-    if (carreira.getFunId().getId().equals(funcionario.getId()))
+    if (carreira.getContrVinculoId().getFunId().getId().equals(funcionario.getId()))
       throw IgrpResponseStatusException.badRequest("Carreira não pertence a este funcionário");
 
     if (!carreira.getEstado().equals(Estado.P))

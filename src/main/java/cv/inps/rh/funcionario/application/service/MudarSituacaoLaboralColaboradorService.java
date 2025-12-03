@@ -100,7 +100,7 @@ public class MudarSituacaoLaboralColaboradorService {
       contract.setDataFim(now);
       contratoEntityRepository.save(contract);
 
-      var carreira = carreiraEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
+      var carreira = carreiraEntityRepository.findByContrVinculoIdFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
       carreira.setDataFim(now);
       carreiraEntityRepository.save(carreira);
 

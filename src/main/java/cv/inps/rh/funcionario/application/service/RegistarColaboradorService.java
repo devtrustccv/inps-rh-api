@@ -55,6 +55,7 @@ public class RegistarColaboradorService {
   private final TipoMovimentoHelper tipoMovimentoHelper;
 
   private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
+  private final CarreiraEntityRepository carreiraEntityRepository;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -137,8 +138,8 @@ public class RegistarColaboradorService {
 
     var carreira = carreiraMapper.toCarreira(dc, Estado.P);
     if (carreira != null) {
-      carreira.setFunId(fun);
-      fun.setCarreiras(new ArrayList<>(List.of(carreira)));
+      carreira.setContrVinculoId(contrato);
+      carreiraEntityRepository.save(carreira);
     }
 
     var regime = regimeTrabalhoMapper.toRegime(dc, Estado.P);
