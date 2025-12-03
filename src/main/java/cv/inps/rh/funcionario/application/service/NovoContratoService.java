@@ -41,7 +41,6 @@ public class NovoContratoService {
 
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
-  private final CarreiraEntityRepository carreiraEntityRepository;
   private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
   private final RemuneracaoTiprelEntityRepository remuneracaoTiprelEntityRepository;
   private final PagTiprelEntityRepository pagTiprelEntityRepository;
@@ -114,6 +113,7 @@ public class NovoContratoService {
     var carreira = carreiraMapper.toCarreira(dc, Estado.P);
     if (carreira != null) {
       carreira.setContrVinculoId(contrato);
+      contrato.getCarreiras().add(carreira);
     }
 
     if (dc.getSubsidios() != null && !dc.getSubsidios().isEmpty()) {
@@ -178,9 +178,6 @@ public class NovoContratoService {
     sl.setContrVinculoId(contrato);
     situacaoLaboralEntityRepository.save(sl);
 
-    if (carreira != null) {
-      carreiraEntityRepository.save(carreira);
-    }
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {
