@@ -207,8 +207,8 @@ public class FuncionarioMapper {
       List<AgregadoDependenteRespDTO> familiares = entity.getFamiliares().stream().map(f -> {
         AgregadoDependenteRespDTO fr = new AgregadoDependenteRespDTO();
         fr.setId(f.getId());
-        fr.setTipoDocumentoId(f.getTpDocumento() != null ? f.getTpDocumento().getId() : null);
-        fr.setTipoDocumentoDesc(f.getTpDocumento() != null ? f.getTpDocumento().getNome() : null);
+        fr.setTipoDocumentoId(f.getTpDocumentoId() != null ? f.getTpDocumentoId().getId() : null);
+        fr.setTipoDocumentoDesc(f.getTpDocumentoId() != null ? f.getTpDocumentoId().getNome() : null);
         fr.setNumDocumento(f.getNumDocumento());
         fr.setNome(f.getNome());
         fr.setDataNascimento(f.getDataNascimento());

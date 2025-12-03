@@ -52,11 +52,6 @@ public class RegimeTrabalhoEntity extends AuditEntity {
     private String obs;
 
   
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
-    private TiposRelacionamentoEntity tiprelId;
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;

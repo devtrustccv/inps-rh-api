@@ -7,9 +7,7 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.UUID;
-
 import jakarta.validation.constraints.NotBlank;
 import cv.inps.rh.shared.application.constants.Estado;
 
@@ -23,36 +21,33 @@ import cv.inps.rh.shared.application.constants.Estado;
 @Table(name = "RH_T_TIPOS_DOCUMENTOS")
 public class TipoDocumentoEntity extends AuditEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_TIPO_DOCUMENTO")
-  @SequenceGenerator(
-      name = "SEQ_TIPO_DOCUMENTO",
-      sequenceName = "SEQ_TIPO_DOCUMENTO",
-      allocationSize = 1
-  )
-  @Column(name = "ID", unique = true, nullable = false)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_tipo_documento")
+    @SequenceGenerator(name = "seq_tipo_documento", sequenceName = "SEQ_TIPO_DOCUMENTO", allocationSize = 1)
+    @Column(name = "id", unique = true, nullable = false)
+    private Long id;
 
-  @Column(name = "uuid")
-  private UUID uuid;
+  
+    @Column(name="uuid")
+    private UUID uuid;
 
+  
+    @NotBlank(message = "referencia is mandatory")
+    @Column(name="referencia", nullable = false)
+    private String referencia;
 
-  @NotBlank(message = "referencia is mandatory")
-  @Column(name = "referencia", nullable = false)
-  private String referencia;
+  
+    @Column(name="codigo")
+    private String codigo;
 
+  
+    @Column(name="nome")
+    private String nome;
 
-  @Column(name = "codigo")
-  private String codigo;
+  
+    @Enumerated(EnumType.STRING)
+    @Column(name="estado")
+    private Estado estado;
 
-
-  @Column(name = "nome")
-  private String nome;
-
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "estado")
-  private Estado estado;
-
-
+  
 }

@@ -34,12 +34,12 @@ public class FamiliarEntity extends AuditEntity {
     private UUID uuid;
 
   
-    @NotNull(message = "tpDocumento is mandatory")
+    @NotNull(message = "tpDocumentoId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
-    @JoinColumn(name = "tp_documento", referencedColumnName = "id")
-    private TipoDocumentoEntity tpDocumento;
+    @JoinColumn(name = "tp_documento_id", referencedColumnName = "id")
+    private TipoDocumentoEntity tpDocumentoId;
     @Column(name="num_documento")
     private String numDocumento;
 

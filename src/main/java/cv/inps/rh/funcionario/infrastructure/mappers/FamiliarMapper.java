@@ -22,7 +22,7 @@ public class FamiliarMapper {
     if (dto == null) return null;
     FamiliarEntity entity = new FamiliarEntity();
     if (dto.getTipoDocumentoId() != null) {
-      entity.setTpDocumento(em.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
+      entity.setTpDocumentoId(em.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
     }
     entity.setNumDocumento(dto.getNumDocumento());
     entity.setNome(dto.getNome());
@@ -47,7 +47,7 @@ public class FamiliarMapper {
       }
       if (found != null) {
         if (dto.getTipoDocumentoId() != null) {
-          found.setTpDocumento(em.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
+          found.setTpDocumentoId(em.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
         }
         found.setNumDocumento(dto.getNumDocumento());
         found.setNome(dto.getNome());
@@ -77,8 +77,8 @@ public class FamiliarMapper {
    return familiares.stream().map(f -> {
       AgregadoDependenteRespDTO fr = new AgregadoDependenteRespDTO();
       fr.setId(f.getId());
-      fr.setTipoDocumentoId(f.getTpDocumento() != null ? f.getTpDocumento().getId() : null);
-      fr.setTipoDocumentoDesc(f.getTpDocumento() != null ? f.getTpDocumento().getNome() : null);
+      fr.setTipoDocumentoId(f.getTpDocumentoId() != null ? f.getTpDocumentoId().getId() : null);
+      fr.setTipoDocumentoDesc(f.getTpDocumentoId() != null ? f.getTpDocumentoId().getNome() : null);
       fr.setNumDocumento(f.getNumDocumento());
       fr.setNome(f.getNome());
       fr.setDataNascimento(f.getDataNascimento());
