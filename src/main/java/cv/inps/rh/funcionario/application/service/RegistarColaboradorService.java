@@ -48,8 +48,6 @@ public class RegistarColaboradorService {
   private final PagTiprelEntityRepository pagTiprelEntityRepository;
 
   private final TipoMovimentoHelper tipoMovimentoHelper;
-  private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
-
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
 
   @Transactional
@@ -187,7 +185,7 @@ public class RegistarColaboradorService {
       throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO.");
     }
 
-    var situacaoLaboral = contratuaisEntityMapper.toSituacaoLaboralInicial(dadosContratuais, paramSituacaoLaboral, Estado.P);
+    var situacaoLaboral = contratuaisEntityMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P);
     situacaoLaboral.setContrVinculoId(contrato);
     contrato.setSituacoesLaborais(new ArrayList<>(List.of(situacaoLaboral)));
 
@@ -208,7 +206,6 @@ public class RegistarColaboradorService {
     valid.setTiprelId(tr);
     fun.setValidacoes(new ArrayList<>(List.of(valid)));
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(fun);
-
 
 
     validacaoEntityRepository.findById(valid.getId())

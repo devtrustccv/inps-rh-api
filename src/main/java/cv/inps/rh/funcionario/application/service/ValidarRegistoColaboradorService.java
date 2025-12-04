@@ -87,6 +87,9 @@ public class ValidarRegistoColaboradorService {
     var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
     dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, dadosContratuais);
 
+    var situacaoLaboral = tiposRelacionamento.getSituacLaboralId();
+    dadosContratuaisMapper.toUpdateSituacaoLaboral(situacaoLaboral, dadosContratuais);
+
     var contrato = tiposRelacionamento.getContrVinculoId();
     contratoMapper.toUpdateEntity(contrato, dadosContratuais);
 
@@ -262,6 +265,10 @@ public class ValidarRegistoColaboradorService {
       var regime = tr.getRegimeId();
       if (regime != null)
         regime.setEstado(estado);
+
+      var situacaoLaboral = tr.getSituacLaboralId();
+      if (situacaoLaboral != null)
+        situacaoLaboral.setEstado(estado);
     }
 
     funcionarioEntity.getValidacoes().stream()
@@ -272,15 +279,5 @@ public class ValidarRegistoColaboradorService {
         .ifPresent(v -> v.setEstado(estado));
 
   }
-
-  // TODO 1.4-Caso for alterado o valor do salário ou data inicio de função ou
-  // data fim de função,
-  // deve fazer atualização na tabela RH_T_DEF_REMUNERACAO onde o
-  // TM_ID=GET_MOVIMENTO_SALL e TIPREL_ID=ID de RH_T_TIPOS_RELACIONAMENTO
-  // • VALOR = novo valor de salario do formulario
-  // • DATA_INICIO = Data inicio de função
-  // • DATA_FIM = Data fim de função
-
-  // TODO mudar estado de RH_T_REMU_TIPREL e RH_T_PAG_TIPREL
 
 }

@@ -172,7 +172,7 @@ public class NovoContratoService {
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    var sl = dadosContratuaisMapper.toSituacaoLaboralInicial(dc, param, Estado.P);
+    var sl = dadosContratuaisMapper.toSituacaoLaboral(dc, param, Estado.P);
     sl.setContrVinculoId(contrato);
     situacaoLaboralEntityRepository.save(sl);
 

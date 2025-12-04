@@ -86,7 +86,7 @@ public class DadosContratuaisMapper {
     return v;
   }
 
-  public SituacaoLaboralEntity toSituacaoLaboralInicial(DadosContratuaisReqDTO dc, ParamSitLaboralEntity param, Estado estado) {
+  public SituacaoLaboralEntity toSituacaoLaboral(DadosContratuaisReqDTO dc, ParamSitLaboralEntity param, Estado estado) {
     var sl = new SituacaoLaboralEntity();
     sl.setSituacaoLaboralId(param);
     sl.setMotivoSitLab(null);
@@ -96,6 +96,14 @@ public class DadosContratuaisMapper {
     sl.setObs("NOVO_CONTRATO");
     sl.setUuid(UuidCreator.getTimeOrderedEpoch());
     return sl;
+  }
+
+  public SituacaoLaboralEntity toUpdateSituacaoLaboral(SituacaoLaboralEntity entity, DadosContratuaisReqDTO dc) {
+    if (dc == null) return entity;
+    //sl.setMotivoSitLab(null);
+    entity.setDataInicio(dc.getDataInicio());
+    entity.setDataFim(dc.getDataFim());
+    return entity;
   }
 
   public DadosContratuaisRespDTO dadosContratuaisRespDTO(FuncionarioEntity entity) {
