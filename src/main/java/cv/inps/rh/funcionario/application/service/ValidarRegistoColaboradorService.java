@@ -74,7 +74,7 @@ public class ValidarRegistoColaboradorService {
     funcionario = funcionarioMapper.toUpdateEntity(funcionario, dadosPessoaisReqDTO);
 
     var contactos = contactoMapper.syncContactos(funcionario.getContactos(),
-        dadosPessoaisReqDTO != null ? dadosPessoaisReqDTO.getContactos() : null);
+        dadosPessoaisReqDTO.getContactos());
     var familiares = familiarMapper.syncFamiliares(funcionario.getFamiliares(), registroColaborador.getFamiliares());
 
     var dadosAcademicosProf = registroColaborador.getDadosAcademicosProf();
@@ -123,6 +123,7 @@ public class ValidarRegistoColaboradorService {
     funcionario.setFormacoesFeitas(formacoesFeitas);
     funcionario.setExperienciasProfissionais(experienciasProfissionais);
 
+    //atualizar renumeracao de tipo salario
     var tmSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
     var remTiprels = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
     for (var rt : remTiprels) {

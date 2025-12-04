@@ -1,13 +1,17 @@
 package cv.inps.rh.funcionario.application.service;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.NovoContratoCommand;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PagTiprelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RemuneracaoTiprelEntity;
@@ -20,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,18 +49,27 @@ public class NovoContratoService {
   private final PagTiprelEntityRepository pagTiprelEntityRepository;
   private final TipoMovimentoHelper tipoMovimentoHelper;
 
+  private final ValidarDadosContratuaisService validarDadosContratuaisService;
+
   @Transactional
   public DadosContratuaisRespDTO registrar(NovoContratoCommand command) {
 
     var dto = command.getNovocontrato();
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
-
     var dadosContratuais = dto.getDadosContratuais();
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
-    boolean temContratoAtivo = funcionario.getContratos().stream()
-        .anyMatch(c -> c.getEstado() == Estado.A);
+    validarDadosContratuaisService.validar(dadosContratuais);
+
+    if (funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT,
+        Referencia.CONTRATO)) {
+      throw IgrpResponseStatusException.badRequest(
+          "funcionario possui validacao de contrato pendente");
+    }
+
+   boolean temContratoAtivo = funcionario.getContratos().stream()
+        .anyMatch(c -> c.getEstado().equals(Estado.A));
 
     if (temContratoAtivo) {
       throw IgrpResponseStatusException.badRequest(
@@ -85,15 +99,28 @@ public class NovoContratoService {
 
     /********* adicionar novo contrato **************/
 
+    // contrato anterior, se existir
+    var contratoAnterior = funcionario.getContratos().stream()
+        .max(Comparator.comparing(ContratoEntity::getVersao))
+        .orElse(null);
+// Cria o contrato
     var contrato = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contrato.setFunId(funcionario);
-    contrato.setVersao(isPrimeiroContrato ? 1
-        : (funcionarioRules.getContratoComMaiorVersao(funcionario) != null
-            && funcionarioRules.getContratoComMaiorVersao(funcionario).getVersao() != null
-                ? funcionarioRules.getContratoComMaiorVersao(funcionario).getVersao() + 1
-                : 1));
     contrato.setSituacaoLaboral(tipoSituacao);
+
+// Define versão e contrato_id
+    if (contratoAnterior == null) {
+      contrato.setVersao(1);
+      contrato.setContratoId(null); // primeiro contrato, raiz
+    } else {
+      contrato.setVersao(contratoAnterior.getVersao() + 1);
+      contrato.setContratoId(contratoAnterior); // contrato pai
+    }
+
     funcionario.getContratos().add(contrato);
+
+    System.out.println("isPrimeiroContrato:: " + isPrimeiroContrato);
+    System.out.println("contrato versao: " + contrato.getVersao());
 
     var regime = regimeTrabalhoMapper.toRegime(dadosContratuais, Estado.P);
     if (regime != null) {
@@ -136,7 +163,7 @@ public class NovoContratoService {
     tr.setSituacLaboralId(situacaoLaboral);
     funcionario.getTiposrelacionamentos().add(tr);
 
-    var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT", "CONTRATO", Estado.P);
+    var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.CONTRATO.name(), Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(tr);
     funcionario.getValidacoes().add(valid);
@@ -144,7 +171,7 @@ public class NovoContratoService {
 
     var tipoMovimentoSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
     var tipoMovimentoInps = tipoMovimentoHelper.getTipoMovimentoEntityInps();
-    var tipoMovimentoIUR =  tipoMovimentoHelper.getTipoMovimentoEntityIur();
+    var tipoMovimentoIUR = tipoMovimentoHelper.getTipoMovimentoEntityIur();
 
     /******************** INI RENUMERACOES ********************************/
     if (dadosContratuais.getSubsidios() != null && !dadosContratuais.getSubsidios().isEmpty()) {
@@ -187,24 +214,32 @@ public class NovoContratoService {
           validacaoEntityRepository.save(e);
         });
 
-    var listTiprel = saved.getDefinicoesRenumeracoes().stream()
+    // Percorre todas as remunerações e cria RemuneracaoTiprelEntity
+    List<RemuneracaoTiprelEntity> listTiprel = saved.getDefinicoesRenumeracoes().stream()
         .map(rem -> {
-          var r = new RemuneracaoTiprelEntity();
+          RemuneracaoTiprelEntity r = new RemuneracaoTiprelEntity();
           r.setRemId(rem);
-          r.setTiprelId(tr);
+          r.setTiprelId(tr); // tr = TiposRelacionamentoEntity
+          r.setUuid(UuidCreator.getTimeOrderedEpoch());
           r.setEstado(Estado.P);
           return r;
-        }).toList();
+        })
+        .collect(Collectors.toList());
     remuneracaoTiprelEntityRepository.saveAll(listTiprel);
 
-    var listPagTiprel = saved.getDefinicoesPagamentos().stream()
+
+    // Percorre todas as definições de pagamento e cria PagTiprelEntity
+    List<PagTiprelEntity> listPagTiprel = saved.getDefinicoesPagamentos().stream()
         .map(pag -> {
-          var p = new PagTiprelEntity();
+          PagTiprelEntity p = new PagTiprelEntity();
           p.setPagId(pag);
-          p.setTiprelId(tr);
+          p.setTiprelId(tr); // tr = TiposRelacionamentoEntity
+          p.setUuid(UuidCreator.getTimeOrderedEpoch());
           p.setEstado(Estado.P);
           return p;
-        }).toList();
+        })
+        .collect(Collectors.toList());
+    // Salva todas em batch
     pagTiprelEntityRepository.saveAll(listPagTiprel);
 
     return dadosContratuaisMapper.dadosContratuaisRespDTO(saved);
