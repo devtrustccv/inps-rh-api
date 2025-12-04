@@ -2,12 +2,10 @@ package cv.inps.rh.configuracao.interfaces.custom;
 
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.configuracao.application.constants.ConfigurationType;
-import cv.inps.rh.configuracao.application.dto.*;
 import cv.inps.rh.configuracao.domain.service.engine.IConfiguration;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,32 +36,13 @@ public class ConfiguracaoController {
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
           required = true,
           description = "Dados da configuração a ser criada",
-          content = @Content(
-              mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(
-                  description = "Requests possíveis de criação",
-                  oneOf = {
-                      CargoRequestDTO.class,
-                      CarreiraRequestDTO.class,
-                      CategoriaCarreiraResponseDTO.class,
-                      EscalaoRequestDTO.class,
-                      LocalTrabalhoRequestDTO.class,
-                      NotificacaoRequestDTO.class,
-                      SeccaoRequestDTO.class,
-                      SituacaoLaboralRequestDTO.class,
-                      TipoContratoLaboralRequestDTO.class,
-                      TipoDocumentoRequestDTO.class,
-                      VinculoLaboralRequestDTO.class
-                  }
-              )
-          )
+          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
       ),
       parameters = {
           @Parameter(
               name = "configurationType",
               description = "Tipo de configuração a ser criada",
-              required = true,
-              example = "CARGO"
+              required = true
           )
       }
   )
@@ -71,15 +50,7 @@ public class ConfiguracaoController {
       @ApiResponse(
           responseCode = "201",
           description = "Configuração criada com sucesso",
-          content = @Content(
-              mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(
-                  oneOf = {
-                      ConfigurationResponseIdDTO.class,
-                      CarreiraResponseDTO.class
-                  }
-              )
-          )
+          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
       ),
       @ApiResponse(responseCode = "400", description = "Requisição inválida"),
       @ApiResponse(responseCode = "500", description = "Erro interno do servidor")

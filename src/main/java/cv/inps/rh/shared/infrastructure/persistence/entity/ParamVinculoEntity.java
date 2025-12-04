@@ -27,6 +27,7 @@ public class ParamVinculoEntity extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // TODO 04/12/2025 14:18 chnage sequence
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
