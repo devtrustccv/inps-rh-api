@@ -70,7 +70,7 @@ public class MudarSituacaoLaboralColaboradorService {
     tipoRelacionamentoNovo.setEstado(Estado.P);
     tipoRelacionamentoNovo.setTipoSituacao("SITUACAO_LABORAL");
     tipoRelacionamentoNovo.setReferente("MUDANCA_SITUACAO_LAB");
-    tipoRelacionamentoNovo.setSituacLaboralId(pamSitLaboral);
+    //tipoRelacionamentoNovo.setSituacLaboralId(pamSitLaboral); // todo alter this
     tipoRelacionamentoEntityRepository.save(tipoRelacionamentoNovo);
 
     var contract = funcionarioRules.getContratoComMaiorVersao(funcionario);

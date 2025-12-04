@@ -91,7 +91,7 @@ public class CarreiraReadService {
       dto.setCargo(cargo != null ? cargo.getNome() : null);
       dto.setEscalao(esc != null ? esc.getEscalao() : null);
       dto.setSalario(car != null && car.getSalario() != null ? car.getSalario().toString() : null);
-      dto.setSituacaoLaboral(sitLab != null ? sitLab.getNome() : null);
+      dto.setSituacaoLaboral(sitLab != null ? sitLab.getSituacaoLaboralId().getNome() : null);
       dto.setDataInicio(tr.getDataInicio());
       dto.setDataFim(tr.getDataFim());
       dto.setProcessamento(tr.getFlgProcessa());

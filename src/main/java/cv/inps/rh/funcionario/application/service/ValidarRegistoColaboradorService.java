@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidarRegistoColaboradorCommand;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
@@ -11,7 +12,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,17 +40,19 @@ public class ValidarRegistoColaboradorService {
   private final RegimeTrabalhoMapper regimeTrabalhoMapper;
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final FuncionarioRules funcionarioRules;
-  private final cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper tipoMovimentoHelper;
-  private final cv.inps.rh.shared.infrastructure.persistence.repository.RemuneracaoTiprelEntityRepository remuneracaoTiprelEntityRepository;
-  private final cv.inps.rh.shared.infrastructure.persistence.repository.PagTiprelEntityRepository pagTiprelEntityRepository;
-  private final cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
-  private final cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository defPagamentoEntityRepository;
+  private final TipoMovimentoHelper tipoMovimentoHelper;
+  private final RemuneracaoTiprelEntityRepository remuneracaoTiprelEntityRepository;
+  private final PagTiprelEntityRepository pagTiprelEntityRepository;
+  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
+  private final ValidarDadosContratuaisService validarDadosContratuaisService;
 
   @Transactional
   public Map<String, ?> validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
 
     var registroColaborador = command.getFuncionariorequest();
     var dadosContratuais = registroColaborador.getDadosContratuais();
+
+    validarDadosContratuaisService.validar(dadosContratuais);
 
     var funcionarioPublicId = IdentificadorUnico.from(command.getId()).valor();
 

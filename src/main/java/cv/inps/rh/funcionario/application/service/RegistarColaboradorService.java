@@ -2,7 +2,6 @@ package cv.inps.rh.funcionario.application.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.CreateFuncionarioCommand;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
@@ -11,14 +10,11 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,15 +50,17 @@ public class RegistarColaboradorService {
   private final TipoMovimentoHelper tipoMovimentoHelper;
   private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
 
-  @PersistenceContext
-  private EntityManager entityManager;
-
+  private final ValidarDadosContratuaisService validarDadosContratuaisService;
 
   @Transactional
   public FuncionarioResponseDTO saveDossierColaborador(CreateFuncionarioCommand command) {
     FuncionarioRequestDTO dto = command.getFuncionariorequest();
 
     var dadosPessoais = dto.getDadosPessoais();
+
+    var dadosContratuais = dto.getDadosContratuais();
+
+    validarDadosContratuaisService.validar(dadosContratuais);
 
     FuncionarioEntity fun = funcionarioMapper.toEntity(dadosPessoais, Estado.P);
 
@@ -123,29 +121,25 @@ public class RegistarColaboradorService {
       fun.setDadosBancarios(list);
     }
 
-    var dc = dto.getDadosContratuais();
-    if (dc == null) {
-      throw IgrpResponseStatusException.badRequest("Dados contratuais obrigatórios");
-    }
 
-    var contrato = contratoMapper.toContrato(dc, Estado.P);
+    var contrato = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contrato.setFunId(fun);
     contrato.setVersao(1);
     fun.setContratos(new ArrayList<>(List.of(contrato)));
 
-    var carreira = carreiraMapper.toCarreira(dc, Estado.P);
+    var carreira = carreiraMapper.toCarreira(dadosContratuais, Estado.P);
     if (carreira != null) {
       carreira.setContrVinculoId(contrato);
       contrato.setCarreiras(new ArrayList<>(List.of(carreira)));
     }
 
-    var regime = regimeTrabalhoMapper.toRegime(dc, Estado.P);
+    var regime = regimeTrabalhoMapper.toRegime(dadosContratuais, Estado.P);
     if (regime != null) {
       regime.setFunId(fun);
       fun.setRegimesTrabalhos(new ArrayList<>(List.of(regime)));
     }
 
-    var mobilidade = mobilidadeMapper.toMobilidade(dc, Estado.P);
+    var mobilidade = mobilidadeMapper.toMobilidade(dadosContratuais, Estado.P);
     if (mobilidade != null) {
       mobilidade.setFunId(fun);
       fun.setMobilidades(new ArrayList<>(List.of(mobilidade)));
@@ -156,46 +150,48 @@ public class RegistarColaboradorService {
     var tipoMovimentoIUR =  tipoMovimentoHelper.getTipoMovimentoEntityIur();
 
     /******************** INI RENUMERACOES ********************************/
-    if (dc.getSubsidios() != null && !dc.getSubsidios().isEmpty()) {
-      var remList = dc.getSubsidios().stream()
+    if (dadosContratuais.getSubsidios() != null && !dadosContratuais.getSubsidios().isEmpty()) {
+      var remList = dadosContratuais.getSubsidios().stream()
           .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, fun, Estado.P))
           .collect(Collectors.toList());
       fun.setDefinicoesRenumeracoes(remList);
     }
 
     var renumeracaoSalario = definicaoRemuneracaoMapper
-        .createRenumeracao(dc.getSalario(), tipoMovimentoSalario, dc.getDataInicio(), dc.getDataFim(), fun, dc.getMoeda());
+        .createRenumeracao(dadosContratuais.getSalario(), tipoMovimentoSalario, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), fun, dadosContratuais.getMoeda());
     var renumeracaoInps = definicaoRemuneracaoMapper
-        .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dc.getDataInicio(), dc.getDataFim(), fun, dc.getMoeda());
+        .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), fun, dadosContratuais.getMoeda());
     fun.getDefinicoesRenumeracoes().addAll(new ArrayList<>(List.of(renumeracaoSalario, renumeracaoInps)));
     /******************** FIM RENUMERACOES ********************************/
 
 
     /******************** INI PAGAMENTOS DESCONTOS ********************************/
-    if (dc.getEncargosDescontos() != null && !dc.getEncargosDescontos().isEmpty()) {
-      var pagList = dc.getEncargosDescontos().stream()
+    if (dadosContratuais.getEncargosDescontos() != null && !dadosContratuais.getEncargosDescontos().isEmpty()) {
+      var pagList = dadosContratuais.getEncargosDescontos().stream()
           .map(e -> defPagamentoMapper.toDefPagamento(e, fun, Estado.P))
           .collect(Collectors.toList());
       fun.setDefinicoesPagamentos(pagList);
     }
 
     var pagamentoDescontoIUR = defPagamentoMapper.createPagamento(BigDecimal.ZERO,
-        tipoMovimentoIUR, dc.getDataInicio(), dc.getDataFim(), fun);
+        tipoMovimentoIUR, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), fun);
     var pagamentoDescontoINPS = defPagamentoMapper.createPagamento(BigDecimal.ZERO,
-        tipoMovimentoInps, dc.getDataInicio(), dc.getDataFim(), fun);
+        tipoMovimentoInps, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), fun);
 
     fun.getDefinicoesPagamentos().addAll(new ArrayList<>(List.of(pagamentoDescontoIUR, pagamentoDescontoINPS)));
     /******************** FIM PAGAMENTOS DESCONTOS ********************************/
 
 
-    var param = paramSitLaboralEntityRepository.findAllByNome("ATIVO").getFirst();
-    if (param == null) {
+    var paramSituacaoLaboral = paramSitLaboralEntityRepository.findAllByNome("ATIVO").getFirst();
+    if (paramSituacaoLaboral == null) {
       throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO.");
     }
 
+    var situacaoLaboral = contratuaisEntityMapper.toSituacaoLaboralInicial(dadosContratuais, paramSituacaoLaboral, Estado.P);
+    situacaoLaboral.setContrVinculoId(contrato);
+    contrato.setSituacoesLaborais(new ArrayList<>(List.of(situacaoLaboral)));
 
-
-    var tr = contratuaisEntityMapper.toRelacionamento(dc, Estado.P);
+    var tr = contratuaisEntityMapper.toRelacionamento(dadosContratuais, Estado.P);
     tr.setFunId(fun);
     tr.setContrVinculoId(contrato);
     tr.setCarreiraId(carreira);
@@ -203,7 +199,7 @@ public class RegistarColaboradorService {
     tr.setMobId(mobilidade);
     tr.setFlgProcessa("NAO");
     tr.setEstActAdm(1);
-    //tr.setSituacLaboralId(sl);
+    tr.setSituacLaboralId(situacaoLaboral);
     fun.setTiposrelacionamentos(new ArrayList<>(List.of(tr)));
 
 
@@ -213,10 +209,6 @@ public class RegistarColaboradorService {
     fun.setValidacoes(new ArrayList<>(List.of(valid)));
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(fun);
 
-
-    var sl = contratuaisEntityMapper.toSituacaoLaboralInicial(dc, param, Estado.P);
-    sl.setContrVinculoId(contrato);
-    situacaoLaboralEntityRepository.save(sl);
 
 
     validacaoEntityRepository.findById(valid.getId())
@@ -258,81 +250,6 @@ public class RegistarColaboradorService {
 
 
     return funcionarioMapper.toResponseDTO(saved);
-  }
-
-
-  private void validarDadosContratuais(DadosContratuaisReqDTO dc) {
-
-    // -----------------------------
-    // OBRIGATÓRIOS BÁSICOS
-    // -----------------------------
-    if (dc.getTipoContratoId() == null)
-      throw IgrpResponseStatusException.badRequest("Tipo de contrato é obrigatório.");
-
-    if (dc.getCargoPosicaoId() == null)
-      throw IgrpResponseStatusException.badRequest("Cargo/posição é obrigatório.");
-
-    if (dc.getDirecaoId() == null)
-      throw IgrpResponseStatusException.badRequest("Direção é obrigatória.");
-
-    if (dc.getSeccaoId() == null)
-      throw IgrpResponseStatusException.badRequest("Seção é obrigatória.");
-
-    if (dc.getLocalTrabalhoId() == null)
-      throw IgrpResponseStatusException.badRequest("Local de trabalho é obrigatório.");
-
-    if (dc.getPaisId() == null)
-      throw IgrpResponseStatusException.badRequest("País é obrigatório.");
-
-    if (dc.getIlhaId() == null)
-      throw IgrpResponseStatusException.badRequest("Ilha é obrigatória.");
-
-    if (dc.getMoeda() == null || dc.getMoeda().isBlank())
-      throw IgrpResponseStatusException.badRequest("Moeda é obrigatória.");
-
-    if (dc.getDataInicio() == null)
-      throw IgrpResponseStatusException.badRequest("Data de início é obrigatória.");
-
-
-    // -----------------------------
-    // REGRAS DE DATAS
-    // -----------------------------
-    var hoje = LocalDate.now();
-
-    if (dc.getDataInicio().isAfter(hoje))
-      throw IgrpResponseStatusException.badRequest("Data início não pode ser maior que a data atual.");
-
-    if (dc.getDataFim() != null && dc.getDataInicio().isAfter(dc.getDataFim()))
-      throw IgrpResponseStatusException.badRequest("Data início não pode ser superior à data fim.");
-
-
-    // -----------------------------
-    // OBRIGATÓRIOS POR TIPO DE VÍNCULO
-    // -----------------------------
-    var vinculo = entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId());
-
-    // flgCarreira = 1 → carreira, categoria, escalão obrigatórios
-    if (vinculo.getFlgCarreira() != null && vinculo.getFlgCarreira() == 1) {
-
-      if (dc.getCarreiraId() == null)
-        throw IgrpResponseStatusException.badRequest("Carreira é obrigatória para este tipo de vínculo.");
-
-      if (dc.getCategoriaId() == null)
-        throw IgrpResponseStatusException.badRequest("Categoria é obrigatória para este tipo de vínculo.");
-
-      if (dc.getEscalaoReferenciaId() == null)
-        throw IgrpResponseStatusException.badRequest("Escalão é obrigatório para este tipo de vínculo.");
-
-      // Salário automático
-      var escalao = entityManager.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId());
-      dc.setSalario(escalao.getValor());
-    }
-
-    // flgSalario = 1 → salário é obrigatório
-    if (vinculo.getFlgSalario() != null && vinculo.getFlgSalario() == 1) {
-      if (dc.getSalario() == null)
-        throw IgrpResponseStatusException.badRequest("Salário é obrigatório para este tipo de vínculo.");
-    }
   }
 
 

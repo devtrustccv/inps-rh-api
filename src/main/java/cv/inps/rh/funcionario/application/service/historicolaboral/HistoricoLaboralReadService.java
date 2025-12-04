@@ -49,7 +49,11 @@ public class HistoricoLaboralReadService {
           ofNullable(obj.getCarreiraId()).map(CarreiraEntity::getCarrPccsId).map(ParamCarreiraEntity::getNome).ifPresent(response::setCarreira);
           ofNullable(obj.getEscalaoId()).map(ParamEscalaoEntity::getEscalao).ifPresent(response::setReferenciaEscalao);
           ofNullable(obj.getCargoId()).map(ParamCargoEntity::getNome).ifPresent(response::setCargo);
-          ofNullable(obj.getSituacLaboralId()).map(ParamSitLaboralEntity::getNome).ifPresent(response::setSituacaoLaboral);
+          ofNullable(obj.getSituacLaboralId())
+              .map(SituacaoLaboralEntity::getSituacaoLaboralId)
+              .map(ParamSitLaboralEntity::getNome)
+              .ifPresent(response::setSituacaoLaboral);
+
 
           var start = DateFormatter.localDateToString(obj.getDataInicio());
           var end = obj.getDataFim() != null ? " / " + DateFormatter.localDateToString(obj.getDataFim()) : StringUtils.EMPTY;

@@ -39,6 +39,8 @@ public class SituacaoLaboralEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "situacao_laboral_id", referencedColumnName = "id")
     private ParamSitLaboralEntity situacaoLaboralId;
+
+
     @Column(name="motivo_sit_lab")
     private String motivoSitLab;
 
