@@ -58,6 +58,10 @@ public class RegistarColaboradorService {
 
     var dadosContratuais = dto.getDadosContratuais();
 
+    if (funcionarioEntityRepository.existsByTipoDocumentoId_idAndNumDocumento(dadosPessoais.getTipoDocumentoId(), dadosPessoais.getNumDocumento())) {
+      throw IgrpResponseStatusException.conflict( "Funcionario já registrado com esse documento");
+    }
+
     validarDadosContratuaisService.validar(dadosContratuais);
 
     FuncionarioEntity fun = funcionarioMapper.toEntity(dadosPessoais, Estado.P);

@@ -51,6 +51,7 @@ public class ValidarRegistoColaboradorService {
 
     var registroColaborador = command.getFuncionariorequest();
     var dadosContratuais = registroColaborador.getDadosContratuais();
+    var dadosPessoaisReqDTO = registroColaborador.getDadosPessoais();
 
     validarDadosContratuaisService.validar(dadosContratuais);
 
@@ -58,13 +59,18 @@ public class ValidarRegistoColaboradorService {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
+    if (funcionarioEntityRepository
+        .existsByTipoDocumentoId_IdAndNumDocumentoAndUuidNot(dadosPessoaisReqDTO.getTipoDocumentoId(), dadosPessoaisReqDTO.getNumDocumento(), funcionario.getUuid())) {
+      throw IgrpResponseStatusException.conflict( "Funcionario já registrado com esse documento");
+    }
+
     if (registroColaborador.getValidar() != null && !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT,
         Referencia.REGISTO_COLABORADOR)) {
       throw IgrpResponseStatusException.badRequest(
           "funcionario nao tem validacao pendente para o tipo de acao: INSERT e referencia: REGISTO_COLABORADOR");
     }
 
-    var dadosPessoaisReqDTO = registroColaborador.getDadosPessoais();
+
     funcionario = funcionarioMapper.toUpdateEntity(funcionario, dadosPessoaisReqDTO);
 
     var contactos = contactoMapper.syncContactos(funcionario.getContactos(),

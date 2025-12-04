@@ -110,6 +110,15 @@ public interface FuncionarioEntityRepository extends
       "tiposrelacionamentos.categoriaId"
   })
   Page<FuncionarioEntity> findAll(Specification<FuncionarioEntity> spec, @NotNull Pageable pageable);
+
+
+
+  boolean existsByTipoDocumentoId_idAndNumDocumento(Long tipoDocumentoIdId, String numDocumento);
+
+  boolean existsByTipoDocumentoId_IdAndNumDocumentoAndUuidNot(
+      Long tipoDocumentoId,
+      String numDocumento,
+      UUID funIdUuid);
 }
 
 
