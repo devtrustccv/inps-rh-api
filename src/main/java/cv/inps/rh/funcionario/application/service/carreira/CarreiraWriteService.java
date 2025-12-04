@@ -118,9 +118,9 @@ public class CarreiraWriteService {
     salario.setTmId(tipoMovimentoSalario);
     definicaoRemuneracaoEntityRepository.save(salario);
 
-    var renumeracaoIur = definicaoRemuneracaoMapper.createRenumeracao(BigDecimal.ZERO, tipoMovimentoIUR, dto.getDataInicio(), dto.getDataFim(), funcionario);
+    var renumeracaoIur = definicaoRemuneracaoMapper.createRenumeracao(BigDecimal.ZERO, tipoMovimentoIUR, dto.getDataInicio(), dto.getDataFim(), funcionario, dto.getMoeda());
     definicaoRemuneracaoEntityRepository.save(renumeracaoIur);
-    var renumeracaoInps = definicaoRemuneracaoMapper.createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dto.getDataInicio(), dto.getDataFim(), funcionario);
+    var renumeracaoInps = definicaoRemuneracaoMapper.createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dto.getDataInicio(), dto.getDataFim(), funcionario, dto.getMoeda());
     definicaoRemuneracaoEntityRepository.save(renumeracaoInps);
 
     if (dto.getEncargosDescontos() != null && !dto.getEncargosDescontos().isEmpty()) {

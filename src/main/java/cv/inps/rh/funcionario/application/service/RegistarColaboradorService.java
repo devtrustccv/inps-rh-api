@@ -167,9 +167,9 @@ public class RegistarColaboradorService {
     }
 
     var renumeracaoSalario = definicaoRemuneracaoMapper
-        .createRenumeracao(dc.getSalario(), tipoMovimentoSalario, dc.getDataInicio(), dc.getDataFim(), fun);
+        .createRenumeracao(dc.getSalario(), tipoMovimentoSalario, dc.getDataInicio(), dc.getDataFim(), fun, dc.getMoeda());
     var renumeracaoInps = definicaoRemuneracaoMapper
-        .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dc.getDataInicio(), dc.getDataFim(), fun);
+        .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dc.getDataInicio(), dc.getDataFim(), fun, dc.getMoeda());
     fun.getDefinicoesRenumeracoes().addAll(new ArrayList<>(List.of(renumeracaoSalario, renumeracaoInps)));
 
 

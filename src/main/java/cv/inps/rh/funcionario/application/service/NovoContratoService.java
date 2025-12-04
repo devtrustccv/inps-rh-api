@@ -159,9 +159,9 @@ public class NovoContratoService {
 
     var renumeracaoSalario = definicaoRemuneracaoMapper
         .createRenumeracao(dc.getSalario() != null ? dc.getSalario() : BigDecimal.ZERO, tmSalario, dc.getDataInicio(),
-            dc.getDataFim(), funcionario);
+            dc.getDataFim(), funcionario, dc.getMoeda());
     var renumeracaoInps = definicaoRemuneracaoMapper
-        .createRenumeracao(BigDecimal.ZERO, tmInps, dc.getDataInicio(), dc.getDataFim(), funcionario);
+        .createRenumeracao(BigDecimal.ZERO, tmInps, dc.getDataInicio(), dc.getDataFim(), funcionario,dc.getMoeda());
     funcionario.getDefinicoesRenumeracoes().addAll(List.of(renumeracaoSalario, renumeracaoInps));
 
     var pagamentoDescontoIUR = defPagamentoMapper.createPagamento(BigDecimal.ZERO,

@@ -235,7 +235,7 @@ public class HistoricoLaboralWriteService {
 
     var renumeracaoSalario = definicaoRemuneracaoMapper.createRenumeracao(
         dc.getSalario() != null ? dc.getSalario() : BigDecimal.ZERO,
-        tmSalario, dc.getDataInicio(), dc.getDataFim(), funcionario);
+        tmSalario, dc.getDataInicio(), dc.getDataFim(), funcionario, dc.getMoeda());
     renumeracaoSalario.setObs(dto.getTipoAlteracao());
     funcionario.getDefinicoesRenumeracoes().add(renumeracaoSalario);
 

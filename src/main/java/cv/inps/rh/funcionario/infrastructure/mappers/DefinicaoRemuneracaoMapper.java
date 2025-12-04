@@ -98,7 +98,7 @@ public class DefinicaoRemuneracaoMapper {
   }
 
   public DefinicaoRemuneracaoEntity createRenumeracao(BigDecimal valor, TipoMovimentoEntity tmId,
-                                                      LocalDate dataInicio, LocalDate dataFim, FuncionarioEntity fun) {
+                                                      LocalDate dataInicio, LocalDate dataFim, FuncionarioEntity fun,String moeda) {
     var de = new DefinicaoRemuneracaoEntity();
     de.setPercentagem(null);
     de.setValor(valor);
@@ -108,6 +108,7 @@ public class DefinicaoRemuneracaoMapper {
     de.setDataFim(dataFim);
     de.setTmId(tmId);
     de.setFunId(fun);
+    de.setMoeda(moeda);
     de.setUuid(UuidCreator.getTimeOrderedEpoch());
     return de;
   }
