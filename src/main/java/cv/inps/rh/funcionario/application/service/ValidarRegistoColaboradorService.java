@@ -55,7 +55,7 @@ public class ValidarRegistoColaboradorService {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
-    if (!funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT,
+    if (registroColaborador.getValidar() != null && !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT,
         Referencia.REGISTO_COLABORADOR)) {
       throw IgrpResponseStatusException.badRequest(
           "funcionario nao tem validacao pendente para o tipo de acao: INSERT e referencia: REGISTO_COLABORADOR");
