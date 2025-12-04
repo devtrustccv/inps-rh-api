@@ -47,15 +47,12 @@ public class RegistarColaboradorService {
 
  private final ValidacaoEntityRepository validacaoEntityRepository;
 
-  private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
 
   private final RemuneracaoTiprelEntityRepository renumeracaoTiprelEntityRepository;
   private final PagTiprelEntityRepository pagTiprelEntityRepository;
 
   private final TipoMovimentoHelper tipoMovimentoHelper;
-
   private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
-  private final CarreiraEntityRepository carreiraEntityRepository;
 
   @PersistenceContext
   private EntityManager entityManager;
