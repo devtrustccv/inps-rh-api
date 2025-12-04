@@ -33,7 +33,7 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
   private final DomainEntityRepository domainEntityRepository;
 
   public ParamVinculoService(Validator validator, ObjectMapper jsonMapper, ParamVinculoEntityRepository repository, TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository, DomainEntityRepository domainEntityRepository) {
-    super(validator, jsonMapper, VinculoLaboralRequestDTO.class);
+    super(validator, jsonMapper);
     this.repository = repository;
     this.tiposRelacionamentoEntityRepository = tiposRelacionamentoEntityRepository;
     this.domainEntityRepository = domainEntityRepository;
@@ -125,5 +125,10 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
 
     e.setEstado(Estado.E);
     repository.save(e);
+  }
+
+  @Override
+  protected Class<VinculoLaboralRequestDTO> getType() {
+    return VinculoLaboralRequestDTO.class;
   }
 }

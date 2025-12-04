@@ -48,11 +48,16 @@ public class EscalaoService extends ConfigurationProcess<EscalaoRequestDTO> {
       ParamCarreiraEntityRepository carreiraRepository,
       ParamCategoriaEntityRepository categoriaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository
   ) {
-    super(validator, jsonMapper, EscalaoRequestDTO.class);
+    super(validator, jsonMapper);
     this.escalaoRepository = escalaoRepository;
     this.carreiraRepository = carreiraRepository;
     this.categoriaRepository = categoriaRepository;
     this.tiposRelacionamentoRepository = tiposRelacionamentoRepository;
+  }
+
+  @Override
+  protected Class<EscalaoRequestDTO> getType() {
+    return EscalaoRequestDTO.class;
   }
 
   @Override

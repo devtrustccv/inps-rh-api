@@ -42,10 +42,14 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
       SecaoEntityRepository secaoRepository,
       InstituicaoEntityRepository instituicaoRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository
   ) {
-    super(validator, jsonMapper, SeccaoRequestDTO.class);
+    super(validator, jsonMapper);
     this.secaoRepository = secaoRepository;
     this.instituicaoRepository = instituicaoRepository;
     this.tiposRelacionamentoEntityRepository = tiposRelacionamentoEntityRepository;
+  }
+  @Override
+  protected Class<SeccaoRequestDTO> getType() {
+    return SeccaoRequestDTO.class;
   }
 
   @Override

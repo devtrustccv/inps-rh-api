@@ -1,9 +1,9 @@
 package cv.inps.rh.configuracao.domain.service.engine;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 public class ConfigurationFactory {
 
   private final ApplicationContext applicationContext;
