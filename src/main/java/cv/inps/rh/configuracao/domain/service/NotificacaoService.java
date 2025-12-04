@@ -1,5 +1,6 @@
 package cv.inps.rh.configuracao.domain.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.NotificacaoRequestDTO;
@@ -10,6 +11,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamNotificacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamNotificacaoEntityRepository;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,16 +30,12 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
   private final ParamNotificacaoEntityRepository notificacaoRepository;
 
   protected NotificacaoService(
-
+      Validator validator, ObjectMapper jsonMapper,
       ParamNotificacaoEntityRepository notificacaoRepository
   ) {
 
+    super(validator, jsonMapper, NotificacaoRequestDTO.class);
     this.notificacaoRepository = notificacaoRepository;
-  }
-
-  @Override
-  protected Class<NotificacaoRequestDTO> getType() {
-    return NotificacaoRequestDTO.class;
   }
 
   @Override

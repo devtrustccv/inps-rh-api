@@ -26,7 +26,8 @@ import java.util.UUID;
 public class ParamLocalTrabEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_local_bancao")
+    @SequenceGenerator(name = "seq_local_bancao", sequenceName = "SEQ_LOCAL_BANCAO", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

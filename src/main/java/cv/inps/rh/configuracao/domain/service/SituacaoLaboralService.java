@@ -1,5 +1,6 @@
 package cv.inps.rh.configuracao.domain.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.SituacaoLaboralRequestDTO;
@@ -11,6 +12,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSitLaboralEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSitLaboralEntityRepository;
+import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,18 +31,14 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
   private final DomainEntityRepository domainEntityRepository;
 
   protected SituacaoLaboralService(
-
+      Validator validator, ObjectMapper jsonMapper,
       ParamSitLaboralEntityRepository repository,
       DomainEntityRepository domainEntityRepository
   ) {
 
+    super(validator, jsonMapper, SituacaoLaboralRequestDTO.class);
     this.repository = repository;
     this.domainEntityRepository = domainEntityRepository;
-  }
-
-  @Override
-  protected Class<SituacaoLaboralRequestDTO> getType() {
-    return SituacaoLaboralRequestDTO.class;
   }
 
   @Override

@@ -1,5 +1,6 @@
 package cv.inps.rh.configuracao.domain.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.EscalaoRequestDTO;
@@ -16,6 +17,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCategoriaEnt
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamEscalaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,17 +44,14 @@ public class EscalaoService extends ConfigurationProcess<EscalaoRequestDTO> {
   protected EscalaoService(
       ParamEscalaoEntityRepository escalaoRepository,
       ParamCarreiraEntityRepository carreiraRepository,
-      ParamCategoriaEntityRepository categoriaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository
+      ParamCategoriaEntityRepository categoriaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository,
+      Validator validator, ObjectMapper jsonMapper
   ) {
+    super(validator, jsonMapper, EscalaoRequestDTO.class);
     this.escalaoRepository = escalaoRepository;
     this.carreiraRepository = carreiraRepository;
     this.categoriaRepository = categoriaRepository;
     this.tiposRelacionamentoRepository = tiposRelacionamentoRepository;
-  }
-
-  @Override
-  protected Class<EscalaoRequestDTO> getType() {
-    return EscalaoRequestDTO.class;
   }
 
   @Override

@@ -25,45 +25,45 @@ import java.util.UUID;
 @Table(name = "RH_T_PARAM_VINCULO")
 public class ParamVinculoEntity extends AuditEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    // TODO 04/12/2025 14:18 chnage sequence
-    @Column(name = "id", unique = true, nullable = false)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_param_vinculo")
+  @SequenceGenerator(name = "seq_param_vinculo", sequenceName = "SEQ_PARAM_VINCULO", allocationSize = 1)
+  @Column(name = "id", unique = true, nullable = false)
+  private Long id;
 
 
-    @Column(name="uuid")
-    private UUID uuid;
+  @Column(name = "uuid")
+  private UUID uuid;
 
 
-    @NotBlank(message = "codigo is mandatory")
-    @Column(name="codigo", nullable = false)
-    private String codigo;
+  @NotBlank(message = "codigo is mandatory")
+  @Column(name = "codigo", nullable = false)
+  private String codigo;
 
 
-    @Column(name="nome")
-    private String nome;
+  @Column(name = "nome")
+  private String nome;
 
 
-    @Column(name="flg_carreira")
-    private Integer flgCarreira;
+  @Column(name = "flg_carreira")
+  private Integer flgCarreira;
 
 
-    @Column(name="flg_salario")
-    private Integer flgSalario;
+  @Column(name = "flg_salario")
+  private Integer flgSalario;
 
 
-    @Column(name="flg_contrato")
-    private Integer flgContrato;
+  @Column(name = "flg_contrato")
+  private Integer flgContrato;
 
 
-    @Column(name="flg_tempo_servico")
-    private Integer flgTempoServico;
+  @Column(name = "flg_tempo_servico")
+  private Integer flgTempoServico;
 
 
-    @Enumerated(EnumType.STRING)
-    @Column(name="estado")
-    private Estado estado;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "estado")
+  private Estado estado;
 
 
 }
