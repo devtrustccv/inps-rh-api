@@ -1,5 +1,6 @@
 package cv.inps.rh.configuracao.domain.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.TipoContratoLaboralRequestDTO;
@@ -13,6 +14,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ParamContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamContratoEntityRepository;
+import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,16 +35,12 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
   private final ContratoEntityRepository contratoEntityRepository;
   private final DomainEntityRepository domainEntityRepository;
 
-  protected TipoContratoLaboralService(ParamContratoEntityRepository repository, ContratoEntityRepository contratoEntityRepository, DomainEntityRepository domainEntityRepository) {
+  protected TipoContratoLaboralService(Validator validator, ObjectMapper jsonMapper, ParamContratoEntityRepository repository, ContratoEntityRepository contratoEntityRepository, DomainEntityRepository domainEntityRepository) {
 
+    super(validator, jsonMapper, TipoContratoLaboralRequestDTO.class);
     this.repository = repository;
     this.contratoEntityRepository = contratoEntityRepository;
     this.domainEntityRepository = domainEntityRepository;
-  }
-
-  @Override
-  protected Class<TipoContratoLaboralRequestDTO> getType() {
-    return TipoContratoLaboralRequestDTO.class;
   }
 
   @Override

@@ -26,7 +26,8 @@ import java.util.UUID;
 public class ParamContratoEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_param_contrato")
+    @SequenceGenerator(name = "seq_param_contrato", sequenceName = "SEQ_PARAM_CONTRATO", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

@@ -1,5 +1,6 @@
 package cv.inps.rh.configuracao.domain.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.LocalTrabalhoRequestDTO;
@@ -14,6 +15,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.GeografiaEntityRe
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamLocalTrabEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,16 +39,13 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
 
   protected LocalTrabalhoService(
       ParamLocalTrabEntityRepository localRepository,
-      GeografiaEntityRepository geografiaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository
+      GeografiaEntityRepository geografiaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository,
+      Validator validator, ObjectMapper jsonMapper
   ) {
+    super(validator, jsonMapper, LocalTrabalhoRequestDTO.class);
     this.localRepository = localRepository;
     this.geografiaRepository = geografiaRepository;
     this.tiposRelacionamentoRepository = tiposRelacionamentoRepository;
-  }
-
-  @Override
-  protected Class<LocalTrabalhoRequestDTO> getType() {
-    return LocalTrabalhoRequestDTO.class;
   }
 
   @Override

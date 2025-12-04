@@ -3,32 +3,33 @@ package cv.inps.rh.configuracao.domain.service.engine;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import jakarta.validation.Validator;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Map;
 
 public abstract class ConfigurationProcess<T> {
 
-  @Autowired
-  protected Validator validator;
+  protected final Validator validator;
+  protected final ObjectMapper jsonMapper;
+  private final Class<T> type;
 
-  @Autowired
-  protected ObjectMapper jsonMapper;
+  protected ConfigurationProcess(Validator validator, ObjectMapper jsonMapper, Class<T> type) {
+    this.validator = validator;
+    this.jsonMapper = jsonMapper;
+    this.type = type;
+  }
 
-  public final Object doCreate(Object payload) {
-    T value = jsonMapper.convertValue(payload, getType());
+  public Object doCreate(Object payload) {
+    T value = jsonMapper.convertValue(payload, type);
     validate(value);
     return create(value);
   }
 
-  public final void doUpdate(String id, Object payload) {
-    T value = jsonMapper.convertValue(payload, getType());
+  public void doUpdate(String id, Object payload) {
+    T value = jsonMapper.convertValue(payload, type);
     validate(value);
     update(id, value);
   }
-
-  protected abstract Class<T> getType();
 
   protected abstract Object create(T payload);
 
