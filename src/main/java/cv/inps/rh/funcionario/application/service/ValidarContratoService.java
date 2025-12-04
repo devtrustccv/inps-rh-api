@@ -75,10 +75,10 @@ public class ValidarContratoService {
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
 
 
-    var definicoesRemuneracoes = definicaoRemuneracaoMapper
-        .syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(), dadosContratuais.getSubsidios());
-    var definicoesPagamentos = defPagamentoMapper
-        .syncPagamentos(funcionario.getDefinicoesPagamentos(), dadosContratuais.getEncargosDescontos());
+    var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(),
+        dadosContratuais.getSubsidios());
+    var definicoesPagamentos = defPagamentoMapper.syncPagamentos(funcionario.getDefinicoesPagamentos(),
+        dadosContratuais.getEncargosDescontos());
 
     funcionario.setDefinicoesRenumeracoes(definicoesRemuneracoes);
     funcionario.setDefinicoesPagamentos(definicoesPagamentos);
