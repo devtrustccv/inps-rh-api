@@ -35,7 +35,7 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
   private final ContratoEntityRepository contratoEntityRepository;
   private final DomainEntityRepository domainEntityRepository;
 
-  public TipoContratoLaboralService(Validator validator, ObjectMapper jsonMapper, ParamContratoEntityRepository repository, ContratoEntityRepository contratoEntityRepository, DomainEntityRepository domainEntityRepository) {
+  protected TipoContratoLaboralService(Validator validator, ObjectMapper jsonMapper, ParamContratoEntityRepository repository, ContratoEntityRepository contratoEntityRepository, DomainEntityRepository domainEntityRepository) {
     super(validator, jsonMapper);
     this.repository = repository;
     this.contratoEntityRepository = contratoEntityRepository;

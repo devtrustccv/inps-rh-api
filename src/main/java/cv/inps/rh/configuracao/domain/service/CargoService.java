@@ -34,7 +34,7 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
   private final ParamCargoEntityRepository cargoRepository;
   private final ParamCarreiraEntityRepository careerRepository;
 
-  public CargoService(
+  protected CargoService(
       Validator validator,
       ObjectMapper jsonMapper,
       ParamCargoEntityRepository cargoRepository,

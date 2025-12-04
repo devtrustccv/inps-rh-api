@@ -30,7 +30,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
   private final ParamSitLaboralEntityRepository repository;
   private final DomainEntityRepository domainEntityRepository;
 
-  public SituacaoLaboralService(
+  protected SituacaoLaboralService(
       Validator validator,
       ObjectMapper jsonMapper,
       ParamSitLaboralEntityRepository repository,

@@ -41,7 +41,7 @@ public class EscalaoService extends ConfigurationProcess<EscalaoRequestDTO> {
   private final ParamCategoriaEntityRepository categoriaRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoRepository;
 
-  public EscalaoService(
+  protected EscalaoService(
       Validator validator,
       ObjectMapper jsonMapper,
       ParamEscalaoEntityRepository escalaoRepository,
