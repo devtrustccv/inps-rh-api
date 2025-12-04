@@ -62,4 +62,7 @@ public interface ValidacaoEntityRepository extends
   default ValidacaoEntity findByUuidOrThrow(UUID uuid) {
     return this.findByUuid(uuid).orElseThrow(() -> IgrpResponseStatusException.notFound("ValidacaoEntity not found for id: " + uuid));
   }
+
+  boolean existsByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(UUID funIdUuid, Estado estado, String tipoAccao, String referenciaName);
+  
 }

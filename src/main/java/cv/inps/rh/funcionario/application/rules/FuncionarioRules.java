@@ -1,16 +1,29 @@
 package cv.inps.rh.funcionario.application.rules;
 
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.TipoAccao;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
 import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
 public class FuncionarioRules {
+
+  private final ValidacaoEntityRepository validacaoEntityRepository;
+
+  public boolean temValidacaoPendente(UUID funUuid, TipoAcao tipoAccao, Referencia referenciaName) {
+    return validacaoEntityRepository.existsByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(funUuid, Estado.P, tipoAccao.name(),
+        referenciaName.name());
+  }
 
   public TiposRelacionamentoEntity getTipoRelacionamentoAtual(FuncionarioEntity entity) {
     return entity.getTiposrelacionamentos().stream()

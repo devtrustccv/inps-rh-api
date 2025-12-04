@@ -5,6 +5,9 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
@@ -47,6 +50,10 @@ public class ValidarRegistoColaboradorService {
     var funcionarioPublicId = IdentificadorUnico.from(command.getId()).valor();
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
+
+    if(!funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR)){
+       throw IgrpResponseStatusException.badRequest("funcionario nao tem validacao pendente para o tipo de acao: INSERT e referencia: REGISTO_COLABORADOR");
+    }
 
     var dadosPessoaisReqDTO = registroColaborador.getDadosPessoais();
     funcionario = funcionarioMapper.toUpdateEntity(funcionario, dadosPessoaisReqDTO);
