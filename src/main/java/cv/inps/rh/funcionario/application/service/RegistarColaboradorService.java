@@ -29,7 +29,7 @@ public class RegistarColaboradorService {
   private final ExperienciaProfissionalMapper experienciaProfissionalMapper;
   private final DocumentoMapper documentoMapper;
   private final DadosBancariosMapper dadosBancariosMapper;
-  private final DadosContratuaisMapper contratuaisEntityMapper;
+  private final DadosContratuaisMapper dadosContratuaisMapper;
   private final FuncionarioMapper funcionarioMapper;
   private final ContratoMapper contratoMapper;
   private final CarreiraMapper carreiraMapper;
@@ -161,9 +161,9 @@ public class RegistarColaboradorService {
 
     var renumeracaoSalario = definicaoRemuneracaoMapper
         .createRenumeracao(dadosContratuais.getSalario(), tipoMovimentoSalario, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), fun, dadosContratuais.getMoeda());
-    var renumeracaoInps = definicaoRemuneracaoMapper
-        .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), fun, dadosContratuais.getMoeda());
-    fun.getDefinicoesRenumeracoes().addAll(new ArrayList<>(List.of(renumeracaoSalario, renumeracaoInps)));
+   /* var renumeracaoInps = definicaoRemuneracaoMapper
+        .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), fun, dadosContratuais.getMoeda());*/
+    fun.getDefinicoesRenumeracoes().addAll(new ArrayList<>(List.of(renumeracaoSalario)));
     /******************** FIM RENUMERACOES ********************************/
 
 
@@ -189,11 +189,12 @@ public class RegistarColaboradorService {
       throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO.");
     }
 
-    var situacaoLaboral = contratuaisEntityMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P);
+    var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P, "INICIO",
+        "NOVO_CONTRATO");
     situacaoLaboral.setContrVinculoId(contrato);
     contrato.setSituacoesLaborais(new ArrayList<>(List.of(situacaoLaboral)));
 
-    var tr = contratuaisEntityMapper.toRelacionamento(dadosContratuais, Estado.P);
+    var tr = dadosContratuaisMapper.toRelacionamento(dadosContratuais, Estado.P);
     tr.setFunId(fun);
     tr.setContrVinculoId(contrato);
     tr.setCarreiraId(carreira);
@@ -205,7 +206,7 @@ public class RegistarColaboradorService {
     fun.setTiposrelacionamentos(new ArrayList<>(List.of(tr)));
 
 
-    var valid = contratuaisEntityMapper.toValidacaoInsert("INSERT", "REGISTO_COLABORADOR", Estado.P);
+    var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT", "REGISTO_COLABORADOR", Estado.P);
     valid.setFunId(fun);
     valid.setTiprelId(tr);
     fun.setValidacoes(new ArrayList<>(List.of(valid)));

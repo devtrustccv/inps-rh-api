@@ -79,28 +79,26 @@ public class DadosContratuaisMapper {
     var v = new ValidacaoEntity();
     v.setTipoAccao(TipoAccao);
     v.setReferenciaName(referenciaName);
-    v.setReferenciaId(null);
     v.setEstado(estado);
-    v.setObs(null);
     v.setUuid(UuidCreator.getTimeOrderedEpoch());
     return v;
   }
 
-  public SituacaoLaboralEntity toSituacaoLaboral(DadosContratuaisReqDTO dc, ParamSitLaboralEntity param, Estado estado) {
+  public SituacaoLaboralEntity toSituacaoLaboral(DadosContratuaisReqDTO dc, ParamSitLaboralEntity param, Estado estado,
+                                                 String motivoSituacaoLaboral, String observacao) {
     var sl = new SituacaoLaboralEntity();
     sl.setSituacaoLaboralId(param);
-    sl.setMotivoSitLab(null);
+    sl.setMotivoSitLab(motivoSituacaoLaboral);
     sl.setDataInicio(dc.getDataInicio());
     sl.setDataFim(dc.getDataFim());
     sl.setEstado(estado);
-    sl.setObs("NOVO_CONTRATO");
+    sl.setObs(observacao);
     sl.setUuid(UuidCreator.getTimeOrderedEpoch());
     return sl;
   }
 
   public SituacaoLaboralEntity toUpdateSituacaoLaboral(SituacaoLaboralEntity entity, DadosContratuaisReqDTO dc) {
     if (dc == null) return entity;
-    //sl.setMotivoSitLab(null);
     entity.setDataInicio(dc.getDataInicio());
     entity.setDataFim(dc.getDataFim());
     return entity;

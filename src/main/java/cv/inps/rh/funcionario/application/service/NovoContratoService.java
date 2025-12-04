@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.service;
 import cv.inps.rh.funcionario.application.commands.NovoContratoCommand;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -18,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,20 +38,19 @@ public class NovoContratoService {
   private final DefPagamentoMapper defPagamentoMapper;
   private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
   private final FuncionarioRules funcionarioRules;
-  private final EntityManager entityManager;
-
   private final ValidacaoEntityRepository validacaoEntityRepository;
-  private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
-  private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
+
   private final RemuneracaoTiprelEntityRepository remuneracaoTiprelEntityRepository;
   private final PagTiprelEntityRepository pagTiprelEntityRepository;
+  private final TipoMovimentoHelper tipoMovimentoHelper;
 
   @Transactional
   public DadosContratuaisRespDTO registrar(NovoContratoCommand command) {
 
     var dto = command.getNovocontrato();
-
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
+
+    var dadosContratuais = dto.getDadosContratuais();
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
@@ -82,11 +84,8 @@ public class NovoContratoService {
     }
 
     /********* adicionar novo contrato **************/
-    var dc = dto.getDadosContratuais();
-    if (dc == null) {
-      throw IgrpResponseStatusException.badRequest("Dados contratuais obrigatórios");
-    }
-    var contrato = contratoMapper.toContrato(dc, Estado.P);
+
+    var contrato = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contrato.setFunId(funcionario);
     contrato.setVersao(isPrimeiroContrato ? 1
         : (funcionarioRules.getContratoComMaiorVersao(funcionario) != null
@@ -96,45 +95,37 @@ public class NovoContratoService {
     contrato.setSituacaoLaboral(tipoSituacao);
     funcionario.getContratos().add(contrato);
 
-    var regime = regimeTrabalhoMapper.toRegime(dc, Estado.P);
+    var regime = regimeTrabalhoMapper.toRegime(dadosContratuais, Estado.P);
     if (regime != null) {
       regime.setFunId(funcionario);
       funcionario.getRegimesTrabalhos().add(regime);
     }
 
-    var mobilidade = mobilidadeMapper.toMobilidade(dc, Estado.P);
+    var mobilidade = mobilidadeMapper.toMobilidade(dadosContratuais, Estado.P);
     if (mobilidade != null) {
       mobilidade.setFunId(funcionario);
       funcionario.getMobilidades().add(mobilidade);
     }
 
-    var carreira = carreiraMapper.toCarreira(dc, Estado.P);
+    var carreira = carreiraMapper.toCarreira(dadosContratuais, Estado.P);
     if (carreira != null) {
       carreira.setContrVinculoId(contrato);
       contrato.getCarreiras().add(carreira);
     }
 
-    if (dc.getSubsidios() != null && !dc.getSubsidios().isEmpty()) {
-      var remList = dc.getSubsidios().stream()
-          .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P))
-          .toList();
-      funcionario.getDefinicoesRenumeracoes().addAll(remList);
-    }
 
-    if (dc.getEncargosDescontos() != null && !dc.getEncargosDescontos().isEmpty()) {
-      var pagList = dc.getEncargosDescontos().stream()
-          .map(e -> defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P))
-          .toList();
-      funcionario.getDefinicoesPagamentos().addAll(pagList);
-    }
-
-    var param = paramSitLaboralEntityRepository.findAllByNome("ATIVO").getFirst();
-    if (param == null) {
+    var paramSituacaoLaboral = paramSitLaboralEntityRepository.findAllByNome("ATIVO").getFirst();
+    if (paramSituacaoLaboral == null) {
       throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO. " +
           "Verifique se o parametro esta cadastrado no banco de dados e tente novamente.");
     }
 
-    var tr = dadosContratuaisMapper.toRelacionamento(dc, Estado.P);
+    var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P,
+        "NOVO_CONTRATO", "NOVO_CONTRATO");
+    situacaoLaboral.setContrVinculoId(contrato);
+    contrato.setSituacoesLaborais(new ArrayList<>(List.of(situacaoLaboral)));
+
+    var tr = dadosContratuaisMapper.toRelacionamento(dadosContratuais, Estado.P);
     tr.setFunId(funcionario);
     tr.setContrVinculoId(contrato);
     tr.setCarreiraId(carreira);
@@ -142,7 +133,7 @@ public class NovoContratoService {
     tr.setMobId(mobilidade);
     tr.setFlgProcessa("NAO");
     tr.setEstActAdm(1);
-    // tr.setSituacLaboralId(sl);
+    tr.setSituacLaboralId(situacaoLaboral);
     funcionario.getTiposrelacionamentos().add(tr);
 
     var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT", "CONTRATO", Estado.P);
@@ -150,32 +141,45 @@ public class NovoContratoService {
     valid.setTiprelId(tr);
     funcionario.getValidacoes().add(valid);
 
-    var tmSalario = tipoMovimentoEntityRepository.findByShortDescAndAmbAplId("SALL", 30L)
-        .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento SALARIO não encontrado"));
-    var tmInps = tipoMovimentoEntityRepository.findByShortDescAndAmbAplId("INPS", 30L)
-        .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento INPS não encontrado"));
-    var tmIur = tipoMovimentoEntityRepository.findByShortDescAndAmbAplId("IUR", 30L)
-        .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento IUR não encontrado"));
+
+    var tipoMovimentoSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
+    var tipoMovimentoInps = tipoMovimentoHelper.getTipoMovimentoEntityInps();
+    var tipoMovimentoIUR =  tipoMovimentoHelper.getTipoMovimentoEntityIur();
+
+    /******************** INI RENUMERACOES ********************************/
+    if (dadosContratuais.getSubsidios() != null && !dadosContratuais.getSubsidios().isEmpty()) {
+      var remList = dadosContratuais.getSubsidios().stream()
+          .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P))
+          .collect(Collectors.toList());
+      funcionario.setDefinicoesRenumeracoes(remList);
+    }
 
     var renumeracaoSalario = definicaoRemuneracaoMapper
-        .createRenumeracao(dc.getSalario() != null ? dc.getSalario() : BigDecimal.ZERO, tmSalario, dc.getDataInicio(),
-            dc.getDataFim(), funcionario, dc.getMoeda());
-    var renumeracaoInps = definicaoRemuneracaoMapper
-        .createRenumeracao(BigDecimal.ZERO, tmInps, dc.getDataInicio(), dc.getDataFim(), funcionario,dc.getMoeda());
-    funcionario.getDefinicoesRenumeracoes().addAll(List.of(renumeracaoSalario, renumeracaoInps));
+        .createRenumeracao(dadosContratuais.getSalario(), tipoMovimentoSalario, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), funcionario, dadosContratuais.getMoeda());
+    /*var renumeracaoInps = definicaoRemuneracaoMapper
+        .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), funcionario, dadosContratuais.getMoeda());*/
+    funcionario.getDefinicoesRenumeracoes().addAll(new ArrayList<>(List.of(renumeracaoSalario)));
+    /******************** FIM RENUMERACOES ********************************/
+
+
+    /******************** INI PAGAMENTOS DESCONTOS ********************************/
+    if (dadosContratuais.getEncargosDescontos() != null && !dadosContratuais.getEncargosDescontos().isEmpty()) {
+      var pagList = dadosContratuais.getEncargosDescontos().stream()
+          .map(e -> defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P))
+          .collect(Collectors.toList());
+      funcionario.setDefinicoesPagamentos(pagList);
+    }
 
     var pagamentoDescontoIUR = defPagamentoMapper.createPagamento(BigDecimal.ZERO,
-        tmIur, dc.getDataInicio(), dc.getDataFim(), funcionario);
+        tipoMovimentoIUR, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), funcionario);
     var pagamentoDescontoINPS = defPagamentoMapper.createPagamento(BigDecimal.ZERO,
-        tmInps, dc.getDataInicio(), dc.getDataFim(), funcionario);
-    funcionario.getDefinicoesPagamentos().addAll(List.of(pagamentoDescontoIUR, pagamentoDescontoINPS));
+        tipoMovimentoInps, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), funcionario);
+
+    funcionario.getDefinicoesPagamentos().addAll(new ArrayList<>(List.of(pagamentoDescontoIUR, pagamentoDescontoINPS)));
+    /******************** FIM PAGAMENTOS DESCONTOS ********************************/
+
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
-
-    var sl = dadosContratuaisMapper.toSituacaoLaboral(dc, param, Estado.P);
-    sl.setContrVinculoId(contrato);
-    situacaoLaboralEntityRepository.save(sl);
-
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {
