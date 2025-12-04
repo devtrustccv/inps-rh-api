@@ -37,9 +37,14 @@ public class TipoDocumentoService extends ConfigurationProcess<TipoDocumentoRequ
       ObjectMapper jsonMapper,
       TipoDocumentoEntityRepository tipoDocumentoRepository, DocumentoEntityRepository documentoEntityRepository
   ) {
-    super(validator, jsonMapper, TipoDocumentoRequestDTO.class);
+    super(validator, jsonMapper);
     this.tipoDocumentoRepository = tipoDocumentoRepository;
     this.documentoEntityRepository = documentoEntityRepository;
+  }
+
+  @Override
+  protected Class<TipoDocumentoRequestDTO> getType() {
+    return TipoDocumentoRequestDTO.class;
   }
 
   @Override

@@ -11,25 +11,26 @@ public abstract class ConfigurationProcess<T> {
 
   protected final Validator validator;
   protected final ObjectMapper jsonMapper;
-  private final Class<T> type;
+  private Class<T> type;
 
-  protected ConfigurationProcess(Validator validator, ObjectMapper jsonMapper, Class<T> type) {
+  protected ConfigurationProcess(Validator validator, ObjectMapper jsonMapper) {
     this.validator = validator;
     this.jsonMapper = jsonMapper;
-    this.type = type;
   }
 
   public final Object doCreate(Object payload) {
-    T value = new ObjectMapper().convertValue(payload, type);
+    T value = new ObjectMapper().convertValue(payload, getType());
     validate(value);
     return create(value);
   }
 
   public final void doUpdate(String id, Object payload) {
-    T value = new ObjectMapper().convertValue(payload, type);
+    T value = new ObjectMapper().convertValue(payload, getType());
     validate(value);
     update(id, value);
   }
+
+  protected abstract Class<T> getType();
 
   protected abstract Object create(T payload);
 

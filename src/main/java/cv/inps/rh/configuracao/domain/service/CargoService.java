@@ -40,9 +40,14 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
       ParamCargoEntityRepository cargoRepository,
       ParamCarreiraEntityRepository careerRepository
   ) {
-    super(validator, jsonMapper, CargoRequestDTO.class);
+    super(validator, jsonMapper);
     this.cargoRepository = cargoRepository;
     this.careerRepository = careerRepository;
+  }
+
+  @Override
+  protected Class<CargoRequestDTO> getType() {
+    return CargoRequestDTO.class;
   }
 
   @Override

@@ -34,8 +34,13 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
       ObjectMapper jsonMapper,
       ParamNotificacaoEntityRepository notificacaoRepository
   ) {
-    super(validator, jsonMapper, NotificacaoRequestDTO.class);
+    super(validator, jsonMapper);
     this.notificacaoRepository = notificacaoRepository;
+  }
+
+  @Override
+  protected Class<NotificacaoRequestDTO> getType() {
+    return NotificacaoRequestDTO.class;
   }
 
   @Override

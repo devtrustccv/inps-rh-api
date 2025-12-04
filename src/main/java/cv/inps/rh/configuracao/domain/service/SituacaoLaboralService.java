@@ -36,9 +36,14 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
       ParamSitLaboralEntityRepository repository,
       DomainEntityRepository domainEntityRepository
   ) {
-    super(validator, jsonMapper, SituacaoLaboralRequestDTO.class);
+    super(validator, jsonMapper);
     this.repository = repository;
     this.domainEntityRepository = domainEntityRepository;
+  }
+
+  @Override
+  protected Class<SituacaoLaboralRequestDTO> getType() {
+    return SituacaoLaboralRequestDTO.class;
   }
 
   @Override

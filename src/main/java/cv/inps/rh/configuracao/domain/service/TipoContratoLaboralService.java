@@ -36,10 +36,15 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
   private final DomainEntityRepository domainEntityRepository;
 
   public TipoContratoLaboralService(Validator validator, ObjectMapper jsonMapper, ParamContratoEntityRepository repository, ContratoEntityRepository contratoEntityRepository, DomainEntityRepository domainEntityRepository) {
-    super(validator, jsonMapper, TipoContratoLaboralRequestDTO.class);
+    super(validator, jsonMapper);
     this.repository = repository;
     this.contratoEntityRepository = contratoEntityRepository;
     this.domainEntityRepository = domainEntityRepository;
+  }
+
+  @Override
+  protected Class<TipoContratoLaboralRequestDTO> getType() {
+    return TipoContratoLaboralRequestDTO.class;
   }
 
   @Override

@@ -43,10 +43,15 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
       ParamLocalTrabEntityRepository localRepository,
       GeografiaEntityRepository geografiaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository
   ) {
-    super(validator, mapper, LocalTrabalhoRequestDTO.class);
+    super(validator, mapper);
     this.localRepository = localRepository;
     this.geografiaRepository = geografiaRepository;
     this.tiposRelacionamentoRepository = tiposRelacionamentoRepository;
+  }
+
+  @Override
+  protected Class<LocalTrabalhoRequestDTO> getType() {
+    return LocalTrabalhoRequestDTO.class;
   }
 
   @Override
