@@ -19,14 +19,14 @@ public abstract class ConfigurationProcess<T> {
     this.type = type;
   }
 
-  public final Object doCreate(T payload) {
-    var value = jsonMapper.convertValue(payload, type);
+  public final Object doCreate(Object payload) {
+    T value = new ObjectMapper().convertValue(payload, type);
     validate(value);
     return create(value);
   }
 
-  public final void doUpdate(String id, T payload) {
-    var value = jsonMapper.convertValue(payload, type);
+  public final void doUpdate(String id, Object payload) {
+    T value = new ObjectMapper().convertValue(payload, type);
     validate(value);
     update(id, value);
   }

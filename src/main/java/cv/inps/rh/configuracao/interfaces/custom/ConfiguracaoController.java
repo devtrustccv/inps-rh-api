@@ -2,7 +2,7 @@ package cv.inps.rh.configuracao.interfaces.custom;
 
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.configuracao.application.constants.ConfigurationType;
-import cv.inps.rh.configuracao.domain.service.engine.IConfiguration;
+import cv.inps.rh.configuracao.domain.service.engine.Configuration;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,9 +23,9 @@ import java.util.Map;
 @Tag(name = "Configuração", description = "Gestão e Parametrização Global do Sistema")
 public class ConfiguracaoController {
 
-  private final IConfiguration configuration;
+  private final Configuration configuration;
 
-  public ConfiguracaoController(IConfiguration configuration) {
+  public ConfiguracaoController(Configuration configuration) {
     this.configuration = configuration;
   }
 
@@ -56,7 +56,7 @@ public class ConfiguracaoController {
       @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
   })
   public ResponseEntity<Object> create(
-      @RequestBody Map<String, Object> request,
+      @RequestBody Object request,
       @RequestParam ConfigurationType configurationType
   ) {
     var data = configuration.create(request, configurationType.getCode());
