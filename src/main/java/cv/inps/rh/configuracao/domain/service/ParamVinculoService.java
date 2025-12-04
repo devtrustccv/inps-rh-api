@@ -1,6 +1,5 @@
 package cv.inps.rh.configuracao.domain.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoLaboralRequestDTO;
@@ -14,7 +13,6 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
-import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,8 +30,8 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final DomainEntityRepository domainEntityRepository;
 
-  protected ParamVinculoService(Validator validator, ObjectMapper jsonMapper, ParamVinculoEntityRepository repository, TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository, DomainEntityRepository domainEntityRepository) {
-    super(validator, jsonMapper);
+  protected ParamVinculoService(ParamVinculoEntityRepository repository, TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository, DomainEntityRepository domainEntityRepository) {
+
     this.repository = repository;
     this.tiposRelacionamentoEntityRepository = tiposRelacionamentoEntityRepository;
     this.domainEntityRepository = domainEntityRepository;

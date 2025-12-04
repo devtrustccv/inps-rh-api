@@ -33,8 +33,7 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
   private final ParamCategoriaEntityRepository categoriaRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoRepository;
 
-  protected CarreiraService(Validator validator, ObjectMapper jsonMapper, ParamCarreiraEntityRepository carreiraRepository, ParamCategoriaEntityRepository categoriaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository) {
-    super(validator, jsonMapper);
+  public CarreiraService(Validator validator, ObjectMapper jsonMapper, ParamCarreiraEntityRepository carreiraRepository, ParamCategoriaEntityRepository categoriaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository) {
     this.carreiraRepository = carreiraRepository;
     this.categoriaRepository = categoriaRepository;
     this.tiposRelacionamentoRepository = tiposRelacionamentoRepository;

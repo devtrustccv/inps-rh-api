@@ -1,6 +1,5 @@
 package cv.inps.rh.configuracao.domain.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.CargoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.CargoResponseDTO;
@@ -13,7 +12,6 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCargoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCarreiraEntityRepository;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -34,13 +32,10 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
   private final ParamCargoEntityRepository cargoRepository;
   private final ParamCarreiraEntityRepository careerRepository;
 
-  protected CargoService(
-      Validator validator,
-      ObjectMapper jsonMapper,
+  public CargoService(
       ParamCargoEntityRepository cargoRepository,
       ParamCarreiraEntityRepository careerRepository
   ) {
-    super(validator, jsonMapper);
     this.cargoRepository = cargoRepository;
     this.careerRepository = careerRepository;
   }

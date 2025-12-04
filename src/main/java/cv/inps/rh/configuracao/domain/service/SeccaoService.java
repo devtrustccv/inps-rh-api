@@ -1,6 +1,5 @@
 package cv.inps.rh.configuracao.domain.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.SeccaoRequestDTO;
@@ -16,7 +15,6 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.InstituicaoEntity
 import cv.inps.rh.shared.infrastructure.persistence.repository.SecaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,12 +35,10 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
 
   protected SeccaoService(
-      Validator validator,
-      ObjectMapper jsonMapper,
+
       SecaoEntityRepository secaoRepository,
       InstituicaoEntityRepository instituicaoRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository
   ) {
-    super(validator, jsonMapper);
     this.secaoRepository = secaoRepository;
     this.instituicaoRepository = instituicaoRepository;
     this.tiposRelacionamentoEntityRepository = tiposRelacionamentoEntityRepository;

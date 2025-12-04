@@ -1,6 +1,5 @@
 package cv.inps.rh.configuracao.domain.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.TipoDocumentoRequestDTO;
@@ -13,7 +12,6 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoDocumentoEntityRepository;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,11 +31,10 @@ public class TipoDocumentoService extends ConfigurationProcess<TipoDocumentoRequ
   private final DocumentoEntityRepository documentoEntityRepository;
 
   protected TipoDocumentoService(
-      Validator validator,
-      ObjectMapper jsonMapper,
+
       TipoDocumentoEntityRepository tipoDocumentoRepository, DocumentoEntityRepository documentoEntityRepository
   ) {
-    super(validator, jsonMapper);
+
     this.tipoDocumentoRepository = tipoDocumentoRepository;
     this.documentoEntityRepository = documentoEntityRepository;
   }
