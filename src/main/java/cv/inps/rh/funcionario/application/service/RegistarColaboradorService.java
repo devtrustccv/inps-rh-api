@@ -210,7 +210,7 @@ public class RegistarColaboradorService {
     fun.setTiposrelacionamentos(new ArrayList<>(List.of(tr)));
 
 
-    var valid = contratuaisEntityMapper.toValidacaoInsert("INSERT", "REGISTO_COLABORADOR", Estado.P); //todo resolve id later
+    var valid = contratuaisEntityMapper.toValidacaoInsert("INSERT", "REGISTO_COLABORADOR", Estado.P);
     valid.setFunId(fun);
     valid.setTiprelId(tr);
     fun.setValidacoes(new ArrayList<>(List.of(valid)));
