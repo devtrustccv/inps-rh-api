@@ -46,6 +46,7 @@ public class ValidarRegistoColaboradorService {
   public Map<String, ?> validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
 
     var registroColaborador = command.getFuncionariorequest();
+    var dadosContratuais = registroColaborador.getDadosContratuais();
 
     var funcionarioPublicId = IdentificadorUnico.from(command.getId()).valor();
 
@@ -59,41 +60,39 @@ public class ValidarRegistoColaboradorService {
     funcionario = funcionarioMapper.toUpdateEntity(funcionario, dadosPessoaisReqDTO);
 
     var contactos = contactoMapper.syncContactos(funcionario.getContactos(), dadosPessoaisReqDTO != null ? dadosPessoaisReqDTO.getContactos() : null);
-
     var familiares = familiarMapper.syncFamiliares(funcionario.getFamiliares(), registroColaborador.getFamiliares());
 
-    var da = registroColaborador.getDadosAcademicosProf();
+    var dadosAcademicosProf = registroColaborador.getDadosAcademicosProf();
 
-    var habilitacoesLiterarias = habilitacaoLiterariaMapper.syncHabilitacoes(funcionario.getHabilitacoesLiterarias(), da.getHabilitacoesLiterarias());
-    var formacoesFeitas = formacaoFeitaMapper.syncFormacoes(funcionario.getFormacoesFeitas(), da.getFormacoesFeitas());
-    var experienciasProfissionais = experienciaProfissionalMapper.syncExperiencias(funcionario.getExperienciasProfissionais(), da.getExperienciasProfssionais());
+    var habilitacoesLiterarias = habilitacaoLiterariaMapper.syncHabilitacoes(funcionario.getHabilitacoesLiterarias(), dadosAcademicosProf.getHabilitacoesLiterarias());
+    var formacoesFeitas = formacaoFeitaMapper.syncFormacoes(funcionario.getFormacoesFeitas(), dadosAcademicosProf.getFormacoesFeitas());
+    var experienciasProfissionais = experienciaProfissionalMapper.syncExperiencias(funcionario.getExperienciasProfissionais(), dadosAcademicosProf.getExperienciasProfssionais());
 
 
     var documentos = documentoMapper.syncDocumentos(funcionario.getDocumentos(), registroColaborador.getAnexos());
     var dadosBancarios = dadosBancariosMapper.syncBancarios(funcionario.getDadosBancarios(), registroColaborador.getDadosBancarios());
 
     var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
-    dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, registroColaborador.getDadosContratuais());
+    dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, dadosContratuais);
 
-
-    var dc = registroColaborador.getDadosContratuais();
 
     var contrato = tiposRelacionamento.getContrVinculoId();
-    contratoMapper.toUpdateEntity(contrato, dc);
+    contratoMapper.toUpdateEntity(contrato, dadosContratuais);
 
     var mobilidade = tiposRelacionamento.getMobId();
-    mobilidadeMapper.toUpdateEntity(mobilidade, dc);
-
+    mobilidadeMapper.toUpdateEntity(mobilidade, dadosContratuais);
 
     var carreira = tiposRelacionamento.getCarreiraId();
-    carreiraMapper.toUpdateEntity(carreira, dc);
+    carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
 
     var regime = tiposRelacionamento.getRegimeId();
-    regimeTrabalhoMapper.toUpdateEntity(regime, dc);
+    regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
 
 
-    var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(), dc.getSubsidios());
-    var definicoesPagamentos = defPagamentoMapper.syncPagamentos(funcionario.getDefinicoesPagamentos(), dc.getEncargosDescontos());
+    var definicoesRemuneracoes =
+        definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(), dadosContratuais.getSubsidios());
+    var definicoesPagamentos =
+        defPagamentoMapper.syncPagamentos(funcionario.getDefinicoesPagamentos(), dadosContratuais.getEncargosDescontos());
 
 
     funcionario.setContactos(contactos);
@@ -112,7 +111,7 @@ public class ValidarRegistoColaboradorService {
         OrdemServicoEntity ordemServicoEntity = new OrdemServicoEntity();
         ordemServicoEntity.setFunId(funcionario);
         ordemServicoEntity.setTiprelId(tiposRelacionamento);
-        ordemServicoEntity.setReferente("REGISTO_COLABORADOR");
+        ordemServicoEntity.setReferente(Referencia.REGISTO_COLABORADOR.name());
         ordemServicoEntity.setDescricao("Registro de colaborador");
         ordemServicoEntity.setNuOrdem("1"); // todo fix later
         ordemServicoEntity.setEstado(Estado.A);
