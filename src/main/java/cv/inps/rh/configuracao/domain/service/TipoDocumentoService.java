@@ -32,7 +32,7 @@ public class TipoDocumentoService extends ConfigurationProcess<TipoDocumentoRequ
   private final TipoDocumentoEntityRepository tipoDocumentoRepository;
   private final DocumentoEntityRepository documentoEntityRepository;
 
-  public TipoDocumentoService(
+  protected TipoDocumentoService(
       Validator validator,
       ObjectMapper jsonMapper,
       TipoDocumentoEntityRepository tipoDocumentoRepository, DocumentoEntityRepository documentoEntityRepository

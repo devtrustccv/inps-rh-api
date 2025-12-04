@@ -29,7 +29,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
 
   private final ParamNotificacaoEntityRepository notificacaoRepository;
 
-  public NotificacaoService(
+  protected NotificacaoService(
       Validator validator,
       ObjectMapper jsonMapper,
       ParamNotificacaoEntityRepository notificacaoRepository

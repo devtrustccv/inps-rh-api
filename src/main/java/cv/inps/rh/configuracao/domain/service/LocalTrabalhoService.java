@@ -37,7 +37,7 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
   private final GeografiaEntityRepository geografiaRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoRepository;
 
-  public LocalTrabalhoService(
+  protected LocalTrabalhoService(
       Validator validator,
       ObjectMapper mapper,
       ParamLocalTrabEntityRepository localRepository,

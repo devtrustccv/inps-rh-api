@@ -11,7 +11,6 @@ public abstract class ConfigurationProcess<T> {
 
   protected final Validator validator;
   protected final ObjectMapper jsonMapper;
-  private Class<T> type;
 
   protected ConfigurationProcess(Validator validator, ObjectMapper jsonMapper) {
     this.validator = validator;

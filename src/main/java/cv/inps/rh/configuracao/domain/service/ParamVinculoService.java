@@ -32,7 +32,7 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final DomainEntityRepository domainEntityRepository;
 
-  public ParamVinculoService(Validator validator, ObjectMapper jsonMapper, ParamVinculoEntityRepository repository, TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository, DomainEntityRepository domainEntityRepository) {
+  protected ParamVinculoService(Validator validator, ObjectMapper jsonMapper, ParamVinculoEntityRepository repository, TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository, DomainEntityRepository domainEntityRepository) {
     super(validator, jsonMapper);
     this.repository = repository;
     this.tiposRelacionamentoEntityRepository = tiposRelacionamentoEntityRepository;

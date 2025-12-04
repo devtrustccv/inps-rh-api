@@ -36,7 +36,7 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
   private final InstituicaoEntityRepository instituicaoRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
 
-  public SeccaoService(
+  protected SeccaoService(
       Validator validator,
       ObjectMapper jsonMapper,
       SecaoEntityRepository secaoRepository,
