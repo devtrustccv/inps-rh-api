@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,9 +20,13 @@ public class VinculoLaboralResponseDTO extends VinculoLaboralRequestDTO {
 
   @NotBlank(message = "The field <id> is required")
 
-  private String id ;
+  private String id;
 
-
-  private String estadoDescricao ;
+  private Integer salario;
+  private String contratoDesc;
+  private String carreiraDesc;
+  private String remuneracaoDesc;
+  private String tempoServicoDesc;
+  private String estadoDescricao;
 
 }
