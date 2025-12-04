@@ -4,9 +4,11 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.TipoAccao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,10 +21,16 @@ import java.util.UUID;
 public class FuncionarioRules {
 
   private final ValidacaoEntityRepository validacaoEntityRepository;
+  private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
 
   public boolean temValidacaoPendente(UUID funUuid, TipoAcao tipoAccao, Referencia referenciaName) {
     return validacaoEntityRepository.existsByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(funUuid, Estado.P, tipoAccao.name(),
         referenciaName.name());
+  }
+
+  public TiposRelacionamentoEntity getTipoRelacionamentoAtual(UUID funUuid) {
+    return tiposRelacionamentoEntityRepository.findAtualByFuncionarioUuid(funUuid)
+        .orElseThrow(()-> IgrpResponseStatusException.badRequest("Funcionario sem tipo de relacionamento atual"));
   }
 
   public TiposRelacionamentoEntity getTipoRelacionamentoAtual(FuncionarioEntity entity) {

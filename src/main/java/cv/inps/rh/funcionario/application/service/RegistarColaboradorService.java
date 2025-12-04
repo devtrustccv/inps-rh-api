@@ -158,7 +158,7 @@ public class RegistarColaboradorService {
     var tipoMovimentoInps = tipoMovimentoHelper.getTipoMovimentoEntityInps();
     var tipoMovimentoIUR =  tipoMovimentoHelper.getTipoMovimentoEntityIur();
 
-    /********************RENUMERACOES ********************************/
+    /******************** INI RENUMERACOES ********************************/
     if (dc.getSubsidios() != null && !dc.getSubsidios().isEmpty()) {
       var remList = dc.getSubsidios().stream()
           .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, fun, Estado.P))
@@ -171,9 +171,10 @@ public class RegistarColaboradorService {
     var renumeracaoInps = definicaoRemuneracaoMapper
         .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dc.getDataInicio(), dc.getDataFim(), fun, dc.getMoeda());
     fun.getDefinicoesRenumeracoes().addAll(new ArrayList<>(List.of(renumeracaoSalario, renumeracaoInps)));
+    /******************** FIM RENUMERACOES ********************************/
 
 
-    /********************PAGAMENTOS DESCONTOS ********************************/
+    /******************** INI PAGAMENTOS DESCONTOS ********************************/
     if (dc.getEncargosDescontos() != null && !dc.getEncargosDescontos().isEmpty()) {
       var pagList = dc.getEncargosDescontos().stream()
           .map(e -> defPagamentoMapper.toDefPagamento(e, fun, Estado.P))
@@ -187,6 +188,7 @@ public class RegistarColaboradorService {
         tipoMovimentoInps, dc.getDataInicio(), dc.getDataFim(), fun);
 
     fun.getDefinicoesPagamentos().addAll(new ArrayList<>(List.of(pagamentoDescontoIUR, pagamentoDescontoINPS)));
+    /******************** FIM PAGAMENTOS DESCONTOS ********************************/
 
 
     var param = paramSitLaboralEntityRepository.findAllByNome("ATIVO").getFirst();
@@ -208,7 +210,7 @@ public class RegistarColaboradorService {
     fun.setTiposrelacionamentos(new ArrayList<>(List.of(tr)));
 
 
-    var valid = contratuaisEntityMapper.toValidacaoInsert("INSERT", "REGISTO_COLABORADOR", Estado.P); //todo resolve id later
+    var valid = contratuaisEntityMapper.toValidacaoInsert("INSERT", "REGISTO_COLABORADOR", Estado.P);
     valid.setFunId(fun);
     valid.setTiprelId(tr);
     fun.setValidacoes(new ArrayList<>(List.of(valid)));

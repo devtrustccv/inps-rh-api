@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
@@ -44,4 +46,14 @@ public interface TiposRelacionamentoEntityRepository extends
 
   Page<TiposRelacionamentoEntity> findByFunId_UuidAndEstado(UUID funcionarioId, Estado estado, Pageable pageable);
   TiposRelacionamentoEntity findByCarreiraId_uuid(UUID carreiraId);
+
+  @Query("""
+    select t
+    from TiposRelacionamentoEntity t
+    where t.funId.uuid = :funcionarioUuid
+      and t.estActAdm = 1
+    order by t.dataInicio desc
+    """)
+  Optional<TiposRelacionamentoEntity> findAtualByFuncionarioUuid(@Param("funcionarioUuid") UUID funcionarioUuid);
+
 }
