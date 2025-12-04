@@ -15,11 +15,6 @@ import java.util.Optional;
 @EnableJpaAuditing(auditorAwareRef = "auditAware", dateTimeProviderRef = "auditDateTimeProvider")
 public class RHINPSSERVICEApplication {
 
-
-  public RHINPSSERVICEApplication() {
-
-  }
-
   @Bean
   public AuditorAware<String> auditAware() {
     return new ApplicationAuditorAware();

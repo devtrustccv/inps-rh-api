@@ -1,0 +1,49 @@
+{
+  "type": "controller",
+  "name": "Declaracao",
+  "module": "funcionario",
+  "description": "Emitir pedidos declaração",
+  "basePath": "api/v1/funcionarios",
+  "actions": [
+    {
+      "actionName": "novoPedidoDeclaracao",
+      "path": "{funcionarioId}/declaracao",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "PedidoDeclaracao",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "gaahn3ko4i"
+}
