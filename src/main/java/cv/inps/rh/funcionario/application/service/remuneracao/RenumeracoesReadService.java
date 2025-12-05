@@ -3,7 +3,7 @@ package cv.inps.rh.funcionario.application.service.remuneracao;
 import cv.inps.rh.funcionario.application.dto.WrapperListRenumeracaoDTO;
 import cv.inps.rh.funcionario.application.queries.GetListRenumeracoesQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
-import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
+import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;

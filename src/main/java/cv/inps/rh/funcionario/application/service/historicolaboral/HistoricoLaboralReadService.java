@@ -3,7 +3,7 @@ package cv.inps.rh.funcionario.application.service.historicolaboral;
 import cv.inps.rh.funcionario.application.dto.HistoricoLaboralResponseDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
 import cv.inps.rh.funcionario.application.queries.GetHistoricoLaboralQuery;
-import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
+import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;

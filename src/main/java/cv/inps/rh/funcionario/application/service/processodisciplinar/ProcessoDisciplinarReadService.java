@@ -1,7 +1,7 @@
 package cv.inps.rh.funcionario.application.service.processodisciplinar;
 
 import cv.inps.rh.funcionario.application.dto.ProcessoDisciplinarResponseDTO;
-import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
+import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ProcessoDisciplinarEntity;

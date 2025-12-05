@@ -6,7 +6,7 @@ import cv.inps.rh.funcionario.application.dto.WrapperListMobilidadeDTO;
 import cv.inps.rh.funcionario.application.queries.GetListMobilidadesQuery;
 import cv.inps.rh.funcionario.application.queries.GetMobilidadeByIdQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.MobilidadeMapper;
-import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
+import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;

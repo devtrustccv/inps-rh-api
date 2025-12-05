@@ -1,4 +1,4 @@
-package cv.inps.rh.funcionario.infrastructure.utils;
+package cv.inps.rh.shared.util;
 
 import org.jetbrains.annotations.NotNull;
 

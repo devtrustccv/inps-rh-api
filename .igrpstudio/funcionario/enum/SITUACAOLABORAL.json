@@ -23,6 +23,20 @@
         "CESSADO",
         "cessado"
       ]
+    },
+    {
+      "name": "APOSENTADO",
+      "attributes": [
+        "APOSENTADO",
+        "aposentado"
+      ]
+    },
+    {
+      "name": "DISPONIVEL_RESERVA",
+      "attributes": [
+        "DISPONIVEL_RESERVA",
+        "diponivel ou reserva"
+      ]
     }
   ],
   "attributes": [

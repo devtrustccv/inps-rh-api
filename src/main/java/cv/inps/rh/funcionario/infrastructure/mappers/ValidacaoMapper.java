@@ -1,7 +1,7 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.ValidacaoResponseDTO;
-import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
+import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
