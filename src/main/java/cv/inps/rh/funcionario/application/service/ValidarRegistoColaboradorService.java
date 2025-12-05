@@ -108,33 +108,35 @@ public class ValidarRegistoColaboradorService {
     var regime = tiposRelacionamento.getRegimeId();
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
 
-    var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(),
+    var renumeracoesByTiposRelacionamento = remuneracaoTiprelEntityRepository.findRenumeracoesByTiprelId(tiposRelacionamento.getId());
+    var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(renumeracoesByTiposRelacionamento,
         dadosContratuais.getSubsidios());
-    var definicoesPagamentos = defPagamentoMapper.syncPagamentos(funcionario.getDefinicoesPagamentos(),
+
+    var pagamentosByTiposRelacionamento = pagTiprelEntityRepository.findPagamentosByTiprelId(tiposRelacionamento.getId());
+    var definicoesPagamentos = defPagamentoMapper.syncPagamentos(pagamentosByTiposRelacionamento,
         dadosContratuais.getEncargosDescontos());
 
     funcionario.setContactos(contactos);
     funcionario.setFamiliares(familiares);
     funcionario.setDocumentos(documentos);
     funcionario.setDadosBancarios(dadosBancarios);
-    funcionario.setDefinicoesRenumeracoes(definicoesRemuneracoes);
-    funcionario.setDefinicoesPagamentos(definicoesPagamentos);
+    funcionario.getDefinicoesRenumeracoes().addAll(definicoesRemuneracoes);
+    funcionario.getDefinicoesPagamentos().addAll(definicoesPagamentos);
     funcionario.setHabilitacoesLiterarias(habilitacoesLiterarias);
     funcionario.setFormacoesFeitas(formacoesFeitas);
     funcionario.setExperienciasProfissionais(experienciasProfissionais);
 
     //atualizar renumeracao de tipo salario
     var tmSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
-    var remTiprels = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
-    for (var rt : remTiprels) {
-      var rem = rt.getRemId();
-      if (rem != null && rem.getTmId() != null && rem.getTmId().getId().equals(tmSalario.getId())) {
+    for(var rem : definicoesRemuneracoes) {
+      if(rem.getTmId() != null && rem.getTmId().getId().equals(tmSalario.getId())) {
         rem.setValor(dadosContratuais.getSalario());
         rem.setDataInicio(dadosContratuais.getDataInicio());
         rem.setDataFim(dadosContratuais.getDataFim());
         definicaoRemuneracaoEntityRepository.save(rem);
       }
     }
+
 
     if (registroColaborador.getValidar() != null) {
       var estado = registroColaborador.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
@@ -151,17 +153,15 @@ public class ValidarRegistoColaboradorService {
       }
       mudaEstado(funcionario, estado);
 
-      var linksRem = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
-      for (var lr : linksRem) {
-        lr.setEstado(estado);
-        remuneracaoTiprelEntityRepository.save(lr);
-      }
 
-      var linksPag = pagTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
-      for (var lp : linksPag) {
-        lp.setEstado(estado);
-        pagTiprelEntityRepository.save(lp);
-      }
+      var renumTipoRelacionamento = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
+      renumTipoRelacionamento.forEach(rtr -> rtr.setEstado(estado));
+      remuneracaoTiprelEntityRepository.saveAll(renumTipoRelacionamento);
+
+      var pagamentoTipoRelacionamento = pagTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
+      pagamentoTipoRelacionamento.forEach(ptr -> ptr.setEstado(estado));
+      pagTiprelEntityRepository.saveAll(pagamentoTipoRelacionamento);
+
     }
 
     funcionarioEntityRepository.save(funcionario);

@@ -2,10 +2,12 @@ package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DefPagamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PagTiprelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
@@ -24,5 +26,12 @@ public interface PagTiprelEntityRepository extends
       }
 
   List<PagTiprelEntity> findByTiprelIdAndEstado(TiposRelacionamentoEntity tiprelId, Estado estado);
+
+  @Query("""
+        select p.pagId
+        from PagTiprelEntity p
+        where p.tiprelId.id = :tiprelId
+    """)
+  List<DefPagamentoEntity> findPagamentosByTiprelId(Long tiprelId);
 
 }

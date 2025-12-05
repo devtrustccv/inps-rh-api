@@ -75,21 +75,22 @@ public class ValidarContratoService {
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
 
 
-    var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(),
+    var renumeracoesByTiposRelacionamento = remuneracaoTiprelEntityRepository.findRenumeracoesByTiprelId(tiposRelacionamento.getId());
+    var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(renumeracoesByTiposRelacionamento,
         dadosContratuais.getSubsidios());
-    var definicoesPagamentos = defPagamentoMapper.syncPagamentos(funcionario.getDefinicoesPagamentos(),
+
+    var pagamentosByTiposRelacionamento = pagTiprelEntityRepository.findPagamentosByTiprelId(tiposRelacionamento.getId());
+    var definicoesPagamentos = defPagamentoMapper.syncPagamentos(pagamentosByTiposRelacionamento,
         dadosContratuais.getEncargosDescontos());
 
-    funcionario.setDefinicoesRenumeracoes(definicoesRemuneracoes);
-    funcionario.setDefinicoesPagamentos(definicoesPagamentos);
+    funcionario.getDefinicoesRenumeracoes().addAll(definicoesRemuneracoes);
+    funcionario.getDefinicoesPagamentos().addAll(definicoesPagamentos);
 
 
     //atualizar renumeracao de tipo salario
     var tmSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
-    var remTiprels = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
-    for (var rt : remTiprels) {
-      var rem = rt.getRemId();
-      if (rem != null && rem.getTmId() != null && rem.getTmId().getId().equals(tmSalario.getId())) {
+    for(var rem : definicoesRemuneracoes) {
+      if(rem.getTmId() != null && rem.getTmId().getId().equals(tmSalario.getId())) {
         rem.setValor(dadosContratuais.getSalario());
         rem.setDataInicio(dadosContratuais.getDataInicio());
         rem.setDataFim(dadosContratuais.getDataFim());
@@ -97,21 +98,18 @@ public class ValidarContratoService {
       }
     }
 
+
     if(dto.getValidar()!=null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       mudarEstado(funcionario,estado);
 
-      var linksRem = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
-      for (var lr : linksRem) {
-        lr.setEstado(estado);
-        remuneracaoTiprelEntityRepository.save(lr);
-      }
+      var renumTipoRelacionamento = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
+      renumTipoRelacionamento.forEach(rtr -> rtr.setEstado(estado));
+      remuneracaoTiprelEntityRepository.saveAll(renumTipoRelacionamento);
 
-      var linksPag = pagTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
-      for (var lp : linksPag) {
-        lp.setEstado(estado);
-        pagTiprelEntityRepository.save(lp);
-      }
+      var pagamentoTipoRelacionamento = pagTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
+      pagamentoTipoRelacionamento.forEach(ptr -> ptr.setEstado(estado));
+      pagTiprelEntityRepository.saveAll(pagamentoTipoRelacionamento);
 
     }
 
