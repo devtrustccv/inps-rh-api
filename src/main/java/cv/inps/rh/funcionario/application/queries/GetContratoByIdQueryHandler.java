@@ -46,6 +46,6 @@ public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoById
     if (dadosContratuais == null)
       throw IgrpResponseStatusException.notFound("Contrato com id '%s' não encontrado".formatted(contratoId));
 
-    return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO2(dadosContratuais));
+    return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO(dadosContratuais));
   }
 }

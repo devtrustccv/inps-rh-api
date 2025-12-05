@@ -11,19 +11,15 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class DadosContratuaisMapper {
 
   @PersistenceContext
   private EntityManager em;
-
-  private final FuncionarioRules funcionarioRules;
-
-  public DadosContratuaisMapper(FuncionarioRules funcionarioRules) {
-    this.funcionarioRules = funcionarioRules;
-  }
 
 
   public TiposRelacionamentoEntity toRelacionamento(DadosContratuaisReqDTO dc, Estado estado) {
@@ -104,89 +100,8 @@ public class DadosContratuaisMapper {
     return entity;
   }
 
-  public DadosContratuaisRespDTO dadosContratuaisRespDTO(FuncionarioEntity entity) {
-    if (entity == null) return null;
 
-    // Tem tipo relacionamento?
-    if (entity.getTiposrelacionamentos() == null || entity.getTiposrelacionamentos().isEmpty()) {
-      return null;
-    }
-
-    var tr = funcionarioRules.getTipoRelacionamentoAtual(entity);
-    if (tr == null) return null;
-
-    DadosContratuaisRespDTO dcr = new DadosContratuaisRespDTO();
-
-    dcr.setTipoContratoId(tr.getContrVinculoId() != null ? tr.getContrVinculoId().getTpContratoId().getId() : null);
-    dcr.setTipoContratoDesc(tr.getContrVinculoId() != null ? tr.getContrVinculoId().getTpContratoId().getNome() : null);
-
-    dcr.setCargoPosicaoId(tr.getCargoId() != null ? tr.getCargoId().getId() : null);
-    dcr.setCargoPosicaoDesc(tr.getCargoId() != null ? tr.getCargoId().getNome() : null);
-
-    dcr.setDirecaoId(tr.getInstitId() != null ? tr.getInstitId().getId() : null);
-    dcr.setDirecaoDesc(tr.getInstitId() != null ? tr.getInstitId().getNome() : null);
-
-    dcr.setSeccaoId(tr.getSeccaoId() != null ? tr.getSeccaoId().getId() : null);
-    dcr.setSeccaoDesc(tr.getSeccaoId() != null ? tr.getSeccaoId().getNome() : null);
-
-    dcr.setCarreiraId(tr.getCarrPccId() != null ? tr.getCarrPccId().getId() : null);
-    dcr.setCarreiraDesc(tr.getCarrPccId() != null ? tr.getCarrPccId().getNome() : null);
-
-    dcr.setCategoriaId(tr.getCategoriaId() != null ? tr.getCategoriaId().getId() : null);
-    dcr.setCategoriaDesc(tr.getCategoriaId() != null ? tr.getCategoriaId().getNome() : null);
-
-    dcr.setEscalaoReferenciaId(tr.getEscalaoId() != null ? tr.getEscalaoId().getId() : null);
-    dcr.setEscalaoReferenciaDesc(tr.getEscalaoId() != null ? tr.getEscalaoId().getEscalao() : null);
-
-    dcr.setLocalTrabalhoId(tr.getLocTrabId() != null ? tr.getLocTrabId().getId() : null);
-    dcr.setLocalTrabalhoDesc(tr.getLocTrabId() != null ? tr.getLocTrabId().getNome() : null);
-
-    dcr.setTipoVinculoLaboralId(tr.getContrVinculoId() != null ? tr.getContrVinculoId().getVinculoId().getId() : null);
-    dcr.setTipoVinculoLaboralDesc(tr.getContrVinculoId() != null ? tr.getContrVinculoId().getVinculoId().getNome() : null);
-
-    dcr.setRegimeTrabalho(tr.getRegime());
-    dcr.setSalario(tr.getSalario());
-    dcr.setMoeda(tr.getMoeda());
-    dcr.setDataInicio(tr.getDataInicioContrato());
-    dcr.setDataFim(tr.getDataFimContrato());
-
-    if (tr.getContrVinculoId() != null)
-      dcr.setDuracaoMeses(tr.getContrVinculoId().getDuracao());
-
-    // Subsídios
-    if (entity.getDefinicoesRenumeracoes() != null) {
-      var subs = entity.getDefinicoesRenumeracoes().stream().map(s -> {
-        SubsidioRespDTO sr = new SubsidioRespDTO();
-        sr.setId(s.getId());
-        sr.setTipoSubsidioId(s.getTmId() != null ? s.getTmId().getId() : null);
-        sr.setPercentagem(s.getPercentagem());
-        sr.setValor(s.getValor());
-        return sr;
-      }).toList();
-
-      dcr.setSubsidios(subs);
-    }
-
-    // Encargos / descontos
-    if (entity.getDefinicoesPagamentos() != null) {
-      var encs = entity.getDefinicoesPagamentos().stream().map(e -> {
-        EncargosDescontosRespDTO er = new EncargosDescontosRespDTO();
-        er.setId(e.getId());
-        er.setTipoEncargoId(e.getTmId() != null ? e.getTmId().getId() : null);
-        er.setValor(e.getValor());
-        er.setDataInicio(e.getDataInicio());
-        er.setDataFim(e.getDataFim());
-        return er;
-      }).toList();
-
-      dcr.setEncargosDescontos(encs);
-    }
-
-    return dcr;
-  }
-
-
-  public DadosContratuaisRespDTO dadosContratuaisRespDTO2(TiposRelacionamentoEntity tiposRelacionamento) {
+  public DadosContratuaisRespDTO dadosContratuaisRespDTO(TiposRelacionamentoEntity tiposRelacionamento) {
     if (tiposRelacionamento == null) return null;
 
     DadosContratuaisRespDTO dcr = new DadosContratuaisRespDTO();

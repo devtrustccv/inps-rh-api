@@ -16,7 +16,6 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PagTiprelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RemuneracaoTiprelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -152,20 +151,20 @@ public class NovoContratoService {
     situacaoLaboral.setContrVinculoId(contrato);
     contrato.setSituacoesLaborais(new ArrayList<>(List.of(situacaoLaboral)));
 
-    var tr = dadosContratuaisMapper.toRelacionamento(dadosContratuais, Estado.P);
-    tr.setFunId(funcionario);
-    tr.setContrVinculoId(contrato);
-    tr.setCarreiraId(carreira);
-    tr.setRegimeId(regime);
-    tr.setMobId(mobilidade);
-    tr.setFlgProcessa("NAO");
-    tr.setEstActAdm(1);
-    tr.setSituacLaboralId(situacaoLaboral);
-    funcionario.getTiposrelacionamentos().add(tr);
+    var tiposRelacionamento = dadosContratuaisMapper.toRelacionamento(dadosContratuais, Estado.P);
+    tiposRelacionamento.setFunId(funcionario);
+    tiposRelacionamento.setContrVinculoId(contrato);
+    tiposRelacionamento.setCarreiraId(carreira);
+    tiposRelacionamento.setRegimeId(regime);
+    tiposRelacionamento.setMobId(mobilidade);
+    tiposRelacionamento.setFlgProcessa("NAO");
+    tiposRelacionamento.setEstActAdm(1);
+    tiposRelacionamento.setSituacLaboralId(situacaoLaboral);
+    funcionario.getTiposrelacionamentos().add(tiposRelacionamento);
 
     var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.CONTRATO.name(), Estado.P);
     valid.setFunId(funcionario);
-    valid.setTiprelId(tr);
+    valid.setTiprelId(tiposRelacionamento);
     funcionario.getValidacoes().add(valid);
 
 
@@ -219,7 +218,7 @@ public class NovoContratoService {
         .map(rem -> {
           RemuneracaoTiprelEntity r = new RemuneracaoTiprelEntity();
           r.setRemId(rem);
-          r.setTiprelId(tr); // tr = TiposRelacionamentoEntity
+          r.setTiprelId(tiposRelacionamento);
           r.setUuid(UuidCreator.getTimeOrderedEpoch());
           r.setEstado(Estado.P);
           return r;
@@ -233,7 +232,7 @@ public class NovoContratoService {
         .map(pag -> {
           PagTiprelEntity p = new PagTiprelEntity();
           p.setPagId(pag);
-          p.setTiprelId(tr); // tr = TiposRelacionamentoEntity
+          p.setTiprelId(tiposRelacionamento);
           p.setUuid(UuidCreator.getTimeOrderedEpoch());
           p.setEstado(Estado.P);
           return p;
@@ -242,6 +241,7 @@ public class NovoContratoService {
     // Salva todas em batch
     pagTiprelEntityRepository.saveAll(listPagTiprel);
 
-    return dadosContratuaisMapper.dadosContratuaisRespDTO(saved);
+
+    return dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento);
   }
 }

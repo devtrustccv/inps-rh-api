@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.*;
+import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.domain.projections.FuncionarioList;
 import cv.inps.rh.funcionario.infrastructure.utils.DateFormatter;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.TipoDocumentoMapper;
@@ -46,6 +47,7 @@ public class FuncionarioMapper {
 
   private final EntityManager entityManager;
   private final DadosContratuaisMapper dadosContratuaisMapper;
+  private final FuncionarioRules funcionarioRules;
 
 
   public FuncionarioListDTO toDTO(FuncionarioList projection) {
@@ -304,7 +306,8 @@ public class FuncionarioMapper {
     }
 
     if (entity.getTiposrelacionamentos() != null && !entity.getTiposrelacionamentos().isEmpty()) {
-      var dcr = dadosContratuaisMapper.dadosContratuaisRespDTO(entity);
+      var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(entity);
+      var dcr = dadosContratuaisMapper.dadosContratuaisRespDTO(tipoRelacionamentoAtual);
       dto.setDadosContratuais(dcr);
     }
 

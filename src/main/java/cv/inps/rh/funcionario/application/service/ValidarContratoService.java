@@ -115,7 +115,7 @@ public class ValidarContratoService {
 
     var saved = funcionarioEntityRepository.save(funcionario);
 
-    return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO(saved));
+    return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento));
 
   }
 
