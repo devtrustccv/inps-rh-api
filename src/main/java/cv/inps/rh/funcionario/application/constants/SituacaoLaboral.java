@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 
 
-public enum SITUACAOLABORAL implements IgrpEnum<String> {
+public enum SituacaoLaboral implements IgrpEnum<String> {
 
   ATIVO("ATIVO", "ativo"),
     SUSPENSO("SUSPENSO", "suspenso"),
@@ -25,7 +25,7 @@ public enum SITUACAOLABORAL implements IgrpEnum<String> {
   private final String code;
   private final String description;
 
-  SITUACAOLABORAL(String code, String description) {
+  SituacaoLaboral(String code, String description) {
     this.code = code;
     this.description = description;
   }
@@ -43,15 +43,15 @@ public enum SITUACAOLABORAL implements IgrpEnum<String> {
   /**
   * Pre-built maps for fast lookup.
   */
-  private static final Map<String, SITUACAOLABORAL> CODE_MAP = Arrays.stream(values())
-          .collect(Collectors.toMap(SITUACAOLABORAL::getCode, Function.identity()));
+  private static final Map<String, SituacaoLaboral> CODE_MAP = Arrays.stream(values())
+          .collect(Collectors.toMap(SituacaoLaboral::getCode, Function.identity()));
 
   /**
   * Attempts to find the enum value associated with the given code.
   * @param code The code to look up
   * @return An Optional containing the enum value if found, empty Optional otherwise
   */
-  public static Optional<SITUACAOLABORAL> fromCode(String code) {
+  public static Optional<SituacaoLaboral> fromCode(String code) {
     return Optional.ofNullable(CODE_MAP.get(code));
   }
 
@@ -61,15 +61,15 @@ public enum SITUACAOLABORAL implements IgrpEnum<String> {
   * @return The enum value for the given code
   * @throws IllegalArgumentException if no enum value exists for the given code
   */
-  public static SITUACAOLABORAL fromCodeOrThrow(String code) {
-    return fromCode(code).orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.BAD_REQUEST, "Invalid SITUACAOLABORAL for this code: " + code));
+  public static SituacaoLaboral fromCodeOrThrow(String code) {
+    return fromCode(code).orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.BAD_REQUEST, "Invalid SituacaoLaboral for this code: " + code));
   }
 
   /**
   * Returns a map of code to description.
   */
   public static Map<String, String> codeDescriptionMap() {
-    return CODE_MAP.values().stream().collect(Collectors.toMap(SITUACAOLABORAL::getCode, SITUACAOLABORAL::getDescription));
+    return CODE_MAP.values().stream().collect(Collectors.toMap(SituacaoLaboral::getCode, SituacaoLaboral::getDescription));
   }
 
 }

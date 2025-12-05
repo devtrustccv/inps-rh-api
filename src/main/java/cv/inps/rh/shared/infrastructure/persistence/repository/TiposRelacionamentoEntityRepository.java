@@ -52,7 +52,7 @@ public interface TiposRelacionamentoEntityRepository extends
     from TiposRelacionamentoEntity t
     where t.funId.uuid = :funcionarioUuid
       and t.estActAdm = 1
-    order by t.dataInicio desc
+    order by t.id, t.dataInicio desc
     """)
   Optional<TiposRelacionamentoEntity> findAtualByFuncionarioUuid(@Param("funcionarioUuid") UUID funcionarioUuid);
 

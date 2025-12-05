@@ -118,8 +118,6 @@ public class NovoContratoService {
 
     funcionario.getContratos().add(contrato);
 
-    System.out.println("isPrimeiroContrato:: " + isPrimeiroContrato);
-    System.out.println("contrato versao: " + contrato.getVersao());
 
     var regime = regimeTrabalhoMapper.toRegime(dadosContratuais, Estado.P);
     if (regime != null) {

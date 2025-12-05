@@ -1,7 +1,7 @@
 {
   "type": "enum",
   "module": "funcionario",
-  "name": "SITUACAOLABORAL",
+  "name": "SituacaoLaboral",
   "values": [
     {
       "name": "ATIVO",
