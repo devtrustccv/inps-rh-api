@@ -150,7 +150,7 @@ public class ValidarContratoService {
 
     funcionarioEntity.getValidacoes().stream()
         .filter(v -> v.getEstado() == Estado.P)
-        .filter(v -> "CONTRATO".equals(v.getReferenciaName()) && "INSERT".equals(v.getTipoAccao()))
+        .filter(v -> Referencia.CONTRATO.name().equals(v.getReferenciaName()) && TipoAcao.INSERT.name().equals(v.getTipoAccao()))
         .findFirst()
         .ifPresent(v -> v.setEstado(estado));
 
