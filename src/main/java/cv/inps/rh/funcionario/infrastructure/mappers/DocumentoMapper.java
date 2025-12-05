@@ -1,12 +1,15 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.AnexoReqDTO;
+import cv.inps.rh.funcionario.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -57,6 +60,19 @@ public class DocumentoMapper {
       }
     }
     return existingList;
+  }
+
+  public AnexoRespDTO toRespDto(DocumentoEntity d){
+    AnexoRespDTO ar = new AnexoRespDTO();
+    ar.setId(d.getId());
+    ar.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
+    ar.setTipoDocumentoDesc(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getNome() : null);
+    ar.setDocumento(d.getReferenciaName());
+    return ar;
+  }
+
+  public List<AnexoRespDTO> toAnexoRespDTOList(java.util.List<DocumentoEntity> documentos){
+    return documentos.stream().map(this::toRespDto).toList();
   }
 
 

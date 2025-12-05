@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.ContactoReqDTO;
+import cv.inps.rh.funcionario.application.dto.ContactoRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContactoEntity;
 import org.springframework.stereotype.Component;
@@ -69,5 +70,20 @@ public class ContactoMapper {
         .orElse(null);
   }
 
+
+  public ContactoRespDTO respDTO(ContactoEntity entity) {
+    if (entity == null) return null;
+    ContactoRespDTO cr = new ContactoRespDTO();
+    cr.setId(entity.getId());
+    cr.setUuid(entity.getUuid() != null ? entity.getUuid().toString() : null);
+    cr.setTipoContacto(entity.getTipoContacto());
+    cr.setContacto(entity.getContacto());
+    cr.setEstado(entity.getEstado() != null ? entity.getEstado().getDescription() : null);
+    return cr;
+  }
+
+  public List<ContactoRespDTO> respDTOList(List<ContactoEntity> entities) {
+    return entities.stream().map(this::respDTO).toList();
+  }
 
 }

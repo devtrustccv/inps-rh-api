@@ -2,8 +2,10 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.EnderecoReqDTO;
+import cv.inps.rh.funcionario.application.dto.EnderecoRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EnderecoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.EntidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +44,37 @@ public class EnderecoMapper {
     e.setZonaId(ref(GeografiaEntity.class, dto.getZonaId()));
     e.setMorada(dto.getMorada());
     return e;
+  }
+
+  public EnderecoRespDTO respDTO(EnderecoEntity entity){
+    if (entity == null) {return null;}
+    EnderecoRespDTO er = new EnderecoRespDTO();
+
+    er.setId(entity.getId());
+    if (entity.getPaisId() != null) {
+      er.setPaisId(entity.getPaisId().getId() != null ? entity.getPaisId().getId().intValue() : null);
+      er.setPaisDesc(entity.getPaisId().getNome());
+    }
+    if (entity.getIlhaId() != null) {
+      er.setIlhaId(entity.getIlhaId().getId() != null ? entity.getIlhaId().getId().intValue() : null);
+      er.setIlhaDesc(entity.getIlhaId().getNome());
+    }
+    if (entity.getConcelhoId() != null) {
+      er.setConcelhoId(entity.getConcelhoId().getId() != null ? entity.getConcelhoId().getId().intValue() : null);
+      er.setConcelhoDesc(entity.getConcelhoId().getNome());
+    }
+    if (entity.getFreguesiaId() != null) {
+      er.setFreguesiaId(entity.getFreguesiaId().getId() != null ? entity.getFreguesiaId().getId().intValue() : null);
+      er.setFreguesiaDesc(entity.getFreguesiaId().getNome());
+    }
+    if (entity.getZonaId() != null) {
+      er.setZonaId(entity.getZonaId().getId() != null ? entity.getZonaId().getId().intValue() : null);
+      er.setZonaDesc(entity.getZonaId().getNome());
+    }
+    er.setMorada(entity.getMorada());
+    er.setEstado(entity.getEstado() != null ? entity.getEstado().getDescription() : null);
+    er.setUuid(entity.getUuid() != null ? entity.getUuid().toString() : null);
+    return er;
   }
 
 
