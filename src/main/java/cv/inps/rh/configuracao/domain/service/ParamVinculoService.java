@@ -11,15 +11,19 @@ import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -104,7 +108,22 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
-    var data = repository.findAll(pageable);
+    var nome = filters.getOrDefault("descricao", null);
+    var status = filters.containsKey(ParamVinculoEntity_.ESTADO)
+        ? Estado.valueOf(filters.get(ParamVinculoEntity_.ESTADO))
+        : Estado.A;
+
+    Specification<ParamVinculoEntity> spec = (root, _, cb) -> {
+      var predicates = new ArrayList<Predicate>();
+      predicates.add(cb.equal(root.get(ParamVinculoEntity_.estado), status));
+      if (StringUtils.hasText(nome)) {
+        var normalizedVal = "%" + nome + "%";
+        predicates.add(cb.like(root.get(ParamVinculoEntity_.nome), normalizedVal));
+      }
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
+
+    var data = repository.findAll(spec, pageable);
     if (data.isEmpty())
       return List.of();
 
