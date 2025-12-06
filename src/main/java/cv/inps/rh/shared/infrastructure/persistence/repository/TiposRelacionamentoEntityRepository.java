@@ -90,7 +90,7 @@ public interface TiposRelacionamentoEntityRepository extends
 
   @Query("""
       SELECT new cv.inps.rh.processamento.application.dto.PesquisaColaboradorResponseDTO(
-               t.funId.uuid,
+               t.uuid,
                t.funId.nome,
                t.institId.nome,
                null

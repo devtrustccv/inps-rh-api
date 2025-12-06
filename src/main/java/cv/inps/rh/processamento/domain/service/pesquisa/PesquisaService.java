@@ -24,8 +24,8 @@ public class PesquisaService {
 
     var directionId = StringUtils.hasText(query.getDireccao()) ? Long.valueOf(query.getDireccao()) : null;
     var nome = StringUtils.hasText(query.getNome()) ? query.getNome() : null;
-    // TODO 06/12/2025 18:46 validate this CC
-    //var cc = StringUtils.hasText(query.getCentroCusto()) ? query.getCentroCusto() : null;
+    // TODO 06/12/2025 18:46 validate this Centro custo
+    //var centroCusto = StringUtils.hasText(query.getCentroCusto()) ? query.getCentroCusto() : null;
 
     var page = tiposRelacionamentoEntityRepository.pesquisaColaborador(directionId, nome, pageRequest);
 
