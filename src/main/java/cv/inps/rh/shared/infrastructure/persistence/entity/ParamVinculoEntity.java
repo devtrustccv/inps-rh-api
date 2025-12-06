@@ -44,6 +44,9 @@ public class ParamVinculoEntity extends AuditEntity {
   @Column(name = "nome")
   private String nome;
 
+  @Column(name = "nome_normalizado")
+  private String nomeNormalizado;
+
 
   @Column(name = "flg_carreira")
   private Integer flgCarreira;

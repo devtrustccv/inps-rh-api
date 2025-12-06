@@ -49,6 +49,7 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     e.setUuid(UuidCreator.getTimeOrderedEpoch());
     e.setCodigo(dto.getCodigo());
     e.setNome(dto.getDescricao());
+    e.setNomeNormalizado(ConfigurationUtils.normalizeAndSetToLowerCaseText(dto.getDescricao()));
     e.setFlgContrato(ConfigurationUtils.parseFlag(dto.getContrato()));
     e.setFlgCarreira(ConfigurationUtils.parseFlag(dto.getCarreira()));
     e.setFlgSalario(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
@@ -117,8 +118,8 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
       var predicates = new ArrayList<Predicate>();
       predicates.add(cb.equal(root.get(ParamVinculoEntity_.estado), status));
       if (StringUtils.hasText(nome)) {
-        var normalizedVal = "%" + nome + "%";
-        predicates.add(cb.like(root.get(ParamVinculoEntity_.nome), normalizedVal));
+        var normalizedVal = "%" + ConfigurationUtils.normalizeAndSetToLowerCaseText(nome) + "%";
+        predicates.add(cb.like(root.get(ParamVinculoEntity_.nomeNormalizado), normalizedVal));
       }
       return cb.and(predicates.toArray(new Predicate[0]));
     };

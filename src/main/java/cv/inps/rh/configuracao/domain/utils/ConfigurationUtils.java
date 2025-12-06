@@ -33,7 +33,7 @@ public class ConfigurationUtils {
     if (Objects.isNull(input))
       return null;
 
-    var normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+    var normalized = Normalizer.normalize(input.trim(), Normalizer.Form.NFD);
     var pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
 
     return pattern.matcher(normalized).replaceAll("").toLowerCase();
