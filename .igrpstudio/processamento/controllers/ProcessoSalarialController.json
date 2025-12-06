@@ -1,0 +1,42 @@
+{
+  "type": "controller",
+  "name": "ProcessoSalarial",
+  "module": "processamento",
+  "description": "Processamento Salarial",
+  "basePath": "processamento-salarial",
+  "actions": [
+    {
+      "actionName": "removerFuncionariosProcessamentoSalarial",
+      "path": "/folha/funcionarios/excluir",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "MarcarNaoProcessadoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "id": "dcry51pbek"
+}
