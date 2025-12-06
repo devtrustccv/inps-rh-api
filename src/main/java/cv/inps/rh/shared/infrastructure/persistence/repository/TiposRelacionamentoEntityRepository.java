@@ -1,6 +1,7 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.processamento.application.dto.BaixaMedicaResponseDTO;
+import cv.inps.rh.processamento.application.dto.PesquisaColaboradorResponseDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -86,4 +87,22 @@ public interface TiposRelacionamentoEntityRepository extends
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,
       Pageable pageable);
+
+  @Query("""
+      SELECT new cv.inps.rh.processamento.application.dto.PesquisaColaboradorResponseDTO(
+               t.funId.uuid,
+               t.funId.nome,
+               t.institId.nome,
+               null
+           )
+      FROM TiposRelacionamentoEntity t
+      WHERE t.estActAdm = 1
+           AND (:directionId IS NULL OR t.institId.id = :directionId)
+           AND (:nome IS NULL OR LOWER(t.funId.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+      """)
+  Page<PesquisaColaboradorResponseDTO> pesquisaColaborador(
+      @Param("directionId") Long directionId,
+      @Param("nome") String nome,
+      Pageable pageable
+  );
 }
