@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "processamento",
-  "name": "BaixaMedicaResponse",
+  "name": "ColaboradorResponse",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [

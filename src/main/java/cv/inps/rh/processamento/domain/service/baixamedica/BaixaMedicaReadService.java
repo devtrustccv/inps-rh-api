@@ -1,6 +1,6 @@
 package cv.inps.rh.processamento.domain.service.baixamedica;
 
-import cv.inps.rh.processamento.application.dto.WrapperListaBaixaMedicaDTO;
+import cv.inps.rh.processamento.application.dto.WrapperListaColaboradorDTO;
 import cv.inps.rh.processamento.application.queries.GetListaBaixamedicaQuery;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
@@ -16,7 +16,7 @@ public class BaixaMedicaReadService {
 
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
 
-  public WrapperListaBaixaMedicaDTO getListaBaixaMedica(GetListaBaixamedicaQuery query) {
+  public WrapperListaColaboradorDTO getListaBaixaMedica(GetListaBaixamedicaQuery query) {
 
     var pageRequest = PageRequest.of(
         Integer.parseInt(query.getPage()),
@@ -28,13 +28,13 @@ public class BaixaMedicaReadService {
     var directionId = StringUtils.hasText(query.getDireccao()) ? Long.valueOf(query.getDireccao()) : null;
     var funcionario = StringUtils.hasText(query.getColaborador()) ? query.getColaborador() : null;
 
-    var page = tiposRelacionamentoEntityRepository.getBaixaMedica(directionId, funcionario, startDate, endDate, pageRequest);
+    var page = tiposRelacionamentoEntityRepository.getListaColaboradores(directionId, funcionario, startDate, endDate, pageRequest);
     page.forEach(obj -> obj.setEstadoSituacaoLaboralDesc(obj.getEstadoSituacaoLaboral().getDescription()));
 
     // TODO 06/12/2025 18:19 falta defenir condicao pa saber k o registo é uma BAIXA MEDICA ???
     // TODO 06/12/2025 18:19 ESTADO P, A ???
 
-    var response = new WrapperListaBaixaMedicaDTO();
+    var response = new WrapperListaColaboradorDTO();
     PageMapper.fillPagination(page, response);
     response.setContent(page.getContent());
     return response;

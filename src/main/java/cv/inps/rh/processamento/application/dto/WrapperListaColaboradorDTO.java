@@ -13,16 +13,17 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 
 @EqualsAndHashCode(callSuper = true)
 @IgrpDTO
-public class WrapperListaBaixaMedicaDTO extends PageDTO {
+public class WrapperListaColaboradorDTO extends PageDTO {
 
 
   @Valid
-  private List<BaixaMedicaResponseDTO> content = new ArrayList<>();
+  private List<ColaboradorResponseDTO> content = new ArrayList<>();
 
 }

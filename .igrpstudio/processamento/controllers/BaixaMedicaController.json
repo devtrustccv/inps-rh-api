@@ -14,7 +14,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "WrapperListaBaixaMedica",
+                "type": "WrapperListaColaborador",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -60,5 +60,5 @@
       ]
     }
   ],
-  "id": "f2v97ka4pz-getListaBaixamedica"
+  "id": "f2v97ka4pz-getListaBaixamedica-getListaBaixamedica"
 }

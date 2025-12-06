@@ -5,7 +5,7 @@ package cv.inps.rh.processamento.interfaces.rest;
 
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import cv.inps.rh.processamento.application.dto.WrapperListaBaixaMedicaDTO;
+import cv.inps.rh.processamento.application.dto.WrapperListaColaboradorDTO;
 import cv.inps.rh.processamento.application.queries.GetListaBaixamedicaQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,14 +43,14 @@ public class BaixaMedicaController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = WrapperListaBaixaMedicaDTO.class,
+                  implementation = WrapperListaColaboradorDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<WrapperListaBaixaMedicaDTO> getListaBaixamedica(
+   public ResponseEntity<WrapperListaColaboradorDTO> getListaBaixamedica(
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
     @RequestParam(value = "dataFim", required = false) String dataFim,
     @RequestParam(value = "colaborador", required = false) String colaborador,

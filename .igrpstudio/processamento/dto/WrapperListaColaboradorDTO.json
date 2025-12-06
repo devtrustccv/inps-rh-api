@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "processamento",
-  "name": "WrapperListaBaixaMedica",
+  "name": "WrapperListaColaborador",
   "template": "classic",
   "enableCustonValidation": false,
   "extends": {
@@ -12,7 +12,7 @@
     {
       "name": "content",
       "objectType": "dto",
-      "type": "BaixaMedicaResponse",
+      "type": "ColaboradorResponse",
       "required": false,
       "before": false,
       "after": false,

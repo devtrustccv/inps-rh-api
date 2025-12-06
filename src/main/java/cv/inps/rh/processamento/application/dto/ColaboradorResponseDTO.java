@@ -18,40 +18,39 @@ import java.util.UUID;
 
 
 @IgrpDTO
-public class BaixaMedicaResponseDTO  {
+public class ColaboradorResponseDTO {
 
 
-
-  private String estadoSituacaoLaboralDesc ;
-
-
-  private Estado estadoSituacaoLaboral ;
+  private String estadoSituacaoLaboralDesc;
 
 
-  private String direccao ;
+  private Estado estadoSituacaoLaboral;
 
 
-  private String seccao ;
+  private String direccao;
 
 
-  private String vinculo ;
+  private String seccao;
 
 
-  private String categoria ;
+  private String vinculo;
 
 
-  private String motivo ;
+  private String categoria;
 
 
-  private LocalDate dataInicio ;
+  private String motivo;
 
 
-  private LocalDate dataFim ;
+  private LocalDate dataInicio;
 
 
-  private UUID idFuncionario ;
+  private LocalDate dataFim;
 
 
-  private String nomeFuncionario ;
+  private UUID idFuncionario;
+
+
+  private String nomeFuncionario;
 
 }

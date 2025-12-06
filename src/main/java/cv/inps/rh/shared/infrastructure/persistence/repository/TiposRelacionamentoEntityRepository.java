@@ -1,6 +1,6 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
-import cv.inps.rh.processamento.application.dto.BaixaMedicaResponseDTO;
+import cv.inps.rh.processamento.application.dto.ColaboradorResponseDTO;
 import cv.inps.rh.processamento.application.dto.PesquisaColaboradorResponseDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -61,7 +61,7 @@ public interface TiposRelacionamentoEntityRepository extends
   Optional<TiposRelacionamentoEntity> findAtualByFuncionarioUuid(@Param("funcionarioUuid") UUID funcionarioUuid);
 
   @Query("""
-      SELECT new cv.inps.rh.processamento.application.dto.BaixaMedicaResponseDTO(
+      SELECT new cv.inps.rh.processamento.application.dto.ColaboradorResponseDTO(
                null,
                t.situacLaboralId.estado,
                t.institId.nome,
@@ -81,7 +81,7 @@ public interface TiposRelacionamentoEntityRepository extends
        AND (:startDate IS NULL OR t.situacLaboralId.dataInicio = :startDate)
        AND (:endDate IS NULL OR t.situacLaboralId.dataFim = :endDate)
       """)
-  Page<BaixaMedicaResponseDTO> getBaixaMedica(
+  Page<ColaboradorResponseDTO> getListaColaboradores(
       @Param("directionId") Long directionId,
       @Param("funcionario") String funcionario,
       @Param("startDate") LocalDate startDate,
