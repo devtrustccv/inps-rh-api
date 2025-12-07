@@ -1,4 +1,4 @@
-package cv.inps.rh.processamento.domain.service;
+package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class ProcessamentoSalarialService {
+public class ProcessamentoSalarialWriteService {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;

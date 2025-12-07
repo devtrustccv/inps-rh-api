@@ -9,7 +9,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
-public class DateFormatter {
+public final class DateFormatter {
 
   private static final List<DateTimeFormatter> DATE_TIME_FORMATTERS = List.of(
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),

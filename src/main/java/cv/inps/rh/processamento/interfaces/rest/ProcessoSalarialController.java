@@ -4,9 +4,12 @@
 package cv.inps.rh.processamento.interfaces.rest;
 
 import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.processamento.application.commands.RemoverFuncionariosProcessamentoSalarialCommand;
 import cv.inps.rh.processamento.application.dto.MarcarNaoProcessadoRequestDTO;
+import cv.inps.rh.processamento.application.dto.WrapperProcessamentoSalarialDTO;
+import cv.inps.rh.processamento.application.queries.GetProcessamentoSalarialQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,10 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
@@ -26,10 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProcessoSalarialController {
 
 
+  private final QueryBus queryBus;
   private final CommandBus commandBus;
 
-  public ProcessoSalarialController(CommandBus commandBus) {
-
+  public ProcessoSalarialController(QueryBus queryBus, CommandBus commandBus) {
+    this.queryBus = queryBus;
           this.commandBus = commandBus;
   }
    @PostMapping(
@@ -59,6 +60,40 @@ public class ProcessoSalarialController {
       final var command = new RemoverFuncionariosProcessamentoSalarialCommand(removerFuncionariosProcessamentoSalarialRequest);
 
       return commandBus.send(command);
+
+  }
+
+  @GetMapping(
+  )
+  @Operation(
+      summary = "Get processamento salarial",
+      description = "Get processamento salarial",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = WrapperProcessamentoSalarialDTO.class,
+                      type = "object")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<WrapperProcessamentoSalarialDTO> getProcessamentoSalarial(
+      @RequestParam(value = "dataInicio", required = false) String dataInicio,
+      @RequestParam(value = "dataFim", required = false) String dataFim,
+      @RequestParam(value = "direcaoId", required = false) String direcaoId,
+      @RequestParam(value = "tipo", required = false) String tipo,
+      @RequestParam(value = "estado", required = false) String estado,
+      @RequestParam(value = "page", required = false, defaultValue = "0") String page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") String size) {
+
+    final var query = new GetProcessamentoSalarialQuery(dataInicio, dataFim, direcaoId, tipo, estado, page, size);
+
+    return queryBus.handle(query);
 
   }
 
