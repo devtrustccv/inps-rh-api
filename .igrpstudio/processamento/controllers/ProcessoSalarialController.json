@@ -97,14 +97,14 @@
       ]
     },
     {
-      "actionName": "validarProcessamentoSalarial",
-      "path": "validar-processamento",
+      "actionName": "executarAcaoNoProcessamento",
+      "path": "processamento-action",
       "method": "POST",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "type": "ValidarProcessamentoRequest",
+              "type": "ProcessamentoActionRequest",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
@@ -129,5 +129,5 @@
       }
     }
   ],
-  "id": "dcry51pbek"
+  "id": "dcry51pbek-validarProcessamentoSalarial"
 }

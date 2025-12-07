@@ -58,4 +58,7 @@ public class ProcessamentoSalarialEntity extends AuditEntity {
 
   @Column(name = "RH_PROC_SALARIOS")
   private Long rhProcSalarios;
+
+  @Column(name = "TIPO_PROCESSAMENTO", length = 55)
+  private String tipoProcessamento;
 }

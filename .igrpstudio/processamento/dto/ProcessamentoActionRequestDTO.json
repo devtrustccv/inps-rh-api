@@ -1,10 +1,23 @@
 {
   "type": "dto",
   "module": "processamento",
-  "name": "ValidarProcessamentoRequest",
+  "name": "ProcessamentoActionRequest",
   "template": "record",
   "enableCustonValidation": false,
   "attributes": [
+    {
+      "name": "action",
+      "objectType": "enum",
+      "type": "ProcessamentoSalarialAction",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "processamento"
+    },
     {
       "name": "idsProcessamento",
       "objectType": "java",

@@ -32,21 +32,21 @@ public interface ProcessamentoSalarialEntityRepository extends
          p.ccId,
          null,
          p.obs,
-         (SELECT COUNT(f.id)
-                        FROM ProcessamentoFuncionarioEntity f
-                        WHERE f.prsals.id = p.id AND f.estado <> 'E'),
+         COUNT(f.id),
          p.cab1Id,
-         (SELECT SUM(f.totalRemuneracoes)
-                        FROM ProcessamentoFuncionarioEntity f
-                        WHERE f.prsals.id = p.id AND f. estado <> 'E')
+         SUM(f.totalRemuneracoes)
       )
       FROM ProcessamentoSalarialEntity p
+             LEFT JOIN ProcessamentoFuncionarioEntity f
+                       ON f.prsals.id = p.id
+                      AND f.estado <> 'E'
       WHERE ((:estado IS NULL AND p.estado <> 'E') OR (:estado IS NOT NULL AND p.estado = :estado))
            AND (:startDate IS NULL OR p.dataDe >= :startDate)
            AND (:endDate IS NULL OR p.dataAte <= :endDate)
            AND (:directionId IS NULL OR p.ccId = :directionId)
+           AND (:type IS NULL OR p.tipoProcessamento = :type)
       """)
-    // TODO 07/12/2025 14:30 validate null fields and Centro custo table, type filter
+    // TODO 07/12/2025 14:30 validate null fields and Centro custo table
   Page<ProcessamentoSalarialDTO> list(
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,

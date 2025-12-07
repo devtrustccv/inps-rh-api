@@ -7,10 +7,10 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ValidarProcessamentoSalarialCommandHandlerTest {
+public class ExecutarAcaoNoProcessamentoCommandHandlerTest {
 
   @InjectMocks
-  private ValidarProcessamentoSalarialCommandHandler validarProcessamentoSalarialCommandHandler;
+  private ExecutarAcaoNoProcessamentoCommandHandler executarAcaoNoProcessamentoCommandHandler;
 
   @BeforeEach
   void setUp() {
@@ -21,10 +21,10 @@ public class ValidarProcessamentoSalarialCommandHandlerTest {
 
     // Example:
     // Given
-    // ValidarProcessamentoSalarialCommand command = new ValidarProcessamentoSalarialCommand(...);
+    // ExecutarAcaoNoProcessamentoCommand command = new ExecutarAcaoNoProcessamentoCommand(...);
     //
     // When
-    // ResponseEntity<String> response = validarProcessamentoSalarialCommandHandler.handle(command);
+    // ResponseEntity<String> response = executarAcaoNoProcessamentoCommandHandler.handle(command);
     //
     // Then
     // assertNotNull(response);

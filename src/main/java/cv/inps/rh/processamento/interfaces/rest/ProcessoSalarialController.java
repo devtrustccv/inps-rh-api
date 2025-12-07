@@ -6,10 +6,10 @@ package cv.inps.rh.processamento.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.processamento.application.commands.ExecutarAcaoNoProcessamentoCommand;
 import cv.inps.rh.processamento.application.commands.RemoverFuncionariosProcessamentoSalarialCommand;
-import cv.inps.rh.processamento.application.commands.ValidarProcessamentoSalarialCommand;
 import cv.inps.rh.processamento.application.dto.MarcarNaoProcessadoRequestDTO;
-import cv.inps.rh.processamento.application.dto.ValidarProcessamentoRequestDTO;
+import cv.inps.rh.processamento.application.dto.ProcessamentoActionRequestDTO;
 import cv.inps.rh.processamento.application.dto.WrapperProcessamentoSalarialDTO;
 import cv.inps.rh.processamento.application.queries.GetProcessamentoSalarialQuery;
 import io.swagger.v3.oas.annotations.Operation;
@@ -100,11 +100,11 @@ public class ProcessoSalarialController {
   }
 
   @PostMapping(
-      value = "validar-processamento"
+      value = "processamento-action"
   )
   @Operation(
-      summary = "Validar processamento salarial",
-      description = "Validar processamento salarial",
+      summary = "Executar acao no processamento",
+      description = "Executar acao no processamento",
       responses = {
           @ApiResponse(
               responseCode = "200",
@@ -119,10 +119,10 @@ public class ProcessoSalarialController {
       }
   )
 
-  public ResponseEntity<String> validarProcessamentoSalarial(@Valid @RequestBody ValidarProcessamentoRequestDTO validarProcessamentoSalarialRequest
+  public ResponseEntity<String> executarAcaoNoProcessamento(@Valid @RequestBody ProcessamentoActionRequestDTO executarAcaoNoProcessamentoRequest
   ) {
 
-    final var command = new ValidarProcessamentoSalarialCommand(validarProcessamentoSalarialRequest);
+    final var command = new ExecutarAcaoNoProcessamentoCommand(executarAcaoNoProcessamentoRequest);
 
     return commandBus.send(command);
 
