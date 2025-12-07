@@ -7,6 +7,7 @@ import cv.inps.rh.funcionario.application.constants.custom.MotivoSituacaoLaboral
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -25,13 +26,6 @@ public class MudarSituacaoLaboralColaboradorService {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
-  private final TiposRelacionamentoEntityRepository tipoRelacionamentoEntityRepository;
-  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
-  private final DefPagamentoEntityRepository defPagamentoEntityRepository;
-  private final CarreiraEntityRepository carreiraEntityRepository;
-  private final MobilidadeEntityRepository mobilidadeEntityRepository;
-  private final ValidacaoEntityRepository validacaoEntityRepository;
-  private final ContratoEntityRepository contratoEntityRepository;
   private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final DadosContratuaisMapper dadosContratuaisMapper;
@@ -43,12 +37,64 @@ public class MudarSituacaoLaboralColaboradorService {
 
     var dto = command.getAtivarinativarcolaborador();
 
-    var paramSituacaoLaboral = paramSitLaboralEntityRepository.getReferenceById(dto.getSituacaoLaboralId());
-    var paramSituacaoLaboralDetalhe = paramSituacaoDetalheEntityRepository.getReferenceById(dto.getMotivoId());
-
     var funcionarioPublicId = IdentificadorUnico.from(command.getId()).valor();
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
+
+    var paramSituacaoLaboral = paramSitLaboralEntityRepository.getReferenceById(dto.getSituacaoLaboralId());
+    var paramSituacaoLaboralDetalhe = paramSituacaoDetalheEntityRepository.getReferenceById(dto.getMotivoId());
+
+    if (dto.getValidar() != null && !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE,
+        Referencia.ESTADO_COLABORADOR)) {
+      throw IgrpResponseStatusException.badRequest(
+          "funcionario nao tem validacao pendente para o tipo de acao: UPDATE e referencia: ESTADO_COLABORADOR");
+    }
+
+
+    if (dto.getValidar() != null) {
+      var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
+
+      var tiposRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+      tiposRelacionamentoAtual.setEstado(estado);
+
+      var situacaoLaboral = tiposRelacionamentoAtual.getSituacLaboralId();
+      situacaoLaboral.setEstado(estado);
+      situacaoLaboral.setMotivoSitLabId(paramSituacaoLaboralDetalhe);
+      situacaoLaboral.setSituacaoLaboralId(paramSituacaoLaboral);
+      situacaoLaboral.setObs(dto.getObservacao());
+      situacaoLaboralEntityRepository.save(situacaoLaboral);
+
+      funcionario.getValidacoes().stream()
+          .filter(v -> v.getEstado() == Estado.P)
+          .filter(v -> Referencia.ESTADO_COLABORADOR.name().equals(v.getReferenciaName())
+              && TipoAcao.UPDATE.name().equals(v.getTipoAccao()))
+          .findFirst()
+          .ifPresent(v -> v.setEstado(estado));
+
+      if(paramSituacaoLaboral.getCodigo().equals(SituacaoLaboral.CESSADO.name())){
+        tiposRelacionamentoAtual.setDataFim(LocalDate.now());
+        tiposRelacionamentoAtual.setEstActAdm(0);
+
+        var mobilidade = tiposRelacionamentoAtual.getMobId();
+        if(mobilidade != null) mobilidade.setDataFim(LocalDate.now());
+
+        var carreira = tiposRelacionamentoAtual.getCarreiraId();
+        if(carreira != null) carreira.setDataFim(LocalDate.now());
+
+        var contrato = tiposRelacionamentoAtual.getContrVinculoId().getContratoId();
+        if(contrato != null) contrato.setDataFim(LocalDate.now());
+
+        funcionario.getDefinicoesRenumeracoes()
+            .forEach(r -> r.setDataFim(LocalDate.now()));
+
+        funcionario.getDefinicoesPagamentos().forEach(p -> p.setDataFim(LocalDate.now()));
+      }
+
+      funcionarioEntityRepository.save(funcionario);
+      return;
+    }
+
+
 
     var tiposRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     tiposRelacionamentoAtual.setDataFim(LocalDate.now());
