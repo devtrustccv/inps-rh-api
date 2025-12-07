@@ -45,6 +45,7 @@ public class DomainsMapper {
     dto.setId(dominio.getId());
     dto.setLabel(dominio.getDescricao());
     dto.setValue(dominio.getValor());
+    dto.setReference(dominio.getReferencia());
     return dto;
   }
 }
