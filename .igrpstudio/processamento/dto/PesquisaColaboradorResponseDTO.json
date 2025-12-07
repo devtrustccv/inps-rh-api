@@ -1,14 +1,14 @@
 {
   "type": "dto",
-  "module": "parametrizacao",
-  "name": "Dominio",
-  "template": "classic",
+  "module": "processamento",
+  "name": "PesquisaColaboradorResponse",
+  "template": "record",
   "enableCustonValidation": false,
   "attributes": [
     {
       "name": "id",
       "objectType": "java",
-      "type": "long",
+      "type": "uuid",
       "required": false,
       "before": false,
       "after": false,
@@ -18,7 +18,7 @@
       "primaryKey": false
     },
     {
-      "name": "label",
+      "name": "nome",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -30,7 +30,7 @@
       "primaryKey": false
     },
     {
-      "name": "value",
+      "name": "direcao",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -42,7 +42,7 @@
       "primaryKey": false
     },
     {
-      "name": "reference",
+      "name": "centroCusto",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -54,5 +54,5 @@
       "primaryKey": false
     }
   ],
-  "id": "jlmtc2o6i8"
+  "id": "ks0nvpiivz"
 }

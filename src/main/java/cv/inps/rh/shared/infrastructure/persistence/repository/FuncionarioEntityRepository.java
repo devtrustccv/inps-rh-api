@@ -83,6 +83,8 @@ public interface FuncionarioEntityRepository extends
   );
 
 
+  List<FuncionarioEntity> findAllByUuidIn(List<UUID> uuid);
+
   Optional<FuncionarioEntity> findByUuid(UUID uuid);
 
   default FuncionarioEntity findByUuidOrThrow(UUID uuid) {
