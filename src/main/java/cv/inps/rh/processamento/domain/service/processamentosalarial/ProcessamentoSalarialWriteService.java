@@ -8,11 +8,14 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntity
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Transactional
@@ -20,10 +23,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProcessamentoSalarialWriteService {
 
+  // TODO 07/12/2025 15:19 validate the parameters for the procedure call actions
+
+  private static final String PACKAGE = "RH_PROCESSAMENTO_SALARIAL_DB";
+
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final ProcessamentoSalarialEntityRepository processamentoSalarialEntityRepository;
   private final FuncionarioRules funcionarioRules;
+  private final DataSource dataSource;
 
   public void removerFuncionariosProcessados(List<String> funcionariosIds) {
 
@@ -66,8 +74,7 @@ public class ProcessamentoSalarialWriteService {
     if (!illegalProcesses.isEmpty())
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'PROV'", illegalProcesses);
 
-    // TODO 07/12/2025 15:19 implement this action
-
+    processes.forEach(p -> callProcedure("EliminarProc").execute(Map.of("p_proc_id", p.getId())));
   }
 
   public void validar(List<Long> processamentoIds) {
@@ -101,7 +108,15 @@ public class ProcessamentoSalarialWriteService {
     if (!illegalProcesses.isEmpty())
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'VALIDADO'", illegalProcesses);
 
-    // TODO 07/12/2025 15:19 implement this action
+    // TODO 07/12/2025 15:19 validate this parameters
+    processes.forEach(p -> callProcedure("CabimentarProc")
+        .execute(
+            Map.of(
+                "p_qnt", p.getId(),
+                "p_proc_sal_id", p.getId(),
+                "p_ano_orcamento", p.getId()
+            ))
+    );
 
   }
 
@@ -118,8 +133,7 @@ public class ProcessamentoSalarialWriteService {
     if (!illegalProcesses.isEmpty())
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'DEV'", illegalProcesses);
 
-    // TODO 07/12/2025 15:19 implement this action
-
+    processes.forEach(p -> callProcedure("EliminarCab").execute(Map.of("p_cab_id", p.getCab1Id())));
   }
 
   public void autorizar(List<Long> processamentoIds) {
@@ -135,6 +149,19 @@ public class ProcessamentoSalarialWriteService {
     if (!illegalProcesses.isEmpty())
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'CABIMENTADO'", illegalProcesses);
 
-    // TODO 07/12/2025 15:19 implement this action
+    // TODO 07/12/2025 15:19 validate this parameters
+    processes.forEach(p -> callProcedure("AutorizarCab")
+        .execute(
+            Map.of(
+                "p_qnt", p.getId(),
+                "p_cabimento_id", p.getId()
+            ))
+    );
+  }
+
+  private SimpleJdbcCall callProcedure(String procedureName) {
+    return new SimpleJdbcCall(dataSource)
+        .withCatalogName(PACKAGE)
+        .withProcedureName(procedureName);
   }
 }
