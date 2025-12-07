@@ -166,7 +166,7 @@
     },
     {
       "actionName": "getParamSituacaoLaboralAtivo",
-      "path": "situacao-laboral/ativos",
+      "path": "situacoes-laborais/ativos",
       "method": "GET",
       "responses": {
         "200": {
@@ -247,6 +247,34 @@
           }
         }
       }
+    },
+    {
+      "actionName": "getParamSituacaoDetalheAtivo",
+      "path": "situacoes-laborais/motivos/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "situacaoLaboralId",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios"

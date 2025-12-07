@@ -28,32 +28,6 @@ public class ParametrizacaoService {
   private final ParamSituacaoDetalheEntityRepository paramSituacaoDetalheEntityRepository;
   private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
 
-  public List<ParametrizacaoDTO> getParamSituacoesLaborais() {
-    var lista = paramSitLaboralEntityRepository.findAllByEstado(Estado.A);
-
-    return lista.stream()
-        .map(e -> {
-          ParametrizacaoDTO dto = new ParametrizacaoDTO();
-          dto.setValue(e.getId());
-          dto.setLabel(e.getNome());
-          return dto;
-        })
-        .toList();
-  }
-
-
-  public List<ParametrizacaoDTO> getDetalhesBySituacaoLaboralId(Long situacaoLaboralId) {
-    var lista = paramSituacaoDetalheEntityRepository.findAllBySituacaoLaboralId_IdAndEstado(situacaoLaboralId, Estado.A);
-
-    return lista.stream()
-        .map(e -> {
-          ParametrizacaoDTO dto = new ParametrizacaoDTO();
-          dto.setValue(e.getId());
-          dto.setLabel(e.getMotivo());
-          return dto;
-        })
-        .toList();
-  }
 
   public List<ParametrizacaoDTO> getTiposMovimentos(){
     return tipoMovimentoEntityRepository.findAll().stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();

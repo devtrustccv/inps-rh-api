@@ -11,11 +11,9 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetDominiosQuery implements Query {
+public class GetParamSituacaoDetalheAtivoQuery implements Query {
 
-  @NotBlank(message = "The field <dominio> is required")
-  private String dominio;
-  @NotBlank(message = "The field <referencia> is required")
-  private String referencia;
+  @NotNull(message = "The field <situacaoLaboralId> is required")
+  private Long situacaoLaboralId;
 
 }
