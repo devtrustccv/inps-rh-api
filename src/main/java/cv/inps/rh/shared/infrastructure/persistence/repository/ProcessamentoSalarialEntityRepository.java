@@ -53,6 +53,7 @@ public interface ProcessamentoSalarialEntityRepository extends
       @Param("directionId") Long directionId,
       @Param("type") String type,
       @Param("estado") String estado,
-      Pageable pageable);
+      Pageable pageable
+  );
 }
 

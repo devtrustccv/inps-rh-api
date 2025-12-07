@@ -95,6 +95,38 @@
           "isRequired": false
         }
       ]
+    },
+    {
+      "actionName": "validarProcessamentoSalarial",
+      "path": "validar-processamento",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ValidarProcessamentoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "id": "dcry51pbek"

@@ -4,10 +4,12 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,6 +19,7 @@ public class ProcessamentoSalarialWriteService {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
+  private final ProcessamentoSalarialEntityRepository processamentoSalarialEntityRepository;
   private final FuncionarioRules funcionarioRules;
 
   public void removerFuncionariosProcessados(List<String> funcionariosIds) {
@@ -47,5 +50,21 @@ public class ProcessamentoSalarialWriteService {
     }
   }
 
+  public void validarProcessamentoSalarial(List<Long> processamentoIds) {
 
+    var processesThatCanNotBeValidated = new ArrayList<Long>();
+
+    var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
+    processes.forEach(process -> {
+      if (!process.getEstado().equals("PROV"))
+        processesThatCanNotBeValidated.add(process.getId());
+      else
+        process.setEstado("VALIDADO");
+    });
+
+    if (!processesThatCanNotBeValidated.isEmpty())
+      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'PROV'", processesThatCanNotBeValidated);
+
+    processamentoSalarialEntityRepository.saveAll(processes);
+  }
 }

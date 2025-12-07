@@ -7,7 +7,9 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.processamento.application.commands.RemoverFuncionariosProcessamentoSalarialCommand;
+import cv.inps.rh.processamento.application.commands.ValidarProcessamentoSalarialCommand;
 import cv.inps.rh.processamento.application.dto.MarcarNaoProcessadoRequestDTO;
+import cv.inps.rh.processamento.application.dto.ValidarProcessamentoRequestDTO;
 import cv.inps.rh.processamento.application.dto.WrapperProcessamentoSalarialDTO;
 import cv.inps.rh.processamento.application.queries.GetProcessamentoSalarialQuery;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,7 +55,7 @@ public class ProcessoSalarialController {
     }
   )
 
-  public ResponseEntity<String> removerFuncionariosProcessamentoSalarial(@Valid @RequestBody MarcarNaoProcessadoRequestDTO removerFuncionariosProcessamentoSalarialRequest
+   public ResponseEntity<String> removerFuncionariosProcessamentoSalarial(@Valid @RequestBody MarcarNaoProcessadoRequestDTO removerFuncionariosProcessamentoSalarialRequest
     )
   {
 
@@ -94,6 +96,35 @@ public class ProcessoSalarialController {
     final var query = new GetProcessamentoSalarialQuery(dataInicio, dataFim, direcaoId, tipo, estado, page, size);
 
     return queryBus.handle(query);
+
+  }
+
+  @PostMapping(
+      value = "validar-processamento"
+  )
+  @Operation(
+      summary = "Validar processamento salarial",
+      description = "Validar processamento salarial",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<String> validarProcessamentoSalarial(@Valid @RequestBody ValidarProcessamentoRequestDTO validarProcessamentoSalarialRequest
+  ) {
+
+    final var command = new ValidarProcessamentoSalarialCommand(validarProcessamentoSalarialRequest);
+
+    return commandBus.send(command);
 
   }
 
