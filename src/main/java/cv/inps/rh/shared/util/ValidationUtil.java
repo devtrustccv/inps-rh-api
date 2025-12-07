@@ -4,7 +4,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 
 import java.util.List;
 
-public class ValidationUtil {
+public final class ValidationUtil {
 
   private ValidationUtil() {
   }

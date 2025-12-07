@@ -1,0 +1,28 @@
+{
+  "type": "dto",
+  "module": "processamento",
+  "name": "WrapperProcessamentoSalarial",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "Page",
+    "module": "shared"
+  },
+  "attributes": [
+    {
+      "name": "content",
+      "objectType": "dto",
+      "type": "ProcessamentoSalarial",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "processamento"
+    }
+  ],
+  "id": "b9hk3k32om"
+}
