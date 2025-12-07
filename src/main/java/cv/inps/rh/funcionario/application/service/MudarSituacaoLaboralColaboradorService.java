@@ -36,14 +36,15 @@ public class MudarSituacaoLaboralColaboradorService {
   private final FuncionarioRules funcionarioRules;
   private final DadosContratuaisMapper dadosContratuaisMapper;
 
+  private final ParamSituacaoDetalheEntityRepository paramSituacaoDetalheEntityRepository;
+
   @Transactional
   public void execute(InativarAtivarColaboradorCommand command) {
 
-
     var dto = command.getAtivarinativarcolaborador();
 
-    SituacaoLaboral situacaoLaboralDomain = SituacaoLaboral.valueOf(dto.getSituacaoLaboral());
-    MotivoSituacaoLaboral motivoSituacaoLaboralDomain = MotivoSituacaoLaboral.valueOf(dto.getMotivo());
+    var paramSituacaoLaboral = paramSitLaboralEntityRepository.getReferenceById(dto.getSituacaoLaboralId());
+    var paramSituacaoLaboralDetalhe = paramSituacaoDetalheEntityRepository.getReferenceById(dto.getMotivoId());
 
     var funcionarioPublicId = IdentificadorUnico.from(command.getId()).valor();
 
@@ -53,25 +54,16 @@ public class MudarSituacaoLaboralColaboradorService {
     tiposRelacionamentoAtual.setDataFim(LocalDate.now());
     tiposRelacionamentoAtual.setEstActAdm(0);
 
-    // todo qual paramSituacaoLaboral associar a situacao Laboral
-    var paramSituacaoLaboral = paramSitLaboralEntityRepository.findAllByNome("ATIVO").getFirst();
-    if (paramSituacaoLaboral == null) {
-      throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO. " +
-          "Verifique se o parametro esta cadastrado no banco de dados e tente novamente.");
-    }
-
-    //todo field MOTIVO_SIT_LAB nao existe na tabela SituacaoLaboral
     var situacaoLaboral = new SituacaoLaboralEntity();
     situacaoLaboral.setUuid(UuidCreator.getTimeOrdered());
     situacaoLaboral.setSituacaoLaboralId(paramSituacaoLaboral);
+    situacaoLaboral.setMotivoSitLabId(paramSituacaoLaboralDetalhe);
     situacaoLaboral.setContrVinculoId(tiposRelacionamentoAtual.getContrVinculoId());
-
     situacaoLaboral.setObs(dto.getObservacao());
     situacaoLaboral.setDataInicio(LocalDate.now());
     situacaoLaboral.setEstado(Estado.P);
     situacaoLaboralEntityRepository.save(situacaoLaboral);
 
-    //todo field MOTIVO_SIT_LAB nao existe na tabela TIPOS_RELACIONAMENTO
     var tipoRelacionamentoNovo = dadosContratuaisMapper.clone(tiposRelacionamentoAtual);
     tipoRelacionamentoNovo.setDataInicio(LocalDate.now());
     tipoRelacionamentoNovo.setEstActAdm(1);
@@ -86,11 +78,11 @@ public class MudarSituacaoLaboralColaboradorService {
     valid.setTiprelId(tipoRelacionamentoNovo);
     funcionario.getValidacoes().add(valid);
 
-    funcionario.setEstado(situacaoLaboralDomain.equals(SituacaoLaboral.CESSADO) ? Estado.I :
-        situacaoLaboralDomain.equals(SituacaoLaboral.ATIVO) ? Estado.A :
-        funcionario.getEstado());
+    funcionario.setEstado(paramSituacaoLaboral.getCodigo().equals(SituacaoLaboral.CESSADO.name()) ? Estado.I :
+        paramSituacaoLaboral.getCodigo().equals(SituacaoLaboral.ATIVO.name()) ? Estado.A :
+            funcionario.getEstado());
 
-    var saved = funcionarioEntityRepository.save(funcionario);
+    funcionarioEntityRepository.save(funcionario);
 
   }
 }

@@ -19,9 +19,9 @@
       "module": "shared"
     },
     {
-      "name": "situacaoLaboral",
+      "name": "situacaoLaboralId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -31,9 +31,9 @@
       "primaryKey": false
     },
     {
-      "name": "motivo",
+      "name": "motivoId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,

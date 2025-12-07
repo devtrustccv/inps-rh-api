@@ -8,6 +8,7 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
+import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
 
 
@@ -42,8 +43,9 @@ public class ParamSituacaoDetalheEntity extends AuditEntity {
     private String motivo;
 
   
+    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private String estado;
+    private Estado estado;
 
   
     @Column(name="uuid")

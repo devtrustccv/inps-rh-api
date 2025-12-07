@@ -27,6 +27,21 @@ public class ParametrizacaoController {
     this.parametrizacaoService = parametrizacaoService;
   }
 
+  @GetMapping("/situacoes-laborais/ativos")
+  @Operation(summary = "Lista situações laborais ativas")
+  public ResponseEntity<List<ParametrizacaoDTO>> getSituacoesLaboraisAtivas() {
+    return ResponseEntity.ok(parametrizacaoService.getParamSituacoesLaborais());
+  }
+
+  @GetMapping("/situacoes-laborais/detalhes")
+  @Operation(summary = "Lista motivo situacoes laborais ativos")
+  public ResponseEntity<List<ParametrizacaoDTO>> getSituacaoLaboralDetalhes(
+      @RequestParam Long situacaoLaboralId
+  ) {
+    return ResponseEntity.ok(parametrizacaoService.getDetalhesBySituacaoLaboralId(situacaoLaboralId));
+  }
+
+
   @GetMapping("/tipo-movimento-desconto/ativos")
   @Operation(summary = "Lista tipos de movimento de desconto ativos")
   public ResponseEntity<List<ParametrizacaoDTO>> getTiposMovimentoPagamentosDescontoAtivos() {

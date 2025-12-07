@@ -1,6 +1,7 @@
 package cv.inps.rh.shared.application.service;
 
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.mappers.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,35 @@ public class ParametrizacaoService {
   private final EntidadeMapper entidadeMapper;
   private final BancoMapper bancoMapper;
 
+  private final ParamSituacaoDetalheEntityRepository paramSituacaoDetalheEntityRepository;
+  private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
+
+  public List<ParametrizacaoDTO> getParamSituacoesLaborais() {
+    var lista = paramSitLaboralEntityRepository.findAllByEstado(Estado.A);
+
+    return lista.stream()
+        .map(e -> {
+          ParametrizacaoDTO dto = new ParametrizacaoDTO();
+          dto.setValue(e.getId());
+          dto.setLabel(e.getNome());
+          return dto;
+        })
+        .toList();
+  }
+
+
+  public List<ParametrizacaoDTO> getDetalhesBySituacaoLaboralId(Long situacaoLaboralId) {
+    var lista = paramSituacaoDetalheEntityRepository.findAllBySituacaoLaboralId_IdAndEstado(situacaoLaboralId, Estado.A);
+
+    return lista.stream()
+        .map(e -> {
+          ParametrizacaoDTO dto = new ParametrizacaoDTO();
+          dto.setValue(e.getId());
+          dto.setLabel(e.getMotivo());
+          return dto;
+        })
+        .toList();
+  }
 
   public List<ParametrizacaoDTO> getTiposMovimentos(){
     return tipoMovimentoEntityRepository.findAll().stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();

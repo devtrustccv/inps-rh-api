@@ -22,10 +22,11 @@ public class AtivarInativarColaboradorDTO  {
   private EstadoValidacao validar ;
 
 
-  private String situacaoLaboral ;
+  private Long situacaoLaboralId ;
 
 
-  private String motivo ;
+
+  private Long motivoId ;
 
 
   private String observacao ;
