@@ -1,16 +1,12 @@
 {
   "type": "dto",
   "module": "configuracao",
-  "name": "SituacaoLaboralResponse",
+  "name": "SituacaoLaboralMotivoRequest",
   "template": "classic",
   "enableCustonValidation": false,
-  "extends": {
-    "name": "SituacaoLaboralRequest",
-    "module": "configuracao"
-  },
   "attributes": [
     {
-      "name": "id",
+      "name": "associacaoId",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -22,10 +18,10 @@
       "primaryKey": false
     },
     {
-      "name": "estadoDescricao",
+      "name": "vinculoId",
       "objectType": "java",
       "type": "string",
-      "required": false,
+      "required": true,
       "before": false,
       "after": false,
       "positive": false,
@@ -34,19 +30,17 @@
       "primaryKey": false
     },
     {
-      "name": "associacao",
-      "objectType": "dto",
-      "type": "SituacaoLaboralMotivoRequest",
-      "required": false,
+      "name": "motivo",
+      "objectType": "java",
+      "type": "string",
+      "required": true,
       "before": false,
       "after": false,
       "positive": false,
       "isEmail": false,
       "isUrl": false,
-      "primaryKey": false,
-      "collectionType": "list",
-      "module": "configuracao"
+      "primaryKey": false
     }
   ],
-  "id": "hl1lm9puke"
+  "id": "rxxr20eibt"
 }
