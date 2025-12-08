@@ -121,7 +121,21 @@ public interface FuncionarioEntityRepository extends
       Long tipoDocumentoId,
       String numDocumento,
       UUID funIdUuid);
+
+  @Query("""
+    select f from FuncionarioEntity f
+    left join fetch f.dadosBancarios db
+    where f.uuid = :funUuid
+      and db.estado in :estados
+    """)
+  Optional<FuncionarioEntity> findByIdAndFilterDadosBancarios(
+      @Param("funUuid") UUID funUuid,
+      @Param("estados") List<Estado> estados
+  );
+
+
 }
+
 
 
 
