@@ -70,12 +70,9 @@ public class ValidacaoRenovacaoContratoService {
       if (contrato != null) contrato.setEstado(estado);
 
     }
+     funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.UPDATE, Referencia.RENOVACAO_CONTRATO)
+        .ifPresent(v -> v.setEstado(estado));
 
-    var validacaoPendente =
-        funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.UPDATE, Referencia.RENOVACAO_CONTRATO);
-    if (validacaoPendente != null) {
-      validacaoPendente.setEstado(estado);
-    }
   }
 
 }

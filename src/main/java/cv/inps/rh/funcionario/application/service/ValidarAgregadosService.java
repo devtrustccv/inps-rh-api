@@ -8,6 +8,8 @@ import cv.inps.rh.funcionario.infrastructure.mappers.FamiliarMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
@@ -22,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ValidarAgregadosService {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
-  private final FuncionarioMapper funcionarioMapper;
   private final FuncionarioRules funcionarioRules;
   private final DadosContratuaisMapper contratuaisEntityMapper;
   private final ValidacaoEntityRepository validacaoEntityRepository;
@@ -38,7 +39,7 @@ public class ValidarAgregadosService {
     var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
-    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario, "UPDATE", "FAMILIA");
+    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario, TipoAcao.UPDATE.name(), Referencia.FAMILIA.name());
 
     // 1) Se tem pendentes mas não enviou validar → erro
     if (temPendentes && estadoValidacao == null) {
@@ -66,7 +67,6 @@ public class ValidarAgregadosService {
 
     var validacao = contratuaisEntityMapper
         .toValidacaoInsert("UPDATE", "FAMILIA", Estado.P);
-
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRel);
 
@@ -89,13 +89,13 @@ public class ValidarAgregadosService {
     if (funcionarioEntity == null) return;
 
     var familiares = funcionarioEntity.getFamiliares();
-    if (familiares != null) familiares.forEach(f -> { if (f != null) f.setEstado(novoEstado); });
+    if (familiares != null) familiares.forEach(f -> {
+      if (f != null) f.setEstado(novoEstado);
+    });
 
-    funcionarioEntity.getValidacoes().stream()
-        .filter(v -> v.getEstado() == Estado.P)
-        .filter(v -> "FAMILIA".equals(v.getReferenciaName()) && "UPDATE".equals(v.getTipoAccao()))
-        .findFirst()
-        .ifPresent(v -> v.setEstado(novoEstado));
+    var validacaoPendente =
+        funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.UPDATE, Referencia.FAMILIA);
+    validacaoPendente.ifPresent(v -> v.setEstado(novoEstado));
 
   }
 }

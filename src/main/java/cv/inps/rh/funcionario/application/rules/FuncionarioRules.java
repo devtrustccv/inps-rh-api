@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -68,12 +69,10 @@ public class FuncionarioRules {
         );
   }
 
-  public ValidacaoEntity getValidacaoPendente(UUID funUuid, TipoAcao tipoAccao, Referencia referenciaName) {
+  public Optional<ValidacaoEntity> getValidacaoPendente(UUID funUuid, TipoAcao tipoAccao, Referencia referenciaName) {
 
-    var validacao =  validacaoEntityRepository
+    return validacaoEntityRepository
         .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(funUuid, Estado.P, tipoAccao.name(), referenciaName.name());
-
-    return validacao.orElse(null);
   }
 
 }
