@@ -7,10 +7,11 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeModalidadeEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeTrabalhoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import jakarta.persistence.EntityManager;
@@ -32,7 +33,7 @@ public class RegimeWriteService {
 
 
   @Transactional
-  public RegimeTrabalhoDTO adicionarRegimeTrabalho(AdicionarRegimeTrabalhoCommand command) {
+  public RegimeTrabalhoDTO alterarRegimeTrabalho(AdicionarRegimeTrabalhoCommand command) {
 
     // Carregar dados do comando
     var dto = command.getRegimetrabalho();
@@ -42,32 +43,24 @@ public class RegimeWriteService {
     var funcionario = funcionarioEntityRepository.findByUuid(idFuncionario)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Funcionário não encontrado"));
 
-    // Desativar relacionamento atual
-    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-    tipoRelacionamentoAtual.setEstActAdm(0);
 
-    // Criar entidade RegimeTrabalho
-    var regimeTrabalho = new RegimeTrabalhoEntity();
+    if(funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGIME)){
+      throw IgrpResponseStatusException.conflict("Existe uma validação pendente regime trabalho para este funcionário");
+    }
+
+    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+
+
+    //update
+    var regimeTrabalho = tipoRelacionamentoAtual.getRegimeId();
     regimeTrabalho.setFunId(funcionario);
     regimeTrabalho.setTipoRegime(dto.getTipoRegime());
+    regimeTrabalho.setTipoSituacao(dto.getTipoRegime());
     regimeTrabalho.setDataInicio(dto.getDataInicio());
     regimeTrabalho.setDataFim(dto.getDataFim());
     regimeTrabalho.setEstado(Estado.P);
     regimeTrabalho.setUuid(IdentificadorUnico.create().valor());
 
-    // Criar novo relacionamento
-    var novoTipoRelacionamento = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
-    novoTipoRelacionamento.setEstActAdm(1);
-    novoTipoRelacionamento.setRegimeId(regimeTrabalho);
-    novoTipoRelacionamento.setDataInicio(dto.getDataInicio());
-    novoTipoRelacionamento.setTipoSituacao("MUDANCA_REGIME");
-    novoTipoRelacionamento.setReferente("REGIME");
-    novoTipoRelacionamento.setObs("REGIME - " + dto.getTipoRegime());
-    novoTipoRelacionamento.setEstado(Estado.P);
-
-    // Associar ao funcionário
-    funcionario.getTiposrelacionamentos().add(novoTipoRelacionamento);
-    funcionario.getRegimesTrabalhos().add(regimeTrabalho);
 
     // Criar modalidades
     if (dto.getRegimeModalidade() != null) {
@@ -84,9 +77,9 @@ public class RegimeWriteService {
 
 
     // Criar validação
-    var validacao = dadosContratuaisMapper.toValidacaoInsert("INSERT", "REGIME", Estado.P);
+    var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.REGIME.name(), Estado.P);
     validacao.setFunId(funcionario);
-    validacao.setTiprelId(novoTipoRelacionamento);
+    validacao.setTiprelId(tipoRelacionamentoAtual);
     funcionario.getValidacoes().add(validacao);
 
     // Salvar tudo (cascade)
@@ -110,6 +103,10 @@ public class RegimeWriteService {
 
     var funcionario = funcionarioEntityRepository.findByUuid(idFuncionario)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Funcionário não encontrado"));
+
+    if(!funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGIME)){
+      throw IgrpResponseStatusException.conflict("Nenhuma validação pendente de regime trabalho para este funcionário");
+    }
 
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     var regime = tipoRelacionamentoAtual.getRegimeId();
@@ -173,11 +170,10 @@ public class RegimeWriteService {
       tipoRelacionamentoAtual.setEstado(estado);
       regime.setEstado(estado);
 
-      funcionario.getValidacoes().stream()
-          .filter(v -> v.getEstado() == Estado.P)
-          .filter(v -> "REGIME".equals(v.getReferenciaName()) && "INSERT".equals(v.getTipoAccao()))
-          .findFirst()
+
+      funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGIME)
           .ifPresent(v -> v.setEstado(estado));
+
     }
 
     funcionarioEntityRepository.save(funcionario);

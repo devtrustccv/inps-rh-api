@@ -23,7 +23,7 @@ public class AdicionarRegimeTrabalhoCommandHandler implements CommandHandler<Adi
    @IgrpCommandHandler
    public ResponseEntity<RegimeTrabalhoDTO> handle(AdicionarRegimeTrabalhoCommand command) {
 
-      return ResponseEntity.ok(regimeWriteService.adicionarRegimeTrabalho(command));
+      return ResponseEntity.ok(regimeWriteService.alterarRegimeTrabalho(command));
    }
 
 }
