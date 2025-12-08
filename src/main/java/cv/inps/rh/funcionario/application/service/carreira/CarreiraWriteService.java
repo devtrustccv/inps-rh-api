@@ -61,7 +61,7 @@ public class CarreiraWriteService {
     var currentDate = LocalDate.now();
     var currentDateMinusOneDay = currentDate.minusDays(1);
 
-    var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario);
+    var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
 
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     relacionamentoAtual.setDataFim(currentDateMinusOneDay);

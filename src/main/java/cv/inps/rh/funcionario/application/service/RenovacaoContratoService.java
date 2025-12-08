@@ -43,7 +43,7 @@ public class RenovacaoContratoService {
     if (contratoPai == null)
       throw IgrpResponseStatusException.notFound("Funcionario com id '%s' não possui contrato pai".formatted(idFunc));
 
-    var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario);
+    var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
     if (contratoAtual == null)
       throw IgrpResponseStatusException.notFound("Funcionario com id '%s' não possui contrato ativo".formatted(idFunc));
 

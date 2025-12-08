@@ -191,7 +191,7 @@ public class HistoricoLaboralWriteService {
         ? contratoMapper.toContrato(dc, Estado.P)
         : null;
     if (novoContrato != null) {
-      var ultimo = funcionarioRules.getContratoComMaiorVersao(funcionario);
+      var ultimo = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
       novoContrato.setVersao(ultimo != null && ultimo.getVersao() != null ? ultimo.getVersao() + 1 : 1);
       novoContrato.setObs(dto.getTipoAlteracao());
       novoContrato.setEstado(Estado.P);

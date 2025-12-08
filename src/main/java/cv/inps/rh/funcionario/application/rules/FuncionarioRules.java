@@ -36,23 +36,6 @@ public class FuncionarioRules {
         .orElseThrow(()-> IgrpResponseStatusException.badRequest("Funcionario sem tipo de relacionamento atual"));
   }
 
- /* public TiposRelacionamentoEntity getTipoRelacionamentoAtual(FuncionarioEntity entity) {
-    return entity.getTiposrelacionamentos().stream()
-        .filter(t -> t.getEstActAdm() != null && t.getEstActAdm() == 1)
-        .max(Comparator.comparing(TiposRelacionamentoEntity::getDataInicio))
-        .orElse(null);
-  }*/
-
-  public ContratoEntity getContratoComMaiorVersao(FuncionarioEntity entity) {
-
-    if (entity.getContratos() == null || entity.getContratos().isEmpty())
-      return null;
-
-    return entity.getContratos().stream()
-        .filter(c -> c.getVersao() != null)
-        .max(Comparator.comparing(ContratoEntity::getVersao))
-        .orElse(null);
-  }
 
   public ContratoEntity getContratoComMaiorVersao(UUID funUuid) {
     return contratoEntityRepository.findTopByFunId_UuidOrderByVersaoDesc(funUuid);
