@@ -279,7 +279,7 @@ public class ValidarRegistoColaboradorService {
     }
 
 
-    var validacaoPendendente = funcionarioRules.getValidacaoPendente(funcionarioEntity, TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR);
+    var validacaoPendendente = funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR);
     if (validacaoPendendente != null)
       validacaoPendendente.setEstado(estado);
 

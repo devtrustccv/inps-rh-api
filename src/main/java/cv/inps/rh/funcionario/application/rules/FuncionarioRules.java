@@ -68,10 +68,10 @@ public class FuncionarioRules {
         );
   }
 
-  public ValidacaoEntity getValidacaoPendente(FuncionarioEntity fun, TipoAcao tipoAccao, Referencia referenciaName) {
+  public ValidacaoEntity getValidacaoPendente(UUID funUuid, TipoAcao tipoAccao, Referencia referenciaName) {
 
     var validacao =  validacaoEntityRepository
-        .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(fun.getUuid(), Estado.P, tipoAccao.name(), referenciaName.name());
+        .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(funUuid, Estado.P, tipoAccao.name(), referenciaName.name());
 
     return validacao.orElse(null);
   }

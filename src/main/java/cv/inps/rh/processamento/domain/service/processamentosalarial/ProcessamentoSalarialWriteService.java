@@ -167,7 +167,7 @@ public class ProcessamentoSalarialWriteService {
     // TODO 07/12/2025 17:53 validate regras
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(request.getFuncionarioId()));
-    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     if (tipoRelacionamentoAtual.getFlgProcessa().equals("0"))
       throw IgrpResponseStatusException.badRequest("Este colaborador encontra-se marcado para não processamento");
 
