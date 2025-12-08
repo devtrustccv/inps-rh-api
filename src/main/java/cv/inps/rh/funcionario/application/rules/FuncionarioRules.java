@@ -56,19 +56,6 @@ public class FuncionarioRules {
 
 
 
-  public boolean temValidacaoPendente(FuncionarioEntity fun, String tipoAccao, String referenciaName) {
-
-    if (fun == null || fun.getValidacoes() == null || fun.getValidacoes().isEmpty())
-      return false;
-
-    return fun.getValidacoes().stream()
-        .anyMatch(v ->
-            v.getEstado() == Estado.P &&
-                tipoAccao.equals(v.getTipoAccao()) &&
-                referenciaName.equals(v.getReferenciaName())
-        );
-  }
-
   public Optional<ValidacaoEntity> getValidacaoPendente(UUID funUuid, TipoAcao tipoAccao, Referencia referenciaName) {
 
     return validacaoEntityRepository

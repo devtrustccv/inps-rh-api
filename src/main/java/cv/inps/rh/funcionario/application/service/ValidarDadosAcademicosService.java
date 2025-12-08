@@ -40,7 +40,7 @@ public class ValidarDadosAcademicosService {
     var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
-    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario, TipoAcao.UPDATE.name(), Referencia.DADOS_ACADEMICOS.name());
+    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_ACADEMICOS);
 
     // 1) Se tem pendentes mas não enviou validar → erro
     if (temPendentes && estadoValidacao == null) {

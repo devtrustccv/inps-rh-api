@@ -8,6 +8,8 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -40,7 +42,7 @@ public class MobilidadeWriteService {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
-    if (funcionarioRules.temValidacaoPendente(funcionario, "INSERT", "MOBILIDADE")){
+    if (funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.MOBILIDADE)){
       throw IgrpResponseStatusException.badRequest("Funcionário tem uma mobilidade pendente por validar");
     }
 
@@ -63,7 +65,7 @@ public class MobilidadeWriteService {
 
 
     // Cria validação agora que os IDs existem
-    var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","MOBILIDADE", Estado.P);
+    var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.MOBILIDADE.name(), Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
     funcionario.getValidacoes().add(valid);
@@ -145,11 +147,9 @@ public class MobilidadeWriteService {
        mobilidade.setEstado(estado);
        tipoRelacionamentoAtual.setEstado(estado);
 
-      funcionario.getValidacoes().stream()
-          .filter(v -> v.getEstado() == Estado.P)
-          .filter(v -> "MOBILIDADE".equals(v.getReferenciaName()) && "INSERT".equals(v.getTipoAccao()))
-          .findFirst()
+       funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.MOBILIDADE)
           .ifPresent(v -> v.setEstado(estado));
+
 
       if(estado.equals(Estado.I)){
         var remuneracoes = funcionario.getDefinicoesRenumeracoes();

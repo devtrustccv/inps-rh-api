@@ -39,7 +39,7 @@ public class ValidarAgregadosService {
     var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
-    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario, TipoAcao.UPDATE.name(), Referencia.FAMILIA.name());
+    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.FAMILIA);
 
     // 1) Se tem pendentes mas não enviou validar → erro
     if (temPendentes && estadoValidacao == null) {

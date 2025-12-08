@@ -40,7 +40,7 @@ public class ValidarDadosPessoaisService {
     var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
-    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario, TipoAcao.UPDATE.name(), Referencia.DADOS_PESSOAIS.name());
+    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_PESSOAIS);
 
 
     // 1) Se tem pendentes mas não enviou validar → erro
