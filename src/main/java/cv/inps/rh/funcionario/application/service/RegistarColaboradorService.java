@@ -221,7 +221,7 @@ public class RegistarColaboradorService {
 
 
     // Percorre todas as remunerações e cria RemuneracaoTiprelEntity
-    List<RemuneracaoTiprelEntity> listTiprel = saved.getDefinicoesRenumeracoes().stream()
+   /* List<RemuneracaoTiprelEntity> listTiprel = saved.getDefinicoesRenumeracoes().stream()
         .map(rem -> {
           RemuneracaoTiprelEntity r = new RemuneracaoTiprelEntity();
           r.setRemId(rem);
@@ -248,7 +248,7 @@ public class RegistarColaboradorService {
         })
         .collect(Collectors.toList());
     // Salva todas em batch
-    pagTiprelEntityRepository.saveAll(listPagTiprel);
+    pagTiprelEntityRepository.saveAll(listPagTiprel);*/
 
 
     return funcionarioMapper.toResponseDTO(saved);
