@@ -10,21 +10,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GetListaBaixamedicaQueryHandler implements QueryHandler<GetListaBaixamedicaQuery, ResponseEntity<WrapperListaColaboradorDTO>> {
+public class GetListaLicensaSemVencimentoQueryHandler implements QueryHandler<GetListaLicensaSemVencimentoQuery, ResponseEntity<WrapperListaColaboradorDTO>> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(GetListaBaixamedicaQueryHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(GetListaLicensaSemVencimentoQueryHandler.class);
+
   private final ColaboradorReadService colaboradorReadService;
 
-  public GetListaBaixamedicaQueryHandler(ColaboradorReadService colaboradorReadService) {
+  public GetListaLicensaSemVencimentoQueryHandler(ColaboradorReadService colaboradorReadService) {
     this.colaboradorReadService = colaboradorReadService;
   }
 
   @IgrpQueryHandler
-  public ResponseEntity<WrapperListaColaboradorDTO> handle(GetListaBaixamedicaQuery query) {
+  public ResponseEntity<WrapperListaColaboradorDTO> handle(GetListaLicensaSemVencimentoQuery query) {
 
-    LOGGER.debug("GetListaBaixamedicaQuery: {}", query);
+    LOGGER.debug("GetListaLicensaSemVencimentoQuery: {}", query);
 
-    var data = colaboradorReadService.getListaBaixaMedica(query);
+    var data = colaboradorReadService.getListaLicensaSemvencimento(query);
 
     return ResponseEntity.ok(data);
   }
