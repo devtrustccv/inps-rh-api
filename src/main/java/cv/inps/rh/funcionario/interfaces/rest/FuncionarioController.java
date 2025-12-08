@@ -496,4 +496,35 @@ public class FuncionarioController {
       return response;
   }
 
+   @GetMapping(
+   value = "status/{id}"
+  )
+  @Operation(
+    summary = "Get situacao laboral colaborador",
+    description = "Get situacao laboral colaborador",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = AtivarInativarColaboradorDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<AtivarInativarColaboradorDTO> getSituacaoLaboralColaborador(
+    @PathVariable(value = "id") String id)
+  {
+
+      final var query = new GetSituacaoLaboralColaboradorQuery(id);
+
+      ResponseEntity<AtivarInativarColaboradorDTO> response = queryBus.handle(query);
+
+      return response;
+  }
+
 }

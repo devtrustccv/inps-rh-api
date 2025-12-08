@@ -3,7 +3,7 @@ package cv.inps.rh.funcionario.application.commands;
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.application.dto.AtivarInativarColaboradorDTO;
-import cv.inps.rh.funcionario.application.service.MudarSituacaoLaboralColaboradorService;
+import cv.inps.rh.funcionario.application.service.SituacaoLaboralColaboradorWriteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +15,9 @@ public class InativarAtivarColaboradorCommandHandler implements CommandHandler<I
 
   private static final Logger LOGGER = LoggerFactory.getLogger(InativarAtivarColaboradorCommandHandler.class);
 
-  private final MudarSituacaoLaboralColaboradorService inativarAtivarColaborarService;
+  private final SituacaoLaboralColaboradorWriteService inativarAtivarColaborarService;
 
-  public InativarAtivarColaboradorCommandHandler(MudarSituacaoLaboralColaboradorService inativarAtivarColaborarService) {
+  public InativarAtivarColaboradorCommandHandler(SituacaoLaboralColaboradorWriteService inativarAtivarColaborarService) {
     this.inativarAtivarColaborarService = inativarAtivarColaborarService;
   }
 
@@ -26,9 +26,9 @@ public class InativarAtivarColaboradorCommandHandler implements CommandHandler<I
 
     LOGGER.info("Iniciando inativacao/ativacao de funcionario: {}", command);
 
-    inativarAtivarColaborarService.execute(command);
+   return ResponseEntity.ok(inativarAtivarColaborarService.execute(command));
 
-    return ResponseEntity.ok().build();
+
   }
 
 }

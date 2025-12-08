@@ -3,7 +3,7 @@ package cv.inps.rh.funcionario.application.service;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.InativarAtivarColaboradorCommand;
 import cv.inps.rh.funcionario.application.constants.SituacaoLaboral;
-import cv.inps.rh.funcionario.application.constants.custom.MotivoSituacaoLaboral;
+import cv.inps.rh.funcionario.application.dto.AtivarInativarColaboradorDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -22,7 +22,7 @@ import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
-public class MudarSituacaoLaboralColaboradorService {
+public class SituacaoLaboralColaboradorWriteService {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
@@ -33,7 +33,7 @@ public class MudarSituacaoLaboralColaboradorService {
   private final ParamSituacaoDetalheEntityRepository paramSituacaoDetalheEntityRepository;
 
   @Transactional
-  public void execute(InativarAtivarColaboradorCommand command) {
+  public AtivarInativarColaboradorDTO execute(InativarAtivarColaboradorCommand command) {
 
     var dto = command.getAtivarinativarcolaborador();
 
@@ -91,7 +91,7 @@ public class MudarSituacaoLaboralColaboradorService {
       }
 
       funcionarioEntityRepository.save(funcionario);
-      return;
+      return dto;
     }
 
 
@@ -129,6 +129,6 @@ public class MudarSituacaoLaboralColaboradorService {
             funcionario.getEstado());
 
     funcionarioEntityRepository.save(funcionario);
-
+    return dto;
   }
 }
