@@ -278,12 +278,10 @@ public class ValidarRegistoColaboradorService {
         situacaoLaboral.setEstado(estado);
     }
 
-    funcionarioEntity.getValidacoes().stream()
-        .filter(v -> v.getEstado() == Estado.P)
-        .filter(v -> Referencia.REGISTO_COLABORADOR.name().equals(v.getReferenciaName())
-            && TipoAcao.INSERT.name().equals(v.getTipoAccao()))
-        .findFirst()
-        .ifPresent(v -> v.setEstado(estado));
+
+    var validacaoPendendente = funcionarioRules.getValidacaoPendente(funcionarioEntity, TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR);
+    if (validacaoPendendente != null)
+      validacaoPendendente.setEstado(estado);
 
   }
 

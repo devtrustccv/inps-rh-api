@@ -8,6 +8,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
@@ -65,6 +66,14 @@ public class FuncionarioRules {
                 tipoAccao.equals(v.getTipoAccao()) &&
                 referenciaName.equals(v.getReferenciaName())
         );
+  }
+
+  public ValidacaoEntity getValidacaoPendente(FuncionarioEntity fun, TipoAcao tipoAccao, Referencia referenciaName) {
+
+    var validacao =  validacaoEntityRepository
+        .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(fun.getUuid(), Estado.P, tipoAccao.name(), referenciaName.name());
+
+    return validacao.orElse(null);
   }
 
 }

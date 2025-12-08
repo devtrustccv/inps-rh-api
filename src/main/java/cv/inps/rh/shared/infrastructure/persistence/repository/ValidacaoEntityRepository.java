@@ -27,34 +27,6 @@ public interface ValidacaoEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "ValidacaoEntity not found for id: " + id));
   }
 
-  @Query(value = """
-      SELECT *
-      FROM (
-          SELECT
-              v.*,
-              ROW_NUMBER() OVER (ORDER BY v.id) AS rn
-          FROM rh_t_validacao v
-          LEFT JOIN rh_t_funcionarios f ON f.id = v.fun_id
-          WHERE (:nomeColaborador IS NULL OR LOWER(f.nome) LIKE LOWER('%' || :nomeColaborador || '%'))
-            AND (:tipoAccao IS NULL OR v.tipo_accao = :tipoAccao)
-            AND (:referenciaName IS NULL OR v.referencia_name = :referenciaName)
-            AND (:dataInicio IS NULL OR v.data_registo >= :dataInicio)
-            AND (:dataFim IS NULL OR v.data_registo <= :dataFim)
-      )
-      WHERE rn BETWEEN :startRow AND :endRow
-      ORDER BY rn
-      """,
-      nativeQuery = true)
-  List<ValidacaoEntity> findAllWithFilters(
-      @Param("nomeColaborador") String nomeColaborador,
-      @Param("tipoAccao") String tipoAccao,
-      @Param("referenciaName") String referenciaName,
-      @Param("dataInicio") LocalDateTime dataInicio,
-      @Param("dataFim") LocalDateTime dataFim,
-      @Param("startRow") int startRow,
-      @Param("endRow") int endRow
-  );
-
   ValidacaoEntity findByTiprelIdAndEstadoAndReferenciaName(TiposRelacionamentoEntity relacionamento, Estado estado, String referenciaName);
 
   Optional<ValidacaoEntity> findByUuid(UUID uuid);
@@ -64,5 +36,10 @@ public interface ValidacaoEntityRepository extends
   }
 
   boolean existsByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(UUID funIdUuid, Estado estado, String tipoAccao, String referenciaName);
-  
+
+  Optional<ValidacaoEntity> findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(UUID funIdUuid, Estado estado, String tipoAccao, String referenciaName);
+
+  Optional<ValidacaoEntity>
+  findByTiprelIdAndEstadoAndTipoAccaoAndReferenciaName(TiposRelacionamentoEntity tiposRelacionamento, Estado estado, String tipoAccao, String referenciaName);
+
 }
