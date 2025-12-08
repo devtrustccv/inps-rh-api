@@ -89,8 +89,8 @@ public class ValidarContratoService {
 
     //atualizar renumeracao de tipo salario
     var tmSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
-    for(var rem : definicoesRemuneracoes) {
-      if(rem.getTmId() != null && rem.getTmId().getId().equals(tmSalario.getId())) {
+    for (var rem : definicoesRemuneracoes) {
+      if (rem.getTmId() != null && rem.getTmId().getId().equals(tmSalario.getId())) {
         rem.setValor(dadosContratuais.getSalario());
         rem.setDataInicio(dadosContratuais.getDataInicio());
         rem.setDataFim(dadosContratuais.getDataFim());
@@ -99,9 +99,9 @@ public class ValidarContratoService {
     }
 
 
-    if(dto.getValidar()!=null) {
+    if (dto.getValidar() != null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-      mudarEstado(funcionario,estado);
+      mudarEstado(funcionario, estado);
 
       var renumTipoRelacionamento = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
       renumTipoRelacionamento.forEach(rtr -> rtr.setEstado(estado));
@@ -113,7 +113,7 @@ public class ValidarContratoService {
 
     }
 
-    var saved = funcionarioEntityRepository.save(funcionario);
+    funcionarioEntityRepository.save(funcionario);
 
     return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento));
 
@@ -153,8 +153,6 @@ public class ValidarContratoService {
         .filter(v -> Referencia.CONTRATO.name().equals(v.getReferenciaName()) && TipoAcao.INSERT.name().equals(v.getTipoAccao()))
         .findFirst()
         .ifPresent(v -> v.setEstado(estado));
-
-
 
 
   }
