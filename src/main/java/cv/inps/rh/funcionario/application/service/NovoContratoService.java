@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.NovoContratoCommand;
+import cv.inps.rh.funcionario.application.constants.SituacaoLaboral;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
@@ -138,11 +139,8 @@ public class NovoContratoService {
     }
 
 
-    var paramSituacaoLaboral = paramSitLaboralEntityRepository.findAllByNome("ATIVO").getFirst();
-    if (paramSituacaoLaboral == null) {
-      throw IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com nome ATIVO. " +
-          "Verifique se o parametro esta cadastrado no banco de dados e tente novamente.");
-    }
+    var paramSituacaoLaboral = paramSitLaboralEntityRepository.findByCodigo(SituacaoLaboral.ATIVO.name()).
+        orElseThrow(() -> IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com codigo ATIVO."));
 
     var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P,
         "NOVO_CONTRATO", "NOVO_CONTRATO");
@@ -212,7 +210,7 @@ public class NovoContratoService {
         });
 
     // Percorre todas as remunerações e cria RemuneracaoTiprelEntity
-    List<RemuneracaoTiprelEntity> listTiprel = saved.getDefinicoesRenumeracoes().stream()
+    /*List<RemuneracaoTiprelEntity> listTiprel = saved.getDefinicoesRenumeracoes().stream()
         .map(rem -> {
           RemuneracaoTiprelEntity r = new RemuneracaoTiprelEntity();
           r.setRemId(rem);
@@ -237,7 +235,7 @@ public class NovoContratoService {
         })
         .collect(Collectors.toList());
     // Salva todas em batch
-    pagTiprelEntityRepository.saveAll(listPagTiprel);
+    pagTiprelEntityRepository.saveAll(listPagTiprel);*/
 
 
     return dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento);

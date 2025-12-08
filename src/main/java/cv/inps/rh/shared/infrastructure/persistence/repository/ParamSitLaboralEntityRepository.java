@@ -32,4 +32,6 @@ public interface ParamSitLaboralEntityRepository extends JpaRepository<ParamSitL
 
   List<ParamSitLaboralEntity> findAllByNome(final String nome);
 
+  Optional<ParamSitLaboralEntity> findByCodigo(final String codigo);
+
 }
