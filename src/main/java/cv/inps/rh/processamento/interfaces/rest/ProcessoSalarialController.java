@@ -7,9 +7,11 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.processamento.application.commands.ExecutarAcaoNoProcessamentoCommand;
+import cv.inps.rh.processamento.application.commands.ProcessarSalarioCommand;
 import cv.inps.rh.processamento.application.commands.RemoverFuncionariosProcessamentoSalarialCommand;
 import cv.inps.rh.processamento.application.dto.MarcarNaoProcessadoRequestDTO;
 import cv.inps.rh.processamento.application.dto.ProcessamentoActionRequestDTO;
+import cv.inps.rh.processamento.application.dto.ProcessamentoSalarioRequestDTO;
 import cv.inps.rh.processamento.application.dto.WrapperProcessamentoSalarialDTO;
 import cv.inps.rh.processamento.application.queries.GetProcessamentoSalarialQuery;
 import io.swagger.v3.oas.annotations.Operation;
@@ -100,7 +102,7 @@ public class ProcessoSalarialController {
   }
 
   @PostMapping(
-      value = "processamento-action"
+      value = "processamento-acao"
   )
   @Operation(
       summary = "Executar acao no processamento",
@@ -123,6 +125,35 @@ public class ProcessoSalarialController {
   ) {
 
     final var command = new ExecutarAcaoNoProcessamentoCommand(executarAcaoNoProcessamentoRequest);
+
+    return commandBus.send(command);
+
+  }
+
+  @PostMapping(
+      value = "processar"
+  )
+  @Operation(
+      summary = "Processar salario",
+      description = "Processar salario",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<String> processarSalario(@Valid @RequestBody ProcessamentoSalarioRequestDTO processarSalarioRequest
+  ) {
+
+    final var command = new ProcessarSalarioCommand(processarSalarioRequest);
 
     return commandBus.send(command);
 

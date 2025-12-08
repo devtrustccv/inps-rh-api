@@ -2,6 +2,7 @@ package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.processamento.application.constants.ProcessamentoSalarialAction;
+import cv.inps.rh.processamento.application.dto.ProcessamentoSalarioRequestDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
@@ -157,6 +158,31 @@ public class ProcessamentoSalarialWriteService {
                 "p_cabimento_id", p.getId()
             ))
     );
+  }
+
+  public void processarSalario(ProcessamentoSalarioRequestDTO request) {
+
+    // TODO 07/12/2025 18:06 handle case processar todos fucnionarios
+
+    // TODO 07/12/2025 17:53 validate regras
+
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(request.getFuncionarioId()));
+    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+    if (tipoRelacionamentoAtual.getFlgProcessa().equals("0"))
+      throw IgrpResponseStatusException.badRequest("Este colaborador encontra-se marcado para não processamento");
+
+    callProcedure("processar")
+        .execute(
+            Map.of(
+                "p_dt_inicio", request.getDataInicio(),
+                "p_dt_fim", request.getDataFim(),
+                "p_cc_id", request.getDireccaoId(),
+                "p_tiprel_id", tipoRelacionamentoAtual.getId(),
+                "p_tipo", request.getTipo(),
+                "P_user_name", "demo@demo.com", // TODO 07/12/2025 17:48 validate this
+                "p_user_id", "demo@demo.com"  // TODO 07/12/2025 17:48 validate this
+            )
+        );
   }
 
   private SimpleJdbcCall callProcedure(String procedureName) {
