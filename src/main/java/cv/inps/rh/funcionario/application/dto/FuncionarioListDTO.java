@@ -45,7 +45,12 @@ public class FuncionarioListDTO  {
 
   private String estadoRegisto ;
 
+  private String estadoRegistoDesc ;
+
 
   private String estadoColaborador ;
+
+
+  private String estadoColaboradorDesc ;
 
 }

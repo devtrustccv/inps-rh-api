@@ -4,9 +4,11 @@ import cv.inps.rh.funcionario.application.dto.FuncionarioListDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaFuncionarioDTO;
 import cv.inps.rh.funcionario.application.queries.GetListFuncionariosQuery;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -98,7 +101,14 @@ public class FuncionarioReadService {
       }
 
       dto.setEstadoRegisto(entity.getEstado() != null ? entity.getEstado().getCode() : null);
+      dto.setEstadoRegistoDesc(entity.getEstado() != null ? entity.getEstado().getDescription() : null);
+
       dto.setEstadoColaborador(entity.getEstadoValidacao());
+      dto.setEstadoColaboradorDesc(ValidationUtil.getEnum(Estado.class, entity.getEstadoValidacao()).map(Estado::getDescription)
+          .orElse(null));
+
+
+
       return dto;
     }).toList();
 
