@@ -41,31 +41,11 @@ public class FuncionarioRules {
     return contratoEntityRepository.findTopByFunId_UuidOrderByVersaoDesc(funUuid);
   }
 
-  public ContratoEntity getPrimeiroContrato(FuncionarioEntity entity) {
-
-    if (entity.getContratos() == null || entity.getContratos().isEmpty())
-      return null;
-
-    return entity.getContratos().stream()
-        .filter(c -> c.getVersao() != null && c.getVersao() == 1)
-        .findFirst()
-        .orElse(null);
-  }
 
   public ContratoEntity getPrimeiroContrato(UUID funUuid) {
     return contratoEntityRepository.findPrimeiroContratoFuncionario(funUuid);
   }
 
-  public TiposRelacionamentoEntity getTipoRelacionamentoByContratoId(FuncionarioEntity fun, UUID contratoId) {
-
-    if (fun == null || contratoId == null) return null;
-
-    return fun.getTiposrelacionamentos().stream()
-        .filter(tr -> tr.getContrVinculoId() != null
-                      && tr.getContrVinculoId().getUuid().equals(contratoId))
-        .findFirst()
-        .orElse(null);
-  }
 
   public TiposRelacionamentoEntity getTipoRelacionamentoByContratoId(UUID funId, UUID contratoId) {
     if (funId == null || contratoId == null) return null;

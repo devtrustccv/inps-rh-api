@@ -39,7 +39,7 @@ public class RenovacaoContratoService {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
-    var contratoPai = funcionarioRules.getPrimeiroContrato(funcionario);
+    var contratoPai = funcionarioRules.getPrimeiroContrato(funcionario.getUuid());
     if (contratoPai == null)
       throw IgrpResponseStatusException.notFound("Funcionario com id '%s' não possui contrato pai".formatted(idFunc));
 
