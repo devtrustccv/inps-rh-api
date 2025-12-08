@@ -148,12 +148,8 @@ public class ValidarContratoService {
 
     }
 
-    funcionarioEntity.getValidacoes().stream()
-        .filter(v -> v.getEstado() == Estado.P)
-        .filter(v -> Referencia.CONTRATO.name().equals(v.getReferenciaName()) && TipoAcao.INSERT.name().equals(v.getTipoAccao()))
-        .findFirst()
+    funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.INSERT, Referencia.CONTRATO)
         .ifPresent(v -> v.setEstado(estado));
-
 
   }
 }

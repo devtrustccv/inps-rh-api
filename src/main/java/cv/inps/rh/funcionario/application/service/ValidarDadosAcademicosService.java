@@ -6,6 +6,8 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
@@ -21,7 +23,6 @@ public class ValidarDadosAcademicosService {
 
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
-  private final FuncionarioMapper funcionarioMapper;
   private final FuncionarioRules funcionarioRules;
   private final DadosContratuaisMapper contratuaisEntityMapper;
   private final ValidacaoEntityRepository validacaoEntityRepository;
@@ -39,7 +40,7 @@ public class ValidarDadosAcademicosService {
     var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
-    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario, "UPDATE", "DADOS_ACADEMICOS");
+    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario, TipoAcao.UPDATE.name(), Referencia.DADOS_ACADEMICOS.name());
 
     // 1) Se tem pendentes mas não enviou validar → erro
     if (temPendentes && estadoValidacao == null) {
@@ -72,7 +73,7 @@ public class ValidarDadosAcademicosService {
     var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var validacao = contratuaisEntityMapper
-        .toValidacaoInsert("UPDATE", "DADOS_ACADEMICOS", Estado.P);
+        .toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.DADOS_ACADEMICOS.name(), Estado.P);
 
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRel);
@@ -94,20 +95,22 @@ public class ValidarDadosAcademicosService {
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado novoEstado) {
 
     var habilitacoes = funcionarioEntity.getHabilitacoesLiterarias();
-    if (habilitacoes != null) habilitacoes.forEach(h -> { if (h != null) h.setEstado(novoEstado); });
+    if (habilitacoes != null) habilitacoes.forEach(h -> {
+      if (h != null) h.setEstado(novoEstado);
+    });
 
     var formacoes = funcionarioEntity.getFormacoesFeitas();
-    if (formacoes != null) formacoes.forEach(f -> { if (f != null) f.setEstado(novoEstado); });
+    if (formacoes != null) formacoes.forEach(f -> {
+      if (f != null) f.setEstado(novoEstado);
+    });
 
     var experiencias = funcionarioEntity.getExperienciasProfissionais();
-    if (experiencias != null) experiencias.forEach(e -> { if (e != null) e.setEstado(novoEstado); });
+    if (experiencias != null) experiencias.forEach(e -> {
+      if (e != null) e.setEstado(novoEstado);
+    });
 
-    funcionarioEntity.getValidacoes().stream()
-        .filter(v -> v.getEstado() == Estado.P)
-        .filter(v -> "DADOS_ACADEMICOS".equals(v.getReferenciaName()) && "UPDATE".equals(v.getTipoAccao()))
-        .findFirst()
+    funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_ACADEMICOS)
         .ifPresent(v -> v.setEstado(novoEstado));
-
 
   }
 }

@@ -1,10 +1,16 @@
 package cv.inps.rh.shared.application.constants.custom;
 
+import io.prometheus.client.SimpleCollector;
+
 public enum Referencia {
   RENDIMENTO,
   DESCONTO,
   REGISTO_COLABORADOR,
   CONTRATO,
   RENOVACAO_CONTRATO,
-  FAMILIA, ESTADO_COLABORADOR
+  FAMILIA,
+  ESTADO_COLABORADOR,
+  DADOS_ACADEMICOS,
+  DADOS_BANCARIOS,
+  DADOS_PESSOAIS ;
 }

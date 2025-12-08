@@ -8,6 +8,8 @@ import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
@@ -38,7 +40,7 @@ public class ValidarDadosBancariosService {
     var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
-    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario, "UPDATE", "DADOS_BANCARIOS");
+    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario, TipoAcao.UPDATE.name(), Referencia.DADOS_BANCARIOS.name());
 
     // 1) Se tem pendentes mas não enviou validar → erro
     if (temPendentes && estadoValidacao == null) {
@@ -64,7 +66,7 @@ public class ValidarDadosBancariosService {
     var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var validacao = contratuaisEntityMapper
-        .toValidacaoInsert("UPDATE", "DADOS_BANCARIOS", Estado.P);
+        .toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.DADOS_BANCARIOS.name(), Estado.P);
 
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRel);
@@ -89,10 +91,7 @@ public class ValidarDadosBancariosService {
     var bancarios = funcionarioEntity.getDadosBancarios();
     if (bancarios != null) bancarios.forEach(b -> { if (b != null) b.setEstado(novoEstado); });
 
-    funcionarioEntity.getValidacoes().stream()
-        .filter(v -> v.getEstado() == Estado.P)
-        .filter(v -> "DADOS_BANCARIOS".equals(v.getReferenciaName()) && "UPDATE".equals(v.getTipoAccao()))
-        .findFirst()
+    funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_BANCARIOS)
         .ifPresent(v -> v.setEstado(novoEstado));
   }
 }
