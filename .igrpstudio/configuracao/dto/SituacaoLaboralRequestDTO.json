@@ -124,6 +124,20 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "associacao",
+      "objectType": "dto",
+      "type": "SituacaoLaboralMotivoRequest",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "configuracao"
     }
   ],
   "id": "o182eru0pkasdas_copy_copy"
