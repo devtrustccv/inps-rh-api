@@ -75,12 +75,10 @@ public class ValidarContratoService {
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
 
 
-    var renumeracoesByTiposRelacionamento = remuneracaoTiprelEntityRepository.findRenumeracoesByTiprelId(tiposRelacionamento.getId());
-    var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(renumeracoesByTiposRelacionamento,
+    var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(),
         dadosContratuais.getSubsidios());
 
-    var pagamentosByTiposRelacionamento = pagTiprelEntityRepository.findPagamentosByTiprelId(tiposRelacionamento.getId());
-    var definicoesPagamentos = defPagamentoMapper.syncPagamentos(pagamentosByTiposRelacionamento,
+    var definicoesPagamentos = defPagamentoMapper.syncPagamentos(funcionario.getDefinicoesPagamentos(),
         dadosContratuais.getEncargosDescontos());
 
     funcionario.getDefinicoesRenumeracoes().addAll(definicoesRemuneracoes);
