@@ -19,9 +19,6 @@ public class DadosBancariosMapper {
 
   private final EntityManager entityManager;
 
-   private final BancoMapper bancoMapper;
-
-
   public DadosBancariosEntity toEntity(DadosBancariosReqDTO dto, Estado estado) {
     if (dto == null) return null;
     DadosBancariosEntity entity = new DadosBancariosEntity();
@@ -35,8 +32,7 @@ public class DadosBancariosMapper {
     return entity;
   }
 
-  public java.util.List<DadosBancariosEntity> syncBancarios(java.util.List<DadosBancariosEntity> existingList,
-                            java.util.List<DadosBancariosReqDTO> newList) {
+  public List<DadosBancariosEntity> syncBancarios(List<DadosBancariosEntity> existingList, List<DadosBancariosReqDTO> newList) {
     if (newList == null) return existingList;
 
     for (DadosBancariosReqDTO dto : newList) {
