@@ -3,23 +3,38 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import cv.inps.rh.funcionario.application.commands.*;
-import cv.inps.rh.funcionario.application.dto.*;
-import cv.inps.rh.funcionario.application.queries.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
-import java.util.List;
+import cv.igrp.framework.core.domain.QueryBus;
+import cv.inps.rh.funcionario.application.queries.*;
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.inps.rh.funcionario.application.commands.*;
+import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
+import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperListaValidacoesDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperListaFuncionarioDTO;
 import java.util.Map;
+import cv.inps.rh.funcionario.application.dto.AtivarInativarColaboradorDTO;
+import cv.inps.rh.funcionario.application.dto.ValidacaoDadosPessoaisDTO;
+import cv.inps.rh.funcionario.application.dto.ValidarDadosAcademicosDTO;
+import cv.inps.rh.funcionario.application.dto.ValidarAgregadosDependentesDTO;
+import cv.inps.rh.funcionario.application.dto.ValidarDadosBancariosDTO;
+import cv.inps.rh.funcionario.application.dto.DadosPessoaisRespDTO;
+import cv.inps.rh.funcionario.application.dto.DadosAcademicosProfResponseDTO;
+import java.util.List;
+import cv.inps.rh.funcionario.application.dto.AgregadoDependenteRespDTO;
+import cv.inps.rh.funcionario.application.dto.DadosBancariosRespDTO;
 
 @IgrpController
 @RestController
@@ -27,7 +42,7 @@ import java.util.Map;
 @Tag(name = "Funcionario", description = "gestao de funcionarios")
 public class FuncionarioController {
 
-
+  
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -53,7 +68,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<FuncionarioResponseDTO> createFuncionario(@Valid @RequestBody FuncionarioRequestDTO createFuncionarioRequest
     )
   {
@@ -84,7 +99,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<FuncionarioResponseDTO> getFuncionarioById(
     @PathVariable(value = "id") String id)
   {
@@ -115,7 +130,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<WrapperListaValidacoesDTO> getValicoesUtilizadores(
     @RequestParam(value = "nomeColaborador", required = false) String nomeColaborador,
     @RequestParam(value = "tipoOperacao", required = false) String tipoOperacao,
@@ -151,7 +166,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<WrapperListaFuncionarioDTO> getListFuncionarios(
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
@@ -190,7 +205,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<Map<String, ?>> validarRegistoColaborador(@Valid @RequestBody FuncionarioRequestDTO validarRegistoColaboradorRequest
     , @PathVariable(value = "id") String id)
   {
@@ -198,37 +213,6 @@ public class FuncionarioController {
       final var command = new ValidarRegistoColaboradorCommand(validarRegistoColaboradorRequest, id);
 
        ResponseEntity<Map<String, ?>> response = commandBus.send(command);
-
-       return response;
-  }
-
-   @PatchMapping(
-   value = "validacao-colaborador/{id}"
-  )
-  @Operation(
-    summary = "Validacao colaborador",
-    description = "Validacao colaborador",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "",
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = AtivarInativarColaboradorDTO.class,
-                  type = "object")
-          )
-      )
-    }
-  )
-
-  public ResponseEntity<AtivarInativarColaboradorDTO> validacaoColaborador(@Valid @RequestBody AtivarInativarColaboradorDTO validacaoColaboradorRequest
-    , @PathVariable(value = "id") String id)
-  {
-
-      final var command = new ValidacaoColaboradorCommand(validacaoColaboradorRequest, id);
-
-       ResponseEntity<AtivarInativarColaboradorDTO> response = commandBus.send(command);
 
        return response;
   }
@@ -252,7 +236,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<AtivarInativarColaboradorDTO> inativarAtivarColaborador(@Valid @RequestBody AtivarInativarColaboradorDTO inativarAtivarColaboradorRequest
     , @PathVariable(value = "id") String id)
   {
@@ -283,7 +267,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<ValidacaoDadosPessoaisDTO> validaDadosPessoais(@Valid @RequestBody ValidacaoDadosPessoaisDTO validaDadosPessoaisRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
@@ -314,7 +298,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<ValidarDadosAcademicosDTO> validarDadosAcademicos(@Valid @RequestBody ValidarDadosAcademicosDTO validarDadosAcademicosRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
@@ -345,7 +329,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<ValidarAgregadosDependentesDTO> validarDadosFamiliares(@Valid @RequestBody ValidarAgregadosDependentesDTO validarDadosFamiliaresRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
@@ -376,7 +360,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<ValidarDadosBancariosDTO> validarDadosBancarios(@Valid @RequestBody ValidarDadosBancariosDTO validarDadosBancariosRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
@@ -407,7 +391,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<DadosPessoaisRespDTO> getDadosPessoais(
     @PathVariable(value = "idFuncionario") String idFuncionario)
   {
@@ -438,7 +422,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<DadosAcademicosProfResponseDTO> getDadosAcademicos(
     @PathVariable(value = "idFuncionario") String idFuncionario)
   {
@@ -469,7 +453,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<List<AgregadoDependenteRespDTO>> getDadosFamiliares(
     @PathVariable(value = "idFuncionario") String idFuncionario)
   {
@@ -500,7 +484,7 @@ public class FuncionarioController {
       )
     }
   )
-
+  
   public ResponseEntity<List<DadosBancariosRespDTO>> getDadosBancarios(
     @PathVariable(value = "idFuncionario") String idFuncionario)
   {
