@@ -46,7 +46,7 @@ public class MobilidadeWriteService {
 
     var novaMobilidade = createMobilidade(mobilidadeDto);
 
-    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     var novoTipoRelacionamento = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
 
     tipoRelacionamentoAtual.setEstActAdm(0);
@@ -135,7 +135,7 @@ public class MobilidadeWriteService {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
-    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var mobilidade = updateMobilidade(tipoRelacionamentoAtual.getMobId(),mobilidadeDto);
 

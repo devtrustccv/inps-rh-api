@@ -62,7 +62,7 @@ public class ValidarAgregadosService {
       return dto;
     }
 
-    var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+    var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var validacao = contratuaisEntityMapper
         .toValidacaoInsert("UPDATE", "FAMILIA", Estado.P);

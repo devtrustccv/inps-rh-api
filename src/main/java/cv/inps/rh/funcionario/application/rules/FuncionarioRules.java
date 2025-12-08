@@ -36,12 +36,12 @@ public class FuncionarioRules {
         .orElseThrow(()-> IgrpResponseStatusException.badRequest("Funcionario sem tipo de relacionamento atual"));
   }
 
-  public TiposRelacionamentoEntity getTipoRelacionamentoAtual(FuncionarioEntity entity) {
+ /* public TiposRelacionamentoEntity getTipoRelacionamentoAtual(FuncionarioEntity entity) {
     return entity.getTiposrelacionamentos().stream()
         .filter(t -> t.getEstActAdm() != null && t.getEstActAdm() == 1)
         .max(Comparator.comparing(TiposRelacionamentoEntity::getDataInicio))
         .orElse(null);
-  }
+  }*/
 
   public ContratoEntity getContratoComMaiorVersao(FuncionarioEntity entity) {
 

@@ -130,14 +130,14 @@ public class HistoricoLaboralWriteService {
     }
 
     if (dto.getTipoAlteracao() != null && requiresActiveContract(dto.getTipoAlteracao())) {
-      var trAtualContrato = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+      var trAtualContrato = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
       if (trAtualContrato == null || trAtualContrato.getContrVinculoId() == null
           || trAtualContrato.getContrVinculoId().getEstado() != Estado.A) {
         throw IgrpResponseStatusException.badRequest("Não existe contrato activo associado ao colaborador");
       }
     }
 
-    var trAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+    var trAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     if (trAtual == null) {
       throw IgrpResponseStatusException.notFound("Relacionamento atual não encontrado");
     }

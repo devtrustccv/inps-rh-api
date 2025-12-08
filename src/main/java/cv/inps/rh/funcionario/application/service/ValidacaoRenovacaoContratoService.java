@@ -33,7 +33,7 @@ public class ValidacaoRenovacaoContratoService {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
-    var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+    var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var contrato = tiposRelacionamento.getContrVinculoId().getContratoId();
 
@@ -61,7 +61,7 @@ public class ValidacaoRenovacaoContratoService {
 
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {
 
-    var tr = funcionarioRules.getTipoRelacionamentoAtual(funcionarioEntity);
+    var tr = funcionarioRules.getTipoRelacionamentoAtual(funcionarioEntity.getUuid());
     if (tr != null) {
       tr.setEstado(estado);
 

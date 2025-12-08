@@ -63,7 +63,7 @@ public class CarreiraWriteService {
 
     var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario);
 
-    var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+    var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     relacionamentoAtual.setDataFim(currentDateMinusOneDay);
     relacionamentoAtual.setEstActAdm(0);
     tiposRelacionamentoEntityRepository.save(relacionamentoAtual);

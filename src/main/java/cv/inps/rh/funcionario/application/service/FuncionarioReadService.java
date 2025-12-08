@@ -85,7 +85,7 @@ public class FuncionarioReadService {
       dto.setUuid(entity.getUuid() != null ? entity.getUuid().toString() : null);
       dto.setNome(entity.getNome());
 
-      var trAtual = funcionarioRules.getTipoRelacionamentoAtual(entity);
+      var trAtual = funcionarioRules.getTipoRelacionamentoAtual(entity.getUuid());
       if (trAtual != null) {
         dto.setCargo(trAtual.getCargoId() != null ? trAtual.getCargoId().getNome() : null);
         dto.setDireccao(trAtual.getInstitId() != null ? trAtual.getInstitId().getNome() : null);

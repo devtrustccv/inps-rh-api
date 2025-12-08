@@ -43,7 +43,7 @@ public class RegimeWriteService {
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Funcionário não encontrado"));
 
     // Desativar relacionamento atual
-    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     tipoRelacionamentoAtual.setEstActAdm(0);
 
     // Criar entidade RegimeTrabalho
@@ -111,7 +111,7 @@ public class RegimeWriteService {
     var funcionario = funcionarioEntityRepository.findByUuid(idFuncionario)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Funcionário não encontrado"));
 
-    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     var regime = tipoRelacionamentoAtual.getRegimeId();
 
     if (regime == null) {

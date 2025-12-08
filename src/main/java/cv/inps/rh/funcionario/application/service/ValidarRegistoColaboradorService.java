@@ -90,7 +90,7 @@ public class ValidarRegistoColaboradorService {
     var dadosBancarios = dadosBancariosMapper.syncBancarios(funcionario.getDadosBancarios(),
         registroColaborador.getDadosBancarios());
 
-    var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+    var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, dadosContratuais);
 
     var situacaoLaboral = tiposRelacionamento.getSituacLaboralId();
@@ -249,7 +249,7 @@ public class ValidarRegistoColaboradorService {
           p.setEstado(estado);
       });
 
-    var tr = funcionarioRules.getTipoRelacionamentoAtual(funcionarioEntity);
+    var tr = funcionarioRules.getTipoRelacionamentoAtual(funcionarioEntity.getUuid());
     if (tr != null) {
       tr.setEstado(estado);
 

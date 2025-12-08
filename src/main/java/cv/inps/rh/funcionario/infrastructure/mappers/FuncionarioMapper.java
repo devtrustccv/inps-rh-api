@@ -112,7 +112,7 @@ public class FuncionarioMapper {
 
 
     if (entity.getTiposrelacionamentos() != null && !entity.getTiposrelacionamentos().isEmpty()) {
-      var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(entity);
+      var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(entity.getUuid());
       var dcr = dadosContratuaisMapper.dadosContratuaisRespDTO(tipoRelacionamentoAtual);
       dto.setDadosContratuais(dcr);
     }

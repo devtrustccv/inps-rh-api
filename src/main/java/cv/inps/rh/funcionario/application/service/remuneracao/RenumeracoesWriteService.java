@@ -53,7 +53,7 @@ public class RenumeracoesWriteService {
     validation.setTipoAccao(TipoAcao.INSERT.name());
     validation.setReferenciaName(Referencia.RENDIMENTO.name());
     validation.setReferenciaId(remuneracao.getId());
-    validation.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionario));
+    validation.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid()));
     validation.setEstado(Estado.P);
     validation.setUuid(UuidCreator.getTimeOrderedEpoch());
     validation.setFunId(funcionario);
@@ -87,7 +87,7 @@ public class RenumeracoesWriteService {
     validation.setTipoAccao(TipoAcao.INSERT.name());
     validation.setReferenciaName(Referencia.DESCONTO.name());
     validation.setReferenciaId(pagamento.getId());
-    validation.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionario));
+    validation.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid()));
     validation.setEstado(Estado.P);
     validation.setUuid(UuidCreator.getTimeOrderedEpoch());
     validation.setFunId(funcionario);

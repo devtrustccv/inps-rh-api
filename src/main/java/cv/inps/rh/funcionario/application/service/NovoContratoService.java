@@ -79,7 +79,7 @@ public class NovoContratoService {
     String tipoSituacao = isPrimeiroContrato ? "INICIO" : "CONTINUIDADE";
 
     if (!isPrimeiroContrato) {
-      var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+      var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
       tipoRelacionamentoAtual.setEstActAdm(0);
       var contratoAtual = tipoRelacionamentoAtual.getContrVinculoId();
       var fim = contratoAtual != null && contratoAtual.getDataFim() != null ? contratoAtual.getDataFim()

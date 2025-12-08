@@ -58,7 +58,7 @@ public class ValidarContratoService {
           "funcionario nao tem validacao pendente para o tipo de acao: INSERT e referencia: CONTRATO");
     }
 
-    var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+    var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, dadosContratuais);
 
 
@@ -121,7 +121,7 @@ public class ValidarContratoService {
 
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {
 
-    var tr = funcionarioRules.getTipoRelacionamentoAtual(funcionarioEntity);
+    var tr = funcionarioRules.getTipoRelacionamentoAtual(funcionarioEntity.getUuid());
     if (tr != null) {
       tr.setEstado(estado);
 

@@ -46,7 +46,7 @@ public class ProcessamentoSalarialWriteService {
       if (!funcionario.getEstado().equals(Estado.A))
         throw IgrpResponseStatusException.badRequest("Funcionário <%s> não está ativo".formatted(funcionario.getNome()));
 
-      var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+      var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
       if (!tipoRelacionamentoAtual.getEstActAdm().equals(1))
         throw IgrpResponseStatusException.badRequest("O vínculo do colaborador <%s> não está activo!".formatted(funcionario.getNome()));
 

@@ -76,7 +76,7 @@ public class ValidarDadosPessoaisService {
     funcionario.setEstado(Estado.A);
     funcionario.setEstadoValidacao(Estado.P.name()); // novo pendente
 
-    var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+    var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var validacao = contratuaisEntityMapper
         .toValidacaoInsert("UPDATE", "DADOS_PESSOAIS", Estado.P);

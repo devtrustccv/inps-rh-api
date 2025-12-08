@@ -43,8 +43,8 @@ public class SubstituicaoWriteService {
 
 
     var substituicao = new SubstituicaoEntity();
-    substituicao.setSubstitutoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido));
-    substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto));
+    substituicao.setSubstitutoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid()));
+    substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid()));
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());
     substituicao.setObs(dto.getObs());
@@ -82,7 +82,7 @@ public class SubstituicaoWriteService {
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());
     substituicao.setObs(dto.getObs());
-    substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto));
+    substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid()));
 
 
     var idFuncionarioSubstituido = IdentificadorUnico.from(command.getIdFuncionario()).valor();
@@ -96,7 +96,7 @@ public class SubstituicaoWriteService {
       if(estado.equals(Estado.A)){
         OrdemServicoEntity ordemServicoEntity = new OrdemServicoEntity();
         ordemServicoEntity.setFunId(funcionarioSubstituido);
-        ordemServicoEntity.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido) );
+        ordemServicoEntity.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid()) );
         ordemServicoEntity.setReferente("SUBSTITUICAO");
         ordemServicoEntity.setDescricao("Substituicao");
         ordemServicoEntity.setNuOrdem("1"); // todo fix later
