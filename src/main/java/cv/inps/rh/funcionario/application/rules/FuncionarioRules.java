@@ -8,6 +8,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,8 @@ public class FuncionarioRules {
 
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
+  private final ContratoEntityRepository contratoEntityRepository;
+
 
   public boolean temValidacaoPendente(UUID funUuid, TipoAcao tipoAccao, Referencia referenciaName) {
     return validacaoEntityRepository.existsByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(funUuid, Estado.P, tipoAccao.name(),
@@ -51,6 +54,10 @@ public class FuncionarioRules {
         .orElse(null);
   }
 
+  public ContratoEntity getContratoComMaiorVersao(UUID funUuid) {
+    return contratoEntityRepository.findTopByFunId_UuidOrderByVersaoDesc(funUuid);
+  }
+
   public ContratoEntity getPrimeiroContrato(FuncionarioEntity entity) {
 
     if (entity.getContratos() == null || entity.getContratos().isEmpty())
@@ -60,6 +67,10 @@ public class FuncionarioRules {
         .filter(c -> c.getVersao() != null && c.getVersao() == 1)
         .findFirst()
         .orElse(null);
+  }
+
+  public ContratoEntity getPrimeiroContrato(UUID funUuid) {
+    return contratoEntityRepository.findPrimeiroContratoFuncionario(funUuid);
   }
 
   public TiposRelacionamentoEntity getTipoRelacionamentoByContratoId(FuncionarioEntity fun, UUID contratoId) {
@@ -72,6 +83,12 @@ public class FuncionarioRules {
         .findFirst()
         .orElse(null);
   }
+
+  public TiposRelacionamentoEntity getTipoRelacionamentoByContratoId(UUID funId, UUID contratoId) {
+    if (funId == null || contratoId == null) return null;
+    return tiposRelacionamentoEntityRepository.findByFunUuidAndContratoUuid(funId, contratoId);
+  }
+
 
 
   public boolean temValidacaoPendente(FuncionarioEntity fun, String tipoAccao, String referenciaName) {

@@ -6,6 +6,8 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContratoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
@@ -45,7 +47,7 @@ public class RenovacaoContratoService {
     if (contratoAtual == null)
       throw IgrpResponseStatusException.notFound("Funcionario com id '%s' não possui contrato ativo".formatted(idFunc));
 
-    var validacaoPendente = funcionarioRules.temValidacaoPendente(funcionario, "INSERT", "RENOVACAO_CONTRATO");
+    var validacaoPendente = funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.RENOVACAO_CONTRATO);
     if (validacaoPendente)
       throw IgrpResponseStatusException.conflict("Funcionario com id '%s' possui uma validação pendente de renovação de contrato".formatted(idFunc));
 
@@ -55,7 +57,7 @@ public class RenovacaoContratoService {
     novoContrato.setFunId(funcionario);
     funcionario.getContratos().add(novoContrato);
 
-    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario);
+    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     if (tipoRelacionamentoAtual == null)
       throw IgrpResponseStatusException.notFound("Funcionario com id '%s' não possui tipo de relacionamento atual".formatted(idFunc));

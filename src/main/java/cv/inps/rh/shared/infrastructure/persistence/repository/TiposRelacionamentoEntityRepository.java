@@ -105,4 +105,16 @@ public interface TiposRelacionamentoEntityRepository extends
       @Param("nome") String nome,
       Pageable pageable
   );
+
+
+  @Query("""
+       select tr
+       from TiposRelacionamentoEntity tr
+       where tr.funId.uuid = :funUuid
+         and tr.contrVinculoId.uuid = :contratoUuid
+       """)
+  TiposRelacionamentoEntity findByFunUuidAndContratoUuid(
+      @Param("funUuid") UUID funUuid,
+      @Param("contratoUuid") UUID contratoUuid);
+
 }

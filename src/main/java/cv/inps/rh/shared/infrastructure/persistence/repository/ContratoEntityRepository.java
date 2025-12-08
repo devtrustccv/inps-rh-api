@@ -58,4 +58,17 @@ public interface ContratoEntityRepository extends
 
   boolean existsByFunIdAndEstado(FuncionarioEntity fun, Estado estado);
 
+
+  @Query("""
+       select c
+       from ContratoEntity c
+       where c.funId.uuid = :funUuid
+         and c.versao = 1
+       """)
+  ContratoEntity findPrimeiroContratoFuncionario(@Param("funUuid") UUID funUuid);
+
+  ContratoEntity findTopByFunId_UuidOrderByVersaoDesc(UUID funUuid);
+
+
+
 }
