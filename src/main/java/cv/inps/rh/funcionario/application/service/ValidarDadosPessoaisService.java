@@ -111,8 +111,11 @@ public class ValidarDadosPessoaisService {
     if (endereco != null) endereco.setEstado(estado);
 
     var contactos = funcionarioEntity.getContactos();
-    if (contactos != null) contactos.forEach(c -> { if (c != null) c.setEstado(estado); });
-
+    if (contactos != null) {
+      contactos.stream()
+          .filter(c -> c != null && c.getEstado() == Estado.P)
+          .forEach(c -> c.setEstado(estado));
+    }
 
     funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_PESSOAIS)
         .ifPresent(v -> v.setEstado(estado));

@@ -7,6 +7,8 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
@@ -52,7 +54,7 @@ public class SubstituicaoWriteService {
     substituicao.setEstado(Estado.P);
     substituicaoEntityRepository.save(substituicao);
 
-    var validacao = dadosContratuaisMapper.toValidacaoInsert("INSERT","SUBSTITUICAO", Estado.P);
+    var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.SUBSTITUICAO.name(), Estado.P);
     validacao.setFunId(funcionarioSubstituido);
     validacao.setTiprelId(substituicao.getSubstitutoTiprelId());
     validacao.setFunId(funcionarioSubstituido);
@@ -97,7 +99,7 @@ public class SubstituicaoWriteService {
         OrdemServicoEntity ordemServicoEntity = new OrdemServicoEntity();
         ordemServicoEntity.setFunId(funcionarioSubstituido);
         ordemServicoEntity.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid()) );
-        ordemServicoEntity.setReferente("SUBSTITUICAO");
+        ordemServicoEntity.setReferente(Referencia.SUBSTITUICAO.name());
         ordemServicoEntity.setDescricao("Substituicao");
         ordemServicoEntity.setNuOrdem("1"); // todo fix later
         ordemServicoEntity.setEstado(Estado.A);
@@ -107,10 +109,7 @@ public class SubstituicaoWriteService {
 
       substituicao.setEstado(estado);
 
-      funcionarioSubstituido.getValidacoes().stream()
-          .filter(v -> v.getEstado() == Estado.P)
-          .filter(v -> "SUBSTITUICAO".equals(v.getReferenciaName()) && "INSERT".equals(v.getTipoAccao()))
-          .findFirst()
+      funcionarioRules.getValidacaoPendente(funcionarioSubstituido.getUuid(), TipoAcao.INSERT, Referencia.SUBSTITUICAO)
           .ifPresent(v -> v.setEstado(estado));
 
     }

@@ -95,19 +95,25 @@ public class ValidarDadosAcademicosService {
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado novoEstado) {
 
     var habilitacoes = funcionarioEntity.getHabilitacoesLiterarias();
-    if (habilitacoes != null) habilitacoes.forEach(h -> {
-      if (h != null) h.setEstado(novoEstado);
-    });
+    if (habilitacoes != null) {
+      habilitacoes.stream()
+          .filter(h -> h != null && h.getEstado() == Estado.P)
+          .forEach(h -> h.setEstado(novoEstado));
+    }
 
     var formacoes = funcionarioEntity.getFormacoesFeitas();
-    if (formacoes != null) formacoes.forEach(f -> {
-      if (f != null) f.setEstado(novoEstado);
-    });
+    if (formacoes != null) {
+      formacoes.stream()
+          .filter(f -> f != null && f.getEstado() == Estado.P)
+          .forEach(f -> f.setEstado(novoEstado));
+    }
 
     var experiencias = funcionarioEntity.getExperienciasProfissionais();
-    if (experiencias != null) experiencias.forEach(e -> {
-      if (e != null) e.setEstado(novoEstado);
-    });
+    if (experiencias != null) {
+      experiencias.stream()
+          .filter(e -> e != null && e.getEstado() == Estado.P)
+          .forEach(e -> e.setEstado(novoEstado));
+    }
 
     funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_ACADEMICOS)
         .ifPresent(v -> v.setEstado(novoEstado));

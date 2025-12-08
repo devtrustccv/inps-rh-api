@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ValidarDadosBancariosService {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
-  private final FuncionarioMapper funcionarioMapper;
   private final FuncionarioRules funcionarioRules;
   private final DadosContratuaisMapper contratuaisEntityMapper;
   private final ValidacaoEntityRepository validacaoEntityRepository;
@@ -89,7 +88,12 @@ public class ValidarDadosBancariosService {
     if (funcionarioEntity == null) return;
 
     var bancarios = funcionarioEntity.getDadosBancarios();
-    if (bancarios != null) bancarios.forEach(b -> { if (b != null) b.setEstado(novoEstado); });
+
+    if (bancarios != null) {
+      bancarios.stream()
+          .filter(b -> b != null && b.getEstado() == Estado.P)
+          .forEach(b -> b.setEstado(novoEstado));
+    }
 
     funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_BANCARIOS)
         .ifPresent(v -> v.setEstado(novoEstado));

@@ -89,9 +89,11 @@ public class ValidarAgregadosService {
     if (funcionarioEntity == null) return;
 
     var familiares = funcionarioEntity.getFamiliares();
-    if (familiares != null) familiares.forEach(f -> {
-      if (f != null) f.setEstado(novoEstado);
-    });
+    if (familiares != null) {
+      familiares.stream()
+          .filter(f -> f != null && f.getEstado() == Estado.P)
+          .forEach(f -> f.setEstado(novoEstado));
+    }
 
     var validacaoPendente =
         funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.UPDATE, Referencia.FAMILIA);

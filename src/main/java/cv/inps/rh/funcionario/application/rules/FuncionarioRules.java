@@ -62,4 +62,6 @@ public class FuncionarioRules {
         .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(funUuid, Estado.P, tipoAccao.name(), referenciaName.name());
   }
 
+
+
 }
