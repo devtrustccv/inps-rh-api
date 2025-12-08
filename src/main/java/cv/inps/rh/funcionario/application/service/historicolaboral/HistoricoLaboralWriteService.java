@@ -5,9 +5,11 @@ import cv.inps.rh.funcionario.application.commands.ValidarHistoricoLaboralComman
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.funcionario.application.service.ValidarDadosContratuaisService;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -43,6 +45,9 @@ public class HistoricoLaboralWriteService {
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
   private final OrdemServicoEntityRepository ordemServicoEntityRepository;
+  private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
+  private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
+  private final ValidarDadosContratuaisService validarDadosContratuaisService;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -52,6 +57,8 @@ public class HistoricoLaboralWriteService {
 
     var dto = command.getValidarnovohistoricolaboral();
 
+    var tipoMobilidade = dto.getTipoAlteracao();
+
     var idFuncionario = IdentificadorUnico.from(command.getIdFuncionario()).valor();
 
     var funcionario = funcionarioEntityRepository.findByUuid(idFuncionario)
@@ -59,15 +66,16 @@ public class HistoricoLaboralWriteService {
 
     var dc = dto.getDadosContratuais();
 
-    validarDadosContratuais(dc);
+    validarDadosContratuaisService.validar(dc);
 
     if (dto.getValidar() != null) {
-      var estadoFinal = dto.getValidar().name().equals("SIM") ? Estado.A : Estado.I;
       var relacionamentoPendente = tiposRelacionamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario,
           Estado.P);
       if (relacionamentoPendente == null) {
         throw IgrpResponseStatusException.badRequest("Não existe histórico laboral pendente para validar");
       }
+
+      var estadoFinal = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
       relacionamentoPendente.setEstado(estadoFinal);
       tiposRelacionamentoEntityRepository.save(relacionamentoPendente);
@@ -85,8 +93,7 @@ public class HistoricoLaboralWriteService {
         defPagamentoEntityRepository.save(dp);
       }
 
-      var remTiprels = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(relacionamentoPendente,
-          Estado.P);
+      var remTiprels = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(relacionamentoPendente, Estado.P);
       for (var rt : remTiprels) {
         rt.setEstado(estadoFinal);
         remuneracaoTiprelEntityRepository.save(rt);
@@ -99,37 +106,35 @@ public class HistoricoLaboralWriteService {
       }
 
       var validacao = validacaoEntityRepository.findByTiprelIdAndEstadoAndReferenciaName(relacionamentoPendente,
-          Estado.P, "HISTORICO_LABORAL");
+          Estado.P, "MOBILIDADE");
       if (validacao != null) {
         validacao.setEstado(estadoFinal);
         validacaoEntityRepository.save(validacao);
       }
 
-      if (dto.getGerarOrdemServico() != null && dto.getGerarOrdemServico().equalsIgnoreCase("SIM")) {
+      if (Estado.A.equals(estadoFinal)) {
         var os = new OrdemServicoEntity();
-        os.setNuOrdem("OS-" + UuidCreator.getTimeOrderedEpoch());
-        os.setDescricao((dto.getTipoAlteracao() != null ? dto.getTipoAlteracao() : "") + " - "
+        os.setNuOrdem("1");
+        os.setDescricao((tipoMobilidade != null ? tipoMobilidade : "MOBILIDADE") + " - "
             + (funcionario.getNome() != null ? funcionario.getNome() : ""));
-        os.setReferente(dto.getTipoAlteracao());
+        os.setReferente("MOBILIDADE");
         os.setFunId(funcionario);
         os.setTiprelId(relacionamentoPendente);
-        os.setValidacaoId(validacao);
         os.setEstado(Estado.A);
-        os.setUuid(UuidCreator.getTimeOrderedEpoch());
-        ordemServicoEntityRepository.save(os);
+        funcionario.getOrdemServicos().add(os);
       }
 
+      funcionarioEntityRepository.save(funcionario);
       return dto;
     }
 
-    var trPendenteExistente = tiposRelacionamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario,
-        Estado.P);
-    if (trPendenteExistente != null) {
+    var pendente = tiposRelacionamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
+    if (pendente != null) {
       throw IgrpResponseStatusException
           .badRequest("Existe histórico laboral pendente por validar. Valide antes de criar novo.");
     }
 
-    if (dto.getTipoAlteracao() != null && requiresActiveContract(dto.getTipoAlteracao())) {
+    if (tipoMobilidade != null && requiresActiveContract(tipoMobilidade)) {
       var trAtualContrato = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
       if (trAtualContrato == null || trAtualContrato.getContrVinculoId() == null
           || trAtualContrato.getContrVinculoId().getEstado() != Estado.A) {
@@ -141,6 +146,7 @@ public class HistoricoLaboralWriteService {
     if (trAtual == null) {
       throw IgrpResponseStatusException.notFound("Relacionamento atual não encontrado");
     }
+
     trAtual.setDataFim(LocalDate.now());
     trAtual.setEstActAdm(0);
     trAtual.setEstado(Estado.I);
@@ -170,6 +176,61 @@ public class HistoricoLaboralWriteService {
       defPagamentoEntityRepository.save(p);
     }
 
+    var trNovo = dadosContratuaisMapper.clone(trAtual);
+    trNovo.setEstado(Estado.P);
+    trNovo.setDataInicio(dc.getDataInicio());
+    trNovo.setDataFim(dc.getDataFim());
+    trNovo.setEstActAdm(1);
+    trNovo.setTipoSituacao("MOBILIDADE");
+    trNovo.setObs(tipoMobilidade);
+    dadosContratuaisMapper.toUpdateRelacionamento(trNovo, dc);
+    trNovo.setReferente("MOBILIDADE");
+
+    var contratoAtual = trAtual.getContrVinculoId();
+    ContratoEntity novoContrato = null;
+    if (tipoMobilidade != null && tipoMobilidade.equalsIgnoreCase("CONVERSAO_CONTRATO")) {
+      novoContrato = contratoMapper.toContrato(dc, Estado.P);
+      if (novoContrato != null) {
+        var ultimo = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
+        novoContrato.setVersao(ultimo != null && ultimo.getVersao() != null ? ultimo.getVersao() + 1 : 1);
+        novoContrato.setObs(tipoMobilidade);
+        novoContrato.setEstado(Estado.P);
+        novoContrato.setFunId(funcionario);
+        funcionario.getContratos().add(novoContrato);
+        trNovo.setContrVinculoId(novoContrato);
+      }
+    } else {
+      trNovo.setContrVinculoId(contratoAtual);
+    }
+
+    var regimeMudou = (trAtual.getRegime() == null && dc.getRegimeTrabalho() != null)
+        || (trAtual.getRegime() != null && !trAtual.getRegime().equals(dc.getRegimeTrabalho()));
+    var novoRegime = regimeMudou ? regimeTrabalhoMapper.toRegime(dc, Estado.P) : null;
+    if (novoRegime != null) {
+      novoRegime.setFunId(funcionario);
+      novoRegime.setTipoSituacao("INICIO");
+      novoRegime.setObs(tipoMobilidade);
+      funcionario.getRegimesTrabalhos().add(novoRegime);
+      trNovo.setRegimeId(novoRegime);
+    }
+
+    var direcaoMudou = trAtual.getInstitId() == null
+        || !java.util.Objects.equals(trAtual.getInstitId().getId(), dc.getDirecaoId());
+    var seccaoMudou = trAtual.getSeccaoId() == null
+        || !java.util.Objects.equals(trAtual.getSeccaoId().getId(), dc.getSeccaoId());
+    var localMudou = trAtual.getLocTrabId() == null
+        || !java.util.Objects.equals(trAtual.getLocTrabId().getId(), dc.getLocalTrabalhoId());
+    var novaMobilidade = (direcaoMudou || seccaoMudou || localMudou) ? mobilidadeMapper.toMobilidade(dc, Estado.P)
+        : null;
+    if (novaMobilidade != null) {
+      novaMobilidade.setTipoSituacao("MOBILIDADE");
+      novaMobilidade.setObs("MOBILIDADE");
+      funcionario.getMobilidades().add(novaMobilidade);
+      trNovo.setMobId(novaMobilidade);
+    }
+
+    funcionario.getTiposrelacionamentos().add(trNovo);
+
     var tmSalario = tipoMovimentoEntityRepository.findByShortDescAndAmbAplId("SALL", 30L)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento SALARIO não encontrado"));
     var tmInps = tipoMovimentoEntityRepository.findByShortDescAndAmbAplId("INPS", 30L)
@@ -177,77 +238,29 @@ public class HistoricoLaboralWriteService {
     var tmIur = tipoMovimentoEntityRepository.findByShortDescAndAmbAplId("IUR", 30L)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento IUR não encontrado"));
 
-    var trNovo = dadosContratuaisMapper.clone(trAtual);
-    trNovo.setEstado(Estado.P);
-    trNovo.setDataInicio(dc.getDataInicio());
-    trNovo.setDataFim(dc.getDataFim());
-    trNovo.setEstActAdm(1);
-    trNovo.setTipoSituacao(dto.getTipoAlteracao());
-    trNovo.setObs(dto.getTipoAlteracao());
-    dadosContratuaisMapper.toUpdateRelacionamento(trNovo, dc);
-
-    var contratoAtual = trAtual.getContrVinculoId();
-    var novoContrato = dto.getTipoAlteracao() != null && dto.getTipoAlteracao().equalsIgnoreCase("CONVERSAO_CONTRATO")
-        ? contratoMapper.toContrato(dc, Estado.P)
-        : null;
-    if (novoContrato != null) {
-      var ultimo = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
-      novoContrato.setVersao(ultimo != null && ultimo.getVersao() != null ? ultimo.getVersao() + 1 : 1);
-      novoContrato.setObs(dto.getTipoAlteracao());
-      novoContrato.setEstado(Estado.P);
-      novoContrato.setFunId(funcionario);
-      funcionario.getContratos().add(novoContrato);
-      trNovo.setContrVinculoId(novoContrato);
-    } else {
-      trNovo.setContrVinculoId(contratoAtual);
+    if (dc.getSalario() != null) {
+      var renumeracaoSalario = definicaoRemuneracaoMapper.createRenumeracao(dc.getSalario(), tmSalario,
+          dc.getDataInicio(), dc.getDataFim(), funcionario, dc.getMoeda());
+      funcionario.getDefinicoesRenumeracoes().add(renumeracaoSalario);
     }
 
-    var novaCarreira = carreiraMapper.toCarreira(dc, Estado.P);
-    if (novaCarreira != null) {
-      novaCarreira.setTipoSituacao("INICIO");
-      novaCarreira.setObs(dto.getTipoAlteracao());
-      novaCarreira.setContrVinculoId(trNovo.getContrVinculoId());
-      carreiraEntityRepository.save(novaCarreira);
-      trNovo.setCarreiraId(novaCarreira);
+    var pagamentosAtivos = defPagamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
+    boolean temIurAtivo = pagamentosAtivos.stream()
+        .anyMatch(p -> p.getTmId() != null && "IUR".equalsIgnoreCase(p.getTmId().getShortDesc()));
+    boolean temInpsAtivo = pagamentosAtivos.stream()
+        .anyMatch(p -> p.getTmId() != null && "INPS".equalsIgnoreCase(p.getTmId().getShortDesc()));
+    if (!temIurAtivo) {
+      var pagamentoIUR = defPagamentoMapper.createPagamento(BigDecimal.ZERO, tmIur, dc.getDataInicio(), dc.getDataFim(),
+          funcionario);
+      funcionario.getDefinicoesPagamentos().add(pagamentoIUR);
+    }
+    if (!temInpsAtivo) {
+      var pagamentoINPS = defPagamentoMapper.createPagamento(BigDecimal.ZERO, tmInps, dc.getDataInicio(),
+          dc.getDataFim(), funcionario);
+      funcionario.getDefinicoesPagamentos().add(pagamentoINPS);
     }
 
-    var novoRegime = regimeTrabalhoMapper.toRegime(dc, Estado.P);
-    if (novoRegime != null) {
-      novoRegime.setFunId(funcionario);
-      novoRegime.setTipoSituacao("INICIO");
-      novoRegime.setObs(dto.getTipoAlteracao());
-      funcionario.getRegimesTrabalhos().add(novoRegime);
-      trNovo.setRegimeId(novoRegime);
-    }
-
-    var novaMobilidade = mobilidadeMapper.toMobilidade(dc, Estado.P);
-    if (novaMobilidade != null) {
-      novaMobilidade.setFunId(funcionario);
-      novaMobilidade.setTipoSituacao("INICIO");
-      novaMobilidade.setObs(dto.getTipoAlteracao());
-      funcionario.getMobilidades().add(novaMobilidade);
-      trNovo.setMobId(novaMobilidade);
-    }
-
-    trNovo.setFunId(funcionario);
-    trNovo.setReferente("HISTORICO_LABORAL");
-    funcionario.getTiposrelacionamentos().add(trNovo);
-
-    var renumeracaoSalario = definicaoRemuneracaoMapper.createRenumeracao(
-        dc.getSalario() != null ? dc.getSalario() : BigDecimal.ZERO,
-        tmSalario, dc.getDataInicio(), dc.getDataFim(), funcionario, dc.getMoeda());
-    renumeracaoSalario.setObs(dto.getTipoAlteracao());
-    funcionario.getDefinicoesRenumeracoes().add(renumeracaoSalario);
-
-    var pagamentoIUR = defPagamentoMapper.createPagamento(BigDecimal.ZERO, tmIur, dc.getDataInicio(), dc.getDataFim(),
-        funcionario);
-    pagamentoIUR.setObs(dto.getTipoAlteracao());
-    var pagamentoINPS = defPagamentoMapper.createPagamento(BigDecimal.ZERO, tmInps, dc.getDataInicio(), dc.getDataFim(),
-        funcionario);
-    pagamentoINPS.setObs(dto.getTipoAlteracao());
-    funcionario.getDefinicoesPagamentos().addAll(List.of(pagamentoIUR, pagamentoINPS));
-
-    var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT", "HISTORICO_LABORAL", Estado.P);
+    var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT", "MOBILIDADE", Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(trNovo);
     funcionario.getValidacoes().add(valid);
@@ -255,100 +268,71 @@ public class HistoricoLaboralWriteService {
     var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
     validacaoEntityRepository.findById(valid.getId()).ifPresent(v -> {
-      var refId = novoContrato != null ? novoContrato.getId() : trNovo.getId();
+      var refId = novaMobilidade != null ? novaMobilidade.getId() : trNovo.getId();
       v.setReferenciaId(refId);
       validacaoEntityRepository.save(v);
     });
 
     var listRemTiprel = saved.getDefinicoesRenumeracoes().stream()
+        .filter(rem -> rem.getEstado() == Estado.P)
         .map(rem -> {
           var r = new RemuneracaoTiprelEntity();
           r.setRemId(rem);
           r.setTiprelId(trNovo);
-          r.setUuid(UuidCreator.getTimeOrderedEpoch());
           r.setEstado(Estado.P);
           return r;
         }).toList();
     remuneracaoTiprelEntityRepository.saveAll(listRemTiprel);
 
     var listPagTiprel = saved.getDefinicoesPagamentos().stream()
+        .filter(pag -> pag.getEstado() == Estado.P)
         .map(pag -> {
           var p = new PagTiprelEntity();
           p.setPagId(pag);
           p.setTiprelId(trNovo);
-          p.setUuid(UuidCreator.getTimeOrderedEpoch());
           p.setEstado(Estado.P);
           return p;
         }).toList();
     pagTiprelEntityRepository.saveAll(listPagTiprel);
 
+    var carreiraMudou = trAtual.getCarrPccId() == null
+        || !java.util.Objects.equals(trAtual.getCarrPccId().getId(), dc.getCarreiraId())
+        || trAtual.getCategoriaId() == null
+        || !java.util.Objects.equals(trAtual.getCategoriaId().getId(), dc.getCategoriaId())
+        || trAtual.getEscalaoId() == null
+        || !java.util.Objects.equals(trAtual.getEscalaoId().getId(), dc.getEscalaoReferenciaId());
+    var novaCarreira = carreiraMudou ? carreiraMapper.toCarreira(dc, Estado.P) : null;
+    if (novaCarreira != null) {
+      novaCarreira.setContrVinculoId(novoContrato != null ? novoContrato : contratoAtual);
+      carreiraEntityRepository.save(novaCarreira);
+      trNovo.setCarreiraId(novaCarreira);
+      tiposRelacionamentoEntityRepository.save(trNovo);
+    }
+
+    var situacaoAtual = trAtual.getSituacLaboralId();
+    var precisaSituacaoAtivo = situacaoAtual == null || situacaoAtual.getSituacaoLaboralId() == null
+        || situacaoAtual.getSituacaoLaboralId().getNome() == null
+        || !situacaoAtual.getSituacaoLaboralId().getNome().equalsIgnoreCase("ATIVO");
+    if (precisaSituacaoAtivo) {
+      var lista = paramSitLaboralEntityRepository.findAllByNome("ATIVO");
+      if (lista != null && !lista.isEmpty()) {
+        var paramAtivo = lista.get(0);
+        var sl = dadosContratuaisMapper.toSituacaoLaboral(dc, paramAtivo, Estado.P, "ATIVO", "MOBILIDADE");
+        sl.setContrVinculoId(novoContrato != null ? novoContrato : contratoAtual);
+        situacaoLaboralEntityRepository.save(sl);
+        trNovo.setSituacLaboralId(sl);
+        tiposRelacionamentoEntityRepository.save(trNovo);
+      }
+    }
+
     return dto;
-
   }
-
-  /* ------------------ helpers ------------------ */
 
   private boolean requiresActiveContract(String tipoAlteracao) {
     if (tipoAlteracao == null)
       return false;
-    String t = tipoAlteracao.toUpperCase();
-    return t.contains("MOBIL") || t.contains("MUDAR_VINCULO") || t.contains("CONVERSAO_CONTRATO");
-  }
-
-  private void validarDadosContratuais(DadosContratuaisReqDTO dc) {
-
-    if (dc.getTipoContratoId() == null)
-      throw IgrpResponseStatusException.badRequest("Tipo de contrato é obrigatório.");
-
-    if (dc.getCargoPosicaoId() == null)
-      throw IgrpResponseStatusException.badRequest("Cargo/posição é obrigatório.");
-
-    if (dc.getDirecaoId() == null)
-      throw IgrpResponseStatusException.badRequest("Direção é obrigatória.");
-
-    if (dc.getSeccaoId() == null)
-      throw IgrpResponseStatusException.badRequest("Seção é obrigatória.");
-
-    if (dc.getLocalTrabalhoId() == null)
-      throw IgrpResponseStatusException.badRequest("Local de trabalho é obrigatório.");
-
-    if (dc.getPaisId() == null)
-      throw IgrpResponseStatusException.badRequest("País é obrigatório.");
-
-    if (dc.getIlhaId() == null)
-      throw IgrpResponseStatusException.badRequest("Ilha é obrigatória.");
-
-    if (dc.getMoeda() == null || dc.getMoeda().isBlank())
-      throw IgrpResponseStatusException.badRequest("Moeda é obrigatória.");
-
-    if (dc.getDataInicio() == null)
-      throw IgrpResponseStatusException.badRequest("Data de início é obrigatória.");
-
-    var hoje = LocalDate.now();
-    if (dc.getDataInicio().isAfter(hoje))
-      throw IgrpResponseStatusException.badRequest("Data início não pode ser maior que a data actual.");
-
-    if (dc.getDataFim() != null && dc.getDataInicio().isAfter(dc.getDataFim()))
-      throw IgrpResponseStatusException.badRequest("Data início não pode ser superior à data fim.");
-
-    if (dc.getTipoVinculoLaboralId() != null) {
-      var vinculo = entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId());
-      if (vinculo.getFlgCarreira() != null && vinculo.getFlgCarreira() == 1) {
-        if (dc.getCarreiraId() == null)
-          throw IgrpResponseStatusException.badRequest("Carreira é obrigatória para este tipo de vínculo.");
-        if (dc.getCategoriaId() == null)
-          throw IgrpResponseStatusException.badRequest("Categoria é obrigatória para este tipo de vínculo.");
-        if (dc.getEscalaoReferenciaId() == null)
-          throw IgrpResponseStatusException.badRequest("Escalão é obrigatório para este tipo de vínculo.");
-        var escalao = entityManager.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId());
-        if (escalao != null && escalao.getValor() != null)
-          dc.setSalario(escalao.getValor());
-      }
-      if (vinculo.getFlgSalario() != null && vinculo.getFlgSalario() == 1) {
-        if (dc.getSalario() == null)
-          throw IgrpResponseStatusException.badRequest("Salário é obrigatório para este tipo de vínculo.");
-      }
-    }
+    var t = tipoAlteracao.trim().toUpperCase();
+    return List.of("MOBILIDADE", "CONVERSAO_CONTRATO").contains(t);
   }
 
 }
