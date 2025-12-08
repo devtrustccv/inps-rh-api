@@ -11,6 +11,7 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,6 @@ public class RenovacaoContratoService {
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final DadosContratuaisMapper  dadosContratuaisMapper;
   private final FuncionarioRules funcionarioRules;
-  private final EntityManager entityManager;
   private final ValidacaoEntityRepository validacaoEntityRepository;
 
   @Transactional
@@ -75,7 +75,7 @@ public class RenovacaoContratoService {
     funcionario.getTiposrelacionamentos().add(novoTipoRelacionamento);
 
 
-    var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT","RENOVACAO_CONTRATO", Estado.P);
+    var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(),Referencia.RENOVACAO_CONTRATO.name(), Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
     funcionario.getValidacoes().add(valid);
