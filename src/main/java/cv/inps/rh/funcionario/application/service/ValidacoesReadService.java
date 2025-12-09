@@ -3,11 +3,15 @@ package cv.inps.rh.funcionario.application.service;
 import cv.inps.rh.funcionario.application.dto.WrapperListaValidacoesDTO;
 import cv.inps.rh.funcionario.application.queries.GetValicoesUtilizadoresQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.ValidacaoMapper;
+import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity_;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity_;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,26 +40,28 @@ public class ValidacoesReadService {
       java.util.List<Predicate> predicates = new java.util.ArrayList<>();
 
       if (StringUtils.hasText(query.getNomeColaborador())) {
-        Join<ValidacaoEntity, FuncionarioEntity> fun = root.join("funId", jakarta.persistence.criteria.JoinType.LEFT);
-        predicates.add(cb.like(cb.lower(fun.get("nome")), "%" + query.getNomeColaborador().toLowerCase() + "%"));
+        Join<ValidacaoEntity, FuncionarioEntity> fun = root.join(ValidacaoEntity_.FUN_ID, JoinType.LEFT);
+        predicates.add(cb.like(cb.lower(fun.get(FuncionarioEntity_.NOME)), "%" + query.getNomeColaborador().toLowerCase() + "%"));
       }
 
       if (StringUtils.hasText(query.getTipoOperacao())) {
-        predicates.add(cb.equal(root.get("tipoAccao"), query.getTipoOperacao()));
+        predicates.add(cb.equal(root.get(ValidacaoEntity_.TIPO_ACCAO), query.getTipoOperacao()));
       }
 
       if (StringUtils.hasText(query.getReferenciaName())) {
-        predicates.add(cb.equal(root.get("referenciaName"), query.getReferenciaName()));
+        predicates.add(cb.equal(root.get(ValidacaoEntity_.REFERENCIA_NAME), query.getReferenciaName()));
       }
 
       if (StringUtils.hasText(query.getDataInicio())) {
         var di = DateFormatter.stringToLocalDateTime(query.getDataInicio());
-        predicates.add(cb.greaterThanOrEqualTo(root.get("createdDate"), di));
+        predicates.add(cb.greaterThanOrEqualTo(root.get(ValidacaoEntity_.CREATED_DATE), di));
       }
       if (StringUtils.hasText(query.getDataFim())) {
         var df = DateFormatter.stringToLocalDateTime(query.getDataFim());
-        predicates.add(cb.lessThanOrEqualTo(root.get("createdDate"), df));
+        predicates.add(cb.lessThanOrEqualTo(root.get(ValidacaoEntity_.CREATED_DATE), df));
       }
+
+      predicates.add(cb.equal(root.get(ValidacaoEntity_.ESTADO), Estado.P));
 
       if (cq != null) { cq.distinct(true); }
       return cb.and(predicates.toArray(new Predicate[0]));
