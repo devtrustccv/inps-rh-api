@@ -8,6 +8,8 @@ import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -206,7 +208,8 @@ public class RegistarColaboradorService {
     fun.setTiposrelacionamentos(new ArrayList<>(List.of(tr)));
 
 
-    var valid = dadosContratuaisMapper.toValidacaoInsert("INSERT", "REGISTO_COLABORADOR", Estado.P);
+    var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.REGISTO_COLABORADOR.name(),
+        Estado.P);
     valid.setFunId(fun);
     valid.setTiprelId(tr);
     fun.setValidacoes(new ArrayList<>(List.of(valid)));
