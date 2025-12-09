@@ -1,13 +1,13 @@
 {
   "type": "controller",
-  "name": "Pesquisa",
+  "name": "Colaborador",
   "module": "processamento",
-  "description": "Pesquisas Globais",
-  "basePath": "pesquisa",
+  "description": "Colaborador",
+  "basePath": "colaborador",
   "actions": [
     {
-      "actionName": "pesquisaColaborador",
-      "path": "colaborador",
+      "actionName": "getListaBaixamedica",
+      "path": "baixa-medica",
       "method": "GET",
       "responses": {
         "200": {
@@ -15,7 +15,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "WrapperPesquisaColaborador",
+                "type": "WrapperListaColaborador",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -28,17 +28,22 @@
       "requestParams": [
         {
           "type": "string",
-          "name": "nome",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "colaborador",
           "isRequired": false
         },
         {
           "type": "string",
           "name": "direccao",
-          "isRequired": false
-        },
-        {
-          "type": "string",
-          "name": "centroCusto",
           "isRequired": false
         },
         {
@@ -56,8 +61,8 @@
       ]
     },
     {
-      "actionName": "pesquisaCentroCusto",
-      "path": "centro-custo",
+      "actionName": "getListaLicensaSemVencimento",
+      "path": "licensa-sem-vencimento",
       "method": "GET",
       "responses": {
         "200": {
@@ -65,7 +70,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "WrapperPesquisaColaborador",
+                "type": "WrapperListaColaborador",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -78,12 +83,22 @@
       "requestParams": [
         {
           "type": "string",
-          "name": "nome",
+          "name": "dataInicio",
           "isRequired": false
         },
         {
           "type": "string",
-          "name": "centroCusto",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "colaborador",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "direccao",
           "isRequired": false
         },
         {
@@ -101,5 +116,5 @@
       ]
     }
   ],
-  "id": "980jkk64em-pesquisaColaboradorCopy"
+  "id": "f2v97ka4pz-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica-getListaBaixamedicaCopy"
 }

@@ -8,6 +8,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
@@ -25,8 +26,6 @@ import java.util.UUID;
 public class ProcessamentoSalarialWriteService {
 
   // TODO 07/12/2025 15:19 validate the parameters for the procedure call actions
-
-  private static final String PACKAGE = "RH_PROCESSAMENTO_SALARIAL_DB";
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
@@ -75,7 +74,10 @@ public class ProcessamentoSalarialWriteService {
     if (!illegalProcesses.isEmpty())
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'PROV'", illegalProcesses);
 
-    processes.forEach(p -> callProcedure("EliminarProc").execute(Map.of("p_proc_id", p.getId())));
+    processes.forEach(p -> {
+      var call = callProcedure(Processamento.PROCEDURE_ELIMINAR_PROC.getName());
+      call.execute(Map.of("p_proc_id", p.getId()));
+    });
   }
 
   public void validar(List<Long> processamentoIds) {
@@ -110,14 +112,15 @@ public class ProcessamentoSalarialWriteService {
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'VALIDADO'", illegalProcesses);
 
     // TODO 07/12/2025 15:19 validate this parameters
-    processes.forEach(p -> callProcedure("CabimentarProc")
-        .execute(
-            Map.of(
-                "p_qnt", p.getId(),
-                "p_proc_sal_id", p.getId(),
-                "p_ano_orcamento", p.getId()
-            ))
-    );
+    processes.forEach(p -> {
+      var call = callProcedure(Processamento.PROCEDURE_CABIMENTAR_PROC.getName());
+      call.execute(
+          Map.of(
+              "p_qnt", p.getId(),
+              "p_proc_sal_id", p.getId(),
+              "p_ano_orcamento", p.getId()
+          ));
+    });
 
   }
 
@@ -134,7 +137,10 @@ public class ProcessamentoSalarialWriteService {
     if (!illegalProcesses.isEmpty())
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'DEV'", illegalProcesses);
 
-    processes.forEach(p -> callProcedure("EliminarCab").execute(Map.of("p_cab_id", p.getCab1Id())));
+    processes.forEach(p -> {
+      var call = callProcedure(Processamento.PROCEDURE_ELIMINAR_CAB.getName());
+      call.execute(Map.of("p_cab_id", p.getCab1Id()));
+    });
   }
 
   public void autorizar(List<Long> processamentoIds) {
@@ -151,13 +157,14 @@ public class ProcessamentoSalarialWriteService {
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'CABIMENTADO'", illegalProcesses);
 
     // TODO 07/12/2025 15:19 validate this parameters
-    processes.forEach(p -> callProcedure("AutorizarCab")
-        .execute(
-            Map.of(
-                "p_qnt", p.getId(),
-                "p_cabimento_id", p.getId()
-            ))
-    );
+    processes.forEach(p -> {
+      var call = callProcedure(Processamento.PROCEDURE_AUTORIZAR_CAB.getName());
+      call.execute(
+          Map.of(
+              "p_qnt", p.getId(),
+              "p_cabimento_id", p.getCab1Id()
+          ));
+    });
   }
 
   public void processarSalario(ProcessamentoSalarioRequestDTO request) {
@@ -171,7 +178,7 @@ public class ProcessamentoSalarialWriteService {
     if (tipoRelacionamentoAtual.getFlgProcessa().equals("0"))
       throw IgrpResponseStatusException.badRequest("Este colaborador encontra-se marcado para não processamento");
 
-    callProcedure("processar")
+    callProcedure(Processamento.PROCEDURE_PROCESSAR.getName())
         .execute(
             Map.of(
                 "p_dt_inicio", request.getDataInicio(),
@@ -187,7 +194,24 @@ public class ProcessamentoSalarialWriteService {
 
   private SimpleJdbcCall callProcedure(String procedureName) {
     return new SimpleJdbcCall(dataSource)
-        .withCatalogName(PACKAGE)
+        .withCatalogName(Processamento.PACKAGE.getName())
         .withProcedureName(procedureName);
+  }
+
+  @Getter
+  private enum Processamento {
+
+    PACKAGE("RH_PROCESSAMENTO_SALARIAL_DB"),
+    PROCEDURE_AUTORIZAR_CAB("AutorizarCab"),
+    PROCEDURE_CABIMENTAR_PROC("CabimentarProc"),
+    PROCEDURE_ELIMINAR_PROC("EliminarProc"),
+    PROCEDURE_ELIMINAR_CAB("EliminarCab"),
+    PROCEDURE_PROCESSAR("processar");
+
+    private final String name;
+
+    Processamento(String name) {
+      this.name = name;
+    }
   }
 }

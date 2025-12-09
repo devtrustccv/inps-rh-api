@@ -1,6 +1,7 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.processamento.application.dto.ColaboradorResponseDTO;
+import cv.inps.rh.processamento.application.dto.PesquisaCentroCustoResponseDTO;
 import cv.inps.rh.processamento.application.dto.PesquisaColaboradorResponseDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -106,13 +107,28 @@ public interface TiposRelacionamentoEntityRepository extends
       Pageable pageable
   );
 
+  @Query("""
+      SELECT new cv.inps.rh.processamento.application.dto.PesquisaCentroCustoResponseDTO(
+            null,
+            t.institId.nome
+           )
+      FROM TiposRelacionamentoEntity t
+      WHERE t.institId IS NOT NULL
+           AND (:directionId IS NULL OR t.institId.id = :directionId)
+           AND (:nome IS NULL OR LOWER(t.funId.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+      """)
+  Page<PesquisaCentroCustoResponseDTO> pesquisaCentroCusto(
+      @Param("directionId") Long directionId,
+      @Param("nome") String nome,
+      Pageable pageable
+  );
 
   @Query("""
-       select tr
-       from TiposRelacionamentoEntity tr
-       where tr.funId.uuid = :funUuid
-         and tr.contrVinculoId.uuid = :contratoUuid
-       """)
+      select tr
+      from TiposRelacionamentoEntity tr
+      where tr.funId.uuid = :funUuid
+        and tr.contrVinculoId.uuid = :contratoUuid
+      """)
   TiposRelacionamentoEntity findByFunUuidAndContratoUuid(
       @Param("funUuid") UUID funUuid,
       @Param("contratoUuid") UUID contratoUuid);
