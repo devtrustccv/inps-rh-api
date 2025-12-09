@@ -86,7 +86,7 @@ public class ValidarDadosPessoaisService {
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRel);
 
-    funcionario.setValidacoes(java.util.List.of(validacao));
+    funcionario.getValidacoes().add(validacao);
 
     var saved = funcionarioEntityRepository.save(funcionario);
 
