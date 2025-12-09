@@ -45,7 +45,7 @@ public class ValidarDadosAcademicosService {
     // 1) Se tem pendentes mas não enviou validar → erro
     if (temPendentes && estadoValidacao == null) {
       throw IgrpResponseStatusException.badRequest(
-          "Funcionario possui validação pendente de dados pessoais, por favor validar"
+          "Funcionario possui validação pendente de dados academicos, por favor validar"
       );
     }
 
@@ -78,11 +78,17 @@ public class ValidarDadosAcademicosService {
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRel);
 
-    funcionario.setValidacoes(java.util.List.of(validacao));
+    funcionario.getValidacoes().add(validacao);
 
-    var saved = funcionarioEntityRepository.save(funcionario);
+    var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    validacaoEntityRepository.findById(validacao.getId())
+    validacaoEntityRepository
+        .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(
+            funcionario.getUuid(),
+            Estado.P,
+            TipoAcao.UPDATE.name(),
+            Referencia.DADOS_ACADEMICOS.name()
+        )
         .ifPresent(v -> {
           v.setReferenciaId(saved.getId());
           validacaoEntityRepository.save(v);

@@ -39,16 +39,17 @@ public class ValidarDadosBancariosService {
     var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
-    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_BANCARIOS);
+    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE,
+        Referencia.DADOS_BANCARIOS);
 
     // 1) Se tem pendentes mas não enviou validar → erro
     if (temPendentes && estadoValidacao == null) {
       throw IgrpResponseStatusException.badRequest(
-          "Funcionario possui validação pendente de dados pessoais, por favor validar"
-      );
+          "Funcionario possui validação pendente de dados bancarios, por favor validar");
     }
 
     var dadosBancarios = dadosBancariosMapper.syncBancarios(funcionario.getDadosBancarios(), dadosBancariosReqDTO);
+    funcionario.setDadosBancarios(dadosBancarios);
 
     if (temPendentes) {
 
@@ -70,11 +71,16 @@ public class ValidarDadosBancariosService {
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRel);
 
-    funcionario.setValidacoes(java.util.List.of(validacao));
+    funcionario.getValidacoes().add(validacao);
 
-    var saved = funcionarioEntityRepository.save(funcionario);
+    var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    validacaoEntityRepository.findById(validacao.getId())
+    validacaoEntityRepository
+        .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(
+            funcionario.getUuid(),
+            Estado.P,
+            TipoAcao.UPDATE.name(),
+            Referencia.DADOS_BANCARIOS.name())
         .ifPresent(v -> {
           v.setReferenciaId(saved.getId());
           validacaoEntityRepository.save(v);
@@ -85,7 +91,8 @@ public class ValidarDadosBancariosService {
   }
 
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado novoEstado) {
-    if (funcionarioEntity == null) return;
+    if (funcionarioEntity == null)
+      return;
 
     var bancarios = funcionarioEntity.getDadosBancarios();
 

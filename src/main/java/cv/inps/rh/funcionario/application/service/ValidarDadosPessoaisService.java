@@ -17,6 +17,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntity
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,7 @@ public class ValidarDadosPessoaisService {
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final ContactoMapper contactoMapper;
 
+  @Transactional
   public ValidacaoDadosPessoaisDTO executar(ValidaDadosPessoaisCommand command) {
 
     var dto = command.getValidacaodadospessoais();
@@ -88,9 +90,15 @@ public class ValidarDadosPessoaisService {
 
     funcionario.getValidacoes().add(validacao);
 
-    var saved = funcionarioEntityRepository.save(funcionario);
+    var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    validacaoEntityRepository.findById(validacao.getId())
+    validacaoEntityRepository
+        .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(
+            funcionario.getUuid(),
+            Estado.P,
+            TipoAcao.UPDATE.name(),
+            Referencia.DADOS_PESSOAIS.name()
+        )
         .ifPresent(v -> {
           v.setReferenciaId(saved.getId());
           validacaoEntityRepository.save(v);

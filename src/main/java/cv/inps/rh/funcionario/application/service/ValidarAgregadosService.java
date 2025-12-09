@@ -44,7 +44,7 @@ public class ValidarAgregadosService {
     // 1) Se tem pendentes mas não enviou validar → erro
     if (temPendentes && estadoValidacao == null) {
       throw IgrpResponseStatusException.badRequest(
-          "Funcionario possui validação pendente de dados pessoais, por favor validar"
+          "Funcionario possui validação pendente de dados de agregados, por favor validar"
       );
     }
 
@@ -66,15 +66,21 @@ public class ValidarAgregadosService {
     var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var validacao = contratuaisEntityMapper
-        .toValidacaoInsert("UPDATE", "FAMILIA", Estado.P);
+        .toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.FAMILIA.name(), Estado.P);
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRel);
 
-    funcionario.setValidacoes(java.util.List.of(validacao));
+    funcionario.getValidacoes().add(validacao);
 
-    var saved = funcionarioEntityRepository.save(funcionario);
+    var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    validacaoEntityRepository.findById(validacao.getId())
+    validacaoEntityRepository
+        .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(
+            funcionario.getUuid(),
+            Estado.P,
+            TipoAcao.UPDATE.name(),
+            Referencia.FAMILIA.name()
+        )
         .ifPresent(v -> {
           v.setReferenciaId(saved.getId());
           validacaoEntityRepository.save(v);
