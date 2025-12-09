@@ -18,6 +18,18 @@
       "primaryKey": false
     },
     {
+      "name": "idColaborador",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "uuid",
       "objectType": "java",
       "type": "string",
