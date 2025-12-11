@@ -1,0 +1,36 @@
+{
+  "type": "dto",
+  "module": "configuracao",
+  "name": "FeriadoListRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "anoReferente",
+      "objectType": "java",
+      "type": "integer",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "feriados",
+      "objectType": "dto",
+      "type": "Feriado",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "configuracao"
+    }
+  ],
+  "id": "o9c804csoe"
+}

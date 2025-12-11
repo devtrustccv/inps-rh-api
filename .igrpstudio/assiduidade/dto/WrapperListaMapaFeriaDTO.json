@@ -1,0 +1,27 @@
+{
+  "type": "dto",
+  "module": "assiduidade",
+  "name": "WrapperListaMapaFeria",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "Page",
+    "module": "shared"
+  },
+  "attributes": [
+    {
+      "name": "content",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list"
+    }
+  ],
+  "id": "22643hmfho"
+}
