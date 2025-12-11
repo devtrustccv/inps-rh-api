@@ -1,0 +1,46 @@
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
+
+package cv.inps.rh.shared.infrastructure.persistence.entity;
+
+import cv.inps.rh.shared.config.AuditEntity;
+import cv.igrp.framework.stereotype.IgrpEntity;
+import jakarta.persistence.*;
+import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+
+
+@Getter
+@Setter
+@IgrpEntity
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "RH_T_TIPO_FALTAS")
+public class TipoFaltaEntity extends AuditEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_tipo_falta")
+    @SequenceGenerator(name = "seq_tipo_falta", sequenceName = "SEQ_TIPO_FALTA", allocationSize = 1)
+    @Column(name = "id", unique = true, nullable = false)
+    private Long id;
+
+  
+    @NotBlank(message = "nome is mandatory")
+    @Column(name="nome", nullable = false)
+    private String nome;
+
+  
+    @Column(name="tipo")
+    private String tipo;
+
+  
+    @Column(name="tf_id")
+    private Long tfId;
+
+  
+    @Column(name="falta")
+    private String falta;
+
+  
+}
