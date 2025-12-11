@@ -8,6 +8,9 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
+import cv.inps.rh.shared.application.constants.Estado;
+import java.util.UUID;
 
 
 @Getter
@@ -20,7 +23,8 @@ import jakarta.validation.constraints.NotNull;
 public class FaltaEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_falta")
+    @SequenceGenerator(name = "seq_falta", sequenceName = "SEQ_FALTA", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
@@ -41,4 +45,53 @@ public class FaltaEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
     private AssiduidadeSinteseDiarioEntity tiprelId;
+    @Column(name="descricao_motivo")
+    private String descricaoMotivo;
+
+  
+    @Column(name="decisao_responsavel")
+    private String decisaoResponsavel;
+
+  
+    @Column(name="obs_responsavel")
+    private String obsResponsavel;
+
+  
+    @Column(name="despacho_rh")
+    private String despachoRh;
+
+  
+    @Column(name="tf_id")
+    private Long tfId;
+
+  
+    @Column(name="horas_ausencia")
+    private String horasAusencia;
+
+  
+    @Column(name="data_inicio")
+    private LocalDateTime dataInicio;
+
+  
+    @Column(name="data_fim")
+    private LocalDateTime dataFim;
+
+  
+    @Column(name="flg_desconto")
+    private Integer flgDesconto;
+
+  
+    @Column(name="flg_justificativo")
+    private String flgJustificativo;
+
+  
+    @Enumerated(EnumType.STRING)
+    @Column(name="estado")
+    private Estado estado;
+
+  
+    @Column(name="uuid")
+    private UUID uuid;
+
+  
 }
