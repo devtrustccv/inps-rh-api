@@ -20,7 +20,7 @@ import java.util.Map;
 @IgrpController
 @RestController
 @RequestMapping(path = "configuracao")
-@Tag(name = "Configuração", description = "Gestão e Parametrização Global do Sistema")
+@Tag(name = "Configuracao", description = "Gestão e Parametrização Global do Sistema")
 public class ConfiguracaoController {
 
   private final Configuration configuration;
