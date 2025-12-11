@@ -1,16 +1,13 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
 
-package cv.inps.rh.processamento.infrastructure.persistence.entity;
+package cv.inps.rh.shared.infrastructure.persistence.entity;
 
 import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
-import cv.inps.rh.shared.domain.models.InstituicaoEntity;
-import cv.inps.rh.shared.domain.models.FuncionarioEntity;
-import cv.inps.rh.shared.domain.models.SecaoEntity;
 
 
 @Getter

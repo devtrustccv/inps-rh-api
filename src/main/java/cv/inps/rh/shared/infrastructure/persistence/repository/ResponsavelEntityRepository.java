@@ -1,6 +1,6 @@
-package cv.inps.rh.processamento.infrastructure.persistence.repository;
+package cv.inps.rh.shared.infrastructure.persistence.repository;
 
-import cv.inps.rh.processamento.infrastructure.persistence.entity.ResponsavelEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
