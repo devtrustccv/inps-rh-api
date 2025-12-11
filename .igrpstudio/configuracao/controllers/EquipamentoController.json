@@ -1,0 +1,77 @@
+{
+  "type": "controller",
+  "name": "Equipamento",
+  "module": "configuracao",
+  "description": "Equipamento Handling",
+  "basePath": "configuracao",
+  "actions": [
+    {
+      "actionName": "saveEquipamentosLocalTrabalho",
+      "path": "{localTrabalhoId}/equipamentos",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "EquipamentoListRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "configuracao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "localTrabalhoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getEquipamentosLocalTrabalho",
+      "path": "{localTrabalhoId}/equipamentos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "EquipamentoListRequest",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "configuracao"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "localTrabalhoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "forxcky5fn"
+}
