@@ -39,7 +39,7 @@ public class HoraExtraEntity extends AuditEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pedido_id", referencedColumnName = "id")
-    private PedidoEntity pedidoId;
+    private AssiduidadeSinteseDiarioEntity pedidoId;
     @Column(name="data_inicio")
     private LocalDate dataInicio;
 
