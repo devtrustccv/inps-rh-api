@@ -25,6 +25,8 @@ public interface ParamContratoEntityRepository extends
 
   List<ParamContratoEntity> findAllByEstado(Estado estado);
 
+  List<ParamContratoEntity> findAllByEstadoAndParamVinculoId_Id(Estado estado, Long paramVinculoId);
+
   Optional<ParamContratoEntity> findByUuid(UUID uuid);
 
   default ParamContratoEntity findByUuidOrThrow(UUID uuid) {

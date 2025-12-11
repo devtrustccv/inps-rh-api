@@ -1,5 +1,5 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
 
 package cv.inps.rh.parametrizacao.interfaces.rest;
 
@@ -26,7 +26,10 @@ import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 @IgrpController
 @RestController
 @RequestMapping(path = "api/v1/parametrizacao")
-@Tag(name = "Parametrizacao", description = "Modulo parametrizacao")
+@Tag(
+    name = "Parametrizacao",
+    description = "Modulo parametrizacao"
+)
 public class ParametrizacaoController {
 
   
@@ -45,7 +48,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -63,9 +66,8 @@ public class ParametrizacaoController {
 
       final var query = new GetDominiosQuery(dominio, referencia);
 
-      ResponseEntity<List<DominioDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -77,7 +79,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -94,9 +96,8 @@ public class ParametrizacaoController {
 
       final var query = new GetCargosAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -108,7 +109,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -125,9 +126,8 @@ public class ParametrizacaoController {
 
       final var query = new GetCarreirasAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -139,7 +139,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -156,9 +156,8 @@ public class ParametrizacaoController {
 
       final var query = new GetCategoriasAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -170,7 +169,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -182,14 +181,13 @@ public class ParametrizacaoController {
   )
   
   public ResponseEntity<List<ParametrizacaoDTO>> getParamContratosAtivos(
-    )
+    @RequestParam(value = "paramVinculoId", required = false) Long paramVinculoId)
   {
 
-      final var query = new GetParamContratosAtivosQuery();
+      final var query = new GetParamContratosAtivosQuery(paramVinculoId);
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -201,7 +199,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -218,9 +216,8 @@ public class ParametrizacaoController {
 
       final var query = new GetEscaloesAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -232,7 +229,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -249,9 +246,8 @@ public class ParametrizacaoController {
 
       final var query = new GetLocalTrabalhoAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -263,7 +259,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -280,9 +276,8 @@ public class ParametrizacaoController {
 
       final var query = new GetParamSituacaoLaboralAtivoQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -294,7 +289,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -311,9 +306,8 @@ public class ParametrizacaoController {
 
       final var query = new GetVinculosAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -325,7 +319,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -342,9 +336,8 @@ public class ParametrizacaoController {
 
       final var query = new GetSeccoesAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -356,7 +349,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -373,9 +366,8 @@ public class ParametrizacaoController {
 
       final var query = new GetTiposDocumentoAtivosQuery();
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -387,7 +379,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -404,9 +396,8 @@ public class ParametrizacaoController {
 
       final var query = new GetParamSituacaoDetalheAtivoQuery(situacaoLaboralId);
 
-      ResponseEntity<List<ParametrizacaoDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
 }
