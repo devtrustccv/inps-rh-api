@@ -20,7 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "RH_T_DISPENSA")
-public class DipensaEntity extends AuditEntity {
+public class DispensaEntity extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_dispensa")
