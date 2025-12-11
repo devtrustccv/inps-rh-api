@@ -61,10 +61,11 @@ public class FaltaEntity extends AuditEntity {
     private String despachoRh;
 
   
-    @Column(name="tf_id")
-    private Long tfId;
 
-  
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tf_id", referencedColumnName = "id")
+    private TipoFaltaEntity tfId;
     @Column(name="horas_ausencia")
     private String horasAusencia;
 
