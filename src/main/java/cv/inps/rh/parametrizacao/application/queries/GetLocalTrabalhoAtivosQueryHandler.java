@@ -2,6 +2,7 @@ package cv.inps.rh.parametrizacao.application.queries;
 
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
+import cv.inps.rh.parametrizacao.application.dto.LocalTrabalhoDTO;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.repository.ParamLocalTrabalhoRepository;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamLocalTrabMapper;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class GetLocalTrabalhoAtivosQueryHandler implements QueryHandler<GetLocalTrabalhoAtivosQuery, ResponseEntity<List<ParametrizacaoDTO>>>{
+public class GetLocalTrabalhoAtivosQueryHandler implements QueryHandler<GetLocalTrabalhoAtivosQuery, ResponseEntity<List<LocalTrabalhoDTO>>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetLocalTrabalhoAtivosQueryHandler.class);
 
@@ -27,10 +28,10 @@ public class GetLocalTrabalhoAtivosQueryHandler implements QueryHandler<GetLocal
   }
 
    @IgrpQueryHandler
-  public ResponseEntity<List<ParametrizacaoDTO>> handle(GetLocalTrabalhoAtivosQuery query) {
+  public ResponseEntity<List<LocalTrabalhoDTO>> handle(GetLocalTrabalhoAtivosQuery query) {
      var paramLocalTrabalhos =  paramLocalTrabalhoRepository.findAllActive();
-     List<ParametrizacaoDTO> parametrizacoes = paramLocalTrabalhos.stream()
-         .map(paramLocalTrabMapper::toParametrizacaoDto)
+     var parametrizacoes = paramLocalTrabalhos.stream()
+         .map(paramLocalTrabMapper::toLocalTrabalhoDto)
          .toList();
      return ResponseEntity.ok(parametrizacoes);
   }

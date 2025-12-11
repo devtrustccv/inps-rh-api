@@ -3,6 +3,7 @@ package cv.inps.rh.parametrizacao.application.queries;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.parametrizacao.application.dto.VinculoDTO;
 import cv.inps.rh.parametrizacao.domain.repository.ParamVinculoRepository;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamVinculoMapper;
 import org.slf4j.Logger;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class GetVinculosAtivosQueryHandler implements QueryHandler<GetVinculosAtivosQuery, ResponseEntity<List<ParametrizacaoDTO>>>{
+public class GetVinculosAtivosQueryHandler implements QueryHandler<GetVinculosAtivosQuery, ResponseEntity<List<VinculoDTO>>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetVinculosAtivosQueryHandler.class);
 
@@ -27,10 +28,10 @@ public class GetVinculosAtivosQueryHandler implements QueryHandler<GetVinculosAt
   }
 
    @IgrpQueryHandler
-  public ResponseEntity<List<ParametrizacaoDTO>> handle(GetVinculosAtivosQuery query) {
+  public ResponseEntity<List<VinculoDTO>> handle(GetVinculosAtivosQuery query) {
      var paramVinculos =  paramVinculoRepository.findAllActive();
-     List<ParametrizacaoDTO> parametrizacoes = paramVinculos.stream()
-         .map(paramVinculoMapper::toParametrizacaoDto)
+     var parametrizacoes = paramVinculos.stream()
+         .map(paramVinculoMapper::toVinculoDto)
          .toList();
      return ResponseEntity.ok(parametrizacoes);
   }
