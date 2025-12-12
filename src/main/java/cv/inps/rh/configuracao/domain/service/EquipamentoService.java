@@ -29,11 +29,11 @@ public class EquipamentoService {
 
     var local = localRepository.findByUuidOrThrow(UUID.fromString(localId));
 
+    var ups = upsEntityRepository.findById(local.getUpsId());
+
     var data = new ArrayList<EquipamentoEntity>();
 
     for (var obj : dto.getEquipamentos()) {
-
-      var ups = upsEntityRepository.findById(local.getUpsId());
 
       final EquipamentoEntity equipment;
       if (StringUtils.hasText(obj.getId())) {
@@ -42,7 +42,6 @@ public class EquipamentoService {
         equipment = new EquipamentoEntity();
         equipment.setUuid(UuidCreator.getTimeOrderedEpoch());
         equipment.setEstado(Estado.A);
-        equipment.setIdLocalTrabalho(local);
       }
       equipment.setIdEquipamento(obj.getIdEquipamento());
       equipment.setLocal(obj.getDescricaoLocal());
@@ -60,7 +59,9 @@ public class EquipamentoService {
 
   public EquipamentoListRequestDTO getEquipmentsByLocalId(String localId) {
 
-    var data = equipamentoEntityRepository.findAllByIdLocalTrabalho_UuidAndEstado(UUID.fromString(localId), Estado.A);
+    var local = localRepository.findByUuidOrThrow(UUID.fromString(localId));
+
+    var data = equipamentoEntityRepository.findAllByIdUps_idAndEstado(local.getUpsId(), Estado.A);
 
     var response = new ArrayList<EquipamentoRequestDTO>();
 

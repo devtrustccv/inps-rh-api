@@ -113,24 +113,6 @@
       }
     },
     {
-      "name": "id_local_trabalho",
-      "type": "relation",
-      "length": 255,
-      "nullable": true,
-      "unique": false,
-      "primaryKey": false,
-      "skipFieldRevision": false,
-      "relation": {
-        "type": "OneToOne",
-        "entity": "ParamLocalTrabEntity",
-        "referencedColumnName": "id",
-        "cardinality": "twoWay",
-        "fetchType": "lazy",
-        "module": "shared",
-        "orphanRemoval": false
-      }
-    },
-    {
       "name": "tipo",
       "type": "string",
       "length": 255,

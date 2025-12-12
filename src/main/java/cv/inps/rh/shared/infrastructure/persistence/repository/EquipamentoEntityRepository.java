@@ -22,7 +22,7 @@ public interface EquipamentoEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "EquipamentoEntity not found for id: " + id));
   }
 
-  List<EquipamentoEntity> findAllByIdLocalTrabalho_UuidAndEstado(UUID localId, Estado estado);
+  List<EquipamentoEntity> findAllByIdUps_idAndEstado(Long upsId, Estado estado);
 
   Optional<EquipamentoEntity> findByUuid(UUID uuid);
 
