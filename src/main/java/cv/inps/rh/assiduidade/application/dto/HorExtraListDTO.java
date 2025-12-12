@@ -17,43 +17,43 @@ import lombok.AllArgsConstructor;
 
 
 @IgrpDTO
-public class DispensaListDTO  {
+public class HorExtraListDTO  {
 
-
-
+  
+  
   private Long id ;
-
-
+  
+  
   private String uuid ;
-
-
+  
+  
   private String direcao ;
-
-
+  
+  
+  private String nomeColaborador ;
+  
+  
+  private String categoria ;
+  
+  
   private String vinculo ;
-
-
-  private String dataPedido ;
-
-
-  private String dataDispensa ;
-
-
-  private String intervaloHoras ;
-
-
-  private Integer totalHorasDireito ;
-
-
-  private Integer totalHorasSolicitadas ;
-
-
-  private String motivoDispensa ;
-
-
+  
+  
+  private String horasTrabalho ;
+  
+  
+  private String data ;
+  
+  
+  private String intervaloData ;
+  
+  
+  private String duracaoDispensa ;
+  
+  
   private String estado ;
-
-
+  
+  
   private String estadoDesc ;
 
 }

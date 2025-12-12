@@ -1,24 +1,12 @@
 {
   "type": "dto",
   "module": "assiduidade",
-  "name": "DispensaList",
+  "name": "FeriasList",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "id",
-      "objectType": "java",
-      "type": "long",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "uuid",
+      "name": "nomeColaborador",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -42,6 +30,18 @@
       "primaryKey": false
     },
     {
+      "name": "secao",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "vinculo",
       "objectType": "java",
       "type": "string",
@@ -54,7 +54,7 @@
       "primaryKey": false
     },
     {
-      "name": "dataPedido",
+      "name": "categoria",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -66,31 +66,7 @@
       "primaryKey": false
     },
     {
-      "name": "dataDispensa",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "intervaloHoras",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "totalHorasDireito",
+      "name": "totalDireito",
       "objectType": "java",
       "type": "integer",
       "required": false,
@@ -102,7 +78,7 @@
       "primaryKey": false
     },
     {
-      "name": "totalHorasSolicitadas",
+      "name": "totalDireitoAno",
       "objectType": "java",
       "type": "integer",
       "required": false,
@@ -114,9 +90,21 @@
       "primaryKey": false
     },
     {
-      "name": "motivoDispensa",
+      "name": "totalPlaneado",
       "objectType": "java",
-      "type": "string",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "totalAgendado",
+      "objectType": "java",
+      "type": "integer",
       "required": false,
       "before": false,
       "after": false,
@@ -150,5 +138,5 @@
       "primaryKey": false
     }
   ],
-  "id": "93scg2tbt9"
+  "id": "bsypc50vx0"
 }

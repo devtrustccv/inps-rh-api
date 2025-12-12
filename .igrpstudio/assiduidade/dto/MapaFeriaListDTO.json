@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "assiduidade",
-  "name": "DispensaList",
+  "name": "MapaFeriaList",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
@@ -30,6 +30,18 @@
       "primaryKey": false
     },
     {
+      "name": "anoReferente",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "direcao",
       "objectType": "java",
       "type": "string",
@@ -42,55 +54,7 @@
       "primaryKey": false
     },
     {
-      "name": "vinculo",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "dataPedido",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "dataDispensa",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "intervaloHoras",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "totalHorasDireito",
+      "name": "totalColaborador",
       "objectType": "java",
       "type": "integer",
       "required": false,
@@ -102,7 +66,7 @@
       "primaryKey": false
     },
     {
-      "name": "totalHorasSolicitadas",
+      "name": "totalFeriasAgendadas",
       "objectType": "java",
       "type": "integer",
       "required": false,
@@ -114,9 +78,9 @@
       "primaryKey": false
     },
     {
-      "name": "motivoDispensa",
+      "name": "totalFeriasPorAgendar",
       "objectType": "java",
-      "type": "string",
+      "type": "integer",
       "required": false,
       "before": false,
       "after": false,
@@ -150,5 +114,5 @@
       "primaryKey": false
     }
   ],
-  "id": "93scg2tbt9"
+  "id": "uqdpq5it99"
 }

@@ -9,21 +9,48 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.assiduidade.application.dto.MapaFeriaListDTO;
-import cv.inps.rh.shared.application.dto.PageDTO;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.EqualsAndHashCode;
+
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 
-@EqualsAndHashCode(callSuper = true)
+
 @IgrpDTO
-public class WrapperListaMapaFeriaDTO extends PageDTO {
+public class FeriasListDTO  {
 
   
-  @Valid
-  private List<MapaFeriaListDTO> content = new ArrayList<>();
+  
+  private String nomeColaborador ;
+  
+  
+  private String direcao ;
+  
+  
+  private String secao ;
+  
+  
+  private String vinculo ;
+  
+  
+  private String categoria ;
+  
+  
+  private Integer totalDireito ;
+  
+  
+  private Integer totalDireitoAno ;
+  
+  
+  private Integer totalPlaneado ;
+  
+  
+  private Integer totalAgendado ;
+  
+  
+  private String estado ;
+  
+  
+  private String estadoDesc ;
 
 }
