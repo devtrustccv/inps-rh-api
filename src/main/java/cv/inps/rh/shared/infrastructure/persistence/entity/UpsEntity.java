@@ -1,5 +1,5 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
@@ -31,6 +31,4 @@ public class UpsEntity extends AuditEntity {
     @NotBlank(message = "nome is mandatory")
     @Column(name="nome", nullable = false)
     private String nome;
-
-
 }

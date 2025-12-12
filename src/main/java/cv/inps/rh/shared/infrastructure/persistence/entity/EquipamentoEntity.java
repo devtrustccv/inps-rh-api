@@ -27,8 +27,7 @@ import java.util.UUID;
 public class EquipamentoEntity extends AuditEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_rh_equip_contr_acesso")
-  @SequenceGenerator(name = "seq_rh_equip_contr_acesso", sequenceName = "SEQ_RH_EQUIP_CONTR_ACESSO", allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", unique = true, nullable = false)
   private Long id;
 
@@ -71,15 +70,9 @@ public class EquipamentoEntity extends AuditEntity {
   @Column(name = "estado", nullable = false)
   private Estado estado;
 
-
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_ups", unique = true, referencedColumnName = "id")
   private UpsEntity idUps;
-
-
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "id_local_trabalho", unique = true, referencedColumnName = "id")
-  private ParamLocalTrabEntity idLocalTrabalho;
   @NotBlank(message = "tipo is mandatory")
   @Column(name = "tipo", nullable = false)
   private String tipo;

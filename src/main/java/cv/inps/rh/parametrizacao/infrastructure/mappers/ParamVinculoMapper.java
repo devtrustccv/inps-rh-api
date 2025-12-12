@@ -1,6 +1,7 @@
 package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.parametrizacao.application.dto.VinculoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamVinculo;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +56,18 @@ public class ParamVinculoMapper {
     ParametrizacaoDTO dto = new ParametrizacaoDTO();
     dto.setLabel(domain.getNome());
     dto.setValue(domain.getId());
+    return dto;
+  }
+
+  public VinculoDTO toVinculoDto(ParamVinculo domain) {
+    if (domain == null) return null;
+    VinculoDTO dto = new VinculoDTO();
+    dto.setLabel(domain.getNome());
+    dto.setValue(domain.getId());
+    dto.setFlgCarreira(domain.getFlgCarreira());
+    dto.setFlgSalario(domain.getFlgSalario());
+    dto.setFlgContrato(domain.getFlgContrato());
+    dto.setFlgTempoServico(domain.getFlgTempoServico());
     return dto;
   }
 }

@@ -1,5 +1,5 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
@@ -26,25 +26,22 @@ import java.util.UUID;
 public class ParamLocalTrabEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_local_bancao")
-    @SequenceGenerator(name = "seq_local_bancao", sequenceName = "SEQ_LOCAL_BANCAO", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
 
-    @Column(name="uuid")
+  @Column(name="uuid")
     private UUID uuid;
 
 
-    @NotBlank(message = "nome is mandatory")
+  @NotBlank(message = "nome is mandatory")
     @Column(name="nome", nullable = false)
     private String nome;
 
 
-    @Column(name="nome_normalizado")
+  @Column(name="nome_normalizado")
     private String nomeNormalizado;
-
-
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -59,7 +56,7 @@ public class ParamLocalTrabEntity extends AuditEntity {
     private Long upsId;
 
 
-    @Enumerated(EnumType.STRING)
+  @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 

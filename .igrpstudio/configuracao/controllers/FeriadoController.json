@@ -1,0 +1,70 @@
+{
+  "type": "controller",
+  "name": "Feriado",
+  "module": "configuracao",
+  "description": "Feriados management",
+  "basePath": "configuracao",
+  "actions": [
+    {
+      "actionName": "saveFeriados",
+      "path": "feriado",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "FeriadoListRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "configuracao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "getFeriadosPorAno",
+      "path": "feriado/{anoReferente}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "FeriadoListRequest",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "configuracao"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "anoReferente",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "uzhtugvgcm-saveFeriados-getFeriadosPorAno"
+}

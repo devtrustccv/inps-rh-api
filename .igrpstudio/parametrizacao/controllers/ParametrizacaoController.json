@@ -160,7 +160,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "Parametrizacao",
+                "type": "LocalTrabalho",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "list",
@@ -202,7 +202,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "Parametrizacao",
+                "type": "Vinculo",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "list",
@@ -284,5 +284,5 @@
       ]
     }
   ],
-  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos"
+  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos"
 }

@@ -1,8 +1,8 @@
 {
   "type": "model",
   "module": "shared",
-  "name": "TipoFaltaEntity",
-  "tableName": "RH_T_TIPO_FALTAS",
+  "name": "FeriadoEntity",
+  "tableName": "RH_T_PARAM_FERIADO",
   "audit": true,
   "crud": false,
   "revision": false,
@@ -14,74 +14,48 @@
       "nullable": true,
       "unique": false,
       "primaryKey": true,
-      "generationType": "SEQUENCE",
+      "generationType": "IDENTITY",
       "skipFieldRevision": false,
-      "objectType": "java",
-      "sequenceName": "SEQ_TIPO_FALTA"
+      "objectType": "java"
     },
     {
-      "name": "nome",
-      "type": "string",
+      "name": "uuid",
+      "type": "uuid",
       "length": 255,
       "nullable": false,
-      "unique": false,
-      "primaryKey": false,
-      "skipFieldRevision": false
-    },
-    {
-      "name": "tipo",
-      "type": "string",
-      "length": 255,
-      "nullable": true,
-      "unique": false,
-      "primaryKey": false,
-      "skipFieldRevision": false
-    },
-    {
-      "name": "tf_id",
-      "type": "long",
-      "length": 255,
-      "nullable": true,
       "unique": false,
       "primaryKey": false,
       "skipFieldRevision": false,
       "objectType": "java"
     },
     {
-      "name": "falta",
-      "type": "string",
+      "name": "ano_referente",
+      "type": "integer",
       "length": 255,
-      "nullable": true,
+      "nullable": false,
       "unique": false,
       "primaryKey": false,
-      "skipFieldRevision": false
+      "skipFieldRevision": false,
+      "objectType": "java"
     },
     {
-      "name": "situacao",
-      "type": "string",
-      "length": 255,
-      "nullable": true,
-      "unique": false,
-      "primaryKey": false,
-      "skipFieldRevision": false
-    },
-    {
-      "name": "desconto_remuneracao",
-      "type": "string",
-      "length": 255,
-      "nullable": true,
-      "unique": false,
-      "primaryKey": false,
-      "skipFieldRevision": false
-    },
-    {
-      "name": "uuid",
+      "name": "descricao",
       "type": "string",
       "length": 255,
       "nullable": false,
       "unique": false,
       "primaryKey": false,
       "skipFieldRevision": false
+    },
+    {
+      "name": "data",
+      "type": "date",
+      "length": 255,
+      "nullable": false,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
     },
     {
       "name": "estado",
@@ -95,7 +69,7 @@
       "module": "shared"
     }
   ],
-  "id": "n022ybuhdz",
+  "id": "g44ncv3xt6",
   "uniqueConstraints": [],
   "indexes": []
 }

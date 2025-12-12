@@ -22,6 +22,8 @@ import cv.inps.rh.parametrizacao.application.queries.*;
 import java.util.List;
 import cv.inps.rh.parametrizacao.application.dto.DominioDTO;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.parametrizacao.application.dto.LocalTrabalhoDTO;
+import cv.inps.rh.parametrizacao.application.dto.VinculoDTO;
 
 @IgrpController
 @RestController
@@ -233,14 +235,14 @@ public class ParametrizacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = ParametrizacaoDTO.class,
+                  implementation = LocalTrabalhoDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<List<ParametrizacaoDTO>> getLocalTrabalhoAtivos(
+  public ResponseEntity<List<LocalTrabalhoDTO>> getLocalTrabalhoAtivos(
     )
   {
 
@@ -293,14 +295,14 @@ public class ParametrizacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = ParametrizacaoDTO.class,
+                  implementation = VinculoDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<List<ParametrizacaoDTO>> getVinculosAtivos(
+  public ResponseEntity<List<VinculoDTO>> getVinculosAtivos(
     )
   {
 

@@ -1,0 +1,62 @@
+{
+  "type": "dto",
+  "module": "parametrizacao",
+  "name": "Vinculo",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "Parametrizacao",
+    "module": "parametrizacao"
+  },
+  "attributes": [
+    {
+      "name": "flgCarreira",
+      "objectType": "java",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "flgSalario",
+      "objectType": "java",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "flgContrato",
+      "objectType": "java",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "flgTempoServico",
+      "objectType": "java",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "qzre9zspoe"
+}

@@ -1,5 +1,6 @@
 package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
+import cv.inps.rh.parametrizacao.application.dto.LocalTrabalhoDTO;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamLocalTrab;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
@@ -65,6 +66,19 @@ public class ParamLocalTrabMapper {
     ParametrizacaoDTO dto = new ParametrizacaoDTO();
     dto.setLabel(domain.getNome());
     dto.setValue(domain.getId());
+    return dto;
+  }
+
+  public LocalTrabalhoDTO toLocalTrabalhoDto(ParamLocalTrab domain) {
+    if (domain == null) return null;
+
+    var dto = new LocalTrabalhoDTO();
+    dto.setLabel(domain.getNome());
+    dto.setValue(domain.getId());
+    dto.setPaisId(domain.getPais().id());
+    dto.setPaisDesc(domain.getPais().nome());
+    dto.setIlhaId(domain.getIlha().id());
+    dto.setIlhaDesc(domain.getIlha().nome());
     return dto;
   }
 
