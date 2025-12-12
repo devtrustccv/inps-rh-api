@@ -9,6 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import cv.inps.rh.assiduidade.application.dto.PicagemListDTO;
 import cv.inps.rh.shared.application.dto.PageDTO;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,7 @@ import lombok.EqualsAndHashCode;
 public class WrapperListaPicagemDTO extends PageDTO {
 
   
-  
-  private List<String> content = new ArrayList<>();
+  @Valid
+  private List<PicagemListDTO> content = new ArrayList<>();
 
 }

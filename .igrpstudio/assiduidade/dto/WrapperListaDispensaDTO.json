@@ -11,8 +11,8 @@
   "attributes": [
     {
       "name": "content",
-      "objectType": "java",
-      "type": "string",
+      "objectType": "dto",
+      "type": "DispensaList",
       "required": false,
       "before": false,
       "after": false,
@@ -20,7 +20,8 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false,
-      "collectionType": "list"
+      "collectionType": "list",
+      "module": "assiduidade"
     }
   ],
   "id": "7qs57pap2d"

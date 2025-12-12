@@ -9,21 +9,45 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.assiduidade.application.dto.FaltaListDTO;
-import cv.inps.rh.shared.application.dto.PageDTO;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.EqualsAndHashCode;
+
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 
-@EqualsAndHashCode(callSuper = true)
+
 @IgrpDTO
-public class WrapperListaFaltaDTO extends PageDTO {
+public class DispensaListDTO  {
 
   
-  @Valid
-  private List<FaltaListDTO> content = new ArrayList<>();
+  
+  private Long id ;
+  
+  
+  private String uuid ;
+  
+  
+  private String direcao ;
+  
+  
+  private String vinculo ;
+  
+  
+  private String dataPedido ;
+  
+  
+  private String dataDispensa ;
+  
+  
+  private String intervaloHoras ;
+  
+  
+  private Integer totalHorasDireito ;
+  
+  
+  private Integer totalHorasSolicitadas ;
+  
+  
+  private String motivoDispensa ;
 
 }
