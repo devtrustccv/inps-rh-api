@@ -1,5 +1,5 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
 
 package cv.inps.rh.configuracao.application.constants;
 
@@ -25,7 +25,8 @@ public enum ConfigurationType implements IgrpEnum<String> {
   PARAM_LOCAL_TRABALHO("local_trabalho_type", "PARAM_LOCAL_TRABALHO"),
   PARAM_SECCAO("seccao_type", "PARAM_SECCAO"),
   PARAM_TIPO_DOCUMENTO("tipo_documento_type", "PARAM_TIPO_DOCUMENTO"),
-  PARAM_NOTIFICACAO("notificacao_type", "PARAM_NOTIFICACAO");
+  PARAM_NOTIFICACAO("notificacao_type", "PARAM_NOTIFICACAO"),
+  PARAM_TIPO_FALTA_AUSENCIA("tipo_falta_ausencia_type", "PARAM_TIPO_FALTA_AUSENCIA");
 
   private final String code;
   private final String description;
@@ -53,7 +54,6 @@ public enum ConfigurationType implements IgrpEnum<String> {
 
   /**
    * Attempts to find the enum value associated with the given code.
-   *
    * @param code The code to look up
    * @return An Optional containing the enum value if found, empty Optional otherwise
    */
@@ -63,7 +63,6 @@ public enum ConfigurationType implements IgrpEnum<String> {
 
   /**
    * Finds the enum value associated with the given code or throws an exception if not found.
-   *
    * @param code The code to look up
    * @return The enum value for the given code
    * @throws IllegalArgumentException if no enum value exists for the given code

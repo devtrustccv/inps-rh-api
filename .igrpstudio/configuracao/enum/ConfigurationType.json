@@ -72,6 +72,13 @@
         "notificacao_type",
         "PARAM_NOTIFICACAO"
       ]
+    },
+    {
+      "name": "PARAM_TIPO_FALTA_AUSENCIA",
+      "attributes": [
+        "tipo_falta_ausencia_type",
+        "PARAM_TIPO_FALTA_AUSENCIA"
+      ]
     }
   ],
   "attributes": [
