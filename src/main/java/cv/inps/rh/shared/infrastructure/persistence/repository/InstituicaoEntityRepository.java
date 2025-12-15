@@ -11,12 +11,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface InstituicaoEntityRepository extends
     JpaRepository<InstituicaoEntity, Long>,
-    JpaSpecificationExecutor<InstituicaoEntity>
-{
+    JpaSpecificationExecutor<InstituicaoEntity> {
 
-      default InstituicaoEntity findByIdOrThrow(Long id) {
-          return this.findById(id)
-          .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"InstituicaoEntity not found for id: " + id));
-      }
-
+  default InstituicaoEntity findByIdOrThrow(Long id) {
+    return this.findById(id)
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "InstituicaoEntity not found for id: " + id));
+  }
 }

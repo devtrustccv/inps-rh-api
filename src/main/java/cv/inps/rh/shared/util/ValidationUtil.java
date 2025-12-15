@@ -15,7 +15,6 @@ public final class ValidationUtil {
       throw IgrpResponseStatusException.badRequest("Decisão inválida: " + decision);
   }
 
-
   public static <E extends Enum<E>> Optional<E> getEnum(Class<E> enumClass, String value) {
     if (value == null) return Optional.empty();
 
@@ -26,6 +25,10 @@ public final class ValidationUtil {
     } catch (IllegalArgumentException e) {
       return Optional.empty();
     }
+  }
+
+  public static boolean isValidNumberId(Long number) {
+    return number != null && number > 0;
   }
 
 
