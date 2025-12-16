@@ -232,7 +232,14 @@
             }
           }
         }
-      }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "institId",
+          "isRequired": true
+        }
+      ]
     },
     {
       "actionName": "getTiposDocumentoAtivos",
@@ -284,5 +291,5 @@
       ]
     }
   ],
-  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos"
+  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos"
 }

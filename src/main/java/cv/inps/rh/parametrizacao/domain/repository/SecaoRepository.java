@@ -7,4 +7,6 @@ import java.util.List;
 public interface SecaoRepository {
 
   List<Secao> findAllActive();
+
+  List<Secao> findAllActiveByInstitId(Long institId);
 }
