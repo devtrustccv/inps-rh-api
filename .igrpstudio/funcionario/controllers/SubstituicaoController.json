@@ -1,0 +1,137 @@
+{
+  "type": "controller",
+  "name": "Substituicao",
+  "module": "funcionario",
+  "description": "gestao substituicoes",
+  "basePath": "api/v1/funcionarios",
+  "actions": [
+    {
+      "actionName": "registarSubstituicao",
+      "path": "{idFuncionario}/substituicoes",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "Substituicao",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Substituicao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "validarSubstituicao",
+      "path": "{idFuncionario}/substituicoes/{substituicaoId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "Substituicao",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Substituicao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "substituicaoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "listaSubstituicao",
+      "path": "substituicoes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "SubstituicaoSumary",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "idFuncionario",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "alqrgnd0ly-registarSubstituicao-listaSubstituicao-registarSubstituicao-validarSubstituicao-listaSubstituicao"
+}

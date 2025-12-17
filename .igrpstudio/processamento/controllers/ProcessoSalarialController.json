@@ -1,0 +1,165 @@
+{
+  "type": "controller",
+  "name": "ProcessoSalarial",
+  "module": "processamento",
+  "description": "Processamento Salarial",
+  "basePath": "processamento-salarial",
+  "actions": [
+    {
+      "actionName": "removerFuncionariosProcessamentoSalarial",
+      "path": "/folha/funcionarios/excluir",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "MarcarNaoProcessadoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "getProcessamentoSalarial",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperProcessamentoSalarial",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "direcaoId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "tipo",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "page",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "size",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "executarAcaoNoProcessamento",
+      "path": "processamento-acao",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ProcessamentoActionRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "processarSalario",
+      "path": "processar",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ProcessamentoSalarioRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "id": "dcry51pbek-validarProcessamentoSalarial"
+}

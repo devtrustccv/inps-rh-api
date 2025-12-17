@@ -1,0 +1,37 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "ValidarAgregadosDependentes",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "validar",
+      "objectType": "enum",
+      "type": "EstadoValidacao",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "shared"
+    },
+    {
+      "name": "familiares",
+      "objectType": "dto",
+      "type": "AgregadoDependenteReq",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "funcionario",
+      "collectionType": "list"
+    }
+  ],
+  "id": "shlf133b27"
+}

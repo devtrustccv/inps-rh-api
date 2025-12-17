@@ -1,0 +1,28 @@
+{
+  "type": "dto",
+  "module": "assiduidade",
+  "name": "WrapperListaDispensa",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "Page",
+    "module": "shared"
+  },
+  "attributes": [
+    {
+      "name": "content",
+      "objectType": "dto",
+      "type": "DispensaList",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "assiduidade"
+    }
+  ],
+  "id": "7qs57pap2d"
+}

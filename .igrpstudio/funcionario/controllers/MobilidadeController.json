@@ -1,0 +1,180 @@
+{
+  "type": "controller",
+  "name": "Mobilidade",
+  "module": "funcionario",
+  "description": "GEstao mobilidade",
+  "basePath": "api/v1/funcionarios",
+  "actions": [
+    {
+      "actionName": "getListMobilidades",
+      "path": "mobilidades",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListMobilidade",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "idFuncionario",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "tipoMobilidade",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getMobilidadeById",
+      "path": "mobilidades/{id}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Mobilidade",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "saveMobilidade",
+      "path": "{idFuncionario}/mobilidades",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "Mobilidade",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Mobilidade",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "validarMobilidade",
+      "path": "{idFuncionario}/mobilidades/{mobilidadeId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "Mobilidade",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Mobilidade",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "mobilidadeId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "tunlfcyaeu-getListMobilidades-saveMobilidade-saveMobilidade-validarMobilidade"
+}

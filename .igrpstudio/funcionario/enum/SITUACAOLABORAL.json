@@ -1,0 +1,52 @@
+{
+  "type": "enum",
+  "module": "funcionario",
+  "name": "SituacaoLaboral",
+  "values": [
+    {
+      "name": "ATIVO",
+      "attributes": [
+        "ATIVO",
+        "ativo"
+      ]
+    },
+    {
+      "name": "SUSPENSO",
+      "attributes": [
+        "SUSPENSO",
+        "suspenso"
+      ]
+    },
+    {
+      "name": "CESSADO",
+      "attributes": [
+        "CESSADO",
+        "cessado"
+      ]
+    },
+    {
+      "name": "APOSENTADO",
+      "attributes": [
+        "APOSENTADO",
+        "aposentado"
+      ]
+    },
+    {
+      "name": "DISPONIVEL_RESERVA",
+      "attributes": [
+        "DISPONIVEL_RESERVA",
+        "diponivel ou reserva"
+      ]
+    }
+  ],
+  "attributes": [
+    {
+      "type": "string",
+      "name": "Code"
+    },
+    {
+      "type": "string",
+      "name": "Description"
+    }
+  ]
+}

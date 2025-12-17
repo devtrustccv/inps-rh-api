@@ -1,0 +1,246 @@
+{
+  "type": "controller",
+  "name": "Carreira",
+  "module": "funcionario",
+  "description": "Gestao carreiras funcionario",
+  "basePath": "api/v1/funcionarios",
+  "actions": [
+    {
+      "actionName": "getCarreiraList",
+      "path": "carreiras",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperCarreiraList",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "idFuncionario",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "isRequired": true,
+          "value": "20"
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "isRequired": true,
+          "value": "0"
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "tipoCarreira",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "novaCarreira",
+      "path": "{funcionarioId}/carreiras",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "DadosContratuaisReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "validarCarreira",
+      "path": "{funcionarioId}/carreiras/{carreiraId}/validar",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "collectionType": "none",
+              "name": "data",
+              "type": "ValidacaoCarreira",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "carreiraId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getCarreiraById",
+      "path": "carreiras/{carreiraId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "CarreiraResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "carreiraId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "eliminarCarreira",
+      "path": "carreiras/{carreiraId}",
+      "method": "DELETE",
+      "responses": {
+        "204": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "carreiraId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "atualizarCarreira",
+      "path": "{funcionarioId}/carreiras/{carreiraId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "collectionType": "none",
+              "name": "data",
+              "type": "DadosContratuaisReq",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "carreiraId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-validarCarreira-getCarreiraById-getCarreiraById-novaCarreira-validarCarreira"
+}

@@ -1,0 +1,105 @@
+{
+  "type": "controller",
+  "name": "Pesquisa",
+  "module": "processamento",
+  "description": "Pesquisas Globais",
+  "basePath": "pesquisa",
+  "actions": [
+    {
+      "actionName": "pesquisaColaborador",
+      "path": "colaborador",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperPesquisaColaborador",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "nome",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "direccao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "centroCusto",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "page",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "size",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "pesquisaCentroCusto",
+      "path": "centro-custo",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperPesquisaColaborador",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "nome",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "centroCusto",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "page",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "size",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
+    }
+  ],
+  "id": "980jkk64em-pesquisaColaboradorCopy"
+}

@@ -1,18 +1,18 @@
 package cv.inps.rh.shared.config;
 
-import java.util.Optional;
-
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
+
+import java.util.Optional;
 
 public class ApplicationAuditorAware implements AuditorAware<String> {
 
   @Value("${spring.profiles.active}")
   private String activeProfile;
 
+  @NotNull
   @Override
   public Optional<String> getCurrentAuditor() {
     var preferredUsername = getPreferredUsername();
@@ -28,7 +28,7 @@ public class ApplicationAuditorAware implements AuditorAware<String> {
     public String getPreferredUsername() {
 
     if ("development".equals(activeProfile) || "staging".equals(activeProfile)) {
-    return "";
+    return "local";
     }
 
     var authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -1,0 +1,52 @@
+{
+  "type": "enum",
+  "module": "processamento",
+  "name": "ProcessamentoSalarialAction",
+  "values": [
+    {
+      "name": "ELIMINAR_PROCESSAMENTO",
+      "attributes": [
+        "PROV",
+        "ELIMINAR_PROCESSAMENTO"
+      ]
+    },
+    {
+      "name": "VALIDAR",
+      "attributes": [
+        "PROV",
+        "VALIDAR"
+      ]
+    },
+    {
+      "name": "CABIMENTAR",
+      "attributes": [
+        "VALIDADO",
+        "CABIMENTAR"
+      ]
+    },
+    {
+      "name": "ELIMINAR_CABIMENTO",
+      "attributes": [
+        "DEV",
+        "ELIMINAR_CABIMENTO"
+      ]
+    },
+    {
+      "name": "AUTORIZAR",
+      "attributes": [
+        "CABIMENTADO",
+        "AUTORIZAR"
+      ]
+    }
+  ],
+  "attributes": [
+    {
+      "type": "string",
+      "name": "Code"
+    },
+    {
+      "type": "string",
+      "name": "Description"
+    }
+  ]
+}

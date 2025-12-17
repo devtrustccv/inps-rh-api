@@ -1,0 +1,28 @@
+{
+  "type": "dto",
+  "module": "configuracao",
+  "name": "WrapperTipoFaltaAusencia",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "Page",
+    "module": "shared"
+  },
+  "attributes": [
+    {
+      "name": "content",
+      "objectType": "dto",
+      "type": "TipoFaltaAusencia",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "configuracao"
+    }
+  ],
+  "id": "1l20ex09h5"
+}

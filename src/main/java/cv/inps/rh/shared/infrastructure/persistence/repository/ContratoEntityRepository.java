@@ -1,0 +1,74 @@
+package cv.inps.rh.shared.infrastructure.persistence.repository;
+
+import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamContratoEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+
+@Repository
+public interface ContratoEntityRepository extends
+    JpaRepository<ContratoEntity, Long>,
+    JpaSpecificationExecutor<ContratoEntity>
+{
+
+      default ContratoEntity findByIdOrThrow(Long id) {
+          return this.findById(id)
+          .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"ContratoEntity not found for id: " + id));
+      }
+
+  @Query(value = """
+        SELECT * FROM (
+            SELECT ce.*, ROWNUM rnum
+            FROM (
+                SELECT ce.*
+                FROM rh_t_contrato ce
+                LEFT JOIN rh_t_funcionarios fi ON fi.id = ce.fun_id
+                LEFT JOIN rh_t_param_contrato tc ON tc.id = ce.tp_contrato_id
+                LEFT JOIN rh_t_param_vinculo vi ON vi.id = ce.vinculo_id
+                WHERE (:vinculo IS NULL OR ce.vinculo_id = :vinculo)
+                and fi.uuid = :funcionarioId
+                ORDER BY ce.data_inicio DESC
+            ) ce
+            WHERE ROWNUM <= :endRow
+        )
+        WHERE rnum >= :startRow
+        """, nativeQuery = true)
+  List<ContratoEntity> findAllWithPagination(
+      @Param("vinculo") Long vinculo,
+      @Param("funcionarioId") String funcionarioId,
+      @Param("startRow") int startRow,
+      @Param("endRow") int endRow
+  );
+
+  boolean existsByTpContratoId(ParamContratoEntity tipoContrato);
+
+  Optional<ContratoEntity> findByUuid(UUID uuid);
+
+  boolean existsByFunIdAndEstado(FuncionarioEntity fun, Estado estado);
+
+
+  @Query("""
+       select c
+       from ContratoEntity c
+       where c.funId.uuid = :funUuid
+         and c.versao = 1
+       """)
+  ContratoEntity findPrimeiroContratoFuncionario(@Param("funUuid") UUID funUuid);
+
+  ContratoEntity findTopByFunId_UuidOrderByVersaoDesc(UUID funUuid);
+
+
+
+}

@@ -1,0 +1,94 @@
+{
+  "type": "enum",
+  "module": "configuracao",
+  "name": "ConfigurationType",
+  "values": [
+    {
+      "name": "PARAM_VINCULO",
+      "attributes": [
+        "param_vinculo_type",
+        "PARAM_VINCULO"
+      ]
+    },
+    {
+      "name": "PARAM_SITUACAO_LABORAL",
+      "attributes": [
+        "situacao_laboral_type",
+        "PARAM_SITUACAO_LABORAL"
+      ]
+    },
+    {
+      "name": "PARAM_TIPO_CONTRATO_LABORAL",
+      "attributes": [
+        "tipo_contrato_laboral_type",
+        "PARAM_TIPO_CONTRATO_LABORAL"
+      ]
+    },
+    {
+      "name": "PARAM_CARREIRA",
+      "attributes": [
+        "carreira_type",
+        "PARAM_CARREIRA"
+      ]
+    },
+    {
+      "name": "PARAM_CARGO",
+      "attributes": [
+        "cargo_type",
+        "PARAM_CARGO"
+      ]
+    },
+    {
+      "name": "PARAM_ESCALAO",
+      "attributes": [
+        "escalao_type",
+        "PARAM_ESCALAO"
+      ]
+    },
+    {
+      "name": "PARAM_LOCAL_TRABALHO",
+      "attributes": [
+        "local_trabalho_type",
+        "PARAM_LOCAL_TRABALHO"
+      ]
+    },
+    {
+      "name": "PARAM_SECCAO",
+      "attributes": [
+        "seccao_type",
+        "PARAM_SECCAO"
+      ]
+    },
+    {
+      "name": "PARAM_TIPO_DOCUMENTO",
+      "attributes": [
+        "tipo_documento_type",
+        "PARAM_TIPO_DOCUMENTO"
+      ]
+    },
+    {
+      "name": "PARAM_NOTIFICACAO",
+      "attributes": [
+        "notificacao_type",
+        "PARAM_NOTIFICACAO"
+      ]
+    },
+    {
+      "name": "PARAM_TIPO_FALTA_AUSENCIA",
+      "attributes": [
+        "tipo_falta_ausencia_type",
+        "PARAM_TIPO_FALTA_AUSENCIA"
+      ]
+    }
+  ],
+  "attributes": [
+    {
+      "type": "string",
+      "name": "Code"
+    },
+    {
+      "type": "string",
+      "name": "Description"
+    }
+  ]
+}

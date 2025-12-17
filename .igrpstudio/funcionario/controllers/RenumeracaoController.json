@@ -1,0 +1,207 @@
+{
+  "type": "controller",
+  "name": "Renumeracao",
+  "module": "funcionario",
+  "description": "gest abonos subsidios",
+  "basePath": "api/v1/funcionarios",
+  "actions": [
+    {
+      "actionName": "getListRenumeracoes",
+      "path": "renumeracoes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListRenumeracao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "idFuncionario",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "AdicionarNovoRemuneracao",
+      "path": "{funcionarioId}/remuneracao",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "collectionType": "none",
+              "name": "data",
+              "type": "NovoRemuneracaoRequest",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "adicionarNovoPagamento",
+      "path": "{funcionarioId}/pagamento",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "NovoPagamentoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "validarNovoRemuneracao",
+      "path": "validar-remuneracao",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ValidarRemuneracaoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "validarNovoPagamento",
+      "path": "validar-pagamento",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ValidarPagamentoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "id": "ixh1ofde84-getListAbonosSubsidios-getListAbonosSubsidios-getListRenumeracoes-getListRenumeracoes-validarNovoRemuneracao-AdicionarNovoRemuneracao-adicionarNovoPagamento-validarNovoRemuneracao-validarNovoRemuneracaoCopy"
+}

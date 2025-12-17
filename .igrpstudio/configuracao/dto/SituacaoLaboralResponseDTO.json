@@ -1,0 +1,52 @@
+{
+  "type": "dto",
+  "module": "configuracao",
+  "name": "SituacaoLaboralResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "SituacaoLaboralRequest",
+    "module": "configuracao"
+  },
+  "attributes": [
+    {
+      "name": "id",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "estadoDescricao",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "associacao",
+      "objectType": "dto",
+      "type": "SituacaoLaboralMotivoRequest",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "configuracao"
+    }
+  ],
+  "id": "hl1lm9puke"
+}

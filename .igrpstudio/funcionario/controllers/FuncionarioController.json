@@ -1,0 +1,584 @@
+{
+  "type": "controller",
+  "name": "Funcionario",
+  "module": "funcionario",
+  "description": "gestao de funcionarios",
+  "basePath": "api/v1/funcionarios",
+  "actions": [
+    {
+      "actionName": "createFuncionario",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "FuncionarioRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "FuncionarioResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "getFuncionarioById",
+      "path": "{id}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "FuncionarioResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getValicoesUtilizadores",
+      "path": "validacoes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaValidacoes",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "nomeColaborador",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "tipoOperacao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "referenciaName",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getListFuncionarios",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaFuncionario",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "nome",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direccao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "tipoVinculoLaboral",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "validarRegistoColaborador",
+      "path": "{id}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "FuncionarioRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "inativarAtivarColaborador",
+      "path": "status/{id}",
+      "method": "PATCH",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AtivarInativarColaborador",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "AtivarInativarColaborador",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "validaDadosPessoais",
+      "path": "{idFuncionario}/dados-pessoais",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ValidacaoDadosPessoais",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ValidacaoDadosPessoais",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "validarDadosAcademicos",
+      "path": "{idFuncionario}/dados-academicos",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ValidarDadosAcademicos",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ValidarDadosAcademicos",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "validarDadosFamiliares",
+      "path": "{idFuncionario}/familiares",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ValidarAgregadosDependentes",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ValidarAgregadosDependentes",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "validarDadosBancarios",
+      "path": "{idFuncionario}/dados-bancarios",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ValidarDadosBancarios",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ValidarDadosBancarios",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getDadosPessoais",
+      "path": "{idFuncionario}/dados-pessoais",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DadosPessoaisResp",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getDadosAcademicos",
+      "path": "{idFuncionario}/dados-academicos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DadosAcademicosProfResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getDadosFamiliares",
+      "path": "{idFuncionario}/familiares",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "AgregadoDependenteResp",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getDadosBancarios",
+      "path": "{idFuncionario}/dados-bancarios",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DadosBancariosResp",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getSituacaoLaboralColaborador",
+      "path": "status/{id}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "AtivarInativarColaborador",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "69p09wi4e0-criarFuncionario-validarRegistoColaborador-createFuncionario-validarRegistoColaborador-createFuncionario-getFuncionarioById-createFuncionario-validarRegistoColaborador-mudarEstadoColaborador-validaDadosPessoais-getDadosFamiliares-getDadosBancarios"
+}

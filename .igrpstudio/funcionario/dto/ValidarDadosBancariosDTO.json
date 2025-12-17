@@ -1,0 +1,37 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "ValidarDadosBancarios",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "validar",
+      "objectType": "enum",
+      "type": "EstadoValidacao",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "shared"
+    },
+    {
+      "name": "dadosBancarios",
+      "objectType": "dto",
+      "type": "DadosBancariosReq",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "funcionario",
+      "collectionType": "list"
+    }
+  ],
+  "id": "m5e8os4da6"
+}

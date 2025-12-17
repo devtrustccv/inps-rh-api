@@ -1,14 +1,15 @@
 package cv.inps.rh;
 
 import cv.inps.rh.shared.config.ApplicationAuditorAware;
-import java.time.LocalDateTime;
-import java.util.Optional;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.auditing.DateTimeProvider;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @SpringBootApplication
 @EnableJpaAuditing(auditorAwareRef = "auditAware", dateTimeProviderRef = "auditDateTimeProvider")
@@ -26,5 +27,7 @@ public class RHINPSSERVICEApplication {
 
   public static void main(String[] args) {
     SpringApplication.run(RHINPSSERVICEApplication.class, args);
+
   }
+
 }

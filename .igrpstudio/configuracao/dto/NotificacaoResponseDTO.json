@@ -1,0 +1,38 @@
+{
+  "type": "dto",
+  "module": "configuracao",
+  "name": "NotificacaoResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "id",
+      "objectType": "java",
+      "type": "string",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "estadoDescricao",
+      "objectType": "java",
+      "type": "string",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "0t582w87c8_copy",
+  "extends": {
+    "name": "NotificacaoRequest",
+    "module": "configuracao"
+  }
+}

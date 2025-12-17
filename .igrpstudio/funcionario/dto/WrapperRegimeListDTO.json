@@ -1,0 +1,28 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "WrapperRegimeList",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "Page",
+    "module": "shared"
+  },
+  "attributes": [
+    {
+      "name": "content",
+      "objectType": "dto",
+      "type": "RegimeList",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "funcionario"
+    }
+  ],
+  "id": "k4v7hc1a7f"
+}

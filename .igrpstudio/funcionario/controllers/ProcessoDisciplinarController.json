@@ -1,0 +1,170 @@
+{
+  "type": "controller",
+  "name": "ProcessoDisciplinar",
+  "module": "funcionario",
+  "description": "Gestão de Processos Disciplinares",
+  "basePath": "api/v1/funcionarios",
+  "actions": [
+    {
+      "actionName": "novoProcessoDisciplinar",
+      "path": "{funcionarioId}/processo-disciplinar",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ProcessoDisciplinarRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getProcessosFuncionario",
+      "path": "{funcionarioId}/processo-disciplinar",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ProcessoDisciplinarResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getProcessoDisciplinarById",
+      "path": "processo-disciplinar/{processoDisciplinarId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ProcessoDisciplinarResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "processoDisciplinarId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "updateProcessoDisciplinar",
+      "path": "processo-disciplinar/{processoDisciplinarId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ProcessoDisciplinarRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "processoDisciplinarId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "deleteProcessoDisciplinar",
+      "path": "processo-disciplinar/{processoDisciplinarId}",
+      "method": "DELETE",
+      "responses": {
+        "204": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "processoDisciplinarId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "2d8lf4vnyr-novoProcessoDisciplinar-novoProcessoDisciplinar-getProcessosFuncionario-novoProcessoDisciplinar-getProcessosFuncionario-getProcessoDisciplinarById-updateProcessoDisciplinar-deleteProcessoDisciplinar"
+}

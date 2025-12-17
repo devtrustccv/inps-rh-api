@@ -1,0 +1,28 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "WrapperListaValidacoes",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "content",
+      "objectType": "dto",
+      "type": "ValidacaoResponse",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "funcionario",
+      "collectionType": "list"
+    }
+  ],
+  "id": "6rw8y6pd63",
+  "extends": {
+    "name": "Page",
+    "module": "shared"
+  }
+}
