@@ -23,7 +23,7 @@ public interface ParamSituacaoDetalheEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "ParamSituacaoDetalheEntity not found for id: " + id));
   }
 
-  List<ParamSituacaoDetalheEntity> findAllBySituacaoLaboralId_IdAndEstado(Long situacaoLaboralIdId, Estado estado);
+  List<ParamSituacaoDetalheEntity> findAllBySituacaoId_IdAndEstado(Long situacaoLaboralIdId, Estado estado);
 
   Optional<ParamSituacaoDetalheEntity> findByUuid(UUID uuid);
 

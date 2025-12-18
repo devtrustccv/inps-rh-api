@@ -29,7 +29,7 @@ public class GetParamSituacaoDetalheAtivoQueryHandler implements QueryHandler<Ge
       LOGGER.info("GetParamSituacaoDetalheAtivoQueryHandler.handle: {}", query);
 
       Long situacaoLaboralId = query.getSituacaoLaboralId();
-     var lista = paramSituacaoDetalheEntityRepository.findAllBySituacaoLaboralId_IdAndEstado(situacaoLaboralId, Estado.A);
+     var lista = paramSituacaoDetalheEntityRepository.findAllBySituacaoId_IdAndEstado(situacaoLaboralId, Estado.A);
 
      var response = lista.stream()
          .map(e -> {

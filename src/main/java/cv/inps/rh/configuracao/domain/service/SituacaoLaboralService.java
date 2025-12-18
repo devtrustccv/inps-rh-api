@@ -143,7 +143,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     response.setEstado(e.getEstado().getCode());
     response.setEstadoDescricao(e.getEstado().getDescription());
 
-    var data = paramSituacaoDetalheEntityRepository.findAllBySituacaoLaboralId_IdAndEstado(e.getId(), Estado.A).stream()
+    var data = paramSituacaoDetalheEntityRepository.findAllBySituacaoId_IdAndEstado(e.getId(), Estado.A).stream()
         .map(obj -> {
           var resp = new SituacaoLaboralMotivoRequestDTO();
           resp.setAssociacaoId(obj.getUuid().toString());
