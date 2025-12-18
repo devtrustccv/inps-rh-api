@@ -1,0 +1,70 @@
+{
+  "type": "controller",
+  "name": "Responsavel",
+  "module": "configuracao",
+  "description": "Gestão de Responsáveis Direção",
+  "basePath": "configuracao",
+  "actions": [
+    {
+      "actionName": "getResponsaveisDirecao",
+      "path": "direcao/responsavel/{institutoId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ResponsaveisDirecaoResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "configuracao"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "institutoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "saveResponsaveisDirecao",
+      "path": "direcao/responsavel",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AssociarResponsaveisRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "configuracao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "id": "l70rzcsd9p-getResponsaveisDirecao"
+}
