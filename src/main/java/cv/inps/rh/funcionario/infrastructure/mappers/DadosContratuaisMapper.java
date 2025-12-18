@@ -5,7 +5,6 @@ import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.application.dto.EncargosDescontosRespDTO;
 import cv.inps.rh.funcionario.application.dto.SubsidioRespDTO;
-import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -80,7 +79,7 @@ public class DadosContratuaisMapper {
     return v;
   }
 
-  public SituacaoLaboralEntity toSituacaoLaboral(DadosContratuaisReqDTO dc, ParamSitLaboralEntity param, Estado estado,
+  public SituacaoLaboralEntity toSituacaoLaboral(DadosContratuaisReqDTO dc, ParamSituacaoEntity param, Estado estado,
                                                  String motivoSituacaoLaboral, String observacao) {
     var sl = new SituacaoLaboralEntity();
     sl.setSituacaoLaboralId(param);

@@ -27,24 +27,24 @@ public class ParamSituacaoDetalheEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotNull(message = "situacaoLaboralId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "situacao_laboral_id", referencedColumnName = "id")
-    private ParamSitLaboralEntity situacaoLaboralId;
+    @JoinColumn(name = "situacao_id", referencedColumnName = "id")
+    private ParamSituacaoEntity situacaoId;
     @Column(name="motivo")
     private String motivo;
 
-  
+
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
 }

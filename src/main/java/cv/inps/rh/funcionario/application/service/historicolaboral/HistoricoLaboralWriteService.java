@@ -1,8 +1,6 @@
 package cv.inps.rh.funcionario.application.service.historicolaboral;
 
-import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.ValidarHistoricoLaboralCommand;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.ValidarDadosContratuaisService;
@@ -45,7 +43,7 @@ public class HistoricoLaboralWriteService {
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
   private final OrdemServicoEntityRepository ordemServicoEntityRepository;
-  private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
+  private final ParamSituacaoEntityRepository paramSitLaboralEntityRepository;
   private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
 

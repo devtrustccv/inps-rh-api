@@ -27,7 +27,7 @@ public class SituacaoLaboralColaboradorReadService {
     var tiposRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var situacaoLaboral = new AtivarInativarColaboradorDTO();
-    situacaoLaboral.setSituacaoLaboralId(tiposRelacionamentoAtual.getSituacLaboralId().getMotivoSitLabId().getSituacaoLaboralId().getId());
+    situacaoLaboral.setSituacaoLaboralId(tiposRelacionamentoAtual.getSituacLaboralId().getMotivoSitLabId().getSituacaoId().getId());
     situacaoLaboral.setMotivoId(tiposRelacionamentoAtual.getSituacLaboralId().getMotivoSitLabId().getId());
     situacaoLaboral.setObservacao(tiposRelacionamentoAtual.getSituacLaboralId().getObs());
 

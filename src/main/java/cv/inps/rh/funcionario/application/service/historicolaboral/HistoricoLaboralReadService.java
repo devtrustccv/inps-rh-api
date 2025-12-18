@@ -51,7 +51,7 @@ public class HistoricoLaboralReadService {
           ofNullable(obj.getCargoId()).map(ParamCargoEntity::getNome).ifPresent(response::setCargo);
           ofNullable(obj.getSituacLaboralId())
               .map(SituacaoLaboralEntity::getSituacaoLaboralId)
-              .map(ParamSitLaboralEntity::getNome)
+              .map(ParamSituacaoEntity::getNome)
               .ifPresent(response::setSituacaoLaboral);
 
 
