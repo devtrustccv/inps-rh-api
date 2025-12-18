@@ -1,5 +1,5 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
@@ -7,8 +7,8 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.UUID;
 import jakarta.validation.constraints.NotBlank;
+import java.util.UUID;
 import cv.inps.rh.shared.application.constants.Estado;
 
 
@@ -18,17 +18,18 @@ import cv.inps.rh.shared.application.constants.Estado;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_T_PARAM_SIT_LABORAL")
+@Table(name = "RH_T_PARAM_SITUACAO")
 public class ParamSitLaboralEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_param_situacao")
+    @SequenceGenerator(name = "seq_param_situacao", sequenceName = "SEQ_PARAM_SITUACAO", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
   
-    @Column(name="uuid")
-    private UUID uuid;
+    @Column(name="flg_falta_deconto_sal")
+    private String flgFaltaDecontoSal;
 
   
     @NotBlank(message = "codigo is mandatory")
@@ -64,9 +65,61 @@ public class ParamSitLaboralEntity extends AuditEntity {
     private Integer flgEstadoContrato;
 
   
+    @Column(name="flg_falta")
+    private String flgFalta;
+
+  
+    @Column(name="classificacao_area")
+    private String classificacaoArea;
+
+  
+    @Column(name="flg_abono_beneficio")
+    private String flgAbonoBeneficio;
+
+  
+    @Column(name="flg_situacao_laboral")
+    private String flgSituacaoLaboral;
+
+  
+    @Column(name="uuid")
+    private UUID uuid;
+
+  
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
+
+  
+    @Column(name="tipo_contagem_dias")
+    private String tipoContagemDias;
+
+  
+    @Column(name="num_dias_abonos")
+    private String numDiasAbonos;
+
+  
+    @Column(name="num_dias_desconto_rh")
+    private String numDiasDescontoRh;
+
+  
+    @Column(name="num_dias_ndesconto_rh")
+    private String numDiasNdescontoRh;
+
+  
+    @Column(name="flg_ausencia")
+    private String flgAusencia;
+
+  
+    @Column(name="flg_cessa_vinculo")
+    private String flgCessaVinculo;
+
+  
+    @Column(name="flg_regressa_carreira")
+    private String flgRegressaCarreira;
+
+  
+    @Column(name="tipo_falta")
+    private String tipoFalta;
 
   
 }

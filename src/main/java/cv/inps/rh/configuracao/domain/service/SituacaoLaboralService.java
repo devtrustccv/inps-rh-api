@@ -109,7 +109,6 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
           obj.setEstado(Estado.A);
           obj.setUuid(UuidCreator.getTimeOrderedEpoch());
         }
-        obj.setVinculoId(paramVinculoEntityRepository.findByUuidOrThrow(UUID.fromString(association.getVinculoId())));
         obj.setMotivo(association.getMotivo());
         data.add(obj);
       }
@@ -148,7 +147,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
         .map(obj -> {
           var resp = new SituacaoLaboralMotivoRequestDTO();
           resp.setAssociacaoId(obj.getUuid().toString());
-          resp.setVinculoId(obj.getVinculoId().getUuid().toString());
+         // resp.setVinculoId(obj.getVinculoId().getUuid().toString());
           resp.setMotivo(obj.getMotivo());
           return resp;
         })
