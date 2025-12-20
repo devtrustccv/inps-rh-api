@@ -107,7 +107,7 @@
     },
     {
       "name": "flg_falta",
-      "type": "string",
+      "type": "integer",
       "length": 255,
       "nullable": true,
       "unique": false,
@@ -125,7 +125,7 @@
     },
     {
       "name": "flg_abono_beneficio",
-      "type": "string",
+      "type": "integer",
       "length": 255,
       "nullable": true,
       "unique": false,
@@ -134,7 +134,7 @@
     },
     {
       "name": "flg_situacao_laboral",
-      "type": "string",
+      "type": "integer",
       "length": 255,
       "nullable": true,
       "unique": false,
@@ -173,7 +173,7 @@
     },
     {
       "name": "num_dias_abonos",
-      "type": "string",
+      "type": "integer",
       "length": 255,
       "nullable": true,
       "unique": false,
@@ -182,7 +182,7 @@
     },
     {
       "name": "num_dias_desconto_rh",
-      "type": "string",
+      "type": "integer",
       "length": 255,
       "nullable": true,
       "unique": false,
@@ -191,7 +191,7 @@
     },
     {
       "name": "num_dias_ndesconto_rh",
-      "type": "string",
+      "type": "integer",
       "length": 255,
       "nullable": true,
       "unique": false,
@@ -200,7 +200,7 @@
     },
     {
       "name": "flg_ausencia",
-      "type": "string",
+      "type": "integer",
       "length": 255,
       "nullable": true,
       "unique": false,
@@ -209,7 +209,7 @@
     },
     {
       "name": "flg_cessa_vinculo",
-      "type": "string",
+      "type": "integer",
       "length": 255,
       "nullable": true,
       "unique": false,
@@ -218,7 +218,7 @@
     },
     {
       "name": "flg_regressa_carreira",
-      "type": "string",
+      "type": "integer",
       "length": 255,
       "nullable": true,
       "unique": false,

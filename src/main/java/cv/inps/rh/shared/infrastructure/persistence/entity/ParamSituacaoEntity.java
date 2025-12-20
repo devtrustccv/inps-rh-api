@@ -29,7 +29,7 @@ public class ParamSituacaoEntity extends AuditEntity {
 
 
     @Column(name="flg_falta_deconto_sal")
-    private String flgFaltaDecontoSal;
+    private Integer flgFaltaDecontoSal;
 
 
     @NotBlank(message = "codigo is mandatory")
@@ -61,7 +61,7 @@ public class ParamSituacaoEntity extends AuditEntity {
 
 
     @Column(name="flg_estado_contrato")
-    private Integer flgEstadoContrato;
+    private Integer  flgEstadoContrato;
 
 
     @Column(name="flg_falta")
@@ -73,11 +73,11 @@ public class ParamSituacaoEntity extends AuditEntity {
 
 
     @Column(name="flg_abono_beneficio")
-    private String flgAbonoBeneficio;
+    private Integer flgAbonoBeneficio;
 
 
     @Column(name="flg_situacao_laboral")
-    private String flgSituacaoLaboral;
+    private Integer flgSituacaoLaboral;
 
 
     @Column(name="uuid")
@@ -94,27 +94,27 @@ public class ParamSituacaoEntity extends AuditEntity {
 
 
     @Column(name="num_dias_abonos")
-    private String numDiasAbonos;
+    private Integer numDiasAbonos;
 
 
     @Column(name="num_dias_desconto_rh")
-    private String numDiasDescontoRh;
+    private Integer  numDiasDescontoRh;
 
 
     @Column(name="num_dias_ndesconto_rh")
-    private String numDiasNdescontoRh;
+    private Integer numDiasNdescontoRh;
 
 
     @Column(name="flg_ausencia")
-    private String flgAusencia;
+    private Integer flgAusencia;
 
 
     @Column(name="flg_cessa_vinculo")
-    private String flgCessaVinculo;
+    private Integer flgCessaVinculo;
 
 
     @Column(name="flg_regressa_carreira")
-    private String flgRegressaCarreira;
+    private Integer flgRegressaCarreira;
 
 
     @Column(name="tipo_falta")
