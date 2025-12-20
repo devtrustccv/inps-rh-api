@@ -56,7 +56,7 @@
       "skipFieldRevision": false
     },
     {
-      "name": "flg_renumeracao",
+      "name": "flg_remuneracao",
       "type": "integer",
       "length": 255,
       "nullable": true,

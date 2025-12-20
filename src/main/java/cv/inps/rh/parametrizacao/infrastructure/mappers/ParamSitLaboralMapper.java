@@ -19,7 +19,7 @@ public class ParamSitLaboralMapper {
         entity.getCodigo(),
         entity.getNome(),
         entity.getTipoSituacao(),
-        entity.getFlgRenumeracao(),
+        entity.getFlgRemuneracao(),
         entity.getFlgAfetaCarreira(),
         entity.getFlgContaTempServico(),
         entity.getFlgCessaProgressao(),
@@ -37,7 +37,7 @@ public class ParamSitLaboralMapper {
     entity.setCodigo(domain.getCodigo());
     entity.setNome(domain.getNome());
     entity.setTipoSituacao(domain.getTipoSituacao());
-    entity.setFlgRenumeracao(domain.getFlgRenumeracao());
+    entity.setFlgRemuneracao(domain.getFlgRenumeracao());
     entity.setFlgAfetaCarreira(domain.getFlgAfetaCarreira());
     entity.setFlgContaTempServico(domain.getFlgContaTempServico());
     entity.setFlgCessaProgressao(domain.getFlgCessaProgressao());

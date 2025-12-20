@@ -45,9 +45,8 @@ public class ParamSituacaoEntity extends AuditEntity {
     private String tipoSituacao;
 
 
-    @Column(name="flg_renumeracao")
-    private Integer flgRenumeracao;
-
+    @Column(name="flg_remuneracao")
+    private Integer flgRemuneracao;
 
     @Column(name="flg_afeta_carreira")
     private Integer flgAfetaCarreira;

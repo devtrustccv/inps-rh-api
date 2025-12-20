@@ -61,7 +61,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     e.setCodigo(dto.getCodigo());
     e.setNome(dto.getDescricao());
     e.setTipoSituacao(dto.getTipo());
-    e.setFlgRenumeracao(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
+    e.setFlgRemuneracao(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
     e.setFlgAfetaCarreira(ConfigurationUtils.parseFlag(dto.getCarreira()));
     e.setFlgContaTempServico(ConfigurationUtils.parseFlag(dto.getTempoServico()));
     e.setFlgCessaProgressao(ConfigurationUtils.parseFlag(dto.getProgressaoPromocao()));
@@ -79,7 +79,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
 
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
     e.setFlgAfetaCarreira(ConfigurationUtils.parseFlag(dto.getCarreira()));
-    e.setFlgRenumeracao(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
+    e.setFlgRemuneracao(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
     e.setFlgContaTempServico(ConfigurationUtils.parseFlag(dto.getTempoServico()));
     e.setFlgCessaProgressao(ConfigurationUtils.parseFlag(dto.getProgressaoPromocao()));
     e.setFlgEstadoContrato(ConfigurationUtils.parseFlag(dto.getEstadoContrato()));
@@ -135,7 +135,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     response.setCodigo(e.getCodigo());
     response.setDescricao(e.getNome());
     response.setTipo(type.get(e.getTipoSituacao()));
-    response.setRemuneracao(domain.get(e.getFlgRenumeracao().toString()));
+    response.setRemuneracao(domain.get(e.getFlgRemuneracao().toString()));
     response.setCarreira(domain.get(e.getFlgAfetaCarreira().toString()));
     response.setTempoServico(domain.get(e.getFlgContaTempServico().toString()));
     response.setProgressaoPromocao(domain.get(e.getFlgCessaProgressao().toString()));
