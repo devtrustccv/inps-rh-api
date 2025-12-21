@@ -172,6 +172,31 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+
+        <!-- IGRP File Libraries -->
+        <dependency>
+            <groupId>cv.igrp.platform</groupId>
+            <artifactId>filemanager</artifactId>
+            <version>0.1.0-beta.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cv.igrp.framework.filemanager</groupId>
+            <artifactId>minio</artifactId>
+            <version>0.1.0-beta.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>flying-saucer-pdf-openpdf</artifactId>
+            <version>9.4.0</version>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>
