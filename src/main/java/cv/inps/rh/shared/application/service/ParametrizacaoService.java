@@ -1,7 +1,6 @@
 package cv.inps.rh.shared.application.service;
 
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
-import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.mappers.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +25,7 @@ public class ParametrizacaoService {
   private final BancoMapper bancoMapper;
 
   private final ParamSituacaoDetalheEntityRepository paramSituacaoDetalheEntityRepository;
-  private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
+  private final ParamSituacaoEntityRepository paramSitLaboralEntityRepository;
 
 
   public List<ParametrizacaoDTO> getTiposMovimentos(){

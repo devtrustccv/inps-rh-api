@@ -4,7 +4,7 @@ import cv.inps.rh.parametrizacao.domain.models.ParamSitLaboral;
 import cv.inps.rh.parametrizacao.domain.repository.ParamSituacaoLaboralRepository;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamSitLaboralMapper;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSitLaboralEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -15,7 +15,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ParamSituacaoLaboralImpl implements ParamSituacaoLaboralRepository {
 
-  private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
+  private final ParamSituacaoEntityRepository paramSitLaboralEntityRepository;
   private final ParamSitLaboralMapper paramSitLaboralMapper;
 
   @Override

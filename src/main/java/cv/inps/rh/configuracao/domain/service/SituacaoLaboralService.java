@@ -10,10 +10,10 @@ import cv.inps.rh.configuracao.domain.service.engine.ConfigurationProcess;
 import cv.inps.rh.configuracao.domain.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSitLaboralEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoDetalheEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSitLaboralEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoDetalheEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
 import jakarta.validation.Validator;
@@ -33,14 +33,14 @@ import java.util.stream.Collectors;
 @Service("situacao_laboral_type")
 public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboralRequestDTO> {
 
-  private final ParamSitLaboralEntityRepository repository;
+  private final ParamSituacaoEntityRepository repository;
   private final ParamSituacaoDetalheEntityRepository paramSituacaoDetalheEntityRepository;
   private final ParamVinculoEntityRepository paramVinculoEntityRepository;
   private final DomainEntityRepository domainEntityRepository;
 
   protected SituacaoLaboralService(
       Validator validator, ObjectMapper jsonMapper,
-      ParamSitLaboralEntityRepository repository,
+      ParamSituacaoEntityRepository repository,
       ParamSituacaoDetalheEntityRepository paramSituacaoDetalheEntityRepository,
       ParamVinculoEntityRepository paramVinculoEntityRepository,
       DomainEntityRepository domainEntityRepository
@@ -56,12 +56,12 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
   @Override
   public Object create(SituacaoLaboralRequestDTO dto) {
 
-    var e = new ParamSitLaboralEntity();
+    var e = new ParamSituacaoEntity();
     e.setUuid(UuidCreator.getTimeOrderedEpoch());
     e.setCodigo(dto.getCodigo());
     e.setNome(dto.getDescricao());
     e.setTipoSituacao(dto.getTipo());
-    e.setFlgRenumeracao(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
+    e.setFlgRemuneracao(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
     e.setFlgAfetaCarreira(ConfigurationUtils.parseFlag(dto.getCarreira()));
     e.setFlgContaTempServico(ConfigurationUtils.parseFlag(dto.getTempoServico()));
     e.setFlgCessaProgressao(ConfigurationUtils.parseFlag(dto.getProgressaoPromocao()));
@@ -79,7 +79,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
 
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
     e.setFlgAfetaCarreira(ConfigurationUtils.parseFlag(dto.getCarreira()));
-    e.setFlgRenumeracao(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
+    e.setFlgRemuneracao(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
     e.setFlgContaTempServico(ConfigurationUtils.parseFlag(dto.getTempoServico()));
     e.setFlgCessaProgressao(ConfigurationUtils.parseFlag(dto.getProgressaoPromocao()));
     e.setFlgEstadoContrato(ConfigurationUtils.parseFlag(dto.getEstadoContrato()));
@@ -96,7 +96,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     return "";
   }
 
-  private void saveAssociations(List<SituacaoLaboralMotivoRequestDTO> associations, ParamSitLaboralEntity saved) {
+  private void saveAssociations(List<SituacaoLaboralMotivoRequestDTO> associations, ParamSituacaoEntity saved) {
     if (!CollectionUtils.isEmpty(associations)) {
       var data = new ArrayList<ParamSituacaoDetalheEntity>();
       for (var association : associations) {
@@ -105,11 +105,10 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
           obj = paramSituacaoDetalheEntityRepository.findByUuidOrThrow(UUID.fromString(association.getAssociacaoId()));
         } else {
           obj = new ParamSituacaoDetalheEntity();
-          obj.setSituacaoLaboralId(saved);
+          obj.setSituacaoId(saved);
           obj.setEstado(Estado.A);
           obj.setUuid(UuidCreator.getTimeOrderedEpoch());
         }
-        obj.setVinculoId(paramVinculoEntityRepository.findByUuidOrThrow(UUID.fromString(association.getVinculoId())));
         obj.setMotivo(association.getMotivo());
         data.add(obj);
       }
@@ -130,13 +129,13 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
   }
 
   @NotNull
-  private Object buildResponse(ParamSitLaboralEntity e, Map<String, String> domain, Map<String, String> type, Map<String, String> contractStatus) {
+  private Object buildResponse(ParamSituacaoEntity e, Map<String, String> domain, Map<String, String> type, Map<String, String> contractStatus) {
     var response = new SituacaoLaboralResponseDTO();
     response.setId(e.getUuid().toString());
     response.setCodigo(e.getCodigo());
     response.setDescricao(e.getNome());
     response.setTipo(type.get(e.getTipoSituacao()));
-    response.setRemuneracao(domain.get(e.getFlgRenumeracao().toString()));
+    response.setRemuneracao(domain.get(e.getFlgRemuneracao().toString()));
     response.setCarreira(domain.get(e.getFlgAfetaCarreira().toString()));
     response.setTempoServico(domain.get(e.getFlgContaTempServico().toString()));
     response.setProgressaoPromocao(domain.get(e.getFlgCessaProgressao().toString()));
@@ -144,11 +143,11 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     response.setEstado(e.getEstado().getCode());
     response.setEstadoDescricao(e.getEstado().getDescription());
 
-    var data = paramSituacaoDetalheEntityRepository.findAllBySituacaoLaboralId_IdAndEstado(e.getId(), Estado.A).stream()
+    var data = paramSituacaoDetalheEntityRepository.findAllBySituacaoId_IdAndEstado(e.getId(), Estado.A).stream()
         .map(obj -> {
           var resp = new SituacaoLaboralMotivoRequestDTO();
           resp.setAssociacaoId(obj.getUuid().toString());
-          resp.setVinculoId(obj.getVinculoId().getUuid().toString());
+         // resp.setVinculoId(obj.getVinculoId().getUuid().toString());
           resp.setMotivo(obj.getMotivo());
           return resp;
         })

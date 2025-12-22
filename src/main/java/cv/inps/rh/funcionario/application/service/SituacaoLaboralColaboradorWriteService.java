@@ -25,7 +25,7 @@ import java.time.LocalDate;
 public class SituacaoLaboralColaboradorWriteService {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
-  private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
+  private final ParamSituacaoEntityRepository paramSitLaboralEntityRepository;
   private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final DadosContratuaisMapper dadosContratuaisMapper;

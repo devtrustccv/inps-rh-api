@@ -2,7 +2,7 @@ package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamSitLaboral;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSitLaboralEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ParamSitLaboralMapper {
 
-  public ParamSitLaboral toDomain(ParamSitLaboralEntity entity) {
+  public ParamSitLaboral toDomain(ParamSituacaoEntity entity) {
     if (entity == null) return null;
 
     return ParamSitLaboral.rebuild(
@@ -19,7 +19,7 @@ public class ParamSitLaboralMapper {
         entity.getCodigo(),
         entity.getNome(),
         entity.getTipoSituacao(),
-        entity.getFlgRenumeracao(),
+        entity.getFlgRemuneracao(),
         entity.getFlgAfetaCarreira(),
         entity.getFlgContaTempServico(),
         entity.getFlgCessaProgressao(),
@@ -28,16 +28,16 @@ public class ParamSitLaboralMapper {
     );
   }
 
-  public ParamSitLaboralEntity toEntity(ParamSitLaboral domain) {
+  public ParamSituacaoEntity toEntity(ParamSitLaboral domain) {
     if (domain == null) return null;
 
-    ParamSitLaboralEntity entity = new ParamSitLaboralEntity();
+    ParamSituacaoEntity entity = new ParamSituacaoEntity();
     entity.setId(domain.getId());
     entity.setUuid(domain.getUuid() != null ? domain.getUuid().valor() : null);
     entity.setCodigo(domain.getCodigo());
     entity.setNome(domain.getNome());
     entity.setTipoSituacao(domain.getTipoSituacao());
-    entity.setFlgRenumeracao(domain.getFlgRenumeracao());
+    entity.setFlgRemuneracao(domain.getFlgRenumeracao());
     entity.setFlgAfetaCarreira(domain.getFlgAfetaCarreira());
     entity.setFlgContaTempServico(domain.getFlgContaTempServico());
     entity.setFlgCessaProgressao(domain.getFlgCessaProgressao());

@@ -1,6 +1,5 @@
 package cv.inps.rh.funcionario.application.service;
 
-import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.CreateFuncionarioCommand;
 import cv.inps.rh.funcionario.application.constants.SituacaoLaboral;
 import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
@@ -42,7 +41,7 @@ public class RegistarColaboradorService {
   private final DefPagamentoMapper defPagamentoMapper;
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
-  private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
+  private final ParamSituacaoEntityRepository paramSitLaboralEntityRepository;
 
  private final ValidacaoEntityRepository validacaoEntityRepository;
 

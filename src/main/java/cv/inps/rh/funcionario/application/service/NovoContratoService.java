@@ -1,6 +1,5 @@
 package cv.inps.rh.funcionario.application.service;
 
-import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.NovoContratoCommand;
 import cv.inps.rh.funcionario.application.constants.SituacaoLaboral;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
@@ -14,8 +13,6 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.PagTiprelEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.RemuneracaoTiprelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,7 +38,7 @@ public class NovoContratoService {
   private final RegimeTrabalhoMapper regimeTrabalhoMapper;
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DefPagamentoMapper defPagamentoMapper;
-  private final ParamSitLaboralEntityRepository paramSitLaboralEntityRepository;
+  private final ParamSituacaoEntityRepository paramSitLaboralEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final ValidacaoEntityRepository validacaoEntityRepository;
 

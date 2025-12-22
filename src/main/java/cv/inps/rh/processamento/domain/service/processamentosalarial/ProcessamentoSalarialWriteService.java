@@ -204,8 +204,8 @@ public class ProcessamentoSalarialWriteService {
     PACKAGE("RH_PROCESSAMENTO_SALARIAL_DB"),
     PROCEDURE_AUTORIZAR_CAB("AutorizarCab"),
     PROCEDURE_CABIMENTAR_PROC("CabimentarProc"),
-    PROCEDURE_ELIMINAR_PROC("EliminarProc"),
     PROCEDURE_ELIMINAR_CAB("EliminarCab"),
+    PROCEDURE_ELIMINAR_PROC("EliminarProc"),
     PROCEDURE_PROCESSAR("processar");
 
     private final String name;

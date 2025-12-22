@@ -1,5 +1,5 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
@@ -18,38 +18,33 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_T_PARAM_SIT_LABORAL_DET")
+@Table(name = "RH_T_PARAM_SITUACAO_DET")
 public class ParamSituacaoDetalheEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_param_sit_laboral_det")
-    @SequenceGenerator(name = "seq_param_sit_laboral_det", sequenceName = "SEQ_PARAM_SIT_LABORAL_DET", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_param_situacao_det")
+    @SequenceGenerator(name = "seq_param_situacao_det", sequenceName = "SEQ_PARAM_SITUACAO_DET", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotNull(message = "situacaoLaboralId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "situacao_laboral_id", referencedColumnName = "id")
-    private ParamSitLaboralEntity situacaoLaboralId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vinculo_id", referencedColumnName = "id")
-    private ParamVinculoEntity vinculoId;
+    @JoinColumn(name = "situacao_id", referencedColumnName = "id")
+    private ParamSituacaoEntity situacaoId;
     @Column(name="motivo")
     private String motivo;
 
-  
+
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
 }
