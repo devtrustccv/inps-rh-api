@@ -4,7 +4,7 @@ services:
   rhinpsservice-service:
     build:
       context: .
-      dockerfile: Dockerfile.test
+      dockerfile: Dockerfile
     image: devtrustcv/rhinps-api:0.0.6
     container_name: rhinpsservice-service
     #platform: linux/arm64
