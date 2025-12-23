@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Ordem de Serviço</title>
+
+    <style>
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 50px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 120px;
+        }
+
+        .title {
+            text-align: center;
+            font-weight: bold;
+            margin: 40px 0;
+        }
+
+        .subject {
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .content {
+            text-align: justify;
+            margin-bottom: 40px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .signature {
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .signature-line {
+            margin-top: 50px;
+            border-top: 1px solid #000;
+            width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Header -->
+<div class="header">
+    <img alt="INPS Logo"
+         class="logo"
+         src="/images/inps-logo.png"/>
+</div>
+
+<!-- Title -->
+<div class="title">
+    ORDEM DE SERVIÇO N.º
+    <span th:text="${numeroOrdem}">____</span>
+    / CE /
+    <span th:text="${ano}">2025</span>
+</div>
+
+<!-- Subject -->
+<div class="subject">
+    Assunto:
+    <span th:text="${assunto}">
+        Pedido de Licença sem Vencimento
+    </span>
+</div>
+
+<!-- Main Content -->
+<div class="content">
+    A pedido da interessada e considerando os fundamentos apresentados,
+    é concedido o pedido de licença sem Retribuição,
+    por um período de
+    <strong th:text="${periodoMeses}">2</strong>
+    (<span th:text="${periodoExtenso}">dois</span>) meses,
+    à
+    <strong th:text="${cargo}">Coordenadora</strong>
+    <strong th:text="${nome}">XXXXXXXXX XX</strong>,
+    categoria
+    <strong th:text="${categoria}">14 E</strong>.
+</div>
+
+<div class="content">
+    Esta Ordem de Serviço produz efeito a partir do dia
+    <strong th:text="${dataEfeito}">
+        20 de maio de 2025
+    </strong>.
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    Instituto Nacional de Previdência Social,
+    aos
+    <span th:text="${dataEmissao}">
+        30 de abril de 2025
+    </span>
+</div>
+
+<!-- Signature -->
+<div class="signature">
+    O Presidente da Comissão Executiva
+
+    <div class="signature-line"></div>
+
+    <strong th:text="${nomePresidente}">
+        Mário Rui Lopes Fernandes
+    </strong>
+</div>
+
+</body>
+</html>

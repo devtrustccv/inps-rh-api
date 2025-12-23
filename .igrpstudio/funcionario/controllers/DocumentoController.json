@@ -2,13 +2,13 @@
   "type": "controller",
   "name": "Documento",
   "module": "funcionario",
-  "description": "Guardar documentos",
+  "description": "Gerir documentos",
   "basePath": "documento",
   "actions": [
     {
-      "actionName": "saveOrdemServico",
+      "actionName": "getOrdemServico",
       "path": "{funcionarioId}",
-      "method": "POST",
+      "method": "GET",
       "responses": {
         "200": {
           "name": "OK",
@@ -23,13 +23,6 @@
           }
         }
       },
-      "requestParams": [
-        {
-          "type": "file",
-          "name": "ordemServico",
-          "isRequired": true
-        }
-      ],
       "pathVariables": [
         {
           "name": "funcionarioId",
@@ -37,7 +30,26 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getUrlTemporario",
+      "path": "url-temporario",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
     }
   ],
-  "id": "54n1gwv2hz"
+  "id": "7tpuueo0n8-getOrdemServico"
 }
