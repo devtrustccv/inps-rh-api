@@ -19,31 +19,7 @@
       "module": "shared"
     },
     {
-      "name": "estadoo",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "tipoAlteracao",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "tipoOrdemServico",
+      "name": "ordemServico",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -93,7 +69,19 @@
     {
       "name": "vinculo",
       "objectType": "java",
-      "type": "long",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "salario",
+      "objectType": "java",
+      "type": "decimal",
       "required": false,
       "before": false,
       "after": false,

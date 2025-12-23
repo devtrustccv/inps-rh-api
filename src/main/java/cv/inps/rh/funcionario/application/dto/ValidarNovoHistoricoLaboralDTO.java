@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -25,13 +26,7 @@ public class ValidarNovoHistoricoLaboralDTO  {
   private EstadoValidacao validar ;
   
   
-  private String estadoo ;
-  
-  
-  private String tipoAlteracao ;
-  
-  
-  private String tipoOrdemServico ;
+  private String ordemServico ;
   
   
   private String gerarOrdemServico ;
@@ -43,7 +38,10 @@ public class ValidarNovoHistoricoLaboralDTO  {
   private String contrato ;
   
   
-  private Long vinculo ;
+  private String vinculo ;
+  
+  
+  private BigDecimal salario ;
   
   
   private String tipoMobilidade ;
