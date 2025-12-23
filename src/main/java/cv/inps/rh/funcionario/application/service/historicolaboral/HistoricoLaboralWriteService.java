@@ -4,6 +4,7 @@ import cv.inps.rh.funcionario.application.commands.ValidarHistoricoLaboralComman
 import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.ValidarDadosContratuaisService;
+import cv.inps.rh.funcionario.application.service.documento.DocumentoWriteService;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -44,6 +45,7 @@ public class HistoricoLaboralWriteService {
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final TipoMovimentoHelper tipoMovimentoHelper;
+  private final DocumentoWriteService documentoWriteService;
 
   @Transactional
   public ValidarNovoHistoricoLaboralDTO validar(ValidarHistoricoLaboralCommand command) {
@@ -181,6 +183,20 @@ public class HistoricoLaboralWriteService {
             .ifPresent(v -> v.setEstado(novoEstado));
       }
 
+      if (dto.getGerarOrdemServico() != null && ("SIM".equalsIgnoreCase(dto.getGerarOrdemServico())
+          || "TRUE".equalsIgnoreCase(dto.getGerarOrdemServico()))) {
+        var numero = "OS-" + System.currentTimeMillis();
+        var ordem = new OrdemServicoEntity();
+        ordem.setNuOrdem(numero);
+        ordem.setDescricao(dto.getOrdemServico());
+        ordem.setReferente("HISTORICO_LABORAL");
+        ordem.setEstado(Estado.A);
+        ordem.setUuid(IdentificadorUnico.create().valor());
+        ordem.setFunId(funcionario);
+        ordem.setTiprelId(atual);
+        funcionario.getOrdemServicos().add(ordem);
+      }
+
       funcionarioEntityRepository.save(funcionario);
       return dto;
     }
@@ -270,6 +286,15 @@ public class HistoricoLaboralWriteService {
 
       if (dto.getSalario() != null) {
         var tmSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
+        var anteriores = definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario,
+            Estado.P);
+        for (var ant : anteriores) {
+          if (ant.getTmId() != null && ant.getTmId().getId().equals(tmSalario.getId())) {
+            ant.setDataFim(dto.getDataInicioCarreira() != null ? dto.getDataInicioCarreira().minusDays(1)
+                : LocalDate.now().minusDays(1));
+            definicaoRemuneracaoEntityRepository.save(ant);
+          }
+        }
         var renumSal = definicaoRemuneracaoMapper.createRenumeracao(dto.getSalario(), tmSalario,
             dto.getDataInicioCarreira(), dto.getDataFimCarreira(), funcionario, null);
         definicaoRemuneracaoEntityRepository.save(renumSal);
@@ -352,6 +377,20 @@ public class HistoricoLaboralWriteService {
           .ifPresent(v -> v.setEstado(novoEstado));
       funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.SITUACAO_LABORAL)
           .ifPresent(v -> v.setEstado(novoEstado));
+    }
+
+    if (dto.getGerarOrdemServico() != null && ("SIM".equalsIgnoreCase(dto.getGerarOrdemServico())
+        || "TRUE".equalsIgnoreCase(dto.getGerarOrdemServico()))) {
+      var numero = "OS-" + System.currentTimeMillis();
+      var ordem = new OrdemServicoEntity();
+      ordem.setNuOrdem(numero);
+      ordem.setDescricao(dto.getOrdemServico());
+      ordem.setReferente("HISTORICO_LABORAL");
+      ordem.setEstado(Estado.A);
+      ordem.setUuid(IdentificadorUnico.create().valor());
+      ordem.setFunId(funcionario);
+      ordem.setTiprelId(novoRelacionamento);
+      funcionario.getOrdemServicos().add(ordem);
     }
 
     funcionarioEntityRepository.save(funcionario);
