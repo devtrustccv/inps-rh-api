@@ -1,14 +1,16 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
 
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import cv.inps.rh.shared.application.constants.EstadoValidacao;
-import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import jakarta.validation.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -18,23 +20,89 @@ import lombok.NoArgsConstructor;
 @IgrpDTO
 public class ValidarNovoHistoricoLaboralDTO  {
 
-
-
+  
+  
   private EstadoValidacao validar ;
-
-
-  private String estado ;
-
-
+  
+  
+  private String estadoo ;
+  
+  
   private String tipoAlteracao ;
-
-  @Valid
-  private DadosContratuaisReqDTO dadosContratuais ;
-
-
+  
+  
   private String tipoOrdemServico ;
-
-
+  
+  
   private String gerarOrdemServico ;
+  
+  
+  private String situacaoAtual ;
+  
+  
+  private String contrato ;
+  
+  
+  private Long vinculo ;
+  
+  
+  private String tipoMobilidade ;
+  
+  
+  private Long direcao ;
+  
+  
+  private Long secao ;
+  
+  
+  private LocalDate dataInicioMobilidade ;
+  
+  
+  private LocalDate dataFimMobilidade ;
+  
+  
+  private Long localTrabalho ;
+  
+  
+  private String pais ;
+  
+  
+  private Long ilha ;
+  
+  
+  private Long cargo ;
+  
+  
+  private String tipoAlteracaoCarreira ;
+  
+  
+  private Long carreira ;
+  
+  
+  private Long categoria ;
+  
+  
+  private Long escalao ;
+  
+  
+  private LocalDate dataInicioCarreira ;
+  
+  
+  private LocalDate dataFimCarreira ;
+  
+  
+  private Long situacaoLaboral ;
+  
+  
+  private String motivo ;
+  
+  
+  private LocalDate dataInicioSituacao ;
+  
+  
+  private LocalDate dataFimSituacao ;
+  
+  
+  private String observacao ;
 
 }
