@@ -83,6 +83,9 @@ public class CarreiraEntity extends AuditEntity {
     @Column(name="data_fim")
     private LocalDate dataFim;
 
+  @Column(name="data_inicio")
+  private LocalDate dataInicio;
+
      @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "contr_vinculo_id")
    private ContratoEntity contrVinculoId;
