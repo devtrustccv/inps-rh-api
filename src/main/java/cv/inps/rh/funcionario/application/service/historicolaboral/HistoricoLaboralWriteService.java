@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -343,7 +344,7 @@ public class HistoricoLaboralWriteService {
       rel.getSituacLaboralId().setEstado(estado);
   }
 
-  private void updateValidacaoPendentes(IdentificadorUnico uuid, Estado estado) {
+  private void updateValidacaoPendentes(UUID uuid, Estado estado) {
     funcionarioRules.getValidacaoPendente(uuid, TipoAcao.INSERT, Referencia.MOBILIDADE)
         .ifPresent(v -> v.setEstado(estado));
     funcionarioRules.getValidacaoPendente(uuid, TipoAcao.INSERT, Referencia.CARREIRA)
