@@ -46,7 +46,6 @@ public class HistoricoLaboralWriteService {
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final TipoMovimentoHelper tipoMovimentoHelper;
-  private final DocumentoWriteService documentoWriteService;
 
   @Transactional
   public ValidarNovoHistoricoLaboralDTO validar(ValidarHistoricoLaboralCommand command) {
