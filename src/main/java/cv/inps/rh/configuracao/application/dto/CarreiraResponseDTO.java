@@ -27,6 +27,8 @@ public class CarreiraResponseDTO  {
 
   private String descricao ;
 
+  private String codigo;
+
   @Valid
   private List<CategoriaCarreiraResponseDTO> categorias = new ArrayList<>();
 
