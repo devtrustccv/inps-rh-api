@@ -11,6 +11,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCategoriaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCategoriaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
@@ -32,12 +33,14 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
   private final ParamCarreiraEntityRepository carreiraRepository;
   private final ParamCategoriaEntityRepository categoriaRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoRepository;
+  private final DomainEntityRepository domainEntityRepository;
 
-  public CarreiraService(Validator validator, ObjectMapper jsonMapper, ParamCarreiraEntityRepository carreiraRepository, ParamCategoriaEntityRepository categoriaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository) {
+  public CarreiraService(Validator validator, ObjectMapper jsonMapper, ParamCarreiraEntityRepository carreiraRepository, ParamCategoriaEntityRepository categoriaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository, DomainEntityRepository domainEntityRepository) {
     super(validator, jsonMapper, CarreiraRequestDTO.class);
     this.carreiraRepository = carreiraRepository;
     this.categoriaRepository = categoriaRepository;
     this.tiposRelacionamentoRepository = tiposRelacionamentoRepository;
+    this.domainEntityRepository = domainEntityRepository;
   }
 
   @Override
@@ -60,10 +63,12 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
         c.setEstado(Estado.A);
         c.setParamCarrId(e);
         c.setNome(cat.getCategoria());
+        c.setCodigo(cat.getCodigo());
         categoriaRepository.save(c);
 
         var categoryResp = new CategoriaCarreiraResponseDTO();
         categoryResp.setId(c.getUuid().toString());
+        categoryResp.setCodigo(c.getCodigo());
         categoryResp.setCategoria(cat.getCategoria());
         categoryResp.setEstado(c.getEstado());
         category.add(categoryResp);
@@ -101,11 +106,13 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
           c.setEstado(Estado.A);
           c.setParamCarrId(e);
         }
+        c.setCodigo(cat.getCodigo());
         c.setNome(cat.getCategoria());
         categoriaRepository.save(c);
 
         categoryResp.setId(c.getUuid().toString());
         categoryResp.setCategoria(cat.getCategoria());
+        categoryResp.setCodigo(c.getCodigo());
         categoryResp.setEstado(c.getEstado());
         category.add(categoryResp);
       }
@@ -123,16 +130,23 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
 
     var response = buildResponse(c);
 
-    var mapped = categoriaRepository.findAllByEstadoAndParamCarrId(Estado.A, c)
-        .stream().map(cat -> {
-          var r = new CategoriaCarreiraResponseDTO();
-          r.setId(cat.getUuid().toString());
-          r.setCategoria(cat.getNome());
-          r.setEstado(cat.getEstado());
-          return r;
-        }).toList();
+    var categories = categoriaRepository.findAllByEstadoAndParamCarrId(Estado.A, c);
+    if (!categories.isEmpty()) {
 
-    response.setCategorias(mapped);
+      var dom = domainEntityRepository.getActiveDomainByCode("CATEGORIA_PCCS");
+
+      var mapped = categories
+          .stream().map(cat -> {
+            var r = new CategoriaCarreiraResponseDTO();
+            r.setId(cat.getUuid().toString());
+            r.setCategoria(cat.getNome());
+            r.setCodigo(cat.getCodigo());
+            r.setCodigoDesc(dom.getOrDefault(cat.getCodigo(), cat.getCodigo()));
+            r.setEstado(cat.getEstado());
+            return r;
+          }).toList();
+      response.setCategorias(mapped);
+    }
 
     return response;
   }

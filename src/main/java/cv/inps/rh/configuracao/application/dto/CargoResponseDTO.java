@@ -21,6 +21,7 @@ public class CargoResponseDTO extends CargoRequestDTO {
 
   private String id ;
 
+  private String carreiraDesc;
 
   private String estadoDescricao ;
 
