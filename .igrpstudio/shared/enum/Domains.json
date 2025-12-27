@@ -37,6 +37,13 @@
         "TP_PROCESSO_DISC",
         "TP_PROCESSO_DISC"
       ]
+    },
+    {
+      "name": "CLASSIFICACAO_SITUACAO",
+      "attributes": [
+        "CLASSIFICACAO_SITUACAO",
+        "CLASSIFICACAO_SITUACAO"
+      ]
     }
   ],
   "attributes": [

@@ -29,4 +29,7 @@ public class SituacaoLaboralResponseDTO extends SituacaoLaboralRequestDTO {
   @Valid
   private List<SituacaoLaboralMotivoRequestDTO> associacao = new ArrayList<>();
 
+
+  private String areaClassificacaoDesc;
+
 }

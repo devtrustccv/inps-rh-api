@@ -46,6 +46,18 @@
       "primaryKey": false,
       "collectionType": "list",
       "module": "configuracao"
+    },
+    {
+      "name": "areaClassificacaoDesc",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
     }
   ],
   "id": "hl1lm9puke"

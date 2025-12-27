@@ -24,12 +24,15 @@ public class SituacaoLaboralRequestDTO  {
   @NotBlank(message = "The field <codigo> is required")
 
   private String codigo ;
+  @NotBlank(message = "The field <nome> is required")
+
+  private String nome;
   @NotBlank(message = "The field <descricao> is required")
 
   private String descricao ;
-  @NotBlank(message = "The field <tipo> is required")
+  @NotBlank(message = "The field <tipoSituacaoLaboral> is required")
 
-  private String tipo ;
+  private String tipoSituacaoLaboral;
   @NotBlank(message = "The field <estadoContrato> is required")
 
   private String estadoContrato ;
@@ -45,14 +48,50 @@ public class SituacaoLaboralRequestDTO  {
   @NotBlank(message = "The field <cessaVinculo> is required")
 
   private String cessaVinculo ;
-  @NotBlank(message = "The field <progressaoPromocao> is required")
+  @NotBlank(message = "The field <suspendeProgressaoPromocao> is required")
 
-  private String progressaoPromocao ;
+  private String suspendeProgressaoPromocao;
 
 
   private String estado ;
 
   @Valid
   private List<SituacaoLaboralMotivoRequestDTO> associacao = new ArrayList<>();
+  @NotBlank(message = "The field <areaClassificacao> is required")
+
+  private String areaClassificacao;
+  @NotBlank(message = "The field <afetaSituacaoLaboral> is required")
+
+  private String afetaSituacaoLaboral;
+  @NotBlank(message = "The field <abonoBeneficio> is required")
+
+  private String abonoBeneficio;
+  @NotBlank(message = "The field <ausenciaLocalTrabalho> is required")
+
+  private String ausenciaLocalTrabalho;
+
+
+  private String falta;
+
+
+  private String tipoFalta;
+
+
+  private String descontoSalario;
+
+
+  private String tipoContagem;
+
+
+  private Integer numeroDias;
+
+
+  private Integer numeroDiasNaoDescontado;
+
+
+  private Integer numeroDiasDescontado;
+
+
+  private String regressaCarreiraOrigem;
 
 }
