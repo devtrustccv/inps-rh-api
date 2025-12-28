@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,11 +21,17 @@ import java.util.List;
 @IgrpDTO
 public class SituacaoLaboralResponseDTO extends SituacaoLaboralRequestDTO {
 
-
-  private String id ;
-
-
-  private String estadoDescricao ;
+  private String id;
+  private String estadoDescricao;
+  private String remuneracaoDesc;
+  private String carreiraDesc;
+  private String tempoServicoDesc;
+  private String suspendeProgressaoPromocaoDesc;
+  private String abonoBeneficioDesc;
+  private String ausenciaLocalTrabalhoDesc;
+  private String cessaVinculoDesc;
+  private String regressaCarreiraOrigemDesc;
+  private String faltaDesc;
 
   @Valid
   private List<SituacaoLaboralMotivoRequestDTO> associacao = new ArrayList<>();

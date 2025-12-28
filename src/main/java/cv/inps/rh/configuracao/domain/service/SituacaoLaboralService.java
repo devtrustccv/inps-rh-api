@@ -149,20 +149,33 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     response.setAreaClassificacao(e.getClassificacaoArea());
     response.setAreaClassificacaoDesc(areaClassification.getOrDefault(e.getClassificacaoArea(), e.getClassificacaoArea()));
     response.setTipoSituacaoLaboral(type.get(e.getTipoSituacao()));
-    response.setRemuneracao(e.getFlgRemuneracao() != null ? domain.get(e.getFlgRemuneracao().toString()) : null);
-    response.setCarreira(e.getFlgAfetaCarreira() != null ? domain.get(e.getFlgAfetaCarreira().toString()) : null);
-    response.setTempoServico(e.getFlgContaTempServico() != null ? domain.get(e.getFlgContaTempServico().toString()) : null);
-    response.setSuspendeProgressaoPromocao(e.getFlgCessaProgressao() != null ? domain.get(e.getFlgCessaProgressao().toString()) : null);
+    response.setRemuneracao(e.getFlgRemuneracao() != null ? e.getFlgRemuneracao().toString() : null);
+    response.setRemuneracaoDesc(e.getFlgRemuneracao() != null ? domain.get(e.getFlgRemuneracao().toString()) : null);
+    response.setCarreira(e.getFlgAfetaCarreira() != null ? e.getFlgAfetaCarreira().toString() : null);
+    response.setCarreiraDesc(e.getFlgAfetaCarreira() != null ? domain.get(e.getFlgAfetaCarreira().toString()) : null);
+    response.setTempoServico(e.getFlgContaTempServico() != null ? e.getFlgContaTempServico().toString() : null);
+    response.setTempoServicoDesc(e.getFlgContaTempServico() != null ? domain.get(e.getFlgContaTempServico().toString()) : null);
+    response.setSuspendeProgressaoPromocao(e.getFlgCessaProgressao() != null ? e.getFlgCessaProgressao().toString() : null);
+    response.setSuspendeProgressaoPromocaoDesc(e.getFlgCessaProgressao() != null ? domain.get(e.getFlgCessaProgressao().toString()) : null);
     response.setEstadoContrato(e.getFlgEstadoContrato() != null ? contractStatus.get(e.getFlgEstadoContrato().toString()) : null);
     response.setEstado(e.getEstado().getCode());
     response.setEstadoDescricao(e.getEstado().getDescription());
-    response.setAbonoBeneficio(e.getFlgAbonoBeneficio() != null ? domain.get(e.getFlgAbonoBeneficio().toString()) : null);
-    response.setAusenciaLocalTrabalho(e.getFlgAusencia() != null ? domain.get(e.getFlgAusencia().toString()) : null);
-    response.setCessaVinculo(e.getFlgCessaVinculo() != null ? domain.get(e.getFlgCessaVinculo().toString()) : null);
-    response.setRegressaCarreiraOrigem(e.getFlgRegressaCarreira() != null ? domain.get(e.getFlgRegressaCarreira().toString()) : null);
+    response.setAbonoBeneficio(e.getFlgAbonoBeneficio() != null ? e.getFlgAbonoBeneficio().toString() : null);
+    response.setAbonoBeneficioDesc(e.getFlgAbonoBeneficio() != null ? domain.get(e.getFlgAbonoBeneficio().toString()) : null);
+    response.setAusenciaLocalTrabalho(e.getFlgAusencia() != null ? e.getFlgAusencia().toString() : null);
+    response.setAusenciaLocalTrabalhoDesc(e.getFlgAusencia() != null ? domain.get(e.getFlgAusencia().toString()) : null);
+    response.setCessaVinculo(e.getFlgCessaVinculo() != null ? e.getFlgCessaVinculo().toString() : null);
+    response.setCessaVinculoDesc(e.getFlgCessaVinculo() != null ? domain.get(e.getFlgCessaVinculo().toString()) : null);
+    response.setRegressaCarreiraOrigem(e.getFlgRegressaCarreira() != null ? e.getFlgRegressaCarreira().toString() : null);
+    response.setRegressaCarreiraOrigemDesc(e.getFlgRegressaCarreira() != null ? domain.get(e.getFlgRegressaCarreira().toString()) : null);
     response.setNumeroDias(e.getNumDiasAbonos());
     response.setNumeroDiasDescontado(e.getNumDiasDescontoRh());
     response.setNumeroDiasNaoDescontado(e.getNumDiasNdescontoRh());
+    response.setFalta(e.getFlgFalta());
+    response.setFaltaDesc(domain.getOrDefault(e.getTipoFalta(), e.getTipoFalta()));
+    response.setTipoFalta(e.getTipoFalta());
+    response.setDescontoSalario(e.getFlgFaltaDecontoSal() != null ? e.getFlgFaltaDecontoSal().toString() : null);
+    response.setTipoContagem(e.getTipoContagemDias());
 
     var data = paramSituacaoDetalheEntityRepository.findAllBySituacaoId_IdAndEstado(e.getId(), Estado.A).stream()
         .map(obj -> {
