@@ -19,54 +19,42 @@ import java.util.List;
 
 
 @IgrpDTO
-public class SituacaoLaboralRequestDTO  {
+public class SituacaoLaboralRequestDTO {
 
   @NotBlank(message = "The field <codigo> is required")
+  private String codigo;
 
-  private String codigo ;
   @NotBlank(message = "The field <nome> is required")
-
   private String nome;
-  @NotBlank(message = "The field <descricao> is required")
 
-  private String descricao ;
+  private String descricao;
+
   @NotBlank(message = "The field <tipoSituacaoLaboral> is required")
-
   private String tipoSituacaoLaboral;
+
   @NotBlank(message = "The field <estadoContrato> is required")
+  private String estadoContrato;
 
-  private String estadoContrato ;
-  @NotBlank(message = "The field <remuneracao> is required")
+  private String remuneracao;
 
-  private String remuneracao ;
-  @NotBlank(message = "The field <carreira> is required")
+  private String carreira;
 
-  private String carreira ;
-  @NotBlank(message = "The field <tempoServico> is required")
+  private String tempoServico;
 
-  private String tempoServico ;
-  @NotBlank(message = "The field <cessaVinculo> is required")
-
-  private String cessaVinculo ;
-  @NotBlank(message = "The field <suspendeProgressaoPromocao> is required")
+  private String cessaVinculo;
 
   private String suspendeProgressaoPromocao;
 
-
-  private String estado ;
+  private String estado;
 
   @Valid
   private List<SituacaoLaboralMotivoRequestDTO> associacao = new ArrayList<>();
-  @NotBlank(message = "The field <areaClassificacao> is required")
 
   private String areaClassificacao;
-  @NotBlank(message = "The field <afetaSituacaoLaboral> is required")
 
   private String afetaSituacaoLaboral;
-  @NotBlank(message = "The field <abonoBeneficio> is required")
 
   private String abonoBeneficio;
-  @NotBlank(message = "The field <ausenciaLocalTrabalho> is required")
 
   private String ausenciaLocalTrabalho;
 
