@@ -26,8 +26,9 @@ public class TipoContratoLaboralRequestDTO  {
   private String descricao ;
   @NotBlank(message = "The field <natureza> is required")
 
-  private String natureza ;
+  private String vinculoId;
 
+  private String natureza ;
 
   private String renovavel ;
 
