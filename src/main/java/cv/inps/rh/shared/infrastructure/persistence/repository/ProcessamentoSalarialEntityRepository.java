@@ -32,9 +32,9 @@ public interface ProcessamentoSalarialEntityRepository extends
          p.ccId,
          null,
          p.obs,
-         COUNT(f.id),
+         null,
          p.cab1Id,
-         SUM(f.totalRemuneracoes)
+         null
       )
       FROM ProcessamentoSalarialEntity p
              LEFT JOIN ProcessamentoFuncionarioEntity f
