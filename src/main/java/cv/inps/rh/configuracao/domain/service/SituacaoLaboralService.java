@@ -89,7 +89,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     e.setFlgFaltaDecontoSal(ConfigurationUtils.parseFlag(dto.getDescontoSalario()));
     e.setFlgFalta(dto.getFalta());
     e.setFlgAbonoBeneficio(ConfigurationUtils.parseFlag(dto.getAbonoBeneficio()));
-    e.setFlgSituacaoLaboral(ConfigurationUtils.parseFlag(dto.getTipoSituacaoLaboral()));
+    e.setFlgSituacaoLaboral(ConfigurationUtils.parseFlag(dto.getAfetaSituacaoLaboral()));
     e.setTipoSituacao(dto.getTipoSituacaoLaboral());
     e.setTipoContagemDias(dto.getTipoContagem());
     e.setNumDiasAbonos(dto.getNumeroDias());
