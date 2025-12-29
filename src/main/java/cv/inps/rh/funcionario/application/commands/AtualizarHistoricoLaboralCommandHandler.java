@@ -8,14 +8,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
+import cv.inps.rh.funcionario.application.service.historicolaboral.HistoricoLaboralWriteService;
 
 @Component
-public class AtualizarHistoricoLaboralCommandHandler implements CommandHandler<AtualizarHistoricoLaboralCommand, ResponseEntity<ValidarNovoHistoricoLaboralDTO>> {
+public class AtualizarHistoricoLaboralCommandHandler
+      implements CommandHandler<AtualizarHistoricoLaboralCommand, ResponseEntity<ValidarNovoHistoricoLaboralDTO>> {
 
    private static final Logger LOGGER = LoggerFactory.getLogger(AtualizarHistoricoLaboralCommandHandler.class);
 
-   public AtualizarHistoricoLaboralCommandHandler() {
+   private final HistoricoLaboralWriteService historicoLaboralWriteService;
 
+   public AtualizarHistoricoLaboralCommandHandler(HistoricoLaboralWriteService historicoLaboralWriteService) {
+      this.historicoLaboralWriteService = historicoLaboralWriteService;
    }
 
    @IgrpCommandHandler
@@ -23,8 +27,8 @@ public class AtualizarHistoricoLaboralCommandHandler implements CommandHandler<A
 
       LOGGER.debug("AtualizarHistoricoLaboralCommand : {}", command);
 
-      // TODO: Implement the command handling logic here
-      return null;
+      var data = historicoLaboralWriteService.atualizar(command);
+      return ResponseEntity.ok(data);
    }
 
 }

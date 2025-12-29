@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.application.service.historicolaboral;
 
+import cv.inps.rh.funcionario.application.commands.AtualizarHistoricoLaboralCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarHistoricoLaboralCommand;
 import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
@@ -11,6 +12,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -240,6 +242,100 @@ public class HistoricoLaboralWriteService {
 
     gerarOrdemServicoIfRequested(funcionario, novoRelacionamento, dto);
 
+    funcionarioEntityRepository.save(funcionario);
+    return dto;
+  }
+
+  @Transactional
+  public ValidarNovoHistoricoLaboralDTO atualizar(AtualizarHistoricoLaboralCommand command) {
+    var dto = command.getValidarnovohistoricolaboral();
+    var idFunc = IdentificadorUnico.from(command.getIdFuncionario()).valor();
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc);
+    var relacionamento = tiposRelacionamentoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getHistoricoId()));
+
+    if (relacionamento.getFunId() == null || !relacionamento.getFunId().getId().equals(funcionario.getId()))
+      throw IgrpResponseStatusException.badRequest("Histórico laboral não pertence ao funcionário");
+
+    if (dto.getTipoMobilidade() != null || dto.getDirecao() != null || dto.getSecao() != null
+        || dto.getLocalTrabalho() != null || dto.getDataInicioMobilidade() != null
+        || dto.getDataFimMobilidade() != null) {
+      var mob = relacionamento.getMobId();
+      if (mob == null) {
+        mob = new MobilidadeEntity();
+        mob.setEstado(Estado.P);
+        mob.setObs("HISTORICO_LABORAL");
+        mob.setUuid(IdentificadorUnico.create().valor());
+        mob.setFunId(funcionario);
+      }
+      populateMobilidade(mob, dto);
+      mobilidadeEntityRepository.save(mob);
+
+      relacionamento.setMobId(mob);
+      if (dto.getTipoMobilidade() != null)
+        relacionamento.setTipoSituacao(dto.getTipoMobilidade());
+      if (dto.getDirecao() != null)
+        relacionamento.setInstitId(entityManager.getReference(InstituicaoEntity.class, dto.getDirecao()));
+      if (dto.getSecao() != null)
+        relacionamento.setSeccaoId(entityManager.getReference(SecaoEntity.class, dto.getSecao()));
+      if (dto.getLocalTrabalho() != null)
+        relacionamento.setLocTrabId(entityManager.getReference(ParamLocalTrabEntity.class, dto.getLocalTrabalho()));
+    }
+
+    if (dto.getTipoAlteracaoCarreira() != null || dto.getCarreira() != null || dto.getCategoria() != null
+        || dto.getEscalao() != null || dto.getSalario() != null || dto.getDataInicioCarreira() != null
+        || dto.getDataFimCarreira() != null || dto.getCargo() != null) {
+      var car = relacionamento.getCarreiraId();
+      if (car == null) {
+        car = new CarreiraEntity();
+        car.setFlgProcessa(1);
+        car.setEstado(Estado.P);
+        car.setObs("HISTORICO_LABORAL");
+        car.setUuid(IdentificadorUnico.create().valor());
+        car.setContrVinculoId(relacionamento.getContrVinculoId());
+      }
+      populateCarreiraCommon(car, dto);
+      carreiraEntityRepository.save(car);
+
+      relacionamento.setCarreiraId(car);
+      if (dto.getCarreira() != null)
+        relacionamento.setCarrPccId(entityManager.getReference(ParamCarreiraEntity.class, dto.getCarreira()));
+      if (dto.getCategoria() != null)
+        relacionamento.setCategoriaId(entityManager.getReference(ParamCategoriaEntity.class, dto.getCategoria()));
+      if (dto.getEscalao() != null)
+        relacionamento.setEscalaoId(entityManager.getReference(ParamEscalaoEntity.class, dto.getEscalao()));
+      if (dto.getCargo() != null)
+        relacionamento.setCargoId(entityManager.getReference(ParamCargoEntity.class, dto.getCargo()));
+      if (dto.getSalario() != null)
+        relacionamento.setSalario(dto.getSalario());
+    }
+
+    if (dto.getSituacaoLaboral() != null || dto.getMotivo() != null || dto.getDataInicioSituacao() != null
+        || dto.getDataFimSituacao() != null || dto.getObservacao() != null) {
+      var sitLab = relacionamento.getSituacLaboralId();
+      if (sitLab == null) {
+        sitLab = new SituacaoLaboralEntity();
+        sitLab.setEstado(Estado.P);
+        sitLab.setUuid(IdentificadorUnico.create().valor());
+        sitLab.setContrVinculoId(relacionamento.getContrVinculoId());
+      }
+      populateSituacao(sitLab, dto);
+      situacaoLaboralEntityRepository.save(sitLab);
+      relacionamento.setSituacLaboralId(sitLab);
+    }
+
+    if (dto.getSalario() != null) {
+      updateExistingSalaryRemuneracao(funcionario, dto);
+    }
+
+    if (dto.getValidar() != null) {
+      var novoEstado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
+      updateEstadoOnRelAndChildren(relacionamento, novoEstado);
+      updateValidacaoPendentes(funcionario.getUuid(), novoEstado);
+    }
+
+    gerarOrdemServicoIfRequested(funcionario, relacionamento, dto);
+
+    tiposRelacionamentoEntityRepository.save(relacionamento);
     funcionarioEntityRepository.save(funcionario);
     return dto;
   }
