@@ -19,40 +19,67 @@ import java.util.List;
 
 
 @IgrpDTO
-public class SituacaoLaboralRequestDTO  {
+public class SituacaoLaboralRequestDTO {
 
   @NotBlank(message = "The field <codigo> is required")
+  private String codigo;
 
-  private String codigo ;
-  @NotBlank(message = "The field <descricao> is required")
+  @NotBlank(message = "The field <nome> is required")
+  private String nome;
 
-  private String descricao ;
-  @NotBlank(message = "The field <tipo> is required")
+  private String descricao;
 
-  private String tipo ;
+  @NotBlank(message = "The field <tipoSituacaoLaboral> is required")
+  private String tipoSituacaoLaboral;
+
   @NotBlank(message = "The field <estadoContrato> is required")
+  private String estadoContrato;
 
-  private String estadoContrato ;
-  @NotBlank(message = "The field <remuneracao> is required")
+  private String remuneracao;
 
-  private String remuneracao ;
-  @NotBlank(message = "The field <carreira> is required")
+  private String carreira;
 
-  private String carreira ;
-  @NotBlank(message = "The field <tempoServico> is required")
+  private String tempoServico;
 
-  private String tempoServico ;
-  @NotBlank(message = "The field <cessaVinculo> is required")
+  private String cessaVinculo;
 
-  private String cessaVinculo ;
-  @NotBlank(message = "The field <progressaoPromocao> is required")
+  private String suspendeProgressaoPromocao;
 
-  private String progressaoPromocao ;
-
-
-  private String estado ;
+  private String estado;
 
   @Valid
   private List<SituacaoLaboralMotivoRequestDTO> associacao = new ArrayList<>();
+
+  private String areaClassificacao;
+
+  private String afetaSituacaoLaboral;
+
+  private String abonoBeneficio;
+
+  private String ausenciaLocalTrabalho;
+
+
+  private String falta;
+
+
+  private String tipoFalta;
+
+
+  private String descontoSalario;
+
+
+  private String tipoContagem;
+
+
+  private Integer numeroDias;
+
+
+  private Integer numeroDiasNaoDescontado;
+
+
+  private Integer numeroDiasDescontado;
+
+
+  private String regressaCarreiraOrigem;
 
 }

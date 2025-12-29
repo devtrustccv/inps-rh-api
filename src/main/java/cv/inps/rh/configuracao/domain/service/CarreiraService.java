@@ -11,6 +11,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCategoriaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCategoriaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
@@ -32,12 +33,14 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
   private final ParamCarreiraEntityRepository carreiraRepository;
   private final ParamCategoriaEntityRepository categoriaRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoRepository;
+  private final DomainEntityRepository domainEntityRepository;
 
-  public CarreiraService(Validator validator, ObjectMapper jsonMapper, ParamCarreiraEntityRepository carreiraRepository, ParamCategoriaEntityRepository categoriaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository) {
+  public CarreiraService(Validator validator, ObjectMapper jsonMapper, ParamCarreiraEntityRepository carreiraRepository, ParamCategoriaEntityRepository categoriaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository, DomainEntityRepository domainEntityRepository) {
     super(validator, jsonMapper, CarreiraRequestDTO.class);
     this.carreiraRepository = carreiraRepository;
     this.categoriaRepository = categoriaRepository;
     this.tiposRelacionamentoRepository = tiposRelacionamentoRepository;
+    this.domainEntityRepository = domainEntityRepository;
   }
 
   @Override
@@ -47,6 +50,7 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
     e.setUuid(UuidCreator.getTimeOrderedEpoch());
     e.setEstado(Estado.A);
     e.setNome(dto.getDescricao().trim());
+    e.setCodigo(dto.getCodigo());
     carreiraRepository.save(e);
 
     var category = new ArrayList<CategoriaCarreiraResponseDTO>();
@@ -59,21 +63,20 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
         c.setEstado(Estado.A);
         c.setParamCarrId(e);
         c.setNome(cat.getCategoria());
+        c.setCodigo(cat.getCodigo());
         categoriaRepository.save(c);
 
         var categoryResp = new CategoriaCarreiraResponseDTO();
         categoryResp.setId(c.getUuid().toString());
+        categoryResp.setCodigo(c.getCodigo());
         categoryResp.setCategoria(cat.getCategoria());
         categoryResp.setEstado(c.getEstado());
         category.add(categoryResp);
       }
     }
 
-    var response = new CarreiraResponseDTO();
-    response.setId(e.getUuid().toString());
+    var response = buildResponse(e);
     response.setCategorias(category);
-    response.setEstadoDescricao(e.getEstado().getDescription());
-    response.setEstado(e.getEstado().getCode());
     return response;
   }
 
@@ -83,6 +86,7 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
     var e = carreiraRepository.findByUuidOrThrow(UUID.fromString(uuid));
 
     e.setNome(dto.getDescricao());
+    e.setCodigo(dto.getCodigo());
     if (StringUtils.hasText(dto.getEstado()))
       e.setEstado(Estado.valueOf(dto.getEstado()));
 
@@ -102,18 +106,19 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
           c.setEstado(Estado.A);
           c.setParamCarrId(e);
         }
+        c.setCodigo(cat.getCodigo());
         c.setNome(cat.getCategoria());
         categoriaRepository.save(c);
 
         categoryResp.setId(c.getUuid().toString());
         categoryResp.setCategoria(cat.getCategoria());
+        categoryResp.setCodigo(c.getCodigo());
         categoryResp.setEstado(c.getEstado());
         category.add(categoryResp);
       }
     }
 
-    var response = new CarreiraResponseDTO();
-    response.setId(e.getUuid().toString());
+    var response = buildResponse(e);
     response.setCategorias(category);
     return response;
   }
@@ -123,21 +128,25 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
 
     var c = carreiraRepository.findByUuidOrThrow(UUID.fromString(uuid));
 
-    var response = new CarreiraResponseDTO();
-    response.setId(c.getUuid().toString());
-    response.setDescricao(c.getNome());
-    response.setEstadoDescricao(c.getEstado().getDescription());
-    response.setEstado(c.getEstado().getCode());
+    var response = buildResponse(c);
 
-    var mapped = categoriaRepository.findAllByEstadoAndParamCarrId(Estado.A, c)
-        .stream().map(cat -> {
-          var r = new CategoriaCarreiraResponseDTO();
-          r.setId(cat.getUuid().toString());
-          r.setCategoria(cat.getNome());
-          return r;
-        }).collect(Collectors.toList());
+    var categories = categoriaRepository.findAllByEstadoAndParamCarrId(Estado.A, c);
+    if (!categories.isEmpty()) {
 
-    response.setCategorias(mapped);
+      var dom = domainEntityRepository.getActiveDomainByCode("CATEGORIA_PCCS");
+
+      var mapped = categories
+          .stream().map(cat -> {
+            var r = new CategoriaCarreiraResponseDTO();
+            r.setId(cat.getUuid().toString());
+            r.setCategoria(cat.getNome());
+            r.setCodigo(cat.getCodigo());
+            r.setCodigoDesc(dom.getOrDefault(cat.getCodigo(), cat.getCodigo()));
+            r.setEstado(cat.getEstado());
+            return r;
+          }).toList();
+      response.setCategorias(mapped);
+    }
 
     return response;
   }
@@ -150,16 +159,18 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
     var data = carreiraRepository.findAll(pageable);
 
     return data.stream()
-        .map(c -> {
-          var dto = new CarreiraResponseDTO();
-          dto.setId(c.getUuid().toString());
-          dto.setDescricao(c.getNome());
-          dto.setEstadoDescricao(c.getEstado().getDescription());
-          dto.setEstado(c.getEstado().getCode());
-          dto.setCategorias(List.of());
-          return dto;
-        })
+        .map(this::buildResponse)
         .collect(Collectors.toList());
+  }
+
+  private CarreiraResponseDTO buildResponse(ParamCarreiraEntity c) {
+    var dto = new CarreiraResponseDTO();
+    dto.setId(c.getUuid().toString());
+    dto.setDescricao(c.getNome());
+    dto.setCodigo(c.getCodigo());
+    dto.setEstadoDescricao(c.getEstado().getDescription());
+    dto.setEstado(c.getEstado().getCode());
+    return dto;
   }
 
   @Override

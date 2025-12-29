@@ -124,7 +124,10 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
     var response = new CargoResponseDTO();
     response.setId(cargo.getUuid().toString());
     response.setDescricao(cargo.getNome());
-    ofNullable(cargo.getParamCarrId()).map(c -> c.getUuid().toString()).ifPresent(response::setCarreiraId);
+    ofNullable(cargo.getParamCarrId()).ifPresent(c -> {
+      response.setCarreiraId(c.getUuid().toString());
+      response.setCarreiraDesc(c.getNome());
+    });
     response.setDirigente(cargo.getDirigente());
     response.setEstado(cargo.getEstado().getCode());
     response.setEstadoDescricao(cargo.getEstado().getDescription());

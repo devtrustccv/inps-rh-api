@@ -3,6 +3,7 @@ package cv.inps.rh.processamento.domain.service.processamentosalarial;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.processamento.application.constants.ProcessamentoSalarialAction;
 import cv.inps.rh.processamento.application.dto.ProcessamentoSalarioRequestDTO;
+import cv.inps.rh.processamento.domain.service.processamentosalarial.api.ProcessarSalarioApi;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
@@ -10,11 +11,14 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSala
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,12 +29,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProcessamentoSalarialWriteService {
 
-  // TODO 07/12/2025 15:19 validate the parameters for the procedure call actions
+  private static final Logger LOGGER = LoggerFactory.getLogger(ProcessamentoSalarialWriteService.class);
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final ProcessamentoSalarialEntityRepository processamentoSalarialEntityRepository;
   private final FuncionarioRules funcionarioRules;
+  private final ProcessarSalarioApi processarSalarioApi;
   private final DataSource dataSource;
 
   public void removerFuncionariosProcessados(List<String> funcionariosIds) {
@@ -111,17 +116,15 @@ public class ProcessamentoSalarialWriteService {
     if (!illegalProcesses.isEmpty())
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'VALIDADO'", illegalProcesses);
 
-    // TODO 07/12/2025 15:19 validate this parameters
-    processes.forEach(p -> {
-      var call = callProcedure(Processamento.PROCEDURE_CABIMENTAR_PROC.getName());
-      call.execute(
-          Map.of(
-              "p_qnt", p.getId(),
-              "p_proc_sal_id", p.getId(),
-              "p_ano_orcamento", p.getId()
-          ));
-    });
+    var formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
+    processes.forEach(p -> {
+      var date = p.getDataProcDefinitivo().format(formatter);
+      var response = processarSalarioApi.processarCabimento(p.getId().toString(), date);
+      LOGGER.info("Cabimentar Response: {}", response);
+      if (response.content().issue().code() != 200)
+        throw IgrpResponseStatusException.badRequest("Erro ao processar cabimento", response.content().issue().diagnostics());
+    });
   }
 
   public void eliminarCabimento(List<Long> processamentoIds) {
@@ -156,14 +159,11 @@ public class ProcessamentoSalarialWriteService {
     if (!illegalProcesses.isEmpty())
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'CABIMENTADO'", illegalProcesses);
 
-    // TODO 07/12/2025 15:19 validate this parameters
     processes.forEach(p -> {
-      var call = callProcedure(Processamento.PROCEDURE_AUTORIZAR_CAB.getName());
-      call.execute(
-          Map.of(
-              "p_qnt", p.getId(),
-              "p_cabimento_id", p.getCab1Id()
-          ));
+      var response = processarSalarioApi.autorizarSalario(p.getCab1Id().toString(), "SIM");
+      LOGGER.info("Autorizar Salario Response: {}", response);
+      if (response.content().issue().code() != 200)
+        throw IgrpResponseStatusException.badRequest("Erro ao autorizar salario", response.content().issue().diagnostics());
     });
   }
 
@@ -202,8 +202,6 @@ public class ProcessamentoSalarialWriteService {
   private enum Processamento {
 
     PACKAGE("RH_PROCESSAMENTO_SALARIAL_DB"),
-    PROCEDURE_AUTORIZAR_CAB("AutorizarCab"),
-    PROCEDURE_CABIMENTAR_PROC("CabimentarProc"),
     PROCEDURE_ELIMINAR_CAB("EliminarCab"),
     PROCEDURE_ELIMINAR_PROC("EliminarProc"),
     PROCEDURE_PROCESSAR("processar");

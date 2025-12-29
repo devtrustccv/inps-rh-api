@@ -10,11 +10,10 @@ import cv.inps.rh.configuracao.domain.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSitLaboralEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity_;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
@@ -35,12 +34,29 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
   private final ParamVinculoEntityRepository repository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final DomainEntityRepository domainEntityRepository;
+  private final ParamSitLaboralEntityRepository situacaoLaboralEntityRepository;
+  private final ParamSituacaoEntityRepository paramSituacaoEntityRepository;
 
-  protected ParamVinculoService(ParamVinculoEntityRepository repository, TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository, DomainEntityRepository domainEntityRepository, Validator validator, ObjectMapper jsonMapper) {
+  protected ParamVinculoService(ParamVinculoEntityRepository repository, TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository, DomainEntityRepository domainEntityRepository, Validator validator, ObjectMapper jsonMapper, ParamSitLaboralEntityRepository situacaoLaboralEntityRepository, ParamSituacaoEntityRepository paramSituacaoEntityRepository) {
     super(validator, jsonMapper, VinculoLaboralRequestDTO.class);
     this.repository = repository;
     this.tiposRelacionamentoEntityRepository = tiposRelacionamentoEntityRepository;
     this.domainEntityRepository = domainEntityRepository;
+    this.situacaoLaboralEntityRepository = situacaoLaboralEntityRepository;
+    this.paramSituacaoEntityRepository = paramSituacaoEntityRepository;
+  }
+
+  public void associarVinculoSituacao(String vinculoId, String situacaoId) {
+
+    var vinculo = repository.findByUuidOrThrow(UUID.fromString(vinculoId));
+
+    var situacao = paramSituacaoEntityRepository.findByUuidOrThrow(UUID.fromString(situacaoId));
+
+    var obj = new ParamSitLaboralEntity();
+    obj.setParamSit(situacao);
+    obj.setVinculo(vinculo);
+    obj.setEstado(Estado.A.name());
+    situacaoLaboralEntityRepository.save(obj);
   }
 
   @Override

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,9 +20,11 @@ public class EscalaoResponseDTO extends EscalaoRequestDTO {
 
   @NotBlank(message = "The field <id> is required")
 
-  private String id ;
+  private String id;
 
+  private String carreiraDesc;
+  private String categoriaDesc;
 
-  private String estadoDescricao ;
+  private String estadoDescricao;
 
 }

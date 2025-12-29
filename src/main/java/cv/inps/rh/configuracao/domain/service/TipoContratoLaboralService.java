@@ -14,6 +14,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ParamContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamContratoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -34,13 +35,15 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
   private final ParamContratoEntityRepository repository;
   private final ContratoEntityRepository contratoEntityRepository;
   private final DomainEntityRepository domainEntityRepository;
+  private final ParamVinculoEntityRepository paramVinculoEntityRepository;
 
-  protected TipoContratoLaboralService(Validator validator, ObjectMapper jsonMapper, ParamContratoEntityRepository repository, ContratoEntityRepository contratoEntityRepository, DomainEntityRepository domainEntityRepository) {
+  protected TipoContratoLaboralService(Validator validator, ObjectMapper jsonMapper, ParamContratoEntityRepository repository, ContratoEntityRepository contratoEntityRepository, DomainEntityRepository domainEntityRepository, ParamVinculoEntityRepository paramVinculoEntityRepository) {
 
     super(validator, jsonMapper, TipoContratoLaboralRequestDTO.class);
     this.repository = repository;
     this.contratoEntityRepository = contratoEntityRepository;
     this.domainEntityRepository = domainEntityRepository;
+    this.paramVinculoEntityRepository = paramVinculoEntityRepository;
   }
 
   @Override
@@ -56,6 +59,7 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
     e.setDuracaoRenovavel(dto.getDuracao());
     e.setMaxRenovacao(dto.getMaxNumeroRenovacao());
     e.setPrazoObrigatorio(ConfigurationUtils.parseFlag(dto.getPrazo()));
+    e.setParamVinculoId(StringUtils.hasText(dto.getVinculoId()) ? paramVinculoEntityRepository.findByUuidOrThrow(UUID.fromString(dto.getVinculoId())) : null);
     repository.save(e);
 
     return new ConfigurationResponseIdDTO(e.getUuid().toString());
@@ -72,6 +76,7 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
     e.setFlgRenovavel(ConfigurationUtils.parseFlag(dto.getRenovavel()));
     e.setDuracaoRenovavel(dto.getDuracao());
     e.setPrazoObrigatorio(ConfigurationUtils.parseFlag(dto.getPrazo()));
+    e.setParamVinculoId(StringUtils.hasText(dto.getVinculoId()) ? paramVinculoEntityRepository.findByUuidOrThrow(UUID.fromString(dto.getVinculoId())) : null);
     if (StringUtils.hasText(dto.getEstado()))
       e.setEstado(Estado.valueOf(dto.getEstado()));
     repository.save(e);
@@ -95,14 +100,23 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
     r.setId(e.getUuid().toString());
     r.setCodigo(e.getCodigo());
     r.setDescricao(e.getNome());
-    r.setNatureza(nature.get(e.getNatureza()));
+    r.setNatureza(nature.getOrDefault(e.getNatureza(), e.getNatureza()));
     r.setDuracao(e.getDuracaoRenovavel());
     r.setMaxNumeroRenovacao(e.getMaxRenovacao());
     r.setEstado(e.getEstado().getCode());
     r.setDescricaoEstado(e.getEstado().getDescription());
-    ofNullable(e.getFlgRenovavel()).ifPresent(y -> r.setRenovavel(yesNo.get(y.toString())));
-    ofNullable(e.getPrazoObrigatorio()).ifPresent(x -> r.setPrazo(yesNo.get(x.toString())));
-
+    ofNullable(e.getFlgRenovavel()).ifPresent(y -> {
+      var v = y.toString();
+      r.setRenovavel(yesNo.getOrDefault(v, v));
+    });
+    ofNullable(e.getPrazoObrigatorio()).ifPresent(x -> {
+      var v = x.toString();
+      r.setPrazo(yesNo.getOrDefault(v, v));
+    });
+    ofNullable(e.getParamVinculoId()).ifPresent(x -> {
+      r.setVinculoId(x.getUuid().toString());
+      r.setVinculoDesc(x.getNome());
+    });
     return r;
   }
 

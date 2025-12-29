@@ -1,0 +1,41 @@
+{
+  "type": "controller",
+  "name": "Vinculo",
+  "module": "configuracao",
+  "description": "Gestão de Vínculos",
+  "basePath": "configuracao",
+  "actions": [
+    {
+      "actionName": "associarVinculoSituacao",
+      "path": "vinculo/associar-situacao",
+      "method": "POST",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "vinculoId",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "situacaoId",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "3j65o2piu8"
+}

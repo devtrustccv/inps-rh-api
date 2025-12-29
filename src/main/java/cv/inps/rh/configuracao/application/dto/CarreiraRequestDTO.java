@@ -19,14 +19,15 @@ import java.util.List;
 
 
 @IgrpDTO
-public class CarreiraRequestDTO  {
+public class CarreiraRequestDTO {
 
   @NotBlank(message = "The field <descricao> is required")
+  private String descricao;
 
-  private String descricao ;
+  @NotBlank(message = "The field <codigo> is required")
+  private String codigo;
 
-
-  private String estado ;
+  private String estado;
 
   @Valid
   private List<CategoriaCarreiraResponseDTO> categorias = new ArrayList<>();
