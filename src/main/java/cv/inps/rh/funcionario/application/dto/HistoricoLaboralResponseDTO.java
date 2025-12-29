@@ -18,7 +18,7 @@ public class HistoricoLaboralResponseDTO {
 
   private String uuid;
 
-  private String situacaoAtual;
+  private boolean situacaoAtual;
 
   private String ultimoMovimento;
 

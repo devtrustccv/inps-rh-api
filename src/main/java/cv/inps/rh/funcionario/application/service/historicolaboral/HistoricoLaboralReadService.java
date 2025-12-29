@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
@@ -91,6 +92,8 @@ public class HistoricoLaboralReadService {
               dataInicioContrato.concat(" / ").concat(dataInicioCarreira));
           response.setDataFimContratoCarreira(
               dataFimContrato.concat(" / ").concat(dataFimCarreira));
+
+          response.setSituacaoAtual(Objects.equals(obj.getEstActAdm(), 1));
 
           var start = DateFormatter.localDateToString(obj.getDataInicio());
           var end = obj.getDataFim() != null
