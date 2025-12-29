@@ -18,6 +18,8 @@ public class HistoricoLaboralResponseDTO {
 
   private String uuid;
 
+  private String situacaoAtual;
+
   private String ultimoMovimento;
 
 
