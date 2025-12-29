@@ -14,6 +14,9 @@ import lombok.NoArgsConstructor;
 @IgrpDTO
 public class HistoricoLaboralResponseDTO {
 
+  private Long id;
+
+  private String uuid;
 
   private String ultimoMovimento;
 
@@ -46,5 +49,9 @@ public class HistoricoLaboralResponseDTO {
 
 
   private String dataInicioFim;
+
+  private String dataInicioContratoCarreira;
+
+  private String dataFimContratoCarreira;
 
 }

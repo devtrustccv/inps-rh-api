@@ -41,6 +41,7 @@ public class HistoricoLaboralReadService {
         .map(obj -> {
           var response = new HistoricoLaboralResponseDTO();
           response.setUltimoMovimento(DateFormatter.localDateToString(obj.getUltProc()));
+
           ofNullable(obj.getTipoSituacao()).ifPresent(response::setTipoSituacao);
           ofNullable(obj.getContrVinculoId().getTpContratoId().getNome()).ifPresent(response::setTipoContrato);
           ofNullable(obj.getContrVinculoId().getVinculoId()).map(ParamVinculoEntity::getNome).ifPresent(response::setVinculo);
@@ -54,6 +55,21 @@ public class HistoricoLaboralReadService {
               .map(ParamSituacaoEntity::getNome)
               .ifPresent(response::setSituacaoLaboral);
 
+          response.setId(obj.getId());
+          response.setUuid(obj.getFunId().getUuid().toString());
+
+          var dataInicioContrato = obj.getContrVinculoId().getDataInicio()!=null ? DateFormatter.localDateToString(obj.getContrVinculoId().getDataInicio())
+              : StringUtils.EMPTY;
+          var dataFimContrato = obj.getContrVinculoId().getDataFim()!=null ? DateFormatter.localDateToString(obj.getContrVinculoId().getDataFim())
+              : StringUtils.EMPTY;
+
+          var dataInicioCarreira = obj.getCarreiraId()!=null ? DateFormatter.localDateToString(obj.getCarreiraId().getDataInicio())
+              : StringUtils.EMPTY;
+          var dataFimCarreira = obj.getCarreiraId()!=null ? DateFormatter.localDateToString(obj.getCarreiraId().getDataFim())
+              : StringUtils.EMPTY;
+
+          response.setDataInicioContratoCarreira(dataInicioContrato.concat(" / ").concat(dataInicioCarreira));
+          response.setDataFimContratoCarreira(dataFimContrato.concat(" / ").concat(dataFimCarreira));
 
           var start = DateFormatter.localDateToString(obj.getDataInicio());
           var end = obj.getDataFim() != null ? " / " + DateFormatter.localDateToString(obj.getDataFim()) : StringUtils.EMPTY;
