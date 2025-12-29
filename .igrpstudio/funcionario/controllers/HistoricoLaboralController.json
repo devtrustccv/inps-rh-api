@@ -115,7 +115,7 @@
     },
     {
       "actionName": "atualizarHistoricoLaboral",
-      "path": "{idFuncionario}/historico-laboral{historicoId}",
+      "path": "{idFuncionario}/historico-laboral/{historicoId}",
       "method": "PUT",
       "requestBody": {
         "content": {
@@ -188,5 +188,5 @@
       ]
     }
   ],
-  "id": "yr7hgkcuf8-getHistoricoLaboral-getHistoricoLaboral"
+  "id": "yr7hgkcuf8-getHistoricoLaboral-getHistoricoLaboral-atualizarHistoricoLaboral"
 }

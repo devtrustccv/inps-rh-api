@@ -107,7 +107,7 @@ public class HistoricoLaboralController {
   }
 
    @PutMapping(
-   value = "{idFuncionario}/historico-laboral{historicoId}"
+   value = "{idFuncionario}/historico-laboral/{historicoId}"
   )
   @Operation(
     summary = "Atualizar historico laboral",
