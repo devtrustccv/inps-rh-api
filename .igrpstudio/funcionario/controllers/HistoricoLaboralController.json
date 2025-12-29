@@ -112,6 +112,80 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "atualizarHistoricoLaboral",
+      "path": "{idFuncionario}/historico-laboral{historicoId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ValidarNovoHistoricoLaboral",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ValidarNovoHistoricoLaboral",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "historicoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getHistoricoLaboralById",
+      "path": "historico-laboral/{historicoId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ValidarNovoHistoricoLaboral",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "historicoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "yr7hgkcuf8-getHistoricoLaboral-getHistoricoLaboral"
