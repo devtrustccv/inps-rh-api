@@ -36,14 +36,16 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
   private final DomainEntityRepository domainEntityRepository;
   private final ParamSitLaboralEntityRepository situacaoLaboralEntityRepository;
   private final ParamSituacaoEntityRepository paramSituacaoEntityRepository;
+  private final ParamContratoEntityRepository paramContratoEntityRepository;
 
-  protected ParamVinculoService(ParamVinculoEntityRepository repository, TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository, DomainEntityRepository domainEntityRepository, Validator validator, ObjectMapper jsonMapper, ParamSitLaboralEntityRepository situacaoLaboralEntityRepository, ParamSituacaoEntityRepository paramSituacaoEntityRepository) {
+  protected ParamVinculoService(ParamVinculoEntityRepository repository, TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository, DomainEntityRepository domainEntityRepository, Validator validator, ObjectMapper jsonMapper, ParamSitLaboralEntityRepository situacaoLaboralEntityRepository, ParamSituacaoEntityRepository paramSituacaoEntityRepository, ParamContratoEntityRepository paramContratoEntityRepository) {
     super(validator, jsonMapper, VinculoLaboralRequestDTO.class);
     this.repository = repository;
     this.tiposRelacionamentoEntityRepository = tiposRelacionamentoEntityRepository;
     this.domainEntityRepository = domainEntityRepository;
     this.situacaoLaboralEntityRepository = situacaoLaboralEntityRepository;
     this.paramSituacaoEntityRepository = paramSituacaoEntityRepository;
+    this.paramContratoEntityRepository = paramContratoEntityRepository;
   }
 
   public void associarVinculoSituacao(String vinculoId, String situacaoId) {
@@ -70,6 +72,7 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     e.setFlgCarreira(ConfigurationUtils.parseFlag(dto.getCarreira()));
     e.setFlgSalario(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
     e.setFlgTempoServico(ConfigurationUtils.parseFlag(dto.getTempoServico()));
+    e.setParamContratoId(StringUtils.hasText(dto.getContratoId()) ? paramContratoEntityRepository.findByUuidOrThrow(UUID.fromString(dto.getContratoId())) : null);
     e.setEstado(Estado.A);
     repository.save(e);
     return new ConfigurationResponseIdDTO(e.getUuid().toString());
@@ -79,10 +82,11 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
   public Object update(String uuid, VinculoLaboralRequestDTO dto) {
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
     e.setCodigo(dto.getCodigo());
-    e.setNome(dto.getDescricao().trim());
     e.setFlgContrato(ConfigurationUtils.parseFlag(dto.getContrato()));
+    e.setNome(dto.getDescricao().trim());
     e.setFlgCarreira(ConfigurationUtils.parseFlag(dto.getCarreira()));
     e.setFlgSalario(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
+    e.setParamContratoId(StringUtils.hasText(dto.getContratoId()) ? paramContratoEntityRepository.findByUuidOrThrow(UUID.fromString(dto.getContratoId())) : null);
     e.setFlgTempoServico(ConfigurationUtils.parseFlag(dto.getTempoServico()));
     if (StringUtils.hasText(dto.getEstado()))
       e.setEstado(Estado.valueOf(dto.getEstado()));
@@ -117,6 +121,13 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     response.setTempoServicoDesc(domain.get(e.getFlgTempoServico().toString()));
     response.setEstado(e.getEstado().getCode());
     response.setEstadoDescricao(e.getEstado().getDescription());
+
+    var paramContratoId = e.getParamContratoId();
+    if (paramContratoId != null) {
+      response.setContratoId(paramContratoId.getUuid().toString());
+      response.setParamContratoDesc(paramContratoId.getNome());
+    }
+
     return response;
   }
 
