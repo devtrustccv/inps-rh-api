@@ -177,7 +177,7 @@ public class HistoricoLaboralReadService {
     return wrapper;
   }
 
-  public RelacaoLaboralDTO getRelacaoLaboralById(GetRelacaoLaboralByCarreiraIdQuery query) {
+  public RelacaoLaboralDTO getRelacaoLaboralByCarreiraId(GetRelacaoLaboralByCarreiraIdQuery query) {
     var entity = tiposRelacionamentoEntityRepository.findByUuid(UUID.fromString(query.getCarreiraId()))
         .orElseThrow(() -> IgrpResponseStatusException
             .notFound("Histórico Laboral não encontrado"));

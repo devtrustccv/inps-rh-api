@@ -26,7 +26,7 @@ public class GetRelacaoLaboralByCarreiraIdQueryHandler implements QueryHandler<G
 
     LOGGER.debug("GetHistoricoLaboralByIdQuery: {}", query);
 
-    var data = historicoLaboralReadService.getRelacaoLaboralById(query);
+    var data = historicoLaboralReadService.getRelacaoLaboralByCarreiraId(query);
     return ResponseEntity.ok(data);
   }
 
