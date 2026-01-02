@@ -3,11 +3,12 @@ package cv.inps.rh.funcionario.application.service.historicolaboral;
 import cv.inps.rh.funcionario.application.dto.HistoricoLaboralResponseDTO;
 import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
-import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByIdQuery;
+import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByCarreiraId;
 import cv.inps.rh.funcionario.application.queries.GetHistoricoLaboralQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralQuery;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.util.DateFormatter;
+import cv.inps.rh.shared.util.PageMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
@@ -28,6 +29,54 @@ import static java.util.Optional.ofNullable;
 public class HistoricoLaboralReadService {
 
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
+
+  public WrapperHistLaboralResponseDTO getHistoricoLaboral2(GetHistoricoLaboralQuery query) {
+    var pageRequest = PageRequest.of(
+        Integer.parseInt(query.getPagina()),
+        Integer.parseInt(query.getTamanho()));
+
+    var di = StringUtils.isNotBlank(query.getDataInicio()) ? DateFormatter.stringToLocalDate(query.getDataInicio()) : null;
+    var df = StringUtils.isNotBlank(query.getDataFim()) ? DateFormatter.stringToLocalDate(query.getDataFim()) : null;
+
+    var page = tiposRelacionamentoEntityRepository.historicoLaboralViewByFuncionario(
+        query.getFuncionarioId(),
+        query.getReferencia(),
+        query.getTipoSituacao(),
+        query.getSituacaoLaboral(),
+        di,
+        df,
+        pageRequest
+    );
+
+    var data = page.getContent().stream().map(r -> {
+      var dto = new HistoricoLaboralResponseDTO();
+      dto.setUltimoMovimento(StringUtils.EMPTY);
+      dto.setTipoSituacao(r.getTipoSituacaoDesc());
+      dto.setTipoContrato(r.getTipoContratoDesc());
+      dto.setVinculo(r.getVinculoDesc());
+      dto.setDirecao(r.getDirecaoDesc());
+      dto.setSeccao(r.getSeccaoDesc());
+      dto.setCarreira(r.getCarreiraDesc());
+      dto.setReferenciaEscalao(r.getReferenciaEscalaoDesc());
+      dto.setCargo(r.getCargoDesc());
+      dto.setSituacaoLaboral(r.getSituacaoLaboralDesc());
+      dto.setId(r.getTiprelId());
+      dto.setUuid(r.getFuncionarioUuid());
+
+      var dataInicio = r.getDataInicio() != null ? DateFormatter.localDateToString(r.getDataInicio()) : StringUtils.EMPTY;
+      var dataFim = r.getDataFim() != null ? DateFormatter.localDateToString(r.getDataFim()) : StringUtils.EMPTY;
+      dto.setDataInicioFimCarreira(dataInicio.concat(" / ").concat(dataFim));
+      dto.setDataInicioFimContrato(dataInicio.concat(" / ").concat(dataFim));
+
+      dto.setSituacaoAtual(Objects.equals(r.getUltimoVinculo(), 1));
+      return dto;
+    }).toList();
+
+    var wrapper = new WrapperHistLaboralResponseDTO();
+    wrapper.setHistorico(data);
+    PageMapper.fillPagination(page, wrapper);
+    return wrapper;
+  }
 
   public WrapperHistLaboralResponseDTO getHistoricoLaboral(GetHistoricoLaboralQuery query) {
 
@@ -141,8 +190,8 @@ public class HistoricoLaboralReadService {
     return wrapper;
   }
 
-  public ValidarNovoHistoricoLaboralDTO getRelacaoLaboralById(GetRelacaoLaboralByIdQuery query) {
-    var entity = tiposRelacionamentoEntityRepository.findByUuid(UUID.fromString(query.getHistoricoId()))
+  public ValidarNovoHistoricoLaboralDTO getRelacaoLaboralById(GetRelacaoLaboralByCarreiraId query) {
+    var entity = tiposRelacionamentoEntityRepository.findByUuid(UUID.fromString(query.getCarreiraId()))
         .orElseThrow(() -> IgrpResponseStatusException
             .notFound("Histórico Laboral não encontrado"));
 

@@ -248,7 +248,7 @@ public class HistoricoLaboralWriteService {
     var dto = command.getValidarnovohistoricolaboral();
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc);
-    var relacionamento = tiposRelacionamentoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getHistoricoId()));
+    var relacionamento = tiposRelacionamentoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getCarreiraId()));
 
     if (relacionamento.getFunId() == null || !relacionamento.getFunId().getId().equals(funcionario.getId()))
       throw IgrpResponseStatusException.badRequest("Histórico laboral não pertence ao funcionário");
