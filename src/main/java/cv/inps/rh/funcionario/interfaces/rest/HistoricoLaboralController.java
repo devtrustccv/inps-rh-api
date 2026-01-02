@@ -22,6 +22,7 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.funcionario.application.commands.*;
 import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
 import cv.inps.rh.funcionario.application.dto.RelacaoLaboralDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperRelacaoLaboralSumaryDTO;
 
 @IgrpController
 @RestController
@@ -179,14 +180,14 @@ public class HistoricoLaboralController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = WrapperHistLaboralResponseDTO.class,
+                  implementation = WrapperRelacaoLaboralSumaryDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<WrapperHistLaboralResponseDTO> getRelacaoLaboral(
+  public ResponseEntity<WrapperRelacaoLaboralSumaryDTO> getRelacaoLaboral(
     @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 

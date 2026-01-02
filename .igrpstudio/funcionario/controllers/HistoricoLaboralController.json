@@ -197,7 +197,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "WrapperHistLaboralResponse",
+                "type": "WrapperRelacaoLaboralSumary",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -216,5 +216,5 @@
       ]
     }
   ],
-  "id": "yr7hgkcuf8-getHistoricoLaboral-getHistoricoLaboral-atualizarHistoricoLaboral-novaRelacaoLaboral-getRelacaoLaboralById-getRelacaoLaboralByCarreiraId-atualizarRelacaoLaboral-getRelacaoLaboral-getRelacaoLaboralByCarreiraId"
+  "id": "yr7hgkcuf8-getHistoricoLaboral-getHistoricoLaboral-atualizarHistoricoLaboral-novaRelacaoLaboral-getRelacaoLaboralById-getRelacaoLaboralByCarreiraId-atualizarRelacaoLaboral-getRelacaoLaboral-getRelacaoLaboralByCarreiraId-getRelacaoLaboral"
 }

@@ -174,6 +174,8 @@ public interface TiposRelacionamentoEntityRepository extends
                           SECCAO_ID AS seccaoId,
                           CARREIRA_DESC AS carreiraDesc,
                           CARREIRA_ID AS carreiraId,
+                          CARREIRA_UUID AS carreiraUuid,
+                          EST_ACT_ADM as situacaoAtual,
                           ESCALAO_DESC AS escalaoDesc,
                           ESCALAO_ID AS escalaoId,
                           DATA_CARREIRA AS dataCarreira,

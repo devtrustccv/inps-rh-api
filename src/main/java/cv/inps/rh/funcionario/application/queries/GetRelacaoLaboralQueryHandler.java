@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.application.queries;
 
+import cv.inps.rh.funcionario.application.dto.WrapperRelacaoLaboralSumaryDTO;
 import cv.inps.rh.funcionario.application.service.historicolaboral.HistoricoLaboralReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
 import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
 
 @Component
-public class GetRelacaoLaboralQueryHandler implements QueryHandler<GetRelacaoLaboralQuery, ResponseEntity<WrapperHistLaboralResponseDTO>>{
+public class GetRelacaoLaboralQueryHandler implements QueryHandler<GetRelacaoLaboralQuery, ResponseEntity<WrapperRelacaoLaboralSumaryDTO>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetRelacaoLaboralQueryHandler.class);
 
@@ -24,7 +25,7 @@ public class GetRelacaoLaboralQueryHandler implements QueryHandler<GetRelacaoLab
   }
 
    @IgrpQueryHandler
-  public ResponseEntity<WrapperHistLaboralResponseDTO> handle(GetRelacaoLaboralQuery query) {
+  public ResponseEntity<WrapperRelacaoLaboralSumaryDTO> handle(GetRelacaoLaboralQuery query) {
 
     LOGGER.debug("GetRelacaoLaboralQuery: {}", query);
 

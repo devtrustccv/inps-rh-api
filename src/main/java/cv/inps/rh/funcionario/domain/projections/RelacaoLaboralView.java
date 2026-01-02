@@ -23,6 +23,10 @@ public interface RelacaoLaboralView {
 
   Long getCarreiraId();
 
+  String getCarreiraUuid();
+
+  Integer getSituacaoAtual();
+
   String getEscalaoDesc();
 
   Long getEscalaoId();

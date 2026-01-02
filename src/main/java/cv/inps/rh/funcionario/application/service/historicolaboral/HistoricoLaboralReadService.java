@@ -1,8 +1,6 @@
 package cv.inps.rh.funcionario.application.service.historicolaboral;
 
-import cv.inps.rh.funcionario.application.dto.HistoricoLaboralResponseDTO;
-import cv.inps.rh.funcionario.application.dto.RelacaoLaboralDTO;
-import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
+import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByCarreiraIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetHistoricoLaboralQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralQuery;
@@ -161,17 +159,19 @@ public class HistoricoLaboralReadService {
     return wrapper;
   }
 
-  public WrapperHistLaboralResponseDTO getRelacaoLaboral(GetRelacaoLaboralQuery query) {
+  public WrapperRelacaoLaboralSumaryDTO getRelacaoLaboral(GetRelacaoLaboralQuery query) {
     var rows = tiposRelacionamentoEntityRepository.relacaoLaboralFromViewByFuncionario(query.getFuncionarioId());
 
     var data = rows.stream().map(r -> {
-      var dto = new HistoricoLaboralResponseDTO();
-      dto.setTipoContrato(r.getContratoDesc());
+      var dto = new RelacaoLaboralSumaryDTO();
+      dto.setCarreiraId(r.getCarreiraId());
+      dto.setCarreiraUuid(r.getCarreiraUuid());
+      System.out.println("r.getSituacaoAtual():: "+r.getSituacaoAtual());
+      dto.setSituacaoAtual(Objects.equals(r.getSituacaoAtual(), 1));
       dto.setVinculo(r.getVinculoDesc());
       dto.setDirecao(r.getDirecaoDesc());
       dto.setSeccao(r.getSeccaoDesc());
       dto.setCarreira(r.getCarreiraDesc());
-      dto.setReferenciaEscalao(r.getEscalaoDesc());
       dto.setDataInicioFimCarreira(r.getDataCarreira());
       dto.setDataInicioFimContrato(r.getDataContrato());
       dto.setCargo(r.getCargoDesc());
@@ -179,8 +179,8 @@ public class HistoricoLaboralReadService {
       return dto;
     }).toList();
 
-    var wrapper = new WrapperHistLaboralResponseDTO();
-    wrapper.setHistorico(data);
+    var wrapper = new WrapperRelacaoLaboralSumaryDTO();
+    wrapper.setContent(data);
     wrapper.setPageNumber(0);
     wrapper.setPageSize(data.size());
     wrapper.setTotalElements((long) data.size());
