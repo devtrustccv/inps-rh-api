@@ -11,18 +11,18 @@ import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 import cv.inps.rh.funcionario.application.service.historicolaboral.HistoricoLaboralReadService;
 
 @Component
-public class GetHistoricoLaboralByIdQueryHandler implements QueryHandler<GetHistoricoLaboralByIdQuery, ResponseEntity<ValidarNovoHistoricoLaboralDTO>>{
+public class GetRelacaoLaboralByIdQueryHandler implements QueryHandler<GetRelacaoLaboralByIdQuery, ResponseEntity<ValidarNovoHistoricoLaboralDTO>>{
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(GetHistoricoLaboralByIdQueryHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(GetRelacaoLaboralByIdQueryHandler.class);
 
   private final HistoricoLaboralReadService historicoLaboralReadService;
 
-  public GetHistoricoLaboralByIdQueryHandler(HistoricoLaboralReadService historicoLaboralReadService) {
+  public GetRelacaoLaboralByIdQueryHandler(HistoricoLaboralReadService historicoLaboralReadService) {
     this.historicoLaboralReadService = historicoLaboralReadService;
   }
 
    @IgrpQueryHandler
-  public ResponseEntity<ValidarNovoHistoricoLaboralDTO> handle(GetHistoricoLaboralByIdQuery query) {
+  public ResponseEntity<ValidarNovoHistoricoLaboralDTO> handle(GetRelacaoLaboralByIdQuery query) {
 
     LOGGER.debug("GetHistoricoLaboralByIdQuery: {}", query);
 

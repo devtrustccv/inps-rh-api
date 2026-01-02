@@ -10,17 +10,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ValidarHistoricoLaboralCommandHandler implements CommandHandler<ValidarHistoricoLaboralCommand, ResponseEntity<ValidarNovoHistoricoLaboralDTO>> {
+public class NovaRelacaoLaboralCommandHandler implements CommandHandler<NovaRelacaoLaboralCommand, ResponseEntity<ValidarNovoHistoricoLaboralDTO>> {
 
-   private static final Logger LOGGER = LoggerFactory.getLogger(ValidarHistoricoLaboralCommandHandler.class);
+   private static final Logger LOGGER = LoggerFactory.getLogger(NovaRelacaoLaboralCommandHandler.class);
 
    private final HistoricoLaboralWriteService historicoLaboralWriteService;
-   public ValidarHistoricoLaboralCommandHandler(HistoricoLaboralWriteService historicoLaboralWriteService) {
+   public NovaRelacaoLaboralCommandHandler(HistoricoLaboralWriteService historicoLaboralWriteService) {
       this.historicoLaboralWriteService = historicoLaboralWriteService;
    }
 
    @IgrpCommandHandler
-   public ResponseEntity<ValidarNovoHistoricoLaboralDTO> handle(ValidarHistoricoLaboralCommand command) {
+   public ResponseEntity<ValidarNovoHistoricoLaboralDTO> handle(NovaRelacaoLaboralCommand command) {
       LOGGER.info("ValidarHistoricoLaboralCommandHandler.handle: {}", command);
       return ResponseEntity.ok(historicoLaboralWriteService.validar(command));
    }

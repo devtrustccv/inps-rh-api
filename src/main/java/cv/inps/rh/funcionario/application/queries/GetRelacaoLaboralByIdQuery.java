@@ -11,7 +11,7 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetHistoricoLaboralByIdQuery implements Query {
+public class GetRelacaoLaboralByIdQuery implements Query {
 
   @NotBlank(message = "The field <historicoId> is required")
   private String historicoId;

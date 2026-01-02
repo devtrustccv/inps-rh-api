@@ -1,11 +1,9 @@
 package cv.inps.rh.funcionario.application.service.historicolaboral;
 
-import cv.inps.rh.funcionario.application.commands.AtualizarHistoricoLaboralCommand;
-import cv.inps.rh.funcionario.application.commands.ValidarHistoricoLaboralCommand;
+import cv.inps.rh.funcionario.application.commands.AtualizarRelacaoLaboralCommand;
+import cv.inps.rh.funcionario.application.commands.NovaRelacaoLaboralCommand;
 import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
-import cv.inps.rh.funcionario.application.service.ValidarDadosContratuaisService;
-import cv.inps.rh.funcionario.application.service.documento.DocumentoWriteService;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -24,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -50,7 +47,7 @@ public class HistoricoLaboralWriteService {
   private final TipoMovimentoHelper tipoMovimentoHelper;
 
   @Transactional
-  public ValidarNovoHistoricoLaboralDTO validar(ValidarHistoricoLaboralCommand command) {
+  public ValidarNovoHistoricoLaboralDTO validar(NovaRelacaoLaboralCommand command) {
 
     var dto = command.getValidarnovohistoricolaboral();
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario()).valor();
@@ -247,7 +244,7 @@ public class HistoricoLaboralWriteService {
   }
 
   @Transactional
-  public ValidarNovoHistoricoLaboralDTO atualizar(AtualizarHistoricoLaboralCommand command) {
+  public ValidarNovoHistoricoLaboralDTO atualizar(AtualizarRelacaoLaboralCommand command) {
     var dto = command.getValidarnovohistoricolaboral();
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc);

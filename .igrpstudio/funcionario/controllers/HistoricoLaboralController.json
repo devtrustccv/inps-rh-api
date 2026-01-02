@@ -73,8 +73,8 @@
       ]
     },
     {
-      "actionName": "validarHistoricoLaboral",
-      "path": "{idFuncionario}/historico-laboral",
+      "actionName": "novaRelacaoLaboral",
+      "path": "{idFuncionario}/relacao-laboral",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -114,8 +114,8 @@
       ]
     },
     {
-      "actionName": "atualizarHistoricoLaboral",
-      "path": "{idFuncionario}/historico-laboral/{historicoId}",
+      "actionName": "atualizarRelacaoLaboral",
+      "path": "{idFuncionario}/relacao-laboral/{historicoId}",
       "method": "PUT",
       "requestBody": {
         "content": {
@@ -160,8 +160,8 @@
       ]
     },
     {
-      "actionName": "getHistoricoLaboralById",
-      "path": "historico-laboral/{historicoId}",
+      "actionName": "getRelacaoLaboralById",
+      "path": "relacao-laboral/{historicoId}",
       "method": "GET",
       "responses": {
         "200": {

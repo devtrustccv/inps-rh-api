@@ -10,13 +10,11 @@ import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AtualizarHistoricoLaboralCommand implements Command {
+public class NovaRelacaoLaboralCommand implements Command {
 
-  
+
   private ValidarNovoHistoricoLaboralDTO validarnovohistoricolaboral;
   @NotBlank(message = "The field <idFuncionario> is required")
   private String idFuncionario;
-  @NotBlank(message = "The field <historicoId> is required")
-  private String historicoId;
 
 }
