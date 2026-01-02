@@ -189,47 +189,48 @@ public interface TiposRelacionamentoEntityRepository extends
                         """, nativeQuery = true)
         List<RelacaoLaboralView> relacaoLaboralFromViewByFuncionario(@Param("funcionarioUuid") String funcionarioUuid);
 
-        @Query(value = """
-                        SELECT
-                          FUNCIONARIO_UUID AS funcionarioUuid,
-                          TIPREL_ID AS tiprelId,
-                          TIPO_CONTRATO_DESC AS tipoContratoDesc,
-                          VINCULO_DESC AS vinculoDesc,
-                          DIRECAO_DESC AS direcaoDesc,
-                          SECCAO_DESC AS seccaoDesc,
-                          CARREIRA_DESC AS carreiraDesc,
-                          REFERENCIA_ESCALAO_DESC AS referenciaEscalaoDesc,
-                          CARGO_DESC AS cargoDesc,
-                          SITUACAO_LABORAL_DESC AS situacaoLaboralDesc,
-                          DATA_INICIO AS dataInicio,
-                          DATA_FIM AS dataFim,
-                          TIPO_SITUACAO_DESC AS tipoSituacaoDesc,
-                          ULTIMO_VINCULO AS ultimoVinculo
-                        FROM RH_V_HIST_LABORAL
-                        WHERE FUNCIONARIO_UUID = :funcionarioUuid
-                          AND (:referencia IS NULL OR REFERENCIA = :referencia)
-                          AND (:tipoSituacao IS NULL OR LOWER(TIPO_SITUACAO_DESC) LIKE LOWER(CONCAT('%', :tipoSituacao, '%')))
-                          AND (:situacaoLaboral IS NULL OR LOWER(SITUACAO_LABORAL_DESC) LIKE LOWER(CONCAT('%', :situacaoLaboral, '%')))
-                          AND (:dataInicio IS NULL OR DATA_INICIO >= :dataInicio)
-                          AND (:dataFim IS NULL OR DATA_FIM <= :dataFim)
-                        ORDER BY DATA_INICIO DESC
-                        """, countQuery = """
-                        SELECT COUNT(*)
-                        FROM RH_V_HIST_LABORAL
-                        WHERE FUNCIONARIO_UUID = :funcionarioUuid
-                          AND (:referencia IS NULL OR REFERENCIA = :referencia)
-                          AND (:tipoSituacao IS NULL OR LOWER(TIPO_SITUACAO_DESC) LIKE LOWER(CONCAT('%', :tipoSituacao, '%')))
-                          AND (:situacaoLaboral IS NULL OR LOWER(SITUACAO_LABORAL_DESC) LIKE LOWER(CONCAT('%', :situacaoLaboral, '%')))
-                          AND (:dataInicio IS NULL OR DATA_INICIO >= :dataInicio)
-                          AND (:dataFim IS NULL OR DATA_FIM <= :dataFim)
-                        """, nativeQuery = true)
-        Page<HistoricoLaboralViewRow> historicoLaboralViewByFuncionario(
-                        @Param("funcionarioUuid") String funcionarioUuid,
-                        @Param("referencia") String referencia,
-                        @Param("tipoSituacao") String tipoSituacao,
-                        @Param("situacaoLaboral") String situacaoLaboral,
-                        @Param("dataInicio") java.time.LocalDate dataInicio,
-                        @Param("dataFim") java.time.LocalDate dataFim,
-                        Pageable pageable);
+  @Query(value = """
+        SELECT
+          FUN_UUID AS funcionarioUuid,
+          TIPREL_ID AS tiprelId,
+          TIPO_CONTRATO_DESC AS tipoContratoDesc,
+          VINCULO_DESC AS vinculoDesc,
+          DIRECAO_DESC AS direcaoDesc,
+          SECCAO_DESC AS seccaoDesc,
+          CARREIRA_DESC AS carreiraDesc,
+          REFERENCIA_ESCALAO_DESC AS referenciaEscalaoDesc,
+          CARGO_DESC AS cargoDesc,
+          SITUACAO_LABORAL_DESC AS situacaoLaboralDesc,
+          DATA_INICIO AS dataInicio,
+          DATA_FIM AS dataFim,
+          TIPO_SITUACAO_DESC AS tipoSituacaoDesc,
+          ULTIMO_VINCULO AS ultimoVinculo
+        FROM RH_V_HIST_LABORAL
+        WHERE FUN_UUID = :funcionarioUuid
+          AND (:referencia IS NULL OR REFERENCIA = :referencia)
+          AND (:tipoSituacao IS NULL OR LOWER(TIPO_SITUACAO_DESC) LIKE LOWER('%' || :tipoSituacao || '%'))
+          AND (:situacaoLaboral IS NULL OR LOWER(SITUACAO_LABORAL_DESC) LIKE LOWER('%' || :situacaoLaboral || '%'))
+          AND (:dataInicio IS NULL OR DATA_INICIO >= :dataInicio)
+          AND (:dataFim IS NULL OR DATA_FIM <= :dataFim)
+        ORDER BY DATA_INICIO DESC
+        """, countQuery = """
+        SELECT COUNT(*)
+        FROM RH_V_HIST_LABORAL
+        WHERE FUN_UUID = :funcionarioUuid
+          AND (:referencia IS NULL OR REFERENCIA = :referencia)
+          AND (:tipoSituacao IS NULL OR LOWER(TIPO_SITUACAO_DESC) LIKE LOWER('%' || :tipoSituacao || '%'))
+          AND (:situacaoLaboral IS NULL OR LOWER(SITUACAO_LABORAL_DESC) LIKE LOWER('%' || :situacaoLaboral || '%'))
+          AND (:dataInicio IS NULL OR DATA_INICIO >= :dataInicio)
+          AND (:dataFim IS NULL OR DATA_FIM <= :dataFim)
+        """, nativeQuery = true)
+  Page<HistoricoLaboralViewRow> historicoLaboralViewByFuncionario(
+      @Param("funcionarioUuid") String funcionarioUuid,
+      @Param("referencia") String referencia,
+      @Param("tipoSituacao") String tipoSituacao,
+      @Param("situacaoLaboral") String situacaoLaboral,
+      @Param("dataInicio") LocalDate dataInicio,
+      @Param("dataFim") LocalDate dataFim,
+      Pageable pageable);
+
 
 }

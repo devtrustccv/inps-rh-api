@@ -129,9 +129,6 @@ public class HistoricoLaboralReadService {
           response.setDataInicioFim(
               dataInicio.concat(" / ").concat(dataFim));
 
-
-
-
           return response;
         }).toList();
 
