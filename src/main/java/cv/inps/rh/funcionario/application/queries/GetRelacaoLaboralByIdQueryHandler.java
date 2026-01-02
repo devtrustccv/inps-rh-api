@@ -26,7 +26,7 @@ public class GetRelacaoLaboralByIdQueryHandler implements QueryHandler<GetRelaca
 
     LOGGER.debug("GetHistoricoLaboralByIdQuery: {}", query);
 
-    var data = historicoLaboralReadService.getHistoricoLaboralById(query);
+    var data = historicoLaboralReadService.getRelacaoLaboralById(query);
     return ResponseEntity.ok(data);
   }
 

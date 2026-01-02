@@ -73,23 +73,22 @@ public class HistoricoLaboralReadService {
 
           var dataInicioContrato = obj.getContrVinculoId().getDataInicio() != null
               ? DateFormatter.localDateToString(
-              obj.getContrVinculoId().getDataInicio())
+                  obj.getContrVinculoId().getDataInicio())
               : StringUtils.EMPTY;
           var dataFimContrato = obj.getContrVinculoId().getDataFim() != null
               ? DateFormatter.localDateToString(
-              obj.getContrVinculoId().getDataFim())
+                  obj.getContrVinculoId().getDataFim())
               : StringUtils.EMPTY;
 
           var dataInicioCarreira = obj.getCarreiraId() != null
               ? DateFormatter.localDateToString(
-              obj.getCarreiraId().getDataInicio())
+                  obj.getCarreiraId().getDataInicio())
               : StringUtils.EMPTY;
 
           var dataFimCarreira = obj.getCarreiraId() != null
               ? DateFormatter.localDateToString(
-              obj.getCarreiraId().getDataFim())
+                  obj.getCarreiraId().getDataFim())
               : StringUtils.EMPTY;
-
 
           response.setDataInicioFimContrato(
               dataInicioContrato.concat(" / ").concat(dataFimContrato));
@@ -97,7 +96,6 @@ public class HistoricoLaboralReadService {
           response.setDataInicioFimCarreira(dataInicioCarreira.concat(" / ").concat(dataFimCarreira));
 
           response.setSituacaoAtual(Objects.equals(obj.getEstActAdm(), 1));
-
 
           return response;
         }).toList();
@@ -114,7 +112,36 @@ public class HistoricoLaboralReadService {
     return wrapper;
   }
 
-  public ValidarNovoHistoricoLaboralDTO getHistoricoLaboralById(GetRelacaoLaboralByIdQuery query) {
+  public WrapperHistLaboralResponseDTO getRelacaoLaboral(GetRelacaoLaboralQuery query) {
+    var rows = tiposRelacionamentoEntityRepository.relacaoLaboralFromViewByFuncionario(query.getFuncionarioId());
+
+    var data = rows.stream().map(r -> {
+      var dto = new HistoricoLaboralResponseDTO();
+      dto.setTipoContrato(r.getContratoDesc());
+      dto.setVinculo(r.getVinculoDesc());
+      dto.setDirecao(r.getDirecaoDesc());
+      dto.setSeccao(r.getSeccaoDesc());
+      dto.setCarreira(r.getCarreiraDesc());
+      dto.setReferenciaEscalao(r.getEscalaoDesc());
+      dto.setDataInicioFimCarreira(r.getDataCarreira());
+      dto.setDataInicioFimContrato(r.getDataContrato());
+      dto.setCargo(r.getCargoDesc());
+      dto.setSituacaoLaboral(r.getSituacaoLaboralDesc());
+      return dto;
+    }).toList();
+
+    var wrapper = new WrapperHistLaboralResponseDTO();
+    wrapper.setHistorico(data);
+    wrapper.setPageNumber(0);
+    wrapper.setPageSize(data.size());
+    wrapper.setTotalElements((long) data.size());
+    wrapper.setTotalPages(1);
+    wrapper.setFirst(true);
+    wrapper.setLast(true);
+    return wrapper;
+  }
+
+  public ValidarNovoHistoricoLaboralDTO getRelacaoLaboralById(GetRelacaoLaboralByIdQuery query) {
     var entity = tiposRelacionamentoEntityRepository.findByUuid(UUID.fromString(query.getHistoricoId()))
         .orElseThrow(() -> IgrpResponseStatusException
             .notFound("Histórico Laboral não encontrado"));
@@ -187,7 +214,4 @@ public class HistoricoLaboralReadService {
   }
 
 
-  public WrapperHistLaboralResponseDTO getRelacaoLaboral(GetRelacaoLaboralQuery query) {
-    return null;
-  }
 }
