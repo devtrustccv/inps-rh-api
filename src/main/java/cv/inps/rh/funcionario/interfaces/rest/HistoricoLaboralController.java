@@ -6,12 +6,15 @@ package cv.inps.rh.funcionario.interfaces.rest;
 import cv.igrp.framework.stereotype.IgrpController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.funcionario.application.queries.*;
@@ -29,7 +32,7 @@ import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 )
 public class HistoricoLaboralController {
 
-
+  
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -46,7 +49,7 @@ public class HistoricoLaboralController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -56,7 +59,7 @@ public class HistoricoLaboralController {
       )
     }
   )
-
+  
   public ResponseEntity<WrapperHistLaboralResponseDTO> getHistoricoLaboral(
     @RequestParam(value = "referencia", required = false) String referencia,
     @RequestParam(value = "tipoSituacao", required = false) String tipoSituacao,
@@ -74,15 +77,15 @@ public class HistoricoLaboralController {
   }
 
    @PostMapping(
-   value = "{idFuncionario}/historico-laboral"
+   value = "{idFuncionario}/relacao-laboral"
   )
   @Operation(
-    summary = "Validar historico laboral",
-    description = "Validar historico laboral",
+    summary = "Nova relacao laboral",
+    description = "Nova relacao laboral",
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -92,27 +95,27 @@ public class HistoricoLaboralController {
       )
     }
   )
-
-  public ResponseEntity<ValidarNovoHistoricoLaboralDTO> validarHistoricoLaboral(@Valid @RequestBody ValidarNovoHistoricoLaboralDTO validarHistoricoLaboralRequest
+  
+  public ResponseEntity<ValidarNovoHistoricoLaboralDTO> novaRelacaoLaboral(@Valid @RequestBody ValidarNovoHistoricoLaboralDTO novaRelacaoLaboralRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
-      final var command = new NovaRelacaoLaboralCommand(validarHistoricoLaboralRequest, idFuncionario);
+      final var command = new NovaRelacaoLaboralCommand(novaRelacaoLaboralRequest, idFuncionario);
 
       return commandBus.send(command);
 
   }
 
    @PutMapping(
-   value = "{idFuncionario}/historico-laboral/{historicoId}"
+   value = "{idFuncionario}/relacao-laboral/{historicoId}"
   )
   @Operation(
-    summary = "Atualizar historico laboral",
-    description = "Atualizar historico laboral",
+    summary = "Atualizar relacao laboral",
+    description = "Atualizar relacao laboral",
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -122,27 +125,27 @@ public class HistoricoLaboralController {
       )
     }
   )
-
-  public ResponseEntity<ValidarNovoHistoricoLaboralDTO> atualizarHistoricoLaboral(@Valid @RequestBody ValidarNovoHistoricoLaboralDTO atualizarHistoricoLaboralRequest
+  
+  public ResponseEntity<ValidarNovoHistoricoLaboralDTO> atualizarRelacaoLaboral(@Valid @RequestBody ValidarNovoHistoricoLaboralDTO atualizarRelacaoLaboralRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "historicoId") String historicoId)
   {
 
-      final var command = new AtualizarRelacaoLaboralCommand(atualizarHistoricoLaboralRequest, idFuncionario, historicoId);
+      final var command = new AtualizarRelacaoLaboralCommand(atualizarRelacaoLaboralRequest, idFuncionario, historicoId);
 
       return commandBus.send(command);
 
   }
 
    @GetMapping(
-   value = "historico-laboral/{historicoId}"
+   value = "relacao-laboral/{historicoId}"
   )
   @Operation(
-    summary = "Get historico laboral by id",
-    description = "Get historico laboral by id",
+    summary = "Get relacao laboral by id",
+    description = "Get relacao laboral by id",
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -152,8 +155,8 @@ public class HistoricoLaboralController {
       )
     }
   )
-
-  public ResponseEntity<ValidarNovoHistoricoLaboralDTO> getHistoricoLaboralById(
+  
+  public ResponseEntity<ValidarNovoHistoricoLaboralDTO> getRelacaoLaboralById(
     @PathVariable(value = "historicoId") String historicoId)
   {
 
@@ -172,7 +175,7 @@ public class HistoricoLaboralController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -182,7 +185,7 @@ public class HistoricoLaboralController {
       )
     }
   )
-
+  
   public ResponseEntity<WrapperHistLaboralResponseDTO> getRelacaoLaboral(
     @PathVariable(value = "funcionarioId") String funcionarioId)
   {
