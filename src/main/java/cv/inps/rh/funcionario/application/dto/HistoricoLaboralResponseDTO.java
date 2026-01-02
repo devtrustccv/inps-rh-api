@@ -50,10 +50,8 @@ public class HistoricoLaboralResponseDTO {
   private String situacaoLaboral;
 
 
-  private String dataInicioFim;
+  private String dataInicioFimCarreira;
 
-  private String dataInicioContratoCarreira;
-
-  private String dataFimContratoCarreira;
+  private String dataInicioFimContrato;
 
 }

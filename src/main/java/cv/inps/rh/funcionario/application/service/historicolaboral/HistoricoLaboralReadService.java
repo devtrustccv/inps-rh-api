@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetHistoricoLaboralQuery;
+import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralQuery;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -83,23 +84,21 @@ public class HistoricoLaboralReadService {
               ? DateFormatter.localDateToString(
               obj.getCarreiraId().getDataInicio())
               : StringUtils.EMPTY;
+
           var dataFimCarreira = obj.getCarreiraId() != null
               ? DateFormatter.localDateToString(
               obj.getCarreiraId().getDataFim())
               : StringUtils.EMPTY;
 
-          response.setDataInicioContratoCarreira(
-              dataInicioContrato.concat(" / ").concat(dataInicioCarreira));
-          response.setDataFimContratoCarreira(
-              dataFimContrato.concat(" / ").concat(dataFimCarreira));
+
+          response.setDataInicioFimContrato(
+              dataInicioContrato.concat(" / ").concat(dataFimContrato));
+
+          response.setDataInicioFimCarreira(dataInicioCarreira.concat(" / ").concat(dataFimCarreira));
 
           response.setSituacaoAtual(Objects.equals(obj.getEstActAdm(), 1));
 
-          var start = DateFormatter.localDateToString(obj.getDataInicio());
-          var end = obj.getDataFim() != null
-              ? " / " + DateFormatter.localDateToString(obj.getDataFim())
-              : StringUtils.EMPTY;
-          response.setDataInicioFim(start + end);
+
           return response;
         }).toList();
 
@@ -187,4 +186,8 @@ public class HistoricoLaboralReadService {
     return dto;
   }
 
+
+  public WrapperHistLaboralResponseDTO getRelacaoLaboral(GetRelacaoLaboralQuery query) {
+    return null;
+  }
 }

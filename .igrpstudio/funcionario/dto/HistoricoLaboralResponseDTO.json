@@ -162,7 +162,7 @@
       "primaryKey": false
     },
     {
-      "name": "dataInicioFim",
+      "name": "dataInicioFimCarreira",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -174,19 +174,7 @@
       "primaryKey": false
     },
     {
-      "name": "dataInicioContratoCarreira",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "dataFimContratoCarreira",
+      "name": "dataInicioFimContrato",
       "objectType": "java",
       "type": "string",
       "required": false,

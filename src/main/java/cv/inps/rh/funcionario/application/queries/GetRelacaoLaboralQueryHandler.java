@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.application.queries;
 
+import cv.inps.rh.funcionario.application.service.historicolaboral.HistoricoLaboralReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -15,9 +16,11 @@ public class GetRelacaoLaboralQueryHandler implements QueryHandler<GetRelacaoLab
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetRelacaoLaboralQueryHandler.class);
 
+  private final HistoricoLaboralReadService historicoLaboralReadService;
 
-  public GetRelacaoLaboralQueryHandler() {
+  public GetRelacaoLaboralQueryHandler(HistoricoLaboralReadService historicoLaboralReadService) {
 
+    this.historicoLaboralReadService = historicoLaboralReadService;
   }
 
    @IgrpQueryHandler
@@ -25,8 +28,8 @@ public class GetRelacaoLaboralQueryHandler implements QueryHandler<GetRelacaoLab
 
     LOGGER.debug("GetRelacaoLaboralQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+
+    return ResponseEntity.ok(historicoLaboralReadService.getRelacaoLaboral(query));
   }
 
 }
