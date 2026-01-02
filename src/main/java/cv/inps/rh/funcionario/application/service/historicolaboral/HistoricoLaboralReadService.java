@@ -3,7 +3,7 @@ package cv.inps.rh.funcionario.application.service.historicolaboral;
 import cv.inps.rh.funcionario.application.dto.HistoricoLaboralResponseDTO;
 import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
-import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByCarreiraId;
+import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByCarreiraIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetHistoricoLaboralQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralQuery;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -190,7 +190,7 @@ public class HistoricoLaboralReadService {
     return wrapper;
   }
 
-  public ValidarNovoHistoricoLaboralDTO getRelacaoLaboralById(GetRelacaoLaboralByCarreiraId query) {
+  public ValidarNovoHistoricoLaboralDTO getRelacaoLaboralById(GetRelacaoLaboralByCarreiraIdQuery query) {
     var entity = tiposRelacionamentoEntityRepository.findByUuid(UUID.fromString(query.getCarreiraId()))
         .orElseThrow(() -> IgrpResponseStatusException
             .notFound("Histórico Laboral não encontrado"));

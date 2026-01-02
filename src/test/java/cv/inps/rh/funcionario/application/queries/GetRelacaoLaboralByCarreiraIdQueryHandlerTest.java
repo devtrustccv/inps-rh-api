@@ -7,10 +7,10 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class GetRelacaoLaboralByIdQueryHandlerTest {
+public class GetRelacaoLaboralByCarreiraIdQueryHandlerTest {
 
   @InjectMocks
-  private GetRelacaoLaboralByCarreiraIdHandler getHistoricoLaboralByIdQueryHandler;
+  private GetRelacaoLaboralByCarreiraIdQueryHandler getHistoricoLaboralByIdQueryHandler;
 
   @BeforeEach
   void setUp() {

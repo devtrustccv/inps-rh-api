@@ -11,7 +11,7 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetRelacaoLaboralByCarreiraId implements Query {
+public class GetRelacaoLaboralByCarreiraIdQuery implements Query {
 
   @NotBlank(message = "The field <carreiraId> is required")
   private String carreiraId;
