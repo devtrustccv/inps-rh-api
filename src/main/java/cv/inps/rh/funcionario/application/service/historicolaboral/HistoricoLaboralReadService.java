@@ -60,6 +60,8 @@ public class HistoricoLaboralReadService {
       dto.setSituacaoLaboral(r.getSituacaoLaboralDesc());
       dto.setId(r.getTiprelId());
       dto.setUuid(r.getFuncionarioUuid());
+      dto.setUuidFuncionario(r.getFuncionarioUuid());
+
 
       var dataInicio = r.getDataInicio() != null ? DateFormatter.localDateToString(r.getDataInicio()) : StringUtils.EMPTY;
       var dataFim = r.getDataFim() != null ? DateFormatter.localDateToString(r.getDataFim()) : StringUtils.EMPTY;
