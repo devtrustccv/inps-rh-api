@@ -80,7 +80,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "ValidarNovoHistoricoLaboral",
+              "type": "RelacaoLaboral",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
@@ -95,7 +95,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "ValidarNovoHistoricoLaboral",
+                "type": "RelacaoLaboral",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -121,7 +121,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "ValidarNovoHistoricoLaboral",
+              "type": "RelacaoLaboral",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
@@ -136,7 +136,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "ValidarNovoHistoricoLaboral",
+                "type": "RelacaoLaboral",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -169,7 +169,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "ValidarNovoHistoricoLaboral",
+                "type": "RelacaoLaboral",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -216,5 +216,5 @@
       ]
     }
   ],
-  "id": "yr7hgkcuf8-getHistoricoLaboral-getHistoricoLaboral-atualizarHistoricoLaboral-novaRelacaoLaboral-getRelacaoLaboralById-getRelacaoLaboralByCarreiraId"
+  "id": "yr7hgkcuf8-getHistoricoLaboral-getHistoricoLaboral-atualizarHistoricoLaboral-novaRelacaoLaboral-getRelacaoLaboralById-getRelacaoLaboralByCarreiraId-atualizarRelacaoLaboral-getRelacaoLaboral-getRelacaoLaboralByCarreiraId"
 }

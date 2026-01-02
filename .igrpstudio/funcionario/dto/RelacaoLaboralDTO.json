@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "ValidarNovoHistoricoLaboral",
+  "name": "RelacaoLaboral",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [

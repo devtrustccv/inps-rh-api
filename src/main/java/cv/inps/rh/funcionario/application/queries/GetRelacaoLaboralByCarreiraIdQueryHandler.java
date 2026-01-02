@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.application.queries;
 
+import cv.inps.rh.funcionario.application.dto.RelacaoLaboralDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -7,11 +8,10 @@ import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 import cv.inps.rh.funcionario.application.service.historicolaboral.HistoricoLaboralReadService;
 
 @Component
-public class GetRelacaoLaboralByCarreiraIdQueryHandler implements QueryHandler<GetRelacaoLaboralByCarreiraIdQuery, ResponseEntity<ValidarNovoHistoricoLaboralDTO>>{
+public class GetRelacaoLaboralByCarreiraIdQueryHandler implements QueryHandler<GetRelacaoLaboralByCarreiraIdQuery, ResponseEntity<RelacaoLaboralDTO>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetRelacaoLaboralByCarreiraIdQueryHandler.class);
 
@@ -22,7 +22,7 @@ public class GetRelacaoLaboralByCarreiraIdQueryHandler implements QueryHandler<G
   }
 
    @IgrpQueryHandler
-  public ResponseEntity<ValidarNovoHistoricoLaboralDTO> handle(GetRelacaoLaboralByCarreiraIdQuery query) {
+  public ResponseEntity<RelacaoLaboralDTO> handle(GetRelacaoLaboralByCarreiraIdQuery query) {
 
     LOGGER.debug("GetHistoricoLaboralByIdQuery: {}", query);
 

@@ -19,7 +19,7 @@ import java.time.LocalDate;
 
 
 @IgrpDTO
-public class ValidarNovoHistoricoLaboralDTO  {
+public class RelacaoLaboralDTO  {
 
   
   

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
+import cv.inps.rh.funcionario.application.dto.RelacaoLaboralDTO;
 
 @Data
 @NoArgsConstructor
@@ -13,7 +13,7 @@ import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 public class AtualizarRelacaoLaboralCommand implements Command {
 
   
-  private ValidarNovoHistoricoLaboralDTO validarnovohistoricolaboral;
+  private RelacaoLaboralDTO relacaolaboral;
   @NotBlank(message = "The field <idFuncionario> is required")
   private String idFuncionario;
   @NotBlank(message = "The field <carreiraId> is required")

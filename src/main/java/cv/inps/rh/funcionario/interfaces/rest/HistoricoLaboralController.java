@@ -21,7 +21,7 @@ import cv.inps.rh.funcionario.application.queries.*;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.funcionario.application.commands.*;
 import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
-import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
+import cv.inps.rh.funcionario.application.dto.RelacaoLaboralDTO;
 
 @IgrpController
 @RestController
@@ -89,14 +89,14 @@ public class HistoricoLaboralController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = ValidarNovoHistoricoLaboralDTO.class,
+                  implementation = RelacaoLaboralDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<ValidarNovoHistoricoLaboralDTO> novaRelacaoLaboral(@Valid @RequestBody ValidarNovoHistoricoLaboralDTO novaRelacaoLaboralRequest
+  public ResponseEntity<RelacaoLaboralDTO> novaRelacaoLaboral(@Valid @RequestBody RelacaoLaboralDTO novaRelacaoLaboralRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
@@ -119,14 +119,14 @@ public class HistoricoLaboralController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = ValidarNovoHistoricoLaboralDTO.class,
+                  implementation = RelacaoLaboralDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<ValidarNovoHistoricoLaboralDTO> atualizarRelacaoLaboral(@Valid @RequestBody ValidarNovoHistoricoLaboralDTO atualizarRelacaoLaboralRequest
+  public ResponseEntity<RelacaoLaboralDTO> atualizarRelacaoLaboral(@Valid @RequestBody RelacaoLaboralDTO atualizarRelacaoLaboralRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "carreiraId") String carreiraId)
   {
 
@@ -149,14 +149,14 @@ public class HistoricoLaboralController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = ValidarNovoHistoricoLaboralDTO.class,
+                  implementation = RelacaoLaboralDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<ValidarNovoHistoricoLaboralDTO> getRelacaoLaboralByCarreiraId(
+  public ResponseEntity<RelacaoLaboralDTO> getRelacaoLaboralByCarreiraId(
     @PathVariable(value = "carreiraId") String carreiraId)
   {
 

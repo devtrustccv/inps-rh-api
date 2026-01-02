@@ -2,7 +2,7 @@ package cv.inps.rh.funcionario.application.service.historicolaboral;
 
 import cv.inps.rh.funcionario.application.commands.AtualizarRelacaoLaboralCommand;
 import cv.inps.rh.funcionario.application.commands.NovaRelacaoLaboralCommand;
-import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
+import cv.inps.rh.funcionario.application.dto.RelacaoLaboralDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
@@ -47,9 +47,9 @@ public class HistoricoLaboralWriteService {
   private final TipoMovimentoHelper tipoMovimentoHelper;
 
   @Transactional
-  public ValidarNovoHistoricoLaboralDTO validar(NovaRelacaoLaboralCommand command) {
+  public RelacaoLaboralDTO validar(NovaRelacaoLaboralCommand command) {
 
-    var dto = command.getValidarnovohistoricolaboral();
+    var dto = command.getRelacaolaboral();
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc);
 
@@ -244,8 +244,8 @@ public class HistoricoLaboralWriteService {
   }
 
   @Transactional
-  public ValidarNovoHistoricoLaboralDTO atualizar(AtualizarRelacaoLaboralCommand command) {
-    var dto = command.getValidarnovohistoricolaboral();
+  public RelacaoLaboralDTO atualizar(AtualizarRelacaoLaboralCommand command) {
+    var dto = command.getRelacaolaboral();
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc);
     var relacionamento = tiposRelacionamentoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getCarreiraId()));
@@ -337,7 +337,7 @@ public class HistoricoLaboralWriteService {
     return dto;
   }
 
-  private void populateMobilidade(MobilidadeEntity mob, ValidarNovoHistoricoLaboralDTO dto) {
+  private void populateMobilidade(MobilidadeEntity mob, RelacaoLaboralDTO dto) {
     if (dto.getTipoMobilidade() != null)
       mob.setTipoSituacao(dto.getTipoMobilidade());
     if (dto.getDirecao() != null)
@@ -352,7 +352,7 @@ public class HistoricoLaboralWriteService {
       mob.setDataFim(dto.getDataFimMobilidade());
   }
 
-  private void populateCarreiraCommon(CarreiraEntity car, ValidarNovoHistoricoLaboralDTO dto) {
+  private void populateCarreiraCommon(CarreiraEntity car, RelacaoLaboralDTO dto) {
     if (dto.getCargo() != null)
       car.setCargoId(entityManager.getReference(ParamCargoEntity.class, dto.getCargo()));
     if (dto.getEscalao() != null)
@@ -370,7 +370,7 @@ public class HistoricoLaboralWriteService {
     car.setDataFim(dto.getDataFimCarreira());
   }
 
-  private void populateSituacao(SituacaoLaboralEntity sit, ValidarNovoHistoricoLaboralDTO dto) {
+  private void populateSituacao(SituacaoLaboralEntity sit, RelacaoLaboralDTO dto) {
     if (dto.getSituacaoLaboral() != null)
       sit.setSituacaoLaboralId(entityManager.getReference(ParamSituacaoEntity.class, dto.getSituacaoLaboral()));
     if (dto.getMotivo() != null) {
@@ -386,7 +386,7 @@ public class HistoricoLaboralWriteService {
     sit.setObs(dto.getObservacao());
   }
 
-  private void updateExistingSalaryRemuneracao(FuncionarioEntity funcionario, ValidarNovoHistoricoLaboralDTO dto) {
+  private void updateExistingSalaryRemuneracao(FuncionarioEntity funcionario, RelacaoLaboralDTO dto) {
     var tmSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
     var renumeracoes = funcionario.getDefinicoesRenumeracoes();
     for (var rem : renumeracoes) {
@@ -402,7 +402,7 @@ public class HistoricoLaboralWriteService {
   }
 
   private void closeExistingSalaryAndCreateNew(FuncionarioEntity funcionario, TiposRelacionamentoEntity rel,
-      ValidarNovoHistoricoLaboralDTO dto) {
+                                               RelacaoLaboralDTO dto) {
     var tmSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
     var anteriores = definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
     for (var ant : anteriores) {
@@ -446,7 +446,7 @@ public class HistoricoLaboralWriteService {
   }
 
   private void gerarOrdemServicoIfRequested(FuncionarioEntity funcionario, TiposRelacionamentoEntity rel,
-      ValidarNovoHistoricoLaboralDTO dto) {
+                                            RelacaoLaboralDTO dto) {
     if (dto.getGerarOrdemServico() != null && ("SIM".equalsIgnoreCase(dto.getGerarOrdemServico())
         || "TRUE".equalsIgnoreCase(dto.getGerarOrdemServico()))) {
       var numero = "OS-" + System.currentTimeMillis();

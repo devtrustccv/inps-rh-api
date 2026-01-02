@@ -2,17 +2,17 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.funcionario.application.dto.RelacaoLaboralDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cv.inps.rh.funcionario.application.dto.ValidarNovoHistoricoLaboralDTO;
 import cv.inps.rh.funcionario.application.service.historicolaboral.HistoricoLaboralWriteService;
 
 @Component
 public class AtualizarRelacaoLaboralCommandHandler
-      implements CommandHandler<AtualizarRelacaoLaboralCommand, ResponseEntity<ValidarNovoHistoricoLaboralDTO>> {
+      implements CommandHandler<AtualizarRelacaoLaboralCommand, ResponseEntity<RelacaoLaboralDTO>> {
 
    private static final Logger LOGGER = LoggerFactory.getLogger(AtualizarRelacaoLaboralCommandHandler.class);
 
@@ -23,7 +23,7 @@ public class AtualizarRelacaoLaboralCommandHandler
    }
 
    @IgrpCommandHandler
-   public ResponseEntity<ValidarNovoHistoricoLaboralDTO> handle(AtualizarRelacaoLaboralCommand command) {
+   public ResponseEntity<RelacaoLaboralDTO> handle(AtualizarRelacaoLaboralCommand command) {
 
       LOGGER.debug("AtualizarHistoricoLaboralCommand : {}", command);
 
