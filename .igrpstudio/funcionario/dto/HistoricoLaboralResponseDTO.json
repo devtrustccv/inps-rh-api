@@ -30,18 +30,6 @@
       "primaryKey": false
     },
     {
-      "name": "situacaoAtual",
-      "objectType": "java",
-      "type": "boolean",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
       "name": "ultimoMovimento",
       "objectType": "java",
       "type": "string",
@@ -162,19 +150,7 @@
       "primaryKey": false
     },
     {
-      "name": "dataInicioFimCarreira",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "dataInicioFimContrato",
+      "name": "dataInicioFim",
       "objectType": "java",
       "type": "string",
       "required": false,

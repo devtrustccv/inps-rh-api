@@ -63,10 +63,8 @@ public class HistoricoLaboralReadService {
 
       var dataInicio = r.getDataInicio() != null ? DateFormatter.localDateToString(r.getDataInicio()) : StringUtils.EMPTY;
       var dataFim = r.getDataFim() != null ? DateFormatter.localDateToString(r.getDataFim()) : StringUtils.EMPTY;
-      dto.setDataInicioFimCarreira(dataInicio.concat(" / ").concat(dataFim));
-      dto.setDataInicioFimContrato(dataInicio.concat(" / ").concat(dataFim));
+      dto.setDataInicioFim(dataInicio.concat(" / ").concat(dataFim));
 
-      dto.setSituacaoAtual(Objects.equals(r.getUltimoVinculo(), 1));
       return dto;
     }).toList();
 
@@ -118,31 +116,21 @@ public class HistoricoLaboralReadService {
           response.setId(obj.getId());
           response.setUuid(obj.getFunId().getUuid().toString());
 
-          var dataInicioContrato = obj.getContrVinculoId().getDataInicio() != null
+          var dataInicio = obj.getDataInicio() != null
               ? DateFormatter.localDateToString(
-                  obj.getContrVinculoId().getDataInicio())
-              : StringUtils.EMPTY;
-          var dataFimContrato = obj.getContrVinculoId().getDataFim() != null
-              ? DateFormatter.localDateToString(
-                  obj.getContrVinculoId().getDataFim())
+                  obj.getDataInicio())
               : StringUtils.EMPTY;
 
-          var dataInicioCarreira = obj.getCarreiraId() != null
+          var dataFim = obj.getDataFim() != null
               ? DateFormatter.localDateToString(
-                  obj.getCarreiraId().getDataInicio())
+                  obj.getDataFim())
               : StringUtils.EMPTY;
 
-          var dataFimCarreira = obj.getCarreiraId() != null
-              ? DateFormatter.localDateToString(
-                  obj.getCarreiraId().getDataFim())
-              : StringUtils.EMPTY;
+          response.setDataInicioFim(
+              dataInicio.concat(" / ").concat(dataFim));
 
-          response.setDataInicioFimContrato(
-              dataInicioContrato.concat(" / ").concat(dataFimContrato));
 
-          response.setDataInicioFimCarreira(dataInicioCarreira.concat(" / ").concat(dataFimCarreira));
 
-          response.setSituacaoAtual(Objects.equals(obj.getEstActAdm(), 1));
 
           return response;
         }).toList();
