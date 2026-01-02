@@ -48,7 +48,7 @@ public class HistoricoLaboralReadService {
 
     var data = page.getContent().stream().map(r -> {
       var dto = new HistoricoLaboralResponseDTO();
-      dto.setUltimoMovimento(StringUtils.EMPTY);
+      dto.setUltimoMovimento(Objects.equals(r.getUltimoVinculo(), 1));
       dto.setTipoSituacao(r.getTipoSituacaoDesc());
       dto.setTipoContrato(r.getTipoContratoDesc());
       dto.setVinculo(r.getVinculoDesc());
@@ -90,7 +90,7 @@ public class HistoricoLaboralReadService {
     var data = page.stream()
         .map(obj -> {
           var response = new HistoricoLaboralResponseDTO();
-          response.setUltimoMovimento(DateFormatter.localDateToString(obj.getUltProc()));
+          response.setUltimoMovimento(Objects.equals(obj.getEstActAdm(), 1));
 
           ofNullable(obj.getTipoSituacao()).ifPresent(response::setTipoSituacao);
           ofNullable(obj.getContrVinculoId().getTpContratoId().getNome())

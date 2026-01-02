@@ -30,7 +30,7 @@ public class HistoricoLaboralResponseDTO  {
   private String uuidFuncionario ;
   
   
-  private String ultimoMovimento ;
+  private boolean ultimoMovimento ;
   
   
   private String tipoSituacao ;

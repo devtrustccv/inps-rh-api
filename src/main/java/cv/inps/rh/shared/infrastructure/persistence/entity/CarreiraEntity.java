@@ -90,5 +90,7 @@ public class CarreiraEntity extends AuditEntity {
    @JoinColumn(name = "contr_vinculo_id")
    private ContratoEntity contrVinculoId;
 
+  @Column(name="est_act_adm")
+  private Integer estActAdm;
 
 }
