@@ -248,7 +248,11 @@ public class HistoricoLaboralWriteService {
     var dto = command.getRelacaolaboral();
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc);
-    var relacionamento = tiposRelacionamentoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getCarreiraId()));
+
+    var relacionamento = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(UUID.fromString(command.getCarreiraId()));
+    if (relacionamento == null) {
+      throw IgrpResponseStatusException.notFound("Histórico Laboral não encontrado");
+    }
 
     if (relacionamento.getFunId() == null || !relacionamento.getFunId().getId().equals(funcionario.getId()))
       throw IgrpResponseStatusException.badRequest("Histórico laboral não pertence ao funcionário");

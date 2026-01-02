@@ -33,7 +33,8 @@ public class HistoricoLaboralReadService {
         Integer.parseInt(query.getPagina()),
         Integer.parseInt(query.getTamanho()));
 
-    var di = StringUtils.isNotBlank(query.getDataInicio()) ? DateFormatter.stringToLocalDate(query.getDataInicio()) : null;
+    var di = StringUtils.isNotBlank(query.getDataInicio()) ? DateFormatter.stringToLocalDate(query.getDataInicio())
+        : null;
     var df = StringUtils.isNotBlank(query.getDataFim()) ? DateFormatter.stringToLocalDate(query.getDataFim()) : null;
 
     var page = tiposRelacionamentoEntityRepository.historicoLaboralViewByFuncionario(
@@ -43,8 +44,7 @@ public class HistoricoLaboralReadService {
         query.getSituacaoLaboral(),
         di,
         df,
-        pageRequest
-    );
+        pageRequest);
 
     var data = page.getContent().stream().map(r -> {
       var dto = new HistoricoLaboralResponseDTO();
@@ -62,8 +62,8 @@ public class HistoricoLaboralReadService {
       dto.setUuid(r.getFuncionarioUuid());
       dto.setUuidFuncionario(r.getFuncionarioUuid());
 
-
-      var dataInicio = r.getDataInicio() != null ? DateFormatter.localDateToString(r.getDataInicio()) : StringUtils.EMPTY;
+      var dataInicio = r.getDataInicio() != null ? DateFormatter.localDateToString(r.getDataInicio())
+          : StringUtils.EMPTY;
       var dataFim = r.getDataFim() != null ? DateFormatter.localDateToString(r.getDataFim()) : StringUtils.EMPTY;
       dto.setDataInicioFim(dataInicio.concat(" / ").concat(dataFim));
 
@@ -153,7 +153,7 @@ public class HistoricoLaboralReadService {
       var dto = new RelacaoLaboralSumaryDTO();
       dto.setCarreiraId(r.getCarreiraId());
       dto.setCarreiraUuid(r.getCarreiraUuid());
-      System.out.println("r.getSituacaoAtual():: "+r.getSituacaoAtual());
+      System.out.println("r.getSituacaoAtual():: " + r.getSituacaoAtual());
       dto.setSituacaoAtual(Objects.equals(r.getSituacaoAtual(), 1));
       dto.setVinculo(r.getVinculoDesc());
       dto.setDirecao(r.getDirecaoDesc());
@@ -178,9 +178,10 @@ public class HistoricoLaboralReadService {
   }
 
   public RelacaoLaboralDTO getRelacaoLaboralByCarreiraId(GetRelacaoLaboralByCarreiraIdQuery query) {
-    var entity = tiposRelacionamentoEntityRepository.findByUuid(UUID.fromString(query.getCarreiraId()))
-        .orElseThrow(() -> IgrpResponseStatusException
-            .notFound("Histórico Laboral não encontrado"));
+    var entity = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(UUID.fromString(query.getCarreiraId()));
+    if (entity == null) {
+      throw IgrpResponseStatusException.notFound("Histórico Laboral não encontrado");
+    }
 
     var dto = new RelacaoLaboralDTO();
 
@@ -248,6 +249,5 @@ public class HistoricoLaboralReadService {
 
     return dto;
   }
-
 
 }
