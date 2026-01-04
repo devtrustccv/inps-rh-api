@@ -14,8 +14,6 @@ public class PesquisaCentroCustoQuery implements Query {
 
   @NotBlank(message = "The field <nome> is required")
   private String nome;
-  @NotBlank(message = "The field <centroCusto> is required")
-  private String centroCusto;
   @NotBlank(message = "The field <page> is required")
   private String page;
   @NotBlank(message = "The field <size> is required")

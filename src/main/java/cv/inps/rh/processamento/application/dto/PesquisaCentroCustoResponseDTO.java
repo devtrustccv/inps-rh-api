@@ -5,12 +5,10 @@ package cv.inps.rh.processamento.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
 
-import java.util.UUID;
-
 @IgrpDTO
 public record PesquisaCentroCustoResponseDTO(
 
-    UUID centroCustoId,
+    Long centroCustoId,
 
     String nome
 ) {

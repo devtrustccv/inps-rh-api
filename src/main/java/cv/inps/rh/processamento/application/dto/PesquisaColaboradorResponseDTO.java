@@ -16,5 +16,7 @@ public record PesquisaColaboradorResponseDTO (
 
   String direcao,
 
+  Long direcaoId,
+
   String centroCusto
 ){}

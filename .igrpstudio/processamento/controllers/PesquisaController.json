@@ -65,7 +65,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "WrapperPesquisaColaborador",
+                "type": "WrapperPesquisaCentroCusto",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -83,11 +83,6 @@
         },
         {
           "type": "string",
-          "name": "centroCusto",
-          "isRequired": false
-        },
-        {
-          "type": "string",
           "name": "page",
           "value": "0",
           "isRequired": false
@@ -101,5 +96,5 @@
       ]
     }
   ],
-  "id": "980jkk64em-pesquisaColaboradorCopy"
+  "id": "980jkk64em-pesquisaColaboradorCopy-pesquisaCentroCusto"
 }

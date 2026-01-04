@@ -42,6 +42,18 @@
       "primaryKey": false
     },
     {
+      "name": "direcaoId",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "centroCusto",
       "objectType": "java",
       "type": "string",

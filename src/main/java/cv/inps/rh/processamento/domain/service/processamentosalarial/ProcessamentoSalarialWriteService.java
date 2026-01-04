@@ -91,7 +91,7 @@ public class ProcessamentoSalarialWriteService {
 
     var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
     processes.forEach(process -> {
-      if (!process.getEstado().equals(ProcessamentoSalarialAction.VALIDAR.getCode()))
+      if (!ProcessamentoSalarialAction.VALIDAR.getCode().equals(process.getEstado()))
         processesThatCanNotBeValidated.add(process.getId());
       else
         process.setEstado("VALIDADO");
@@ -169,13 +169,13 @@ public class ProcessamentoSalarialWriteService {
 
   public void processarSalario(ProcessamentoSalarioRequestDTO request) {
 
-    // TODO 07/12/2025 18:06 handle case processar todos fucnionarios
+    // TODO 07/12/2025 18:06 handle case processar todos funcionarios
 
     // TODO 07/12/2025 17:53 validate regras
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(request.getFuncionarioId()));
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-    if (tipoRelacionamentoAtual.getFlgProcessa().equals("0"))
+    if ("0".equals(tipoRelacionamentoAtual.getFlgProcessa()))
       throw IgrpResponseStatusException.badRequest("Este colaborador encontra-se marcado para não processamento");
 
     callProcedure(Processamento.PROCEDURE_PROCESSAR.getName())
