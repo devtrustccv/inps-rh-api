@@ -103,7 +103,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     e.setFlgAfetaCarreira(ConfigurationUtils.parseFlag(dto.getCarreira()));
     e.setFlgContaTempServico(ConfigurationUtils.parseFlag(dto.getTempoServico()));
     e.setFlgCessaProgressao(ConfigurationUtils.parseFlag(dto.getSuspendeProgressaoPromocao()));
-    e.setFlgEstadoContrato(ConfigurationUtils.parseFlag(dto.getEstadoContrato()));
+    e.setFlgEstadoContrato(dto.getEstadoContrato());
   }
 
   private void saveAssociations(List<SituacaoLaboralMotivoRequestDTO> associations, ParamSituacaoEntity saved) {
