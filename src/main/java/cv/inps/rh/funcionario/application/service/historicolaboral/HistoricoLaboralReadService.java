@@ -196,6 +196,8 @@ public class HistoricoLaboralReadService {
         ? entity.getSalario()
         : (entity.getCarreiraId() != null ? entity.getCarreiraId().getSalario() : null));
 
+    dto.setSituacaoAtual(entity.getEstActAdm() + "");
+
     var mob = entity.getMobId();
     if (mob != null) {
       dto.setTipoMobilidade(mob.getTipoSituacao());
@@ -244,7 +246,6 @@ public class HistoricoLaboralReadService {
       dto.setDataInicioSituacao(sit.getDataInicio());
       dto.setDataFimSituacao(sit.getDataFim());
       dto.setObservacao(sit.getObs());
-      dto.setSituacaoAtual(paramSit != null ? paramSit.getNome() : null);
     }
 
     return dto;

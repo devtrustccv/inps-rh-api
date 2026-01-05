@@ -157,9 +157,10 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     response.setTempoServicoDesc(e.getFlgContaTempServico() != null ? domain.get(e.getFlgContaTempServico().toString()) : null);
     response.setSuspendeProgressaoPromocao(e.getFlgCessaProgressao() != null ? e.getFlgCessaProgressao().toString() : null);
     response.setSuspendeProgressaoPromocaoDesc(e.getFlgCessaProgressao() != null ? domain.get(e.getFlgCessaProgressao().toString()) : null);
-    response.setEstadoContrato(e.getFlgEstadoContrato() != null ? contractStatus.get(e.getFlgEstadoContrato().toString()) : null);
+    response.setEstadoContrato(e.getFlgEstadoContrato() != null ? contractStatus.get(e.getFlgEstadoContrato()) : null);
     response.setEstado(e.getEstado().getCode());
     response.setEstadoDescricao(e.getEstado().getDescription());
+    response.setAfetaSituacaoLaboral(e.getFlgSituacaoLaboral() != null ? e.getFlgSituacaoLaboral().toString() : null);
     response.setAbonoBeneficio(e.getFlgAbonoBeneficio() != null ? e.getFlgAbonoBeneficio().toString() : null);
     response.setAbonoBeneficioDesc(e.getFlgAbonoBeneficio() != null ? domain.get(e.getFlgAbonoBeneficio().toString()) : null);
     response.setAusenciaLocalTrabalho(e.getFlgAusencia() != null ? e.getFlgAusencia().toString() : null);
