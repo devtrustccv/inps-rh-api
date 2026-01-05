@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Recibos de Pagamento de Salário</title>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            color: #000;
+        }
+
+        .receipt {
+            width: 800px;
+            margin: 0 auto 40px auto;
+            border-bottom: 1px solid #000;
+            padding-bottom: 20px;
+            page-break-inside: avoid;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .header img {
+            height: 50px;
+        }
+
+        .title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .section {
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+
+        th, td {
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        th {
+            text-align: left;
+        }
+
+        .totals {
+            margin-top: 10px;
+        }
+
+        .signature {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .signature-line {
+            width: 60%;
+            border-top: 1px solid #000;
+            text-align: center;
+            padding-top: 5px;
+        }
+
+        .footer {
+            margin-top: 10px;
+            font-size: 10px;
+        }
+
+        @media print {
+            body {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ================== MULTIPLE RECEIPTS ================== -->
+<div th:each="recibo : ${recibos}" class="receipt">
+
+    <div class="header">
+        <img th:src="@{/images/inps-logo.png}" alt="INPS Logo"/>
+        <div class="title">Recibo de Pagamento de Salário</div>
+        <div>
+            Modelo <span th:text="${recibo.modelo}">SA0003</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="bold" th:text="${recibo.entidade}">
+            Processar Remunerações Gabinete Sistemas de Informação
+        </div>
+        <div>
+            Data Processamento:
+            <span th:text="${recibo.dataProcessamento}">10/2025</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div>
+            <span class="bold" th:text="${recibo.funcionario.numero}">10458041</span>
+            &nbsp;-&nbsp;
+            <span class="bold" th:text="${recibo.funcionario.nome}">
+                Nivaldo Cardoso Tavares
+            </span>
+            &nbsp;-&nbsp;
+            <span th:text="${recibo.funcionario.vinculo}">
+                Contratado (Contratado - Contratado)
+            </span>
+        </div>
+    </div>
+
+    <div class="row totals">
+        <div>
+            Total Remunerações:
+            <span class="bold" th:text="${recibo.totais.remuneracoes}">
+                112.167
+            </span>
+        </div>
+        <div>
+            Total Descontos:
+            <span class="bold" th:text="${recibo.totais.descontos}">
+                22.364
+            </span>
+        </div>
+        <div>
+            Total Líquido:
+            <span class="bold" th:text="${recibo.totais.liquido}">
+                89.803
+            </span>
+        </div>
+    </div>
+
+    <!-- REMUNERAÇÕES -->
+    <div class="section">
+        <div class="bold">REMUNERAÇÕES</div>
+        <table>
+            <thead>
+            <tr>
+                <th>Descrição</th>
+                <th style="text-align:right;">Valor</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="r : ${recibo.remuneracoes}">
+                <td th:text="${r.descricao}">Descrição</td>
+                <td style="text-align:right;" th:text="${r.valor}">0,00</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- DESCONTOS -->
+    <div class="section">
+        <div class="bold">DESCONTOS</div>
+        <table>
+            <thead>
+            <tr>
+                <th>Descrição</th>
+                <th style="text-align:right;">Valor</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="d : ${recibo.descontos}">
+                <td th:text="${d.descricao}">Descrição</td>
+                <td style="text-align:right;" th:text="${d.valor}">0,00</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="signature">
+        <div class="footer">
+            Documento Emitido em:
+            <span th:text="${recibo.dataEmissao}">
+                27-10-2025 10:54:16
+            </span>
+        </div>
+        <div class="signature-line">
+            Assinatura
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

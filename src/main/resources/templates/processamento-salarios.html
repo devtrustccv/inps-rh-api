@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Processamento de Salários</title>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            color: #000;
+        }
+
+        .container {
+            width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header img {
+            height: 45px;
+        }
+
+        .title {
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .entity {
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .employee {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #000;
+            page-break-inside: avoid;
+        }
+
+        .employee-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+
+        td {
+            padding: 3px 0;
+        }
+
+        td.desc {
+            width: 75%;
+        }
+
+        td.val {
+            width: 25%;
+            text-align: right;
+        }
+
+        .totals {
+            border-top: 1px solid #000;
+            margin-top: 5px;
+            padding-top: 5px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+        }
+
+        @media print {
+            body {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <img th:src="@{/images/inps-logo.png}" alt="INPS"/>
+        <div class="title">Processamento de Salários</div>
+        <div>Modelo <span th:text="${modelo}">SA0001</span></div>
+    </div>
+
+    <!-- META -->
+    <div class="meta">
+        <div>
+            Elaborado em:
+            <span th:text="${dataElaboracao}">27-10-2025 10:50:11</span>
+        </div>
+        <div>
+            Data Proc.:
+            <span th:text="${dataProcessamento}">27/10/2025</span>
+        </div>
+    </div>
+
+    <div class="entity" th:text="${entidade}">
+        Processar Remunerações Gabinete Sistemas de Informação
+    </div>
+
+    <!-- ================= EMPLOYEES ================= -->
+    <div th:each="emp : ${funcionarios}" class="employee">
+
+        <div class="employee-header">
+            <span th:text="${emp.numero}">10116231</span>
+            &nbsp;-&nbsp;
+            <span th:text="${emp.nome}">Anilton Pina Brandão</span>
+            &nbsp;-&nbsp;
+            (<span th:text="${emp.vinculo}">Contratado - Diretor de Gabinete/15</span>)
+        </div>
+
+        <table>
+            <tbody>
+            <tr th:each="l : ${emp.lancamentos}">
+                <td class="desc" th:text="${l.descricao}">
+                    Vencimento Pessoal Contratado (IUR SS)
+                </td>
+                <td class="val" th:text="${l.valor}">
+                    200.319
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="totals">
+            <div>
+                Total Remunerações:
+                <span th:text="${emp.totais.remuneracoes}">214.319</span>
+            </div>
+            <div>
+                Total Descontos:
+                <span th:text="${emp.totais.descontos}">53.062</span>
+            </div>
+            <div>
+                Total Líquido:
+                <span th:text="${emp.totais.liquido}">161.257</span>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
