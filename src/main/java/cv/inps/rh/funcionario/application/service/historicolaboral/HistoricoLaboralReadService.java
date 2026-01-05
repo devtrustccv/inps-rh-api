@@ -215,7 +215,7 @@ public class HistoricoLaboralReadService {
     if (lt != null) {
       dto.setLocalTrabalho(lt.getId());
       dto.setPais(lt.getPaisId() != null ? lt.getPaisId().getNome() : null);
-      dto.setIlha(lt.getIlhaId() != null ? lt.getIlhaId().getId() : null);
+      dto.setIlha(lt.getIlhaId() != null ? lt.getIlhaId().getNome() : null);
     }
 
     var car = entity.getCarreiraId();

@@ -65,7 +65,7 @@ public class RelacaoLaboralDTO  {
   private String pais ;
   
   
-  private Long ilha ;
+  private String ilha ;
   
   
   private Long cargo ;
