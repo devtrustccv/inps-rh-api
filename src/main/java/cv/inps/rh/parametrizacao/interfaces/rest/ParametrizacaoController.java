@@ -333,10 +333,10 @@ public class ParametrizacaoController {
   )
   
   public ResponseEntity<List<ParametrizacaoDTO>> getTiposDocumentoAtivos(
-    )
+    @RequestParam(value = "referencia", required = false) String referencia)
   {
 
-      final var query = new GetTiposDocumentoAtivosQuery();
+      final var query = new GetTiposDocumentoAtivosQuery(referencia);
 
       return queryBus.handle(query);
 

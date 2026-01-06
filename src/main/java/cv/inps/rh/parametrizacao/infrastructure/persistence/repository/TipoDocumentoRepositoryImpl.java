@@ -7,6 +7,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoDocumentoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +26,23 @@ public class TipoDocumentoRepositoryImpl implements TipoDocumentoRepository {
   }
 
   @Override
-  public List<TipoDocumento> findAllActive() {
-    return tipoDocumentoEntityRepository.findAllByEstado(Estado.A).stream().map(tipoDocumentoMapper::toDomain).toList();
+  public List<TipoDocumento> findAllActive(String referencia) {
+
+    if (StringUtils.hasText(referencia)) {
+      return tipoDocumentoEntityRepository
+          .findAllByReferenciaAndEstado(referencia, Estado.A)
+          .stream()
+          .map(tipoDocumentoMapper::toDomain)
+          .toList();
+    }
+    return tipoDocumentoEntityRepository
+        .findAllByEstado(Estado.A)
+        .stream()
+        .map(tipoDocumentoMapper::toDomain)
+        .toList();
   }
+
+
+
+
 }
