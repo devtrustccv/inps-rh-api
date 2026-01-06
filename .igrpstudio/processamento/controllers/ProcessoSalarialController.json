@@ -180,6 +180,44 @@
           }
         }
       }
+    },
+    {
+      "actionName": "getDetalhesProcessamento",
+      "path": "resumo/detalhes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DetalhesProcessamento",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "tipoMovimento",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "procSalId",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "tipoDetalhe",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "dcry51pbek-validarProcessamentoSalarial"

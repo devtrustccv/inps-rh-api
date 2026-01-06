@@ -4,10 +4,13 @@
 package cv.inps.rh.processamento.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -15,11 +18,10 @@ import lombok.NoArgsConstructor;
 
 
 @IgrpDTO
-public class ResumoProcessamentoRowDTO  {
+public class DetalhesProcessamentoDTO  {
 
-  private String tipoMovimento ;
 
-  private Long procId;
+  @Valid
+  private List<DetalhesProcessamentoRowDTO> content = new ArrayList<>();
 
-  private Long total ;
 }

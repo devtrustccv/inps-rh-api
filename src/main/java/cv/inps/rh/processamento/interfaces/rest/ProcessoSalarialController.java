@@ -10,6 +10,7 @@ import cv.inps.rh.processamento.application.commands.ExecutarAcaoNoProcessamento
 import cv.inps.rh.processamento.application.commands.ProcessarSalarioCommand;
 import cv.inps.rh.processamento.application.commands.RemoverFuncionariosProcessamentoSalarialCommand;
 import cv.inps.rh.processamento.application.dto.*;
+import cv.inps.rh.processamento.application.queries.GetDetalhesProcessamentoQuery;
 import cv.inps.rh.processamento.application.queries.GetProcessamentoSalarialQuery;
 import cv.inps.rh.processamento.application.queries.GetResumoProcessamentoQuery;
 import io.swagger.v3.oas.annotations.Operation;
@@ -188,6 +189,38 @@ public class ProcessoSalarialController {
   {
 
       final var query = new GetResumoProcessamentoQuery();
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "resumo/detalhes"
+  )
+  @Operation(
+    summary = "Get detalhes processamento",
+    description = "Get detalhes processamento",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DetalhesProcessamentoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<DetalhesProcessamentoDTO> getDetalhesProcessamento(
+    @RequestParam(value = "tipoMovimento") String tipoMovimento,
+    @RequestParam(value = "procSalId") String procSalId,
+    @RequestParam(value = "tipoDetalhe") String tipoDetalhe)
+  {
+
+      final var query = new GetDetalhesProcessamentoQuery(tipoMovimento, procSalId, tipoDetalhe);
 
       return queryBus.handle(query);
 
