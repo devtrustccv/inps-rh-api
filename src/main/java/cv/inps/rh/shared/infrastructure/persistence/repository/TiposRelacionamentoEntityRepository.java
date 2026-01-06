@@ -111,7 +111,8 @@ public interface TiposRelacionamentoEntityRepository extends
   Page<PesquisaColaboradorResponseDTO> pesquisaColaborador(
       @Param("directionId") Long directionId,
       @Param("nome") String nome,
-      Pageable pageable);
+      Pageable pageable
+  );
 
   @Query("""
       SELECT new cv.inps.rh.processamento.application.dto.PesquisaCentroCustoResponseDTO(
