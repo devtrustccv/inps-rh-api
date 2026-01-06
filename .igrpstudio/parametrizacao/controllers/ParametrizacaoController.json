@@ -172,27 +172,6 @@
       }
     },
     {
-      "actionName": "getParamSituacaoLaboralAtivo",
-      "path": "situacoes-laborais/ativos",
-      "method": "GET",
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "Parametrizacao",
-                "objectType": "dto",
-                "name": "data",
-                "collectionType": "list",
-                "module": "parametrizacao"
-              }
-            }
-          }
-        }
-      }
-    },
-    {
       "actionName": "getVinculosAtivos",
       "path": "vinculos/ativos",
       "method": "GET",
@@ -264,7 +243,7 @@
     },
     {
       "actionName": "getParamSituacaoDetalheAtivo",
-      "path": "situacoes-laborais/motivos/ativos",
+      "path": "param-situacoes/motivos/ativos",
       "method": "GET",
       "responses": {
         "200": {
@@ -289,7 +268,63 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getParamSituacoesAtivo",
+      "path": "param-situacoes/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "integer",
+          "name": "flgSituacaoLaboral",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "getParamSituacoesLaboraisByVinculo",
+      "path": "vinculos/{vinculoId}/situacoes-laborais/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "vinculoId",
+          "type": "long",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos"
+  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos-getParamSituacaoDetalheAtivo-getParamSituacaoLaboralAtivo"
 }

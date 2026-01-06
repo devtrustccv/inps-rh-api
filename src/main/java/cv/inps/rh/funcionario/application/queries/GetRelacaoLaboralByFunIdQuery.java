@@ -1,4 +1,4 @@
-package cv.inps.rh.parametrizacao.application.queries;
+package cv.inps.rh.funcionario.application.queries;
 
 import cv.igrp.framework.core.domain.Query;
 import jakarta.validation.constraints.*;
@@ -11,9 +11,9 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetSeccoesAtivosQuery implements Query {
+public class GetRelacaoLaboralByFunIdQuery implements Query {
 
-  @NotNull(message = "The field <institId> is required")
-  private Long institId;
+  @NotBlank(message = "The field <idFuncionario> is required")
+  private String idFuncionario;
 
 }

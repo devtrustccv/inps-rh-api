@@ -197,4 +197,34 @@ public class HistoricoLaboralController {
 
   }
 
+   @GetMapping(
+   value = "relacao-laboral/{idFuncionario}"
+  )
+  @Operation(
+    summary = "Get relacao laboral by fun id",
+    description = "Get relacao laboral by fun id",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = RelacaoLaboralDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<RelacaoLaboralDTO> getRelacaoLaboralByFunId(
+    @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var query = new GetRelacaoLaboralByFunIdQuery(idFuncionario);
+
+      return queryBus.handle(query);
+
+  }
+
 }

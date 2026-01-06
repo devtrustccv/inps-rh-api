@@ -177,7 +177,7 @@
     {
       "name": "ilha",
       "objectType": "java",
-      "type": "long",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
