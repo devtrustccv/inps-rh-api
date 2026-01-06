@@ -159,6 +159,27 @@
           }
         }
       }
+    },
+    {
+      "actionName": "getResumoProcessamento",
+      "path": "resumo",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ResumoProcessamento",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "id": "dcry51pbek-validarProcessamentoSalarial"

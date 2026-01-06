@@ -9,11 +9,9 @@ import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.processamento.application.commands.ExecutarAcaoNoProcessamentoCommand;
 import cv.inps.rh.processamento.application.commands.ProcessarSalarioCommand;
 import cv.inps.rh.processamento.application.commands.RemoverFuncionariosProcessamentoSalarialCommand;
-import cv.inps.rh.processamento.application.dto.MarcarNaoProcessadoRequestDTO;
-import cv.inps.rh.processamento.application.dto.ProcessamentoActionRequestDTO;
-import cv.inps.rh.processamento.application.dto.ProcessamentoSalarioRequestDTO;
-import cv.inps.rh.processamento.application.dto.WrapperProcessamentoSalarialDTO;
+import cv.inps.rh.processamento.application.dto.*;
 import cv.inps.rh.processamento.application.queries.GetProcessamentoSalarialQuery;
+import cv.inps.rh.processamento.application.queries.GetResumoProcessamentoQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,7 +24,10 @@ import org.springframework.web.bind.annotation.*;
 @IgrpController
 @RestController
 @RequestMapping(path = "processamento-salarial")
-@Tag(name = "ProcessoSalarial", description = "Processamento Salarial")
+@Tag(
+    name = "Processamento",
+    description = "Processamento Salarial"
+)
 public class ProcessoSalarialController {
 
 
@@ -34,7 +35,7 @@ public class ProcessoSalarialController {
   private final CommandBus commandBus;
 
   public ProcessoSalarialController(QueryBus queryBus, CommandBus commandBus) {
-    this.queryBus = queryBus;
+          this.queryBus = queryBus;
           this.commandBus = commandBus;
   }
    @PostMapping(
@@ -57,7 +58,7 @@ public class ProcessoSalarialController {
     }
   )
 
-   public ResponseEntity<String> removerFuncionariosProcessamentoSalarial(@Valid @RequestBody MarcarNaoProcessadoRequestDTO removerFuncionariosProcessamentoSalarialRequest
+  public ResponseEntity<String> removerFuncionariosProcessamentoSalarial(@Valid @RequestBody MarcarNaoProcessadoRequestDTO removerFuncionariosProcessamentoSalarialRequest
     )
   {
 
@@ -67,95 +68,128 @@ public class ProcessoSalarialController {
 
   }
 
-  @GetMapping(
+   @GetMapping(
   )
   @Operation(
-      summary = "Get processamento salarial",
-      description = "Get processamento salarial",
-      responses = {
-          @ApiResponse(
-              responseCode = "200",
+    summary = "Get processamento salarial",
+    description = "Get processamento salarial",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
 
-              content = @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(
-                      implementation = WrapperProcessamentoSalarialDTO.class,
-                      type = "object")
-              )
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = WrapperProcessamentoSalarialDTO.class,
+                  type = "object")
           )
-      }
+      )
+    }
   )
 
   public ResponseEntity<WrapperProcessamentoSalarialDTO> getProcessamentoSalarial(
-      @RequestParam(value = "dataInicio", required = false) String dataInicio,
-      @RequestParam(value = "dataFim", required = false) String dataFim,
-      @RequestParam(value = "direcaoId", required = false) String direcaoId,
-      @RequestParam(value = "tipo", required = false) String tipo,
-      @RequestParam(value = "estado", required = false) String estado,
-      @RequestParam(value = "page", required = false, defaultValue = "0") String page,
-      @RequestParam(value = "size", required = false, defaultValue = "20") String size) {
+    @RequestParam(value = "dataInicio", required = false) String dataInicio,
+    @RequestParam(value = "dataFim", required = false) String dataFim,
+    @RequestParam(value = "direcaoId", required = false) String direcaoId,
+    @RequestParam(value = "tipo", required = false) String tipo,
+    @RequestParam(value = "estado", required = false) String estado,
+    @RequestParam(value = "page", required = false, defaultValue = "0") String page,
+    @RequestParam(value = "size", required = false, defaultValue = "20") String size)
+  {
 
-    final var query = new GetProcessamentoSalarialQuery(dataInicio, dataFim, direcaoId, tipo, estado, page, size);
+      final var query = new GetProcessamentoSalarialQuery(dataInicio, dataFim, direcaoId, tipo, estado, page, size);
 
-    return queryBus.handle(query);
+      return queryBus.handle(query);
 
   }
 
-  @PostMapping(
-      value = "processamento-acao"
+   @PostMapping(
+   value = "processamento-acao"
   )
   @Operation(
-      summary = "Executar acao no processamento",
-      description = "Executar acao no processamento",
-      responses = {
-          @ApiResponse(
-              responseCode = "200",
+    summary = "Executar acao no processamento",
+    description = "Executar acao no processamento",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
 
-              content = @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(
-                      implementation = String.class,
-                      type = "String")
-              )
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
           )
-      }
+      )
+    }
   )
 
   public ResponseEntity<String> executarAcaoNoProcessamento(@Valid @RequestBody ProcessamentoActionRequestDTO executarAcaoNoProcessamentoRequest
-  ) {
+    )
+  {
 
-    final var command = new ExecutarAcaoNoProcessamentoCommand(executarAcaoNoProcessamentoRequest);
+      final var command = new ExecutarAcaoNoProcessamentoCommand(executarAcaoNoProcessamentoRequest);
 
-    return commandBus.send(command);
+      return commandBus.send(command);
 
   }
 
-  @PostMapping(
-      value = "processar"
+   @PostMapping(
+   value = "processar"
   )
   @Operation(
-      summary = "Processar salario",
-      description = "Processar salario",
-      responses = {
-          @ApiResponse(
-              responseCode = "200",
+    summary = "Processar salario",
+    description = "Processar salario",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
 
-              content = @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(
-                      implementation = String.class,
-                      type = "String")
-              )
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
           )
-      }
+      )
+    }
   )
 
   public ResponseEntity<String> processarSalario(@Valid @RequestBody ProcessamentoSalarioRequestDTO processarSalarioRequest
-  ) {
+    )
+  {
 
-    final var command = new ProcessarSalarioCommand(processarSalarioRequest);
+      final var command = new ProcessarSalarioCommand(processarSalarioRequest);
 
-    return commandBus.send(command);
+      return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "resumo"
+  )
+  @Operation(
+    summary = "Get resumo processamento",
+    description = "Get resumo processamento",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ResumoProcessamentoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<ResumoProcessamentoDTO> getResumoProcessamento(
+    )
+  {
+
+      final var query = new GetResumoProcessamentoQuery();
+
+      return queryBus.handle(query);
 
   }
 

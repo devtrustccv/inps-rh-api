@@ -1,7 +1,10 @@
 package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
+import cv.inps.rh.processamento.application.dto.ResumoProcessamentoDTO;
 import cv.inps.rh.processamento.application.dto.WrapperProcessamentoSalarialDTO;
 import cv.inps.rh.processamento.application.queries.GetProcessamentoSalarialQuery;
+import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcPagEntityRepository;
+import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcRemunEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
@@ -15,6 +18,8 @@ import org.springframework.util.StringUtils;
 public class ProcessamentoSalarialReadService {
 
   private final ProcessamentoSalarialEntityRepository processamentoSalarialEntityRepository;
+  private final ProcSalCcRemunEntityRepository procSalCcRemunEntityRepository;
+  private final ProcSalCcPagEntityRepository procSalCcPagEntityRepository;
 
   public WrapperProcessamentoSalarialDTO getProcessamentoSalarial(GetProcessamentoSalarialQuery query) {
 
@@ -34,5 +39,12 @@ public class ProcessamentoSalarialReadService {
     return response;
   }
 
+  public ResumoProcessamentoDTO getResumoProcessamentoSalarial() {
 
+    var data = new ResumoProcessamentoDTO();
+    data.setRemuneracao(procSalCcRemunEntityRepository.getRemuneracoes());
+    data.setPagamento(procSalCcPagEntityRepository.getPagamentos());
+
+    return data;
+  }
 }
