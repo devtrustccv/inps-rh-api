@@ -13,11 +13,14 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
+import java.sql.Types;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,12 +57,6 @@ public class ProcessamentoSalarialWriteService {
       var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
       if (!tipoRelacionamentoAtual.getEstActAdm().equals(1))
         throw IgrpResponseStatusException.badRequest("O vínculo do colaborador <%s> não está activo!".formatted(funcionario.getNome()));
-
-      // TODO 06/12/2025 17:00 validate this part from remuneracoes
-      funcionario.getDefinicoesRenumeracoes().forEach(salario -> {
-        if (!salario.getEstado().equals(Estado.A))
-          throw IgrpResponseStatusException.badRequest("O salário do colaborador <%s> não está activo!".formatted(funcionario.getNome()));
-      });
 
       tipoRelacionamentoAtual.setFlgProcessa("0");
       tiposRelacionamentoEntityRepository.save(tipoRelacionamentoAtual);
@@ -178,22 +175,32 @@ public class ProcessamentoSalarialWriteService {
     if ("0".equals(tipoRelacionamentoAtual.getFlgProcessa()))
       throw IgrpResponseStatusException.badRequest("Este colaborador encontra-se marcado para não processamento");
 
-    callProcedure(Processamento.PROCEDURE_PROCESSAR.getName())
-        .execute(
-            Map.of(
-                "p_dt_inicio", request.getDataInicio(),
-                "p_dt_fim", request.getDataFim(),
-                "p_cc_id", request.getDireccaoId(),
-                "p_tiprel_id", tipoRelacionamentoAtual.getId(),
-                "p_tipo", request.getTipo(),
-                "P_user_name", "demo@demo.com", // TODO 07/12/2025 17:48 validate this
-                "p_user_id", "demo@demo.com"  // TODO 07/12/2025 17:48 validate this
-            )
+    var call = callProcedure(Processamento.PROCEDURE_PROCESSAR.getName())
+        .declareParameters(
+            new SqlParameter("p_dt_inicio", Types.VARCHAR),
+            new SqlParameter("p_dt_fim", Types.VARCHAR),
+            new SqlParameter("p_cc_id", Types.NUMERIC),
+            new SqlParameter("p_tiprel_id", Types.NUMERIC),
+            new SqlParameter("p_tipo", Types.VARCHAR),
+            new SqlParameter("P_user_name", Types.VARCHAR),
+            new SqlParameter("p_user_id", Types.NUMERIC)
         );
+
+    call.execute(
+        new MapSqlParameterSource()
+            .addValue("p_dt_inicio", request.getDataInicio())
+            .addValue("p_dt_fim", request.getDataFim())
+            .addValue("p_cc_id", request.getDireccaoId())
+            .addValue("p_tiprel_id", tipoRelacionamentoAtual.getId())
+            .addValue("p_tipo", request.getTipo())
+            .addValue("P_user_name", "demo@demo.com") // TODO 07/12/2025 17:48 validate this
+            .addValue("p_user_id", 0) // TODO 07/12/2025 17:48 validate this
+    );
   }
 
   private SimpleJdbcCall callProcedure(String procedureName) {
     return new SimpleJdbcCall(dataSource)
+        .withoutProcedureColumnMetaDataAccess()
         .withCatalogName(Processamento.PACKAGE.getName())
         .withProcedureName(procedureName);
   }
@@ -204,7 +211,7 @@ public class ProcessamentoSalarialWriteService {
     PACKAGE("RH_PROCESSAMENTO_SALARIAL_DB"),
     PROCEDURE_ELIMINAR_CAB("EliminarCab"),
     PROCEDURE_ELIMINAR_PROC("EliminarProc"),
-    PROCEDURE_PROCESSAR("processar");
+    PROCEDURE_PROCESSAR("PROCESSAR");
 
     private final String name;
 
