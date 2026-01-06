@@ -217,7 +217,7 @@
     },
     {
       "actionName": "getRelacaoLaboralByFunId",
-      "path": "relacao-laboral/{idFuncionario}",
+      "path": "relacao-laboral/{idFuncionario}/novo",
       "method": "GET",
       "responses": {
         "200": {
@@ -244,5 +244,5 @@
       ]
     }
   ],
-  "id": "yr7hgkcuf8-getHistoricoLaboral-getHistoricoLaboral-atualizarHistoricoLaboral-novaRelacaoLaboral-getRelacaoLaboralById-getRelacaoLaboralByCarreiraId-atualizarRelacaoLaboral-getRelacaoLaboral-getRelacaoLaboralByCarreiraId-getRelacaoLaboral"
+  "id": "yr7hgkcuf8-getHistoricoLaboral-getHistoricoLaboral-atualizarHistoricoLaboral-novaRelacaoLaboral-getRelacaoLaboralById-getRelacaoLaboralByCarreiraId-atualizarRelacaoLaboral-getRelacaoLaboral-getRelacaoLaboralByCarreiraId-getRelacaoLaboral-getRelacaoLaboralByFunId"
 }

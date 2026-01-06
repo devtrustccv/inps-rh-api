@@ -198,7 +198,7 @@ public class HistoricoLaboralController {
   }
 
    @GetMapping(
-   value = "relacao-laboral/{idFuncionario}"
+   value = "relacao-laboral/{idFuncionario}/novo"
   )
   @Operation(
     summary = "Get relacao laboral by fun id",
