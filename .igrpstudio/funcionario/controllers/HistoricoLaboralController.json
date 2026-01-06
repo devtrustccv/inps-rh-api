@@ -214,6 +214,34 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getRelacaoLaboralByFunId",
+      "path": "relacao-laboral/{idFuncionario}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "RelacaoLaboral",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "yr7hgkcuf8-getHistoricoLaboral-getHistoricoLaboral-atualizarHistoricoLaboral-novaRelacaoLaboral-getRelacaoLaboralById-getRelacaoLaboralByCarreiraId-atualizarRelacaoLaboral-getRelacaoLaboral-getRelacaoLaboralByCarreiraId-getRelacaoLaboral"

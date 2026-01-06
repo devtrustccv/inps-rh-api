@@ -3,8 +3,12 @@ package cv.inps.rh.funcionario.application.service.historicolaboral;
 import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByCarreiraIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetHistoricoLaboralQuery;
+import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByFunIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralQuery;
+import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
+import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -27,6 +31,8 @@ import static java.util.Optional.ofNullable;
 public class HistoricoLaboralReadService {
 
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
+  private final FuncionarioEntityRepository funcionarioEntityRepository;
+  private final FuncionarioRules funcionarioRules;
 
   public WrapperHistLaboralResponseDTO getHistoricoLaboral2(GetHistoricoLaboralQuery query) {
     var pageRequest = PageRequest.of(
@@ -238,6 +244,82 @@ public class HistoricoLaboralReadService {
       dto.setCargo(cargo.getId());
 
     var sit = entity.getSituacLaboralId();
+    if (sit != null) {
+      var paramSit = sit.getSituacaoLaboralId();
+      dto.setSituacaoLaboral(paramSit != null ? paramSit.getId() : null);
+      dto.setMotivo(sit.getMotivoSitLabId() != null ? String.valueOf(sit.getMotivoSitLabId().getId())
+          : sit.getMotivoSitLab());
+      dto.setDataInicioSituacao(sit.getDataInicio());
+      dto.setDataFimSituacao(sit.getDataFim());
+      dto.setObservacao(sit.getObs());
+    }
+
+    return dto;
+  }
+
+
+  public RelacaoLaboralDTO getRelacaoLaboralByFunId(GetRelacaoLaboralByFunIdQuery query) {
+    var idFunc = IdentificadorUnico.from(query.getIdFuncionario()).valor();
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc);
+
+    var atual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+
+    var dto = new RelacaoLaboralDTO();
+
+    var contrato = atual.getContrVinculoId();
+
+    if (contrato != null) {
+      dto.setContrato(contrato.getTpContratoId() != null ? contrato.getTpContratoId().getNome()
+          : null);
+      dto.setVinculo(contrato.getVinculoId() != null ? contrato.getVinculoId().getNome() : null);
+    }
+
+    dto.setSalario(atual.getSalario() != null
+        ? atual.getSalario()
+        : (atual.getCarreiraId() != null ? atual.getCarreiraId().getSalario() : null));
+
+    dto.setSituacaoAtual(atual.getEstActAdm() + "");
+
+    var mob = atual.getMobId();
+    if (mob != null) {
+      dto.setTipoMobilidade(mob.getTipoSituacao());
+      dto.setDataInicioMobilidade(mob.getDataInicio());
+      dto.setDataFimMobilidade(mob.getDataFim());
+    }
+
+    var inst = atual.getInstitId();
+    if (inst != null)
+      dto.setDirecao(inst.getId());
+    var sec = atual.getSeccaoId();
+    if (sec != null)
+      dto.setSecao(sec.getId());
+    var lt = atual.getLocTrabId();
+    if (lt != null) {
+      dto.setLocalTrabalho(lt.getId());
+      dto.setPais(lt.getPaisId() != null ? lt.getPaisId().getNome() : null);
+      dto.setIlha(lt.getIlhaId() != null ? lt.getIlhaId().getNome() : null);
+    }
+
+    var car = atual.getCarreiraId();
+    if (car != null) {
+      dto.setTipoAlteracaoCarreira(car.getTipoSituacao());
+      dto.setDataInicioCarreira(car.getDataInicio());
+      dto.setDataFimCarreira(car.getDataFim());
+    }
+    var carrPcc = atual.getCarrPccId();
+    if (carrPcc != null)
+      dto.setCarreira(carrPcc.getId());
+    var cat = atual.getCategoriaId();
+    if (cat != null)
+      dto.setCategoria(cat.getId());
+    var esc = atual.getEscalaoId();
+    if (esc != null)
+      dto.setEscalao(esc.getId());
+    var cargo = atual.getCargoId();
+    if (cargo != null)
+      dto.setCargo(cargo.getId());
+
+    var sit = atual.getSituacLaboralId();
     if (sit != null) {
       var paramSit = sit.getSituacaoLaboralId();
       dto.setSituacaoLaboral(paramSit != null ? paramSit.getId() : null);
