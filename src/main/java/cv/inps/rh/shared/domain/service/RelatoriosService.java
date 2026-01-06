@@ -74,7 +74,10 @@ public class RelatoriosService {
         "dataElaboracao", "27-10-2025 10:50:11",
         "dataProcessamento", "27/10/2025",
         "entidade", "Processar Remunerações Gabinete Sistemas de Informação",
-        "funcionarios", List.of(funcionario, funcionario)
+        "funcionarios", List.of(
+            funcionario, funcionario, funcionario, funcionario, funcionario, funcionario, funcionario, funcionario,
+            funcionario, funcionario, funcionario, funcionario, funcionario, funcionario, funcionario, funcionario
+        )
     );
   }
 }
