@@ -34,4 +34,9 @@ public interface ParamSituacaoEntityRepository extends JpaRepository<ParamSituac
 
   Optional<ParamSituacaoEntity> findByCodigo(final String codigo);
 
+  List<ParamSituacaoEntity> findAllByFlgSituacaoLaboralAndEstado(
+      Integer flgSituacaoLaboral,
+      Estado estado
+  );
+
 }

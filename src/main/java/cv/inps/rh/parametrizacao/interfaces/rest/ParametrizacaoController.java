@@ -34,12 +34,12 @@ import cv.inps.rh.parametrizacao.application.dto.VinculoDTO;
 )
 public class ParametrizacaoController {
 
-
+  
   private final QueryBus queryBus;
 
   public ParametrizacaoController(QueryBus queryBus) {
           this.queryBus = queryBus;
-
+          
   }
    @GetMapping(
    value = "dominios"
@@ -50,7 +50,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -60,7 +60,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<DominioDTO>> getDominios(
     @RequestParam(value = "dominio") String dominio,
     @RequestParam(value = "referencia", required = false) String referencia)
@@ -81,7 +81,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -91,7 +91,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getCargosAtivos(
     )
   {
@@ -111,7 +111,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -121,7 +121,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getCarreirasAtivos(
     )
   {
@@ -141,7 +141,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -151,7 +151,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getCategoriasAtivos(
     )
   {
@@ -171,7 +171,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -181,7 +181,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getParamContratosAtivos(
     @RequestParam(value = "paramVinculoId", required = false) Long paramVinculoId)
   {
@@ -201,7 +201,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -211,7 +211,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getEscaloesAtivos(
     )
   {
@@ -231,7 +231,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -241,7 +241,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<LocalTrabalhoDTO>> getLocalTrabalhoAtivos(
     )
   {
@@ -261,7 +261,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -271,7 +271,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacaoLaboralAtivo(
     )
   {
@@ -291,7 +291,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -301,7 +301,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<VinculoDTO>> getVinculosAtivos(
     )
   {
@@ -321,7 +321,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -331,7 +331,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getSeccoesAtivos(
     @RequestParam(value = "institId") Long institId)
   {
@@ -351,7 +351,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -361,7 +361,7 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getTiposDocumentoAtivos(
     )
   {
@@ -381,7 +381,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -391,12 +391,42 @@ public class ParametrizacaoController {
       )
     }
   )
-
+  
   public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacaoDetalheAtivo(
     @RequestParam(value = "situacaoLaboralId") Long situacaoLaboralId)
   {
 
       final var query = new GetParamSituacaoDetalheAtivoQuery(situacaoLaboralId);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "param-situacoes/ativos"
+  )
+  @Operation(
+    summary = "Get param situacoes ativo",
+    description = "Get param situacoes ativo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ParametrizacaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacoesAtivo(
+    @RequestParam(value = "flgSituacaoLaboral", required = false) Integer flgSituacaoLaboral)
+  {
+
+      final var query = new GetParamSituacoesAtivoQuery(flgSituacaoLaboral);
 
       return queryBus.handle(query);
 

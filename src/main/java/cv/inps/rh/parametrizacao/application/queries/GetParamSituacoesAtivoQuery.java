@@ -11,9 +11,9 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetSeccoesAtivosQuery implements Query {
+public class GetParamSituacoesAtivoQuery implements Query {
 
-  @NotNull(message = "The field <institId> is required")
-  private Long institId;
+  @NotNull(message = "The field <flgSituacaoLaboral> is required")
+  private Integer flgSituacaoLaboral;
 
 }
