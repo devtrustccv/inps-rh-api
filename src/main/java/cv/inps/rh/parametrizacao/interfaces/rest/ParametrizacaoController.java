@@ -432,4 +432,34 @@ public class ParametrizacaoController {
 
   }
 
+   @GetMapping(
+   value = "vinculos/{vinculoId}/situacoes-laborais/ativos"
+  )
+  @Operation(
+    summary = "Get param situacoes laborais by vinculo",
+    description = "Get param situacoes laborais by vinculo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ParametrizacaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacoesLaboraisByVinculo(
+    @PathVariable(value = "vinculoId") Long vinculoId)
+  {
+
+      final var query = new GetParamSituacoesLaboraisByVinculoQuery(vinculoId);
+
+      return queryBus.handle(query);
+
+  }
+
 }
