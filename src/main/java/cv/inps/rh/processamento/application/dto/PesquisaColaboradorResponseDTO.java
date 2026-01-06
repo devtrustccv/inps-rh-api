@@ -8,15 +8,18 @@ import cv.igrp.framework.stereotype.IgrpDTO;
 import java.util.UUID;
 
 @IgrpDTO
-public record PesquisaColaboradorResponseDTO (
+public record PesquisaColaboradorResponseDTO(
 
-  UUID id,
+    Long relacionamentoId,
 
-  String nome,
+    UUID funcionarioId,
 
-  String direcao,
+    String nome,
 
-  Long direcaoId,
+    String direcao,
 
-  String centroCusto
-){}
+    Long direcaoId,
+
+    String centroCusto
+) {
+}

@@ -30,16 +30,12 @@ public class ProcessamentoSalarioRequestDTO {
 
   private String tipo;
 
-
-  private String colaborador;
-
-
-  private String direccaoId;
+  private Long direccaoId;
 
 
   private String observacao;
-  @NotBlank(message = "The field <funcionarioId> is required")
+  @NotNull(message = "The field <funcionarioId> is required")
 
-  private String funcionarioId;
+  private Long relacionamentoId;
 
 }

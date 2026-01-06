@@ -6,7 +6,19 @@
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "id",
+      "name": "relacionamentoId",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "funcionarioId",
       "objectType": "java",
       "type": "uuid",
       "required": false,

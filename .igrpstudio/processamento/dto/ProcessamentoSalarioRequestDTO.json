@@ -42,21 +42,9 @@
       "primaryKey": false
     },
     {
-      "name": "colaborador",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
       "name": "direccaoId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -78,9 +66,9 @@
       "primaryKey": false
     },
     {
-      "name": "funcionarioId",
+      "name": "relacionamentoId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": true,
       "before": false,
       "after": false,

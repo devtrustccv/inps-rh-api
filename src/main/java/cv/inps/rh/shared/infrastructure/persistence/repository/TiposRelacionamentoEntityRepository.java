@@ -96,6 +96,7 @@ public interface TiposRelacionamentoEntityRepository extends
 
   @Query("""
       SELECT new cv.inps.rh.processamento.application.dto.PesquisaColaboradorResponseDTO(
+               t.id,
                t.funId.uuid,
                t.funId.nome,
                t.institId.nome,
@@ -103,7 +104,7 @@ public interface TiposRelacionamentoEntityRepository extends
                null
            )
       FROM TiposRelacionamentoEntity t
-      WHERE t.estActAdm = 1
+      WHERE t.estActAdm = 1 AND t.flgProcessa = '1'
            AND (:directionId IS NULL OR t.institId.id = :directionId)
            AND (:nome IS NULL OR LOWER(t.funId.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
       """)
