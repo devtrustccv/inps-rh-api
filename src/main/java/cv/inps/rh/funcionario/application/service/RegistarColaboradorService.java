@@ -222,37 +222,6 @@ public class RegistarColaboradorService {
         });
 
 
-    // Percorre todas as remunerações e cria RemuneracaoTiprelEntity
-   /* List<RemuneracaoTiprelEntity> listTiprel = saved.getDefinicoesRenumeracoes().stream()
-        .map(rem -> {
-          RemuneracaoTiprelEntity r = new RemuneracaoTiprelEntity();
-          r.setRemId(rem);
-          r.setTiprelId(tr); // tr = TiposRelacionamentoEntity
-          r.setUuid(UuidCreator.getTimeOrderedEpoch());
-          r.setEstado(Estado.P);
-          return r;
-        })
-        .collect(Collectors.toList());
-
-    // Salva todas em batch
-    renumeracaoTiprelEntityRepository.saveAll(listTiprel);
-
-
-    // Percorre todas as definições de pagamento e cria PagTiprelEntity
-    List<PagTiprelEntity> listPagTiprel = saved.getDefinicoesPagamentos().stream()
-        .map(pag -> {
-          PagTiprelEntity p = new PagTiprelEntity();
-          p.setPagId(pag);
-          p.setTiprelId(tr); // tr = TiposRelacionamentoEntity
-          p.setUuid(UuidCreator.getTimeOrderedEpoch());
-          p.setEstado(Estado.P);
-          return p;
-        })
-        .collect(Collectors.toList());
-    // Salva todas em batch
-    pagTiprelEntityRepository.saveAll(listPagTiprel);*/
-
-
     return funcionarioMapper.toResponseDTO(saved);
   }
 

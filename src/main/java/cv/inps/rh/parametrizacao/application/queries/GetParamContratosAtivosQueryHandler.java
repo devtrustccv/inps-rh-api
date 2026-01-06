@@ -29,7 +29,7 @@ public class GetParamContratosAtivosQueryHandler implements QueryHandler<GetPara
 
   @IgrpQueryHandler
   public ResponseEntity<List<ParametrizacaoDTO>> handle(GetParamContratosAtivosQuery query) {
-     var paramContratos =  paramContratoRepository.findAllActive(query.getParamVinculoId());
+     var paramContratos =  paramContratoRepository.findAllActive();
      List<ParametrizacaoDTO> parametrizacoes = paramContratos.stream()
          .map(paramContratoMapper::toParametrizacaoDto)
          .toList();

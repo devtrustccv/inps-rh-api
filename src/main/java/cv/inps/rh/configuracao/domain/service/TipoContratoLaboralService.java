@@ -59,7 +59,7 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
     e.setDuracaoRenovavel(dto.getDuracao());
     e.setMaxRenovacao(dto.getMaxNumeroRenovacao());
     e.setPrazoObrigatorio(ConfigurationUtils.parseFlag(dto.getPrazo()));
-    e.setParamVinculoId(StringUtils.hasText(dto.getVinculoId()) ? paramVinculoEntityRepository.findByUuidOrThrow(UUID.fromString(dto.getVinculoId())) : null);
+    //e.setParamVinculoId(StringUtils.hasText(dto.getVinculoId()) ? paramVinculoEntityRepository.findByUuidOrThrow(UUID.fromString(dto.getVinculoId())) : null);
     repository.save(e);
 
     return new ConfigurationResponseIdDTO(e.getUuid().toString());
@@ -76,7 +76,7 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
     e.setFlgRenovavel(ConfigurationUtils.parseFlag(dto.getRenovavel()));
     e.setDuracaoRenovavel(dto.getDuracao());
     e.setPrazoObrigatorio(ConfigurationUtils.parseFlag(dto.getPrazo()));
-    e.setParamVinculoId(StringUtils.hasText(dto.getVinculoId()) ? paramVinculoEntityRepository.findByUuidOrThrow(UUID.fromString(dto.getVinculoId())) : null);
+    //e.setParamVinculoId(StringUtils.hasText(dto.getVinculoId()) ? paramVinculoEntityRepository.findByUuidOrThrow(UUID.fromString(dto.getVinculoId())) : null);
     if (StringUtils.hasText(dto.getEstado()))
       e.setEstado(Estado.valueOf(dto.getEstado()));
     repository.save(e);
@@ -113,10 +113,10 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
       var v = x.toString();
       r.setPrazo(yesNo.getOrDefault(v, v));
     });
-    ofNullable(e.getParamVinculoId()).ifPresent(x -> {
+    /*ofNullable(e.getParamVinculoId()).ifPresent(x -> {
       r.setVinculoId(x.getUuid().toString());
       r.setVinculoDesc(x.getNome());
-    });
+    });*/
     return r;
   }
 

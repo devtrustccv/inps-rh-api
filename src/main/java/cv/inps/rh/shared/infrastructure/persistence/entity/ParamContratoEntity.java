@@ -65,9 +65,6 @@ public class ParamContratoEntity extends AuditEntity {
   private Integer maxRenovacao;
 
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "param_vinculo_id", referencedColumnName = "id")
-  private ParamVinculoEntity paramVinculoId;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "estado")
