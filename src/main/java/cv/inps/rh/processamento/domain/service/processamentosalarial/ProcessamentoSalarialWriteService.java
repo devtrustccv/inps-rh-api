@@ -166,16 +166,7 @@ public class ProcessamentoSalarialWriteService {
 
   public void processarSalario(ProcessamentoSalarioRequestDTO request) {
 
-    // TODO 07/12/2025 18:06 handle case processar todos funcionarios
-
-    // TODO 07/12/2025 17:53 validate regras
-
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(request.getFuncionarioId()));
-    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-    if ("0".equals(tipoRelacionamentoAtual.getFlgProcessa()))
-      throw IgrpResponseStatusException.badRequest("Este colaborador encontra-se marcado para não processamento");
-
-    var call = callProcedure(Processamento.PROCEDURE_PROCESSAR.getName())
+    callProcedure(Processamento.PROCEDURE_PROCESSAR.getName())
         .declareParameters(
             new SqlParameter("p_dt_inicio", Types.VARCHAR),
             new SqlParameter("p_dt_fim", Types.VARCHAR),
@@ -184,18 +175,17 @@ public class ProcessamentoSalarialWriteService {
             new SqlParameter("p_tipo", Types.VARCHAR),
             new SqlParameter("P_user_name", Types.VARCHAR),
             new SqlParameter("p_user_id", Types.NUMERIC)
+        )
+        .execute(
+            new MapSqlParameterSource()
+                .addValue("p_dt_inicio", request.getDataInicio())
+                .addValue("p_dt_fim", request.getDataFim())
+                .addValue("p_cc_id", request.getDireccaoId())
+                .addValue("p_tiprel_id", request.getRelacionamentoId())
+                .addValue("p_tipo", request.getTipo())
+                .addValue("P_user_name", "demo@demo.com") // TODO 07/12/2025 17:48 validate this
+                .addValue("p_user_id", 0) // TODO 07/12/2025 17:48 validate this
         );
-
-    call.execute(
-        new MapSqlParameterSource()
-            .addValue("p_dt_inicio", request.getDataInicio())
-            .addValue("p_dt_fim", request.getDataFim())
-            .addValue("p_cc_id", request.getDireccaoId())
-            .addValue("p_tiprel_id", tipoRelacionamentoAtual.getId())
-            .addValue("p_tipo", request.getTipo())
-            .addValue("P_user_name", "demo@demo.com") // TODO 07/12/2025 17:48 validate this
-            .addValue("p_user_id", 0) // TODO 07/12/2025 17:48 validate this
-    );
   }
 
   private SimpleJdbcCall callProcedure(String procedureName) {
