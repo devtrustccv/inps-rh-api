@@ -403,7 +403,7 @@ public class ParametrizacaoController {
   }
 
    @GetMapping(
-   value = "vinculos/{vinculoId}/situacoes-laborais/ativos"
+   value = "vinculos/situacoes-laborais/ativos"
   )
   @Operation(
     summary = "Get param situacoes laborais by vinculo",
@@ -423,7 +423,7 @@ public class ParametrizacaoController {
   )
   
   public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacoesLaboraisByVinculo(
-    @PathVariable(value = "vinculoId") Long vinculoId)
+    @RequestParam(value = "vinculoId") Long vinculoId)
   {
 
       final var query = new GetParamSituacoesLaboraisByVinculoQuery(vinculoId);
