@@ -253,36 +253,6 @@ public class ParametrizacaoController {
   }
 
    @GetMapping(
-   value = "situacoes-laborais/ativos"
-  )
-  @Operation(
-    summary = "Get param situacao laboral ativo",
-    description = "Get param situacao laboral ativo",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-          
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = ParametrizacaoDTO.class,
-                  type = "object")
-          )
-      )
-    }
-  )
-  
-  public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacaoLaboralAtivo(
-    )
-  {
-
-      final var query = new GetParamSituacaoLaboralAtivoQuery();
-
-      return queryBus.handle(query);
-
-  }
-
-   @GetMapping(
    value = "vinculos/ativos"
   )
   @Operation(
