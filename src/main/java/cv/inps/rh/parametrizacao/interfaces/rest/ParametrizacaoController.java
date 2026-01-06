@@ -373,7 +373,7 @@ public class ParametrizacaoController {
   }
 
    @GetMapping(
-   value = "situacoes-laborais/motivos/ativos"
+   value = "param-situacoes/motivos/ativos"
   )
   @Operation(
     summary = "Get param situacao detalhe ativo",
