@@ -21,4 +21,9 @@ public class ParamVinculoRepositoryImpl implements ParamVinculoRepository {
   public List<ParamVinculo> findAllActive() {
     return paramVinculoEntityRepository.findAllByEstado(Estado.A).stream().map(paramVinculoMapper::toDomain).toList();
   }
+
+  @Override
+  public List<ParamVinculo> findAllActive(Long paramContratoId) {
+    return paramVinculoEntityRepository.findAllByEstadoAndParamContratoId_Id(Estado.A, paramContratoId).stream().map(paramVinculoMapper::toDomain).toList();
+  }
 }

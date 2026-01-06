@@ -120,14 +120,7 @@
             }
           }
         }
-      },
-      "requestParams": [
-        {
-          "type": "long",
-          "name": "paramVinculoId",
-          "isRequired": false
-        }
-      ]
+      }
     },
     {
       "actionName": "getEscaloesAtivos",
@@ -190,7 +183,14 @@
             }
           }
         }
-      }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "paramContratoId",
+          "isRequired": false
+        }
+      ]
     },
     {
       "actionName": "getSeccoesAtivos",
@@ -333,5 +333,5 @@
       ]
     }
   ],
-  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos-getParamSituacaoDetalheAtivo-getParamSituacaoLaboralAtivo-getTiposDocumentoAtivos"
+  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos-getParamSituacaoDetalheAtivo-getParamSituacaoLaboralAtivo-getTiposDocumentoAtivos-getVinculosAtivos"
 }

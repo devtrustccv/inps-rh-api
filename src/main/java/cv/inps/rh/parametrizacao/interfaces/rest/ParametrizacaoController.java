@@ -183,10 +183,10 @@ public class ParametrizacaoController {
   )
   
   public ResponseEntity<List<ParametrizacaoDTO>> getParamContratosAtivos(
-    @RequestParam(value = "paramVinculoId", required = false) Long paramVinculoId)
+    )
   {
 
-      final var query = new GetParamContratosAtivosQuery(paramVinculoId);
+      final var query = new GetParamContratosAtivosQuery();
 
       return queryBus.handle(query);
 
@@ -273,10 +273,10 @@ public class ParametrizacaoController {
   )
   
   public ResponseEntity<List<VinculoDTO>> getVinculosAtivos(
-    )
+    @RequestParam(value = "paramContratoId", required = false) Long paramContratoId)
   {
 
-      final var query = new GetVinculosAtivosQuery();
+      final var query = new GetVinculosAtivosQuery(paramContratoId);
 
       return queryBus.handle(query);
 

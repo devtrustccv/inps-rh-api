@@ -29,7 +29,12 @@ public class GetVinculosAtivosQueryHandler implements QueryHandler<GetVinculosAt
 
    @IgrpQueryHandler
   public ResponseEntity<List<VinculoDTO>> handle(GetVinculosAtivosQuery query) {
-     var paramVinculos =  paramVinculoRepository.findAllActive();
+     LOGGER.info("GetVinculosAtivosQueryHandler.handle: {}", query);
+
+     var paramVinculos =  query.getParamContratoId() != null && query.getParamContratoId() > 0 ?
+         paramVinculoRepository.findAllActive(query.getParamContratoId()) :
+         paramVinculoRepository.findAllActive();
+
      var parametrizacoes = paramVinculos.stream()
          .map(paramVinculoMapper::toVinculoDto)
          .toList();
