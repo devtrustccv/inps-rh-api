@@ -45,10 +45,6 @@ public class RegistarColaboradorService {
 
  private final ValidacaoEntityRepository validacaoEntityRepository;
 
-
-  private final RemuneracaoTiprelEntityRepository renumeracaoTiprelEntityRepository;
-  private final PagTiprelEntityRepository pagTiprelEntityRepository;
-
   private final TipoMovimentoHelper tipoMovimentoHelper;
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
 

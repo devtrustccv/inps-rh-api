@@ -103,7 +103,7 @@ public class NovoContratoService {
 // Cria o contrato
     var contrato = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contrato.setFunId(funcionario);
-    contrato.setSituacaoLaboral(tipoSituacao);
+    contrato.setTipoSituacao(tipoSituacao);
 
 // Define versão e contrato_id
     if (contratoAnterior == null) {

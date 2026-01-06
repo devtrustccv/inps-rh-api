@@ -32,7 +32,7 @@ public class ContratoMapper {
     dto.setUuid(contrato.getUuid() != null ? contrato.getUuid().toString() : null);
     dto.setFuncionarioId(contrato.getFunId().getId());
     dto.setUuidFuncionario(contrato.getFunId() != null ? contrato.getFunId().getUuid().toString() : null);
-    dto.setSituacao(contrato.getSituacaoLaboral());
+    dto.setSituacao(contrato.getTipoSituacao());
     dto.setTipoVinculo(contrato.getVinculoId() != null ? contrato.getVinculoId().getNome() : null);
     dto.setDataInicio(contrato.getDataInicio() != null ? DateFormatter.localDateToString(contrato.getDataInicio()) : null);
     dto.setDataFim(contrato.getDataFim() != null ? DateFormatter.localDateToString(contrato.getDataFim()) : null);
@@ -53,7 +53,7 @@ public class ContratoMapper {
     c.setDataInicio(dc.getDataInicio());
     c.setDataFim(dc.getDataFim());
     c.setDuracao(dc.getDuracaoMeses());
-    c.setSituacaoLaboral("INICIO");
+    c.setTipoSituacao("INICIO");
     c.setObs("NOVO_CONTRATO");
     c.setUuid(IdentificadorUnico.create().valor());
     c.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
@@ -67,7 +67,7 @@ public class ContratoMapper {
     c.setDataInicio(dc.getDataInicio());
     c.setDataFim(dc.getDataFim());
     c.setDuracao(dc.getDuracaoMeses());
-    c.setSituacaoLaboral("RENOVACAO_CONTRATO");
+    c.setTipoSituacao("RENOVACAO_CONTRATO");
     c.setObs("RENOVACAO_CONTRATO");
     c.setUuid(IdentificadorUnico.create().valor());
     c.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
