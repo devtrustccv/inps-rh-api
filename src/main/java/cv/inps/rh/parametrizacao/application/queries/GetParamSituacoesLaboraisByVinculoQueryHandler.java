@@ -37,7 +37,7 @@ public class GetParamSituacoesLaboraisByVinculoQueryHandler implements QueryHand
          .stream()
          .map(r -> new ParametrizacaoDTO(
              r.getParamSit().getNome(),
-             r.getId()
+             r.getParamSit().getId()
          ))
          .toList();
 
