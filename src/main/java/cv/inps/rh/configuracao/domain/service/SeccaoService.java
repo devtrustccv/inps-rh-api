@@ -133,7 +133,7 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
     dto.setDescricao(s.getNome());
     dto.setId(s.getUuid().toString());
     dto.setEstadoDescricao(s.getEstado().getDescription());
-    dto.setEstado(s.getEstado().getDescription());
+    dto.setEstado(s.getEstado().getCode());
     return dto;
   }
 }

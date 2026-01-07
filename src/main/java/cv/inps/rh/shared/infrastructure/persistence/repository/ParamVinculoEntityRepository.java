@@ -2,6 +2,7 @@ package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -26,5 +27,7 @@ public interface ParamVinculoEntityRepository extends
   }
 
   List<ParamVinculoEntity> findAllByEstado(Estado estado);
+
+  List<ParamVinculoEntity> findAllByEstadoAndParamContratoId_Id(Estado estado, Long paramContratoIdId);
 
 }

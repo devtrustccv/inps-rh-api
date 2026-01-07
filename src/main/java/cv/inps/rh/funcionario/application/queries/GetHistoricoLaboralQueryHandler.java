@@ -25,7 +25,7 @@ public class GetHistoricoLaboralQueryHandler implements QueryHandler<GetHistoric
 
     LOGGER.info("Handling GetHistoricoLaboralQuery: {}", query);
 
-    var data = historicoLaboralReadService.getHistoricoLaboral(query);
+    var data = historicoLaboralReadService.getHistoricoLaboral2(query);
 
     return ResponseEntity.ok(data);
   }

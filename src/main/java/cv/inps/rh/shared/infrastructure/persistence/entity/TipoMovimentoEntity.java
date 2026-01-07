@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_TIPO_MOVIMENTOS")
+@Table(name = "RH_TIPO_MOVIMENTOS", schema = "INPSSIGOF")
 public class TipoMovimentoEntity  {
 
     @Id

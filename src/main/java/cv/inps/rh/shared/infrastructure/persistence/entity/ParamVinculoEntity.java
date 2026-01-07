@@ -66,4 +66,9 @@ public class ParamVinculoEntity extends AuditEntity {
     private Estado estado;
 
   
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "param_contrato_id", referencedColumnName = "id")
+    private ParamContratoEntity paramContratoId;
 }

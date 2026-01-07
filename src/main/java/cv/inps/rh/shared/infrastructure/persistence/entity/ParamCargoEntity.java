@@ -47,7 +47,7 @@ public class ParamCargoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "param_carr_id", referencedColumnName = "id")
     private ParamCarreiraEntity paramCarrId;
-    @Column(name="dirigente", length=1)
+    @Column(name="dirigente", length=10)
     private String dirigente;
 
 

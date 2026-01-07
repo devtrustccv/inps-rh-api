@@ -23,6 +23,8 @@ public class CategoriaCarreiraResponseDTO  {
   private String id ;
 
 
+  private String codigo;
+  private String codigoDesc;
   private String categoria ;
 
 

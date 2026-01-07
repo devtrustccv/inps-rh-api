@@ -61,7 +61,7 @@ public class ParamSituacaoEntity extends AuditEntity {
 
 
     @Column(name="flg_estado_contrato")
-    private Integer  flgEstadoContrato;
+    private String  flgEstadoContrato;
 
 
     @Column(name="flg_falta")

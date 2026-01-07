@@ -5,6 +5,7 @@ package cv.inps.rh.processamento.interfaces.rest;
 
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.processamento.application.dto.WrapperPesquisaCentroCustoDTO;
 import cv.inps.rh.processamento.application.dto.WrapperPesquisaColaboradorDTO;
 import cv.inps.rh.processamento.application.queries.PesquisaCentroCustoQuery;
 import cv.inps.rh.processamento.application.queries.PesquisaColaboradorQuery;
@@ -22,7 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 @IgrpController
 @RestController
 @RequestMapping(path = "pesquisa")
-@Tag(name = "Pesquisa", description = "Pesquisas Globais")
+@Tag(
+    name = "Processamento",
+    description = "Pesquisas Globais"
+)
 public class PesquisaController {
 
 
@@ -52,7 +56,7 @@ public class PesquisaController {
     }
   )
 
-   public ResponseEntity<WrapperPesquisaColaboradorDTO> pesquisaColaborador(
+  public ResponseEntity<WrapperPesquisaColaboradorDTO> pesquisaColaborador(
     @RequestParam(value = "nome", required = false) String nome,
     @RequestParam(value = "direccao", required = false) String direccao,
     @RequestParam(value = "centroCusto", required = false) String centroCusto,
@@ -62,37 +66,37 @@ public class PesquisaController {
 
       final var query = new PesquisaColaboradorQuery(nome, direccao, centroCusto, page, size);
 
-    return queryBus.handle(query);
+      return queryBus.handle(query);
 
   }
 
-  @GetMapping(
-      value = "centro-custo"
+   @GetMapping(
+   value = "centro-custo"
   )
   @Operation(
-      summary = "Pesquisa centro custo",
-      description = "Pesquisa centro custo",
-      responses = {
-          @ApiResponse(
-              responseCode = "200",
+    summary = "Pesquisa centro custo",
+    description = "Pesquisa centro custo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
 
-              content = @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(
-                      implementation = WrapperPesquisaColaboradorDTO.class,
-                      type = "object")
-              )
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = WrapperPesquisaCentroCustoDTO.class,
+                  type = "object")
           )
-      }
+      )
+    }
   )
 
-  public ResponseEntity<WrapperPesquisaColaboradorDTO> pesquisaCentroCusto(
-      @RequestParam(value = "nome", required = false) String nome,
-      @RequestParam(value = "centroCusto", required = false) String centroCusto,
-      @RequestParam(value = "page", required = false, defaultValue = "0") String page,
-      @RequestParam(value = "size", required = false, defaultValue = "20") String size) {
+  public ResponseEntity<WrapperPesquisaCentroCustoDTO> pesquisaCentroCusto(
+    @RequestParam(value = "nome", required = false) String nome,
+    @RequestParam(value = "page", required = false, defaultValue = "0") String page,
+    @RequestParam(value = "size", required = false, defaultValue = "20") String size)
+  {
 
-    final var query = new PesquisaCentroCustoQuery(nome, centroCusto, page, size);
+      final var query = new PesquisaCentroCustoQuery(nome, page, size);
 
       return queryBus.handle(query);
 

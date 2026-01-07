@@ -37,6 +37,8 @@ public class VinculoLaboralRequestDTO  {
 
   private String tempoServico ;
 
+  private String contratoId;
+
 
   private String estado ;
 

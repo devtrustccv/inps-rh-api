@@ -42,8 +42,8 @@ public class RenumeracoesReadService {
     Specification<DefinicaoRemuneracaoEntity> spec = (root, cq, cb) -> {
       List<Predicate> predicates = new java.util.ArrayList<>();
 
-      Join<DefinicaoRemuneracaoEntity, TipoMovimentoEntity> tm = root.join("tmId");
-      predicates.add(cb.equal(tm.get("tipo"), "REM"));
+      /*Join<DefinicaoRemuneracaoEntity, TipoMovimentoEntity> tm = root.join("tmId");
+      predicates.add(cb.equal(tm.get("tipo"), "REM"));*/
 
       Join<DefinicaoRemuneracaoEntity, FuncionarioEntity> fun = root.join("funId");
       predicates.add(cb.equal(fun.get("uuid"), idFuncionario));

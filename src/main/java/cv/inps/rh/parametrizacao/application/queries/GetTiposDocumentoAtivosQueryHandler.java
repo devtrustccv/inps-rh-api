@@ -28,7 +28,7 @@ public class GetTiposDocumentoAtivosQueryHandler implements QueryHandler<GetTipo
 
    @IgrpQueryHandler
   public ResponseEntity<List<ParametrizacaoDTO>> handle(GetTiposDocumentoAtivosQuery query) {
-     var tiposDocumentos =  tipoDocumentoRepository.findAllActive();
+     var tiposDocumentos =  tipoDocumentoRepository.findAllActive(query.getReferencia());
      List<ParametrizacaoDTO> parametrizacoes = tiposDocumentos.stream()
          .map(tipoDocumentoMapper::toParametrizacaoDto)
          .toList();

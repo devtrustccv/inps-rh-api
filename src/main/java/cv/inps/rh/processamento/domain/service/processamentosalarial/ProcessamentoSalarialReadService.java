@@ -1,7 +1,12 @@
 package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
+import cv.inps.rh.processamento.application.dto.DetalhesProcessamentoDTO;
+import cv.inps.rh.processamento.application.dto.ResumoProcessamentoDTO;
 import cv.inps.rh.processamento.application.dto.WrapperProcessamentoSalarialDTO;
+import cv.inps.rh.processamento.application.queries.GetDetalhesProcessamentoQuery;
 import cv.inps.rh.processamento.application.queries.GetProcessamentoSalarialQuery;
+import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcPagEntityRepository;
+import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcRemunEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
@@ -15,6 +20,8 @@ import org.springframework.util.StringUtils;
 public class ProcessamentoSalarialReadService {
 
   private final ProcessamentoSalarialEntityRepository processamentoSalarialEntityRepository;
+  private final ProcSalCcRemunEntityRepository procSalCcRemunEntityRepository;
+  private final ProcSalCcPagEntityRepository procSalCcPagEntityRepository;
 
   public WrapperProcessamentoSalarialDTO getProcessamentoSalarial(GetProcessamentoSalarialQuery query) {
 
@@ -34,5 +41,30 @@ public class ProcessamentoSalarialReadService {
     return response;
   }
 
+  public ResumoProcessamentoDTO getResumoProcessamentoSalarial() {
 
+    var data = new ResumoProcessamentoDTO();
+    data.setRemuneracao(procSalCcRemunEntityRepository.getRemuneracoes());
+    data.setPagamento(procSalCcPagEntityRepository.getPagamentos());
+
+    return data;
+  }
+
+  public DetalhesProcessamentoDTO getDetalhesProcessamentoSalarial(GetDetalhesProcessamentoQuery query) {
+
+    var isPayment = TipoDetalhe.valueOf(query.getTipoDetalhe()).equals(TipoDetalhe.PAGAMENTO);
+
+    var procId = Long.valueOf(query.getProcSalId());
+
+    var data = new DetalhesProcessamentoDTO();
+    data.setContent(isPayment ?
+        procSalCcPagEntityRepository.getDetalhesPagamento(query.getTipoMovimento(), procId) :
+        procSalCcRemunEntityRepository.getDetalhesRemuneracao(query.getTipoMovimento(), procId));
+
+    return data;
+  }
+
+  private enum TipoDetalhe {
+    REMUNERACAO, PAGAMENTO
+  }
 }

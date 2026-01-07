@@ -42,6 +42,18 @@
       "primaryKey": false
     },
     {
+      "name": "vinculoId",
+      "objectType": "java",
+      "type": "string",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "renovavel",
       "objectType": "java",
       "type": "string",

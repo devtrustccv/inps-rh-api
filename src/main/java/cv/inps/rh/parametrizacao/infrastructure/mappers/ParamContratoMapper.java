@@ -20,9 +20,9 @@ public class ParamContratoMapper {
   public ParamContrato toDomain(ParamContratoEntity entity) {
     if (entity == null) return null;
 
-    ParamVinculo vinculo = vinculoMapper.toDomain(
+    /*ParamVinculo vinculo = vinculoMapper.toDomain(
         entity.getParamVinculoId() != null ? entity.getParamVinculoId().getId() : null
-    );
+    );*/
 
     return ParamContrato.rebuild(
         entity.getId(),
@@ -33,7 +33,7 @@ public class ParamContratoMapper {
         entity.getFlgRenovavel(),
         entity.getDuracaoRenovavel(),
         entity.getPrazoObrigatorio(),
-        vinculo,
+        null,
         entity.getEstado()
     );
   }
@@ -53,9 +53,9 @@ public class ParamContratoMapper {
     entity.setPrazoObrigatorio(domain.getPrazoObrigatorio());
     entity.setEstado(domain.getEstado());
 
-    if (domain.getParamVinculo() != null && domain.getParamVinculo().getId() != null) {
+   /* if (domain.getParamVinculo() != null && domain.getParamVinculo().getId() != null) {
       entity.setParamVinculoId(entityManager.getReference(ParamVinculoEntity.class, domain.getParamVinculo().getId()));
-    }
+    }*/
 
     return entity;
   }

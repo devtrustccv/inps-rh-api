@@ -16,7 +16,7 @@ public class ParamSitLaboral {
   private Integer flgAfetaCarreira;
   private Integer flgContaTempServico;
   private Integer flgCessaProgressao;
-  private Integer flgEstadoContrato;
+  private String flgEstadoContrato;
   private final Estado estado;
 
   private ParamSitLaboral(
@@ -29,7 +29,7 @@ public class ParamSitLaboral {
       Integer flgAfetaCarreira,
       Integer flgContaTempServico,
       Integer flgCessaProgressao,
-      Integer flgEstadoContrato,
+      String flgEstadoContrato,
       Estado estado
   ) {
     this.id = id;
@@ -53,7 +53,7 @@ public class ParamSitLaboral {
       Integer flgAfetaCarreira,
       Integer flgContaTempServico,
       Integer flgCessaProgressao,
-      Integer flgEstadoContrato,
+      String flgEstadoContrato,
       Estado estado
   ) {
     return new ParamSitLaboral(
@@ -81,7 +81,7 @@ public class ParamSitLaboral {
       Integer flgAfetaCarreira,
       Integer flgContaTempServico,
       Integer flgCessaProgressao,
-      Integer flgEstadoContrato,
+      String flgEstadoContrato,
       Estado estado
   ) {
     return new ParamSitLaboral(
@@ -124,7 +124,7 @@ public class ParamSitLaboral {
       Integer flgAfetaCarreira,
       Integer flgContaTempServico,
       Integer flgCessaProgressao,
-      Integer flgEstadoContrato
+      String flgEstadoContrato
   ) {
     if (nome != null) this.nome = nome;
     if (tipoSituacao != null) this.tipoSituacao = tipoSituacao;

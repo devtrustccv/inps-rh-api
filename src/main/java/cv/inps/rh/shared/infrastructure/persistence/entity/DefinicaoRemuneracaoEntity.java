@@ -1,5 +1,5 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
@@ -68,7 +68,12 @@ public class DefinicaoRemuneracaoEntity extends AuditEntity {
     @Column(name="data_fim")
     private LocalDate dataFim;
 
-     @ManyToOne(fetch = FetchType.LAZY)
+  
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
+    private TiposRelacionamentoEntity tiprelId;   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "fun_id")
    private FuncionarioEntity funId;
 

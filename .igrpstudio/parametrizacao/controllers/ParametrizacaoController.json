@@ -120,14 +120,7 @@
             }
           }
         }
-      },
-      "requestParams": [
-        {
-          "type": "long",
-          "name": "paramVinculoId",
-          "isRequired": false
-        }
-      ]
+      }
     },
     {
       "actionName": "getEscaloesAtivos",
@@ -172,27 +165,6 @@
       }
     },
     {
-      "actionName": "getParamSituacaoLaboralAtivo",
-      "path": "situacoes-laborais/ativos",
-      "method": "GET",
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "Parametrizacao",
-                "objectType": "dto",
-                "name": "data",
-                "collectionType": "list",
-                "module": "parametrizacao"
-              }
-            }
-          }
-        }
-      }
-    },
-    {
       "actionName": "getVinculosAtivos",
       "path": "vinculos/ativos",
       "method": "GET",
@@ -211,7 +183,14 @@
             }
           }
         }
-      }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "paramContratoId",
+          "isRequired": false
+        }
+      ]
     },
     {
       "actionName": "getSeccoesAtivos",
@@ -260,11 +239,18 @@
             }
           }
         }
-      }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "referencia",
+          "isRequired": false
+        }
+      ]
     },
     {
       "actionName": "getParamSituacaoDetalheAtivo",
-      "path": "situacoes-laborais/motivos/ativos",
+      "path": "param-situacoes/motivos/ativos",
       "method": "GET",
       "responses": {
         "200": {
@@ -289,7 +275,63 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getParamSituacoesAtivo",
+      "path": "param-situacoes/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "integer",
+          "name": "flgSituacaoLaboral",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "getParamSituacoesLaboraisByVinculo",
+      "path": "vinculos/situacoes-laborais/ativos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Parametrizacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "parametrizacao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "vinculoId",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos"
+  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos-getParamSituacaoDetalheAtivo-getParamSituacaoLaboralAtivo-getTiposDocumentoAtivos-getVinculosAtivos-getParamSituacoesLaboraisByVinculo"
 }

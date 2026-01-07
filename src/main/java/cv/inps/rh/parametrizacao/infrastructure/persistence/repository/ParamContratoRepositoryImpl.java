@@ -25,12 +25,14 @@ public class ParamContratoRepositoryImpl implements ParamContratoRepository {
 
   @Override
   public List<ParamContrato> findAllActive(Long paramVinculoId) {
-    var entities = (paramVinculoId != null && paramVinculoId > 0)
+    /*var entities = (paramVinculoId != null && paramVinculoId > 0)
         ? paramContratoEntityRepository.findAllByEstadoAndParamVinculoId_Id(Estado.A, paramVinculoId)
         : paramContratoEntityRepository.findAllByEstado(Estado.A);
 
     return entities.stream()
         .map(paramContratoMapper::toDomain)
-        .toList();
+        .toList();*/
+
+    return null ;
   }
 }

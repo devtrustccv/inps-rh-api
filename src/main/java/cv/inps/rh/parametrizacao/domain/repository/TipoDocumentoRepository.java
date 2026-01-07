@@ -9,5 +9,5 @@ public interface TipoDocumentoRepository {
 
   Optional<TipoDocumento> findById(Long id);
 
-  List<TipoDocumento> findAllActive();
+  List<TipoDocumento> findAllActive(String referencia);
 }

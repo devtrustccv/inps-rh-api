@@ -28,5 +28,6 @@ public class VinculoLaboralResponseDTO extends VinculoLaboralRequestDTO {
   private String remuneracaoDesc;
   private String tempoServicoDesc;
   private String estadoDescricao;
+  private String paramContratoDesc;
 
 }

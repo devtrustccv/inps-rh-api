@@ -6,9 +6,45 @@
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "ultimoMovimento",
+      "name": "id",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "uuid",
       "objectType": "java",
       "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "uuidFuncionario",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "ultimoMovimento",
+      "objectType": "java",
+      "type": "boolean",
       "required": false,
       "before": false,
       "after": false,

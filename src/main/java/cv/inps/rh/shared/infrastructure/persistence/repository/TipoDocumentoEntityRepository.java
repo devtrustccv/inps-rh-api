@@ -16,15 +16,16 @@ import java.util.UUID;
 @Repository
 public interface TipoDocumentoEntityRepository extends
     JpaRepository<TipoDocumentoEntity, Long>,
-    JpaSpecificationExecutor<TipoDocumentoEntity>
-{
+    JpaSpecificationExecutor<TipoDocumentoEntity> {
 
-      default TipoDocumentoEntity findByIdOrThrow(Long id) {
-          return this.findById(id)
-          .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"TipoDocumentoEntity not found for id: " + id));
-      }
+  default TipoDocumentoEntity findByIdOrThrow(Long id) {
+    return this.findById(id)
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "TipoDocumentoEntity not found for id: " + id));
+  }
 
   List<TipoDocumentoEntity> findAllByEstado(Estado estado);
+
+  List<TipoDocumentoEntity> findAllByReferenciaAndEstado(String referencia, Estado estado);
 
   Optional<TipoDocumentoEntity> findByUuid(UUID uuid);
 
@@ -32,4 +33,6 @@ public interface TipoDocumentoEntityRepository extends
     return findByUuid(uuid)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("TipoDocumentoEntity not found for id: " + uuid));
   }
+
+
 }

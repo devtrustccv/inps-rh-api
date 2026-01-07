@@ -164,13 +164,20 @@ public class EscalaoService extends ConfigurationProcess<EscalaoRequestDTO> {
     dto.setSalario(e.getValor().toString());
     dto.setDataInicio(e.getDataInicio());
     dto.setDataFim(e.getDataFim());
-    dto.setCarreiraId(e.getParamCarrId().getUuid().toString());
     dto.setEstado(e.getEstado().getCode());
     dto.setEstadoDescricao(e.getEstado().getDescription());
 
+    ofNullable(e.getParamCarrId())
+        .ifPresent(c -> {
+          dto.setCarreiraId(c.getUuid().toString());
+          dto.setCarreiraDesc(c.getNome());
+        });
+
     ofNullable(e.getParamCategoriaId())
-        .map(c -> c.getUuid().toString())
-        .ifPresent(dto::setCategoriaId);
+        .ifPresent(c -> {
+          dto.setCategoriaId(c.getUuid().toString());
+          dto.setCategoriaDesc(c.getNome());
+        });
 
     return dto;
   }

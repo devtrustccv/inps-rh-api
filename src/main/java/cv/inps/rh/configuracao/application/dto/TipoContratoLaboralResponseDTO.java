@@ -20,6 +20,7 @@ public class TipoContratoLaboralResponseDTO extends TipoContratoLaboralRequestDT
   @NotBlank(message = "The field <id> is required")
 
   private String id ;
+  private String vinculoDesc;
 
 
   private String descricaoEstado ;

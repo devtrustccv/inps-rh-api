@@ -1,25 +1,12 @@
 {
   "type": "dto",
-  "module": "funcionario",
-  "name": "ValidarNovoHistoricoLaboral",
+  "module": "processamento",
+  "name": "DetalhesProcessamentoRow",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "validar",
-      "objectType": "enum",
-      "type": "EstadoValidacao",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false,
-      "module": "shared"
-    },
-    {
-      "name": "estado",
+      "name": "nomeColaborador",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -31,7 +18,7 @@
       "primaryKey": false
     },
     {
-      "name": "tipoAlteracao",
+      "name": "cargo",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -43,20 +30,7 @@
       "primaryKey": false
     },
     {
-      "name": "dadosContratuais",
-      "objectType": "dto",
-      "type": "DadosContratuaisReq",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false,
-      "module": "funcionario"
-    },
-    {
-      "name": "tipoOrdemServico",
+      "name": "vinculo",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -68,9 +42,9 @@
       "primaryKey": false
     },
     {
-      "name": "gerarOrdemServico",
+      "name": "valor",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -80,5 +54,5 @@
       "primaryKey": false
     }
   ],
-  "id": "l6xt20qblf"
+  "id": "ppjvqdipkp"
 }
