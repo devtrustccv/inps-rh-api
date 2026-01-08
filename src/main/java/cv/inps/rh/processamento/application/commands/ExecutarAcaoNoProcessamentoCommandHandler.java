@@ -31,7 +31,7 @@ public class ExecutarAcaoNoProcessamentoCommandHandler implements CommandHandler
       case ELIMINAR_PROCESSAMENTO -> service.eliminarProcessamento(ids);
       case VALIDAR -> service.validar(ids);
       case CABIMENTAR -> service.cabimentar(ids);
-      case ELIMINAR_CABIMENTO -> service.eliminarCabimento(ids);
+      case ELIMINAR_CABIMENTO -> service.extornarCabimento(ids);
       case AUTORIZAR -> service.autorizar(ids);
     }
 

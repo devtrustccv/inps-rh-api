@@ -7,11 +7,11 @@ import lombok.Setter;
 @Setter
 public class RequestHeader {
 
-  private ProcessarCabimentoRequest.Autorization Autorization;
+  private Autorization Autorization;
   private ProcessarCabimentoRequest.User User;
 
   public RequestHeader() {
-    this.Autorization = new ProcessarCabimentoRequest.Autorization(
+    this.Autorization = new Autorization(
         "sips",
         "sips@is",
         "1001",

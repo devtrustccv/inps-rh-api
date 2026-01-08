@@ -124,25 +124,6 @@ public class ProcessamentoSalarialWriteService {
     });
   }
 
-  public void eliminarCabimento(List<Long> processamentoIds) {
-
-    var illegalProcesses = new ArrayList<Long>();
-
-    var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
-    processes.forEach(process -> {
-      if (!process.getEstado().equals(ProcessamentoSalarialAction.ELIMINAR_CABIMENTO.getCode()))
-        illegalProcesses.add(process.getId());
-    });
-
-    if (!illegalProcesses.isEmpty())
-      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'DEV'", illegalProcesses);
-
-    processes.forEach(p -> {
-      var call = callProcedure(Processamento.PROCEDURE_ELIMINAR_CAB.getName());
-      call.execute(Map.of("p_cab_id", p.getCab1Id()));
-    });
-  }
-
   public void autorizar(List<Long> processamentoIds) {
 
     var illegalProcesses = new ArrayList<Long>();
@@ -161,6 +142,27 @@ public class ProcessamentoSalarialWriteService {
       LOGGER.info("Autorizar Salario Response: {}", response);
       if (response.content().issue().code() != 200)
         throw IgrpResponseStatusException.badRequest("Erro ao autorizar salario", response.content().issue().diagnostics());
+    });
+  }
+
+  public void extornarCabimento(List<Long> processamentoIds) {
+
+    var illegalProcesses = new ArrayList<Long>();
+
+    var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
+    processes.forEach(process -> {
+      if (!process.getEstado().equals(ProcessamentoSalarialAction.ELIMINAR_CABIMENTO.getCode()))
+        illegalProcesses.add(process.getId());
+    });
+
+    if (!illegalProcesses.isEmpty())
+      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'DEV'", illegalProcesses);
+
+    processes.forEach(p -> {
+      var response = processarSalarioApi.extornarCabimento(p.getCab1Id().toString());
+      LOGGER.info("Extornar Cabimento Response: {}", response);
+      if (response.content().issue().code() != 200)
+        throw IgrpResponseStatusException.badRequest("Erro ao extornar cabimento", response.content().issue().diagnostics());
     });
   }
 
