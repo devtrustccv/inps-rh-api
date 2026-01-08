@@ -10,17 +10,6 @@ public record AutorizaSalarioRequest(
   ) {
   }
 
-  public record Autorization(
-      String UserName,
-      String Password,
-      String CanalCode,
-      String RolesName
-  ) {
-  }
-
-  public record User(int UserID) {
-  }
-
   public record RequestBody(
       AutorizaProcessoSalario autoriza_processo_salario
   ) {

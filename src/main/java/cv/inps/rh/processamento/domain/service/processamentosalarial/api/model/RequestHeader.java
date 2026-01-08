@@ -8,7 +8,7 @@ import lombok.Setter;
 public class RequestHeader {
 
   private Autorization Autorization;
-  private ProcessarCabimentoRequest.User User;
+  private User User;
 
   public RequestHeader() {
     this.Autorization = new Autorization(
@@ -17,6 +17,6 @@ public class RequestHeader {
         "1001",
         "sips"
     );
-    this.User = new ProcessarCabimentoRequest.User(0);
+    this.User = new User(0);
   }
 }
