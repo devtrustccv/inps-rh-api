@@ -24,9 +24,10 @@ public interface ProcSalCcRemunEntityRepository extends
               sum(e.valor)
           )
           FROM ProcSalCcRemunEntity e
+          WHERE e.procSalId = :procId
           GROUP BY e.tipo, e.procSalId
       """)
-  List<ResumoProcessamentoRowDTO> getRemuneracoes();
+  List<ResumoProcessamentoRowDTO> getRemuneracoes(@Param("procId") Long procId);
 
   @Query("""
           SELECT new cv.inps.rh.processamento.application.dto.DetalhesProcessamentoRowDTO(

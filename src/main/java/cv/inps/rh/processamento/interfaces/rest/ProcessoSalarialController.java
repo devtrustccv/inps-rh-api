@@ -165,7 +165,7 @@ public class ProcessoSalarialController {
   }
 
    @GetMapping(
-   value = "resumo"
+   value = "resumo/{processamentoId}"
   )
   @Operation(
     summary = "Get resumo processamento",
@@ -185,10 +185,10 @@ public class ProcessoSalarialController {
   )
 
   public ResponseEntity<ResumoProcessamentoDTO> getResumoProcessamento(
-    )
+    @PathVariable(value = "processamentoId") String processamentoId)
   {
 
-      final var query = new GetResumoProcessamentoQuery();
+      final var query = new GetResumoProcessamentoQuery(processamentoId);
 
       return queryBus.handle(query);
 

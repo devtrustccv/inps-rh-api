@@ -162,7 +162,7 @@
     },
     {
       "actionName": "getResumoProcessamento",
-      "path": "resumo",
+      "path": "resumo/{processamentoId}",
       "method": "GET",
       "responses": {
         "200": {
@@ -179,7 +179,14 @@
             }
           }
         }
-      }
+      },
+      "pathVariables": [
+        {
+          "name": "processamentoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     },
     {
       "actionName": "getDetalhesProcessamento",
@@ -220,5 +227,5 @@
       ]
     }
   ],
-  "id": "dcry51pbek-validarProcessamentoSalarial"
+  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento"
 }
