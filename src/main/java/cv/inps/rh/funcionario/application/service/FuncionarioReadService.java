@@ -119,6 +119,7 @@ public class FuncionarioReadService {
       dto.setCarreiraCategoria(carreira != null && categoria != null ? carreira + "/" + categoria : carreira);
 
       dto.setDataInicio(contrato != null ? DateFormatter.localDateToString(contrato.getDataInicio()) : null);
+      dto.setVinculoId(contrato != null && contrato.getVinculoId() != null ? contrato.getVinculoId().getId() : null);
 
       dto.setEstadoRegisto(f.getEstado() != null ? f.getEstado().getCode() : null);
       dto.setEstadoRegistoDesc(f.getEstado() != null ? f.getEstado().getDescription() : null);

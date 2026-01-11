@@ -149,6 +149,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     response.setAreaClassificacao(e.getClassificacaoArea());
     response.setAreaClassificacaoDesc(areaClassification.getOrDefault(e.getClassificacaoArea(), e.getClassificacaoArea()));
     response.setTipoSituacaoLaboral(type.get(e.getTipoSituacao()));
+    response.setTipoSituacao(e.getTipoSituacao());
     response.setRemuneracao(e.getFlgRemuneracao() != null ? e.getFlgRemuneracao().toString() : null);
     response.setRemuneracaoDesc(e.getFlgRemuneracao() != null ? domain.get(e.getFlgRemuneracao().toString()) : null);
     response.setCarreira(e.getFlgAfetaCarreira() != null ? e.getFlgAfetaCarreira().toString() : null);

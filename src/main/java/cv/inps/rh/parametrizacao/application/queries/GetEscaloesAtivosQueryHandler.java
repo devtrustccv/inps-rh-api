@@ -2,6 +2,7 @@ package cv.inps.rh.parametrizacao.application.queries;
 
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
+import cv.inps.rh.parametrizacao.application.dto.EscalaoDTO;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.repository.ParamEscalaoRepository;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamEscalaoMapper;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class GetEscaloesAtivosQueryHandler implements QueryHandler<GetEscaloesAtivosQuery, ResponseEntity<List<ParametrizacaoDTO>>>{
+public class GetEscaloesAtivosQueryHandler implements QueryHandler<GetEscaloesAtivosQuery, ResponseEntity<List<EscalaoDTO>>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetEscaloesAtivosQueryHandler.class);
 
@@ -27,9 +28,9 @@ public class GetEscaloesAtivosQueryHandler implements QueryHandler<GetEscaloesAt
   }
 
    @IgrpQueryHandler
-  public ResponseEntity<List<ParametrizacaoDTO>> handle(GetEscaloesAtivosQuery query) {
+  public ResponseEntity<List<EscalaoDTO>> handle(GetEscaloesAtivosQuery query) {
      var paramEscaloes =  paramEscalaoRepository.findAllActive();
-     List<ParametrizacaoDTO> parametrizacoes = paramEscaloes.stream()
+     List<EscalaoDTO> parametrizacoes = paramEscaloes.stream()
          .map(paramEscalaoMapper::toParametrizacaoDto)
          .toList();
      return ResponseEntity.ok(parametrizacoes);

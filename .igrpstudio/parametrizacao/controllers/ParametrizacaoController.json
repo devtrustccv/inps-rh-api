@@ -132,7 +132,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "Parametrizacao",
+                "type": "Escalao",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "list",
@@ -329,9 +329,14 @@
           "type": "long",
           "name": "vinculoId",
           "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "flgEstadoContrato",
+          "isRequired": true
         }
       ]
     }
   ],
-  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos-getParamSituacaoDetalheAtivo-getParamSituacaoLaboralAtivo-getTiposDocumentoAtivos-getVinculosAtivos-getParamSituacoesLaboraisByVinculo"
+  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos-getParamSituacaoDetalheAtivo-getParamSituacaoLaboralAtivo-getTiposDocumentoAtivos-getVinculosAtivos-getParamSituacoesLaboraisByVinculo-getEscaloesAtivos-getParamSituacoesLaboraisByVinculo"
 }

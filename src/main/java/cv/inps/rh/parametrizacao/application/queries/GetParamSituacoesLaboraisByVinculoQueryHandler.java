@@ -14,6 +14,7 @@ import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class GetParamSituacoesLaboraisByVinculoQueryHandler implements QueryHandler<GetParamSituacoesLaboraisByVinculoQuery, ResponseEntity<List<ParametrizacaoDTO>>>{
@@ -35,6 +36,7 @@ public class GetParamSituacoesLaboraisByVinculoQueryHandler implements QueryHand
 
      var result = paramSitLaboralEntityRepository.findAllByVinculoId(query.getVinculoId())
          .stream()
+         .filter(obj -> Objects.isNull(query.getFlgEstadoContrato()) || obj.getParamSit().getFlgEstadoContrato().equals(query.getFlgEstadoContrato()))
          .map(r -> new ParametrizacaoDTO(
              r.getParamSit().getNome(),
              r.getParamSit().getId()

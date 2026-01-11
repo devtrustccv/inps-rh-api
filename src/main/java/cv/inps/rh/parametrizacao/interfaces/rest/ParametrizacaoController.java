@@ -22,6 +22,7 @@ import cv.inps.rh.parametrizacao.application.queries.*;
 import java.util.List;
 import cv.inps.rh.parametrizacao.application.dto.DominioDTO;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.parametrizacao.application.dto.EscalaoDTO;
 import cv.inps.rh.parametrizacao.application.dto.LocalTrabalhoDTO;
 import cv.inps.rh.parametrizacao.application.dto.VinculoDTO;
 
@@ -205,14 +206,14 @@ public class ParametrizacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = ParametrizacaoDTO.class,
+                  implementation = EscalaoDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<List<ParametrizacaoDTO>> getEscaloesAtivos(
+  public ResponseEntity<List<EscalaoDTO>> getEscaloesAtivos(
     )
   {
 
@@ -423,10 +424,11 @@ public class ParametrizacaoController {
   )
   
   public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacoesLaboraisByVinculo(
-    @RequestParam(value = "vinculoId") Long vinculoId)
+    @RequestParam(value = "vinculoId") Long vinculoId,
+    @RequestParam(value = "flgEstadoContrato") String flgEstadoContrato)
   {
 
-      final var query = new GetParamSituacoesLaboraisByVinculoQuery(vinculoId);
+      final var query = new GetParamSituacoesLaboraisByVinculoQuery(vinculoId, flgEstadoContrato);
 
       return queryBus.handle(query);
 
