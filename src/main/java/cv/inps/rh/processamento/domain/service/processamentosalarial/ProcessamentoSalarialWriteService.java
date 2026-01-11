@@ -22,10 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
 import java.sql.Types;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Transactional
 @Service
@@ -168,6 +165,10 @@ public class ProcessamentoSalarialWriteService {
 
   public void processarSalario(ProcessamentoSalarioRequestDTO request) {
 
+    var formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    var startDate = Objects.nonNull(request.getDataInicio()) ? request.getDataInicio().format(formatter) : null;
+    var endDate = Objects.nonNull(request.getDataInicio()) ? request.getDataInicio().format(formatter) : null;
+
     callProcedure(Processamento.PROCEDURE_PROCESSAR.getName())
         .declareParameters(
             new SqlParameter("p_dt_inicio", Types.VARCHAR),
@@ -180,8 +181,8 @@ public class ProcessamentoSalarialWriteService {
         )
         .execute(
             new MapSqlParameterSource()
-                .addValue("p_dt_inicio", request.getDataInicio())
-                .addValue("p_dt_fim", request.getDataFim())
+                .addValue("p_dt_inicio", startDate)
+                .addValue("p_dt_fim", endDate)
                 .addValue("p_cc_id", request.getDireccaoId())
                 .addValue("p_tiprel_id", request.getRelacionamentoId())
                 .addValue("p_tipo", request.getTipo())
