@@ -41,12 +41,10 @@ public class ProcessamentoSalarialReadService {
     return response;
   }
 
-  public ResumoProcessamentoDTO getResumoProcessamentoSalarial(String processamentoId) {
-
-    var procId = Long.valueOf(processamentoId);
+  public ResumoProcessamentoDTO getResumoProcessamentoSalarial(Long procId, Long ccId, Integer ano, Integer mes) {
 
     var data = new ResumoProcessamentoDTO();
-    data.setRemuneracao(procSalCcRemunEntityRepository.getRemuneracoes(procId));
+    data.setRemuneracao(procSalCcRemunEntityRepository.getRemuneracoes(procId, ccId, ano, mes));
     data.setPagamento(procSalCcPagEntityRepository.getPagamentos(procId));
 
     return data;

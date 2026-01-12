@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "processamento",
-  "name": "ResumoProcessamentoRow",
+  "name": "ResumoProcPagamento",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
@@ -18,7 +18,7 @@
       "primaryKey": false
     },
     {
-      "name": "tipoMovimento",
+      "name": "descricao",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -42,19 +42,7 @@
       "primaryKey": false
     },
     {
-      "name": "procId",
-      "objectType": "java",
-      "type": "long",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "total",
+      "name": "valor",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -66,5 +54,5 @@
       "primaryKey": false
     }
   ],
-  "id": "5gwmph2we9"
+  "id": "p6bqlkd5jt"
 }

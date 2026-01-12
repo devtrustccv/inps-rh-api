@@ -162,7 +162,7 @@
     },
     {
       "actionName": "getResumoProcessamento",
-      "path": "resumo/{processamentoId}",
+      "path": "resumo",
       "method": "GET",
       "responses": {
         "200": {
@@ -180,11 +180,26 @@
           }
         }
       },
-      "pathVariables": [
+      "requestParams": [
         {
-          "name": "processamentoId",
           "type": "string",
+          "name": "processamentoId",
           "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "ccId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "ano",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "mes",
+          "isRequired": false
         }
       ]
     },
@@ -227,5 +242,5 @@
       ]
     }
   ],
-  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento"
+  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento"
 }
