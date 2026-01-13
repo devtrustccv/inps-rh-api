@@ -237,7 +237,7 @@
     },
     {
       "actionName": "getPagamentosDescontosById",
-      "path": "{idFuncionario}/remuneracao/{pagamentoId}",
+      "path": "{idFuncionario}/pagamento/{pagamentoId}",
       "method": "GET",
       "responses": {
         "200": {

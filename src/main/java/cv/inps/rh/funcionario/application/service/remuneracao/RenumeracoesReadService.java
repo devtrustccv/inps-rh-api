@@ -96,6 +96,7 @@ public class RenumeracoesReadService {
     return wrapper;
   }
 
+  @Transactional(readOnly = true)
   public NovoRemuneracaoRequestDTO getRenumeracaoById(GetRenumeracaoByIdQuery query){
 
     var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
@@ -121,6 +122,7 @@ public class RenumeracoesReadService {
 
   }
 
+  @Transactional(readOnly = true)
   public NovoPagamentoRequestDTO getPagamentoById(GetPagamentosDescontosByIdQuery query){
 
     var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();

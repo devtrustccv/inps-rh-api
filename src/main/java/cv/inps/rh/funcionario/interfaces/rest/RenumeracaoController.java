@@ -229,7 +229,7 @@ public class RenumeracaoController {
   }
 
    @GetMapping(
-   value = "{idFuncionario}/remuneracao/{pagamentoId}"
+   value = "{idFuncionario}/pagamento/{pagamentoId}"
   )
   @Operation(
     summary = "Get pagamentos descontos by id",
