@@ -100,26 +100,30 @@ public class RenumeracoesWriteService {
     var data = command.getValidarremuneracaorequest();
     var request = data.getDados();
 
-    ValidationUtil.validateDecision(data.getValidacao());
-
-    var estado = data.getValidacao().equals("S") ? Estado.A : Estado.I;
-
     var remuneracao = definicaoRemuneracaoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getRemuneracaoId()));
     remuneracao.setValor(request.getValor());
     remuneracao.setPercentagem(request.getPercentagem());
     remuneracao.setObs(request.getObservacao());
-    remuneracao.setEstado(estado);
     remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     remuneracao.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     remuneracao.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
+
+    if (data.getValidacao() != null) {
+      if (remuneracao.getEstado() == Estado.P) {
+        ValidationUtil.validateDecision(data.getValidacao());
+
+        var novoEstado = data.getValidacao().equals("S") ? Estado.A : Estado.I;
+        remuneracao.setEstado(novoEstado);
+
+        var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
+        var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
+
+        var validation = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.RENDIMENTO);
+        validation.ifPresent(validacaoEntityRepository::save);
+      }
+    }
+
     definicaoRemuneracaoEntityRepository.save(remuneracao);
-
-
-    var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
-
-    var validation = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.RENDIMENTO);
-    validation.ifPresent(validacaoEntityRepository::save);
   }
 
   public void validarNovoPagamento(ValidarNovoPagamentoCommand command) {
@@ -127,14 +131,10 @@ public class RenumeracoesWriteService {
     var data = command.getValidarpagamentorequest();
     var request = data.getDados();
 
-    ValidationUtil.validateDecision(data.getValidacao());
-
-    var estado = data.getValidacao().equals("S") ? Estado.A : Estado.I;
-
     var pagamento = defPagamentoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getPagamentoId()));
+
     pagamento.setPercentagem(request.getPercentagem());
     pagamento.setValor(request.getValor());
-    pagamento.setEstado(estado);
     pagamento.setObs(request.getObservacao());
     pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
@@ -146,13 +146,23 @@ public class RenumeracoesWriteService {
     var entidade = entityManager.getReference(EntidadeEntity.class, request.getEntidade());
     pagamento.setNmEntidade(entidade.getNome());
     pagamento.setEntId(entidade);
+
+    if (data.getValidacao() != null) {
+
+      if (pagamento.getEstado() == Estado.P) {
+        ValidationUtil.validateDecision(data.getValidacao());
+
+        var novoEstado = data.getValidacao().equals("S") ? Estado.A : Estado.I;
+        pagamento.setEstado(novoEstado);
+        var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
+        var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
+
+        var validation = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.DESCONTO);
+        validation.ifPresent(validacaoEntityRepository::save);
+      }
+    }
+
     defPagamentoEntityRepository.save(pagamento);
-
-    var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
-
-    var validation = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.DESCONTO);
-    validation.ifPresent(validacaoEntityRepository::save);
 
   }
 }
