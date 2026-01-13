@@ -22,7 +22,7 @@ public class NovoRemuneracaoRequestDTO  {
 
   @NotBlank(message = "The field <movimentoId> is required")
 
-  private String movimentoId ;
+  private Long movimentoId ;
   @NotNull(message = "The field <valor> is required")
 
   private BigDecimal valor ;

@@ -1,8 +1,12 @@
 package cv.inps.rh.funcionario.application.service.remuneracao;
 
+import cv.inps.rh.funcionario.application.dto.NovoRemuneracaoRequestDTO;
+import cv.inps.rh.funcionario.application.dto.RenumeracaoReqDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListRenumeracaoDTO;
 import cv.inps.rh.funcionario.application.queries.GetListRenumeracoesQuery;
+import cv.inps.rh.funcionario.application.queries.GetRenumeracaoByIdQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
@@ -23,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -84,5 +89,30 @@ public class RenumeracoesReadService {
     wrapper.setLast(page.isLast());
 
     return wrapper;
+  }
+
+  public NovoRemuneracaoRequestDTO getRenumeracaoById(GetRenumeracaoByIdQuery query){
+
+    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
+    var renumeracaoId = IdentificadorUnico.from(query.getRenumeracaoId()).valor();
+
+    var renumeracao = definicaoRemuneracaoEntityRepository.findByUuidOrThrow(renumeracaoId);
+
+    if(!Objects.equals(renumeracao.getFunId().getUuid(), idFuncionario)){
+      throw IgrpResponseStatusException.badRequest("Renumeracao nao pertence ao funcionario :" +renumeracao.getFunId().getNome());
+    }
+
+    var response = new NovoRemuneracaoRequestDTO();
+    response.setPercentagem(renumeracao.getPercentagem());
+    response.setValor(renumeracao.getValor());
+    response.setMoeda(renumeracao.getMoeda());
+    response.setMovimentoId(renumeracao.getTmId().getId());
+    response.setDataInicio(renumeracao.getDataInicio()!=null ? DateFormatter.localDateToString(renumeracao.getDataInicio()) : null);
+    response.setDataFim(renumeracao.getDataFim()!=null ? DateFormatter.localDateToString(renumeracao.getDataFim()) : null);
+    response.setObservacao(renumeracao.getObs());
+
+    return response;
+
+
   }
 }

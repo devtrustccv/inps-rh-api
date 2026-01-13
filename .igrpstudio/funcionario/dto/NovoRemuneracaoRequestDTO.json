@@ -8,7 +8,7 @@
     {
       "name": "movimentoId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": true,
       "before": false,
       "after": false,

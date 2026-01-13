@@ -43,7 +43,7 @@ public class RenumeracoesWriteService {
     remuneracao.setObs(request.getObservacao());
     remuneracao.setEstado(Estado.P);
     remuneracao.setUuid(UuidCreator.getTimeOrderedEpoch());
-    remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(request.getMovimentoId())));
+    remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     remuneracao.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     remuneracao.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
     remuneracao.setFunId(funcionario);
