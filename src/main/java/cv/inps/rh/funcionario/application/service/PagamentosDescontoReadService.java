@@ -42,8 +42,8 @@ public class PagamentosDescontoReadService {
     Specification<DefPagamentoEntity> spec = (root, cq, cb) -> {
       List<Predicate> predicates = new java.util.ArrayList<>();
 
-      Join<DefPagamentoEntity, TipoMovimentoEntity> tm = root.join("tmId");
-      predicates.add(cb.equal(tm.get("tipo"), "PAG"));
+      /*Join<DefPagamentoEntity, TipoMovimentoEntity> tm = root.join("tmId");
+      predicates.add(cb.equal(tm.get("tipo"), "PAG"));*/
 
       Join<DefPagamentoEntity, FuncionarioEntity> fun = root.join("funId");
       predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
