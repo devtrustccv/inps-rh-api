@@ -22,9 +22,6 @@ public class ValidarPagamentoRequestDTO  {
   @NotBlank(message = "The field <validacao> is required")
   
   private String validacao ;
-  @NotBlank(message = "The field <validacaoId> is required")
-  
-  private String validacaoId ;
   
   @Valid
   private NovoPagamentoRequestDTO dados ;

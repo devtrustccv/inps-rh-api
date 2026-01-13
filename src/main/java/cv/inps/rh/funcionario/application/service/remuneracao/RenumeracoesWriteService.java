@@ -6,6 +6,7 @@ import cv.inps.rh.funcionario.application.commands.ValidarNovoRemuneracaoCommand
 import cv.inps.rh.funcionario.application.dto.NovoPagamentoRequestDTO;
 import cv.inps.rh.funcionario.application.dto.NovoRemuneracaoRequestDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
@@ -113,9 +114,12 @@ public class RenumeracoesWriteService {
     remuneracao.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
     definicaoRemuneracaoEntityRepository.save(remuneracao);
 
-    var validation = validacaoEntityRepository.findByUuidOrThrow(UUID.fromString(data.getValidacaoId()));
-    validation.setEstado(estado);
-    validacaoEntityRepository.save(validation);
+
+    var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
+
+    var validation = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.RENDIMENTO);
+    validation.ifPresent(validacaoEntityRepository::save);
   }
 
   public void validarNovoPagamento(ValidarNovoPagamentoCommand command) {
@@ -144,8 +148,11 @@ public class RenumeracoesWriteService {
     pagamento.setEntId(entidade);
     defPagamentoEntityRepository.save(pagamento);
 
-    var validation = validacaoEntityRepository.findByUuidOrThrow(UUID.fromString(data.getValidacaoId()));
-    validation.setEstado(estado);
-    validacaoEntityRepository.save(validation);
+    var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
+
+    var validation = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.DESCONTO);
+    validation.ifPresent(validacaoEntityRepository::save);
+
   }
 }
