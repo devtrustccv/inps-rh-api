@@ -79,6 +79,13 @@
         "tipo_falta_ausencia_type",
         "PARAM_TIPO_FALTA_AUSENCIA"
       ]
+    },
+    {
+      "name": "PARAM_CONFIGURACAO_GERAL",
+      "attributes": [
+        "configuracao_geral_type",
+        "PARAM_CONFIGURACAO_GERAL"
+      ]
     }
   ],
   "attributes": [

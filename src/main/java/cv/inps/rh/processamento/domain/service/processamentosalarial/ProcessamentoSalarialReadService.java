@@ -7,10 +7,10 @@ import cv.inps.rh.processamento.application.dto.WrapperProcessamentoSalarialDTO;
 import cv.inps.rh.processamento.application.queries.GetDadosValidacaoQuery;
 import cv.inps.rh.processamento.application.queries.GetDetalhesProcessamentoQuery;
 import cv.inps.rh.processamento.application.queries.GetProcessamentoSalarialQuery;
-import cv.inps.rh.processamento.infrastructure.persistence.entity.RhValidacaoView;
+import cv.inps.rh.processamento.infrastructure.persistence.entity.RhValidacaoEntityView;
 import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcPagEntityRepository;
 import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcRemunEntityRepository;
-import cv.inps.rh.processamento.infrastructure.repositories.RhValidacaoRepository;
+import cv.inps.rh.processamento.infrastructure.repositories.RhValidacaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
@@ -31,7 +31,7 @@ public class ProcessamentoSalarialReadService {
   private final ProcessamentoSalarialEntityRepository processamentoSalarialEntityRepository;
   private final ProcSalCcRemunEntityRepository procSalCcRemunEntityRepository;
   private final ProcSalCcPagEntityRepository procSalCcPagEntityRepository;
-  private final RhValidacaoRepository rhValidacaoRepository;
+  private final RhValidacaoEntityRepository rhValidacaoRepository;
 
   public WrapperProcessamentoSalarialDTO getProcessamentoSalarial(GetProcessamentoSalarialQuery query) {
 
@@ -80,7 +80,7 @@ public class ProcessamentoSalarialReadService {
 
   public List<DadosValidacaoDTO> getDadosValidacao(GetDadosValidacaoQuery f) {
 
-    Specification<RhValidacaoView> spec = (root, query, cb) -> {
+    Specification<RhValidacaoEntityView> spec = (root, query, cb) -> {
 
       List<Predicate> predicates = new ArrayList<>();
 
