@@ -234,6 +234,39 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getPagamentosDescontosById",
+      "path": "{idFuncionario}/remuneracao/{pagamentoId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "NovoRemuneracaoRequest",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "pagamentoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "ixh1ofde84-getListAbonosSubsidios-getListAbonosSubsidios-getListRenumeracoes-getListRenumeracoes-validarNovoRemuneracao-AdicionarNovoRemuneracao-adicionarNovoPagamento-validarNovoRemuneracao-validarNovoRemuneracaoCopy"

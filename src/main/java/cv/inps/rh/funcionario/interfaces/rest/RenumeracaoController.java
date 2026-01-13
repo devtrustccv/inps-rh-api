@@ -228,4 +228,34 @@ public class RenumeracaoController {
 
   }
 
+   @GetMapping(
+   value = "{idFuncionario}/remuneracao/{pagamentoId}"
+  )
+  @Operation(
+    summary = "Get pagamentos descontos by id",
+    description = "Get pagamentos descontos by id",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = NovoRemuneracaoRequestDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<NovoRemuneracaoRequestDTO> getPagamentosDescontosById(
+    @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "pagamentoId") String pagamentoId)
+  {
+
+      final var query = new GetPagamentosDescontosByIdQuery(idFuncionario, pagamentoId);
+
+      return queryBus.handle(query);
+
+  }
+
 }

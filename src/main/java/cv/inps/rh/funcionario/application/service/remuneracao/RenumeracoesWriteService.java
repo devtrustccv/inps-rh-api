@@ -70,7 +70,7 @@ public class RenumeracoesWriteService {
     pagamento.setEstado(Estado.P);
     pagamento.setObs(request.getObservacao());
     pagamento.setUuid(UuidCreator.getTimeOrderedEpoch());
-    pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(request.getMovimentoId())));
+    pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     pagamento.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
     pagamento.setFunId(funcionario);

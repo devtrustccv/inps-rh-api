@@ -1,12 +1,15 @@
 package cv.inps.rh.funcionario.application.service.remuneracao;
 
+import cv.inps.rh.funcionario.application.dto.NovoPagamentoRequestDTO;
 import cv.inps.rh.funcionario.application.dto.NovoRemuneracaoRequestDTO;
 import cv.inps.rh.funcionario.application.dto.RenumeracaoReqDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListRenumeracaoDTO;
 import cv.inps.rh.funcionario.application.queries.GetListRenumeracoesQuery;
+import cv.inps.rh.funcionario.application.queries.GetPagamentosDescontosByIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetRenumeracaoByIdQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
@@ -35,6 +38,8 @@ public class RenumeracoesReadService {
 
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
+
+  private final DefPagamentoEntityRepository defPagamentoEntityRepository;
 
   @Transactional(readOnly = true)
   public WrapperListRenumeracaoDTO getListRenumeracoes(GetListRenumeracoesQuery query) {
@@ -110,6 +115,34 @@ public class RenumeracoesReadService {
     response.setDataInicio(renumeracao.getDataInicio()!=null ? DateFormatter.localDateToString(renumeracao.getDataInicio()) : null);
     response.setDataFim(renumeracao.getDataFim()!=null ? DateFormatter.localDateToString(renumeracao.getDataFim()) : null);
     response.setObservacao(renumeracao.getObs());
+
+    return response;
+
+
+  }
+
+  public NovoPagamentoRequestDTO getPagamentoById(GetPagamentosDescontosByIdQuery query){
+
+    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
+    var pagamentoId = IdentificadorUnico.from(query.getPagamentoId()).valor();
+
+    var pagamento = defPagamentoEntityRepository.findByUuidOrThrow(pagamentoId);
+
+    if(!Objects.equals(pagamento.getFunId().getUuid(), idFuncionario)){
+      throw IgrpResponseStatusException.badRequest("Pagamento Desconto nao pertence ao funcionario :" +pagamento.getFunId().getNome());
+    }
+
+    var response = new NovoPagamentoRequestDTO();
+    response.setPercentagem(pagamento.getPercentagem());
+    response.setValor(pagamento.getValor());
+    response.setMovimentoId(pagamento.getTmId().getId());
+    response.setDataInicio(pagamento.getDataInicio()!=null ? DateFormatter.localDateToString(pagamento.getDataInicio()) : null);
+    response.setDataFim(pagamento.getDataFim()!=null ? DateFormatter.localDateToString(pagamento.getDataFim()) : null);
+    response.setObservacao(pagamento.getObs());
+    response.setNib(pagamento.getNib() != null ? pagamento.getNib() : null);
+    response.setNif(pagamento.getNif() != null ? pagamento.getNif() : null);
+    response.setEntidade(pagamento.getEntId()!= null ? pagamento.getEntId().getId(): null);
+    response.setBanco(pagamento.getRhbId()!=null ? pagamento.getRhbId().getId(): null);
 
     return response;
 
