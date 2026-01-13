@@ -100,7 +100,7 @@ public class RenumeracoesReadService {
   public NovoRemuneracaoRequestDTO getRenumeracaoById(GetRenumeracaoByIdQuery query){
 
     var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
-    var renumeracaoId = IdentificadorUnico.from(query.getRenumeracaoId()).valor();
+    var renumeracaoId = IdentificadorUnico.from(query.getRemuneracaoId()).valor();
 
     var renumeracao = definicaoRemuneracaoEntityRepository.findByUuidOrThrow(renumeracaoId);
 

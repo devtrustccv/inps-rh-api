@@ -103,7 +103,7 @@ public class RenumeracoesWriteService {
 
     var estado = data.getValidacao().equals("S") ? Estado.A : Estado.I;
 
-    var remuneracao = definicaoRemuneracaoEntityRepository.findByUuidOrThrow(UUID.fromString(data.getRemuneracaoId()));
+    var remuneracao = definicaoRemuneracaoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getRemuneracaoId()));
     remuneracao.setValor(request.getValor());
     remuneracao.setPercentagem(request.getPercentagem());
     remuneracao.setObs(request.getObservacao());
@@ -127,7 +127,7 @@ public class RenumeracoesWriteService {
 
     var estado = data.getValidacao().equals("S") ? Estado.A : Estado.I;
 
-    var pagamento = defPagamentoEntityRepository.findByUuidOrThrow(UUID.fromString(data.getPagamentoId()));
+    var pagamento = defPagamentoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getPagamentoId()));
     pagamento.setPercentagem(request.getPercentagem());
     pagamento.setValor(request.getValor());
     pagamento.setEstado(estado);

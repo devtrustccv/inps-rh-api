@@ -15,7 +15,7 @@ public class GetRenumeracaoByIdQuery implements Query {
 
   @NotBlank(message = "The field <idFuncionario> is required")
   private String idFuncionario;
-  @NotBlank(message = "The field <renumeracaoId> is required")
-  private String renumeracaoId;
+  @NotBlank(message = "The field <remuneracaoId> is required")
+  private String remuneracaoId;
 
 }

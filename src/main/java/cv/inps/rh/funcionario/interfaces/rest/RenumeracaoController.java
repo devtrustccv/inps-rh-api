@@ -139,7 +139,7 @@ public class RenumeracaoController {
   }
 
    @PutMapping(
-   value = "{idFuncionario}/validar-remuneracao/{renumeracaoId}"
+   value = "{idFuncionario}/validar-remuneracao/{remuneracaoId}"
   )
   @Operation(
     summary = "Validar novo remuneracao",
@@ -159,10 +159,10 @@ public class RenumeracaoController {
   )
   
   public ResponseEntity<String> validarNovoRemuneracao(@Valid @RequestBody ValidarRemuneracaoRequestDTO validarNovoRemuneracaoRequest
-    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "renumeracaoId") String renumeracaoId)
+    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "remuneracaoId") String remuneracaoId)
   {
 
-      final var command = new ValidarNovoRemuneracaoCommand(validarNovoRemuneracaoRequest, idFuncionario, renumeracaoId);
+      final var command = new ValidarNovoRemuneracaoCommand(validarNovoRemuneracaoRequest, idFuncionario, remuneracaoId);
 
       return commandBus.send(command);
 
@@ -199,7 +199,7 @@ public class RenumeracaoController {
   }
 
    @GetMapping(
-   value = "{idFuncionario}/remuneracao/{renumeracaoId}"
+   value = "{idFuncionario}/remuneracao/{remuneracaoId}"
   )
   @Operation(
     summary = "Get renumeracao by id",
@@ -219,10 +219,10 @@ public class RenumeracaoController {
   )
   
   public ResponseEntity<NovoRemuneracaoRequestDTO> getRenumeracaoById(
-    @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "renumeracaoId") String renumeracaoId)
+    @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "remuneracaoId") String remuneracaoId)
   {
 
-      final var query = new GetRenumeracaoByIdQuery(idFuncionario, renumeracaoId);
+      final var query = new GetRenumeracaoByIdQuery(idFuncionario, remuneracaoId);
 
       return queryBus.handle(query);
 
