@@ -138,8 +138,8 @@ public class RenumeracaoController {
 
   }
 
-   @PostMapping(
-   value = "validar-remuneracao"
+   @PutMapping(
+   value = "{idFuncionario}/validar-remuneracao/{renumeracaoId}"
   )
   @Operation(
     summary = "Validar novo remuneracao",
@@ -159,17 +159,17 @@ public class RenumeracaoController {
   )
   
   public ResponseEntity<String> validarNovoRemuneracao(@Valid @RequestBody ValidarRemuneracaoRequestDTO validarNovoRemuneracaoRequest
-    )
+    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "renumeracaoId") String renumeracaoId)
   {
 
-      final var command = new ValidarNovoRemuneracaoCommand(validarNovoRemuneracaoRequest);
+      final var command = new ValidarNovoRemuneracaoCommand(validarNovoRemuneracaoRequest, idFuncionario, renumeracaoId);
 
       return commandBus.send(command);
 
   }
 
-   @PostMapping(
-   value = "validar-pagamento"
+   @PutMapping(
+   value = "{idFuncionario}/validar-pagamento/{pagamentoId}"
   )
   @Operation(
     summary = "Validar novo pagamento",
@@ -189,10 +189,10 @@ public class RenumeracaoController {
   )
   
   public ResponseEntity<String> validarNovoPagamento(@Valid @RequestBody ValidarPagamentoRequestDTO validarNovoPagamentoRequest
-    )
+    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "pagamentoId") String pagamentoId)
   {
 
-      final var command = new ValidarNovoPagamentoCommand(validarNovoPagamentoRequest);
+      final var command = new ValidarNovoPagamentoCommand(validarNovoPagamentoRequest, idFuncionario, pagamentoId);
 
       return commandBus.send(command);
 

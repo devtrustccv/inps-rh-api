@@ -140,8 +140,8 @@
     },
     {
       "actionName": "validarNovoRemuneracao",
-      "path": "validar-remuneracao",
-      "method": "POST",
+      "path": "{idFuncionario}/validar-remuneracao/{renumeracaoId}",
+      "method": "PUT",
       "requestBody": {
         "content": {
           "application/json": {
@@ -168,12 +168,24 @@
             }
           }
         }
-      }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "renumeracaoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     },
     {
       "actionName": "validarNovoPagamento",
-      "path": "validar-pagamento",
-      "method": "POST",
+      "path": "{idFuncionario}/validar-pagamento/{pagamentoId}",
+      "method": "PUT",
       "requestBody": {
         "content": {
           "application/json": {
@@ -200,7 +212,19 @@
             }
           }
         }
-      }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "pagamentoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     },
     {
       "actionName": "getRenumeracaoById",
@@ -269,5 +293,5 @@
       ]
     }
   ],
-  "id": "ixh1ofde84-getListAbonosSubsidios-getListAbonosSubsidios-getListRenumeracoes-getListRenumeracoes-validarNovoRemuneracao-AdicionarNovoRemuneracao-adicionarNovoPagamento-validarNovoRemuneracao-validarNovoRemuneracaoCopy"
+  "id": "ixh1ofde84-getListAbonosSubsidios-getListAbonosSubsidios-getListRenumeracoes-getListRenumeracoes-validarNovoRemuneracao-AdicionarNovoRemuneracao-adicionarNovoPagamento-validarNovoRemuneracao-validarNovoRemuneracaoCopy-validarNovoRemuneracao-validarNovoPagamento"
 }

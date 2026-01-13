@@ -108,7 +108,7 @@ public class RenumeracoesWriteService {
     remuneracao.setPercentagem(request.getPercentagem());
     remuneracao.setObs(request.getObservacao());
     remuneracao.setEstado(estado);
-    remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(request.getMovimentoId())));
+    remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     remuneracao.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     remuneracao.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
     definicaoRemuneracaoEntityRepository.save(remuneracao);
@@ -132,7 +132,7 @@ public class RenumeracoesWriteService {
     pagamento.setValor(request.getValor());
     pagamento.setEstado(estado);
     pagamento.setObs(request.getObservacao());
-    pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(request.getMovimentoId())));
+    pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     pagamento.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
     pagamento.setNib(request.getNib());

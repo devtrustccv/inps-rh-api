@@ -14,5 +14,9 @@ public class ValidarNovoPagamentoCommand implements Command {
 
   
   private ValidarPagamentoRequestDTO validarpagamentorequest;
+  @NotBlank(message = "The field <idFuncionario> is required")
+  private String idFuncionario;
+  @NotBlank(message = "The field <pagamentoId> is required")
+  private String pagamentoId;
 
 }

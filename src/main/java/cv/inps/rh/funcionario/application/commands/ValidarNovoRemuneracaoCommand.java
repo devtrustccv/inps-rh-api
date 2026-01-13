@@ -14,5 +14,9 @@ public class ValidarNovoRemuneracaoCommand implements Command {
 
   
   private ValidarRemuneracaoRequestDTO validarremuneracaorequest;
+  @NotBlank(message = "The field <idFuncionario> is required")
+  private String idFuncionario;
+  @NotBlank(message = "The field <renumeracaoId> is required")
+  private String renumeracaoId;
 
 }
