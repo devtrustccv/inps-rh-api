@@ -43,7 +43,7 @@ public class RegistarColaboradorService {
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ParamSituacaoEntityRepository paramSitLaboralEntityRepository;
 
- private final ValidacaoEntityRepository validacaoEntityRepository;
+  private final ValidacaoEntityRepository validacaoEntityRepository;
 
   private final TipoMovimentoHelper tipoMovimentoHelper;
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
@@ -56,8 +56,9 @@ public class RegistarColaboradorService {
 
     var dadosContratuais = dto.getDadosContratuais();
 
-    if (funcionarioEntityRepository.existsByTipoDocumentoId_idAndNumDocumento(dadosPessoais.getTipoDocumentoId(), dadosPessoais.getNumDocumento())) {
-      throw IgrpResponseStatusException.conflict( "Funcionario já registrado com esse documento");
+    if (funcionarioEntityRepository.existsByTipoDocumentoId_idAndNumDocumento(dadosPessoais.getTipoDocumentoId(),
+        dadosPessoais.getNumDocumento())) {
+      throw IgrpResponseStatusException.conflict("Funcionario já registrado com esse documento");
     }
 
     validarDadosContratuaisService.validar(dadosContratuais);
@@ -121,7 +122,6 @@ public class RegistarColaboradorService {
       fun.setDadosBancarios(list);
     }
 
-
     var contrato = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contrato.setFunId(fun);
     contrato.setVersao(1);
@@ -147,7 +147,7 @@ public class RegistarColaboradorService {
 
     var tipoMovimentoSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
     var tipoMovimentoInps = tipoMovimentoHelper.getTipoMovimentoEntityInps();
-    var tipoMovimentoIUR =  tipoMovimentoHelper.getTipoMovimentoEntityIur();
+    var tipoMovimentoIUR = tipoMovimentoHelper.getTipoMovimentoEntityIur();
 
     /******************** INI RENUMERACOES ********************************/
     if (dadosContratuais.getSubsidios() != null && !dadosContratuais.getSubsidios().isEmpty()) {
@@ -158,12 +158,16 @@ public class RegistarColaboradorService {
     }
 
     var renumeracaoSalario = definicaoRemuneracaoMapper
-        .createRenumeracao(dadosContratuais.getSalario(), tipoMovimentoSalario, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), fun, dadosContratuais.getMoeda());
-   /* var renumeracaoInps = definicaoRemuneracaoMapper
-        .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), fun, dadosContratuais.getMoeda());*/
+        .createRenumeracao(dadosContratuais.getSalario(), tipoMovimentoSalario, dadosContratuais.getDataInicio(),
+            dadosContratuais.getDataFim(), fun, dadosContratuais.getMoeda());
+    /*
+     * var renumeracaoInps = definicaoRemuneracaoMapper
+     * .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps,
+     * dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), fun,
+     * dadosContratuais.getMoeda());
+     */
     fun.getDefinicoesRenumeracoes().addAll(new ArrayList<>(List.of(renumeracaoSalario)));
     /******************** FIM RENUMERACOES ********************************/
-
 
     /******************** INI PAGAMENTOS DESCONTOS ********************************/
     if (dadosContratuais.getEncargosDescontos() != null && !dadosContratuais.getEncargosDescontos().isEmpty()) {
@@ -181,12 +185,11 @@ public class RegistarColaboradorService {
     fun.getDefinicoesPagamentos().addAll(new ArrayList<>(List.of(pagamentoDescontoIUR, pagamentoDescontoINPS)));
     /******************** FIM PAGAMENTOS DESCONTOS ********************************/
 
+    var paramSituacaoLaboral = paramSitLaboralEntityRepository.findByCodigo(SituacaoLaboral.ATIVO.name()).orElseThrow(
+        () -> IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com codigo ATIVO."));
 
-    var paramSituacaoLaboral = paramSitLaboralEntityRepository.findByCodigo(SituacaoLaboral.ATIVO.name()).
-        orElseThrow(() -> IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com codigo ATIVO."));
-
-
-    var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P, "INICIO",
+    var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P,
+        "INICIO",
         "NOVO_CONTRATO");
     situacaoLaboral.setContrVinculoId(contrato);
     contrato.setSituacoesLaborais(new ArrayList<>(List.of(situacaoLaboral)));
@@ -202,6 +205,16 @@ public class RegistarColaboradorService {
     tr.setSituacLaboralId(situacaoLaboral);
     fun.setTiposrelacionamentos(new ArrayList<>(List.of(tr)));
 
+    if (fun.getDefinicoesRenumeracoes() != null) {
+      for (var rem : fun.getDefinicoesRenumeracoes()) {
+        rem.setTiprelId(tr);
+      }
+    }
+    if (fun.getDefinicoesPagamentos() != null) {
+      for (var pag : fun.getDefinicoesPagamentos()) {
+        pag.setTiprelId(tr);
+      }
+    }
 
     var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.REGISTO_COLABORADOR.name(),
         Estado.P);
@@ -210,16 +223,13 @@ public class RegistarColaboradorService {
     fun.setValidacoes(new ArrayList<>(List.of(valid)));
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(fun);
 
-
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {
           e.setReferenciaId(saved.getId());
           validacaoEntityRepository.save(e);
         });
 
-
     return funcionarioMapper.toResponseDTO(saved);
   }
-
 
 }
