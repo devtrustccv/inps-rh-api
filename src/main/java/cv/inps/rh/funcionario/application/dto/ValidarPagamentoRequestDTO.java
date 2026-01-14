@@ -19,7 +19,7 @@ import cv.inps.rh.funcionario.application.dto.NovoPagamentoRequestDTO;
 @IgrpDTO
 public class ValidarPagamentoRequestDTO  {
 
-  @NotBlank(message = "The field <validacao> is required")
+  
   
   private String validacao ;
   
