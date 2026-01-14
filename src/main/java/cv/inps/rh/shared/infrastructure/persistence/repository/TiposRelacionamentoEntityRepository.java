@@ -74,7 +74,7 @@ public interface TiposRelacionamentoEntityRepository extends
                t.seccaoId.nome,
                t.contrVinculoId.tpContratoId.nome,
                t.cargoId.nome,
-               t.situacLaboralId.motivoSitLab,
+               t.situacLaboralId.tipoSituacao,
                t.situacLaboralId.dataInicio,
                t.situacLaboralId.dataFim,
                t.funId.uuid,
