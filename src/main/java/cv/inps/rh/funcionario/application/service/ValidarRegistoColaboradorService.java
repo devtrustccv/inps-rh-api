@@ -60,12 +60,14 @@ public class ValidarRegistoColaboradorService {
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
     if (funcionarioEntityRepository
-        .existsByTipoDocumentoId_IdAndNumDocumentoAndUuidNot(dadosPessoaisReqDTO.getTipoDocumentoId(), dadosPessoaisReqDTO.getNumDocumento(), funcionario.getUuid())) {
-      throw IgrpResponseStatusException.conflict( "Funcionario já registrado com esse documento");
+        .existsByTipoDocumentoId_IdAndNumDocumentoAndUuidNot(dadosPessoaisReqDTO.getTipoDocumentoId(),
+            dadosPessoaisReqDTO.getNumDocumento(), funcionario.getUuid())) {
+      throw IgrpResponseStatusException.conflict("Funcionario já registrado com esse documento");
     }
 
-    if (registroColaborador.getValidar() != null && !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT,
-        Referencia.REGISTO_COLABORADOR)) {
+    if (registroColaborador.getValidar() != null
+        && !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT,
+            Referencia.REGISTO_COLABORADOR)) {
       throw IgrpResponseStatusException.badRequest(
           "funcionario nao tem validacao pendente de REGISTO COLABORADOR");
     }
@@ -123,17 +125,27 @@ public class ValidarRegistoColaboradorService {
     funcionario.setFormacoesFeitas(formacoesFeitas);
     funcionario.setExperienciasProfissionais(experienciasProfissionais);
 
-    //atualizar renumeracao de tipo salario
+    if (funcionario.getDefinicoesRenumeracoes() != null) {
+      for (var rem : funcionario.getDefinicoesRenumeracoes()) {
+        rem.setTiprelId(tiposRelacionamento);
+      }
+    }
+    if (funcionario.getDefinicoesPagamentos() != null) {
+      for (var pag : funcionario.getDefinicoesPagamentos()) {
+        pag.setTiprelId(tiposRelacionamento);
+      }
+    }
+
+    // atualizar renumeracao de tipo salario
     var tmSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
-    for(var rem : definicoesRemuneracoes) {
-      if(rem.getTmId() != null && rem.getTmId().getId().equals(tmSalario.getId())) {
+    for (var rem : definicoesRemuneracoes) {
+      if (rem.getTmId() != null && rem.getTmId().getId().equals(tmSalario.getId())) {
         rem.setValor(dadosContratuais.getSalario());
         rem.setDataInicio(dadosContratuais.getDataInicio());
         rem.setDataFim(dadosContratuais.getDataFim());
         definicaoRemuneracaoEntityRepository.save(rem);
       }
     }
-
 
     if (registroColaborador.getValidar() != null) {
       var estado = registroColaborador.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
@@ -150,14 +162,19 @@ public class ValidarRegistoColaboradorService {
       }
       mudaEstado(funcionario, estado);
 
-
-     /* var renumTipoRelacionamento = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
-      renumTipoRelacionamento.forEach(rtr -> rtr.setEstado(estado));
-      remuneracaoTiprelEntityRepository.saveAll(renumTipoRelacionamento);
-
-      var pagamentoTipoRelacionamento = pagTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
-      pagamentoTipoRelacionamento.forEach(ptr -> ptr.setEstado(estado));
-      pagTiprelEntityRepository.saveAll(pagamentoTipoRelacionamento);*/
+      /*
+       * var renumTipoRelacionamento =
+       * remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(
+       * tiposRelacionamento, Estado.P);
+       * renumTipoRelacionamento.forEach(rtr -> rtr.setEstado(estado));
+       * remuneracaoTiprelEntityRepository.saveAll(renumTipoRelacionamento);
+       * 
+       * var pagamentoTipoRelacionamento =
+       * pagTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento,
+       * Estado.P);
+       * pagamentoTipoRelacionamento.forEach(ptr -> ptr.setEstado(estado));
+       * pagTiprelEntityRepository.saveAll(pagamentoTipoRelacionamento);
+       */
 
     }
 
