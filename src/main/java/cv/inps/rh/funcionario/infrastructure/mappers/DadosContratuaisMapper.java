@@ -83,7 +83,7 @@ public class DadosContratuaisMapper {
                                                  String motivoSituacaoLaboral, String observacao) {
     var sl = new SituacaoLaboralEntity();
     sl.setSituacaoLaboralId(param);
-    sl.setMotivoSitLab(motivoSituacaoLaboral);
+    sl.setTipoSituacao(motivoSituacaoLaboral);
     sl.setDataInicio(dc.getDataInicio());
     sl.setDataFim(dc.getDataFim());
     sl.setEstado(estado);

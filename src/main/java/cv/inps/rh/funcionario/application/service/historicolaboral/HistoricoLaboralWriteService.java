@@ -383,7 +383,7 @@ public class HistoricoLaboralWriteService {
         sit.setMotivoSitLabId(entityManager.getReference(ParamSituacaoDetalheEntity.class, mid));
       } catch (NumberFormatException ignored) {
       }
-      sit.setMotivoSitLab(dto.getMotivo());
+      sit.setTipoSituacao(dto.getMotivo());
     }
     sit.setDataInicio(dto.getDataInicioSituacao());
     sit.setDataFim(dto.getDataFimSituacao());

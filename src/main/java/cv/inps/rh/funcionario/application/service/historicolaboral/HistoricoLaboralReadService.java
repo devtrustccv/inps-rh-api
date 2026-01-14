@@ -248,7 +248,7 @@ public class HistoricoLaboralReadService {
       var paramSit = sit.getSituacaoLaboralId();
       dto.setSituacaoLaboral(paramSit != null ? paramSit.getId() : null);
       dto.setMotivo(sit.getMotivoSitLabId() != null ? String.valueOf(sit.getMotivoSitLabId().getId())
-          : sit.getMotivoSitLab());
+          : sit.getTipoSituacao());
       dto.setDataInicioSituacao(sit.getDataInicio());
       dto.setDataFimSituacao(sit.getDataFim());
       dto.setObservacao(sit.getObs());
@@ -324,7 +324,7 @@ public class HistoricoLaboralReadService {
       var paramSit = sit.getSituacaoLaboralId();
       dto.setSituacaoLaboral(paramSit != null ? paramSit.getId() : null);
       dto.setMotivo(sit.getMotivoSitLabId() != null ? String.valueOf(sit.getMotivoSitLabId().getId())
-          : sit.getMotivoSitLab());
+          : sit.getTipoSituacao());
       dto.setDataInicioSituacao(sit.getDataInicio());
       dto.setDataFimSituacao(sit.getDataFim());
       dto.setObservacao(sit.getObs());

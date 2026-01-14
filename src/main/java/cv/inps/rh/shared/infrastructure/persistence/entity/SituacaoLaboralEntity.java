@@ -30,7 +30,7 @@ public class SituacaoLaboralEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotNull(message = "situacaoLaboralId is mandatory")
 
 
@@ -42,27 +42,28 @@ public class SituacaoLaboralEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "motivo_sit_lab_id", referencedColumnName = "id")
     private ParamSituacaoDetalheEntity motivoSitLabId;
-    @Column(name="motivo_sit_lab")
-    private String motivoSitLab;
 
-  
+    @Column(name="tipo_situacao")
+    private String tipoSituacao;
+
+
     @Column(name="data_inicio")
     private LocalDate dataInicio;
 
-  
+
     @Column(name="data_fim")
     private LocalDate dataFim;
 
-  
+
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
+
     @Column(name="obs", length=4000)
     private String obs;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
