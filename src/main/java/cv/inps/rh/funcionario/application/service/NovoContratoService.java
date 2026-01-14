@@ -65,7 +65,7 @@ public class NovoContratoService {
           "funcionario possui validacao de contrato pendente");
     }
 
-   boolean temContratoAtivo = funcionario.getContratos().stream()
+    boolean temContratoAtivo = funcionario.getContratos().stream()
         .anyMatch(c -> c.getEstado().equals(Estado.A));
 
     if (temContratoAtivo) {
@@ -100,12 +100,12 @@ public class NovoContratoService {
     var contratoAnterior = funcionario.getContratos().stream()
         .max(Comparator.comparing(ContratoEntity::getVersao))
         .orElse(null);
-// Cria o contrato
+    // Cria o contrato
     var contrato = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contrato.setFunId(funcionario);
     contrato.setTipoSituacao(tipoSituacao);
 
-// Define versão e contrato_id
+    // Define versão e contrato_id
     if (contratoAnterior == null) {
       contrato.setVersao(1);
       contrato.setContratoId(null); // primeiro contrato, raiz
@@ -115,7 +115,6 @@ public class NovoContratoService {
     }
 
     funcionario.getContratos().add(contrato);
-
 
     var regime = regimeTrabalhoMapper.toRegime(dadosContratuais, Estado.P);
     if (regime != null) {
@@ -135,9 +134,8 @@ public class NovoContratoService {
       contrato.getCarreiras().add(carreira);
     }
 
-
-    var paramSituacaoLaboral = paramSitLaboralEntityRepository.findByCodigo(SituacaoLaboral.ATIVO.name()).
-        orElseThrow(() -> IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com codigo ATIVO."));
+    var paramSituacaoLaboral = paramSitLaboralEntityRepository.findByCodigo(SituacaoLaboral.ATIVO.name()).orElseThrow(
+        () -> IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com codigo ATIVO."));
 
     var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P,
         "NOVO_CONTRATO", "NOVO_CONTRATO");
@@ -160,7 +158,6 @@ public class NovoContratoService {
     valid.setTiprelId(tiposRelacionamento);
     funcionario.getValidacoes().add(valid);
 
-
     var tipoMovimentoSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
     var tipoMovimentoInps = tipoMovimentoHelper.getTipoMovimentoEntityInps();
     var tipoMovimentoIUR = tipoMovimentoHelper.getTipoMovimentoEntityIur();
@@ -174,12 +171,16 @@ public class NovoContratoService {
     }
 
     var renumeracaoSalario = definicaoRemuneracaoMapper
-        .createRenumeracao(dadosContratuais.getSalario(), tipoMovimentoSalario, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), funcionario, dadosContratuais.getMoeda());
-    /*var renumeracaoInps = definicaoRemuneracaoMapper
-        .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), funcionario, dadosContratuais.getMoeda());*/
+        .createRenumeracao(dadosContratuais.getSalario(), tipoMovimentoSalario, dadosContratuais.getDataInicio(),
+            dadosContratuais.getDataFim(), funcionario, dadosContratuais.getMoeda());
+    /*
+     * var renumeracaoInps = definicaoRemuneracaoMapper
+     * .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps,
+     * dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), funcionario,
+     * dadosContratuais.getMoeda());
+     */
     funcionario.getDefinicoesRenumeracoes().addAll(new ArrayList<>(List.of(renumeracaoSalario)));
     /******************** FIM RENUMERACOES ********************************/
-
 
     /******************** INI PAGAMENTOS DESCONTOS ********************************/
     if (dadosContratuais.getEncargosDescontos() != null && !dadosContratuais.getEncargosDescontos().isEmpty()) {
@@ -197,6 +198,16 @@ public class NovoContratoService {
     funcionario.getDefinicoesPagamentos().addAll(new ArrayList<>(List.of(pagamentoDescontoIUR, pagamentoDescontoINPS)));
     /******************** FIM PAGAMENTOS DESCONTOS ********************************/
 
+    if (funcionario.getDefinicoesRenumeracoes() != null) {
+      for (var rem : funcionario.getDefinicoesRenumeracoes()) {
+        rem.setTiprelId(tiposRelacionamento);
+      }
+    }
+    if (funcionario.getDefinicoesPagamentos() != null) {
+      for (var pag : funcionario.getDefinicoesPagamentos()) {
+        pag.setTiprelId(tiposRelacionamento);
+      }
+    }
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
@@ -205,35 +216,6 @@ public class NovoContratoService {
           e.setReferenciaId(contrato.getId());
           validacaoEntityRepository.save(e);
         });
-
-    // Percorre todas as remunerações e cria RemuneracaoTiprelEntity
-    /*List<RemuneracaoTiprelEntity> listTiprel = saved.getDefinicoesRenumeracoes().stream()
-        .map(rem -> {
-          RemuneracaoTiprelEntity r = new RemuneracaoTiprelEntity();
-          r.setRemId(rem);
-          r.setTiprelId(tiposRelacionamento);
-          r.setUuid(UuidCreator.getTimeOrderedEpoch());
-          r.setEstado(Estado.P);
-          return r;
-        })
-        .collect(Collectors.toList());
-    remuneracaoTiprelEntityRepository.saveAll(listTiprel);
-
-
-    // Percorre todas as definições de pagamento e cria PagTiprelEntity
-    List<PagTiprelEntity> listPagTiprel = saved.getDefinicoesPagamentos().stream()
-        .map(pag -> {
-          PagTiprelEntity p = new PagTiprelEntity();
-          p.setPagId(pag);
-          p.setTiprelId(tiposRelacionamento);
-          p.setUuid(UuidCreator.getTimeOrderedEpoch());
-          p.setEstado(Estado.P);
-          return p;
-        })
-        .collect(Collectors.toList());
-    // Salva todas em batch
-    pagTiprelEntityRepository.saveAll(listPagTiprel);*/
-
 
     return dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento);
   }
