@@ -44,7 +44,7 @@ public class HistoricoLaboralWriteService {
   private final RemuneracaoTiprelEntityRepository remuneracaoTiprelEntityRepository;
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DadosContratuaisMapper dadosContratuaisMapper;
-  private final TipoMovimentoHelper tipoMovimentoHelper;
+  private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
 
   @Transactional
   public RelacaoLaboralDTO validar(NovaRelacaoLaboralCommand command) {
@@ -100,7 +100,7 @@ public class HistoricoLaboralWriteService {
       }
 
       if (dto.getSalario() != null) {
-        updateExistingSalaryRemuneracao(funcionario, dto);
+        updateExistingSalaryRemuneracao(funcionario, dto, atual);
       }
 
       if (dto.getValidar() != null) {
@@ -311,7 +311,7 @@ public class HistoricoLaboralWriteService {
     }
 
     if (dto.getSalario() != null) {
-      updateExistingSalaryRemuneracao(funcionario, dto);
+      updateExistingSalaryRemuneracao(funcionario, dto,relacionamento);
     }
 
     if (dto.getValidar() != null) {
@@ -376,8 +376,16 @@ public class HistoricoLaboralWriteService {
     sit.setObs(dto.getObservacao());
   }
 
-  private void updateExistingSalaryRemuneracao(FuncionarioEntity funcionario, RelacaoLaboralDTO dto) {
-    var tmSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
+  private void updateExistingSalaryRemuneracao(FuncionarioEntity funcionario, RelacaoLaboralDTO dto,
+                                               TiposRelacionamentoEntity tiposRelacionamento) {
+
+    //atraves de vinculo sabemos o tm_id sall, associação feita na tabela paramVinculoMovimento
+    var vinculoId = tiposRelacionamento.getContrVinculoId().getId();
+    var paramVinculoMovimentoEntity =
+        paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoId,"REM").getFirst();
+
+    var tmSalario = paramVinculoMovimentoEntity.getTmId();
+
     var renumeracoes = funcionario.getDefinicoesRenumeracoes();
     for (var rem : renumeracoes) {
       if (rem.getTmId() != null && rem.getTmId().getId().equals(tmSalario.getId()) && rem.getEstado() == Estado.P) {
@@ -393,7 +401,13 @@ public class HistoricoLaboralWriteService {
 
   private void closeExistingSalaryAndCreateNew(FuncionarioEntity funcionario, TiposRelacionamentoEntity rel,
                                                RelacaoLaboralDTO dto) {
-    var tmSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
+
+    var vinculoId = rel.getContrVinculoId().getId();
+    var paramVinculoMovimentoEntity =
+        paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoId,"REM").getFirst();
+
+    var tmSalario = paramVinculoMovimentoEntity.getTmId();
+
     var anteriores = definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
     for (var ant : anteriores) {
       if (ant.getTmId() != null && ant.getTmId().getId().equals(tmSalario.getId())) {

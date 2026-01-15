@@ -12,12 +12,16 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoRelRemPagEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -35,10 +39,8 @@ public class ValidarContratoService {
   private final FuncionarioRules funcionarioRules;
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
   private final TipoMovimentoHelper tipoMovimentoHelper;
-  private final RemuneracaoTiprelEntityRepository remuneracaoTiprelEntityRepository;
-  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
-  private final PagTiprelEntityRepository pagTiprelEntityRepository;
   private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
+  private final EntityManager entityManager;
 
   @Transactional
   public ResponseEntity<DadosContratuaisRespDTO> validar(ValidarContratoCommand command) {
@@ -52,6 +54,9 @@ public class ValidarContratoService {
     var dadosContratuais = dto.getDadosContratuais();
 
     validarDadosContratuaisService.validar(dadosContratuais);
+
+    var paramVinculo = entityManager.find(ParamVinculoEntity.class,
+        dadosContratuais.getTipoVinculoLaboralId());
 
     if (dto.getValidar() != null && !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT,
         Referencia.CONTRATO)) {
@@ -68,24 +73,26 @@ public class ValidarContratoService {
     var mobilidade = tiposRelacionamento.getMobId();
     mobilidadeMapper.toUpdateEntity(mobilidade, dadosContratuais);
 
-    var carreira = tiposRelacionamento.getCarreiraId();
-    carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
+    var carreira = tiposRelacionamento.getCarreiraId()!= null ? tiposRelacionamento.getCarreiraId() : null;
+     if(carreira != null) {
+       carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
+     }
 
     var regime = tiposRelacionamento.getRegimeId();
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
 
-    var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(),
-        dadosContratuais.getSubsidios());
+    if (Objects.equals(1, paramVinculo.getFlgSalario())) {
+      var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(),
+          dadosContratuais.getSubsidios());
+      var definicoesPagamentos = defPagamentoMapper.syncPagamentos(funcionario.getDefinicoesPagamentos(),
+          dadosContratuais.getEncargosDescontos());
+      funcionario.getDefinicoesRenumeracoes().addAll(definicoesRemuneracoes);
+      funcionario.getDefinicoesPagamentos().addAll(definicoesPagamentos);
 
-    var definicoesPagamentos = defPagamentoMapper.syncPagamentos(funcionario.getDefinicoesPagamentos(),
-        dadosContratuais.getEncargosDescontos());
-
-    funcionario.getDefinicoesRenumeracoes().addAll(definicoesRemuneracoes);
-    funcionario.getDefinicoesPagamentos().addAll(definicoesPagamentos);
-
-    if (dto.getValidar() != null) {
-      var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-      mudarEstado(funcionario, estado);
+      if (dto.getValidar() != null) {
+        var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
+        mudarEstado(funcionario, estado);
+      }
     }
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
@@ -143,7 +150,7 @@ public class ValidarContratoService {
       if (mob != null)
         mob.setEstado(estado);
 
-      var carreira = tr.getCarreiraId();
+      var carreira = tr.getCarreiraId()!=null ? tr.getCarreiraId() : null;
       if (carreira != null)
         carreira.setEstado(estado);
 

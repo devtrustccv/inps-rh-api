@@ -127,16 +127,6 @@ public class ValidarRegistoColaboradorService {
     funcionario.setFormacoesFeitas(formacoesFeitas);
     funcionario.setExperienciasProfissionais(experienciasProfissionais);
 
-    // atualizar renumeracao de tipo salario
-    var tmSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
-    for (var rem : definicoesRemuneracoes) {
-      if (rem.getTmId() != null && rem.getTmId().getId().equals(tmSalario.getId())) {
-        rem.setValor(dadosContratuais.getSalario());
-        rem.setDataInicio(dadosContratuais.getDataInicio());
-        rem.setDataFim(dadosContratuais.getDataFim());
-        definicaoRemuneracaoEntityRepository.save(rem);
-      }
-    }
 
     if (registroColaborador.getValidar() != null) {
       var estado = registroColaborador.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;

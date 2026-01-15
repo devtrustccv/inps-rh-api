@@ -52,7 +52,6 @@ public class RegistarColaboradorService {
 
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
 
-  private final TipoMovimentoHelper tipoMovimentoHelper;
   private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
 
   private final EntityManager entityManager;
