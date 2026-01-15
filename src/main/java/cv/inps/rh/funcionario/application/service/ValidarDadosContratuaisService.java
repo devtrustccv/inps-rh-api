@@ -93,7 +93,7 @@ public class ValidarDadosContratuaisService {
     // flgSalario = 1 → salário é obrigatório
     if (vinculo.getFlgSalario() != null && vinculo.getFlgSalario() == 1) {
       if (dc.getSalario() == null)
-        throw IgrpResponseStatusException.badRequest("Salário é obrigatório para este tipo de vínculo.");
+        throw IgrpResponseStatusException.badRequest("valor do salário é obrigatório para este tipo de vínculo.");
     }
   }
 
