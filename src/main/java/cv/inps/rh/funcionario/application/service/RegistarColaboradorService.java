@@ -139,9 +139,7 @@ public class RegistarColaboradorService {
     fun.setContratos(new ArrayList<>(List.of(contrato)));
 
     CarreiraEntity carreira = null;
-    System.out.println("Carreiraaaa antes" + paramVinculo.getFlgCarreira());
     if (Objects.equals(1, paramVinculo.getFlgCarreira()) && dadosContratuais.getCarreiraId() != null) {
-      System.out.println("Carreiraaaa " + paramVinculo.getFlgCarreira());
       carreira = carreiraMapper.toCarreira(dadosContratuais, Estado.P);
       if (carreira != null) {
         carreira.setContrVinculoId(contrato);
