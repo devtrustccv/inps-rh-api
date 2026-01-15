@@ -62,7 +62,6 @@ public class RegistarColaboradorService {
     FuncionarioRequestDTO dto = command.getFuncionariorequest();
 
     var dadosPessoais = dto.getDadosPessoais();
-
     var dadosContratuais = dto.getDadosContratuais();
 
     if (funcionarioEntityRepository.existsByTipoDocumentoId_idAndNumDocumento(dadosPessoais.getTipoDocumentoId(),
@@ -71,6 +70,9 @@ public class RegistarColaboradorService {
     }
 
     validarDadosContratuaisService.validar(dadosContratuais);
+
+    var paramVinculo = entityManager.find(ParamVinculoEntity.class,
+        dadosContratuais.getTipoVinculoLaboralId());
 
     FuncionarioEntity fun = funcionarioMapper.toEntity(dadosPessoais, Estado.P);
 
@@ -136,11 +138,16 @@ public class RegistarColaboradorService {
     contrato.setVersao(1);
     fun.setContratos(new ArrayList<>(List.of(contrato)));
 
-    var carreira = carreiraMapper.toCarreira(dadosContratuais, Estado.P);
-    if (carreira != null) {
-      carreira.setContrVinculoId(contrato);
-      contrato.setCarreiras(new ArrayList<>(List.of(carreira)));
+
+    CarreiraEntity carreira = null;
+    if (Objects.equals(1, paramVinculo.getFlgCarreira())) {
+      carreira = carreiraMapper.toCarreira(dadosContratuais, Estado.P);
+      if (carreira != null) {
+        carreira.setContrVinculoId(contrato);
+        contrato.setCarreiras(new ArrayList<>(List.of(carreira)));
+      }
     }
+
 
     var regime = regimeTrabalhoMapper.toRegime(dadosContratuais, Estado.P);
     if (regime != null) {
@@ -156,8 +163,6 @@ public class RegistarColaboradorService {
 
 
     //verifica se vinculo tem salario
-    var paramVinculo = entityManager.find(ParamVinculoEntity.class,
-        dadosContratuais.getTipoVinculoLaboralId());
     if (Objects.equals(1, paramVinculo.getFlgSalario())) {
       /******************** INI RENUMERACOES ********************************/
       if (dadosContratuais.getSubsidios() != null && !dadosContratuais.getSubsidios().isEmpty()) {
