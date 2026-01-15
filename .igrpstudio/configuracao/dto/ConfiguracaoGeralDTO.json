@@ -280,6 +280,20 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "fusoHorario",
+      "objectType": "dto",
+      "type": "FusoHorario",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "configuracao"
     }
   ],
   "id": "a4q9y22jzv"
