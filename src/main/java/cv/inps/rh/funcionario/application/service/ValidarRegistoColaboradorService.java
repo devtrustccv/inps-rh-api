@@ -125,16 +125,6 @@ public class ValidarRegistoColaboradorService {
     funcionario.setFormacoesFeitas(formacoesFeitas);
     funcionario.setExperienciasProfissionais(experienciasProfissionais);
 
-    if (funcionario.getDefinicoesRenumeracoes() != null) {
-      for (var rem : funcionario.getDefinicoesRenumeracoes()) {
-        rem.setTiprelId(tiposRelacionamento);
-      }
-    }
-    if (funcionario.getDefinicoesPagamentos() != null) {
-      for (var pag : funcionario.getDefinicoesPagamentos()) {
-        pag.setTiprelId(tiposRelacionamento);
-      }
-    }
 
     // atualizar renumeracao de tipo salario
     var tmSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
@@ -161,20 +151,6 @@ public class ValidarRegistoColaboradorService {
 
       }
       mudaEstado(funcionario, estado);
-
-      /*
-       * var renumTipoRelacionamento =
-       * remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(
-       * tiposRelacionamento, Estado.P);
-       * renumTipoRelacionamento.forEach(rtr -> rtr.setEstado(estado));
-       * remuneracaoTiprelEntityRepository.saveAll(renumTipoRelacionamento);
-       * 
-       * var pagamentoTipoRelacionamento =
-       * pagTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento,
-       * Estado.P);
-       * pagamentoTipoRelacionamento.forEach(ptr -> ptr.setEstado(estado));
-       * pagTiprelEntityRepository.saveAll(pagamentoTipoRelacionamento);
-       */
 
     }
 
