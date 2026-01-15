@@ -93,25 +93,33 @@ public class ValidarContratoService {
     if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
       java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
       for (var rem : saved.getDefinicoesRenumeracoes()) {
-        var assoc = new TipoRelRemPagEntity();
-        assoc.setTipRelId(tiposRelacionamento);
-        assoc.setRemId(rem);
-        assoc.setPagId(null);
-        lista.add(assoc);
+        if (!tipoRelRemPagEntityRepository.existsByTipRelIdAndRemId(tiposRelacionamento, rem)) {
+          var assoc = new TipoRelRemPagEntity();
+          assoc.setTipRelId(tiposRelacionamento);
+          assoc.setRemId(rem);
+          assoc.setPagId(null);
+          lista.add(assoc);
+        }
       }
-      tipoRelRemPagEntityRepository.saveAll(lista);
+      if (!lista.isEmpty()) {
+        tipoRelRemPagEntityRepository.saveAll(lista);
+      }
     }
 
     if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
       java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
       for (var pag : saved.getDefinicoesPagamentos()) {
-        var assoc = new TipoRelRemPagEntity();
-        assoc.setTipRelId(tiposRelacionamento);
-        assoc.setPagId(pag);
-        assoc.setRemId(null);
-        lista.add(assoc);
+        if (!tipoRelRemPagEntityRepository.existsByTipRelIdAndPagId(tiposRelacionamento, pag)) {
+          var assoc = new TipoRelRemPagEntity();
+          assoc.setTipRelId(tiposRelacionamento);
+          assoc.setPagId(pag);
+          assoc.setRemId(null);
+          lista.add(assoc);
+        }
       }
-      tipoRelRemPagEntityRepository.saveAll(lista);
+      if (!lista.isEmpty()) {
+        tipoRelRemPagEntityRepository.saveAll(lista);
+      }
     }
 
     return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento));
