@@ -12,6 +12,7 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TipoRelRemPagEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class ValidarContratoService {
   private final RemuneracaoTiprelEntityRepository remuneracaoTiprelEntityRepository;
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final PagTiprelEntityRepository pagTiprelEntityRepository;
-
+  private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
 
   @Transactional
   public ResponseEntity<DadosContratuaisRespDTO> validar(ValidarContratoCommand command) {
@@ -61,7 +62,6 @@ public class ValidarContratoService {
     var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, dadosContratuais);
 
-
     var contrato = tiposRelacionamento.getContrVinculoId();
     contratoMapper.toUpdateEntity(contrato, dadosContratuais);
 
@@ -74,7 +74,6 @@ public class ValidarContratoService {
     var regime = tiposRelacionamento.getRegimeId();
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
 
-
     var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(),
         dadosContratuais.getSubsidios());
 
@@ -84,13 +83,36 @@ public class ValidarContratoService {
     funcionario.getDefinicoesRenumeracoes().addAll(definicoesRemuneracoes);
     funcionario.getDefinicoesPagamentos().addAll(definicoesPagamentos);
 
-
     if (dto.getValidar() != null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       mudarEstado(funcionario, estado);
     }
 
-    funcionarioEntityRepository.save(funcionario);
+    FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+
+    if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
+      java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
+      for (var rem : saved.getDefinicoesRenumeracoes()) {
+        var assoc = new TipoRelRemPagEntity();
+        assoc.setTipRelId(tiposRelacionamento);
+        assoc.setRemId(rem);
+        assoc.setPagId(null);
+        lista.add(assoc);
+      }
+      tipoRelRemPagEntityRepository.saveAll(lista);
+    }
+
+    if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
+      java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
+      for (var pag : saved.getDefinicoesPagamentos()) {
+        var assoc = new TipoRelRemPagEntity();
+        assoc.setTipRelId(tiposRelacionamento);
+        assoc.setPagId(pag);
+        assoc.setRemId(null);
+        lista.add(assoc);
+      }
+      tipoRelRemPagEntityRepository.saveAll(lista);
+    }
 
     return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento));
 
@@ -110,13 +132,16 @@ public class ValidarContratoService {
       }
 
       var mob = tr.getMobId();
-      if (mob != null) mob.setEstado(estado);
+      if (mob != null)
+        mob.setEstado(estado);
 
       var carreira = tr.getCarreiraId();
-      if (carreira != null) carreira.setEstado(estado);
+      if (carreira != null)
+        carreira.setEstado(estado);
 
       var regime = tr.getRegimeId();
-      if (regime != null) regime.setEstado(estado);
+      if (regime != null)
+        regime.setEstado(estado);
 
       var situacaoLaboral = tr.getSituacLaboralId();
       if (situacaoLaboral != null)

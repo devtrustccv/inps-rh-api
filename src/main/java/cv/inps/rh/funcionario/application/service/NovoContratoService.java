@@ -200,17 +200,6 @@ public class NovoContratoService {
     funcionario.getDefinicoesPagamentos().addAll(new ArrayList<>(List.of(pagamentoDescontoIUR, pagamentoDescontoINPS)));
     /******************** FIM PAGAMENTOS DESCONTOS ********************************/
 
-    if (funcionario.getDefinicoesRenumeracoes() != null) {
-      for (var rem : funcionario.getDefinicoesRenumeracoes()) {
-        rem.setTiprelId(tiposRelacionamento);
-      }
-    }
-    if (funcionario.getDefinicoesPagamentos() != null) {
-      for (var pag : funcionario.getDefinicoesPagamentos()) {
-        pag.setTiprelId(tiposRelacionamento);
-      }
-    }
-
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
     if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
