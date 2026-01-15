@@ -46,10 +46,12 @@ public class RegistarColaboradorService {
 
   private final ValidacaoEntityRepository validacaoEntityRepository;
 
-  private final TipoMovimentoHelper tipoMovimentoHelper;
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
 
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
+
+  private final TipoMovimentoHelper tipoMovimentoHelper;
+  private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
 
   @Transactional
   public FuncionarioResponseDTO saveDossierColaborador(CreateFuncionarioCommand command) {
