@@ -77,9 +77,9 @@ public class CarreiraReadService {
       var car = tr.getCarreiraId();
       var fun = tr.getFunId();
       var vinc = tr.getContrVinculoId().getVinculoId();
-      var carrPcc = tr.getCarrPccId();
+      var carrPcc = tr.getCarreiraId()!=null ? tr.getCarreiraId().getCarrPccsId() : null;
       var cargo = tr.getCargoId();
-      var esc = tr.getEscalaoId();
+      var esc = tr.getCarreiraId()!=null ? tr.getCarreiraId().getEscalaoId(): null;
       var sitLab = tr.getSituacLaboralId();
 
       dto.setId(car != null ? car.getId() : null);
@@ -123,24 +123,25 @@ public class CarreiraReadService {
     var car = tr.getCarreiraId();
     var fun = tr.getFunId();
     var vinc = tr.getContrVinculoId().getVinculoId();
-    var carrPcc = tr.getCarrPccId();
-    var esc = tr.getEscalaoId();
-    var categoria = tr.getCategoriaId();
+    var carrPcc = tr.getCarreiraId() !=null ? tr.getCarreiraId().getCarrPccsId() : null;
+    var esc = tr.getCarreiraId() !=null ? tr.getCarreiraId().getEscalaoId() : null;
+    var categoria = tr.getCarreiraId()!=null ? tr.getCarreiraId().getEscalaoId(): null;
 
     var dto = new CarreiraResponseDTO();
     dto.setMoeda(tr.getMoeda());
     dto.setFuncionarioId(fun != null && fun.getUuid() != null ? fun.getUuid().toString() : null);
-    dto.setTipoCarreira(car.getTipoSituacao());
+    dto.setTipoCarreira(car!=null ? car.getTipoSituacao() : null);
     dto.setCargoId(tr.getCargoId() != null ? tr.getCargoId().getId() : null);
     dto.setCarreiraId(carrPcc != null ? carrPcc.getId() : null);
     dto.setEscalaoId(esc != null ? esc.getId() : null);
-    dto.setSalario(car.getSalario().toString());
+    dto.setSalario(car!=null ? car.getSalario().toString() : null);
     dto.setTipoVinculoLaboral(vinc != null ? vinc.getNome() : null);
     dto.setDataInicio(DateFormatter.localDateToString(tr.getDataInicio()));
     dto.setDataFim(DateFormatter.localDateToString(tr.getDataFim()));
     dto.setProcessaSalarioNestaCarreira(tr.getFlgProcessa()== 1 ? "SIM" : "NAO");
     dto.setCategoriaId(categoria != null ? categoria.getId() : null);
-    if (car.getEstado() != null) {
+
+    if (car != null) {
       dto.setEstado(car.getEstado().getCode());
       dto.setEstadoDesc(car.getEstado().getDescription());
     }

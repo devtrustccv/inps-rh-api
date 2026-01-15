@@ -138,16 +138,16 @@ public class RegistarColaboradorService {
     contrato.setVersao(1);
     fun.setContratos(new ArrayList<>(List.of(contrato)));
 
-
     CarreiraEntity carreira = null;
-    if (Objects.equals(1, paramVinculo.getFlgCarreira())) {
+    System.out.println("Carreiraaaa antes" + paramVinculo.getFlgCarreira());
+    if (Objects.equals(1, paramVinculo.getFlgCarreira()) && dadosContratuais.getCarreiraId() != null) {
+      System.out.println("Carreiraaaa " + paramVinculo.getFlgCarreira());
       carreira = carreiraMapper.toCarreira(dadosContratuais, Estado.P);
       if (carreira != null) {
         carreira.setContrVinculoId(contrato);
         contrato.setCarreiras(new ArrayList<>(List.of(carreira)));
       }
     }
-
 
     var regime = regimeTrabalhoMapper.toRegime(dadosContratuais, Estado.P);
     if (regime != null) {
@@ -161,8 +161,7 @@ public class RegistarColaboradorService {
       fun.setMobilidades(new ArrayList<>(List.of(mobilidade)));
     }
 
-
-    //verifica se vinculo tem salario
+    // verifica se vinculo tem salario
     if (Objects.equals(1, paramVinculo.getFlgSalario())) {
       /******************** INI RENUMERACOES ********************************/
       if (dadosContratuais.getSubsidios() != null && !dadosContratuais.getSubsidios().isEmpty()) {
@@ -184,8 +183,7 @@ public class RegistarColaboradorService {
               dadosContratuais.getDataInicio(),
               dadosContratuais.getDataFim(),
               fun,
-              dadosContratuais.getMoeda()
-          );
+              dadosContratuais.getMoeda());
           fun.getDefinicoesRenumeracoes().add(renumeracao);
         });
       }
@@ -199,9 +197,9 @@ public class RegistarColaboradorService {
         fun.setDefinicoesPagamentos(pagList);
       }
 
-      var listAssociacaoVinculoTipoMovimentoPag = paramVinculoMovimentoEntityRepository.
-          findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
-              "PAG");
+      var listAssociacaoVinculoTipoMovimentoPag = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(
+          dadosContratuais.getTipoVinculoLaboralId(),
+          "PAG");
 
       if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
         listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
@@ -210,14 +208,12 @@ public class RegistarColaboradorService {
               movimento.getTmId(),
               dadosContratuais.getDataInicio(),
               dadosContratuais.getDataFim(),
-              fun
-          );
+              fun);
           fun.getDefinicoesPagamentos().add(pagamento);
         });
       }
     }
     /******************** FIM PAGAMENTOS DESCONTOS ********************************/
-
 
     var paramSituacaoLaboral = paramSitLaboralEntityRepository.findByCodigo(SituacaoLaboral.ATIVO.name()).orElseThrow(
         () -> IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com codigo ATIVO."));
@@ -237,6 +233,7 @@ public class RegistarColaboradorService {
     tr.setFlgProcessa(0);
     tr.setEstActAdm(1);
     tr.setSituacLaboralId(situacaoLaboral);
+
     fun.setTiposrelacionamentos(new ArrayList<>(List.of(tr)));
 
     var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.REGISTO_COLABORADOR.name(),

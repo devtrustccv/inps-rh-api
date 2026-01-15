@@ -85,11 +85,6 @@ public class HistoricoLaboralWriteService {
         carreiraEntityRepository.save(car);
 
         if (dto.getCarreira() != null)
-          atual.setCarrPccId(entityManager.getReference(ParamCarreiraEntity.class, dto.getCarreira()));
-        if (dto.getCategoria() != null)
-          atual.setCategoriaId(entityManager.getReference(ParamCategoriaEntity.class, dto.getCategoria()));
-        if (dto.getEscalao() != null)
-          atual.setEscalaoId(entityManager.getReference(ParamEscalaoEntity.class, dto.getEscalao()));
         if (dto.getCargo() != null)
           atual.setCargoId(entityManager.getReference(ParamCargoEntity.class, dto.getCargo()));
         if (dto.getSalario() != null)
@@ -172,9 +167,6 @@ public class HistoricoLaboralWriteService {
       carreiraEntityRepository.save(novaCar);
 
       novoRelacionamento.setCarreiraId(novaCar);
-      novoRelacionamento.setCarrPccId(novaCar.getCarrPccsId());
-      novoRelacionamento.setCategoriaId(novaCar.getCategoriaId());
-      novoRelacionamento.setEscalaoId(novaCar.getEscalaoId());
       novoRelacionamento.setSalario(novaCar.getSalario());
       criouAlgum = true;
 
@@ -298,12 +290,6 @@ public class HistoricoLaboralWriteService {
       carreiraEntityRepository.save(car);
 
       relacionamento.setCarreiraId(car);
-      if (dto.getCarreira() != null)
-        relacionamento.setCarrPccId(entityManager.getReference(ParamCarreiraEntity.class, dto.getCarreira()));
-      if (dto.getCategoria() != null)
-        relacionamento.setCategoriaId(entityManager.getReference(ParamCategoriaEntity.class, dto.getCategoria()));
-      if (dto.getEscalao() != null)
-        relacionamento.setEscalaoId(entityManager.getReference(ParamEscalaoEntity.class, dto.getEscalao()));
       if (dto.getCargo() != null)
         relacionamento.setCargoId(entityManager.getReference(ParamCargoEntity.class, dto.getCargo()));
       if (dto.getSalario() != null)

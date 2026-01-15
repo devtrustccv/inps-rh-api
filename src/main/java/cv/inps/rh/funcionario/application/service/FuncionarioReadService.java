@@ -114,8 +114,8 @@ public class FuncionarioReadService {
       dto.setDireccao(tr.getInstitId() != null ? tr.getInstitId().getNome() : null);
       dto.setSeccao(tr.getSeccaoId() != null ? tr.getSeccaoId().getNome() : null);
 
-      String carreira = tr.getCarrPccId() != null ? tr.getCarrPccId().getNome() : null;
-      String categoria = tr.getCategoriaId() != null ? tr.getCategoriaId().getNome() : null;
+      String carreira = tr.getCarreiraId()!=null ? tr.getCarreiraId().getCarrPccsId().getNome() : null;
+      String categoria =  tr.getCarreiraId()!=null  ?tr.getCarreiraId().getCategoriaId().getNome() : null;
       dto.setCarreiraCategoria(carreira != null && categoria != null ? carreira + "/" + categoria : carreira);
 
       dto.setDataInicio(contrato != null ? DateFormatter.localDateToString(contrato.getDataInicio()) : null);

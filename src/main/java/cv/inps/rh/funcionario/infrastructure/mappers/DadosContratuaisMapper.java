@@ -27,9 +27,9 @@ public class DadosContratuaisMapper {
     tr.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
     tr.setInstitId(em.getReference(InstituicaoEntity.class, dc.getDirecaoId()));
     tr.setSeccaoId(em.getReference(SecaoEntity.class, dc.getSeccaoId()));
-    tr.setCategoriaId(em.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
+   /* tr.setCategoriaId(em.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
     tr.setEscalaoId(em.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
-    tr.setCarrPccId(em.getReference(ParamCarreiraEntity.class, dc.getCarreiraId()));
+    tr.setCarrPccId(em.getReference(ParamCarreiraEntity.class, dc.getCarreiraId()));*/
     tr.setSalario(dc.getSalario());
     tr.setMoeda(dc.getMoeda());
     tr.setRegime(dc.getRegimeTrabalho());
@@ -52,9 +52,6 @@ public class DadosContratuaisMapper {
     tr.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
     tr.setInstitId(em.getReference(InstituicaoEntity.class, dc.getDirecaoId()));
     tr.setSeccaoId(em.getReference(SecaoEntity.class, dc.getSeccaoId()));
-    tr.setCategoriaId(em.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
-    tr.setEscalaoId(em.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
-    tr.setCarrPccId(em.getReference(ParamCarreiraEntity.class, dc.getCarreiraId()));
     tr.setSalario(dc.getSalario());
     tr.setMoeda(dc.getMoeda());
     tr.setRegime(dc.getRegimeTrabalho());
@@ -117,14 +114,23 @@ public class DadosContratuaisMapper {
     dcr.setSeccaoId(tiposRelacionamento.getSeccaoId() != null ? tiposRelacionamento.getSeccaoId().getId() : null);
     dcr.setSeccaoDesc(tiposRelacionamento.getSeccaoId() != null ? tiposRelacionamento.getSeccaoId().getNome() : null);
 
-    dcr.setCarreiraId(tiposRelacionamento.getCarrPccId() != null ? tiposRelacionamento.getCarrPccId().getId() : null);
-    dcr.setCarreiraDesc(tiposRelacionamento.getCarrPccId() != null ? tiposRelacionamento.getCarrPccId().getNome() : null);
+    dcr.setCarreiraId(tiposRelacionamento.getCarreiraId()!=null ?
+        tiposRelacionamento.getCarreiraId().getCarrPccsId().getId() : null);
 
-    dcr.setCategoriaId(tiposRelacionamento.getCategoriaId() != null ? tiposRelacionamento.getCategoriaId().getId() : null);
-    dcr.setCategoriaDesc(tiposRelacionamento.getCategoriaId() != null ? tiposRelacionamento.getCategoriaId().getNome() : null);
+    dcr.setCarreiraDesc(tiposRelacionamento.getCarreiraId()!=null ?
+        tiposRelacionamento.getCarreiraId().getCarrPccsId().getNome(): null);
 
-    dcr.setEscalaoReferenciaId(tiposRelacionamento.getEscalaoId() != null ? tiposRelacionamento.getEscalaoId().getId() : null);
-    dcr.setEscalaoReferenciaDesc(tiposRelacionamento.getEscalaoId() != null ? tiposRelacionamento.getEscalaoId().getEscalao() : null);
+    dcr.setCategoriaId(tiposRelacionamento.getCarreiraId()!=null ?
+        tiposRelacionamento.getCarreiraId().getCategoriaId().getId() : null);
+
+    dcr.setCategoriaDesc(tiposRelacionamento.getCarreiraId()!=null ?
+        tiposRelacionamento.getCarreiraId().getCategoriaId().getNome() : null);
+
+    dcr.setEscalaoReferenciaId(tiposRelacionamento.getCarreiraId()!=null ?
+        tiposRelacionamento.getCarreiraId().getEscalaoId().getId() : null);
+
+    dcr.setEscalaoReferenciaDesc(tiposRelacionamento.getCarreiraId()!=null ?
+        tiposRelacionamento.getCarreiraId().getEscalaoId().getEscalao() : null);
 
     dcr.setLocalTrabalhoId(tiposRelacionamento.getLocTrabId() != null ? tiposRelacionamento.getLocTrabId().getId() : null);
     dcr.setLocalTrabalhoDesc(tiposRelacionamento.getLocTrabId() != null ? tiposRelacionamento.getLocTrabId().getNome() : null);
@@ -181,9 +187,6 @@ public class DadosContratuaisMapper {
     clone.setCargoId(original.getCargoId());
     clone.setInstitId(original.getInstitId());
     clone.setSeccaoId(original.getSeccaoId());
-    clone.setCategoriaId(original.getCategoriaId());
-    clone.setEscalaoId(original.getEscalaoId());
-    clone.setCarrPccId(original.getCarrPccId());
     clone.setSalario(original.getSalario());
     clone.setMoeda(original.getMoeda());
     clone.setRegime(original.getRegime());
