@@ -12,6 +12,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TipoRelRemPagEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,7 @@ public class ValidarRegistoColaboradorService {
   private final PagTiprelEntityRepository pagTiprelEntityRepository;
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
+  private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
 
   @Transactional
   public Map<String, ?> validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -125,7 +127,6 @@ public class ValidarRegistoColaboradorService {
     funcionario.setFormacoesFeitas(formacoesFeitas);
     funcionario.setExperienciasProfissionais(experienciasProfissionais);
 
-
     // atualizar renumeracao de tipo salario
     var tmSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
     for (var rem : definicoesRemuneracoes) {
@@ -154,7 +155,31 @@ public class ValidarRegistoColaboradorService {
 
     }
 
-    funcionarioEntityRepository.save(funcionario);
+    FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+
+    if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
+      java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
+      for (var rem : saved.getDefinicoesRenumeracoes()) {
+        var assoc = new TipoRelRemPagEntity();
+        assoc.setTipRelId(tiposRelacionamento);
+        assoc.setRemId(rem);
+        assoc.setPagId(null);
+        lista.add(assoc);
+      }
+      tipoRelRemPagEntityRepository.saveAll(lista);
+    }
+
+    if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
+      java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
+      for (var pag : saved.getDefinicoesPagamentos()) {
+        var assoc = new TipoRelRemPagEntity();
+        assoc.setTipRelId(tiposRelacionamento);
+        assoc.setPagId(pag);
+        assoc.setRemId(null);
+        lista.add(assoc);
+      }
+      tipoRelRemPagEntityRepository.saveAll(lista);
+    }
 
     return java.util.Map.of(
         "id", funcionario.getId(),

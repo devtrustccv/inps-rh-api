@@ -85,30 +85,9 @@ public class ValidarContratoService {
     funcionario.getDefinicoesPagamentos().addAll(definicoesPagamentos);
 
 
-    //atualizar renumeracao de tipo salario
-    var tmSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
-    for (var rem : definicoesRemuneracoes) {
-      if (rem.getTmId() != null && rem.getTmId().getId().equals(tmSalario.getId())) {
-        rem.setValor(dadosContratuais.getSalario());
-        rem.setDataInicio(dadosContratuais.getDataInicio());
-        rem.setDataFim(dadosContratuais.getDataFim());
-        definicaoRemuneracaoEntityRepository.save(rem);
-      }
-    }
-
-
     if (dto.getValidar() != null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       mudarEstado(funcionario, estado);
-
-      var renumTipoRelacionamento = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
-      renumTipoRelacionamento.forEach(rtr -> rtr.setEstado(estado));
-      remuneracaoTiprelEntityRepository.saveAll(renumTipoRelacionamento);
-
-      var pagamentoTipoRelacionamento = pagTiprelEntityRepository.findByTiprelIdAndEstado(tiposRelacionamento, Estado.P);
-      pagamentoTipoRelacionamento.forEach(ptr -> ptr.setEstado(estado));
-      pagTiprelEntityRepository.saveAll(pagamentoTipoRelacionamento);
-
     }
 
     funcionarioEntityRepository.save(funcionario);
@@ -122,7 +101,6 @@ public class ValidarContratoService {
     var tr = funcionarioRules.getTipoRelacionamentoAtual(funcionarioEntity.getUuid());
     if (tr != null) {
       tr.setEstado(estado);
-
       var contrato = tr.getContrVinculoId();
       if (contrato != null) {
         contrato.setEstado(estado);

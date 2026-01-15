@@ -13,6 +13,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TipoRelRemPagEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,7 @@ public class NovoContratoService {
   private final TipoMovimentoHelper tipoMovimentoHelper;
 
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
+  private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
 
   @Transactional
   public DadosContratuaisRespDTO registrar(NovoContratoCommand command) {
@@ -210,6 +212,30 @@ public class NovoContratoService {
     }
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+
+    if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
+      java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
+      for (var rem : saved.getDefinicoesRenumeracoes()) {
+        var assoc = new TipoRelRemPagEntity();
+        assoc.setTipRelId(tiposRelacionamento);
+        assoc.setRemId(rem);
+        assoc.setPagId(null);
+        lista.add(assoc);
+      }
+      tipoRelRemPagEntityRepository.saveAll(lista);
+    }
+
+    if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
+      java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
+      for (var pag : saved.getDefinicoesPagamentos()) {
+        var assoc = new TipoRelRemPagEntity();
+        assoc.setTipRelId(tiposRelacionamento);
+        assoc.setPagId(pag);
+        assoc.setRemId(null);
+        lista.add(assoc);
+      }
+      tipoRelRemPagEntityRepository.saveAll(lista);
+    }
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {
