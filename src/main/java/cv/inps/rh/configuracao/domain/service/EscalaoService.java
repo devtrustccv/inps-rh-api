@@ -148,7 +148,7 @@ public class EscalaoService extends ConfigurationProcess<EscalaoRequestDTO> {
 
     var entity = escalaoRepository.findByUuidOrThrow(UUID.fromString(uuid));
 
-    if (tiposRelacionamentoRepository.existsByEscalaoId(entity))
+    if (tiposRelacionamentoRepository.existsByCarreiraId_EscalaoId(entity))
       throw IgrpResponseStatusException.conflictByAnotherTableDependency();
 
     entity.setEstado(Estado.E);

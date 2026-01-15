@@ -35,9 +35,9 @@ public interface TiposRelacionamentoEntityRepository extends
 
   boolean existsByContrVinculoId_VinculoId(ParamVinculoEntity vinculoId);
 
-  boolean existsByCarrPccId(ParamCarreiraEntity categoriaId);
+  boolean existsByCarreiraId_CarrPccsId(ParamCarreiraEntity carreiraIdCarrPccsId);
 
-  boolean existsByEscalaoId(ParamEscalaoEntity escalaoId);
+  boolean existsByCarreiraId_EscalaoId(ParamEscalaoEntity escalaoId);
 
   boolean existsByLocTrabId(ParamLocalTrabEntity localTrabEntity);
 
