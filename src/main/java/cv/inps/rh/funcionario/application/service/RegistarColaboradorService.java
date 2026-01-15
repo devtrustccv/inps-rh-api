@@ -12,6 +12,7 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,6 +54,8 @@ public class RegistarColaboradorService {
 
   private final TipoMovimentoHelper tipoMovimentoHelper;
   private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
+
+  private final EntityManager entityManager;
 
   @Transactional
   public FuncionarioResponseDTO saveDossierColaborador(CreateFuncionarioCommand command) {
@@ -151,58 +155,64 @@ public class RegistarColaboradorService {
     }
 
 
-    /******************** INI RENUMERACOES ********************************/
-    if (dadosContratuais.getSubsidios() != null && !dadosContratuais.getSubsidios().isEmpty()) {
-      var remList = dadosContratuais.getSubsidios().stream()
-          .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, fun, Estado.P))
-          .collect(Collectors.toList());
-      fun.setDefinicoesRenumeracoes(remList);
-    }
+    //verifica se vinculo tem salario
+    var paramVinculo = entityManager.find(ParamVinculoEntity.class,
+        dadosContratuais.getTipoVinculoLaboralId());
+    if (Objects.equals(1, paramVinculo.getFlgSalario())) {
+      /******************** INI RENUMERACOES ********************************/
+      if (dadosContratuais.getSubsidios() != null && !dadosContratuais.getSubsidios().isEmpty()) {
+        var remList = dadosContratuais.getSubsidios().stream()
+            .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, fun, Estado.P))
+            .collect(Collectors.toList());
+        fun.setDefinicoesRenumeracoes(remList);
+      }
 
-    var listAssociacaoVinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
-        .findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
-        "REM");
+      var listAssociacaoVinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
+          .findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
+              "REM");
 
-    if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoREM)) {
-      listAssociacaoVinculoTipoMovimentoREM.forEach(movimento -> {
-        var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
-            dadosContratuais.getSalario(),
-            movimento.getTmId(),
-            dadosContratuais.getDataInicio(),
-            dadosContratuais.getDataFim(),
-            fun,
-            dadosContratuais.getMoeda()
-        );
-        fun.getDefinicoesRenumeracoes().add(renumeracao);
-      });
-    }
-    /******************** FIM RENUMERACOES ********************************/
+      if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoREM)) {
+        listAssociacaoVinculoTipoMovimentoREM.forEach(movimento -> {
+          var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
+              dadosContratuais.getSalario(),
+              movimento.getTmId(),
+              dadosContratuais.getDataInicio(),
+              dadosContratuais.getDataFim(),
+              fun,
+              dadosContratuais.getMoeda()
+          );
+          fun.getDefinicoesRenumeracoes().add(renumeracao);
+        });
+      }
+      /******************** FIM RENUMERACOES ********************************/
 
-    /******************** INI PAGAMENTOS DESCONTOS ********************************/
-    if (dadosContratuais.getEncargosDescontos() != null && !dadosContratuais.getEncargosDescontos().isEmpty()) {
-      var pagList = dadosContratuais.getEncargosDescontos().stream()
-          .map(e -> defPagamentoMapper.toDefPagamento(e, fun, Estado.P))
-          .collect(Collectors.toList());
-      fun.setDefinicoesPagamentos(pagList);
-    }
+      /******************** INI PAGAMENTOS DESCONTOS ********************************/
+      if (dadosContratuais.getEncargosDescontos() != null && !dadosContratuais.getEncargosDescontos().isEmpty()) {
+        var pagList = dadosContratuais.getEncargosDescontos().stream()
+            .map(e -> defPagamentoMapper.toDefPagamento(e, fun, Estado.P))
+            .collect(Collectors.toList());
+        fun.setDefinicoesPagamentos(pagList);
+      }
 
-    var listAssociacaoVinculoTipoMovimentoPag = paramVinculoMovimentoEntityRepository.
-        findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
-        "PAG");
+      var listAssociacaoVinculoTipoMovimentoPag = paramVinculoMovimentoEntityRepository.
+          findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
+              "PAG");
 
-    if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
-      listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
-        var pagamento = defPagamentoMapper.createPagamento(
-            BigDecimal.ZERO,
-            movimento.getTmId(),
-            dadosContratuais.getDataInicio(),
-            dadosContratuais.getDataFim(),
-            fun
-        );
-        fun.getDefinicoesPagamentos().add(pagamento);
-      });
+      if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
+        listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
+          var pagamento = defPagamentoMapper.createPagamento(
+              BigDecimal.ZERO,
+              movimento.getTmId(),
+              dadosContratuais.getDataInicio(),
+              dadosContratuais.getDataFim(),
+              fun
+          );
+          fun.getDefinicoesPagamentos().add(pagamento);
+        });
+      }
     }
     /******************** FIM PAGAMENTOS DESCONTOS ********************************/
+
 
     var paramSituacaoLaboral = paramSitLaboralEntityRepository.findByCodigo(SituacaoLaboral.ATIVO.name()).orElseThrow(
         () -> IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com codigo ATIVO."));
