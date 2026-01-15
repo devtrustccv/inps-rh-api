@@ -34,7 +34,7 @@ public class DadosContratuaisMapper {
     tr.setMoeda(dc.getMoeda());
     tr.setRegime(dc.getRegimeTrabalho());
     tr.setTipoSituacao("NOVO_CONTRATO");
-    tr.setFlgProcessa("S");
+    tr.setFlgProcessa(1);
     tr.setObs("NOVO_CONTRATO");
     tr.setDataInicio(dc.getDataInicio());
     tr.setDataFim(null);

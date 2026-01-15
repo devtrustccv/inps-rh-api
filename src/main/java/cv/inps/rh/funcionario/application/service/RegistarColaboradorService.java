@@ -15,6 +15,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -47,6 +48,8 @@ public class RegistarColaboradorService {
 
   private final TipoMovimentoHelper tipoMovimentoHelper;
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
+
+  private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
 
   @Transactional
   public FuncionarioResponseDTO saveDossierColaborador(CreateFuncionarioCommand command) {
@@ -145,9 +148,6 @@ public class RegistarColaboradorService {
       fun.setMobilidades(new ArrayList<>(List.of(mobilidade)));
     }
 
-    var tipoMovimentoSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
-    var tipoMovimentoInps = tipoMovimentoHelper.getTipoMovimentoEntityInps();
-    var tipoMovimentoIUR = tipoMovimentoHelper.getTipoMovimentoEntityIur();
 
     /******************** INI RENUMERACOES ********************************/
     if (dadosContratuais.getSubsidios() != null && !dadosContratuais.getSubsidios().isEmpty()) {
@@ -157,16 +157,23 @@ public class RegistarColaboradorService {
       fun.setDefinicoesRenumeracoes(remList);
     }
 
-    var renumeracaoSalario = definicaoRemuneracaoMapper
-        .createRenumeracao(dadosContratuais.getSalario(), tipoMovimentoSalario, dadosContratuais.getDataInicio(),
-            dadosContratuais.getDataFim(), fun, dadosContratuais.getMoeda());
-    /*
-     * var renumeracaoInps = definicaoRemuneracaoMapper
-     * .createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps,
-     * dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), fun,
-     * dadosContratuais.getMoeda());
-     */
-    fun.getDefinicoesRenumeracoes().addAll(new ArrayList<>(List.of(renumeracaoSalario)));
+    var listAssociacaoVinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
+        .findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
+        "REM");
+
+    if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoREM)) {
+      listAssociacaoVinculoTipoMovimentoREM.forEach(movimento -> {
+        var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
+            dadosContratuais.getSalario(),
+            movimento.getTmId(),
+            dadosContratuais.getDataInicio(),
+            dadosContratuais.getDataFim(),
+            fun,
+            dadosContratuais.getMoeda()
+        );
+        fun.getDefinicoesRenumeracoes().add(renumeracao);
+      });
+    }
     /******************** FIM RENUMERACOES ********************************/
 
     /******************** INI PAGAMENTOS DESCONTOS ********************************/
@@ -177,12 +184,22 @@ public class RegistarColaboradorService {
       fun.setDefinicoesPagamentos(pagList);
     }
 
-    var pagamentoDescontoIUR = defPagamentoMapper.createPagamento(BigDecimal.ZERO,
-        tipoMovimentoIUR, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), fun);
-    var pagamentoDescontoINPS = defPagamentoMapper.createPagamento(BigDecimal.ZERO,
-        tipoMovimentoInps, dadosContratuais.getDataInicio(), dadosContratuais.getDataFim(), fun);
+    var listAssociacaoVinculoTipoMovimentoPag = paramVinculoMovimentoEntityRepository.
+        findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
+        "PAG");
 
-    fun.getDefinicoesPagamentos().addAll(new ArrayList<>(List.of(pagamentoDescontoIUR, pagamentoDescontoINPS)));
+    if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
+      listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
+        var pagamento = defPagamentoMapper.createPagamento(
+            BigDecimal.ZERO,
+            movimento.getTmId(),
+            dadosContratuais.getDataInicio(),
+            dadosContratuais.getDataFim(),
+            fun
+        );
+        fun.getDefinicoesPagamentos().add(pagamento);
+      });
+    }
     /******************** FIM PAGAMENTOS DESCONTOS ********************************/
 
     var paramSituacaoLaboral = paramSitLaboralEntityRepository.findByCodigo(SituacaoLaboral.ATIVO.name()).orElseThrow(
@@ -200,21 +217,10 @@ public class RegistarColaboradorService {
     tr.setCarreiraId(carreira);
     tr.setRegimeId(regime);
     tr.setMobId(mobilidade);
-    tr.setFlgProcessa("NAO");
+    tr.setFlgProcessa(0);
     tr.setEstActAdm(1);
     tr.setSituacLaboralId(situacaoLaboral);
     fun.setTiposrelacionamentos(new ArrayList<>(List.of(tr)));
-
-    if (fun.getDefinicoesRenumeracoes() != null) {
-      for (var rem : fun.getDefinicoesRenumeracoes()) {
-        rem.setTiprelId(tr);
-      }
-    }
-    if (fun.getDefinicoesPagamentos() != null) {
-      for (var pag : fun.getDefinicoesPagamentos()) {
-        pag.setTiprelId(tr);
-      }
-    }
 
     var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.REGISTO_COLABORADOR.name(),
         Estado.P);

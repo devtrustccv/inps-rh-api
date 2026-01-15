@@ -94,7 +94,7 @@ public class CarreiraReadService {
       dto.setSituacaoLaboral(sitLab != null ? sitLab.getSituacaoLaboralId().getNome() : null);
       dto.setDataInicio(tr.getDataInicio());
       dto.setDataFim(tr.getDataFim());
-      dto.setProcessamento(tr.getFlgProcessa());
+      dto.setProcessamento(tr.getFlgProcessa()== 1 ? "SIM" : "NAO");
       dto.setEstado(car != null && car.getEstado() != null ? car.getEstado().getCode() : null);
       dto.setEstadoDesc(car != null && car.getEstado() != null ? car.getEstado().getDescription() : null);
 
@@ -138,7 +138,7 @@ public class CarreiraReadService {
     dto.setTipoVinculoLaboral(vinc != null ? vinc.getNome() : null);
     dto.setDataInicio(DateFormatter.localDateToString(tr.getDataInicio()));
     dto.setDataFim(DateFormatter.localDateToString(tr.getDataFim()));
-    dto.setProcessaSalarioNestaCarreira(tr.getFlgProcessa());
+    dto.setProcessaSalarioNestaCarreira(tr.getFlgProcessa()== 1 ? "SIM" : "NAO");
     dto.setCategoriaId(categoria != null ? categoria.getId() : null);
     if (car.getEstado() != null) {
       dto.setEstado(car.getEstado().getCode());

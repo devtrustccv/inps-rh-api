@@ -55,7 +55,7 @@ public class ProcessamentoSalarialWriteService {
       if (!tipoRelacionamentoAtual.getEstActAdm().equals(1))
         throw IgrpResponseStatusException.badRequest("O vínculo do colaborador <%s> não está activo!".formatted(funcionario.getNome()));
 
-      tipoRelacionamentoAtual.setFlgProcessa("0");
+      tipoRelacionamentoAtual.setFlgProcessa(0);
       tiposRelacionamentoEntityRepository.save(tipoRelacionamentoAtual);
     }
   }

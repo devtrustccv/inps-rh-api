@@ -148,7 +148,7 @@ public class NovoContratoService {
     tiposRelacionamento.setCarreiraId(carreira);
     tiposRelacionamento.setRegimeId(regime);
     tiposRelacionamento.setMobId(mobilidade);
-    tiposRelacionamento.setFlgProcessa("NAO");
+    tiposRelacionamento.setFlgProcessa(0);
     tiposRelacionamento.setEstActAdm(1);
     tiposRelacionamento.setSituacLaboralId(situacaoLaboral);
     funcionario.getTiposrelacionamentos().add(tiposRelacionamento);

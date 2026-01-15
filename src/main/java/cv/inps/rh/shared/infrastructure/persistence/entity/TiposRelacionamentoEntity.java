@@ -31,7 +31,7 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -65,53 +65,53 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     @Column(name="salario")
     private BigDecimal salario;
 
-  
+
     @Column(name="moeda")
     private String moeda;
 
-  
+
     @Column(name="regime")
     private String regime;
 
-  
+
     @Column(name="tipo_situacao")
     private String tipoSituacao;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
     private TiposRelacionamentoEntity tiprelId;
     @Column(name="flg_processa")
-    private String flgProcessa;
+    private Integer flgProcessa;
 
-  
+
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
+
     @Column(name="obs", length=4000)
     private String obs;
 
-  
+
     @Column(name="data_inicio")
     private LocalDate dataInicio;
 
-  
+
     @Column(name="data_fim")
     private LocalDate dataFim;
 
-  
+
     @Column(name="data_inicio_contrato")
     private LocalDate dataInicioContrato;
 
-  
+
     @Column(name="data_fim_contrato")
     private LocalDate dataFimContrato;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -131,7 +131,7 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     @Column(name="uuid", nullable = false)
     private UUID uuid;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -145,15 +145,15 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     @Column(name="referente")
     private String referente;
 
-  
+
     @Column(name="ult_proc")
     private LocalDate ultProc;
 
-  
+
     @Column(name="motivo_sit_lab")
     private String motivoSitLab;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
