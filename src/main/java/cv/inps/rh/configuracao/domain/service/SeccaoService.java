@@ -119,7 +119,7 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
 
     var section = secaoRepository.findByUuidOrThrow(UUID.fromString(uuid));
 
-    if (tiposRelacionamentoEntityRepository.existsBySeccaoId(section))
+    if (tiposRelacionamentoEntityRepository.existsByMobId_SecaoId(section))
       throw IgrpResponseStatusException.conflictByAnotherTableDependency();
 
     section.setEstado(Estado.E);

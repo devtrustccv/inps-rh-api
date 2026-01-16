@@ -39,9 +39,9 @@ public interface TiposRelacionamentoEntityRepository extends
 
   boolean existsByCarreiraId_EscalaoId(ParamEscalaoEntity escalaoId);
 
-  boolean existsByLocTrabId(ParamLocalTrabEntity localTrabEntity);
+  boolean existsByMobId_LocalTrabId(ParamLocalTrabEntity localTrabEntity);
 
-  boolean existsBySeccaoId(SecaoEntity section);
+  boolean existsByMobId_SecaoId(SecaoEntity section);
 
   Optional<TiposRelacionamentoEntity> findByUuid(UUID uuid);
 
@@ -70,8 +70,8 @@ public interface TiposRelacionamentoEntityRepository extends
       SELECT new cv.inps.rh.processamento.application.dto.ColaboradorResponseDTO(
                null,
                t.situacLaboralId.estado,
-               t.institId.nome,
-               t.seccaoId.nome,
+               t.mobId.instidId.nome,
+               t.mobId.secaoId.nome,
                t.contrVinculoId.tpContratoId.nome,
                t.cargoId.nome,
                t.situacLaboralId.tipoSituacao,
@@ -82,7 +82,7 @@ public interface TiposRelacionamentoEntityRepository extends
            )
       FROM TiposRelacionamentoEntity t
       WHERE
-           (:directionId IS NULL OR t.institId.id = :directionId)
+           (:directionId IS NULL OR t.mobId.instidId.id = :directionId)
        AND (:funcionario IS NULL OR LOWER(t.funId.nome) LIKE LOWER(CONCAT('%', :funcionario, '%')))
        AND (:startDate IS NULL OR t.situacLaboralId.dataInicio = :startDate)
        AND (:endDate IS NULL OR t.situacLaboralId.dataFim = :endDate)
@@ -99,13 +99,13 @@ public interface TiposRelacionamentoEntityRepository extends
                t.id,
                t.funId.uuid,
                t.funId.nome,
-               t.institId.nome,
-               t.institId.id,
+               t.mobId.instidId.nome,
+               t.mobId.instidId.id,
                null
            )
       FROM TiposRelacionamentoEntity t
       WHERE t.estActAdm = 1 AND t.flgProcessa = 1
-           AND (:directionId IS NULL OR t.institId.id = :directionId)
+           AND (:directionId IS NULL OR t.mobId.instidId.id = :directionId)
            AND (:nome IS NULL OR LOWER(t.funId.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
       """)
   Page<PesquisaColaboradorResponseDTO> pesquisaColaborador(
