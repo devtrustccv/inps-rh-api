@@ -85,14 +85,6 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     private LocalDate dataFim;
 
   
-    @Column(name="data_inicio_contrato")
-    private LocalDate dataInicioContrato;
-
-  
-    @Column(name="data_fim_contrato")
-    private LocalDate dataFimContrato;
-
-  
 
 
   @ManyToOne(fetch = FetchType.LAZY)

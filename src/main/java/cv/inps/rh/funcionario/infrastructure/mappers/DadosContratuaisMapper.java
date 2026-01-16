@@ -34,8 +34,6 @@ public class DadosContratuaisMapper {
     tr.setObs("NOVO_CONTRATO");
     tr.setDataInicio(dc.getDataInicio());
     tr.setDataFim(null);
-    tr.setDataInicioContrato(dc.getDataInicio());
-    tr.setDataFimContrato(dc.getDataFim());
     tr.setLocTrabId(em.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));
     tr.setReferente("REGISTO_COLABORADOR");
     tr.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -54,8 +52,6 @@ public class DadosContratuaisMapper {
     tr.setObs("NOVO_CONTRATO");
     tr.setDataInicio(dc.getDataInicio());
     tr.setDataFim(null);
-    tr.setDataInicioContrato(dc.getDataInicio());
-    tr.setDataFimContrato(dc.getDataFim());
     tr.setLocTrabId(em.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));
     tr.setReferente("REGISTO_COLABORADOR");
 
@@ -135,8 +131,6 @@ public class DadosContratuaisMapper {
 
     dcr.setSalario(tiposRelacionamento.getSalario());
     dcr.setMoeda(tiposRelacionamento.getMoeda());
-    dcr.setDataInicio(tiposRelacionamento.getDataInicioContrato());
-    dcr.setDataFim(tiposRelacionamento.getDataFimContrato());
 
     if (tiposRelacionamento.getContrVinculoId() != null)
       dcr.setDuracaoMeses(tiposRelacionamento.getContrVinculoId().getDuracao());
