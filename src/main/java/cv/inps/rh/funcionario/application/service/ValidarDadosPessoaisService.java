@@ -37,20 +37,20 @@ public class ValidarDadosPessoaisService {
 
     var dto = command.getValidacaodadospessoais();
     var dadosPessoaisReqDTO = dto.getDadosPessoais();
-    var estadoValidacao = dto.getValidar();
+    //var estadoValidacao = dto.getValidar();
 
     var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
-    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_PESSOAIS);
+    //boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_PESSOAIS);
 
 
     // 1) Se tem pendentes mas não enviou validar → erro
-    if (temPendentes && estadoValidacao == null) {
+    /*if (temPendentes && estadoValidacao == null) {
       throw IgrpResponseStatusException.badRequest(
           "Funcionario possui validação pendente de dados pessoais, por favor validar"
       );
-    }
+    }*/
 
     // 2) Fazer UPDATE dos dados (sempre permitido)
     var contactos = contactoMapper.syncContactos(
@@ -63,7 +63,7 @@ public class ValidarDadosPessoaisService {
     // =====================================================
     // 3) Se já existe pendente → só mudar estado
     // =====================================================
-    if (temPendentes) {
+   /* if (temPendentes) {
 
       var novoEstado = (estadoValidacao == EstadoValidacao.SIM)
           ? Estado.A
@@ -73,26 +73,26 @@ public class ValidarDadosPessoaisService {
 
       funcionarioEntityRepository.save(funcionario);
       return dto;
-    }
+    }*/
 
 
     // 4) Se NÃO existe pendente → criar o registo
-    funcionario.setEstado(Estado.A);
-    funcionario.setEstadoValidacao(Estado.P.name()); // novo pendente
+    //funcionario.setEstado(Estado.A);
+    //funcionario.setEstadoValidacao(Estado.P.name()); // novo pendente
 
-    var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+   // var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
-    var validacao = contratuaisEntityMapper
+   /* var validacao = contratuaisEntityMapper
         .toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.DADOS_PESSOAIS.name(), Estado.P);
 
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRel);
 
-    funcionario.getValidacoes().add(validacao);
+    funcionario.getValidacoes().add(validacao);*/
 
     var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    validacaoEntityRepository
+   /* validacaoEntityRepository
         .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(
             funcionario.getUuid(),
             Estado.P,
@@ -102,13 +102,13 @@ public class ValidarDadosPessoaisService {
         .ifPresent(v -> {
           v.setReferenciaId(saved.getId());
           validacaoEntityRepository.save(v);
-        });
+        });*/
 
     return dto;
   }
 
 
-  private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {
+  /*private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {
     if (funcionarioEntity == null) return;
     funcionarioEntity.setEstadoValidacao(estado != null ? estado.name() : null);
 
@@ -128,7 +128,7 @@ public class ValidarDadosPessoaisService {
     funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_PESSOAIS)
         .ifPresent(v -> v.setEstado(estado));
 
-  }
+  }*/
 
 
 }

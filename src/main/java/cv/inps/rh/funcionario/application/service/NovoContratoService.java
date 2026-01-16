@@ -72,13 +72,13 @@ public class NovoContratoService {
           "funcionario possui validacao de contrato pendente");
     }
 
-    boolean temContratoAtivo = funcionario.getContratos().stream()
+    /*boolean temContratoAtivo = funcionario.getContratos().stream()
         .anyMatch(c -> c.getEstado().equals(Estado.A));
 
     if (temContratoAtivo) {
       throw IgrpResponseStatusException.badRequest(
           "Funcionário já possui contrato ativo");
-    }
+    }*/
 
     boolean isPrimeiroContrato = funcionario.getContratos().isEmpty();
     String tipoSituacao = isPrimeiroContrato ? "INICIO" : "CONTINUIDADE";
