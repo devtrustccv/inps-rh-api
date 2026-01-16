@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.service;
 import cv.inps.rh.funcionario.application.dto.WrapperListContratoDTO;
 import cv.inps.rh.funcionario.application.queries.GetListContratosQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContratoMapper;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
@@ -41,6 +42,11 @@ public class ContratoReadService {
 
       Join<ContratoEntity, FuncionarioEntity> fun = root.join("funId");
       predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
+
+      var estados = List.of(Estado.A, Estado.I);
+      predicates.add(
+          root.get("estado").in(estados)
+      );
 
       if (query.getVinculo() != null) {
         Join<ContratoEntity, ParamVinculoEntity> vinc = root.join("vinculoId");
