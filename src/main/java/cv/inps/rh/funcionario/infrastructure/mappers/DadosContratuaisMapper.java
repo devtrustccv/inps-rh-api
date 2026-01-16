@@ -32,7 +32,6 @@ public class DadosContratuaisMapper {
     tr.setObs("NOVO_CONTRATO");
     tr.setDataInicio(dc.getDataInicio());
     tr.setDataFim(null);
-    tr.setLocTrabId(em.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));
     tr.setReferente("REGISTO_COLABORADOR");
     tr.setUuid(UuidCreator.getTimeOrderedEpoch());
     tr.setEstado(estado);
@@ -48,7 +47,6 @@ public class DadosContratuaisMapper {
     tr.setObs("NOVO_CONTRATO");
     tr.setDataInicio(dc.getDataInicio());
     tr.setDataFim(null);
-    tr.setLocTrabId(em.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));
     tr.setReferente("REGISTO_COLABORADOR");
 
   }
@@ -120,11 +118,11 @@ public class DadosContratuaisMapper {
     dcr.setEscalaoReferenciaDesc(tiposRelacionamento.getCarreiraId()!=null ?
         tiposRelacionamento.getCarreiraId().getEscalaoId().getEscalao() : null);
 
-    if(tiposRelacionamento.getLocTrabId() != null){
-      dcr.setLocalTrabalhoId(tiposRelacionamento.getLocTrabId().getId());
-      dcr.setLocalTrabalhoDesc(tiposRelacionamento.getLocTrabId().getNome());
-      dcr.setPaisId(tiposRelacionamento.getLocTrabId().getPaisId() != null ? tiposRelacionamento.getLocTrabId().getPaisId().getId() : null);
-      dcr.setIlhaId(tiposRelacionamento.getLocTrabId().getIlhaId() != null ? tiposRelacionamento.getLocTrabId().getIlhaId().getId() : null);
+    if(tiposRelacionamento.getMobId()!=null){
+      dcr.setLocalTrabalhoId(tiposRelacionamento.getMobId().getLocalTrabId().getId());
+      dcr.setLocalTrabalhoDesc(tiposRelacionamento.getMobId().getLocalTrabId().getNome());
+      dcr.setPaisId(tiposRelacionamento.getMobId().getLocalTrabId().getPaisId() != null ? tiposRelacionamento.getMobId().getLocalTrabId().getPaisId().getId() : null);
+      dcr.setIlhaId(tiposRelacionamento.getMobId().getLocalTrabId().getIlhaId() != null ? tiposRelacionamento.getMobId().getLocalTrabId().getIlhaId().getId() : null);
     }
 
     dcr.setTipoVinculoLaboralId(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getVinculoId().getId() : null);
@@ -174,8 +172,6 @@ public class DadosContratuaisMapper {
     TiposRelacionamentoEntity clone = new TiposRelacionamentoEntity();
     clone.setUuid(IdentificadorUnico.create().valor());
     clone.setCargoId(original.getCargoId());
-    //clone.setInstitId(original.getInstitId());
-    //clone.setSeccaoId(original.getSeccaoId());
     clone.setSalario(original.getSalario());
     clone.setMoeda(original.getMoeda());
     clone.setTipoSituacao(original.getTipoSituacao());
@@ -189,7 +185,6 @@ public class DadosContratuaisMapper {
     clone.setEstActAdm(original.getEstActAdm());
     clone.setFunId(original.getFunId());
     clone.setObs(original.getObs());
-    clone.setLocTrabId(original.getLocTrabId());
     clone.setSituacLaboralId(original.getSituacLaboralId());
     clone.setReferente(original.getReferente());
     clone.setUltProc(original.getUltProc());

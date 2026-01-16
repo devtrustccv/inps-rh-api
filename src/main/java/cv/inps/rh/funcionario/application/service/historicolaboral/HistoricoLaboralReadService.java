@@ -209,15 +209,12 @@ public class HistoricoLaboralReadService {
       dto.setTipoMobilidade(mob.getTipoSituacao());
       dto.setDataInicioMobilidade(mob.getDataInicio());
       dto.setDataFimMobilidade(mob.getDataFim());
+      dto.setLocalTrabalho(mob.getLocalTrabId().getId());
+      dto.setPais(mob.getLocalTrabId().getPaisId() != null ? mob.getLocalTrabId().getPaisId().getNome() : null);
+      dto.setIlha(mob.getLocalTrabId().getIlhaId() != null ? mob.getLocalTrabId().getIlhaId().getNome() : null);
     }
 
 
-    var lt = entity.getLocTrabId();
-    if (lt != null) {
-      dto.setLocalTrabalho(lt.getId());
-      dto.setPais(lt.getPaisId() != null ? lt.getPaisId().getNome() : null);
-      dto.setIlha(lt.getIlhaId() != null ? lt.getIlhaId().getNome() : null);
-    }
 
     var car = entity.getCarreiraId();
     if (car != null) {
@@ -280,15 +277,11 @@ public class HistoricoLaboralReadService {
       dto.setTipoMobilidade(mob.getTipoSituacao());
       dto.setDataInicioMobilidade(mob.getDataInicio());
       dto.setDataFimMobilidade(mob.getDataFim());
+      dto.setLocalTrabalho(mob.getLocalTrabId().getId());
+      dto.setPais(mob.getLocalTrabId().getPaisId() != null ? mob.getLocalTrabId().getPaisId().getNome() : null);
+      dto.setIlha(mob.getLocalTrabId().getIlhaId() != null ? mob.getLocalTrabId().getIlhaId().getNome() : null);
     }
 
-
-    var lt = atual.getLocTrabId();
-    if (lt != null) {
-      dto.setLocalTrabalho(lt.getId());
-      dto.setPais(lt.getPaisId() != null ? lt.getPaisId().getNome() : null);
-      dto.setIlha(lt.getIlhaId() != null ? lt.getIlhaId().getNome() : null);
-    }
 
     var car = atual.getCarreiraId();
     if (car != null) {

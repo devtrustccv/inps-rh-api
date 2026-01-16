@@ -98,11 +98,6 @@ public class TiposRelacionamentoEntity extends AuditEntity {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "loc_trab_id", referencedColumnName = "id")
-    private ParamLocalTrabEntity locTrabId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "regime_id", referencedColumnName = "id")
     private RegimeTrabalhoEntity regimeId;
     @Column(name="referente")
