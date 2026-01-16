@@ -37,16 +37,6 @@ public class TiposRelacionamentoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cargo_id", referencedColumnName = "id")
     private ParamCargoEntity cargoId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "instit_id", referencedColumnName = "id")
-    private InstituicaoEntity institId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seccao_id", referencedColumnName = "id")
-    private SecaoEntity seccaoId;
     @Column(name="salario")
     private BigDecimal salario;
 

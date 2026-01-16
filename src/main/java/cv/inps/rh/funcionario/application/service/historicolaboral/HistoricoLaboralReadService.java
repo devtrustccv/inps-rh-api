@@ -104,10 +104,10 @@ public class HistoricoLaboralReadService {
           ofNullable(obj.getContrVinculoId().getVinculoId())
               .map(ParamVinculoEntity::getNome)
               .ifPresent(response::setVinculo);
-          ofNullable(obj.getSeccaoId()).map(SecaoEntity::getInstId)
+          ofNullable(obj.getMobId().getSecaoId()).map(SecaoEntity::getInstId)
               .map(InstituicaoEntity::getNome)
               .ifPresent(response::setDirecao);
-          ofNullable(obj.getSeccaoId()).map(SecaoEntity::getNome)
+          ofNullable(obj.getMobId().getSecaoId()).map(SecaoEntity::getNome)
               .ifPresent(response::setSeccao);
           ofNullable(obj.getCarreiraId()).map(CarreiraEntity::getCarrPccsId)
               .map(ParamCarreiraEntity::getNome)
@@ -211,12 +211,7 @@ public class HistoricoLaboralReadService {
       dto.setDataFimMobilidade(mob.getDataFim());
     }
 
-    var inst = entity.getInstitId();
-    if (inst != null)
-      dto.setDirecao(inst.getId());
-    var sec = entity.getSeccaoId();
-    if (sec != null)
-      dto.setSecao(sec.getId());
+
     var lt = entity.getLocTrabId();
     if (lt != null) {
       dto.setLocalTrabalho(lt.getId());
@@ -287,12 +282,7 @@ public class HistoricoLaboralReadService {
       dto.setDataFimMobilidade(mob.getDataFim());
     }
 
-    var inst = atual.getInstitId();
-    if (inst != null)
-      dto.setDirecao(inst.getId());
-    var sec = atual.getSeccaoId();
-    if (sec != null)
-      dto.setSecao(sec.getId());
+
     var lt = atual.getLocTrabId();
     if (lt != null) {
       dto.setLocalTrabalho(lt.getId());

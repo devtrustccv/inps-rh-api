@@ -25,8 +25,6 @@ public class DadosContratuaisMapper {
     if (dc == null) return null;
     var tr = new TiposRelacionamentoEntity();
     tr.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
-    tr.setInstitId(em.getReference(InstituicaoEntity.class, dc.getDirecaoId()));
-    tr.setSeccaoId(em.getReference(SecaoEntity.class, dc.getSeccaoId()));
     tr.setSalario(dc.getSalario());
     tr.setMoeda(dc.getMoeda());
     tr.setTipoSituacao("NOVO_CONTRATO");
@@ -44,8 +42,6 @@ public class DadosContratuaisMapper {
   public void toUpdateRelacionamento(TiposRelacionamentoEntity tr, DadosContratuaisReqDTO dc) {
     if (dc == null) return ;
     tr.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
-    tr.setInstitId(em.getReference(InstituicaoEntity.class, dc.getDirecaoId()));
-    tr.setSeccaoId(em.getReference(SecaoEntity.class, dc.getSeccaoId()));
     tr.setSalario(dc.getSalario());
     tr.setMoeda(dc.getMoeda());
     tr.setTipoSituacao("NOVO_CONTRATO");
@@ -99,11 +95,12 @@ public class DadosContratuaisMapper {
     dcr.setCargoPosicaoId(tiposRelacionamento.getCargoId() != null ? tiposRelacionamento.getCargoId().getId() : null);
     dcr.setCargoPosicaoDesc(tiposRelacionamento.getCargoId() != null ? tiposRelacionamento.getCargoId().getNome() : null);
 
-    dcr.setDirecaoId(tiposRelacionamento.getInstitId() != null ? tiposRelacionamento.getInstitId().getId() : null);
-    dcr.setDirecaoDesc(tiposRelacionamento.getInstitId() != null ? tiposRelacionamento.getInstitId().getNome() : null);
-
-    dcr.setSeccaoId(tiposRelacionamento.getSeccaoId() != null ? tiposRelacionamento.getSeccaoId().getId() : null);
-    dcr.setSeccaoDesc(tiposRelacionamento.getSeccaoId() != null ? tiposRelacionamento.getSeccaoId().getNome() : null);
+    if(tiposRelacionamento.getMobId()!=null){
+      dcr.setDirecaoId(tiposRelacionamento.getMobId().getInstidId().getId());
+      dcr.setDirecaoDesc(tiposRelacionamento.getMobId().getInstidId().getNome());
+      dcr.setSeccaoId(tiposRelacionamento.getMobId().getSecaoId().getId());
+      dcr.setSeccaoDesc(tiposRelacionamento.getMobId().getSecaoId().getNome());
+    }
 
     dcr.setCarreiraId(tiposRelacionamento.getCarreiraId()!=null ?
         tiposRelacionamento.getCarreiraId().getCarrPccsId().getId() : null);
@@ -123,8 +120,12 @@ public class DadosContratuaisMapper {
     dcr.setEscalaoReferenciaDesc(tiposRelacionamento.getCarreiraId()!=null ?
         tiposRelacionamento.getCarreiraId().getEscalaoId().getEscalao() : null);
 
-    dcr.setLocalTrabalhoId(tiposRelacionamento.getLocTrabId() != null ? tiposRelacionamento.getLocTrabId().getId() : null);
-    dcr.setLocalTrabalhoDesc(tiposRelacionamento.getLocTrabId() != null ? tiposRelacionamento.getLocTrabId().getNome() : null);
+    if(tiposRelacionamento.getLocTrabId() != null){
+      dcr.setLocalTrabalhoId(tiposRelacionamento.getLocTrabId().getId());
+      dcr.setLocalTrabalhoDesc(tiposRelacionamento.getLocTrabId().getNome());
+      dcr.setPaisId(tiposRelacionamento.getLocTrabId().getPaisId() != null ? tiposRelacionamento.getLocTrabId().getPaisId().getId() : null);
+      dcr.setIlhaId(tiposRelacionamento.getLocTrabId().getIlhaId() != null ? tiposRelacionamento.getLocTrabId().getIlhaId().getId() : null);
+    }
 
     dcr.setTipoVinculoLaboralId(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getVinculoId().getId() : null);
     dcr.setTipoVinculoLaboralDesc(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getVinculoId().getNome() : null);
@@ -173,8 +174,8 @@ public class DadosContratuaisMapper {
     TiposRelacionamentoEntity clone = new TiposRelacionamentoEntity();
     clone.setUuid(IdentificadorUnico.create().valor());
     clone.setCargoId(original.getCargoId());
-    clone.setInstitId(original.getInstitId());
-    clone.setSeccaoId(original.getSeccaoId());
+    //clone.setInstitId(original.getInstitId());
+    //clone.setSeccaoId(original.getSeccaoId());
     clone.setSalario(original.getSalario());
     clone.setMoeda(original.getMoeda());
     clone.setTipoSituacao(original.getTipoSituacao());

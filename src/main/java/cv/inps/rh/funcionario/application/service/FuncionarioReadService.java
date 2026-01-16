@@ -51,20 +51,31 @@ public class FuncionarioReadService {
       }
 
       // join e filtro direcção
+      // join com mobilidade (LEFT porque pode não existir)
+      Join<TiposRelacionamentoEntity, MobilidadeEntity> mob = root.join(
+          TiposRelacionamentoEntity_.mobId, JoinType.LEFT
+      );
+
+// filtro direcção (instituição)
       if (query.getDireccao() != null) {
-        Join<TiposRelacionamentoEntity, InstituicaoEntity> dir = root.join(
-            TiposRelacionamentoEntity_.institId, JoinType.LEFT
+        predicates.add(
+            cb.equal(
+                mob.get(MobilidadeEntity_.instidId).get(InstituicaoEntity_.id),
+                query.getDireccao()
+            )
         );
-        predicates.add(cb.equal(dir.get(InstituicaoEntity_.id), query.getDireccao()));
       }
 
-      // join e filtro secção
+// filtro secção
       if (query.getSeccao() != null) {
-        Join<TiposRelacionamentoEntity, SecaoEntity> sec = root.join(
-            TiposRelacionamentoEntity_.seccaoId, JoinType.LEFT
+        predicates.add(
+            cb.equal(
+                mob.get(MobilidadeEntity_.secaoId).get(SecaoEntity_.id),
+                query.getSeccao()
+            )
         );
-        predicates.add(cb.equal(sec.get(SecaoEntity_.id), query.getSeccao()));
       }
+
 
       // estado colaborador
       if (StringUtils.hasText(query.getEstado())) {
@@ -111,11 +122,15 @@ public class FuncionarioReadService {
       dto.setNome(f.getNome());
 
       dto.setCargo(tr.getCargoId() != null ? tr.getCargoId().getNome() : null);
-      dto.setDireccao(tr.getInstitId() != null ? tr.getInstitId().getNome() : null);
-      dto.setSeccao(tr.getSeccaoId() != null ? tr.getSeccaoId().getNome() : null);
 
-      String carreira = tr.getCarreiraId()!=null ? tr.getCarreiraId().getCarrPccsId().getNome() : null;
-      String categoria =  tr.getCarreiraId()!=null  ?tr.getCarreiraId().getCategoriaId().getNome() : null;
+      if (tr.getMobId() != null) {
+        dto.setDireccao(tr.getMobId().getInstidId() != null ? tr.getMobId().getInstidId().getNome() : null);
+        dto.setSeccao(tr.getMobId().getSecaoId() != null ? tr.getMobId().getSecaoId().getNome() : null);
+      }
+
+
+      String carreira = tr.getCarreiraId() != null ? tr.getCarreiraId().getCarrPccsId().getNome() : null;
+      String categoria = tr.getCarreiraId() != null ? tr.getCarreiraId().getCategoriaId().getNome() : null;
       dto.setCarreiraCategoria(carreira != null && categoria != null ? carreira + "/" + categoria : carreira);
 
       dto.setDataInicio(contrato != null ? DateFormatter.localDateToString(contrato.getDataInicio()) : null);

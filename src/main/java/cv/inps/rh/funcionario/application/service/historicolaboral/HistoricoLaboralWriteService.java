@@ -68,10 +68,6 @@ public class HistoricoLaboralWriteService {
 
         if (dto.getTipoMobilidade() != null)
           atual.setTipoSituacao(dto.getTipoMobilidade());
-        if (dto.getDirecao() != null)
-          atual.setInstitId(entityManager.getReference(InstituicaoEntity.class, dto.getDirecao()));
-        if (dto.getSecao() != null)
-          atual.setSeccaoId(entityManager.getReference(SecaoEntity.class, dto.getSecao()));
         if (dto.getLocalTrabalho() != null)
           atual.setLocTrabId(entityManager.getReference(ParamLocalTrabEntity.class, dto.getLocalTrabalho()));
       }
@@ -141,8 +137,6 @@ public class HistoricoLaboralWriteService {
       funcionario.getMobilidades().add(novaMob);
 
       novoRelacionamento.setMobId(novaMob);
-      novoRelacionamento.setInstitId(novaMob.getInstidId());
-      novoRelacionamento.setSeccaoId(novaMob.getSecaoId());
       novoRelacionamento.setLocTrabId(novaMob.getLocalTrabId());
       novoRelacionamento.setTipoSituacao(dto.getTipoMobilidade());
       criouAlgum = true;
@@ -259,6 +253,7 @@ public class HistoricoLaboralWriteService {
         mob.setObs("HISTORICO_LABORAL");
         mob.setUuid(IdentificadorUnico.create().valor());
         mob.setFunId(funcionario);
+
       }
       populateMobilidade(mob, dto);
       mobilidadeEntityRepository.save(mob);
@@ -266,10 +261,6 @@ public class HistoricoLaboralWriteService {
       relacionamento.setMobId(mob);
       if (dto.getTipoMobilidade() != null)
         relacionamento.setTipoSituacao(dto.getTipoMobilidade());
-      if (dto.getDirecao() != null)
-        relacionamento.setInstitId(entityManager.getReference(InstituicaoEntity.class, dto.getDirecao()));
-      if (dto.getSecao() != null)
-        relacionamento.setSeccaoId(entityManager.getReference(SecaoEntity.class, dto.getSecao()));
       if (dto.getLocalTrabalho() != null)
         relacionamento.setLocTrabId(entityManager.getReference(ParamLocalTrabEntity.class, dto.getLocalTrabalho()));
     }
