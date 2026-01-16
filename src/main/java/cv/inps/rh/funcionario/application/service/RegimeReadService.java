@@ -43,6 +43,11 @@ public class RegimeReadService {
       Join<RegimeTrabalhoEntity, FuncionarioEntity> fun = root.join("funId");
       predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
 
+      var estados = List.of(Estado.A, Estado.I);
+      predicates.add(
+          root.get("estado").in(estados)
+      );
+
       if (StringUtils.hasText(query.getTipoRegime())) {
         predicates.add(cb.equal(root.get("tipoRegime"), query.getTipoRegime()));
       }

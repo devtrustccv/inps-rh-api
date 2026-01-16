@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.dto.SubstituicaoSumaryDTO;
 import cv.inps.rh.funcionario.application.queries.ListaSubstituicaoQuery;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SubstituicaoEntity;
@@ -31,9 +32,10 @@ public class SubstituicaoReadService {
 
     var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
 
+    var estados = List.of(Estado.A, Estado.I);
 
     return substituicaoEntityRepository
-        .findBySubstituidoTiprelId_FunId_Uuid(idFuncionario, pageable)
+        .findBySubstituidoTiprelId_FunId_Uuid_AndEstadoIn(idFuncionario,estados, pageable)
         .map(this::toDto)
         .getContent();
   }
