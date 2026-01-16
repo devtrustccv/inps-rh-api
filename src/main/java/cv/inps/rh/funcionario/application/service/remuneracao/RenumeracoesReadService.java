@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -58,12 +59,20 @@ public class RenumeracoesReadService {
       Join<DefinicaoRemuneracaoEntity, FuncionarioEntity> fun = root.join("funId");
       predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
 
+      var estadosPermitidos = EnumSet.of(Estado.A, Estado.I);
+
       if (StringUtils.hasText(query.getEstado())) {
         try {
-          Estado estado = Estado.fromCodeOrThrow(query.getEstado());
-          predicates.add(cb.equal(root.get("estado"), estado));
+          Estado estadoRequest = Estado.fromCodeOrThrow(query.getEstado());
+          if (estadosPermitidos.contains(estadoRequest)) {
+            estadosPermitidos = EnumSet.of(estadoRequest);
+          }
         } catch (Exception ignored) {}
       }
+      predicates.add(
+          root.get("estado").in(estadosPermitidos)
+      );
+
 
       if (StringUtils.hasText(query.getDataInicio())) {
         var di = DateFormatter.stringToLocalDate(query.getDataInicio());
