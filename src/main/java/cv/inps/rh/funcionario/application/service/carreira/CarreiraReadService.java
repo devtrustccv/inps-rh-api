@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.service.carreira;
 
 import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.application.service.DominioService;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
@@ -48,6 +49,11 @@ public class CarreiraReadService {
 
       Join<TiposRelacionamentoEntity, FuncionarioEntity> fun = root.join("funId");
       predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
+
+      var estados = List.of(Estado.A, Estado.I);
+      predicates.add(
+          root.get("estado").in(estados)
+      );
 
       Join<TiposRelacionamentoEntity, CarreiraEntity> carreira = root.join("carreiraId");
 
