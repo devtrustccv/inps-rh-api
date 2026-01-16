@@ -74,11 +74,10 @@ public class DadosContratuaisMapper {
     return sl;
   }
 
-  public SituacaoLaboralEntity toUpdateSituacaoLaboral(SituacaoLaboralEntity entity, DadosContratuaisReqDTO dc) {
-    if (dc == null) return entity;
+  public void toUpdateSituacaoLaboral(SituacaoLaboralEntity entity, DadosContratuaisReqDTO dc) {
+    if (dc == null) return;
     entity.setDataInicio(dc.getDataInicio());
     entity.setDataFim(dc.getDataFim());
-    return entity;
   }
 
 
@@ -130,6 +129,9 @@ public class DadosContratuaisMapper {
 
     dcr.setSalario(tiposRelacionamento.getSalario());
     dcr.setMoeda(tiposRelacionamento.getMoeda());
+    dcr.setDataInicio(tiposRelacionamento.getDataInicio());
+    dcr.setDataFim(tiposRelacionamento.getDataFim());
+    dcr.setRegimeTrabalho(tiposRelacionamento.getRegimeId()!=null ? tiposRelacionamento.getRegimeId().getTipoRegime() : null);
 
     if (tiposRelacionamento.getContrVinculoId() != null)
       dcr.setDuracaoMeses(tiposRelacionamento.getContrVinculoId().getDuracao());
