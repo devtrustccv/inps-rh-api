@@ -89,11 +89,6 @@ public class DefPagamentoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ent_id", referencedColumnName = "id")
     private EntidadeEntity entId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
-    private TiposRelacionamentoEntity tiprelId;
     @Column(name="data_ultimo_proc")
     private LocalDate dataUltimoProc;
 

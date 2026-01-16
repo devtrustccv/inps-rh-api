@@ -69,11 +69,6 @@ public class DefinicaoRemuneracaoEntity extends AuditEntity {
     private LocalDate dataFim;
 
   
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
-    private TiposRelacionamentoEntity tiprelId;
     @Column(name="data_ultimo_proc")
     private LocalDate dataUltimoProc;
 
