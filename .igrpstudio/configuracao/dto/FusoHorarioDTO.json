@@ -1,0 +1,34 @@
+{
+  "type": "dto",
+  "module": "configuracao",
+  "name": "FusoHorario",
+  "template": "record",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "upsId",
+      "objectType": "java",
+      "type": "long",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "fuso",
+      "objectType": "java",
+      "type": "string",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "szu0qu1fx5"
+}

@@ -5,7 +5,9 @@ import cv.inps.rh.configuracao.application.dto.ConfiguracaoGeralDTO;
 import cv.inps.rh.configuracao.domain.service.engine.ConfigurationProcess;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeParametroEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FusoHorarioUpsEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AssiduidadeParametroEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.FusoHorarioUpsEntityRepository;
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -21,14 +23,16 @@ import java.util.stream.Collectors;
 public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoGeralDTO> {
 
   private final AssiduidadeParametroEntityRepository repository;
+  private final FusoHorarioUpsEntityRepository fusoHorarioUpsEntityRepository;
 
   public ConfiguracaoGeralService(
       AssiduidadeParametroEntityRepository repository,
       Validator validator,
-      ObjectMapper jsonMapper
+      ObjectMapper jsonMapper, FusoHorarioUpsEntityRepository fusoHorarioUpsEntityRepository
   ) {
     super(validator, jsonMapper, ConfiguracaoGeralDTO.class);
     this.repository = repository;
+    this.fusoHorarioUpsEntityRepository = fusoHorarioUpsEntityRepository;
   }
 
   @Override
@@ -60,11 +64,14 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
     e.setHeValorDnutil(dto.getPercentagemDiasNaoUteis());
     e.setPrazoJustifFalta(dto.getPeriodoLimiteJustFalta());
     e.setPrazoJustifAusencia(dto.getPrazoLimiteJustAusencia());
+
+    // TODO 15/01/2026 20:30 verify this fields
     //e.setTDispensa();
     //e.setCAtraso();
     //e.setTaCompensacao();
     //e.setHeMensal();
     //e.setHeAnual();
+
     e.setFaltaMaxMarcacao(dto.getNumeroMaximoMarcAno());
     e.setFaltaDireitoAnula(dto.getDireitoAnual());
     e.setFaltaDataVencimento(dto.getDataVencimentoFerias());
@@ -75,6 +82,20 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
     e.setUsrRegisto(1L);
 
     var saved = repository.save(e);
+
+    var timeZones = dto.getFusoHorario();
+    if (timeZones != null && !timeZones.isEmpty()) {
+
+      var tz = timeZones.stream().map(obj -> {
+        var fuso = new FusoHorarioUpsEntity();
+        fuso.setIdParametrizacao(saved.getId());
+        fuso.setIdUps(obj.upsId());
+        fuso.setFuso(obj.fuso());
+        return fuso;
+      }).toList();
+
+      fusoHorarioUpsEntityRepository.saveAll(tz);
+    }
 
     return buildResponse(saved);
   }
