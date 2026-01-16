@@ -22,8 +22,8 @@ public interface TipoRelRemPagEntityRepository extends
                         "TipoRelRemPagEntity not found for id: " + id));
     }
 
-    boolean existsByTipRelIdAndRemId(TiposRelacionamentoEntity tipRelId, DefinicaoRemuneracaoEntity remId);
+    boolean existsByTiprelIdAndRemId(TiposRelacionamentoEntity tipRelId, DefinicaoRemuneracaoEntity remId);
 
-    boolean existsByTipRelIdAndPagId(TiposRelacionamentoEntity tipRelId, DefPagamentoEntity pagId);
+    boolean existsByTiprelIdAndPagId(TiposRelacionamentoEntity tipRelId, DefPagamentoEntity pagId);
 
 }

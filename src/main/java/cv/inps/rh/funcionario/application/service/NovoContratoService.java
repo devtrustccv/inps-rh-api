@@ -228,7 +228,7 @@ public class NovoContratoService {
       java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
       for (var rem : saved.getDefinicoesRenumeracoes()) {
         var assoc = new TipoRelRemPagEntity();
-        assoc.setTipRelId(tiposRelacionamento);
+        assoc.setTiprelId(tiposRelacionamento);
         assoc.setRemId(rem);
         assoc.setPagId(null);
         lista.add(assoc);
@@ -240,7 +240,7 @@ public class NovoContratoService {
       java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
       for (var pag : saved.getDefinicoesPagamentos()) {
         var assoc = new TipoRelRemPagEntity();
-        assoc.setTipRelId(tiposRelacionamento);
+        assoc.setTiprelId(tiposRelacionamento);
         assoc.setPagId(pag);
         assoc.setRemId(null);
         lista.add(assoc);

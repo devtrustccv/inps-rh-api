@@ -31,7 +31,7 @@ public class DadosContratuaisMapper {
     tr.setFlgProcessa(1);
     tr.setObs("NOVO_CONTRATO");
     tr.setDataInicio(dc.getDataInicio());
-    tr.setDataFim(null);
+    tr.setDataFim(dc.getDataFim());
     tr.setReferente("REGISTO_COLABORADOR");
     tr.setUuid(UuidCreator.getTimeOrderedEpoch());
     tr.setEstado(estado);
@@ -46,7 +46,7 @@ public class DadosContratuaisMapper {
     tr.setTipoSituacao("NOVO_CONTRATO");
     tr.setObs("NOVO_CONTRATO");
     tr.setDataInicio(dc.getDataInicio());
-    tr.setDataFim(null);
+    tr.setDataFim(dc.getDataInicio());
     tr.setReferente("REGISTO_COLABORADOR");
 
   }

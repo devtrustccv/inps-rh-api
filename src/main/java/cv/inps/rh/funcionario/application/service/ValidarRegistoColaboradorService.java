@@ -42,9 +42,6 @@ public class ValidarRegistoColaboradorService {
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final FuncionarioRules funcionarioRules;
   private final TipoMovimentoHelper tipoMovimentoHelper;
-  private final RemuneracaoTiprelEntityRepository remuneracaoTiprelEntityRepository;
-  private final PagTiprelEntityRepository pagTiprelEntityRepository;
-  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
   private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
 
@@ -150,9 +147,9 @@ public class ValidarRegistoColaboradorService {
     if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
       java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
       for (var rem : saved.getDefinicoesRenumeracoes()) {
-        if (!tipoRelRemPagEntityRepository.existsByTipRelIdAndRemId(tiposRelacionamento, rem)) {
+        if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndRemId(tiposRelacionamento, rem)) {
           var assoc = new TipoRelRemPagEntity();
-          assoc.setTipRelId(tiposRelacionamento);
+          assoc.setTiprelId(tiposRelacionamento);
           assoc.setRemId(rem);
           assoc.setPagId(null);
           lista.add(assoc);
@@ -166,9 +163,9 @@ public class ValidarRegistoColaboradorService {
     if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
       java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
       for (var pag : saved.getDefinicoesPagamentos()) {
-        if (!tipoRelRemPagEntityRepository.existsByTipRelIdAndPagId(tiposRelacionamento, pag)) {
+        if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndPagId(tiposRelacionamento, pag)) {
           var assoc = new TipoRelRemPagEntity();
-          assoc.setTipRelId(tiposRelacionamento);
+          assoc.setTiprelId(tiposRelacionamento);
           assoc.setPagId(pag);
           assoc.setRemId(null);
           lista.add(assoc);

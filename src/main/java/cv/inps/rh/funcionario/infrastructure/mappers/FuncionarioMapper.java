@@ -40,6 +40,7 @@ public class FuncionarioMapper {
     dadosPessoais.setIdColaborador(entity.getIdColaborador());
     dadosPessoais.setUuid(entity.getUuid() != null ? entity.getUuid().toString() : null);
     dadosPessoais.setNome(entity.getNome());
+    dadosPessoais.setUrlFoto(entity.getFotografia());
     dadosPessoais.setDataNascimento(entity.getDataNascimento());
     dadosPessoais.setGenero(entity.getSexo());
     dadosPessoais.setNomeMae(entity.getNmMae());

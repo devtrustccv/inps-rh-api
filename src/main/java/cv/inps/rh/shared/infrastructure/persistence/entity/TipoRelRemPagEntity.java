@@ -3,6 +3,7 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
+import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,7 +17,7 @@ import jakarta.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "RH_T_TIPREL_REM_PAG")
-public class TipoRelRemPagEntity  {
+public class TipoRelRemPagEntity extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rh_s_tiprel_rem_pag")
@@ -25,12 +26,12 @@ public class TipoRelRemPagEntity  {
     private Long id;
 
   
-    @NotNull(message = "tipRelId is mandatory")
+    @NotNull(message = "tiprelId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tip_rel_id", referencedColumnName = "id")
-    private TiposRelacionamentoEntity tipRelId;
+    @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
+    private TiposRelacionamentoEntity tiprelId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)

@@ -243,7 +243,7 @@ public class RegistarColaboradorService {
       var lista = new ArrayList<TipoRelRemPagEntity>();
       for (var rem : saved.getDefinicoesRenumeracoes()) {
         var assoc = new TipoRelRemPagEntity();
-        assoc.setTipRelId(tr);
+        assoc.setTiprelId(tr);
         assoc.setRemId(rem);
         assoc.setPagId(null);
         lista.add(assoc);
@@ -255,7 +255,7 @@ public class RegistarColaboradorService {
       var lista = new ArrayList<TipoRelRemPagEntity>();
       for (var pag : saved.getDefinicoesPagamentos()) {
         var assoc = new TipoRelRemPagEntity();
-        assoc.setTipRelId(tr);
+        assoc.setTiprelId(tr);
         assoc.setPagId(pag);
         assoc.setRemId(null);
         lista.add(assoc);
