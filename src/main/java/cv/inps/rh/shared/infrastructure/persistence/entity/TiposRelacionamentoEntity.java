@@ -55,10 +55,6 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     private String moeda;
 
   
-    @Column(name="regime")
-    private String regime;
-
-  
     @Column(name="tipo_situacao")
     private String tipoSituacao;
 

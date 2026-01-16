@@ -27,12 +27,8 @@ public class DadosContratuaisMapper {
     tr.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
     tr.setInstitId(em.getReference(InstituicaoEntity.class, dc.getDirecaoId()));
     tr.setSeccaoId(em.getReference(SecaoEntity.class, dc.getSeccaoId()));
-   /* tr.setCategoriaId(em.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
-    tr.setEscalaoId(em.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
-    tr.setCarrPccId(em.getReference(ParamCarreiraEntity.class, dc.getCarreiraId()));*/
     tr.setSalario(dc.getSalario());
     tr.setMoeda(dc.getMoeda());
-    tr.setRegime(dc.getRegimeTrabalho());
     tr.setTipoSituacao("NOVO_CONTRATO");
     tr.setFlgProcessa(1);
     tr.setObs("NOVO_CONTRATO");
@@ -54,7 +50,6 @@ public class DadosContratuaisMapper {
     tr.setSeccaoId(em.getReference(SecaoEntity.class, dc.getSeccaoId()));
     tr.setSalario(dc.getSalario());
     tr.setMoeda(dc.getMoeda());
-    tr.setRegime(dc.getRegimeTrabalho());
     tr.setTipoSituacao("NOVO_CONTRATO");
     tr.setObs("NOVO_CONTRATO");
     tr.setDataInicio(dc.getDataInicio());
@@ -138,7 +133,6 @@ public class DadosContratuaisMapper {
     dcr.setTipoVinculoLaboralId(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getVinculoId().getId() : null);
     dcr.setTipoVinculoLaboralDesc(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getVinculoId().getNome() : null);
 
-    dcr.setRegimeTrabalho(tiposRelacionamento.getRegime());
     dcr.setSalario(tiposRelacionamento.getSalario());
     dcr.setMoeda(tiposRelacionamento.getMoeda());
     dcr.setDataInicio(tiposRelacionamento.getDataInicioContrato());
@@ -189,7 +183,6 @@ public class DadosContratuaisMapper {
     clone.setSeccaoId(original.getSeccaoId());
     clone.setSalario(original.getSalario());
     clone.setMoeda(original.getMoeda());
-    clone.setRegime(original.getRegime());
     clone.setTipoSituacao(original.getTipoSituacao());
     clone.setCarreiraId(original.getCarreiraId());
     clone.setMobId(original.getMobId());
