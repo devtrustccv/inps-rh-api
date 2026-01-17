@@ -152,6 +152,9 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
     r.setDataVencimentoFerias(e.getFaltaDataVencimento());
     r.setNumeroMesesLimiteTrabalho(e.getFaltaMesMaximoAno1());
     r.setMaximoAcumulacao(e.getMaxAcumulacao());
+    r.setEstado(e.getEstado());
+    r.setDataRegisto(e.getDtRegisto());
+    r.setUtilizadoRegisto(e.getUsrRegisto()+"");
     return r;
   }
 
