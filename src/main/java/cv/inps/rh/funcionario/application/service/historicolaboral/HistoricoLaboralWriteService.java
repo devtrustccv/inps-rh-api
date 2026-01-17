@@ -79,7 +79,6 @@ public class HistoricoLaboralWriteService {
         car.setEstado(Estado.P);
         carreiraEntityRepository.save(car);
 
-        if (dto.getCarreira() != null)
         if (dto.getCargo() != null)
           atual.setCargoId(entityManager.getReference(ParamCargoEntity.class, dto.getCargo()));
         if (dto.getSalario() != null)
