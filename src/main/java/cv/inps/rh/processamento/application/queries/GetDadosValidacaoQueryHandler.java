@@ -3,6 +3,7 @@ package cv.inps.rh.processamento.application.queries;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.processamento.application.dto.DadosValidacaoDTO;
+import cv.inps.rh.processamento.domain.service.processamentosalarial.ProcessamentoSalarialReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +17,10 @@ public class GetDadosValidacaoQueryHandler implements QueryHandler<GetDadosValid
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetDadosValidacaoQueryHandler.class);
 
-  public GetDadosValidacaoQueryHandler() {
+  private final ProcessamentoSalarialReadService processamentoSalarialService;
 
+  public GetDadosValidacaoQueryHandler(ProcessamentoSalarialReadService processamentoSalarialService) {
+    this.processamentoSalarialService = processamentoSalarialService;
   }
 
   @IgrpQueryHandler
@@ -25,8 +28,9 @@ public class GetDadosValidacaoQueryHandler implements QueryHandler<GetDadosValid
 
     LOGGER.debug("GetDadosValidacaoQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    var data = processamentoSalarialService.getDadosValidacao(query);
+
+    return ResponseEntity.ok(data);
   }
 
 }

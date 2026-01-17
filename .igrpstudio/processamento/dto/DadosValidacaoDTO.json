@@ -54,7 +54,7 @@
       "primaryKey": false
     },
     {
-      "name": "tiposMovimento",
+      "name": "tipoMovimento",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -66,7 +66,7 @@
       "primaryKey": false
     },
     {
-      "name": "mesProcessamento",
+      "name": "mesAnterior",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -78,9 +78,9 @@
       "primaryKey": false
     },
     {
-      "name": "valorProcessado",
+      "name": "mesAtual",
       "objectType": "java",
-      "type": "decimal",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -93,18 +93,6 @@
       "name": "valorEscalao",
       "objectType": "java",
       "type": "decimal",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "valor",
-      "objectType": "java",
-      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -129,6 +117,42 @@
       "name": "situacaoLaboral",
       "objectType": "java",
       "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "tipoFiltro",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "processamentoId",
+      "objectType": "java",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "funId",
+      "objectType": "java",
+      "type": "integer",
       "required": false,
       "before": false,
       "after": false,

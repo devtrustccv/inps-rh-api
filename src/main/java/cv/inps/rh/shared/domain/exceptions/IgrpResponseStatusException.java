@@ -67,6 +67,10 @@ public class IgrpResponseStatusException extends ErrorResponseException {
     return of(HttpStatus.SERVICE_UNAVAILABLE, title);
   }
 
+  public static IgrpResponseStatusException internalServerError(String title) {
+    return of(HttpStatus.INTERNAL_SERVER_ERROR, title);
+  }
+
   public static IgrpResponseStatusException conflict(String title) {
     var problemDetail = ProblemDetail.forStatus(HttpStatus.CONFLICT);
     problemDetail.setTitle(title);
