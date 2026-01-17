@@ -178,21 +178,19 @@ public class NovoContratoService {
         funcionario.setDefinicoesRenumeracoes(remList);
       }
 
-      var listAssociacaoVinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
+      var vinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
           .findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
-              "REM");
+              "REM").getFirst(); // so é associado um tipo REM SALL ao vinculo
 
-      if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoREM)) {
-        listAssociacaoVinculoTipoMovimentoREM.forEach(movimento -> {
+      if (!Objects.isNull(vinculoTipoMovimentoREM)) {
           var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
               dadosContratuais.getSalario(),
-              movimento.getTmId(),
+              vinculoTipoMovimentoREM.getTmId(),
               dadosContratuais.getDataInicio(),
               dadosContratuais.getDataFim(),
               funcionario,
               dadosContratuais.getMoeda());
           funcionario.getDefinicoesRenumeracoes().add(renumeracao);
-        });
       }
       /******************** FIM RENUMERACOES ********************************/
 
