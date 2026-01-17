@@ -190,7 +190,7 @@ public class NovoContratoService {
               dadosContratuais.getDataFim(),
               funcionario,
               dadosContratuais.getMoeda());
-          funcionario.getDefinicoesRenumeracoes().add(renumeracao);
+        funcionario.getDefinicoesRenumeracoes().add(renumeracao);
       }
       /******************** FIM RENUMERACOES ********************************/
 
