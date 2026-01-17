@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 
 @Repository
 public interface FusoHorarioUpsEntityRepository extends
@@ -17,5 +19,7 @@ public interface FusoHorarioUpsEntityRepository extends
     return this.findById(id)
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "FusoHorarioUpsEntity not found for id: " + id));
   }
+
+  List<FusoHorarioUpsEntity> findByIdParametrizacao(Long idParametrizacao);
 
 }

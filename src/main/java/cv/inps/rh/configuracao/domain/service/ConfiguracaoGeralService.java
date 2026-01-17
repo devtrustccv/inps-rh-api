@@ -2,6 +2,7 @@ package cv.inps.rh.configuracao.domain.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cv.inps.rh.configuracao.application.dto.ConfiguracaoGeralDTO;
+import cv.inps.rh.configuracao.application.dto.FusoHorarioDTO;
 import cv.inps.rh.configuracao.domain.service.engine.ConfigurationProcess;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeParametroEntity;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -64,14 +66,6 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
     e.setHeValorDnutil(dto.getPercentagemDiasNaoUteis());
     e.setPrazoJustifFalta(dto.getPeriodoLimiteJustFalta());
     e.setPrazoJustifAusencia(dto.getPrazoLimiteJustAusencia());
-
-    // TODO 15/01/2026 20:30 verify this fields
-    //e.setTDispensa();
-    //e.setCAtraso();
-    //e.setTaCompensacao();
-    //e.setHeMensal();
-    //e.setHeAnual();
-
     e.setFaltaMaxMarcacao(dto.getNumeroMaximoMarcAno());
     e.setFaltaDireitoAnula(dto.getDireitoAnual());
     e.setFaltaDataVencimento(dto.getDataVencimentoFerias());
@@ -154,7 +148,19 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
     r.setMaximoAcumulacao(e.getMaxAcumulacao());
     r.setEstado(e.getEstado());
     r.setDataRegisto(e.getDtRegisto());
-    r.setUtilizadoRegisto(e.getUsrRegisto()+"");
+    r.setUtilizadoRegisto(e.getUsrRegisto() != null ? e.getUsrRegisto().toString() : null);
+
+    var fusos = new ArrayList<FusoHorarioDTO>();
+
+    fusoHorarioUpsEntityRepository.findByIdParametrizacao(e.getId())
+        .forEach(obj -> {
+              var row = new FusoHorarioDTO(obj.getIdUps(), obj.getFuso());
+              fusos.add(row);
+            }
+        );
+
+    r.setFusoHorario(fusos);
+
     return r;
   }
 
