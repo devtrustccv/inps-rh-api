@@ -9,7 +9,7 @@ import cv.inps.rh.processamento.application.dto.WrapperProcessamentoSalarialDTO;
 import cv.inps.rh.processamento.application.queries.GetDadosValidacaoQuery;
 import cv.inps.rh.processamento.application.queries.GetDetalhesProcessamentoQuery;
 import cv.inps.rh.processamento.application.queries.GetProcessamentoSalarialQuery;
-import cv.inps.rh.processamento.domain.service.processamentosalarial.validacao.ColaboradorMovimento;
+import cv.inps.rh.processamento.domain.service.processamentosalarial.validacao.DadosValidacao;
 import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcPagEntityRepository;
 import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcRemunEntityRepository;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -107,7 +107,7 @@ public class ProcessamentoSalarialReadService {
 
       var json = clob.getSubString(1, (int) clob.length());
 
-      return objectMapper.readValue(json, new TypeReference<List<ColaboradorMovimento>>() {
+      return objectMapper.readValue(json, new TypeReference<List<DadosValidacao>>() {
           })
           .stream()
           .map(obj -> {

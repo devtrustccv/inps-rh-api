@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 @Setter
 @Getter
-public class ColaboradorMovimento {
+public class DadosValidacao {
 
   @JsonProperty("nome_colaborador")
   private String nomeColaborador;
