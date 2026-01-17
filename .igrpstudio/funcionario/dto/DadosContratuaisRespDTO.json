@@ -18,9 +18,21 @@
       "primaryKey": false
     },
     {
-      "name": "cargoPosicaoId",
+      "name": "tipoVinculoLaboralId",
       "objectType": "java",
       "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "situacaoLaboralId",
+      "objectType": "java",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -102,21 +114,9 @@
       "primaryKey": false
     },
     {
-      "name": "tipoVinculoLaboralId",
+      "name": "cargoPosicaoId",
       "objectType": "java",
       "type": "long",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "RegimeTrabalho",
-      "objectType": "java",
-      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -150,9 +150,9 @@
       "primaryKey": false
     },
     {
-      "name": "dataInicio",
+      "name": "regimeTrabalho",
       "objectType": "java",
-      "type": "date",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -162,7 +162,7 @@
       "primaryKey": false
     },
     {
-      "name": "dataFim",
+      "name": "dataInicio",
       "objectType": "java",
       "type": "date",
       "required": false,
@@ -177,6 +177,18 @@
       "name": "duracaoMeses",
       "objectType": "java",
       "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dataFim",
+      "objectType": "java",
+      "type": "date",
       "required": false,
       "before": false,
       "after": false,

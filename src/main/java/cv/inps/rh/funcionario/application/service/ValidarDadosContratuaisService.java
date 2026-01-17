@@ -36,11 +36,6 @@ public class ValidarDadosContratuaisService {
     if (dc.getLocalTrabalhoId() == null)
       throw IgrpResponseStatusException.badRequest("Local de trabalho é obrigatório.");
 
-    if (dc.getPaisId() == null)
-      throw IgrpResponseStatusException.badRequest("País é obrigatório.");
-
-    if (dc.getIlhaId() == null)
-      throw IgrpResponseStatusException.badRequest("Ilha é obrigatória.");
 
     if (dc.getMoeda() == null || dc.getMoeda().isBlank())
       throw IgrpResponseStatusException.badRequest("Moeda é obrigatória.");
