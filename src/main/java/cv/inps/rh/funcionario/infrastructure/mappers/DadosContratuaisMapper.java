@@ -120,8 +120,6 @@ public class DadosContratuaisMapper {
     if(tiposRelacionamento.getMobId()!=null){
       dcr.setLocalTrabalhoId(tiposRelacionamento.getMobId().getLocalTrabId().getId());
       dcr.setLocalTrabalhoDesc(tiposRelacionamento.getMobId().getLocalTrabId().getNome());
-      dcr.setPaisId(tiposRelacionamento.getMobId().getLocalTrabId().getPaisId() != null ? tiposRelacionamento.getMobId().getLocalTrabId().getPaisId().getId() : null);
-      dcr.setIlhaId(tiposRelacionamento.getMobId().getLocalTrabId().getIlhaId() != null ? tiposRelacionamento.getMobId().getLocalTrabId().getIlhaId().getId() : null);
     }
 
     dcr.setTipoVinculoLaboralId(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getVinculoId().getId() : null);

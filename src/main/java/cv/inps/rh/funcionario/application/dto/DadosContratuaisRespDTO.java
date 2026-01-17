@@ -76,12 +76,6 @@ public class DadosContratuaisRespDTO  {
   
   private Long localTrabalhoId ;
   
-  
-  private Long paisId ;
-  
-  
-  private Long ilhaId ;
-  
   @Valid
   private List<SubsidioRespDTO> subsidios = new ArrayList<>();
   
