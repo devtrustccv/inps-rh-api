@@ -12,6 +12,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -83,7 +86,8 @@ public class DadosContratuaisMapper {
   }
 
 
-  public DadosContratuaisRespDTO dadosContratuaisRespDTO(TiposRelacionamentoEntity tiposRelacionamento) {
+  public DadosContratuaisRespDTO dadosContratuaisRespDTO
+      (TiposRelacionamentoEntity tiposRelacionamento) {
     if (tiposRelacionamento == null) return null;
 
     DadosContratuaisRespDTO dcr = new DadosContratuaisRespDTO();
@@ -141,8 +145,8 @@ public class DadosContratuaisMapper {
       dcr.setDuracaoMeses(tiposRelacionamento.getContrVinculoId().getDuracao());
 
     // Subsídios
-    if (tiposRelacionamento.getFunId().getDefinicoesRenumeracoes() != null) {
-      var subs = tiposRelacionamento.getFunId().getDefinicoesRenumeracoes().stream().map(s -> {
+   /*if (!CollectionUtils.isEmpty(remuneracoes)) {
+      var subs = remuneracoes.stream().map(s -> {
         SubsidioRespDTO sr = new SubsidioRespDTO();
         sr.setId(s.getId());
         sr.setTipoSubsidioId(s.getTmId() != null ? s.getTmId().getId() : null);
@@ -155,8 +159,8 @@ public class DadosContratuaisMapper {
     }
 
     // Encargos / descontos
-    if (tiposRelacionamento.getFunId().getDefinicoesPagamentos() != null) {
-      var encs = tiposRelacionamento.getFunId().getDefinicoesPagamentos().stream().map(e -> {
+    if (!CollectionUtils.isEmpty(pagamentosDescontos)) {
+      var encs = pagamentosDescontos.stream().map(e -> {
         EncargosDescontosRespDTO er = new EncargosDescontosRespDTO();
         er.setId(e.getId());
         er.setTipoEncargoId(e.getTmId() != null ? e.getTmId().getId() : null);
@@ -167,9 +171,44 @@ public class DadosContratuaisMapper {
       }).toList();
 
       dcr.setEncargosDescontos(encs);
-    }
+    }*/
 
     return dcr;
+  }
+
+  public List<EncargosDescontosRespDTO> encargosDescontosRespDTO(List<DefPagamentoEntity> pagamentosDescontos) {
+
+    if (CollectionUtils.isEmpty(pagamentosDescontos)) {
+      return null;
+    }
+      var encs = pagamentosDescontos.stream().map(e -> {
+        EncargosDescontosRespDTO er = new EncargosDescontosRespDTO();
+        er.setId(e.getId());
+        er.setTipoEncargoId(e.getTmId() != null ? e.getTmId().getId() : null);
+        er.setValor(e.getValor());
+        er.setDataInicio(e.getDataInicio());
+        er.setDataFim(e.getDataFim());
+        return er;
+      }).toList();
+
+    return encs;
+  }
+
+  public List<SubsidioRespDTO> subsidioRespDTOS(List<DefinicaoRemuneracaoEntity> remuneracoes) {
+
+    if (CollectionUtils.isEmpty(remuneracoes)) {
+      return null;
+    }
+    var subs = remuneracoes.stream().map(s -> {
+      SubsidioRespDTO sr = new SubsidioRespDTO();
+      sr.setId(s.getId());
+      sr.setTipoSubsidioId(s.getTmId() != null ? s.getTmId().getId() : null);
+      sr.setPercentagem(s.getPercentagem());
+      sr.setValor(s.getValor());
+      return sr;
+    }).toList();
+
+    return subs;
   }
 
 

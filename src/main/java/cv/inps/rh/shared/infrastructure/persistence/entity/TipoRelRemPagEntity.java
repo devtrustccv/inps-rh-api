@@ -3,7 +3,6 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,7 +16,7 @@ import jakarta.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "RH_T_TIPREL_REM_PAG")
-public class TipoRelRemPagEntity extends AuditEntity {
+public class TipoRelRemPagEntity  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rh_s_tiprel_rem_pag")

@@ -21,13 +21,13 @@ public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoById
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final DadosContratuaisMapper dadosContratuaisMapper;
-  private final FuncionarioRules funcionarioRoles;
+  private final FuncionarioRules funcionarioRules;
 
-  public GetContratoByIdQueryHandler(FuncionarioEntityRepository funcionarioEntityRepository, DadosContratuaisMapper dadosContratuaisMapper, FuncionarioRules funcionarioRoles) {
+  public GetContratoByIdQueryHandler(FuncionarioEntityRepository funcionarioEntityRepository, DadosContratuaisMapper dadosContratuaisMapper, FuncionarioRules funcionarioRules) {
 
     this.funcionarioEntityRepository = funcionarioEntityRepository;
     this.dadosContratuaisMapper = dadosContratuaisMapper;
-    this.funcionarioRoles = funcionarioRoles;
+    this.funcionarioRules = funcionarioRules;
   }
 
 
@@ -42,10 +42,23 @@ public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoById
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
-    var dadosContratuais = funcionarioRoles.getTipoRelacionamentoByContratoId(funcionario.getUuid(), contratoId);
-    if (dadosContratuais == null)
+    var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoByContratoId(funcionario.getUuid(), contratoId);
+    if (tiposRelacionamento == null)
       throw IgrpResponseStatusException.notFound("Contrato com id '%s' não encontrado".formatted(contratoId));
 
-    return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO(dadosContratuais));
+    var remuneracoes = funcionarioRules.getRemuneracoesAssociadosAtivas(tiposRelacionamento.getId());
+    var pagamentos = funcionarioRules.getPagamentosDescontosAssociadosAtivas(tiposRelacionamento.getId());
+
+    var dadosContratuaisResp = dadosContratuaisMapper
+        .dadosContratuaisRespDTO(tiposRelacionamento);
+
+    var remuneracoesResp= dadosContratuaisMapper.subsidioRespDTOS(remuneracoes);
+    var pagamentosResp = dadosContratuaisMapper.encargosDescontosRespDTO(pagamentos);
+
+    dadosContratuaisResp.setSubsidios(remuneracoesResp);
+    dadosContratuaisResp.setEncargosDescontos(pagamentosResp);
+
+
+    return ResponseEntity.ok(dadosContratuaisResp);
   }
 }
