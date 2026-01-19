@@ -4,6 +4,7 @@ import cv.inps.rh.funcionario.application.commands.CreateFuncionarioCommand;
 import cv.inps.rh.funcionario.application.constants.SituacaoLaboral;
 import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
+import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -53,6 +54,9 @@ public class RegistarColaboradorService {
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
 
   private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
+
+  private final FuncionarioRules funcionarioRules;
+
 
   private final EntityManager entityManager;
 
@@ -265,7 +269,16 @@ public class RegistarColaboradorService {
           validacaoEntityRepository.save(e);
         });
 
-    return funcionarioMapper.toResponseDTO(saved);
+    var funcionarioResponseDTO = funcionarioMapper.toResponseDTO(saved);
+
+    var remuneracoes = funcionarioRules.getRemuneracoesAssociados(tr.getId());
+    var pagamentos = funcionarioRules.getPagamentosDescontosAssociados(tr.getId());
+
+    var dcr = dadosContratuaisMapper.dadosContratuaisRespDTO(tr,
+        pagamentos, remuneracoes);
+    funcionarioResponseDTO.setDadosContratuais(dcr);
+
+    return funcionarioResponseDTO;
   }
 
 }

@@ -43,17 +43,18 @@ public class GetFuncionarioByIdQueryHandler implements QueryHandler<GetFuncionar
     var funcionarioResponseDTO = funcionarioMapper.toResponseDTO(funcionario);
 
     var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-    var remuneracoes = funcionarioRules.getRemuneracoesAssociados(tiposRelacionamento.getId());
-    var pagamentos = funcionarioRules.getPagamentosDescontosAssociados(tiposRelacionamento.getId());
 
-    var remuneracoesResp= dadosContratuaisMapper.subsidioRespDTOS(remuneracoes);
-    var pagamentosResp = dadosContratuaisMapper.encargosDescontosRespDTO(pagamentos);
+    var remuneracoes = funcionarioRules
+        .getRemuneracoesAssociados(tiposRelacionamento.getId());
+    var pagamentos = funcionarioRules
+        .getPagamentosDescontosAssociados(tiposRelacionamento.getId());
 
-    funcionarioResponseDTO.getDadosContratuais().setSubsidios(remuneracoesResp);
-    funcionarioResponseDTO.getDadosContratuais().setEncargosDescontos(pagamentosResp);
+    var dcr = dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento, pagamentos,
+        remuneracoes);
+    funcionarioResponseDTO.setDadosContratuais(dcr);
+
 
     return ResponseEntity.ok(funcionarioResponseDTO);
-
 
 
   }

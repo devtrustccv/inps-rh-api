@@ -20,16 +20,12 @@ public class FuncionarioMapper {
   private final ContactoMapper contactoMapper;
   private final EnderecoMapper enderecoMapper;
   private final EntityManager entityManager;
-  private final DadosContratuaisMapper dadosContratuaisMapper;
-  private final FuncionarioRules funcionarioRules;
   private final FamiliarMapper familiarMapper;
   private final DadosBancariosMapper dadosBancariosMapper;
   private final HabilitacaoLiterariaMapper habilitacaoLiterariaMapper;
   private final FormacaoFeitaMapper formacaoFeitaMapper;
   private final ExperienciaProfissionalMapper experienciaProfissionalMapper;
   private final DocumentoMapper documentoMapper;
-
-
 
 
   public DadosPessoaisRespDTO toDadosPessoaisRespDTO(FuncionarioEntity entity) {
@@ -110,13 +106,6 @@ public class FuncionarioMapper {
     if (entity.getDocumentos() != null) {
       var anexos = documentoMapper.toAnexoRespDTOList(entity.getDocumentos());
       dto.setAnexos(anexos);
-    }
-
-
-    if (entity.getTiposrelacionamentos() != null && !entity.getTiposrelacionamentos().isEmpty()) {
-      var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(entity.getUuid());
-      var dcr = dadosContratuaisMapper.dadosContratuaisRespDTO(tipoRelacionamentoAtual);
-      dto.setDadosContratuais(dcr);
     }
 
 

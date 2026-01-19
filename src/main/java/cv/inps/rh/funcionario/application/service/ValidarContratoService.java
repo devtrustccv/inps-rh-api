@@ -21,7 +21,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -100,39 +102,45 @@ public class ValidarContratoService {
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
+    List<TipoRelRemPagEntity> listRemunTipRel = new java.util.ArrayList<>();
     if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
-      java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
       for (var rem : saved.getDefinicoesRenumeracoes()) {
         if (tipoRelRemPagEntityRepository.existsByTiprelIdAndRemId(tiposRelacionamento, rem)) {
           var assoc = new TipoRelRemPagEntity();
           assoc.setTiprelId(tiposRelacionamento);
           assoc.setRemId(rem);
           assoc.setPagId(null);
-          lista.add(assoc);
+          listRemunTipRel.add(assoc);
         }
       }
-      if (!lista.isEmpty()) {
-        tipoRelRemPagEntityRepository.saveAll(lista);
+      if (!listRemunTipRel.isEmpty()) {
+        tipoRelRemPagEntityRepository.saveAll(listRemunTipRel);
       }
     }
 
+    List<TipoRelRemPagEntity> listPagTipRel = new java.util.ArrayList<>();
     if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
-      java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
       for (var pag : saved.getDefinicoesPagamentos()) {
         if (tipoRelRemPagEntityRepository.existsByTiprelIdAndPagId(tiposRelacionamento, pag)) {
           var assoc = new TipoRelRemPagEntity();
           assoc.setTiprelId(tiposRelacionamento);
           assoc.setPagId(pag);
           assoc.setRemId(null);
-          lista.add(assoc);
+          listPagTipRel.add(assoc);
         }
       }
-      if (!lista.isEmpty()) {
-        tipoRelRemPagEntityRepository.saveAll(lista);
+      if (!listPagTipRel.isEmpty()) {
+        tipoRelRemPagEntityRepository.saveAll(listPagTipRel);
       }
     }
 
-    return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento));
+    var remuneracoes = funcionarioRules
+        .getRemuneracoesAssociados(tiposRelacionamento.getId());
+    var pagamentos = funcionarioRules
+        .getPagamentosDescontosAssociados(tiposRelacionamento.getId());
+
+
+    return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento,pagamentos,remuneracoes));
 
   }
 

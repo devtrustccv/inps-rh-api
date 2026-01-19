@@ -87,7 +87,8 @@ public class DadosContratuaisMapper {
 
 
   public DadosContratuaisRespDTO dadosContratuaisRespDTO
-      (TiposRelacionamentoEntity tiposRelacionamento) {
+      (TiposRelacionamentoEntity tiposRelacionamento,
+       List<DefPagamentoEntity> pagamentosDescontos,List<DefinicaoRemuneracaoEntity> remuneracoes ) {
     if (tiposRelacionamento == null) return null;
 
     DadosContratuaisRespDTO dcr = new DadosContratuaisRespDTO();
@@ -145,7 +146,7 @@ public class DadosContratuaisMapper {
       dcr.setDuracaoMeses(tiposRelacionamento.getContrVinculoId().getDuracao());
 
     // Subsídios
-   /*if (!CollectionUtils.isEmpty(remuneracoes)) {
+   if (!CollectionUtils.isEmpty(remuneracoes)) {
       var subs = remuneracoes.stream().map(s -> {
         SubsidioRespDTO sr = new SubsidioRespDTO();
         sr.setId(s.getId());
@@ -171,12 +172,12 @@ public class DadosContratuaisMapper {
       }).toList();
 
       dcr.setEncargosDescontos(encs);
-    }*/
+    }
 
     return dcr;
   }
 
-  public List<EncargosDescontosRespDTO> encargosDescontosRespDTO(List<DefPagamentoEntity> pagamentosDescontos) {
+ /* public List<EncargosDescontosRespDTO> encargosDescontosRespDTO(List<DefPagamentoEntity> pagamentosDescontos) {
 
     if (CollectionUtils.isEmpty(pagamentosDescontos)) {
       return null;
@@ -209,7 +210,7 @@ public class DadosContratuaisMapper {
     }).toList();
 
     return subs;
-  }
+  }*/
 
 
   public TiposRelacionamentoEntity clone(TiposRelacionamentoEntity original) {

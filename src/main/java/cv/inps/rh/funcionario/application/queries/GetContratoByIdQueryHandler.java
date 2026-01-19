@@ -50,14 +50,7 @@ public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoById
     var pagamentos = funcionarioRules.getPagamentosDescontosAssociados(tiposRelacionamento.getId());
 
     var dadosContratuaisResp = dadosContratuaisMapper
-        .dadosContratuaisRespDTO(tiposRelacionamento);
-
-    var remuneracoesResp= dadosContratuaisMapper.subsidioRespDTOS(remuneracoes);
-    var pagamentosResp = dadosContratuaisMapper.encargosDescontosRespDTO(pagamentos);
-
-    dadosContratuaisResp.setSubsidios(remuneracoesResp);
-    dadosContratuaisResp.setEncargosDescontos(pagamentosResp);
-
+        .dadosContratuaisRespDTO(tiposRelacionamento, pagamentos, remuneracoes);
 
     return ResponseEntity.ok(dadosContratuaisResp);
   }

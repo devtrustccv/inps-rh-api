@@ -227,33 +227,33 @@ public class NovoContratoService {
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
     // Associações para remunerações
+    List<TipoRelRemPagEntity> listRemunTipRel = new java.util.ArrayList<>();
     if (saved.getDefinicoesRenumeracoes() != null) {
-      List<TipoRelRemPagEntity> lista = new ArrayList<>();
       for (var rem : saved.getDefinicoesRenumeracoes()) {
         if (rem.getEstado() == Estado.A) {  // só ativo
           var assoc = new TipoRelRemPagEntity();
           assoc.setTiprelId(tiposRelacionamentoNovo);
           assoc.setRemId(rem);
           assoc.setPagId(null);
-          lista.add(assoc);
+          listRemunTipRel.add(assoc);
         }
       }
-      tipoRelRemPagEntityRepository.saveAll(lista);
+      tipoRelRemPagEntityRepository.saveAll(listRemunTipRel);
     }
 
     // Associações para pagamentos
+    List<TipoRelRemPagEntity> listPagTipRel = new java.util.ArrayList<>();
     if (saved.getDefinicoesPagamentos() != null) {
-      List<TipoRelRemPagEntity> lista = new ArrayList<>();
       for (var pag : saved.getDefinicoesPagamentos()) {
         if (pag.getEstado() == Estado.A) { // só ativo
           var assoc = new TipoRelRemPagEntity();
           assoc.setTiprelId(tiposRelacionamentoNovo);
           assoc.setPagId(pag);
           assoc.setRemId(null);
-          lista.add(assoc);
+          listPagTipRel.add(assoc);
         }
       }
-      tipoRelRemPagEntityRepository.saveAll(lista);
+      tipoRelRemPagEntityRepository.saveAll(listPagTipRel);
     }
 
     validacaoEntityRepository.findById(valid.getId())
@@ -262,7 +262,12 @@ public class NovoContratoService {
           validacaoEntityRepository.save(e);
         });
 
-    return dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamentoNovo);
+    var remuneracoes = funcionarioRules
+        .getRemuneracoesAssociados(tiposRelacionamentoNovo.getId());
+    var pagamentos = funcionarioRules
+        .getPagamentosDescontosAssociados(tiposRelacionamentoNovo.getId());
+
+    return dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamentoNovo, pagamentos, remuneracoes);
   }
 
   private CarreiraEntity mudaCarreiraOuManter(
@@ -467,13 +472,45 @@ public class NovoContratoService {
       }
     }
 
+
+    FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+
+    if (!CollectionUtils.isEmpty(saved.getDefinicoesRenumeracoes())) {
+      var lista = new ArrayList<TipoRelRemPagEntity>();
+      for (var rem : saved.getDefinicoesRenumeracoes()) {
+        var assoc = new TipoRelRemPagEntity();
+        assoc.setTiprelId(tiposRelacionamento);
+        assoc.setRemId(rem);
+        assoc.setPagId(null);
+        lista.add(assoc);
+      }
+      tipoRelRemPagEntityRepository.saveAll(lista);
+    }
+
+    if (!CollectionUtils.isEmpty(saved.getDefinicoesPagamentos())) {
+      var lista = new ArrayList<TipoRelRemPagEntity>();
+      for (var pag : saved.getDefinicoesPagamentos()) {
+        var assoc = new TipoRelRemPagEntity();
+        assoc.setTiprelId(tiposRelacionamento);
+        assoc.setPagId(pag);
+        assoc.setRemId(null);
+        lista.add(assoc);
+      }
+      tipoRelRemPagEntityRepository.saveAll(lista);
+    }
+
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {
           e.setReferenciaId(contrato.getId());
           validacaoEntityRepository.save(e);
         });
 
-    return dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento);
+    var remuneracoes = funcionarioRules
+        .getRemuneracoesAssociados(tiposRelacionamento.getId());
+    var pagamentos = funcionarioRules
+        .getPagamentosDescontosAssociados(tiposRelacionamento.getId());
+
+    return dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento, pagamentos, remuneracoes);
 
   }
 }
