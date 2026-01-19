@@ -210,8 +210,7 @@ public class RegistarColaboradorService {
     }
     /******************** FIM PAGAMENTOS DESCONTOS ********************************/
 
-    var paramSituacaoLaboral = paramSitLaboralEntityRepository.findByCodigo(SituacaoLaboral.ATIVO.name()).orElseThrow(
-        () -> IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com codigo ATIVO."));
+    var paramSituacaoLaboral = entityManager.getReference(ParamSituacaoEntity.class,dadosContratuais.getSituacaoLaboralId());
 
     var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P,
         "INICIO",
