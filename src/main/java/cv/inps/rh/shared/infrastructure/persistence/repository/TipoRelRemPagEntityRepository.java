@@ -31,7 +31,7 @@ public interface TipoRelRemPagEntityRepository extends
 
     boolean existsByTiprelIdAndPagId(TiposRelacionamentoEntity tipRelId, DefPagamentoEntity pagId);
 
-    List<TipoRelRemPagEntity> findByTiprelId(TiposRelacionamentoEntity tiprelId);
+    List<TipoRelRemPagEntity> findByTiprelId_Id(Long tiprelId);
 
   @Query("""
     SELECT trrp

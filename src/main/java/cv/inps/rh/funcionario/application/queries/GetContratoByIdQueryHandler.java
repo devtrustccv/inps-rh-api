@@ -46,8 +46,8 @@ public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoById
     if (tiposRelacionamento == null)
       throw IgrpResponseStatusException.notFound("Contrato com id '%s' não encontrado".formatted(contratoId));
 
-    var remuneracoes = funcionarioRules.getRemuneracoesAssociadosAtivas(tiposRelacionamento.getId());
-    var pagamentos = funcionarioRules.getPagamentosDescontosAssociadosAtivas(tiposRelacionamento.getId());
+    var remuneracoes = funcionarioRules.getRemuneracoesAssociados(tiposRelacionamento.getId());
+    var pagamentos = funcionarioRules.getPagamentosDescontosAssociados(tiposRelacionamento.getId());
 
     var dadosContratuaisResp = dadosContratuaisMapper
         .dadosContratuaisRespDTO(tiposRelacionamento);
