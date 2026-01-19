@@ -78,6 +78,8 @@ public class DadosContratuaisMapper {
     if (dc == null) return;
     entity.setDataInicio(dc.getDataInicio());
     entity.setDataFim(dc.getDataFim());
+    entity.setSituacaoLaboralId(em.getReference(ParamSituacaoEntity.class,dc.getSituacaoLaboralId()));
+
   }
 
 

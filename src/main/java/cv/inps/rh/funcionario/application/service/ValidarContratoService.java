@@ -78,6 +78,9 @@ public class ValidarContratoService {
        carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
      }
 
+    var situacaoLaboral = tiposRelacionamento.getSituacLaboralId();
+    dadosContratuaisMapper.toUpdateSituacaoLaboral(situacaoLaboral, dadosContratuais);
+
     var regime = tiposRelacionamento.getRegimeId();
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
 
