@@ -105,7 +105,7 @@ public class ValidarContratoService {
     List<TipoRelRemPagEntity> listRemunTipRel = new java.util.ArrayList<>();
     if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
       for (var rem : saved.getDefinicoesRenumeracoes()) {
-        if (tipoRelRemPagEntityRepository.existsByTiprelIdAndRemId(tiposRelacionamento, rem)) {
+        if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndRemId(tiposRelacionamento, rem)) {
           var assoc = new TipoRelRemPagEntity();
           assoc.setTiprelId(tiposRelacionamento);
           assoc.setRemId(rem);
@@ -121,7 +121,7 @@ public class ValidarContratoService {
     List<TipoRelRemPagEntity> listPagTipRel = new java.util.ArrayList<>();
     if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
       for (var pag : saved.getDefinicoesPagamentos()) {
-        if (tipoRelRemPagEntityRepository.existsByTiprelIdAndPagId(tiposRelacionamento, pag)) {
+        if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndPagId(tiposRelacionamento, pag)) {
           var assoc = new TipoRelRemPagEntity();
           assoc.setTiprelId(tiposRelacionamento);
           assoc.setPagId(pag);

@@ -177,41 +177,6 @@ public class DadosContratuaisMapper {
     return dcr;
   }
 
- /* public List<EncargosDescontosRespDTO> encargosDescontosRespDTO(List<DefPagamentoEntity> pagamentosDescontos) {
-
-    if (CollectionUtils.isEmpty(pagamentosDescontos)) {
-      return null;
-    }
-      var encs = pagamentosDescontos.stream().map(e -> {
-        EncargosDescontosRespDTO er = new EncargosDescontosRespDTO();
-        er.setId(e.getId());
-        er.setTipoEncargoId(e.getTmId() != null ? e.getTmId().getId() : null);
-        er.setValor(e.getValor());
-        er.setDataInicio(e.getDataInicio());
-        er.setDataFim(e.getDataFim());
-        return er;
-      }).toList();
-
-    return encs;
-  }
-
-  public List<SubsidioRespDTO> subsidioRespDTOS(List<DefinicaoRemuneracaoEntity> remuneracoes) {
-
-    if (CollectionUtils.isEmpty(remuneracoes)) {
-      return null;
-    }
-    var subs = remuneracoes.stream().map(s -> {
-      SubsidioRespDTO sr = new SubsidioRespDTO();
-      sr.setId(s.getId());
-      sr.setTipoSubsidioId(s.getTmId() != null ? s.getTmId().getId() : null);
-      sr.setPercentagem(s.getPercentagem());
-      sr.setValor(s.getValor());
-      return sr;
-    }).toList();
-
-    return subs;
-  }*/
-
 
   public TiposRelacionamentoEntity clone(TiposRelacionamentoEntity original) {
 

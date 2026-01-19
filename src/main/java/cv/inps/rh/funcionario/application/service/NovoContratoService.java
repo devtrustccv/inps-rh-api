@@ -164,7 +164,6 @@ public class NovoContratoService {
       var vinculoId = tipoRelacionamentoAtual.getContrVinculoId() != null ?
           tipoRelacionamentoAtual.getContrVinculoId().getVinculoId().getId() : null;
 
-
       var houveMudancaSalario = houveMudancaSalario(vinculoId, escalaoId, dadosContratuais, funcionario);
 
       if (houveMudancaSalario) {
@@ -198,8 +197,7 @@ public class NovoContratoService {
         funcionario.setDefinicoesPagamentos(pagList);
       }
 
-      if(Objects.equals(vinculoId, dadosContratuais.getTipoVinculoLaboralId())) {
-
+      if(!Objects.equals(vinculoId, dadosContratuais.getTipoVinculoLaboralId())) {
         if (funcionario.getDefinicoesPagamentos() != null) {
           funcionario.getDefinicoesPagamentos().stream()
               .filter(r -> r.getEstado() == Estado.A)
