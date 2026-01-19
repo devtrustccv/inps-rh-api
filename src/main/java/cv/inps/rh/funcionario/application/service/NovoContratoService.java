@@ -205,7 +205,8 @@ public class NovoContratoService {
               .filter(r -> r.getEstado() == Estado.A)
               .forEach(r -> r.setEstado(Estado.I));
         }
-        var listAssociacaoVinculoTipoMovimentoPag = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(
+        var listAssociacaoVinculoTipoMovimentoPag =
+            paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(
             dadosContratuais.getTipoVinculoLaboralId(),
             "PAG");
 

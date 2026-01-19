@@ -78,6 +78,32 @@ public class FuncionarioRules {
   }
 
 
+  public List<DefinicaoRemuneracaoEntity> getRemuneracoesAssociadosAtivos(Long tipoRelacionamentoId) {
+
+    return tipoRelRemPagEntityRepository
+        .findByTiprelIdAndEstado(tipoRelacionamentoId, Estado.A)
+        .stream()
+        .map(TipoRelRemPagEntity::getRemId)
+        .filter(Objects::nonNull)
+        //.distinct()
+        .collect(Collectors.toList());
+
+  }
+
+  public List<DefPagamentoEntity> getPagamentosDescontosAssociadosAtivos(Long tipoRelacionamentoId) {
+
+    return tipoRelRemPagEntityRepository
+        .findByTiprelIdAndEstado(tipoRelacionamentoId, Estado.A)
+        .stream()
+        .map(TipoRelRemPagEntity::getPagId)
+        .filter(Objects::nonNull)
+        //.distinct()
+        .collect(Collectors.toList());
+
+  }
+
+
+
   public Optional<ValidacaoEntity> getValidacaoPendente(UUID funUuid, TipoAcao tipoAccao, Referencia referenciaName) {
 
     return validacaoEntityRepository
