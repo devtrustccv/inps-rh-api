@@ -91,8 +91,12 @@ public class DadosContratuaisMapper {
     dcr.setTipoContratoId(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getTpContratoId().getId() : null);
     dcr.setTipoContratoDesc(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getTpContratoId().getNome() : null);
 
+    dcr.setSituacaoLaboralId(tiposRelacionamento.getSituacLaboralId() != null ? tiposRelacionamento.getSituacLaboralId().getSituacaoLaboralId().getId() : null);
+
+
     dcr.setCargoPosicaoId(tiposRelacionamento.getCargoId() != null ? tiposRelacionamento.getCargoId().getId() : null);
     dcr.setCargoPosicaoDesc(tiposRelacionamento.getCargoId() != null ? tiposRelacionamento.getCargoId().getNome() : null);
+
 
     if(tiposRelacionamento.getMobId()!=null){
       dcr.setDirecaoId(tiposRelacionamento.getMobId().getInstidId().getId());

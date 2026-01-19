@@ -4,6 +4,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -65,6 +66,7 @@ public interface DefinicaoRemuneracaoEntityRepository extends
     return this.findByUuid(uuid).orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "DefinicaoRemuneracaoEntity not found for id: " + uuid));
   }
 
+  List<DefinicaoRemuneracaoEntity> findByFunIdAndTmIdAndEstado(FuncionarioEntity funId, TipoMovimentoEntity tmId, Estado estado);
 
 
 }

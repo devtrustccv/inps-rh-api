@@ -228,7 +228,6 @@ public class RegistarColaboradorService {
     tr.setEstActAdm(1);
     tr.setSituacLaboralId(situacaoLaboral);
     fun.setTiposrelacionamentos(new ArrayList<>(List.of(tr)));
-
     var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.REGISTO_COLABORADOR.name(),
         Estado.P);
     valid.setFunId(fun);
