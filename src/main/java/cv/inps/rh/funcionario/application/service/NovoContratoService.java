@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.NovoContratoCommand;
 import cv.inps.rh.funcionario.application.constants.SituacaoLaboral;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
@@ -72,56 +73,185 @@ public class NovoContratoService {
           "funcionario possui validacao de contrato pendente");
     }
 
-    /*boolean temContratoAtivo = funcionario.getContratos().stream()
-        .anyMatch(c -> c.getEstado().equals(Estado.A));
-
-    if (temContratoAtivo) {
-      throw IgrpResponseStatusException.badRequest(
-          "Funcionário já possui contrato ativo");
-    }*/
-
     boolean isPrimeiroContrato = funcionario.getContratos().isEmpty();
-    String tipoSituacao = isPrimeiroContrato ? "INICIO" : "CONTINUIDADE";
 
-    if (!isPrimeiroContrato) {
-      var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-      tipoRelacionamentoAtual.setEstActAdm(0);
-      var contratoAtual = tipoRelacionamentoAtual.getContrVinculoId();
-      var fim = contratoAtual != null && contratoAtual.getDataFim() != null ? contratoAtual.getDataFim()
-          : LocalDate.now();
-      tipoRelacionamentoAtual.setDataFim(fim);
-      if (tipoRelacionamentoAtual.getCarreiraId() != null) {
-        tipoRelacionamentoAtual.getCarreiraId().setDataFim(fim);
-      }
-      if (tipoRelacionamentoAtual.getRegimeId() != null && tipoRelacionamentoAtual.getRegimeId().getDataFim() == null) {
-        tipoRelacionamentoAtual.getRegimeId().setDataFim(fim);
-      }
-      if (tipoRelacionamentoAtual.getMobId() != null && tipoRelacionamentoAtual.getMobId().getDataFim() == null) {
-        tipoRelacionamentoAtual.getMobId().setDataFim(fim);
-      }
+    if (isPrimeiroContrato) {
+      return primeiroContrato(funcionario, dadosContratuais);
     }
 
-    /********* adicionar novo contrato **************/
+    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    tipoRelacionamentoAtual.setEstActAdm(0);
 
-    // contrato anterior, se existir
-    var contratoAnterior = funcionario.getContratos().stream()
-        .max(Comparator.comparing(ContratoEntity::getVersao))
-        .orElse(null);
-    // Cria o contrato
+    ContratoEntity contratoAtual = null;
+    contratoAtual = tipoRelacionamentoAtual.getContrVinculoId();
+    contratoAtual.setEstado(Estado.I);
+    var fim = contratoAtual.getDataFim();
+
+    tipoRelacionamentoAtual.setDataFim(fim);
+
+    if (tipoRelacionamentoAtual.getCarreiraId() != null) {
+      tipoRelacionamentoAtual.getCarreiraId().setDataFim(fim);
+    }
+    if (tipoRelacionamentoAtual.getRegimeId() != null && tipoRelacionamentoAtual.getRegimeId().getDataFim() == null) {
+      tipoRelacionamentoAtual.getRegimeId().setDataFim(fim);
+    }
+    if (tipoRelacionamentoAtual.getMobId() != null && tipoRelacionamentoAtual.getMobId().getDataFim() == null) {
+      tipoRelacionamentoAtual.getMobId().setDataFim(fim);
+    }
+
+
     var contrato = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contrato.setFunId(funcionario);
-    contrato.setTipoSituacao(tipoSituacao);
-
-    // Define versão e contrato_id
-    if (contratoAnterior == null) {
-      contrato.setVersao(1);
-      contrato.setContratoId(null); // primeiro contrato, raiz
-    } else {
-      contrato.setVersao(contratoAnterior.getVersao() + 1);
-      contrato.setContratoId(contratoAnterior); // contrato pai
-    }
+    contrato.setTipoSituacao("CONTINUIDADE");
+    contrato.setVersao(contratoAtual.getVersao() + 1);
+    contrato.setContratoId(contratoAtual); // contrato pai
 
     funcionario.getContratos().add(contrato);
+
+    var regime = regimeTrabalhoMapper.toRegime(dadosContratuais, Estado.P);
+    if (regime != null) {
+      regime.setFunId(funcionario);
+      funcionario.getRegimesTrabalhos().add(regime);
+    }
+
+    var mobilidade = mobilidadeMapper.toMobilidade(dadosContratuais, Estado.P);
+    if (mobilidade != null) {
+      mobilidade.setFunId(funcionario);
+      funcionario.getMobilidades().add(mobilidade);
+    }
+
+    CarreiraEntity carreira = null;
+    if (Objects.equals(1, paramVinculo.getFlgCarreira()) && dadosContratuais.getCarreiraId() != null) {
+      carreira = carreiraMapper.toCarreira(dadosContratuais, Estado.P);
+      if (carreira != null) {
+        carreira.setContrVinculoId(contrato);
+        contrato.getCarreiras().add(carreira);
+      }
+    }
+
+    var paramSituacaoLaboral = paramSitLaboralEntityRepository
+        .findByCodigo(SituacaoLaboral.ATIVO.name()).orElseThrow(
+        () -> IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com codigo ATIVO."));
+
+    var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P,
+        "NOVO_CONTRATO", "NOVO_CONTRATO");
+    situacaoLaboral.setContrVinculoId(contrato);
+    contrato.setSituacoesLaborais(new ArrayList<>(List.of(situacaoLaboral)));
+
+    var tiposRelacionamentoNovo = dadosContratuaisMapper.toRelacionamento(dadosContratuais, Estado.P);
+    tiposRelacionamentoNovo.setFunId(funcionario);
+    tiposRelacionamentoNovo.setContrVinculoId(contrato);
+    tiposRelacionamentoNovo.setCarreiraId(carreira);
+    tiposRelacionamentoNovo.setRegimeId(regime);
+    tiposRelacionamentoNovo.setMobId(mobilidade);
+    tiposRelacionamentoNovo.setFlgProcessa(0);
+    tiposRelacionamentoNovo.setEstActAdm(1);
+    tiposRelacionamentoNovo.setSituacLaboralId(situacaoLaboral);
+    funcionario.getTiposrelacionamentos().add(tiposRelacionamentoNovo);
+
+    var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.CONTRATO.name(), Estado.P);
+    valid.setFunId(funcionario);
+    valid.setTiprelId(tiposRelacionamentoNovo);
+    funcionario.getValidacoes().add(valid);
+
+    // verifica se vinculo tem salario
+    if (Objects.equals(1, paramVinculo.getFlgSalario())) {
+      /******************** INI RENUMERACOES ********************************/
+      if (dadosContratuais.getSubsidios() != null && !dadosContratuais.getSubsidios().isEmpty()) {
+        var remList = dadosContratuais.getSubsidios().stream()
+            .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P))
+            .collect(Collectors.toList());
+        funcionario.setDefinicoesRenumeracoes(remList);
+      }
+
+      var vinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
+          .findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
+              "REM").getFirst(); // so é associado um tipo REM SALL ao vinculo
+
+      if (!Objects.isNull(vinculoTipoMovimentoREM)) {
+        var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
+            dadosContratuais.getSalario(),
+            vinculoTipoMovimentoREM.getTmId(),
+            dadosContratuais.getDataInicio(),
+            dadosContratuais.getDataFim(),
+            funcionario,
+            dadosContratuais.getMoeda());
+        funcionario.getDefinicoesRenumeracoes().add(renumeracao);
+      }
+      /******************** FIM RENUMERACOES ********************************/
+
+      /******************** INI PAGAMENTOS DESCONTOS ********************************/
+      if (dadosContratuais.getEncargosDescontos() != null && !dadosContratuais.getEncargosDescontos().isEmpty()) {
+        var pagList = dadosContratuais.getEncargosDescontos().stream()
+            .map(e -> defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P))
+            .collect(Collectors.toList());
+        funcionario.setDefinicoesPagamentos(pagList);
+      }
+
+      var listAssociacaoVinculoTipoMovimentoPag = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(
+          dadosContratuais.getTipoVinculoLaboralId(),
+          "PAG");
+
+      if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
+        listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
+          var pagamento = defPagamentoMapper.createPagamento(
+              BigDecimal.ZERO,
+              movimento.getTmId(),
+              dadosContratuais.getDataInicio(),
+              dadosContratuais.getDataFim(),
+              funcionario);
+          funcionario.getDefinicoesPagamentos().add(pagamento);
+        });
+      }
+    }
+    /******************** FIM PAGAMENTOS DESCONTOS ********************************/
+
+    FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+
+    if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
+      java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
+      for (var rem : saved.getDefinicoesRenumeracoes()) {
+        var assoc = new TipoRelRemPagEntity();
+        assoc.setTiprelId(tiposRelacionamentoNovo);
+        assoc.setRemId(rem);
+        assoc.setPagId(null);
+        lista.add(assoc);
+      }
+      tipoRelRemPagEntityRepository.saveAll(lista);
+    }
+
+    if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
+      java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
+      for (var pag : saved.getDefinicoesPagamentos()) {
+        var assoc = new TipoRelRemPagEntity();
+        assoc.setTiprelId(tiposRelacionamentoNovo);
+        assoc.setPagId(pag);
+        assoc.setRemId(null);
+        lista.add(assoc);
+      }
+      tipoRelRemPagEntityRepository.saveAll(lista);
+    }
+
+    validacaoEntityRepository.findById(valid.getId())
+        .ifPresent(e -> {
+          e.setReferenciaId(contrato.getId());
+          validacaoEntityRepository.save(e);
+        });
+
+    return dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamentoNovo);
+  }
+
+
+  private DadosContratuaisRespDTO primeiroContrato(FuncionarioEntity funcionario, DadosContratuaisReqDTO dadosContratuais) {
+
+    var paramVinculo = entityManager.find(ParamVinculoEntity.class,
+        dadosContratuais.getTipoVinculoLaboralId());
+
+    var contrato = contratoMapper.toContrato(dadosContratuais, Estado.P);
+    contrato.setFunId(funcionario);
+    contrato.setTipoSituacao("INICIO");
+    contrato.setVersao(1);
+    contrato.setContratoId(null);
 
     var regime = regimeTrabalhoMapper.toRegime(dadosContratuais, Estado.P);
     if (regime != null) {
@@ -168,6 +298,7 @@ public class NovoContratoService {
     valid.setTiprelId(tiposRelacionamento);
     funcionario.getValidacoes().add(valid);
 
+
     // verifica se vinculo tem salario
     if (Objects.equals(1, paramVinculo.getFlgSalario())) {
       /******************** INI RENUMERACOES ********************************/
@@ -183,13 +314,13 @@ public class NovoContratoService {
               "REM").getFirst(); // so é associado um tipo REM SALL ao vinculo
 
       if (!Objects.isNull(vinculoTipoMovimentoREM)) {
-          var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
-              dadosContratuais.getSalario(),
-              vinculoTipoMovimentoREM.getTmId(),
-              dadosContratuais.getDataInicio(),
-              dadosContratuais.getDataFim(),
-              funcionario,
-              dadosContratuais.getMoeda());
+        var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
+            dadosContratuais.getSalario(),
+            vinculoTipoMovimentoREM.getTmId(),
+            dadosContratuais.getDataInicio(),
+            dadosContratuais.getDataFim(),
+            funcionario,
+            dadosContratuais.getMoeda());
         funcionario.getDefinicoesRenumeracoes().add(renumeracao);
       }
       /******************** FIM RENUMERACOES ********************************/
@@ -218,33 +349,6 @@ public class NovoContratoService {
         });
       }
     }
-    /******************** FIM PAGAMENTOS DESCONTOS ********************************/
-
-    FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
-
-    if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
-      java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
-      for (var rem : saved.getDefinicoesRenumeracoes()) {
-        var assoc = new TipoRelRemPagEntity();
-        assoc.setTiprelId(tiposRelacionamento);
-        assoc.setRemId(rem);
-        assoc.setPagId(null);
-        lista.add(assoc);
-      }
-      tipoRelRemPagEntityRepository.saveAll(lista);
-    }
-
-    if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
-      java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
-      for (var pag : saved.getDefinicoesPagamentos()) {
-        var assoc = new TipoRelRemPagEntity();
-        assoc.setTiprelId(tiposRelacionamento);
-        assoc.setPagId(pag);
-        assoc.setRemId(null);
-        lista.add(assoc);
-      }
-      tipoRelRemPagEntityRepository.saveAll(lista);
-    }
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {
@@ -253,5 +357,6 @@ public class NovoContratoService {
         });
 
     return dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento);
+
   }
 }
