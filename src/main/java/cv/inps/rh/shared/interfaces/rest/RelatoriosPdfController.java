@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.interfaces.rest;
 
+import cv.inps.rh.shared.application.dto.MinioFileDataDTO;
 import cv.inps.rh.shared.domain.service.RelatoriosService;
 import cv.inps.rh.shared.util.PdfGenerator;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/relatorios/pdf")
-@Tag(name = "Relatorios", description = "Módulo relatorios")
+@Tag(name = "Relatorios", description = "Módulo relatórios")
 public class RelatoriosPdfController {
 
   private final RelatoriosService service;
@@ -24,11 +25,8 @@ public class RelatoriosPdfController {
   }
 
   @GetMapping("/ordem-servico")
-  public ResponseEntity<byte[]> ordemServicoPdf() {
-    return pdfResponse(
-        pdf.generate("ordem-servico", service.ordemServico()),
-        "ordem-servico.pdf"
-    );
+  public ResponseEntity<MinioFileDataDTO> ordemServicoPdf() {
+    return ResponseEntity.ok(service.ordemServico());
   }
 
   @GetMapping("/recibos-salario")

@@ -1,5 +1,7 @@
 package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cv.inps.rh.processamento.application.dto.DadosValidacaoDTO;
 import cv.inps.rh.processamento.application.dto.DetalhesProcessamentoDTO;
 import cv.inps.rh.processamento.application.dto.ResumoProcessamentoDTO;
@@ -7,31 +9,38 @@ import cv.inps.rh.processamento.application.dto.WrapperProcessamentoSalarialDTO;
 import cv.inps.rh.processamento.application.queries.GetDadosValidacaoQuery;
 import cv.inps.rh.processamento.application.queries.GetDetalhesProcessamentoQuery;
 import cv.inps.rh.processamento.application.queries.GetProcessamentoSalarialQuery;
-import cv.inps.rh.processamento.infrastructure.persistence.entity.RhValidacaoEntityView;
+import cv.inps.rh.processamento.domain.service.processamentosalarial.validacao.DadosValidacao;
 import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcPagEntityRepository;
 import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcRemunEntityRepository;
-import cv.inps.rh.processamento.infrastructure.repositories.RhValidacaoEntityRepository;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
-import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
+import java.sql.Clob;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ProcessamentoSalarialReadService {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(ProcessamentoSalarialReadService.class);
+
   private final ProcessamentoSalarialEntityRepository processamentoSalarialEntityRepository;
   private final ProcSalCcRemunEntityRepository procSalCcRemunEntityRepository;
   private final ProcSalCcPagEntityRepository procSalCcPagEntityRepository;
-  private final RhValidacaoEntityRepository rhValidacaoRepository;
+  private final ObjectMapper objectMapper;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   public WrapperProcessamentoSalarialDTO getProcessamentoSalarial(GetProcessamentoSalarialQuery query) {
 
@@ -78,38 +87,51 @@ public class ProcessamentoSalarialReadService {
     REMUNERACAO, PAGAMENTO
   }
 
-  public List<DadosValidacaoDTO> getDadosValidacao(GetDadosValidacaoQuery f) {
+  public List<DadosValidacaoDTO> getDadosValidacao(GetDadosValidacaoQuery query) {
+    try {
 
-    Specification<RhValidacaoEntityView> spec = (root, query, cb) -> {
+      if (!StringUtils.hasText(query.getTipoValidacao())
+          && !StringUtils.hasText(query.getMesAtual())
+          && !StringUtils.hasText(query.getMesAnterior()))
+        return List.of();
 
-      List<Predicate> predicates = new ArrayList<>();
+      var clob = (Clob) entityManager
+          .createNativeQuery("SELECT RH_F_VALIDACAO(:tipo, :mesAnterior, :mesAtual) FROM dual")
+          .setParameter("tipo", query.getTipoValidacao())
+          .setParameter("mesAnterior", query.getMesAnterior())
+          .setParameter("mesAtual", query.getMesAtual())
+          .getSingleResult();
 
-      if (f.getTipoValidacao() != null)
-        predicates.add(cb.equal(root.get("tipoValidacao"), f.getTipoValidacao()));
+      if (clob == null)
+        return List.of();
 
-      if (f.getMesAtual() != null)
-        predicates.add(cb.equal(root.get("mesAtual"), f.getMesAtual()));
+      var json = clob.getSubString(1, (int) clob.length());
 
-      if (f.getMesAnterior() != null)
-        predicates.add(cb.equal(root.get("mesAnterior"), f.getMesAnterior()));
+      return objectMapper.readValue(json, new TypeReference<List<DadosValidacao>>() {
+          })
+          .stream()
+          .map(obj -> {
+            var row = new DadosValidacaoDTO();
+            row.setNomeColaborador(obj.getNomeColaborador());
+            row.setNib(obj.getNib());
+            row.setValorAnterior(obj.getValorAnterior());
+            row.setValorAtual(obj.getValorAtual());
+            row.setTipoMovimento(obj.getTipoMovimento());
+            row.setMesAnterior(obj.getMesAnterior());
+            row.setMesAtual(obj.getMesAtual());
+            row.setValorEscalao(obj.getValorEscalao());
+            row.setNumero(obj.getNumero());
+            row.setSituacaoLaboral(obj.getSituacaoLaboral());
+            row.setTipoFiltro(obj.getTipoFiltro());
+            row.setProcessamentoId(obj.getProcsalId());
+            row.setFunId(obj.getFunId());
+            return row;
+          })
+          .toList();
 
-      return cb.and(predicates.toArray(new Predicate[0]));
-    };
-
-    return rhValidacaoRepository.findAll(spec).stream()
-        .map(obj -> new DadosValidacaoDTO(
-            obj.getNomeColaborador(),
-            obj.getNib(),
-            obj.getValorAnterior(),
-            obj.getValorAtual(),
-            obj.getTipoMovimento(),
-            obj.getMesAtual(),
-            obj.getValorAtual(),
-            obj.getValorEscalao(),
-            obj.getNomeColaborador(),
-            obj.getNumero(),
-            obj.getSituacaoLaboral()
-        ))
-        .toList();
+    } catch (Exception e) {
+      LOGGER.error(e.getMessage(), e);
+    }
+    throw IgrpResponseStatusException.internalServerError("Error getting data...");
   }
 }

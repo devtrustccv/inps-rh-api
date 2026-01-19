@@ -1,0 +1,34 @@
+{
+  "type": "dto",
+  "module": "shared",
+  "name": "MinioFileData",
+  "template": "record",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "fileId",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "fileDescription",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "s6t8p7ml6g"
+}

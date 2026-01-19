@@ -32,24 +32,30 @@ public class DadosValidacaoDTO  {
   private BigDecimal valorAtual ;
 
 
-  private String tiposMovimento ;
+  private String tipoMovimento ;
 
 
-  private String mesProcessamento ;
+  private String mesAnterior ;
 
 
-  private BigDecimal valorProcessado ;
+  private String mesAtual ;
 
 
   private BigDecimal valorEscalao ;
-
-
-  private String valor ;
 
 
   private Integer numero ;
 
 
   private String situacaoLaboral ;
+
+
+  private String tipoFiltro ;
+
+
+  private Integer processamentoId ;
+
+
+  private Integer funId ;
 
 }

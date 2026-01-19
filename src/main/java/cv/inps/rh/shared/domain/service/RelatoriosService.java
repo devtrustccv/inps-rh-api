@@ -1,5 +1,10 @@
 package cv.inps.rh.shared.domain.service;
 
+import cv.igrp.platform.filemanager.StorageService;
+import cv.inps.rh.shared.application.dto.MinioFileDataDTO;
+import cv.inps.rh.shared.util.PdfGenerator;
+import lombok.SneakyThrows;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -8,8 +13,18 @@ import java.util.Map;
 @Service
 public class RelatoriosService {
 
-  public Map<String, Object> ordemServico() {
-    return Map.ofEntries(
+  private final PdfGenerator pdf;
+  private final StorageService storageService;
+
+  public RelatoriosService(PdfGenerator pdf, StorageService storageService) {
+    this.pdf = pdf;
+    this.storageService = storageService;
+  }
+
+  @SneakyThrows
+  public MinioFileDataDTO ordemServico() {
+
+    Map<String, Object> data = Map.ofEntries(
         Map.entry("numeroOrdem", "15"),
         Map.entry("ano", "2025"),
         Map.entry("assunto", "Pedido de Licença sem Vencimento"),
@@ -22,6 +37,12 @@ public class RelatoriosService {
         Map.entry("dataEmissao", "30 de abril de 2025"),
         Map.entry("nomePresidente", "Mário Rui Lopes Fernandes")
     );
+
+    var bytes = pdf.generate("ordem-servico", data);
+
+    storageService.uploadPublicFile(bytes, "ordem-servico.pdf", MediaType.APPLICATION_PDF_VALUE);
+
+    return new MinioFileDataDTO("ordem-servico.pdf", "ordem-servico.pdf");
   }
 
   public Map<String, Object> recibosSalario() {
