@@ -82,31 +82,41 @@ public class NovoContratoService {
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     tipoRelacionamentoAtual.setEstActAdm(0);
 
-    ContratoEntity contratoAtual = null;
-    contratoAtual = tipoRelacionamentoAtual.getContrVinculoId();
+    var contratoAtual = tipoRelacionamentoAtual.getContrVinculoId();
     contratoAtual.setEstado(Estado.I);
     var fim = contratoAtual.getDataFim();
-
     tipoRelacionamentoAtual.setDataFim(fim);
 
-    if (tipoRelacionamentoAtual.getCarreiraId() != null) {
-      tipoRelacionamentoAtual.getCarreiraId().setDataFim(fim);
-    }
     if (tipoRelacionamentoAtual.getRegimeId() != null && tipoRelacionamentoAtual.getRegimeId().getDataFim() == null) {
       tipoRelacionamentoAtual.getRegimeId().setDataFim(fim);
     }
-    if (tipoRelacionamentoAtual.getMobId() != null && tipoRelacionamentoAtual.getMobId().getDataFim() == null) {
-      tipoRelacionamentoAtual.getMobId().setDataFim(fim);
-    }
-
 
     var contratoNovo = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contratoNovo.setFunId(funcionario);
     contratoNovo.setTipoSituacao("CONTINUIDADE");
     contratoNovo.setVersao(contratoAtual.getVersao() + 1);
     contratoNovo.setContratoId(contratoAtual); // contrato pai
-
     funcionario.getContratos().add(contratoNovo);
+
+    //**************** INI verifica se mudou carreira e tambem se foi escolhido carreira***********/
+    CarreiraEntity carreira = null;
+    if (Objects.equals(1, paramVinculo.getFlgCarreira()) && dadosContratuais.getCarreiraId() != null) {
+
+      CarreiraEntity atual = tipoRelacionamentoAtual.getCarreiraId()!=null ? tipoRelacionamentoAtual.getCarreiraId() : null;
+      if (atual != null) {
+        carreira = mudaCarreiraOuManter(atual, dadosContratuais);
+
+        // só adiciona nova carreira ao contrato novo se realmente criou nova
+        if (carreira != atual) {
+          carreira.setContrVinculoId(contratoNovo);
+          contratoNovo.getCarreiras().add(carreira);
+        }
+      }
+    }
+    //**************** FIM verifica se mudou carreira e tambem se foi escolhido carreira***********/
+
+    var mobilidade = mudaMobilidadeOuManter(tipoRelacionamentoAtual.getMobId(), dadosContratuais,
+        funcionario);
 
     var regime = regimeTrabalhoMapper.toRegime(dadosContratuais, Estado.P);
     if (regime != null) {
@@ -114,24 +124,8 @@ public class NovoContratoService {
       funcionario.getRegimesTrabalhos().add(regime);
     }
 
-    var mobilidade = mobilidadeMapper.toMobilidade(dadosContratuais, Estado.P);
-    if (mobilidade != null) {
-      mobilidade.setFunId(funcionario);
-      funcionario.getMobilidades().add(mobilidade);
-    }
+    var paramSituacaoLaboral = entityManager.getReference(ParamSituacaoEntity.class,dadosContratuais.getSituacaoLaboralId());
 
-    CarreiraEntity carreira = null;
-    if (Objects.equals(1, paramVinculo.getFlgCarreira()) && dadosContratuais.getCarreiraId() != null) {
-      carreira = carreiraMapper.toCarreira(dadosContratuais, Estado.P);
-      if (carreira != null) {
-        carreira.setContrVinculoId(contratoNovo);
-        contratoNovo.getCarreiras().add(carreira);
-      }
-    }
-
-    var paramSituacaoLaboral = paramSitLaboralEntityRepository
-        .findByCodigo(SituacaoLaboral.ATIVO.name()).orElseThrow(
-        () -> IgrpResponseStatusException.notFound("Parametro de situacao laboral nao encontrado com codigo ATIVO."));
 
     var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P,
         "NOVO_CONTRATO", "NOVO_CONTRATO");
@@ -240,6 +234,70 @@ public class NovoContratoService {
 
     return dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamentoNovo);
   }
+
+  private CarreiraEntity mudaCarreiraOuManter(
+      CarreiraEntity carreiraAtual,
+      DadosContratuaisReqDTO dc) {
+
+    if (!houveMudancaFuncionalCarreira(carreiraAtual, dc)) {
+      return carreiraAtual;
+    }
+
+    carreiraAtual.setDataFim(LocalDate.now());
+    return carreiraMapper.toCarreira(dc, Estado.P);
+  }
+
+  private boolean houveMudancaFuncionalCarreira(CarreiraEntity atual, DadosContratuaisReqDTO dc) {
+
+    if (!Objects.equals(atual.getCargoId().getId(), dc.getCargoPosicaoId())) {
+      return true;
+    }
+
+    if (!Objects.equals(atual.getEscalaoId().getId(), dc.getEscalaoReferenciaId())) {
+      return true;
+    }
+
+    if (!Objects.equals(atual.getCategoriaId().getId(), dc.getCategoriaId())) {
+      return true;
+    }
+
+    return !Objects.equals(atual.getCarrPccsId().getId(), dc.getCarreiraId());
+
+  }
+
+  private MobilidadeEntity mudaMobilidadeOuManter(MobilidadeEntity mobilidadeAtual, DadosContratuaisReqDTO dc,
+                                                  FuncionarioEntity funcionario) {
+
+    if (!houveMudancaFuncionalMobilidade(mobilidadeAtual, dc)) {
+      return mobilidadeAtual;
+    }
+    mobilidadeAtual.setDataFim(LocalDate.now());
+
+    MobilidadeEntity nova = mobilidadeMapper.toMobilidade(dc, Estado.P);
+    nova.setFunId(funcionario);
+    funcionario.getMobilidades().add(nova);
+    return nova;
+  }
+
+
+
+  private boolean houveMudancaFuncionalMobilidade(MobilidadeEntity atual, DadosContratuaisReqDTO dc) {
+
+    if (!Objects.equals(atual.getLocalTrabId().getId(), dc.getLocalTrabalhoId())) {
+      return true;
+    }
+
+    if (!Objects.equals(atual.getSecaoId().getId(), dc.getSeccaoId())) {
+      return true;
+    }
+
+    if (!Objects.equals(atual.getInstidId() != null ? atual.getInstidId().getId() : null, dc.getDirecaoId())) {
+      return true;
+    }
+
+    return false;
+  }
+
 
 
   private DadosContratuaisRespDTO primeiroContrato(FuncionarioEntity funcionario, DadosContratuaisReqDTO dadosContratuais) {
