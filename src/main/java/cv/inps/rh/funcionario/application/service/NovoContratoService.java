@@ -100,13 +100,13 @@ public class NovoContratoService {
     }
 
 
-    var contrato = contratoMapper.toContrato(dadosContratuais, Estado.P);
-    contrato.setFunId(funcionario);
-    contrato.setTipoSituacao("CONTINUIDADE");
-    contrato.setVersao(contratoAtual.getVersao() + 1);
-    contrato.setContratoId(contratoAtual); // contrato pai
+    var contratoNovo = contratoMapper.toContrato(dadosContratuais, Estado.P);
+    contratoNovo.setFunId(funcionario);
+    contratoNovo.setTipoSituacao("CONTINUIDADE");
+    contratoNovo.setVersao(contratoAtual.getVersao() + 1);
+    contratoNovo.setContratoId(contratoAtual); // contrato pai
 
-    funcionario.getContratos().add(contrato);
+    funcionario.getContratos().add(contratoNovo);
 
     var regime = regimeTrabalhoMapper.toRegime(dadosContratuais, Estado.P);
     if (regime != null) {
@@ -124,8 +124,8 @@ public class NovoContratoService {
     if (Objects.equals(1, paramVinculo.getFlgCarreira()) && dadosContratuais.getCarreiraId() != null) {
       carreira = carreiraMapper.toCarreira(dadosContratuais, Estado.P);
       if (carreira != null) {
-        carreira.setContrVinculoId(contrato);
-        contrato.getCarreiras().add(carreira);
+        carreira.setContrVinculoId(contratoNovo);
+        contratoNovo.getCarreiras().add(carreira);
       }
     }
 
@@ -135,12 +135,12 @@ public class NovoContratoService {
 
     var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P,
         "NOVO_CONTRATO", "NOVO_CONTRATO");
-    situacaoLaboral.setContrVinculoId(contrato);
-    contrato.setSituacoesLaborais(new ArrayList<>(List.of(situacaoLaboral)));
+    situacaoLaboral.setContrVinculoId(contratoNovo);
+    contratoNovo.setSituacoesLaborais(new ArrayList<>(List.of(situacaoLaboral)));
 
     var tiposRelacionamentoNovo = dadosContratuaisMapper.toRelacionamento(dadosContratuais, Estado.P);
     tiposRelacionamentoNovo.setFunId(funcionario);
-    tiposRelacionamentoNovo.setContrVinculoId(contrato);
+    tiposRelacionamentoNovo.setContrVinculoId(contratoNovo);
     tiposRelacionamentoNovo.setCarreiraId(carreira);
     tiposRelacionamentoNovo.setRegimeId(regime);
     tiposRelacionamentoNovo.setMobId(mobilidade);
@@ -234,7 +234,7 @@ public class NovoContratoService {
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {
-          e.setReferenciaId(contrato.getId());
+          e.setReferenciaId(contratoNovo.getId());
           validacaoEntityRepository.save(e);
         });
 
