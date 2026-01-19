@@ -147,12 +147,14 @@ public class ValidarRegistoColaboradorService {
     if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
       java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
       for (var rem : saved.getDefinicoesRenumeracoes()) {
-        if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndRemId(tiposRelacionamento, rem)) {
-          var assoc = new TipoRelRemPagEntity();
-          assoc.setTiprelId(tiposRelacionamento);
-          assoc.setRemId(rem);
-          assoc.setPagId(null);
-          lista.add(assoc);
+        if(rem.getEstado().equals(Estado.A) || rem.getEstado().equals(Estado.P)) {
+          if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndRemId(tiposRelacionamento, rem)) {
+            var assoc = new TipoRelRemPagEntity();
+            assoc.setTiprelId(tiposRelacionamento);
+            assoc.setRemId(rem);
+            assoc.setPagId(null);
+            lista.add(assoc);
+          }
         }
       }
       if (!lista.isEmpty()) {
@@ -163,12 +165,14 @@ public class ValidarRegistoColaboradorService {
     if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
       java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
       for (var pag : saved.getDefinicoesPagamentos()) {
-        if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndPagId(tiposRelacionamento, pag)) {
-          var assoc = new TipoRelRemPagEntity();
-          assoc.setTiprelId(tiposRelacionamento);
-          assoc.setPagId(pag);
-          assoc.setRemId(null);
-          lista.add(assoc);
+        if(pag.getEstado().equals(Estado.A) || pag.getEstado().equals(Estado.P)) {
+          if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndPagId(tiposRelacionamento, pag)) {
+            var assoc = new TipoRelRemPagEntity();
+            assoc.setTiprelId(tiposRelacionamento);
+            assoc.setPagId(pag);
+            assoc.setRemId(null);
+            lista.add(assoc);
+          }
         }
       }
       if (!lista.isEmpty()) {

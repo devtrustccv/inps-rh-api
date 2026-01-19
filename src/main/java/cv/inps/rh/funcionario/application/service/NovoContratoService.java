@@ -227,37 +227,46 @@ public class NovoContratoService {
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
+    migrarRenumeracoesEDescontos(tiposRelacionamentoNovo, tipoRelacionamentoAtual);
+
     // Associações para remunerações
     List<TipoRelRemPagEntity> listRemunTipRel = new java.util.ArrayList<>();
-    var renumeracoesAtuais = funcionarioRules
-        .getRemuneracoesAssociadosAtivos(tipoRelacionamentoAtual.getId());
-
-    if (renumeracoesAtuais != null) {
-      for (var rem : renumeracoesAtuais) {
-          var assoc = new TipoRelRemPagEntity();
-          assoc.setTiprelId(tiposRelacionamentoNovo);
-          assoc.setRemId(rem);
-          assoc.setPagId(null);
-          listRemunTipRel.add(assoc);
+    if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
+      for (var rem : saved.getDefinicoesRenumeracoes()) {
+        if(rem.getEstado().equals(Estado.A) || rem.getEstado().equals(Estado.P)) {
+          if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndRemId(tiposRelacionamentoNovo, rem)) {
+            var assoc = new TipoRelRemPagEntity();
+            assoc.setTiprelId(tiposRelacionamentoNovo);
+            assoc.setRemId(rem);
+            assoc.setPagId(null);
+            listRemunTipRel.add(assoc);
+          }
         }
-      tipoRelRemPagEntityRepository.saveAll(listRemunTipRel);
+      }
+      if (!listRemunTipRel.isEmpty()) {
+        tipoRelRemPagEntityRepository.saveAll(listRemunTipRel);
+      }
     }
-
 
     // Associações para pagamentos
     List<TipoRelRemPagEntity> listPagTipRel = new java.util.ArrayList<>();
-    var pagamentosAtuais = funcionarioRules
-        .getPagamentosDescontosAssociadosAtivos(tipoRelacionamentoAtual.getId());
-    if (pagamentosAtuais != null) {
-      for (var pag : pagamentosAtuais) {
-          var assoc = new TipoRelRemPagEntity();
-          assoc.setTiprelId(tiposRelacionamentoNovo);
-          assoc.setPagId(pag);
-          assoc.setRemId(null);
-          listPagTipRel.add(assoc);
+    if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
+      for (var pag : saved.getDefinicoesPagamentos()) {
+        if(pag.getEstado().equals(Estado.A) || pag.getEstado().equals(Estado.P)) {
+          if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndPagId(tiposRelacionamentoNovo, pag)) {
+            var assoc = new TipoRelRemPagEntity();
+            assoc.setTiprelId(tiposRelacionamentoNovo);
+            assoc.setPagId(pag);
+            assoc.setRemId(null);
+            listPagTipRel.add(assoc);
+          }
+        }
       }
-      tipoRelRemPagEntityRepository.saveAll(listPagTipRel);
+      if (!listPagTipRel.isEmpty()) {
+        tipoRelRemPagEntityRepository.saveAll(listPagTipRel);
+      }
     }
+
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {
@@ -271,6 +280,40 @@ public class NovoContratoService {
         .getPagamentosDescontosAssociados(tiposRelacionamentoNovo.getId());
 
     return dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamentoNovo, pagamentos, remuneracoes);
+  }
+
+  private void migrarRenumeracoesEDescontos(TiposRelacionamentoEntity tiposRelacionamentoNovo,
+                                                      TiposRelacionamentoEntity tipoRelacionamentoAtual){
+    // Associações para remunerações
+    List<TipoRelRemPagEntity> listRemunTipRel = new java.util.ArrayList<>();
+    var renumeracoesAtuais = funcionarioRules
+        .getRemuneracoesAssociadosAtivos(tipoRelacionamentoAtual.getId());
+
+    if (renumeracoesAtuais != null) {
+      for (var rem : renumeracoesAtuais) {
+        var assoc = new TipoRelRemPagEntity();
+        assoc.setTiprelId(tiposRelacionamentoNovo);
+        assoc.setRemId(rem);
+        assoc.setPagId(null);
+        listRemunTipRel.add(assoc);
+      }
+      tipoRelRemPagEntityRepository.saveAll(listRemunTipRel);
+    }
+
+    // Associações para pagamentos
+    List<TipoRelRemPagEntity> listPagTipRel = new java.util.ArrayList<>();
+    var pagamentosAtuais = funcionarioRules
+        .getPagamentosDescontosAssociadosAtivos(tipoRelacionamentoAtual.getId());
+    if (pagamentosAtuais != null) {
+      for (var pag : pagamentosAtuais) {
+        var assoc = new TipoRelRemPagEntity();
+        assoc.setTiprelId(tiposRelacionamentoNovo);
+        assoc.setPagId(pag);
+        assoc.setRemId(null);
+        listPagTipRel.add(assoc);
+      }
+      tipoRelRemPagEntityRepository.saveAll(listPagTipRel);
+    }
   }
 
   private CarreiraEntity mudaCarreiraOuManter(

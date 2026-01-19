@@ -105,12 +105,14 @@ public class ValidarContratoService {
     List<TipoRelRemPagEntity> listRemunTipRel = new java.util.ArrayList<>();
     if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
       for (var rem : saved.getDefinicoesRenumeracoes()) {
-        if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndRemId(tiposRelacionamento, rem)) {
-          var assoc = new TipoRelRemPagEntity();
-          assoc.setTiprelId(tiposRelacionamento);
-          assoc.setRemId(rem);
-          assoc.setPagId(null);
-          listRemunTipRel.add(assoc);
+        if(rem.getEstado().equals(Estado.A) || rem.getEstado().equals(Estado.P)) {
+          if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndRemId(tiposRelacionamento, rem)) {
+            var assoc = new TipoRelRemPagEntity();
+            assoc.setTiprelId(tiposRelacionamento);
+            assoc.setRemId(rem);
+            assoc.setPagId(null);
+            listRemunTipRel.add(assoc);
+          }
         }
       }
       if (!listRemunTipRel.isEmpty()) {
@@ -121,12 +123,14 @@ public class ValidarContratoService {
     List<TipoRelRemPagEntity> listPagTipRel = new java.util.ArrayList<>();
     if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
       for (var pag : saved.getDefinicoesPagamentos()) {
-        if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndPagId(tiposRelacionamento, pag)) {
-          var assoc = new TipoRelRemPagEntity();
-          assoc.setTiprelId(tiposRelacionamento);
-          assoc.setPagId(pag);
-          assoc.setRemId(null);
-          listPagTipRel.add(assoc);
+        if(pag.getEstado().equals(Estado.A) || pag.getEstado().equals(Estado.P)) {
+          if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndPagId(tiposRelacionamento, pag)) {
+            var assoc = new TipoRelRemPagEntity();
+            assoc.setTiprelId(tiposRelacionamento);
+            assoc.setPagId(pag);
+            assoc.setRemId(null);
+            listPagTipRel.add(assoc);
+          }
         }
       }
       if (!listPagTipRel.isEmpty()) {
