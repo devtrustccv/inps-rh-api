@@ -151,7 +151,8 @@ public class NovoContratoService {
     // verifica se vinculo tem salario
     if (Objects.equals(1, paramVinculo.getFlgSalario())) {
       /******************** INI RENUMERACOES ********************************/
-      if (dadosContratuais.getSubsidios() != null && !dadosContratuais.getSubsidios().isEmpty()) {
+      if (!CollectionUtils.isEmpty(dadosContratuais.getSubsidios())) {
+        System.out.println("RENUMERACOES");
         var remList = dadosContratuais.getSubsidios().stream()
             .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P))
             .collect(Collectors.toList());
@@ -190,7 +191,8 @@ public class NovoContratoService {
       /******************** FIM RENUMERACOES ********************************/
 
       /******************** INI PAGAMENTOS DESCONTOS ********************************/
-      if (dadosContratuais.getEncargosDescontos() != null && !dadosContratuais.getEncargosDescontos().isEmpty()) {
+      if (!CollectionUtils.isEmpty(dadosContratuais.getEncargosDescontos())) {
+        System.out.println("PAGAMENTOS DESCONTOS");
         var pagList = dadosContratuais.getEncargosDescontos().stream()
             .map(e -> defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P))
             .collect(Collectors.toList());
@@ -227,30 +229,32 @@ public class NovoContratoService {
 
     // Associações para remunerações
     List<TipoRelRemPagEntity> listRemunTipRel = new java.util.ArrayList<>();
-    if (saved.getDefinicoesRenumeracoes() != null) {
-      for (var rem : saved.getDefinicoesRenumeracoes()) {
-        if (rem.getEstado() == Estado.A) {  // só ativo
+    var renumeracoesAtuais = funcionarioRules
+        .getRemuneracoesAssociadosAtivos(tipoRelacionamentoAtual.getId());
+
+    if (renumeracoesAtuais != null) {
+      for (var rem : renumeracoesAtuais) {
           var assoc = new TipoRelRemPagEntity();
           assoc.setTiprelId(tiposRelacionamentoNovo);
           assoc.setRemId(rem);
           assoc.setPagId(null);
           listRemunTipRel.add(assoc);
         }
-      }
       tipoRelRemPagEntityRepository.saveAll(listRemunTipRel);
     }
 
+
     // Associações para pagamentos
     List<TipoRelRemPagEntity> listPagTipRel = new java.util.ArrayList<>();
-    if (saved.getDefinicoesPagamentos() != null) {
-      for (var pag : saved.getDefinicoesPagamentos()) {
-        if (pag.getEstado() == Estado.A) { // só ativo
+    var pagamentosAtuais = funcionarioRules
+        .getPagamentosDescontosAssociadosAtivos(tipoRelacionamentoAtual.getId());
+    if (pagamentosAtuais != null) {
+      for (var pag : pagamentosAtuais) {
           var assoc = new TipoRelRemPagEntity();
           assoc.setTiprelId(tiposRelacionamentoNovo);
           assoc.setPagId(pag);
           assoc.setRemId(null);
           listPagTipRel.add(assoc);
-        }
       }
       tipoRelRemPagEntityRepository.saveAll(listPagTipRel);
     }

@@ -53,6 +53,13 @@ public class FuncionarioRules {
   }
 
 
+  public List<TipoRelRemPagEntity> getRemuneracoesPagamentosAssociados(Long tipoRelacionamentoId) {
+
+    return tipoRelRemPagEntityRepository
+        .findByTiprelId_Id(tipoRelacionamentoId);
+
+
+  }
     public List<DefinicaoRemuneracaoEntity> getRemuneracoesAssociados(Long tipoRelacionamentoId) {
 
       return tipoRelRemPagEntityRepository
