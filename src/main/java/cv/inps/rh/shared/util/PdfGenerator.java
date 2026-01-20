@@ -17,12 +17,9 @@ public class PdfGenerator {
     this.templateEngine = templateEngine;
   }
 
-  public byte[] generate(String templateName, Map<String, Object> data) {
+  public byte[] generate(String templateName, Context data) {
 
-    var context = new Context();
-    context.setVariables(data);
-
-    var html = templateEngine.process(templateName, context);
+    var html = templateEngine.process(templateName, data);
 
     try (var out = new ByteArrayOutputStream()) {
 
@@ -36,5 +33,13 @@ public class PdfGenerator {
     } catch (Exception e) {
       throw new RuntimeException("Erro ao gerar PDF", e);
     }
+  }
+
+  public byte[] generate(String templateName, Map<String, Object> data) {
+
+    var context = new Context();
+    context.setVariables(data);
+
+    return generate(templateName, context);
   }
 }

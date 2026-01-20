@@ -1,25 +1,30 @@
 package cv.inps.rh.shared.domain.service;
 
 import cv.igrp.platform.filemanager.StorageService;
+import cv.inps.rh.processamento.domain.service.processamentosalarial.report.model.ProcessamentoSalarialReport;
 import cv.inps.rh.shared.application.dto.MinioFileDataDTO;
 import cv.inps.rh.shared.util.PdfGenerator;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class RelatoriosService {
 
   private final PdfGenerator pdf;
   private final StorageService storageService;
-
-  public RelatoriosService(PdfGenerator pdf, StorageService storageService) {
-    this.pdf = pdf;
-    this.storageService = storageService;
-  }
+  private final JdbcTemplate jdbcTemplate;
 
   @SneakyThrows
   public MinioFileDataDTO ordemServico() {
@@ -74,31 +79,97 @@ public class RelatoriosService {
     return Map.of("recibos", List.of(recibo, recibo));
   }
 
-  public Map<String, Object> processamentoSalarios() {
+  public Context processamentoSalarios(Long processamentoId, String tipo) {
 
-    Map<String, Object> funcionario = Map.of(
-        "dados", "10116231 - Anilton Pina Brandão - (Contratado - Diretor de Gabinete/15)",
-        "lancamentos", List.of(
-            Map.of("descricao", "Vencimento Pessoal Contratado (IUR SS)", "valor", "200.319"),
-            Map.of("descricao", "Retenção Previdência Social (8,5%)", "valor", "17.707"),
-            Map.of("descricao", "Retenção IUR (Pessoal INPS)", "valor", "35.355")
-        ),
-        "totais", Map.of(
-            "remuneracoes", "214.319",
-            "descontos", "53.062",
-            "liquido", "161.257"
-        )
+    var context = new Context();
+
+    var funcionarios = new ArrayList<Map<String, Object>>();
+
+    var data = getProcessamentoSalarialReportData(processamentoId, tipo);
+    if (data.isEmpty())
+      return context;
+
+    var dataProcessamento = data.getFirst().dataProcessamento();
+    var centroCusto = data.getFirst().centroDeCusto();
+
+    var grouped = data.stream()
+        .collect(Collectors.groupingBy(
+            ProcessamentoSalarialReport::cargo,
+            Collectors.groupingBy(ProcessamentoSalarialReport::funId)
+        ));
+
+    grouped.forEach((_, funMap) ->
+        funMap.forEach((_, registros) -> {
+
+          var lancamentos = registros.stream()
+              .map(r -> Map.of(
+                  "descricao", r.descricao(),
+                  "valor", r.valor()
+              ))
+              .toList();
+
+          var first = registros.getFirst();
+
+          Map<String, Object> row = Map.of(
+              "shortDesc", first.descricaoMovimento(),
+              "dados", first.nif() + " - " + first.nomeCargoEscalao(),
+              "lancamentos", lancamentos,
+              "totais", Map.of(
+                  "remuneracoes", first.totalRemuneracoes(),
+                  "descontos", first.totalDescontos(),
+                  "liquido", first.totalLiquido()
+              )
+          );
+          funcionarios.add(row);
+        })
     );
 
-    return Map.of(
-        "modelo", "SA0001",
-        "dataElaboracao", "27-10-2025 10:50:11",
-        "dataProcessamento", "27/10/2025",
-        "entidade", "Processar Remunerações Gabinete Sistemas de Informação",
-        "funcionarios", List.of(
-            funcionario, funcionario, funcionario, funcionario, funcionario, funcionario, funcionario, funcionario,
-            funcionario, funcionario, funcionario, funcionario, funcionario, funcionario, funcionario, funcionario
-        )
-    );
+    var formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+
+    context.setVariable("dataElaboracao", LocalDateTime.now().format(formatter));
+    context.setVariable("dataProcessamento", dataProcessamento);
+    context.setVariable("entidade", "Processar Remunerações de " + centroCusto);
+    context.setVariable("funcionarios", funcionarios);
+    return context;
   }
+
+  private List<ProcessamentoSalarialReport> getProcessamentoSalarialReportData(Long processamentoId, String tipo) {
+
+    var sql = """
+            SELECT
+                tm.DESCRICAO AS DESCRICAO_MOVIMENTO,
+                p.DATA_PROCESSAMENTO,
+                p.CENTRO_DE_CUSTO,
+                p.CARGO,
+                p.FUN_ID,
+                p.DESCRICAO,
+                p.VALOR,
+                p.NIF,
+                p.NOME_CARGO_ESCALAO,
+                p.TOTAL_REMUNERACOES,
+                p.TOTAL_DESCONTOS,
+                p.TOTAL_LIQUIDO
+            FROM INPSRH.PROC_SAL_CC p, RH_TIPO_MOVIMENTOS tm
+            WHERE tm.ID = p.TM_ID
+        """;
+
+    return
+        jdbcTemplate.query(sql, (rs, rowNum) ->
+            new ProcessamentoSalarialReport(
+                rs.getString("DESCRICAO_MOVIMENTO"),
+                rs.getDate("DATA_PROCESSAMENTO").toLocalDate(),
+                rs.getString("CENTRO_DE_CUSTO"),
+                rs.getString("CARGO"),
+                rs.getLong("FUN_ID"),
+                rs.getString("DESCRICAO"),
+                rs.getLong("VALOR"),
+                rs.getLong("NIF"),
+                rs.getString("NOME_CARGO_ESCALAO"),
+                rs.getLong("TOTAL_REMUNERACOES"),
+                rs.getLong("TOTAL_DESCONTOS"),
+                rs.getLong("TOTAL_LIQUIDO")
+            )
+        );
+  }
+
 }

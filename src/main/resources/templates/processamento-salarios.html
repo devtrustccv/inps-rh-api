@@ -172,7 +172,6 @@
 
     <table class="top-bar">
         <tr>
-            <td class="producer"> Produzido por Nosi Soluções</td>
             <td class="model"> Modelo SA0001</td>
         </tr>
     </table>
@@ -196,7 +195,7 @@
     <table class="entity-row">
         <tr>
             <td class="entity-left">
-                <span>Processar Remunerações Gabinete Sistemas de Informação</span>
+                <span th:text="${entidade}">Processar Remunerações Gabinete Sistemas de Informação</span>
             </td>
             <td class="entity-right">
                 <span class="data-proc-label">Data Proc.:</span>
@@ -205,9 +204,12 @@
         </tr>
     </table>
 
-    <div class="entity-center">Vencimento Pessoal Contratado</div>
+    <div th:each="emp, stat : ${funcionarios}" class="employee">
 
-    <div th:each="emp : ${funcionarios}" class="employee">
+        <div class="entity-center"
+             th:if="${stat.first and emp.shortDesc != 'NULL'}">
+            <span th:text="${emp.shortDesc}"></span>
+        </div>
 
         <div class="employee-header">
             <span th:text="${emp.dados}">10116231</span>

@@ -19,6 +19,7 @@ import java.time.LocalDate;
 @Immutable
 @Table(name = "PROC_SAL_CC_PAG")
 public class ProcSalCcPagEntity {
+
   @Id
   @Column(name = "CC_ID")
   private Long ccId;
