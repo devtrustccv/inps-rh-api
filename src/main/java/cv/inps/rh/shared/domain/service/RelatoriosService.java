@@ -2,24 +2,28 @@ package cv.inps.rh.shared.domain.service;
 
 import cv.igrp.platform.filemanager.StorageService;
 import cv.inps.rh.shared.application.dto.MinioFileDataDTO;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ProcSalCcEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ProcSalCcEntityRepository;
 import cv.inps.rh.shared.util.PdfGenerator;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class RelatoriosService {
 
   private final PdfGenerator pdf;
   private final StorageService storageService;
-
-  public RelatoriosService(PdfGenerator pdf, StorageService storageService) {
-    this.pdf = pdf;
-    this.storageService = storageService;
-  }
+  private final ProcSalCcEntityRepository procSalCcEntityRepository;
 
   @SneakyThrows
   public MinioFileDataDTO ordemServico() {
@@ -76,29 +80,51 @@ public class RelatoriosService {
 
   public Map<String, Object> processamentoSalarios() {
 
-    Map<String, Object> funcionario = Map.of(
-        "dados", "10116231 - Anilton Pina Brandão - (Contratado - Diretor de Gabinete/15)",
-        "lancamentos", List.of(
-            Map.of("descricao", "Vencimento Pessoal Contratado (IUR SS)", "valor", "200.319"),
-            Map.of("descricao", "Retenção Previdência Social (8,5%)", "valor", "17.707"),
-            Map.of("descricao", "Retenção IUR (Pessoal INPS)", "valor", "35.355")
-        ),
-        "totais", Map.of(
-            "remuneracoes", "214.319",
-            "descontos", "53.062",
-            "liquido", "161.257"
-        )
-    );
+    var funcionarios = new ArrayList<Map<String, Object>>();
+
+    var data = procSalCcEntityRepository.findAll(); // todo findByProcSalIdAndTipoAndShortDesc
+    if (data.isEmpty())
+      return Map.of();
+
+    var dataProcessamento = data.getFirst().getDataProcessamento();
+    var centroCusto = data.getFirst().getCentroDeCusto();
+
+    data.stream()
+        //.filter(obj -> "SAL".equals(obj.getShortDesc()))
+        .collect(Collectors.groupingBy(ProcSalCcEntity::getFunId))
+        .forEach((_, v) -> {
+
+          var first = v.getFirst();
+          var shortDesc = first.getShortDesc();
+          var nif = first.getNif();
+          var cargo = first.getNomeCargoEscalao();
+          var totalRemuneracoes = first.getTotalRemuneracoes();
+          var totalDescontos = first.getTotalDescontos();
+          var totalLiquido = first.getTotalLiquido();
+
+          var lancamentos = new ArrayList<Map<String, Object>>();
+          v.forEach(obj -> lancamentos.add(Map.of("descricao", obj.getDescricao(), "valor", obj.getValor())));
+
+          Map<String, Object> row = Map.of(
+              "shortDesc", shortDesc,
+              "dados", nif + " - " + cargo,
+              "lancamentos", lancamentos,
+              "totais", Map.of(
+                  "remuneracoes", totalRemuneracoes,
+                  "descontos", totalDescontos,
+                  "liquido", totalLiquido
+              )
+          );
+          funcionarios.add(row);
+        });
+
+    var formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     return Map.of(
-        "modelo", "SA0001",
-        "dataElaboracao", "27-10-2025 10:50:11",
-        "dataProcessamento", "27/10/2025",
-        "entidade", "Processar Remunerações Gabinete Sistemas de Informação",
-        "funcionarios", List.of(
-            funcionario, funcionario, funcionario, funcionario, funcionario, funcionario, funcionario, funcionario,
-            funcionario, funcionario, funcionario, funcionario, funcionario, funcionario, funcionario, funcionario
-        )
+        "dataElaboracao", LocalDateTime.now().format(formatter),
+        "dataProcessamento", dataProcessamento,
+        "entidade", "Processar Remunerações de " + centroCusto,
+        "funcionarios", funcionarios
     );
   }
 }
