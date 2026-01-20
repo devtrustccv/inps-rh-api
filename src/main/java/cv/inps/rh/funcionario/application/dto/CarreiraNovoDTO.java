@@ -13,6 +13,7 @@ import cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO;
 import cv.inps.rh.funcionario.application.dto.SubsidioReqDTO;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +49,12 @@ public class CarreiraNovoDTO  {
   
   
   private String moeda ;
+  
+  
+  private LocalDate dataInicio ;
+  
+  
+  private LocalDate dataFim ;
   
   
   private String processamentoSalarial ;
