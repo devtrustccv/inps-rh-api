@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -17,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class RelatoriosPdfController {
 
   private final RelatoriosService service;
-  private final PdfGenerator pdf;
+  private final PdfGenerator pdfGenerator;
 
-  public RelatoriosPdfController(RelatoriosService service, PdfGenerator pdf) {
+  public RelatoriosPdfController(RelatoriosService service, PdfGenerator pdfGenerator) {
     this.service = service;
-    this.pdf = pdf;
+    this.pdfGenerator = pdfGenerator;
   }
 
   @GetMapping("/ordem-servico")
@@ -31,16 +32,13 @@ public class RelatoriosPdfController {
 
   @GetMapping("/recibos-salario")
   public ResponseEntity<byte[]> recibosSalarioPdf() {
-    return pdfResponse(
-        pdf.generate("recibo-salario", service.recibosSalario()),
-        "recibos-salario.pdf"
-    );
+    return pdfResponse(pdfGenerator.generate("recibo-salario", service.recibosSalario()), "recibos-salario.pdf");
   }
 
   @GetMapping("/processamento-salarios")
-  public ResponseEntity<byte[]> processamentoSalariosPdf() {
+  public ResponseEntity<byte[]> processamentoSalariosPdf(@RequestParam Long processamentoId, @RequestParam String tipo) {
     return pdfResponse(
-        pdf.generate("processamento-salarios", service.processamentoSalarios()),
+        pdfGenerator.generate("processamento-salarios", service.processamentoSalarios(processamentoId, tipo)),
         "processamento-salarios.pdf"
     );
   }
