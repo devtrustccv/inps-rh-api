@@ -227,7 +227,7 @@ public class NovoContratoService {
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    migrarRenumeracoesEDescontos(tiposRelacionamentoNovo, tipoRelacionamentoAtual);
+   //migrarRenumeracoesEDescontos(tiposRelacionamentoNovo, tipoRelacionamentoAtual);
 
     // Associações para remunerações
     List<TipoRelRemPagEntity> listRemunTipRel = new java.util.ArrayList<>();
