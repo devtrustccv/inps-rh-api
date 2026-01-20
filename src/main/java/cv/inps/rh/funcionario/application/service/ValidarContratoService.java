@@ -14,6 +14,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoRelRemPagEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,10 +75,10 @@ public class ValidarContratoService {
     var mobilidade = tiposRelacionamento.getMobId();
     mobilidadeMapper.toUpdateEntity(mobilidade, dadosContratuais);
 
-    var carreira = tiposRelacionamento.getCarreiraId()!= null ? tiposRelacionamento.getCarreiraId() : null;
-     if(carreira != null) {
-       carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
-     }
+    var carreira = tiposRelacionamento.getCarreiraId() != null ? tiposRelacionamento.getCarreiraId() : null;
+    if (carreira != null) {
+      carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
+    }
 
     var situacaoLaboral = tiposRelacionamento.getSituacLaboralId();
     dadosContratuaisMapper.toUpdateSituacaoLaboral(situacaoLaboral, dadosContratuais);
@@ -102,41 +102,7 @@ public class ValidarContratoService {
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    List<TipoRelRemPagEntity> listRemunTipRel = new java.util.ArrayList<>();
-    if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
-      for (var rem : saved.getDefinicoesRenumeracoes()) {
-        if(rem.getEstado().equals(Estado.A) || rem.getEstado().equals(Estado.P)) {
-          if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndRemId(tiposRelacionamento, rem)) {
-            var assoc = new TipoRelRemPagEntity();
-            assoc.setTiprelId(tiposRelacionamento);
-            assoc.setRemId(rem);
-            assoc.setPagId(null);
-            listRemunTipRel.add(assoc);
-          }
-        }
-      }
-      if (!listRemunTipRel.isEmpty()) {
-        tipoRelRemPagEntityRepository.saveAll(listRemunTipRel);
-      }
-    }
-
-    List<TipoRelRemPagEntity> listPagTipRel = new java.util.ArrayList<>();
-    if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
-      for (var pag : saved.getDefinicoesPagamentos()) {
-        if(pag.getEstado().equals(Estado.A) || pag.getEstado().equals(Estado.P)) {
-          if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndPagId(tiposRelacionamento, pag)) {
-            var assoc = new TipoRelRemPagEntity();
-            assoc.setTiprelId(tiposRelacionamento);
-            assoc.setPagId(pag);
-            assoc.setRemId(null);
-            listPagTipRel.add(assoc);
-          }
-        }
-      }
-      if (!listPagTipRel.isEmpty()) {
-        tipoRelRemPagEntityRepository.saveAll(listPagTipRel);
-      }
-    }
+     associarPagamentosERemuneracoes(saved, tiposRelacionamento);
 
     var remuneracoes = funcionarioRules
         .getRemuneracoesAssociados(tiposRelacionamento.getId());
@@ -144,7 +110,86 @@ public class ValidarContratoService {
         .getPagamentosDescontosAssociados(tiposRelacionamento.getId());
 
 
-    return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento,pagamentos,remuneracoes));
+    return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento, pagamentos, remuneracoes));
+
+  }
+
+  private void associarPagamentosERemuneracoes(FuncionarioEntity saved, TiposRelacionamentoEntity tiposRelacionamento) {
+    // =========================
+// Associações para remunerações
+// =========================
+    List<TipoRelRemPagEntity> listRemunTipRel = new ArrayList<>();
+    if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
+
+      Set<Long> remIdsJaProcessados = new HashSet<>(); // passo 1: deduplicação local
+
+      for (var rem : saved.getDefinicoesRenumeracoes()) {
+
+        // passo 2: verifica se o estado é válido
+        boolean estadoValido = rem.getEstado().equals(Estado.A) || rem.getEstado().equals(Estado.P);
+        if (!estadoValido) continue;
+
+        // passo 3: verifica se já processamos este ID no Set local
+        boolean naoProcessadoAinda = remIdsJaProcessados.add(rem.getId());
+        if (!naoProcessadoAinda) continue;
+
+        // passo 4: verifica se a associação já existe no banco
+        boolean associacaoExiste = tipoRelRemPagEntityRepository.existsByTiprelIdAndRemId(tiposRelacionamento, rem);
+        if (associacaoExiste) continue;
+
+        // passo 5: criar nova associação
+        TipoRelRemPagEntity assoc = new TipoRelRemPagEntity();
+        assoc.setTiprelId(tiposRelacionamento);
+        assoc.setRemId(rem);
+        assoc.setPagId(null);
+
+        // passo 6: adicionar à lista de inserção
+        listRemunTipRel.add(assoc);
+      }
+
+      // passo 7: salvar todas as novas associações de uma vez
+      if (!listRemunTipRel.isEmpty()) {
+        tipoRelRemPagEntityRepository.saveAll(listRemunTipRel);
+      }
+    }
+
+// =========================
+// Associações para pagamentos
+// =========================
+    List<TipoRelRemPagEntity> listPagTipRel = new ArrayList<>();
+    if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
+
+      Set<Long> pagIdsJaProcessados = new HashSet<>(); // passo 1: deduplicação local
+
+      for (var pag : saved.getDefinicoesPagamentos()) {
+
+        // passo 2: verifica se o estado é válido
+        boolean estadoValido = pag.getEstado().equals(Estado.A) || pag.getEstado().equals(Estado.P);
+        if (!estadoValido) continue;
+
+        // passo 3: verifica se já processamos este ID no Set local
+        boolean naoProcessadoAinda = pagIdsJaProcessados.add(pag.getId());
+        if (!naoProcessadoAinda) continue;
+
+        // passo 4: verifica se a associação já existe no banco
+        boolean associacaoExiste = tipoRelRemPagEntityRepository.existsByTiprelIdAndPagId(tiposRelacionamento, pag);
+        if (associacaoExiste) continue;
+
+        // passo 5: criar nova associação
+        TipoRelRemPagEntity assoc = new TipoRelRemPagEntity();
+        assoc.setTiprelId(tiposRelacionamento);
+        assoc.setPagId(pag);
+        assoc.setRemId(null);
+
+        // passo 6: adicionar à lista de inserção
+        listPagTipRel.add(assoc);
+      }
+
+      // passo 7: salvar todas as novas associações de uma vez
+      if (!listPagTipRel.isEmpty()) {
+        tipoRelRemPagEntityRepository.saveAll(listPagTipRel);
+      }
+    }
 
   }
 
@@ -165,7 +210,7 @@ public class ValidarContratoService {
       if (mob != null)
         mob.setEstado(estado);
 
-      var carreira = tr.getCarreiraId()!=null ? tr.getCarreiraId() : null;
+      var carreira = tr.getCarreiraId() != null ? tr.getCarreiraId() : null;
       if (carreira != null)
         carreira.setEstado(estado);
 
