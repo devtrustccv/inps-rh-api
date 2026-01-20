@@ -85,7 +85,6 @@ public class CarreiraWriteService {
     carreiraEntityRepository.save(carreiraAtual);
 
     var novaCarreira = Objects.requireNonNull(carreiraMapper.toCarreira(dto, Estado.P));
-    //novaCarreira.setFunId(funcionario);
     novaCarreira.setObs("CARREIRA");
     carreiraEntityRepository.save(novaCarreira);
 
