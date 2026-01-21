@@ -85,27 +85,37 @@ public class HoraExtraReadService {
     var mob = tiprel != null ? tiprel.getMobId() : null;
     var inst = mob != null ? mob.getInstidId() : null;
     dto.setDirecao(inst != null ? inst.getNome() : null);
+    dto.setDirecaoId(inst != null ? (inst.getId() != null ? inst.getId() : null) : null);
     dto.setNomeColaborador(tiprel != null && tiprel.getFunId() != null ? tiprel.getFunId().getNome() : null);
-    dto.setCategoria(tiprel != null && tiprel.getCargoId() != null ? tiprel.getCargoId().getNome() : null);
+    var cargo = tiprel != null ? tiprel.getCargoId() : null;
+    dto.setCategoria(cargo != null ? cargo.getNome() : null);
+    dto.setCategoriaId(cargo != null && cargo.getId() != null ? cargo.getId() : null);
     dto.setVinculo(
         tiprel != null &&
             tiprel.getContrVinculoId() != null &&
             tiprel.getContrVinculoId().getVinculoId() != null ? tiprel.getContrVinculoId().getVinculoId().getNome()
                 : null);
+    var vinc = tiprel != null && tiprel.getContrVinculoId() != null ? tiprel.getContrVinculoId().getVinculoId() : null;
+    dto.setVinculoId(vinc != null && vinc.getId() != null ? vinc.getId() : null);
+                : null);
 
     var horasExtras = e.getSinteseDiarioId() != null ? e.getSinteseDiarioId().getHorasExtras() : null;
+    dto.setHorasContratato(e.getHorasDiarias() != null ? e.getHorasDiarias().toString() : null);
     dto.setHorasTrabalho(formatHorasExtra(horasExtras));
 
     var di = e.getDataInicio() != null ? DateFormatter.localDateToString(e.getDataInicio()) : "";
-    var df = e.getDataFim() != null ? DateFormatter.localDateToString(e.getDataFim()) : "";
     dto.setData(di);
-    dto.setIntervaloData(di + " / " + df);
+
+    dto.setSalarioMensal(
+        tiprel != null && tiprel.getSalario() != null ? tiprel.getSalario().toPlainString() : null
+    );
+    dto.setValorHorasMensal(null);
+    dto.setValorHorasDiario(e.getValorDiario() != null ? e.getValorDiario().toString() : null);
     dto.setDuracaoDispensa(null);
 
     dto.setEstado(e.getEstado() != null ? e.getEstado().name() : null);
     dto.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);
     return dto;
-  }
 
   private static String formatHorasExtra(String s) {
     if (!StringUtils.hasText(s))

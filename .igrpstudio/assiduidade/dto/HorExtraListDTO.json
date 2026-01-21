@@ -80,7 +80,7 @@
     {
       "name": "categoriaId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -104,7 +104,7 @@
     {
       "name": "vinculoId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,

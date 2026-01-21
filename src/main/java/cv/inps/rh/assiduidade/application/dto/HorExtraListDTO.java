@@ -39,13 +39,13 @@ public class HorExtraListDTO  {
   private String categoria ;
   
   
-  private String categoriaId ;
+  private Long categoriaId ;
   
   
   private String vinculo ;
   
   
-  private String vinculoId ;
+  private Long vinculoId ;
   
   
   private String intervaloData ;
