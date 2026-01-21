@@ -350,6 +350,76 @@
           "isRequired": false
         }
       ]
+    },
+    {
+      "actionName": "marcarDispensa",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "DispensaReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "validarDispensa",
+      "path": "{dispensaId}",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "DispensaReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "dispensaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "mxvoz9hyxu-getListaMovimentosResumidos"

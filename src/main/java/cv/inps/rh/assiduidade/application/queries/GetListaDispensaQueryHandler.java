@@ -29,7 +29,7 @@ public class GetListaDispensaQueryHandler implements QueryHandler<GetListaDispen
     LOGGER.debug("GetListaDispensaQuery: {}", query);
 
 
-    return ResponseEntity.ok(dispensaReadService.getListaDispensa());
+    return ResponseEntity.ok(dispensaReadService.getListaDispensa(query));
   }
 
 }

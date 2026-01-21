@@ -26,6 +26,7 @@ import cv.inps.rh.assiduidade.application.dto.FaltaReqDTO;
 import java.util.Map;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFaltaDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaDispensaDTO;
+import cv.inps.rh.assiduidade.application.dto.DispensaReqDTO;
 
 @IgrpController
 @RestController
@@ -252,6 +253,65 @@ public class AssiduidadeController {
       final var query = new GetListaDispensaQuery(pageNumber, pageSize, colaborador, ilha, direcao, seccao, dataInicio, dataFim, estado);
 
       return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+  )
+  @Operation(
+    summary = "Marcar dispensa",
+    description = "Marcar dispensa",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> marcarDispensa(@Valid @RequestBody DispensaReqDTO marcarDispensaRequest
+    )
+  {
+
+      final var command = new MarcarDispensaCommand(marcarDispensaRequest);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "{dispensaId}"
+  )
+  @Operation(
+    summary = "Validar dispensa",
+    description = "Validar dispensa",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> validarDispensa(@Valid @RequestBody DispensaReqDTO validarDispensaRequest
+    , @PathVariable(value = "dispensaId") String dispensaId)
+  {
+
+      final var command = new ValidarDispensaCommand(validarDispensaRequest, dispensaId);
+
+      return commandBus.send(command);
 
   }
 
