@@ -86,4 +86,20 @@ public class FeriasGozadasEntity extends AuditEntity {
     private UUID uuid;
 
   
+    @Column(name="num_dia")
+    private Integer numDia;
+
+  
+    @Column(name="ferias_gozadas_id")
+    private Long feriasGozadasId;
+
+  
+    @Column(name="decisao_responsavel")
+    private String decisaoResponsavel;
+
+  
+    @Column(name="obs_rh")
+    private String obsRh;
+
+  
 }
