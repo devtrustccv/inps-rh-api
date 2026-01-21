@@ -10,11 +10,7 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeSinteseDiarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.TipoFaltaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AssiduidadeParametroEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AssiduidadeSinteseDiarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FaltaEntityRepository;
@@ -23,11 +19,16 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepos
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoFaltaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
+import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
+import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -49,6 +50,9 @@ public class FaltaServiceWrite {
   private final FuncionarioRules funcionarioRules;
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final AssiduidadeParametroEntityRepository assiduidadeParametroRepository;
+  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoRepository;
+  private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
+  private final TipoMovimentoHelper tipoMovimentoHelper;
 
   @Transactional
   public Map<String, ?> marcarFalta(MarcarFaltaCommand command) {
@@ -79,7 +83,7 @@ public class FaltaServiceWrite {
     var datas = expandirDias(req.getDataInicio(), req.getDataFim());
     var idsFaltas = new ArrayList<Long>();
     for (var dia : datas) {
-      var falta = buildFalta(req, pedido, tipoFalta, dia, funcionario);
+      var falta = buildFalta(req, pedido, tipoFalta, dia, tipoRelAtual);
       falta = faltaRepository.save(falta);
       idsFaltas.add(falta.getId());
       var sintese = buildOrCreateSinteseDia(funcionario, dia, req.getTotalDeHorasAusentes());
@@ -150,6 +154,31 @@ public class FaltaServiceWrite {
           validacaoEntityRepository.save(v);
         });
 
+    if (Estado.A.equals(estado) && falta.getFlgDesconto() != null && falta.getFlgDesconto() == 1) {
+      var jornada = assiduidadeParametroRepository.findAllByEstado(Estado.A.getCode());
+      var diaria = jornada != null && !jornada.isEmpty() ? jornada.getFirst().getDiaria() : "08:00";
+      var totalMin = parseMin(diaria);
+      var ausMin = parseMin(falta.getHorasAusencia());
+      if (tipoRelAtual != null && tipoRelAtual.getSalario() != null && totalMin > 0 && ausMin > 0) {
+        var salarioDia = tipoRelAtual.getSalario().divide(new BigDecimal("30"), 2, RoundingMode.HALF_UP);
+        var valorDesconto = salarioDia.multiply(BigDecimal.valueOf(ausMin))
+            .divide(BigDecimal.valueOf(totalMin), 2, RoundingMode.HALF_UP);
+        var tm = tipoMovimentoHelper.getTipoMovimentoEntityFaltaDesconto();
+        var defRem = definicaoRemuneracaoMapper.createRenumeracao(
+            valorDesconto,
+            tm,
+            falta.getDataInicio().toLocalDate(),
+            falta.getDataFim().toLocalDate(),
+            funcionario,
+            tipoRelAtual.getMoeda()
+        );
+        defRem.setEstado(Estado.A);
+        defRem = definicaoRemuneracaoRepository.save(defRem);
+        falta.setDefRemId(defRem);
+        faltaRepository.save(falta);
+      }
+    }
+
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", falta.getId());
     resp.put("uuid", falta.getUuid() != null ? falta.getUuid().toString() : null);
@@ -174,10 +203,11 @@ public class FaltaServiceWrite {
   }
 
   private FaltaEntity buildFalta(FaltaReqDTO req, PedidoEntity pedido, TipoFaltaEntity tipo, LocalDate dia,
-      FuncionarioEntity fun) {
+                                 TiposRelacionamentoEntity tiposRelacionamento) {
     var falta = new FaltaEntity();
     falta.setPedidoId(pedido);
     falta.setTfId(tipo);
+    falta.setTiprelId(tiposRelacionamento);
     falta.setDescricaoMotivo(req.getMotivoAusencia());
     falta.setHorasAusencia(req.getTotalDeHorasAusentes());
     falta.setDataInicio(LocalDateTime.of(dia, LocalTime.MIN));

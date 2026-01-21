@@ -27,5 +27,9 @@ public class TipoMovimentoHelper {
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento IUR nao encontrado."));
   }
 
+  public TipoMovimentoEntity getTipoMovimentoEntityFaltaDesconto() {
+    return tipoMovimentoEntityRepository.findByShortDescAndAmbAplId("FALT", 30L)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento FALTA nao encontrado."));
+  }
 
 }
