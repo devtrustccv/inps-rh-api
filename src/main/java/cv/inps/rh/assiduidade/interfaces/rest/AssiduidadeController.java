@@ -374,7 +374,7 @@ public class AssiduidadeController {
     }
   )
   
-  public ResponseEntity<String> marcarHoraExtra(@Valid @RequestBody HoraExtraReqDTO marcarHoraExtraRequest
+  public ResponseEntity<Map<String, ?>> marcarHoraExtra(@Valid @RequestBody HoraExtraReqDTO marcarHoraExtraRequest
     )
   {
 

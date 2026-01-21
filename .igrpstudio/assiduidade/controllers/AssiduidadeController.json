@@ -507,7 +507,7 @@
               "schema": {
                 "type": "string",
                 "name": "data",
-                "collectionType": "none"
+                "collectionType": "map"
               }
             }
           }
@@ -554,5 +554,5 @@
       ]
     }
   ],
-  "id": "mxvoz9hyxu-getListaMovimentosResumidos"
+  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra"
 }

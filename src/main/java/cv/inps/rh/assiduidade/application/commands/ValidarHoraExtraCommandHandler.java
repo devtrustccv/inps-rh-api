@@ -2,6 +2,7 @@ package cv.inps.rh.assiduidade.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.assiduidade.application.services.HoraExtraServiceWrite;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -14,17 +15,19 @@ public class ValidarHoraExtraCommandHandler implements CommandHandler<ValidarHor
 
    private static final Logger LOGGER = LoggerFactory.getLogger(ValidarHoraExtraCommandHandler.class);
 
-   public ValidarHoraExtraCommandHandler() {
+  private final HoraExtraServiceWrite horaExtraServiceWrite;
 
-   }
+  public ValidarHoraExtraCommandHandler(HoraExtraServiceWrite horaExtraServiceWrite) {
+
+    this.horaExtraServiceWrite = horaExtraServiceWrite;
+  }
 
    @IgrpCommandHandler
    public ResponseEntity<Map<String, ?>> handle(ValidarHoraExtraCommand command) {
 
       LOGGER.debug("ValidarHoraExtraCommand : {}", command);
 
-      // TODO: Implement the command handling logic here
-      return null;
+      return ResponseEntity.ok(horaExtraServiceWrite.validarHoraExtra(command));
    }
 
 }
