@@ -1,5 +1,6 @@
 package cv.inps.rh.assiduidade.application.queries;
 
+import cv.inps.rh.assiduidade.application.services.PicagemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -15,9 +16,11 @@ public class GetListaPicagemQueryHandler implements QueryHandler<GetListaPicagem
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetListaPicagemQueryHandler.class);
 
+  private final PicagemService picagemService;
 
-  public GetListaPicagemQueryHandler() {
+  public GetListaPicagemQueryHandler(PicagemService picagemService) {
 
+    this.picagemService = picagemService;
   }
 
    @IgrpQueryHandler
@@ -25,8 +28,7 @@ public class GetListaPicagemQueryHandler implements QueryHandler<GetListaPicagem
 
     LOGGER.debug("GetListaPicagemQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    return ResponseEntity.ok(picagemService.getListaPicagem(query));
   }
 
 }
