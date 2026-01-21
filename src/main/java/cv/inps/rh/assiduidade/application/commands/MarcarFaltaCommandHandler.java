@@ -2,6 +2,7 @@ package cv.inps.rh.assiduidade.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.assiduidade.application.services.FaltaServiceWrite;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -14,8 +15,11 @@ public class MarcarFaltaCommandHandler implements CommandHandler<MarcarFaltaComm
 
    private static final Logger LOGGER = LoggerFactory.getLogger(MarcarFaltaCommandHandler.class);
 
-   public MarcarFaltaCommandHandler() {
+   private final FaltaServiceWrite faltaServiceWrite;
 
+   public MarcarFaltaCommandHandler(FaltaServiceWrite faltaServiceWrite) {
+
+     this.faltaServiceWrite = faltaServiceWrite;
    }
 
    @IgrpCommandHandler
@@ -23,8 +27,8 @@ public class MarcarFaltaCommandHandler implements CommandHandler<MarcarFaltaComm
 
       LOGGER.debug("MarcarFaltaCommand : {}", command);
 
-      // TODO: Implement the command handling logic here
-      return null;
+
+     return  ResponseEntity.ok(faltaServiceWrite.marcarFalta(command));
    }
 
 }
