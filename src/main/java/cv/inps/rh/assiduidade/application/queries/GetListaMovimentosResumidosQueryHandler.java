@@ -1,5 +1,7 @@
 package cv.inps.rh.assiduidade.application.queries;
 
+import cv.inps.rh.assiduidade.application.services.MovimentoResumoService;
+import cv.inps.rh.assiduidade.application.services.PicagemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -15,9 +17,11 @@ public class GetListaMovimentosResumidosQueryHandler implements QueryHandler<Get
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetListaMovimentosResumidosQueryHandler.class);
 
+  private final MovimentoResumoService movimentoResumoService;
 
-  public GetListaMovimentosResumidosQueryHandler() {
+  public GetListaMovimentosResumidosQueryHandler(MovimentoResumoService movimentoResumoService) {
 
+    this.movimentoResumoService = movimentoResumoService;
   }
 
    @IgrpQueryHandler
@@ -25,8 +29,8 @@ public class GetListaMovimentosResumidosQueryHandler implements QueryHandler<Get
 
     LOGGER.debug("GetListaMovimentosResumidosQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+
+    return ResponseEntity.ok(movimentoResumoService.getListaMovimentosResumidos(query));
   }
 
 }
