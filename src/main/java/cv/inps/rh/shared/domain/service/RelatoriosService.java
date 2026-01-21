@@ -14,6 +14,7 @@ import org.thymeleaf.context.Context;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -81,6 +82,8 @@ public class RelatoriosService {
 
   public Context processamentoSalarios(Long processamentoId, String tipo) {
 
+    // TODO 21/01/2026 22:54 optimize later for better memory usage, use DTO
+
     var context = new Context();
 
     var funcionarios = new ArrayList<Map<String, Object>>();
@@ -89,8 +92,9 @@ public class RelatoriosService {
     if (data.isEmpty())
       return context;
 
-    var dataProcessamento = data.getFirst().dataProcessamento();
-    var centroCusto = data.getFirst().centroDeCusto();
+    var dataFirst = data.getFirst();
+    var dataProcessamento = dataFirst.dataProcessamento();
+    var centroCusto = dataFirst.centroDeCusto();
 
     var grouped = data.stream()
         .collect(Collectors.groupingBy(
@@ -99,25 +103,26 @@ public class RelatoriosService {
         ));
 
     grouped.forEach((_, funMap) ->
-        funMap.forEach((_, registros) -> {
+        funMap.forEach((_, rows) -> {
 
-          var lancamentos = registros.stream()
+          var lancamentos = rows.stream()
+              .sorted(Comparator.comparing(r -> !"AREM".equals(r.tipo())))
               .map(r -> Map.of(
                   "descricao", r.descricao(),
                   "valor", r.valor()
               ))
               .toList();
 
-          var first = registros.getFirst();
+          var firstRow = rows.getFirst();
 
           Map<String, Object> row = Map.of(
-              "shortDesc", first.descricaoMovimento(),
-              "dados", first.nif() + " - " + first.nomeCargoEscalao(),
+              "shortDesc", firstRow.descricaoMovimento(),
+              "dados", firstRow.nif() + " - " + firstRow.nomeCargoEscalao(),
               "lancamentos", lancamentos,
               "totais", Map.of(
-                  "remuneracoes", first.totalRemuneracoes(),
-                  "descontos", first.totalDescontos(),
-                  "liquido", first.totalLiquido()
+                  "remuneracoes", firstRow.totalRemuneracoes(),
+                  "descontos", firstRow.totalDescontos(),
+                  "liquido", firstRow.totalLiquido()
               )
           );
           funcionarios.add(row);
@@ -128,7 +133,7 @@ public class RelatoriosService {
 
     context.setVariable("dataElaboracao", LocalDateTime.now().format(formatter));
     context.setVariable("dataProcessamento", dataProcessamento);
-    context.setVariable("entidade", "Processar Remunerações de " + centroCusto);
+    context.setVariable("entidade", "Processar Remunerações " + centroCusto);
     context.setVariable("funcionarios", funcionarios);
     return context;
   }
@@ -137,6 +142,7 @@ public class RelatoriosService {
 
     var sql = """
             SELECT
+                p.TIPO,
                 tm.DESCRICAO AS DESCRICAO_MOVIMENTO,
                 p.DATA_PROCESSAMENTO,
                 p.CENTRO_DE_CUSTO,
@@ -154,8 +160,9 @@ public class RelatoriosService {
         """;
 
     return
-        jdbcTemplate.query(sql, (rs, rowNum) ->
+        jdbcTemplate.query(sql, (rs, _) ->
             new ProcessamentoSalarialReport(
+                rs.getString("TIPO"),
                 rs.getString("DESCRICAO_MOVIMENTO"),
                 rs.getDate("DATA_PROCESSAMENTO").toLocalDate(),
                 rs.getString("CENTRO_DE_CUSTO"),

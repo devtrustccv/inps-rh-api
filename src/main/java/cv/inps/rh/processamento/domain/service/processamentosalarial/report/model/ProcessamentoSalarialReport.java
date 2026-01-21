@@ -3,6 +3,7 @@ package cv.inps.rh.processamento.domain.service.processamentosalarial.report.mod
 import java.time.LocalDate;
 
 public record ProcessamentoSalarialReport(
+    String tipo,
     String descricaoMovimento,
     LocalDate dataProcessamento,
     String centroDeCusto,
