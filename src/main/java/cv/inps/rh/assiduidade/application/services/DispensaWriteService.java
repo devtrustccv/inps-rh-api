@@ -138,6 +138,11 @@ public class DispensaWriteService {
     pedido.setEstado(estado);
     pedidoRepository.save(pedido);
 
+
+    funcionarioRules.getValidacaoPendente(funcionario.getUuid(),
+        TipoAcao.INSERT, Referencia.AUSENCIA).ifPresent(validacaoEntityRepository::save);
+
+
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", dispensa.getId());
     resp.put("estado", dispensa.getEstado().name());
