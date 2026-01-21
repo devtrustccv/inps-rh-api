@@ -280,6 +280,76 @@
           "isRequired": false
         }
       ]
+    },
+    {
+      "actionName": "getListaDispensa",
+      "path": "dispensa",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaDispensa",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "colaborador",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "ilha",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        }
+      ]
     }
   ],
   "id": "mxvoz9hyxu-getListaMovimentosResumidos"

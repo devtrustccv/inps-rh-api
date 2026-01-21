@@ -25,6 +25,7 @@ import cv.inps.rh.assiduidade.application.dto.WrapperListaAssiduidadadeDTO;
 import cv.inps.rh.assiduidade.application.dto.FaltaReqDTO;
 import java.util.Map;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFaltaDTO;
+import cv.inps.rh.assiduidade.application.dto.WrapperListaDispensaDTO;
 
 @IgrpController
 @RestController
@@ -211,6 +212,44 @@ public class AssiduidadeController {
   {
 
       final var query = new GetListaFaltaQuery(pageNumber, pageSize, colaborador, ilha, direcao, seccao, dataInicio, dataFim, estado);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "dispensa"
+  )
+  @Operation(
+    summary = "Get lista dispensa",
+    description = "Get lista dispensa",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = WrapperListaDispensaDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<WrapperListaDispensaDTO> getListaDispensa(
+    @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
+    @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
+    @RequestParam(value = "colaborador", required = false) String colaborador,
+    @RequestParam(value = "ilha", required = false) Long ilha,
+    @RequestParam(value = "direcao", required = false) Long direcao,
+    @RequestParam(value = "seccao", required = false) Long seccao,
+    @RequestParam(value = "dataInicio", required = false) String dataInicio,
+    @RequestParam(value = "dataFim", required = false) String dataFim,
+    @RequestParam(value = "estado", required = false) String estado)
+  {
+
+      final var query = new GetListaDispensaQuery(pageNumber, pageSize, colaborador, ilha, direcao, seccao, dataInicio, dataFim, estado);
 
       return queryBus.handle(query);
 
