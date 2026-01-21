@@ -18,9 +18,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.assiduidade.application.queries.*;
-
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.inps.rh.assiduidade.application.commands.*;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaPicagemDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaAssiduidadadeDTO;
+import cv.inps.rh.assiduidade.application.dto.FaltaReqDTO;
+import java.util.Map;
 
 @IgrpController
 @RestController
@@ -33,10 +36,11 @@ public class AssiduidadeController {
 
   
   private final QueryBus queryBus;
+  private final CommandBus commandBus;
 
-  public AssiduidadeController(QueryBus queryBus) {
+  public AssiduidadeController(QueryBus queryBus, CommandBus commandBus) {
           this.queryBus = queryBus;
-          
+          this.commandBus = commandBus;
   }
    @GetMapping(
    value = "picagens"
@@ -110,6 +114,66 @@ public class AssiduidadeController {
       final var query = new GetListaMovimentosResumidosQuery(pageSize, pageNumber, colaborador, dataInicio, dataFim, estado, ilha, direcao, seccao);
 
       return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "falta"
+  )
+  @Operation(
+    summary = "Marcar falta",
+    description = "Marcar falta",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> marcarFalta(@Valid @RequestBody FaltaReqDTO marcarFaltaRequest
+    )
+  {
+
+      final var command = new MarcarFaltaCommand(marcarFaltaRequest);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "falta/{faltaId}"
+  )
+  @Operation(
+    summary = "Validar falta",
+    description = "Validar falta",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> validarFalta(@Valid @RequestBody FaltaReqDTO validarFaltaRequest
+    , @PathVariable(value = "faltaId") String faltaId)
+  {
+
+      final var command = new ValidarFaltaCommand(validarFaltaRequest, faltaId);
+
+      return commandBus.send(command);
 
   }
 

@@ -139,6 +139,77 @@
           "isRequired": false
         }
       ]
+    },
+    {
+      "actionName": "marcarFalta",
+      "path": "falta",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "FaltaReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "validarFalta",
+      "path": "falta/{faltaId}",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "FaltaReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "faltaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "mxvoz9hyxu-getListaMovimentosResumidos"
