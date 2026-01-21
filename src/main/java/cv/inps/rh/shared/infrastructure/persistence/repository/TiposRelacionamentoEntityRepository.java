@@ -51,6 +51,16 @@ public interface TiposRelacionamentoEntityRepository extends
             .notFound("TiposRelacionamentoEntity not found for id: " + uuid));
   }
 
+  @Query("""
+      select t
+      from TiposRelacionamentoEntity t
+      left join fetch t.mobId m
+      left join fetch m.instidId inst
+      where t.estActAdm = 1
+        and t.funId.uuid in :funcionarioUuids
+      """)
+  List<TiposRelacionamentoEntity> findAtuaisByFuncionarioUuids(@Param("funcionarioUuids") List<UUID> funcionarioUuids);
+
   TiposRelacionamentoEntity findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity funcionario, Estado estado);
 
   Page<TiposRelacionamentoEntity> findByFunId_UuidAndEstado(UUID funcionarioId, Estado estado, Pageable pageable);
@@ -111,8 +121,7 @@ public interface TiposRelacionamentoEntityRepository extends
   Page<PesquisaColaboradorResponseDTO> pesquisaColaborador(
       @Param("directionId") Long directionId,
       @Param("nome") String nome,
-      Pageable pageable
-  );
+      Pageable pageable);
 
   @Query("""
       SELECT new cv.inps.rh.processamento.application.dto.PesquisaCentroCustoResponseDTO(
@@ -231,6 +240,5 @@ public interface TiposRelacionamentoEntityRepository extends
       @Param("dataInicio") LocalDate dataInicio,
       @Param("dataFim") LocalDate dataFim,
       Pageable pageable);
-
 
 }
