@@ -431,7 +431,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "HorExtraList",
+                "type": "WrapperListaHoraExtra",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -440,7 +440,46 @@
             }
           }
         }
-      }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "ilha",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        }
+      ]
     }
   ],
   "id": "mxvoz9hyxu-getListaMovimentosResumidos"

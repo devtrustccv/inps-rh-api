@@ -27,7 +27,7 @@ import java.util.Map;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFaltaDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaDispensaDTO;
 import cv.inps.rh.assiduidade.application.dto.DispensaReqDTO;
-import cv.inps.rh.assiduidade.application.dto.HorExtraListDTO;
+import cv.inps.rh.assiduidade.application.dto.WrapperListaHoraExtraDTO;
 
 @IgrpController
 @RestController
@@ -329,18 +329,24 @@ public class AssiduidadeController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = HorExtraListDTO.class,
+                  implementation = WrapperListaHoraExtraDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<HorExtraListDTO> getListaHoraExtra(
-    )
+  public ResponseEntity<WrapperListaHoraExtraDTO> getListaHoraExtra(
+    @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
+    @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
+    @RequestParam(value = "ilha", required = false) Long ilha,
+    @RequestParam(value = "direcao", required = false) Long direcao,
+    @RequestParam(value = "seccao", required = false) Long seccao,
+    @RequestParam(value = "dataInicio", required = false) String dataInicio,
+    @RequestParam(value = "dataFim", required = false) String dataFim)
   {
 
-      final var query = new GetListaHoraExtraQuery();
+      final var query = new GetListaHoraExtraQuery(pageNumber, pageSize, ilha, direcao, seccao, dataInicio, dataFim);
 
       return queryBus.handle(query);
 
