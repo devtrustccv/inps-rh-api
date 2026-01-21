@@ -110,10 +110,8 @@ public class FaltaServiceWrite {
   @Transactional
   public Map<String, ?> validarFalta(ValidarFaltaCommand command) {
     var req = command.getFaltareq();
-
-    if (StringUtils.hasText(req.getValidar())) {
-      throw IgrpResponseStatusException.badRequest("validar falta");
-    }
+    if (req == null || !StringUtils.hasText(req.getValidar()))
+      throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
     if (!StringUtils.hasText(command.getFaltaId()))
       throw IgrpResponseStatusException.badRequest("Identificador da falta é obrigatório");
     Long faltaId;
@@ -135,15 +133,16 @@ public class FaltaServiceWrite {
     var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
     var estado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
-
     falta.setDecisaoResponsavel(req.getParecer());
     falta.setObsResponsavel(req.getObservacao());
     falta.setDespachoRh(req.getDespachoRh());
     falta.setEstado(estado);
     faltaRepository.save(falta);
 
-    pedido.setEstado(estado);
-    pedidoRepository.save(pedido);
+    if (pedido != null) {
+      pedido.setEstado(estado);
+      pedidoRepository.save(pedido);
+    }
 
     funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.FALTA)
         .ifPresent(v -> {
@@ -175,7 +174,7 @@ public class FaltaServiceWrite {
   }
 
   private FaltaEntity buildFalta(FaltaReqDTO req, PedidoEntity pedido, TipoFaltaEntity tipo, LocalDate dia,
-                                 FuncionarioEntity fun) {
+      FuncionarioEntity fun) {
     var falta = new FaltaEntity();
     falta.setPedidoId(pedido);
     falta.setTfId(tipo);
@@ -195,7 +194,7 @@ public class FaltaServiceWrite {
   }
 
   private AssiduidadeSinteseDiarioEntity buildOrCreateSinteseDia(FuncionarioEntity fun, LocalDate dia,
-                                                                 String horasAusencia) {
+      String horasAusencia) {
     var e = new AssiduidadeSinteseDiarioEntity();
     e.setFuncionarioId(fun);
     e.setData(dia);
