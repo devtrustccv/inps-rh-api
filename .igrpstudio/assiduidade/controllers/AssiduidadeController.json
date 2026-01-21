@@ -420,6 +420,27 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getListaHoraExtra",
+      "path": "hora-extra",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "HorExtraList",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "id": "mxvoz9hyxu-getListaMovimentosResumidos"

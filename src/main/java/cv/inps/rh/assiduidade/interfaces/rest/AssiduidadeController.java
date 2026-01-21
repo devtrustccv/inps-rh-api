@@ -27,6 +27,7 @@ import java.util.Map;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFaltaDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaDispensaDTO;
 import cv.inps.rh.assiduidade.application.dto.DispensaReqDTO;
+import cv.inps.rh.assiduidade.application.dto.HorExtraListDTO;
 
 @IgrpController
 @RestController
@@ -312,6 +313,36 @@ public class AssiduidadeController {
       final var command = new ValidarDispensaCommand(validarDispensaRequest, dispensaId);
 
       return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "hora-extra"
+  )
+  @Operation(
+    summary = "Get lista hora extra",
+    description = "Get lista hora extra",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = HorExtraListDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<HorExtraListDTO> getListaHoraExtra(
+    )
+  {
+
+      final var query = new GetListaHoraExtraQuery();
+
+      return queryBus.handle(query);
 
   }
 
