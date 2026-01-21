@@ -1,0 +1,75 @@
+{
+  "type": "controller",
+  "name": "Assiduidade",
+  "module": "assiduidade",
+  "description": "gestao de assiduidade",
+  "basePath": "api/v1/assiduidade",
+  "actions": [
+    {
+      "actionName": "getListaPicagem",
+      "path": "picagens",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaPicagem",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "nomeColaborador",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "ups",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        }
+      ]
+    }
+  ],
+  "id": "mxvoz9hyxu"
+}
