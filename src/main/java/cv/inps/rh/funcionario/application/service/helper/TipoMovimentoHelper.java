@@ -32,4 +32,9 @@ public class TipoMovimentoHelper {
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento FALTA nao encontrado."));
   }
 
+  public TipoMovimentoEntity getTipoMovimentoEntityHoraExtra() {
+    return tipoMovimentoEntityRepository.findByShortDescAndAmbAplId("HEXT", 30L)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Tipo de movimento HORA EXTRA nao encontrado."));
+  }
+
 }

@@ -72,7 +72,7 @@ public class DispensaWriteService {
     disp.setUuid(UuidCreator.getTimeOrderedEpoch());
     disp = dispensaRepository.save(disp);
 
-    var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.AUSENCIA.name(),
+    var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.DISPENSA.name(),
         Estado.P);
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRelAtual);
@@ -140,7 +140,7 @@ public class DispensaWriteService {
 
 
     funcionarioRules.getValidacaoPendente(funcionario.getUuid(),
-        TipoAcao.INSERT, Referencia.AUSENCIA).ifPresent(validacaoEntityRepository::save);
+        TipoAcao.INSERT, Referencia.DISPENSA).ifPresent(validacaoEntityRepository::save);
 
 
     Map<String, Object> resp = new HashMap<>();

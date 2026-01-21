@@ -19,5 +19,7 @@ public enum Referencia {
   SUBSTITUICAO,
   CARREIRA,
   FALTA,
-  AUSENCIA
+  DISPENSA,
+  HORA_EXTRA
+
 }
