@@ -110,6 +110,10 @@ public class FaltaServiceWrite {
   @Transactional
   public Map<String, ?> validarFalta(ValidarFaltaCommand command) {
     var req = command.getFaltareq();
+
+    if (StringUtils.hasText(req.getValidar())) {
+      throw IgrpResponseStatusException.badRequest("validar falta");
+    }
     if (!StringUtils.hasText(command.getFaltaId()))
       throw IgrpResponseStatusException.badRequest("Identificador da falta é obrigatório");
     Long faltaId;
@@ -122,27 +126,24 @@ public class FaltaServiceWrite {
     var falta = faltaRepository.findByIdOrThrow(faltaId);
     var pedido = falta.getPedidoId();
     var funcionario = pedido != null ? pedido.getFunId() : null;
+
     if (funcionario == null)
       throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
 
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
-    var estado = Estado.I;
-    if (req != null && StringUtils.hasText(req.getValidar())) {
-      var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
-      estado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-    }
+    var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
+    var estado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
-    falta.setDecisaoResponsavel(req != null ? req.getParecer() : null);
-    falta.setObsResponsavel(req != null ? req.getObservacao() : null);
-    falta.setDespachoRh(req != null ? req.getDespachoRh() : null);
+
+    falta.setDecisaoResponsavel(req.getParecer());
+    falta.setObsResponsavel(req.getObservacao());
+    falta.setDespachoRh(req.getDespachoRh());
     falta.setEstado(estado);
     faltaRepository.save(falta);
 
-    if (pedido != null) {
-      pedido.setEstado(estado);
-      pedidoRepository.save(pedido);
-    }
+    pedido.setEstado(estado);
+    pedidoRepository.save(pedido);
 
     funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.FALTA)
         .ifPresent(v -> {
@@ -174,7 +175,7 @@ public class FaltaServiceWrite {
   }
 
   private FaltaEntity buildFalta(FaltaReqDTO req, PedidoEntity pedido, TipoFaltaEntity tipo, LocalDate dia,
-      FuncionarioEntity fun) {
+                                 FuncionarioEntity fun) {
     var falta = new FaltaEntity();
     falta.setPedidoId(pedido);
     falta.setTfId(tipo);
@@ -194,7 +195,7 @@ public class FaltaServiceWrite {
   }
 
   private AssiduidadeSinteseDiarioEntity buildOrCreateSinteseDia(FuncionarioEntity fun, LocalDate dia,
-      String horasAusencia) {
+                                                                 String horasAusencia) {
     var e = new AssiduidadeSinteseDiarioEntity();
     e.setFuncionarioId(fun);
     e.setData(dia);
