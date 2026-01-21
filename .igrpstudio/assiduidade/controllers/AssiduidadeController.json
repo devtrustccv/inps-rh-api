@@ -353,6 +353,7 @@
     },
     {
       "actionName": "marcarDispensa",
+      "path": "dispensa",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -384,7 +385,7 @@
     },
     {
       "actionName": "validarDispensa",
-      "path": "{dispensaId}",
+      "path": "dispensa/{dispensaId}",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -478,6 +479,77 @@
           "type": "string",
           "name": "dataFim",
           "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "marcarHoraExtra",
+      "path": "hora-extra",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "HoraExtraReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "validarHoraExtra",
+      "path": "hora-extra/{horaExtraId}",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "HoraExtraReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "horaExtraId",
+          "type": "string",
+          "isRequired": true
         }
       ]
     }

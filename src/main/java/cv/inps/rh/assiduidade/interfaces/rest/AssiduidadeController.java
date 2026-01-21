@@ -28,6 +28,7 @@ import cv.inps.rh.assiduidade.application.dto.WrapperListaFaltaDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaDispensaDTO;
 import cv.inps.rh.assiduidade.application.dto.DispensaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaHoraExtraDTO;
+import cv.inps.rh.assiduidade.application.dto.HoraExtraReqDTO;
 
 @IgrpController
 @RestController
@@ -258,6 +259,7 @@ public class AssiduidadeController {
   }
 
    @PostMapping(
+   value = "dispensa"
   )
   @Operation(
     summary = "Marcar dispensa",
@@ -287,7 +289,7 @@ public class AssiduidadeController {
   }
 
    @PostMapping(
-   value = "{dispensaId}"
+   value = "dispensa/{dispensaId}"
   )
   @Operation(
     summary = "Validar dispensa",
@@ -349,6 +351,66 @@ public class AssiduidadeController {
       final var query = new GetListaHoraExtraQuery(pageNumber, pageSize, ilha, direcao, seccao, dataInicio, dataFim);
 
       return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "hora-extra"
+  )
+  @Operation(
+    summary = "Marcar hora extra",
+    description = "Marcar hora extra",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<String> marcarHoraExtra(@Valid @RequestBody HoraExtraReqDTO marcarHoraExtraRequest
+    )
+  {
+
+      final var command = new MarcarHoraExtraCommand(marcarHoraExtraRequest);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "hora-extra/{horaExtraId}"
+  )
+  @Operation(
+    summary = "Validar hora extra",
+    description = "Validar hora extra",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> validarHoraExtra(@Valid @RequestBody HoraExtraReqDTO validarHoraExtraRequest
+    , @PathVariable(value = "horaExtraId") String horaExtraId)
+  {
+
+      final var command = new ValidarHoraExtraCommand(validarHoraExtraRequest, horaExtraId);
+
+      return commandBus.send(command);
 
   }
 
