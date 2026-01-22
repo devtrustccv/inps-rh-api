@@ -982,6 +982,45 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "validarFaltaJustificada",
+      "path": "falta/justificar/validar/{faltaId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "JustificarFalta",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "faltaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta"

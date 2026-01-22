@@ -793,4 +793,34 @@ public class AssiduidadeController {
 
   }
 
+   @PutMapping(
+   value = "falta/justificar/validar/{faltaId}"
+  )
+  @Operation(
+    summary = "Validar falta justificada",
+    description = "Validar falta justificada",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> validarFaltaJustificada(@Valid @RequestBody JustificarFaltaDTO validarFaltaJustificadaRequest
+    , @PathVariable(value = "faltaId") String faltaId)
+  {
+
+      final var command = new ValidarFaltaJustificadaCommand(validarFaltaJustificadaRequest, faltaId);
+
+      return commandBus.send(command);
+
+  }
+
 }
