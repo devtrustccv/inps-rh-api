@@ -1,5 +1,6 @@
 package cv.inps.rh.assiduidade.application.queries;
 
+import cv.inps.rh.assiduidade.application.services.FeriaReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -15,9 +16,11 @@ public class GetListaFeriaQueryHandler implements QueryHandler<GetListaFeriaQuer
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetListaFeriaQueryHandler.class);
 
+   private final FeriaReadService feriaReadService;
 
-  public GetListaFeriaQueryHandler() {
+  public GetListaFeriaQueryHandler(FeriaReadService feriaReadService) {
 
+    this.feriaReadService = feriaReadService;
   }
 
    @IgrpQueryHandler
@@ -25,8 +28,7 @@ public class GetListaFeriaQueryHandler implements QueryHandler<GetListaFeriaQuer
 
     LOGGER.debug("GetListaFeriaQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    return ResponseEntity.ok(feriaReadService.getListaFeria(query));
   }
 
 }

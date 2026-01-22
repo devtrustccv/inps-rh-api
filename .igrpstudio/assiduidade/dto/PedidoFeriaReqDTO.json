@@ -18,6 +18,18 @@
       "primaryKey": false
     },
     {
+      "name": "obsValidacao",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "colaborador",
       "objectType": "java",
       "type": "long",
@@ -103,18 +115,6 @@
     },
     {
       "name": "obsParecer",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "obsValidacao",
       "objectType": "java",
       "type": "string",
       "required": false,

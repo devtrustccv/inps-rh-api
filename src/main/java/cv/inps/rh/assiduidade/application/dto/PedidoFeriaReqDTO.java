@@ -27,6 +27,9 @@ public class PedidoFeriaReqDTO  {
   private String validar ;
   
   
+  private String obsValidacao ;
+  
+  
   private Long colaborador ;
   
   
@@ -49,9 +52,6 @@ public class PedidoFeriaReqDTO  {
   
   
   private String obsParecer ;
-  
-  
-  private String obsValidacao ;
   
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();

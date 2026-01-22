@@ -30,6 +30,7 @@ import cv.inps.rh.assiduidade.application.dto.DispensaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaHoraExtraDTO;
 import cv.inps.rh.assiduidade.application.dto.HoraExtraReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFeriaDTO;
+import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
 
 @IgrpController
 @RestController
@@ -448,6 +449,36 @@ public class AssiduidadeController {
       final var query = new GetListaFeriaQuery(pageNumber, pageSize, anoReferente, ilha, direcao, seccao, colaborador);
 
       return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "feria"
+  )
+  @Operation(
+    summary = "Marcar feria",
+    description = "Marcar feria",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> marcarFeria(@Valid @RequestBody PedidoFeriaReqDTO marcarFeriaRequest
+    )
+  {
+
+      final var command = new MarcarFeriaCommand(marcarFeriaRequest);
+
+      return commandBus.send(command);
 
   }
 
