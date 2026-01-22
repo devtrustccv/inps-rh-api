@@ -2,6 +2,7 @@ package cv.inps.rh.assiduidade.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.assiduidade.application.services.FeriaWriteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -14,8 +15,11 @@ public class ValidarPedidoFeriaCommandHandler implements CommandHandler<ValidarP
 
    private static final Logger LOGGER = LoggerFactory.getLogger(ValidarPedidoFeriaCommandHandler.class);
 
-   public ValidarPedidoFeriaCommandHandler() {
+  private final FeriaWriteService feriaWriteService;
 
+   public ValidarPedidoFeriaCommandHandler(FeriaWriteService feriaWriteService) {
+
+     this.feriaWriteService = feriaWriteService;
    }
 
    @IgrpCommandHandler
@@ -23,8 +27,8 @@ public class ValidarPedidoFeriaCommandHandler implements CommandHandler<ValidarP
 
       LOGGER.debug("ValidarPedidoFeriaCommand : {}", command);
 
-      // TODO: Implement the command handling logic here
-      return null;
+
+      return ResponseEntity.ok(feriaWriteService.validarFeria(command));
    }
 
 }
