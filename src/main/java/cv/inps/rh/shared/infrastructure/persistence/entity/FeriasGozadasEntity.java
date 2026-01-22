@@ -53,8 +53,8 @@ public class FeriasGozadasEntity extends AuditEntity {
     private LocalDate dataFim;
 
   
-    @Column(name="tiprel_id_susbtituido")
-    private Long tiprelIdSusbtituido;
+    @Column(name="tiprel_id_substituido")
+    private Long tiprelIdSubstituido;
 
   
     @Column(name="motivo_alteracao")

@@ -172,7 +172,7 @@ public class FeriaReadService {
     req.setDataInicio(entity.getDataInicio());
     req.setDataFim(entity.getDataFim());
     req.setNumDias(entity.getNumDia());
-    req.setSubstituidoPor(entity.getTiprelIdSusbtituido());
+    req.setSubstituidoPor(entity.getTiprelIdSubstituido());
     req.setObsConvinienciaServico(entity.getObsInfoConveniencia());
     req.setResponsavel(entity.getResponsavelId());
     req.setObsParecer(entity.getObsResponsavel());

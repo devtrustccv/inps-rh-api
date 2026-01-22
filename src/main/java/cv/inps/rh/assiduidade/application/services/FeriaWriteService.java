@@ -66,7 +66,7 @@ public class FeriaWriteService {
     ferias.setDataInicio(req.getDataInicio());
     ferias.setDataFim(req.getDataFim());
     ferias.setNumDia(diffDays(req.getDataInicio(), req.getDataFim()));
-    ferias.setTiprelIdSusbtituido(req.getSubstituidoPor());
+    ferias.setTiprelIdSubstituido(req.getSubstituidoPor());
     ferias.setObsInfoConveniencia(req.getObsConvinienciaServico());
     ferias.setResponsavelId(req.getResponsavel());
     ferias.setObsResponsavel(req.getObsParecer());
@@ -172,7 +172,7 @@ public class FeriaWriteService {
     nova.setDataInicio(di);
     nova.setDataFim(df);
     nova.setNumDia(diffDays(di, df));
-    nova.setTiprelIdSusbtituido(base.getSubstituidoPor());
+    nova.setTiprelIdSubstituido(base.getSubstituidoPor());
     nova.setObsInfoConveniencia(base.getObsConvinienciaServico());
     nova.setResponsavelId(base.getResponsavel());
     nova.setObsResponsavel(base.getObsParecer());
