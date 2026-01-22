@@ -3,6 +3,7 @@ package cv.inps.rh.shared.domain.service;
 import cv.igrp.platform.filemanager.StorageService;
 import cv.inps.rh.processamento.domain.service.processamentosalarial.report.model.ProcessamentoSalarialReport;
 import cv.inps.rh.shared.application.dto.MinioFileDataDTO;
+import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PdfGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 @Service
 public class RelatoriosService {
 
+  public static final String AREM = "AREM";
   private final PdfGenerator pdf;
   private final StorageService storageService;
   private final JdbcTemplate jdbcTemplate;
@@ -82,11 +83,9 @@ public class RelatoriosService {
 
   public Context processamentoSalarios(Long processamentoId, String tipo) {
 
-    // TODO 21/01/2026 22:54 optimize later for better memory usage, use DTO
-
     var context = new Context();
 
-    var funcionarios = new ArrayList<Map<String, Object>>();
+    var funcionarios = new ArrayList<Funcionarios>();
 
     var data = getProcessamentoSalarialReportData(processamentoId, tipo);
     if (data.isEmpty())
@@ -106,44 +105,36 @@ public class RelatoriosService {
         funMap.forEach((_, rows) -> {
 
           var lancamentos = rows.stream()
-              .sorted(Comparator.comparing(r -> !"AREM".equals(r.tipo())))
-              .map(r -> Map.of(
-                  "descricao", r.descricao(),
-                  "valor", r.valor()
-              ))
+              .sorted(Comparator.comparing(r -> !AREM.equals(r.tipo())))
+              .map(r -> new Lancamentos(r.descricao(), r.valor()))
               .toList();
 
           var firstRow = rows.getFirst();
 
-          Map<String, Object> row = Map.of(
-              "shortDesc", firstRow.descricaoMovimento(),
-              "dados", firstRow.nif() + " - " + firstRow.nomeCargoEscalao(),
-              "lancamentos", lancamentos,
-              "totais", Map.of(
-                  "remuneracoes", firstRow.totalRemuneracoes(),
-                  "descontos", firstRow.totalDescontos(),
-                  "liquido", firstRow.totalLiquido()
-              )
+          var func = new Funcionarios(
+              firstRow.descricaoMovimento(),
+              firstRow.nif() + " - " + firstRow.nomeCargoEscalao(),
+              lancamentos,
+              firstRow.totalRemuneracoes(),
+              firstRow.totalDescontos(),
+              firstRow.totalLiquido()
           );
-          funcionarios.add(row);
+          funcionarios.add(func);
         })
     );
 
-    var formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
-
-    context.setVariable("dataElaboracao", LocalDateTime.now().format(formatter));
-    context.setVariable("dataProcessamento", dataProcessamento);
+    context.setVariable("dataElaboracao", LocalDateTime.now().format(DateFormatter.DATE_TIME));
+    context.setVariable("dataProcessamento", dataProcessamento.format(DateFormatter.DATE));
     context.setVariable("entidade", "Processar Remunerações " + centroCusto);
     context.setVariable("funcionarios", funcionarios);
     return context;
   }
 
   private List<ProcessamentoSalarialReport> getProcessamentoSalarialReportData(Long processamentoId, String tipo) {
-
     var sql = """
             SELECT
-                p.TIPO,
                 tm.DESCRICAO AS DESCRICAO_MOVIMENTO,
+                p.TIPO,
                 p.DATA_PROCESSAMENTO,
                 p.CENTRO_DE_CUSTO,
                 p.CARGO,
@@ -155,15 +146,16 @@ public class RelatoriosService {
                 p.TOTAL_REMUNERACOES,
                 p.TOTAL_DESCONTOS,
                 p.TOTAL_LIQUIDO
-            FROM INPSRH.PROC_SAL_CC p, RH_TIPO_MOVIMENTOS tm
-            WHERE tm.ID = p.TM_ID
+            FROM INPSRH.PROC_SAL_CC p JOIN RH_TIPO_MOVIMENTOS tm ON tm.ID = p.TM_ID
+            ORDER BY p.CARGO, p.FUN_ID
         """;
+
 
     return
         jdbcTemplate.query(sql, (rs, _) ->
             new ProcessamentoSalarialReport(
-                rs.getString("TIPO"),
                 rs.getString("DESCRICAO_MOVIMENTO"),
+                rs.getString("TIPO"),
                 rs.getDate("DATA_PROCESSAMENTO").toLocalDate(),
                 rs.getString("CENTRO_DE_CUSTO"),
                 rs.getString("CARGO"),
@@ -177,6 +169,13 @@ public class RelatoriosService {
                 rs.getLong("TOTAL_LIQUIDO")
             )
         );
+  }
+
+  public record Lancamentos(String descricao, Long valor) {
+  }
+
+  public record Funcionarios(String shortDesc, String dados, List<Lancamentos> lancamentos,
+                             Long remuneracoes, Long descontos, Long liquido) {
   }
 
 }
