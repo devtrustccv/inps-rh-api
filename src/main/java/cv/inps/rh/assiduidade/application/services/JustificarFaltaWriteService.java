@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class JustificarFaltaService {
+public class JustificarFaltaWriteService {
 
 
   public Map<String, ?> justificarFalta(JustificarFaltaCommand command) {

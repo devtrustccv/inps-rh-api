@@ -2,7 +2,7 @@ package cv.inps.rh.assiduidade.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.assiduidade.application.services.JustificarFaltaService;
+import cv.inps.rh.assiduidade.application.services.JustificarFaltaWriteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -15,8 +15,8 @@ public class ValidarFaltaJustificadaCommandHandler implements CommandHandler<Val
 
    private static final Logger LOGGER = LoggerFactory.getLogger(ValidarFaltaJustificadaCommandHandler.class);
 
-   private final JustificarFaltaService justificarFaltaService;
-   public ValidarFaltaJustificadaCommandHandler(JustificarFaltaService justificarFaltaService) {
+   private final JustificarFaltaWriteService justificarFaltaService;
+   public ValidarFaltaJustificadaCommandHandler(JustificarFaltaWriteService justificarFaltaService) {
 
      this.justificarFaltaService = justificarFaltaService;
    }
