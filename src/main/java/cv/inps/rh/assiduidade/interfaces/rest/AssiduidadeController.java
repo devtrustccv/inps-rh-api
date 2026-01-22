@@ -31,6 +31,7 @@ import cv.inps.rh.assiduidade.application.dto.WrapperListaHoraExtraDTO;
 import cv.inps.rh.assiduidade.application.dto.HoraExtraReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFeriaDTO;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
+import cv.inps.rh.assiduidade.application.dto.PedidoFeriaAlterarReqDTO;
 
 @IgrpController
 @RestController
@@ -477,6 +478,66 @@ public class AssiduidadeController {
   {
 
       final var command = new MarcarFeriaCommand(marcarFeriaRequest);
+
+      return commandBus.send(command);
+
+  }
+
+   @PutMapping(
+   value = "feria/{feriaId}"
+  )
+  @Operation(
+    summary = "Alterar pedido feria",
+    description = "Alterar pedido feria",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> alterarPedidoFeria(@Valid @RequestBody PedidoFeriaAlterarReqDTO alterarPedidoFeriaRequest
+    , @PathVariable(value = "feriaId") String feriaId)
+  {
+
+      final var command = new AlterarPedidoFeriaCommand(alterarPedidoFeriaRequest, feriaId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "feria/{feriaId}"
+  )
+  @Operation(
+    summary = "Validar pedido feria",
+    description = "Validar pedido feria",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> validarPedidoFeria(@Valid @RequestBody PedidoFeriaReqDTO validarPedidoFeriaRequest
+    , @PathVariable(value = "feriaId") String feriaId)
+  {
+
+      final var command = new ValidarPedidoFeriaCommand(validarPedidoFeriaRequest, feriaId);
 
       return commandBus.send(command);
 
