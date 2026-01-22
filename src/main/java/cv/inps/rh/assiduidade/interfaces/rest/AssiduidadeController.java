@@ -823,4 +823,34 @@ public class AssiduidadeController {
 
   }
 
+   @GetMapping(
+   value = "falta/justificar/{faltaId}"
+  )
+  @Operation(
+    summary = "Get falta justificada",
+    description = "Get falta justificada",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = JustificarFaltaDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<JustificarFaltaDTO> getFaltaJustificada(
+    @PathVariable(value = "faltaId") String faltaId)
+  {
+
+      final var query = new GetFaltaJustificadaQuery(faltaId);
+
+      return queryBus.handle(query);
+
+  }
+
 }

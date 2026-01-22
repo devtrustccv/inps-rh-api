@@ -1021,6 +1021,34 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getFaltaJustificada",
+      "path": "falta/justificar/{faltaId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "JustificarFalta",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "faltaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta"
