@@ -23,7 +23,8 @@ import java.util.stream.Collectors;
 @Service
 public class RelatoriosService {
 
-  public static final String AREM = "AREM";
+  private static final String AREM = "AREM";
+  private static final String SEPARATOR = " - ";
   private final PdfGenerator pdf;
   private final StorageService storageService;
   private final JdbcTemplate jdbcTemplate;
@@ -55,7 +56,6 @@ public class RelatoriosService {
   public Map<String, Object> recibosSalario() {
 
     Map<String, Object> recibo = Map.of(
-        "modelo", "SA0003",
         "entidade", "Processar Remunerações Gabinete Sistemas de Informação",
         "dataProcessamento", "10/2025",
         "dataEmissao", "27-10-2025 10:54:16",
@@ -85,11 +85,11 @@ public class RelatoriosService {
 
     var context = new Context();
 
-    var funcionarios = new ArrayList<Funcionarios>();
-
     var data = getProcessamentoSalarialReportData(processamentoId, tipo);
     if (data.isEmpty())
       return context;
+
+    var funcionarios = new ArrayList<Funcionarios>(data.size());
 
     var dataFirst = data.getFirst();
     var dataProcessamento = dataFirst.dataProcessamento();
@@ -97,7 +97,7 @@ public class RelatoriosService {
 
     var grouped = data.stream()
         .collect(Collectors.groupingBy(
-            ProcessamentoSalarialReport::cargo,
+            ProcessamentoSalarialReport::cargo, // TODO 22/01/2026 21:24 group by cargo id here to be more performant
             Collectors.groupingBy(ProcessamentoSalarialReport::funId)
         ));
 
@@ -113,12 +113,13 @@ public class RelatoriosService {
 
           var func = new Funcionarios(
               firstRow.descricaoMovimento(),
-              firstRow.nif() + " - " + firstRow.nomeCargoEscalao(),
+              firstRow.nif() + SEPARATOR + firstRow.nomeCargoEscalao(),
               lancamentos,
               firstRow.totalRemuneracoes(),
               firstRow.totalDescontos(),
               firstRow.totalLiquido()
           );
+
           funcionarios.add(func);
         })
     );
