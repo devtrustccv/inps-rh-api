@@ -156,7 +156,33 @@ public class FeriaReadService {
 
 
   public PedidoFeriaAlterarReqDTO getPedidoFeria(GetPedidoFeriaQuery query){
-    return new PedidoFeriaAlterarReqDTO();
+    if (!StringUtils.hasText(query.getFeriaId()))
+      throw cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException.badRequest("Identificador de férias é obrigatório");
+    Long id;
+    try {
+      id = Long.parseLong(query.getFeriaId());
+    } catch (NumberFormatException e) {
+      throw cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException.badRequest("Identificador de férias inválido");
+    }
+
+    var entity = feriasGozadasEntityRepository.findByIdOrThrow(id);
+
+    var req = new cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO();
+    req.setColaborador(entity.getFunId() != null ? entity.getFunId().getId() : null);
+    req.setDataInicio(entity.getDataInicio());
+    req.setDataFim(entity.getDataFim());
+    req.setNumDias(entity.getNumDia());
+    req.setSubstituidoPor(entity.getTiprelIdSusbtituido());
+    req.setObsConvinienciaServico(entity.getObsInfoConveniencia());
+    req.setResponsavel(entity.getResponsavelId());
+    req.setObsParecer(entity.getObsResponsavel());
+
+    var dto = new PedidoFeriaAlterarReqDTO();
+    dto.setFeria(req);
+    dto.setTipoAlteracao("DATA");
+    dto.setNovaDataFim(entity.getDataFim());
+    dto.setMotivo(entity.getMotivoAlteracao());
+    return dto;
 
   }
 }

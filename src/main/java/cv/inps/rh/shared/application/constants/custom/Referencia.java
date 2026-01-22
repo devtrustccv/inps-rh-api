@@ -20,6 +20,7 @@ public enum Referencia {
   CARREIRA,
   FALTA,
   DISPENSA,
-  HORA_EXTRA
+  HORA_EXTRA,
+  FERIA
 
 }
