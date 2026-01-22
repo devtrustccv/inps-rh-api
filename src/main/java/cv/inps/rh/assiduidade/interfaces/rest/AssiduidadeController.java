@@ -32,6 +32,7 @@ import cv.inps.rh.assiduidade.application.dto.HoraExtraReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFeriaDTO;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaAlterarReqDTO;
+import cv.inps.rh.assiduidade.application.dto.VerMapaDTO;
 
 @IgrpController
 @RestController
@@ -540,6 +541,36 @@ public class AssiduidadeController {
       final var command = new ValidarPedidoFeriaCommand(validarPedidoFeriaRequest, feriaId);
 
       return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "mapa"
+  )
+  @Operation(
+    summary = "Ver mapa",
+    description = "Ver mapa",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = VerMapaDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<VerMapaDTO> verMapa(
+    )
+  {
+
+      final var query = new VerMapaQuery();
+
+      return queryBus.handle(query);
 
   }
 

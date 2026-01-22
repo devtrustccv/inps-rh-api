@@ -722,6 +722,27 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "verMapa",
+      "path": "mapa",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "VerMapa",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria"
