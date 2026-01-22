@@ -34,6 +34,7 @@ import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaAlterarReqDTO;
 import cv.inps.rh.assiduidade.application.dto.VerMapaDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaMapaFeriaDTO;
+import cv.inps.rh.assiduidade.application.dto.DetalheMapaFeriaDTO;
 
 @IgrpController
 @RestController
@@ -606,6 +607,36 @@ public class AssiduidadeController {
   {
 
       final var query = new ListaMapaFeriaQuery(pageNumber, pageSize, anoReferente, ilha, direcao, seccao, estado);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "mapa-feria/{mapaFeriaId}"
+  )
+  @Operation(
+    summary = "Get detalhe mapa feria",
+    description = "Get detalhe mapa feria",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DetalheMapaFeriaDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<DetalheMapaFeriaDTO> getDetalheMapaFeria(
+    @PathVariable(value = "mapaFeriaId") String mapaFeriaId)
+  {
+
+      final var query = new GetDetalheMapaFeriaQuery(mapaFeriaId);
 
       return queryBus.handle(query);
 
