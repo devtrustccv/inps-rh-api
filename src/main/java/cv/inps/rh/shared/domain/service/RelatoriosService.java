@@ -148,35 +148,38 @@ public class RelatoriosService {
                 p.TOTAL_DESCONTOS,
                 p.TOTAL_LIQUIDO
             FROM INPSRH.PROC_SAL_CC p JOIN RH_TIPO_MOVIMENTOS tm ON tm.ID = p.TM_ID
-            ORDER BY p.CARGO, p.FUN_ID
         """;
 
-
-    return
-        jdbcTemplate.query(sql, (rs, _) ->
-            new ProcessamentoSalarialReport(
-                rs.getString("DESCRICAO_MOVIMENTO"),
-                rs.getString("TIPO"),
-                rs.getDate("DATA_PROCESSAMENTO").toLocalDate(),
-                rs.getString("CENTRO_DE_CUSTO"),
-                rs.getString("CARGO"),
-                rs.getLong("FUN_ID"),
-                rs.getString("DESCRICAO"),
-                rs.getLong("VALOR"),
-                rs.getLong("NIF"),
-                rs.getString("NOME_CARGO_ESCALAO"),
-                rs.getLong("TOTAL_REMUNERACOES"),
-                rs.getLong("TOTAL_DESCONTOS"),
-                rs.getLong("TOTAL_LIQUIDO")
-            )
-        );
+    return jdbcTemplate.query(sql, (rs, _) ->
+        new ProcessamentoSalarialReport(
+            rs.getString("TIPO"),
+            rs.getString("DESCRICAO_MOVIMENTO"),
+            rs.getDate("DATA_PROCESSAMENTO").toLocalDate(),
+            rs.getString("CENTRO_DE_CUSTO"),
+            rs.getString("CARGO"),
+            rs.getLong("FUN_ID"),
+            rs.getString("DESCRICAO"),
+            rs.getLong("VALOR"),
+            rs.getLong("NIF"),
+            rs.getString("NOME_CARGO_ESCALAO"),
+            rs.getLong("TOTAL_REMUNERACOES"),
+            rs.getLong("TOTAL_DESCONTOS"),
+            rs.getLong("TOTAL_LIQUIDO")
+        )
+    );
   }
 
   public record Lancamentos(String descricao, Long valor) {
   }
 
-  public record Funcionarios(String shortDesc, String dados, List<Lancamentos> lancamentos,
-                             Long remuneracoes, Long descontos, Long liquido) {
+  public record Funcionarios(
+      String shortDesc,
+      String dados,
+      List<Lancamentos> lancamentos,
+      Long remuneracoes,
+      Long descontos,
+      Long liquido
+  ) {
   }
 
 }
