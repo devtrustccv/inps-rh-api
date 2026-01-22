@@ -78,8 +78,8 @@ public class FaltaEntity extends AuditEntity {
     private LocalDateTime dataFim;
 
   
-    @Column(name="flg_desconto")
-    private Integer flgDesconto;
+    @Column(name="flg_desconto_sal")
+    private Integer flgDescontoSal;
 
   
     @Column(name="flg_justificativo")

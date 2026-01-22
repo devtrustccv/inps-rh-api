@@ -154,7 +154,7 @@ public class FaltaServiceWrite {
           validacaoEntityRepository.save(v);
         });
 
-    if (Estado.A.equals(estado) && falta.getFlgDesconto() != null && falta.getFlgDesconto() == 1) {
+    if (Estado.A.equals(estado) && falta.getFlgDescontoSal() != null && falta.getFlgDescontoSal() == 1) {
       var jornada = assiduidadeParametroRepository.findAllByEstado(Estado.A.getCode());
       var diaria = jornada != null && !jornada.isEmpty() ? jornada.getFirst().getDiaria() : "08:00";
       var totalMin = parseMin(diaria);
@@ -214,9 +214,9 @@ public class FaltaServiceWrite {
     falta.setDataFim(LocalDateTime.of(dia, LocalTime.of(23, 59, 59)));
     falta.setFlgJustificativo(req.getJustificar());
     if (StringUtils.hasText(tipo.getDescontoRemuneracao()) && tipo.getDescontoRemuneracao().equalsIgnoreCase("SIM")) {
-      falta.setFlgDesconto(1);
+      falta.setFlgDescontoSal(1);
     } else {
-      falta.setFlgDesconto(0);
+      falta.setFlgDescontoSal(0);
     }
     falta.setEstado(Estado.P);
     falta.setUuid(UuidCreator.getTimeOrderedEpoch());

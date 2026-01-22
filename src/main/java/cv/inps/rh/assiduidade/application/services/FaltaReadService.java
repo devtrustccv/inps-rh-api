@@ -122,7 +122,7 @@ public class FaltaReadService {
     dto.setNumFalta(1);
     dto.setValorADescontar(
         e.getDefRemId() != null && e.getDefRemId().getValor() != null ? e.getDefRemId().getValor() : null);
-    dto.setDescontoRenumeracao(Objects.equals(e.getFlgDesconto(), 1));
+    dto.setDescontoRenumeracao(Objects.equals(e.getFlgDescontoSal(), 1));
     dto.setEstadoProcessamento(e.getPedidoId() != null ? e.getPedidoId().getEtapa() : null);
     dto.setEstado(e.getEstado() != null ? e.getEstado().name() : null);
     dto.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);
