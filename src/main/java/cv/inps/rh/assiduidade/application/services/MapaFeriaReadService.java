@@ -1,10 +1,6 @@
 package cv.inps.rh.assiduidade.application.services;
 
-import cv.inps.rh.assiduidade.application.dto.DetalheMapaFeriaDTO;
-import cv.inps.rh.assiduidade.application.dto.PeriodoDTO;
-import cv.inps.rh.assiduidade.application.dto.VerMapaContentDTO;
-import cv.inps.rh.assiduidade.application.dto.VerMapaDTO;
-import cv.inps.rh.assiduidade.application.dto.WrapperListaMapaFeriaDTO;
+import cv.inps.rh.assiduidade.application.dto.*;
 import cv.inps.rh.assiduidade.application.queries.GetDetalheMapaFeriaQuery;
 import cv.inps.rh.assiduidade.application.queries.ListaMapaFeriaQuery;
 import cv.inps.rh.assiduidade.application.queries.VerMapaQuery;
@@ -78,7 +74,7 @@ public class MapaFeriaReadService {
   }
 
   public WrapperListaMapaFeriaDTO getListaMapaFeria(ListaMapaFeriaQuery query) {
-    return null;
+
     int pageNumber = StringUtils.hasText(query.getPageNumber()) ? Integer.parseInt(query.getPageNumber()) : 0;
     int pageSize = StringUtils.hasText(query.getPageSize()) ? Integer.parseInt(query.getPageSize()) : 20;
     int ano = query.getAnoReferente() != null ? query.getAnoReferente() : LocalDate.now().getYear();
@@ -195,12 +191,13 @@ public class MapaFeriaReadService {
     wrapper.setFirst(pageNumber == 0);
     wrapper.setLast(pageNumber >= totalPages - 1);
     return wrapper;
+  }
 
   public DetalheMapaFeriaDTO getDetalheMapaFeria(GetDetalheMapaFeriaQuery query) {
     return null;
   }
 
-  }
+
 
   private List<PeriodoDTO> getFeriasAgendadas(FuncionarioEntity fun, int anoReferente) {
     Specification<FeriasMapaEntity> spec = (root, cq, cb) -> {
