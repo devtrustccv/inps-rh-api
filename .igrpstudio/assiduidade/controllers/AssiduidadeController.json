@@ -725,7 +725,7 @@
     },
     {
       "actionName": "verMapa",
-      "path": "mapa",
+      "path": "mapa-feria-view",
       "method": "GET",
       "responses": {
         "200": {
@@ -743,6 +743,66 @@
           }
         }
       }
+    },
+    {
+      "actionName": "listaMapaFeria",
+      "path": "mapa-feria",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaMapaFeria",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "anoReferente",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "ilha",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        }
+      ]
     }
   ],
   "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria"

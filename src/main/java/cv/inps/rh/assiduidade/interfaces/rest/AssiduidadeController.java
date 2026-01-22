@@ -33,6 +33,7 @@ import cv.inps.rh.assiduidade.application.dto.WrapperListaFeriaDTO;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaAlterarReqDTO;
 import cv.inps.rh.assiduidade.application.dto.VerMapaDTO;
+import cv.inps.rh.assiduidade.application.dto.WrapperListaMapaFeriaDTO;
 
 @IgrpController
 @RestController
@@ -545,7 +546,7 @@ public class AssiduidadeController {
   }
 
    @GetMapping(
-   value = "mapa"
+   value = "mapa-feria-view"
   )
   @Operation(
     summary = "Ver mapa",
@@ -569,6 +570,42 @@ public class AssiduidadeController {
   {
 
       final var query = new VerMapaQuery();
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "mapa-feria"
+  )
+  @Operation(
+    summary = "Lista mapa feria",
+    description = "Lista mapa feria",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = WrapperListaMapaFeriaDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<WrapperListaMapaFeriaDTO> listaMapaFeria(
+    @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
+    @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
+    @RequestParam(value = "anoReferente", required = false) Integer anoReferente,
+    @RequestParam(value = "ilha", required = false) Long ilha,
+    @RequestParam(value = "direcao", required = false) Long direcao,
+    @RequestParam(value = "seccao", required = false) Long seccao,
+    @RequestParam(value = "estado", required = false) String estado)
+  {
+
+      final var query = new ListaMapaFeriaQuery(pageNumber, pageSize, anoReferente, ilha, direcao, seccao, estado);
 
       return queryBus.handle(query);
 
