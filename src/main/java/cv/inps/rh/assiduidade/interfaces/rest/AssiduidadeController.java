@@ -35,6 +35,7 @@ import cv.inps.rh.assiduidade.application.dto.PedidoFeriaAlterarReqDTO;
 import cv.inps.rh.assiduidade.application.dto.VerMapaDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaMapaFeriaDTO;
 import cv.inps.rh.assiduidade.application.dto.DetalheMapaFeriaDTO;
+import cv.inps.rh.assiduidade.application.dto.JustificarFaltaDTO;
 
 @IgrpController
 @RestController
@@ -639,6 +640,36 @@ public class AssiduidadeController {
       final var query = new GetDetalheMapaFeriaQuery(mapaFeriaId);
 
       return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "falta/justificar/{faltaId}"
+  )
+  @Operation(
+    summary = "Justificar falta",
+    description = "Justificar falta",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> justificarFalta(@Valid @RequestBody JustificarFaltaDTO justificarFaltaRequest
+    , @PathVariable(value = "faltaId") String faltaId)
+  {
+
+      final var command = new JustificarFaltaCommand(justificarFaltaRequest, faltaId);
+
+      return commandBus.send(command);
 
   }
 
