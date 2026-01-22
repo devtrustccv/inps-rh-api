@@ -29,6 +29,7 @@ import cv.inps.rh.assiduidade.application.dto.WrapperListaDispensaDTO;
 import cv.inps.rh.assiduidade.application.dto.DispensaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaHoraExtraDTO;
 import cv.inps.rh.assiduidade.application.dto.HoraExtraReqDTO;
+import cv.inps.rh.assiduidade.application.dto.WrapperListaFeriaDTO;
 
 @IgrpController
 @RestController
@@ -411,6 +412,42 @@ public class AssiduidadeController {
       final var command = new ValidarHoraExtraCommand(validarHoraExtraRequest, horaExtraId);
 
       return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "feria"
+  )
+  @Operation(
+    summary = "Get lista feria",
+    description = "Get lista feria",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = WrapperListaFeriaDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<WrapperListaFeriaDTO> getListaFeria(
+    @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
+    @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
+    @RequestParam(value = "anoReferente", required = false) Integer anoReferente,
+    @RequestParam(value = "ilha", required = false) Long ilha,
+    @RequestParam(value = "direcao", required = false) Long direcao,
+    @RequestParam(value = "seccao", required = false) Long seccao,
+    @RequestParam(value = "colaborador", required = false) String colaborador)
+  {
+
+      final var query = new GetListaFeriaQuery(pageNumber, pageSize, anoReferente, ilha, direcao, seccao, colaborador);
+
+      return queryBus.handle(query);
 
   }
 

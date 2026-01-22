@@ -6,6 +6,30 @@
   "enableCustonValidation": false,
   "attributes": [
     {
+      "name": "id",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "uuid",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "nomeColaborador",
       "objectType": "java",
       "type": "string",
@@ -90,7 +114,7 @@
       "primaryKey": false
     },
     {
-      "name": "totalPlaneado",
+      "name": "totalAgendado",
       "objectType": "java",
       "type": "integer",
       "required": false,
@@ -102,7 +126,7 @@
       "primaryKey": false
     },
     {
-      "name": "totalAgendado",
+      "name": "totalGozado",
       "objectType": "java",
       "type": "integer",
       "required": false,
