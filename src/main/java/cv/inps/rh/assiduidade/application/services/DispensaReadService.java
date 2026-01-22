@@ -150,9 +150,43 @@ public class DispensaReadService {
     return Math.max(d, 0);
   }
 
-
   public DispensaReqDTO getDispensa(GetDispensaQuery query) {
-    return new DispensaReqDTO();
+    if (query == null || !StringUtils.hasText(query.getDispensaId())) {
+      return new DispensaReqDTO();
+    }
+    Long id;
+    try {
+      id = Long.parseLong(query.getDispensaId());
+    } catch (NumberFormatException ex) {
+      return new DispensaReqDTO();
+    }
+
+    var e = dispensaRepository.findByIdOrThrow(id);
+
+    var dto = new DispensaReqDTO();
+    dto.setColaborador(
+        e.getPedidoId() != null && e.getPedidoId().getFunId() != null
+            ? e.getPedidoId().getFunId().getId()
+            : null);
+    dto.setDataDispensa(e.getData());
+    dto.setHoraSaida(e.getHoraIncio());
+    dto.setHoraEntrada(e.getHoraFim());
+    var mins = diffMinutes(e.getHoraIncio(), e.getHoraFim());
+    dto.setTotalHoras(formatMinutes(mins));
+    dto.setTipoMotivo(e.getTipoDispensa());
+    dto.setMotivo(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : null);
+    dto.setParecerResponsavel(e.getDecisaoResponsavel());
+    dto.setObservacaoResponsavel(e.getObsResponsavel());
+    dto.setObservacaoRh(e.getObsRh());
+    return dto;
   }
 
+  private static String formatMinutes(Integer minutes) {
+    if (minutes == null)
+      return null;
+    int h = minutes / 60;
+    int m = minutes % 60;
+    String mm = (m < 10 ? "0" : "") + m;
+    return h + ":" + mm;
+  }
 }
