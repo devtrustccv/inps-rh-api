@@ -870,6 +870,118 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getFalta",
+      "path": "falta/{faltaId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "FaltaReq",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "faltaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getDispensa",
+      "path": "dispensa/{dispensaId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DispensaReq",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "dispensaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getHoraExtra",
+      "path": "hora-extra/{horaExtraId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "HoraExtraReq",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "horaExtraId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getPedidoFeria",
+      "path": "feria/{feriaId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "PedidoFeriaAlterarReq",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "feriaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta"

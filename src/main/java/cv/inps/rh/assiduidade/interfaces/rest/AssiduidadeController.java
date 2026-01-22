@@ -673,4 +673,124 @@ public class AssiduidadeController {
 
   }
 
+   @GetMapping(
+   value = "falta/{faltaId}"
+  )
+  @Operation(
+    summary = "Get falta",
+    description = "Get falta",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = FaltaReqDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<FaltaReqDTO> getFalta(
+    @PathVariable(value = "faltaId") String faltaId)
+  {
+
+      final var query = new GetFaltaQuery(faltaId);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "dispensa/{dispensaId}"
+  )
+  @Operation(
+    summary = "Get dispensa",
+    description = "Get dispensa",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DispensaReqDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<DispensaReqDTO> getDispensa(
+    @PathVariable(value = "dispensaId") String dispensaId)
+  {
+
+      final var query = new GetDispensaQuery(dispensaId);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "hora-extra/{horaExtraId}"
+  )
+  @Operation(
+    summary = "Get hora extra",
+    description = "Get hora extra",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = HoraExtraReqDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<HoraExtraReqDTO> getHoraExtra(
+    @PathVariable(value = "horaExtraId") String horaExtraId)
+  {
+
+      final var query = new GetHoraExtraQuery(horaExtraId);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "feria/{feriaId}"
+  )
+  @Operation(
+    summary = "Get pedido feria",
+    description = "Get pedido feria",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = PedidoFeriaAlterarReqDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<PedidoFeriaAlterarReqDTO> getPedidoFeria(
+    @PathVariable(value = "feriaId") String feriaId)
+  {
+
+      final var query = new GetPedidoFeriaQuery(feriaId);
+
+      return queryBus.handle(query);
+
+  }
+
 }
