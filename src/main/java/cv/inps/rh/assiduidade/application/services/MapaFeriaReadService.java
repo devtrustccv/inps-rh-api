@@ -1,7 +1,9 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import cv.inps.rh.assiduidade.application.dto.DetalheMapaFeriaDTO;
 import cv.inps.rh.assiduidade.application.dto.VerMapaDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaMapaFeriaDTO;
+import cv.inps.rh.assiduidade.application.queries.GetDetalheMapaFeriaQuery;
 import cv.inps.rh.assiduidade.application.queries.ListaMapaFeriaQuery;
 import cv.inps.rh.assiduidade.application.queries.VerMapaQuery;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,11 @@ public class MapaFeriaReadService {
 
 
   public WrapperListaMapaFeriaDTO getListaMapaFeria(ListaMapaFeriaQuery query){
+    return null;
+  }
+
+
+  public DetalheMapaFeriaDTO getDetalheMapaFeria(GetDetalheMapaFeriaQuery query){
     return null;
   }
 

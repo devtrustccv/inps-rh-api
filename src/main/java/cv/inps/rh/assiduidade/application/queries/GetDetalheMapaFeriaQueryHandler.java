@@ -1,5 +1,6 @@
 package cv.inps.rh.assiduidade.application.queries;
 
+import cv.inps.rh.assiduidade.application.services.MapaFeriaReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -15,9 +16,11 @@ public class GetDetalheMapaFeriaQueryHandler implements QueryHandler<GetDetalheM
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetDetalheMapaFeriaQueryHandler.class);
 
+  private final MapaFeriaReadService mapaFeriaReadService;
 
-  public GetDetalheMapaFeriaQueryHandler() {
+  public GetDetalheMapaFeriaQueryHandler(MapaFeriaReadService mapaFeriaReadService) {
 
+    this.mapaFeriaReadService = mapaFeriaReadService;
   }
 
    @IgrpQueryHandler
@@ -25,8 +28,7 @@ public class GetDetalheMapaFeriaQueryHandler implements QueryHandler<GetDetalheM
 
     LOGGER.debug("GetDetalheMapaFeriaQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    return ResponseEntity.ok(mapaFeriaReadService.getDetalheMapaFeria(query));
   }
 
 }
