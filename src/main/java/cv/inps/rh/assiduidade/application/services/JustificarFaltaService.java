@@ -16,7 +16,7 @@ public class JustificarFaltaService {
     return null;
   }
 
-  public Map<String, ?> validarFalta(ValidarFaltaJustificadaCommand command) {
+  public Map<String, ?> validarFaltaJustificada(ValidarFaltaJustificadaCommand command) {
     return null;
   }
 
