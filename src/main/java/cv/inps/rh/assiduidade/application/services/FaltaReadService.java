@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -153,6 +154,36 @@ public class FaltaReadService {
 
 
   public FaltaReqDTO getFalta(GetFaltaQuery query) {
-    return new FaltaReqDTO();
+    if (query == null || !StringUtils.hasText(query.getFaltaId())) {
+      return new FaltaReqDTO();
+    }
+    Long id;
+    try {
+      id = Long.parseLong(query.getFaltaId());
+    } catch (NumberFormatException e) {
+      return new FaltaReqDTO();
+    }
+
+    var e = faltaRepository.findByIdOrThrow(id);
+
+    var dto = new FaltaReqDTO();
+    var pedido = e.getPedidoId();
+    var fun = pedido != null ? pedido.getFunId() : null;
+    dto.setColaboradorId(fun != null ? fun.getId() : null);
+    dto.setDataInicio(e.getDataInicio() != null ? e.getDataInicio().toLocalDate() : null);
+    dto.setDataFim(e.getDataFim() != null ? e.getDataFim().toLocalDate() : null);
+    if (dto.getDataInicio() != null && dto.getDataFim() != null) {
+      long dias = ChronoUnit.DAYS.between(dto.getDataInicio(), dto.getDataFim()) + 1;
+      dto.setTotalDias((int) Math.max(dias, 1));
+    }
+    dto.setTotalDeHorasAusentes(e.getHorasAusencia());
+    dto.setJustificar(e.getFlgJustificativo());
+    dto.setMotivoAusencia(e.getDescricaoMotivo());
+    dto.setTipoFalta(e.getTfId() != null ? e.getTfId().getUuid() : null);
+    dto.setParecer(e.getDecisaoResponsavel());
+    dto.setObservacao(e.getObsResponsavel());
+    dto.setDespachoRh(e.getDespachoRh());
+    dto.setTipoJustificacao(e.getTfId() != null ? e.getTfId().getSituacao() : null);
+    return dto;
   }
 }

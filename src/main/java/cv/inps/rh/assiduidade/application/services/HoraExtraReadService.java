@@ -1,6 +1,7 @@
 package cv.inps.rh.assiduidade.application.services;
 
 import cv.inps.rh.assiduidade.application.dto.HoraExtraReqDTO;
+import cv.inps.rh.assiduidade.application.dto.HoraExtraDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaHoraExtraDTO;
 import cv.inps.rh.assiduidade.application.queries.GetHoraExtraQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaHoraExtraQuery;
@@ -37,11 +38,9 @@ public class HoraExtraReadService {
         ? Integer.parseInt(query.getPageSize())
         : 20;
 
-    Pageable pageable =
-        PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
 
-    Page<HoraExtraEntity> page =
-        horaExtraRepository.findAll(buildSpec(query), pageable);
+    Page<HoraExtraEntity> page = horaExtraRepository.findAll(buildSpec(query), pageable);
 
     var content = page.getContent()
         .stream()
@@ -117,25 +116,22 @@ public class HoraExtraReadService {
     dto.setNomeColaborador(
         tiprel != null && tiprel.getFunId() != null
             ? tiprel.getFunId().getNome()
-            : null
-    );
+            : null);
 
     var cargo = tiprel != null ? tiprel.getCargoId() : null;
     dto.setCategoria(cargo != null ? cargo.getNome() : null);
     dto.setCategoriaId(cargo != null ? cargo.getId() : null);
 
-    var vinc =
-        tiprel != null && tiprel.getContrVinculoId() != null
-            ? tiprel.getContrVinculoId().getVinculoId()
-            : null;
+    var vinc = tiprel != null && tiprel.getContrVinculoId() != null
+        ? tiprel.getContrVinculoId().getVinculoId()
+        : null;
 
     dto.setVinculo(vinc != null ? vinc.getNome() : null);
     dto.setVinculoId(vinc != null ? vinc.getId() : null);
 
-    var horasExtras =
-        e.getSinteseDiarioId() != null
-            ? e.getSinteseDiarioId().getHorasExtras()
-            : null;
+    var horasExtras = e.getSinteseDiarioId() != null
+        ? e.getSinteseDiarioId().getHorasExtras()
+        : null;
 
     dto.setHorasContratato(
         e.getHorasDiarias() != null ? e.getHorasDiarias().toString() : null);
@@ -145,8 +141,7 @@ public class HoraExtraReadService {
     dto.setSalarioMensal(
         tiprel != null && tiprel.getSalario() != null
             ? tiprel.getSalario().toPlainString()
-            : null
-    );
+            : null);
 
     dto.setValorHorasMensal(null);
     dto.setValorHorasDiario(
@@ -159,7 +154,8 @@ public class HoraExtraReadService {
   }
 
   private String formatHorasExtra(String s) {
-    if (!StringUtils.hasText(s)) return null;
+    if (!StringUtils.hasText(s))
+      return null;
 
     var p = s.split(":");
     if (p.length >= 2) {
@@ -168,7 +164,32 @@ public class HoraExtraReadService {
     return s;
   }
 
-  public HoraExtraReqDTO getHoraExtra(GetHoraExtraQuery query){
-    return new HoraExtraReqDTO();
+  @Transactional(readOnly = true)
+  public HoraExtraReqDTO getHoraExtra(GetHoraExtraQuery query) {
+    if (query == null || !StringUtils.hasText(query.getHoraExtraId())) {
+      return new HoraExtraReqDTO();
+    }
+    Long id;
+    try {
+      id = Long.parseLong(query.getHoraExtraId());
+    } catch (NumberFormatException e) {
+      return new HoraExtraReqDTO();
+    }
+
+    var e = horaExtraRepository.findByIdOrThrow(id);
+
+    var dto = new HoraExtraReqDTO();
+    var item = new HoraExtraDTO();
+    item.setColaborador(
+        e.getTiprelId() != null && e.getTiprelId().getFunId() != null
+            ? e.getTiprelId().getFunId().getId()
+            : null);
+    item.setDataInicio(e.getDataInicio());
+    item.setDataFim(e.getDataFim());
+    item.setHorasDiaria(e.getHorasDiarias());
+    item.setPercentagemHora(e.getPercentagem());
+    item.setValorDiario(e.getValorDiario());
+    dto.getHoraExtra().add(item);
+    return dto;
   }
 }
