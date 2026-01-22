@@ -1,6 +1,8 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import cv.inps.rh.assiduidade.application.dto.HoraExtraReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaHoraExtraDTO;
+import cv.inps.rh.assiduidade.application.queries.GetHoraExtraQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaHoraExtraQuery;
 import cv.inps.rh.assiduidade.application.dto.HorExtraListDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.HoraExtraEntity;
@@ -164,5 +166,9 @@ public class HoraExtraReadService {
       return p[0] + ":" + p[1];
     }
     return s;
+  }
+
+  public HoraExtraReqDTO getHoraExtra(GetHoraExtraQuery query){
+    return new HoraExtraReqDTO();
   }
 }

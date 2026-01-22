@@ -1,5 +1,6 @@
 package cv.inps.rh.assiduidade.application.queries;
 
+import cv.inps.rh.assiduidade.application.services.DispensaReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -15,9 +16,11 @@ public class GetDispensaQueryHandler implements QueryHandler<GetDispensaQuery, R
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetDispensaQueryHandler.class);
 
+  private final DispensaReadService dispensaReadService;
 
-  public GetDispensaQueryHandler() {
+  public GetDispensaQueryHandler(DispensaReadService dispensaReadService) {
 
+    this.dispensaReadService = dispensaReadService;
   }
 
    @IgrpQueryHandler
@@ -25,8 +28,7 @@ public class GetDispensaQueryHandler implements QueryHandler<GetDispensaQuery, R
 
     LOGGER.debug("GetDispensaQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    return ResponseEntity.ok(dispensaReadService.getDispensa(query));
   }
 
 }

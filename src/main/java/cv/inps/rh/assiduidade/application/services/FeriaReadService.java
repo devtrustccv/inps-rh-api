@@ -1,8 +1,10 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import cv.inps.rh.assiduidade.application.dto.PedidoFeriaAlterarReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFeriaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetListaFeriaQuery;
 import cv.inps.rh.assiduidade.application.dto.FeriasListDTO;
+import cv.inps.rh.assiduidade.application.queries.GetPedidoFeriaQuery;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FeriasGozadasEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FeriasMapaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
@@ -150,5 +152,11 @@ public class FeriaReadService {
       return 0;
     long days = ChronoUnit.DAYS.between(inicio, fim);
     return (int) (days >= 0 ? days + 1 : 0);
+  }
+
+
+  public PedidoFeriaAlterarReqDTO getPedidoFeria(GetPedidoFeriaQuery query){
+    return new PedidoFeriaAlterarReqDTO();
+
   }
 }

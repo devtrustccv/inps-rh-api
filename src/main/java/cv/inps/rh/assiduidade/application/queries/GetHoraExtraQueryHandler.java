@@ -1,5 +1,6 @@
 package cv.inps.rh.assiduidade.application.queries;
 
+import cv.inps.rh.assiduidade.application.services.HoraExtraReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -15,9 +16,11 @@ public class GetHoraExtraQueryHandler implements QueryHandler<GetHoraExtraQuery,
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetHoraExtraQueryHandler.class);
 
+  private final HoraExtraReadService horaExtraReadService;
 
-  public GetHoraExtraQueryHandler() {
+  public GetHoraExtraQueryHandler(HoraExtraReadService horaExtraReadService) {
 
+    this.horaExtraReadService = horaExtraReadService;
   }
 
    @IgrpQueryHandler
@@ -25,8 +28,7 @@ public class GetHoraExtraQueryHandler implements QueryHandler<GetHoraExtraQuery,
 
     LOGGER.debug("GetHoraExtraQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    return ResponseEntity.ok(horaExtraReadService.getHoraExtra(query));
   }
 
 }

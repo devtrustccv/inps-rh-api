@@ -1,5 +1,6 @@
 package cv.inps.rh.assiduidade.application.queries;
 
+import cv.inps.rh.assiduidade.application.services.FaltaReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -15,9 +16,11 @@ public class GetFaltaQueryHandler implements QueryHandler<GetFaltaQuery, Respons
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetFaltaQueryHandler.class);
 
+  private final FaltaReadService faltaReadService;
 
-  public GetFaltaQueryHandler() {
+  public GetFaltaQueryHandler(FaltaReadService faltaReadService) {
 
+    this.faltaReadService = faltaReadService;
   }
 
    @IgrpQueryHandler
@@ -25,8 +28,7 @@ public class GetFaltaQueryHandler implements QueryHandler<GetFaltaQuery, Respons
 
     LOGGER.debug("GetFaltaQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    return ResponseEntity.ok(faltaReadService.getFalta(query));
   }
 
 }

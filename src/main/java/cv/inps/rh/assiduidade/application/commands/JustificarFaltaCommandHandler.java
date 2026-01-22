@@ -2,6 +2,7 @@ package cv.inps.rh.assiduidade.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.assiduidade.application.services.JustificarFaltaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -14,8 +15,11 @@ public class JustificarFaltaCommandHandler implements CommandHandler<JustificarF
 
    private static final Logger LOGGER = LoggerFactory.getLogger(JustificarFaltaCommandHandler.class);
 
-   public JustificarFaltaCommandHandler() {
+   private final JustificarFaltaService justificarFaltaService;
 
+   public JustificarFaltaCommandHandler(JustificarFaltaService justificarFaltaService) {
+
+     this.justificarFaltaService = justificarFaltaService;
    }
 
    @IgrpCommandHandler
@@ -23,8 +27,8 @@ public class JustificarFaltaCommandHandler implements CommandHandler<JustificarF
 
       LOGGER.debug("JustificarFaltaCommand : {}", command);
 
-      // TODO: Implement the command handling logic here
-      return null;
+
+      return ResponseEntity.ok(justificarFaltaService.justificarFalta(command));
    }
 
 }

@@ -1,7 +1,9 @@
 package cv.inps.rh.assiduidade.application.services;
 
 import cv.inps.rh.assiduidade.application.dto.FaltaListDTO;
+import cv.inps.rh.assiduidade.application.dto.FaltaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFaltaDTO;
+import cv.inps.rh.assiduidade.application.queries.GetFaltaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaFaltaQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
@@ -146,5 +148,11 @@ public class FaltaReadService {
     } catch (NumberFormatException ex) {
       return 0;
     }
+  }
+
+
+
+  public FaltaReqDTO getFalta(GetFaltaQuery query) {
+    return new FaltaReqDTO();
   }
 }

@@ -1,7 +1,9 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import cv.inps.rh.assiduidade.application.dto.DispensaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaDispensaDTO;
 import cv.inps.rh.assiduidade.application.dto.DispensaListDTO;
+import cv.inps.rh.assiduidade.application.queries.GetDispensaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaDispensaQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DispensaEntity;
@@ -147,4 +149,10 @@ public class DispensaReadService {
     var d = e - s;
     return Math.max(d, 0);
   }
+
+
+  public DispensaReqDTO getDispensa(GetDispensaQuery query) {
+    return new DispensaReqDTO();
+  }
+
 }
