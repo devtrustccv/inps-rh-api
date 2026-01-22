@@ -18,6 +18,7 @@ import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
@@ -37,6 +38,7 @@ public class MapaFeriaReadService {
   private final FeriasMapaEntityRepository feriasMapaEntityRepository;
   private final FeriasGozadasEntityRepository feriasGozadasEntityRepository;
 
+  @Transactional(readOnly = true)
   public VerMapaDTO verMapa(VerMapaQuery query) {
     int ano = LocalDate.now().getYear();
 
@@ -83,6 +85,7 @@ public class MapaFeriaReadService {
     return dto;
   }
 
+  @Transactional(readOnly = true)
   public WrapperListaMapaFeriaDTO getListaMapaFeria(ListaMapaFeriaQuery query) {
 
     int pageNumber = StringUtils.hasText(query.getPageNumber()) ? Integer.parseInt(query.getPageNumber()) : 0;
@@ -210,6 +213,7 @@ public class MapaFeriaReadService {
     return wrapper;
   }
 
+  @Transactional(readOnly = true)
   public DetalheMapaFeriaDTO getDetalheMapaFeria(GetDetalheMapaFeriaQuery query) {
     Long direcaoId;
     try {
