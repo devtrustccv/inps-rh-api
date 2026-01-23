@@ -25,6 +25,6 @@ public class ResumoProcessamentoDTO  {
   private List<ResumoProcessamentoRowDTO> remuneracao = new ArrayList<>();
 
   @Valid
-  private List<ResumoProcessamentoRowDTO> pagamento = new ArrayList<>();
+  private List<ResumoProcPagamentoDTO> pagamento = new ArrayList<>();
 
 }

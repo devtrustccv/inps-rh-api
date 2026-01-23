@@ -1,0 +1,26 @@
+{
+  "type": "dto",
+  "module": "parametrizacao",
+  "name": "Escalao",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "Parametrizacao",
+    "module": "parametrizacao"
+  },
+  "attributes": [
+    {
+      "name": "valor",
+      "objectType": "java",
+      "type": "decimal",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "c32ehm8she"
+}

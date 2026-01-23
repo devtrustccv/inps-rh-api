@@ -22,10 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
 import java.sql.Types;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Transactional
 @Service
@@ -58,7 +55,7 @@ public class ProcessamentoSalarialWriteService {
       if (!tipoRelacionamentoAtual.getEstActAdm().equals(1))
         throw IgrpResponseStatusException.badRequest("O vínculo do colaborador <%s> não está activo!".formatted(funcionario.getNome()));
 
-      tipoRelacionamentoAtual.setFlgProcessa("0");
+      tipoRelacionamentoAtual.setFlgProcessa(0);
       tiposRelacionamentoEntityRepository.save(tipoRelacionamentoAtual);
     }
   }
@@ -124,25 +121,6 @@ public class ProcessamentoSalarialWriteService {
     });
   }
 
-  public void eliminarCabimento(List<Long> processamentoIds) {
-
-    var illegalProcesses = new ArrayList<Long>();
-
-    var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
-    processes.forEach(process -> {
-      if (!process.getEstado().equals(ProcessamentoSalarialAction.ELIMINAR_CABIMENTO.getCode()))
-        illegalProcesses.add(process.getId());
-    });
-
-    if (!illegalProcesses.isEmpty())
-      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'DEV'", illegalProcesses);
-
-    processes.forEach(p -> {
-      var call = callProcedure(Processamento.PROCEDURE_ELIMINAR_CAB.getName());
-      call.execute(Map.of("p_cab_id", p.getCab1Id()));
-    });
-  }
-
   public void autorizar(List<Long> processamentoIds) {
 
     var illegalProcesses = new ArrayList<Long>();
@@ -164,7 +142,32 @@ public class ProcessamentoSalarialWriteService {
     });
   }
 
+  public void extornarCabimento(List<Long> processamentoIds) {
+
+    var illegalProcesses = new ArrayList<Long>();
+
+    var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
+    processes.forEach(process -> {
+      if (!process.getEstado().equals(ProcessamentoSalarialAction.ELIMINAR_CABIMENTO.getCode()))
+        illegalProcesses.add(process.getId());
+    });
+
+    if (!illegalProcesses.isEmpty())
+      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'DEV'", illegalProcesses);
+
+    processes.forEach(p -> {
+      var response = processarSalarioApi.extornarCabimento(p.getCab1Id().toString());
+      LOGGER.info("Extornar Cabimento Response: {}", response);
+      if (response.content().issue().code() != 200)
+        throw IgrpResponseStatusException.badRequest("Erro ao extornar cabimento", response.content().issue().diagnostics());
+    });
+  }
+
   public void processarSalario(ProcessamentoSalarioRequestDTO request) {
+
+    var formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    var startDate = Objects.nonNull(request.getDataInicio()) ? request.getDataInicio().format(formatter) : null;
+    var endDate = Objects.nonNull(request.getDataInicio()) ? request.getDataInicio().format(formatter) : null;
 
     callProcedure(Processamento.PROCEDURE_PROCESSAR.getName())
         .declareParameters(
@@ -178,8 +181,8 @@ public class ProcessamentoSalarialWriteService {
         )
         .execute(
             new MapSqlParameterSource()
-                .addValue("p_dt_inicio", request.getDataInicio())
-                .addValue("p_dt_fim", request.getDataFim())
+                .addValue("p_dt_inicio", startDate)
+                .addValue("p_dt_fim", endDate)
                 .addValue("p_cc_id", request.getDireccaoId())
                 .addValue("p_tiprel_id", request.getRelacionamentoId())
                 .addValue("p_tipo", request.getTipo())

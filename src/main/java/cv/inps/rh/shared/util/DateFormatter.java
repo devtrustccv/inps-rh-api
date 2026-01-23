@@ -11,6 +11,9 @@ import java.util.Optional;
 
 public final class DateFormatter {
 
+  public static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+  public static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
   private static final List<DateTimeFormatter> DATE_TIME_FORMATTERS = List.of(
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
       DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"),

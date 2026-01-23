@@ -22,7 +22,7 @@
     {
       "name": "pagamento",
       "objectType": "dto",
-      "type": "ResumoProcessamentoRow",
+      "type": "ResumoProcPagamento",
       "required": false,
       "before": false,
       "after": false,

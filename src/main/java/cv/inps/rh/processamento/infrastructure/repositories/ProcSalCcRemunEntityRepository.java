@@ -19,14 +19,30 @@ public interface ProcSalCcRemunEntityRepository extends
 
   @Query("""
           SELECT new cv.inps.rh.processamento.application.dto.ResumoProcessamentoRowDTO(
+              e.itemActo,
               e.tipo,
+              e.shortDesc,
               e.procSalId,
-              sum(e.valor)
+              SUM(e.valor)
           )
           FROM ProcSalCcRemunEntity e
-          GROUP BY e.tipo, e.procSalId
+          WHERE (:procId IS NULL OR e.procSalId = :procId)
+            AND (:ccId   IS NULL OR e.ccId = :ccId)
+            AND (:ano    IS NULL OR YEAR(e.dataProcessamento) = :ano)
+            AND (:mes    IS NULL OR MONTH(e.dataProcessamento) = :mes)
+          GROUP BY e.itemActo,
+                   e.tipo,
+                   e.shortDesc,
+                   e.procSalId
       """)
-  List<ResumoProcessamentoRowDTO> getRemuneracoes();
+  List<ResumoProcessamentoRowDTO> getRemuneracoes(
+      @Param("procId") Long procId,
+      @Param("ccId")   Long ccId,
+      @Param("ano")    Integer ano,
+      @Param("mes")    Integer mes
+  );
+
+
 
   @Query("""
           SELECT new cv.inps.rh.processamento.application.dto.DetalhesProcessamentoRowDTO(

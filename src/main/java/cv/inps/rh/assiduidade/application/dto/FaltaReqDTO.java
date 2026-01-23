@@ -1,0 +1,71 @@
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
+
+package cv.inps.rh.assiduidade.application.dto;
+
+import cv.igrp.framework.stereotype.IgrpDTO;
+import jakarta.validation.*;
+import jakarta.validation.constraints.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+
+
+@IgrpDTO
+public class FaltaReqDTO  {
+
+  
+  
+  private String validar ;
+  
+  
+  private Long colaboradorId ;
+  
+  
+  private LocalDate dataInicio ;
+  
+  
+  private LocalDate dataFim ;
+  
+  
+  private Integer totalDias ;
+  
+  
+  private String totalDeHorasAusentes ;
+  
+  
+  private String justificar ;
+  
+  
+  private String motivoAusencia ;
+  
+  
+  private String tipoFalta ;
+  
+  
+  private String parecer ;
+  
+  
+  private Long responsavel ;
+  
+  
+  private String observacao ;
+  
+  
+  private String despachoRh ;
+  
+  
+  private String tipoJustificacao ;
+  
+  @Valid
+  private List<AnexoReqDTO> documentos = new ArrayList<>();
+
+}

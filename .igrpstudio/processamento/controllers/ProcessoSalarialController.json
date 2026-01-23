@@ -179,7 +179,29 @@
             }
           }
         }
-      }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "processamentoId",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "ccId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "ano",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "mes",
+          "isRequired": false
+        }
+      ]
     },
     {
       "actionName": "getDetalhesProcessamento",
@@ -218,7 +240,45 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getDadosValidacao",
+      "path": "processar/dados-validacao",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DadosValidacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "tipoValidacao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "mesAtual",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "mesAnterior",
+          "isRequired": false
+        }
+      ]
     }
   ],
-  "id": "dcry51pbek-validarProcessamentoSalarial"
+  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao"
 }

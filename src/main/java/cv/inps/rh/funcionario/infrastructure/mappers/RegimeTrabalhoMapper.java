@@ -48,6 +48,7 @@ public class RegimeTrabalhoMapper {
     var re = new RegimeTrabalhoEntity();
     re.setTipoRegime(dc.getRegimeTrabalho());
     re.setTipoSituacao("NOVO_CONTRATO");
+    re.setDataInicio(dc.getDataInicio());
     re.setDataFim(dc.getDataFim());
     re.setObs(null);
     re.setEstado(Estado.P);

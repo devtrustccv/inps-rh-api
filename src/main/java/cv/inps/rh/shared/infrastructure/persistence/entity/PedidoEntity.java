@@ -34,6 +34,10 @@ public class PedidoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fun_id", referencedColumnName = "id")
     private FuncionarioEntity funId;
+    @Column(name="tipo_pedido")
+    private String tipoPedido;
+
+  
     @Column(name="origem")
     private String origem;
 

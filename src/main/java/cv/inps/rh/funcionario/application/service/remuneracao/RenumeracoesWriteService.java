@@ -6,6 +6,7 @@ import cv.inps.rh.funcionario.application.commands.ValidarNovoRemuneracaoCommand
 import cv.inps.rh.funcionario.application.dto.NovoPagamentoRequestDTO;
 import cv.inps.rh.funcionario.application.dto.NovoRemuneracaoRequestDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
@@ -43,7 +44,7 @@ public class RenumeracoesWriteService {
     remuneracao.setObs(request.getObservacao());
     remuneracao.setEstado(Estado.P);
     remuneracao.setUuid(UuidCreator.getTimeOrderedEpoch());
-    remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(request.getMovimentoId())));
+    remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     remuneracao.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     remuneracao.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
     remuneracao.setFunId(funcionario);
@@ -70,7 +71,7 @@ public class RenumeracoesWriteService {
     pagamento.setEstado(Estado.P);
     pagamento.setObs(request.getObservacao());
     pagamento.setUuid(UuidCreator.getTimeOrderedEpoch());
-    pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(request.getMovimentoId())));
+    pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     pagamento.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
     pagamento.setFunId(funcionario);
@@ -99,23 +100,30 @@ public class RenumeracoesWriteService {
     var data = command.getValidarremuneracaorequest();
     var request = data.getDados();
 
-    ValidationUtil.validateDecision(data.getValidacao());
-
-    var estado = data.getValidacao().equals("S") ? Estado.A : Estado.I;
-
-    var remuneracao = definicaoRemuneracaoEntityRepository.findByUuidOrThrow(UUID.fromString(data.getRemuneracaoId()));
+    var remuneracao = definicaoRemuneracaoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getRemuneracaoId()));
     remuneracao.setValor(request.getValor());
     remuneracao.setPercentagem(request.getPercentagem());
     remuneracao.setObs(request.getObservacao());
-    remuneracao.setEstado(estado);
-    remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(request.getMovimentoId())));
+    remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     remuneracao.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     remuneracao.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
-    definicaoRemuneracaoEntityRepository.save(remuneracao);
 
-    var validation = validacaoEntityRepository.findByUuidOrThrow(UUID.fromString(data.getValidacaoId()));
-    validation.setEstado(estado);
-    validacaoEntityRepository.save(validation);
+    if (data.getValidacao() != null) {
+      if (remuneracao.getEstado() == Estado.P) {
+        ValidationUtil.validateDecision(data.getValidacao());
+
+        var novoEstado = data.getValidacao().equals("S") ? Estado.A : Estado.I;
+        remuneracao.setEstado(novoEstado);
+
+        var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
+        var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
+
+        var validation = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.RENDIMENTO);
+        validation.ifPresent(validacaoEntityRepository::save);
+      }
+    }
+
+    definicaoRemuneracaoEntityRepository.save(remuneracao);
   }
 
   public void validarNovoPagamento(ValidarNovoPagamentoCommand command) {
@@ -123,16 +131,12 @@ public class RenumeracoesWriteService {
     var data = command.getValidarpagamentorequest();
     var request = data.getDados();
 
-    ValidationUtil.validateDecision(data.getValidacao());
+    var pagamento = defPagamentoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getPagamentoId()));
 
-    var estado = data.getValidacao().equals("S") ? Estado.A : Estado.I;
-
-    var pagamento = defPagamentoEntityRepository.findByUuidOrThrow(UUID.fromString(data.getPagamentoId()));
     pagamento.setPercentagem(request.getPercentagem());
     pagamento.setValor(request.getValor());
-    pagamento.setEstado(estado);
     pagamento.setObs(request.getObservacao());
-    pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(request.getMovimentoId())));
+    pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     pagamento.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
     pagamento.setNib(request.getNib());
@@ -142,10 +146,23 @@ public class RenumeracoesWriteService {
     var entidade = entityManager.getReference(EntidadeEntity.class, request.getEntidade());
     pagamento.setNmEntidade(entidade.getNome());
     pagamento.setEntId(entidade);
+
+    if (data.getValidacao() != null) {
+
+      if (pagamento.getEstado() == Estado.P) {
+        ValidationUtil.validateDecision(data.getValidacao());
+
+        var novoEstado = data.getValidacao().equals("S") ? Estado.A : Estado.I;
+        pagamento.setEstado(novoEstado);
+        var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
+        var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
+
+        var validation = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.DESCONTO);
+        validation.ifPresent(validacaoEntityRepository::save);
+      }
+    }
+
     defPagamentoEntityRepository.save(pagamento);
 
-    var validation = validacaoEntityRepository.findByUuidOrThrow(UUID.fromString(data.getValidacaoId()));
-    validation.setEstado(estado);
-    validacaoEntityRepository.save(validation);
   }
 }

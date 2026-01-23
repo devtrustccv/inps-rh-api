@@ -9,8 +9,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
+import cv.inps.rh.shared.application.constants.Estado;
 
 
 @Getter
@@ -38,8 +38,8 @@ public class HoraExtraEntity extends AuditEntity {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pedido_id", referencedColumnName = "id")
-    private AssiduidadeSinteseDiarioEntity pedidoId;
+    @JoinColumn(name = "sintese_diario_id", referencedColumnName = "id")
+    private AssiduidadeSinteseDiarioEntity sinteseDiarioId;
     @Column(name="data_inicio")
     private LocalDate dataInicio;
 
@@ -48,13 +48,30 @@ public class HoraExtraEntity extends AuditEntity {
     private LocalDate dataFim;
 
   
+    @Column(name="uuid")
+    private UUID uuid;
+
+  
+    @Column(name="horas_diarias")
+    private Integer horasDiarias;
+
+  
+    @Column(name="valor_diario")
+    private Integer valorDiario;
+
+  
+    @Column(name="percentagem")
+    private Integer percentagem;
+
+  
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "def_rem_id", referencedColumnName = "id")
+    private DefinicaoRemuneracaoEntity defRemId;
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
-
-  
-    @Column(name="uuid")
-    private UUID uuid;
 
   
 }

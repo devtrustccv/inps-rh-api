@@ -8,6 +8,7 @@ import cv.inps.rh.shared.infrastructure.mappers.TipoMovimentoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefPagamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
+import cv.inps.rh.shared.util.DateFormatter;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -36,9 +37,9 @@ public class DefPagamentoMapper {
     dto.setValor(defPagamentoEntity.getValor() != null ? defPagamentoEntity.getValor().toPlainString() : null);
     dto.setEstado(defPagamentoEntity.getEstado() != null ? defPagamentoEntity.getEstado().name() : null);
     dto.setEstadoDesc(defPagamentoEntity.getEstado() != null ? defPagamentoEntity.getEstado().getDescription() : null);
-    dto.setDataInicio(defPagamentoEntity.getDataInicio() != null ? defPagamentoEntity.getDataInicio().toString() : null);
-    dto.setDataFim(defPagamentoEntity.getDataFim() != null ? defPagamentoEntity.getDataFim().toString() : null);
-    dto.setUltimoProc(defPagamentoEntity.getDataInicio() != null ? defPagamentoEntity.getDataInicio().toString() : null);
+    dto.setDataInicio(defPagamentoEntity.getDataInicio() != null ? DateFormatter.localDateToString(defPagamentoEntity.getDataInicio()) : null);
+    dto.setDataFim(defPagamentoEntity.getDataFim() != null ? DateFormatter.localDateToString(defPagamentoEntity.getDataFim()) : null);
+    dto.setUltimoProc(defPagamentoEntity.getDataUltimoProc() != null ? DateFormatter.localDateToString(defPagamentoEntity.getDataUltimoProc()) : null);
 
     return dto;
   }

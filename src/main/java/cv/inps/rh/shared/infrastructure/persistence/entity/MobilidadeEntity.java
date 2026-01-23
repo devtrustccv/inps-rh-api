@@ -64,7 +64,8 @@ public class MobilidadeEntity extends AuditEntity {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "instid_id", referencedColumnName = "id")
+    @JoinColumn(name = "instit_id", referencedColumnName = "id")
+
     private InstituicaoEntity instidId;
     @Column(name="data_inicio")
     private LocalDate dataInicio;

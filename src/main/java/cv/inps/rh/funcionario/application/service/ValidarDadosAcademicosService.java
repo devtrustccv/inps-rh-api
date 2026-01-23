@@ -35,19 +35,19 @@ public class ValidarDadosAcademicosService {
 
     var dto = command.getValidardadosacademicos();
     var dadosAcademicosProfReqDTO = dto.getDadosAcademicosProf();
-    var estadoValidacao = dto.getValidar();
+    //var estadoValidacao = dto.getValidar();
 
     var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
-    boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_ACADEMICOS);
+    //boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_ACADEMICOS);
 
     // 1) Se tem pendentes mas não enviou validar → erro
-    if (temPendentes && estadoValidacao == null) {
+    /*if (temPendentes && estadoValidacao == null) {
       throw IgrpResponseStatusException.badRequest(
           "Funcionario possui validação pendente de dados academicos, por favor validar"
       );
-    }
+    }*/
 
 
     var habilitacoesLiterarias = habilitacaoLiterariaMapper.syncHabilitacoes(funcionario.getHabilitacoesLiterarias(), dadosAcademicosProfReqDTO.getHabilitacoesLiterarias());
@@ -58,7 +58,7 @@ public class ValidarDadosAcademicosService {
     funcionario.setFormacoesFeitas(formacoesFeitas);
     funcionario.setExperienciasProfissionais(experienciasProfissionais);
 
-    if (temPendentes) {
+   /* if (temPendentes) {
 
       var novoEstado = (estadoValidacao == EstadoValidacao.SIM)
           ? Estado.A
@@ -68,9 +68,9 @@ public class ValidarDadosAcademicosService {
 
       funcionarioEntityRepository.save(funcionario);
       return dto;
-    }
+    }*/
 
-    var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+   /* var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var validacao = contratuaisEntityMapper
         .toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.DADOS_ACADEMICOS.name(), Estado.P);
@@ -78,11 +78,11 @@ public class ValidarDadosAcademicosService {
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRel);
 
-    funcionario.getValidacoes().add(validacao);
+    funcionario.getValidacoes().add(validacao);*/
 
     var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    validacaoEntityRepository
+    /*validacaoEntityRepository
         .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(
             funcionario.getUuid(),
             Estado.P,
@@ -92,13 +92,13 @@ public class ValidarDadosAcademicosService {
         .ifPresent(v -> {
           v.setReferenciaId(saved.getId());
           validacaoEntityRepository.save(v);
-        });
+        });*/
 
     return dto;
 
   }
 
-  private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado novoEstado) {
+  /*private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado novoEstado) {
 
     var habilitacoes = funcionarioEntity.getHabilitacoesLiterarias();
     if (habilitacoes != null) {
@@ -124,5 +124,5 @@ public class ValidarDadosAcademicosService {
     funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_ACADEMICOS)
         .ifPresent(v -> v.setEstado(novoEstado));
 
-  }
+  }*/
 }

@@ -30,25 +30,40 @@ public class HorExtraListDTO  {
   private String direcao ;
   
   
+  private Long direcaoId ;
+  
+  
   private String nomeColaborador ;
   
   
   private String categoria ;
   
   
+  private Long categoriaId ;
+  
+  
   private String vinculo ;
   
   
-  private String horasTrabalho ;
-  
-  
-  private String data ;
+  private Long vinculoId ;
   
   
   private String intervaloData ;
   
   
-  private String duracaoDispensa ;
+  private String horasContratato ;
+  
+  
+  private String horasTrabalho ;
+  
+  
+  private String salarioMensal ;
+  
+  
+  private String valorHorasMensal ;
+  
+  
+  private String valorHorasDiario ;
   
   
   private String estado ;

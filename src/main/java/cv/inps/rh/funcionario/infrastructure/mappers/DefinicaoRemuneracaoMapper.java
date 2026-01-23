@@ -8,6 +8,7 @@ import cv.inps.rh.shared.infrastructure.mappers.TipoMovimentoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
+import cv.inps.rh.shared.util.DateFormatter;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -25,17 +26,19 @@ public class DefinicaoRemuneracaoMapper {
   private final EntityManager entityManager;
 
 
-  public RenumeracaoListDTO toDTO(DefinicaoRemuneracaoEntity domain) {
-    if (domain == null) return null;
+  public RenumeracaoListDTO toDTO(DefinicaoRemuneracaoEntity entity) {
+    if (entity == null) return null;
 
     RenumeracaoListDTO dto = new RenumeracaoListDTO();
-    dto.setId(domain.getId());
-    dto.setUuid(domain.getUuid().toString());
-    dto.setEstado(domain.getEstado() != null ? domain.getEstado().name() : null);
-    dto.setEstadoDesc(domain.getEstado() != null ? domain.getEstado().getDescription() : null);
-    dto.setMovimento(domain.getTmId() != null ? domain.getTmId().getDescricao() : null);
-    dto.setValor(domain.getValor() != null ? domain.getValor().toPlainString() : null);
-    dto.setUltimoPRoc(domain.getDataInicio() != null ? domain.getDataInicio().toString() : null);
+    dto.setId(entity.getId());
+    dto.setUuid(entity.getUuid().toString());
+    dto.setEstado(entity.getEstado() != null ? entity.getEstado().name() : null);
+    dto.setEstadoDesc(entity.getEstado() != null ? entity.getEstado().getDescription() : null);
+    dto.setMovimento(entity.getTmId() != null ? entity.getTmId().getDescricao() : null);
+    dto.setValor(entity.getValor() != null ? entity.getValor().toPlainString() : null);
+    dto.setUltimoPRoc(entity.getDataUltimoProc() != null ? DateFormatter.localDateToString(entity.getDataUltimoProc()) : null);
+    dto.setDataInicio(entity.getDataInicio() != null ? DateFormatter.localDateToString(entity.getDataInicio()) : null);
+    dto.setDataFim(entity.getDataFim() != null ? DateFormatter.localDateToString(entity.getDataFim()) : null);
 
     return dto;
   }

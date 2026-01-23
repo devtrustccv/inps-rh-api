@@ -10,17 +10,6 @@ public record ProcessarCabimentoRequest(
   ) {
   }
 
-  public record Autorization(
-      String UserName,
-      String Password,
-      String CanalCode,
-      String RolesName
-  ) {
-  }
-
-  public record User(Integer UserID) {
-  }
-
   public record RequestBody(ProcessaCabimento processa_cabimento) {
   }
 

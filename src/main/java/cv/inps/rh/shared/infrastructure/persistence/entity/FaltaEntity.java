@@ -44,7 +44,7 @@ public class FaltaEntity extends AuditEntity {
 
   @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
-    private AssiduidadeSinteseDiarioEntity tiprelId;
+    private TiposRelacionamentoEntity tiprelId;
     @Column(name="descricao_motivo")
     private String descricaoMotivo;
 
@@ -78,8 +78,8 @@ public class FaltaEntity extends AuditEntity {
     private LocalDateTime dataFim;
 
   
-    @Column(name="flg_desconto")
-    private Integer flgDesconto;
+    @Column(name="flg_desconto_sal")
+    private Integer flgDescontoSal;
 
   
     @Column(name="flg_justificativo")
@@ -95,4 +95,9 @@ public class FaltaEntity extends AuditEntity {
     private UUID uuid;
 
   
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "def_rem_id", referencedColumnName = "id")
+    private DefinicaoRemuneracaoEntity defRemId;
 }

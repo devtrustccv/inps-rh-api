@@ -1,5 +1,5 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
@@ -37,41 +37,12 @@ public class TiposRelacionamentoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cargo_id", referencedColumnName = "id")
     private ParamCargoEntity cargoId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "instit_id", referencedColumnName = "id")
-    private InstituicaoEntity institId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seccao_id", referencedColumnName = "id")
-    private SecaoEntity seccaoId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "categoria_id", referencedColumnName = "id")
-    private ParamCategoriaEntity categoriaId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "escalao_id", referencedColumnName = "id")
-    private ParamEscalaoEntity escalaoId;
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "carr_pcc_id", referencedColumnName = "id")
-    private ParamCarreiraEntity carrPccId;
     @Column(name="salario")
     private BigDecimal salario;
 
   
     @Column(name="moeda")
     private String moeda;
-
-  
-    @Column(name="regime")
-    private String regime;
 
   
     @Column(name="tipo_situacao")
@@ -84,7 +55,7 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
     private TiposRelacionamentoEntity tiprelId;
     @Column(name="flg_processa")
-    private String flgProcessa;
+    private Integer flgProcessa;
 
   
     @Enumerated(EnumType.STRING)
@@ -102,14 +73,6 @@ public class TiposRelacionamentoEntity extends AuditEntity {
   
     @Column(name="data_fim")
     private LocalDate dataFim;
-
-  
-    @Column(name="data_inicio_contrato")
-    private LocalDate dataInicioContrato;
-
-  
-    @Column(name="data_fim_contrato")
-    private LocalDate dataFimContrato;
 
   
 
@@ -132,11 +95,6 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     private UUID uuid;
 
   
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "loc_trab_id", referencedColumnName = "id")
-    private ParamLocalTrabEntity locTrabId;
 
 
   @ManyToOne(fetch = FetchType.LAZY)

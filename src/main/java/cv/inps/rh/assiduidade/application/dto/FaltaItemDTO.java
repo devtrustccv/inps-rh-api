@@ -1,0 +1,47 @@
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
+
+package cv.inps.rh.assiduidade.application.dto;
+
+import cv.igrp.framework.stereotype.IgrpDTO;
+import jakarta.validation.*;
+import jakarta.validation.constraints.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+
+
+@IgrpDTO
+public class FaltaItemDTO  {
+
+  
+  
+  private Long id ;
+  
+  
+  private String dataInicio ;
+  
+  
+  private String dataFim ;
+  
+  
+  private String horasAusencia ;
+  
+  
+  private Integer valorAusencia ;
+  
+  
+  private String motivo ;
+  
+  
+  private String comJustificativo ;
+  
+  @Valid
+  private AnexoReqDTO documento ;
+
+}

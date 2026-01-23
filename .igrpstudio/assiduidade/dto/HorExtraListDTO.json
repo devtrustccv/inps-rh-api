@@ -42,6 +42,18 @@
       "primaryKey": false
     },
     {
+      "name": "direcaoId",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "nomeColaborador",
       "objectType": "java",
       "type": "string",
@@ -66,7 +78,55 @@
       "primaryKey": false
     },
     {
+      "name": "categoriaId",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "vinculo",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "vinculoId",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "intervaloData",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "horasContratato",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -90,7 +150,7 @@
       "primaryKey": false
     },
     {
-      "name": "data",
+      "name": "salarioMensal",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -102,7 +162,7 @@
       "primaryKey": false
     },
     {
-      "name": "intervaloData",
+      "name": "valorHorasMensal",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -114,7 +174,7 @@
       "primaryKey": false
     },
     {
-      "name": "duracaoDispensa",
+      "name": "valorHorasDiario",
       "objectType": "java",
       "type": "string",
       "required": false,

@@ -1,5 +1,6 @@
 package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
+import cv.inps.rh.parametrizacao.application.dto.EscalaoDTO;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamCarreira;
 import cv.inps.rh.parametrizacao.domain.models.ParamCategoria;
@@ -80,12 +81,13 @@ public class ParamEscalaoMapper {
     return ParamEscalao.rebuild(id);
   }
 
-  public ParametrizacaoDTO toParametrizacaoDto(ParamEscalao domain) {
+  public EscalaoDTO toParametrizacaoDto(ParamEscalao domain) {
     if (domain == null) return null;
 
-    ParametrizacaoDTO dto = new ParametrizacaoDTO();
+    EscalaoDTO dto = new EscalaoDTO();
     dto.setLabel(domain.getCodigo() != null ? domain.getCodigo() : "");
     dto.setValue(domain.getId());
+    dto.setValor(domain.getValor());
     return dto;
   }
 

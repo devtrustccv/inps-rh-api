@@ -6,6 +6,7 @@ import cv.inps.rh.funcionario.application.dto.WrapperListMobilidadeDTO;
 import cv.inps.rh.funcionario.application.queries.GetListMobilidadesQuery;
 import cv.inps.rh.funcionario.application.queries.GetMobilidadeByIdQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.MobilidadeMapper;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
@@ -46,6 +47,11 @@ public class MobilidadeReadService {
 
       Join<MobilidadeEntity, FuncionarioEntity> fun = root.join("funId");
       predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
+
+      var estados = List.of(Estado.A, Estado.I);
+      predicates.add(
+          root.get("estado").in(estados)
+      );
 
       if (StringUtils.hasText(query.getTipoMobilidade())) {
         predicates.add(cb.equal(root.get("tipoSituacao"), query.getTipoMobilidade()));

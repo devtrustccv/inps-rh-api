@@ -4,7 +4,6 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.ValidacaoCarreiraDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
-import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.CarreiraMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper;
@@ -23,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -37,15 +37,16 @@ public class CarreiraWriteService {
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
-  private final RemuneracaoTiprelEntityRepository remuneracaoTiprelEntityRepository;
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final MobilidadeEntityRepository mobilidadeEntityRepository;
+  private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
+  private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
+  private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
   private final CarreiraMapper carreiraMapper;
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DadosContratuaisMapper contratuaisEntityMapper;
   private final DefPagamentoMapper defPagamentoMapper;
   private final FuncionarioRules funcionarioRules;
-  private final TipoMovimentoHelper tipoMovimentoHelper;
   private final EntityManager entityManager;
 
   public void novaCarreira(String funcionarioId, DadosContratuaisReqDTO dto) {
@@ -85,7 +86,6 @@ public class CarreiraWriteService {
     carreiraEntityRepository.save(carreiraAtual);
 
     var novaCarreira = Objects.requireNonNull(carreiraMapper.toCarreira(dto, Estado.P));
-    //novaCarreira.setFunId(funcionario);
     novaCarreira.setObs("CARREIRA");
     carreiraEntityRepository.save(novaCarreira);
 
@@ -99,6 +99,8 @@ public class CarreiraWriteService {
     novoRelacionamento.setReferente("CARREIRA");
     tiposRelacionamentoEntityRepository.save(novoRelacionamento);
 
+    var novasRemuneracoes = new ArrayList<DefinicaoRemuneracaoEntity>();
+    var novosPagamentos = new ArrayList<DefPagamentoEntity>();
     if (dto.getSubsidios() != null && !dto.getSubsidios().isEmpty()) {
       var remList = dto.getSubsidios().stream()
           .map(s -> {
@@ -107,24 +109,27 @@ public class CarreiraWriteService {
             return obj;
           })
           .toList();
-      definicaoRemuneracaoEntityRepository.saveAll(remList);
+      novasRemuneracoes.addAll(remList);
+      funcionario.setDefinicoesRenumeracoes(remList);
     }
 
-    var tipoMovimentoSalario = tipoMovimentoHelper.getTipoMovimentoEntitySalario();
-    var tipoMovimentoInps = tipoMovimentoHelper.getTipoMovimentoEntityInps();
-    var tipoMovimentoIUR = tipoMovimentoHelper.getTipoMovimentoEntityIur();
+    var vinculoAtualId = contratoAtual.getVinculoId() != null ? contratoAtual.getVinculoId().getId() : null;
+    var escalaoAtualId = relacionamentoAtual.getCarreiraId() != null ? relacionamentoAtual.getCarreiraId().getEscalaoId().getId() : null;
 
-    var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario);
-    salario.setTmId(tipoMovimentoSalario);
-    definicaoRemuneracaoEntityRepository.save(salario);
-
-    var renumeracaoIur = definicaoRemuneracaoMapper.createRenumeracao(BigDecimal.ZERO, tipoMovimentoIUR, dto.getDataInicio(), dto.getDataFim(), funcionario, dto.getMoeda());
-    definicaoRemuneracaoEntityRepository.save(renumeracaoIur);
-    var renumeracaoInps = definicaoRemuneracaoMapper.createRenumeracao(BigDecimal.ZERO, tipoMovimentoInps, dto.getDataInicio(), dto.getDataFim(), funcionario, dto.getMoeda());
-    definicaoRemuneracaoEntityRepository.save(renumeracaoInps);
+    var criarNovoSalario = houveMudancaSalario(vinculoAtualId, escalaoAtualId, dto, funcionario);
+    if (criarNovoSalario) {
+      var vinculoTipoMovimentoREMList = paramVinculoMovimentoEntityRepository
+          .findByVinculoId_IdAndTipo(dto.getTipoVinculoLaboralId(), "REM");
+      var vinculoTipoMovimentoREM = vinculoTipoMovimentoREMList.stream().findFirst().orElse(null);
+      if (vinculoTipoMovimentoREM != null) {
+        var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario);
+        salario.setTmId(vinculoTipoMovimentoREM.getTmId());
+        novasRemuneracoes.add(salario);
+        funcionario.getDefinicoesRenumeracoes().add(salario);
+      }
+    }
 
     if (dto.getEncargosDescontos() != null && !dto.getEncargosDescontos().isEmpty()) {
-
       var pagList = dto.getEncargosDescontos().stream()
           .map(e -> {
             var def = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
@@ -132,15 +137,86 @@ public class CarreiraWriteService {
             return def;
           })
           .toList();
-      defPagamentoEntityRepository.saveAll(pagList);
+      novosPagamentos.addAll(pagList);
+      funcionario.setDefinicoesPagamentos(pagList);
     }
 
-    var remun = new RemuneracaoTiprelEntity();
-    remun.setEstado(Estado.P);
-    remun.setUuid(UuidCreator.getTimeOrderedEpoch());
-    remun.setRemId(salario);
-    remun.setTiprelId(novoRelacionamento);
-    remuneracaoTiprelEntityRepository.save(remun);
+    if (!Objects.equals(vinculoAtualId, dto.getTipoVinculoLaboralId())) {
+      var listAssociacaoVinculoTipoMovimentoPag =
+          paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(
+              dto.getTipoVinculoLaboralId(), "PAG");
+      if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
+        listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
+          var pagamento = defPagamentoMapper.createPagamento(
+              BigDecimal.ZERO,
+              movimento.getTmId(),
+              dto.getDataInicio(),
+              dto.getDataFim(),
+              funcionario);
+          novosPagamentos.add(pagamento);
+          funcionario.getDefinicoesPagamentos().add(pagamento);
+        });
+      }
+    }
+
+    var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+
+    var listAssociacoes = new ArrayList<TipoRelRemPagEntity>();
+    var renumeracoesAtivasAntigas = funcionarioRules.getRemuneracoesAssociadosAtivos(relacionamentoAtual.getId());
+    var pagamentosAtivosAntigos = funcionarioRules.getPagamentosDescontosAssociadosAtivos(relacionamentoAtual.getId());
+
+    var remIdsAdicionados = new java.util.HashSet<Long>();
+    var pagIdsAdicionados = new java.util.HashSet<Long>();
+
+    if (renumeracoesAtivasAntigas != null) {
+      for (var rem : renumeracoesAtivasAntigas) {
+        if (rem != null && rem.getId() != null && remIdsAdicionados.add(rem.getId())) {
+          var assoc = new TipoRelRemPagEntity();
+          assoc.setTiprelId(novoRelacionamento);
+          assoc.setRemId(rem);
+          assoc.setPagId(null);
+          listAssociacoes.add(assoc);
+        }
+      }
+    }
+    if (pagamentosAtivosAntigos != null) {
+      for (var pag : pagamentosAtivosAntigos) {
+        if (pag != null && pag.getId() != null && pagIdsAdicionados.add(pag.getId())) {
+          var assoc = new TipoRelRemPagEntity();
+          assoc.setTiprelId(novoRelacionamento);
+          assoc.setPagId(pag);
+          assoc.setRemId(null);
+          listAssociacoes.add(assoc);
+        }
+      }
+    }
+
+    if (!novasRemuneracoes.isEmpty()) {
+      for (var rem : novasRemuneracoes) {
+        if (rem != null && rem.getId() != null && remIdsAdicionados.add(rem.getId())) {
+          var assoc = new TipoRelRemPagEntity();
+          assoc.setTiprelId(novoRelacionamento);
+          assoc.setRemId(rem);
+          assoc.setPagId(null);
+          listAssociacoes.add(assoc);
+        }
+      }
+    }
+    if (!novosPagamentos.isEmpty()) {
+      for (var pag : novosPagamentos) {
+        if (pag != null && pag.getId() != null && pagIdsAdicionados.add(pag.getId())) {
+          var assoc = new TipoRelRemPagEntity();
+          assoc.setTiprelId(novoRelacionamento);
+          assoc.setPagId(pag);
+          assoc.setRemId(null);
+          listAssociacoes.add(assoc);
+        }
+      }
+    }
+
+    if (!listAssociacoes.isEmpty()) {
+      tipoRelRemPagEntityRepository.saveAll(listAssociacoes);
+    }
 
     var mobilidade = mobilidadeEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
 
@@ -199,12 +275,6 @@ public class CarreiraWriteService {
       defPagamentoEntityRepository.save(obj);
     });
 
-    var remuneracoes = remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(relacionamento, Estado.P);
-    remuneracoes.forEach(obj -> {
-      obj.setEstado(estado);
-      remuneracaoTiprelEntityRepository.save(obj);
-    });
-
     var validation = validacaoEntityRepository.findByTiprelIdAndEstadoAndReferenciaName(relacionamento, Estado.P, "CARREIRA");
     validation.setEstado(estado);
     validacaoEntityRepository.save(validation);
@@ -240,12 +310,6 @@ public class CarreiraWriteService {
         forEach(obj -> {
           obj.setEstado(Estado.E);
           definicaoRemuneracaoEntityRepository.save(obj);
-        });
-
-    remuneracaoTiprelEntityRepository.findByTiprelIdAndEstado(relacionamentoAtual, Estado.P)
-        .forEach(remun -> {
-          remun.setEstado(Estado.E);
-          remuneracaoTiprelEntityRepository.save(remun);
         });
 
     var validation = validacaoEntityRepository.findByTiprelIdAndEstadoAndReferenciaName(relacionamentoAtual, Estado.P, "CARREIRA");
@@ -305,5 +369,29 @@ public class CarreiraWriteService {
         })
         .toList();
     defPagamentoEntityRepository.saveAll(pagList);
+  }
+
+  private boolean houveMudancaSalario(Long vinculoId, Long escalaoId, DadosContratuaisReqDTO dc, FuncionarioEntity funcionario) {
+    if (escalaoId != null && escalaoId > 0) {
+      if (!Objects.equals(escalaoId, dc.getEscalaoReferenciaId())) {
+        return true;
+      }
+    }
+    var vinculoTipoMovimentoREMList = paramVinculoMovimentoEntityRepository
+        .findByVinculoId_IdAndTipo(vinculoId, "REM");
+    var tmRem = vinculoTipoMovimentoREMList.stream()
+        .findFirst()
+        .map(ParamVinculoMovimentoEntity::getTmId)
+        .orElse(null);
+    if (tmRem == null) return true;
+    var renumeracoes = definicaoRemuneracaoEntityRepository
+        .findByFunIdAndTmIdAndEstado(funcionario, tmRem, Estado.A);
+    var renumeracao = renumeracoes.stream().findFirst().orElse(null);
+    if (renumeracao != null) {
+      if (!Objects.equals(renumeracao.getValor(), dc.getSalario())) {
+        return true;
+      }
+    }
+    return false;
   }
 }

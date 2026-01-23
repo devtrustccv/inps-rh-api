@@ -36,11 +36,6 @@ public class ValidarDadosContratuaisService {
     if (dc.getLocalTrabalhoId() == null)
       throw IgrpResponseStatusException.badRequest("Local de trabalho é obrigatório.");
 
-    if (dc.getPaisId() == null)
-      throw IgrpResponseStatusException.badRequest("País é obrigatório.");
-
-    if (dc.getIlhaId() == null)
-      throw IgrpResponseStatusException.badRequest("Ilha é obrigatória.");
 
     if (dc.getMoeda() == null || dc.getMoeda().isBlank())
       throw IgrpResponseStatusException.badRequest("Moeda é obrigatória.");
@@ -93,7 +88,7 @@ public class ValidarDadosContratuaisService {
     // flgSalario = 1 → salário é obrigatório
     if (vinculo.getFlgSalario() != null && vinculo.getFlgSalario() == 1) {
       if (dc.getSalario() == null)
-        throw IgrpResponseStatusException.badRequest("Salário é obrigatório para este tipo de vínculo.");
+        throw IgrpResponseStatusException.badRequest("valor do salário é obrigatório para este tipo de vínculo.");
     }
   }
 

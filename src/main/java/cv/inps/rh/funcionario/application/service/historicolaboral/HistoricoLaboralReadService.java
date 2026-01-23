@@ -104,15 +104,15 @@ public class HistoricoLaboralReadService {
           ofNullable(obj.getContrVinculoId().getVinculoId())
               .map(ParamVinculoEntity::getNome)
               .ifPresent(response::setVinculo);
-          ofNullable(obj.getSeccaoId()).map(SecaoEntity::getInstId)
+          ofNullable(obj.getMobId().getSecaoId()).map(SecaoEntity::getInstId)
               .map(InstituicaoEntity::getNome)
               .ifPresent(response::setDirecao);
-          ofNullable(obj.getSeccaoId()).map(SecaoEntity::getNome)
+          ofNullable(obj.getMobId().getSecaoId()).map(SecaoEntity::getNome)
               .ifPresent(response::setSeccao);
           ofNullable(obj.getCarreiraId()).map(CarreiraEntity::getCarrPccsId)
               .map(ParamCarreiraEntity::getNome)
               .ifPresent(response::setCarreira);
-          ofNullable(obj.getEscalaoId()).map(ParamEscalaoEntity::getEscalao)
+          ofNullable(obj.getCarreiraId().getEscalaoId()).map(ParamEscalaoEntity::getEscalao)
               .ifPresent(response::setReferenciaEscalao);
           ofNullable(obj.getCargoId()).map(ParamCargoEntity::getNome)
               .ifPresent(response::setCargo);
@@ -209,20 +209,12 @@ public class HistoricoLaboralReadService {
       dto.setTipoMobilidade(mob.getTipoSituacao());
       dto.setDataInicioMobilidade(mob.getDataInicio());
       dto.setDataFimMobilidade(mob.getDataFim());
+      dto.setLocalTrabalho(mob.getLocalTrabId().getId());
+      dto.setPais(mob.getLocalTrabId().getPaisId() != null ? mob.getLocalTrabId().getPaisId().getNome() : null);
+      dto.setIlha(mob.getLocalTrabId().getIlhaId() != null ? mob.getLocalTrabId().getIlhaId().getNome() : null);
     }
 
-    var inst = entity.getInstitId();
-    if (inst != null)
-      dto.setDirecao(inst.getId());
-    var sec = entity.getSeccaoId();
-    if (sec != null)
-      dto.setSecao(sec.getId());
-    var lt = entity.getLocTrabId();
-    if (lt != null) {
-      dto.setLocalTrabalho(lt.getId());
-      dto.setPais(lt.getPaisId() != null ? lt.getPaisId().getNome() : null);
-      dto.setIlha(lt.getIlhaId() != null ? lt.getIlhaId().getNome() : null);
-    }
+
 
     var car = entity.getCarreiraId();
     if (car != null) {
@@ -230,13 +222,13 @@ public class HistoricoLaboralReadService {
       dto.setDataInicioCarreira(car.getDataInicio());
       dto.setDataFimCarreira(car.getDataFim());
     }
-    var carrPcc = entity.getCarrPccId();
+    var carrPcc = entity.getCarreiraId()!= null ? entity.getCarreiraId().getCarrPccsId() : null;
     if (carrPcc != null)
       dto.setCarreira(carrPcc.getId());
-    var cat = entity.getCategoriaId();
+    var cat =entity.getCarreiraId()!= null ?  entity.getCarreiraId().getCategoriaId() : null;
     if (cat != null)
       dto.setCategoria(cat.getId());
-    var esc = entity.getEscalaoId();
+    var esc = entity.getCarreiraId()!= null ? entity.getCarreiraId().getEscalaoId() : null;
     if (esc != null)
       dto.setEscalao(esc.getId());
     var cargo = entity.getCargoId();
@@ -248,7 +240,7 @@ public class HistoricoLaboralReadService {
       var paramSit = sit.getSituacaoLaboralId();
       dto.setSituacaoLaboral(paramSit != null ? paramSit.getId() : null);
       dto.setMotivo(sit.getMotivoSitLabId() != null ? String.valueOf(sit.getMotivoSitLabId().getId())
-          : sit.getMotivoSitLab());
+          : sit.getTipoSituacao());
       dto.setDataInicioSituacao(sit.getDataInicio());
       dto.setDataFimSituacao(sit.getDataFim());
       dto.setObservacao(sit.getObs());
@@ -285,20 +277,11 @@ public class HistoricoLaboralReadService {
       dto.setTipoMobilidade(mob.getTipoSituacao());
       dto.setDataInicioMobilidade(mob.getDataInicio());
       dto.setDataFimMobilidade(mob.getDataFim());
+      dto.setLocalTrabalho(mob.getLocalTrabId().getId());
+      dto.setPais(mob.getLocalTrabId().getPaisId() != null ? mob.getLocalTrabId().getPaisId().getNome() : null);
+      dto.setIlha(mob.getLocalTrabId().getIlhaId() != null ? mob.getLocalTrabId().getIlhaId().getNome() : null);
     }
 
-    var inst = atual.getInstitId();
-    if (inst != null)
-      dto.setDirecao(inst.getId());
-    var sec = atual.getSeccaoId();
-    if (sec != null)
-      dto.setSecao(sec.getId());
-    var lt = atual.getLocTrabId();
-    if (lt != null) {
-      dto.setLocalTrabalho(lt.getId());
-      dto.setPais(lt.getPaisId() != null ? lt.getPaisId().getNome() : null);
-      dto.setIlha(lt.getIlhaId() != null ? lt.getIlhaId().getNome() : null);
-    }
 
     var car = atual.getCarreiraId();
     if (car != null) {
@@ -306,13 +289,13 @@ public class HistoricoLaboralReadService {
       dto.setDataInicioCarreira(car.getDataInicio());
       dto.setDataFimCarreira(car.getDataFim());
     }
-    var carrPcc = atual.getCarrPccId();
+    var carrPcc = atual.getCarreiraId()!= null ? atual.getCarreiraId().getCarrPccsId() : null;
     if (carrPcc != null)
       dto.setCarreira(carrPcc.getId());
-    var cat = atual.getCategoriaId();
+    var cat =atual.getCarreiraId()!= null ?  atual.getCarreiraId().getCategoriaId() : null;
     if (cat != null)
       dto.setCategoria(cat.getId());
-    var esc = atual.getEscalaoId();
+    var esc = atual.getCarreiraId()!= null ? atual.getCarreiraId().getEscalaoId() : null;
     if (esc != null)
       dto.setEscalao(esc.getId());
     var cargo = atual.getCargoId();
@@ -324,7 +307,7 @@ public class HistoricoLaboralReadService {
       var paramSit = sit.getSituacaoLaboralId();
       dto.setSituacaoLaboral(paramSit != null ? paramSit.getId() : null);
       dto.setMotivo(sit.getMotivoSitLabId() != null ? String.valueOf(sit.getMotivoSitLabId().getId())
-          : sit.getMotivoSitLab());
+          : sit.getTipoSituacao());
       dto.setDataInicioSituacao(sit.getDataInicio());
       dto.setDataFimSituacao(sit.getDataFim());
       dto.setObservacao(sit.getObs());

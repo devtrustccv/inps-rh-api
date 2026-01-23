@@ -35,13 +35,13 @@ public interface TiposRelacionamentoEntityRepository extends
 
   boolean existsByContrVinculoId_VinculoId(ParamVinculoEntity vinculoId);
 
-  boolean existsByCarrPccId(ParamCarreiraEntity categoriaId);
+  boolean existsByCarreiraId_CarrPccsId(ParamCarreiraEntity carreiraIdCarrPccsId);
 
-  boolean existsByEscalaoId(ParamEscalaoEntity escalaoId);
+  boolean existsByCarreiraId_EscalaoId(ParamEscalaoEntity escalaoId);
 
-  boolean existsByLocTrabId(ParamLocalTrabEntity localTrabEntity);
+  boolean existsByMobId_LocalTrabId(ParamLocalTrabEntity localTrabEntity);
 
-  boolean existsBySeccaoId(SecaoEntity section);
+  boolean existsByMobId_SecaoId(SecaoEntity section);
 
   Optional<TiposRelacionamentoEntity> findByUuid(UUID uuid);
 
@@ -50,6 +50,16 @@ public interface TiposRelacionamentoEntityRepository extends
         () -> IgrpResponseStatusException
             .notFound("TiposRelacionamentoEntity not found for id: " + uuid));
   }
+
+  @Query("""
+      select t
+      from TiposRelacionamentoEntity t
+      left join fetch t.mobId m
+      left join fetch m.instidId inst
+      where t.estActAdm = 1
+        and t.funId.uuid in :funcionarioUuids
+      """)
+  List<TiposRelacionamentoEntity> findAtuaisByFuncionarioUuids(@Param("funcionarioUuids") List<UUID> funcionarioUuids);
 
   TiposRelacionamentoEntity findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity funcionario, Estado estado);
 
@@ -70,11 +80,11 @@ public interface TiposRelacionamentoEntityRepository extends
       SELECT new cv.inps.rh.processamento.application.dto.ColaboradorResponseDTO(
                null,
                t.situacLaboralId.estado,
-               t.institId.nome,
-               t.seccaoId.nome,
+               t.mobId.instidId.nome,
+               t.mobId.secaoId.nome,
                t.contrVinculoId.tpContratoId.nome,
                t.cargoId.nome,
-               t.situacLaboralId.motivoSitLab,
+               t.situacLaboralId.tipoSituacao,
                t.situacLaboralId.dataInicio,
                t.situacLaboralId.dataFim,
                t.funId.uuid,
@@ -82,7 +92,7 @@ public interface TiposRelacionamentoEntityRepository extends
            )
       FROM TiposRelacionamentoEntity t
       WHERE
-           (:directionId IS NULL OR t.institId.id = :directionId)
+           (:directionId IS NULL OR t.mobId.instidId.id = :directionId)
        AND (:funcionario IS NULL OR LOWER(t.funId.nome) LIKE LOWER(CONCAT('%', :funcionario, '%')))
        AND (:startDate IS NULL OR t.situacLaboralId.dataInicio = :startDate)
        AND (:endDate IS NULL OR t.situacLaboralId.dataFim = :endDate)
@@ -99,20 +109,19 @@ public interface TiposRelacionamentoEntityRepository extends
                t.id,
                t.funId.uuid,
                t.funId.nome,
-               t.institId.nome,
-               t.institId.id,
+               t.mobId.instidId.nome,
+               t.mobId.instidId.id,
                null
            )
       FROM TiposRelacionamentoEntity t
-      WHERE t.estActAdm = 1 AND t.flgProcessa = '1'
-           AND (:directionId IS NULL OR t.institId.id = :directionId)
+      WHERE t.estActAdm = 1 AND t.flgProcessa = 1
+           AND (:directionId IS NULL OR t.mobId.instidId.id = :directionId)
            AND (:nome IS NULL OR LOWER(t.funId.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
       """)
   Page<PesquisaColaboradorResponseDTO> pesquisaColaborador(
       @Param("directionId") Long directionId,
       @Param("nome") String nome,
-      Pageable pageable
-  );
+      Pageable pageable);
 
   @Query("""
       SELECT new cv.inps.rh.processamento.application.dto.PesquisaCentroCustoResponseDTO(
@@ -231,6 +240,5 @@ public interface TiposRelacionamentoEntityRepository extends
       @Param("dataInicio") LocalDate dataInicio,
       @Param("dataFim") LocalDate dataFim,
       Pageable pageable);
-
 
 }

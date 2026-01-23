@@ -12,22 +12,27 @@ public class UpsMapper {
 
   public Ups toDomain(UpsEntity upsEntity) {
     if (upsEntity == null) return null;
-    return Ups
-        .rebuild(upsEntity.getId(), upsEntity.getNome());
+    return Ups.rebuild(upsEntity.getId(), upsEntity.getNome());
   }
 
   public Ups toDomain(Long idUps) {
     if (idUps == null) return null;
-    return Ups
-        .rebuild(idUps, null);
+    return Ups.rebuild(idUps, null);
   }
 
   public ParametrizacaoDTO toParametrizacaoDto(Ups ups) {
     if (ups == null) return null;
-
-    ParametrizacaoDTO dto = new ParametrizacaoDTO();
+    var dto = new ParametrizacaoDTO();
     dto.setLabel(ups.nome());
     dto.setValue(ups.id());
+    return dto;
+  }
+
+  public ParametrizacaoDTO toParametrizacaoDto(UpsEntity ups) {
+    if (ups == null) return null;
+    var dto = new ParametrizacaoDTO();
+    dto.setLabel(ups.getNome());
+    dto.setValue(ups.getId());
     return dto;
   }
 }

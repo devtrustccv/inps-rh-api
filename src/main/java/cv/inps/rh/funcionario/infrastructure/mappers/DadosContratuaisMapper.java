@@ -12,6 +12,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -25,22 +28,13 @@ public class DadosContratuaisMapper {
     if (dc == null) return null;
     var tr = new TiposRelacionamentoEntity();
     tr.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
-    tr.setInstitId(em.getReference(InstituicaoEntity.class, dc.getDirecaoId()));
-    tr.setSeccaoId(em.getReference(SecaoEntity.class, dc.getSeccaoId()));
-    tr.setCategoriaId(em.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
-    tr.setEscalaoId(em.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
-    tr.setCarrPccId(em.getReference(ParamCarreiraEntity.class, dc.getCarreiraId()));
     tr.setSalario(dc.getSalario());
     tr.setMoeda(dc.getMoeda());
-    tr.setRegime(dc.getRegimeTrabalho());
     tr.setTipoSituacao("NOVO_CONTRATO");
-    tr.setFlgProcessa("S");
+    tr.setFlgProcessa(1);
     tr.setObs("NOVO_CONTRATO");
     tr.setDataInicio(dc.getDataInicio());
-    tr.setDataFim(null);
-    tr.setDataInicioContrato(dc.getDataInicio());
-    tr.setDataFimContrato(dc.getDataFim());
-    tr.setLocTrabId(em.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));
+    tr.setDataFim(dc.getDataFim());
     tr.setReferente("REGISTO_COLABORADOR");
     tr.setUuid(UuidCreator.getTimeOrderedEpoch());
     tr.setEstado(estado);
@@ -50,21 +44,12 @@ public class DadosContratuaisMapper {
   public void toUpdateRelacionamento(TiposRelacionamentoEntity tr, DadosContratuaisReqDTO dc) {
     if (dc == null) return ;
     tr.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
-    tr.setInstitId(em.getReference(InstituicaoEntity.class, dc.getDirecaoId()));
-    tr.setSeccaoId(em.getReference(SecaoEntity.class, dc.getSeccaoId()));
-    tr.setCategoriaId(em.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
-    tr.setEscalaoId(em.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
-    tr.setCarrPccId(em.getReference(ParamCarreiraEntity.class, dc.getCarreiraId()));
     tr.setSalario(dc.getSalario());
     tr.setMoeda(dc.getMoeda());
-    tr.setRegime(dc.getRegimeTrabalho());
     tr.setTipoSituacao("NOVO_CONTRATO");
     tr.setObs("NOVO_CONTRATO");
     tr.setDataInicio(dc.getDataInicio());
-    tr.setDataFim(null);
-    tr.setDataInicioContrato(dc.getDataInicio());
-    tr.setDataFimContrato(dc.getDataFim());
-    tr.setLocTrabId(em.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));
+    tr.setDataFim(dc.getDataInicio());
     tr.setReferente("REGISTO_COLABORADOR");
 
   }
@@ -83,7 +68,7 @@ public class DadosContratuaisMapper {
                                                  String motivoSituacaoLaboral, String observacao) {
     var sl = new SituacaoLaboralEntity();
     sl.setSituacaoLaboralId(param);
-    sl.setMotivoSitLab(motivoSituacaoLaboral);
+    sl.setTipoSituacao(motivoSituacaoLaboral);
     sl.setDataInicio(dc.getDataInicio());
     sl.setDataFim(dc.getDataFim());
     sl.setEstado(estado);
@@ -92,15 +77,18 @@ public class DadosContratuaisMapper {
     return sl;
   }
 
-  public SituacaoLaboralEntity toUpdateSituacaoLaboral(SituacaoLaboralEntity entity, DadosContratuaisReqDTO dc) {
-    if (dc == null) return entity;
+  public void toUpdateSituacaoLaboral(SituacaoLaboralEntity entity, DadosContratuaisReqDTO dc) {
+    if (dc == null) return;
     entity.setDataInicio(dc.getDataInicio());
     entity.setDataFim(dc.getDataFim());
-    return entity;
+    entity.setSituacaoLaboralId(em.getReference(ParamSituacaoEntity.class,dc.getSituacaoLaboralId()));
+
   }
 
 
-  public DadosContratuaisRespDTO dadosContratuaisRespDTO(TiposRelacionamentoEntity tiposRelacionamento) {
+  public DadosContratuaisRespDTO dadosContratuaisRespDTO
+      (TiposRelacionamentoEntity tiposRelacionamento,
+       List<DefPagamentoEntity> pagamentosDescontos,List<DefinicaoRemuneracaoEntity> remuneracoes ) {
     if (tiposRelacionamento == null) return null;
 
     DadosContratuaisRespDTO dcr = new DadosContratuaisRespDTO();
@@ -108,42 +96,58 @@ public class DadosContratuaisMapper {
     dcr.setTipoContratoId(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getTpContratoId().getId() : null);
     dcr.setTipoContratoDesc(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getTpContratoId().getNome() : null);
 
+    dcr.setSituacaoLaboralId(tiposRelacionamento.getSituacLaboralId() != null ? tiposRelacionamento.getSituacLaboralId().getSituacaoLaboralId().getId() : null);
+
+
     dcr.setCargoPosicaoId(tiposRelacionamento.getCargoId() != null ? tiposRelacionamento.getCargoId().getId() : null);
     dcr.setCargoPosicaoDesc(tiposRelacionamento.getCargoId() != null ? tiposRelacionamento.getCargoId().getNome() : null);
 
-    dcr.setDirecaoId(tiposRelacionamento.getInstitId() != null ? tiposRelacionamento.getInstitId().getId() : null);
-    dcr.setDirecaoDesc(tiposRelacionamento.getInstitId() != null ? tiposRelacionamento.getInstitId().getNome() : null);
 
-    dcr.setSeccaoId(tiposRelacionamento.getSeccaoId() != null ? tiposRelacionamento.getSeccaoId().getId() : null);
-    dcr.setSeccaoDesc(tiposRelacionamento.getSeccaoId() != null ? tiposRelacionamento.getSeccaoId().getNome() : null);
+    if(tiposRelacionamento.getMobId()!=null){
+      dcr.setDirecaoId(tiposRelacionamento.getMobId().getInstidId().getId());
+      dcr.setDirecaoDesc(tiposRelacionamento.getMobId().getInstidId().getNome());
+      dcr.setSeccaoId(tiposRelacionamento.getMobId().getSecaoId().getId());
+      dcr.setSeccaoDesc(tiposRelacionamento.getMobId().getSecaoId().getNome());
+    }
 
-    dcr.setCarreiraId(tiposRelacionamento.getCarrPccId() != null ? tiposRelacionamento.getCarrPccId().getId() : null);
-    dcr.setCarreiraDesc(tiposRelacionamento.getCarrPccId() != null ? tiposRelacionamento.getCarrPccId().getNome() : null);
+    dcr.setCarreiraId(tiposRelacionamento.getCarreiraId()!=null ?
+        tiposRelacionamento.getCarreiraId().getCarrPccsId().getId() : null);
 
-    dcr.setCategoriaId(tiposRelacionamento.getCategoriaId() != null ? tiposRelacionamento.getCategoriaId().getId() : null);
-    dcr.setCategoriaDesc(tiposRelacionamento.getCategoriaId() != null ? tiposRelacionamento.getCategoriaId().getNome() : null);
+    dcr.setCarreiraDesc(tiposRelacionamento.getCarreiraId()!=null ?
+        tiposRelacionamento.getCarreiraId().getCarrPccsId().getNome(): null);
 
-    dcr.setEscalaoReferenciaId(tiposRelacionamento.getEscalaoId() != null ? tiposRelacionamento.getEscalaoId().getId() : null);
-    dcr.setEscalaoReferenciaDesc(tiposRelacionamento.getEscalaoId() != null ? tiposRelacionamento.getEscalaoId().getEscalao() : null);
+    dcr.setCategoriaId(tiposRelacionamento.getCarreiraId()!=null ?
+        tiposRelacionamento.getCarreiraId().getCategoriaId().getId() : null);
 
-    dcr.setLocalTrabalhoId(tiposRelacionamento.getLocTrabId() != null ? tiposRelacionamento.getLocTrabId().getId() : null);
-    dcr.setLocalTrabalhoDesc(tiposRelacionamento.getLocTrabId() != null ? tiposRelacionamento.getLocTrabId().getNome() : null);
+    dcr.setCategoriaDesc(tiposRelacionamento.getCarreiraId()!=null ?
+        tiposRelacionamento.getCarreiraId().getCategoriaId().getNome() : null);
+
+    dcr.setEscalaoReferenciaId(tiposRelacionamento.getCarreiraId()!=null ?
+        tiposRelacionamento.getCarreiraId().getEscalaoId().getId() : null);
+
+    dcr.setEscalaoReferenciaDesc(tiposRelacionamento.getCarreiraId()!=null ?
+        tiposRelacionamento.getCarreiraId().getEscalaoId().getEscalao() : null);
+
+    if(tiposRelacionamento.getMobId()!=null){
+      dcr.setLocalTrabalhoId(tiposRelacionamento.getMobId().getLocalTrabId().getId());
+      dcr.setLocalTrabalhoDesc(tiposRelacionamento.getMobId().getLocalTrabId().getNome());
+    }
 
     dcr.setTipoVinculoLaboralId(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getVinculoId().getId() : null);
     dcr.setTipoVinculoLaboralDesc(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getVinculoId().getNome() : null);
 
-    dcr.setRegimeTrabalho(tiposRelacionamento.getRegime());
     dcr.setSalario(tiposRelacionamento.getSalario());
     dcr.setMoeda(tiposRelacionamento.getMoeda());
-    dcr.setDataInicio(tiposRelacionamento.getDataInicioContrato());
-    dcr.setDataFim(tiposRelacionamento.getDataFimContrato());
+    dcr.setDataInicio(tiposRelacionamento.getDataInicio());
+    dcr.setDataFim(tiposRelacionamento.getDataFim());
+    dcr.setRegimeTrabalho(tiposRelacionamento.getRegimeId()!=null ? tiposRelacionamento.getRegimeId().getTipoRegime() : null);
 
     if (tiposRelacionamento.getContrVinculoId() != null)
       dcr.setDuracaoMeses(tiposRelacionamento.getContrVinculoId().getDuracao());
 
     // Subsídios
-    if (tiposRelacionamento.getFunId().getDefinicoesRenumeracoes() != null) {
-      var subs = tiposRelacionamento.getFunId().getDefinicoesRenumeracoes().stream().map(s -> {
+   if (!CollectionUtils.isEmpty(remuneracoes)) {
+      var subs = remuneracoes.stream().map(s -> {
         SubsidioRespDTO sr = new SubsidioRespDTO();
         sr.setId(s.getId());
         sr.setTipoSubsidioId(s.getTmId() != null ? s.getTmId().getId() : null);
@@ -156,8 +160,8 @@ public class DadosContratuaisMapper {
     }
 
     // Encargos / descontos
-    if (tiposRelacionamento.getFunId().getDefinicoesPagamentos() != null) {
-      var encs = tiposRelacionamento.getFunId().getDefinicoesPagamentos().stream().map(e -> {
+    if (!CollectionUtils.isEmpty(pagamentosDescontos)) {
+      var encs = pagamentosDescontos.stream().map(e -> {
         EncargosDescontosRespDTO er = new EncargosDescontosRespDTO();
         er.setId(e.getId());
         er.setTipoEncargoId(e.getTmId() != null ? e.getTmId().getId() : null);
@@ -179,14 +183,8 @@ public class DadosContratuaisMapper {
     TiposRelacionamentoEntity clone = new TiposRelacionamentoEntity();
     clone.setUuid(IdentificadorUnico.create().valor());
     clone.setCargoId(original.getCargoId());
-    clone.setInstitId(original.getInstitId());
-    clone.setSeccaoId(original.getSeccaoId());
-    clone.setCategoriaId(original.getCategoriaId());
-    clone.setEscalaoId(original.getEscalaoId());
-    clone.setCarrPccId(original.getCarrPccId());
     clone.setSalario(original.getSalario());
     clone.setMoeda(original.getMoeda());
-    clone.setRegime(original.getRegime());
     clone.setTipoSituacao(original.getTipoSituacao());
     clone.setCarreiraId(original.getCarreiraId());
     clone.setMobId(original.getMobId());
@@ -198,7 +196,6 @@ public class DadosContratuaisMapper {
     clone.setEstActAdm(original.getEstActAdm());
     clone.setFunId(original.getFunId());
     clone.setObs(original.getObs());
-    clone.setLocTrabId(original.getLocTrabId());
     clone.setSituacLaboralId(original.getSituacLaboralId());
     clone.setReferente(original.getReferente());
     clone.setUltProc(original.getUltProc());

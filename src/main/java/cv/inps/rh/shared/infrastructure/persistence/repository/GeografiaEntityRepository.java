@@ -22,7 +22,8 @@ public interface GeografiaEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "GeografiaEntity not found for id: " + id));
   }
 
-  @Query(value = """
+
+  /*@Query(value = """
       SELECT *
       FROM glb_t_geografia g
       WHERE g.nivel_detalhe = :nivelDetalhe
@@ -32,6 +33,17 @@ public interface GeografiaEntityRepository extends
   List<GeografiaEntity> findByNivelDetalheAndGeogrId(
       @Param("nivelDetalhe") Long nivelDetalhe,
       @Param("geogrId") Long geogrId
+  );*/
+
+  @Query("SELECT g FROM GeografiaEntity g " +
+      "WHERE g.nivelDetalhe = :nivelDetalhe " +
+      "AND (:geogrId IS NULL OR g.geogrId = :geogrId) " +
+      "ORDER BY g.id")
+  List<GeografiaEntity> findByNivelDetalheAndGeogrId(
+      @Param("nivelDetalhe") Long nivelDetalhe,
+      @Param("geogrId") Long geogrId
   );
+
+
 
 }

@@ -137,7 +137,7 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
 
     var entity = localRepository.findByUuidOrThrow(UUID.fromString(uuid));
 
-    if (tiposRelacionamentoRepository.existsByLocTrabId(entity))
+    if (tiposRelacionamentoRepository.existsByMobId_LocalTrabId(entity))
       throw IgrpResponseStatusException.conflictByAnotherTableDependency();
 
     entity.setEstado(Estado.E);

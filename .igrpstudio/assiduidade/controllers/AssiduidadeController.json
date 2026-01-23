@@ -1,0 +1,1055 @@
+{
+  "type": "controller",
+  "name": "Assiduidade",
+  "module": "assiduidade",
+  "description": "gestao de assiduidade",
+  "basePath": "api/v1/assiduidade",
+  "actions": [
+    {
+      "actionName": "getListaPicagem",
+      "path": "picagens",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaPicagem",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "nomeColaborador",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "ups",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "getListaMovimentosResumidos",
+      "path": "movimento-resumos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaAssiduidadade",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "colaborador",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "ilha",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccao",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "marcarFalta",
+      "path": "falta",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "FaltaReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "validarFalta",
+      "path": "falta/{faltaId}",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "FaltaReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "faltaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getListaFalta",
+      "path": "falta",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaFalta",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "colaborador",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "ilha",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "getListaDispensa",
+      "path": "dispensa",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaDispensa",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "colaborador",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "ilha",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "marcarDispensa",
+      "path": "dispensa",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "DispensaReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "validarDispensa",
+      "path": "dispensa/{dispensaId}",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "DispensaReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "dispensaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getListaHoraExtra",
+      "path": "hora-extra",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaHoraExtra",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "ilha",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "marcarHoraExtra",
+      "path": "hora-extra",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "HoraExtraReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "validarHoraExtra",
+      "path": "hora-extra/{horaExtraId}",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "HoraExtraReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "horaExtraId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getListaFeria",
+      "path": "feria",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaFeria",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "anoReferente",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "ilha",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "colaborador",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "marcarFeria",
+      "path": "feria",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "PedidoFeriaReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "alterarPedidoFeria",
+      "path": "feria/{feriaId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "PedidoFeriaAlterarReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "feriaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "validarPedidoFeria",
+      "path": "feria/{feriaId}",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "PedidoFeriaReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "feriaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "verMapa",
+      "path": "mapa-feria-view",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "VerMapa",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "listaMapaFeria",
+      "path": "mapa-feria",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaMapaFeria",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "anoReferente",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "ilha",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "getDetalheMapaFeria",
+      "path": "mapa-feria/{mapaFeriaId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DetalheMapaFeria",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "mapaFeriaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "justificarFalta",
+      "path": "falta/justificar/{faltaId}",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "JustificarFalta",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "faltaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getFalta",
+      "path": "falta/{faltaId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "FaltaReq",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "faltaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getDispensa",
+      "path": "dispensa/{dispensaId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DispensaReq",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "dispensaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getHoraExtra",
+      "path": "hora-extra/{horaExtraId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "HoraExtraReq",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "horaExtraId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getPedidoFeria",
+      "path": "feria/{feriaId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "PedidoFeriaAlterarReq",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "feriaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "validarFaltaJustificada",
+      "path": "falta/justificar/validar/{faltaId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "JustificarFalta",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "faltaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getFaltaJustificada",
+      "path": "falta/justificar/{faltaId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "JustificarFalta",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "faltaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta"
+}

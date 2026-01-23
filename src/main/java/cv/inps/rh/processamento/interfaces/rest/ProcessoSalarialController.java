@@ -10,6 +10,7 @@ import cv.inps.rh.processamento.application.commands.ExecutarAcaoNoProcessamento
 import cv.inps.rh.processamento.application.commands.ProcessarSalarioCommand;
 import cv.inps.rh.processamento.application.commands.RemoverFuncionariosProcessamentoSalarialCommand;
 import cv.inps.rh.processamento.application.dto.*;
+import cv.inps.rh.processamento.application.queries.GetDadosValidacaoQuery;
 import cv.inps.rh.processamento.application.queries.GetDetalhesProcessamentoQuery;
 import cv.inps.rh.processamento.application.queries.GetProcessamentoSalarialQuery;
 import cv.inps.rh.processamento.application.queries.GetResumoProcessamentoQuery;
@@ -21,6 +22,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @IgrpController
 @RestController
@@ -185,10 +188,13 @@ public class ProcessoSalarialController {
   )
 
   public ResponseEntity<ResumoProcessamentoDTO> getResumoProcessamento(
-    )
+    @RequestParam(value = "processamentoId") String processamentoId,
+    @RequestParam(value = "ccId", required = false) String ccId,
+    @RequestParam(value = "ano", required = false) String ano,
+    @RequestParam(value = "mes", required = false) String mes)
   {
 
-      final var query = new GetResumoProcessamentoQuery();
+      final var query = new GetResumoProcessamentoQuery(processamentoId, ccId, ano, mes);
 
       return queryBus.handle(query);
 
@@ -221,6 +227,38 @@ public class ProcessoSalarialController {
   {
 
       final var query = new GetDetalhesProcessamentoQuery(tipoMovimento, procSalId, tipoDetalhe);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "processar/dados-validacao"
+  )
+  @Operation(
+    summary = "Get dados validacao",
+    description = "Get dados validacao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DadosValidacaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<List<DadosValidacaoDTO>> getDadosValidacao(
+    @RequestParam(value = "tipoValidacao", required = false) String tipoValidacao,
+    @RequestParam(value = "mesAtual", required = false) String mesAtual,
+    @RequestParam(value = "mesAnterior", required = false) String mesAnterior)
+  {
+
+      final var query = new GetDadosValidacaoQuery(tipoValidacao, mesAtual, mesAnterior);
 
       return queryBus.handle(query);
 
