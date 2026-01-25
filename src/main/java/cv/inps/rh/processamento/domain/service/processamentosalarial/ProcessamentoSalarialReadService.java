@@ -42,6 +42,7 @@ public class ProcessamentoSalarialReadService {
   @PersistenceContext
   private EntityManager entityManager;
 
+
   public WrapperProcessamentoSalarialDTO getProcessamentoSalarial(GetProcessamentoSalarialQuery query) {
 
     var pageRequest = PageRequest.of(Integer.parseInt(query.getPage()), Integer.parseInt(query.getSize()));
