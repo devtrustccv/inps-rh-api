@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.interfaces.rest;
 
+import cv.inps.rh.shared.application.constants.custom.RelatorioTemplate;
 import cv.inps.rh.shared.application.dto.MinioFileDataDTO;
 import cv.inps.rh.shared.domain.service.RelatoriosService;
 import cv.inps.rh.shared.util.PdfGenerator;
@@ -26,8 +27,8 @@ public class RelatoriosPdfController {
   }
 
   @GetMapping("/ordem-servico")
-  public ResponseEntity<MinioFileDataDTO> ordemServicoPdf() {
-    return ResponseEntity.ok(service.ordemServico());
+  public ResponseEntity<MinioFileDataDTO> ordemServicoPdf(@RequestParam RelatorioTemplate template) {
+    return ResponseEntity.ok(service.ordemServico(template));
   }
 
   @GetMapping("/recibos-salario")

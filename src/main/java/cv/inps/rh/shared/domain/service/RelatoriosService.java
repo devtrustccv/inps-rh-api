@@ -2,6 +2,7 @@ package cv.inps.rh.shared.domain.service;
 
 import cv.igrp.platform.filemanager.StorageService;
 import cv.inps.rh.processamento.domain.service.processamentosalarial.report.model.ProcessamentoSalarialReport;
+import cv.inps.rh.shared.application.constants.custom.RelatorioTemplate;
 import cv.inps.rh.shared.application.dto.MinioFileDataDTO;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PdfGenerator;
@@ -30,7 +31,7 @@ public class RelatoriosService {
   private final JdbcTemplate jdbcTemplate;
 
   @SneakyThrows
-  public MinioFileDataDTO ordemServico() {
+  public MinioFileDataDTO ordemServico(RelatorioTemplate template) {
 
     Map<String, Object> data = Map.ofEntries(
         Map.entry("numeroOrdem", "15"),
