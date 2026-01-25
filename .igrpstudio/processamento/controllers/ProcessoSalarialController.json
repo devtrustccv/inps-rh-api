@@ -276,9 +276,14 @@
           "type": "string",
           "name": "mesAnterior",
           "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "processamentoIds",
+          "isRequired": false
         }
       ]
     }
   ],
-  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao"
+  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao"
 }

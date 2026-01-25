@@ -18,5 +18,7 @@ public class GetDadosValidacaoQuery implements Query {
   private String mesAtual;
   @NotBlank(message = "The field <mesAnterior> is required")
   private String mesAnterior;
+  @NotBlank(message = "The field <processamentoIds> is required")
+  private String processamentoIds;
 
 }

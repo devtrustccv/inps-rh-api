@@ -97,10 +97,11 @@ public class ProcessamentoSalarialReadService {
         return List.of();
 
       var clob = (Clob) entityManager
-          .createNativeQuery("SELECT RH_F_VALIDACAO(:tipo, :mesAnterior, :mesAtual) FROM dual")
+          .createNativeQuery("SELECT RH_F_VALIDACAO(:tipo, :mesAnterior, :mesAtual, :idsProcessamento) FROM dual")
           .setParameter("tipo", query.getTipoValidacao())
           .setParameter("mesAnterior", query.getMesAnterior())
           .setParameter("mesAtual", query.getMesAtual())
+          .setParameter("idsProcessamento", query.getProcessamentoIds())
           .getSingleResult();
 
       if (clob == null)

@@ -255,10 +255,11 @@ public class ProcessoSalarialController {
   public ResponseEntity<List<DadosValidacaoDTO>> getDadosValidacao(
     @RequestParam(value = "tipoValidacao", required = false) String tipoValidacao,
     @RequestParam(value = "mesAtual", required = false) String mesAtual,
-    @RequestParam(value = "mesAnterior", required = false) String mesAnterior)
+    @RequestParam(value = "mesAnterior", required = false) String mesAnterior,
+    @RequestParam(value = "processamentoIds", required = false) String processamentoIds)
   {
 
-      final var query = new GetDadosValidacaoQuery(tipoValidacao, mesAtual, mesAnterior);
+      final var query = new GetDadosValidacaoQuery(tipoValidacao, mesAtual, mesAnterior, processamentoIds);
 
       return queryBus.handle(query);
 
