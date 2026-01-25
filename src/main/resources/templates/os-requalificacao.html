@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Ordem de Serviço – Reclassificação</title>
+
+    <style>
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 25px;
+            margin-bottom: 140px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 120px;
+        }
+
+        .title {
+            text-align: center;
+            font-weight: bold;
+            margin: 40px 0;
+        }
+
+        .subject {
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .content {
+            text-align: justify;
+            margin-bottom: 25px;
+        }
+
+        .list {
+            margin-left: 40px;
+            margin-bottom: 25px;
+        }
+
+        .collaborators {
+            margin-left: 40px;
+            margin-bottom: 30px;
+        }
+
+        .collaborator {
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            margin-top: 30px;
+        }
+
+        .signature {
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .signature-line {
+            margin-top: 50px;
+            border-top: 1px solid #000;
+            width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Fixed Footer (igual aos outros templates) */
+        .footer-fixed {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            right: 25px;
+            font-size: 12px;
+        }
+
+        .footer-line {
+            border-top: 1px solid #000;
+            margin-bottom: 8px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .footer-left {
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        .footer-right {
+            text-align: right;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Header -->
+<div class="header">
+    <img class="logo"
+         src="data:image/jpeg;base64,SEU_BASE64_AQUI"
+         alt="INPS Logo"/>
+</div>
+
+<!-- Title -->
+<div class="title">
+    ORDEM DE SERVIÇO Nº
+    <span th:text="${numeroOrdem}">____</span>
+    / CE /
+    <span th:text="${ano}">2025</span>
+</div>
+
+<!-- Subject -->
+<div class="subject">
+    Assunto: Reclassificação
+</div>
+
+<!-- Main Content -->
+<div class="content">
+    O Plano de Cargos, Carreiras e Salários (PCCS) em vigor no INPS,
+    estipula 4 (quatro) carreiras e condições de acesso que a seguir se enumeram:
+</div>
+
+<div class="list">
+    • Carreira Técnico Superior: Licenciatura e Bacharelato;<br/>
+    • Carreira Técnico Especializado: 12º ano de escolaridade com Formação Técnica nível 4;<br/>
+    • Carreira Técnico Geral: 12º ano de escolaridade;<br/>
+    • Carreira Técnico Auxiliar: 9º ano de escolaridade (a ser descontinuado)
+</div>
+
+<div class="content">
+    O artigo 13º do PCCS estabelece que cada grupo profissional corresponde
+    a uma carreira, representada por categoriais e que traduzem crescentes
+    atribuições de responsabilidade e complexidade funcional.
+</div>
+
+<div class="content">
+    Para cada carreira estão definidos os critérios base de acesso relacionados
+    com o nível de escolaridade mínimo considerado desejável para que o trabalhador
+    possa responder eficientemente às exigências dos perfis comportamental e técnico,
+    definidos para o grupo profissional e categoria em causa.
+</div>
+
+<div class="content">
+    Assim, tendo em atenção o colaborador indicado abaixo, em efetividade de
+    funções no INPS desde
+    <strong th:text="${dataInicioFuncoes}">outubro de 2007</strong>,
+    já possui as competências técnicas, comportamentais e habilidades literárias,
+    que cumprem com os requisitos de acesso à Carreira de Técnico Superior,
+    pelo que, a Comissão Executiva, após análise do conteúdo, avaliados os
+    desempenhos e a disponibilidade em termos orçamental, deliberou reclassificar
+    o colaborador conforme indicação:
+</div>
+
+<!-- Collaborators -->
+<div class="collaborators">
+    <div class="collaborator"
+         th:each="colaborador, stat : ${colaboradores}">
+        <span th:text="${stat.index + 1}">1</span>.
+        <strong th:text="${colaborador.nome}">
+            XXXXXXXXXXXXXXXXXXXX
+        </strong>
+        –
+        <span th:text="${colaborador.cargoAtual}">
+            Técnico Geral Assistente 5D
+        </span>
+        para
+        <span th:text="${colaborador.cargoNovo}">
+            Técnico Superior 10F
+        </span>;
+    </div>
+</div>
+
+<div class="content">
+    Esta Ordem de Serviço, produz efeitos a partir do dia
+    <strong th:text="${dataEfeito}">
+        01 de fevereiro de 2025
+    </strong>.
+</div>
+
+<div class="footer">
+    Cidade da Praia aos
+    <span th:text="${dataEmissao}">
+        29 dias de mês de janeiro do ano de 2025
+    </span>.
+</div>
+
+<!-- Signature -->
+<div class="signature">
+    A Administradora da Comissão Executiva
+
+    <div class="signature-line"></div>
+
+    <strong th:text="${nomeAssinante}">
+        Armandina do Rosário
+    </strong>
+</div>
+
+<!-- Fixed Footer -->
+<div class="footer-fixed">
+
+    <div class="footer-line"></div>
+
+    <div class="footer-content">
+
+        <!-- Left -->
+        <div class="footer-left">
+            <strong>Instituto Nacional de Previdência Social - INPS</strong><br/>
+            Av. Amílcar Cabral, Nº65, Plateau, C.P. 372 - Praia, CV<br/>
+            Tel.: +238 260 91 00 | www.inps.cv
+        </div>
+
+        <!-- Right -->
+        <div class="footer-right">
+            Página <span th:text="${paginaAtual}">1</span> de
+            <span th:text="${totalPaginas}">1</span><br/>
+            <strong>Imp. 803 Ed.04 31-08-2022</strong>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
