@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -23,49 +24,49 @@ import java.util.UUID;
 @IgrpDTO
 public class FaltaReqDTO  {
 
-  
-  
+
+
   private String validar ;
-  
-  
+
+
   private UUID colaboradorId ;
-  
-  
+
+
   private LocalDate dataInicio ;
-  
-  
+
+
   private LocalDate dataFim ;
-  
-  
+
+
   private Integer totalDias ;
-  
-  
+
+
   private String totalDeHorasAusentes ;
-  
-  
+
+
   private String justificar ;
-  
-  
+
+
   private String motivoAusencia ;
-  
-  
+
+
   private String tipoFalta ;
-  
-  
+
+
   private String parecer ;
-  
-  
+
+
   private Long responsavel ;
-  
-  
+
+
   private String observacao ;
-  
-  
+
+
   private String despachoRh ;
-  
-  
+
+
   private String tipoJustificacao ;
-  
+
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();
 

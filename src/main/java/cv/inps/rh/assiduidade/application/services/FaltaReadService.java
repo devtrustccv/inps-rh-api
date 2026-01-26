@@ -6,6 +6,7 @@ import cv.inps.rh.assiduidade.application.dto.WrapperListaFaltaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetFaltaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaFaltaQuery;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FaltaEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
@@ -22,10 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -157,14 +160,12 @@ public class FaltaReadService {
     if (query == null || !StringUtils.hasText(query.getFaltaId())) {
       return new FaltaReqDTO();
     }
-    Long id;
-    try {
-      id = Long.parseLong(query.getFaltaId());
-    } catch (NumberFormatException e) {
-      return new FaltaReqDTO();
-    }
 
-    var e = faltaRepository.findByIdOrThrow(id);
+    var uuid = UUID.fromString(query.getFaltaId());
+
+    var e = faltaRepository.findByUuid((uuid)).orElseThrow(
+        () -> IgrpResponseStatusException.notFound("Falta nao encontrada com o id: " + query.getFaltaId())
+    );
 
     var dto = new FaltaReqDTO();
     var pedido = e.getPedidoId();

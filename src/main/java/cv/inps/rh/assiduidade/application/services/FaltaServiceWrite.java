@@ -86,7 +86,7 @@ public class FaltaServiceWrite {
       var falta = buildFalta(req, pedido, tipoFalta, dia, tipoRelAtual);
       falta = faltaRepository.save(falta);
       idsFaltas.add(falta.getId());
-      var sintese = buildOrCreateSinteseDia(funcionario, dia, req.getTotalDeHorasAusentes());
+      var sintese = buildOrCreateSinteseDia(funcionario, dia, req.getTotalDeHorasAusentes().toString());
       sinteseRepository.save(sintese);
     }
 

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import java.util.Optional;
-
+import java.util.UUID;
 
 
 @Repository
@@ -20,5 +20,7 @@ public interface FaltaEntityRepository extends
           return this.findById(id)
           .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"FaltaEntity not found for id: " + id));
       }
+
+  Optional<FaltaEntity> findByUuid(UUID uuid);
 
 }
