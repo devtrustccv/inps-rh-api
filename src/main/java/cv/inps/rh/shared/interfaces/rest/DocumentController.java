@@ -1,0 +1,95 @@
+package cv.inps.rh.shared.interfaces.rest;
+
+import cv.igrp.platform.access.client.model.FileUrlDTO;
+import cv.inps.rh.shared.domain.service.DocumentoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+@RestController
+@RequestMapping("api/v1/documento")
+@Tag(name = "Documento", description = "API para gestão e manipulação de documentos no sistema")
+public class DocumentController {
+
+  private final DocumentoService documentoService;
+
+  public DocumentController(DocumentoService documentoService) {
+    this.documentoService = documentoService;
+  }
+
+  @PostMapping(
+      path = "private",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE
+  )
+  @Operation(
+      summary = "Upload de documento privado",
+      description = "Realiza o upload de um documento para uma pasta privada específica do sistema",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Documento enviado com sucesso",
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DocumentoService.FileResponseDTO.class))
+          ),
+          @ApiResponse(
+              responseCode = "400",
+              description = "Arquivo inválido ou vazio",
+              content = @Content
+          )
+      }
+  )
+  public ResponseEntity<DocumentoService.FileResponseDTO> upload(
+      @Parameter(description = "File to upload", required = true) @RequestParam(name = "file") MultipartFile uploadFile) {
+    return documentoService.save(uploadFile);
+  }
+
+  @PostMapping(
+      path = "public/{path}",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE
+  )
+  @Operation(
+      summary = "Upload de documento público",
+      description = "Realiza o upload de um documento para uma pasta pública específica com URL acessível",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Documento enviado com sucesso",
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DocumentoService.FileResponseDTO.class))
+          ),
+          @ApiResponse(
+              responseCode = "400",
+              description = "Arquivo inválido ou vazio",
+              content = @Content
+          )
+      }
+  )
+  public ResponseEntity<DocumentoService.FileResponseDTO> uploadPublicFile(
+      @PathVariable String path, @Parameter(description = "File to upload", required = true) @RequestParam(name = "file") MultipartFile file) {
+    return documentoService.savePublicFile(path, file);
+  }
+
+  @GetMapping
+  @Operation(
+      summary = "Obter link",
+      description = "Gera um link assinado temporário para acesso ao documento",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Link gerado com sucesso",
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = FileUrlDTO.class))
+          )
+      }
+  )
+  public ResponseEntity<DocumentoService.FileUrl> getPresignedLink(@Parameter(description = "ID do arquivo para gerar o link", required = true) @RequestParam(value = "fileId") String fileId) {
+    return documentoService.getPresignedLink(fileId);
+  }
+
+}

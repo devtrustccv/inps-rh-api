@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Fim de Comissão de Serviço</title>
+
+    <style>
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 25px 25px 140px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 120px;
+        }
+
+        .title {
+            text-align: center;
+            font-weight: bold;
+            margin: 40px 0;
+        }
+
+        .subject {
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .content {
+            text-align: justify;
+            margin-bottom: 40px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .signature {
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .signature-line {
+            margin-top: 50px;
+            border-top: 1px solid #000;
+            width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Fixed Footer */
+        .footer-fixed {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            right: 25px;
+            font-size: 12px;
+        }
+
+        .footer-line {
+            border-top: 1px solid #000;
+            margin-bottom: 8px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .footer-left {
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        .footer-right {
+            text-align: right;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Header -->
+<div class="header">
+    <img class="logo"
+         src="data:image/jpeg;base64,SEU_BASE64_AQUI"
+         alt="INPS Logo"/>
+</div>
+
+<!-- Title -->
+<div class="title">
+    ORDEM DE SERVIÇO N.º
+    <span th:text="${numeroOrdem}">______</span>
+    / CE /
+    <span th:text="${ano}">2025</span>
+</div>
+
+<!-- Subject -->
+<div class="subject">
+    Assunto: Fim de Comissão de Serviço
+</div>
+
+<!-- Main Content -->
+<div class="content">
+    <span th:text="${dataReuniao}">
+    A pedido do interessado, é dado por fim de comissão de serviço, na Função de Coordenador das Unidades de Previdência Social das ilhas do Fogo e Brava, afetas a Direção das Unidades de Previdência Social Sul, o colaborador XXXXXXXXXX, Técnico Superior Assistente 10E.
+
+Esta Ordem de Serviço, produz efeitos a partir do dia 30 de junho de 2024.
+
+    </span>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    Instituto Nacional de Previdência Social,
+    aos
+    <span th:text="${dataEmissao}">
+        14 de maio de 2025
+    </span>
+</div>
+
+<!-- Signature -->
+<div class="signature">
+    O Presidente da Comissão Executiva
+
+    <div class="signature-line"></div>
+
+    <strong th:text="${nomePresidente}">
+        Mário Rui Fernandes
+    </strong>
+</div>
+
+<!-- Fixed Footer -->
+<div class="footer-fixed">
+
+    <div class="footer-line"></div>
+
+    <div class="footer-content">
+
+        <!-- Left -->
+        <div class="footer-left">
+            <strong>Instituto Nacional de Previdência Social - INPS</strong><br/>
+            Av. Amílcar Cabral, Nº65, Plateau, C.P. 372 - Praia, CV<br/>
+            Tel.: +238 260 91 00 | www.inps.cv
+        </div>
+
+        <!-- Right -->
+        <div class="footer-right">
+            Página <span th:text="${paginaAtual}">1</span> de
+            <span th:text="${totalPaginas}">1</span><br/>
+            <strong>Imp. 803 Ed.04 31-08-2022</strong>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
