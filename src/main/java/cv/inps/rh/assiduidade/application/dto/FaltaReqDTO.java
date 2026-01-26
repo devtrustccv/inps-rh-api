@@ -13,6 +13,7 @@ import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -27,7 +28,7 @@ public class FaltaReqDTO  {
   private String validar ;
   
   
-  private Long colaboradorId ;
+  private UUID colaboradorId ;
   
   
   private LocalDate dataInicio ;

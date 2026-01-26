@@ -169,7 +169,7 @@ public class FaltaReadService {
     var dto = new FaltaReqDTO();
     var pedido = e.getPedidoId();
     var fun = pedido != null ? pedido.getFunId() : null;
-    dto.setColaboradorId(fun != null ? fun.getId() : null);
+    dto.setColaboradorId(fun != null ? fun.getUuid() : null);
     dto.setDataInicio(e.getDataInicio() != null ? e.getDataInicio().toLocalDate() : null);
     dto.setDataFim(e.getDataFim() != null ? e.getDataFim().toLocalDate() : null);
     if (dto.getDataInicio() != null && dto.getDataFim() != null) {

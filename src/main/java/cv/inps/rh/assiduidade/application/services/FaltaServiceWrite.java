@@ -66,7 +66,7 @@ public class FaltaServiceWrite {
     if (req.getDataFim().isBefore(req.getDataInicio()))
       throw IgrpResponseStatusException.badRequest("Data fim não pode ser anterior à data início");
 
-    var funcionario = funcionarioRepository.findByIdOrThrow(req.getColaboradorId());
+    var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaboradorId());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var tipoFalta = resolveTipoFalta(req.getTipoFalta());
