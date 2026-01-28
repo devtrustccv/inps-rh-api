@@ -180,11 +180,10 @@ public class FaltaReadService {
     dto.setTotalDeHorasAusentes(e.getHorasAusencia());
     dto.setJustificar(e.getFlgJustificativo());
     dto.setMotivoAusencia(e.getDescricaoMotivo());
-    dto.setTipoFalta(e.getTfId() != null ? e.getTfId().getUuid() : null);
     dto.setParecer(e.getDecisaoResponsavel());
     dto.setObservacao(e.getObsResponsavel());
     dto.setDespachoRh(e.getDespachoRh());
-    dto.setTipoJustificacao(e.getTfId() != null ? e.getTfId().getSituacao() : null);
+    dto.setTipoJustificacao(e.getParamSitId() != null ? e.getParamSitId().getId() : null);
     return dto;
   }
 }

@@ -50,7 +50,7 @@ public class JustificarFaltaReadService {
     dto.setDecisaoResponsavel(e.getDecisaoResponsavel());
     dto.setObsResponsavel(e.getObsResponsavel());
     dto.setDespachoRh(e.getDespachoRh());
-    dto.setTipoJustificacao(e.getTfId() != null ? e.getTfId().getSituacao() : null);
+    dto.setTipoJustificacao(e.getParamSitId() != null ? e.getParamSitId().getNome() : null);
     return dto;
   }
 
