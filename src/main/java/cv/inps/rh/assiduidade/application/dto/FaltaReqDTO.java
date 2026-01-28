@@ -61,7 +61,7 @@ public class FaltaReqDTO  {
   private String despachoRh ;
   
   
-  private String tipoJustificacao ;
+  private Long tipoJustificacao ;
   
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();
