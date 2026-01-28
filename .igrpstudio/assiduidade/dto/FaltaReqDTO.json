@@ -6,18 +6,6 @@
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "validar",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
       "name": "colaboradorId",
       "objectType": "java",
       "type": "uuid",
@@ -102,18 +90,6 @@
       "primaryKey": false
     },
     {
-      "name": "tipoFalta",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
       "name": "parecer",
       "objectType": "java",
       "type": "string",
@@ -139,6 +115,18 @@
     },
     {
       "name": "observacao",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "validar",
       "objectType": "java",
       "type": "string",
       "required": false,

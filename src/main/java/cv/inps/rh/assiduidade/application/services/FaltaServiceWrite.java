@@ -69,7 +69,6 @@ public class FaltaServiceWrite {
     var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaboradorId());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
-    var tipoFalta = resolveTipoFalta(req.getTipoFalta());
 
     var pedido = new PedidoEntity();
     pedido.setFunId(funcionario);
@@ -83,7 +82,7 @@ public class FaltaServiceWrite {
     var datas = expandirDias(req.getDataInicio(), req.getDataFim());
     var idsFaltas = new ArrayList<Long>();
     for (var dia : datas) {
-      var falta = buildFalta(req, pedido, tipoFalta, dia, tipoRelAtual);
+      var falta = buildFalta(req, pedido, dia, tipoRelAtual);
       falta = faltaRepository.save(falta);
       idsFaltas.add(falta.getId());
       var sintese = buildOrCreateSinteseDia(funcionario, dia, req.getTotalDeHorasAusentes().toString());
@@ -202,22 +201,16 @@ public class FaltaServiceWrite {
     return dias;
   }
 
-  private FaltaEntity buildFalta(FaltaReqDTO req, PedidoEntity pedido, TipoFaltaEntity tipo, LocalDate dia,
+  private FaltaEntity buildFalta(FaltaReqDTO req, PedidoEntity pedido, LocalDate dia,
                                  TiposRelacionamentoEntity tiposRelacionamento) {
     var falta = new FaltaEntity();
     falta.setPedidoId(pedido);
-    falta.setTfId(tipo);
     falta.setTiprelId(tiposRelacionamento);
     falta.setDescricaoMotivo(req.getMotivoAusencia());
     falta.setHorasAusencia(req.getTotalDeHorasAusentes());
     falta.setDataInicio(LocalDateTime.of(dia, LocalTime.MIN));
     falta.setDataFim(LocalDateTime.of(dia, LocalTime.of(23, 59, 59)));
     falta.setFlgJustificativo(req.getJustificar());
-    if (StringUtils.hasText(tipo.getDescontoRemuneracao()) && tipo.getDescontoRemuneracao().equalsIgnoreCase("SIM")) {
-      falta.setFlgDescontoSal(1);
-    } else {
-      falta.setFlgDescontoSal(0);
-    }
     falta.setEstado(Estado.P);
     falta.setUuid(UuidCreator.getTimeOrderedEpoch());
     return falta;
