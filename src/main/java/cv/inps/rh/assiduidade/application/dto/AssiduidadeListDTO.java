@@ -19,44 +19,45 @@ import java.util.UUID;
 @IgrpDTO
 public class AssiduidadeListDTO  {
 
-  
-  
+
+
   private Long id ;
-  
-  
+
+
   private UUID uuid ;
-  
-  
+
+
   private UUID uuidFuncionairio ;
-  
-  
+
+
   private String nomeColaborador ;
-  
-  
+
+
   private String direcao ;
-  
-  
+
+
   private Integer totalFalta ;
-  
-  
+
+
   private Integer totalDias ;
-  
-  
+
+
   private Integer totalHorasTrabalhadas ;
-  
-  
+
+
   private Integer totalHorasAusentes ;
-  
-  
+
+
   private Integer totalHoraExtra ;
-  
-  
+
+
   private Integer totalHoraAlmoco ;
-  
-  
+
+
   private String estado ;
-  
-  
+
+
   private String estadoDesc ;
+
 
 }
