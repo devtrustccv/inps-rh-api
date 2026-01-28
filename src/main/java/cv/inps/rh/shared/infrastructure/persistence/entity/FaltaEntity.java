@@ -61,11 +61,6 @@ public class FaltaEntity extends AuditEntity {
     private String despachoRh;
 
   
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tf_id", referencedColumnName = "id")
-    private TipoFaltaEntity tfId;
     @Column(name="horas_ausencia")
     private String horasAusencia;
 
@@ -100,4 +95,9 @@ public class FaltaEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "def_rem_id", referencedColumnName = "id")
     private DefinicaoRemuneracaoEntity defRemId;
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "param_sit_id", referencedColumnName = "id")
+    private ParamSituacaoEntity paramSitId;
 }
