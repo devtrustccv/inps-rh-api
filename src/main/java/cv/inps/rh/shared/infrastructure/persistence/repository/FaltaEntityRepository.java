@@ -8,19 +8,22 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import java.util.Optional;
 import java.util.UUID;
-
+import java.util.List;
+import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 
 @Repository
 public interface FaltaEntityRepository extends
-    JpaRepository<FaltaEntity, Long>,
-    JpaSpecificationExecutor<FaltaEntity>
-{
+        JpaRepository<FaltaEntity, Long>,
+        JpaSpecificationExecutor<FaltaEntity> {
 
-      default FaltaEntity findByIdOrThrow(Long id) {
-          return this.findById(id)
-          .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"FaltaEntity not found for id: " + id));
-      }
+    default FaltaEntity findByIdOrThrow(Long id) {
+        return this.findById(id)
+                .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
+                        "FaltaEntity not found for id: " + id));
+    }
 
-  Optional<FaltaEntity> findByUuid(UUID uuid);
+    Optional<FaltaEntity> findByUuid(UUID uuid);
+
+    List<FaltaEntity> findAllByPedidoId(PedidoEntity pedidoId);
 
 }
