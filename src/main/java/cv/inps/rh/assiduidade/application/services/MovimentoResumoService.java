@@ -241,4 +241,12 @@ public class MovimentoResumoService {
       return dto;
     }
   }
+
+
+
+  @Transactional(readOnly = true)
+  public WrapperListaAssiduidadadeDTO getListaMovimentosResumidos2(GetListaMovimentosResumidosQuery query) {
+
+  return null;
+  }
 }
