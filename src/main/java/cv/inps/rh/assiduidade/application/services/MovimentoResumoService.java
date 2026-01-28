@@ -37,7 +37,6 @@ import java.util.Map;
 public class MovimentoResumoService {
 
   private final AssiduidadeSinteseDiarioEntityRepository sinteseRepository;
-  private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
 
   @Transactional(readOnly = true)
   public WrapperListaAssiduidadadeDTO getListaMovimentosResumidos(GetListaMovimentosResumidosQuery query) {
