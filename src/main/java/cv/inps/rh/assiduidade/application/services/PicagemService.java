@@ -64,9 +64,10 @@ public class PicagemService {
       // ===============================
       // Direção / Secção / UPS
       // ===============================
-      if (query.getDirecao() != null
-          || query.getSeccao() != null
-          || query.getUps() != null) {
+      if (cq != null && (
+          query.getDirecao() != null
+              || query.getSeccao() != null
+              || query.getUps() != null)) {
 
         Subquery<TiposRelacionamentoEntity> sub =
             cq.subquery(TiposRelacionamentoEntity.class);
