@@ -226,8 +226,8 @@ public class MovimentoResumoService {
 
     AssiduidadeListDTO toDTO() {
       var dto = new AssiduidadeListDTO();
-      dto.setId(fun.getId() != null ? fun.getId().toString() : null);
-      dto.setUuid(fun.getUuid() != null ? fun.getUuid().toString() : null);
+      dto.setId(fun.getId() != null ? fun.getId() : null);
+      dto.setUuid(fun.getUuid() != null ? fun.getUuid() : null);
       dto.setNomeColaborador(fun.getNome());
       dto.setDirecao(direcao);
       dto.setTotalFalta(totalFalta);

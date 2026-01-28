@@ -8,7 +8,7 @@
     {
       "name": "id",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -20,7 +20,19 @@
     {
       "name": "uuid",
       "objectType": "java",
-      "type": "string",
+      "type": "uuid",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "uuidFuncionairio",
+      "objectType": "java",
+      "type": "uuid",
       "required": false,
       "before": false,
       "after": false,

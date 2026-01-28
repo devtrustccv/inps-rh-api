@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -21,10 +21,13 @@ public class AssiduidadeListDTO  {
 
   
   
-  private String id ;
+  private Long id ;
   
   
-  private String uuid ;
+  private UUID uuid ;
+  
+  
+  private UUID uuidFuncionairio ;
   
   
   private String nomeColaborador ;
