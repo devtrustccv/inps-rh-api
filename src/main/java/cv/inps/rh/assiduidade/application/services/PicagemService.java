@@ -157,9 +157,7 @@ public class PicagemService {
     return dto;
   }
 
-  // ======================================================
-  // Regras de negócio
-  // ======================================================
+
   private boolean isEntrada(MovimentoEntity e) {
     return ("ENTRADA".equalsIgnoreCase(e.getTpMovimento()))
         || ("Entrada".equalsIgnoreCase(e.getTpMovimentoDesc()))
