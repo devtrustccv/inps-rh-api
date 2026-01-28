@@ -100,4 +100,9 @@ public class FaltaEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "param_sit_id", referencedColumnName = "id")
     private ParamSituacaoEntity paramSitId;
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "responsavel_id", referencedColumnName = "id")
+    private ResponsavelEntity responsavelId;
 }

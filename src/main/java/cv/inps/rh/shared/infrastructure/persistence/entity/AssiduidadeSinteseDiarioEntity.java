@@ -27,7 +27,7 @@ public class AssiduidadeSinteseDiarioEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-
+  
     @NotNull(message = "funcionarioId is mandatory")
 
 
@@ -37,58 +37,58 @@ public class AssiduidadeSinteseDiarioEntity extends AuditEntity {
     @Column(name="data")
     private LocalDate data;
 
-
+  
     @Column(name="mes")
     private Integer mes;
 
-
+  
     @Column(name="ano")
     private Integer ano;
 
-
+  
     @Column(name="hora_primeira_entrada")
     private String horaPrimeiraEntrada;
 
-
+  
     @Column(name="hora_ultima_saida")
     private String horaUltimaSaida;
 
-
+  
     @Column(name="horas_trabalhadas")
     private String horasTrabalhadas;
 
-
+  
     @Column(name="hora_primeira_saida_almoco")
     private String horaPrimeiraSaidaAlmoco;
 
-
+  
     @Column(name="hora_ultima_entrada_almoco")
     private String horaUltimaEntradaAlmoco;
 
-
+  
     @Column(name="horas_almoco")
     private String horasAlmoco;
 
-
+  
     @Column(name="horas_extras")
     private String horasExtras;
 
-
+  
     @Column(name="horas_ausencia")
     private String horasAusencia;
 
-
+  
     @Column(name="falta")
     private String falta;
 
-
+  
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-
+  
     @Column(name="flag_rececao")
     private String flagRececao;
 
-
+  
 }
