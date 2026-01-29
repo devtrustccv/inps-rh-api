@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 public class MovimentoResumoService {
@@ -29,6 +31,9 @@ public class MovimentoResumoService {
 
     int pageSize = Integer.parseInt(query.getPageSize());
     int pageNumber = Integer.parseInt(query.getPageNumber());
+
+    Integer mes = query.getMes()!=null ? query.getMes(): LocalDate.now().getMonthValue();
+    Integer ano = query.getAno()!=null ? query.getAno(): LocalDate.now().getYear();
 
 
     return null;
