@@ -216,7 +216,7 @@ public class HoraExtraServiceWrite {
     e.setMes(dia.getMonthValue());
     e.setAno(dia.getYear());
     e.setHorasExtras(formatHoras(horasExtra));
-    e.setEstado(Estado.A);
+    e.setEstado(null);
     return e;
   }
 
