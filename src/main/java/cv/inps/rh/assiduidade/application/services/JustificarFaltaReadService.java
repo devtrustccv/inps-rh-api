@@ -2,16 +2,14 @@ package cv.inps.rh.assiduidade.application.services;
 
 import cv.inps.rh.assiduidade.application.dto.JustificarFaltaDTO;
 import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
+import cv.inps.rh.assiduidade.application.queries.GetJustificacaoFaltaByPedidoQuery;
 import cv.inps.rh.assiduidade.application.queries.GetJustificacaoFaltaQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeSinteseDiarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.AssiduidadeSinteseDiarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FaltaEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.DateFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -35,64 +33,7 @@ public class JustificarFaltaReadService {
   private final DocumentoEntityRepository documentoEntityRepository;
 
   private final AssiduidadeSinteseDiarioEntityRepository assiduidadeSinteseDiarioEntityRepository;
-
-  @Transactional(readOnly = true)
-  public JustificarFaltaDTO getFaltaJustificada(GetJustificacaoFaltaQuery query) {
-
-    UUID funcUuid;
-    try {
-      funcUuid = UUID.fromString(query.getFuncionarioId());
-    } catch (IllegalArgumentException e) {
-      throw IgrpResponseStatusException.badRequest("Funcionario UUID inválido");
-    }
-
-    FuncionarioEntity funcionario = funcionarioRepository.findByUuid(funcUuid)
-        .orElseThrow(() -> IgrpResponseStatusException.of(
-            HttpStatus.NOT_FOUND,
-            "Funcionário não encontrado para UUID: " + funcUuid
-        ));
-
-    // --- calcular intervalo do mês ---
-    LocalDate inicioMes = LocalDate.of(query.getAno(), query.getMes(), 1);
-    LocalDate fimMes = inicioMes.withDayOfMonth(inicioMes.lengthOfMonth());
-
-    // --- buscar todas as faltas do funcionario no mês ---
-    List<FaltaEntity> faltas = faltaRepository.findAllByFuncionarioAndPeriodo(funcUuid, inicioMes, fimMes);
-
-    // --- mapear para FaltaItemDTO ---
-    List<FaltaItemDTO> itensFalta = faltas.stream().map(f -> {
-      FaltaItemDTO item = new FaltaItemDTO();
-      item.setId(f.getId());
-
-      item.setHorasAusencia(f.getHorasAusencia());
-      item.setValorAusencia(null); // ou outro campo de valor
-      item.setMotivo(f.getDescricaoMotivo());
-      item.setComJustificativo(f.getFlgJustificativo());
-      // documento pode ser mapeado se houver relacionamento
-      return item;
-    }).collect(Collectors.toList());
-
-    // --- montar DTO principal ---
-    JustificarFaltaDTO dto = new JustificarFaltaDTO();
-    dto.setColaboradorId(funcionario.getUuid());
-    dto.setNomeColaborador(funcionario.getNome());
-    dto.setItensFalta(itensFalta);
-    dto.setAno(query.getAno());
-    dto.setMes(query.getMes());
-
-    // campos de decisão, despacho e tipoJustificacao podem ser preenchidos se houver somente um registro
-    if (!faltas.isEmpty()) {
-      FaltaEntity primeira = faltas.get(0);
-      dto.setParecerResponsavel(primeira.getDecisaoResponsavel());
-      dto.setResponsavelId(primeira.getResponsavelId() != null ? primeira.getResponsavelId().getId() : null);
-      dto.setObsResponsavel(primeira.getObsResponsavel());
-      dto.setDespachoRh(primeira.getDespachoRh());
-      dto.setTipoJustificacao(primeira.getParamSitId() != null ? primeira.getParamSitId().getId() : null);
-    }
-
-    return dto;
-  }
-
+  private final PedidoEntityRepository pedidoRepository;
 
   @Transactional(readOnly = true)
   public JustificarFaltaDTO getFaltaJustificadaResumo(GetJustificacaoFaltaQuery query) {
@@ -142,5 +83,63 @@ public class JustificarFaltaReadService {
 
     return dto;
   }
+
+
+  @Transactional(readOnly = true)
+  public JustificarFaltaDTO getFaltaJustificada(GetJustificacaoFaltaByPedidoQuery query) {
+
+    if (query == null || !StringUtils.hasText(query.getPedidoId())) {
+      throw IgrpResponseStatusException.badRequest("Identificador do pedido é obrigatório");
+    }
+    // Converter UUID
+    UUID pedidoUuid;
+    try {
+      pedidoUuid = UUID.fromString(query.getPedidoId());
+    } catch (IllegalArgumentException e) {
+      throw IgrpResponseStatusException.badRequest("UUID do pedido inválido");
+    }
+
+    // Buscar pedido
+    var pedido = pedidoRepository.findByUuid(pedidoUuid)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound(
+            "Pedido não encontrado com UUID: " + pedidoUuid
+        ));
+
+    var funcionario = pedido.getFunId();
+
+    // Buscar todas as faltas associadas ao pedido
+    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
+
+    // Mapear para FaltaItemDTO
+    List<FaltaItemDTO> itensFalta = faltas.stream().map(f -> {
+      var item = new FaltaItemDTO();
+      item.setId(f.getId());
+      item.setData(f.getSinteseDiarioId().getData().toString());
+      item.setTipoFalta(f.getParamSitId() != null ? f.getParamSitId().getNome() : null);
+      item.setHorasAusencia(f.getHorasAusencia());
+      item.setMotivo(f.getDescricaoMotivo());
+      item.setComJustificativo(f.getFlgJustificativo());
+      return item;
+    }).toList();
+
+    // Montar DTO principal
+    var dto = new JustificarFaltaDTO();
+    dto.setColaboradorId(funcionario.getUuid());
+    dto.setNomeColaborador(funcionario.getNome());
+    dto.setItensFalta(itensFalta);
+
+    // Campos de decisão, despacho e tipoJustificacao podem ser preenchidos a partir da primeira falta
+    if (!faltas.isEmpty()) {
+      var primeira = faltas.getFirst();
+      dto.setParecerResponsavel(primeira.getDecisaoResponsavel());
+      dto.setResponsavelId(primeira.getResponsavelId() != null ? primeira.getResponsavelId().getId() : null);
+      dto.setObsResponsavel(primeira.getObsResponsavel());
+      dto.setDespachoRh(primeira.getDespachoRh());
+      dto.setTipoJustificacao(primeira.getParamSitId() != null ? primeira.getParamSitId().getId() : null);
+    }
+
+    return dto;
+  }
+
 
 }
