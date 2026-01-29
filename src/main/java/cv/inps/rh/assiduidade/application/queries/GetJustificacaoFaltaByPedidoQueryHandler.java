@@ -1,5 +1,6 @@
 package cv.inps.rh.assiduidade.application.queries;
 
+import cv.inps.rh.assiduidade.application.services.JustificarFaltaReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -15,9 +16,11 @@ public class GetJustificacaoFaltaByPedidoQueryHandler implements QueryHandler<Ge
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetJustificacaoFaltaByPedidoQueryHandler.class);
 
+  private final JustificarFaltaReadService justificarFaltaReadService;
 
-  public GetJustificacaoFaltaByPedidoQueryHandler() {
+  public GetJustificacaoFaltaByPedidoQueryHandler(JustificarFaltaReadService justificarFaltaReadService) {
 
+    this.justificarFaltaReadService = justificarFaltaReadService;
   }
 
    @IgrpQueryHandler
@@ -25,8 +28,7 @@ public class GetJustificacaoFaltaByPedidoQueryHandler implements QueryHandler<Ge
 
     LOGGER.debug("GetJustificacaoFaltaByPedidoQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    return ResponseEntity.ok(justificarFaltaReadService.getFaltaJustificada(query));
   }
 
 }
