@@ -1,19 +1,17 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.igrp.framework.stereotype.IgrpEntity;
-import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.config.AuditEntity;
+import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
+import lombok.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.util.UUID;
+import cv.inps.rh.shared.application.constants.Estado;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Getter
@@ -31,20 +29,24 @@ public class ValidacaoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-
+  
     @NotBlank(message = "tipoAccao is mandatory")
     @Column(name="tipo_accao", nullable = false)
     private String tipoAccao;
 
-
+  
     @Column(name="referencia_name")
     private String referenciaName;
 
-
+  
     @Column(name="referencia_id")
     private Long referenciaId;
 
+  
+    @Column(name="referencia_uuid")
+    private UUID referenciaUuid;
 
+  
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -54,11 +56,11 @@ public class ValidacaoEntity extends AuditEntity {
     @Column(name="estado")
     private Estado estado;
 
-
+  
     @Column(name="obs")
     private String obs;
 
-
+  
     @Column(name="uuid")
     private UUID uuid;
 
