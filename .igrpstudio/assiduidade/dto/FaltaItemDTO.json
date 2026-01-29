@@ -6,6 +6,18 @@
   "enableCustonValidation": false,
   "attributes": [
     {
+      "name": "selecionar",
+      "objectType": "java",
+      "type": "boolean",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "id",
       "objectType": "java",
       "type": "long",
@@ -31,6 +43,18 @@
     },
     {
       "name": "dataFim",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "tipoFalta",
       "objectType": "java",
       "type": "string",
       "required": false,

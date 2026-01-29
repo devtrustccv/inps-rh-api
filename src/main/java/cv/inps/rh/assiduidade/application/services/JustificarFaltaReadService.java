@@ -3,13 +3,26 @@ package cv.inps.rh.assiduidade.application.services;
 import cv.inps.rh.assiduidade.application.dto.JustificarFaltaDTO;
 import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
 import cv.inps.rh.assiduidade.application.queries.GetJustificacaoFaltaQuery;
+import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FaltaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.data.jpa.domain.Specification;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,42 +30,61 @@ public class JustificarFaltaReadService {
 
   private final FaltaEntityRepository faltaRepository;
   private final FuncionarioEntityRepository funcionarioRepository;
+  private final DocumentoEntityRepository documentoEntityRepository;
 
   @Transactional(readOnly = true)
   public JustificarFaltaDTO getFaltaJustificada(GetJustificacaoFaltaQuery query) {
-    if (query == null || !StringUtils.hasText(query.getFaltaId())) {
-      return new JustificarFaltaDTO();
-    }
-    Long id;
+
+    UUID funcUuid;
     try {
-      id = Long.parseLong(query.getFaltaId());
-    } catch (NumberFormatException e) {
-      return new JustificarFaltaDTO();
+      funcUuid = UUID.fromString(query.getFuncionarioId());
+    } catch (IllegalArgumentException e) {
+      throw IgrpResponseStatusException.badRequest("Funcionario UUID inválido");
     }
 
-    var e = faltaRepository.findByIdOrThrow(id);
+    FuncionarioEntity funcionario = funcionarioRepository.findByUuid(funcUuid)
+        .orElseThrow(() -> IgrpResponseStatusException.of(
+            HttpStatus.NOT_FOUND,
+            "Funcionário não encontrado para UUID: " + funcUuid
+        ));
 
-    var dto = new JustificarFaltaDTO();
-    var pedido = e.getPedidoId();
-    var fun = pedido != null ? pedido.getFunId() : null;
-    dto.setColaboradorId(fun != null ? fun.getId() : null);
-    dto.setNomeColaborador(fun != null ? fun.getNome() : null);
+    // --- calcular intervalo do mês ---
+    LocalDate inicioMes = LocalDate.of(query.getAno(), query.getMes(), 1);
+    LocalDate fimMes = inicioMes.withDayOfMonth(inicioMes.lengthOfMonth());
 
-    var item = new FaltaItemDTO();
-    item.setId(e.getId());
-    item.setDataInicio(DateFormatter.localDateTimeToLocalDateString(e.getDataInicio()));
-    item.setDataFim(DateFormatter.localDateTimeToLocalDateString(e.getDataFim()));
-    item.setHorasAusencia(e.getHorasAusencia());
-    var def = e.getDefRemId();
-    item.setValorAusencia(def != null && def.getValor() != null ? def.getValor().intValue() : null);
-    item.setMotivo(e.getDescricaoMotivo());
-    item.setComJustificativo(e.getFlgJustificativo());
-    dto.getItensFalta().add(item);
+    // --- buscar todas as faltas do funcionario no mês ---
+    List<FaltaEntity> faltas = faltaRepository.findAllByFuncionarioAndPeriodo(funcUuid, inicioMes, fimMes);
 
-    dto.setDecisaoResponsavel(e.getDecisaoResponsavel());
-    dto.setObsResponsavel(e.getObsResponsavel());
-    dto.setDespachoRh(e.getDespachoRh());
-    dto.setTipoJustificacao(e.getParamSitId() != null ? e.getParamSitId().getNome() : null);
+    // --- mapear para FaltaItemDTO ---
+    List<FaltaItemDTO> itensFalta = faltas.stream().map(f -> {
+      FaltaItemDTO item = new FaltaItemDTO();
+      item.setId(f.getId());
+      item.setDataInicio(f.getDataInicio() != null ? f.getDataInicio().toLocalDate().toString() : null);
+      item.setDataFim(f.getDataFim() != null ? f.getDataFim().toLocalDate().toString() : null);
+      item.setHorasAusencia(f.getHorasAusencia());
+      item.setValorAusencia(f.getFlgDescontoSal()); // ou outro campo de valor
+      item.setMotivo(f.getDescricaoMotivo());
+      item.setComJustificativo(f.getFlgJustificativo());
+      // documento pode ser mapeado se houver relacionamento
+      return item;
+    }).collect(Collectors.toList());
+
+    // --- montar DTO principal ---
+    JustificarFaltaDTO dto = new JustificarFaltaDTO();
+    dto.setColaboradorId(funcionario.getUuid());
+    dto.setNomeColaborador(funcionario.getNome());
+    dto.setItensFalta(itensFalta);
+
+    // campos de decisão, despacho e tipoJustificacao podem ser preenchidos se houver somente um registro
+    if (!faltas.isEmpty()) {
+      FaltaEntity primeira = faltas.get(0);
+      dto.setParecerResponsavel(primeira.getDecisaoResponsavel());
+      dto.setResponsavelId(primeira.getResponsavelId() != null ? primeira.getResponsavelId().getId() : null);
+      dto.setObsResponsavel(primeira.getObsResponsavel());
+      dto.setDespachoRh(primeira.getDespachoRh());
+      dto.setTipoJustificacao(primeira.getParamSitId() != null ? primeira.getParamSitId().getId() : null);
+    }
+
     return dto;
   }
 

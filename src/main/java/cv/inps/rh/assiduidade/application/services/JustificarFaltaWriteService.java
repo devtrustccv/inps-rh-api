@@ -55,7 +55,7 @@ public class JustificarFaltaWriteService {
 
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
-    falta.setDecisaoResponsavel(req.getDecisaoResponsavel());
+    falta.setDecisaoResponsavel(req.getParecerResponsavel());
     falta.setObsResponsavel(req.getObsResponsavel());
     falta.setDespachoRh(req.getDespachoRh());
     falta.setFlgJustificativo("SIM");
@@ -97,7 +97,7 @@ public class JustificarFaltaWriteService {
     var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
     var estado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
-    falta.setDecisaoResponsavel(req.getDecisaoResponsavel());
+    falta.setDecisaoResponsavel(req.getParecerResponsavel());
     falta.setObsResponsavel(req.getObsResponsavel());
     falta.setDespachoRh(req.getDespachoRh());
     falta.setEstado(estado);

@@ -60,6 +60,8 @@ public class MovimentoResumoService {
       dto.setEstado(entity.getEstado());
       dto.setEstadoDesc(entity.getEstado());
       dto.setMesReferencia(String.format("%02d/%d", entity.getMes(), entity.getAno()));
+      dto.setMes(entity.getMes());
+      dto.setAno(entity.getAno());
 
       wrapper.getContent().add(dto);
     });

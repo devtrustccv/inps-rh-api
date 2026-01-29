@@ -21,6 +21,9 @@ public class FaltaItemDTO  {
 
   
   
+  private boolean selecionar ;
+  
+  
   private Long id ;
   
   
@@ -28,6 +31,9 @@ public class FaltaItemDTO  {
   
   
   private String dataFim ;
+  
+  
+  private String tipoFalta ;
   
   
   private String horasAusencia ;

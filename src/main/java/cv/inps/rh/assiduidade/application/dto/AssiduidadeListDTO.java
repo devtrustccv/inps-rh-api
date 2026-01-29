@@ -61,5 +61,11 @@ public class AssiduidadeListDTO  {
   
   
   private String mesReferencia ;
+  
+  
+  private Integer ano ;
+  
+  
+  private Integer mes ;
 
 }

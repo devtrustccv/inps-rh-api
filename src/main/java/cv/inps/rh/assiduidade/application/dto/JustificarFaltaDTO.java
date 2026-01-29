@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -23,7 +24,7 @@ public class JustificarFaltaDTO  {
 
   
   
-  private Long colaboradorId ;
+  private UUID colaboradorId ;
   
   
   private String nomeColaborador ;
@@ -32,7 +33,7 @@ public class JustificarFaltaDTO  {
   private List<FaltaItemDTO> itensFalta = new ArrayList<>();
   
   
-  private String decisaoResponsavel ;
+  private String parecerResponsavel ;
   
   
   private Long responsavelId ;
@@ -44,7 +45,7 @@ public class JustificarFaltaDTO  {
   private String despachoRh ;
   
   
-  private String tipoJustificacao ;
+  private Long tipoJustificacao ;
   
   
   private String validar ;

@@ -8,7 +8,7 @@
     {
       "name": "colaboradorId",
       "objectType": "java",
-      "type": "long",
+      "type": "uuid",
       "required": false,
       "before": false,
       "after": false,
@@ -44,7 +44,7 @@
       "module": "assiduidade"
     },
     {
-      "name": "decisaoResponsavel",
+      "name": "parecerResponsavel",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -94,7 +94,7 @@
     {
       "name": "tipoJustificacao",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
