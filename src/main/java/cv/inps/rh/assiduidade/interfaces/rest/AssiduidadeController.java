@@ -824,11 +824,11 @@ public class AssiduidadeController {
   }
 
    @GetMapping(
-   value = "falta/justificar/{faltaId}"
+   value = "falta/justificar/{funcionarioId}"
   )
   @Operation(
-    summary = "Get falta justificada",
-    description = "Get falta justificada",
+    summary = "Get justificacao falta",
+    description = "Get justificacao falta",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -843,11 +843,12 @@ public class AssiduidadeController {
     }
   )
   
-  public ResponseEntity<JustificarFaltaDTO> getFaltaJustificada(
-    @PathVariable(value = "faltaId") String faltaId)
+  public ResponseEntity<JustificarFaltaDTO> getJustificacaoFalta(
+    @RequestParam(value = "ano") Integer ano,
+    @RequestParam(value = "mes") Integer mes, @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
-      final var query = new GetFaltaJustificadaQuery(faltaId);
+      final var query = new GetJustificacaoFaltaQuery(ano, mes, funcionarioId);
 
       return queryBus.handle(query);
 

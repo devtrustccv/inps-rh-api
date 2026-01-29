@@ -1023,8 +1023,8 @@
       ]
     },
     {
-      "actionName": "getFaltaJustificada",
-      "path": "falta/justificar/{faltaId}",
+      "actionName": "getJustificacaoFalta",
+      "path": "falta/justificar/{funcionarioId}",
       "method": "GET",
       "responses": {
         "200": {
@@ -1042,14 +1042,26 @@
           }
         }
       },
+      "requestParams": [
+        {
+          "type": "integer",
+          "name": "ano",
+          "isRequired": true
+        },
+        {
+          "type": "integer",
+          "name": "mes",
+          "isRequired": true
+        }
+      ],
       "pathVariables": [
         {
-          "name": "faltaId",
+          "name": "funcionarioId",
           "type": "string",
           "isRequired": true
         }
       ]
     }
   ],
-  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos"
+  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada"
 }

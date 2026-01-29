@@ -2,8 +2,9 @@ package cv.inps.rh.assiduidade.application.services;
 
 import cv.inps.rh.assiduidade.application.dto.JustificarFaltaDTO;
 import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
-import cv.inps.rh.assiduidade.application.queries.GetFaltaJustificadaQuery;
+import cv.inps.rh.assiduidade.application.queries.GetJustificacaoFaltaQuery;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FaltaEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,10 @@ import org.springframework.util.StringUtils;
 public class JustificarFaltaReadService {
 
   private final FaltaEntityRepository faltaRepository;
+  private final FuncionarioEntityRepository funcionarioRepository;
 
   @Transactional(readOnly = true)
-  public JustificarFaltaDTO getFaltaJustificada(GetFaltaJustificadaQuery query) {
+  public JustificarFaltaDTO getFaltaJustificada(GetJustificacaoFaltaQuery query) {
     if (query == null || !StringUtils.hasText(query.getFaltaId())) {
       return new JustificarFaltaDTO();
     }
