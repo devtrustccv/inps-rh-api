@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeSinteseDiarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import org.springframework.data.jpa.repository.Query;
@@ -45,4 +46,5 @@ public interface FaltaEntityRepository extends
       @Param("dataFim") LocalDate dataFim
   );
 
+  boolean existsBySinteseDiarioId(AssiduidadeSinteseDiarioEntity sintese);
 }

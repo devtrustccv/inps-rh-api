@@ -65,7 +65,7 @@ public class JustificarFaltaReadService {
       item.setId(s.getId());
       item.setData(s.getData().toString());
       // Se houver falta total (0 = falta total?), definir tipoFalta
-      item.setTipoFalta(s.getFalta() != null && s.getFalta() > 0 ? "INJUSTIFICADA" : null);
+      //item.setTipoFalta(s.getFalta() != null && s.getFalta() > 0 ? "INJUSTIFICADA" : null);
       item.setHorasAusencia(s.getHorasAusencia());
       item.setValorAusencia(null); // cálculo futuro
       item.setMotivo(null); // não há motivo na síntese
@@ -83,6 +83,9 @@ public class JustificarFaltaReadService {
 
     return dto;
   }
+
+
+
 
 
   @Transactional(readOnly = true)
@@ -113,9 +116,10 @@ public class JustificarFaltaReadService {
     // Mapear para FaltaItemDTO
     List<FaltaItemDTO> itensFalta = faltas.stream().map(f -> {
       var item = new FaltaItemDTO();
-      item.setId(f.getId());
+      item.setId(f.getSinteseDiarioId().getId());
       item.setData(f.getSinteseDiarioId().getData().toString());
-      item.setTipoFalta(f.getParamSitId() != null ? f.getParamSitId().getNome() : null);
+      //item.setTipoFalta(f.getParamSitId() != null ? f.getParamSitId().getNome() : null);
+      item.setValorAusencia(null); // calculo futuro
       item.setHorasAusencia(f.getHorasAusencia());
       item.setMotivo(f.getDescricaoMotivo());
       item.setComJustificativo(f.getFlgJustificativo());

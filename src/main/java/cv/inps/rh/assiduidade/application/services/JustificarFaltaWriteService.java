@@ -10,19 +10,22 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeSinteseDiarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -35,23 +38,42 @@ public class JustificarFaltaWriteService {
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final FuncionarioEntityRepository funcionarioRepository;
   private final ParamSituacaoEntityRepository paramSituacaoEntityRepository;
+  private final EntityManager entityManager;
+
 
 
   @Transactional
   public Map<String, ?> justificarFalta(JustificarFaltaCommand command) {
 
-    // 1. Validar funcionário
-    var funcionarioUuid = UUID.fromString(command.getFuncionarioId());
+    //  Validar funcionário
+    UUID funcionarioUuid;
+    try {
+      funcionarioUuid = UUID.fromString(command.getFuncionarioId());
+    } catch (IllegalArgumentException e) {
+      throw IgrpResponseStatusException.badRequest("Funcionario UUID inválido");
+    }
 
     var funcionario = funcionarioRepository.findByUuid(funcionarioUuid)
         .orElseThrow(() ->
             IgrpResponseStatusException.badRequest("Funcionário não encontrado"));
 
     var dto = command.getJustificarfalta();
-    if (dto == null || dto.getItensFalta()== null || dto.getItensFalta().isEmpty()) {
-      throw IgrpResponseStatusException.badRequest("Nenhuma falta selecionada para justificar");
-    }
+    if (dto == null || dto.getItensFalta() == null || dto.getItensFalta().isEmpty())
+      throw IgrpResponseStatusException.badRequest("Nenhuma falta informada para justificar");
 
+    //  Validar se existe pelo menos uma síntese selecionada
+    boolean temSelecionado = dto.getItensFalta()
+        .stream()
+        .anyMatch(FaltaItemDTO::isSelecionar);
+
+    if (!temSelecionado)
+      throw IgrpResponseStatusException.badRequest(
+          "Nenhuma falta marcada para justificação");
+
+    // Buscar ParamSituação (obrigatório)
+    var paramSituacao = paramSituacaoEntityRepository.findByIdOrThrow(dto.getTipoJustificacao());
+
+    //  Criar pedido de justificação
     PedidoEntity pedido = new PedidoEntity();
     pedido.setFunId(funcionario);
     pedido.setTipoPedido("JUSTIFICACAO_FALTA");
@@ -59,57 +81,72 @@ public class JustificarFaltaWriteService {
     pedido.setEstado(Estado.P);
     pedido = pedidoRepository.save(pedido);
 
+    // Criar faltas a partir das sínteses diárias
+    List<FaltaEntity> faltas = new ArrayList<>();
 
-    var paramSituacao = paramSituacaoEntityRepository.findByIdOrThrow(dto.getTipoJustificacao());
-
-    // 3. Buscar faltas selecionadas
-    var faltaIds = dto.getItensFalta().stream()
-        .filter(FaltaItemDTO::isSelecionar)
-        .map(FaltaItemDTO::getId)
-        .toList();
-
-    if (faltaIds.isEmpty()) {
-      throw IgrpResponseStatusException.badRequest("Nenhuma falta marcada para justificação");
-    }
-
-    List<FaltaEntity> faltas = faltaRepository.findAllById(faltaIds);
-
-    if (faltas.size() != faltaIds.size()) {
-      throw IgrpResponseStatusException.badRequest("Existem faltas inválidas ou inexistentes");
-    }
-
-    /*for (var falta : faltas) {
-      var funIdFalta = falta.getTiprelId()
-          .getFunId()
-          .getId();
-
-      if (!funIdFalta.equals(funcionario.getId())) {
-        throw IgrpResponseStatusException.badRequest(
-            "Uma ou mais faltas não pertencem ao colaborador informado");
-      }
-    }*/
-
-    // 4. Atualizar faltas
     for (var item : dto.getItensFalta()) {
 
-      if (!item.isSelecionar()) continue;
+      if (!item.isSelecionar())
+        continue;
 
-      FaltaEntity falta = faltas.stream()
-          .filter(f -> f.getId().equals(item.getId()))
-          .findFirst()
-          .orElseThrow();
+      AssiduidadeSinteseDiarioEntity sintese;
+      try {
+        sintese = entityManager.getReference(
+            AssiduidadeSinteseDiarioEntity.class,
+            item.getId()
+        );
+      } catch (EntityNotFoundException e) {
+        throw IgrpResponseStatusException.badRequest(
+            "Síntese diária inválida: " + item.getId()
+        );
+      }
 
+      // Regra crítica: não permitir falta duplicada para a mesma síntese
+      if (faltaRepository.existsBySinteseDiarioId(sintese)) {
+        throw IgrpResponseStatusException.badRequest(
+            "Já existe uma falta associada à data " + sintese.getData()
+        );
+      }
+
+      FaltaEntity falta = new FaltaEntity();
       falta.setPedidoId(pedido);
+      falta.setSinteseDiarioId(sintese);
+
+      falta.setDataInicio(LocalDateTime.of(
+          sintese.getData(),
+          LocalTime.MIN
+      ));
+      falta.setDataFim(LocalDateTime.of(
+          sintese.getData(),
+          LocalTime.of(23, 59, 59)
+      ));
+
+      falta.setHorasAusencia(sintese.getHorasAusencia());
+      falta.setValor(
+          item.getValorAusencia() != null
+              ? BigDecimal.valueOf(item.getValorAusencia())
+              : null
+      );
+
       falta.setDescricaoMotivo(item.getMotivo());
+      falta.setFlgJustificativo("SIM");
+
       falta.setDecisaoResponsavel(dto.getParecerResponsavel());
       falta.setObsResponsavel(dto.getObsResponsavel());
+      falta.setDespachoRh(dto.getDespachoRh());
+
       falta.setParamSitId(paramSituacao);
       falta.setEstado(Estado.P);
+
+      faltas.add(falta);
     }
+
+    // 6️⃣ Persistir faltas
     faltaRepository.saveAll(faltas);
 
+    // 7️⃣ Criar validação
+    var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionarioUuid);
 
-    var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     var validacao = dadosContratuaisMapper.toValidacaoInsert(
         TipoAcao.INSERT.name(),
         Referencia.JUSTIFICAR_FALTA.name(),
@@ -118,8 +155,10 @@ public class JustificarFaltaWriteService {
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRelAtual);
     validacao.setReferenciaId(pedido.getId());
+
     validacaoEntityRepository.save(validacao);
 
+    // 8️⃣ Retorno
     return Map.of(
         "pedidoId", pedido.getId(),
         "pedidoUuid", pedido.getUuid(),

@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
+import java.math.BigDecimal;
 
 
 @Getter
@@ -105,4 +106,8 @@ public class FaltaEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "responsavel_id", referencedColumnName = "id")
     private ResponsavelEntity responsavelId;
+    @Column(name="valor")
+    private BigDecimal valor;
+
+  
 }
