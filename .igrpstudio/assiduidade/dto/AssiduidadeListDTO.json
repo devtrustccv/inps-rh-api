@@ -172,18 +172,6 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
-    },
-    {
-      "name": "data",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
     }
   ],
   "id": "s3d9vt0x7l"
