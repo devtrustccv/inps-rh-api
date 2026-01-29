@@ -74,6 +74,8 @@ public class JustificarFaltaReadService {
     dto.setColaboradorId(funcionario.getUuid());
     dto.setNomeColaborador(funcionario.getNome());
     dto.setItensFalta(itensFalta);
+    dto.setAno(query.getAno());
+    dto.setMes(query.getMes());
 
     // campos de decisão, despacho e tipoJustificacao podem ser preenchidos se houver somente um registro
     if (!faltas.isEmpty()) {

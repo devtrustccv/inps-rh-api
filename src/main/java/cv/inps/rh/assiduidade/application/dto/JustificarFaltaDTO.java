@@ -49,5 +49,11 @@ public class JustificarFaltaDTO  {
   
   
   private String validar ;
+  
+  
+  private Integer ano ;
+  
+  
+  private Integer mes ;
 
 }
