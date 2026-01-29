@@ -644,7 +644,7 @@ public class AssiduidadeController {
   }
 
    @PostMapping(
-   value = "falta/justificar/{faltaId}"
+   value = "falta/justificar/{funcionarioId}"
   )
   @Operation(
     summary = "Justificar falta",
@@ -664,10 +664,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<Map<String, ?>> justificarFalta(@Valid @RequestBody JustificarFaltaDTO justificarFaltaRequest
-    , @PathVariable(value = "faltaId") String faltaId)
+    , @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
-      final var command = new JustificarFaltaCommand(justificarFaltaRequest, faltaId);
+      final var command = new JustificarFaltaCommand(justificarFaltaRequest, funcionarioId);
 
       return commandBus.send(command);
 
@@ -794,7 +794,7 @@ public class AssiduidadeController {
   }
 
    @PutMapping(
-   value = "falta/justificar/validar/{faltaId}"
+   value = "falta/justificar/validar/{funcionarioId}"
   )
   @Operation(
     summary = "Validar falta justificada",
@@ -814,10 +814,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<Map<String, ?>> validarFaltaJustificada(@Valid @RequestBody JustificarFaltaDTO validarFaltaJustificadaRequest
-    , @PathVariable(value = "faltaId") String faltaId)
+    , @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
-      final var command = new ValidarFaltaJustificadaCommand(validarFaltaJustificadaRequest, faltaId);
+      final var command = new ValidarFaltaJustificadaCommand(validarFaltaJustificadaRequest, funcionarioId);
 
       return commandBus.send(command);
 
