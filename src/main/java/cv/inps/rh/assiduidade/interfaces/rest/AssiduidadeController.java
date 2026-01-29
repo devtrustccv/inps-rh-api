@@ -115,15 +115,15 @@ public class AssiduidadeController {
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "colaborador", required = false) String colaborador,
-    @RequestParam(value = "dataInicio", required = false) String dataInicio,
-    @RequestParam(value = "dataFim", required = false) String dataFim,
+    @RequestParam(value = "mes", required = false) Integer mes,
+    @RequestParam(value = "ano", required = false) Integer ano,
     @RequestParam(value = "estado", required = false) String estado,
     @RequestParam(value = "ilha", required = false) Long ilha,
     @RequestParam(value = "direcao", required = false) Long direcao,
     @RequestParam(value = "seccao", required = false) Long seccao)
   {
 
-      final var query = new GetListaMovimentosResumidosQuery(pageSize, pageNumber, colaborador, dataInicio, dataFim, estado, ilha, direcao, seccao);
+      final var query = new GetListaMovimentosResumidosQuery(pageSize, pageNumber, colaborador, mes, ano, estado, ilha, direcao, seccao);
 
       return queryBus.handle(query);
 

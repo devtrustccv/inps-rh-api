@@ -109,13 +109,13 @@
           "isRequired": false
         },
         {
-          "type": "string",
-          "name": "dataInicio",
+          "type": "integer",
+          "name": "mes",
           "isRequired": false
         },
         {
-          "type": "string",
-          "name": "dataFim",
+          "type": "integer",
+          "name": "ano",
           "isRequired": false
         },
         {
@@ -1051,5 +1051,5 @@
       ]
     }
   ],
-  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta"
+  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos"
 }
