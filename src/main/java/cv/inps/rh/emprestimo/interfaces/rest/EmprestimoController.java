@@ -7,8 +7,15 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.emprestimo.application.commands.SaveConfiguracaoInfoEmprestimoCommand;
+import cv.inps.rh.emprestimo.application.commands.SaveEmprestimoCommand;
+import cv.inps.rh.emprestimo.application.commands.UpdateEmprestimoCommand;
+import cv.inps.rh.emprestimo.application.dto.EmprestimoListDTO;
+import cv.inps.rh.emprestimo.application.dto.IdDTO;
 import cv.inps.rh.emprestimo.application.dto.InformacaoEmprestimoRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.PedidoEmprestimoDTO;
 import cv.inps.rh.emprestimo.application.queries.GetConfiguracaoEmprestimoQuery;
+import cv.inps.rh.emprestimo.application.queries.GetEmprestimoByIdQuery;
+import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -92,6 +99,130 @@ public class EmprestimoController {
   {
 
       final var query = new GetConfiguracaoEmprestimoQuery();
+
+      return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+  )
+  @Operation(
+    summary = "Save emprestimo",
+    description = "Save emprestimo",
+    responses = {
+      @ApiResponse(
+          responseCode = "201",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = IdDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<IdDTO> saveEmprestimo(@Valid @RequestBody PedidoEmprestimoDTO saveEmprestimoRequest
+    )
+  {
+
+      final var command = new SaveEmprestimoCommand(saveEmprestimoRequest);
+
+      return commandBus.send(command);
+
+  }
+
+   @PutMapping(
+   value = "{emprestimoId}"
+  )
+  @Operation(
+    summary = "Update emprestimo",
+    description = "Update emprestimo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = IdDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<IdDTO> updateEmprestimo(@Valid @RequestBody PedidoEmprestimoDTO updateEmprestimoRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new UpdateEmprestimoCommand(updateEmprestimoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "{emprestimoId}"
+  )
+  @Operation(
+    summary = "Get emprestimo by id",
+    description = "Get emprestimo by id",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = PedidoEmprestimoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<PedidoEmprestimoDTO> getEmprestimoById(
+    @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var query = new GetEmprestimoByIdQuery(emprestimoId);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+  )
+  @Operation(
+    summary = "Listar emprestimos",
+    description = "Listar emprestimos",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = EmprestimoListDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<EmprestimoListDTO> listarEmprestimos(
+    @RequestParam(value = "tipoEmprestimo", required = false) String tipoEmprestimo,
+    @RequestParam(value = "direccaoId", required = false) String direccaoId,
+    @RequestParam(value = "dataInicio", required = false) String dataInicio,
+    @RequestParam(value = "dataFim", required = false) String dataFim,
+    @RequestParam(value = "estadoEmprestimo", required = false) String estadoEmprestimo,
+    @RequestParam(value = "page", required = false, defaultValue = "0") String page,
+    @RequestParam(value = "size", required = false, defaultValue = "20") String size)
+  {
+
+      final var query = new ListarEmprestimosQuery(tipoEmprestimo, direccaoId, dataInicio, dataFim, estadoEmprestimo, page, size);
 
       return queryBus.handle(query);
 
