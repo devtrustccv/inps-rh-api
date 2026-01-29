@@ -9,7 +9,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import cv.inps.rh.shared.application.constants.Estado;
 
 
 @Getter
@@ -79,12 +78,11 @@ public class AssiduidadeSinteseDiarioEntity extends AuditEntity {
 
   
     @Column(name="falta")
-    private String falta;
+    private Integer falta;
 
   
-    @Enumerated(EnumType.STRING)
     @Column(name="estado")
-    private Estado estado;
+    private String estado;
 
   
     @Column(name="flag_rececao")
