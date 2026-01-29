@@ -42,16 +42,16 @@ public class AssiduidadeListDTO  {
   private Integer totalDias ;
   
   
-  private Integer totalHorasTrabalhadas ;
+  private String totalHorasTrabalhadas ;
   
   
   private String totalHorasAusentes ;
   
   
-  private Integer totalHoraExtra ;
+  private String totalHoraExtra ;
   
   
-  private Integer totalHoraAlmoco ;
+  private String totalHoraAlmoco ;
   
   
   private String estado ;
