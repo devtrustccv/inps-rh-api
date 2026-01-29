@@ -3,6 +3,7 @@ package cv.inps.rh.shared.infrastructure.persistence.repository;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeSinteseDiarioEntity;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.assiduidade.infrastructure.persistence.projections.AssiduidadeResumoViewRow;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -26,4 +27,5 @@ public interface AssiduidadeSinteseDiarioEntityRepository extends
             "AssiduidadeSinteseDiarioEntity not found for id: " + id));
   }
 
+  List<AssiduidadeSinteseDiarioEntity> findAllByFuncionarioIdAndDataBetween(FuncionarioEntity funcionarioId, LocalDate dataAfter, LocalDate dataBefore);
 }

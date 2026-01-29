@@ -27,7 +27,7 @@ public class GetJustificacaoFaltaQueryHandler implements QueryHandler<GetJustifi
 
     LOGGER.debug("GetFaltaJustificadaQuery: {}", query);
 
-    return ResponseEntity.ok(justificarFaltaReadService.getFaltaJustificada(query));
+    return ResponseEntity.ok(justificarFaltaReadService.getFaltaJustificadaResumo(query));
   }
 
 }

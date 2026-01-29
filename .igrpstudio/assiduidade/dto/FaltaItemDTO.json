@@ -30,19 +30,7 @@
       "primaryKey": false
     },
     {
-      "name": "dataInicio",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "dataFim",
+      "name": "data",
       "objectType": "java",
       "type": "string",
       "required": false,

@@ -93,4 +93,54 @@ public class JustificarFaltaReadService {
     return dto;
   }
 
+
+  @Transactional(readOnly = true)
+  public JustificarFaltaDTO getFaltaJustificadaResumo(GetJustificacaoFaltaQuery query) {
+
+    UUID funcUuid;
+    try {
+      funcUuid = UUID.fromString(query.getFuncionarioId());
+    } catch (IllegalArgumentException e) {
+      throw IgrpResponseStatusException.badRequest("Funcionario UUID inválido");
+    }
+
+    // Buscar funcionário
+    FuncionarioEntity funcionario = funcionarioRepository.findByUuid(funcUuid)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound(
+            "Funcionário não encontrado para UUID: " + funcUuid
+        ));
+
+    // Calcular intervalo do mês
+    LocalDate inicioMes = LocalDate.of(query.getAno(), query.getMes(), 1);
+    LocalDate fimMes = inicioMes.withDayOfMonth(inicioMes.lengthOfMonth());
+
+    // Buscar todas as sínteses diárias do funcionário no mês
+    List<AssiduidadeSinteseDiarioEntity> sinteses =
+        assiduidadeSinteseDiarioEntityRepository.findAllByFuncionarioIdAndDataBetween(funcionario, inicioMes, fimMes);
+
+    // Mapear para FaltaItemDTO
+    List<FaltaItemDTO> itensFalta = sinteses.stream().map(s -> {
+      FaltaItemDTO item = new FaltaItemDTO();
+      item.setId(s.getId());
+      item.setData(s.getData().toString());
+      // Se houver falta total (0 = falta total?), definir tipoFalta
+      item.setTipoFalta(s.getFalta() != null && s.getFalta() > 0 ? "INJUSTIFICADA" : null);
+      item.setHorasAusencia(s.getHorasAusencia());
+      item.setValorAusencia(null); // cálculo futuro
+      item.setMotivo(null); // não há motivo na síntese
+      item.setComJustificativo(null); // será preenchido quando houver falta vinculada
+      return item;
+    }).toList();
+
+    // Montar DTO principal
+    JustificarFaltaDTO dto = new JustificarFaltaDTO();
+    dto.setColaboradorId(funcionario.getUuid());
+    dto.setNomeColaborador(funcionario.getNome());
+    dto.setItensFalta(itensFalta);
+    dto.setAno(query.getAno());
+    dto.setMes(query.getMes());
+
+    return dto;
+  }
+
 }

@@ -27,10 +27,7 @@ public class FaltaItemDTO  {
   private Long id ;
   
   
-  private String dataInicio ;
-  
-  
-  private String dataFim ;
+  private String data ;
   
   
   private String tipoFalta ;
