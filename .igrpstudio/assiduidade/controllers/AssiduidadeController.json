@@ -174,7 +174,7 @@
     },
     {
       "actionName": "validarFalta",
-      "path": "falta/{faltaId}",
+      "path": "falta/{pedidoId}",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -205,7 +205,7 @@
       },
       "pathVariables": [
         {
-          "name": "faltaId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
@@ -873,7 +873,7 @@
     },
     {
       "actionName": "getFalta",
-      "path": "falta/{faltaId}",
+      "path": "falta/{pedidoId}",
       "method": "GET",
       "responses": {
         "200": {
@@ -893,7 +893,7 @@
       },
       "pathVariables": [
         {
-          "name": "faltaId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
@@ -1063,5 +1063,5 @@
       ]
     }
   ],
-  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada"
+  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta"
 }

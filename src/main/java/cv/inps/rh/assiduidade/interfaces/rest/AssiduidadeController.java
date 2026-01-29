@@ -160,7 +160,7 @@ public class AssiduidadeController {
   }
 
    @PostMapping(
-   value = "falta/{faltaId}"
+   value = "falta/{pedidoId}"
   )
   @Operation(
     summary = "Validar falta",
@@ -180,10 +180,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<Map<String, ?>> validarFalta(@Valid @RequestBody FaltaReqDTO validarFaltaRequest
-    , @PathVariable(value = "faltaId") String faltaId)
+    , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var command = new ValidarFaltaCommand(validarFaltaRequest, faltaId);
+      final var command = new ValidarFaltaCommand(validarFaltaRequest, pedidoId);
 
       return commandBus.send(command);
 
@@ -674,7 +674,7 @@ public class AssiduidadeController {
   }
 
    @GetMapping(
-   value = "falta/{faltaId}"
+   value = "falta/{pedidoId}"
   )
   @Operation(
     summary = "Get falta",
@@ -694,10 +694,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<FaltaReqDTO> getFalta(
-    @PathVariable(value = "faltaId") String faltaId)
+    @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var query = new GetFaltaQuery(faltaId);
+      final var query = new GetFaltaQuery(pedidoId);
 
       return queryBus.handle(query);
 

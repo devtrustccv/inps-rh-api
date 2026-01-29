@@ -18,6 +18,18 @@
       "primaryKey": false
     },
     {
+      "name": "colaboradorNome",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "dataInicio",
       "objectType": "java",
       "type": "date",
@@ -127,15 +139,16 @@
     },
     {
       "name": "validar",
-      "objectType": "java",
-      "type": "string",
+      "objectType": "enum",
+      "type": "EstadoValidacao",
       "required": false,
       "before": false,
       "after": false,
       "positive": false,
       "isEmail": false,
       "isUrl": false,
-      "primaryKey": false
+      "primaryKey": false,
+      "module": "shared"
     },
     {
       "name": "despachoRh",

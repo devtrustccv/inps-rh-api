@@ -9,6 +9,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FaltaEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
@@ -23,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -35,6 +38,7 @@ import java.util.UUID;
 public class FaltaReadService {
 
   private final FaltaEntityRepository faltaRepository;
+  private final PedidoEntityRepository pedidoEntityRepository;
 
   @Transactional(readOnly = true)
   public WrapperListaFaltaDTO faltaReadService(GetListaFaltaQuery query) {
@@ -156,34 +160,67 @@ public class FaltaReadService {
 
 
 
+  @Transactional(readOnly = true)
   public FaltaReqDTO getFalta(GetFaltaQuery query) {
-    if (query == null || !StringUtils.hasText(query.getFaltaId())) {
+    if (query == null || !StringUtils.hasText(query.getPedidoId())) {
+      return new FaltaReqDTO();
+    }
+    UUID pedidoUuid = UUID.fromString(query.getPedidoId());
+
+    // Buscar pedido
+    var pedido = pedidoEntityRepository.findByUuid(pedidoUuid)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound(
+            "Registo de marcacao de falta nao encontrada com: " + query.getPedidoId())
+        );
+
+    // Buscar todas as faltas desse pedido
+    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
+    if (faltas.isEmpty()) {
       return new FaltaReqDTO();
     }
 
-    var uuid = UUID.fromString(query.getFaltaId());
+    // Usar a primeira falta para os campos comuns (horasAusencia, justificativa, etc.)
+    var primeiraFalta = faltas.getFirst();
 
-    var e = faltaRepository.findByUuid((uuid)).orElseThrow(
-        () -> IgrpResponseStatusException.notFound("Falta nao encontrada com o id: " + query.getFaltaId())
-    );
-
+    // Montar DTO
     var dto = new FaltaReqDTO();
-    var pedido = e.getPedidoId();
-    var fun = pedido != null ? pedido.getFunId() : null;
-    dto.setColaboradorId(fun != null ? fun.getUuid() : null);
-    dto.setDataInicio(e.getDataInicio() != null ? e.getDataInicio().toLocalDate() : null);
-    dto.setDataFim(e.getDataFim() != null ? e.getDataFim().toLocalDate() : null);
-    if (dto.getDataInicio() != null && dto.getDataFim() != null) {
-      long dias = ChronoUnit.DAYS.between(dto.getDataInicio(), dto.getDataFim()) + 1;
+    var funcionario = pedido.getFunId();
+
+    dto.setColaboradorId(funcionario != null ? funcionario.getUuid() : null);
+    dto.setColaboradorNome(funcionario != null ? funcionario.getNome() : null);
+
+    // Determinar período
+    LocalDate dataInicio = faltas.stream()
+        .map(FaltaEntity::getDataInicio)
+        .filter(d -> d != null)
+        .map(LocalDateTime::toLocalDate)
+        .min(LocalDate::compareTo)
+        .orElse(null);
+
+    LocalDate dataFim = faltas.stream()
+        .map(FaltaEntity::getDataFim)
+        .filter(d -> d != null)
+        .map(LocalDateTime::toLocalDate)
+        .max(LocalDate::compareTo)
+        .orElse(null);
+
+    dto.setDataInicio(dataInicio);
+    dto.setDataFim(dataFim);
+
+    if (dataInicio != null && dataFim != null) {
+      long dias = ChronoUnit.DAYS.between(dataInicio, dataFim) + 1;
       dto.setTotalDias((int) Math.max(dias, 1));
     }
-    dto.setTotalDeHorasAusentes(e.getHorasAusencia());
-    dto.setJustificar(e.getFlgJustificativo());
-    dto.setMotivoAusencia(e.getDescricaoMotivo());
-    dto.setParecer(e.getDecisaoResponsavel());
-    dto.setObservacao(e.getObsResponsavel());
-    dto.setDespachoRh(e.getDespachoRh());
-    dto.setTipoJustificacao(e.getParamSitId() != null ? e.getParamSitId().getId() : null);
+
+    dto.setTotalDeHorasAusentes(primeiraFalta.getHorasAusencia());
+    dto.setJustificar(primeiraFalta.getFlgJustificativo());
+    dto.setMotivoAusencia(primeiraFalta.getDescricaoMotivo());
+    dto.setParecer(primeiraFalta.getDecisaoResponsavel());
+    dto.setObservacao(primeiraFalta.getObsResponsavel());
+    dto.setDespachoRh(primeiraFalta.getDespachoRh());
+    dto.setTipoJustificacao(primeiraFalta.getParamSitId() != null ? primeiraFalta.getParamSitId().getId() : null);
+
     return dto;
   }
+
 }

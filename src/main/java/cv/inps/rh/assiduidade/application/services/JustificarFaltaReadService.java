@@ -5,8 +5,10 @@ import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
 import cv.inps.rh.assiduidade.application.queries.GetJustificacaoFaltaQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeSinteseDiarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.AssiduidadeSinteseDiarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FaltaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
@@ -31,6 +33,8 @@ public class JustificarFaltaReadService {
   private final FaltaEntityRepository faltaRepository;
   private final FuncionarioEntityRepository funcionarioRepository;
   private final DocumentoEntityRepository documentoEntityRepository;
+
+  private final AssiduidadeSinteseDiarioEntityRepository assiduidadeSinteseDiarioEntityRepository;
 
   @Transactional(readOnly = true)
   public JustificarFaltaDTO getFaltaJustificada(GetJustificacaoFaltaQuery query) {
@@ -59,10 +63,9 @@ public class JustificarFaltaReadService {
     List<FaltaItemDTO> itensFalta = faltas.stream().map(f -> {
       FaltaItemDTO item = new FaltaItemDTO();
       item.setId(f.getId());
-      item.setDataInicio(f.getDataInicio() != null ? f.getDataInicio().toLocalDate().toString() : null);
-      item.setDataFim(f.getDataFim() != null ? f.getDataFim().toLocalDate().toString() : null);
+
       item.setHorasAusencia(f.getHorasAusencia());
-      item.setValorAusencia(f.getFlgDescontoSal()); // ou outro campo de valor
+      item.setValorAusencia(null); // ou outro campo de valor
       item.setMotivo(f.getDescricaoMotivo());
       item.setComJustificativo(f.getFlgJustificativo());
       // documento pode ser mapeado se houver relacionamento

@@ -9,6 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,6 +27,9 @@ public class FaltaReqDTO  {
   
   
   private UUID colaboradorId ;
+  
+  
+  private String colaboradorNome ;
   
   
   private LocalDate dataInicio ;
@@ -55,7 +59,7 @@ public class FaltaReqDTO  {
   private String observacao ;
   
   
-  private String validar ;
+  private EstadoValidacao validar ;
   
   
   private String despachoRh ;

@@ -21,4 +21,6 @@ public interface PedidoEntityRepository extends
           .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"PedidoEntity not found for id: " + id));
       }
 
+  Optional<PedidoEntity> findByUuid(UUID uuid);
+
 }
