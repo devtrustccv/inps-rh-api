@@ -3,6 +3,7 @@ package cv.inps.rh.assiduidade.application.services;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.assiduidade.application.commands.MarcarFaltaCommand;
 import cv.inps.rh.assiduidade.application.commands.ValidarFaltaCommand;
+import cv.inps.rh.assiduidade.application.constants.AssiduidadeDiariaEstado;
 import cv.inps.rh.assiduidade.application.dto.FaltaReqDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
@@ -329,9 +330,9 @@ public class FaltaServiceWrite {
     e.setHorasTrabalhadas(parseInterval(horasTrabalhadasStr));
 
     // Se trabalhou 0, falta total
-    e.setFalta(trabalhadosMinutos == 0 ? "0" : "1");
+    e.setFalta(trabalhadosMinutos == 0 ? 0 : 1);
 
-    e.setEstado(Estado.A);
+    e.setEstado(AssiduidadeDiariaEstado.INJUSTIFICADA.name());
 
     // Debug logs (opcional)
     System.out.println("Diária: " + diaria);
