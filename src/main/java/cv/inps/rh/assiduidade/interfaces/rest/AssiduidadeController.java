@@ -794,7 +794,7 @@ public class AssiduidadeController {
   }
 
    @PutMapping(
-   value = "falta/justificar/validar/{funcionarioId}"
+   value = "falta/justificar/validar/{pedidoId}"
   )
   @Operation(
     summary = "Validar falta justificada",
@@ -814,10 +814,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<Map<String, ?>> validarFaltaJustificada(@Valid @RequestBody JustificarFaltaDTO validarFaltaJustificadaRequest
-    , @PathVariable(value = "funcionarioId") String funcionarioId)
+    , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var command = new ValidarFaltaJustificadaCommand(validarFaltaJustificadaRequest, funcionarioId);
+      final var command = new ValidarFaltaJustificadaCommand(validarFaltaJustificadaRequest, pedidoId);
 
       return commandBus.send(command);
 

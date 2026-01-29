@@ -86,8 +86,6 @@ public class JustificarFaltaReadService {
 
 
 
-
-
   @Transactional(readOnly = true)
   public JustificarFaltaDTO getFaltaJustificada(GetJustificacaoFaltaByPedidoQuery query) {
 

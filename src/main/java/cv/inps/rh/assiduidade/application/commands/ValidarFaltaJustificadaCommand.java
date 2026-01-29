@@ -14,7 +14,7 @@ public class ValidarFaltaJustificadaCommand implements Command {
 
   
   private JustificarFaltaDTO justificarfalta;
-  @NotBlank(message = "The field <funcionarioId> is required")
-  private String funcionarioId;
+  @NotBlank(message = "The field <pedidoId> is required")
+  private String pedidoId;
 
 }

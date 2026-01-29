@@ -985,7 +985,7 @@
     },
     {
       "actionName": "validarFaltaJustificada",
-      "path": "falta/justificar/validar/{funcionarioId}",
+      "path": "falta/justificar/validar/{pedidoId}",
       "method": "PUT",
       "requestBody": {
         "content": {
@@ -1016,7 +1016,7 @@
       },
       "pathVariables": [
         {
-          "name": "funcionarioId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
@@ -1091,5 +1091,5 @@
       ]
     }
   ],
-  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta"
+  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada"
 }

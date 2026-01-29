@@ -26,6 +26,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -171,57 +173,92 @@ public class JustificarFaltaWriteService {
   @Transactional
   public Map<String, ?> validarFaltaJustificada(ValidarFaltaJustificadaCommand command) {
 
-    var funcionarioUuid = UUID.fromString(command.getFuncionarioId());
-    var funcionario = funcionarioRepository.findByUuid(funcionarioUuid)
-        .orElseThrow(() -> IgrpResponseStatusException.badRequest("Funcionário não encontrado"));
+    var pedidoUuid = UUID.fromString(command.getPedidoId());
+
+    var pedido = pedidoRepository.findByUuid(pedidoUuid)
+        .orElseThrow(() ->
+            IgrpResponseStatusException.badRequest("Pedido de justificação de falta não encontrado"));
+
+    var funcionario = pedido.getFunId();
 
     var dto = command.getJustificarfalta();
     if (dto == null || dto.getItensFalta() == null || dto.getItensFalta().isEmpty()) {
       throw IgrpResponseStatusException.badRequest("Nenhuma falta selecionada para validação");
     }
-
-//    var pedido = pedidoRepository.findByIdOrThrow(dto.getPedidoId());
-
-       var pedido = pedidoRepository.findByIdOrThrow(1L);
-
-
-    // Atualizar faltas com observações e tipo de situação
+    // Parametrização da justificação
     var paramSituacao = paramSituacaoEntityRepository.findByIdOrThrow(dto.getTipoJustificacao());
 
+    // Todas as faltas do pedido (já criadas na fase de justificar)
     List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
+    Map<Long, FaltaEntity> faltaPorSinteseId =
+        faltas.stream()
+            .filter(f -> f.getSinteseDiarioId() != null)
+            .collect(Collectors.toMap(
+                f -> f.getSinteseDiarioId().getId(),
+                Function.identity()
+            ));
 
+
+    if (faltas.isEmpty()) {
+      throw IgrpResponseStatusException.badRequest(
+          "Não existem faltas associadas a este pedido");
+    }
+
+    // Estado final
+    final Estado estadoFinal =
+        dto.getValidar() == EstadoValidacao.SIM ? Estado.A : Estado.I;
+
+    // Atualizar apenas as faltas correspondentes às sínteses selecionadas
     for (var item : dto.getItensFalta()) {
+
       if (!item.isSelecionar()) continue;
 
-      FaltaEntity falta = faltas.stream()
-          .filter(f -> f.getId().equals(item.getId()))
-          .findFirst()
-          .orElseThrow();
+      FaltaEntity falta = faltaPorSinteseId.get(item.getId());
+
+      if (falta == null) {
+        throw IgrpResponseStatusException.badRequest(
+            "Falta não encontrada para a síntese diária ID: " + item.getId()
+        );
+      }
 
       falta.setDescricaoMotivo(item.getMotivo());
       falta.setObsResponsavel(dto.getObsResponsavel());
       falta.setDespachoRh(dto.getDespachoRh());
       falta.setParamSitId(paramSituacao);
+      falta.setEstado(estadoFinal);
+
+      /*
+       * NOTA IMPORTANTE:
+       * - DEF_REM_ID só deve ser preenchido aqui após confirmação de desconto
+       * - O registo em RH_T_DEF_PAGAMENTOS depende da regra de flgFaltaDescontoSal
+       * - Será tratado após validação com o analista
+       */
     }
+
     faltaRepository.saveAll(faltas);
 
-    final Estado estadoParaAtualizar = (dto.getValidar() == EstadoValidacao.SIM) ? Estado.A : Estado.I;
-
-
-    faltas.forEach(f -> f.setEstado(estadoParaAtualizar));
-    faltaRepository.saveAll(faltas);
-
-    pedido.setEstado(estadoParaAtualizar);
+    // Atualizar pedido
+    pedido.setEstado(estadoFinal);
     pedido.setEtapa("FINALIZADO");
     pedidoRepository.save(pedido);
 
-    // Atualizar validação
-    funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT,
-            Referencia.JUSTIFICAR_FALTA)
+    // Atualizar validação pendente
+    funcionarioRules.getValidacaoPendente(
+            funcionario.getUuid(),
+            TipoAcao.INSERT,
+            Referencia.JUSTIFICAR_FALTA
+        )
         .ifPresent(v -> {
-          v.setEstado(estadoParaAtualizar);
+          v.setEstado(estadoFinal);
           validacaoEntityRepository.save(v);
         });
+
+    return Map.of(
+        "pedidoId", pedido.getId(),
+        "pedidoUuid", pedido.getUuid(),
+        "estado", pedido.getEstado()
+    );
+
 
     /*
      * ================= DÚVIDAS / PONTOS A CONFIRMAR COM ANALISTA =================
@@ -262,13 +299,8 @@ public class JustificarFaltaWriteService {
      *
      * =============================================================================
      */
-
-    return Map.of(
-        "pedidoId", pedido.getId(),
-        "pedidoUuid", pedido.getUuid(),
-        "estado", pedido.getEstado()
-    );
   }
+
 
 
 }
