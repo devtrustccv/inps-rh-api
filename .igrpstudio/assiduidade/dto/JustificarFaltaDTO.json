@@ -105,15 +105,16 @@
     },
     {
       "name": "validar",
-      "objectType": "java",
-      "type": "string",
+      "objectType": "enum",
+      "type": "EstadoValidacao",
       "required": false,
       "before": false,
       "after": false,
       "positive": false,
       "isEmail": false,
       "isUrl": false,
-      "primaryKey": false
+      "primaryKey": false,
+      "module": "shared"
     },
     {
       "name": "ano",

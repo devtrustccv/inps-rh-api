@@ -115,7 +115,6 @@ public class JustificarFaltaWriteService {
         Referencia.JUSTIFICAR_FALTA.name(),
         Estado.P
     );
-
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRelAtual);
     validacao.setReferenciaId(pedido.getId());
@@ -132,50 +131,105 @@ public class JustificarFaltaWriteService {
 
   @Transactional
   public Map<String, ?> validarFaltaJustificada(ValidarFaltaJustificadaCommand command) {
-    var req = command.getJustificarfalta();
-    if (req == null || !StringUtils.hasText(req.getValidar()))
-      throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
-    if (!StringUtils.hasText(command.getFaltaId()))
-      throw IgrpResponseStatusException.badRequest("Identificador da falta é obrigatório");
 
-    Long faltaId;
-    try {
-      faltaId = Long.parseLong(command.getFaltaId());
-    } catch (NumberFormatException e) {
-      throw IgrpResponseStatusException.badRequest("Identificador da falta inválido");
+    var funcionarioUuid = UUID.fromString(command.getFuncionarioId());
+    var funcionario = funcionarioRepository.findByUuid(funcionarioUuid)
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest("Funcionário não encontrado"));
+
+    var dto = command.getJustificarfalta();
+    if (dto == null || dto.getItensFalta() == null || dto.getItensFalta().isEmpty()) {
+      throw IgrpResponseStatusException.badRequest("Nenhuma falta selecionada para validação");
     }
 
-    FaltaEntity falta = faltaRepository.findByIdOrThrow(faltaId);
-    PedidoEntity pedido = falta.getPedidoId();
-    var funcionario = pedido != null ? pedido.getFunId() : null;
-    if (funcionario == null)
-      throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
+//    var pedido = pedidoRepository.findByIdOrThrow(dto.getPedidoId());
 
-    var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
-    var estado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
+       var pedido = pedidoRepository.findByIdOrThrow(1L);
 
-    falta.setDecisaoResponsavel(req.getParecerResponsavel());
-    falta.setObsResponsavel(req.getObsResponsavel());
-    falta.setDespachoRh(req.getDespachoRh());
-    falta.setEstado(estado);
-    faltaRepository.save(falta);
 
-    if (pedido != null) {
-      pedido.setEstado(estado);
-      pedidoRepository.save(pedido);
+    // Atualizar faltas com observações e tipo de situação
+    var paramSituacao = paramSituacaoEntityRepository.findByIdOrThrow(dto.getTipoJustificacao());
+
+    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
+
+    for (var item : dto.getItensFalta()) {
+      if (!item.isSelecionar()) continue;
+
+      FaltaEntity falta = faltas.stream()
+          .filter(f -> f.getId().equals(item.getId()))
+          .findFirst()
+          .orElseThrow();
+
+      falta.setDescricaoMotivo(item.getMotivo());
+      falta.setObsResponsavel(dto.getObsResponsavel());
+      falta.setDespachoRh(dto.getDespachoRh());
+      falta.setParamSitId(paramSituacao);
     }
+    faltaRepository.saveAll(faltas);
 
-    funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.FALTA)
+    final Estado estadoParaAtualizar = (dto.getValidar() == EstadoValidacao.SIM) ? Estado.A : Estado.I;
+
+
+    faltas.forEach(f -> f.setEstado(estadoParaAtualizar));
+    faltaRepository.saveAll(faltas);
+
+    pedido.setEstado(estadoParaAtualizar);
+    pedido.setEtapa("FINALIZADO");
+    pedidoRepository.save(pedido);
+
+    // Atualizar validação
+    funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT,
+            Referencia.JUSTIFICAR_FALTA)
         .ifPresent(v -> {
-          v.setEstado(estado);
+          v.setEstado(estadoParaAtualizar);
           validacaoEntityRepository.save(v);
         });
 
-    Map<String, Object> resp = new HashMap<>();
-    resp.put("id", falta.getId());
-    resp.put("uuid", falta.getUuid() != null ? falta.getUuid().toString() : null);
-    resp.put("estado", falta.getEstado().name());
-    return resp;
+    /*
+     * ================= DÚVIDAS / PONTOS A CONFIRMAR COM ANALISTA =================
+     *
+     * 1️⃣ Desconto de Salário (RH_T_DEF_PAGAMENTOS)
+     *    - Qual entidade exata devemos usar para registrar o desconto de salário?
+     *    - Quais campos são obrigatórios: funId, tiprelId, referenciaId, valor, data, estado?
+     *    - O desconto é automático ao validar a falta ou apenas registro histórico?
+     *
+     * 2️⃣ Desconto de Férias (RH_T_FERIAS_GOZADAS)
+     *    - Existe entidade mapeada para registrar férias gozadas?
+     *    - Como calcular os dias a descontar por falta?
+     *    - Só desconta se houver saldo suficiente de férias?
+     *    - As datas da falta (dataInicio/dataFim) devem ser replicadas no registro de férias?
+     *
+     * 3️⃣ Desconto de Horas de Dispensa (RH_T_DISPENSA)
+     *    - Existe entidade mapeada para horas de dispensa?
+     *    - Como calcular a quantidade de horas a descontar por falta?
+     *    - Aplica apenas a faltas injustificadas ou todas as faltas?
+     *
+     * 4️⃣ Valor da Justificação de Falta
+     *    - Para cada tipoJustificacao (ParamSituacaoEntity.tipoFalta), como calcular o valor?
+     *    - Valor por hora ou por dia?
+     *    - É apenas para descontos ou também para relatórios?
+     *
+     * 5️⃣ Integração com Pedido e Validação
+     *    - Ao validar a falta, devemos atualizar estados:
+     *        FaltaEntity.estado = 'A'
+     *        PedidoEntity.estado = 'A', PedidoEntity.etapa = 'FINALIZADO'
+     *        ValidacaoEntity.estado = 'A'
+     *    - Isso deve ocorrer somente se EstadoValidacao enviado for "SIM"?
+     *
+     * 6️⃣ Observações Gerais
+     *    - O campo tipoJustificacao já vem no DTO como Long (id de ParamSituacaoEntity), está correto?
+     *    - Se uma falta já tiver desconto registrado, sobrescrever ou criar novo registro?
+     *    - Como tratar múltiplas faltas do mesmo colaborador no mesmo mês: justificar todas juntas ou individualmente?
+     *    - Confirmação do cálculo de horas trabalhadas e horas de ausência para atualização na FaltaEntity.
+     *
+     * =============================================================================
+     */
+
+    return Map.of(
+        "pedidoId", pedido.getId(),
+        "pedidoUuid", pedido.getUuid(),
+        "estado", pedido.getEstado()
+    );
   }
+
 
 }

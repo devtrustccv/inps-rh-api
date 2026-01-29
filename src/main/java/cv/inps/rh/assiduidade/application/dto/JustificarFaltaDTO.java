@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -48,7 +49,7 @@ public class JustificarFaltaDTO  {
   private Long tipoJustificacao ;
   
   
-  private String validar ;
+  private EstadoValidacao validar ;
   
   
   private Integer ano ;
