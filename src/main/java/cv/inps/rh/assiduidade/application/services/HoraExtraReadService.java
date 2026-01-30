@@ -21,6 +21,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class HoraExtraReadService {
@@ -166,30 +168,44 @@ public class HoraExtraReadService {
 
   @Transactional(readOnly = true)
   public HoraExtraReqDTO getHoraExtra(GetHoraExtraQuery query) {
-    if (query == null || !StringUtils.hasText(query.getHoraExtraId())) {
-      return new HoraExtraReqDTO();
+
+    HoraExtraReqDTO dto = new HoraExtraReqDTO();
+
+    if (query == null || !StringUtils.hasText(query.getPedidoId())) {
+      return dto;
     }
-    Long id;
+
+    UUID pedidoUuid;
     try {
-      id = Long.parseLong(query.getHoraExtraId());
-    } catch (NumberFormatException e) {
-      return new HoraExtraReqDTO();
+      pedidoUuid = UUID.fromString(query.getPedidoId());
+    } catch (IllegalArgumentException e) {
+      return dto;
     }
 
-    var e = horaExtraRepository.findByIdOrThrow(id);
+    var horasExtra = horaExtraRepository.findAllByPedidoId_Uuid(pedidoUuid);
 
-    var dto = new HoraExtraReqDTO();
-    var item = new HoraExtraDTO();
-    item.setColaborador(
-        e.getTiprelId() != null && e.getTiprelId().getFunId() != null
-            ? e.getTiprelId().getFunId().getId()
-            : null);
-    item.setDataInicio(e.getDataInicio());
-    item.setDataFim(e.getDataFim());
-    item.setHorasDiaria(e.getHorasDiarias());
-    item.setPercentagemHora(e.getPercentagem());
-    item.setValorDiario(e.getValorDiario());
-    dto.getHoraExtra().add(item);
+    if (horasExtra == null || horasExtra.isEmpty()) {
+      return dto;
+    }
+
+    for (HoraExtraEntity e : horasExtra) {
+      HoraExtraDTO item = new HoraExtraDTO();
+      item.setId(e.getId());
+      item.setColaborador(
+          e.getTiprelId() != null && e.getTiprelId().getFunId() != null
+              ? e.getTiprelId().getFunId().getId()
+              : null
+      );
+      item.setDataInicio(e.getDataInicio());
+      item.setDataFim(e.getDataFim());
+      item.setHorasDiaria(e.getHorasDiarias());
+      item.setPercentagemHora(e.getPercentagem());
+      item.setValorDiario(e.getValorDiario());
+
+      dto.getHoraExtra().add(item);
+    }
+
     return dto;
   }
+
 }
