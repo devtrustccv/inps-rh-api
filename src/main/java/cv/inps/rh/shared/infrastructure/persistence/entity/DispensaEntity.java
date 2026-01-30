@@ -52,8 +52,8 @@ public class DispensaEntity extends AuditEntity {
     private LocalDate data;
 
   
-    @Column(name="hora_incio")
-    private String horaIncio;
+    @Column(name="hora_inicio")
+    private String horaInicio;
 
   
     @Column(name="hora_fim")

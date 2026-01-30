@@ -66,7 +66,7 @@ public class DispensaWriteService {
     disp.setTipoDispensa(req.getTipoMotivo());
     disp.setDescricaoMotivo(req.getMotivo());
     disp.setData(req.getDataDispensa());
-    disp.setHoraIncio(req.getHoraSaida());
+    disp.setHoraInicio(req.getHoraSaida());
     disp.setHoraFim(req.getHoraEntrada());
     disp.setEstado(Estado.P);
     disp.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -125,7 +125,7 @@ public class DispensaWriteService {
       dispensa.setData(req.getDataDispensa());
     }
     if (StringUtils.hasText(req.getHoraSaida())) {
-      dispensa.setHoraIncio(req.getHoraSaida());
+      dispensa.setHoraInicio(req.getHoraSaida());
     }
     if (StringUtils.hasText(req.getHoraEntrada())) {
       dispensa.setHoraFim(req.getHoraEntrada());

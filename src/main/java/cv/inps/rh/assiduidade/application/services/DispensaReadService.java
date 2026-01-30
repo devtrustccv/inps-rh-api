@@ -113,7 +113,7 @@ public class DispensaReadService {
         e.getPedidoId() != null ? DateFormatter.localDateTimeToLocalDateString(e.getPedidoId().getCreatedDate())
             : null);
     dto.setDataDispensa(e.getData() != null ? DateFormatter.localDateToString(e.getData()) : null);
-    var hi = e.getHoraIncio();
+    var hi = e.getHoraInicio();
     var hf = e.getHoraFim();
     dto.setIntervaloHoras(
         (StringUtils.hasText(hi) ? hi : "") +
@@ -169,9 +169,9 @@ public class DispensaReadService {
             ? e.getPedidoId().getFunId().getId()
             : null);
     dto.setDataDispensa(e.getData());
-    dto.setHoraSaida(e.getHoraIncio());
+    dto.setHoraSaida(e.getHoraInicio());
     dto.setHoraEntrada(e.getHoraFim());
-    var mins = diffMinutes(e.getHoraIncio(), e.getHoraFim());
+    var mins = diffMinutes(e.getHoraInicio(), e.getHoraFim());
     dto.setTotalHoras(formatMinutes(mins));
     dto.setTipoMotivo(e.getTipoDispensa());
     dto.setMotivo(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : null);
