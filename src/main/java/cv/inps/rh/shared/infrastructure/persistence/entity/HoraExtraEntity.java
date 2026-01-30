@@ -28,7 +28,7 @@ public class HoraExtraEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotNull(message = "tiprelId is mandatory")
 
 
@@ -43,27 +43,27 @@ public class HoraExtraEntity extends AuditEntity {
     @Column(name="data_inicio")
     private LocalDate dataInicio;
 
-  
+
     @Column(name="data_fim")
     private LocalDate dataFim;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
     @Column(name="horas_diarias")
     private Integer horasDiarias;
 
-  
+
     @Column(name="valor_diario")
     private Integer valorDiario;
 
-  
+
     @Column(name="percentagem")
     private Integer percentagem;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -74,9 +74,10 @@ public class HoraExtraEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pedido_id", referencedColumnName = "id")
     private PedidoEntity pedidoId;
+
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
+
 }
