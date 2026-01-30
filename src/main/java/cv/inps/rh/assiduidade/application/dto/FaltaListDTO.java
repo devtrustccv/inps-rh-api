@@ -21,12 +21,6 @@ public class FaltaListDTO  {
 
   
   
-  private Long id ;
-  
-  
-  private String uuid ;
-  
-  
   private String nomeColaborador ;
   
   
@@ -36,13 +30,13 @@ public class FaltaListDTO  {
   private String categoria ;
   
   
-  private String dataIntervalo ;
+  private String dataInicio ;
   
   
-  private String motivo ;
+  private String dataFim ;
   
   
-  private Integer totalHorasAusente ;
+  private String totalHorasAusente ;
   
   
   private Integer numFalta ;
