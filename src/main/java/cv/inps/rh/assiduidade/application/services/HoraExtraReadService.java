@@ -105,7 +105,7 @@ public class HoraExtraReadService {
 
     var dto = new HorExtraListDTO();
 
-    dto.setId(e.getId());
+    /*dto.setId(e.getId());
     dto.setUuid(e.getUuid() != null ? e.getUuid().toString() : null);
 
     var tiprel = e.getTiprelId();
@@ -150,7 +150,7 @@ public class HoraExtraReadService {
         e.getValorDiario() != null ? e.getValorDiario().toString() : null);
 
     dto.setEstado(e.getEstado() != null ? e.getEstado().name() : null);
-    dto.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);
+    dto.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);*/
 
     return dto;
   }
