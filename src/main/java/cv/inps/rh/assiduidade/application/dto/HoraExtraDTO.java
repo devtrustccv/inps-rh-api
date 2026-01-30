@@ -21,6 +21,9 @@ public class HoraExtraDTO  {
 
   
   
+  private Long id ;
+  
+  
   private Long colaborador ;
   
   

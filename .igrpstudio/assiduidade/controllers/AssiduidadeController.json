@@ -516,7 +516,7 @@
     },
     {
       "actionName": "validarHoraExtra",
-      "path": "hora-extra/{horaExtraId}",
+      "path": "hora-extra/{pedidoId}",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -547,7 +547,7 @@
       },
       "pathVariables": [
         {
-          "name": "horaExtraId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
@@ -1158,5 +1158,5 @@
       ]
     }
   ],
-  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa"
+  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa-validarHoraExtra"
 }

@@ -14,16 +14,8 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeSinteseDiarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.HoraExtraEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.AssiduidadeSinteseDiarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.AssiduidadeParametroEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.HoraExtraEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,10 +25,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -53,152 +42,125 @@ public class HoraExtraServiceWrite {
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final TipoMovimentoHelper tipoMovimentoHelper;
 
+  private final PedidoEntityRepository pedidoRepository;
+
   @Transactional
   public Map<String, ?> marcarHoraExtra(MarcarHoraExtraCommand command) {
-    var req = command.getHoraextrareq();
-    if (req == null)
-      throw IgrpResponseStatusException.badRequest("Dados de hora extra ausentes");
-    if (req.getHoraExtra() == null || req.getHoraExtra().isEmpty())
-      throw IgrpResponseStatusException.badRequest("Registos de hora extra obrigatórios");
 
-    Long firstId = null;
-    String firstUuid = null;
+    var req = command.getHoraextrareq();
+    if (req == null || req.getHoraExtra() == null || req.getHoraExtra().isEmpty()) {
+      throw IgrpResponseStatusException.badRequest("Dados de hora extra ausentes");
+    }
+
+
+    var pedido = new PedidoEntity();
+    pedido.setEstado(Estado.P);
+    pedido.setTipoPedido(Referencia.HORA_EXTRA.name());
+    pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
+
+    pedido = pedidoRepository.save(pedido);
+
+    Long firstHoraExtraId = null;
+    String pedidoUuid = pedido.getUuid().toString();
     int totalRegistos = 0;
 
+
     for (HoraExtraDTO dto : req.getHoraExtra()) {
+
       if (dto.getColaborador() == null)
         throw IgrpResponseStatusException.badRequest("Colaborador obrigatório");
+
       if (dto.getDataInicio() == null || dto.getDataFim() == null)
         throw IgrpResponseStatusException.badRequest("Intervalo de datas obrigatório");
+
       if (dto.getDataFim().isBefore(dto.getDataInicio()))
         throw IgrpResponseStatusException.badRequest("Data fim não pode ser anterior à data início");
+
       if (dto.getHorasDiaria() == null)
         throw IgrpResponseStatusException.badRequest("Horas diárias obrigatórias");
 
       var funcionario = funcionarioRepository.findByIdOrThrow(dto.getColaborador());
       var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
+      // Se o pedido for por funcionário (opcional, depende do modelo)
+      pedido.setFunId(funcionario);
+
       var dias = expandirDias(dto.getDataInicio(), dto.getDataFim());
+
       for (var dia : dias) {
+
         var sintese = buildSinteseDia(funcionario, dia, dto.getHorasDiaria());
         sintese = sinteseRepository.save(sintese);
 
+        // =========================
+        // Cálculo valor
+        // =========================
+        int valorDiario = calcularValorHoraExtra(
+            tipoRelAtual,
+            dto.getHorasDiaria(),
+            dto.getPercentagemHora()
+        );
+
         var he = new HoraExtraEntity();
+        he.setPedidoId(pedido);
         he.setTiprelId(tipoRelAtual);
         he.setSinteseDiarioId(sintese);
         he.setDataInicio(dia);
         he.setDataFim(dia);
         he.setHorasDiarias(dto.getHorasDiaria());
         he.setPercentagem(dto.getPercentagemHora());
-        he.setValorDiario(dto.getValorDiario());
+        he.setValorDiario(valorDiario);
         he.setEstado(Estado.P);
         he.setUuid(UuidCreator.getTimeOrderedEpoch());
+
         he = horaExtraRepository.save(he);
 
-        if (firstId == null) {
-          firstId = he.getId();
-          firstUuid = he.getUuid() != null ? he.getUuid().toString() : null;
+        if (firstHoraExtraId == null) {
+          firstHoraExtraId = he.getId();
         }
-        totalRegistos += 1;
 
-        var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.HORA_EXTRA.name(),
-            Estado.P);
-        validacao.setFunId(funcionario);
-        validacao.setTiprelId(tipoRelAtual);
-        funcionario.getValidacoes().add(validacao);
-        funcionarioRepository.saveAndFlush(funcionario);
-        HoraExtraEntity finalHe = he;
-        validacaoEntityRepository.findById(validacao.getId()).ifPresent(v -> {
-          v.setReferenciaId(finalHe.getId());
-          validacaoEntityRepository.save(v);
-        });
+        totalRegistos++;
       }
     }
 
+
+    var validacao = dadosContratuaisMapper.toValidacaoInsert(
+        TipoAcao.INSERT.name(),
+        Referencia.HORA_EXTRA.name(),
+        Estado.P
+    );
+
+    validacao.setReferenciaId(pedido.getId());
+    validacao.setReferenciaUuid(pedido.getUuid());
+
+    validacaoEntityRepository.save(validacao);
+
+
     Map<String, Object> resp = new HashMap<>();
-    resp.put("id", firstId);
-    resp.put("uuid", firstUuid);
+    resp.put("pedidoId", pedido.getId());
+    resp.put("pedidoUuid", pedidoUuid);
     resp.put("totalRegistos", totalRegistos);
+
     return resp;
   }
 
-  @Transactional
-  public Map<String, ?> validarHoraExtra(ValidarHoraExtraCommand command) {
-    var req = command.getHoraextrareq();
-    if (req == null || !StringUtils.hasText(req.getValidar()))
-      throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
-    if (!StringUtils.hasText(command.getHoraExtraId()))
-      throw IgrpResponseStatusException.badRequest("Identificador da hora extra é obrigatório");
 
-    Long horaExtraId;
-    try {
-      horaExtraId = Long.parseLong(command.getHoraExtraId());
-    } catch (NumberFormatException e) {
-      throw IgrpResponseStatusException.badRequest("Identificador da hora extra inválido");
-    }
+  // Método para calcular valor da hora extra
+  private int calcularValorHoraExtra(TiposRelacionamentoEntity tipoRel, int horasDiarias, Integer percentagem) {
+    if (percentagem == null) percentagem = 100;
 
-    var horaExtra = horaExtraRepository.findByIdOrThrow(horaExtraId);
-    var tipoRel = horaExtra.getTiprelId();
-    var funcionario = tipoRel != null ? tipoRel.getFunId() : null;
+    /*var valorSalario = tipoRel.getCarreiraId()!= null ? tipoRel.getCarreiraId().getEscalaoId().getValor()
+        : null;*/
 
-    if (funcionario == null)
-      throw IgrpResponseStatusException.badRequest("Registo sem colaborador associado");
-
-    var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
-    var estado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-
-    horaExtra.setEstado(estado);
-    horaExtraRepository.save(horaExtra);
-
-    funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.HORA_EXTRA)
-        .ifPresent(v -> {
-          v.setEstado(estado);
-          validacaoEntityRepository.save(v);
-        });
-
-    if (Estado.A.equals(estado)) {
-      var horas = horaExtra.getHorasDiarias() != null ? horaExtra.getHorasDiarias() : 0;
-      if (horas > 0) {
-        BigDecimal valorHora;
-        if (horaExtra.getValorDiario() != null && horaExtra.getValorDiario() > 0) {
-          valorHora = BigDecimal.valueOf(horaExtra.getValorDiario());
-        } else {
-          var params = assiduidadeParametroRepository.findAllByEstado(Estado.A.getCode());
-          var p = params != null && !params.isEmpty() ? params.getFirst() : null;
-          var isFimDeSemana = horaExtra.getDataInicio() != null &&
-              (horaExtra.getDataInicio().getDayOfWeek() == DayOfWeek.SATURDAY
-                  || horaExtra.getDataInicio().getDayOfWeek() == DayOfWeek.SUNDAY);
-          valorHora = p != null
-              ? (isFimDeSemana ? p.getHeValorDnutil() : p.getHeValorDutil())
-              : BigDecimal.ZERO;
-        }
-        var valor = valorHora.multiply(BigDecimal.valueOf(horas)).setScale(2, RoundingMode.HALF_UP);
-        if (horaExtra.getPercentagem() != null && horaExtra.getPercentagem() > 0) {
-          valor = valor.multiply(BigDecimal.valueOf(horaExtra.getPercentagem()))
-              .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-        }
-        var tm = tipoMovimentoHelper.getTipoMovimentoEntityHoraExtra();
-        var defRem = definicaoRemuneracaoMapper.createRenumeracao(
-            valor,
-            tm,
-            horaExtra.getDataInicio(),
-            horaExtra.getDataFim(),
-            funcionario,
-            tipoRel.getMoeda());
-        defRem.setEstado(Estado.A);
-        defRem = definicaoRemuneracaoRepository.save(defRem);
-        horaExtra.setDefRemId(defRem);
-        horaExtraRepository.save(horaExtra);
-      }
-    }
-
-    Map<String, Object> resp = new HashMap<>();
-    resp.put("id", horaExtra.getId());
-    resp.put("uuid", horaExtra.getUuid() != null ? horaExtra.getUuid().toString() : null);
-    resp.put("estado", horaExtra.getEstado() != null ? horaExtra.getEstado().name() : null);
-    return resp;
+    // Exemplo: pega salário diário do tipoRel
+    BigDecimal salarioDiario = tipoRel.getSalario() != null ? tipoRel.getSalario() : BigDecimal.ZERO;
+    BigDecimal valor = salarioDiario.multiply(BigDecimal.valueOf(horasDiarias))
+        .multiply(BigDecimal.valueOf(percentagem))
+        .divide(BigDecimal.valueOf(100));
+    return valor.intValue();
   }
 
+  // Expande intervalo de datas
   private List<LocalDate> expandirDias(LocalDate inicio, LocalDate fim) {
     var dias = new ArrayList<LocalDate>();
     var d = inicio;
@@ -208,6 +170,138 @@ public class HoraExtraServiceWrite {
     }
     return dias;
   }
+
+
+  @Transactional
+  public Map<String, ?> validarHoraExtra(ValidarHoraExtraCommand command) {
+
+    var req = command.getHoraextrareq();
+
+    if (req == null || req.getValidar() == null)
+      throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+
+    if (!StringUtils.hasText(command.getPedidoId()))
+      throw IgrpResponseStatusException.badRequest("Identificador do pedido é obrigatório");
+
+    var pedidoUuid = UUID.fromString(command.getPedidoId());
+
+    var pedido = pedidoRepository.findByUuid(pedidoUuid)
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest("Pedido não encontrado"));
+
+    var horasExtra = horaExtraRepository
+        .findAllByPedidoId_UuidAndEstado(pedidoUuid, Estado.P);
+
+    if (horasExtra.isEmpty())
+      throw IgrpResponseStatusException.badRequest("Pedido já validado ou sem registos pendentes");
+
+    Estado estado = Objects.equals(req.getValidar(), EstadoValidacao.SIM)
+        ? Estado.A
+        : Estado.I;
+
+    Map<LocalDate, HoraExtraDTO> ajustes = new HashMap<>();
+
+    if (req.getHoraExtra() != null) {
+      for (HoraExtraDTO dto : req.getHoraExtra()) {
+        if (dto.getDataInicio() != null) {
+          ajustes.put(dto.getDataInicio(), dto);
+        }
+      }
+    }
+
+    for (HoraExtraEntity he : horasExtra) {
+
+      var ajuste = ajustes.get(he.getDataInicio());
+
+      if (ajuste != null) {
+        if (ajuste.getHorasDiaria() != null)
+          he.setHorasDiarias(ajuste.getHorasDiaria());
+
+        if (ajuste.getPercentagemHora() != null)
+          he.setPercentagem(ajuste.getPercentagemHora());
+
+        if (ajuste.getValorDiario() != null)
+          he.setValorDiario(ajuste.getValorDiario());
+      }
+
+      he.setEstado(estado);
+      horaExtraRepository.save(he);
+    }
+
+    funcionarioRules.getValidacaoPendenteByReferenciaUuid(
+        pedido.getUuid(),
+        TipoAcao.INSERT,
+        Referencia.HORA_EXTRA
+    ).ifPresent(v -> {
+      v.setEstado(estado);
+      validacaoEntityRepository.save(v);
+    });
+
+    pedido.setEstado(estado);
+    pedidoRepository.save(pedido);
+
+    /*if (estado == Estado.A) {
+
+  var horas = he.getHorasDiarias() != null ? he.getHorasDiarias() : 0;
+
+  if (horas > 0) {
+
+    BigDecimal valorHora;
+
+    if (he.getValorDiario() != null && he.getValorDiario() > 0) {
+      valorHora = BigDecimal.valueOf(he.getValorDiario());
+    } else {
+
+      var params = assiduidadeParametroRepository.findAllByEstado(Estado.A.getCode());
+      var p = params != null && !params.isEmpty() ? params.getFirst() : null;
+
+      var isFimDeSemana =
+          he.getDataInicio() != null &&
+          (he.getDataInicio().getDayOfWeek() == DayOfWeek.SATURDAY
+              || he.getDataInicio().getDayOfWeek() == DayOfWeek.SUNDAY);
+
+      valorHora = p != null
+          ? (isFimDeSemana ? p.getHeValorDnutil() : p.getHeValorDutil())
+          : BigDecimal.ZERO;
+    }
+
+    var valor = valorHora
+        .multiply(BigDecimal.valueOf(horas))
+        .setScale(2, RoundingMode.HALF_UP);
+
+    if (he.getPercentagem() != null && he.getPercentagem() > 0) {
+      valor = valor.multiply(BigDecimal.valueOf(he.getPercentagem()))
+          .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+    }
+
+    var tm = tipoMovimentoHelper.getTipoMovimentoEntityHoraExtra();
+
+    var defRem = definicaoRemuneracaoMapper.createRenumeracao(
+        valor,
+        tm,
+        he.getDataInicio(),
+        he.getDataFim(),
+        funcionario,
+        tipoRel.getMoeda()
+    );
+
+    defRem.setEstado(Estado.A);
+    defRem = definicaoRemuneracaoRepository.save(defRem);
+
+    he.setDefRemId(defRem);
+    horaExtraRepository.save(he);
+  }
+}
+*/
+
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("pedidoId", pedido.getId());
+    resp.put("pedidoUuid", pedido.getUuid());
+    resp.put("estado", pedido.getEstado());
+    resp.put("totalRegistos", horasExtra.size());
+
+    return resp;
+  }
+
 
   private AssiduidadeSinteseDiarioEntity buildSinteseDia(FuncionarioEntity fun, LocalDate dia, Integer horasExtra) {
     var e = new AssiduidadeSinteseDiarioEntity();
@@ -227,4 +321,4 @@ public class HoraExtraServiceWrite {
     return hh + ":00";
   }
 
-  }
+}

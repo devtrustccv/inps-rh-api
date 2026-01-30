@@ -117,6 +117,10 @@ public class FuncionarioRules {
         .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(funUuid, Estado.P, tipoAccao.name(), referenciaName.name());
   }
 
+  public Optional<ValidacaoEntity> getValidacaoPendenteByReferenciaUuid(UUID referenciaUuid, TipoAcao tipoAccao, Referencia referenciaName) {
+    return validacaoEntityRepository
+        .findByReferenciaUuidAndEstadoAndTipoAccaoAndReferenciaName(referenciaUuid, Estado.P, tipoAccao.name(), referenciaName.name());
+  }
 
 
 }

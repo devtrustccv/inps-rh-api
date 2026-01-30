@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.HoraExtraEntity;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import org.springframework.stereotype.Repository;
@@ -27,4 +28,6 @@ public interface HoraExtraEntityRepository extends
 
 
   List<HoraExtraEntity> findAllByPedidoId_Uuid(UUID pedidoIdUuid);
+
+  List<HoraExtraEntity> findAllByPedidoId_UuidAndEstado(UUID pedidoUuid, Estado estado);
 }

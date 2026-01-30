@@ -392,7 +392,7 @@ public class AssiduidadeController {
   }
 
    @PostMapping(
-   value = "hora-extra/{horaExtraId}"
+   value = "hora-extra/{pedidoId}"
   )
   @Operation(
     summary = "Validar hora extra",
@@ -412,10 +412,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<Map<String, ?>> validarHoraExtra(@Valid @RequestBody HoraExtraReqDTO validarHoraExtraRequest
-    , @PathVariable(value = "horaExtraId") String horaExtraId)
+    , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var command = new ValidarHoraExtraCommand(validarHoraExtraRequest, horaExtraId);
+      final var command = new ValidarHoraExtraCommand(validarHoraExtraRequest, pedidoId);
 
       return commandBus.send(command);
 
