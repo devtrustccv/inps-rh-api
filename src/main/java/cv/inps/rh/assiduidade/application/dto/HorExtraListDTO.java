@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-
+import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -21,10 +21,10 @@ public class HorExtraListDTO  {
 
   
   
-  private Long id ;
+  private String funcionarioUuid ;
   
   
-  private String uuid ;
+  private Long pedidoId ;
   
   
   private String direcao ;
@@ -36,19 +36,16 @@ public class HorExtraListDTO  {
   private String nomeColaborador ;
   
   
-  private String categoria ;
+  private String seccao ;
   
   
-  private Long categoriaId ;
+  private Long seccaoId ;
   
   
-  private String vinculo ;
+  private String dataInicio ;
   
   
-  private Long vinculoId ;
-  
-  
-  private String intervaloData ;
+  private String dataFim ;
   
   
   private String horasContratato ;
@@ -57,13 +54,16 @@ public class HorExtraListDTO  {
   private String horasTrabalho ;
   
   
-  private String salarioMensal ;
+  private BigDecimal salarioMensal ;
   
   
-  private String valorHorasMensal ;
+  private BigDecimal valorHorasMensal ;
   
   
-  private String valorHorasDiario ;
+  private BigDecimal valorHorasDiario ;
+  
+  
+  private Integer percentagem ;
   
   
   private String estado ;
