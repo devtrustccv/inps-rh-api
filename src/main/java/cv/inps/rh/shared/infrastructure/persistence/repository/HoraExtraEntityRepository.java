@@ -21,4 +21,5 @@ public interface HoraExtraEntityRepository extends
           .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"HoraExtraEntity not found for id: " + id));
       }
 
+    Optional<HoraExtraEntity> findByUuid(UUID uuid);
 }
