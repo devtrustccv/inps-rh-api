@@ -1089,6 +1089,34 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getDispensaByPedidoId",
+      "path": "dispensa/{pedidoId}/validacao",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DispensaReq",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "pedidoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada"

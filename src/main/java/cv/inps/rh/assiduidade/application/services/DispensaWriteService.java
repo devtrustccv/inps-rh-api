@@ -80,8 +80,10 @@ public class DispensaWriteService {
     funcionarioRepository.saveAndFlush(funcionario);
 
     PedidoEntity finalPedido = pedido;
+
     validacaoEntityRepository.findById(validacao.getId()).ifPresent(v -> {
       v.setReferenciaId(finalPedido.getId());
+      v.setReferenciaUuid(finalPedido.getUuid());
       validacaoEntityRepository.save(v);
     });
 

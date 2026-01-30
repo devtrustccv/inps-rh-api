@@ -884,4 +884,34 @@ public class AssiduidadeController {
 
   }
 
+   @GetMapping(
+   value = "dispensa/{pedidoId}/validacao"
+  )
+  @Operation(
+    summary = "Get dispensa by pedido id",
+    description = "Get dispensa by pedido id",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DispensaReqDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<DispensaReqDTO> getDispensaByPedidoId(
+    @PathVariable(value = "pedidoId") String pedidoId)
+  {
+
+      final var query = new GetDispensaByPedidoIdQuery(pedidoId);
+
+      return queryBus.handle(query);
+
+  }
+
 }
