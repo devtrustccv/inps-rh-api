@@ -56,8 +56,7 @@ public class EmprestimoEntity extends AuditEntity {
   @Column(name = "VALOR_EMPRESTIMO", nullable = false)
   private Long valorEmprestimo;
 
-  @NotNull
-  @Column(name = "VALOR_DIVIDA", nullable = false)
+  @Column(name = "VALOR_DIVIDA")
   private Long valorDivida;
 
   @NotNull
@@ -73,15 +72,13 @@ public class EmprestimoEntity extends AuditEntity {
   @Column(name = "DATA_INICIO", nullable = false)
   private LocalDate dataInicio;
 
-  @NotNull
-  @Column(name = "DATA_FIM", nullable = false)
+  @Column(name = "DATA_FIM")
   private LocalDate dataFim;
 
   @Column(name = "JURO")
   private Long juro;
 
-  @NotNull
-  @Column(name = "VALOR_PRESTACAO", nullable = false)
+  @Column(name = "VALOR_PRESTACAO")
   private Long valorPrestacao;
 
   @Size(max = 300)
@@ -97,14 +94,11 @@ public class EmprestimoEntity extends AuditEntity {
   @JoinColumn(name = "EMPRESTIMO_ID")
   private EmprestimoEntity emprestimo;
 
-  @NotNull
-  @Column(name = "VERSAO", nullable = false)
+  @Column(name = "VERSAO")
   private Long versao;
 
-  @NotNull
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @OnDelete(action = OnDeleteAction.RESTRICT)
-  @JoinColumn(name = "PEDIDO_ID", nullable = false)
+  @JoinColumn(name = "PEDIDO_ID")
   private PedidoEntity pedido;
 
   @Size(max = 10)
@@ -140,8 +134,7 @@ public class EmprestimoEntity extends AuditEntity {
   private String motivo;
 
   @Size(max = 100)
-  @NotNull
-  @Column(name = "TIPO_SITUACAO", nullable = false, length = 100)
+  @Column(name = "TIPO_SITUACAO", length = 100)
   private String tipoSituacao;
 
   @ManyToOne(fetch = FetchType.LAZY)

@@ -67,10 +67,7 @@ public class EmprestimoWriteService {
       entity = new EmprestimoEntity();
       entity.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
       entity.setEstado(Estado.A.name());
-
-      // TODO 29/01/2026 21:10 validate this fields
       entity.setDataInicio(LocalDate.now());
-      entity.setDataFim(LocalDate.now());
       entity.setTipoEmprestimo("AQUISICAO_VIATURA");
       entity.setFinalidade("AQUISICAO_VIATURA");
     }
@@ -85,14 +82,6 @@ public class EmprestimoWriteService {
     entity.setEstadoViatura(request.getEstadoViatura());
     entity.setValorEmprestimo(request.getValorEmprestimo());
     entity.setNrPrestacao(request.getNumeroPrestacoes());
-
-    // TODO 29/01/2026 21:10 validate this fields
-    entity.setValorPrestacao(request.getValorEmprestimo());
-    entity.setPedido(pedidoEntityRepository.findByIdOrThrow(13L));
-    entity.setValorDivida(request.getValorEmprestimo());
-    entity.setValorDivida(request.getValorEmprestimo());
-    entity.setVersao(1L);
-    entity.setTipoSituacao("XQWERTY");
 
     // TODO 29/01/2026 21:23 save documentos
 

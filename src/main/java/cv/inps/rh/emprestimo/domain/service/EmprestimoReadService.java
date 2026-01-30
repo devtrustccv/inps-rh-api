@@ -105,7 +105,7 @@ public class EmprestimoReadService {
           var dto = new EmprestimoListRowDTO();
           dto.setEstado(e.getEstado());
           dto.setEstadoDesc(Estado.codeDescriptionMap().get(e.getEstado()));
-          dto.setTipoEmprestimo(e.getPedido().getTipoPedido());
+          dto.setTipoEmprestimo(e.getTipoEmprestimo());
           dto.setRenegociacaoDivida(e.getRenogociacao());
           dto.setValorConcedido(e.getValorEmprestimo());
           dto.setNumeroPrestacoesPagas(e.getNrPrestacao());
