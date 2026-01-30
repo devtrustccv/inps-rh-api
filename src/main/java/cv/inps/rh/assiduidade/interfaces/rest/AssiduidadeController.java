@@ -734,7 +734,7 @@ public class AssiduidadeController {
   }
 
    @GetMapping(
-   value = "hora-extra/{horaExtraId}"
+   value = "hora-extra/{pedidoId}"
   )
   @Operation(
     summary = "Get hora extra",
@@ -754,10 +754,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<HoraExtraReqDTO> getHoraExtra(
-    @PathVariable(value = "horaExtraId") String horaExtraId)
+    @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var query = new GetHoraExtraQuery(horaExtraId);
+      final var query = new GetHoraExtraQuery(pedidoId);
 
       return queryBus.handle(query);
 

@@ -929,7 +929,7 @@
     },
     {
       "actionName": "getHoraExtra",
-      "path": "hora-extra/{horaExtraId}",
+      "path": "hora-extra/{pedidoId}",
       "method": "GET",
       "responses": {
         "200": {
@@ -949,7 +949,7 @@
       },
       "pathVariables": [
         {
-          "name": "horaExtraId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
@@ -1158,5 +1158,5 @@
       ]
     }
   ],
-  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa-validarHoraExtra"
+  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa-validarHoraExtra-getHoraExtra"
 }
