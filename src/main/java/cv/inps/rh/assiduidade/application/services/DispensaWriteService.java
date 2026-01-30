@@ -1,6 +1,7 @@
 package cv.inps.rh.assiduidade.application.services;
 
 import cv.inps.rh.assiduidade.application.commands.MarcarDispensaCommand;
+import cv.inps.rh.assiduidade.application.commands.UpdateDispensaCommand;
 import cv.inps.rh.assiduidade.application.commands.ValidarDispensaCommand;
 import cv.inps.rh.assiduidade.application.dto.DispensaReqDTO;
 import com.github.f4b6a3.uuid.UuidCreator;
@@ -24,6 +25,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -98,18 +100,16 @@ public class DispensaWriteService {
     var req = command.getDispensareq();
     if (req == null || !StringUtils.hasText(req.getValidar()))
       throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
-    if (!StringUtils.hasText(command.getDispensaId()))
-      throw IgrpResponseStatusException.badRequest("Identificador da dispensa é obrigatório");
+    if (!StringUtils.hasText(command.getPedidoId()))
+      throw IgrpResponseStatusException.badRequest("Identificador da pedido é obrigatório");
 
-    Long dispensaId;
-    try {
-      dispensaId = Long.parseLong(command.getDispensaId());
-    } catch (NumberFormatException e) {
-      throw IgrpResponseStatusException.badRequest("Identificador da dispensa inválido");
-    }
+    var dispensa = dispensaRepository.findByPedidoId_Uuid(UUID.fromString(command.getPedidoId()))
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Dispensa nao encontrada" +
+                "para esse pedido",
+            command.getPedidoId()));
 
-    var dispensa = dispensaRepository.findByIdOrThrow(dispensaId);
     var pedido = dispensa.getPedidoId();
+
     var funcionario = pedido != null ? pedido.getFunId() : null;
     if (funcionario == null)
       throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
@@ -142,8 +142,74 @@ public class DispensaWriteService {
 
 
     funcionarioRules.getValidacaoPendente(funcionario.getUuid(),
-        TipoAcao.INSERT, Referencia.DISPENSA).ifPresent(validacaoEntityRepository::save);
+            TipoAcao.INSERT, Referencia.DISPENSA)
+        .ifPresent(v -> {
+          v.setEstado(estado);
+          validacaoEntityRepository.save(v);
+        });
 
+
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("id", dispensa.getId());
+    resp.put("estado", dispensa.getEstado().name());
+    return resp;
+  }
+
+  @Transactional
+  public Map<String, ?> updateDispensa(UpdateDispensaCommand command) {
+    var req = command.getDispensareq();
+    if (req == null || !StringUtils.hasText(req.getValidar()))
+      throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+    if (!StringUtils.hasText(command.getDispensaId()))
+      throw IgrpResponseStatusException.badRequest("Identificador da Dispensa é obrigatório");
+
+    var dispensa = dispensaRepository.findByUuid(UUID.fromString(command.getDispensaId()))
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Dispensa nao encontrada",
+            command.getDispensaId()));
+
+    var pedido = dispensa.getPedidoId();
+
+    var funcionario = pedido != null ? pedido.getFunId() : null;
+    if (funcionario == null)
+      throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
+
+    var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+
+    dispensa.setDecisaoResponsavel(req.getParecerResponsavel());
+    dispensa.setObsResponsavel(req.getObservacaoResponsavel());
+    dispensa.setObsRh(req.getObservacaoRh());
+    dispensa.setEstado(Estado.P);
+    dispensa.setTiprelId(tipoRelAtual);
+    if (req.getDataDispensa() != null) {
+      dispensa.setData(req.getDataDispensa());
+    }
+    if (StringUtils.hasText(req.getHoraSaida())) {
+      dispensa.setHoraInicio(req.getHoraSaida());
+    }
+    if (StringUtils.hasText(req.getHoraEntrada())) {
+      dispensa.setHoraFim(req.getHoraEntrada());
+    }
+    if (StringUtils.hasText(req.getMotivo())) {
+      dispensa.setDescricaoMotivo(req.getMotivo());
+    }
+    dispensaRepository.save(dispensa);
+
+    pedido.setEstado(Estado.P);
+    pedidoRepository.save(pedido);
+
+    var validacao = dadosContratuaisMapper.
+        toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.DISPENSA.name(),
+        Estado.P);
+    validacao.setFunId(funcionario);
+    validacao.setTiprelId(tipoRelAtual);
+    funcionario.getValidacoes().add(validacao);
+    funcionarioRepository.saveAndFlush(funcionario);
+
+    validacaoEntityRepository.findById(validacao.getId()).ifPresent(v -> {
+      v.setReferenciaId(pedido.getId());
+      v.setReferenciaUuid(pedido.getUuid());
+      validacaoEntityRepository.save(v);
+    });
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", dispensa.getId());

@@ -10,11 +10,11 @@ import cv.inps.rh.assiduidade.application.dto.DispensaReqDTO;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ValidarDispensaCommand implements Command {
+public class UpdateDispensaCommand implements Command {
 
   
   private DispensaReqDTO dispensareq;
-  @NotBlank(message = "The field <pedidoId> is required")
-  private String pedidoId;
+  @NotBlank(message = "The field <dispensaId> is required")
+  private String dispensaId;
 
 }

@@ -295,8 +295,8 @@ public class AssiduidadeController {
 
   }
 
-   @PostMapping(
-   value = "dispensa/{dispensaId}"
+   @PutMapping(
+   value = "dispensa/{pedidoId}/validar"
   )
   @Operation(
     summary = "Validar dispensa",
@@ -316,10 +316,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<Map<String, ?>> validarDispensa(@Valid @RequestBody DispensaReqDTO validarDispensaRequest
-    , @PathVariable(value = "dispensaId") String dispensaId)
+    , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var command = new ValidarDispensaCommand(validarDispensaRequest, dispensaId);
+      final var command = new ValidarDispensaCommand(validarDispensaRequest, pedidoId);
 
       return commandBus.send(command);
 
@@ -911,6 +911,36 @@ public class AssiduidadeController {
       final var query = new GetDispensaByPedidoIdQuery(pedidoId);
 
       return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "dispensa/{dispensaId}"
+  )
+  @Operation(
+    summary = "Update dispensa",
+    description = "Update dispensa",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> updateDispensa(@Valid @RequestBody DispensaReqDTO updateDispensaRequest
+    , @PathVariable(value = "dispensaId") String dispensaId)
+  {
+
+      final var command = new UpdateDispensaCommand(updateDispensaRequest, dispensaId);
+
+      return commandBus.send(command);
 
   }
 

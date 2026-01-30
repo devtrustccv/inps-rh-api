@@ -385,8 +385,8 @@
     },
     {
       "actionName": "validarDispensa",
-      "path": "dispensa/{dispensaId}",
-      "method": "POST",
+      "path": "dispensa/{pedidoId}/validar",
+      "method": "PUT",
       "requestBody": {
         "content": {
           "application/json": {
@@ -416,7 +416,7 @@
       },
       "pathVariables": [
         {
-          "name": "dispensaId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
@@ -1117,7 +1117,46 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "updateDispensa",
+      "path": "dispensa/{dispensaId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "DispensaReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "dispensaId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada"
+  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa"
 }
