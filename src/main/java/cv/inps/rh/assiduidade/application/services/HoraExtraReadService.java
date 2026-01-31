@@ -7,7 +7,9 @@ import cv.inps.rh.assiduidade.application.queries.GetHoraExtraQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaHoraExtraQuery;
 import cv.inps.rh.assiduidade.application.dto.HorExtraListDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.HoraExtraEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.VHoraExtraMensalEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.HoraExtraEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.VHoraExtraMensalEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
@@ -21,6 +23,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Service
@@ -28,6 +32,7 @@ import java.util.UUID;
 public class HoraExtraReadService {
 
   private final HoraExtraEntityRepository horaExtraRepository;
+  private final VHoraExtraMensalEntityRepository vHoraExtraMensalRepository;
 
   @Transactional(readOnly = true)
   public WrapperListaHoraExtraDTO getListaHoraExtra(GetListaHoraExtraQuery query) {
@@ -42,7 +47,7 @@ public class HoraExtraReadService {
 
     Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
 
-    Page<HoraExtraEntity> page = horaExtraRepository.findAll(buildSpec(query), pageable);
+    Page<VHoraExtraMensalEntity> page = vHoraExtraMensalRepository.findAll(buildSpec(query), pageable);
 
     var content = page.getContent()
         .stream()
@@ -55,105 +60,82 @@ public class HoraExtraReadService {
     return wrapper;
   }
 
-  private Specification<HoraExtraEntity> buildSpec(GetListaHoraExtraQuery query) {
+  private Specification<VHoraExtraMensalEntity> buildSpec(GetListaHoraExtraQuery query) {
     return (root, cq, cb) -> {
 
-      var predicates = new java.util.ArrayList<Predicate>();
+      var predicates = new ArrayList<Predicate>();
 
-      if (StringUtils.hasText(query.getDataInicio())) {
-        var di = DateFormatter.stringToLocalDate(query.getDataInicio());
-        if (di != null) {
-          predicates.add(cb.greaterThanOrEqualTo(root.get("dataInicio"), di));
-        }
-      }
-
-      if (StringUtils.hasText(query.getDataFim())) {
-        var df = DateFormatter.stringToLocalDate(query.getDataFim());
-        if (df != null) {
-          predicates.add(cb.lessThanOrEqualTo(root.get("dataFim"), df));
-        }
+      if (query.getIlha() != null) {
+        predicates.add(cb.equal(root.get("ilhaId"), query.getIlha()));
       }
 
       if (query.getDirecao() != null) {
-        predicates.add(
-            cb.equal(root.get("tiprelId").get("mobId").get("instidId").get("id"),
-                query.getDirecao()));
+        predicates.add(cb.equal(root.get("direcaoId"), query.getDirecao()));
       }
 
       if (query.getSeccao() != null) {
-        predicates.add(
-            cb.equal(root.get("tiprelId").get("mobId").get("secaoId").get("id"),
-                query.getSeccao()));
+        predicates.add(cb.equal(root.get("seccaoId"), query.getSeccao()));
       }
 
-      if (query.getIlha() != null) {
-        predicates.add(
-            cb.equal(
-                root.get("tiprelId")
-                    .get("mobId")
-                    .get("localTrabId")
-                    .get("ilhaId")
-                    .get("id"),
-                query.getIlha()));
+      if (StringUtils.hasText(query.getDataInicio())) {
+        var dtIni = LocalDate.parse(query.getDataInicio());
+        predicates.add(cb.greaterThanOrEqualTo(root.get("dataInicio"), dtIni));
+      }
+
+      if (StringUtils.hasText(query.getDataFim())) {
+        var dtFim = LocalDate.parse(query.getDataFim());
+        predicates.add(cb.lessThanOrEqualTo(root.get("dataFim"), dtFim));
       }
 
       return cb.and(predicates.toArray(new Predicate[0]));
     };
   }
 
-  private HorExtraListDTO toDTO(HoraExtraEntity e) {
+
+  private HorExtraListDTO toDTO(VHoraExtraMensalEntity e) {
 
     var dto = new HorExtraListDTO();
 
-    /*dto.setId(e.getId());
-    dto.setUuid(e.getUuid() != null ? e.getUuid().toString() : null);
+    dto.setFuncionarioUuid(e.getFuncionarioUuid().toString());
+    dto.setPedidoId(e.getPedidoId());
 
-    var tiprel = e.getTiprelId();
-    var mob = tiprel != null ? tiprel.getMobId() : null;
-    var inst = mob != null ? mob.getInstidId() : null;
+    dto.setDirecao(e.getNomeDirecao());
+    dto.setDirecaoId(e.getIdDirecao());
 
-    dto.setDirecao(inst != null ? inst.getNome() : null);
-    dto.setDirecaoId(inst != null ? inst.getId() : null);
+    dto.setSeccao(e.getNomeSeccao());
+    dto.setSeccaoId(e.getIdSeccao());
 
-    dto.setNomeColaborador(
-        tiprel != null && tiprel.getFunId() != null
-            ? tiprel.getFunId().getNome()
-            : null);
+    dto.setNomeColaborador(e.getNomeFuncionario());
 
-    var cargo = tiprel != null ? tiprel.getCargoId() : null;
-    dto.setCategoria(cargo != null ? cargo.getNome() : null);
-    dto.setCategoriaId(cargo != null ? cargo.getId() : null);
-
-    var vinc = tiprel != null && tiprel.getContrVinculoId() != null
-        ? tiprel.getContrVinculoId().getVinculoId()
-        : null;
-
-    dto.setVinculo(vinc != null ? vinc.getNome() : null);
-    dto.setVinculoId(vinc != null ? vinc.getId() : null);
-
-    var horasExtras = e.getSinteseDiarioId() != null
-        ? e.getSinteseDiarioId().getHorasExtras()
-        : null;
+    dto.setDataInicio(
+        e.getDataInicio() != null ? e.getDataInicio().toString() : null
+    );
+    dto.setDataFim(
+        e.getDataFim() != null ? e.getDataFim().toString() : null
+    );
 
     dto.setHorasContratato(
-        e.getHorasDiarias() != null ? e.getHorasDiarias().toString() : null);
+        e.getHorasContratadoDiario() != null
+            ? e.getHorasContratadoDiario() + " / " + e.getHorasContratadoMensal()
+            : null
+    );
 
-    dto.setHorasTrabalho(formatHorasExtra(horasExtras));
+    dto.setHorasTrabalho(
+        e.getHorasTrabalho() != null ? e.getHorasTrabalho().toPlainString() : null
+    );
 
-    dto.setSalarioMensal(
-        tiprel != null && tiprel.getSalario() != null
-            ? tiprel.getSalario().toPlainString()
-            : null);
+    dto.setSalarioMensal(e.getSalarioMensal());
+    dto.setValorHorasMensal(e.getValorHorasMensal());
+    dto.setValorHorasDiario(e.getValorHorasDiario());
 
-    dto.setValorHorasMensal(null);
-    dto.setValorHorasDiario(
-        e.getValorDiario() != null ? e.getValorDiario().toString() : null);
+    dto.setPercentagem(e.getPercentagem());
 
-    dto.setEstado(e.getEstado() != null ? e.getEstado().name() : null);
-    dto.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);*/
+    dto.setEstado(e.getEstado());
+    dto.setEstadoDesc(e.getEstadoDesc());
 
     return dto;
   }
+
 
   private String formatHorasExtra(String s) {
     if (!StringUtils.hasText(s))
