@@ -6,7 +6,6 @@ package cv.inps.rh.shared.infrastructure.persistence.entity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import java.time.LocalDate;
 
@@ -21,12 +20,7 @@ import java.time.LocalDate;
 public class VFeriasDetalheColaboradorEntity  {
 
     @Id
-    @Column(name = "id", unique = true, nullable = false)
-    private Long id;
-
-  
-    @NotNull(message = "funcionarioId is mandatory")
-    @Column(name="funcionario_id", nullable = false)
+    @Column(name = "funcionario_id", unique = true, nullable = false)
     private Long funcionarioId;
 
   
