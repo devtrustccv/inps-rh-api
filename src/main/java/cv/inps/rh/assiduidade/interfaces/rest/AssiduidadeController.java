@@ -614,7 +614,7 @@ public class AssiduidadeController {
   }
 
    @GetMapping(
-   value = "mapa-feria/{mapaFeriaId}"
+   value = "mapa-feria"
   )
   @Operation(
     summary = "Get detalhe mapa feria",
@@ -634,10 +634,11 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<DetalheMapaFeriaDTO> getDetalheMapaFeria(
-    @PathVariable(value = "mapaFeriaId") String mapaFeriaId)
+    @RequestParam(value = "ano") Integer ano,
+    @RequestParam(value = "direcao") Long direcao)
   {
 
-      final var query = new GetDetalheMapaFeriaQuery(mapaFeriaId);
+      final var query = new GetDetalheMapaFeriaQuery(ano, direcao);
 
       return queryBus.handle(query);
 

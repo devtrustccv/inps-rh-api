@@ -806,7 +806,7 @@
     },
     {
       "actionName": "getDetalheMapaFeria",
-      "path": "mapa-feria/{mapaFeriaId}",
+      "path": "mapa-feria",
       "method": "GET",
       "responses": {
         "200": {
@@ -824,10 +824,15 @@
           }
         }
       },
-      "pathVariables": [
+      "requestParams": [
         {
-          "name": "mapaFeriaId",
-          "type": "string",
+          "type": "integer",
+          "name": "ano",
+          "isRequired": true
+        },
+        {
+          "type": "long",
+          "name": "direcao",
           "isRequired": true
         }
       ]
@@ -1158,5 +1163,5 @@
       ]
     }
   ],
-  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa-validarHoraExtra-getHoraExtra"
+  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa-validarHoraExtra-getHoraExtra-getDetalheMapaFeria"
 }

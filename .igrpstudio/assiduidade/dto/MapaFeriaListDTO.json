@@ -6,7 +6,19 @@
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "id",
+      "name": "direcao",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "direcaoId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -18,33 +30,9 @@
       "primaryKey": false
     },
     {
-      "name": "uuid",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
       "name": "anoReferente",
       "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "direcao",
-      "objectType": "java",
-      "type": "string",
+      "type": "integer",
       "required": false,
       "before": false,
       "after": false,
