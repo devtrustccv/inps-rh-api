@@ -568,10 +568,12 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<VerMapaDTO> verMapa(
-    )
+    @RequestParam(value = "ano", required = false) Integer ano,
+    @RequestParam(value = "direcaoId", required = false) Long direcaoId,
+    @RequestParam(value = "funcionarioUuid", required = false) String funcionarioUuid)
   {
 
-      final var query = new VerMapaQuery();
+      final var query = new VerMapaQuery(ano, direcaoId, funcionarioUuid);
 
       return queryBus.handle(query);
 
