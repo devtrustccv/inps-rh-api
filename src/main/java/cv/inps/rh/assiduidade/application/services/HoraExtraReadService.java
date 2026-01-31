@@ -102,8 +102,8 @@ public class HoraExtraReadService {
     dto.setDirecao(e.getNomeDirecao());
     dto.setDirecaoId(e.getIdDirecao());
 
-    dto.setSeccao(e.getNomeSeccao());
-    dto.setSeccaoId(e.getIdSeccao());
+    dto.setSeccao(e.getNomeSecao());
+    dto.setSeccaoId(e.getIdSecao());
 
     dto.setNomeColaborador(e.getNomeFuncionario());
 
