@@ -23,69 +23,71 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MapaFeriaReadService {
 
-  private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
-  private final FeriasMapaEntityRepository feriasMapaEntityRepository;
-  private final FeriasGozadasEntityRepository feriasGozadasEntityRepository;
-
   private final VMapaFeriasDetalheEntityRepository vMapaFeriasDetalheEntityRepository;
   private final VMapaFeriaEntityRepository vMapaFeriaEntityRepository;
+  private final VFeriasDetalheColaboradorEntityRepository vFeriasDetalheColaboradorEntityRepository;
 
   @Transactional(readOnly = true)
   public VerMapaDTO verMapa(VerMapaQuery query) {
-    int ano = LocalDate.now().getYear();
+    // Ano default
+    int ano = query.getAno() != null ? query.getAno() : LocalDate.now().getYear();
 
-    Specification<TiposRelacionamentoEntity> spec = (root, cq, cb) -> {
-      List<Predicate> predicates = new ArrayList<>();
-      predicates.add(cb.equal(root.get("estActAdm"), 1));
-      return cb.and(predicates.toArray(new Predicate[0]));
-    };
+    // Specification dinâmica
+    Specification<VFeriasDetalheColaboradorEntity> spec = (root, cq, cb) ->
+        cb.equal(root.get("anoReferente"), ano);
 
-    List<TiposRelacionamentoEntity> colaboradores = tiposRelacionamentoEntityRepository.findAll(spec);
-
-    List<VerMapaContentDTO> content = new ArrayList<>();
-
-    for (TiposRelacionamentoEntity tr : colaboradores) {
-      FuncionarioEntity fun = tr.getFunId();
-      if (fun == null)
-        continue;
-
-      List<PeriodoDTO> agendadas = getFeriasAgendadas(fun, ano);
-      List<PeriodoDTO> gozadas = getFeriasGozadas(fun, ano);
-
-      if (agendadas.isEmpty() && gozadas.isEmpty())
-        continue;
-
-      VerMapaContentDTO row = new VerMapaContentDTO();
-      row.setNomeColaborador(fun.getNome());
-      row.setFeriasAgendadas(agendadas);
-      row.setFeriasGozadas(gozadas);
-      content.add(row);
+    if (query.getDirecaoId() != null) {
+      spec = spec.and((root, cq, cb) -> cb.equal(root.get("direcaoId"), query.getDirecaoId()));
     }
 
-    content.sort((a, b) -> {
-      if (a.getNomeColaborador() == null && b.getNomeColaborador() == null)
-        return 0;
-      if (a.getNomeColaborador() == null)
-        return 1;
-      if (b.getNomeColaborador() == null)
-        return -1;
-      return a.getNomeColaborador().compareToIgnoreCase(b.getNomeColaborador());
-    });
+    if (StringUtils.hasText(query.getFuncionarioUuid())) {
+      spec = spec.and((root, cq, cb) -> cb.equal(root.get("uuidFuncionario"), UUID.fromString(query.getFuncionarioUuid())));
+    }
 
-    var dto = new VerMapaDTO();
-    dto.setContent(content);
-    return dto;
+    // Buscar registros da view
+    List<VFeriasDetalheColaboradorEntity> registros = vFeriasDetalheColaboradorEntityRepository.findAll(spec);
+
+    // Agrupar por funcionário
+    Map<Long, VerMapaContentDTO> mapa = new HashMap<>();
+    for (VFeriasDetalheColaboradorEntity r : registros) {
+      VerMapaContentDTO content = mapa.computeIfAbsent(
+          r.getFuncionarioId(),
+          k -> {
+            VerMapaContentDTO v = new VerMapaContentDTO();
+            v.setNomeColaborador(r.getNomeColaborador());
+            return v;
+          }
+      );
+
+      // Adicionar período de férias marcadas se existir
+      if (r.getFeriasMarcadasInicio() != null && r.getFeriasMarcadasFim() != null) {
+        PeriodoDTO periodoMarcadas = new PeriodoDTO();
+        periodoMarcadas.setDataInicio(r.getFeriasMarcadasInicio().toString());
+        periodoMarcadas.setDataFim(r.getFeriasMarcadasFim().toString());
+        content.getFeriasAgendadas().add(periodoMarcadas);
+      }
+
+      // Adicionar período de férias gozadas se existir
+      if (r.getFeriasGozadasInicio() != null && r.getFeriasGozadasFim() != null) {
+        PeriodoDTO periodoGozadas = new PeriodoDTO();
+        periodoGozadas.setDataInicio(r.getFeriasGozadasInicio().toString());
+        periodoGozadas.setDataFim(r.getFeriasGozadasFim().toString());
+        content.getFeriasGozadas().add(periodoGozadas);
+      }
+    }
+
+    // Montar DTO final
+    VerMapaDTO resultado = new VerMapaDTO();
+    resultado.setContent(new ArrayList<>(mapa.values()));
+
+    return resultado;
   }
 
   @Transactional(readOnly = true)
@@ -182,32 +184,5 @@ public class MapaFeriaReadService {
 
     return dto;
   }
-
-  private List<PeriodoDTO> getFeriasAgendadas(FuncionarioEntity fun, int anoReferente) {
-    Specification<FeriasMapaEntity> spec = (root, cq, cb) -> {
-      List<Predicate> predicates = new ArrayList<>();
-      predicates.add(cb.equal(root.get("funId").get("id"), fun.getId()));
-      predicates.add(cb.equal(root.get("anoId").get("ano"), String.valueOf(anoReferente)));
-      return cb.and(predicates.toArray(new Predicate[0]));
-    };
-    return feriasMapaEntityRepository.findAll(spec).stream()
-        .map(e -> new PeriodoDTO(DateFormatter.localDateToString(e.getDataInicio()),
-            DateFormatter.localDateToString(e.getDataFim())))
-        .toList();
-  }
-
-  private List<PeriodoDTO> getFeriasGozadas(FuncionarioEntity fun, int anoReferente) {
-    Specification<FeriasGozadasEntity> spec = (root, cq, cb) -> {
-      List<Predicate> predicates = new ArrayList<>();
-      predicates.add(cb.equal(root.get("funId").get("id"), fun.getId()));
-      predicates.add(cb.equal(root.get("anoId").get("ano"), String.valueOf(anoReferente)));
-      return cb.and(predicates.toArray(new Predicate[0]));
-    };
-    return feriasGozadasEntityRepository.findAll(spec).stream()
-        .map(e -> new PeriodoDTO(DateFormatter.localDateToString(e.getDataInicio()),
-            DateFormatter.localDateToString(e.getDataFim())))
-        .toList();
-  }
-
 
 }
