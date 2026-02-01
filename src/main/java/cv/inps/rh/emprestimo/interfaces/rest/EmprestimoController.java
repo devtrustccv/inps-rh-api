@@ -7,12 +7,10 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.emprestimo.application.commands.SaveConfiguracaoInfoEmprestimoCommand;
+import cv.inps.rh.emprestimo.application.commands.SaveDecisaoAnaliseCommand;
 import cv.inps.rh.emprestimo.application.commands.SaveEmprestimoCommand;
 import cv.inps.rh.emprestimo.application.commands.UpdateEmprestimoCommand;
-import cv.inps.rh.emprestimo.application.dto.EmprestimoListDTO;
-import cv.inps.rh.emprestimo.application.dto.IdDTO;
-import cv.inps.rh.emprestimo.application.dto.InformacaoEmprestimoRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.PedidoEmprestimoDTO;
+import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.application.queries.GetConfiguracaoEmprestimoQuery;
 import cv.inps.rh.emprestimo.application.queries.GetEmprestimoByIdQuery;
 import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
@@ -176,14 +174,14 @@ public class EmprestimoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = PedidoEmprestimoDTO.class,
+                  implementation = DetalhesEmprestimoDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<PedidoEmprestimoDTO> getEmprestimoById(
+  public ResponseEntity<DetalhesEmprestimoDTO> getEmprestimoById(
     @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
@@ -225,6 +223,36 @@ public class EmprestimoController {
       final var query = new ListarEmprestimosQuery(tipoEmprestimo, direccaoId, dataInicio, dataFim, estadoEmprestimo, page, size);
 
       return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/analise"
+  )
+  @Operation(
+    summary = "Save decisao analise",
+    description = "Save decisao analise",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> saveDecisaoAnalise(@Valid @RequestBody AnaliseRhRequestDTO saveDecisaoAnaliseRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new SaveDecisaoAnaliseCommand(saveDecisaoAnaliseRequest, emprestimoId);
+
+      return commandBus.send(command);
 
   }
 

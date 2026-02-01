@@ -2,16 +2,16 @@ package cv.inps.rh.emprestimo.domain.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.commands.SaveConfiguracaoInfoEmprestimoCommand;
+import cv.inps.rh.emprestimo.application.dto.AnaliseRhRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.IdDTO;
 import cv.inps.rh.emprestimo.application.dto.PedidoEmprestimoDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEmprestimoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCarreiraEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamEmprestimoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +29,7 @@ public class EmprestimoWriteService {
   private final ParamEmprestimoEntityRepository paramEmprestimoEntityRepository;
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final ParamCarreiraEntityRepository paramCarreiraEntityRepository;
+  private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PedidoEntityRepository pedidoEntityRepository;
   private final FuncionarioRules funcionarioRules;
 
@@ -59,6 +60,8 @@ public class EmprestimoWriteService {
 
   public IdDTO saveUpdatePedidoEmprestimo(String uuid, PedidoEmprestimoDTO request) {
 
+    var currentRelation = funcionarioRules.getTipoRelacionamentoAtual(UUID.fromString(request.getFuncionarioId()));
+
     final EmprestimoEntity entity;
 
     if (StringUtils.hasText(uuid)) {
@@ -72,8 +75,7 @@ public class EmprestimoWriteService {
       entity.setFinalidade("AQUISICAO_VIATURA");
     }
 
-    // TODO 29/01/2026 21:28 optimize this code
-    entity.setTiprel(funcionarioRules.getTipoRelacionamentoAtual(UUID.fromString(request.getFuncionarioId())));
+    entity.setTiprel(currentRelation);
     entity.setMarca(request.getMarca());
     entity.setAnoFabrico(request.getAnoFabrico());
     entity.setCilincrada(request.getCilindrada());
@@ -83,9 +85,57 @@ public class EmprestimoWriteService {
     entity.setValorEmprestimo(request.getValorEmprestimo());
     entity.setNrPrestacao(request.getNumeroPrestacoes());
 
+    var funId = currentRelation.getFunId();
+
+    var orderOP = pedidoEntityRepository.findByFunIdAndEtapaAndEstado(funId, EtapaEmprestimo.PEDIDO.name(), Estado.A.name());
+    if (orderOP.isEmpty()) {
+      var order = new PedidoEntity();
+      order.setFunId(funId);
+      order.setUuid(UuidCreator.getTimeOrderedEpoch());
+      order.setTipoPedido("EMPRESTIMO");
+      order.setOrigem("RH");
+      order.setEtapa(EtapaEmprestimo.PEDIDO.name());
+      order.setEstado(Estado.A.name());
+      pedidoEntityRepository.save(order);
+    }
+
     // TODO 29/01/2026 21:23 save documentos
 
     return new IdDTO(emprestimoEntityRepository.save(entity).getUuid());
+  }
+
+  public void saveDecisaoAnaliseEmprestimo(String uuid, AnaliseRhRequestDTO request) {
+
+    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    entity.setNrPrestacao(request.getNumeroPrestacao());
+    entity.setValorEmprestimo(request.getValorEmprestimo());
+    emprestimoEntityRepository.save(entity);
+
+    var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(null, EtapaEmprestimo.ANALISE_RH.name(), Estado.A.name());
+
+    decisionOP.ifPresentOrElse(obj -> {
+          obj.setDecisao(request.getParecer());
+          obj.setObs(request.getObservacao());
+          pedidoDecisaoEntityRepository.save(obj);
+        },
+        () -> {
+
+          var order = pedidoEntityRepository.findByFunIdAndEtapaAndEstado(
+                  entity.getTiprel().getFunId(),
+                  EtapaEmprestimo.PEDIDO.name(),
+                  Estado.A.name())
+              .orElseThrow();
+
+          var newObj = new PedidoDecisaoEntity();
+          newObj.setPedido(order);
+          newObj.setDecisao(request.getParecer());
+          newObj.setObs(request.getObservacao());
+          newObj.setEtapa(EtapaEmprestimo.ANALISE_RH.name());
+          newObj.setReferencia("EMPRESTIMO");
+          newObj.setEstado(Estado.A.name());
+          newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+          pedidoDecisaoEntityRepository.save(newObj);
+        });
   }
 }
 

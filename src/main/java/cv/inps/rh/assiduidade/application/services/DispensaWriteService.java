@@ -1,10 +1,9 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.assiduidade.application.commands.MarcarDispensaCommand;
 import cv.inps.rh.assiduidade.application.commands.UpdateDispensaCommand;
 import cv.inps.rh.assiduidade.application.commands.ValidarDispensaCommand;
-import cv.inps.rh.assiduidade.application.dto.DispensaReqDTO;
-import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -23,8 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -58,7 +57,7 @@ public class DispensaWriteService {
     pedido.setTipoPedido("DISPENSA");
     pedido.setOrigem("ASSIDUIDADE");
     pedido.setEtapa("DESPACHO_RH");
-    pedido.setEstado(Estado.P);
+    pedido.setEstado(Estado.P.name());
     pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
     pedido = pedidoRepository.save(pedido);
 
@@ -137,7 +136,7 @@ public class DispensaWriteService {
     }
     dispensaRepository.save(dispensa);
 
-    pedido.setEstado(estado);
+    pedido.setEstado(estado.name());
     pedidoRepository.save(pedido);
 
 
@@ -194,7 +193,7 @@ public class DispensaWriteService {
     }
     dispensaRepository.save(dispensa);
 
-    pedido.setEstado(Estado.P);
+    pedido.setEstado(Estado.P.name());
     pedidoRepository.save(pedido);
 
     var validacao = dadosContratuaisMapper.

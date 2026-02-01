@@ -7,10 +7,10 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class GetConfiguracaoEmprestimoQueryHandlerTest {
+public class SaveDecisaoAnaliseQueryHandlerTest {
 
   @InjectMocks
-  private GetConfiguracaoEmprestimoQueryHandler getConfiguracaoEmprestimoQueryHandler;
+  private SaveDecisaoAnaliseQueryHandler saveDecisaoAnaliseQueryHandler;
 
   @BeforeEach
   void setUp() {
@@ -18,14 +18,14 @@ public class GetConfiguracaoEmprestimoQueryHandlerTest {
   }
 
   @Test
-  void testHandleGetConfiguracaoEmprestimoQuery() {
+  void testHandleSaveDecisaoAnaliseQuery() {
 
     // Example:
     // Given
-    // GetConfiguracaoEmprestimoQuery query = new GetConfiguracaoEmprestimoQuery(...);
+    // SaveDecisaoAnaliseQuery query = new SaveDecisaoAnaliseQuery(...);
     //
     // When
-    // ResponseEntity<List<InformacaoEmprestimoRequestDTO>> response = getConfiguracaoEmprestimoQueryHandler.handle(query);
+    // ResponseEntity<String> response = saveDecisaoAnaliseQueryHandler.handle(query);
     //
     // Then
     // assertNotNull(response);

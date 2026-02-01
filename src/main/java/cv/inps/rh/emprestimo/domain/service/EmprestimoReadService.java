@@ -1,9 +1,9 @@
 package cv.inps.rh.emprestimo.domain.service;
 
+import cv.inps.rh.emprestimo.application.dto.DetalhesEmprestimoDTO;
 import cv.inps.rh.emprestimo.application.dto.EmprestimoListDTO;
 import cv.inps.rh.emprestimo.application.dto.EmprestimoListRowDTO;
 import cv.inps.rh.emprestimo.application.dto.InformacaoEmprestimoRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.PedidoEmprestimoDTO;
 import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
@@ -44,11 +44,14 @@ public class EmprestimoReadService {
         .toList();
   }
 
-  public PedidoEmprestimoDTO getPedidoEmprestimoByUuid(String uuid) {
+  public DetalhesEmprestimoDTO getPedidoEmprestimoByUuid(String uuid) {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
-    var dto = new PedidoEmprestimoDTO();
+    var dto = new DetalhesEmprestimoDTO();
+    dto.setDataInicio(entity.getDataInicio());
+    dto.setDataFim(entity.getDataFim());
+    dto.setValorPrestacao(entity.getValorPrestacao());
     dto.setMarca(entity.getMarca());
     dto.setAnoFabrico(entity.getAnoFabrico());
     dto.setCilindrada(entity.getCilincrada());

@@ -1,0 +1,50 @@
+{
+  "type": "dto",
+  "module": "emprestimo",
+  "name": "DetalhesEmprestimo",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "PedidoEmprestimo",
+    "module": "emprestimo"
+  },
+  "attributes": [
+    {
+      "name": "dataInicio",
+      "objectType": "java",
+      "type": "date",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dataFim",
+      "objectType": "java",
+      "type": "date",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "valorPrestacao",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "xk2qnwid79"
+}

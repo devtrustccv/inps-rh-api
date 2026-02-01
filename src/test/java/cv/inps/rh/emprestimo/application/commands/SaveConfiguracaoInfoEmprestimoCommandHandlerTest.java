@@ -9,26 +9,26 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class SaveConfiguracaoInfoEmprestimoCommandHandlerTest {
 
-    @InjectMocks
-    private SaveConfiguracaoInfoEmprestimoCommandHandler saveConfiguracaoInfoEmprestimoCommandHandler;
+  @InjectMocks
+  private SaveConfiguracaoInfoEmprestimoCommandHandler saveConfiguracaoInfoEmprestimoCommandHandler;
 
-    @BeforeEach
-    void setUp() {
-      // TODO: initialize mock dependencies if needed
-    }
+  @BeforeEach
+  void setUp() {
 
-    @Test
-    void testHandle() {
-        // TODO: Implement unit test for handle method
-        // Example:
-        // Given
-        // SaveConfiguracaoInfoEmprestimoCommand command = new SaveConfiguracaoInfoEmprestimoCommand(...);
-        //
-        // When
-        // ResponseEntity<String> response = saveConfiguracaoInfoEmprestimoCommandHandler.handle(command);
-        //
-        // Then
-        // assertNotNull(response);
-        // assertEquals(..., response.getBody());
-    }
+  }
+
+  @Test
+  void testHandle() {
+
+    // Example:
+    // Given
+    // SaveConfiguracaoInfoEmprestimoCommand command = new SaveConfiguracaoInfoEmprestimoCommand(...);
+    //
+    // When
+    // ResponseEntity<String> response = saveConfiguracaoInfoEmprestimoCommandHandler.handle(command);
+    //
+    // Then
+    // assertNotNull(response);
+    // assertEquals(..., response.getBody());
+  }
 }
