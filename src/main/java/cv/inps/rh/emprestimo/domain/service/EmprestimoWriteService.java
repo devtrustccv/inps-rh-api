@@ -166,38 +166,6 @@ public class EmprestimoWriteService {
     saveDocuments(request.getDocumentos(), funId, entity.getUuid());
   }
 
-  private void saveDocuments(List<DocumentoDTO> documentos, FuncionarioEntity funId, String referenceId) {
-
-    if (Objects.isNull(documentos) || documentos.isEmpty())
-      return;
-
-    var docs = new ArrayList<DocumentoEntity>();
-
-    documentos.forEach(doc -> {
-
-      final DocumentoEntity newDoc;
-
-      if (StringUtils.hasText(doc.getId())) {
-        newDoc = documentoEntityRepository.findByUuidOrThrow(UUID.fromString(doc.getId()));
-      } else {
-        newDoc = new DocumentoEntity();
-        newDoc.setEstado(Estado.A);
-        newDoc.setReferenciaName("RH_T_EMPRESTIMO");
-        newDoc.setReferenciaId(referenceId);
-        newDoc.setUuid(UuidCreator.getTimeOrderedEpoch());
-        newDoc.setDocId(1L);
-      }
-
-      newDoc.setTpDocumentoId(tipoDocumentoEntityRepository.findByUuidOrThrow(UUID.fromString(doc.getTipoDocumentoId())));
-      newDoc.setFunId(funId);
-      newDoc.setUrl(doc.getUrl());
-
-      docs.add(newDoc);
-    });
-
-    documentoEntityRepository.saveAll(docs);
-  }
-
   public void saveUpdateDecisaoAnaliseFinanceira(String uuid, AnaliseFinanceiroRequestDTO request) {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
@@ -240,9 +208,7 @@ public class EmprestimoWriteService {
 
   public void autorizarComissaoExecutiva(String uuid, AutorizacaoComissaoExecutivaDTO request) {
 
-    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
-
-    var funId = entity.getTiprel().getFunId();
+    var funId = emprestimoEntityRepository.findByUuidOrThrow(uuid).getTiprel().getFunId();
 
     var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, "EMPRESTIMO", Estado.A.name()).orElseThrow();
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name());
@@ -273,6 +239,53 @@ public class EmprestimoWriteService {
           newObj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(newObj);
         });
+  }
+
+  public void elaborarContrato(String uuid, ElaboracaoContratoRequestDTO request) {
+
+    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+
+    var funId = entity.getTiprel().getFunId();
+
+    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, "EMPRESTIMO", Estado.A.name()).orElseThrow();
+    order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO.name());
+    pedidoEntityRepository.save(order);
+
+    // TODO 01/02/2026 14:52 CALCULA O NUMERO DE PRESTACAO MENSAL E DATA INICIO
+
+    saveDocuments(request.getDocumentos(), funId, entity.getUuid());
+  }
+
+  private void saveDocuments(List<DocumentoDTO> documentos, FuncionarioEntity funId, String referenceId) {
+
+    if (Objects.isNull(documentos) || documentos.isEmpty())
+      return;
+
+    var docs = new ArrayList<DocumentoEntity>();
+
+    documentos.forEach(doc -> {
+
+      final DocumentoEntity newDoc;
+
+      if (StringUtils.hasText(doc.getId())) {
+        newDoc = documentoEntityRepository.findByUuidOrThrow(UUID.fromString(doc.getId()));
+      } else {
+        newDoc = new DocumentoEntity();
+        newDoc.setEstado(Estado.A);
+        newDoc.setReferenciaName("RH_T_EMPRESTIMO");
+        newDoc.setReferenciaId(referenceId);
+        newDoc.setUuid(UuidCreator.getTimeOrderedEpoch());
+        newDoc.setDocId(1L);
+      }
+
+      newDoc.setTpDocumentoId(tipoDocumentoEntityRepository.findByUuidOrThrow(UUID.fromString(doc.getTipoDocumentoId())));
+      newDoc.setFunId(funId);
+      newDoc.setUrl(doc.getUrl());
+
+      docs.add(newDoc);
+    });
+
+    documentoEntityRepository.saveAll(docs);
   }
 }
 

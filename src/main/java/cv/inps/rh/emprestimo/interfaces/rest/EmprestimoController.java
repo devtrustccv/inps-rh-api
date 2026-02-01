@@ -313,4 +313,34 @@ public class EmprestimoController {
 
   }
 
+   @PostMapping(
+   value = "/{emprestimoId}/elaborar-contrato"
+  )
+  @Operation(
+    summary = "Elaborar contrato",
+    description = "Elaborar contrato",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> elaborarContrato(@Valid @RequestBody ElaboracaoContratoRequestDTO elaborarContratoRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new ElaborarContratoCommand(elaborarContratoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
 }
