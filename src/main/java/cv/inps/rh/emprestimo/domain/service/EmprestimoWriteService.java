@@ -74,6 +74,8 @@ public class EmprestimoWriteService {
       entity.setDataInicio(LocalDate.now());
       entity.setTipoEmprestimo("AQUISICAO_VIATURA");
       entity.setFinalidade("AQUISICAO_VIATURA");
+      entity.setTipoSituacao("EMPRESTIMO");
+      entity.setVersao(1L);
     }
 
     entity.setTiprel(currentRelation);
