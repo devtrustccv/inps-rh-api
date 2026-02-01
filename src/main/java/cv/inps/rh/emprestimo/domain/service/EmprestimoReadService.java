@@ -120,6 +120,7 @@ public class EmprestimoReadService {
           var funId = e.getTiprel().getFunId();
           dto.setFuncionarioId(funId.getUuid().toString());
           dto.setNomeColaborador(funId.getNome());
+          dto.setEtapa(e.getPedido().getEtapa());
           return dto;
         })
         .toList());

@@ -25,6 +25,6 @@ public interface PedidoEntityRepository extends
 
   Optional<PedidoEntity> findByUuid(UUID uuid);
 
-  Optional<PedidoEntity> findByFunIdAndEtapaAndEstado(FuncionarioEntity funcionario, String etapa, String estado);
+  Optional<PedidoEntity> findByFunIdAndTipoPedidoAndEstado(FuncionarioEntity funcionario,String tipoPedido, String estado);
 
 }

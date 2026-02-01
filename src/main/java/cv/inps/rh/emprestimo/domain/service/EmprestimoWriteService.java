@@ -3,14 +3,12 @@ package cv.inps.rh.emprestimo.domain.service;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.commands.SaveConfiguracaoInfoEmprestimoCommand;
 import cv.inps.rh.emprestimo.application.dto.AnaliseRhRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
 import cv.inps.rh.emprestimo.application.dto.IdDTO;
 import cv.inps.rh.emprestimo.application.dto.PedidoEmprestimoDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEmprestimoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +17,8 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Transactional
@@ -32,6 +32,8 @@ public class EmprestimoWriteService {
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PedidoEntityRepository pedidoEntityRepository;
   private final FuncionarioRules funcionarioRules;
+  private final DocumentoEntityRepository documentoEntityRepository;
+  private final TipoDocumentoEntityRepository tipoDocumentoEntityRepository;
 
   public void saveConfiguracaoEmprestimo(SaveConfiguracaoInfoEmprestimoCommand command) {
 
@@ -87,7 +89,7 @@ public class EmprestimoWriteService {
 
     var funId = currentRelation.getFunId();
 
-    var orderOP = pedidoEntityRepository.findByFunIdAndEtapaAndEstado(funId, EtapaEmprestimo.PEDIDO.name(), Estado.A.name());
+    var orderOP = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, "EMPRESTIMO", Estado.A.name());
     if (orderOP.isEmpty()) {
       var order = new PedidoEntity();
       order.setFunId(funId);
@@ -96,36 +98,61 @@ public class EmprestimoWriteService {
       order.setOrigem("RH");
       order.setEtapa(EtapaEmprestimo.PEDIDO.name());
       order.setEstado(Estado.A.name());
-      pedidoEntityRepository.save(order);
+      var savedOrder = pedidoEntityRepository.save(order);
+      entity.setPedido(savedOrder);
     }
 
-    // TODO 29/01/2026 21:23 save documentos
+    var response = new IdDTO(emprestimoEntityRepository.save(entity).getUuid());
 
-    return new IdDTO(emprestimoEntityRepository.save(entity).getUuid());
+    var docs = new ArrayList<DocumentoEntity>();
+
+    request.getDocumentos().forEach(doc -> {
+      var newDoc = new DocumentoEntity();
+      newDoc.setUuid(UuidCreator.getTimeOrderedEpoch());
+      newDoc.setTpDocumentoId(tipoDocumentoEntityRepository.findByUuidOrThrow(UUID.fromString(doc.getTipoDocumentoId())));
+      newDoc.setEstado(Estado.A);
+      newDoc.setFunId(funId);
+      newDoc.setReferenciaId(response.getId());
+      newDoc.setReferenciaName("RH_T_EMPRESTIMO");
+      newDoc.setDocId(1L);
+      newDoc.setUrl(doc.getUrl());
+      newDoc.setEstado(Estado.A);
+      docs.add(newDoc);
+    });
+
+    documentoEntityRepository.saveAll(docs);
+
+    saveDocuments(request.getDocumentos(), funId, response.getId());
+
+    return response;
   }
 
-  public void saveDecisaoAnaliseEmprestimo(String uuid, AnaliseRhRequestDTO request) {
+  public void saveUpdateDecisaoAnaliseEmprestimo(String uuid, AnaliseRhRequestDTO request) {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
     entity.setNrPrestacao(request.getNumeroPrestacao());
     entity.setValorEmprestimo(request.getValorEmprestimo());
     emprestimoEntityRepository.save(entity);
 
-    var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(null, EtapaEmprestimo.ANALISE_RH.name(), Estado.A.name());
+    var funId = entity.getTiprel().getFunId();
 
-    decisionOP.ifPresentOrElse(obj -> {
+    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, "EMPRESTIMO", Estado.A.name()).orElseThrow();
+    order.setEtapa(EtapaEmprestimo.ANALISE_RH.name());
+    pedidoEntityRepository.save(order);
+
+    var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
+        order,
+        EtapaEmprestimo.ANALISE_RH.name(),
+        Estado.A.name()
+    );
+
+    decisionOP.ifPresentOrElse(
+        obj -> {
           obj.setDecisao(request.getParecer());
           obj.setObs(request.getObservacao());
           pedidoDecisaoEntityRepository.save(obj);
         },
         () -> {
-
-          var order = pedidoEntityRepository.findByFunIdAndEtapaAndEstado(
-                  entity.getTiprel().getFunId(),
-                  EtapaEmprestimo.PEDIDO.name(),
-                  Estado.A.name())
-              .orElseThrow();
-
           var newObj = new PedidoDecisaoEntity();
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer());
@@ -136,6 +163,40 @@ public class EmprestimoWriteService {
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
           pedidoDecisaoEntityRepository.save(newObj);
         });
+
+    saveDocuments(request.getDocumentos(), funId, entity.getUuid());
+  }
+
+  private void saveDocuments(List<DocumentoDTO> documentos, FuncionarioEntity funId, String referenceId) {
+
+    if (Objects.isNull(documentos) || documentos.isEmpty())
+      return;
+
+    var docs = new ArrayList<DocumentoEntity>();
+
+    documentos.forEach(doc -> {
+
+      final DocumentoEntity newDoc;
+
+      if (StringUtils.hasText(doc.getId())) {
+        newDoc = documentoEntityRepository.findByUuidOrThrow(UUID.fromString(doc.getId()));
+      } else {
+        newDoc = new DocumentoEntity();
+        newDoc.setEstado(Estado.A);
+        newDoc.setReferenciaName("RH_T_EMPRESTIMO");
+        newDoc.setReferenciaId(referenceId);
+        newDoc.setUuid(UuidCreator.getTimeOrderedEpoch());
+        newDoc.setDocId(1L);
+      }
+
+      newDoc.setTpDocumentoId(tipoDocumentoEntityRepository.findByUuidOrThrow(UUID.fromString(doc.getTipoDocumentoId())));
+      newDoc.setFunId(funId);
+      newDoc.setUrl(doc.getUrl());
+
+      docs.add(newDoc);
+    });
+
+    documentoEntityRepository.saveAll(docs);
   }
 }
 
