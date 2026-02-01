@@ -2,10 +2,7 @@ package cv.inps.rh.emprestimo.domain.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.commands.SaveConfiguracaoInfoEmprestimoCommand;
-import cv.inps.rh.emprestimo.application.dto.AnaliseRhRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
-import cv.inps.rh.emprestimo.application.dto.IdDTO;
-import cv.inps.rh.emprestimo.application.dto.PedidoEmprestimoDTO;
+import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -127,7 +124,7 @@ public class EmprestimoWriteService {
     return response;
   }
 
-  public void saveUpdateDecisaoAnaliseEmprestimo(String uuid, AnaliseRhRequestDTO request) {
+  public void saveUpdateDecisaoAnaliseRh(String uuid, AnaliseRhRequestDTO request) {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
     entity.setNrPrestacao(request.getNumeroPrestacao());
@@ -197,6 +194,46 @@ public class EmprestimoWriteService {
     });
 
     documentoEntityRepository.saveAll(docs);
+  }
+
+  public void saveUpdateDecisaoAnaliseFinanceira(String uuid, AnaliseFinanceiroRequestDTO request) {
+
+    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    entity.setDescCabimentacaoOrcamental(request.getCabimentacaoOrcamental());
+    entity.setDescTaxaEsforco(request.getAvaliacaoTaxaEsforco());
+    emprestimoEntityRepository.save(entity);
+
+    var funId = entity.getTiprel().getFunId();
+
+    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, "EMPRESTIMO", Estado.A.name()).orElseThrow();
+    order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA.name());
+    pedidoEntityRepository.save(order);
+
+    var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
+        order,
+        EtapaEmprestimo.ANALISE_FINANCEIRA.name(),
+        Estado.A.name()
+    );
+
+    decisionOP.ifPresentOrElse(
+        obj -> {
+          obj.setDecisao(request.getParecer());
+          obj.setObs(request.getObservacao());
+          obj.setCreatedDate(request.getData().atStartOfDay());
+          pedidoDecisaoEntityRepository.save(obj);
+        },
+        () -> {
+          var newObj = new PedidoDecisaoEntity();
+          newObj.setPedido(order);
+          newObj.setDecisao(request.getParecer());
+          newObj.setObs(request.getObservacao());
+          newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA.name());
+          newObj.setReferencia("EMPRESTIMO");
+          newObj.setEstado(Estado.A.name());
+          newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+          newObj.setCreatedDate(request.getData().atStartOfDay());
+          pedidoDecisaoEntityRepository.save(newObj);
+        });
   }
 }
 

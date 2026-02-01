@@ -1,6 +1,7 @@
 package cv.inps.rh.emprestimo.domain.service;
 
-public enum EtapaEmprestimo {
+enum EtapaEmprestimo {
   PEDIDO,
-  ANALISE_RH
+  ANALISE_RH,
+  ANALISE_FINANCEIRA
 }

@@ -6,10 +6,7 @@ package cv.inps.rh.emprestimo.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import cv.inps.rh.emprestimo.application.commands.SaveConfiguracaoInfoEmprestimoCommand;
-import cv.inps.rh.emprestimo.application.commands.SaveDecisaoAnaliseCommand;
-import cv.inps.rh.emprestimo.application.commands.SaveEmprestimoCommand;
-import cv.inps.rh.emprestimo.application.commands.UpdateEmprestimoCommand;
+import cv.inps.rh.emprestimo.application.commands.*;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.application.queries.GetConfiguracaoEmprestimoQuery;
 import cv.inps.rh.emprestimo.application.queries.GetEmprestimoByIdQuery;
@@ -227,7 +224,7 @@ public class EmprestimoController {
   }
 
    @PostMapping(
-   value = "/{emprestimoId}/analise"
+   value = "/{emprestimoId}/analise-rh"
   )
   @Operation(
     summary = "Save decisao analise",
@@ -251,6 +248,36 @@ public class EmprestimoController {
   {
 
       final var command = new SaveDecisaoAnaliseCommand(saveDecisaoAnaliseRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/analise-financeiro"
+  )
+  @Operation(
+    summary = "Save decisao analise financeira",
+    description = "Save decisao analise financeira",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> saveDecisaoAnaliseFinanceira(@Valid @RequestBody AnaliseFinanceiroRequestDTO saveDecisaoAnaliseFinanceiraRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new SaveDecisaoAnaliseFinanceiraCommand(saveDecisaoAnaliseFinanceiraRequest, emprestimoId);
 
       return commandBus.send(command);
 

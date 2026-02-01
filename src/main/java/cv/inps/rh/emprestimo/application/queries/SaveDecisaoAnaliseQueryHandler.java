@@ -25,7 +25,7 @@ public class SaveDecisaoAnaliseQueryHandler implements QueryHandler<SaveDecisaoA
 
     LOGGER.debug("SaveDecisaoAnaliseQuery: {}", query);
 
-    emprestimoWriteService.saveUpdateDecisaoAnaliseEmprestimo(query.getEmprestimoId(), query.getAnaliserhrequest());
+    emprestimoWriteService.saveUpdateDecisaoAnaliseRh(query.getEmprestimoId(), query.getAnaliserhrequest());
 
     return ResponseEntity.ok().build();
   }
