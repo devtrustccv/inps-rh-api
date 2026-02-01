@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+// TODO 01/02/2026 14:29 validate the cases where the orders are returned, decision is not positive
+
 @Transactional
 @RequiredArgsConstructor
 @Service
@@ -228,6 +230,43 @@ public class EmprestimoWriteService {
           newObj.setDecisao(request.getParecer());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA.name());
+          newObj.setReferencia("EMPRESTIMO");
+          newObj.setEstado(Estado.A.name());
+          newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+          newObj.setCreatedDate(request.getData().atStartOfDay());
+          pedidoDecisaoEntityRepository.save(newObj);
+        });
+  }
+
+  public void autorizarComissaoExecutiva(String uuid, AutorizacaoComissaoExecutivaDTO request) {
+
+    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+
+    var funId = entity.getTiprel().getFunId();
+
+    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, "EMPRESTIMO", Estado.A.name()).orElseThrow();
+    order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name());
+    pedidoEntityRepository.save(order);
+
+    var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
+        order,
+        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name(),
+        Estado.A.name()
+    );
+
+    decisionOP.ifPresentOrElse(
+        obj -> {
+          obj.setDecisao(request.getParecer());
+          obj.setObs(request.getObservacao());
+          obj.setCreatedDate(request.getData().atStartOfDay());
+          pedidoDecisaoEntityRepository.save(obj);
+        },
+        () -> {
+          var newObj = new PedidoDecisaoEntity();
+          newObj.setPedido(order);
+          newObj.setDecisao(request.getParecer());
+          newObj.setObs(request.getObservacao());
+          newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name());
           newObj.setReferencia("EMPRESTIMO");
           newObj.setEstado(Estado.A.name());
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());

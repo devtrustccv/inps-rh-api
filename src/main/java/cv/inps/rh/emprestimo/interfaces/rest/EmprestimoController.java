@@ -283,4 +283,34 @@ public class EmprestimoController {
 
   }
 
+   @PostMapping(
+   value = "/{emprestimoId}/autorizar-comissao-executiva"
+  )
+  @Operation(
+    summary = "Autorizar comissao executiva",
+    description = "Autorizar comissao executiva",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> autorizarComissaoExecutiva(@Valid @RequestBody AutorizacaoComissaoExecutivaDTO autorizarComissaoExecutivaRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new AutorizarComissaoExecutivaCommand(autorizarComissaoExecutivaRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
 }
