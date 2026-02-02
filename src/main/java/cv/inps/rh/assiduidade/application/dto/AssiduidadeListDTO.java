@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -21,10 +21,13 @@ public class AssiduidadeListDTO  {
 
   
   
-  private String id ;
+  private Long id ;
   
   
-  private String uuid ;
+  private UUID uuid ;
+  
+  
+  private UUID uuidFuncionairio ;
   
   
   private String nomeColaborador ;
@@ -39,21 +42,30 @@ public class AssiduidadeListDTO  {
   private Integer totalDias ;
   
   
-  private Integer totalHorasTrabalhadas ;
+  private String totalHorasTrabalhadas ;
   
   
-  private Integer totalHorasAusentes ;
+  private String totalHorasAusentes ;
   
   
-  private Integer totalHoraExtra ;
+  private String totalHoraExtra ;
   
   
-  private Integer totalHoraAlmoco ;
+  private String totalHoraAlmoco ;
   
   
   private String estado ;
   
   
   private String estadoDesc ;
+  
+  
+  private String mesReferencia ;
+  
+  
+  private Integer ano ;
+  
+  
+  private Integer mes ;
 
 }

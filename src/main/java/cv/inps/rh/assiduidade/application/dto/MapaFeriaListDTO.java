@@ -21,16 +21,13 @@ public class MapaFeriaListDTO  {
 
   
   
-  private Long id ;
-  
-  
-  private String uuid ;
-  
-  
-  private String anoReferente ;
-  
-  
   private String direcao ;
+  
+  
+  private Long direcaoId ;
+  
+  
+  private Integer anoReferente ;
   
   
   private Integer totalColaborador ;

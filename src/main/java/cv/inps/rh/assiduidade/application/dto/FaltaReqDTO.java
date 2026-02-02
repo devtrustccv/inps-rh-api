@@ -9,10 +9,12 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -24,10 +26,10 @@ public class FaltaReqDTO  {
 
   
   
-  private String validar ;
+  private UUID colaboradorId ;
   
   
-  private Long colaboradorId ;
+  private String colaboradorNome ;
   
   
   private LocalDate dataInicio ;
@@ -48,9 +50,6 @@ public class FaltaReqDTO  {
   private String motivoAusencia ;
   
   
-  private String tipoFalta ;
-  
-  
   private String parecer ;
   
   
@@ -60,10 +59,13 @@ public class FaltaReqDTO  {
   private String observacao ;
   
   
+  private EstadoValidacao validar ;
+  
+  
   private String despachoRh ;
   
   
-  private String tipoJustificacao ;
+  private Long tipoJustificacao ;
   
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();

@@ -11,9 +11,9 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetFaltaJustificadaQuery implements Query {
+public class GetJustificacaoFaltaByPedidoQuery implements Query {
 
-  @NotBlank(message = "The field <faltaId> is required")
-  private String faltaId;
+  @NotBlank(message = "The field <pedidoId> is required")
+  private String pedidoId;
 
 }

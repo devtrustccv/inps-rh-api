@@ -3,9 +3,11 @@ package cv.inps.rh.assiduidade.application.services;
 import cv.inps.rh.assiduidade.application.dto.DispensaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaDispensaDTO;
 import cv.inps.rh.assiduidade.application.dto.DispensaListDTO;
+import cv.inps.rh.assiduidade.application.queries.GetDispensaByPedidoIdQuery;
 import cv.inps.rh.assiduidade.application.queries.GetDispensaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaDispensaQuery;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DispensaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DispensaEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
@@ -20,6 +22,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -113,7 +117,7 @@ public class DispensaReadService {
         e.getPedidoId() != null ? DateFormatter.localDateTimeToLocalDateString(e.getPedidoId().getCreatedDate())
             : null);
     dto.setDataDispensa(e.getData() != null ? DateFormatter.localDateToString(e.getData()) : null);
-    var hi = e.getHoraIncio();
+    var hi = e.getHoraInicio();
     var hf = e.getHoraFim();
     dto.setIntervaloHoras(
         (StringUtils.hasText(hi) ? hi : "") +
@@ -154,14 +158,10 @@ public class DispensaReadService {
     if (query == null || !StringUtils.hasText(query.getDispensaId())) {
       return new DispensaReqDTO();
     }
-    Long id;
-    try {
-      id = Long.parseLong(query.getDispensaId());
-    } catch (NumberFormatException ex) {
-      return new DispensaReqDTO();
-    }
 
-    var e = dispensaRepository.findByIdOrThrow(id);
+    var e = dispensaRepository.findByUuid(UUID.fromString(query.getDispensaId()))
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Dispensa nao encontrada",
+            query.getDispensaId()));
 
     var dto = new DispensaReqDTO();
     dto.setColaborador(
@@ -169,9 +169,36 @@ public class DispensaReadService {
             ? e.getPedidoId().getFunId().getId()
             : null);
     dto.setDataDispensa(e.getData());
-    dto.setHoraSaida(e.getHoraIncio());
+    dto.setHoraSaida(e.getHoraInicio());
     dto.setHoraEntrada(e.getHoraFim());
-    var mins = diffMinutes(e.getHoraIncio(), e.getHoraFim());
+    var mins = diffMinutes(e.getHoraInicio(), e.getHoraFim());
+    dto.setTotalHoras(formatMinutes(mins));
+    dto.setTipoMotivo(e.getTipoDispensa());
+    dto.setMotivo(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : null);
+    dto.setParecerResponsavel(e.getDecisaoResponsavel());
+    dto.setObservacaoResponsavel(e.getObsResponsavel());
+    dto.setObservacaoRh(e.getObsRh());
+    return dto;
+  }
+
+  public DispensaReqDTO getDispensaByPedidoId(GetDispensaByPedidoIdQuery query) {
+    if (query == null || !StringUtils.hasText(query.getPedidoId())) {
+      return new DispensaReqDTO();
+    }
+
+    var e = dispensaRepository.findByPedidoId_Uuid(UUID.fromString(query.getPedidoId()))
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Dispensa nao encontrada",
+            query.getPedidoId()));
+
+    var dto = new DispensaReqDTO();
+    dto.setColaborador(
+        e.getPedidoId() != null && e.getPedidoId().getFunId() != null
+            ? e.getPedidoId().getFunId().getId()
+            : null);
+    dto.setDataDispensa(e.getData());
+    dto.setHoraSaida(e.getHoraInicio());
+    dto.setHoraEntrada(e.getHoraFim());
+    var mins = diffMinutes(e.getHoraInicio(), e.getHoraFim());
     dto.setTotalHoras(formatMinutes(mins));
     dto.setTipoMotivo(e.getTipoDispensa());
     dto.setMotivo(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : null);

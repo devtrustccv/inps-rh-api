@@ -14,7 +14,7 @@ public class ValidarHoraExtraCommand implements Command {
 
   
   private HoraExtraReqDTO horaextrareq;
-  @NotBlank(message = "The field <horaExtraId> is required")
-  private String horaExtraId;
+  @NotBlank(message = "The field <pedidoId> is required")
+  private String pedidoId;
 
 }

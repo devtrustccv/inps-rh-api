@@ -1,0 +1,52 @@
+{
+  "type": "enum",
+  "module": "assiduidade",
+  "name": "AssiduidadeDiariaEstado",
+  "values": [
+    {
+      "name": "AUSENTE",
+      "attributes": [
+        "AUSENTE",
+        "ausente"
+      ]
+    },
+    {
+      "name": "PENDENTE",
+      "attributes": [
+        "PENDENTE",
+        "pendente"
+      ]
+    },
+    {
+      "name": "INJUSTIFICADA",
+      "attributes": [
+        "INJUSTIFICADA",
+        "injustificada"
+      ]
+    },
+    {
+      "name": "JUSTIFICADA",
+      "attributes": [
+        "JUSTIFICADA",
+        "justificada"
+      ]
+    },
+    {
+      "name": "CONFORME",
+      "attributes": [
+        "CONFORME",
+        "Em conformidade"
+      ]
+    }
+  ],
+  "attributes": [
+    {
+      "type": "string",
+      "name": "Code"
+    },
+    {
+      "type": "string",
+      "name": "Description"
+    }
+  ]
+}

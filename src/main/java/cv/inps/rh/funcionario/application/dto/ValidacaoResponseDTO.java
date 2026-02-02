@@ -36,6 +36,10 @@ public class ValidacaoResponseDTO  {
 
   private String referenciaName ;
 
+  private String referenciaUuid;
+
+  private Long referenciaId;
+
 
   private String dataOperacao ;
 

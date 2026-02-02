@@ -22,7 +22,8 @@ public class ValidacaoMapper {
     dto.setReferenciaName(validacao.getReferenciaName());
     dto.setDataOperacao(DateFormatter.localDateTimeToString((validacao.getCreatedDate())));
     dto.setUtilizador(validacao.getCreatedBy());
-
+    dto.setReferenciaUuid(validacao.getReferenciaUuid()!=null ? validacao.getReferenciaUuid().toString() : null);
+    dto.setReferenciaId(validacao.getReferenciaId());
     dto.setIdFuncionario(validacao.getFunId().getId());
     dto.setUuidFuncionario(validacao.getFunId()!= null ? validacao.getFunId().getUuid().toString(): null);
 

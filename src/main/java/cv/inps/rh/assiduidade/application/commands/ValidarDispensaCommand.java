@@ -14,7 +14,7 @@ public class ValidarDispensaCommand implements Command {
 
   
   private DispensaReqDTO dispensareq;
-  @NotBlank(message = "The field <dispensaId> is required")
-  private String dispensaId;
+  @NotBlank(message = "The field <pedidoId> is required")
+  private String pedidoId;
 
 }

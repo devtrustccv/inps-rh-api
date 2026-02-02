@@ -13,10 +13,10 @@ import org.springframework.http.ResponseEntity;
 import cv.inps.rh.assiduidade.application.queries.*;
 
 @ExtendWith(MockitoExtension.class)
-public class GetFaltaJustificadaQueryHandlerTest {
+public class GetDispensaByPedidoIdQueryHandlerTest {
 
   @InjectMocks
-  private GetFaltaJustificadaQueryHandler getFaltaJustificadaQueryHandler;
+  private GetDispensaByPedidoIdQueryHandler getDispensaByPedidoIdQueryHandler;
 
   @BeforeEach
   void setUp() {
@@ -24,14 +24,14 @@ public class GetFaltaJustificadaQueryHandlerTest {
   }
 
   @Test
-  void testHandleGetFaltaJustificadaQuery() {
+  void testHandleGetDispensaByPedidoIdQuery() {
     // TODO: Implement unit test for handle method
     // Example:
     // Given
-    // GetFaltaJustificadaQuery query = new GetFaltaJustificadaQuery(...);
+    // GetDispensaByPedidoIdQuery query = new GetDispensaByPedidoIdQuery(...);
     //
     // When
-    // ResponseEntity<JustificarFaltaDTO> response = getFaltaJustificadaQueryHandler.handle(query);
+    // ResponseEntity<DispensaReqDTO> response = getDispensaByPedidoIdQueryHandler.handle(query);
     //
     // Then
     // assertNotNull(response);

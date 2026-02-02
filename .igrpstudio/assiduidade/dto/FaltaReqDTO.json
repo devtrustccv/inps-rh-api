@@ -6,9 +6,9 @@
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "validar",
+      "name": "colaboradorId",
       "objectType": "java",
-      "type": "string",
+      "type": "uuid",
       "required": false,
       "before": false,
       "after": false,
@@ -18,9 +18,9 @@
       "primaryKey": false
     },
     {
-      "name": "colaboradorId",
+      "name": "colaboradorNome",
       "objectType": "java",
-      "type": "long",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -102,18 +102,6 @@
       "primaryKey": false
     },
     {
-      "name": "tipoFalta",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
       "name": "parecer",
       "objectType": "java",
       "type": "string",
@@ -150,6 +138,19 @@
       "primaryKey": false
     },
     {
+      "name": "validar",
+      "objectType": "enum",
+      "type": "EstadoValidacao",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "shared"
+    },
+    {
       "name": "despachoRh",
       "objectType": "java",
       "type": "string",
@@ -164,7 +165,7 @@
     {
       "name": "tipoJustificacao",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,

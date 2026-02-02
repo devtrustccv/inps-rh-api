@@ -21,10 +21,7 @@ public class FeriasListDTO  {
 
   
   
-  private Long id ;
-  
-  
-  private String uuid ;
+  private String uuidFuncionario ;
   
   
   private String nomeColaborador ;
@@ -48,10 +45,13 @@ public class FeriasListDTO  {
   private Integer totalDireitoAno ;
   
   
-  private Integer totalAgendado ;
+  private Integer totalPlaneado ;
   
   
   private Integer totalGozado ;
+  
+  
+  private Integer ano ;
   
   
   private String estado ;

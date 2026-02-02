@@ -13,7 +13,9 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class GetDetalheMapaFeriaQuery implements Query {
 
-  @NotBlank(message = "The field <mapaFeriaId> is required")
-  private String mapaFeriaId;
+  @NotNull(message = "The field <ano> is required")
+  private Integer ano;
+  @NotNull(message = "The field <direcao> is required")
+  private Long direcao;
 
 }

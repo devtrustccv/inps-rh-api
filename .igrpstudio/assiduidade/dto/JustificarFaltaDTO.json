@@ -8,7 +8,7 @@
     {
       "name": "colaboradorId",
       "objectType": "java",
-      "type": "long",
+      "type": "uuid",
       "required": false,
       "before": false,
       "after": false,
@@ -44,7 +44,7 @@
       "module": "assiduidade"
     },
     {
-      "name": "decisaoResponsavel",
+      "name": "parecerResponsavel",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -94,7 +94,7 @@
     {
       "name": "tipoJustificacao",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -105,8 +105,33 @@
     },
     {
       "name": "validar",
+      "objectType": "enum",
+      "type": "EstadoValidacao",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "shared"
+    },
+    {
+      "name": "ano",
       "objectType": "java",
-      "type": "string",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "mes",
+      "objectType": "java",
+      "type": "integer",
       "required": false,
       "before": false,
       "after": false,

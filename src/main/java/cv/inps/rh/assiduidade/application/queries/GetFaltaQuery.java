@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class GetFaltaQuery implements Query {
 
-  @NotBlank(message = "The field <faltaId> is required")
-  private String faltaId;
+  @NotBlank(message = "The field <pedidoId> is required")
+  private String pedidoId;
 
 }

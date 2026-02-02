@@ -1,11 +1,14 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.HoraExtraEntity;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,4 +24,10 @@ public interface HoraExtraEntityRepository extends
           .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"HoraExtraEntity not found for id: " + id));
       }
 
+    Optional<HoraExtraEntity> findByUuid(UUID uuid);
+
+
+  List<HoraExtraEntity> findAllByPedidoId_Uuid(UUID pedidoIdUuid);
+
+  List<HoraExtraEntity> findAllByPedidoId_UuidAndEstado(UUID pedidoUuid, Estado estado);
 }

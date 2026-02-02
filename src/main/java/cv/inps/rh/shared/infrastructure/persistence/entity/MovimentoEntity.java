@@ -7,7 +7,6 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
-import jakarta.validation.constraints.NotNull;
 
 
 @Getter
@@ -16,17 +15,15 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "RH_MOVIMENTOS")
+@Table(name = "VW_RH_MOVIMENTOS_PICAGEM")
 public class MovimentoEntity  {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
   
-    @NotNull(message = "dtMovimento is mandatory")
-    @Column(name="dt_movimento", nullable = false)
+    @Column(name="dt_movimento")
     private LocalDate dtMovimento;
 
   
@@ -88,6 +85,10 @@ public class MovimentoEntity  {
   
     @Column(name="id_equip_contr_acesso")
     private Long idEquipContrAcesso;
+
+  
+    @Column(name="local_movimento")
+    private String localMovimento;
 
   
 }

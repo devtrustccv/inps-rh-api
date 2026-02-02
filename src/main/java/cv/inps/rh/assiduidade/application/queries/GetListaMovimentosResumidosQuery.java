@@ -19,10 +19,10 @@ public class GetListaMovimentosResumidosQuery implements Query {
   private String pageNumber;
   @NotBlank(message = "The field <colaborador> is required")
   private String colaborador;
-  @NotBlank(message = "The field <dataInicio> is required")
-  private String dataInicio;
-  @NotBlank(message = "The field <dataFim> is required")
-  private String dataFim;
+  @NotNull(message = "The field <mes> is required")
+  private Integer mes;
+  @NotNull(message = "The field <ano> is required")
+  private Integer ano;
   @NotBlank(message = "The field <estado> is required")
   private String estado;
   @NotNull(message = "The field <ilha> is required")

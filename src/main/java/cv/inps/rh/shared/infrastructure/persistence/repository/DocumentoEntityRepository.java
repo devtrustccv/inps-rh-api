@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+import java.util.UUID;
+
 
 @Repository
 public interface DocumentoEntityRepository extends
@@ -20,5 +23,16 @@ public interface DocumentoEntityRepository extends
   }
 
   boolean existsByTpDocumentoId(TipoDocumentoEntity tpDocumentoId);
+
+
+  Optional<DocumentoEntity> findByUuid(UUID uuid);
+
+  default DocumentoEntity findByUuidOrThrow(UUID uuid) {
+    return this.findByUuid(uuid)
+        .orElseThrow(() -> IgrpResponseStatusException.of(
+            HttpStatus.NOT_FOUND,
+            "DocumentoEntity not found for uuid: " + uuid
+        ));
+  }
 
 }

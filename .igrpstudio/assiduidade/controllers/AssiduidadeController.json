@@ -109,13 +109,13 @@
           "isRequired": false
         },
         {
-          "type": "string",
-          "name": "dataInicio",
+          "type": "integer",
+          "name": "mes",
           "isRequired": false
         },
         {
-          "type": "string",
-          "name": "dataFim",
+          "type": "integer",
+          "name": "ano",
           "isRequired": false
         },
         {
@@ -174,7 +174,7 @@
     },
     {
       "actionName": "validarFalta",
-      "path": "falta/{faltaId}",
+      "path": "falta/{pedidoId}",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -205,7 +205,7 @@
       },
       "pathVariables": [
         {
-          "name": "faltaId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
@@ -385,8 +385,8 @@
     },
     {
       "actionName": "validarDispensa",
-      "path": "dispensa/{dispensaId}",
-      "method": "POST",
+      "path": "dispensa/{pedidoId}/validar",
+      "method": "PUT",
       "requestBody": {
         "content": {
           "application/json": {
@@ -416,7 +416,7 @@
       },
       "pathVariables": [
         {
-          "name": "dispensaId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
@@ -516,7 +516,7 @@
     },
     {
       "actionName": "validarHoraExtra",
-      "path": "hora-extra/{horaExtraId}",
+      "path": "hora-extra/{pedidoId}",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -547,7 +547,7 @@
       },
       "pathVariables": [
         {
-          "name": "horaExtraId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
@@ -742,7 +742,24 @@
             }
           }
         }
-      }
+      },
+      "requestParams": [
+        {
+          "type": "integer",
+          "name": "ano",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcaoId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "funcionarioUuid",
+          "isRequired": false
+        }
+      ]
     },
     {
       "actionName": "listaMapaFeria",
@@ -806,7 +823,7 @@
     },
     {
       "actionName": "getDetalheMapaFeria",
-      "path": "mapa-feria/{mapaFeriaId}",
+      "path": "mapa-feria",
       "method": "GET",
       "responses": {
         "200": {
@@ -824,17 +841,22 @@
           }
         }
       },
-      "pathVariables": [
+      "requestParams": [
         {
-          "name": "mapaFeriaId",
-          "type": "string",
+          "type": "integer",
+          "name": "ano",
+          "isRequired": true
+        },
+        {
+          "type": "long",
+          "name": "direcao",
           "isRequired": true
         }
       ]
     },
     {
       "actionName": "justificarFalta",
-      "path": "falta/justificar/{faltaId}",
+      "path": "falta/justificar/{funcionarioId}",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -865,7 +887,7 @@
       },
       "pathVariables": [
         {
-          "name": "faltaId",
+          "name": "funcionarioId",
           "type": "string",
           "isRequired": true
         }
@@ -873,7 +895,7 @@
     },
     {
       "actionName": "getFalta",
-      "path": "falta/{faltaId}",
+      "path": "falta/{pedidoId}",
       "method": "GET",
       "responses": {
         "200": {
@@ -893,7 +915,7 @@
       },
       "pathVariables": [
         {
-          "name": "faltaId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
@@ -929,7 +951,7 @@
     },
     {
       "actionName": "getHoraExtra",
-      "path": "hora-extra/{horaExtraId}",
+      "path": "hora-extra/{pedidoId}",
       "method": "GET",
       "responses": {
         "200": {
@@ -949,7 +971,7 @@
       },
       "pathVariables": [
         {
-          "name": "horaExtraId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
@@ -985,7 +1007,7 @@
     },
     {
       "actionName": "validarFaltaJustificada",
-      "path": "falta/justificar/validar/{faltaId}",
+      "path": "falta/justificar/validar/{pedidoId}",
       "method": "PUT",
       "requestBody": {
         "content": {
@@ -1016,15 +1038,55 @@
       },
       "pathVariables": [
         {
-          "name": "faltaId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
       ]
     },
     {
-      "actionName": "getFaltaJustificada",
-      "path": "falta/justificar/{faltaId}",
+      "actionName": "getJustificacaoFalta",
+      "path": "falta/justificar/{funcionarioId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "JustificarFalta",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "integer",
+          "name": "ano",
+          "isRequired": true
+        },
+        {
+          "type": "integer",
+          "name": "mes",
+          "isRequired": true
+        }
+      ],
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getJustificacaoFaltaByPedido",
+      "path": "falta/justificar/pedido/{pedidoId}",
       "method": "GET",
       "responses": {
         "200": {
@@ -1044,12 +1106,79 @@
       },
       "pathVariables": [
         {
-          "name": "faltaId",
+          "name": "pedidoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getDispensaByPedidoId",
+      "path": "dispensa/{pedidoId}/validacao",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DispensaReq",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "pedidoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "updateDispensa",
+      "path": "dispensa/{dispensaId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "DispensaReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "dispensaId",
           "type": "string",
           "isRequired": true
         }
       ]
     }
   ],
-  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta"
+  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa-validarHoraExtra-getHoraExtra-getDetalheMapaFeria-verMapa"
 }

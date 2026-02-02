@@ -115,15 +115,15 @@ public class AssiduidadeController {
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "colaborador", required = false) String colaborador,
-    @RequestParam(value = "dataInicio", required = false) String dataInicio,
-    @RequestParam(value = "dataFim", required = false) String dataFim,
+    @RequestParam(value = "mes", required = false) Integer mes,
+    @RequestParam(value = "ano", required = false) Integer ano,
     @RequestParam(value = "estado", required = false) String estado,
     @RequestParam(value = "ilha", required = false) Long ilha,
     @RequestParam(value = "direcao", required = false) Long direcao,
     @RequestParam(value = "seccao", required = false) Long seccao)
   {
 
-      final var query = new GetListaMovimentosResumidosQuery(pageSize, pageNumber, colaborador, dataInicio, dataFim, estado, ilha, direcao, seccao);
+      final var query = new GetListaMovimentosResumidosQuery(pageSize, pageNumber, colaborador, mes, ano, estado, ilha, direcao, seccao);
 
       return queryBus.handle(query);
 
@@ -160,7 +160,7 @@ public class AssiduidadeController {
   }
 
    @PostMapping(
-   value = "falta/{faltaId}"
+   value = "falta/{pedidoId}"
   )
   @Operation(
     summary = "Validar falta",
@@ -180,10 +180,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<Map<String, ?>> validarFalta(@Valid @RequestBody FaltaReqDTO validarFaltaRequest
-    , @PathVariable(value = "faltaId") String faltaId)
+    , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var command = new ValidarFaltaCommand(validarFaltaRequest, faltaId);
+      final var command = new ValidarFaltaCommand(validarFaltaRequest, pedidoId);
 
       return commandBus.send(command);
 
@@ -295,8 +295,8 @@ public class AssiduidadeController {
 
   }
 
-   @PostMapping(
-   value = "dispensa/{dispensaId}"
+   @PutMapping(
+   value = "dispensa/{pedidoId}/validar"
   )
   @Operation(
     summary = "Validar dispensa",
@@ -316,10 +316,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<Map<String, ?>> validarDispensa(@Valid @RequestBody DispensaReqDTO validarDispensaRequest
-    , @PathVariable(value = "dispensaId") String dispensaId)
+    , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var command = new ValidarDispensaCommand(validarDispensaRequest, dispensaId);
+      final var command = new ValidarDispensaCommand(validarDispensaRequest, pedidoId);
 
       return commandBus.send(command);
 
@@ -392,7 +392,7 @@ public class AssiduidadeController {
   }
 
    @PostMapping(
-   value = "hora-extra/{horaExtraId}"
+   value = "hora-extra/{pedidoId}"
   )
   @Operation(
     summary = "Validar hora extra",
@@ -412,10 +412,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<Map<String, ?>> validarHoraExtra(@Valid @RequestBody HoraExtraReqDTO validarHoraExtraRequest
-    , @PathVariable(value = "horaExtraId") String horaExtraId)
+    , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var command = new ValidarHoraExtraCommand(validarHoraExtraRequest, horaExtraId);
+      final var command = new ValidarHoraExtraCommand(validarHoraExtraRequest, pedidoId);
 
       return commandBus.send(command);
 
@@ -568,10 +568,12 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<VerMapaDTO> verMapa(
-    )
+    @RequestParam(value = "ano", required = false) Integer ano,
+    @RequestParam(value = "direcaoId", required = false) Long direcaoId,
+    @RequestParam(value = "funcionarioUuid", required = false) String funcionarioUuid)
   {
 
-      final var query = new VerMapaQuery();
+      final var query = new VerMapaQuery(ano, direcaoId, funcionarioUuid);
 
       return queryBus.handle(query);
 
@@ -614,7 +616,7 @@ public class AssiduidadeController {
   }
 
    @GetMapping(
-   value = "mapa-feria/{mapaFeriaId}"
+   value = "mapa-feria"
   )
   @Operation(
     summary = "Get detalhe mapa feria",
@@ -634,17 +636,18 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<DetalheMapaFeriaDTO> getDetalheMapaFeria(
-    @PathVariable(value = "mapaFeriaId") String mapaFeriaId)
+    @RequestParam(value = "ano") Integer ano,
+    @RequestParam(value = "direcao") Long direcao)
   {
 
-      final var query = new GetDetalheMapaFeriaQuery(mapaFeriaId);
+      final var query = new GetDetalheMapaFeriaQuery(ano, direcao);
 
       return queryBus.handle(query);
 
   }
 
    @PostMapping(
-   value = "falta/justificar/{faltaId}"
+   value = "falta/justificar/{funcionarioId}"
   )
   @Operation(
     summary = "Justificar falta",
@@ -664,17 +667,17 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<Map<String, ?>> justificarFalta(@Valid @RequestBody JustificarFaltaDTO justificarFaltaRequest
-    , @PathVariable(value = "faltaId") String faltaId)
+    , @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
-      final var command = new JustificarFaltaCommand(justificarFaltaRequest, faltaId);
+      final var command = new JustificarFaltaCommand(justificarFaltaRequest, funcionarioId);
 
       return commandBus.send(command);
 
   }
 
    @GetMapping(
-   value = "falta/{faltaId}"
+   value = "falta/{pedidoId}"
   )
   @Operation(
     summary = "Get falta",
@@ -694,10 +697,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<FaltaReqDTO> getFalta(
-    @PathVariable(value = "faltaId") String faltaId)
+    @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var query = new GetFaltaQuery(faltaId);
+      final var query = new GetFaltaQuery(pedidoId);
 
       return queryBus.handle(query);
 
@@ -734,7 +737,7 @@ public class AssiduidadeController {
   }
 
    @GetMapping(
-   value = "hora-extra/{horaExtraId}"
+   value = "hora-extra/{pedidoId}"
   )
   @Operation(
     summary = "Get hora extra",
@@ -754,10 +757,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<HoraExtraReqDTO> getHoraExtra(
-    @PathVariable(value = "horaExtraId") String horaExtraId)
+    @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var query = new GetHoraExtraQuery(horaExtraId);
+      final var query = new GetHoraExtraQuery(pedidoId);
 
       return queryBus.handle(query);
 
@@ -794,7 +797,7 @@ public class AssiduidadeController {
   }
 
    @PutMapping(
-   value = "falta/justificar/validar/{faltaId}"
+   value = "falta/justificar/validar/{pedidoId}"
   )
   @Operation(
     summary = "Validar falta justificada",
@@ -814,21 +817,21 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<Map<String, ?>> validarFaltaJustificada(@Valid @RequestBody JustificarFaltaDTO validarFaltaJustificadaRequest
-    , @PathVariable(value = "faltaId") String faltaId)
+    , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var command = new ValidarFaltaJustificadaCommand(validarFaltaJustificadaRequest, faltaId);
+      final var command = new ValidarFaltaJustificadaCommand(validarFaltaJustificadaRequest, pedidoId);
 
       return commandBus.send(command);
 
   }
 
    @GetMapping(
-   value = "falta/justificar/{faltaId}"
+   value = "falta/justificar/{funcionarioId}"
   )
   @Operation(
-    summary = "Get falta justificada",
-    description = "Get falta justificada",
+    summary = "Get justificacao falta",
+    description = "Get justificacao falta",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -843,13 +846,104 @@ public class AssiduidadeController {
     }
   )
   
-  public ResponseEntity<JustificarFaltaDTO> getFaltaJustificada(
-    @PathVariable(value = "faltaId") String faltaId)
+  public ResponseEntity<JustificarFaltaDTO> getJustificacaoFalta(
+    @RequestParam(value = "ano") Integer ano,
+    @RequestParam(value = "mes") Integer mes, @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
-      final var query = new GetFaltaJustificadaQuery(faltaId);
+      final var query = new GetJustificacaoFaltaQuery(ano, mes, funcionarioId);
 
       return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "falta/justificar/pedido/{pedidoId}"
+  )
+  @Operation(
+    summary = "Get justificacao falta by pedido",
+    description = "Get justificacao falta by pedido",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = JustificarFaltaDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<JustificarFaltaDTO> getJustificacaoFaltaByPedido(
+    @PathVariable(value = "pedidoId") String pedidoId)
+  {
+
+      final var query = new GetJustificacaoFaltaByPedidoQuery(pedidoId);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "dispensa/{pedidoId}/validacao"
+  )
+  @Operation(
+    summary = "Get dispensa by pedido id",
+    description = "Get dispensa by pedido id",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DispensaReqDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<DispensaReqDTO> getDispensaByPedidoId(
+    @PathVariable(value = "pedidoId") String pedidoId)
+  {
+
+      final var query = new GetDispensaByPedidoIdQuery(pedidoId);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "dispensa/{dispensaId}"
+  )
+  @Operation(
+    summary = "Update dispensa",
+    description = "Update dispensa",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> updateDispensa(@Valid @RequestBody DispensaReqDTO updateDispensaRequest
+    , @PathVariable(value = "dispensaId") String dispensaId)
+  {
+
+      final var command = new UpdateDispensaCommand(updateDispensaRequest, dispensaId);
+
+      return commandBus.send(command);
 
   }
 

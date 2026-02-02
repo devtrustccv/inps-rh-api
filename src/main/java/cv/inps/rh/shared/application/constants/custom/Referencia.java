@@ -21,6 +21,7 @@ public enum Referencia {
   FALTA,
   DISPENSA,
   HORA_EXTRA,
-  FERIA
+  FERIA,
+  JUSTIFICAR_FALTA
 
 }

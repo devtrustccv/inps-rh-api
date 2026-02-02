@@ -8,7 +8,7 @@
     {
       "name": "id",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -20,7 +20,19 @@
     {
       "name": "uuid",
       "objectType": "java",
-      "type": "string",
+      "type": "uuid",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "uuidFuncionairio",
+      "objectType": "java",
+      "type": "uuid",
       "required": false,
       "before": false,
       "after": false,
@@ -80,7 +92,7 @@
     {
       "name": "totalHorasTrabalhadas",
       "objectType": "java",
-      "type": "integer",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -92,7 +104,7 @@
     {
       "name": "totalHorasAusentes",
       "objectType": "java",
-      "type": "integer",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -104,7 +116,7 @@
     {
       "name": "totalHoraExtra",
       "objectType": "java",
-      "type": "integer",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -116,7 +128,7 @@
     {
       "name": "totalHoraAlmoco",
       "objectType": "java",
-      "type": "integer",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -141,6 +153,42 @@
       "name": "estadoDesc",
       "objectType": "java",
       "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "mesReferencia",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "ano",
+      "objectType": "java",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "mes",
+      "objectType": "java",
+      "type": "integer",
       "required": false,
       "before": false,
       "after": false,
