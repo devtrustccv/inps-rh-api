@@ -68,8 +68,7 @@ public class EmprestimoEntity extends AuditEntity {
   @Column(name = "TIPO_EMPRESTIMO", nullable = false, length = 100)
   private String tipoEmprestimo;
 
-  @NotNull
-  @Column(name = "DATA_INICIO", nullable = false)
+  @Column(name = "DATA_INICIO")
   private LocalDate dataInicio;
 
   @Column(name = "DATA_FIM")

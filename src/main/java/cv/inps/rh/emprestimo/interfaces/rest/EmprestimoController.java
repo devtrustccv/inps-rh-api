@@ -374,4 +374,34 @@ public class EmprestimoController {
 
   }
 
+   @PostMapping(
+   value = "{emprestimoId}/plano-financeiro"
+  )
+  @Operation(
+    summary = "Gerar plano financeiro",
+    description = "Gerar plano financeiro",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = PlanoFinanceiroRowDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<List<PlanoFinanceiroRowDTO>> gerarPlanoFinanceiro(
+    @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new GerarPlanoFinanceiroCommand(emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
 }

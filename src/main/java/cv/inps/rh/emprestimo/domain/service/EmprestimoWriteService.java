@@ -31,6 +31,7 @@ public class EmprestimoWriteService {
   private final FuncionarioRules funcionarioRules;
   private final DocumentoEntityRepository documentoEntityRepository;
   private final TipoDocumentoEntityRepository tipoDocumentoEntityRepository;
+  private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
 
   public void saveConfiguracaoEmprestimo(SaveConfiguracaoInfoEmprestimoCommand command) {
 
@@ -69,7 +70,6 @@ public class EmprestimoWriteService {
       entity = new EmprestimoEntity();
       entity.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
       entity.setEstado(Estado.A.name());
-      entity.setDataInicio(LocalDate.now());
       entity.setTipoEmprestimo("AQUISICAO_VIATURA");
       entity.setFinalidade("AQUISICAO_VIATURA");
       entity.setTipoSituacao("EMPRESTIMO");
@@ -285,6 +285,38 @@ public class EmprestimoWriteService {
     });
 
     documentoEntityRepository.saveAll(docs);
+  }
+
+  public List<PlanoFinanceiroRowDTO> generateFinancialPlan(String uuid) {
+
+    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+
+    var plan = FinancialPlanHelper.generateFinancialPlan(
+        Double.parseDouble(entity.getValorEmprestimo().toString()),
+        Double.parseDouble("0.035"), // TODO 02/02/2026 21:11 valor
+        Integer.parseInt(entity.getNrPrestacao().toString()),
+        entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now()
+    );
+
+    var plans = new ArrayList<PlanoFinanceiroEntity>();
+
+    plan.forEach(obj -> {
+      var newPlan = new PlanoFinanceiroEntity();
+      newPlan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+      newPlan.setEmprestimo(entity);
+      newPlan.setNrOrdemPrestacao(obj.numero());
+      newPlan.setDataPagamento(obj.dataPagamento());
+      newPlan.setValorPrincipal(obj.principal());
+      newPlan.setValorJuros(obj.juros());
+      newPlan.setEstado(Estado.A.name());
+      newPlan.setSaldoInicial(obj.saldoInicial());
+      newPlan.setSaldoFinal(obj.saldoFinal());
+      plans.add(newPlan);
+    });
+
+    planoFinanceiroEntityRepository.saveAll(plans);
+
+    return plan;
   }
 }
 

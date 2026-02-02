@@ -10,6 +10,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityR
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamEmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PlanoFinanceiroEntityRepository;
+import cv.inps.rh.shared.util.NumberUtils;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -181,7 +184,7 @@ public class EmprestimoReadService {
     plan.setDataInicio(entity.getDataInicio());
     plan.setNumeroPagamento(entity.getNrPrestacao());
     plan.setJurosTotal(entity.getValorJuroTotal());
-    plan.setCustoTotalEmprestimo(sum(entity.getValorJuroTotal(), entity.getValorEmprestimo()));
+    plan.setCustoTotalEmprestimo(NumberUtils.sum(entity.getValorJuroTotal(), entity.getValorEmprestimo()));
     plan.setPagamentoMensal(entity.getValorPrestacao());
 
     var rows = planoFinanceiroEntityRepository.findAllByEmprestimo(entity)
@@ -190,7 +193,7 @@ public class EmprestimoReadService {
             obj.getNrOrdemPrestacao(),
             obj.getDataPagamento(),
             obj.getSaldoInicial(),
-            sum(obj.getValorPrincipal(), obj.getValorJuros()),
+            NumberUtils.sum(obj.getValorPrincipal(), obj.getValorJuros()),
             obj.getValorPrincipal(),
             obj.getValorJuros(),
             obj.getSaldoFinal()
@@ -200,8 +203,6 @@ public class EmprestimoReadService {
     return plan;
   }
 
-  private Long sum(Long... values) {
-    return Arrays.stream(values).filter(Objects::nonNull).reduce(0L, Long::sum);
-  }
+
 }
 
