@@ -252,8 +252,6 @@ public class EmprestimoWriteService {
     order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO.name());
     pedidoEntityRepository.save(order);
 
-    // TODO 01/02/2026 14:52 CALCULA O NUMERO DE PRESTACAO MENSAL E DATA INICIO
-
     saveDocuments(request.getDocumentos(), funId, entity.getUuid());
   }
 

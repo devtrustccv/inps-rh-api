@@ -10,6 +10,7 @@ import cv.inps.rh.emprestimo.application.commands.*;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.application.queries.GetConfiguracaoEmprestimoQuery;
 import cv.inps.rh.emprestimo.application.queries.GetEmprestimoByIdQuery;
+import cv.inps.rh.emprestimo.application.queries.GetPlanoFinanceiroQuery;
 import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -340,6 +341,36 @@ public class EmprestimoController {
       final var command = new ElaborarContratoCommand(elaborarContratoRequest, emprestimoId);
 
       return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "{emprestimoId}/plano-financeiro"
+  )
+  @Operation(
+    summary = "Get plano financeiro",
+    description = "Get plano financeiro",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = PlanoFinanceiroDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<PlanoFinanceiroDTO> getPlanoFinanceiro(
+    @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var query = new GetPlanoFinanceiroQuery(emprestimoId);
+
+      return queryBus.handle(query);
 
   }
 

@@ -9,6 +9,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamEmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.PlanoFinanceiroEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -32,6 +31,7 @@ public class EmprestimoReadService {
   private final ParamEmprestimoEntityRepository paramEmprestimoEntityRepository;
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
+  private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
 
   public List<InformacaoEmprestimoRequestDTO> getAllConfiguracaoEmprestimo() {
     return paramEmprestimoEntityRepository.findAll()
@@ -168,6 +168,40 @@ public class EmprestimoReadService {
         .toList());
 
     return response;
+  }
+
+  public PlanoFinanceiroDTO getPlanoFinanceiro(String uuid) {
+
+    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+
+    var plan = new PlanoFinanceiroDTO();
+    plan.setValorEmprestimo(entity.getValorEmprestimo());
+    plan.setTaxaJuroAnual(entity.getJuro());
+    plan.setPeriodoEmprestimo(entity.getNrPrestacao() != null ? (entity.getNrPrestacao() / 12) : null);
+    plan.setDataInicio(entity.getDataInicio());
+    plan.setNumeroPagamento(entity.getNrPrestacao());
+    plan.setJurosTotal(entity.getValorJuroTotal());
+    plan.setCustoTotalEmprestimo(sum(entity.getValorJuroTotal(), entity.getValorEmprestimo()));
+    plan.setPagamentoMensal(entity.getValorPrestacao());
+
+    var rows = planoFinanceiroEntityRepository.findAllByEmprestimo(entity)
+        .stream()
+        .map(obj -> new PlanoFinanceiroRowDTO(
+            obj.getNrOrdemPrestacao(),
+            obj.getDataPagamento(),
+            obj.getSaldoInicial(),
+            sum(obj.getValorPrincipal(), obj.getValorJuros()),
+            obj.getValorPrincipal(),
+            obj.getValorJuros(),
+            obj.getSaldoFinal()
+        )).toList();
+    plan.setRows(rows);
+
+    return plan;
+  }
+
+  private Long sum(Long... values) {
+    return Arrays.stream(values).filter(Objects::nonNull).reduce(0L, Long::sum);
   }
 }
 
