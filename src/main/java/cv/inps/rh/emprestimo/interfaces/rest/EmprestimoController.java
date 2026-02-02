@@ -404,4 +404,34 @@ public class EmprestimoController {
 
   }
 
+   @PostMapping(
+   value = "fundo-social"
+  )
+  @Operation(
+    summary = "Save fundo social",
+    description = "Save fundo social",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> saveFundoSocial(@Valid @RequestBody List<FundoSocialRequestDTO> saveFundoSocialRequest
+    )
+  {
+
+      final var command = new SaveFundoSocialCommand(saveFundoSocialRequest);
+
+      return commandBus.send(command);
+
+  }
+
 }

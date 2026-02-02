@@ -202,7 +202,5 @@ public class EmprestimoReadService {
 
     return plan;
   }
-
-
 }
 
