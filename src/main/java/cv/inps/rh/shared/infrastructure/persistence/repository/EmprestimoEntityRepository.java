@@ -2,11 +2,13 @@ package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -29,5 +31,7 @@ public interface EmprestimoEntityRepository extends
             "EmprestimoEntity not found for uuid: " + uuid
         ));
   }
+
+  List<EmprestimoEntity> findByUuidNotAndTiprel_FunId(String uuid, FuncionarioEntity funcionarioEntity);
 
 }

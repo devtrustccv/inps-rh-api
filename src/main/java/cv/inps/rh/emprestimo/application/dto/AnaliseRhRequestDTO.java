@@ -28,6 +28,9 @@ public class AnaliseRhRequestDTO  {
   @NotNull(message = "The field <numeroPrestacao> is required")
 
   private Long numeroPrestacao ;
+  @NotNull(message = "The field <juros> is required")
+
+  private Long juros ;
   @NotBlank(message = "The field <parecer> is required")
 
   private String parecer ;

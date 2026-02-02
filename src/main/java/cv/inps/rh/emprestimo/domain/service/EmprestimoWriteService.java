@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-// TODO 01/02/2026 14:29 validate the cases where the orders are returned, decision is not positive
-
 @Transactional
 @RequiredArgsConstructor
 @Service
@@ -133,6 +131,7 @@ public class EmprestimoWriteService {
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
     entity.setNrPrestacao(request.getNumeroPrestacao());
     entity.setValorEmprestimo(request.getValorEmprestimo());
+    entity.setJuro(request.getJuros());
     emprestimoEntityRepository.save(entity);
 
     var funId = entity.getTiprel().getFunId();

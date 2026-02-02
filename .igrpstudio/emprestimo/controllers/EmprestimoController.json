@@ -221,7 +221,7 @@
     },
     {
       "actionName": "saveDecisaoAnalise",
-      "path": "/{emprestimoId}/analise-rh",
+      "path": "/{emprestimoId}/analise-rh-pedido",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -260,7 +260,7 @@
     },
     {
       "actionName": "saveDecisaoAnaliseFinanceira",
-      "path": "/{emprestimoId}/analise-financeiro",
+      "path": "/{emprestimoId}/analise-financeiro-pedido",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -299,7 +299,7 @@
     },
     {
       "actionName": "autorizarComissaoExecutiva",
-      "path": "/{emprestimoId}/autorizar-comissao-executiva",
+      "path": "/{emprestimoId}/autorizar-comissao-executiva-pedido",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -338,8 +338,21 @@
     },
     {
       "actionName": "elaborarContrato",
-      "path": "/{emprestimoId}/elaborar-contrato",
+      "path": "/{emprestimoId}/elaborar-contrato-pedido",
       "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ElaboracaoContratoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "emprestimo"
+            }
+          }
+        }
+      },
       "responses": {
         "200": {
           "name": "OK",
@@ -360,21 +373,8 @@
           "type": "string",
           "isRequired": true
         }
-      ],
-      "requestBody": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "ElaboracaoContratoRequest",
-              "collectionType": "none",
-              "name": "data",
-              "objectType": "dto",
-              "module": "emprestimo"
-            }
-          }
-        }
-      }
+      ]
     }
   ],
-  "id": "lls7ig9nio-getConfiguracaoEmprestimo-saveEmprestimo-updateEmprestimo-getEmprestimoById-saveDecisaoAnalise-saveDecisaoAnaliseFinanceira"
+  "id": "lls7ig9nio-getConfiguracaoEmprestimo-saveEmprestimo-updateEmprestimo-getEmprestimoById-saveDecisaoAnalise-saveDecisaoAnaliseFinanceira-elaborarContrato-autorizarComissaoExecutiva-saveDecisaoAnaliseFinanceira-saveDecisaoAnalise"
 }

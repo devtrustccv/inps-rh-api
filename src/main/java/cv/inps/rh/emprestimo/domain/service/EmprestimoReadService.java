@@ -1,14 +1,14 @@
 package cv.inps.rh.emprestimo.domain.service;
 
-import cv.inps.rh.emprestimo.application.dto.DetalhesEmprestimoDTO;
-import cv.inps.rh.emprestimo.application.dto.EmprestimoListDTO;
-import cv.inps.rh.emprestimo.application.dto.EmprestimoListRowDTO;
-import cv.inps.rh.emprestimo.application.dto.InformacaoEmprestimoRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamEmprestimoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class EmprestimoReadService {
 
   private final ParamEmprestimoEntityRepository paramEmprestimoEntityRepository;
   private final EmprestimoEntityRepository emprestimoEntityRepository;
+  private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
 
   public List<InformacaoEmprestimoRequestDTO> getAllConfiguracaoEmprestimo() {
     return paramEmprestimoEntityRepository.findAll()
@@ -44,7 +46,7 @@ public class EmprestimoReadService {
         .toList();
   }
 
-  public DetalhesEmprestimoDTO getPedidoEmprestimoByUuid(String uuid) {
+  public DetalhesEmprestimoDTO getEmprestimoByUuid(String uuid) {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
@@ -60,9 +62,49 @@ public class EmprestimoReadService {
     dto.setEstadoViatura(entity.getEstadoViatura());
     dto.setValorEmprestimo(entity.getValorEmprestimo());
     dto.setNumeroPrestacoes(entity.getNrPrestacao());
+    dto.setJuros(entity.getJuro());
     dto.setFuncionarioId(entity.getTiprel().getFunId().getUuid().toString());
+    dto.setCabimentacaoOrcamental(entity.getDescCabimentacaoOrcamental());
+    dto.setAvaliacaoTaxaEsforco(entity.getDescTaxaEsforco());
+
+    var another = emprestimoEntityRepository.findByUuidNotAndTiprel_FunId(entity.getUuid(), entity.getTiprel().getFunId())
+        .stream()
+        .map(obj -> new OutrosEmprestimosDTO(
+            obj.getTipoEmprestimo(),
+            obj.getDataInicio(),
+            obj.getDataFim(),
+            obj.getValorEmprestimo(),
+            obj.getValorPrestacao()
+        ))
+        .toList();
+    dto.setOutrosEmprestimos(another);
+
+    var order = entity.getPedido();
+
+    // TODO 02/02/2026 20:10 improve performance of ths later, bring all the decisions at once
+    final var decision = new DecisaoEmprestimoDTO();
+    getDecision(order, EtapaEmprestimo.ANALISE_RH).map(this::buildDecisionData).ifPresent(decision::setAnaliseRh);
+    getDecision(order, EtapaEmprestimo.ANALISE_FINANCEIRA).map(this::buildDecisionData).ifPresent(decision::setAnaliseFinanceiro);
+    getDecision(order, EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA).map(this::buildDecisionData).ifPresent(decision::setAutorizacaoComissaoExecutiva);
+    dto.setDecisao(decision);
 
     return dto;
+  }
+
+  private Optional<PedidoDecisaoEntity> getDecision(PedidoEntity order, EtapaEmprestimo etapa) {
+    return pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
+        order,
+        etapa.name(),
+        Estado.A.name()
+    );
+  }
+
+  private BaseDecisaoDTO buildDecisionData(PedidoDecisaoEntity obj) {
+    var baseDecision = new BaseDecisaoDTO();
+    baseDecision.setParecer(obj.getDecisao());
+    baseDecision.setObservacao(obj.getObs());
+    baseDecision.setData(obj.getCreatedDate().toLocalDate());
+    return baseDecision;
   }
 
   public EmprestimoListDTO listarEmprestimos(ListarEmprestimosQuery query) {

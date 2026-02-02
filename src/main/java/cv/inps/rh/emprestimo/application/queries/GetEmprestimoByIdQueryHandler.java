@@ -26,7 +26,7 @@ public class GetEmprestimoByIdQueryHandler implements QueryHandler<GetEmprestimo
 
     LOGGER.debug("GetEmprestimoByIdQuery: {}", query);
 
-    var data = emprestimoReadService.getPedidoEmprestimoByUuid(query.getEmprestimoId());
+    var data = emprestimoReadService.getEmprestimoByUuid(query.getEmprestimoId());
 
     return ResponseEntity.ok(data);
   }

@@ -30,6 +30,18 @@
       "primaryKey": false
     },
     {
+      "name": "juros",
+      "objectType": "java",
+      "type": "long",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "parecer",
       "objectType": "java",
       "type": "string",

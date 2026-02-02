@@ -49,6 +49,9 @@ public class PedidoEmprestimoDTO  {
 
   private Long numeroPrestacoes ;
 
+
+  private Long juros ;
+
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();
 

@@ -224,7 +224,7 @@ public class EmprestimoController {
   }
 
    @PostMapping(
-   value = "/{emprestimoId}/analise-rh"
+   value = "/{emprestimoId}/analise-rh-pedido"
   )
   @Operation(
     summary = "Save decisao analise",
@@ -254,7 +254,7 @@ public class EmprestimoController {
   }
 
    @PostMapping(
-   value = "/{emprestimoId}/analise-financeiro"
+   value = "/{emprestimoId}/analise-financeiro-pedido"
   )
   @Operation(
     summary = "Save decisao analise financeira",
@@ -284,7 +284,7 @@ public class EmprestimoController {
   }
 
    @PostMapping(
-   value = "/{emprestimoId}/autorizar-comissao-executiva"
+   value = "/{emprestimoId}/autorizar-comissao-executiva-pedido"
   )
   @Operation(
     summary = "Autorizar comissao executiva",
@@ -314,7 +314,7 @@ public class EmprestimoController {
   }
 
    @PostMapping(
-   value = "/{emprestimoId}/elaborar-contrato"
+   value = "/{emprestimoId}/elaborar-contrato-pedido"
   )
   @Operation(
     summary = "Elaborar contrato",
