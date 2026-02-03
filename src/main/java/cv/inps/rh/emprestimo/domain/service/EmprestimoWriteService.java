@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -325,8 +326,8 @@ public class EmprestimoWriteService {
 
     var plan = FinancialPlanHelper.generateFinancialPlan(
         entity.getValorEmprestimo(),
-        BigDecimal.valueOf(Double.parseDouble("0.035")), // TODO 02/02/2026 21:11 valor
-        Integer.parseInt(entity.getNrPrestacao().toString()),
+        entity.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
+        entity.getNrPrestacao().intValue(),
         entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now()
     );
 
