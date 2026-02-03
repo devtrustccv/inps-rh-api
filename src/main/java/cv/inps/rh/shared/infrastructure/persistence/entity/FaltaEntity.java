@@ -29,7 +29,7 @@ public class FaltaEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @NotNull(message = "pedidoId is mandatory")
 
 
@@ -49,48 +49,48 @@ public class FaltaEntity extends AuditEntity {
     @Column(name="descricao_motivo")
     private String descricaoMotivo;
 
-  
+
     @Column(name="decisao_responsavel")
     private String decisaoResponsavel;
 
-  
+
     @Column(name="obs_responsavel")
     private String obsResponsavel;
 
-  
+
     @Column(name="despacho_rh")
     private String despachoRh;
 
-  
+
     @Column(name="horas_ausencia")
     private String horasAusencia;
 
-  
+
     @Column(name="data_inicio")
     private LocalDateTime dataInicio;
 
-  
+
     @Column(name="data_fim")
     private LocalDateTime dataFim;
 
-  
+
     @Column(name="flg_desconto_sal")
     private Integer flgDescontoSal;
 
-  
+
     @Column(name="flg_justificativo")
     private String flgJustificativo;
 
-  
+
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -109,5 +109,5 @@ public class FaltaEntity extends AuditEntity {
     @Column(name="valor")
     private BigDecimal valor;
 
-  
+
 }
