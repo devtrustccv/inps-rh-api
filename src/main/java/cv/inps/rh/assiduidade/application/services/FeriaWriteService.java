@@ -14,6 +14,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -89,17 +90,14 @@ public class FeriaWriteService {
     var req = command.getPedidoferiareq();
     if (req == null || !StringUtils.hasText(req.getValidar()))
       throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
-    if (!StringUtils.hasText(command.getFeriaId()))
-      throw IgrpResponseStatusException.badRequest("Identificador de férias é obrigatório");
+    if (!StringUtils.hasText(command.getPedidoId()))
+      throw IgrpResponseStatusException.badRequest("Identificador de pedido ferias é obrigatório");
 
-    Long feriasId;
-    try {
-      feriasId = Long.parseLong(command.getFeriaId());
-    } catch (NumberFormatException e) {
-      throw IgrpResponseStatusException.badRequest("Identificador de férias inválido");
-    }
 
-    var ferias = feriasGozadasRepository.findByIdOrThrow(feriasId);
+
+    var ferias = feriasGozadasRepository.findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"Ferias Gozadas not found for id: " + command.getPedidoId()));
+
     var funcionario = ferias.getFunId();
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
@@ -127,17 +125,13 @@ public class FeriaWriteService {
     var req = command.getPedidoferiaalterarreq();
     if (req == null)
       throw IgrpResponseStatusException.badRequest("Dados de alteração de férias ausentes");
-    if (!StringUtils.hasText(command.getFeriaId()))
-      throw IgrpResponseStatusException.badRequest("Identificador de férias é obrigatório");
+    if (!StringUtils.hasText(command.getPedidoId()))
+      throw IgrpResponseStatusException.badRequest("Identificador de pedido ferias é obrigatório");
 
-    Long feriasId;
-    try {
-      feriasId = Long.parseLong(command.getFeriaId());
-    } catch (NumberFormatException e) {
-      throw IgrpResponseStatusException.badRequest("Identificador de férias inválido");
-    }
 
-    var existing = feriasGozadasRepository.findByIdOrThrow(feriasId);
+    var existing = feriasGozadasRepository.findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"Ferias Gozadas not found for id: " + command.getPedidoId()));
+
     var funcionario = existing.getFunId();
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 

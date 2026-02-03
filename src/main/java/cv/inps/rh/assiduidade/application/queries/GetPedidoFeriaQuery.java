@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class GetPedidoFeriaQuery implements Query {
 
-  @NotBlank(message = "The field <feriaId> is required")
-  private String feriaId;
+  @NotBlank(message = "The field <pedidoId> is required")
+  private String pedidoId;
 
 }

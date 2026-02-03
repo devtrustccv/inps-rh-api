@@ -488,7 +488,7 @@ public class AssiduidadeController {
   }
 
    @PutMapping(
-   value = "feria/{feriaId}"
+   value = "feria/{pedidoId}"
   )
   @Operation(
     summary = "Alterar pedido feria",
@@ -508,17 +508,17 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<Map<String, ?>> alterarPedidoFeria(@Valid @RequestBody PedidoFeriaAlterarReqDTO alterarPedidoFeriaRequest
-    , @PathVariable(value = "feriaId") String feriaId)
+    , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var command = new AlterarPedidoFeriaCommand(alterarPedidoFeriaRequest, feriaId);
+      final var command = new AlterarPedidoFeriaCommand(alterarPedidoFeriaRequest, pedidoId);
 
       return commandBus.send(command);
 
   }
 
    @PostMapping(
-   value = "feria/{feriaId}"
+   value = "feria/{pedidoId}"
   )
   @Operation(
     summary = "Validar pedido feria",
@@ -538,10 +538,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<Map<String, ?>> validarPedidoFeria(@Valid @RequestBody PedidoFeriaReqDTO validarPedidoFeriaRequest
-    , @PathVariable(value = "feriaId") String feriaId)
+    , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var command = new ValidarPedidoFeriaCommand(validarPedidoFeriaRequest, feriaId);
+      final var command = new ValidarPedidoFeriaCommand(validarPedidoFeriaRequest, pedidoId);
 
       return commandBus.send(command);
 
@@ -767,7 +767,7 @@ public class AssiduidadeController {
   }
 
    @GetMapping(
-   value = "feria/{feriaId}"
+   value = "feria/{pedidoId}"
   )
   @Operation(
     summary = "Get pedido feria",
@@ -787,10 +787,10 @@ public class AssiduidadeController {
   )
   
   public ResponseEntity<PedidoFeriaAlterarReqDTO> getPedidoFeria(
-    @PathVariable(value = "feriaId") String feriaId)
+    @PathVariable(value = "pedidoId") String pedidoId)
   {
 
-      final var query = new GetPedidoFeriaQuery(feriaId);
+      final var query = new GetPedidoFeriaQuery(pedidoId);
 
       return queryBus.handle(query);
 

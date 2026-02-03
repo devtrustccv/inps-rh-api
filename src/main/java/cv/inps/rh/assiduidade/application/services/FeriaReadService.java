@@ -1,11 +1,13 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaAlterarReqDTO;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFeriaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetListaFeriaQuery;
 import cv.inps.rh.assiduidade.application.dto.FeriasListDTO;
 import cv.inps.rh.assiduidade.application.queries.GetPedidoFeriaQuery;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FeriasGozadasEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FeriasMapaEntityRepository;
@@ -21,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -107,16 +110,12 @@ public class FeriaReadService {
 
 
   public PedidoFeriaAlterarReqDTO getPedidoFeria(GetPedidoFeriaQuery query){
-    if (!StringUtils.hasText(query.getFeriaId()))
-      throw cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException.badRequest("Identificador de férias é obrigatório");
-    Long id;
-    try {
-      id = Long.parseLong(query.getFeriaId());
-    } catch (NumberFormatException e) {
-      throw cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException.badRequest("Identificador de férias inválido");
-    }
+    if (!StringUtils.hasText(query.getPedidoId()))
+      throw cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException.badRequest("Identificador de pedido férias é obrigatório");
 
-    var entity = feriasGozadasEntityRepository.findByIdOrThrow(id);
+
+    var entity = feriasGozadasEntityRepository.findByPedidoId_Uuid(UuidCreator.fromString(query.getPedidoId()))
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"Ferias Gozadas not found for id: " + query.getPedidoId()));
 
     var req = new PedidoFeriaReqDTO();
     req.setColaborador(entity.getFunId() != null ? entity.getFunId().getUuid() : null);

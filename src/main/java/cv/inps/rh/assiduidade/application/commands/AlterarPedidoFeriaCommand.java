@@ -14,7 +14,7 @@ public class AlterarPedidoFeriaCommand implements Command {
 
   
   private PedidoFeriaAlterarReqDTO pedidoferiaalterarreq;
-  @NotBlank(message = "The field <feriaId> is required")
-  private String feriaId;
+  @NotBlank(message = "The field <pedidoId> is required")
+  private String pedidoId;
 
 }

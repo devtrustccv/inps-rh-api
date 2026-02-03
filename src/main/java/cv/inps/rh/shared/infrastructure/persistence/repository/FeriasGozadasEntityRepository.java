@@ -21,4 +21,5 @@ public interface FeriasGozadasEntityRepository extends
           .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"FeriasGozadasEntity not found for id: " + id));
       }
 
+  Optional<FeriasGozadasEntity> findByPedidoId_Uuid(UUID uuid);
 }
