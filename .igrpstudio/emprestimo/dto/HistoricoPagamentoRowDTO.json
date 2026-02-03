@@ -1,0 +1,34 @@
+{
+  "type": "dto",
+  "module": "emprestimo",
+  "name": "HistoricoPagamentoRow",
+  "template": "record",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "dataProcessamento",
+      "objectType": "java",
+      "type": "date",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "valor",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "6ex46h0xs3"
+}

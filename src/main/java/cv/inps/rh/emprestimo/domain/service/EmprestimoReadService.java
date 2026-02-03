@@ -175,19 +175,19 @@ public class EmprestimoReadService {
 
   public PlanoFinanceiroDTO getPlanoFinanceiro(String uuid) {
 
-    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
     var plan = new PlanoFinanceiroDTO();
-    plan.setValorEmprestimo(entity.getValorEmprestimo());
-    plan.setTaxaJuroAnual(entity.getJuro());
-    plan.setPeriodoEmprestimo(entity.getNrPrestacao() != null ? (entity.getNrPrestacao() / 12) : null);
-    plan.setDataInicio(entity.getDataInicio());
-    plan.setNumeroPagamento(entity.getNrPrestacao());
-    plan.setJurosTotal(entity.getValorJuroTotal());
-    plan.setCustoTotalEmprestimo(NumberUtils.sum(entity.getValorJuroTotal(), entity.getValorEmprestimo()));
-    plan.setPagamentoMensal(entity.getValorPrestacao());
+    plan.setValorEmprestimo(loan.getValorEmprestimo());
+    plan.setTaxaJuroAnual(loan.getJuro());
+    plan.setPeriodoEmprestimo(loan.getNrPrestacao() != null ? (loan.getNrPrestacao() / 12) : null);
+    plan.setDataInicio(loan.getDataInicio());
+    plan.setNumeroPagamento(loan.getNrPrestacao());
+    plan.setJurosTotal(loan.getValorJuroTotal());
+    plan.setCustoTotalEmprestimo(NumberUtils.sum(loan.getValorJuroTotal(), loan.getValorEmprestimo()));
+    plan.setPagamentoMensal(loan.getValorPrestacao());
 
-    var rows = planoFinanceiroEntityRepository.findAllByEmprestimo(entity)
+    var rows = planoFinanceiroEntityRepository.findAllByEmprestimo(loan)
         .stream()
         .map(obj -> new PlanoFinanceiroRowDTO(
             obj.getNrOrdemPrestacao(),
@@ -201,6 +201,18 @@ public class EmprestimoReadService {
     plan.setRows(rows);
 
     return plan;
+  }
+
+  public HistoricoPagamentoDTO getHistoricoPagamento(String uuid) {
+
+    var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+
+    var history = new HistoricoPagamentoDTO();
+    history.setValorTotalPago(null);
+    history.setSaldoDivida(null);
+    history.setPagamentos(null);
+
+    return history;
   }
 }
 

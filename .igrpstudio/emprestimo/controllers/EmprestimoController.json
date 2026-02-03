@@ -462,6 +462,34 @@
           }
         }
       }
+    },
+    {
+      "actionName": "getHistoricoPagamento",
+      "path": "{emprestimoId}/historico-pagamento",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "HistoricoPagamento",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "emprestimo"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "emprestimoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "lls7ig9nio-getConfiguracaoEmprestimo-saveEmprestimo-updateEmprestimo-getEmprestimoById-saveDecisaoAnalise-saveDecisaoAnaliseFinanceira-elaborarContrato-autorizarComissaoExecutiva-saveDecisaoAnaliseFinanceira-saveDecisaoAnalise"

@@ -8,10 +8,7 @@ import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.emprestimo.application.commands.*;
 import cv.inps.rh.emprestimo.application.dto.*;
-import cv.inps.rh.emprestimo.application.queries.GetConfiguracaoEmprestimoQuery;
-import cv.inps.rh.emprestimo.application.queries.GetEmprestimoByIdQuery;
-import cv.inps.rh.emprestimo.application.queries.GetPlanoFinanceiroQuery;
-import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
+import cv.inps.rh.emprestimo.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -431,6 +428,36 @@ public class EmprestimoController {
       final var command = new SaveFundoSocialCommand(saveFundoSocialRequest);
 
       return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "{emprestimoId}/historico-pagamento"
+  )
+  @Operation(
+    summary = "Get historico pagamento",
+    description = "Get historico pagamento",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = HistoricoPagamentoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<HistoricoPagamentoDTO> getHistoricoPagamento(
+    @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var query = new GetHistoricoPagamentoQuery(emprestimoId);
+
+      return queryBus.handle(query);
 
   }
 
