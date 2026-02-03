@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -24,7 +25,7 @@ public class InformacaoEmprestimoRequestDTO  {
   private String carreiraId ;
   @NotNull(message = "The field <valorLimiteEmprestimo> is required")
 
-  private Long valorLimiteEmprestimo ;
+  private BigDecimal valorLimiteEmprestimo ;
 
 
   private Long numeroLimitePrestacaoMeses ;

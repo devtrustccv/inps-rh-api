@@ -5,6 +5,7 @@ package cv.inps.rh.processamento.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @IgrpDTO
@@ -20,6 +21,14 @@ public record PesquisaColaboradorResponseDTO(
 
     Long direcaoId,
 
-    String centroCusto
+    String centroCusto,
+
+    String categoria,
+
+    BigDecimal salarioBrutoCategoria,
+
+    String funcao,
+
+    BigDecimal salarioBrutoFuncao
 ) {
 }

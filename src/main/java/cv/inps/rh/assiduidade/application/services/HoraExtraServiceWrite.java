@@ -1,14 +1,13 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.assiduidade.application.commands.MarcarHoraExtraCommand;
 import cv.inps.rh.assiduidade.application.commands.ValidarHoraExtraCommand;
-import cv.inps.rh.assiduidade.application.dto.HoraExtraReqDTO;
 import cv.inps.rh.assiduidade.application.dto.HoraExtraDTO;
-import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
-import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
@@ -22,8 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -54,7 +51,7 @@ public class HoraExtraServiceWrite {
 
 
     var pedido = new PedidoEntity();
-    pedido.setEstado(Estado.P);
+    pedido.setEstado(Estado.P.name());
     pedido.setTipoPedido(Referencia.HORA_EXTRA.name());
     pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
 
@@ -236,7 +233,7 @@ public class HoraExtraServiceWrite {
       validacaoEntityRepository.save(v);
     });
 
-    pedido.setEstado(estado);
+    pedido.setEstado(estado.name());
     pedidoRepository.save(pedido);
 
     /*if (estado == Estado.A) {

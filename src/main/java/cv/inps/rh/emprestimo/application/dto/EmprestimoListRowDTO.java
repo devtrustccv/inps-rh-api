@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -41,16 +42,16 @@ public class EmprestimoListRowDTO  {
   private String emprestimoId ;
 
 
-  private Long valorConcedido ;
+  private BigDecimal valorConcedido ;
 
 
   private Long numeroPrestacoesPagas ;
 
 
-  private Long valorPago ;
+  private BigDecimal valorPago ;
 
 
-  private Long saldoEmDivida ;
+  private BigDecimal saldoEmDivida ;
 
 
   private LocalDate dataInicioEmprestimo ;

@@ -12,7 +12,6 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeSinteseDiarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import jakarta.persistence.EntityManager;
@@ -20,12 +19,14 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -80,7 +81,7 @@ public class JustificarFaltaWriteService {
     pedido.setFunId(funcionario);
     pedido.setTipoPedido("JUSTIFICACAO_FALTA");
     pedido.setOrigem("RH");
-    pedido.setEstado(Estado.P);
+    pedido.setEstado(Estado.P.name());
     pedido = pedidoRepository.save(pedido);
 
     // Criar faltas a partir das sínteses diárias
@@ -238,7 +239,7 @@ public class JustificarFaltaWriteService {
     faltaRepository.saveAll(faltas);
 
     // Atualizar pedido
-    pedido.setEstado(estadoFinal);
+    pedido.setEstado(estadoFinal.name());
     pedido.setEtapa("FINALIZADO");
     pedidoRepository.save(pedido);
 

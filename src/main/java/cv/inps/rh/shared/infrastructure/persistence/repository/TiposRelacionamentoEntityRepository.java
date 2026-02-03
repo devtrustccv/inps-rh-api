@@ -111,7 +111,11 @@ public interface TiposRelacionamentoEntityRepository extends
                t.funId.nome,
                t.mobId.instidId.nome,
                t.mobId.instidId.id,
-               null
+               null,
+               t.carreiraId.categoriaId.nome,
+               t.carreiraId.salario,
+               t.carreiraId.cargoId.nome,
+               t.carreiraId.escalaoId.valor
            )
       FROM TiposRelacionamentoEntity t
       WHERE t.estActAdm = 1 AND t.flgProcessa = 1

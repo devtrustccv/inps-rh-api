@@ -6,16 +6,9 @@ package cv.inps.rh.emprestimo.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import cv.inps.rh.emprestimo.application.commands.SaveConfiguracaoInfoEmprestimoCommand;
-import cv.inps.rh.emprestimo.application.commands.SaveEmprestimoCommand;
-import cv.inps.rh.emprestimo.application.commands.UpdateEmprestimoCommand;
-import cv.inps.rh.emprestimo.application.dto.EmprestimoListDTO;
-import cv.inps.rh.emprestimo.application.dto.IdDTO;
-import cv.inps.rh.emprestimo.application.dto.InformacaoEmprestimoRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.PedidoEmprestimoDTO;
-import cv.inps.rh.emprestimo.application.queries.GetConfiguracaoEmprestimoQuery;
-import cv.inps.rh.emprestimo.application.queries.GetEmprestimoByIdQuery;
-import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
+import cv.inps.rh.emprestimo.application.commands.*;
+import cv.inps.rh.emprestimo.application.dto.*;
+import cv.inps.rh.emprestimo.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -176,14 +169,14 @@ public class EmprestimoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = PedidoEmprestimoDTO.class,
+                  implementation = DetalhesEmprestimoDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<PedidoEmprestimoDTO> getEmprestimoById(
+  public ResponseEntity<DetalhesEmprestimoDTO> getEmprestimoById(
     @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
@@ -223,6 +216,246 @@ public class EmprestimoController {
   {
 
       final var query = new ListarEmprestimosQuery(tipoEmprestimo, direccaoId, dataInicio, dataFim, estadoEmprestimo, page, size);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/analise-rh-pedido"
+  )
+  @Operation(
+    summary = "Save decisao analise",
+    description = "Save decisao analise",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> saveDecisaoAnalise(@Valid @RequestBody AnaliseRhRequestDTO saveDecisaoAnaliseRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new SaveDecisaoAnaliseCommand(saveDecisaoAnaliseRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/analise-financeiro-pedido"
+  )
+  @Operation(
+    summary = "Save decisao analise financeira",
+    description = "Save decisao analise financeira",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> saveDecisaoAnaliseFinanceira(@Valid @RequestBody AnaliseFinanceiroRequestDTO saveDecisaoAnaliseFinanceiraRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new SaveDecisaoAnaliseFinanceiraCommand(saveDecisaoAnaliseFinanceiraRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/autorizar-comissao-executiva-pedido"
+  )
+  @Operation(
+    summary = "Autorizar comissao executiva",
+    description = "Autorizar comissao executiva",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> autorizarComissaoExecutiva(@Valid @RequestBody AutorizacaoComissaoExecutivaDTO autorizarComissaoExecutivaRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new AutorizarComissaoExecutivaCommand(autorizarComissaoExecutivaRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/elaborar-contrato-pedido"
+  )
+  @Operation(
+    summary = "Elaborar contrato",
+    description = "Elaborar contrato",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> elaborarContrato(@Valid @RequestBody ElaboracaoContratoRequestDTO elaborarContratoRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new ElaborarContratoCommand(elaborarContratoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "{emprestimoId}/plano-financeiro"
+  )
+  @Operation(
+    summary = "Get plano financeiro",
+    description = "Get plano financeiro",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = PlanoFinanceiroDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<PlanoFinanceiroDTO> getPlanoFinanceiro(
+    @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var query = new GetPlanoFinanceiroQuery(emprestimoId);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "{emprestimoId}/plano-financeiro"
+  )
+  @Operation(
+    summary = "Gerar plano financeiro",
+    description = "Gerar plano financeiro",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = PlanoFinanceiroRowDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<List<PlanoFinanceiroRowDTO>> gerarPlanoFinanceiro(
+    @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new GerarPlanoFinanceiroCommand(emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "fundo-social"
+  )
+  @Operation(
+    summary = "Save fundo social",
+    description = "Save fundo social",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> saveFundoSocial(@Valid @RequestBody List<FundoSocialRequestDTO> saveFundoSocialRequest
+    )
+  {
+
+      final var command = new SaveFundoSocialCommand(saveFundoSocialRequest);
+
+      return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "{emprestimoId}/historico-pagamento"
+  )
+  @Operation(
+    summary = "Get historico pagamento",
+    description = "Get historico pagamento",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = HistoricoPagamentoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<HistoricoPagamentoDTO> getHistoricoPagamento(
+    @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var query = new GetHistoricoPagamentoQuery(emprestimoId);
 
       return queryBus.handle(query);
 

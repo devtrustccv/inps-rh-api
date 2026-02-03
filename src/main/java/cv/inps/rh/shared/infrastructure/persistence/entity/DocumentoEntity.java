@@ -25,45 +25,45 @@ import java.util.UUID;
 @Table(name = "RH_T_DOCUMENTO")
 public class DocumentoEntity extends AuditEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_documento")
-    @SequenceGenerator(name = "seq_documento", sequenceName = "SEQ_DOCUMENTO", allocationSize = 1)
-    @Column(name = "id", unique = true, nullable = false)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_documento")
+  @SequenceGenerator(name = "seq_documento", sequenceName = "SEQ_DOCUMENTO", allocationSize = 1)
+  @Column(name = "id", unique = true, nullable = false)
+  private Long id;
 
 
-    @Column(name="uuid")
-    private UUID uuid;
+  @Column(name = "uuid")
+  private UUID uuid;
 
 
-    @NotNull(message = "tpDocumentoId is mandatory")
+  @NotNull(message = "tpDocumentoId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tp_documento_id", referencedColumnName = "id")
-    private TipoDocumentoEntity tpDocumentoId;
-    @Column(name="doc_id")
-    private Long docId;
+  @JoinColumn(name = "tp_documento_id", referencedColumnName = "id")
+  private TipoDocumentoEntity tpDocumentoId;
+  @Column(name = "doc_id")
+  private Long docId;
 
 
+  @Column(name = "referencia_name")
+  private String referenciaName;
 
 
-
-    @Column(name="referencia_name")
-    private String referenciaName;
-
-
-    @Column(name="referencia_id")
-    private String referenciaId;
+  @Column(name = "referencia_id")
+  private String referenciaId;
 
 
-    @Enumerated(EnumType.STRING)
-    @Column(name="estado")
-    private Estado estado;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "estado")
+  private Estado estado;
 
-     @ManyToOne(fetch = FetchType.LAZY)
-   @JoinColumn(name = "fun_id")
-   private FuncionarioEntity funId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "fun_id")
+  private FuncionarioEntity funId;
+
+  @Column(name = "url")
+  private String url;
 
 
 }

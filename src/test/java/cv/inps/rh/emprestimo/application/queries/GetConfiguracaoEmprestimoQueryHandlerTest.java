@@ -14,12 +14,12 @@ public class GetConfiguracaoEmprestimoQueryHandlerTest {
 
   @BeforeEach
   void setUp() {
-    // TODO: Initialize mock dependencies if needed
+
   }
 
   @Test
   void testHandleGetConfiguracaoEmprestimoQuery() {
-    // TODO: Implement unit test for handle method
+
     // Example:
     // Given
     // GetConfiguracaoEmprestimoQuery query = new GetConfiguracaoEmprestimoQuery(...);

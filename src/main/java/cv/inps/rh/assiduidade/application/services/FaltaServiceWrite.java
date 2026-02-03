@@ -6,6 +6,8 @@ import cv.inps.rh.assiduidade.application.commands.ValidarFaltaCommand;
 import cv.inps.rh.assiduidade.application.constants.AssiduidadeDiariaEstado;
 import cv.inps.rh.assiduidade.application.dto.FaltaReqDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
+import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -13,21 +15,14 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
-import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
-import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
-import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -77,7 +72,7 @@ public class FaltaServiceWrite {
       pedido.setFunId(funcionario);
       pedido.setTipoPedido("JUSTIFICACAO_FALTA");
       pedido.setEtapa("DESPACHO_RH");
-      pedido.setEstado(Estado.P);
+      pedido.setEstado(Estado.P.name());
       pedido.setOrigem("MANUAL");
       pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
       pedido = pedidoRepository.save(pedido);
@@ -168,7 +163,7 @@ public class FaltaServiceWrite {
     faltaRepository.saveAll(faltas);
 
     // Atualizar estado e etapa do pedido
-    pedido.setEstado(novoEstado);
+    pedido.setEstado(novoEstado.name());
     if (novoEstado == Estado.A) {
       pedido.setEtapa("FINALIZADO");
     }

@@ -1,0 +1,49 @@
+{
+  "type": "dto",
+  "module": "emprestimo",
+  "name": "DecisaoEmprestimo",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "analiseRh",
+      "objectType": "dto",
+      "type": "BaseDecisao",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "emprestimo"
+    },
+    {
+      "name": "analiseFinanceiro",
+      "objectType": "dto",
+      "type": "BaseDecisao",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "emprestimo"
+    },
+    {
+      "name": "autorizacaoComissaoExecutiva",
+      "objectType": "dto",
+      "type": "BaseDecisao",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "emprestimo"
+    }
+  ],
+  "id": "p6jyheijsx"
+}

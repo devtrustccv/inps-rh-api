@@ -1,33 +1,26 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.assiduidade.application.commands.AlterarPedidoFeriaCommand;
 import cv.inps.rh.assiduidade.application.commands.MarcarFeriaCommand;
 import cv.inps.rh.assiduidade.application.commands.ValidarPedidoFeriaCommand;
-import com.github.f4b6a3.uuid.UuidCreator;
-import cv.inps.rh.assiduidade.application.dto.PedidoFeriaAlterarReqDTO;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
-import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
-import cv.inps.rh.shared.infrastructure.persistence.repository.AnoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FeriasGozadasEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +48,7 @@ public class FeriaWriteService {
     pedido.setTipoPedido("FERIA");
     pedido.setOrigem("ASSIDUIDADE");
     pedido.setEtapa("DESPACHO_RH");
-    pedido.setEstado(Estado.P);
+    pedido.setEstado(Estado.P.name());
     pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
     pedido = pedidoRepository.save(pedido);
 
@@ -161,7 +154,7 @@ public class FeriaWriteService {
     pedido.setTipoPedido("FERIA");
     pedido.setOrigem("ASSIDUIDADE");
     pedido.setEtapa("DESPACHO_RH");
-    pedido.setEstado(Estado.P);
+    pedido.setEstado(Estado.P.name());
     pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
     pedido = pedidoRepository.save(pedido);
 

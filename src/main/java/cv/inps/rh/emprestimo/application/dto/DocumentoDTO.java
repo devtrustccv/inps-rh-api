@@ -23,7 +23,7 @@ public class DocumentoDTO  {
   private String id ;
   @NotBlank(message = "The field <tipo> is required")
 
-  private String tipo ;
+  private String tipoDocumentoId ;
   @NotBlank(message = "The field <url> is required")
 
   private String url ;

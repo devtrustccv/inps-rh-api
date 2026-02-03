@@ -14,12 +14,11 @@ public class SaveEmprestimoCommandHandlerTest {
 
     @BeforeEach
     void setUp() {
-      // TODO: initialize mock dependencies if needed
     }
 
     @Test
     void testHandle() {
-        // TODO: Implement unit test for handle method
+
         // Example:
         // Given
         // SaveEmprestimoCommand command = new SaveEmprestimoCommand(...);

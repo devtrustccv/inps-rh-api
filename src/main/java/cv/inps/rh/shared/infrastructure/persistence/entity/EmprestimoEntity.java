@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -54,10 +55,10 @@ public class EmprestimoEntity extends AuditEntity {
 
   @NotNull
   @Column(name = "VALOR_EMPRESTIMO", nullable = false)
-  private Long valorEmprestimo;
+  private BigDecimal valorEmprestimo;
 
   @Column(name = "VALOR_DIVIDA")
-  private Long valorDivida;
+  private BigDecimal valorDivida;
 
   @NotNull
   @Column(name = "NR_PRESTACAO", nullable = false)
@@ -68,18 +69,17 @@ public class EmprestimoEntity extends AuditEntity {
   @Column(name = "TIPO_EMPRESTIMO", nullable = false, length = 100)
   private String tipoEmprestimo;
 
-  @NotNull
-  @Column(name = "DATA_INICIO", nullable = false)
+  @Column(name = "DATA_INICIO")
   private LocalDate dataInicio;
 
   @Column(name = "DATA_FIM")
   private LocalDate dataFim;
 
   @Column(name = "JURO")
-  private Long juro;
+  private BigDecimal juro;
 
   @Column(name = "VALOR_PRESTACAO")
-  private Long valorPrestacao;
+  private BigDecimal valorPrestacao;
 
   @Size(max = 300)
   @Column(name = "DESC_CABIMENTACAO_ORCAMENTAL", length = 300)
@@ -113,7 +113,7 @@ public class EmprestimoEntity extends AuditEntity {
   private String finalidade;
 
   @Column(name = "VALOR_ADIANTADO")
-  private Long valorAdiantado;
+  private BigDecimal valorAdiantado;
 
   @Size(max = 100)
   @Column(name = "TIPO_RENOGOCIACAO", length = 100)
@@ -124,10 +124,10 @@ public class EmprestimoEntity extends AuditEntity {
   private String motivoFecho;
 
   @Column(name = "VALOR_REFORCO")
-  private Long valorReforco;
+  private BigDecimal valorReforco;
 
   @Column(name = "VALOR_PAGO")
-  private Long valorPago;
+  private BigDecimal valorPago;
 
   @Size(max = 200)
   @Column(name = "MOTIVO", length = 200)
@@ -161,5 +161,5 @@ public class EmprestimoEntity extends AuditEntity {
   private String uuid;
 
   @Column(name = "VALOR_JURO_TOTAL")
-  private Long valorJuroTotal;
+  private BigDecimal valorJuroTotal;
 }
