@@ -616,7 +616,7 @@ public class AssiduidadeController {
   }
 
    @GetMapping(
-   value = "mapa-feria"
+   value = "mapa-feria/detalhe"
   )
   @Operation(
     summary = "Get detalhe mapa feria",
