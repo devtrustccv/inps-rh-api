@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -36,17 +37,17 @@ public class PlanoFinanceiroEntity extends AuditEntity {
 
   @NotNull
   @Column(name = "VALOR_PRINCIPAL", nullable = false)
-  private Long valorPrincipal;
+  private BigDecimal valorPrincipal;
 
   @Column(name = "VALOR_JUROS")
-  private Long valorJuros;
+  private BigDecimal valorJuros;
 
   @Size(max = 10)
   @Column(name = "FLG_PAGO", length = 10)
   private String flgPago;
 
   @Column(name = "VALOR_PAGO")
-  private Long valorPago;
+  private BigDecimal valorPago;
 
   @Column(name = "DEFP_ID")
   private Long defpId;
@@ -62,8 +63,8 @@ public class PlanoFinanceiroEntity extends AuditEntity {
   private String uuid;
 
   @Column(name = "SALDO_INICIAL")
-  private Long saldoInicial;
+  private BigDecimal saldoInicial;
 
   @Column(name = "SALDO_FINAL")
-  private Long saldoFinal;
+  private BigDecimal saldoFinal;
 }

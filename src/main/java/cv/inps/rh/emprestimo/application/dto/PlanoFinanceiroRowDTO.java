@@ -5,6 +5,7 @@ package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @IgrpDTO
@@ -14,13 +15,13 @@ public record PlanoFinanceiroRowDTO (
 
   LocalDate dataPagamento,
 
-  Long saldoInicial,
+  BigDecimal saldoInicial,
 
-  Long pagamento,
+  BigDecimal pagamento,
 
-  Long principal,
+  BigDecimal principal,
 
-  Long juros,
+  BigDecimal juros,
 
-  Long saldoFinal
+  BigDecimal saldoFinal
 ){}

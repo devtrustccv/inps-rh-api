@@ -20,7 +20,7 @@
     {
       "name": "valor",
       "objectType": "java",
-      "type": "long",
+      "type": "decimal",
       "required": false,
       "before": false,
       "after": false,

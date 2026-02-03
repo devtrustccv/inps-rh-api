@@ -10,10 +10,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,19 +22,26 @@ import java.util.List;
 @IgrpDTO
 public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
 
-  private LocalDate dataInicio;
 
-  private LocalDate dataFim;
 
-  private Long valorPrestacao;
+  private LocalDate dataInicio ;
 
-  private String cabimentacaoOrcamental;
 
-  private String avaliacaoTaxaEsforco;
+  private LocalDate dataFim ;
+
+
+  private BigDecimal valorPrestacao ;
+
+
+  private String cabimentacaoOrcamental ;
+
+
+  private String avaliacaoTaxaEsforco ;
 
   @Valid
   private List<OutrosEmprestimosDTO> outrosEmprestimos = new ArrayList<>();
 
   @Valid
-  private DecisaoEmprestimoDTO decisao;
+  private DecisaoEmprestimoDTO decisao ;
+
 }

@@ -6,10 +6,8 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamEmprestimoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.PlanoFinanceiroEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.RhPagamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.NumberUtils;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
@@ -21,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +34,7 @@ public class EmprestimoReadService {
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
+  private final RhPagamentoEntityRepository rhPagamentoEntityRepository;
 
   public List<InformacaoEmprestimoRequestDTO> getAllConfiguracaoEmprestimo() {
     return paramEmprestimoEntityRepository.findAll()
@@ -207,10 +207,24 @@ public class EmprestimoReadService {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
+    var payments = rhPagamentoEntityRepository.findByEstadoAndDefp_FunId(Estado.A.name(), loan.getTiprel().getFunId());
+
     var history = new HistoricoPagamentoDTO();
-    history.setValorTotalPago(null);
-    history.setSaldoDivida(null);
-    history.setPagamentos(null);
+
+    var rows = payments.stream()
+        .map(p -> new HistoricoPagamentoRowDTO(p.getDataRef(), p.getValor()))
+        .toList();
+    history.setPagamentos(rows);
+
+    var totalPago = payments.stream()
+        .map(RhPagamentoEntity::getValor)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    history.setPagamentos(rows);
+    history.setValorTotalPago(totalPago);
+    history.setSaldoDivida(
+        loan.getValorEmprestimo().subtract(totalPago)
+    );
 
     return history;
   }

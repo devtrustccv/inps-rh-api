@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +24,10 @@ public class PlanoFinanceiroDTO  {
 
 
 
-  private Long valorEmprestimo ;
+  private BigDecimal valorEmprestimo ;
 
 
-  private Long taxaJuroAnual ;
+  private BigDecimal taxaJuroAnual ;
 
 
   private Long periodoEmprestimo ;
@@ -38,13 +39,13 @@ public class PlanoFinanceiroDTO  {
   private Long numeroPagamento ;
 
 
-  private Long jurosTotal ;
+  private BigDecimal jurosTotal ;
 
 
-  private Long custoTotalEmprestimo ;
+  private BigDecimal custoTotalEmprestimo ;
 
 
-  private Long pagamentoMensal ;
+  private BigDecimal pagamentoMensal ;
 
   @Valid
   private List<PlanoFinanceiroRowDTO> rows = new ArrayList<>();

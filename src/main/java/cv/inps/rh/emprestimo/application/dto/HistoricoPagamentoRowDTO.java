@@ -5,6 +5,7 @@ package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @IgrpDTO
@@ -12,5 +13,5 @@ public record HistoricoPagamentoRowDTO (
 
   LocalDate dataProcessamento,
 
-  Long valor
+  BigDecimal valor
 ){}

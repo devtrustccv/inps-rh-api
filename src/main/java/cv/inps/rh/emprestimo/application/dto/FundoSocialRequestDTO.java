@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,13 +38,13 @@ public class FundoSocialRequestDTO  {
   private LocalDate dataFim ;
   @NotNull(message = "The field <valorPrestacaoMensal> is required")
 
-  private Long valorPrestacaoMensal ;
+  private BigDecimal valorPrestacaoMensal ;
   @NotNull(message = "The field <valorTotalEmprestimo> is required")
 
-  private Long valorTotalEmprestimo ;
+  private BigDecimal valorTotalEmprestimo ;
 
 
-  private Long valorPago ;
+  private BigDecimal valorPago ;
 
 
   private String finalidade ;

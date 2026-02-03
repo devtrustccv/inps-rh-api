@@ -92,7 +92,7 @@
     {
       "name": "valorEmprestimo",
       "objectType": "java",
-      "type": "long",
+      "type": "decimal",
       "required": false,
       "before": false,
       "after": false,
@@ -116,7 +116,7 @@
     {
       "name": "juros",
       "objectType": "java",
-      "type": "long",
+      "type": "decimal",
       "required": false,
       "before": false,
       "after": false,

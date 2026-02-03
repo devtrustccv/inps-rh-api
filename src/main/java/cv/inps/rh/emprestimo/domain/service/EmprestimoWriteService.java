@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -323,8 +324,8 @@ public class EmprestimoWriteService {
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
     var plan = FinancialPlanHelper.generateFinancialPlan(
-        Double.parseDouble(entity.getValorEmprestimo().toString()),
-        Double.parseDouble("0.035"), // TODO 02/02/2026 21:11 valor
+        entity.getValorEmprestimo(),
+        BigDecimal.valueOf(Double.parseDouble("0.035")), // TODO 02/02/2026 21:11 valor
         Integer.parseInt(entity.getNrPrestacao().toString()),
         entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now()
     );

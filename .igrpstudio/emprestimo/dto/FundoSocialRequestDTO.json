@@ -56,7 +56,7 @@
     {
       "name": "valorPrestacaoMensal",
       "objectType": "java",
-      "type": "long",
+      "type": "decimal",
       "required": true,
       "before": false,
       "after": false,
@@ -68,7 +68,7 @@
     {
       "name": "valorTotalEmprestimo",
       "objectType": "java",
-      "type": "long",
+      "type": "decimal",
       "required": true,
       "before": false,
       "after": false,
@@ -80,7 +80,7 @@
     {
       "name": "valorPago",
       "objectType": "java",
-      "type": "long",
+      "type": "decimal",
       "required": false,
       "before": false,
       "after": false,
