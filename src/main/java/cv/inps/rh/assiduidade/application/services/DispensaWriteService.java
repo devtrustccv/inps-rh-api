@@ -49,7 +49,7 @@ public class DispensaWriteService {
     if (!StringUtils.hasText(req.getHoraSaida()) || !StringUtils.hasText(req.getHoraEntrada()))
       throw IgrpResponseStatusException.badRequest("Intervalo de horas obrigatório");
 
-    var funcionario = funcionarioRepository.findByIdOrThrow(req.getColaborador());
+    var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaborador());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var pedido = new PedidoEntity();

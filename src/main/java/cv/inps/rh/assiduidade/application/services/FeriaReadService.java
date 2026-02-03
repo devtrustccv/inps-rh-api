@@ -1,6 +1,7 @@
 package cv.inps.rh.assiduidade.application.services;
 
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaAlterarReqDTO;
+import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFeriaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetListaFeriaQuery;
 import cv.inps.rh.assiduidade.application.dto.FeriasListDTO;
@@ -117,8 +118,8 @@ public class FeriaReadService {
 
     var entity = feriasGozadasEntityRepository.findByIdOrThrow(id);
 
-    var req = new cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO();
-    req.setColaborador(entity.getFunId() != null ? entity.getFunId().getId() : null);
+    var req = new PedidoFeriaReqDTO();
+    req.setColaborador(entity.getFunId() != null ? entity.getFunId().getUuid() : null);
     req.setDataInicio(entity.getDataInicio());
     req.setDataFim(entity.getDataFim());
     req.setNumDias(entity.getNumDia());

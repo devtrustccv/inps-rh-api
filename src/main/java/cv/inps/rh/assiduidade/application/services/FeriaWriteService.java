@@ -40,7 +40,7 @@ public class FeriaWriteService {
       throw IgrpResponseStatusException.badRequest("Dados de férias ausentes");
     validatePedido(req);
 
-    var funcionario = funcionarioRepository.findByIdOrThrow(req.getColaborador());
+    var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaborador());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var pedido = new PedidoEntity();
@@ -74,6 +74,7 @@ public class FeriaWriteService {
     var finalPedido = pedido;
     validacaoEntityRepository.findById(validacao.getId()).ifPresent(v -> {
       v.setReferenciaId(finalPedido.getId());
+      v.setReferenciaUuid(finalPedido.getUuid());
       validacaoEntityRepository.save(v);
     });
 

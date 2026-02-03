@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -24,7 +25,7 @@ public class HoraExtraDTO  {
   private Long id ;
   
   
-  private Long colaborador ;
+  private UUID colaborador ;
   
   
   private LocalDate dataInicio ;

@@ -76,7 +76,7 @@ public class HoraExtraServiceWrite {
       if (dto.getHorasDiaria() == null)
         throw IgrpResponseStatusException.badRequest("Horas diárias obrigatórias");
 
-      var funcionario = funcionarioRepository.findByIdOrThrow(dto.getColaborador());
+      var funcionario = funcionarioRepository.findByUuidOrThrow(dto.getColaborador());
       var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
       // Se o pedido for por funcionário (opcional, depende do modelo)
