@@ -9,6 +9,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.DateFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,9 @@ public class EmprestimoWriteService {
   private final DocumentoEntityRepository documentoEntityRepository;
   private final TipoDocumentoEntityRepository tipoDocumentoEntityRepository;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
+  private final DefPagamentoEntityRepository defPagamentoEntityRepository;
+  private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
+  private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
 
   public void saveConfiguracaoEmprestimo(SaveConfiguracaoInfoEmprestimoCommand command) {
 
@@ -76,6 +80,7 @@ public class EmprestimoWriteService {
       entity.setEstado(Estado.A.name());
       entity.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
       entity.setFinalidade(TipoPedido.AQUISICAO_VIATURA.name());
+      entity.setTipoSituacao(TipoPedido.AQUISICAO_VIATURA.name());
       entity.setVersao(1L);
     }
 
@@ -134,7 +139,7 @@ public class EmprestimoWriteService {
       entity.setTipoSituacao(TipoPedido.FUNDO_SOCIAL.name());
       entity.setVersao(1L);
       entity.setTiprel(currentRelation);
-      entity.setNrPrestacao(15L); // TODO 02/02/2026 21:52 validate this
+      entity.setNrPrestacao(DateFormatter.monthsBetween(request.getDataInicio(), request.getDataFim()));
 
       var funId = currentRelation.getFunId();
 
@@ -151,11 +156,26 @@ public class EmprestimoWriteService {
         entity.setPedido(savedOrder);
       }
 
-      var uuid = emprestimoEntityRepository.save(entity).getUuid();
+      var savedEntity = emprestimoEntityRepository.save(entity);
 
-      saveDocuments(request.getDocumentos(), funId, uuid);
+      generateFinancialPlan(savedEntity); // TODO 04/02/2026 20:17 fix possible NPE at JUROS
 
-      // TODO 02/02/2026 22:06 more saves
+      saveDocuments(request.getDocumentos(), funId, savedEntity.getUuid());
+
+      var defPagamentoEntity = new DefPagamentoEntity();
+      defPagamentoEntity.setTmId(tipoMovimentoEntityRepository.getReferenceById(request.getTipoMovimentoId()));
+      defPagamentoEntity.setValor(entity.getValorPrestacao());
+      defPagamentoEntity.setDataInicio(entity.getDataInicio());
+      defPagamentoEntity.setDataFim(entity.getDataFim());
+      defPagamentoEntity.setEstado(Estado.A);
+      defPagamentoEntity.setUuid(UuidCreator.getTimeOrderedEpoch());
+      defPagamentoEntity.setFunId(funId);
+      var savedDefPag = defPagamentoEntityRepository.save(defPagamentoEntity);
+
+      var tipoRel = new TipoRelRemPagEntity();
+      tipoRel.setTiprelId(currentRelation);
+      tipoRel.setPagId(savedDefPag);
+      tipoRelRemPagEntityRepository.save(tipoRel);
     }
   }
 
@@ -324,6 +344,11 @@ public class EmprestimoWriteService {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
+    return generateFinancialPlan(entity);
+  }
+
+  public List<PlanoFinanceiroRowDTO> generateFinancialPlan(EmprestimoEntity entity) {
+
     var plan = FinancialPlanHelper.generateFinancialPlan(
         entity.getValorEmprestimo(),
         entity.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
@@ -337,8 +362,8 @@ public class EmprestimoWriteService {
       var newPlan = new PlanoFinanceiroEntity();
       newPlan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
       newPlan.setEmprestimo(entity);
-      newPlan.setNrOrdemPrestacao(obj.numero());
       newPlan.setDataPagamento(obj.dataPagamento());
+      newPlan.setNrOrdemPrestacao(obj.numero());
       newPlan.setValorPrincipal(obj.principal());
       newPlan.setValorJuros(obj.juros());
       newPlan.setEstado(Estado.A.name());
