@@ -53,6 +53,9 @@ public class DocumentoEntity extends AuditEntity {
   @Column(name = "referencia_id")
   private String referenciaId;
 
+  @Column(name = "referencia_uuid")
+  private UUID referenciaUuid;
+
 
   @Enumerated(EnumType.STRING)
   @Column(name = "estado")

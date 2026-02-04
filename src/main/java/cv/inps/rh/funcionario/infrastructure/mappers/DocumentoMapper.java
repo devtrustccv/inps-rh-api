@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import cv.inps.rh.funcionario.application.dto.AnexoReqDTO;
 import cv.inps.rh.funcionario.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import jakarta.persistence.EntityManager;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -18,14 +20,17 @@ public class DocumentoMapper {
   private final EntityManager entityManager;
 
 
-  public DocumentoEntity toEntity(AnexoReqDTO dto, Estado estado) {
+  public DocumentoEntity toEntity(AnexoReqDTO dto,
+                                  Estado estado) {
     if (dto == null) return null;
     DocumentoEntity entity = new DocumentoEntity();
     entity.setTpDocumentoId(entityManager.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
-    entity.setReferenciaName(dto.getDocumento());
-    entity.setReferenciaId(dto.getDocumento());
+   // entity.setReferenciaName(referenciaName);
+   // entity.setReferenciaId(referenciaId.toString());
+   // entity.setDocId(referenciaId);
+   // entity.setReferenciaUuid(referenciaUuid);
     entity.setEstado(estado);
-    entity.setDocId(1L);
+    entity.setUrl(dto.getDocumento());
     return entity;
   }
 
@@ -43,8 +48,9 @@ public class DocumentoMapper {
         if (dto.getTipoDocumentoId() != null) {
           found.setTpDocumentoId(entityManager.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
         }
-        found.setReferenciaName(dto.getDocumento());
-        found.setReferenciaId(dto.getDocumento());
+        //found.setReferenciaName(dto.getDocumento());
+        //found.setReferenciaId(dto.getDocumento());
+        found.setUrl(dto.getDocumento());
       } else {
         DocumentoEntity novo = toEntity(dto, Estado.P);
         existingList.add(novo);
@@ -67,7 +73,7 @@ public class DocumentoMapper {
     ar.setId(d.getId());
     ar.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
     ar.setTipoDocumentoDesc(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getNome() : null);
-    ar.setDocumento(d.getReferenciaName());
+    ar.setDocumento(d.getUrl());
     return ar;
   }
 

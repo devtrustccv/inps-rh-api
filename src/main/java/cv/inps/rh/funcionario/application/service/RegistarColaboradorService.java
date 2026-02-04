@@ -266,6 +266,7 @@ public class RegistarColaboradorService {
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {
           e.setReferenciaId(saved.getId());
+          e.setReferenciaUuid(saved.getUuid());
           validacaoEntityRepository.save(e);
         });
 
