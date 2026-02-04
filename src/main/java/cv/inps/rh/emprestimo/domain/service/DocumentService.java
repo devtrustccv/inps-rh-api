@@ -2,8 +2,8 @@ package cv.inps.rh.emprestimo.domain.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
+import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
@@ -26,7 +26,7 @@ public class DocumentService {
   private final DocumentoEntityRepository documentoEntityRepository;
   private final TipoDocumentoEntityRepository tipoDocumentoEntityRepository;
 
-  public void saveDocuments(List<DocumentoDTO> documentos, FuncionarioEntity funId, String referenceId) {
+  public void saveDocuments(List<DocumentoDTO> documentos, FuncionarioEntity funId, String referenceId, ReferenceName referenceName) {
 
     if (Objects.isNull(documentos) || documentos.isEmpty())
       return;
@@ -42,7 +42,7 @@ public class DocumentService {
       } else {
         newDoc = new DocumentoEntity();
         newDoc.setEstado(Estado.A);
-        newDoc.setReferenciaName(TableName.RH_T_EMPRESTIMO.name());
+        newDoc.setReferenciaName(referenceName.name());
         newDoc.setReferenciaId(referenceId);
         newDoc.setUuid(UuidCreator.getTimeOrderedEpoch());
         newDoc.setDocId(1L);

@@ -5,6 +5,7 @@ import cv.inps.rh.emprestimo.application.commands.SaveConfiguracaoInfoEmprestimo
 import cv.inps.rh.emprestimo.application.dto.FundoSocialRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
+import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -105,7 +106,7 @@ public class EmprestimoWriteService {
 
       generateFinancialPlan(savedEntity); // TODO 04/02/2026 20:17 fix possible NPE at JUROS
 
-      documentService.saveDocuments(request.getDocumentos(), funId, savedEntity.getUuid());
+      documentService.saveDocuments(request.getDocumentos(), funId, savedEntity.getUuid(), ReferenceName.RH_T_EMPRESTIMO);
 
       var defPagamentoEntity = new DefPagamentoEntity();
       defPagamentoEntity.setTmId(tipoMovimentoEntityRepository.getReferenceById(request.getTipoMovimentoId()));
