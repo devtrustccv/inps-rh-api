@@ -33,6 +33,9 @@ public class FeriaWriteService {
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final AnoEntityRepository anoEntityRepository;
+  private final SubstituicaoEntityRepository substituicaoRepository;
+  private final AusenciaEntityRepository ausenciaRepository;
+  private final ParamSituacaoEntityRepository paramSituacaoRepository;
 
   @Transactional
   public Map<String, ?> marcarFeria(MarcarFeriaCommand command) {
@@ -68,7 +71,21 @@ public class FeriaWriteService {
     ferias.setUuid(UuidCreator.getTimeOrderedEpoch());
     ferias = feriasGozadasRepository.save(ferias);
 
-    var validacao = buildValidacao(funcionario, tipoRelAtual, TipoAcao.INSERT.name(), Referencia.FERIA.name(), Estado.P);
+    if (req.getSubstituidoPor() != null) {
+      var substituto = funcionarioRepository.findByIdOrThrow(req.getSubstituidoPor());
+      var tipoRelSubstituto = funcionarioRules.getTipoRelacionamentoAtual(substituto.getUuid());
+      var s = new SubstituicaoEntity();
+      s.setSubstituidoTiprelId(tipoRelAtual);
+      s.setSubstitutoTiprelId(tipoRelSubstituto);
+      s.setDataInicio(req.getDataInicio());
+      s.setDataFim(req.getDataFim());
+      s.setEstado(Estado.P);
+      s.setUuid(UuidCreator.getTimeOrderedEpoch());
+      substituicaoRepository.save(s);
+    }
+
+    var validacao = buildValidacao(funcionario, tipoRelAtual, TipoAcao.INSERT.name(), Referencia.FERIA.name(),
+        Estado.P);
     funcionario.getValidacoes().add(validacao);
     funcionarioRepository.saveAndFlush(funcionario);
 
@@ -93,10 +110,9 @@ public class FeriaWriteService {
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador de pedido ferias é obrigatório");
 
-
-
     var ferias = feriasGozadasRepository.findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
-        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"Ferias Gozadas not found for id: " + command.getPedidoId()));
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
+            "Ferias Gozadas not found for id: " + command.getPedidoId()));
 
     var funcionario = ferias.getFunId();
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -104,8 +120,23 @@ public class FeriaWriteService {
     var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
     var estado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
+    ferias.setDecisaoRh(req.getValidar());
+    ferias.setObsRh(req.getObsValidacao());
     ferias.setEstado(estado);
     feriasGozadasRepository.save(ferias);
+
+    var pedido = ferias.getPedidoId();
+    if (pedido != null) {
+      pedido.setEstado(estado.name());
+      if (estado == Estado.A) {
+        pedido.setEtapa("FINALIZADO");
+      }
+      pedidoRepository.save(pedido);
+    }
+
+    if (estado == Estado.A) {
+      criarAusenciaNaValidacao(ferias);
+    }
 
     funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.FERIA)
         .ifPresent(v -> {
@@ -128,9 +159,9 @@ public class FeriaWriteService {
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador de pedido ferias é obrigatório");
 
-
     var existing = feriasGozadasRepository.findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
-        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"Ferias Gozadas not found for id: " + command.getPedidoId()));
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
+            "Ferias Gozadas not found for id: " + command.getPedidoId()));
 
     var funcionario = existing.getFunId();
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -170,7 +201,22 @@ public class FeriaWriteService {
     nova.setFeriasGozadasId(existing.getId());
     nova = feriasGozadasRepository.save(nova);
 
-    var validacao = buildValidacao(funcionario, tipoRelAtual, TipoAcao.UPDATE.name(), Referencia.FERIA.name(), Estado.P);
+    var substituidoPor = base.getSubstituidoPor();
+    if (substituidoPor != null) {
+      var substituto = funcionarioRepository.findByIdOrThrow(substituidoPor);
+      var tipoRelSubstituto = funcionarioRules.getTipoRelacionamentoAtual(substituto.getUuid());
+      var s = new SubstituicaoEntity();
+      s.setSubstituidoTiprelId(tipoRelAtual);
+      s.setSubstitutoTiprelId(tipoRelSubstituto);
+      s.setDataInicio(di);
+      s.setDataFim(df);
+      s.setEstado(Estado.P);
+      s.setUuid(UuidCreator.getTimeOrderedEpoch());
+      substituicaoRepository.save(s);
+    }
+
+    var validacao = buildValidacao(funcionario, tipoRelAtual, TipoAcao.UPDATE.name(), Referencia.FERIA.name(),
+        Estado.P);
     funcionario.getValidacoes().add(validacao);
     funcionarioRepository.saveAndFlush(funcionario);
 
@@ -222,8 +268,7 @@ public class FeriaWriteService {
       TiposRelacionamentoEntity tipoRelAtual,
       String tipoAcao,
       String referencia,
-      Estado estado
-  ) {
+      Estado estado) {
     var v = new ValidacaoEntity();
     v.setTipoAccao(tipoAcao);
     v.setReferenciaName(referencia);
@@ -232,5 +277,27 @@ public class FeriaWriteService {
     v.setFunId(funcionario);
     v.setTiprelId(tipoRelAtual);
     return validacaoEntityRepository.save(v);
+  }
+
+  private void criarAusenciaNaValidacao(FeriasGozadasEntity ferias) {
+    try {
+      // TODO: Selecionar corretamente o PARAM_SIT_ID para 'Férias' conforme
+      // configuração
+      var params = paramSituacaoRepository.findAllByNome("Férias");
+      if (params == null || params.isEmpty())
+        return;
+      var param = params.get(0);
+      var ausencia = new AusenciaEntity();
+      ausencia.setParamSitId(param);
+      ausencia.setReferenciaName("RH_T_FERIAS_GOZADAS");
+      ausencia.setReferenciaId(ferias.getId());
+      ausencia.setObs(ferias.getFeriasGozadasId() != null ? "ALTERACAO DE FERIAS" : null);
+      ausencia.setDataInicio(ferias.getDataInicio());
+      ausencia.setDataFim(ferias.getDataFim());
+      ausencia.setEstado(Estado.A);
+      ausencia.setUuid(UuidCreator.getTimeOrderedEpoch());
+      ausenciaRepository.save(ausencia);
+    } catch (Exception ignored) {
+    }
   }
 }
