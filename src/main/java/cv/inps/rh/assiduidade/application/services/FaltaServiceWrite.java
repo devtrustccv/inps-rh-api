@@ -53,8 +53,10 @@ public class FaltaServiceWrite {
   public Map<String, ?> marcarFalta(MarcarFaltaCommand command) {
 
     var req = command.getFaltareq();
-    if (req == null) throw IgrpResponseStatusException.badRequest("Dados de falta ausentes");
-    if (req.getColaboradorId() == null) throw IgrpResponseStatusException.badRequest("Colaborador obrigatório");
+    if (req == null)
+      throw IgrpResponseStatusException.badRequest("Dados de falta ausentes");
+    if (req.getColaboradorId() == null)
+      throw IgrpResponseStatusException.badRequest("Colaborador obrigatório");
     if (req.getDataInicio() == null || req.getDataFim() == null)
       throw IgrpResponseStatusException.badRequest("Intervalo de datas obrigatório");
     if (req.getDataFim().isBefore(req.getDataInicio()))
@@ -65,7 +67,7 @@ public class FaltaServiceWrite {
 
     boolean deveJustificar = "SIM".equalsIgnoreCase(req.getJustificar());
 
-    //  Criar pedido apenas se justificar
+    // Criar pedido apenas se justificar
     PedidoEntity pedido = null;
     if (deveJustificar) {
       pedido = new PedidoEntity();
@@ -101,8 +103,7 @@ public class FaltaServiceWrite {
       var validacao = dadosContratuaisMapper.toValidacaoInsert(
           TipoAcao.INSERT.name(),
           Referencia.FALTA.name(),
-          Estado.P
-      );
+          Estado.P);
       validacao.setFunId(funcionario);
       validacao.setTiprelId(tipoRelAtual);
       validacao.setReferenciaId(pedido.getId());
@@ -119,8 +120,6 @@ public class FaltaServiceWrite {
 
     return resp;
   }
-
-
 
   @Transactional
   public Map<String, Object> validarFalta(ValidarFaltaCommand command) {
@@ -143,7 +142,7 @@ public class FaltaServiceWrite {
     var ev = req.getValidar();
     var novoEstado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
-    //  Atualizar faltas do pedido
+    // Atualizar faltas do pedido
     List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
     for (FaltaEntity f : faltas) {
       f.setEstado(novoEstado);
@@ -154,7 +153,8 @@ public class FaltaServiceWrite {
           f.getParamSitId().getFlgFaltaDecontoSal() == 1) {
 
         // TODO: Criar registro em RH_T_DEF_PAGAMENTOS
-        // Exemplo de campos: funId, tiprelId, referenciaId(pedido.getId), valor, data, estado
+        // Exemplo de campos: funId, tiprelId, referenciaId(pedido.getId), valor, data,
+        // estado
       }
 
       // TODO: Desconto de férias (RH_T_FERIAS_GOZADAS)
@@ -184,7 +184,6 @@ public class FaltaServiceWrite {
 
     return resp;
   }
-
 
   private List<LocalDate> expandirDias(LocalDate inicio, LocalDate fim) {
     var dias = new ArrayList<LocalDate>();
@@ -264,14 +263,11 @@ public class FaltaServiceWrite {
     // Falta: 1 = falta total, 0 = não falta
     sintese.setFalta(trabalhadosMinutos == 0 ? 1 : 0);
 
-    sintese.setEstado(justificar ? AssiduidadeDiariaEstado.JUSTIFICADA.name() :AssiduidadeDiariaEstado.INJUSTIFICADA.name());
+    sintese.setEstado(
+        justificar ? AssiduidadeDiariaEstado.JUSTIFICADA.name() : AssiduidadeDiariaEstado.INJUSTIFICADA.name());
 
     return sintese;
   }
-
-
-
-
 
   private int parseMin(String hhmm) {
     if (!StringUtils.hasText(hhmm))
@@ -287,7 +283,8 @@ public class FaltaServiceWrite {
   }
 
   private String parseInterval(String hhmm) {
-    if (!StringUtils.hasText(hhmm)) return null;
+    if (!StringUtils.hasText(hhmm))
+      return null;
 
     try {
       String[] parts = hhmm.split(":");
@@ -298,7 +295,5 @@ public class FaltaServiceWrite {
       throw new IllegalArgumentException("Horas inválidas: " + hhmm, e);
     }
   }
-
-
 
 }
