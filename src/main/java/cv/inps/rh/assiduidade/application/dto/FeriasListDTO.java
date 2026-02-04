@@ -19,44 +19,49 @@ import lombok.AllArgsConstructor;
 @IgrpDTO
 public class FeriasListDTO  {
 
-  
-  
+
+
+  private Long pedidoId ;
+
+
+  private String pedidoUuid ;
+
   private String uuidFuncionario ;
-  
-  
+
+
   private String nomeColaborador ;
-  
-  
+
+
   private String direcao ;
-  
-  
+
+
   private String secao ;
-  
-  
+
+
   private String vinculo ;
-  
-  
+
+
   private String categoria ;
-  
-  
+
+
   private Integer totalDireito ;
-  
-  
+
+
   private Integer totalDireitoAno ;
-  
-  
+
+
   private Integer totalPlaneado ;
-  
-  
+
+
   private Integer totalGozado ;
-  
-  
+
+
   private Integer ano ;
-  
-  
+
+
   private String estado ;
-  
-  
+
+
   private String estadoDesc ;
 
 }
