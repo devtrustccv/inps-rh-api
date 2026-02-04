@@ -2,7 +2,7 @@ package cv.inps.rh.emprestimo.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.emprestimo.domain.service.EmprestimoWriteService;
+import cv.inps.rh.emprestimo.domain.service.process.PedidoAquisicaoViaturaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +14,10 @@ public class AutorizarComissaoExecutivaCommandHandler implements CommandHandler<
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AutorizarComissaoExecutivaCommandHandler.class);
 
-  private final EmprestimoWriteService emprestimoWriteService;
+  private final PedidoAquisicaoViaturaService service;
 
-  public AutorizarComissaoExecutivaCommandHandler(EmprestimoWriteService emprestimoWriteService) {
-    this.emprestimoWriteService = emprestimoWriteService;
+  public AutorizarComissaoExecutivaCommandHandler(PedidoAquisicaoViaturaService service) {
+    this.service = service;
   }
 
   @IgrpCommandHandler
@@ -25,7 +25,7 @@ public class AutorizarComissaoExecutivaCommandHandler implements CommandHandler<
 
     LOGGER.debug("AutorizarComissaoExecutivaCommand : {}", command);
 
-    emprestimoWriteService.autorizarComissaoExecutiva(command.getEmprestimoId(), command.getAutorizacaocomissaoexecutiva());
+    service.autorizarComissaoExecutiva(command.getEmprestimoId(), command.getAutorizacaocomissaoexecutiva());
 
     return ResponseEntity.ok().build();
   }
