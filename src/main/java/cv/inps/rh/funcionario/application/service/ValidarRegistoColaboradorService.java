@@ -86,7 +86,14 @@ public class ValidarRegistoColaboradorService {
     var experienciasProfissionais = experienciaProfissionalMapper.syncExperiencias(
         funcionario.getExperienciasProfissionais(), dadosAcademicosProf.getExperienciasProfssionais());
 
-    var documentos = documentoMapper.syncDocumentos(funcionario.getDocumentos(), registroColaborador.getAnexos());
+    var documentos = documentoMapper.syncDocumentos(
+        funcionario.getDocumentos(),
+        registroColaborador.getAnexos(),
+        Referencia.REGISTO_COLABORADOR.name(),
+        funcionario.getId(),
+        funcionario.getUuid(),
+        1L,
+        funcionario);
     var dadosBancarios = dadosBancariosMapper.syncBancarios(funcionario.getDadosBancarios(),
         registroColaborador.getDadosBancarios());
 
@@ -124,7 +131,6 @@ public class ValidarRegistoColaboradorService {
     funcionario.setFormacoesFeitas(formacoesFeitas);
     funcionario.setExperienciasProfissionais(experienciasProfissionais);
 
-
     if (registroColaborador.getValidar() != null) {
       var estado = registroColaborador.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       if (estado.equals(Estado.A)) {
@@ -147,7 +153,7 @@ public class ValidarRegistoColaboradorService {
     if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
       java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
       for (var rem : saved.getDefinicoesRenumeracoes()) {
-        if(rem.getEstado().equals(Estado.A) || rem.getEstado().equals(Estado.P)) {
+        if (rem.getEstado().equals(Estado.A) || rem.getEstado().equals(Estado.P)) {
           if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndRemId(tiposRelacionamento, rem)) {
             var assoc = new TipoRelRemPagEntity();
             assoc.setTiprelId(tiposRelacionamento);
@@ -165,7 +171,7 @@ public class ValidarRegistoColaboradorService {
     if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
       java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
       for (var pag : saved.getDefinicoesPagamentos()) {
-        if(pag.getEstado().equals(Estado.A) || pag.getEstado().equals(Estado.P)) {
+        if (pag.getEstado().equals(Estado.A) || pag.getEstado().equals(Estado.P)) {
           if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndPagId(tiposRelacionamento, pag)) {
             var assoc = new TipoRelRemPagEntity();
             assoc.setTiprelId(tiposRelacionamento);

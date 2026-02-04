@@ -57,7 +57,6 @@ public class RegistarColaboradorService {
 
   private final FuncionarioRules funcionarioRules;
 
-
   private final EntityManager entityManager;
 
   private final DocumentoEntityRepository documentoEntityRepository;
@@ -120,14 +119,16 @@ public class RegistarColaboradorService {
       }
     }
 
-    /*if (dto.getAnexos() != null) {
-      var list = dto.getAnexos().stream().map(a -> {
-        var de = documentoMapper.toEntity(a, Estado.P);
-        de.setFunId(fun);
-        return de;
-      }).collect(Collectors.toList());
-      fun.setDocumentos(list);
-    }*/
+    /*
+     * if (dto.getAnexos() != null) {
+     * var list = dto.getAnexos().stream().map(a -> {
+     * var de = documentoMapper.toEntity(a, Estado.P);
+     * de.setFunId(fun);
+     * return de;
+     * }).collect(Collectors.toList());
+     * fun.setDocumentos(list);
+     * }
+     */
 
     if (dto.getDadosBancarios() != null) {
       var list = dto.getDadosBancarios().stream().map(b -> {
@@ -176,7 +177,8 @@ public class RegistarColaboradorService {
 
       var vinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
           .findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
-              "REM").getFirst(); // so é associado um tipo REM SALL ao vinculo
+              "REM")
+          .getFirst(); // so é associado um tipo REM SALL ao vinculo
 
       if (!Objects.isNull(vinculoTipoMovimentoREM)) {
         var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
@@ -216,7 +218,8 @@ public class RegistarColaboradorService {
     }
     /******************** FIM PAGAMENTOS DESCONTOS ********************************/
 
-    var paramSituacaoLaboral = entityManager.getReference(ParamSituacaoEntity.class,dadosContratuais.getSituacaoLaboralId());
+    var paramSituacaoLaboral = entityManager.getReference(ParamSituacaoEntity.class,
+        dadosContratuais.getSituacaoLaboralId());
 
     var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P,
         "INICIO",
@@ -241,23 +244,19 @@ public class RegistarColaboradorService {
     fun.setValidacoes(new ArrayList<>(List.of(valid)));
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(fun);
 
-
     if (dto.getAnexos() != null) {
       var list = dto.getAnexos().stream().map(a -> {
-        var docEntity = documentoMapper.toEntity(a, Estado.P);
-        docEntity.setFunId(saved);
-        documentoMapper.preencherReferencias(
-            docEntity,
+        return documentoMapper.toEntity(
+            a,
+            Estado.P,
             Referencia.REGISTO_COLABORADOR.name(),
             saved.getId(),
             saved.getUuid(),
-            1L
-        );
-        return docEntity;
+            1L,
+            saved);
       }).collect(Collectors.toList());
       documentoEntityRepository.saveAll(list);
     }
-
 
     if (!CollectionUtils.isEmpty(saved.getDefinicoesRenumeracoes())) {
       var lista = new ArrayList<TipoRelRemPagEntity>();

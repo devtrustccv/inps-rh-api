@@ -3,8 +3,8 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import cv.inps.rh.funcionario.application.dto.AnexoReqDTO;
 import cv.inps.rh.funcionario.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -20,31 +20,33 @@ public class DocumentoMapper {
   private final EntityManager entityManager;
 
   public DocumentoEntity toEntity(AnexoReqDTO dto,
-      Estado estado) {
+      Estado estado,
+      String referenciaName,
+      Long referenciaId,
+      UUID referenciaUuid,
+      Long docId,
+      FuncionarioEntity fun) {
     if (dto == null)
       return null;
     DocumentoEntity entity = new DocumentoEntity();
     entity.setTpDocumentoId(entityManager.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
     entity.setEstado(estado);
     entity.setUrl(dto.getDocumento());
-    return entity;
-  }
-
-  public void preencherReferencias(DocumentoEntity entity,
-      String referenciaName,
-      Long referenciaId,
-      UUID referenciaUuid,
-      Long docId) {
-    if (entity == null)
-      return;
     entity.setReferenciaName(referenciaName);
     entity.setReferenciaId(referenciaId != null ? referenciaId.toString() : null);
     entity.setReferenciaUuid(referenciaUuid);
     entity.setDocId(docId);
+    entity.setFunId(fun);
+    return entity;
   }
 
   public java.util.List<DocumentoEntity> syncDocumentos(java.util.List<DocumentoEntity> existingList,
-      java.util.List<AnexoReqDTO> newList) {
+      java.util.List<AnexoReqDTO> newList,
+      String referenciaName,
+      Long referenciaId,
+      UUID referenciaUuid,
+      Long docId,
+      FuncionarioEntity fun) {
     if (newList == null)
       return existingList;
     for (AnexoReqDTO dto : newList) {
@@ -61,11 +63,16 @@ public class DocumentoMapper {
         if (dto.getTipoDocumentoId() != null) {
           found.setTpDocumentoId(entityManager.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
         }
-        // found.setReferenciaName(dto.getDocumento());
-        // found.setReferenciaId(dto.getDocumento());
         found.setUrl(dto.getDocumento());
+        found.setReferenciaName(referenciaName);
+        found.setReferenciaId(referenciaId != null ? referenciaId.toString() : null);
+        found.setReferenciaUuid(referenciaUuid);
+        found.setDocId(docId);
+        if (fun != null && found.getFunId() == null) {
+          found.setFunId(fun);
+        }
       } else {
-        DocumentoEntity novo = toEntity(dto, Estado.P);
+        DocumentoEntity novo = toEntity(dto, Estado.P, referenciaName, referenciaId, referenciaUuid, docId, fun);
         existingList.add(novo);
       }
     }

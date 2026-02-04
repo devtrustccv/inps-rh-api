@@ -46,7 +46,15 @@ public class DocumentoWriteService {
     dto.setDocumento(fileId);
     dto.setTipoDocumentoId(1L);
 
-    var documentoEntity = documentoMapper.toEntity(dto, Estado.A);
+    var documentoEntity = documentoMapper.toEntity(
+        dto,
+        Estado.A,
+        null,
+        null,
+        null,
+        null,
+        funcionario
+    );
     documentoEntity.setUuid(UuidCreator.getTimeOrderedEpoch());
     documentoEntity.setFunId(funcionario);
     documentoEntityRepository.save(documentoEntity);
