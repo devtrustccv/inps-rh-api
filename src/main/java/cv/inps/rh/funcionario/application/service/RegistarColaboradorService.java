@@ -239,6 +239,20 @@ public class RegistarColaboradorService {
     fun.setValidacoes(new ArrayList<>(List.of(valid)));
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(fun);
 
+    // preencher referencias documento
+    if (!CollectionUtils.isEmpty(saved.getDocumentos())) {
+      for (var d : saved.getDocumentos()) {
+        documentoMapper.preencherReferencias(
+            d,
+            Referencia.REGISTO_COLABORADOR.name(),
+            saved.getId(),
+            saved.getUuid(),
+            1L
+        );
+      }
+      funcionarioEntityRepository.saveAndFlush(saved);
+    }
+
     if (!CollectionUtils.isEmpty(saved.getDefinicoesRenumeracoes())) {
       var lista = new ArrayList<TipoRelRemPagEntity>();
       for (var rem : saved.getDefinicoesRenumeracoes()) {
