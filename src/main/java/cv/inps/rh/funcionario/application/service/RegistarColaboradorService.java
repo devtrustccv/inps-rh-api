@@ -245,6 +245,7 @@ public class RegistarColaboradorService {
     if (dto.getAnexos() != null) {
       var list = dto.getAnexos().stream().map(a -> {
         var docEntity = documentoMapper.toEntity(a, Estado.P);
+        docEntity.setFunId(saved);
         documentoMapper.preencherReferencias(
             docEntity,
             Referencia.REGISTO_COLABORADOR.name(),
