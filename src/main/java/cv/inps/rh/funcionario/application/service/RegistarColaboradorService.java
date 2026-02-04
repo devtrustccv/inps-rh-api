@@ -60,6 +60,8 @@ public class RegistarColaboradorService {
 
   private final EntityManager entityManager;
 
+  private final DocumentoEntityRepository documentoEntityRepository;
+
   @Transactional
   public FuncionarioResponseDTO saveDossierColaborador(CreateFuncionarioCommand command) {
     FuncionarioRequestDTO dto = command.getFuncionariorequest();
@@ -118,14 +120,14 @@ public class RegistarColaboradorService {
       }
     }
 
-    if (dto.getAnexos() != null) {
+    /*if (dto.getAnexos() != null) {
       var list = dto.getAnexos().stream().map(a -> {
         var de = documentoMapper.toEntity(a, Estado.P);
         de.setFunId(fun);
         return de;
       }).collect(Collectors.toList());
       fun.setDocumentos(list);
-    }
+    }*/
 
     if (dto.getDadosBancarios() != null) {
       var list = dto.getDadosBancarios().stream().map(b -> {
@@ -239,19 +241,22 @@ public class RegistarColaboradorService {
     fun.setValidacoes(new ArrayList<>(List.of(valid)));
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(fun);
 
-    // preencher referencias documento
-    if (!CollectionUtils.isEmpty(saved.getDocumentos())) {
-      for (var d : saved.getDocumentos()) {
+
+    if (dto.getAnexos() != null) {
+      var list = dto.getAnexos().stream().map(a -> {
+        var docEntity = documentoMapper.toEntity(a, Estado.P);
         documentoMapper.preencherReferencias(
-            d,
+            docEntity,
             Referencia.REGISTO_COLABORADOR.name(),
             saved.getId(),
             saved.getUuid(),
             1L
         );
-      }
-      funcionarioEntityRepository.saveAndFlush(saved);
+        return docEntity;
+      }).collect(Collectors.toList());
+      documentoEntityRepository.saveAll(list);
     }
+
 
     if (!CollectionUtils.isEmpty(saved.getDefinicoesRenumeracoes())) {
       var lista = new ArrayList<TipoRelRemPagEntity>();
