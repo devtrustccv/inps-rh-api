@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,10 +25,13 @@ public class AnaliseRhRequestDTO  {
 
   @NotNull(message = "The field <valorEmprestimo> is required")
 
-  private Long valorEmprestimo ;
+  private BigDecimal valorEmprestimo ;
   @NotNull(message = "The field <numeroPrestacao> is required")
 
   private Long numeroPrestacao ;
+  @NotNull(message = "The field <juros> is required")
+
+  private BigDecimal juros ;
   @NotBlank(message = "The field <parecer> is required")
 
   private String parecer ;

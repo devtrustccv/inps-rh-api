@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Entity
@@ -25,7 +27,7 @@ public class ParamEmprestimoEntity extends AuditEntity {
   private ParamCarreiraEntity carrPccs;
 
   @Column(name = "VALOR_LIMITE")
-  private Long valorLimite;
+  private BigDecimal valorLimite;
 
   @Column(name = "NUMERO_LIMITE")
   private Long numeroLimite;

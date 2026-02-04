@@ -166,7 +166,7 @@ public class DispensaReadService {
     var dto = new DispensaReqDTO();
     dto.setColaborador(
         e.getPedidoId() != null && e.getPedidoId().getFunId() != null
-            ? e.getPedidoId().getFunId().getId()
+             ? e.getPedidoId().getFunId().getUuid()
             : null);
     dto.setDataDispensa(e.getData());
     dto.setHoraSaida(e.getHoraInicio());
@@ -193,7 +193,7 @@ public class DispensaReadService {
     var dto = new DispensaReqDTO();
     dto.setColaborador(
         e.getPedidoId() != null && e.getPedidoId().getFunId() != null
-            ? e.getPedidoId().getFunId().getId()
+             ? e.getPedidoId().getFunId().getUuid()
             : null);
     dto.setDataDispensa(e.getData());
     dto.setHoraSaida(e.getHoraInicio());

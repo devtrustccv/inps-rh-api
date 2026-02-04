@@ -647,7 +647,7 @@
     },
     {
       "actionName": "alterarPedidoFeria",
-      "path": "feria/{feriaId}",
+      "path": "feria/{pedidoId}",
       "method": "PUT",
       "requestBody": {
         "content": {
@@ -678,7 +678,7 @@
       },
       "pathVariables": [
         {
-          "name": "feriaId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
@@ -686,7 +686,7 @@
     },
     {
       "actionName": "validarPedidoFeria",
-      "path": "feria/{feriaId}",
+      "path": "feria/{pedidoId}",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -717,7 +717,7 @@
       },
       "pathVariables": [
         {
-          "name": "feriaId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
@@ -823,7 +823,7 @@
     },
     {
       "actionName": "getDetalheMapaFeria",
-      "path": "mapa-feria",
+      "path": "mapa-feria/detalhe",
       "method": "GET",
       "responses": {
         "200": {
@@ -979,7 +979,7 @@
     },
     {
       "actionName": "getPedidoFeria",
-      "path": "feria/{feriaId}",
+      "path": "feria/{pedidoId}",
       "method": "GET",
       "responses": {
         "200": {
@@ -999,7 +999,7 @@
       },
       "pathVariables": [
         {
-          "name": "feriaId",
+          "name": "pedidoId",
           "type": "string",
           "isRequired": true
         }
@@ -1180,5 +1180,5 @@
       ]
     }
   ],
-  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa-validarHoraExtra-getHoraExtra-getDetalheMapaFeria-verMapa"
+  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa-validarHoraExtra-getHoraExtra-getDetalheMapaFeria-verMapa-getDetalheMapaFeria-getPedidoFeria-alterarPedidoFeria-validarPedidoFeria"
 }

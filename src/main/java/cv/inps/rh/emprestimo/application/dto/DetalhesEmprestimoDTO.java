@@ -4,12 +4,16 @@
 package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,6 +30,18 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
   private LocalDate dataFim ;
 
 
-  private Long valorPrestacao ;
+  private BigDecimal valorPrestacao ;
+
+
+  private String cabimentacaoOrcamental ;
+
+
+  private String avaliacaoTaxaEsforco ;
+
+  @Valid
+  private List<OutrosEmprestimosDTO> outrosEmprestimos = new ArrayList<>();
+
+  @Valid
+  private DecisaoEmprestimoDTO decisao ;
 
 }

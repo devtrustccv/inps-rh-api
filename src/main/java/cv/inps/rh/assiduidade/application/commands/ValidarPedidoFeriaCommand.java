@@ -14,7 +14,7 @@ public class ValidarPedidoFeriaCommand implements Command {
 
   
   private PedidoFeriaReqDTO pedidoferiareq;
-  @NotBlank(message = "The field <feriaId> is required")
-  private String feriaId;
+  @NotBlank(message = "The field <pedidoId> is required")
+  private String pedidoId;
 
 }

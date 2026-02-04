@@ -175,7 +175,7 @@ public class HoraExtraReadService {
       item.setId(e.getId());
       item.setColaborador(
           e.getTiprelId() != null && e.getTiprelId().getFunId() != null
-              ? e.getTiprelId().getFunId().getId()
+                  ? e.getTiprelId().getFunId().getUuid()
               : null
       );
       item.setDataInicio(e.getDataInicio());
