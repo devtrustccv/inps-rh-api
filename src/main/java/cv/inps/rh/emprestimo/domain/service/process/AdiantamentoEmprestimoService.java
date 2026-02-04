@@ -1,8 +1,7 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
+import cv.inps.rh.emprestimo.application.dto.AnaliseRhAdiantamentoRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.PedidoAdiantamentoRequestDTO;
-import cv.inps.rh.emprestimo.domain.service.DocumentService;
-import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
@@ -20,8 +19,6 @@ public class AdiantamentoEmprestimoService {
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PedidoEntityRepository pedidoEntityRepository;
-  private final FuncionarioRules funcionarioRules;
-  private final DocumentService documentService;
 
   public void saveUpdatePedidoAdiantamento(List<PedidoAdiantamentoRequestDTO> request) {
     for (var obj : request) {
@@ -29,6 +26,18 @@ public class AdiantamentoEmprestimoService {
       entity.setValorAdiantado(obj.getValorAdiantamento());
       emprestimoEntityRepository.save(entity);
     }
+  }
+
+  public void saveAnaliseRh(AnaliseRhAdiantamentoRequestDTO request){
+    // TODO 04/02/2026 22:06 implement
+  }
+
+  public void anexarComprovativo(){
+    // TODO 04/02/2026 22:06 implement
+  }
+
+  public void verificar(){
+    // TODO 04/02/2026 22:06 implement
   }
 
 

@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.domain.service.DocumentService;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
+import cv.inps.rh.emprestimo.domain.service.constants.ProcessType;
 import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
@@ -92,11 +93,10 @@ public class PedidoAquisicaoViaturaService {
     entity.setNrPrestacao(request.getNumeroPrestacao());
     entity.setValorEmprestimo(request.getValorEmprestimo());
     entity.setJuro(request.getJuros());
-    emprestimoEntityRepository.save(entity);
 
     var funId = entity.getTiprel().getFunId();
 
-    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, "EMPRESTIMO", Estado.A.name()).orElseThrow();
+    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, ProcessType.EMPRESTIMO.name(), Estado.A.name()).orElseThrow();
     order.setEtapa(EtapaEmprestimo.ANALISE_RH.name());
     pedidoEntityRepository.save(order);
 
@@ -118,7 +118,7 @@ public class PedidoAquisicaoViaturaService {
           newObj.setDecisao(request.getParecer());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.ANALISE_RH.name());
-          newObj.setReferencia("EMPRESTIMO");
+          newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
           pedidoDecisaoEntityRepository.save(newObj);
@@ -136,7 +136,7 @@ public class PedidoAquisicaoViaturaService {
 
     var funId = entity.getTiprel().getFunId();
 
-    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, "EMPRESTIMO", Estado.A.name()).orElseThrow();
+    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, ProcessType.EMPRESTIMO.name(), Estado.A.name()).orElseThrow();
     order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA.name());
     pedidoEntityRepository.save(order);
 
@@ -159,19 +159,24 @@ public class PedidoAquisicaoViaturaService {
           newObj.setDecisao(request.getParecer());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA.name());
-          newObj.setReferencia("EMPRESTIMO");
+          newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
           newObj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(newObj);
         });
+
+    if (request.getParecer().equals("NAO_VALIDADO")) // TODO 04/02/2026 22:02 get real code
+      entity.setEstado(Estado.I.name());
+
+    emprestimoEntityRepository.save(entity);
   }
 
   public void autorizarComissaoExecutiva(String uuid, AutorizacaoComissaoExecutivaDTO request) {
 
     var funId = emprestimoEntityRepository.findByUuidOrThrow(uuid).getTiprel().getFunId();
 
-    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, "EMPRESTIMO", Estado.A.name()).orElseThrow();
+    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, ProcessType.EMPRESTIMO.name(), Estado.A.name()).orElseThrow();
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name());
     pedidoEntityRepository.save(order);
 
@@ -194,7 +199,7 @@ public class PedidoAquisicaoViaturaService {
           newObj.setDecisao(request.getParecer());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name());
-          newObj.setReferencia("EMPRESTIMO");
+          newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
           newObj.setCreatedDate(request.getData().atStartOfDay());
@@ -208,7 +213,7 @@ public class PedidoAquisicaoViaturaService {
 
     var funId = entity.getTiprel().getFunId();
 
-    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, "EMPRESTIMO", Estado.A.name()).orElseThrow();
+    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, ProcessType.EMPRESTIMO.name(), Estado.A.name()).orElseThrow();
     order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO.name());
     pedidoEntityRepository.save(order);
 
