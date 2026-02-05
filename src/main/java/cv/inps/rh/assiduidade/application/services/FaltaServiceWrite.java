@@ -154,60 +154,41 @@ public class FaltaServiceWrite {
         .orElseThrow(() -> IgrpResponseStatusException.badRequest(
             "Pedido marcação de falta não encontrado com id: " + pedidoUuid));
 
-    var ev = req.getValidar();
-    var novoEstado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
+    var novoEstado = req.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
     List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
+
     for (FaltaEntity f : faltas) {
+
       f.setEstado(novoEstado);
 
-      if (StringUtils.hasText(req.getParecer())) {
+      if (StringUtils.hasText(req.getParecer()))
         f.setDecisaoResponsavel(req.getParecer());
-      }
-      if (StringUtils.hasText(req.getObservacao())) {
+      if (StringUtils.hasText(req.getObservacao()))
         f.setObsResponsavel(req.getObservacao());
-      }
-      if (StringUtils.hasText(req.getDespachoRh())) {
+      if (StringUtils.hasText(req.getDespachoRh()))
         f.setDespachoRh(req.getDespachoRh());
-      }
 
       if (req.getTipoJustificacao() != null && req.getTipoJustificacao() > 0) {
-        var paramSituacao = paramSituacaoRepository.findByIdOrThrow(req.getTipoJustificacao());
-        if (!"1".equalsIgnoreCase(paramSituacao.getFlgFalta())) {
-          throw IgrpResponseStatusException.badRequest("Tipo justificativo não permitido para falta");
-        }
-        f.setParamSitId(paramSituacao);
+        var ps = paramSituacaoRepository.findByIdOrThrow(req.getTipoJustificacao());
+        f.setParamSitId(ps);
       }
 
+      // 🔹 desconto salário
       if (novoEstado == Estado.A && f.getParamSitId() != null &&
           f.getParamSitId().getFlgFaltaDecontoSal() != null &&
           f.getParamSitId().getFlgFaltaDecontoSal() == 1) {
 
-        var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid());
-        Long vinculoId = tipoRelAtual != null
-            && tipoRelAtual.getContrVinculoId() != null
-            && tipoRelAtual.getContrVinculoId().getVinculoId() != null
-                ? tipoRelAtual.getContrVinculoId().getVinculoId().getId()
-                : null;
+        var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid());
+        var vinculoId = tipoRel.getContrVinculoId().getVinculoId().getId();
 
-        if (vinculoId == null) {
-          throw IgrpResponseStatusException.badRequest("Vínculo atual do funcionário não encontrado");
-        }
-
-        var movimentos = paramVinculoMovimentoEntityRepository
-            .findByVinculoId_IdAndTipo(vinculoId, "PAG_FALTA");
-
-        if (movimentos == null || movimentos.isEmpty()) {
-          throw IgrpResponseStatusException.badRequest(
-              "Associação de movimento PAG_FALTA não encontrada para o vínculo");
-        }
-
-        var tmFalta = movimentos.getFirst().getTmId();
-        var valorDesconto = f.getValor() != null ? f.getValor() : java.math.BigDecimal.ZERO;
+        var mov = paramVinculoMovimentoEntityRepository
+            .findByVinculoId_IdAndTipo(vinculoId, "PAG_FALTA")
+            .getFirst();
 
         var dp = defPagamentoMapper.createPagamento(
-            valorDesconto,
-            tmFalta,
+            f.getValor(),
+            mov.getTmId(),
             f.getDataInicio().toLocalDate(),
             f.getDataFim().toLocalDate(),
             pedido.getFunId());
@@ -216,74 +197,44 @@ public class FaltaServiceWrite {
         f.setFlgDescontoSal(1);
       }
 
-      // Desconto nas férias (critério por tipo/código da ParamSituacao)
+      // 🔹 desconto férias
       if (novoEstado == Estado.A && f.getParamSitId() != null) {
-        var ps = f.getParamSitId();
-        var tf = ps.getTipoFalta();
-        var cod = ps.getCodigo();
-        var nomeSit = ps.getNome();
-        boolean descontoFerias = (tf != null && "FERIAS".equalsIgnoreCase(tf))
-            || (cod != null && "FERIAS".equalsIgnoreCase(cod))
-            || (nomeSit != null && nomeSit.toUpperCase().contains("FÉRIAS"));
-        if (descontoFerias) {
-          var fg = new FeriasGozadasEntity();
-          fg.setFunId(pedido.getFunId());
-          fg.setPedidoId(pedido);
-          var dia = f.getDataInicio().toLocalDate();
-          fg.setAnoId(resolveAno(dia));
-          fg.setDataInicio(dia);
-          fg.setDataFim(dia);
-          fg.setNumDia(1);
-          fg.setResponsavelId(f.getResponsavelId() != null ? f.getResponsavelId().getId() : null);
-          fg.setObsResponsavel(f.getObsResponsavel());
-          fg.setDecisaoRh(req.getValidar().name());
-          fg.setObsRh(req.getDespachoRh());
-          fg.setEstado(Estado.A);
-          fg.setUuid(UuidCreator.getTimeOrderedEpoch());
-          feriasGozadasRepository.save(fg);
-        }
+        var fg = new FeriasGozadasEntity();
+        fg.setFunId(pedido.getFunId());
+        fg.setPedidoId(pedido);
+        fg.setAnoId(resolveAno(f.getDataInicio().toLocalDate()));
+        fg.setDataInicio(f.getDataInicio().toLocalDate());
+        fg.setDataFim(f.getDataInicio().toLocalDate());
+        fg.setNumDia(1);
+        fg.setEstado(Estado.A);
+        fg.setUuid(UuidCreator.getTimeOrderedEpoch());
+        feriasGozadasRepository.save(fg);
       }
 
-      // Desconto nas horas de dispensa (critério por tipo/código da ParamSituacao)
+      // 🔹 desconto dispensa
       if (novoEstado == Estado.A && f.getParamSitId() != null) {
-        var ps = f.getParamSitId();
-        var tf = ps.getTipoFalta();
-        var cod = ps.getCodigo();
-        var nomeSit = ps.getNome();
-        boolean descontoDispensa = (tf != null && "DISPENSA".equalsIgnoreCase(tf))
-            || (cod != null && "DISPENSA".equalsIgnoreCase(cod))
-            || (nomeSit != null && nomeSit.toUpperCase().contains("DISPENSA"));
-        if (descontoDispensa) {
-          var disp = new DispensaEntity();
-          disp.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid()));
-          disp.setPedidoId(pedido);
-          disp.setTipoDispensa(nomeSit);
-          disp.setDescricaoMotivo(f.getDescricaoMotivo());
-          var dia = f.getDataInicio().toLocalDate();
-          disp.setData(dia);
-          disp.setHoraInicio("00:00");
-          disp.setHoraFim(intervalToHHmm(f.getHorasAusencia()));
-          disp.setEstado(Estado.A);
-          disp.setDecisaoResponsavel(req.getParecer());
-          disp.setObsResponsavel(req.getObservacao());
-          disp.setObsRh(req.getDespachoRh());
-          disp.setResponsavelId(f.getResponsavelId() != null ? f.getResponsavelId().getId() : null);
-          disp.setUuid(UuidCreator.getTimeOrderedEpoch());
-          dispensaRepository.save(disp);
-        }
+        var disp = new DispensaEntity();
+        disp.setPedidoId(pedido);
+        disp.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid()));
+        disp.setData(f.getDataInicio().toLocalDate());
+        disp.setHoraInicio("00:00");
+        disp.setHoraFim(intervalToHHmm(f.getHorasAusencia()));
+        disp.setEstado(Estado.A);
+        disp.setUuid(UuidCreator.getTimeOrderedEpoch());
+        dispensaRepository.save(disp);
       }
     }
 
     faltaRepository.saveAll(faltas);
 
     pedido.setEstado(novoEstado.name());
-    if (novoEstado == Estado.A) {
+    if (novoEstado == Estado.A)
       pedido.setEtapa("FINALIZADO");
-    }
+
     pedidoRepository.save(pedido);
 
     funcionarioRules.getValidacaoPendente(
-        pedido.getFunId().getUuid(), TipoAcao.INSERT, Referencia.FALTA)
+            pedido.getFunId().getUuid(), TipoAcao.INSERT, Referencia.FALTA)
         .ifPresent(v -> {
           v.setEstado(novoEstado);
           validacaoEntityRepository.save(v);
@@ -291,12 +242,12 @@ public class FaltaServiceWrite {
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("pedidoId", pedido.getId());
-    resp.put("pedidoUuid", pedido.getUuid() != null ? pedido.getUuid().toString() : null);
     resp.put("estado", novoEstado);
     resp.put("totalFaltas", faltas.size());
 
     return resp;
   }
+
 
   private List<LocalDate> expandirDias(LocalDate inicio, LocalDate fim) {
     var dias = new ArrayList<LocalDate>();
