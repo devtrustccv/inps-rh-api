@@ -45,6 +45,9 @@ public class FaltaServiceWrite {
   private final DefPagamentoMapper defPagamentoMapper;
   private final DocumentoEntityRepository documentoEntityRepository;
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
+  private final FeriasGozadasEntityRepository feriasGozadasRepository;
+  private final AnoEntityRepository anoEntityRepository;
+  private final DispensaEntityRepository dispensaRepository;
 
   @Transactional
   public Map<String, ?> marcarFalta(MarcarFaltaCommand command) {
@@ -184,7 +187,8 @@ public class FaltaServiceWrite {
         Long vinculoId = tipoRelAtual != null
             && tipoRelAtual.getContrVinculoId() != null
             && tipoRelAtual.getContrVinculoId().getVinculoId() != null
-            ? tipoRelAtual.getContrVinculoId().getVinculoId().getId() : null;
+                ? tipoRelAtual.getContrVinculoId().getVinculoId().getId()
+                : null;
 
         if (vinculoId == null) {
           throw IgrpResponseStatusException.badRequest("Vínculo atual do funcionário não encontrado");
@@ -206,11 +210,61 @@ public class FaltaServiceWrite {
             tmFalta,
             f.getDataInicio().toLocalDate(),
             f.getDataFim().toLocalDate(),
-            pedido.getFunId()
-        );
+            pedido.getFunId());
 
         defPagamentoRepository.save(dp);
         f.setFlgDescontoSal(1);
+      }
+
+      // Desconto nas férias
+      if (novoEstado == Estado.A && f.getParamSitId() != null) {
+        var tipoFalta = f.getParamSitId().getTipoFalta();
+        var nomeSit = f.getParamSitId().getNome();
+        boolean descontoFerias = (tipoFalta != null && "FERIAS".equalsIgnoreCase(tipoFalta))
+            || (nomeSit != null && nomeSit.toUpperCase().contains("FÉRIAS"));
+        if (descontoFerias) {
+          var fg = new FeriasGozadasEntity();
+          fg.setFunId(pedido.getFunId());
+          fg.setPedidoId(pedido);
+          var dia = f.getDataInicio().toLocalDate();
+          fg.setAnoId(resolveAno(dia));
+          fg.setDataInicio(dia);
+          fg.setDataFim(dia);
+          fg.setNumDia(1);
+          fg.setResponsavelId(f.getResponsavelId() != null ? f.getResponsavelId().getId() : null);
+          fg.setObsResponsavel(f.getObsResponsavel());
+          fg.setDecisaoRh(req.getValidar().name());
+          fg.setObsRh(req.getDespachoRh());
+          fg.setEstado(Estado.A);
+          fg.setUuid(UuidCreator.getTimeOrderedEpoch());
+          feriasGozadasRepository.save(fg);
+        }
+      }
+
+      // Desconto nas horas de dispensa
+      if (novoEstado == Estado.A && f.getParamSitId() != null) {
+        var tipoFalta = f.getParamSitId().getTipoFalta();
+        var nomeSit = f.getParamSitId().getNome();
+        boolean descontoDispensa = (tipoFalta != null && "DISPENSA".equalsIgnoreCase(tipoFalta))
+            || (nomeSit != null && nomeSit.toUpperCase().contains("DISPENSA"));
+        if (descontoDispensa) {
+          var disp = new DispensaEntity();
+          disp.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid()));
+          disp.setPedidoId(pedido);
+          disp.setTipoDispensa(nomeSit);
+          disp.setDescricaoMotivo(f.getDescricaoMotivo());
+          var dia = f.getDataInicio().toLocalDate();
+          disp.setData(dia);
+          disp.setHoraInicio("00:00");
+          disp.setHoraFim(intervalToHHmm(f.getHorasAusencia()));
+          disp.setEstado(Estado.A);
+          disp.setDecisaoResponsavel(req.getParecer());
+          disp.setObsResponsavel(req.getObservacao());
+          disp.setObsRh(req.getDespachoRh());
+          disp.setResponsavelId(f.getResponsavelId() != null ? f.getResponsavelId().getId() : null);
+          disp.setUuid(UuidCreator.getTimeOrderedEpoch());
+          dispensaRepository.save(disp);
+        }
       }
     }
 
@@ -223,7 +277,7 @@ public class FaltaServiceWrite {
     pedidoRepository.save(pedido);
 
     funcionarioRules.getValidacaoPendente(
-            pedido.getFunId().getUuid(), TipoAcao.INSERT, Referencia.FALTA)
+        pedido.getFunId().getUuid(), TipoAcao.INSERT, Referencia.FALTA)
         .ifPresent(v -> {
           v.setEstado(novoEstado);
           validacaoEntityRepository.save(v);
@@ -290,6 +344,21 @@ public class FaltaServiceWrite {
       falta.setParamSitId(paramSituacao);
     }
 
+    var jornada = assiduidadeParametroRepository.findAllByEstado(Estado.A.getCode());
+    String diaria = (jornada != null && !jornada.isEmpty())
+        ? jornada.getFirst().getDiaria()
+        : "08:00";
+    int totalMinutosDia = parseMin(diaria);
+    int ausenciaMinutos = parseMin(req.getTotalDeHorasAusentes());
+    java.math.BigDecimal salarioDiario = tipoRel.getSalario() != null ? tipoRel.getSalario()
+        : java.math.BigDecimal.ZERO;
+    java.math.BigDecimal ratio = totalMinutosDia > 0
+        ? java.math.BigDecimal.valueOf(ausenciaMinutos)
+            .divide(java.math.BigDecimal.valueOf(totalMinutosDia), 8, java.math.RoundingMode.HALF_UP)
+        : java.math.BigDecimal.ZERO;
+    java.math.BigDecimal valorDesconto = salarioDiario.multiply(ratio).setScale(2, java.math.RoundingMode.HALF_UP);
+    falta.setValor(valorDesconto);
+
     return falta;
   }
 
@@ -354,5 +423,33 @@ public class FaltaServiceWrite {
     } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
       throw new IllegalArgumentException("Horas inválidas: " + hhmm, e);
     }
+  }
+
+  private String intervalToHHmm(String interval) {
+    if (!StringUtils.hasText(interval))
+      return "00:00";
+    try {
+      String[] parts = interval.trim().split("\\s+");
+      if (parts.length >= 2) {
+        String time = parts[1];
+        String[] hm = time.split(":");
+        String hh = hm.length > 0 ? hm[0] : "00";
+        String mm = hm.length > 1 ? hm[1] : "00";
+        return String.format("%02d:%02d", Integer.parseInt(hh), Integer.parseInt(mm));
+      }
+      return "00:00";
+    } catch (Exception e) {
+      return "00:00";
+    }
+  }
+
+  private AnoEntity resolveAno(LocalDate data) {
+    if (data == null)
+      throw IgrpResponseStatusException.badRequest("Data inválida");
+    var anoStr = String.valueOf(data.getYear());
+    return anoEntityRepository.findAll().stream()
+        .filter(a -> anoStr.equals(a.getAno()))
+        .findFirst()
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Ano não encontrado"));
   }
 }
