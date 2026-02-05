@@ -11,12 +11,15 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DispensaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DispensaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
+import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +39,8 @@ public class DispensaWriteService {
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final DadosContratuaisMapper dadosContratuaisMapper;
+  private final DocumentoMapper documentoMapper;
+  private final DocumentoEntityRepository documentoEntityRepository;
 
   @Transactional
   public Map<String, ?> marcarDispensa(MarcarDispensaCommand command) {
@@ -73,6 +78,23 @@ public class DispensaWriteService {
     disp.setUuid(UuidCreator.getTimeOrderedEpoch());
     disp = dispensaRepository.save(disp);
 
+    if (req.getDocumentos() != null && !req.getDocumentos().isEmpty()) {
+      java.util.List<DocumentoEntity> documentos = new java.util.ArrayList<>();
+      for (var d : req.getDocumentos()) {
+        var doc = documentoMapper.toEntity(
+            d,
+            Estado.P,
+            Referencia.DISPENSA.name(),
+            disp.getId(),
+            disp.getUuid(),
+            1L,
+            funcionario);
+        doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+        documentos.add(doc);
+      }
+      documentoEntityRepository.saveAll(documentos);
+    }
+
     var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.DISPENSA.name(),
         Estado.P);
     validacao.setFunId(funcionario);
@@ -104,7 +126,7 @@ public class DispensaWriteService {
 
     var dispensa = dispensaRepository.findByPedidoId_Uuid(UUID.fromString(command.getPedidoId()))
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Dispensa nao encontrada" +
-                "para esse pedido",
+            "para esse pedido",
             command.getPedidoId()));
 
     var pedido = dispensa.getPedidoId();
@@ -139,14 +161,12 @@ public class DispensaWriteService {
     pedido.setEstado(estado.name());
     pedidoRepository.save(pedido);
 
-
     funcionarioRules.getValidacaoPendente(funcionario.getUuid(),
-            TipoAcao.INSERT, Referencia.DISPENSA)
+        TipoAcao.INSERT, Referencia.DISPENSA)
         .ifPresent(v -> {
           v.setEstado(estado);
           validacaoEntityRepository.save(v);
         });
-
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", dispensa.getId());
@@ -193,11 +213,28 @@ public class DispensaWriteService {
     }
     dispensaRepository.save(dispensa);
 
+    if (req.getDocumentos() != null && !req.getDocumentos().isEmpty()) {
+      var funcionario = pedido.getFunId();
+      java.util.List<DocumentoEntity> documentos = new java.util.ArrayList<>();
+      for (var d : req.getDocumentos()) {
+        var doc = documentoMapper.toEntity(
+            d,
+            Estado.P,
+            Referencia.DISPENSA.name(),
+            dispensa.getId(),
+            dispensa.getUuid(),
+            1L,
+            funcionario);
+        doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+        documentos.add(doc);
+      }
+      documentoEntityRepository.saveAll(documentos);
+    }
+
     pedido.setEstado(Estado.P.name());
     pedidoRepository.save(pedido);
 
-    var validacao = dadosContratuaisMapper.
-        toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.DISPENSA.name(),
+    var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.DISPENSA.name(),
         Estado.P);
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRelAtual);
