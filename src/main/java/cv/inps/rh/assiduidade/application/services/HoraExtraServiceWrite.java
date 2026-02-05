@@ -64,6 +64,7 @@ public class HoraExtraServiceWrite {
     pedido.setEstado(Estado.P.name());
     pedido.setTipoPedido(Referencia.HORA_EXTRA.name());
     pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
+    pedido.setOrigem("MANUAL");
     pedido = pedidoRepository.save(pedido);
 
     FuncionarioEntity primeiroFuncionario = null;
