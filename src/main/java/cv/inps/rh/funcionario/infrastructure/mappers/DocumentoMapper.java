@@ -1,8 +1,9 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
-import cv.inps.rh.funcionario.application.dto.AnexoReqDTO;
-import cv.inps.rh.funcionario.application.dto.AnexoRespDTO;
+
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
+import cv.inps.rh.shared.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
@@ -19,13 +20,13 @@ public class DocumentoMapper {
 
   private final EntityManager entityManager;
 
-  public DocumentoEntity toEntity(AnexoReqDTO dto,
-      Estado estado,
-      String referenciaName,
-      Long referenciaId,
-      UUID referenciaUuid,
-      Long docId,
-      FuncionarioEntity fun) {
+  public DocumentoEntity toEntity(cv.inps.rh.shared.application.dto.AnexoReqDTO dto,
+                                  Estado estado,
+                                  String referenciaName,
+                                  Long referenciaId,
+                                  UUID referenciaUuid,
+                                  Long docId,
+                                  FuncionarioEntity fun) {
     if (dto == null)
       return null;
     DocumentoEntity entity = new DocumentoEntity();

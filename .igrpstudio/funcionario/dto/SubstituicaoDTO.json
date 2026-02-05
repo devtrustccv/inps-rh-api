@@ -90,7 +90,7 @@
       "isUrl": false,
       "primaryKey": false,
       "collectionType": "list",
-      "module": "funcionario"
+      "module": "shared"
     }
   ],
   "id": "sg6madw6kc"

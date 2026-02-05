@@ -1,7 +1,7 @@
 {
   "type": "dto",
-  "module": "funcionario",
-  "name": "AnexoReq",
+  "module": "shared",
+  "name": "AnexoResp",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
@@ -18,9 +18,21 @@
       "primaryKey": false
     },
     {
-      "name": "TipoDocumentoId",
+      "name": "tipoDocumentoId",
       "objectType": "java",
       "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "tipoDocumentoDesc",
+      "objectType": "java",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -42,5 +54,5 @@
       "primaryKey": false
     }
   ],
-  "id": "tzyth8gfwh"
+  "id": "g7xu2kgf7e_copy"
 }
