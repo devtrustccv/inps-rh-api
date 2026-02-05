@@ -2,6 +2,7 @@ package cv.inps.rh.emprestimo.domain.service;
 
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
+import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -137,6 +139,13 @@ public class EmprestimoReadService {
         var relacionamento = root.join("tiprel");
         predicates.add(
             cb.equal(relacionamento.get("mobId").get("instidId").get("id"), Long.valueOf(query.getDireccaoId()))
+        );
+      }
+
+      if (StringUtils.hasText(query.getFuncionarioId())) {
+        var relacionamento = root.join("tiprel");
+        predicates.add(
+            cb.equal(relacionamento.get("funId").get("uuid"), UUID.fromString(query.getFuncionarioId()))
         );
       }
 

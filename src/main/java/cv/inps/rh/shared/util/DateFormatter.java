@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -96,5 +97,9 @@ public final class DateFormatter {
     } catch (DateTimeParseException e) {
       return Optional.empty();
     }
+  }
+
+  public static long monthsBetween(LocalDate start, LocalDate end) {
+    return ChronoUnit.MONTHS.between(start, end);
   }
 }

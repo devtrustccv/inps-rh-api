@@ -212,10 +212,11 @@ public class EmprestimoController {
     @RequestParam(value = "dataFim", required = false) String dataFim,
     @RequestParam(value = "estadoEmprestimo", required = false) String estadoEmprestimo,
     @RequestParam(value = "page", required = false, defaultValue = "0") String page,
-    @RequestParam(value = "size", required = false, defaultValue = "20") String size)
+    @RequestParam(value = "size", required = false, defaultValue = "20") String size,
+    @RequestParam(value = "funcionarioId", required = false) String funcionarioId)
   {
 
-      final var query = new ListarEmprestimosQuery(tipoEmprestimo, direccaoId, dataInicio, dataFim, estadoEmprestimo, page, size);
+      final var query = new ListarEmprestimosQuery(tipoEmprestimo, direccaoId, dataInicio, dataFim, estadoEmprestimo, page, size, funcionarioId);
 
       return queryBus.handle(query);
 
@@ -458,6 +459,36 @@ public class EmprestimoController {
       final var query = new GetHistoricoPagamentoQuery(emprestimoId);
 
       return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "/pedido-adiantamento"
+  )
+  @Operation(
+    summary = "Save pedidos adiantamento",
+    description = "Save pedidos adiantamento",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> savePedidosAdiantamento(@Valid @RequestBody List<PedidoAdiantamentoRequestDTO> savePedidosAdiantamentoRequest
+    )
+  {
+
+      final var command = new SavePedidosAdiantamentoCommand(savePedidosAdiantamentoRequest);
+
+      return commandBus.send(command);
 
   }
 

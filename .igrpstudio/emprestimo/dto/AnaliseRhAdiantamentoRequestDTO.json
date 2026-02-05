@@ -1,0 +1,50 @@
+{
+  "type": "dto",
+  "module": "emprestimo",
+  "name": "AnaliseRhAdiantamentoRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "BaseDecisao",
+    "module": "emprestimo"
+  },
+  "attributes": [
+    {
+      "name": "banco",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "nib",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "swift",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "7xvpvblslk"
+}

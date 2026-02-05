@@ -1,0 +1,34 @@
+{
+  "type": "dto",
+  "module": "emprestimo",
+  "name": "PedidoAdiantamentoRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "emprestimoId",
+      "objectType": "java",
+      "type": "string",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "valorAdiantamento",
+      "objectType": "java",
+      "type": "decimal",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "o32nu3jaii"
+}
