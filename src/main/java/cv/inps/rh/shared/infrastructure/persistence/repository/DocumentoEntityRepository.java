@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
 
-
 @Repository
 public interface DocumentoEntityRepository extends
     JpaRepository<DocumentoEntity, Long>,
@@ -19,11 +18,11 @@ public interface DocumentoEntityRepository extends
 
   default DocumentoEntity findByIdOrThrow(Long id) {
     return this.findById(id)
-        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "DocumentoEntity not found for id: " + id));
+        .orElseThrow(
+            () -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "DocumentoEntity not found for id: " + id));
   }
 
   boolean existsByTpDocumentoId(TipoDocumentoEntity tpDocumentoId);
-
 
   Optional<DocumentoEntity> findByUuid(UUID uuid);
 
@@ -31,8 +30,9 @@ public interface DocumentoEntityRepository extends
     return this.findByUuid(uuid)
         .orElseThrow(() -> IgrpResponseStatusException.of(
             HttpStatus.NOT_FOUND,
-            "DocumentoEntity not found for uuid: " + uuid
-        ));
+            "DocumentoEntity not found for uuid: " + uuid));
   }
+
+  java.util.List<DocumentoEntity> findAllByReferenciaNameAndReferenciaUuid(String referenciaName, UUID referenciaUuid);
 
 }

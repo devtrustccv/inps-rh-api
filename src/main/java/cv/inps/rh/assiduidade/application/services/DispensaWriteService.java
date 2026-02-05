@@ -13,12 +13,16 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DispensaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.AusenciaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DispensaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.AusenciaEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoEntityRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,6 +43,8 @@ public class DispensaWriteService {
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final DocumentoMapper documentoMapper;
   private final DocumentoEntityRepository documentoEntityRepository;
+  private final AusenciaEntityRepository ausenciaEntityRepository;
+  private final ParamSituacaoEntityRepository paramSituacaoEntityRepository;
 
   @Transactional
   public Map<String, ?> marcarDispensa(MarcarDispensaCommand command) {
@@ -158,7 +164,7 @@ public class DispensaWriteService {
       for (var d : req.getDocumentos()) {
         var doc = documentoMapper.toEntity(
             d,
-            Estado.P,
+            estado,
             Referencia.DISPENSA.name(),
             dispensa.getId(),
             dispensa.getUuid(),
@@ -169,6 +175,34 @@ public class DispensaWriteService {
         documentos.add(doc);
       }
       documentoEntityRepository.saveAll(documentos);
+    }
+
+    // Propagar estado para anexos existentes da dispensa
+    var anexosExistentes = documentoEntityRepository
+        .findAllByReferenciaNameAndReferenciaUuid(Referencia.DISPENSA.name(), dispensa.getUuid());
+    if (anexosExistentes != null && !anexosExistentes.isEmpty()) {
+      anexosExistentes.forEach(a -> a.setEstado(estado));
+      documentoEntityRepository.saveAll(anexosExistentes);
+    }
+
+    // Criar ausência quando validação for SIM (estado A)
+    if (estado == Estado.A) {
+      var paramsDispensa = paramSituacaoEntityRepository.findAllByNome("Dispensa");
+      if (paramsDispensa != null && !paramsDispensa.isEmpty()) {
+        ParamSituacaoEntity param = paramsDispensa.get(0);
+        var ausencia = new AusenciaEntity();
+        ausencia.setParamSitId(param);
+        ausencia.setReferenciaName("RH_T_DISPENSA");
+        ausencia.setReferenciaId(dispensa.getId());
+        ausencia.setObs(dispensa.getTipoDispensa());
+        ausencia.setDataInicio(dispensa.getData());
+        ausencia.setDataFim(dispensa.getData());
+        var minutos = diffMinutes(dispensa.getHoraInicio(), dispensa.getHoraFim());
+        ausencia.setHora(minutos != null ? minutos : 0);
+        ausencia.setEstado(Estado.A);
+        ausencia.setUuid(UuidCreator.getTimeOrderedEpoch());
+        ausenciaEntityRepository.save(ausencia);
+      }
     }
 
     // Atualizar estado do pedido
@@ -193,8 +227,8 @@ public class DispensaWriteService {
   public Map<String, ?> updateDispensa(UpdateDispensaCommand command) {
 
     var req = command.getDispensareq();
-    if (req == null || !StringUtils.hasText(req.getValidar()))
-      throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
+    if (req == null)
+      throw IgrpResponseStatusException.badRequest("Dados de dispensa ausentes");
     if (!StringUtils.hasText(command.getDispensaId()))
       throw IgrpResponseStatusException.badRequest("Identificador da Dispensa é obrigatório");
 
@@ -225,23 +259,20 @@ public class DispensaWriteService {
 
     dispensaRepository.save(dispensa);
 
-    // Documentos
-    if (req.getDocumentos() != null && !req.getDocumentos().isEmpty()) {
-      List<DocumentoEntity> documentos = new ArrayList<>();
-      for (var d : req.getDocumentos()) {
-        var doc = documentoMapper.toEntity(
-            d,
-            Estado.P,
-            Referencia.DISPENSA.name(),
-            dispensa.getId(),
-            dispensa.getUuid(),
-            1L,
-            funcionario
-        );
-        doc.setUuid(UuidCreator.getTimeOrderedEpoch());
-        documentos.add(doc);
-      }
-      documentoEntityRepository.saveAll(documentos);
+    // Documentos - substituição/sincronização
+    var anexosExistentes = documentoEntityRepository
+        .findAllByReferenciaNameAndReferenciaUuid(Referencia.DISPENSA.name(), dispensa.getUuid());
+    var sincronizados = documentoMapper.syncDocumentos(
+        anexosExistentes != null ? anexosExistentes : new ArrayList<>(),
+        req.getDocumentos(),
+        Referencia.DISPENSA.name(),
+        dispensa.getId(),
+        dispensa.getUuid(),
+        1L,
+        funcionario);
+    if (sincronizados != null && !sincronizados.isEmpty()) {
+      sincronizados.forEach(d -> { if (d.getUuid() == null) d.setUuid(UuidCreator.getTimeOrderedEpoch()); });
+      documentoEntityRepository.saveAll(sincronizados);
     }
 
     // Atualizar pedido
@@ -273,6 +304,17 @@ public class DispensaWriteService {
     resp.put("id", dispensa.getId());
     resp.put("estado", dispensa.getEstado()); // sem .name() se já for String
     return resp;
+  }
+
+  private static Integer diffMinutes(String inicio, String fim) {
+    try {
+      if (!StringUtils.hasText(inicio) || !StringUtils.hasText(fim)) return null;
+      var t1 = java.time.LocalTime.parse(inicio);
+      var t2 = java.time.LocalTime.parse(fim);
+      return (int) java.time.Duration.between(t1, t2).toMinutes();
+    } catch (Exception e) {
+      return null;
+    }
   }
 
 }

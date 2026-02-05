@@ -178,6 +178,19 @@ public class DispensaReadService {
     dto.setParecerResponsavel(e.getDecisaoResponsavel());
     dto.setObservacaoResponsavel(e.getObsResponsavel());
     dto.setObservacaoRh(e.getObsRh());
+
+    if (dto.getColaborador() != null && dto.getDataDispensa() != null) {
+      var inicioMes = dto.getDataDispensa().withDayOfMonth(1);
+      var fimMes = dto.getDataDispensa().withDayOfMonth(dto.getDataDispensa().lengthOfMonth());
+      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataBetween(
+          dto.getColaborador(), inicioMes, fimMes);
+      int totalMin = 0;
+      for (var d : listaMes) {
+        var minsItem = diffMinutes(d.getHoraInicio(), d.getHoraFim());
+        if (minsItem != null) totalMin += minsItem;
+      }
+      dto.setHorasUsadasMes(formatMinutes(totalMin));
+    }
     return dto;
   }
 
@@ -205,6 +218,19 @@ public class DispensaReadService {
     dto.setParecerResponsavel(e.getDecisaoResponsavel());
     dto.setObservacaoResponsavel(e.getObsResponsavel());
     dto.setObservacaoRh(e.getObsRh());
+
+    if (dto.getColaborador() != null && dto.getDataDispensa() != null) {
+      var inicioMes = dto.getDataDispensa().withDayOfMonth(1);
+      var fimMes = dto.getDataDispensa().withDayOfMonth(dto.getDataDispensa().lengthOfMonth());
+      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataBetween(
+          dto.getColaborador(), inicioMes, fimMes);
+      int totalMin = 0;
+      for (var d : listaMes) {
+        var minsItem = diffMinutes(d.getHoraInicio(), d.getHoraFim());
+        if (minsItem != null) totalMin += minsItem;
+      }
+      dto.setHorasUsadasMes(formatMinutes(totalMin));
+    }
     return dto;
   }
 
