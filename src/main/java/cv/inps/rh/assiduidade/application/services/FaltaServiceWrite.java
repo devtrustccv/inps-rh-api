@@ -3,10 +3,8 @@ package cv.inps.rh.assiduidade.application.services;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.assiduidade.application.commands.MarcarFaltaCommand;
 import cv.inps.rh.assiduidade.application.commands.ValidarFaltaCommand;
-import cv.inps.rh.assiduidade.application.constants.AssiduidadeDiariaEstado;
 import cv.inps.rh.assiduidade.application.dto.FaltaReqDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
-import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
@@ -40,15 +38,13 @@ public class FaltaServiceWrite {
   private final FuncionarioRules funcionarioRules;
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final AssiduidadeParametroEntityRepository assiduidadeParametroRepository;
-  private final TipoMovimentoHelper tipoMovimentoHelper;
   private final DocumentoMapper documentoMapper;
   private final ParamSituacaoEntityRepository paramSituacaoRepository;
   private final EntityManager entityManager;
   private final DefPagamentoEntityRepository defPagamentoRepository;
   private final DefPagamentoMapper defPagamentoMapper;
   private final DocumentoEntityRepository documentoEntityRepository;
-
-  private final PedidoEntityRepository pedidoEntityRepository;
+  private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
 
   @Transactional
   public Map<String, ?> marcarFalta(MarcarFaltaCommand command) {
@@ -63,17 +59,11 @@ public class FaltaServiceWrite {
     if (req.getDataFim().isBefore(req.getDataInicio()))
       throw IgrpResponseStatusException.badRequest("Data fim não pode ser anterior à data início");
 
-    // TODO: Confirmar com análise regras de bloqueio/tolerância
-    // - Bloquear marcação em dias com férias/dispensa aprovadas?
-    // - Bloquear quando existirem picagens que indiquem presença?
-    // - Critérios de sobreposição e prioridades entre movimentos
-
     var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaboradorId());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     boolean deveJustificar = "SIM".equalsIgnoreCase(req.getJustificar());
 
-    // Criar pedido apenas se justificar
     PedidoEntity pedido = null;
     if (deveJustificar) {
       if (req.getTipoJustificacao() == null || req.getTipoJustificacao() <= 0) {
@@ -107,17 +97,14 @@ public class FaltaServiceWrite {
       }
     }
 
-    // Expandir dias do período
     var datas = expandirDias(req.getDataInicio(), req.getDataFim());
     int totalRegistos = 0;
 
     for (var dia : datas) {
-      // Criar síntese diária (sempre)
       var sintese = createSinteseDiaria(funcionario, dia,
           req.getTotalDeHorasAusentes(), deveJustificar);
       sinteseRepository.save(sintese);
 
-      // Criar falta apenas se justificar
       if (deveJustificar) {
         var falta = createFaltaDoDia(req, pedido, dia, tipoRelAtual, sintese);
         faltaRepository.save(falta);
@@ -160,44 +147,83 @@ public class FaltaServiceWrite {
 
     UUID pedidoUuid = UUID.fromString(command.getPedidoId());
 
-    // Buscar pedido
     var pedido = pedidoRepository.findByUuid(pedidoUuid)
         .orElseThrow(() -> IgrpResponseStatusException.badRequest(
             "Pedido marcação de falta não encontrado com id: " + pedidoUuid));
 
-    // Determinar novo estado
     var ev = req.getValidar();
     var novoEstado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
-    // Atualizar faltas do pedido
     List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
     for (FaltaEntity f : faltas) {
       f.setEstado(novoEstado);
 
-      // Desconto de salário
+      if (StringUtils.hasText(req.getParecer())) {
+        f.setDecisaoResponsavel(req.getParecer());
+      }
+      if (StringUtils.hasText(req.getObservacao())) {
+        f.setObsResponsavel(req.getObservacao());
+      }
+      if (StringUtils.hasText(req.getDespachoRh())) {
+        f.setDespachoRh(req.getDespachoRh());
+      }
+
+      if (req.getTipoJustificacao() != null && req.getTipoJustificacao() > 0) {
+        var paramSituacao = paramSituacaoRepository.findByIdOrThrow(req.getTipoJustificacao());
+        if (!"1".equalsIgnoreCase(paramSituacao.getFlgFalta())) {
+          throw IgrpResponseStatusException.badRequest("Tipo justificativo não permitido para falta");
+        }
+        f.setParamSitId(paramSituacao);
+      }
+
       if (novoEstado == Estado.A && f.getParamSitId() != null &&
           f.getParamSitId().getFlgFaltaDecontoSal() != null &&
           f.getParamSitId().getFlgFaltaDecontoSal() == 1) {
 
-        // TODO: Criar registro em RH_T_DEF_PAGAMENTOS
-        // Exemplo de campos: funId, tiprelId, referenciaId(pedido.getId), valor, data,
-        // estado
-      }
+        var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid());
+        Long vinculoId = tipoRelAtual != null
+            && tipoRelAtual.getContrVinculoId() != null
+            && tipoRelAtual.getContrVinculoId().getVinculoId() != null
+            ? tipoRelAtual.getContrVinculoId().getVinculoId().getId() : null;
 
-      // TODO: Desconto de férias (RH_T_FERIAS_GOZADAS)
-      // TODO: Desconto de horas de dispensa (RH_T_DISPENSA)
+        if (vinculoId == null) {
+          throw IgrpResponseStatusException.badRequest("Vínculo atual do funcionário não encontrado");
+        }
+
+        var movimentos = paramVinculoMovimentoEntityRepository
+            .findByVinculoId_IdAndTipo(vinculoId, "PAG_FALTA");
+
+        if (movimentos == null || movimentos.isEmpty()) {
+          throw IgrpResponseStatusException.badRequest(
+              "Associação de movimento PAG_FALTA não encontrada para o vínculo");
+        }
+
+        var tmFalta = movimentos.getFirst().getTmId();
+        var valorDesconto = f.getValor() != null ? f.getValor() : java.math.BigDecimal.ZERO;
+
+        var dp = defPagamentoMapper.createPagamento(
+            valorDesconto,
+            tmFalta,
+            f.getDataInicio().toLocalDate(),
+            f.getDataFim().toLocalDate(),
+            pedido.getFunId()
+        );
+
+        defPagamentoRepository.save(dp);
+        f.setFlgDescontoSal(1);
+      }
     }
+
     faltaRepository.saveAll(faltas);
 
-    // Atualizar estado e etapa do pedido
     pedido.setEstado(novoEstado.name());
     if (novoEstado == Estado.A) {
       pedido.setEtapa("FINALIZADO");
     }
     pedidoRepository.save(pedido);
 
-    // Atualizar validação
-    funcionarioRules.getValidacaoPendente(pedido.getFunId().getUuid(), TipoAcao.INSERT, Referencia.FALTA)
+    funcionarioRules.getValidacaoPendente(
+            pedido.getFunId().getUuid(), TipoAcao.INSERT, Referencia.FALTA)
         .ifPresent(v -> {
           v.setEstado(novoEstado);
           validacaoEntityRepository.save(v);
@@ -238,17 +264,15 @@ public class FaltaServiceWrite {
     falta.setDataInicio(LocalDateTime.of(dia, LocalTime.MIN));
     falta.setDataFim(LocalDateTime.of(dia, LocalTime.of(23, 59, 59)));
     falta.setFlgJustificativo(req.getJustificar());
-    falta.setEstado(Estado.P); // Pendente
+    falta.setEstado(Estado.P);
     falta.setUuid(UuidCreator.getTimeOrderedEpoch());
     falta.setSinteseDiarioId(sintese);
 
-    // Responsável
     if (req.getResponsavel() != null && req.getResponsavel() > 0) {
       var resp = entityManager.find(ResponsavelEntity.class, req.getResponsavel());
       falta.setResponsavelId(resp);
     }
 
-    // Parecer e observação do responsável (quando aplicável)
     if (StringUtils.hasText(req.getParecer())) {
       falta.setDecisaoResponsavel(req.getParecer());
     }
@@ -256,12 +280,12 @@ public class FaltaServiceWrite {
       falta.setObsResponsavel(req.getObservacao());
     }
 
-    // Tipo justificativa
     if (req.getTipoJustificacao() != null && req.getTipoJustificacao() > 0) {
       var paramSituacao = paramSituacaoRepository.findById(req.getTipoJustificacao())
           .orElseThrow(() -> IgrpResponseStatusException.badRequest("Tipo justificativo inválido"));
       if (!"1".equalsIgnoreCase(paramSituacao.getFlgFalta())) {
-        throw IgrpResponseStatusException.badRequest("Tipo justificativo não permitido para falta");
+        throw IgrpResponseStatusException.badRequest(
+            "Tipo justificativo não permitido para falta");
       }
       falta.setParamSitId(paramSituacao);
     }
@@ -281,13 +305,13 @@ public class FaltaServiceWrite {
     sintese.setMes(dia.getMonthValue());
     sintese.setAno(dia.getYear());
 
-    // Converter horas de ausência para INTERVAL
     String horasAusenciaInterval = parseInterval(horasAusencia);
     sintese.setHorasAusencia(horasAusenciaInterval);
 
-    // Jornada diária (padrão 8:00)
     var jornada = assiduidadeParametroRepository.findAllByEstado(Estado.A.getCode());
-    String diaria = (jornada != null && !jornada.isEmpty()) ? jornada.getFirst().getDiaria() : "08:00";
+    String diaria = (jornada != null && !jornada.isEmpty())
+        ? jornada.getFirst().getDiaria()
+        : "08:00";
 
     int totalMinutos = parseMin(diaria);
     int ausenciaMinutos = parseMin(horasAusencia);
@@ -298,12 +322,8 @@ public class FaltaServiceWrite {
     String horasTrabalhadasStr = String.format("%02d:%02d", h, m);
     sintese.setHorasTrabalhadas(parseInterval(horasTrabalhadasStr));
 
-    // Falta: 1 = falta total, 0 = não falta
     sintese.setFalta(trabalhadosMinutos == 0 ? 1 : 0);
-
-    // Estado do registo (ativo)
     sintese.setEstado(Estado.A.name());
-    // Forma de marcação (manual)
     sintese.setFlagRececao("MANUAL");
 
     return sintese;
@@ -335,5 +355,4 @@ public class FaltaServiceWrite {
       throw new IllegalArgumentException("Horas inválidas: " + hhmm, e);
     }
   }
-
 }
