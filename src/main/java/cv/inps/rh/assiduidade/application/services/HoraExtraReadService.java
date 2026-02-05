@@ -9,7 +9,9 @@ import cv.inps.rh.assiduidade.application.dto.HorExtraListDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.HoraExtraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.VHoraExtraMensalEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.HoraExtraEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.VHoraExtraMensalEntityRepository;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
@@ -32,6 +34,7 @@ import java.util.UUID;
 public class HoraExtraReadService {
 
   private final HoraExtraEntityRepository horaExtraRepository;
+  private final DocumentoEntityRepository documentoEntityRepository;
   private final VHoraExtraMensalEntityRepository vHoraExtraMensalRepository;
 
   @Transactional(readOnly = true)
@@ -91,7 +94,6 @@ public class HoraExtraReadService {
     };
   }
 
-
   private HorExtraListDTO toDTO(VHoraExtraMensalEntity e) {
 
     var dto = new HorExtraListDTO();
@@ -108,21 +110,17 @@ public class HoraExtraReadService {
     dto.setNomeColaborador(e.getNomeFuncionario());
 
     dto.setDataInicio(
-        e.getDataInicio() != null ? e.getDataInicio().toString() : null
-    );
+        e.getDataInicio() != null ? e.getDataInicio().toString() : null);
     dto.setDataFim(
-        e.getDataFim() != null ? e.getDataFim().toString() : null
-    );
+        e.getDataFim() != null ? e.getDataFim().toString() : null);
 
     dto.setHorasContratato(
         e.getHorasContratadoDiario() != null
             ? e.getHorasContratadoDiario() + " / " + e.getHorasContratadoMensal()
-            : null
-    );
+            : null);
 
     dto.setHorasTrabalho(
-        e.getHorasTrabalho() != null ? e.getHorasTrabalho().toPlainString() : null
-    );
+        e.getHorasTrabalho() != null ? e.getHorasTrabalho().toPlainString() : null);
 
     dto.setSalarioMensal(e.getSalarioMensal());
     dto.setValorHorasMensal(e.getValorHorasMensal());
@@ -135,7 +133,6 @@ public class HoraExtraReadService {
 
     return dto;
   }
-
 
   private String formatHorasExtra(String s) {
     if (!StringUtils.hasText(s))
@@ -175,9 +172,8 @@ public class HoraExtraReadService {
       item.setId(e.getId());
       item.setColaborador(
           e.getTiprelId() != null && e.getTiprelId().getFunId() != null
-                  ? e.getTiprelId().getFunId().getUuid()
-              : null
-      );
+              ? e.getTiprelId().getFunId().getUuid()
+              : null);
       item.setDataInicio(e.getDataInicio());
       item.setDataFim(e.getDataFim());
       item.setHorasDiaria(e.getHorasDiarias());
@@ -185,6 +181,19 @@ public class HoraExtraReadService {
       item.setValorDiario(e.getValorDiario());
 
       dto.getHoraExtra().add(item);
+    }
+
+    var anexos = documentoEntityRepository
+        .findAllByReferenciaNameAndReferenciaUuid(Referencia.HORA_EXTRA.name(), pedidoUuid);
+    if (anexos != null && !anexos.isEmpty()) {
+      var list = new java.util.ArrayList<cv.inps.rh.shared.application.dto.AnexoReqDTO>();
+      for (var d : anexos) {
+        var ar = new cv.inps.rh.shared.application.dto.AnexoReqDTO();
+        ar.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
+        ar.setDocumento(d.getUrl());
+        list.add(ar);
+      }
+      dto.setDocumentos(list);
     }
 
     return dto;
