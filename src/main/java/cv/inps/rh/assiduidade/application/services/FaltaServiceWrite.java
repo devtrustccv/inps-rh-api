@@ -216,11 +216,14 @@ public class FaltaServiceWrite {
         f.setFlgDescontoSal(1);
       }
 
-      // Desconto nas férias
+      // Desconto nas férias (critério por tipo/código da ParamSituacao)
       if (novoEstado == Estado.A && f.getParamSitId() != null) {
-        var tipoFalta = f.getParamSitId().getTipoFalta();
-        var nomeSit = f.getParamSitId().getNome();
-        boolean descontoFerias = (tipoFalta != null && "FERIAS".equalsIgnoreCase(tipoFalta))
+        var ps = f.getParamSitId();
+        var tf = ps.getTipoFalta();
+        var cod = ps.getCodigo();
+        var nomeSit = ps.getNome();
+        boolean descontoFerias = (tf != null && "FERIAS".equalsIgnoreCase(tf))
+            || (cod != null && "FERIAS".equalsIgnoreCase(cod))
             || (nomeSit != null && nomeSit.toUpperCase().contains("FÉRIAS"));
         if (descontoFerias) {
           var fg = new FeriasGozadasEntity();
@@ -241,11 +244,14 @@ public class FaltaServiceWrite {
         }
       }
 
-      // Desconto nas horas de dispensa
+      // Desconto nas horas de dispensa (critério por tipo/código da ParamSituacao)
       if (novoEstado == Estado.A && f.getParamSitId() != null) {
-        var tipoFalta = f.getParamSitId().getTipoFalta();
-        var nomeSit = f.getParamSitId().getNome();
-        boolean descontoDispensa = (tipoFalta != null && "DISPENSA".equalsIgnoreCase(tipoFalta))
+        var ps = f.getParamSitId();
+        var tf = ps.getTipoFalta();
+        var cod = ps.getCodigo();
+        var nomeSit = ps.getNome();
+        boolean descontoDispensa = (tf != null && "DISPENSA".equalsIgnoreCase(tf))
+            || (cod != null && "DISPENSA".equalsIgnoreCase(cod))
             || (nomeSit != null && nomeSit.toUpperCase().contains("DISPENSA"));
         if (descontoDispensa) {
           var disp = new DispensaEntity();
