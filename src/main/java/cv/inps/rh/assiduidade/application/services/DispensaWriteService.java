@@ -25,9 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -122,16 +120,18 @@ public class DispensaWriteService {
     if (req == null || !StringUtils.hasText(req.getValidar()))
       throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
     if (!StringUtils.hasText(command.getPedidoId()))
-      throw IgrpResponseStatusException.badRequest("Identificador da pedido é obrigatório");
+      throw IgrpResponseStatusException.badRequest("Identificador do pedido é obrigatório");
 
     var dispensa = dispensaRepository.findByPedidoId_Uuid(UUID.fromString(command.getPedidoId()))
-        .orElseThrow(() -> IgrpResponseStatusException.notFound("Dispensa nao encontrada" +
-            "para esse pedido",
+        .orElseThrow(() -> IgrpResponseStatusException.notFound(
+            "Dispensa não encontrada para esse pedido",
             command.getPedidoId()));
 
     var pedido = dispensa.getPedidoId();
+    if (pedido == null)
+      throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
 
-    var funcionario = pedido != null ? pedido.getFunId() : null;
+    var funcionario = pedido.getFunId();
     if (funcionario == null)
       throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
 
@@ -139,30 +139,44 @@ public class DispensaWriteService {
     var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
     var estado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
+    // Atualizar campos da dispensa
     dispensa.setDecisaoResponsavel(req.getParecerResponsavel());
     dispensa.setObsResponsavel(req.getObservacaoResponsavel());
     dispensa.setObsRh(req.getObservacaoRh());
     dispensa.setEstado(estado);
     dispensa.setTiprelId(tipoRelAtual);
-    if (req.getDataDispensa() != null) {
-      dispensa.setData(req.getDataDispensa());
-    }
-    if (StringUtils.hasText(req.getHoraSaida())) {
-      dispensa.setHoraInicio(req.getHoraSaida());
-    }
-    if (StringUtils.hasText(req.getHoraEntrada())) {
-      dispensa.setHoraFim(req.getHoraEntrada());
-    }
-    if (StringUtils.hasText(req.getMotivo())) {
-      dispensa.setDescricaoMotivo(req.getMotivo());
-    }
+    if (req.getDataDispensa() != null) dispensa.setData(req.getDataDispensa());
+    if (StringUtils.hasText(req.getHoraSaida())) dispensa.setHoraInicio(req.getHoraSaida());
+    if (StringUtils.hasText(req.getHoraEntrada())) dispensa.setHoraFim(req.getHoraEntrada());
+    if (StringUtils.hasText(req.getMotivo())) dispensa.setDescricaoMotivo(req.getMotivo());
+
     dispensaRepository.save(dispensa);
 
+    // Documentos
+    if (req.getDocumentos() != null && !req.getDocumentos().isEmpty()) {
+      List<DocumentoEntity> documentos = new ArrayList<>();
+      for (var d : req.getDocumentos()) {
+        var doc = documentoMapper.toEntity(
+            d,
+            Estado.P,
+            Referencia.DISPENSA.name(),
+            dispensa.getId(),
+            dispensa.getUuid(),
+            1L,
+            funcionario
+        );
+        doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+        documentos.add(doc);
+      }
+      documentoEntityRepository.saveAll(documentos);
+    }
+
+    // Atualizar estado do pedido
     pedido.setEstado(estado.name());
     pedidoRepository.save(pedido);
 
-    funcionarioRules.getValidacaoPendente(funcionario.getUuid(),
-        TipoAcao.INSERT, Referencia.DISPENSA)
+    // Atualizar validação pendente
+    funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.DISPENSA)
         .ifPresent(v -> {
           v.setEstado(estado);
           validacaoEntityRepository.save(v);
@@ -170,12 +184,14 @@ public class DispensaWriteService {
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", dispensa.getId());
-    resp.put("estado", dispensa.getEstado().name());
+    resp.put("estado", dispensa.getEstado().name()); // mantido .name() se Estado for enum
     return resp;
   }
 
+
   @Transactional
   public Map<String, ?> updateDispensa(UpdateDispensaCommand command) {
+
     var req = command.getDispensareq();
     if (req == null || !StringUtils.hasText(req.getValidar()))
       throw IgrpResponseStatusException.badRequest("Campo validar é obrigatório");
@@ -187,35 +203,31 @@ public class DispensaWriteService {
             command.getDispensaId()));
 
     var pedido = dispensa.getPedidoId();
+    if (pedido == null)
+      throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
 
-    var funcionario = pedido != null ? pedido.getFunId() : null;
+    var funcionario = pedido.getFunId();
     if (funcionario == null)
       throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
 
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
+    // Atualizar campos da dispensa
     dispensa.setDecisaoResponsavel(req.getParecerResponsavel());
     dispensa.setObsResponsavel(req.getObservacaoResponsavel());
     dispensa.setObsRh(req.getObservacaoRh());
     dispensa.setEstado(Estado.P);
     dispensa.setTiprelId(tipoRelAtual);
-    if (req.getDataDispensa() != null) {
-      dispensa.setData(req.getDataDispensa());
-    }
-    if (StringUtils.hasText(req.getHoraSaida())) {
-      dispensa.setHoraInicio(req.getHoraSaida());
-    }
-    if (StringUtils.hasText(req.getHoraEntrada())) {
-      dispensa.setHoraFim(req.getHoraEntrada());
-    }
-    if (StringUtils.hasText(req.getMotivo())) {
-      dispensa.setDescricaoMotivo(req.getMotivo());
-    }
+    if (req.getDataDispensa() != null) dispensa.setData(req.getDataDispensa());
+    if (StringUtils.hasText(req.getHoraSaida())) dispensa.setHoraInicio(req.getHoraSaida());
+    if (StringUtils.hasText(req.getHoraEntrada())) dispensa.setHoraFim(req.getHoraEntrada());
+    if (StringUtils.hasText(req.getMotivo())) dispensa.setDescricaoMotivo(req.getMotivo());
+
     dispensaRepository.save(dispensa);
 
+    // Documentos
     if (req.getDocumentos() != null && !req.getDocumentos().isEmpty()) {
-      var funcionario = pedido.getFunId();
-      java.util.List<DocumentoEntity> documentos = new java.util.ArrayList<>();
+      List<DocumentoEntity> documentos = new ArrayList<>();
       for (var d : req.getDocumentos()) {
         var doc = documentoMapper.toEntity(
             d,
@@ -224,32 +236,42 @@ public class DispensaWriteService {
             dispensa.getId(),
             dispensa.getUuid(),
             1L,
-            funcionario);
+            funcionario
+        );
         doc.setUuid(UuidCreator.getTimeOrderedEpoch());
         documentos.add(doc);
       }
       documentoEntityRepository.saveAll(documentos);
     }
 
+    // Atualizar pedido
     pedido.setEstado(Estado.P.name());
     pedidoRepository.save(pedido);
 
-    var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.DISPENSA.name(),
-        Estado.P);
+    // Validação
+    var validacao = dadosContratuaisMapper.toValidacaoInsert(
+        TipoAcao.INSERT.name(),
+        Referencia.DISPENSA.name(),
+        Estado.P
+    );
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRelAtual);
-    funcionario.getValidacoes().add(validacao);
+    validacaoEntityRepository.save(validacao); // salva para gerar ID
+
+    if (funcionario.getValidacoes() == null)
+      funcionario.setValidacoes(new ArrayList<>());
+     funcionario.getValidacoes().add(validacao);
+
     funcionarioRepository.saveAndFlush(funcionario);
 
-    validacaoEntityRepository.findById(validacao.getId()).ifPresent(v -> {
-      v.setReferenciaId(pedido.getId());
-      v.setReferenciaUuid(pedido.getUuid());
-      validacaoEntityRepository.save(v);
-    });
+    // Atualizar referencia na validação
+    validacao.setReferenciaId(pedido.getId());
+    validacao.setReferenciaUuid(pedido.getUuid());
+    validacaoEntityRepository.save(validacao);
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", dispensa.getId());
-    resp.put("estado", dispensa.getEstado().name());
+    resp.put("estado", dispensa.getEstado()); // sem .name() se já for String
     return resp;
   }
 

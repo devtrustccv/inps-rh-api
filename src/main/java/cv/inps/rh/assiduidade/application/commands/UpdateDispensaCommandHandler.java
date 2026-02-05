@@ -2,6 +2,7 @@ package cv.inps.rh.assiduidade.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.assiduidade.application.services.DispensaWriteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -14,8 +15,11 @@ public class UpdateDispensaCommandHandler implements CommandHandler<UpdateDispen
 
    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateDispensaCommandHandler.class);
 
-   public UpdateDispensaCommandHandler() {
+   private final DispensaWriteService dispensaWriteService;
 
+   public UpdateDispensaCommandHandler(DispensaWriteService dispensaWriteService) {
+
+     this.dispensaWriteService = dispensaWriteService;
    }
 
    @IgrpCommandHandler
@@ -23,8 +27,8 @@ public class UpdateDispensaCommandHandler implements CommandHandler<UpdateDispen
 
       LOGGER.debug("UpdateDispensaCommand : {}", command);
 
-      // TODO: Implement the command handling logic here
-      return null;
+
+      return ResponseEntity.ok(dispensaWriteService.updateDispensa(command));
    }
 
 }
