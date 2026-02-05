@@ -46,6 +46,7 @@ public class FaltaServiceWrite {
   private final EntityManager entityManager;
   private final DefPagamentoEntityRepository defPagamentoRepository;
   private final DefPagamentoMapper defPagamentoMapper;
+  private final DocumentoEntityRepository documentoEntityRepository;
 
   private final PedidoEntityRepository pedidoEntityRepository;
 
@@ -62,6 +63,11 @@ public class FaltaServiceWrite {
     if (req.getDataFim().isBefore(req.getDataInicio()))
       throw IgrpResponseStatusException.badRequest("Data fim não pode ser anterior à data início");
 
+    // TODO: Confirmar com análise regras de bloqueio/tolerância
+    // - Bloquear marcação em dias com férias/dispensa aprovadas?
+    // - Bloquear quando existirem picagens que indiquem presença?
+    // - Critérios de sobreposição e prioridades entre movimentos
+
     var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaboradorId());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
@@ -70,6 +76,10 @@ public class FaltaServiceWrite {
     // Criar pedido apenas se justificar
     PedidoEntity pedido = null;
     if (deveJustificar) {
+      if (req.getTipoJustificacao() == null || req.getTipoJustificacao() <= 0) {
+        throw IgrpResponseStatusException.badRequest("Tipo de justificação é obrigatório");
+      }
+
       pedido = new PedidoEntity();
       pedido.setFunId(funcionario);
       pedido.setTipoPedido("JUSTIFICACAO_FALTA");
@@ -78,6 +88,23 @@ public class FaltaServiceWrite {
       pedido.setOrigem("MANUAL");
       pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
       pedido = pedidoRepository.save(pedido);
+
+      if (req.getDocumentos() != null && !req.getDocumentos().isEmpty()) {
+        List<DocumentoEntity> docs = new ArrayList<>();
+        for (var d : req.getDocumentos()) {
+          var doc = documentoMapper.toEntity(
+              d,
+              Estado.P,
+              Referencia.JUSTIFICAR_FALTA.name(),
+              pedido.getId(),
+              pedido.getUuid(),
+              1L,
+              funcionario);
+          doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+          docs.add(doc);
+        }
+        documentoEntityRepository.saveAll(docs);
+      }
     }
 
     // Expandir dias do período
@@ -221,10 +248,21 @@ public class FaltaServiceWrite {
       falta.setResponsavelId(resp);
     }
 
+    // Parecer e observação do responsável (quando aplicável)
+    if (StringUtils.hasText(req.getParecer())) {
+      falta.setDecisaoResponsavel(req.getParecer());
+    }
+    if (StringUtils.hasText(req.getObservacao())) {
+      falta.setObsResponsavel(req.getObservacao());
+    }
+
     // Tipo justificativa
     if (req.getTipoJustificacao() != null && req.getTipoJustificacao() > 0) {
       var paramSituacao = paramSituacaoRepository.findById(req.getTipoJustificacao())
           .orElseThrow(() -> IgrpResponseStatusException.badRequest("Tipo justificativo inválido"));
+      if (!"1".equalsIgnoreCase(paramSituacao.getFlgFalta())) {
+        throw IgrpResponseStatusException.badRequest("Tipo justificativo não permitido para falta");
+      }
       falta.setParamSitId(paramSituacao);
     }
 
@@ -263,8 +301,10 @@ public class FaltaServiceWrite {
     // Falta: 1 = falta total, 0 = não falta
     sintese.setFalta(trabalhadosMinutos == 0 ? 1 : 0);
 
-    sintese.setEstado(
-        justificar ? AssiduidadeDiariaEstado.JUSTIFICADA.name() : AssiduidadeDiariaEstado.INJUSTIFICADA.name());
+    // Estado do registo (ativo)
+    sintese.setEstado(Estado.A.name());
+    // Forma de marcação (manual)
+    sintese.setFlagRececao("MANUAL");
 
     return sintese;
   }
