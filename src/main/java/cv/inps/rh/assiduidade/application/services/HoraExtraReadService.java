@@ -12,6 +12,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.HoraExtraEntityRe
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.VHoraExtraMensalEntityRepository;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
@@ -179,21 +180,17 @@ public class HoraExtraReadService {
       item.setHorasDiaria(e.getHorasDiarias());
       item.setPercentagemHora(e.getPercentagem());
       item.setValorDiario(e.getValorDiario());
-
-      dto.getHoraExtra().add(item);
-    }
-
-    var anexos = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(Referencia.HORA_EXTRA.name(), pedidoUuid);
-    if (anexos != null && !anexos.isEmpty()) {
-      var list = new java.util.ArrayList<cv.inps.rh.shared.application.dto.AnexoReqDTO>();
-      for (var d : anexos) {
-        var ar = new cv.inps.rh.shared.application.dto.AnexoReqDTO();
+      var docsHe = documentoEntityRepository
+          .findAllByReferenciaNameAndReferenciaUuid(Referencia.HORA_EXTRA.name(), e.getUuid());
+      if (docsHe != null && !docsHe.isEmpty()) {
+        var d = docsHe.getFirst();
+        AnexoReqDTO ar = new AnexoReqDTO();
         ar.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
         ar.setDocumento(d.getUrl());
-        list.add(ar);
+        item.setDocumento(ar);
       }
-      dto.setDocumentos(list);
+
+      dto.getHoraExtra().add(item);
     }
 
     return dto;
