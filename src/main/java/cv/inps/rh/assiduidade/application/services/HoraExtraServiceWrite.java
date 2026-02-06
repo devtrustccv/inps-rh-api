@@ -117,34 +117,28 @@ public class HoraExtraServiceWrite {
         he.setUuid(UuidCreator.getTimeOrderedEpoch());
         he = horaExtraRepository.save(he);
 
-        if (firstHoraExtraId == null) firstHoraExtraId = he.getId();
+        if (firstHoraExtraId == null)
+          firstHoraExtraId = he.getId();
+        if (dto.getDocumento() != null) {
+          var doc = documentoMapper.toEntity(
+              dto.getDocumento(),
+              Estado.P,
+              Referencia.HORA_EXTRA.name(),
+              he.getId(),
+              he.getUuid(),
+              1L,
+              funcionario);
+          doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+          documentoEntityRepository.save(doc);
+        }
         totalRegistos++;
       }
     }
 
-   /* if (req.getDocumentos() != null && !req.getDocumentos().isEmpty() && primeiroFuncionario != null) {
-      List<DocumentoEntity> documentos = new ArrayList<>();
-      for (var d : req.getDocumentos()) {
-        var doc = documentoMapper.toEntity(
-            d,
-            Estado.P,
-            Referencia.HORA_EXTRA.name(),
-            pedido.getId(),
-            pedido.getUuid(),
-            1L,
-            primeiroFuncionario
-        );
-        doc.setUuid(UuidCreator.getTimeOrderedEpoch());
-        documentos.add(doc);
-      }
-      documentoEntityRepository.saveAll(documentos);
-    }*/
-
     var validacao = dadosContratuaisMapper.toValidacaoInsert(
         TipoAcao.INSERT.name(),
         Referencia.HORA_EXTRA.name(),
-        Estado.P
-    );
+        Estado.P);
 
     validacao.setReferenciaId(pedido.getId());
     validacao.setReferenciaUuid(pedido.getUuid());
@@ -159,7 +153,8 @@ public class HoraExtraServiceWrite {
   }
 
   private int calcularValorHoraExtra(TiposRelacionamentoEntity tipoRel, int horasDiarias, Integer percentagem) {
-    if (percentagem == null) percentagem = 100;
+    if (percentagem == null)
+      percentagem = 100;
     BigDecimal salarioDiario = tipoRel.getSalario() != null ? tipoRel.getSalario() : BigDecimal.ZERO;
     BigDecimal valor = salarioDiario.multiply(BigDecimal.valueOf(horasDiarias))
         .multiply(BigDecimal.valueOf(percentagem))
@@ -198,23 +193,26 @@ public class HoraExtraServiceWrite {
     Estado estado = Objects.equals(req.getValidar(), EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
     // Anexos
-    /*if (req.getDocumentos() != null && !req.getDocumentos().isEmpty() && pedido.getFunId() != null) {
-      List<DocumentoEntity> novos = new ArrayList<>();
-      for (var d : req.getDocumentos()) {
-        var doc = documentoMapper.toEntity(
-            d,
-            estado,
-            Referencia.HORA_EXTRA.name(),
-            pedido.getId(),
-            pedido.getUuid(),
-            1L,
-            pedido.getFunId()
-        );
-        doc.setUuid(UuidCreator.getTimeOrderedEpoch());
-        novos.add(doc);
-      }
-      documentoEntityRepository.saveAll(novos);
-    }*/
+    /*
+     * if (req.getDocumentos() != null && !req.getDocumentos().isEmpty() &&
+     * pedido.getFunId() != null) {
+     * List<DocumentoEntity> novos = new ArrayList<>();
+     * for (var d : req.getDocumentos()) {
+     * var doc = documentoMapper.toEntity(
+     * d,
+     * estado,
+     * Referencia.HORA_EXTRA.name(),
+     * pedido.getId(),
+     * pedido.getUuid(),
+     * 1L,
+     * pedido.getFunId()
+     * );
+     * doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+     * novos.add(doc);
+     * }
+     * documentoEntityRepository.saveAll(novos);
+     * }
+     */
 
     var anexosExistentes = documentoEntityRepository
         .findAllByReferenciaNameAndReferenciaUuid(Referencia.HORA_EXTRA.name(), pedido.getUuid());
@@ -226,19 +224,41 @@ public class HoraExtraServiceWrite {
     Map<LocalDate, HoraExtraDTO> ajustes = new HashMap<>();
     if (req.getHoraExtra() != null) {
       for (HoraExtraDTO dto : req.getHoraExtra()) {
-        if (dto.getDataInicio() != null) ajustes.put(dto.getDataInicio(), dto);
+        if (dto.getDataInicio() != null)
+          ajustes.put(dto.getDataInicio(), dto);
       }
     }
 
     for (var he : horasExtra) {
       var ajuste = ajustes.get(he.getDataInicio());
       if (ajuste != null) {
-        if (ajuste.getHorasDiaria() != null) he.setHorasDiarias(ajuste.getHorasDiaria());
-        if (ajuste.getPercentagemHora() != null) he.setPercentagem(ajuste.getPercentagemHora());
-        if (ajuste.getValorDiario() != null) he.setValorDiario(ajuste.getValorDiario());
+        if (ajuste.getHorasDiaria() != null)
+          he.setHorasDiarias(ajuste.getHorasDiaria());
+        if (ajuste.getPercentagemHora() != null)
+          he.setPercentagem(ajuste.getPercentagemHora());
+        if (ajuste.getValorDiario() != null)
+          he.setValorDiario(ajuste.getValorDiario());
+        if (ajuste.getDocumento() != null) {
+          var doc = documentoMapper.toEntity(
+              ajuste.getDocumento(),
+              estado,
+              Referencia.HORA_EXTRA.name(),
+              he.getId(),
+              he.getUuid(),
+              1L,
+              he.getTiprelId() != null ? he.getTiprelId().getFunId() : null);
+          doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+          documentoEntityRepository.save(doc);
+        }
       }
       he.setEstado(estado);
       horaExtraRepository.save(he);
+      var docsHe = documentoEntityRepository
+          .findAllByReferenciaNameAndReferenciaUuid(Referencia.HORA_EXTRA.name(), he.getUuid());
+      if (docsHe != null && !docsHe.isEmpty()) {
+        docsHe.forEach(d -> d.setEstado(estado));
+        documentoEntityRepository.saveAll(docsHe);
+      }
     }
 
     funcionarioRules.getValidacaoPendenteByReferenciaUuid(pedido.getUuid(), TipoAcao.INSERT, Referencia.HORA_EXTRA)
@@ -271,7 +291,8 @@ public class HoraExtraServiceWrite {
   }
 
   private String formatHoras(Integer horas) {
-    if (horas == null || horas < 0) return "00:00";
+    if (horas == null || horas < 0)
+      return "00:00";
     String hh = horas < 10 ? "0" + horas : String.valueOf(horas);
     return hh + ":00";
   }
