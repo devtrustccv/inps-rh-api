@@ -9,6 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -41,5 +42,8 @@ public class HoraExtraDTO  {
   
   
   private Integer valorDiario ;
+  
+  @Valid
+  private AnexoReqDTO documento ;
 
 }

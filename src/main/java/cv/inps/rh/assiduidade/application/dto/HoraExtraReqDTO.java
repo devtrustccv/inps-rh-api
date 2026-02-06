@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import cv.inps.rh.assiduidade.application.dto.HoraExtraDTO;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
-import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,8 +28,5 @@ public class HoraExtraReqDTO  {
   
   @Valid
   private List<HoraExtraDTO> horaExtra = new ArrayList<>();
-  
-  @Valid
-  private List<AnexoReqDTO> documentos = new ArrayList<>();
 
 }

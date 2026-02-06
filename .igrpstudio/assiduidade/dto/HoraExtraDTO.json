@@ -88,6 +88,19 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "documento",
+      "objectType": "dto",
+      "type": "AnexoReq",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "shared"
     }
   ],
   "id": "klttehfr7p"

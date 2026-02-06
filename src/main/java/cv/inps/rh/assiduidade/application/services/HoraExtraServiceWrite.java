@@ -64,7 +64,8 @@ public class HoraExtraServiceWrite {
     pedido.setEstado(Estado.P.name());
     pedido.setTipoPedido(Referencia.HORA_EXTRA.name());
     pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
-    pedido.setOrigem("MANUAL");
+    pedido.setOrigem("RH");
+    pedido.setEtapa("VALIDACAO");
     pedido = pedidoRepository.save(pedido);
 
     FuncionarioEntity primeiroFuncionario = null;
@@ -121,7 +122,7 @@ public class HoraExtraServiceWrite {
       }
     }
 
-    if (req.getDocumentos() != null && !req.getDocumentos().isEmpty() && primeiroFuncionario != null) {
+   /* if (req.getDocumentos() != null && !req.getDocumentos().isEmpty() && primeiroFuncionario != null) {
       List<DocumentoEntity> documentos = new ArrayList<>();
       for (var d : req.getDocumentos()) {
         var doc = documentoMapper.toEntity(
@@ -137,7 +138,7 @@ public class HoraExtraServiceWrite {
         documentos.add(doc);
       }
       documentoEntityRepository.saveAll(documentos);
-    }
+    }*/
 
     var validacao = dadosContratuaisMapper.toValidacaoInsert(
         TipoAcao.INSERT.name(),
@@ -197,7 +198,7 @@ public class HoraExtraServiceWrite {
     Estado estado = Objects.equals(req.getValidar(), EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
     // Anexos
-    if (req.getDocumentos() != null && !req.getDocumentos().isEmpty() && pedido.getFunId() != null) {
+    /*if (req.getDocumentos() != null && !req.getDocumentos().isEmpty() && pedido.getFunId() != null) {
       List<DocumentoEntity> novos = new ArrayList<>();
       for (var d : req.getDocumentos()) {
         var doc = documentoMapper.toEntity(
@@ -213,7 +214,7 @@ public class HoraExtraServiceWrite {
         novos.add(doc);
       }
       documentoEntityRepository.saveAll(novos);
-    }
+    }*/
 
     var anexosExistentes = documentoEntityRepository
         .findAllByReferenciaNameAndReferenciaUuid(Referencia.HORA_EXTRA.name(), pedido.getUuid());
