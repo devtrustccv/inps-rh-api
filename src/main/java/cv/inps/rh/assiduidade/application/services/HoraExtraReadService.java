@@ -135,7 +135,6 @@ public class HoraExtraReadService {
     return dto;
   }
 
-
   @Transactional(readOnly = true)
   public HoraExtraReqDTO getHoraExtra(GetHoraExtraQuery query) {
 
@@ -158,6 +157,7 @@ public class HoraExtraReadService {
       return dto;
     }
 
+    dto.setHoraExtra(new ArrayList<>()); // Inicializa a lista
     for (HoraExtraEntity e : horasExtra) {
       HoraExtraDTO item = new HoraExtraDTO();
       item.setId(e.getId());
