@@ -51,10 +51,28 @@ public class DocumentService {
       newDoc.setTpDocumentoId(tipoDocumentoEntityRepository.findByUuidOrThrow(UUID.fromString(doc.getTipoDocumentoId())));
       newDoc.setFunId(funId);
       newDoc.setUrl(doc.getUrl());
-
       docs.add(newDoc);
     });
 
     documentoEntityRepository.saveAll(docs);
+  }
+
+  public List<DocumentoDTO> getDocuments(FuncionarioEntity funcionario, ReferenceName referenceName, String referenceId) {
+
+    return documentoEntityRepository.findAllByFunIdAndReferenciaNameAndReferenciaUuidAndEstado(
+            funcionario,
+            referenceName.name(),
+            UUID.fromString(referenceId),
+            Estado.A
+        ).stream()
+        .map(doc -> {
+          var obj = new DocumentoDTO();
+          obj.setId(doc.getUuid().toString());
+          obj.setTipoDocumentoId(doc.getTpDocumentoId().getUuid().toString());
+          obj.setUrl(doc.getUrl());
+          return obj;
+        })
+        .toList();
+
   }
 }

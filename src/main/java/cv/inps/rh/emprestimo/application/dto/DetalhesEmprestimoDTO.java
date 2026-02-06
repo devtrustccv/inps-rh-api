@@ -44,4 +44,7 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
   @Valid
   private DecisaoEmprestimoDTO decisao ;
 
+  @Valid
+  private List<DocumentoDTO> documentos = new ArrayList<>();
+
 }

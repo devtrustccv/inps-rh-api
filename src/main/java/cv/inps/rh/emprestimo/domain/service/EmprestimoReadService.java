@@ -3,6 +3,7 @@ package cv.inps.rh.emprestimo.domain.service;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
+import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
@@ -37,6 +38,7 @@ public class EmprestimoReadService {
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
   private final RhPagamentoEntityRepository rhPagamentoEntityRepository;
+  private final DocumentService documentService;
 
   public List<InformacaoEmprestimoRequestDTO> getAllConfiguracaoEmprestimo() {
     return paramEmprestimoEntityRepository.findAll()
@@ -55,6 +57,8 @@ public class EmprestimoReadService {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
+    var funId = entity.getTiprel().getFunId();
+
     var dto = new DetalhesEmprestimoDTO();
     dto.setDataInicio(entity.getDataInicio());
     dto.setDataFim(entity.getDataFim());
@@ -68,11 +72,11 @@ public class EmprestimoReadService {
     dto.setValorEmprestimo(entity.getValorEmprestimo());
     dto.setNumeroPrestacoes(entity.getNrPrestacao());
     dto.setJuros(entity.getJuro());
-    dto.setFuncionarioId(entity.getTiprel().getFunId().getUuid().toString());
+    dto.setFuncionarioId(funId.getUuid().toString());
     dto.setCabimentacaoOrcamental(entity.getDescCabimentacaoOrcamental());
     dto.setAvaliacaoTaxaEsforco(entity.getDescTaxaEsforco());
 
-    var another = emprestimoEntityRepository.findByUuidNotAndTiprel_FunId(entity.getUuid(), entity.getTiprel().getFunId())
+    var another = emprestimoEntityRepository.findByUuidNotAndTiprel_FunId(entity.getUuid(), funId)
         .stream()
         .map(obj -> new OutrosEmprestimosDTO(
             obj.getTipoEmprestimo(),
@@ -92,6 +96,9 @@ public class EmprestimoReadService {
     getDecision(order, EtapaEmprestimo.ANALISE_FINANCEIRA).map(this::buildDecisionData).ifPresent(decision::setAnaliseFinanceiro);
     getDecision(order, EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA).map(this::buildDecisionData).ifPresent(decision::setAutorizacaoComissaoExecutiva);
     dto.setDecisao(decision);
+
+    var docs = documentService.getDocuments(funId, ReferenceName.RH_T_EMPRESTIMO, entity.getUuid());
+    dto.setDocumentos(docs);
 
     return dto;
   }
