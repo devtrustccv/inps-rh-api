@@ -92,44 +92,41 @@ public class HoraExtraServiceWrite {
       if (tipoRelAtual == null)
         throw IgrpResponseStatusException.badRequest("Tipo de relacionamento atual do colaborador inválido");
 
-      var dias = expandirDias(dto.getDataInicio(), dto.getDataFim());
+      var sintese = buildSinteseDia(funcionario, dto.getDataInicio(), dto.getHorasDiaria());
+      sintese = sinteseRepository.save(sintese);
 
-      for (var dia : dias) {
+      int valorDiario = calcularValorHoraExtra(tipoRelAtual, dto.getHorasDiaria(), dto.getPercentagemHora());
 
-        var sintese = buildSinteseDia(funcionario, dia, dto.getHorasDiaria());
-        sintese = sinteseRepository.save(sintese);
+      // Cria UMA hora extra por registo do JSON
+      var he = new HoraExtraEntity();
+      he.setPedidoId(pedido);
+      he.setTiprelId(tipoRelAtual);
+      he.setSinteseDiarioId(sintese);
+      he.setDataInicio(dto.getDataInicio()); // Usa a data do DTO
+      he.setDataFim(dto.getDataFim()); // Usa a data do DTO
+      he.setHorasDiarias(dto.getHorasDiaria());
+      he.setPercentagem(dto.getPercentagemHora());
+      he.setValorDiario(valorDiario);
+      he.setEstado(Estado.P);
+      he.setUuid(UuidCreator.getTimeOrderedEpoch());
+      he = horaExtraRepository.save(he);
 
-        int valorDiario = calcularValorHoraExtra(tipoRelAtual, dto.getHorasDiaria(), dto.getPercentagemHora());
+      if (firstHoraExtraId == null)
+        firstHoraExtraId = he.getId();
 
-        var he = new HoraExtraEntity();
-        he.setPedidoId(pedido);
-        he.setTiprelId(tipoRelAtual);
-        he.setSinteseDiarioId(sintese);
-        he.setDataInicio(dia);
-        he.setDataFim(dia);
-        he.setHorasDiarias(dto.getHorasDiaria());
-        he.setPercentagem(dto.getPercentagemHora());
-        he.setValorDiario(valorDiario);
-        he.setEstado(Estado.P);
-        he.setUuid(UuidCreator.getTimeOrderedEpoch());
-        he = horaExtraRepository.save(he);
-
-        if (firstHoraExtraId == null)
-          firstHoraExtraId = he.getId();
-        if (dto.getDocumento() != null) {
-          var doc = documentoMapper.toEntity(
-              dto.getDocumento(),
-              Estado.P,
-              Referencia.HORA_EXTRA.name(),
-              he.getId(),
-              he.getUuid(),
-              1L,
-              funcionario);
-          doc.setUuid(UuidCreator.getTimeOrderedEpoch());
-          documentoEntityRepository.save(doc);
-        }
-        totalRegistos++;
+      if (dto.getDocumento() != null) {
+        var doc = documentoMapper.toEntity(
+            dto.getDocumento(),
+            Estado.P,
+            Referencia.HORA_EXTRA.name(),
+            he.getId(),
+            he.getUuid(),
+            1L,
+            funcionario);
+        doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+        documentoEntityRepository.save(doc);
       }
+      totalRegistos++;
     }
 
     var validacao = dadosContratuaisMapper.toValidacaoInsert(
@@ -277,7 +274,8 @@ public class HoraExtraServiceWrite {
   }
 
   /**
-   * Converte um valor em minutos para string no formato Oracle INTERVAL "+0 HH:MM:00"
+   * Converte um valor em minutos para string no formato Oracle INTERVAL "+0
+   * HH:MM:00"
    */
   private String formatHorasToInterval(Long minutosTotais) {
     if (minutosTotais == null || minutosTotais < 0) {
