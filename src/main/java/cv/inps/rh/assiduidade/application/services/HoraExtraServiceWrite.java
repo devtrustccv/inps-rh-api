@@ -192,7 +192,6 @@ public class HoraExtraServiceWrite {
 
     Estado estado = Objects.equals(req.getValidar(), EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
-
     var anexosExistentes = documentoEntityRepository
         .findAllByReferenciaNameAndReferenciaUuid(Referencia.HORA_EXTRA.name(), pedido.getUuid());
     if (anexosExistentes != null && !anexosExistentes.isEmpty()) {
@@ -210,33 +209,45 @@ public class HoraExtraServiceWrite {
 
     for (var he : horasExtra) {
       var ajuste = ajustes.get(he.getDataInicio());
+
       if (ajuste != null) {
         if (ajuste.getHorasDiaria() != null)
           he.setHorasDiarias(ajuste.getHorasDiaria());
         if (ajuste.getPercentagemHora() != null)
-          he.setPercentagem(ajuste.getPercentagemHora());
-        if (ajuste.getValorDiario() != null)
-          he.setValorDiario(ajuste.getValorDiario());
-        if (ajuste.getDocumento() != null) {
-          var doc = documentoMapper.toEntity(
-              ajuste.getDocumento(),
-              estado,
-              Referencia.HORA_EXTRA.name(),
-              he.getId(),
-              he.getUuid(),
-              1L,
-              he.getTiprelId() != null ? he.getTiprelId().getFunId() : null);
-          doc.setUuid(UuidCreator.getTimeOrderedEpoch());
-          documentoEntityRepository.save(doc);
-        }
-      }
-      he.setEstado(estado);
-      horaExtraRepository.save(he);
-      var docsHe = documentoEntityRepository
-          .findAllByReferenciaNameAndReferenciaUuid(Referencia.HORA_EXTRA.name(), he.getUuid());
-      if (docsHe != null && !docsHe.isEmpty()) {
-        docsHe.forEach(d -> d.setEstado(estado));
-        documentoEntityRepository.saveAll(docsHe);
+
+          if (ajuste.getDocumento() != null) {
+            var docsHe = documentoEntityRepository
+                .findAllByReferenciaNameAndReferenciaUuid(Referencia.HORA_EXTRA.name(), he.getUuid());
+
+            var fun = he.getTiprelId() != null ? he.getTiprelId().getFunId() : null;
+
+            if (docsHe != null && !docsHe.isEmpty()) {
+              var existing = docsHe.getFirst();
+              var mapped = documentoMapper.toEntity(
+                  ajuste.getDocumento(),
+                  estado,
+                  Referencia.HORA_EXTRA.name(),
+                  he.getId(),
+                  he.getUuid(),
+                  1L,
+                  fun);
+              existing.setTpDocumentoId(mapped.getTpDocumentoId());
+              existing.setUrl(mapped.getUrl());
+              existing.setEstado(estado);
+              documentoEntityRepository.save(existing);
+            } else {
+              var novo = documentoMapper.toEntity(
+                  ajuste.getDocumento(),
+                  estado,
+                  Referencia.HORA_EXTRA.name(),
+                  he.getId(),
+                  he.getUuid(),
+                  1L,
+                  fun);
+              novo.setUuid(UuidCreator.getTimeOrderedEpoch());
+              documentoEntityRepository.save(novo);
+            }
+          }
       }
     }
 
