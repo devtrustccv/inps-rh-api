@@ -1,13 +1,16 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,6 +36,8 @@ public interface DocumentoEntityRepository extends
             "DocumentoEntity not found for uuid: " + uuid));
   }
 
-  java.util.List<DocumentoEntity> findAllByReferenciaNameAndReferenciaUuid(String referenciaName, UUID referenciaUuid);
+  List<DocumentoEntity> findAllByReferenciaNameAndReferenciaUuid(String referenciaName, UUID referenciaUuid);
+
+  List<DocumentoEntity> findAllByFunIdAndReferenciaNameAndReferenciaUuidAndEstado(FuncionarioEntity funId, String referenciaName, UUID referenciaUuid, Estado estado);
 
 }
