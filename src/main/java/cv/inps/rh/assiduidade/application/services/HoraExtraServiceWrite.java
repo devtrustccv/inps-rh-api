@@ -192,27 +192,6 @@ public class HoraExtraServiceWrite {
 
     Estado estado = Objects.equals(req.getValidar(), EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
-    // Anexos
-    /*
-     * if (req.getDocumentos() != null && !req.getDocumentos().isEmpty() &&
-     * pedido.getFunId() != null) {
-     * List<DocumentoEntity> novos = new ArrayList<>();
-     * for (var d : req.getDocumentos()) {
-     * var doc = documentoMapper.toEntity(
-     * d,
-     * estado,
-     * Referencia.HORA_EXTRA.name(),
-     * pedido.getId(),
-     * pedido.getUuid(),
-     * 1L,
-     * pedido.getFunId()
-     * );
-     * doc.setUuid(UuidCreator.getTimeOrderedEpoch());
-     * novos.add(doc);
-     * }
-     * documentoEntityRepository.saveAll(novos);
-     * }
-     */
 
     var anexosExistentes = documentoEntityRepository
         .findAllByReferenciaNameAndReferenciaUuid(Referencia.HORA_EXTRA.name(), pedido.getUuid());
