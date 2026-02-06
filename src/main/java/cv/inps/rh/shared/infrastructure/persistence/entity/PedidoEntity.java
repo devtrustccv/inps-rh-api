@@ -31,7 +31,6 @@ public class PedidoEntity extends AuditEntity {
   private Long id;
 
 
-  @NotNull(message = "funId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)

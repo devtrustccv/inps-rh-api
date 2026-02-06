@@ -135,16 +135,6 @@ public class HoraExtraReadService {
     return dto;
   }
 
-  private String formatHorasExtra(String s) {
-    if (!StringUtils.hasText(s))
-      return null;
-
-    var p = s.split(":");
-    if (p.length >= 2) {
-      return p[0] + ":" + p[1];
-    }
-    return s;
-  }
 
   @Transactional(readOnly = true)
   public HoraExtraReqDTO getHoraExtra(GetHoraExtraQuery query) {

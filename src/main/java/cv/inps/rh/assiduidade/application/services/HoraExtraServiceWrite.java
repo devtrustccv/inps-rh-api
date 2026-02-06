@@ -66,7 +66,7 @@ public class HoraExtraServiceWrite {
     pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
     pedido.setOrigem("RH");
     pedido.setEtapa("VALIDACAO");
-    pedido = pedidoRepository.save(pedido);
+    pedido = pedidoRepository.saveAndFlush(pedido);
 
     Long firstHoraExtraId = null;
     String pedidoUuid = pedido.getUuid().toString();
@@ -89,7 +89,7 @@ public class HoraExtraServiceWrite {
       var funcionario = funcionarioRepository.findByUuidOrThrow(dto.getColaborador());
 
       var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-      if(tipoRelAtual == null)
+      if (tipoRelAtual == null)
         throw IgrpResponseStatusException.badRequest("Tipo de relacionamento atual do colaborador inválido");
 
       var dias = expandirDias(dto.getDataInicio(), dto.getDataFim());
@@ -148,7 +148,7 @@ public class HoraExtraServiceWrite {
     return resp;
   }
 
-  private int calcularValorHoraExtra(TiposRelacionamentoEntity tipoRel, int horasDiarias, Integer percentagem) {
+  private int calcularValorHoraExtra(TiposRelacionamentoEntity tipoRel, Long horasDiarias, Integer percentagem) {
     if (percentagem == null)
       percentagem = 100;
     BigDecimal salarioDiario = tipoRel.getSalario() != null ? tipoRel.getSalario() : BigDecimal.ZERO;
@@ -265,21 +265,33 @@ public class HoraExtraServiceWrite {
     return resp;
   }
 
-  private AssiduidadeSinteseDiarioEntity buildSinteseDia(FuncionarioEntity fun, LocalDate dia, Integer horasExtra) {
+  private AssiduidadeSinteseDiarioEntity buildSinteseDia(FuncionarioEntity fun, LocalDate dia, Long horasExtra) {
     var e = new AssiduidadeSinteseDiarioEntity();
     e.setFuncionarioId(fun);
     e.setData(dia);
     e.setMes(dia.getMonthValue());
     e.setAno(dia.getYear());
-    e.setHorasExtras(formatHoras(horasExtra));
-    e.setEstado(null);
+    e.setHorasExtras(formatHorasToInterval(horasExtra));
+    e.setEstado(Estado.A.name());
     return e;
   }
 
-  private String formatHoras(Integer horas) {
-    if (horas == null || horas < 0)
-      return "00:00";
-    String hh = horas < 10 ? "0" + horas : String.valueOf(horas);
-    return hh + ":00";
+  /**
+   * Converte um valor em minutos para string no formato Oracle INTERVAL "+0 HH:MM:00"
+   */
+  private String formatHorasToInterval(Long minutosTotais) {
+    if (minutosTotais == null || minutosTotais < 0) {
+      return "+0 00:00:00";
+    }
+
+    long hours = minutosTotais / 60;
+    long minutes = minutosTotais % 60;
+
+    // Garante dois dígitos
+    String hh = hours < 10 ? "0" + hours : String.valueOf(hours);
+    String mm = minutes < 10 ? "0" + minutes : String.valueOf(minutes);
+
+    return "+0 " + hh + ":" + mm + ":00";
   }
+
 }
