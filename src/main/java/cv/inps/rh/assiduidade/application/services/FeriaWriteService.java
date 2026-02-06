@@ -13,14 +13,20 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
+import cv.inps.rh.shared.application.enums.SituacaoFalta;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -36,6 +42,9 @@ public class FeriaWriteService {
   private final SubstituicaoEntityRepository substituicaoRepository;
   private final AusenciaEntityRepository ausenciaRepository;
   private final ParamSituacaoEntityRepository paramSituacaoRepository;
+  private final DocumentoEntityRepository documentoEntityRepository;
+  private final TipoDocumentoEntityRepository tipoDocumentoEntityRepository;
+  private final EmailService emailService;
 
   @Transactional
   public Map<String, ?> marcarFeria(MarcarFeriaCommand command) {
@@ -96,6 +105,8 @@ public class FeriaWriteService {
       validacaoEntityRepository.save(v);
     });
 
+    saveDocuments(req.getDocumentos(), funcionario, pedido);
+
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", ferias.getId());
     resp.put("uuid", ferias.getUuid());
@@ -136,6 +147,19 @@ public class FeriaWriteService {
 
     if (estado == Estado.A) {
       criarAusenciaNaValidacao(ferias);
+      // Send email notification
+      /*String subject = "Validação do Pedido de Férias";
+      String text = String.format(
+          "O seu pedido de férias com início em %s e fim em %s foi aprovado.",
+          ferias.getDataInicio(),
+          ferias.getDataFim());
+      var funcEmail = funcionario.getContactos().stream()
+          .filter(c -> c.getTipoContacto().equals("EMAIL"))
+          .findFirst()
+          .map(ContactoEntity::getContacto)
+          .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
+              "Email not found for funcionario: " + funcionario.getUuid()));
+      emailService.sendSimpleMessage(funcEmail, subject, text);*/
     }
 
     funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.FERIA)
@@ -226,6 +250,10 @@ public class FeriaWriteService {
       validacaoEntityRepository.save(v);
     });
 
+    if (req.getFeria() != null) {
+      saveDocuments(req.getFeria().getDocumentos(), funcionario, pedido);
+    }
+
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", nova.getId());
     resp.put("uuid", nova.getUuid());
@@ -281,9 +309,7 @@ public class FeriaWriteService {
 
   private void criarAusenciaNaValidacao(FeriasGozadasEntity ferias) {
     try {
-      // TODO: Selecionar corretamente o PARAM_SIT_ID para 'Férias' conforme
-      // configuração
-      var params = paramSituacaoRepository.findAllByNome("Férias");
+      var params = paramSituacaoRepository.findAllByNome(SituacaoFalta.FERIAS.getNome());
       if (params == null || params.isEmpty())
         return;
       var param = params.get(0);
@@ -299,5 +325,25 @@ public class FeriaWriteService {
       ausenciaRepository.save(ausencia);
     } catch (Exception ignored) {
     }
+  }
+
+  private void saveDocuments(List<AnexoReqDTO> documentos, FuncionarioEntity funId, PedidoEntity pedido) {
+    if (documentos == null || documentos.isEmpty()) {
+      return;
+    }
+    List<DocumentoEntity> docs = new ArrayList<>();
+    for (AnexoReqDTO doc : documentos) {
+      var newDoc = new DocumentoEntity();
+      newDoc.setEstado(Estado.A);
+      newDoc.setReferenciaName(Referencia.FERIA.name());
+      newDoc.setReferenciaId(pedido.getId().toString());
+      newDoc.setReferenciaUuid(pedido.getUuid());
+      newDoc.setUuid(UuidCreator.getTimeOrderedEpoch());
+      newDoc.setTpDocumentoId(tipoDocumentoEntityRepository.findById(doc.getTipoDocumentoId()).orElse(null));
+      newDoc.setFunId(funId);
+      newDoc.setUrl(doc.getDocumento());
+      docs.add(newDoc);
+    }
+    documentoEntityRepository.saveAll(docs);
   }
 }
