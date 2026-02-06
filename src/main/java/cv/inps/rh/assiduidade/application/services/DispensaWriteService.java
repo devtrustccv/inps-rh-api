@@ -46,6 +46,42 @@ public class DispensaWriteService {
   private final AusenciaEntityRepository ausenciaEntityRepository;
   private final ParamSituacaoEntityRepository paramSituacaoEntityRepository;
 
+
+
+  /**
+   * Converte uma string "HH:MM" em formato aceito por Oracle INTERVAL DAY TO SECOND.
+   * Retorna "+0 HH:MM:SS"
+   */
+  private String hhmmToIntervalFormat(String hhmm) {
+    if (!StringUtils.hasText(hhmm)) {
+      return null; // ou "+0 00:00:00" se preferir default
+    }
+
+    String[] parts = hhmm.trim().split(":");
+    if (parts.length != 2) {
+      throw new IllegalArgumentException("Formato inválido de hora: " + hhmm);
+    }
+
+    int hours = Integer.parseInt(parts[0]);
+    int minutes = Integer.parseInt(parts[1]);
+
+    if (hours < 0 || hours > 23) {
+      throw new IllegalArgumentException("Horas inválidas: " + hours);
+    }
+    if (minutes < 0 || minutes > 59) {
+      throw new IllegalArgumentException("Minutos inválidos: " + minutes);
+    }
+
+    return String.format("+0 %02d:%02d:00", hours, minutes);
+  }
+
+  /**
+   * Converte string de INTERVAL Oracle "+0 HH:MM:SS" para "HH:MM"
+   * Ex.: "+0 08:30:00" -> "08:30"
+   */
+
+
+
   @Transactional
   public Map<String, ?> marcarDispensa(MarcarDispensaCommand command) {
     var req = command.getDispensareq();
@@ -64,7 +100,7 @@ public class DispensaWriteService {
     var pedido = new PedidoEntity();
     pedido.setFunId(funcionario);
     pedido.setTipoPedido("DISPENSA");
-    pedido.setOrigem("ASSIDUIDADE");
+    pedido.setOrigem("RH");
     pedido.setEtapa("DESPACHO_RH");
     pedido.setEstado(Estado.P.name());
     pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -76,8 +112,8 @@ public class DispensaWriteService {
     disp.setTipoDispensa(req.getTipoMotivo());
     disp.setDescricaoMotivo(req.getMotivo());
     disp.setData(req.getDataDispensa());
-    disp.setHoraInicio(req.getHoraSaida());
-    disp.setHoraFim(req.getHoraEntrada());
+    disp.setHoraInicio(hhmmToIntervalFormat(req.getHoraSaida()));
+    disp.setHoraFim(hhmmToIntervalFormat(req.getHoraEntrada()));
     disp.setEstado(Estado.P);
     disp.setUuid(UuidCreator.getTimeOrderedEpoch());
     disp = dispensaRepository.save(disp);
@@ -103,20 +139,17 @@ public class DispensaWriteService {
         Estado.P);
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRelAtual);
-    funcionario.getValidacoes().add(validacao);
-    funcionarioRepository.saveAndFlush(funcionario);
+    validacao.setReferenciaId(pedido.getId());
+    validacao.setReferenciaUuid(pedido.getUuid());
+    validacaoEntityRepository.save(validacao);
 
-    PedidoEntity finalPedido = pedido;
 
-    validacaoEntityRepository.findById(validacao.getId()).ifPresent(v -> {
-      v.setReferenciaId(finalPedido.getId());
-      v.setReferenciaUuid(finalPedido.getUuid());
-      validacaoEntityRepository.save(v);
-    });
 
     Map<String, Object> resp = new HashMap<>();
-    resp.put("id", disp.getId());
-    resp.put("uuid", disp.getUuid());
+    resp.put("pedidoId", pedido.getId());
+    resp.put("pedidoUuid", pedido.getUuid());
+    resp.put("dispensaId", disp.getId());
+    resp.put("dispensaUuid", disp.getUuid());
     return resp;
   }
 

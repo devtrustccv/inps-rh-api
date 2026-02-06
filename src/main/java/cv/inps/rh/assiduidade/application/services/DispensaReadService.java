@@ -154,6 +154,7 @@ public class DispensaReadService {
     return Math.max(d, 0);
   }
 
+  @Transactional(readOnly = true)
   public DispensaReqDTO getDispensa(GetDispensaQuery query) {
     if (query == null || !StringUtils.hasText(query.getDispensaId())) {
       return new DispensaReqDTO();
@@ -169,8 +170,8 @@ public class DispensaReadService {
              ? e.getPedidoId().getFunId().getUuid()
             : null);
     dto.setDataDispensa(e.getData());
-    dto.setHoraSaida(e.getHoraInicio());
-    dto.setHoraEntrada(e.getHoraFim());
+    dto.setHoraSaida(intervalFormatToHHmm(e.getHoraInicio()));
+    dto.setHoraEntrada(intervalFormatToHHmm(e.getHoraFim()));
     var mins = diffMinutes(e.getHoraInicio(), e.getHoraFim());
     dto.setTotalHoras(formatMinutes(mins));
     dto.setTipoMotivo(e.getTipoDispensa());
@@ -194,6 +195,7 @@ public class DispensaReadService {
     return dto;
   }
 
+  @Transactional(readOnly = true)
   public DispensaReqDTO getDispensaByPedidoId(GetDispensaByPedidoIdQuery query) {
     if (query == null || !StringUtils.hasText(query.getPedidoId())) {
       return new DispensaReqDTO();
@@ -209,8 +211,8 @@ public class DispensaReadService {
              ? e.getPedidoId().getFunId().getUuid()
             : null);
     dto.setDataDispensa(e.getData());
-    dto.setHoraSaida(e.getHoraInicio());
-    dto.setHoraEntrada(e.getHoraFim());
+    dto.setHoraSaida(intervalFormatToHHmm(e.getHoraInicio()));
+    dto.setHoraEntrada(intervalFormatToHHmm(e.getHoraFim()));
     var mins = diffMinutes(e.getHoraInicio(), e.getHoraFim());
     dto.setTotalHoras(formatMinutes(mins));
     dto.setTipoMotivo(e.getTipoDispensa());
@@ -242,4 +244,35 @@ public class DispensaReadService {
     String mm = (m < 10 ? "0" : "") + m;
     return h + ":" + mm;
   }
+
+  private String intervalFormatToHHmm(String interval) {
+    if (interval == null || interval.isBlank()) {
+      return "00:00";
+    }
+
+    try {
+      // Divide pelo espaço para pegar a parte do tempo
+      String[] parts = interval.trim().split("\\s+");
+      if (parts.length < 2) {
+        throw new IllegalArgumentException("Formato inválido de interval: " + interval);
+      }
+
+      // Pega HH:MM:SS
+      String timePart = parts[1];
+      String[] hm = timePart.split(":");
+
+      if (hm.length < 2) {
+        throw new IllegalArgumentException("Formato inválido de tempo: " + timePart);
+      }
+
+      int hours = Integer.parseInt(hm[0]);
+      int minutes = Integer.parseInt(hm[1]);
+
+      return String.format("%02d:%02d", hours, minutes);
+
+    } catch (Exception e) {
+      throw new IllegalArgumentException("Erro ao converter interval para HH:MM: " + interval, e);
+    }
+  }
+
 }

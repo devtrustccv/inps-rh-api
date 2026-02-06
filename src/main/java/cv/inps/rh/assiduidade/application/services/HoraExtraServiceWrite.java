@@ -68,7 +68,6 @@ public class HoraExtraServiceWrite {
     pedido.setEtapa("VALIDACAO");
     pedido = pedidoRepository.save(pedido);
 
-    FuncionarioEntity primeiroFuncionario = null;
     Long firstHoraExtraId = null;
     String pedidoUuid = pedido.getUuid().toString();
     int totalRegistos = 0;
@@ -88,13 +87,11 @@ public class HoraExtraServiceWrite {
         throw IgrpResponseStatusException.badRequest("Horas diárias obrigatórias");
 
       var funcionario = funcionarioRepository.findByUuidOrThrow(dto.getColaborador());
-      if (primeiroFuncionario == null) {
-        primeiroFuncionario = funcionario;
-        pedido.setFunId(funcionario);
-        pedidoRepository.save(pedido);
-      }
 
       var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+      if(tipoRelAtual == null)
+        throw IgrpResponseStatusException.badRequest("Tipo de relacionamento atual do colaborador inválido");
+
       var dias = expandirDias(dto.getDataInicio(), dto.getDataFim());
 
       for (var dia : dias) {
@@ -139,7 +136,6 @@ public class HoraExtraServiceWrite {
         TipoAcao.INSERT.name(),
         Referencia.HORA_EXTRA.name(),
         Estado.P);
-
     validacao.setReferenciaId(pedido.getId());
     validacao.setReferenciaUuid(pedido.getUuid());
     validacaoEntityRepository.save(validacao);
