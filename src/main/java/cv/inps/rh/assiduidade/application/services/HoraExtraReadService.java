@@ -101,6 +101,7 @@ public class HoraExtraReadService {
 
     dto.setFuncionarioUuid(e.getFuncionarioUuid().toString());
     dto.setPedidoId(e.getPedidoId());
+    dto.setPedidoUuid(e.getPedidoUuid()!=null? e.getPedidoUuid().toString(): null);
 
     dto.setDirecao(e.getNomeDirecao());
     dto.setDirecaoId(e.getIdDirecao());
