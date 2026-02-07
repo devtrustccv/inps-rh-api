@@ -102,6 +102,8 @@ public class DispensaReadService {
     var dto = new DispensaListDTO();
     dto.setId(e.getId());
     dto.setUuid(e.getUuid() != null ? e.getUuid().toString() : null);
+    dto.setPedidoId(e.getPedidoId() != null ? e.getPedidoId().getId() : null);
+    dto.setPedidoUuid(e.getPedidoId() != null ? e.getPedidoId().getUuid().toString() : null);
     var mob = e.getTiprelId() != null ? e.getTiprelId().getMobId() : null;
     var inst = mob != null ? mob.getInstidId() : null;
     dto.setDirecao(inst != null ? inst.getNome() : null);
@@ -167,7 +169,7 @@ public class DispensaReadService {
     var dto = new DispensaReqDTO();
     dto.setColaborador(
         e.getPedidoId() != null && e.getPedidoId().getFunId() != null
-             ? e.getPedidoId().getFunId().getUuid()
+            ? e.getPedidoId().getFunId().getUuid()
             : null);
     dto.setDataDispensa(e.getData());
     dto.setHoraSaida(intervalFormatToHHmm(e.getHoraInicio()));
@@ -208,7 +210,7 @@ public class DispensaReadService {
     var dto = new DispensaReqDTO();
     dto.setColaborador(
         e.getPedidoId() != null && e.getPedidoId().getFunId() != null
-             ? e.getPedidoId().getFunId().getUuid()
+            ? e.getPedidoId().getFunId().getUuid()
             : null);
     dto.setDataDispensa(e.getData());
     dto.setHoraSaida(intervalFormatToHHmm(e.getHoraInicio()));
