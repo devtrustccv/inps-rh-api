@@ -30,7 +30,7 @@ public class SituacaoLaboralRequestDTO  {
   
   
   private String descricao ;
-  @NotBlank(message = "The field <tipoSituacaoLaboral> is required")
+  
   
   private String tipoSituacaoLaboral ;
   
