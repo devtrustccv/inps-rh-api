@@ -28,6 +28,9 @@ public class DispensaReqDTO  {
   private UUID colaborador ;
   
   
+  private String colaboradorNome ;
+  
+  
   private String horasUsadasMes ;
   
   

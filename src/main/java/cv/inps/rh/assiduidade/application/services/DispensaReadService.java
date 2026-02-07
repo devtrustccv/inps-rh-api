@@ -171,6 +171,10 @@ public class DispensaReadService {
         e.getPedidoId() != null && e.getPedidoId().getFunId() != null
             ? e.getPedidoId().getFunId().getUuid()
             : null);
+    dto.setColaboradorNome(
+        e.getPedidoId() != null && e.getPedidoId().getFunId() != null
+            ? e.getPedidoId().getFunId().getNome()
+            : null);
     dto.setDataDispensa(e.getData());
     dto.setHoraSaida(intervalFormatToHHmm(e.getHoraInicio()));
     dto.setHoraEntrada(intervalFormatToHHmm(e.getHoraFim()));
@@ -211,6 +215,10 @@ public class DispensaReadService {
     dto.setColaborador(
         e.getPedidoId() != null && e.getPedidoId().getFunId() != null
             ? e.getPedidoId().getFunId().getUuid()
+            : null);
+    dto.setColaboradorNome(
+        e.getPedidoId() != null && e.getPedidoId().getFunId() != null
+            ? e.getPedidoId().getFunId().getNome()
             : null);
     dto.setDataDispensa(e.getData());
     dto.setHoraSaida(intervalFormatToHHmm(e.getHoraInicio()));
