@@ -17,15 +17,15 @@ public class ValidacaoMapper {
     var dto = new ValidacaoResponseDTO();
     dto.setId(validacao.getId());
     dto.setUuid(validacao.getUuid() != null ? validacao.getUuid().toString() : null);
-    dto.setNomeColaborador(validacao.getFunId().getNome());
+    dto.setNomeColaborador(validacao.getFunId() != null ? validacao.getFunId().getNome() : "");
     dto.setTipoOperacao(validacao.getTipoAccao());
     dto.setReferenciaName(validacao.getReferenciaName());
     dto.setDataOperacao(DateFormatter.localDateTimeToString((validacao.getCreatedDate())));
     dto.setUtilizador(validacao.getCreatedBy());
     dto.setReferenciaUuid(validacao.getReferenciaUuid()!=null ? validacao.getReferenciaUuid().toString() : null);
     dto.setReferenciaId(validacao.getReferenciaId());
-    dto.setIdFuncionario(validacao.getFunId().getId());
-    dto.setUuidFuncionario(validacao.getFunId()!= null ? validacao.getFunId().getUuid().toString(): null);
+    dto.setIdFuncionario(validacao.getFunId() != null ? validacao.getFunId().getId() : 0L);
+    dto.setUuidFuncionario(validacao.getFunId() != null ? validacao.getFunId().getUuid().toString(): null);
 
     return dto;
   }

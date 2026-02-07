@@ -166,6 +166,10 @@ public class HoraExtraReadService {
           e.getTiprelId() != null && e.getTiprelId().getFunId() != null
               ? e.getTiprelId().getFunId().getUuid()
               : null);
+      item.setColaboradorNome(
+          e.getTiprelId() != null && e.getTiprelId().getFunId() != null
+              ? e.getTiprelId().getFunId().getNome()
+              : null);
       item.setDataInicio(e.getDataInicio());
       item.setDataFim(e.getDataFim());
       item.setHorasDiaria(e.getHorasDiarias());

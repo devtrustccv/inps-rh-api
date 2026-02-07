@@ -21,28 +21,31 @@ import java.util.UUID;
 @IgrpDTO
 public class HoraExtraDTO  {
 
-
-
+  
+  
   private Long id ;
-
-
+  
+  
   private UUID colaborador ;
-
-
+  
+  
+  private String colaboradorNome ;
+  
+  
   private LocalDate dataInicio ;
-
-
+  
+  
   private LocalDate dataFim ;
-
-
+  
+  
   private Long horasDiaria ;
-
-
+  
+  
   private Integer percentagemHora ;
-
-
+  
+  
   private Integer valorDiario ;
-
+  
   @Valid
   private AnexoReqDTO documento ;
 
