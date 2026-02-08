@@ -177,6 +177,7 @@ public class EmprestimoReadService {
           dto.setRenegociacaoDivida(e.getRenogociacao());
           dto.setValorConcedido(e.getValorEmprestimo());
           dto.setNumeroPrestacoesPagas(e.getNrPrestacao());
+          dto.setTipoSituacao(e.getTipoSituacao());
           dto.setValorPago(e.getValorPago());
           dto.setDataInicioEmprestimo(e.getDataInicio());
           dto.setEmprestimoId(e.getUuid());

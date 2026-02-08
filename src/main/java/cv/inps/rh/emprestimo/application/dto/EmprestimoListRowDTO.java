@@ -22,6 +22,7 @@ public class EmprestimoListRowDTO  {
 
 
   private String funcionarioId ;
+  private String tipoSituacao ;
 
 
   private String estado ;
