@@ -57,12 +57,12 @@ public class DocumentService {
     documentoEntityRepository.saveAll(docs);
   }
 
-  public List<DocumentoDTO> getDocuments(FuncionarioEntity funcionario, ReferenceName referenceName, String referenceId) {
+  public List<DocumentoDTO> getDocuments(FuncionarioEntity funId, ReferenceName referenceName, String referenceId) {
 
-    return documentoEntityRepository.findAllByFunIdAndReferenciaNameAndReferenciaUuidAndEstado(
-            funcionario,
+    return documentoEntityRepository.findAllByFunIdAndReferenciaNameAndReferenciaIdAndEstado(
+            funId,
             referenceName.name(),
-            UUID.fromString(referenceId),
+            referenceId,
             Estado.A
         ).stream()
         .map(doc -> {
