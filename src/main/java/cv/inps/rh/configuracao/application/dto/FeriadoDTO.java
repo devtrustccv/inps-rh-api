@@ -3,14 +3,14 @@
 
 package cv.inps.rh.configuracao.application.dto;
 
+import java.time.LocalDate;
+
 import cv.igrp.framework.stereotype.IgrpDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -25,8 +25,22 @@ public class FeriadoDTO {
   @NotBlank(message = "The field <descricao> is required")
 
   private String descricao;
-  @NotNull(message = "The field <dataFeriado> is required")
+  @NotNull(message = "The field <dataEspecifica> is required")
 
-  private LocalDate dataFeriado;
+  private LocalDate dataEspecifica;
+
+  private Integer anoReferente;
+
+  private Long geogrId;
+
+  private String tipoFeriado;
+
+  private String fixoAno;
+
+  private Integer dia;
+
+  private Integer mes;
+
+  private String estado;
 
 }

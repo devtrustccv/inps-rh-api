@@ -3,18 +3,29 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
+import java.time.LocalDate;
+
 import cv.igrp.framework.stereotype.IgrpEntity;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.config.AuditEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDate;
 
 
 @Getter
@@ -49,14 +60,36 @@ public class FeriadoEntity extends AuditEntity {
 
 
   @NotNull(message = "data is mandatory")
-  @Column(name = "data", nullable = false)
-  private LocalDate data;
+  @Column(name = "data_especifica", nullable = false)
+  private LocalDate dataEspecifica;
 
 
   @NotNull(message = "estado is mandatory")
   @Enumerated(EnumType.STRING)
   @Column(name = "estado", nullable = false)
   private Estado estado;
+
+  @Column(name = "situacao")
+  private String situacao;
+
+  @Column(name = "desconto_remuneracao")
+  private String descontoRemuneracao;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "geogr_id", referencedColumnName = "id")
+  private GeografiaEntity geogrId;
+
+  @Column(name = "tipo_feriado")
+  private String tipoFeriado;
+
+  @Column(name = "fixo_ano")
+  private String fixoAno;
+
+  @Column(name = "dia")
+  private Integer dia;
+
+  @Column(name = "mes")
+  private Integer mes;
 
 
 }

@@ -7,6 +7,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FeriadoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FeriadoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.GeografiaEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,17 +23,19 @@ import java.util.stream.Collectors;
 public class FeriadoService {
 
   private final FeriadoEntityRepository feriadoEntityRepository;
+  private final GeografiaEntityRepository geografiaEntityRepository;
 
   public void save(FeriadoListRequestDTO dto) {
 
     var ano = dto.getAnoReferente();
 
-    var distinctDates = dto.getFeriados().stream()
-        .map(FeriadoDTO::getDataFeriado)
+    var distinctKeys = dto.getFeriados().stream()
+        .map(f -> f.getDataEspecifica().toString() + "-" + (f.getGeogrId() == null ? "null" : f.getGeogrId()))
         .distinct()
         .toList();
-    if (distinctDates.size() != dto.getFeriados().size())
-      throw IgrpResponseStatusException.badRequest("Não é possível cadastrar feriados com datas iguais");
+    
+    if (distinctKeys.size() != dto.getFeriados().size())
+      throw IgrpResponseStatusException.badRequest("Não é possível cadastrar feriados duplicados (mesma data e região)");
 
     var existing = feriadoEntityRepository.findAllByAnoReferenteAndEstado(ano, Estado.A);
 
@@ -44,7 +47,7 @@ public class FeriadoService {
 
     for (var obj : dto.getFeriados()) {
 
-      if (obj.getDataFeriado().getYear() != dto.getAnoReferente())
+      if (obj.getDataEspecifica().getYear() != dto.getAnoReferente())
         throw IgrpResponseStatusException.badRequest("O ano referente deve ser igual ao ano da data do feriado.");
 
       final FeriadoEntity holiday;
@@ -61,7 +64,21 @@ public class FeriadoService {
 
       holiday.setAnoReferente(dto.getAnoReferente());
       holiday.setDescricao(obj.getDescricao());
-      holiday.setData(obj.getDataFeriado());
+      holiday.setDataEspecifica(obj.getDataEspecifica());
+      
+      holiday.setTipoFeriado(obj.getTipoFeriado());
+      holiday.setFixoAno(obj.getFixoAno());
+      holiday.setDia(obj.getDia());
+      holiday.setMes(obj.getMes());
+      
+      if (obj.getGeogrId() != null) {
+          var geo = geografiaEntityRepository.findById(obj.getGeogrId())
+              .orElseThrow(() -> IgrpResponseStatusException.badRequest("Geografia com id " + obj.getGeogrId() + " não encontrada."));
+          holiday.setGeogrId(geo);
+      } else {
+          holiday.setGeogrId(null);
+      }
+
       toSave.add(holiday);
     }
 
@@ -90,11 +107,22 @@ public class FeriadoService {
       var dto = new FeriadoDTO();
       dto.setIdFeriado(obj.getUuid());
       dto.setDescricao(obj.getDescricao());
-      dto.setDataFeriado(obj.getData());
+      dto.setDataEspecifica(obj.getDataEspecifica());
+      
+      dto.setAnoReferente(obj.getAnoReferente());
+      dto.setTipoFeriado(obj.getTipoFeriado());
+      dto.setFixoAno(obj.getFixoAno());
+      dto.setDia(obj.getDia());
+      dto.setMes(obj.getMes());
+      dto.setEstado(obj.getEstado().name());
+      
+      if (obj.getGeogrId() != null) {
+          dto.setGeogrId(obj.getGeogrId().getId());
+      }
+      
       response.add(dto);
     }
 
     return new FeriadoListRequestDTO(year, response);
   }
 }
-
