@@ -493,4 +493,34 @@ public class EmprestimoController {
 
   }
 
+   @PostMapping(
+   value = "/{emprestimoId}/analise-rh-adiantamento"
+  )
+  @Operation(
+    summary = "Save decisao analise rh adiantamento",
+    description = "Save decisao analise rh adiantamento",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> saveDecisaoAnaliseRhAdiantamento(@Valid @RequestBody AnaliseRhAdiantamentoRequestDTO saveDecisaoAnaliseRhAdiantamentoRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new SaveDecisaoAnaliseRhAdiantamentoCommand(saveDecisaoAnaliseRhAdiantamentoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
 }

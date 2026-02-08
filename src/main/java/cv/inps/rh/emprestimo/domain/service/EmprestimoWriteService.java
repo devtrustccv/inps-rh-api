@@ -46,7 +46,7 @@ public class EmprestimoWriteService {
 
     for (var row : command.getInformacaoemprestimorequest()) {
 
-      ParamEmprestimoEntity entity;
+      final ParamEmprestimoEntity entity;
 
       if (StringUtils.hasText(row.getId())) {
         entity = paramEmprestimoEntityRepository.findByUuidOrThrow(row.getId());

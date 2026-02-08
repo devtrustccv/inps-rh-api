@@ -89,20 +89,20 @@ public class PedidoAquisicaoViaturaService {
 
   public void saveUpdateDecisaoAnaliseRh(String uuid, AnaliseRhRequestDTO request) {
 
-    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
-    entity.setNrPrestacao(request.getNumeroPrestacao());
-    entity.setValorEmprestimo(request.getValorEmprestimo());
-    entity.setJuro(request.getJuros());
+    var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    loan.setNrPrestacao(request.getNumeroPrestacao());
+    loan.setValorEmprestimo(request.getValorEmprestimo());
+    loan.setJuro(request.getJuros());
 
-    var funId = entity.getTiprel().getFunId();
+    var funId = loan.getTiprel().getFunId();
 
     var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, TipoPedido.AQUISICAO_VIATURA.name(), Estado.A.name()).orElseThrow();
-    order.setEtapa(EtapaEmprestimo.ANALISE_RH.name());
+    order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
     pedidoEntityRepository.save(order);
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
         order,
-        EtapaEmprestimo.ANALISE_RH.name(),
+        EtapaEmprestimo.ANALISE_RH_PEDIDO.name(),
         Estado.A.name()
     );
 
@@ -117,24 +117,24 @@ public class PedidoAquisicaoViaturaService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer());
           newObj.setObs(request.getObservacao());
-          newObj.setEtapa(EtapaEmprestimo.ANALISE_RH.name());
+          newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
           pedidoDecisaoEntityRepository.save(newObj);
         });
 
-    documentService.saveDocuments(request.getDocumentos(), funId, entity.getUuid(), ReferenceName.RH_T_EMPRESTIMO);
+    documentService.saveDocuments(request.getDocumentos(), funId, loan.getUuid(), ReferenceName.RH_T_EMPRESTIMO);
   }
 
   public void saveUpdateDecisaoAnaliseFinanceira(String uuid, AnaliseFinanceiroRequestDTO request) {
 
-    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
-    entity.setDescCabimentacaoOrcamental(request.getCabimentacaoOrcamental());
-    entity.setDescTaxaEsforco(request.getAvaliacaoTaxaEsforco());
-    emprestimoEntityRepository.save(entity);
+    var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    loan.setDescCabimentacaoOrcamental(request.getCabimentacaoOrcamental());
+    loan.setDescTaxaEsforco(request.getAvaliacaoTaxaEsforco());
+    emprestimoEntityRepository.save(loan);
 
-    var funId = entity.getTiprel().getFunId();
+    var funId = loan.getTiprel().getFunId();
 
     var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, TipoPedido.AQUISICAO_VIATURA.name(), Estado.A.name()).orElseThrow();
     order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA.name());
@@ -166,10 +166,10 @@ public class PedidoAquisicaoViaturaService {
           pedidoDecisaoEntityRepository.save(newObj);
         });
 
-    if (request.getParecer().equals("FAVORAVEL")) // TODO 04/02/2026 22:02 get real code
-      entity.setEstado(Estado.I.name());
+    if ("DESFAVORAVEL".equals(request.getParecer())) // TODO 04/02/2026 22:02 get real code
+      loan.setEstado(Estado.I.name());
 
-    emprestimoEntityRepository.save(entity);
+    emprestimoEntityRepository.save(loan);
   }
 
   public void autorizarComissaoExecutiva(String uuid, AutorizacaoComissaoExecutivaDTO request) {

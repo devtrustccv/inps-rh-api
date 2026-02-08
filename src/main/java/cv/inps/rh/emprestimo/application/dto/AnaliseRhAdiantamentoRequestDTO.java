@@ -17,8 +17,7 @@ import lombok.NoArgsConstructor;
 public class AnaliseRhAdiantamentoRequestDTO extends BaseDecisaoDTO {
 
 
-
-  private String banco ;
+  private Long bancoId ;
 
 
   private String nib ;

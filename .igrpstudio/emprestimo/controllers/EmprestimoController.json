@@ -532,6 +532,45 @@
           }
         }
       }
+    },
+    {
+      "actionName": "saveDecisaoAnaliseRhAdiantamento",
+      "path": "/{emprestimoId}/analise-rh-adiantamento",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AnaliseRhAdiantamentoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "emprestimo"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "emprestimoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "lls7ig9nio-getConfiguracaoEmprestimo-saveEmprestimo-updateEmprestimo-getEmprestimoById-saveDecisaoAnalise-saveDecisaoAnaliseFinanceira-elaborarContrato-autorizarComissaoExecutiva-saveDecisaoAnaliseFinanceira-saveDecisaoAnalise-listarEmprestimos-listarEmprestimos"
