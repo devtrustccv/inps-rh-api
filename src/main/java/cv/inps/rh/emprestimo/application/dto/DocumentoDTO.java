@@ -5,6 +5,7 @@ package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,17 +17,15 @@ import lombok.NoArgsConstructor;
 
 
 @IgrpDTO
-public class DocumentoDTO  {
+public class DocumentoDTO {
 
+  private String id;
 
+  @NotNull(message = "The field <tipo> is required")
+  private Long tipoDocumentoId;
 
-  private String id ;
-  @NotBlank(message = "The field <tipo> is required")
+  private String tipoDocumentoDesc;
 
-  private Long tipoDocumentoId ;
-  private String tipoDocumentoDesc ;
   @NotBlank(message = "The field <url> is required")
-
-  private String url ;
-
+  private String url;
 }
