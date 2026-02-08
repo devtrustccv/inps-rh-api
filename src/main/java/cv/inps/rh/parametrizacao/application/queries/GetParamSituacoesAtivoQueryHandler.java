@@ -1,19 +1,21 @@
 package cv.inps.rh.parametrizacao.application.queries;
 
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoEntityRepository;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cv.igrp.framework.core.domain.QueryHandler;
-import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
-import java.util.List;
-
+import cv.igrp.framework.core.domain.QueryHandler;
+import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoEntityRepository;
+import jakarta.persistence.criteria.Predicate;
 
 @Component
 public class GetParamSituacoesAtivoQueryHandler implements QueryHandler<GetParamSituacoesAtivoQuery, ResponseEntity<List<ParametrizacaoDTO>>> {
@@ -33,13 +35,32 @@ public class GetParamSituacoesAtivoQueryHandler implements QueryHandler<GetParam
     LOGGER.debug("GetParamSituacoesAtivoQuery: {}", query);
 
     Specification<ParamSituacaoEntity> spec = (root, q, cb) -> {
-      if (query.getFlgSituacaoLaboral() == null) {
-        return cb.conjunction();
+      List<Predicate> predicates = new ArrayList<>();
+
+      if (query.getFlgSituacaoLaboral() != null) {
+        predicates.add(cb.equal(
+            root.get("flgSituacaoLaboral"),
+            query.getFlgSituacaoLaboral()
+        ));
       }
-      return cb.equal(
-          root.get("flgSituacaoLaboral"),
-          query.getFlgSituacaoLaboral()
-      );
+
+      if (StringUtils.hasText(query.getFlgAusencia())) {
+        try {
+          predicates.add(cb.equal(root.get("flgAusencia"), Integer.valueOf(query.getFlgAusencia())));
+        } catch (NumberFormatException e) {
+          LOGGER.warn("Invalid integer format for flgAusencia: {}", query.getFlgAusencia());
+        }
+      }
+
+      if (StringUtils.hasText(query.getFlgFalta())) {
+        predicates.add(cb.equal(root.get("flgFalta"), query.getFlgFalta()));
+      }
+
+      if (StringUtils.hasText(query.getTipoFalta())) {
+        predicates.add(cb.equal(root.get("tipoFalta"), query.getTipoFalta()));
+      }
+
+      return cb.and(predicates.toArray(new Predicate[0]));
     };
 
     List<ParametrizacaoDTO> result =
