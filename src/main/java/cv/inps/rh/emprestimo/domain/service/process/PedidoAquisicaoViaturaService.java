@@ -47,7 +47,7 @@ public class PedidoAquisicaoViaturaService {
       entity.setEstado(Estado.A.name());
       entity.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
       entity.setFinalidade(TipoPedido.AQUISICAO_VIATURA.name());
-      entity.setTipoSituacao(TipoPedido.AQUISICAO_VIATURA.name());
+      entity.setTipoSituacao(request.getTipoSituacao());
       entity.setVersao(1L);
     }
 
@@ -166,7 +166,7 @@ public class PedidoAquisicaoViaturaService {
           pedidoDecisaoEntityRepository.save(newObj);
         });
 
-    if (request.getParecer().equals("NAO_VALIDADO")) // TODO 04/02/2026 22:02 get real code
+    if (request.getParecer().equals("FAVORAVEL")) // TODO 04/02/2026 22:02 get real code
       entity.setEstado(Estado.I.name());
 
     emprestimoEntityRepository.save(entity);

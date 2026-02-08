@@ -221,6 +221,11 @@
           "type": "string",
           "name": "funcionarioId",
           "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
         }
       ]
     },
@@ -529,5 +534,5 @@
       }
     }
   ],
-  "id": "lls7ig9nio-getConfiguracaoEmprestimo-saveEmprestimo-updateEmprestimo-getEmprestimoById-saveDecisaoAnalise-saveDecisaoAnaliseFinanceira-elaborarContrato-autorizarComissaoExecutiva-saveDecisaoAnaliseFinanceira-saveDecisaoAnalise-listarEmprestimos"
+  "id": "lls7ig9nio-getConfiguracaoEmprestimo-saveEmprestimo-updateEmprestimo-getEmprestimoById-saveDecisaoAnalise-saveDecisaoAnaliseFinanceira-elaborarContrato-autorizarComissaoExecutiva-saveDecisaoAnaliseFinanceira-saveDecisaoAnalise-listarEmprestimos-listarEmprestimos"
 }

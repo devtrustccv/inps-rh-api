@@ -126,13 +126,17 @@ public class EmprestimoReadService {
 
     var pageable = PageRequest.of(page, size, Sort.by("dataInicio").descending());
 
-    Specification<EmprestimoEntity> specification = (root, cq, cb) -> {
+    Specification<EmprestimoEntity> specification = (root, _, cb) -> {
 
       var predicates = new ArrayList<Predicate>();
 
       if (StringUtils.hasText(query.getTipoEmprestimo()))
         predicates.add(cb.equal(root.get("tipoEmprestimo"), query.getTipoEmprestimo()));
 
+      if (StringUtils.hasText(query.getEstado()))
+        predicates.add(cb.equal(root.get("estado"), query.getEstado()));
+      else
+        predicates.add(cb.equal(root.get("estado"), Estado.A.name()));
 
       if (StringUtils.hasText(query.getEstadoEmprestimo()))
         predicates.add(cb.equal(root.get("estado"), query.getEstadoEmprestimo()));

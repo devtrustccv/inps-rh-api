@@ -28,5 +28,7 @@ public class ListarEmprestimosQuery implements Query {
   private String size;
   @NotBlank(message = "The field <funcionarioId> is required")
   private String funcionarioId;
+  @NotBlank(message = "The field <estado> is required")
+  private String estado;
 
 }

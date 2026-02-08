@@ -213,10 +213,11 @@ public class EmprestimoController {
     @RequestParam(value = "estadoEmprestimo", required = false) String estadoEmprestimo,
     @RequestParam(value = "page", required = false, defaultValue = "0") String page,
     @RequestParam(value = "size", required = false, defaultValue = "20") String size,
-    @RequestParam(value = "funcionarioId", required = false) String funcionarioId)
+    @RequestParam(value = "funcionarioId", required = false) String funcionarioId,
+    @RequestParam(value = "estado", required = false) String estado)
   {
 
-      final var query = new ListarEmprestimosQuery(tipoEmprestimo, direccaoId, dataInicio, dataFim, estadoEmprestimo, page, size, funcionarioId);
+      final var query = new ListarEmprestimosQuery(tipoEmprestimo, direccaoId, dataInicio, dataFim, estadoEmprestimo, page, size, funcionarioId, estado);
 
       return queryBus.handle(query);
 

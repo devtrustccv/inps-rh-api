@@ -14,22 +14,12 @@ public class ListarEmprestimosQueryHandlerTest {
 
   @BeforeEach
   void setUp() {
-    // TODO: Initialize mock dependencies if needed
+
   }
 
   @Test
   void testHandleListarEmprestimosQuery() {
-    // TODO: Implement unit test for handle method
-    // Example:
-    // Given
-    // ListarEmprestimosQuery query = new ListarEmprestimosQuery(...);
-    //
-    // When
-    // ResponseEntity<EmprestimoListDTO> response = listarEmprestimosQueryHandler.handle(query);
-    //
-    // Then
-    // assertNotNull(response);
-    // assertEquals(..., response.getBody());
+
   }
 
 }
