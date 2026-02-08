@@ -48,7 +48,7 @@ public class DocumentService {
         newDoc.setDocId(1L);
       }
 
-      newDoc.setTpDocumentoId(tipoDocumentoEntityRepository.findByUuidOrThrow(UUID.fromString(doc.getTipoDocumentoId())));
+      newDoc.setTpDocumentoId(doc.getTipoDocumentoId() != null ? tipoDocumentoEntityRepository.findByIdOrThrow(doc.getTipoDocumentoId()) : null);
       newDoc.setFunId(funId);
       newDoc.setUrl(doc.getUrl());
       docs.add(newDoc);
@@ -68,7 +68,11 @@ public class DocumentService {
         .map(doc -> {
           var obj = new DocumentoDTO();
           obj.setId(doc.getUuid().toString());
-          obj.setTipoDocumentoId(doc.getTpDocumentoId().getUuid().toString());
+          var docType = doc.getTpDocumentoId();
+          if (docType != null) {
+            obj.setTipoDocumentoId(docType.getId());
+            obj.setTipoDocumentoDesc(docType.getNome());
+          }
           obj.setUrl(doc.getUrl());
           return obj;
         })
