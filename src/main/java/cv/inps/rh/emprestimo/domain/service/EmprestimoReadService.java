@@ -92,7 +92,7 @@ public class EmprestimoReadService {
 
     // TODO 02/02/2026 20:10 improve performance of ths later, bring all the decisions at once
     final var decision = new DecisaoEmprestimoDTO();
-    getDecision(order, EtapaEmprestimo.ANALISE_RH).map(this::buildDecisionData).ifPresent(decision::setAnaliseRh);
+    getDecision(order, EtapaEmprestimo.ANALISE_RH_PEDIDO).map(this::buildDecisionData).ifPresent(decision::setAnaliseRh);
     getDecision(order, EtapaEmprestimo.ANALISE_FINANCEIRA).map(this::buildDecisionData).ifPresent(decision::setAnaliseFinanceiro);
     getDecision(order, EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA).map(this::buildDecisionData).ifPresent(decision::setAutorizacaoComissaoExecutiva);
     dto.setDecisao(decision);
