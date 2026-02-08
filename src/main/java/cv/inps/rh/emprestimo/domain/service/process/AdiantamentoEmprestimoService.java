@@ -2,6 +2,7 @@ package cv.inps.rh.emprestimo.domain.service.process;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.dto.AnaliseRhAdiantamentoRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.BaseDecisaoDTO;
 import cv.inps.rh.emprestimo.application.dto.PedidoAdiantamentoRequestDTO;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.ProcessType;
@@ -27,9 +28,11 @@ public class AdiantamentoEmprestimoService {
 
   public void saveUpdatePedidoAdiantamento(List<PedidoAdiantamentoRequestDTO> request) {
     for (var obj : request) {
-      var entity = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
-      entity.setValorAdiantado(obj.getValorAdiantamento());
-      emprestimoEntityRepository.save(entity);
+      var loan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
+      loan.setValorAdiantado(obj.getValorAdiantamento());
+      loan.setTipoSituacao("ADIANTAMENTO");
+      loan.setTipoEmprestimo("ADIANTAMENTO");
+      emprestimoEntityRepository.save(loan);
     }
   }
 
@@ -39,7 +42,6 @@ public class AdiantamentoEmprestimoService {
     loan.setBanco(request.getBancoId() != null ? bancoEntityRepository.findById(request.getBancoId()).orElseThrow() : null);
     loan.setNib(request.getNib());
     loan.setSwift(request.getSwift());
-    emprestimoEntityRepository.save(loan);
 
     var order = loan.getPedido();
 
@@ -66,14 +68,61 @@ public class AdiantamentoEmprestimoService {
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
           pedidoDecisaoEntityRepository.save(newObj);
         });
+
+    if ("DESFAVORAVEL".equals(request.getParecer())) // TODO 04/02/2026 22:02 get real code
+      loan.setEstado(Estado.I.name());
+
+    emprestimoEntityRepository.save(loan);
   }
 
   public void anexarComprovativo() {
     // TODO 04/02/2026 22:06 implement
   }
 
-  public void verificar() {
-    // TODO 04/02/2026 22:06 implement
+  public void verificar(String emprestimoId, BaseDecisaoDTO request) {
+
+    var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
+
+    var order = loan.getPedido();
+
+    var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
+        order,
+        EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name(),
+        Estado.A.name()
+    );
+
+    decisionOP.ifPresentOrElse(
+        obj -> {
+          obj.setDecisao(request.getParecer());
+          obj.setObs(request.getObservacao());
+          pedidoDecisaoEntityRepository.save(obj);
+        },
+        () -> {
+          var newObj = new PedidoDecisaoEntity();
+          newObj.setPedido(order);
+          newObj.setDecisao(request.getParecer());
+          newObj.setObs(request.getObservacao());
+          newObj.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
+          newObj.setReferencia(ProcessType.EMPRESTIMO.name());
+          newObj.setEstado(Estado.A.name());
+          newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+          pedidoDecisaoEntityRepository.save(newObj);
+        });
+
+    if ("RETIFICAR".equals(request.getParecer())) { // TODO 04/02/2026 22:02 get real code
+      return;
+    }
+
+    if ("DESFAVORAVEL".equals(request.getParecer())) {// TODO 04/02/2026 22:02 get real code
+      loan.setEstado(Estado.I.name());
+      loan.setMotivoFecho("ADIANTAMENTO PAGAMENTO DIVIDA NAO ACEITE");
+    }
+
+    if ("FAVORAVEL".equals(request.getParecer())) {// TODO 04/02/2026 22:02 get real code
+
+    }
+
+    emprestimoEntityRepository.save(loan);
   }
 
 

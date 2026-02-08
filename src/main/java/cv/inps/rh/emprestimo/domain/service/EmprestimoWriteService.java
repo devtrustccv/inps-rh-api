@@ -125,7 +125,6 @@ public class EmprestimoWriteService {
     }
   }
 
-
   public List<PlanoFinanceiroRowDTO> generateFinancialPlan(String uuid) {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
@@ -142,23 +141,19 @@ public class EmprestimoWriteService {
         entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now()
     );
 
-    var plans = new ArrayList<PlanoFinanceiroEntity>();
-
-    plan.forEach(obj -> {
+    for (var obj : plan) {
       var newPlan = new PlanoFinanceiroEntity();
       newPlan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+      newPlan.setEstado(Estado.A.name());
       newPlan.setEmprestimo(entity);
       newPlan.setDataPagamento(obj.dataPagamento());
       newPlan.setNrOrdemPrestacao(obj.numero());
       newPlan.setValorPrincipal(obj.principal());
       newPlan.setValorJuros(obj.juros());
-      newPlan.setEstado(Estado.A.name());
       newPlan.setSaldoInicial(obj.saldoInicial());
       newPlan.setSaldoFinal(obj.saldoFinal());
-      plans.add(newPlan);
-    });
-
-    planoFinanceiroEntityRepository.saveAll(plans);
+      planoFinanceiroEntityRepository.save(newPlan);
+    }
 
     return plan;
   }
