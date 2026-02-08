@@ -96,7 +96,7 @@ public class PedidoAquisicaoViaturaService {
 
     var funId = entity.getTiprel().getFunId();
 
-    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, ProcessType.EMPRESTIMO.name(), Estado.A.name()).orElseThrow();
+    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, TipoPedido.AQUISICAO_VIATURA.name(), Estado.A.name()).orElseThrow();
     order.setEtapa(EtapaEmprestimo.ANALISE_RH.name());
     pedidoEntityRepository.save(order);
 
@@ -136,7 +136,7 @@ public class PedidoAquisicaoViaturaService {
 
     var funId = entity.getTiprel().getFunId();
 
-    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, ProcessType.EMPRESTIMO.name(), Estado.A.name()).orElseThrow();
+    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, TipoPedido.AQUISICAO_VIATURA.name(), Estado.A.name()).orElseThrow();
     order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA.name());
     pedidoEntityRepository.save(order);
 
@@ -176,7 +176,7 @@ public class PedidoAquisicaoViaturaService {
 
     var funId = emprestimoEntityRepository.findByUuidOrThrow(uuid).getTiprel().getFunId();
 
-    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, ProcessType.EMPRESTIMO.name(), Estado.A.name()).orElseThrow();
+    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, TipoPedido.AQUISICAO_VIATURA.name(), Estado.A.name()).orElseThrow();
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name());
     pedidoEntityRepository.save(order);
 
@@ -213,7 +213,7 @@ public class PedidoAquisicaoViaturaService {
 
     var funId = entity.getTiprel().getFunId();
 
-    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, ProcessType.EMPRESTIMO.name(), Estado.A.name()).orElseThrow();
+    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, TipoPedido.AQUISICAO_VIATURA.name(), Estado.A.name()).orElseThrow();
     order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO.name());
     pedidoEntityRepository.save(order);
 
