@@ -185,8 +185,8 @@ public class DispensaWriteService {
     dispensa.setEstado(estado);
     dispensa.setTiprelId(tipoRelAtual);
     if (req.getDataDispensa() != null) dispensa.setData(req.getDataDispensa());
-    if (StringUtils.hasText(req.getHoraSaida())) dispensa.setHoraInicio(req.getHoraSaida());
-    if (StringUtils.hasText(req.getHoraEntrada())) dispensa.setHoraFim(req.getHoraEntrada());
+    if (StringUtils.hasText(req.getHoraSaida())) dispensa.setHoraInicio(hhmmToIntervalFormat(req.getHoraSaida()));
+    if (StringUtils.hasText(req.getHoraEntrada())) dispensa.setHoraFim(hhmmToIntervalFormat(req.getHoraEntrada()));
     if (StringUtils.hasText(req.getMotivo())) dispensa.setDescricaoMotivo(req.getMotivo());
 
     dispensaRepository.save(dispensa);
@@ -286,8 +286,8 @@ public class DispensaWriteService {
     dispensa.setEstado(Estado.P);
     dispensa.setTiprelId(tipoRelAtual);
     if (req.getDataDispensa() != null) dispensa.setData(req.getDataDispensa());
-    if (StringUtils.hasText(req.getHoraSaida())) dispensa.setHoraInicio(req.getHoraSaida());
-    if (StringUtils.hasText(req.getHoraEntrada())) dispensa.setHoraFim(req.getHoraEntrada());
+    if (StringUtils.hasText(req.getHoraSaida())) dispensa.setHoraInicio(hhmmToIntervalFormat(req.getHoraSaida()));
+    if (StringUtils.hasText(req.getHoraEntrada())) dispensa.setHoraFim(hhmmToIntervalFormat(req.getHoraEntrada()));
     if (StringUtils.hasText(req.getMotivo())) dispensa.setDescricaoMotivo(req.getMotivo());
 
     dispensaRepository.save(dispensa);
