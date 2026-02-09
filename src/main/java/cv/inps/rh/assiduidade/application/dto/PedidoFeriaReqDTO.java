@@ -43,7 +43,7 @@ public class PedidoFeriaReqDTO  {
   private Integer numDias ;
 
 
-  private Long substituidoPor ;
+  private UUID substituidoPor ;
 
 
   private String obsConvinienciaServico ;
