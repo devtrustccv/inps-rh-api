@@ -72,6 +72,7 @@ public class DocumentService {
           if (docType != null) {
             obj.setTipoDocumentoId(docType.getId());
             obj.setTipoDocumentoDesc(docType.getNome());
+            obj.setReferenciaTipoDocumento(docType.getReferencia());
           }
           obj.setUrl(doc.getUrl());
           return obj;

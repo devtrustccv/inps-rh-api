@@ -26,6 +26,8 @@ public class DocumentoDTO {
 
   private String tipoDocumentoDesc;
 
+  private String referenciaTipoDocumento;
+
   @NotBlank(message = "The field <url> is required")
   private String url;
 }

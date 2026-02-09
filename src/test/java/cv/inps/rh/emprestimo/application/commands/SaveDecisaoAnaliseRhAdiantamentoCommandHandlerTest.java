@@ -9,26 +9,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class SaveDecisaoAnaliseRhAdiantamentoCommandHandlerTest {
 
-    @InjectMocks
-    private SaveDecisaoAnaliseRhAdiantamentoCommandHandler saveDecisaoAnaliseRhAdiantamentoCommandHandler;
+  @InjectMocks
+  private SaveDecisaoAnaliseRhAdiantamentoCommandHandler saveDecisaoAnaliseRhAdiantamentoCommandHandler;
 
-    @BeforeEach
-    void setUp() {
-      // TODO: initialize mock dependencies if needed
-    }
+  @BeforeEach
+  void setUp() {
+  }
 
-    @Test
-    void testHandle() {
-        // TODO: Implement unit test for handle method
-        // Example:
-        // Given
-        // SaveDecisaoAnaliseRhAdiantamentoCommand command = new SaveDecisaoAnaliseRhAdiantamentoCommand(...);
-        //
-        // When
-        // ResponseEntity<String> response = saveDecisaoAnaliseRhAdiantamentoCommandHandler.handle(command);
-        //
-        // Then
-        // assertNotNull(response);
-        // assertEquals(..., response.getBody());
-    }
+  @Test
+  void testHandle() {
+
+  }
 }
