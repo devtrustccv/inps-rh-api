@@ -23,49 +23,50 @@ import java.util.UUID;
 @IgrpDTO
 public class DispensaReqDTO  {
 
-  
-  
+
+
   private UUID colaborador ;
-  
-  
+
+
   private String colaboradorNome ;
-  
-  
+
+
   private String horasUsadasMes ;
-  
-  
+
+
   private String horasDisponiveis ;
-  
-  
+
+
   private LocalDate dataDispensa ;
-  
-  
+
+
   private String horaSaida ;
-  
-  
+
+
   private String horaEntrada ;
-  
-  
+
+
   private String totalHoras ;
-  
-  
+
+
   private String tipoMotivo ;
-  
-  
+
+
   private String motivo ;
-  
-  
+
+  private UUID responsavel ;
+
   private String parecerResponsavel ;
-  
-  
+
+
   private String observacaoResponsavel ;
-  
-  
+
+
   private String validar ;
-  
-  
+
+
   private String ObservacaoRh ;
-  
+
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();
 

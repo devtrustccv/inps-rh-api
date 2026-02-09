@@ -11,18 +11,8 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.DispensaEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.AusenciaEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DispensaEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.AusenciaEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,6 +35,7 @@ public class DispensaWriteService {
   private final DocumentoEntityRepository documentoEntityRepository;
   private final AusenciaEntityRepository ausenciaEntityRepository;
   private final ParamSituacaoEntityRepository paramSituacaoEntityRepository;
+  private final ResponsavelEntityRepository responsavelEntityRepository;
 
 
 
@@ -97,6 +88,13 @@ public class DispensaWriteService {
     var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaborador());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
+    ResponsavelEntity responsavel = null;
+    if (req.getResponsavel()!=null) {
+      responsavel = responsavelEntityRepository.findByFunId_Uuid(req.getResponsavel()).orElseThrow(
+      () -> IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + req.getResponsavel()));
+
+    }
+
     var pedido = new PedidoEntity();
     pedido.setFunId(funcionario);
     pedido.setTipoPedido("DISPENSA");
@@ -114,6 +112,7 @@ public class DispensaWriteService {
     disp.setData(req.getDataDispensa());
     disp.setHoraInicio(hhmmToIntervalFormat(req.getHoraSaida()));
     disp.setHoraFim(hhmmToIntervalFormat(req.getHoraEntrada()));
+    disp.setResponsavelId(responsavel != null ? responsavel.getId() : null);
     disp.setEstado(Estado.P);
     disp.setUuid(UuidCreator.getTimeOrderedEpoch());
     disp = dispensaRepository.save(disp);
@@ -142,7 +141,6 @@ public class DispensaWriteService {
     validacao.setReferenciaId(pedido.getId());
     validacao.setReferenciaUuid(pedido.getUuid());
     validacaoEntityRepository.save(validacao);
-
 
 
     Map<String, Object> resp = new HashMap<>();
@@ -178,11 +176,19 @@ public class DispensaWriteService {
     var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
     var estado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
+    ResponsavelEntity responsavel = null;
+    if (req.getResponsavel()!=null) {
+      responsavel = responsavelEntityRepository.findByFunId_Uuid(req.getResponsavel()).orElseThrow(
+          () -> IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + req.getResponsavel()));
+
+    }
+
     // Atualizar campos da dispensa
     dispensa.setDecisaoResponsavel(req.getParecerResponsavel());
     dispensa.setObsResponsavel(req.getObservacaoResponsavel());
     dispensa.setObsRh(req.getObservacaoRh());
     dispensa.setEstado(estado);
+    dispensa.setResponsavelId(responsavel != null ? responsavel.getId() : null);
     dispensa.setTiprelId(tipoRelAtual);
     if (req.getDataDispensa() != null) dispensa.setData(req.getDataDispensa());
     if (StringUtils.hasText(req.getHoraSaida())) dispensa.setHoraInicio(hhmmToIntervalFormat(req.getHoraSaida()));
@@ -279,10 +285,17 @@ public class DispensaWriteService {
 
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
+    ResponsavelEntity responsavel = null;
+    if (req.getResponsavel()!=null) {
+      responsavel = responsavelEntityRepository.findByFunId_Uuid(req.getResponsavel()).orElseThrow(
+          () -> IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + req.getResponsavel()));
+
+    }
     // Atualizar campos da dispensa
     dispensa.setDecisaoResponsavel(req.getParecerResponsavel());
     dispensa.setObsResponsavel(req.getObservacaoResponsavel());
     dispensa.setObsRh(req.getObservacaoRh());
+    dispensa.setResponsavelId(responsavel != null ? responsavel.getId() : null);
     dispensa.setEstado(Estado.P);
     dispensa.setTiprelId(tipoRelAtual);
     if (req.getDataDispensa() != null) dispensa.setData(req.getDataDispensa());
