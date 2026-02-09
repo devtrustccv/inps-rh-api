@@ -45,6 +45,8 @@ public class FeriaWriteService {
   private final DocumentoEntityRepository documentoEntityRepository;
   private final TipoDocumentoEntityRepository tipoDocumentoEntityRepository;
   private final EmailService emailService;
+  private final ResponsavelEntityRepository responsavelEntityRepository;
+
 
   @Transactional
   public Map<String, ?> marcarFeria(MarcarFeriaCommand command) {
@@ -55,6 +57,8 @@ public class FeriaWriteService {
 
     var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaborador());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+
+
 
     var pedido = new PedidoEntity();
     pedido.setFunId(funcionario);
@@ -74,10 +78,19 @@ public class FeriaWriteService {
     ferias.setNumDia(diffDays(req.getDataInicio(), req.getDataFim()));
     ferias.setTiprelIdSubstituido(req.getSubstituidoPor());
     ferias.setObsInfoConveniencia(req.getObsConvinienciaServico());
-    ferias.setResponsavelId(req.getResponsavel());
+
     ferias.setObsResponsavel(req.getObsParecer());
     ferias.setEstado(Estado.P);
     ferias.setUuid(UuidCreator.getTimeOrderedEpoch());
+
+    ResponsavelEntity responsavel = null;
+    if (req.getResponsavel()!=null) {
+      responsavel = responsavelEntityRepository.findByFunId_Uuid(req.getResponsavel()).orElseThrow(
+          () ->
+              IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + req.getResponsavel()));
+      ferias.setResponsavelId(responsavel.getId());
+    }
+
     ferias = feriasGozadasRepository.save(ferias);
 
     if (req.getSubstituidoPor() != null) {
@@ -130,6 +143,15 @@ public class FeriaWriteService {
 
     var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
     var estado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
+
+    ResponsavelEntity responsavel = null;
+    if (req.getResponsavel()!=null) {
+      responsavel = responsavelEntityRepository.findByFunId_Uuid(req.getResponsavel()).orElseThrow(
+          () ->
+              IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + req.getResponsavel()));
+      ferias.setResponsavelId(responsavel.getId());
+    }
+
 
     ferias.setDecisaoRh(req.getValidar());
     ferias.setObsRh(req.getObsValidacao());
@@ -217,12 +239,23 @@ public class FeriaWriteService {
     nova.setNumDia(diffDays(di, df));
     nova.setTiprelIdSubstituido(base.getSubstituidoPor());
     nova.setObsInfoConveniencia(base.getObsConvinienciaServico());
-    nova.setResponsavelId(base.getResponsavel());
     nova.setObsResponsavel(base.getObsParecer());
     nova.setMotivoAlteracao(req.getMotivo());
     nova.setEstado(Estado.P);
     nova.setUuid(UuidCreator.getTimeOrderedEpoch());
     nova.setFeriasGozadasId(existing.getId());
+
+
+    ResponsavelEntity responsavel = null;
+    if (req.getFeria().getResponsavel()!=null) {
+      responsavel = responsavelEntityRepository.findByFunId_Uuid(req.getFeria().getResponsavel()).orElseThrow(
+          () ->
+              IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + req.getFeria().getResponsavel()));
+      nova.setResponsavelId(responsavel.getId());
+    }
+
+
+
     nova = feriasGozadasRepository.save(nova);
 
     var substituidoPor = base.getSubstituidoPor();
