@@ -6,6 +6,7 @@ import cv.inps.rh.emprestimo.application.dto.BaseDecisaoDTO;
 import cv.inps.rh.emprestimo.application.dto.PedidoAdiantamentoRequestDTO;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.ProcessType;
+import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.BancoEntityRepository;
@@ -30,8 +31,8 @@ public class AdiantamentoEmprestimoService {
     for (var obj : request) {
       var loan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
       loan.setValorAdiantado(obj.getValorAdiantamento());
-      loan.setTipoSituacao("ADIANTAMENTO");
-      loan.setTipoEmprestimo("ADIANTAMENTO");
+      loan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
+      loan.setTipoSituacao(obj.getTipoSituacao());
       emprestimoEntityRepository.save(loan);
     }
   }
@@ -110,6 +111,7 @@ public class AdiantamentoEmprestimoService {
         });
 
     if ("RETIFICAR".equals(request.getParecer())) { // TODO 04/02/2026 22:02 get real code
+
       return;
     }
 
@@ -124,6 +126,4 @@ public class AdiantamentoEmprestimoService {
 
     emprestimoEntityRepository.save(loan);
   }
-
-
 }

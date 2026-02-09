@@ -26,7 +26,7 @@ public class DocumentService {
   private final DocumentoEntityRepository documentoEntityRepository;
   private final TipoDocumentoEntityRepository tipoDocumentoEntityRepository;
 
-  public void saveDocuments(List<DocumentoDTO> documentos, FuncionarioEntity funId, String referenceId, ReferenceName referenceName) {
+  public void saveDocuments(List<DocumentoDTO> documentos, FuncionarioEntity funId, String referenceId, String referenceName) {
 
     if (Objects.isNull(documentos) || documentos.isEmpty())
       return;
@@ -42,7 +42,7 @@ public class DocumentService {
       } else {
         newDoc = new DocumentoEntity();
         newDoc.setEstado(Estado.A);
-        newDoc.setReferenciaName(referenceName.name());
+        newDoc.setReferenciaName(referenceName);
         newDoc.setReferenciaId(referenceId);
         newDoc.setUuid(UuidCreator.getTimeOrderedEpoch());
         newDoc.setDocId(1L);

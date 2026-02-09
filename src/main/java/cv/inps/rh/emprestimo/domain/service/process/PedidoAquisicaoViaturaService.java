@@ -82,7 +82,12 @@ public class PedidoAquisicaoViaturaService {
 
     var response = new IdDTO(emprestimoEntityRepository.save(entity).getUuid());
 
-    documentService.saveDocuments(request.getDocumentos(), funId, response.getId(), ReferenceName.RH_T_EMPRESTIMO);
+    documentService.saveDocuments(
+        request.getDocumentos(),
+        funId,
+        response.getId(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.PEDIDO.name()
+    );
 
     return response;
   }
@@ -124,7 +129,12 @@ public class PedidoAquisicaoViaturaService {
           pedidoDecisaoEntityRepository.save(newObj);
         });
 
-    documentService.saveDocuments(request.getDocumentos(), funId, loan.getUuid(), ReferenceName.RH_T_EMPRESTIMO);
+    documentService.saveDocuments(
+        request.getDocumentos(),
+        funId,
+        loan.getUuid(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_PEDIDO.name()
+    );
   }
 
   public void saveUpdateDecisaoAnaliseFinanceira(String uuid, AnaliseFinanceiroRequestDTO request) {
@@ -217,6 +227,11 @@ public class PedidoAquisicaoViaturaService {
     order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO.name());
     pedidoEntityRepository.save(order);
 
-    documentService.saveDocuments(request.getDocumentos(), funId, entity.getUuid(), ReferenceName.RH_T_EMPRESTIMO);
+    documentService.saveDocuments(
+        request.getDocumentos(),
+        funId,
+        entity.getUuid(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name()
+    );
   }
 }
