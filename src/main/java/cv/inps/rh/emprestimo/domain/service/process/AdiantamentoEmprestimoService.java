@@ -99,7 +99,7 @@ public class AdiantamentoEmprestimoService {
         List.of(request),
         loan.getTiprel().getFunId(),
         loan.getUuid(),
-        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name()
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name()
     );
   }
 
