@@ -116,7 +116,7 @@
     {
       "name": "responsavel",
       "objectType": "java",
-      "type": "long",
+      "type": "uuid",
       "required": false,
       "before": false,
       "after": false,

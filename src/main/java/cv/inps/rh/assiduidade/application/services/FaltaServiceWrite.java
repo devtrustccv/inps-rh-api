@@ -48,6 +48,8 @@ public class FaltaServiceWrite {
   private final FeriasGozadasEntityRepository feriasGozadasRepository;
   private final AnoEntityRepository anoEntityRepository;
   private final DispensaEntityRepository dispensaRepository;
+  private final ResponsavelEntityRepository responsavelEntityRepository;
+
 
   @Transactional
   public Map<String, ?> marcarFalta(MarcarFaltaCommand command) {
@@ -69,9 +71,9 @@ public class FaltaServiceWrite {
 
     PedidoEntity pedido = null;
     if (deveJustificar) {
-      if (req.getTipoJustificacao() == null || req.getTipoJustificacao() <= 0) {
+      /*if (req.getTipoJustificacao() == null || req.getTipoJustificacao() <= 0) {
         throw IgrpResponseStatusException.badRequest("Tipo de justificação é obrigatório");
-      }
+      }*/
 
       pedido = new PedidoEntity();
       pedido.setFunId(funcionario);
@@ -197,7 +199,7 @@ public class FaltaServiceWrite {
         f.setFlgDescontoSal(1);
       }
 
-      // 🔹 desconto férias
+      // desconto férias
       if (novoEstado == Estado.A && f.getParamSitId() != null) {
         var fg = new FeriasGozadasEntity();
         fg.setFunId(pedido.getFunId());
@@ -211,7 +213,7 @@ public class FaltaServiceWrite {
         feriasGozadasRepository.save(fg);
       }
 
-      // 🔹 desconto dispensa
+      // desconto dispensa
       if (novoEstado == Estado.A && f.getParamSitId() != null) {
         var disp = new DispensaEntity();
         disp.setPedidoId(pedido);
@@ -279,9 +281,12 @@ public class FaltaServiceWrite {
     falta.setUuid(UuidCreator.getTimeOrderedEpoch());
     falta.setSinteseDiarioId(sintese);
 
-    if (req.getResponsavel() != null && req.getResponsavel() > 0) {
-      var resp = entityManager.find(ResponsavelEntity.class, req.getResponsavel());
-      falta.setResponsavelId(resp);
+    ResponsavelEntity responsavel = null;
+    if (req.getResponsavel()!=null) {
+      responsavel = responsavelEntityRepository.findByFunId_Uuid(req.getResponsavel()).orElseThrow(
+          () ->
+              IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + req.getResponsavel()));
+      falta.setResponsavelId(responsavel);
     }
 
     if (StringUtils.hasText(req.getParecer())) {

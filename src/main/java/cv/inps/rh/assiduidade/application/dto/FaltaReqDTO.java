@@ -24,49 +24,49 @@ import java.util.UUID;
 @IgrpDTO
 public class FaltaReqDTO  {
 
-  
-  
+
+
   private UUID colaboradorId ;
-  
-  
+
+
   private String colaboradorNome ;
-  
-  
+
+
   private LocalDate dataInicio ;
-  
-  
+
+
   private LocalDate dataFim ;
-  
-  
+
+
   private Integer totalDias ;
-  
-  
+
+
   private String totalDeHorasAusentes ;
-  
-  
+
+
   private String justificar ;
-  
-  
+
+
   private String motivoAusencia ;
-  
-  
+
+
   private String parecer ;
-  
-  
-  private Long responsavel ;
-  
-  
+
+
+  private UUID responsavel ;
+
+
   private String observacao ;
-  
-  
+
+
   private EstadoValidacao validar ;
-  
-  
+
+
   private String despachoRh ;
-  
-  
+
+
   private Long tipoJustificacao ;
-  
+
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();
 
