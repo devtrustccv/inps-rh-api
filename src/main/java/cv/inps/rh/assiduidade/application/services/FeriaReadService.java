@@ -6,12 +6,11 @@ import cv.inps.rh.assiduidade.application.dto.WrapperListaFeriaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetListaFeriaQuery;
 import cv.inps.rh.assiduidade.application.dto.FeriasListDTO;
 import cv.inps.rh.assiduidade.application.queries.GetPedidoFeriaQuery;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FeriasGozadasEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.VFeriasMensalEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.PageMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.criteria.Join;
@@ -43,6 +42,10 @@ public class FeriaReadService {
   private final FeriasGozadasEntityRepository feriasGozadasEntityRepository;
   private final VFeriasMensalEntityRepository vFeriasMensalEntityRepository;
   private final DocumentoEntityRepository documentoEntityRepository;
+  private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
+  private final FuncionarioEntityRepository funcionarioEntityRepository;
+  private final ResponsavelEntityRepository responsavelEntityRepository;
+
 
   @Transactional(readOnly = true)
   public WrapperListaFeriaDTO getListaFeria(GetListaFeriaQuery query) {
@@ -128,13 +131,24 @@ public class FeriaReadService {
     req.setDataInicio(entity.getDataInicio());
     req.setDataFim(entity.getDataFim());
     req.setNumDias(entity.getNumDia());
-    req.setSubstituidoPor(entity.getTiprelIdSubstituido() != null ? entity.getTiprelIdSubstituido().getUuid() : null);
+
+    if (entity.getTiprelIdSubstituido() != null) {
+      var substituido = tiposRelacionamentoEntityRepository.findById(entity.getTiprelIdSubstituido()).orElse(null);
+      req.setSubstituidoPor(substituido != null ? substituido.getUuid() : null);
+    }
+
     req.setObsConvinienciaServico(entity.getObsInfoConveniencia());
-    req.setResponsavel(entity.getResponsavelId() != null ? entity.getResponsavelId().getUuid() : null);
+
+    if (entity.getResponsavelId() != null) {
+      var responsavel = responsavelEntityRepository.findById(entity.getResponsavelId()).orElse(null);
+      req.setResponsavel(responsavel != null ? responsavel.getFunId().getUuid()  : null);
+    }
+
     req.setObsParecer(entity.getObsResponsavel());
 
     var documentos = documentoEntityRepository.findAllByReferenciaNameAndReferenciaUuid(
-        "FERIAS_GOZADAS", entity.getPedidoId().getUuid());
+        Referencia.FERIA.name(), entity.getPedidoId().getUuid());
+
     if (documentos != null && !documentos.isEmpty()) {
       req.setDocumentos(documentos.stream().map(d -> {
         var anexo = new AnexoReqDTO();
