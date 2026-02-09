@@ -5,7 +5,6 @@ import cv.inps.rh.emprestimo.application.commands.SaveConfiguracaoInfoEmprestimo
 import cv.inps.rh.emprestimo.application.dto.FundoSocialRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
-import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -65,7 +64,6 @@ public class EmprestimoWriteService {
     paramEmprestimoEntityRepository.saveAll(entities);
   }
 
-
   public void saveFundoSocial(List<FundoSocialRequestDTO> requests) {
 
     for (var request : requests) {
@@ -104,9 +102,14 @@ public class EmprestimoWriteService {
 
       var savedEntity = emprestimoEntityRepository.save(entity);
 
-      generateFinancialPlan(savedEntity); // TODO 04/02/2026 20:17 fix possible NPE at JUROS
+      generateFinancialPlanForFundoSocial(savedEntity);
 
-      documentService.saveDocuments(request.getDocumentos(), funId, savedEntity.getUuid(), ReferenceName.RH_T_EMPRESTIMO);
+      documentService.saveDocuments(
+          request.getDocumentos(),
+          funId,
+          savedEntity.getUuid(),
+          TipoPedido.FUNDO_SOCIAL.name()
+      );
 
       var defPagamentoEntity = new DefPagamentoEntity();
       defPagamentoEntity.setTmId(tipoMovimentoEntityRepository.getReferenceById(request.getTipoMovimentoId()));
@@ -141,6 +144,24 @@ public class EmprestimoWriteService {
         entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now()
     );
 
+    savePlans(entity, plan);
+
+    return plan;
+  }
+
+  public void generateFinancialPlanForFundoSocial(EmprestimoEntity entity) {
+
+    var plan = FinancialPlanHelper.generateFinancialPlanForSocialFund(
+        entity.getValorEmprestimo(),
+        entity.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
+        entity.getNrPrestacao().intValue(),
+        entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now()
+    );
+
+    savePlans(entity, plan);
+  }
+
+  private void savePlans(EmprestimoEntity entity, List<PlanoFinanceiroRowDTO> plan) {
     for (var obj : plan) {
       var newPlan = new PlanoFinanceiroEntity();
       newPlan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
@@ -154,8 +175,6 @@ public class EmprestimoWriteService {
       newPlan.setSaldoFinal(obj.saldoFinal());
       planoFinanceiroEntityRepository.save(newPlan);
     }
-
-    return plan;
   }
 }
 

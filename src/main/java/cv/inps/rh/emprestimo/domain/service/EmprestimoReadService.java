@@ -98,8 +98,16 @@ public class EmprestimoReadService {
     getDecision(order, EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO).map(this::buildDecisionData).ifPresent(decision::setVerificacaoAdiantamento);
     dto.setDecisao(decision);
 
-    // TODO 09/02/2026 18:17 fix referencia name
-    var docs = documentService.getDocuments(funId, ReferenceName.RH_T_EMPRESTIMO, entity.getUuid());
+    var docCodes = List.of(
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.PEDIDO.name(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_PEDIDO.name(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name()
+    );
+
+    var docs = documentService.getDocuments(
+        funId,
+        docCodes,
+        entity.getUuid());
     dto.setDocumentos(docs);
 
     return dto;

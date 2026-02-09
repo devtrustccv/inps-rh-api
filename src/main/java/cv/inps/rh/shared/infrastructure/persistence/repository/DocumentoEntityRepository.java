@@ -38,6 +38,6 @@ public interface DocumentoEntityRepository extends
 
   List<DocumentoEntity> findAllByReferenciaNameAndReferenciaUuid(String referenciaName, UUID referenciaUuid);
 
-  List<DocumentoEntity> findAllByFunIdAndReferenciaNameAndReferenciaIdAndEstado(FuncionarioEntity funId, String referenciaName, String referenciaId, Estado estado);
+  List<DocumentoEntity> findAllByFunIdAndReferenciaNameInAndReferenciaIdAndEstado(FuncionarioEntity funId, List<String> referenciaName, String referenciaId, Estado estado);
 
 }

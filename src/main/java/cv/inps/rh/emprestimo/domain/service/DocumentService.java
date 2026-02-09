@@ -2,7 +2,6 @@ package cv.inps.rh.emprestimo.domain.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
-import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
@@ -57,11 +56,11 @@ public class DocumentService {
     documentoEntityRepository.saveAll(docs);
   }
 
-  public List<DocumentoDTO> getDocuments(FuncionarioEntity funId, ReferenceName referenceName, String referenceId) {
+  public List<DocumentoDTO> getDocuments(FuncionarioEntity funId, List<String> references, String referenceId) {
 
-    return documentoEntityRepository.findAllByFunIdAndReferenciaNameAndReferenciaIdAndEstado(
+    return documentoEntityRepository.findAllByFunIdAndReferenciaNameInAndReferenciaIdAndEstado(
             funId,
-            referenceName.name(),
+            references,
             referenceId,
             Estado.A
         ).stream()

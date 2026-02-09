@@ -15,4 +15,5 @@ public interface PlanoFinanceiroEntityRepository extends
     JpaSpecificationExecutor<PlanoFinanceiroEntity> {
 
   List<PlanoFinanceiroEntity> findAllByEmprestimo(EmprestimoEntity emprestimo);
+  List<PlanoFinanceiroEntity> findAllByEmprestimoAndEstadoNot(EmprestimoEntity emprestimo, String estado);
 }
