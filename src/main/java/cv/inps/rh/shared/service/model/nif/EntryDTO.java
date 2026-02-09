@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.service.model.nif;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -8,30 +9,39 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EntryDTO {
 
-  @JsonProperty("NU_NIF")
+  @JsonProperty("nuNif")
+  @JsonAlias("NU_NIF")
   private Long nuNif;
 
-  @JsonProperty("NM_CONTRIBUINTE")
-  private String nome;
+  @JsonProperty("nmContribuinte")
+  @JsonAlias("NM_CONTRIBUINTE")
+  private String nmContribuinte;
 
-  @JsonProperty("DT_NASC")
-  private String dataNascimento;
+  @JsonProperty("dtNasc")
+  @JsonAlias("DT_NASC")
+  private String dtNasc;
 
-  @JsonProperty("NM_PAI")
-  private Object nomePai;
+  @JsonProperty("nmPai")
+  @JsonAlias("NM_PAI")
+  private String nmPai;
 
-  @JsonProperty("NM_MAE")
-  private String nomeMae;
+  @JsonProperty("nmMae")
+  @JsonAlias("NM_MAE")
+  private String nmMae;
 
-  @JsonProperty("NU_BI")
-  private Object nuBi;
+  @JsonProperty("nuBi")
+  @JsonAlias("NU_BI")
+  private Long nuBi;
 
-  @JsonProperty("NM_PESQUISA")
-  private String pesquisa;
+  @JsonProperty("nmPesquisa")
+  @JsonAlias("NM_PESQUISA")
+  private String nmPesquisa;
 
-  @JsonProperty("NM_PESQUISA_MAE")
-  private String pesquisaMae;
+  @JsonProperty("nmPesquisaMae")
+  @JsonAlias("NM_PESQUISA_MAE")
+  private String nmPesquisaMae;
 
-  @JsonProperty("NM_PESQUISA_PAI")
-  private Object pesquisaPai;
+  @JsonProperty("nmPesquisaPai")
+  @JsonAlias("NM_PESQUISA_PAI")
+  private String nmPesquisaPai;
 }
