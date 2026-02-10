@@ -183,6 +183,8 @@ public class FaltaReadService {
     dto.setParecer(primeiraFalta.getDecisaoResponsavel());
     dto.setObservacao(primeiraFalta.getObsResponsavel());
     dto.setDespachoRh(primeiraFalta.getDespachoRh());
+    dto.setResponsavel(primeiraFalta.getResponsavelId()!=null ? primeiraFalta.getResponsavelId().getFunId().getUuid() : null);
+    dto.setResponsavelNome(primeiraFalta.getResponsavelId()!=null ? primeiraFalta.getResponsavelId().getFunId().getNome() : null);
     dto.setTipoJustificacao(primeiraFalta.getParamSitId() != null ? primeiraFalta.getParamSitId().getId() : null);
 
     return dto;

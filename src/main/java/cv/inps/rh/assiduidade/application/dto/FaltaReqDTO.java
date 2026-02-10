@@ -55,6 +55,8 @@ public class FaltaReqDTO  {
 
   private UUID responsavel ;
 
+  private String responsavelNome ;
+
 
   private String observacao ;
 
