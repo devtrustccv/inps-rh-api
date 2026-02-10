@@ -5,18 +5,18 @@ import cv.inps.rh.emprestimo.application.dto.AnaliseRhAdiantamentoRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.BaseDecisaoDTO;
 import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
 import cv.inps.rh.emprestimo.application.dto.PedidoAdiantamentoRequestDTO;
-import cv.inps.rh.emprestimo.domain.service.DocumentService;
-import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
-import cv.inps.rh.emprestimo.domain.service.constants.ProcessType;
-import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
-import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
+import cv.inps.rh.emprestimo.domain.service.EmprestimoDocumentService;
+import cv.inps.rh.emprestimo.domain.service.constants.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.BancoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.PlanoFinanceiroEntityRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,28 +28,37 @@ import java.util.List;
 @Service
 public class AdiantamentoEmprestimoService {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(AdiantamentoEmprestimoService.class);
+
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final BancoEntityRepository bancoEntityRepository;
-  private final DocumentService documentService;
+  private final EmprestimoDocumentService documentService;
+  private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
+  private final AdiantamentoEmprestimoHelper adiantamentoEmprestimoHelper;
 
   public String saveUpdatePedidoAdiantamento(PedidoAdiantamentoRequestDTO obj) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
+    var rowsInactivated = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
+    LOGGER.debug("INACTIVATED {} ROWS FOR LOAN ID <{}> : ", rowsInactivated, loan.getId());
+
+    var tipoSituacao = TipoSituacao.valueOf(obj.getTipoSituacao());
 
     var newLoan = new EmprestimoEntity();
     BeanUtils.copyProperties(loan, newLoan);
     newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
     newLoan.setValorAdiantado(obj.getValorAdiantamento()); // TODO 09/02/2026 19:12 so se for adiantamento ADIANTAMENTO_PAGAMENTO_ANTECIPADO ou
     newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
-    newLoan.setTipoSituacao(obj.getTipoSituacao());
+    newLoan.setTipoSituacao(tipoSituacao.name());
     newLoan.setVersao(loan.getVersao() + 1);
     newLoan.setValorPago(null);
     newLoan.setEmprestimo(loan);
+    var saved = emprestimoEntityRepository.save(loan);
 
-    // TODO 09/02/2026 20:07 gerar plano
+    adiantamentoEmprestimoHelper.saveByTipoSituacao(tipoSituacao, newLoan, obj.getValorAdiantamento(), obj.getNumeroPrestacao());
 
-    return emprestimoEntityRepository.save(loan).getUuid();
+    return saved.getUuid();
   }
 
   public void saveAnaliseRh(String emprestimoId, AnaliseRhAdiantamentoRequestDTO request) {
@@ -85,8 +94,17 @@ public class AdiantamentoEmprestimoService {
           pedidoDecisaoEntityRepository.save(newObj);
         });
 
-    if ("DESFAVORAVEL".equals(request.getParecer())) // TODO 04/02/2026 22:02 get real code
+    if ("DESFAVORAVEL".equals(request.getParecer())) {
+
       loan.setEstado(Estado.I.name());
+
+      var rowsActivatedFromLoan = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
+      LOGGER.debug("INACTIVATED {} ROWS FOR CURRENT LOAN ID <{}> : ", rowsActivatedFromLoan, loan.getId());
+
+      var father = loan.getEmprestimo();
+      var rowsActivated = planoFinanceiroEntityRepository.ativarPlanosNaoPagos(father.getId());
+      LOGGER.debug("ACTIVATED {} ROWS FOR LOAN FATHER ID <{}> : ", rowsActivated, father.getId());
+    }
 
     emprestimoEntityRepository.save(loan);
   }
@@ -132,19 +150,6 @@ public class AdiantamentoEmprestimoService {
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
           pedidoDecisaoEntityRepository.save(newObj);
         });
-
-    if ("RETIFICAR".equals(request.getParecer())) { // TODO 04/02/2026 22:02 get real code
-      return;
-    }
-
-    if ("DESFAVORAVEL".equals(request.getParecer())) {// TODO 04/02/2026 22:02 get real code
-      loan.setEstado(Estado.I.name());
-      loan.setMotivoFecho("ADIANTAMENTO PAGAMENTO DIVIDA NAO ACEITE");
-    }
-
-    if ("FAVORAVEL".equals(request.getParecer())) {// TODO 04/02/2026 22:02 get real code
-
-    }
 
     emprestimoEntityRepository.save(loan);
   }

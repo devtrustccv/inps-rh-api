@@ -20,7 +20,7 @@ import java.util.UUID;
 @Transactional
 @RequiredArgsConstructor
 @Service
-public class DocumentService {
+public class EmprestimoDocumentService {
 
   private final DocumentoEntityRepository documentoEntityRepository;
   private final TipoDocumentoEntityRepository tipoDocumentoEntityRepository;

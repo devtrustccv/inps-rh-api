@@ -37,7 +37,7 @@ public class EmprestimoWriteService {
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
   private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
   private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
-  private final DocumentService documentService;
+  private final EmprestimoDocumentService documentService;
 
   public void saveConfiguracaoEmprestimo(SaveConfiguracaoInfoEmprestimoCommand command) {
 

@@ -2,7 +2,7 @@ package cv.inps.rh.emprestimo.domain.service.process;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.dto.*;
-import cv.inps.rh.emprestimo.domain.service.DocumentService;
+import cv.inps.rh.emprestimo.domain.service.EmprestimoDocumentService;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.ProcessType;
 import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
@@ -31,7 +31,7 @@ public class PedidoAquisicaoViaturaService {
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PedidoEntityRepository pedidoEntityRepository;
   private final FuncionarioRules funcionarioRules;
-  private final DocumentService documentService;
+  private final EmprestimoDocumentService documentService;
 
   public IdDTO saveUpdatePedidoEmprestimo(String uuid, PedidoEmprestimoDTO request) {
 
