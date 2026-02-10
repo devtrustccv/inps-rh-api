@@ -188,6 +188,45 @@
           "isRequired": false
         }
       ]
+    },
+    {
+      "actionName": "validarMovimentoImportado",
+      "path": "movimentos/{movimentoId}/validar",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "collectionType": "none",
+              "name": "data",
+              "type": "ValidacaoMovimentoImportado",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "movimentoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "f2v97ka4pz-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica-getListaBaixamedicaCopy"
