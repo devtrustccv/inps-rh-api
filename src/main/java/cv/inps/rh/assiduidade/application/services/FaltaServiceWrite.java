@@ -67,13 +67,13 @@ public class FaltaServiceWrite {
     var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaboradorId());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
-    boolean deveJustificar = "SIM".equalsIgnoreCase(req.getJustificar());
+    boolean deveJustificar = Objects.equals(req.getJustificar(), "SIM");
 
     PedidoEntity pedido = null;
     if (deveJustificar) {
-      /*if (req.getTipoJustificacao() == null || req.getTipoJustificacao() <= 0) {
+      if (req.getTipoJustificacao() == null || req.getTipoJustificacao() <= 0) {
         throw IgrpResponseStatusException.badRequest("Tipo de justificação é obrigatório");
-      }*/
+      }
 
       pedido = new PedidoEntity();
       pedido.setFunId(funcionario);
@@ -355,7 +355,7 @@ public class FaltaServiceWrite {
 
     sintese.setFalta(trabalhadosMinutos == 0 ? 1 : 0);
     sintese.setEstado(Estado.A.name());
-    sintese.setFlagRececao("MANUAL");
+    sintese.setFlagRececao("1");
 
     return sintese;
   }
