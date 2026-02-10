@@ -96,4 +96,70 @@ public class FinancialPlanHelper {
 
     return plano;
   }
+
+  public static List<PlanoFinanceiroRowDTO> generateFinancialPlanForSocialFund(
+      BigDecimal valorEmprestimo,
+      BigDecimal taxaAnual,
+      int prazoMeses,
+      LocalDate dataInicio
+  ) {
+
+    LOGGER.debug("VALOR EMPRESTIMO FUNDO SOCIAL: {}", valorEmprestimo);
+    LOGGER.debug("TAXA ANUAL FUNDO SOCIAL : {}", taxaAnual);
+    LOGGER.debug("PRAZO MESES FUNDO SOCIAL : {}", prazoMeses);
+    LOGGER.debug("DATA INICIO FUNDO SOCIAL: {}", dataInicio);
+
+    var taxaMensal = taxaAnual.divide(BigDecimal.valueOf(12), MC);
+    LOGGER.debug("TAXA MENSAL FUNDO SOCIAL: {}", taxaMensal);
+
+    var umMaisTaxa = BigDecimal.ONE.add(taxaMensal, MC);
+    var potencia = umMaisTaxa.pow(prazoMeses, MC);
+    var prestacaoFixa = valorEmprestimo
+        .multiply(taxaMensal, MC)
+        .divide(BigDecimal.ONE.subtract(BigDecimal.ONE.divide(potencia, MC), MC), MC)
+        .setScale(SCALE, RoundingMode.HALF_UP);
+
+    LOGGER.debug("PRESTACAO FUNDO SOCIAL FIXA : {}", prestacaoFixa);
+
+    var saldoInicial = valorEmprestimo.setScale(SCALE, RoundingMode.HALF_UP);
+
+    var plano = new ArrayList<PlanoFinanceiroRowDTO>();
+
+    for (int i = 1; i <= prazoMeses; i++) {
+
+      var dataPagamento = dataInicio.plusMonths(i);
+
+      var principal = prestacaoFixa.setScale(SCALE, RoundingMode.HALF_UP);
+
+      var pagamentoAtual = prestacaoFixa;
+
+      // Ajuste no último mês para zerar saldo
+      if (i == prazoMeses) {
+        principal = saldoInicial;
+        pagamentoAtual = principal.setScale(SCALE, RoundingMode.HALF_UP);
+      }
+
+      var saldoFinal = saldoInicial.subtract(principal)
+          .setScale(SCALE, RoundingMode.HALF_UP);
+
+      LOGGER.debug("MÊS {} | DATA: {} | SALDO INICIAL: {} | PRINCIPAL: {} | PAGAMENTO ATUAL: {} | SALDO FINAL: {}",
+          i, dataPagamento, saldoInicial, principal, pagamentoAtual, saldoFinal);
+
+      plano.add(
+          new PlanoFinanceiroRowDTO(
+              (long) i,
+              dataPagamento,
+              saldoInicial,
+              pagamentoAtual,
+              principal,
+              null,
+              saldoFinal
+          )
+      );
+
+      saldoInicial = saldoFinal;
+    }
+
+    return plano;
+  }
 }

@@ -90,14 +90,25 @@ public class EmprestimoReadService {
 
     var order = entity.getPedido();
 
-    // TODO 02/02/2026 20:10 improve performance of ths later, bring all the decisions at once
     final var decision = new DecisaoEmprestimoDTO();
-    getDecision(order, EtapaEmprestimo.ANALISE_RH_PEDIDO).map(this::buildDecisionData).ifPresent(decision::setAnaliseRh);
+    getDecision(order, EtapaEmprestimo.ANALISE_RH_PEDIDO).map(this::buildDecisionData).ifPresent(decision::setAnaliseRhPedido);
     getDecision(order, EtapaEmprestimo.ANALISE_FINANCEIRA).map(this::buildDecisionData).ifPresent(decision::setAnaliseFinanceiro);
     getDecision(order, EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA).map(this::buildDecisionData).ifPresent(decision::setAutorizacaoComissaoExecutiva);
+    getDecision(order, EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO).map(this::buildDecisionData).ifPresent(decision::setAnaliseRhAdiantamento);
+    getDecision(order, EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO).map(this::buildDecisionData).ifPresent(decision::setVerificacaoAdiantamento);
     dto.setDecisao(decision);
 
-    var docs = documentService.getDocuments(funId, ReferenceName.RH_T_EMPRESTIMO, entity.getUuid());
+    var docCodes = List.of(
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.PEDIDO.name(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_PEDIDO.name(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name()
+    );
+
+    var docs = documentService.getDocuments(
+        funId,
+        docCodes,
+        entity.getUuid());
     dto.setDocumentos(docs);
 
     return dto;

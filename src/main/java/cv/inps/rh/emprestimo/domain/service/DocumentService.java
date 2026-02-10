@@ -2,7 +2,6 @@ package cv.inps.rh.emprestimo.domain.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
-import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
@@ -26,7 +25,7 @@ public class DocumentService {
   private final DocumentoEntityRepository documentoEntityRepository;
   private final TipoDocumentoEntityRepository tipoDocumentoEntityRepository;
 
-  public void saveDocuments(List<DocumentoDTO> documentos, FuncionarioEntity funId, String referenceId, ReferenceName referenceName) {
+  public void saveDocuments(List<DocumentoDTO> documentos, FuncionarioEntity funId, String referenceId, String referenceName) {
 
     if (Objects.isNull(documentos) || documentos.isEmpty())
       return;
@@ -42,7 +41,7 @@ public class DocumentService {
       } else {
         newDoc = new DocumentoEntity();
         newDoc.setEstado(Estado.A);
-        newDoc.setReferenciaName(referenceName.name());
+        newDoc.setReferenciaName(referenceName);
         newDoc.setReferenciaId(referenceId);
         newDoc.setUuid(UuidCreator.getTimeOrderedEpoch());
         newDoc.setDocId(1L);
@@ -57,11 +56,11 @@ public class DocumentService {
     documentoEntityRepository.saveAll(docs);
   }
 
-  public List<DocumentoDTO> getDocuments(FuncionarioEntity funId, ReferenceName referenceName, String referenceId) {
+  public List<DocumentoDTO> getDocuments(FuncionarioEntity funId, List<String> references, String referenceId) {
 
-    return documentoEntityRepository.findAllByFunIdAndReferenciaNameAndReferenciaIdAndEstado(
+    return documentoEntityRepository.findAllByFunIdAndReferenciaNameInAndReferenciaIdAndEstado(
             funId,
-            referenceName.name(),
+            references,
             referenceId,
             Estado.A
         ).stream()
@@ -72,6 +71,7 @@ public class DocumentService {
           if (docType != null) {
             obj.setTipoDocumentoId(docType.getId());
             obj.setTipoDocumentoDesc(docType.getNome());
+            obj.setReferenciaTipoDocumento(docType.getReferencia());
           }
           obj.setUrl(doc.getUrl());
           return obj;

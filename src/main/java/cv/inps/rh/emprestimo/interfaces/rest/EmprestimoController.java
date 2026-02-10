@@ -476,14 +476,14 @@ public class EmprestimoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = IdDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<String> savePedidosAdiantamento(@Valid @RequestBody List<PedidoAdiantamentoRequestDTO> savePedidosAdiantamentoRequest
+  public ResponseEntity<IdDTO> savePedidosAdiantamento(@Valid @RequestBody PedidoAdiantamentoRequestDTO savePedidosAdiantamentoRequest
     )
   {
 
@@ -518,6 +518,66 @@ public class EmprestimoController {
   {
 
       final var command = new SaveDecisaoAnaliseRhAdiantamentoCommand(saveDecisaoAnaliseRhAdiantamentoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/verificar-pedido-adiantamento"
+  )
+  @Operation(
+    summary = "Verificar pedido adiantamento",
+    description = "Verificar pedido adiantamento",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> verificarPedidoAdiantamento(@Valid @RequestBody BaseDecisaoDTO verificarPedidoAdiantamentoRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new VerificarPedidoAdiantamentoCommand(verificarPedidoAdiantamentoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "{emprestimoId}/anexar-comprovativo"
+  )
+  @Operation(
+    summary = "Anexar comprovativo pagamento",
+    description = "Anexar comprovativo pagamento",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> anexarComprovativoPagamento(@Valid @RequestBody DocumentoDTO anexarComprovativoPagamentoRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new AnexarComprovativoPagamentoCommand(anexarComprovativoPagamentoRequest, emprestimoId);
 
       return commandBus.send(command);
 

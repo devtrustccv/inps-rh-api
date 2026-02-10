@@ -3,15 +3,21 @@ package cv.inps.rh.emprestimo.domain.service.process;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.dto.AnaliseRhAdiantamentoRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.BaseDecisaoDTO;
+import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
 import cv.inps.rh.emprestimo.application.dto.PedidoAdiantamentoRequestDTO;
+import cv.inps.rh.emprestimo.domain.service.DocumentService;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.ProcessType;
+import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
+import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.BancoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,15 +31,25 @@ public class AdiantamentoEmprestimoService {
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final BancoEntityRepository bancoEntityRepository;
+  private final DocumentService documentService;
 
-  public void saveUpdatePedidoAdiantamento(List<PedidoAdiantamentoRequestDTO> request) {
-    for (var obj : request) {
-      var loan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
-      loan.setValorAdiantado(obj.getValorAdiantamento());
-      loan.setTipoSituacao("ADIANTAMENTO");
-      loan.setTipoEmprestimo("ADIANTAMENTO");
-      emprestimoEntityRepository.save(loan);
-    }
+  public String saveUpdatePedidoAdiantamento(PedidoAdiantamentoRequestDTO obj) {
+
+    var loan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
+
+    var newLoan = new EmprestimoEntity();
+    BeanUtils.copyProperties(loan, newLoan);
+    newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    newLoan.setValorAdiantado(obj.getValorAdiantamento()); // TODO 09/02/2026 19:12 so se for adiantamento ADIANTAMENTO_PAGAMENTO_ANTECIPADO ou
+    newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
+    newLoan.setTipoSituacao(obj.getTipoSituacao());
+    newLoan.setVersao(loan.getVersao() + 1);
+    newLoan.setValorPago(null);
+    newLoan.setEmprestimo(loan);
+
+    // TODO 09/02/2026 20:07 gerar plano
+
+    return emprestimoEntityRepository.save(loan).getUuid();
   }
 
   public void saveAnaliseRh(String emprestimoId, AnaliseRhAdiantamentoRequestDTO request) {
@@ -75,8 +91,16 @@ public class AdiantamentoEmprestimoService {
     emprestimoEntityRepository.save(loan);
   }
 
-  public void anexarComprovativo() {
-    // TODO 04/02/2026 22:06 implement
+  public void anexarComprovativo(String emprestimoId, DocumentoDTO request) {
+
+    var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
+
+    documentService.saveDocuments(
+        List.of(request),
+        loan.getTiprel().getFunId(),
+        loan.getUuid(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name()
+    );
   }
 
   public void verificar(String emprestimoId, BaseDecisaoDTO request) {
@@ -124,6 +148,4 @@ public class AdiantamentoEmprestimoService {
 
     emprestimoEntityRepository.save(loan);
   }
-
-
 }

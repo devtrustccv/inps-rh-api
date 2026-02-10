@@ -27,4 +27,7 @@ public class PedidoAdiantamentoRequestDTO  {
 
   private BigDecimal valorAdiantamento ;
 
+  @NotBlank(message = "The field <tipoSituacao> is required")
+  private String tipoSituacao ;
+
 }

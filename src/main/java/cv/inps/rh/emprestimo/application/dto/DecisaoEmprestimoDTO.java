@@ -19,12 +19,18 @@ public class DecisaoEmprestimoDTO  {
 
 
   @Valid
-  private BaseDecisaoDTO analiseRh ;
+  private BaseDecisaoDTO analiseRhPedido ;
 
   @Valid
   private BaseDecisaoDTO analiseFinanceiro ;
 
   @Valid
   private BaseDecisaoDTO autorizacaoComissaoExecutiva ;
+
+  @Valid
+  private BaseDecisaoDTO analiseRhAdiantamento ;
+
+  @Valid
+  private BaseDecisaoDTO verificacaoAdiantamento ;
 
 }

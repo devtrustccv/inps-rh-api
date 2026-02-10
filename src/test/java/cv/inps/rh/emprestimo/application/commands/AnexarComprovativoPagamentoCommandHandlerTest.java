@@ -7,17 +7,17 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class SaveDecisaoAnaliseRhAdiantamentoCommandHandlerTest {
+public class AnexarComprovativoPagamentoCommandHandlerTest {
 
-  @InjectMocks
-  private SaveDecisaoAnaliseRhAdiantamentoCommandHandler saveDecisaoAnaliseRhAdiantamentoCommandHandler;
+    @InjectMocks
+    private AnexarComprovativoPagamentoCommandHandler anexarComprovativoPagamentoCommandHandler;
 
-  @BeforeEach
-  void setUp() {
-  }
+    @BeforeEach
+    void setUp() {
+    }
 
-  @Test
-  void testHandle() {
+    @Test
+    void testHandle() {
 
-  }
+    }
 }
