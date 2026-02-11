@@ -273,7 +273,6 @@ public class FaltaServiceWrite {
     falta.setTiprelId(tipoRel);
     falta.setDescricaoMotivo(req.getMotivoAusencia());
     falta.setHorasAusencia(parseInterval(req.getTotalDeHorasAusentes()));
-    falta.setTipoFalta(req.getTipoFalta());
 
     falta.setDataInicio(LocalDateTime.of(dia, LocalTime.MIN));
     falta.setDataFim(LocalDateTime.of(dia, LocalTime.of(23, 59, 59)));

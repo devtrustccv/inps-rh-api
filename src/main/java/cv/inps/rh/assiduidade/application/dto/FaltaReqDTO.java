@@ -47,9 +47,6 @@ public class FaltaReqDTO  {
   private String justificar ;
 
 
-  private String tipoFalta;
-
-
   private String motivoAusencia ;
 
 
