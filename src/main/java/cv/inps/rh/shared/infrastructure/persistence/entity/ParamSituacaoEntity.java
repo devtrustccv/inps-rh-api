@@ -64,8 +64,8 @@ public class ParamSituacaoEntity extends AuditEntity {
     private String  flgEstadoContrato;
 
 
-    @Column(name="flg_falta")
-    private String flgFalta;
+    @Column(name="tipo_ausencia")
+    private String tipoAusencia;
 
 
     @Column(name="classificacao_area")

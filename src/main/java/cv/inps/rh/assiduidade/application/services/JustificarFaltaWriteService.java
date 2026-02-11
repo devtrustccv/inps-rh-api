@@ -80,7 +80,7 @@ public class JustificarFaltaWriteService {
 
     // Buscar ParamSituação (obrigatório)
     var paramSituacao = paramSituacaoEntityRepository.findByIdOrThrow(dto.getTipoJustificacao());
-    if (!"1".equalsIgnoreCase(paramSituacao.getFlgFalta())) {
+    if (!"1".equalsIgnoreCase(paramSituacao.getTipoAusencia())) {
       throw IgrpResponseStatusException.badRequest("Tipo justificativo não permitido para falta");
     }
 

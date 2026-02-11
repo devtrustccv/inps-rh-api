@@ -300,7 +300,7 @@ public class FaltaServiceWrite {
     if (req.getTipoJustificacao() != null && req.getTipoJustificacao() > 0) {
       var paramSituacao = paramSituacaoRepository.findById(req.getTipoJustificacao())
           .orElseThrow(() -> IgrpResponseStatusException.badRequest("Tipo justificativo inválido"));
-      if (!"1".equalsIgnoreCase(paramSituacao.getFlgFalta())) {
+      if (!"1".equalsIgnoreCase(paramSituacao.getTipoAusencia())) {
         throw IgrpResponseStatusException.badRequest(
             "Tipo justificativo não permitido para falta");
       }
