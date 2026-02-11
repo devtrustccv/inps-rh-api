@@ -4,6 +4,7 @@ import cv.inps.rh.funcionario.application.dto.ExperienciaProfissionalReqDTO;
 import cv.inps.rh.funcionario.application.dto.ExperienciaProfissionalRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ExperienciaProfEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,8 @@ public class ExperienciaProfissionalMapper {
 
   private final EntityManager entityManager;
 
-  public ExperienciaProfEntity toEntity(ExperienciaProfissionalReqDTO dto, Estado estado) {
+  public ExperienciaProfEntity toEntity(ExperienciaProfissionalReqDTO dto, Estado estado,
+  FuncionarioEntity fun) {
     if (dto == null) {
       return null;
     }
@@ -36,13 +38,14 @@ public class ExperienciaProfissionalMapper {
     e.setDataInicio(dto.getDataEntrada());
     e.setDataFim(dto.getDataSaida());
     e.setObservacao(dto.getObservacoes());
+    e.setFunId(fun);
     e.setEstado(estado);
 
     return e;
   }
 
   public java.util.List<ExperienciaProfEntity> syncExperiencias(java.util.List<ExperienciaProfEntity> existingList,
-                               java.util.List<ExperienciaProfissionalReqDTO> newList) {
+                               java.util.List<ExperienciaProfissionalReqDTO> newList, FuncionarioEntity fun) {
     if (newList == null) return existingList;
     for (ExperienciaProfissionalReqDTO dto : newList) {
       ExperienciaProfEntity found = null;
@@ -61,7 +64,7 @@ public class ExperienciaProfissionalMapper {
         found.setDataFim(dto.getDataSaida());
         found.setObservacao(dto.getObservacoes());
       } else {
-        ExperienciaProfEntity novo = toEntity(dto, Estado.P);
+        ExperienciaProfEntity novo = toEntity(dto, Estado.P, fun);
         existingList.add(novo);
       }
     }

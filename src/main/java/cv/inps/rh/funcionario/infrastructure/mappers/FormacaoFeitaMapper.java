@@ -4,6 +4,7 @@ import cv.inps.rh.funcionario.application.dto.FormacaoProfissionalReqDTO;
 import cv.inps.rh.funcionario.application.dto.FormacaoProfissionalRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FormacaoFeitaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class FormacaoFeitaMapper {
   private final EntityManager entityManager;
 
 
-  public FormacaoFeitaEntity toEntity(FormacaoProfissionalReqDTO dto, Estado estado) {
+  public FormacaoFeitaEntity toEntity(FormacaoProfissionalReqDTO dto, Estado estado, FuncionarioEntity fun) {
     if (dto == null) {
       return null;
     }
@@ -36,13 +37,14 @@ public class FormacaoFeitaMapper {
     e.setRhtpfor(dto.getTipoFormacao());
     e.setCurso(dto.getDesignacao());
     e.setNivel(dto.getNivel());
+    e.setFunId(fun);
     e.setEstado(estado);
 
     return e;
   }
 
   public java.util.List<FormacaoFeitaEntity> syncFormacoes(java.util.List<FormacaoFeitaEntity> existingList,
-                            java.util.List<FormacaoProfissionalReqDTO> newList) {
+                            java.util.List<FormacaoProfissionalReqDTO> newList, FuncionarioEntity fun) {
     if (newList == null) return existingList;
     for (FormacaoProfissionalReqDTO dto : newList) {
       FormacaoFeitaEntity found = null;
@@ -60,7 +62,7 @@ public class FormacaoFeitaMapper {
         found.setCurso(dto.getDesignacao());
         found.setNivel(dto.getNivel());
       } else {
-        FormacaoFeitaEntity novo = toEntity(dto, Estado.P);
+        FormacaoFeitaEntity novo = toEntity(dto, Estado.P, fun);
         existingList.add(novo);
       }
     }

@@ -55,7 +55,8 @@ public class ValidarDadosPessoaisService {
     // 2) Fazer UPDATE dos dados (sempre permitido)
     var contactos = contactoMapper.syncContactos(
         funcionario.getContactos(),
-        dadosPessoaisReqDTO != null ? dadosPessoaisReqDTO.getContactos() : null
+        dadosPessoaisReqDTO != null ? dadosPessoaisReqDTO.getContactos() : null,
+        funcionario
     );
     funcionario.setContactos(contactos);
     funcionario = funcionarioMapper.toUpdateEntity(funcionario, dadosPessoaisReqDTO);

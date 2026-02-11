@@ -74,17 +74,30 @@ public class ValidarRegistoColaboradorService {
     funcionario = funcionarioMapper.toUpdateEntity(funcionario, dadosPessoaisReqDTO);
 
     var contactos = contactoMapper.syncContactos(funcionario.getContactos(),
-        dadosPessoaisReqDTO.getContactos());
-    var familiares = familiarMapper.syncFamiliares(funcionario.getFamiliares(), registroColaborador.getFamiliares());
+        dadosPessoaisReqDTO.getContactos(), funcionario);
+
+    var familiares = familiarMapper
+        .syncFamiliares(funcionario.getFamiliares(),
+            registroColaborador.getFamiliares(),funcionario);
 
     var dadosAcademicosProf = registroColaborador.getDadosAcademicosProf();
 
-    var habilitacoesLiterarias = habilitacaoLiterariaMapper.syncHabilitacoes(funcionario.getHabilitacoesLiterarias(),
-        dadosAcademicosProf.getHabilitacoesLiterarias());
-    var formacoesFeitas = formacaoFeitaMapper.syncFormacoes(funcionario.getFormacoesFeitas(),
-        dadosAcademicosProf.getFormacoesFeitas());
-    var experienciasProfissionais = experienciaProfissionalMapper.syncExperiencias(
-        funcionario.getExperienciasProfissionais(), dadosAcademicosProf.getExperienciasProfssionais());
+    var habilitacoesLiterarias = habilitacaoLiterariaMapper
+        .syncHabilitacoes(funcionario.getHabilitacoesLiterarias(),
+        dadosAcademicosProf.getHabilitacoesLiterarias(), funcionario);
+
+    var formacoesFeitas = formacaoFeitaMapper
+        .syncFormacoes(funcionario.getFormacoesFeitas(),
+        dadosAcademicosProf.getFormacoesFeitas(), funcionario);
+
+    var experienciasProfissionais = experienciaProfissionalMapper
+        .syncExperiencias(
+        funcionario.getExperienciasProfissionais(),
+        dadosAcademicosProf.getExperienciasProfssionais(), funcionario);
+
+    var dadosBancarios = dadosBancariosMapper
+        .syncBancarios(funcionario.getDadosBancarios(),
+        registroColaborador.getDadosBancarios(), funcionario);
 
     var documentos = documentoMapper.syncDocumentos(
         funcionario.getDocumentos(),
@@ -94,8 +107,7 @@ public class ValidarRegistoColaboradorService {
         funcionario.getUuid(),
         1L,
         funcionario);
-    var dadosBancarios = dadosBancariosMapper.syncBancarios(funcionario.getDadosBancarios(),
-        registroColaborador.getDadosBancarios());
+
 
     var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, dadosContratuais);

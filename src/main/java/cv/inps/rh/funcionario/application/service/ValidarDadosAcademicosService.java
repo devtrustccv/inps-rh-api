@@ -50,9 +50,17 @@ public class ValidarDadosAcademicosService {
     }*/
 
 
-    var habilitacoesLiterarias = habilitacaoLiterariaMapper.syncHabilitacoes(funcionario.getHabilitacoesLiterarias(), dadosAcademicosProfReqDTO.getHabilitacoesLiterarias());
-    var formacoesFeitas = formacaoFeitaMapper.syncFormacoes(funcionario.getFormacoesFeitas(), dadosAcademicosProfReqDTO.getFormacoesFeitas());
-    var experienciasProfissionais = experienciaProfissionalMapper.syncExperiencias(funcionario.getExperienciasProfissionais(), dadosAcademicosProfReqDTO.getExperienciasProfssionais());
+    var habilitacoesLiterarias = habilitacaoLiterariaMapper
+        .syncHabilitacoes(funcionario.getHabilitacoesLiterarias(),
+        dadosAcademicosProfReqDTO.getHabilitacoesLiterarias(), funcionario);
+
+    var formacoesFeitas = formacaoFeitaMapper
+        .syncFormacoes(funcionario.getFormacoesFeitas(),
+        dadosAcademicosProfReqDTO.getFormacoesFeitas(), funcionario);
+
+    var experienciasProfissionais = experienciaProfissionalMapper
+        .syncExperiencias(funcionario.getExperienciasProfissionais(),
+        dadosAcademicosProfReqDTO.getExperienciasProfssionais(), funcionario);
 
     funcionario.setHabilitacoesLiterarias(habilitacoesLiterarias);
     funcionario.setFormacoesFeitas(formacoesFeitas);

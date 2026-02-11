@@ -48,7 +48,8 @@ public class ValidarAgregadosService {
       );
     }*/
 
-    var familiares = familiarMapper.syncFamiliares(funcionario.getFamiliares(), agregadoDependenteReqDTO);
+    var familiares = familiarMapper
+        .syncFamiliares(funcionario.getFamiliares(), agregadoDependenteReqDTO, funcionario);
     funcionario.setFamiliares(familiares);
 
     /*if (temPendentes) {

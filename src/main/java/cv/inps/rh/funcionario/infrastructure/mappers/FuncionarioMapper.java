@@ -152,8 +152,7 @@ public class FuncionarioMapper {
 
     if (dadosPessoais.getContactos() != null) {
       var list = dadosPessoais.getContactos().stream().map(c -> {
-        var ce = contactoMapper.toEntity(c, Estado.P);
-        ce.setFunId(fun);
+        var ce = contactoMapper.toEntity(c, Estado.P,fun);
         return ce;
       }).toList();
       fun.setContactos(list);

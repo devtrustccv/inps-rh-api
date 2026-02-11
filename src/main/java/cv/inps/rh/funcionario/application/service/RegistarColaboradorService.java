@@ -82,8 +82,7 @@ public class RegistarColaboradorService {
 
     if (dto.getFamiliares() != null) {
       var list = dto.getFamiliares().stream().map(f -> {
-        var fe = familiarMapper.toEntity(f, Estado.P);
-        fe.setFunId(fun);
+        var fe = familiarMapper.toEntity(f, Estado.P, fun);
         return fe;
       }).collect(Collectors.toList());
       fun.setFamiliares(list);
@@ -93,8 +92,7 @@ public class RegistarColaboradorService {
       var da = dto.getDadosAcademicosProf();
       if (da.getHabilitacoesLiterarias() != null) {
         var list = da.getHabilitacoesLiterarias().stream().map(h -> {
-          var he = habilitationLiterariaMapper.toEntity(h, Estado.P);
-          he.setFunId(fun);
+          var he = habilitationLiterariaMapper.toEntity(h, Estado.P, fun);
           return he;
         }).collect(Collectors.toList());
         fun.setHabilitacoesLiterarias(list);
@@ -102,8 +100,7 @@ public class RegistarColaboradorService {
 
       if (da.getFormacoesFeitas() != null) {
         var list = da.getFormacoesFeitas().stream().map(f -> {
-          var fe = formacaoFeitaMapper.toEntity(f, Estado.P);
-          fe.setFunId(fun);
+          var fe = formacaoFeitaMapper.toEntity(f, Estado.P, fun);
           return fe;
         }).collect(Collectors.toList());
         fun.setFormacoesFeitas(list);
@@ -111,29 +108,17 @@ public class RegistarColaboradorService {
 
       if (da.getExperienciasProfssionais() != null) {
         var list = da.getExperienciasProfssionais().stream().map(e -> {
-          var ee = experienciaProfissionalMapper.toEntity(e, Estado.P);
-          ee.setFunId(fun);
+          var ee = experienciaProfissionalMapper.toEntity(e, Estado.P, fun);
           return ee;
         }).collect(Collectors.toList());
         fun.setExperienciasProfissionais(list);
       }
     }
 
-    /*
-     * if (dto.getAnexos() != null) {
-     * var list = dto.getAnexos().stream().map(a -> {
-     * var de = documentoMapper.toEntity(a, Estado.P);
-     * de.setFunId(fun);
-     * return de;
-     * }).collect(Collectors.toList());
-     * fun.setDocumentos(list);
-     * }
-     */
 
     if (dto.getDadosBancarios() != null) {
       var list = dto.getDadosBancarios().stream().map(b -> {
-        var be = dadosBancariosMapper.toEntity(b, Estado.P);
-        be.setFunId(fun);
+        var be = dadosBancariosMapper.toEntity(b, Estado.P, fun);
         return be;
       }).collect(Collectors.toList());
       fun.setDadosBancarios(list);
