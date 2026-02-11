@@ -52,23 +52,23 @@ public class EnderecoMapper {
 
     er.setId(entity.getId());
     if (entity.getPaisId() != null) {
-      er.setPaisId(entity.getPaisId().getId() != null ? entity.getPaisId().getId().intValue() : null);
+      er.setPaisId(entity.getPaisId().getId() != null ? entity.getPaisId().getId() : null);
       er.setPaisDesc(entity.getPaisId().getNome());
     }
     if (entity.getIlhaId() != null) {
-      er.setIlhaId(entity.getIlhaId().getId() != null ? entity.getIlhaId().getId().intValue() : null);
+      er.setIlhaId(entity.getIlhaId().getId() != null ? entity.getIlhaId().getId() : null);
       er.setIlhaDesc(entity.getIlhaId().getNome());
     }
     if (entity.getConcelhoId() != null) {
-      er.setConcelhoId(entity.getConcelhoId().getId() != null ? entity.getConcelhoId().getId().intValue() : null);
+      er.setConcelhoId(entity.getConcelhoId().getId() != null ? entity.getConcelhoId().getId() : null);
       er.setConcelhoDesc(entity.getConcelhoId().getNome());
     }
     if (entity.getFreguesiaId() != null) {
-      er.setFreguesiaId(entity.getFreguesiaId().getId() != null ? entity.getFreguesiaId().getId().intValue() : null);
+      er.setFreguesiaId(entity.getFreguesiaId().getId() != null ? entity.getFreguesiaId().getId() : null);
       er.setFreguesiaDesc(entity.getFreguesiaId().getNome());
     }
     if (entity.getZonaId() != null) {
-      er.setZonaId(entity.getZonaId().getId() != null ? entity.getZonaId().getId().intValue() : null);
+      er.setZonaId(entity.getZonaId().getId() != null ? entity.getZonaId().getId(): null);
       er.setZonaDesc(entity.getZonaId().getNome());
     }
     er.setMorada(entity.getMorada());

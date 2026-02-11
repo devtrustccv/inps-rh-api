@@ -25,31 +25,31 @@ public class EnderecoRespDTO  {
   private String uuid ;
 
 
-  private Integer paisId ;
+  private Long paisId ;
 
 
   private String paisDesc ;
 
 
-  private Integer ilhaId ;
+  private Long ilhaId ;
 
 
   private String ilhaDesc ;
 
 
-  private Integer concelhoId ;
+  private Long concelhoId ;
 
 
   private String concelhoDesc ;
 
 
-  private Integer freguesiaId ;
+  private Long freguesiaId ;
 
 
   private String freguesiaDesc ;
 
 
-  private Integer zonaId ;
+  private Long zonaId ;
 
 
   private String zonaDesc ;
