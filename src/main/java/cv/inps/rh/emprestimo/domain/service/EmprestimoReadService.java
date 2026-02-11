@@ -38,7 +38,7 @@ public class EmprestimoReadService {
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
   private final RhPagamentoEntityRepository rhPagamentoEntityRepository;
-  private final DocumentService documentService;
+  private final EmprestimoDocumentService documentService;
 
   public List<InformacaoEmprestimoRequestDTO> getAllConfiguracaoEmprestimo() {
     return paramEmprestimoEntityRepository.findAll()

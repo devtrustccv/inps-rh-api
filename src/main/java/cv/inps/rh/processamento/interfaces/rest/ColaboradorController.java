@@ -7,7 +7,9 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.processamento.application.commands.ImportarMovimentosCommand;
+import cv.inps.rh.processamento.application.commands.ValidarMovimentoImportadoCommand;
 import cv.inps.rh.processamento.application.dto.MovimentosImportadosDTO;
+import cv.inps.rh.processamento.application.dto.ValidacaoMovimentoImportadoDTO;
 import cv.inps.rh.processamento.application.dto.WrapperListaColaboradorDTO;
 import cv.inps.rh.processamento.application.queries.GetListaBaixamedicaQuery;
 import cv.inps.rh.processamento.application.queries.GetListaLicensaSemVencimentoQuery;
@@ -17,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -168,6 +171,36 @@ public class ColaboradorController {
       final var query = new GetMovimentosImportadosQuery(page, size, dataImportacao);
 
       return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "movimentos/{movimentoId}/validar"
+  )
+  @Operation(
+    summary = "Validar movimento importado",
+    description = "Validar movimento importado",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> validarMovimentoImportado(@Valid @RequestBody ValidacaoMovimentoImportadoDTO validarMovimentoImportadoRequest
+    , @PathVariable(value = "movimentoId") String movimentoId)
+  {
+
+      final var command = new ValidarMovimentoImportadoCommand(validarMovimentoImportadoRequest, movimentoId);
+
+      return commandBus.send(command);
 
   }
 

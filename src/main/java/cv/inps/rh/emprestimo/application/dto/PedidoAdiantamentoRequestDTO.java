@@ -5,7 +5,6 @@ package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,19 +14,16 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-
 @IgrpDTO
-public class PedidoAdiantamentoRequestDTO  {
+public class PedidoAdiantamentoRequestDTO {
 
   @NotBlank(message = "The field <emprestimoId> is required")
+  private String emprestimoId;
 
-  private String emprestimoId ;
-  @NotNull(message = "The field <valorAdiantamento> is required")
+  private BigDecimal valorAdiantamento;
 
-  private BigDecimal valorAdiantamento ;
+  private Long numeroPrestacao;
 
   @NotBlank(message = "The field <tipoSituacao> is required")
-  private String tipoSituacao ;
-
+  private String tipoSituacao;
 }

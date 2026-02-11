@@ -2,11 +2,14 @@ package cv.inps.rh.shared.infrastructure.persistence.entity;
 
 import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -23,6 +26,18 @@ public class ImportacaoMovimentoEntity extends AuditEntity {
   )
   @Column(name = "ID")
   private Long id;
+
+  @NotNull
+  @Column(name = "UUID")
+  private UUID uuid;
+
+  @NotBlank
+  @Column(name = "ESTADO")
+  private String estado;
+
+  @NotBlank
+  @Column(name = "NOME_FICHEIRO")
+  private String nomeFicheiro;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "FUN_ID", nullable = false)

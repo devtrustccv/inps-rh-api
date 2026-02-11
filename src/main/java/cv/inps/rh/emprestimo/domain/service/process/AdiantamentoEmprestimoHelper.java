@@ -3,10 +3,11 @@ package cv.inps.rh.emprestimo.domain.service.process;
 import cv.inps.rh.emprestimo.domain.service.FinancialPlanHelper;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoSituacao;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.PlanoFinanceiroEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PlanoFinanceiroEntityRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,20 +20,16 @@ import java.time.LocalDate;
 @Service
 public class AdiantamentoEmprestimoHelper {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(AdiantamentoEmprestimoHelper.class);
+
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
 
   public void saveByTipoSituacao(TipoSituacao tipoSituacao, EmprestimoEntity loan, BigDecimal value, Long newNumeroPrestacao) {
 
+    LOGGER.debug("TIPO SITUACAO: {}, LOAN ID: {}, VALUE: {}, NUMERO PRESTACOES: {}", tipoSituacao, loan.getId(), value, newNumeroPrestacao);
+
     var allPlans = planoFinanceiroEntityRepository.findAllByEmprestimo(loan);
-
-    // TODO 09/02/2026 19:01 inactivate not payed plans
-    var notPayedPlans = allPlans.stream().filter(obj -> !obj.getFlgPago().equals("PAGO")).toList();
-
-    var paidValue = allPlans.stream()
-        .filter(obj -> obj.getFlgPago().equals("PAGO"))
-        .map(PlanoFinanceiroEntity::getValorPago)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
 
     var numberOfPaidPrestations = allPlans.stream()
         .filter(obj -> obj.getFlgPago().equals("PAGO"))
@@ -44,13 +41,13 @@ public class AdiantamentoEmprestimoHelper {
     // reforço mexe com valor em divida e com valor reforço
     // reforço sobre prestacao mexe com valor prestacao e com numero de pretacao
 
-    var numeroPrestacoes = (loan.getNrPrestacao() - numberOfPaidPrestations);
-
     switch (tipoSituacao) {
       case REFORCO_AUMENTO_VALOR -> {
 
+        var numeroPrestacoes = (loan.getNrPrestacao() - numberOfPaidPrestations);
+
         loan.setValorReforco(value);
-        loan.setValorDivida(loan.getValorDivida().subtract(value));
+        loan.setValorDivida(loan.getValorDivida().add(value));
         emprestimoEntityRepository.save(loan);
 
         FinancialPlanHelper.generateFinancialPlan(
@@ -60,7 +57,7 @@ public class AdiantamentoEmprestimoHelper {
             loan.getDataInicio() != null ? loan.getDataInicio() : LocalDate.now()
         );
       }
-      case REFORCO_AUMENTO_PRESTACAO -> {
+      case REFORCO_AUMENTO_PRESTACAO, ADIANTAMENTO_DIMINUICAO_PRESTACAO -> {
 
         loan.setNrPrestacao(newNumeroPrestacao);
         emprestimoEntityRepository.save(loan);
@@ -85,11 +82,36 @@ public class AdiantamentoEmprestimoHelper {
             newNumeroPrestacao.intValue(),
             loan.getDataInicio() != null ? loan.getDataInicio() : LocalDate.now()
         );
-
       }
+      case ADIANTAMENTO_PAGAMENTO_ANTECIPADO -> {
 
+        var numeroPrestacoes = (loan.getNrPrestacao() - numberOfPaidPrestations);
+
+        loan.setValorAdiantado(value);
+        loan.setValorDivida(loan.getValorDivida().subtract(value));
+        emprestimoEntityRepository.save(loan);
+
+        FinancialPlanHelper.generateFinancialPlan(
+            loan.getValorDivida(),
+            loan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
+            (int) numeroPrestacoes,
+            loan.getDataInicio() != null ? loan.getDataInicio() : LocalDate.now()
+        );
+      }
+      case ADIANTAMENTO_PAGAMENTO_ANTECIPADO_DIMINUICAO_PRESTACAO -> {
+
+        loan.setValorAdiantado(value);
+        loan.setNrPrestacao(newNumeroPrestacao);
+        loan.setValorDivida(loan.getValorDivida().subtract(value));
+        emprestimoEntityRepository.save(loan);
+
+        FinancialPlanHelper.generateFinancialPlan(
+            loan.getValorDivida(),
+            loan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
+            newNumeroPrestacao.intValue(),
+            loan.getDataInicio() != null ? loan.getDataInicio() : LocalDate.now()
+        );
+      }
     }
-
   }
-
 }

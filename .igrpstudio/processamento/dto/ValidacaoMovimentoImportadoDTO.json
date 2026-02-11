@@ -1,0 +1,26 @@
+{
+  "type": "dto",
+  "module": "processamento",
+  "name": "ValidacaoMovimentoImportado",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "MovRow",
+    "module": "processamento"
+  },
+  "attributes": [
+    {
+      "name": "validacao",
+      "objectType": "java",
+      "type": "string",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "g9ca6vgtvl"
+}
