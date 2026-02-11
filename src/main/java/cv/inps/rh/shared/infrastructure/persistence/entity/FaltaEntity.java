@@ -109,5 +109,7 @@ public class FaltaEntity extends AuditEntity {
     @Column(name="valor")
     private BigDecimal valor;
 
+    @Column(name="tipo_falta")
+    private String tipoFalta;
 
 }
