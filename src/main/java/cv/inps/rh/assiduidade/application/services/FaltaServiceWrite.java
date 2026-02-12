@@ -176,8 +176,8 @@ public class FaltaServiceWrite {
         f.setParamSitId(ps);
       }
 
-      // 🔹 desconto salário
-      if (novoEstado == Estado.A && f.getParamSitId() != null &&
+      //desconto salário
+      if (Objects.equals(novoEstado, Estado.A) && f.getParamSitId() != null &&
           f.getParamSitId().getFlgFaltaDecontoSal() != null &&
           f.getParamSitId().getFlgFaltaDecontoSal() == 1) {
 
@@ -200,7 +200,7 @@ public class FaltaServiceWrite {
       }
 
       // desconto férias
-      if (novoEstado == Estado.A && f.getParamSitId() != null) {
+      if (Objects.equals(novoEstado, Estado.A) && f.getParamSitId() != null) {
         var fg = new FeriasGozadasEntity();
         fg.setFunId(pedido.getFunId());
         fg.setPedidoId(pedido);
@@ -214,7 +214,7 @@ public class FaltaServiceWrite {
       }
 
       // desconto dispensa
-      if (novoEstado == Estado.A && f.getParamSitId() != null) {
+      if (Objects.equals(novoEstado, Estado.A) && f.getParamSitId() != null) {
         var disp = new DispensaEntity();
         disp.setPedidoId(pedido);
         disp.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid()));
