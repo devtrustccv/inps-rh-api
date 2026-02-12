@@ -1,5 +1,9 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
+import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.assiduidade.application.dto.JustificarFaltaDTO;
 import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
 import cv.inps.rh.assiduidade.application.queries.GetJustificacaoFaltaByPedidoQuery;
@@ -34,6 +38,7 @@ public class JustificarFaltaReadService {
 
   private final AssiduidadeSinteseDiarioEntityRepository assiduidadeSinteseDiarioEntityRepository;
   private final PedidoEntityRepository pedidoRepository;
+  private final DocumentoMapper documentoMapper;
 
   @Transactional(readOnly = true)
   public JustificarFaltaDTO getFaltaJustificadaResumo(GetJustificacaoFaltaQuery query) {
@@ -48,16 +53,15 @@ public class JustificarFaltaReadService {
     // Buscar funcionário
     FuncionarioEntity funcionario = funcionarioRepository.findByUuid(funcUuid)
         .orElseThrow(() -> IgrpResponseStatusException.notFound(
-            "Funcionário não encontrado para UUID: " + funcUuid
-        ));
+            "Funcionário não encontrado para UUID: " + funcUuid));
 
     // Calcular intervalo do mês
     LocalDate inicioMes = LocalDate.of(query.getAno(), query.getMes(), 1);
     LocalDate fimMes = inicioMes.withDayOfMonth(inicioMes.lengthOfMonth());
 
     // Buscar todas as sínteses diárias do funcionário no mês
-    List<AssiduidadeSinteseDiarioEntity> sinteses =
-        assiduidadeSinteseDiarioEntityRepository.findAllByFuncionarioIdAndDataBetween(funcionario, inicioMes, fimMes);
+    List<AssiduidadeSinteseDiarioEntity> sinteses = assiduidadeSinteseDiarioEntityRepository
+        .findAllByFuncionarioIdAndDataBetween(funcionario, inicioMes, fimMes);
 
     // Mapear para FaltaItemDTO
     List<FaltaItemDTO> itensFalta = sinteses.stream().map(s -> {
@@ -65,7 +69,8 @@ public class JustificarFaltaReadService {
       item.setId(s.getId());
       item.setData(s.getData().toString());
       // Se houver falta total (0 = falta total?), definir tipoFalta
-      //item.setTipoFalta(s.getFalta() != null && s.getFalta() > 0 ? "INJUSTIFICADA" : null);
+      // item.setTipoFalta(s.getFalta() != null && s.getFalta() > 0 ? "INJUSTIFICADA"
+      // : null);
       item.setHorasAusencia(s.getHorasAusencia());
       item.setValorAusencia(null); // cálculo futuro
       item.setMotivo(null); // não há motivo na síntese
@@ -84,8 +89,6 @@ public class JustificarFaltaReadService {
     return dto;
   }
 
-
-
   @Transactional(readOnly = true)
   public JustificarFaltaDTO getFaltaJustificada(GetJustificacaoFaltaByPedidoQuery query) {
 
@@ -103,24 +106,39 @@ public class JustificarFaltaReadService {
     // Buscar pedido
     var pedido = pedidoRepository.findByUuid(pedidoUuid)
         .orElseThrow(() -> IgrpResponseStatusException.notFound(
-            "Pedido não encontrado com UUID: " + pedidoUuid
-        ));
+            "Pedido não encontrado com UUID: " + pedidoUuid));
 
     var funcionario = pedido.getFunId();
 
     // Buscar todas as faltas associadas ao pedido
     List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
 
+
+
     // Mapear para FaltaItemDTO
     List<FaltaItemDTO> itensFalta = faltas.stream().map(f -> {
       var item = new FaltaItemDTO();
       item.setId(f.getSinteseDiarioId().getId());
       item.setData(f.getSinteseDiarioId().getData().toString());
-      //item.setTipoFalta(f.getParamSitId() != null ? f.getParamSitId().getNome() : null);
+      // item.setTipoFalta(f.getParamSitId() != null ? f.getParamSitId().getNome() :
+      // null);
       item.setValorAusencia(null); // calculo futuro
       item.setHorasAusencia(f.getHorasAusencia());
       item.setMotivo(f.getDescricaoMotivo());
       item.setComJustificativo(f.getFlgJustificativo());
+
+      List<DocumentoEntity> documentos = documentoEntityRepository
+          .findAllByReferenciaNameAndReferenciaUuid(Referencia.JUSTIFICAR_FALTA.name(), f.getUuid());
+
+      if (!documentos.isEmpty()) {
+        DocumentoEntity doc = documentos.getFirst(); // Pegando o primeiro documento como exemplo
+        AnexoReqDTO anexo = new AnexoReqDTO();
+        anexo.setId(doc.getId());
+        anexo.setTipoDocumentoId(doc.getTpDocumentoId() != null ? doc.getTpDocumentoId().getId() : null);
+        anexo.setDocumento(doc.getUrl());
+        item.setDocumento(anexo);
+      }
+
       return item;
     }).toList();
 
@@ -130,7 +148,8 @@ public class JustificarFaltaReadService {
     dto.setNomeColaborador(funcionario.getNome());
     dto.setItensFalta(itensFalta);
 
-    // Campos de decisão, despacho e tipoJustificacao podem ser preenchidos a partir da primeira falta
+    // Campos de decisão, despacho e tipoJustificacao podem ser preenchidos a partir
+    // da primeira falta
     if (!faltas.isEmpty()) {
       var primeira = faltas.getFirst();
       dto.setParecerResponsavel(primeira.getDecisaoResponsavel());
@@ -142,6 +161,5 @@ public class JustificarFaltaReadService {
 
     return dto;
   }
-
 
 }
