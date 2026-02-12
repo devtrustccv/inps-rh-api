@@ -6,6 +6,11 @@ import cv.inps.rh.assiduidade.application.commands.ValidarFaltaJustificadaComman
 import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
+import cv.inps.rh.shared.infrastructure.persistence.repository.FeriasGozadasEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.AnoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FeriasGozadasEntity;
+import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -27,10 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -50,7 +52,11 @@ public class JustificarFaltaWriteService {
   private final DocumentoEntityRepository documentoEntityRepository;
   private final DefPagamentoEntityRepository defPagamentoRepository;
   private final DefPagamentoMapper defPagamentoMapper;
+  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
+  private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
+  private final FeriasGozadasEntityRepository feriasGozadasRepository;
+  private final AnoEntityRepository anoRepository;
 
   @Transactional
   public Map<String, ?> justificarFalta(JustificarFaltaCommand command) {
@@ -183,7 +189,7 @@ public class JustificarFaltaWriteService {
       documentoEntityRepository.saveAll(documentos);
     }
 
-    //  Criar validação
+    // Criar validação
     var validacao = dadosContratuaisMapper.toValidacaoInsert(
         TipoAcao.INSERT.name(),
         Referencia.JUSTIFICAR_FALTA.name(),
@@ -267,15 +273,39 @@ public class JustificarFaltaWriteService {
             .getFirst();
 
         var valor = falta.getValor() != null ? falta.getValor() : BigDecimal.ZERO;
-        var dp = defPagamentoMapper.createPagamento(
+        var dr = definicaoRemuneracaoMapper.createRenumeracao(
             valor,
             mov.getTmId(),
             falta.getDataInicio().toLocalDate(),
             falta.getDataFim().toLocalDate(),
-            funcionario);
+            funcionario,
+            "CVE");
 
-        defPagamentoRepository.save(dp);
+        definicaoRemuneracaoEntityRepository.save(dr);
         falta.setFlgDescontoSal(1);
+        falta.setDefRemId(dr);
+      }
+
+      // REGRA: Desconto de Férias
+      if (Objects.equals(estadoFinal, Estado.A) &&  falta.getParamSitId() != null &&
+          Objects.equals(falta.getParamSitId().getFlgAusencia(), 1) &&
+          Objects.equals(falta.getParamSitId().getTipoAusencia(), "FERIAS"))  {
+
+        // TODO: Implementar validação de saldo de férias do funcionário
+
+        var ano = anoRepository.findByAno(String.valueOf(falta.getDataInicio().getYear()))
+            .orElseThrow(() -> IgrpResponseStatusException.badRequest("Ano de referência não encontrado"));
+
+        var feriasGozadas = new FeriasGozadasEntity();
+        feriasGozadas.setFunId(funcionario);
+        feriasGozadas.setPedidoId(pedido);
+        feriasGozadas.setAnoId(ano);
+        feriasGozadas.setDataInicio(falta.getDataInicio().toLocalDate());
+        feriasGozadas.setDataFim(falta.getDataFim().toLocalDate());
+        feriasGozadas.setNumDia(1); // Assumindo 1 dia de desconto por falta
+        feriasGozadas.setEstado(Estado.A);
+        feriasGozadas.setUuid(UuidCreator.getTimeOrderedEpoch());
+        feriasGozadasRepository.save(feriasGozadas);
       }
     }
 
