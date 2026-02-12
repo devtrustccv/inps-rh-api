@@ -226,9 +226,9 @@ public class DispensaWriteService {
 
     // Criar ausência quando validação for SIM (estado A)
     if (estado == Estado.A) {
-      var paramsDispensa = paramSituacaoEntityRepository.findAllByNome("Dispensa");
+      var paramsDispensa = paramSituacaoEntityRepository.findByFlgAusenciaAndTipoAusencia(1, "DISPENSA");
       if (paramsDispensa != null && !paramsDispensa.isEmpty()) {
-        ParamSituacaoEntity param = paramsDispensa.get(0);
+        ParamSituacaoEntity param = paramsDispensa.getFirst();
         var ausencia = new AusenciaEntity();
         ausencia.setParamSitId(param);
         ausencia.setReferenciaName("RH_T_DISPENSA");

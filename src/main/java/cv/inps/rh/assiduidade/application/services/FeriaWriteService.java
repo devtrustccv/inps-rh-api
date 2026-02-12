@@ -330,10 +330,10 @@ public class FeriaWriteService {
 
   private void criarAusenciaNaValidacao(FeriasGozadasEntity ferias) {
     try {
-      var params = paramSituacaoRepository.findAllByNome(SituacaoFalta.FERIAS.getNome());
+      var params = paramSituacaoRepository.findByFlgAusenciaAndTipoAusencia(1,SituacaoFalta.FERIAS.name());
       if (params == null || params.isEmpty())
         return;
-      var param = params.get(0);
+      var param = params.getFirst();
       var ausencia = new AusenciaEntity();
       ausencia.setParamSitId(param);
       ausencia.setReferenciaName("RH_T_FERIAS_GOZADAS");

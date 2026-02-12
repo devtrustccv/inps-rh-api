@@ -39,4 +39,7 @@ public interface ParamSituacaoEntityRepository extends JpaRepository<ParamSituac
       Estado estado
   );
 
+  List<ParamSituacaoEntity> findByFlgAusenciaAndTipoAusencia(Integer flgAusencia, String tipoAusencia);
+
+
 }
