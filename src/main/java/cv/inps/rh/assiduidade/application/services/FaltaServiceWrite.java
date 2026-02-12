@@ -40,7 +40,6 @@ public class FaltaServiceWrite {
   private final AssiduidadeParametroEntityRepository assiduidadeParametroRepository;
   private final DocumentoMapper documentoMapper;
   private final ParamSituacaoEntityRepository paramSituacaoRepository;
-  private final EntityManager entityManager;
   private final DefPagamentoEntityRepository defPagamentoRepository;
   private final DefPagamentoMapper defPagamentoMapper;
   private final DocumentoEntityRepository documentoEntityRepository;
@@ -178,8 +177,7 @@ public class FaltaServiceWrite {
 
       //desconto salário
       if (Objects.equals(novoEstado, Estado.A) && f.getParamSitId() != null &&
-          f.getParamSitId().getFlgFaltaDecontoSal() != null &&
-          f.getParamSitId().getFlgFaltaDecontoSal() == 1) {
+          Objects.equals( f.getParamSitId().getFlgFaltaDecontoSal(), 1)) {
 
         var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid());
         var vinculoId = tipoRel.getContrVinculoId().getVinculoId().getId();
@@ -200,7 +198,10 @@ public class FaltaServiceWrite {
       }
 
       // desconto férias
-      if (Objects.equals(novoEstado, Estado.A) && f.getParamSitId() != null) {
+      if (Objects.equals(novoEstado, Estado.A) &&  f.getParamSitId() != null &&
+      Objects.equals(f.getParamSitId().getFlgAusencia(), 1) &&
+          Objects.equals(f.getParamSitId().getTipoAusencia(), "FERIAS")) {
+
         var fg = new FeriasGozadasEntity();
         fg.setFunId(pedido.getFunId());
         fg.setPedidoId(pedido);
@@ -214,7 +215,10 @@ public class FaltaServiceWrite {
       }
 
       // desconto dispensa
-      if (Objects.equals(novoEstado, Estado.A) && f.getParamSitId() != null) {
+      if (Objects.equals(novoEstado, Estado.A) && f.getParamSitId() != null &&
+          Objects.equals(f.getParamSitId().getFlgAusencia(), 1) &&
+          Objects.equals(f.getParamSitId().getTipoAusencia(), "DISPENSA")) {
+
         var disp = new DispensaEntity();
         disp.setPedidoId(pedido);
         disp.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid()));
