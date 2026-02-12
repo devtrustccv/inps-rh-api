@@ -7,9 +7,12 @@ import cv.inps.rh.assiduidade.application.queries.GetDispensaByPedidoIdQuery;
 import cv.inps.rh.assiduidade.application.queries.GetDispensaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaDispensaQuery;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DispensaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DispensaEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
@@ -21,15 +24,18 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class DispensaReadService {
 
   private final DispensaEntityRepository dispensaRepository;
+  private final DocumentoEntityRepository documentoEntityRepository;
 
   @Transactional(readOnly = true)
   public WrapperListaDispensaDTO getListaDispensa(GetListaDispensaQuery query) {
@@ -198,6 +204,20 @@ public class DispensaReadService {
       }
       dto.setHorasUsadasMes(formatMinutes(totalMin));
     }
+
+    var documentos = documentoEntityRepository
+        .findAllByReferenciaNameAndReferenciaUuid(Referencia.DISPENSA.name(),e.getUuid());
+
+    if (!CollectionUtils.isEmpty(documentos)) {
+      dto.setDocumentos(documentos.stream().map(d -> {
+        var anexo = new AnexoReqDTO();
+        anexo.setId(d.getId() != null ? d.getId() : null);
+        anexo.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
+        anexo.setDocumento(d.getUrl());
+        return anexo;
+      }).collect(Collectors.toList()));
+    }
+
     return dto;
   }
 
@@ -243,6 +263,20 @@ public class DispensaReadService {
       }
       dto.setHorasUsadasMes(formatMinutes(totalMin));
     }
+
+    var documentos = documentoEntityRepository
+        .findAllByReferenciaNameAndReferenciaUuid(Referencia.DISPENSA.name(),e.getUuid());
+
+    if (!CollectionUtils.isEmpty(documentos)) {
+      dto.setDocumentos(documentos.stream().map(d -> {
+        var anexo = new AnexoReqDTO();
+        anexo.setId(d.getId() != null ? d.getId() : null);
+        anexo.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
+        anexo.setDocumento(d.getUrl());
+        return anexo;
+      }).collect(Collectors.toList()));
+    }
+
     return dto;
   }
 

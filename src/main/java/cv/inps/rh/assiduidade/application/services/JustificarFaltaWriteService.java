@@ -6,6 +6,7 @@ import cv.inps.rh.assiduidade.application.commands.ValidarFaltaJustificadaComman
 import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
+import cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
@@ -48,7 +49,7 @@ public class JustificarFaltaWriteService {
   private final DocumentoMapper documentoMapper;
   private final DocumentoEntityRepository documentoEntityRepository;
   private final DefPagamentoEntityRepository defPagamentoRepository;
-  private final cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper defPagamentoMapper;
+  private final DefPagamentoMapper defPagamentoMapper;
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
 
   @Transactional
@@ -150,7 +151,7 @@ public class JustificarFaltaWriteService {
       faltas.add(falta);
     }
 
-    // 6️⃣ Persistir faltas
+    // 6 Persistir faltas
     faltaRepository.saveAll(faltas);
 
     Map<Long, FaltaEntity> faltaPorSinteseId = faltas.stream()
@@ -182,7 +183,7 @@ public class JustificarFaltaWriteService {
       documentoEntityRepository.saveAll(documentos);
     }
 
-    // 7️⃣ Criar validação
+    //  Criar validação
     var validacao = dadosContratuaisMapper.toValidacaoInsert(
         TipoAcao.INSERT.name(),
         Referencia.JUSTIFICAR_FALTA.name(),
@@ -194,7 +195,7 @@ public class JustificarFaltaWriteService {
 
     validacaoEntityRepository.save(validacao);
 
-    // 8️⃣ Retorno
+    // 8️ Retorno
     return Map.of(
         "pedidoId", pedido.getId(),
         "pedidoUuid", pedido.getUuid(),
@@ -303,38 +304,38 @@ public class JustificarFaltaWriteService {
     /*
      * ================= DÚVIDAS / PONTOS A CONFIRMAR COM ANALISTA =================
      *
-     * 1️⃣ Desconto de Salário (RH_T_DEF_PAGAMENTOS)
+     * 1️ Desconto de Salário (RH_T_DEF_PAGAMENTOS)
      * - Qual entidade exata devemos usar para registrar o desconto de salário?
      * - Quais campos são obrigatórios: funId, tiprelId, referenciaId, valor, data,
      * estado?
      * - O desconto é automático ao validar a falta ou apenas registro histórico?
      *
-     * 2️⃣ Desconto de Férias (RH_T_FERIAS_GOZADAS)
+     * 2️ Desconto de Férias (RH_T_FERIAS_GOZADAS)
      * - Existe entidade mapeada para registrar férias gozadas?
      * - Como calcular os dias a descontar por falta?
      * - Só desconta se houver saldo suficiente de férias?
      * - As datas da falta (dataInicio/dataFim) devem ser replicadas no registro de
      * férias?
      *
-     * 3️⃣ Desconto de Horas de Dispensa (RH_T_DISPENSA)
+     * 3️ Desconto de Horas de Dispensa (RH_T_DISPENSA)
      * - Existe entidade mapeada para horas de dispensa?
      * - Como calcular a quantidade de horas a descontar por falta?
      * - Aplica apenas a faltas injustificadas ou todas as faltas?
      *
-     * 4️⃣ Valor da Justificação de Falta
+     * 4️ Valor da Justificação de Falta
      * - Para cada tipoJustificacao (ParamSituacaoEntity.tipoFalta), como calcular o
      * valor?
      * - Valor por hora ou por dia?
      * - É apenas para descontos ou também para relatórios?
      *
-     * 5️⃣ Integração com Pedido e Validação
+     * 5️ Integração com Pedido e Validação
      * - Ao validar a falta, devemos atualizar estados:
      * FaltaEntity.estado = 'A'
      * PedidoEntity.estado = 'A', PedidoEntity.etapa = 'FINALIZADO'
      * ValidacaoEntity.estado = 'A'
      * - Isso deve ocorrer somente se EstadoValidacao enviado for "SIM"?
      *
-     * 6️⃣ Observações Gerais
+     * 6️ Observações Gerais
      * - O campo tipoJustificacao já vem no DTO como Long (id de
      * ParamSituacaoEntity), está correto?
      * - Se uma falta já tiver desconto registrado, sobrescrever ou criar novo
