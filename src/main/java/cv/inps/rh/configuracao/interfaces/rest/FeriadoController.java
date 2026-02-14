@@ -3,20 +3,25 @@
 
 package cv.inps.rh.configuracao.interfaces.rest;
 
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import cv.inps.rh.configuracao.application.commands.SaveFeriadosCommand;
-import cv.inps.rh.configuracao.application.dto.FeriadoListRequestDTO;
-import cv.inps.rh.configuracao.application.queries.GetFeriadosPorAnoQuery;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import cv.igrp.framework.core.domain.QueryBus;
+import cv.inps.rh.configuracao.application.queries.*;
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.inps.rh.configuracao.application.commands.*;
+import cv.inps.rh.configuracao.application.dto.FeriadoDTO;
+import cv.inps.rh.configuracao.application.dto.FeriadoListRequestDTO;
 
 @IgrpController
 @RestController
@@ -27,70 +32,101 @@ import org.springframework.web.bind.annotation.*;
 )
 public class FeriadoController {
 
-
+  
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
   public FeriadoController(QueryBus queryBus, CommandBus commandBus) {
-    this.queryBus = queryBus;
-    this.commandBus = commandBus;
+          this.queryBus = queryBus;
+          this.commandBus = commandBus;
   }
-
-  @PostMapping(
-      value = "feriado"
+   @PostMapping(
+   value = "feriado"
   )
   @Operation(
-      summary = "Save feriados",
-      description = "Save feriados",
-      responses = {
-          @ApiResponse(
-              responseCode = "200",
-
-              content = @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(
-                      implementation = String.class,
-                      type = "String")
-              )
+    summary = "Save feriados",
+    description = "Save feriados",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
           )
-      }
+      )
+    }
   )
+  
+  public ResponseEntity<String> saveFeriados(@Valid @RequestBody FeriadoDTO saveFeriadosRequest
+    )
+  {
 
-  public ResponseEntity<String> saveFeriados(@Valid @RequestBody FeriadoListRequestDTO saveFeriadosRequest
-  ) {
+      final var command = new SaveFeriadosCommand(saveFeriadosRequest);
 
-    final var command = new SaveFeriadosCommand(saveFeriadosRequest);
-
-    return commandBus.send(command);
+      return commandBus.send(command);
 
   }
 
-  @GetMapping(
-      value = "feriado/{anoReferente}"
+   @GetMapping(
+   value = "feriado/{anoReferente}"
   )
   @Operation(
-      summary = "Get feriados por ano",
-      description = "Get feriados por ano",
-      responses = {
-          @ApiResponse(
-              responseCode = "200",
-
-              content = @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(
-                      implementation = FeriadoListRequestDTO.class,
-                      type = "object")
-              )
+    summary = "Get feriados por ano",
+    description = "Get feriados por ano",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = FeriadoListRequestDTO.class,
+                  type = "object")
           )
-      }
+      )
+    }
   )
-
+  
   public ResponseEntity<FeriadoListRequestDTO> getFeriadosPorAno(
-      @PathVariable(value = "anoReferente") String anoReferente) {
+    @PathVariable(value = "anoReferente") String anoReferente)
+  {
 
-    final var query = new GetFeriadosPorAnoQuery(anoReferente);
+      final var query = new GetFeriadosPorAnoQuery(anoReferente);
 
-    return queryBus.handle(query);
+      return queryBus.handle(query);
+
+  }
+
+   @DeleteMapping(
+   value = "feriado/{idFeriado}"
+  )
+  @Operation(
+    summary = "Delete feriado",
+    description = "Delete feriado",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<String> deleteFeriado(
+    @PathVariable(value = "idFeriado") String idFeriado)
+  {
+
+      final var command = new DeleteFeriadoCommand(idFeriado);
+
+      return commandBus.send(command);
 
   }
 

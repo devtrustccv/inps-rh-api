@@ -13,7 +13,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "FeriadoListRequest",
+              "type": "Feriado",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
@@ -64,7 +64,33 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "deleteFeriado",
+      "path": "feriado/{idFeriado}",
+      "method": "DELETE",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFeriado",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "uzhtugvgcm-saveFeriados-getFeriadosPorAno"
+  "id": "uzhtugvgcm-saveFeriados-getFeriadosPorAno-saveFeriados-deleteFeriado"
 }

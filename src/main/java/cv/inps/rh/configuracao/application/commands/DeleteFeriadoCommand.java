@@ -5,14 +5,14 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.configuracao.application.dto.FeriadoDTO;
+
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SaveFeriadosCommand implements Command {
+public class DeleteFeriadoCommand implements Command {
 
-  
-  private FeriadoDTO feriado;
+  @NotBlank(message = "The field <idFeriado> is required")
+  private String idFeriado;
 
 }
