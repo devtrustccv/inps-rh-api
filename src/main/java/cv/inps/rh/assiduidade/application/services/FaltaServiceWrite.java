@@ -70,9 +70,9 @@ public class FaltaServiceWrite {
 
     PedidoEntity pedido = null;
     if (deveJustificar) {
-      if (req.getTipoJustificacao() == null || req.getTipoJustificacao() <= 0) {
+      /*if (req.getTipoJustificacao() == null || req.getTipoJustificacao() <= 0) {
         throw IgrpResponseStatusException.badRequest("Tipo de justificação é obrigatório");
-      }
+      }*/
 
       pedido = new PedidoEntity();
       pedido.setFunId(funcionario);
@@ -303,10 +303,10 @@ public class FaltaServiceWrite {
     if (req.getTipoJustificacao() != null && req.getTipoJustificacao() > 0) {
       var paramSituacao = paramSituacaoRepository.findById(req.getTipoJustificacao())
           .orElseThrow(() -> IgrpResponseStatusException.badRequest("Tipo justificativo inválido"));
-      if (!"1".equalsIgnoreCase(paramSituacao.getTipoAusencia())) {
+      /*if (!"1".equalsIgnoreCase(paramSituacao.getTipoAusencia())) {
         throw IgrpResponseStatusException.badRequest(
             "Tipo justificativo não permitido para falta");
-      }
+      }*/
       falta.setParamSitId(paramSituacao);
     }
 
