@@ -52,8 +52,8 @@ public class GetParamSituacoesAtivoQueryHandler implements QueryHandler<GetParam
         }
       }
 
-      if (StringUtils.hasText(query.getFlgFalta())) {
-        predicates.add(cb.equal(root.get("flgFalta"), query.getFlgFalta()));
+      if (StringUtils.hasText(query.getTipoAusencia())) {
+        predicates.add(cb.equal(root.get("tipoAusencia"), query.getTipoAusencia()));
       }
 
       if (StringUtils.hasText(query.getTipoFalta())) {

@@ -396,11 +396,11 @@ public class ParametrizacaoController {
   public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacoesAtivo(
     @RequestParam(value = "flgSituacaoLaboral", required = false) Integer flgSituacaoLaboral,
     @RequestParam(value = "flgAusencia", required = false) String flgAusencia,
-    @RequestParam(value = "flgFalta", required = false) String flgFalta,
+    @RequestParam(value = "tipoAusencia", required = false) String tipoAusencia,
     @RequestParam(value = "tipoFalta", required = false) String tipoFalta)
   {
 
-      final var query = new GetParamSituacoesAtivoQuery(flgSituacaoLaboral, flgAusencia, flgFalta, tipoFalta);
+      final var query = new GetParamSituacoesAtivoQuery(flgSituacaoLaboral, flgAusencia, tipoAusencia, tipoFalta);
 
       return queryBus.handle(query);
 

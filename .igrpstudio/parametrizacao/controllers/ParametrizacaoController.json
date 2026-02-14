@@ -309,7 +309,7 @@
         },
         {
           "type": "string",
-          "name": "flgFalta",
+          "name": "tipoAusencia",
           "isRequired": false
         },
         {
@@ -374,5 +374,5 @@
       }
     }
   ],
-  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos-getParamSituacaoDetalheAtivo-getParamSituacaoLaboralAtivo-getTiposDocumentoAtivos-getVinculosAtivos-getParamSituacoesLaboraisByVinculo-getEscaloesAtivos-getParamSituacoesLaboraisByVinculo-getParamSituacoesLaboraisByVinculo-getParamSituacoesAtivo-getParamSituacoesAtivo"
+  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos-getParamSituacaoDetalheAtivo-getParamSituacaoLaboralAtivo-getTiposDocumentoAtivos-getVinculosAtivos-getParamSituacoesLaboraisByVinculo-getEscaloesAtivos-getParamSituacoesLaboraisByVinculo-getParamSituacoesLaboraisByVinculo-getParamSituacoesAtivo-getParamSituacoesAtivo-getParamSituacoesAtivo"
 }

@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
@@ -31,7 +33,13 @@ public interface FeriadoEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.notFound("FeriadoEntity not found for id: " + uuid));
   }
 
-  List<FeriadoEntity> findAllByAnoReferenteAndEstado(Integer anoReferente, Estado estado);
+  @Query("""
+      select f
+      from FeriadoEntity f
+      where f.estado = :estado
+        and (f.anoReferente = :anoReferente or f.anoReferente = 0)
+      """)
+  List<FeriadoEntity> findAllByAnoReferenteAndEstado(@Param("anoReferente") Integer anoReferente, @Param("estado") Estado estado);
 
   List<FeriadoEntity> findAllByGeogrId(GeografiaEntity geogrId);
 

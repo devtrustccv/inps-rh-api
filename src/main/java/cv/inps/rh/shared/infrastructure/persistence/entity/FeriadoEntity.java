@@ -49,17 +49,13 @@ public class FeriadoEntity extends AuditEntity {
   private String uuid;
 
 
-  @NotNull(message = "anoReferente is mandatory")
   @Column(name = "ano_referente", nullable = false)
   private Integer anoReferente;
-
 
   @NotBlank(message = "descricao is mandatory")
   @Column(name = "descricao", nullable = false)
   private String descricao;
 
-
-  @NotNull(message = "data is mandatory")
   @Column(name = "data_especifica", nullable = false)
   private LocalDate dataEspecifica;
 

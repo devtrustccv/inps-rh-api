@@ -17,8 +17,8 @@ public class GetParamSituacoesAtivoQuery implements Query {
   private Integer flgSituacaoLaboral;
   @NotBlank(message = "The field <flgAusencia> is required")
   private String flgAusencia;
-  @NotBlank(message = "The field <flgFalta> is required")
-  private String flgFalta;
+  @NotBlank(message = "The field <tipoAusencia> is required")
+  private String tipoAusencia;
   @NotBlank(message = "The field <tipoFalta> is required")
   private String tipoFalta;
 

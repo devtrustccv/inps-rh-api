@@ -25,13 +25,7 @@ public class FeriadoService {
 
   public void save(FeriadoDTO dto) {
 
-    if (dto.getAnoReferente() == null)
-      throw IgrpResponseStatusException.badRequest("O campo <anoReferente> é obrigatório.");
-
-    if (dto.getDataEspecifica() == null)
-      throw IgrpResponseStatusException.badRequest("O campo <dataEspecifica> é obrigatório.");
-
-    if (dto.getDataEspecifica().getYear() != dto.getAnoReferente())
+    if (dto.getDataEspecifica() != null && dto.getDataEspecifica().getYear() != dto.getAnoReferente())
       throw IgrpResponseStatusException.badRequest("O ano referente deve ser igual ao ano da data do feriado.");
 
     var existing = feriadoEntityRepository.findAllByAnoReferenteAndEstado(dto.getAnoReferente(), Estado.A);
@@ -40,13 +34,27 @@ public class FeriadoService {
 
     boolean duplicateExists = existing.stream()
         .filter(f -> currentUuid == null || !f.getUuid().equals(currentUuid))
-        .anyMatch(f ->
-            f.getDataEspecifica().equals(dto.getDataEspecifica()) &&
-                (
-                    (f.getGeogrId() == null && dto.getGeogrId() == null) ||
-                    (f.getGeogrId() != null && dto.getGeogrId() != null && f.getGeogrId().getId().equals(dto.getGeogrId()))
-                )
-        );
+        .anyMatch(f -> {
+          boolean sameRegion =
+              (f.getGeogrId() == null && dto.getGeogrId() == null) ||
+                  (f.getGeogrId() != null && dto.getGeogrId() != null && f.getGeogrId().getId().equals(dto.getGeogrId()));
+
+          if ("SIM".equalsIgnoreCase(dto.getFixoAno())) {
+            Integer d = dto.getDia();
+            Integer m = dto.getMes();
+            return sameRegion
+                && "SIM".equalsIgnoreCase(f.getFixoAno())
+                && d != null && m != null
+                && f.getDia() != null && f.getMes() != null
+                && f.getDia().equals(d)
+                && f.getMes().equals(m);
+          } else {
+            return sameRegion
+                && f.getDataEspecifica() != null
+                && dto.getDataEspecifica() != null
+                && f.getDataEspecifica().equals(dto.getDataEspecifica());
+          }
+        });
     if (duplicateExists)
       throw IgrpResponseStatusException.badRequest("Não é possível cadastrar feriados duplicados (mesma data e região)");
 
@@ -100,18 +108,18 @@ public class FeriadoService {
       dto.setIdFeriado(obj.getUuid());
       dto.setDescricao(obj.getDescricao());
       dto.setDataEspecifica(obj.getDataEspecifica());
-      
+
       dto.setAnoReferente(obj.getAnoReferente());
       dto.setTipoFeriado(obj.getTipoFeriado());
       dto.setFixoAno(obj.getFixoAno());
       dto.setDia(obj.getDia());
       dto.setMes(obj.getMes());
       dto.setEstado(obj.getEstado().name());
-      
+
       if (obj.getGeogrId() != null) {
           dto.setGeogrId(obj.getGeogrId().getId());
       }
-      
+
       response.add(dto);
     }
 

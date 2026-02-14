@@ -33,7 +33,7 @@
       "name": "dataEspecifica",
       "objectType": "java",
       "type": "date",
-      "required": true,
+      "required": false,
       "before": false,
       "after": false,
       "positive": false,
