@@ -147,7 +147,7 @@ public class EmprestimoController {
   )
 
   public ResponseEntity<IdDTO> updateEmprestimo(@Valid @RequestBody PedidoEmprestimoDTO updateEmprestimoRequest
-    , @PathVariable String emprestimoId)
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
       final var command = new UpdateEmprestimoCommand(updateEmprestimoRequest, emprestimoId);
@@ -177,7 +177,7 @@ public class EmprestimoController {
   )
 
   public ResponseEntity<DetalhesEmprestimoDTO> getEmprestimoById(
-       @PathVariable String emprestimoId)
+    @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
       final var query = new GetEmprestimoByIdQuery(emprestimoId);
@@ -244,7 +244,7 @@ public class EmprestimoController {
   )
 
   public ResponseEntity<String> saveDecisaoAnalise(@Valid @RequestBody AnaliseRhRequestDTO saveDecisaoAnaliseRequest
-    , @PathVariable String emprestimoId)
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
       final var command = new SaveDecisaoAnaliseCommand(saveDecisaoAnaliseRequest, emprestimoId);
@@ -274,7 +274,7 @@ public class EmprestimoController {
   )
 
   public ResponseEntity<String> saveDecisaoAnaliseFinanceira(@Valid @RequestBody AnaliseFinanceiroRequestDTO saveDecisaoAnaliseFinanceiraRequest
-    , @PathVariable String emprestimoId)
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
       final var command = new SaveDecisaoAnaliseFinanceiraCommand(saveDecisaoAnaliseFinanceiraRequest, emprestimoId);
@@ -304,7 +304,7 @@ public class EmprestimoController {
   )
 
   public ResponseEntity<String> autorizarComissaoExecutiva(@Valid @RequestBody AutorizacaoComissaoExecutivaDTO autorizarComissaoExecutivaRequest
-    , @PathVariable String emprestimoId)
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
       final var command = new AutorizarComissaoExecutivaCommand(autorizarComissaoExecutivaRequest, emprestimoId);
@@ -334,7 +334,7 @@ public class EmprestimoController {
   )
 
   public ResponseEntity<String> elaborarContrato(@Valid @RequestBody ElaboracaoContratoRequestDTO elaborarContratoRequest
-    , @PathVariable String emprestimoId)
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
       final var command = new ElaborarContratoCommand(elaborarContratoRequest, emprestimoId);
@@ -364,7 +364,7 @@ public class EmprestimoController {
   )
 
   public ResponseEntity<PlanoFinanceiroDTO> getPlanoFinanceiro(
-       @PathVariable String emprestimoId)
+    @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
       final var query = new GetPlanoFinanceiroQuery(emprestimoId);
@@ -394,7 +394,7 @@ public class EmprestimoController {
   )
 
   public ResponseEntity<List<PlanoFinanceiroRowDTO>> gerarPlanoFinanceiro(
-       @PathVariable String emprestimoId)
+    @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
       final var command = new GerarPlanoFinanceiroCommand(emprestimoId);
@@ -454,7 +454,7 @@ public class EmprestimoController {
   )
 
   public ResponseEntity<HistoricoPagamentoDTO> getHistoricoPagamento(
-       @PathVariable String emprestimoId)
+    @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
       final var query = new GetHistoricoPagamentoQuery(emprestimoId);
@@ -514,7 +514,7 @@ public class EmprestimoController {
   )
 
   public ResponseEntity<String> saveDecisaoAnaliseRhAdiantamento(@Valid @RequestBody AnaliseRhAdiantamentoRequestDTO saveDecisaoAnaliseRhAdiantamentoRequest
-    , @PathVariable String emprestimoId)
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
       final var command = new SaveDecisaoAnaliseRhAdiantamentoCommand(saveDecisaoAnaliseRhAdiantamentoRequest, emprestimoId);
@@ -544,7 +544,7 @@ public class EmprestimoController {
   )
 
   public ResponseEntity<String> verificarPedidoAdiantamento(@Valid @RequestBody BaseDecisaoDTO verificarPedidoAdiantamentoRequest
-    , @PathVariable String emprestimoId)
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
       final var command = new VerificarPedidoAdiantamentoCommand(verificarPedidoAdiantamentoRequest, emprestimoId);
@@ -574,10 +574,130 @@ public class EmprestimoController {
   )
 
   public ResponseEntity<String> anexarComprovativoPagamento(@Valid @RequestBody DocumentoDTO anexarComprovativoPagamentoRequest
-    , @PathVariable String emprestimoId)
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
       final var command = new AnexarComprovativoPagamentoCommand(anexarComprovativoPagamentoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/analise-rh-renegociacao"
+  )
+  @Operation(
+    summary = "Save decisao analise renegociacao",
+    description = "Save decisao analise renegociacao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> saveDecisaoAnaliseRenegociacao(@Valid @RequestBody AnaliseRhRequestDTO saveDecisaoAnaliseRenegociacaoRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new SaveDecisaoAnaliseRenegociacaoCommand(saveDecisaoAnaliseRenegociacaoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/analise-financeiro-renegociacao"
+  )
+  @Operation(
+    summary = "Save decisao analise financeira renegociacao",
+    description = "Save decisao analise financeira renegociacao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> saveDecisaoAnaliseFinanceiraRenegociacao(@Valid @RequestBody AnaliseFinanceiroRequestDTO saveDecisaoAnaliseFinanceiraRenegociacaoRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new SaveDecisaoAnaliseFinanceiraRenegociacaoCommand(saveDecisaoAnaliseFinanceiraRenegociacaoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/autorizar-comissao-executiva-renegociacao"
+  )
+  @Operation(
+    summary = "Autorizar comissao executiva renegociacao",
+    description = "Autorizar comissao executiva renegociacao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> autorizarComissaoExecutivaRenegociacao(@Valid @RequestBody AutorizacaoComissaoExecutivaDTO autorizarComissaoExecutivaRenegociacaoRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new AutorizarComissaoExecutivaRenegociacaoCommand(autorizarComissaoExecutivaRenegociacaoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/elaborar-contrato-renegociacao"
+  )
+  @Operation(
+    summary = "Elaborar contrato renegociacao",
+    description = "Elaborar contrato renegociacao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<String> elaborarContratoRenegociacao(@Valid @RequestBody ElaboracaoContratoRequestDTO elaborarContratoRenegociacaoRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new ElaborarContratoRenegociacaoCommand(elaborarContratoRenegociacaoRequest, emprestimoId);
 
       return commandBus.send(command);
 
