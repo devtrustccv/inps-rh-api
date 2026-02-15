@@ -117,6 +117,8 @@ public class FeriaReadService {
     return dto;
   }
 
+
+  @Transactional(readOnly = true)
   public PedidoFeriaAlterarReqDTO getPedidoFeria(GetPedidoFeriaQuery query) {
     if (!StringUtils.hasText(query.getPedidoId()))
       throw cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException
