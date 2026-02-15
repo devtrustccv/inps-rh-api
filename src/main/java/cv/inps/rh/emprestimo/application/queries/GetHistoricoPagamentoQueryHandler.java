@@ -25,7 +25,7 @@ public class GetHistoricoPagamentoQueryHandler implements QueryHandler<GetHistor
 
     LOGGER.debug("GetHistoricoPagamentoQuery: {}", query);
 
-    var data = emprestimoReadService.getHistoricoPagamento(query.getEmprestimoId());
+    var data = emprestimoReadService.getPaymentHistory(query.getEmprestimoId());
 
     return ResponseEntity.ok(data);
   }

@@ -7,8 +7,6 @@ import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.RhPagamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.NumberUtils;
 import cv.inps.rh.shared.util.PageMapper;
@@ -21,12 +19,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -90,13 +89,29 @@ public class EmprestimoReadService {
 
     var order = entity.getPedido();
 
-    final var decision = new DecisaoEmprestimoDTO();
-    getDecision(order, EtapaEmprestimo.ANALISE_RH_PEDIDO).map(this::buildDecisionData).ifPresent(decision::setAnaliseRhPedido);
-    getDecision(order, EtapaEmprestimo.ANALISE_FINANCEIRA).map(this::buildDecisionData).ifPresent(decision::setAnaliseFinanceiro);
-    getDecision(order, EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA).map(this::buildDecisionData).ifPresent(decision::setAutorizacaoComissaoExecutiva);
-    getDecision(order, EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO).map(this::buildDecisionData).ifPresent(decision::setAnaliseRhAdiantamento);
-    getDecision(order, EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO).map(this::buildDecisionData).ifPresent(decision::setVerificacaoAdiantamento);
-    dto.setDecisao(decision);
+    final var allDecisions = new DecisaoEmprestimoDTO();
+
+    var steps = List.of(
+        EtapaEmprestimo.ANALISE_RH_PEDIDO.name(),
+        EtapaEmprestimo.ANALISE_FINANCEIRA.name(),
+        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name(),
+        EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name(),
+        EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name()
+    );
+
+    var decisions = pedidoDecisaoEntityRepository
+        .findByPedidoAndEtapaInAndEstado(order, steps, Estado.A.name()).stream()
+        .collect(Collectors.toMap(
+            PedidoDecisaoEntity::getEtapa,
+            this::buildDecisionData
+        ));
+
+    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_PEDIDO.name())).ifPresent(allDecisions::setAnaliseRhPedido);
+    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_FINANCEIRA.name())).ifPresent(allDecisions::setAnaliseFinanceiro);
+    ofNullable(decisions.get(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name())).ifPresent(allDecisions::setAutorizacaoComissaoExecutiva);
+    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name())).ifPresent(allDecisions::setAnaliseRhAdiantamento);
+    ofNullable(decisions.get(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name())).ifPresent(allDecisions::setVerificacaoAdiantamento);
+    dto.setDecisao(allDecisions);
 
     var docCodes = List.of(
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.PEDIDO.name(),
@@ -105,21 +120,10 @@ public class EmprestimoReadService {
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name()
     );
 
-    var docs = documentService.getDocuments(
-        funId,
-        docCodes,
-        entity.getUuid());
+    var docs = documentService.getDocuments(funId, docCodes, entity.getUuid());
     dto.setDocumentos(docs);
 
     return dto;
-  }
-
-  private Optional<PedidoDecisaoEntity> getDecision(PedidoEntity order, EtapaEmprestimo etapa) {
-    return pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
-        order,
-        etapa.name(),
-        Estado.A.name()
-    );
   }
 
   private BaseDecisaoDTO buildDecisionData(PedidoDecisaoEntity obj) {
@@ -130,7 +134,7 @@ public class EmprestimoReadService {
     return baseDecision;
   }
 
-  public EmprestimoListDTO listarEmprestimos(ListarEmprestimosQuery query) {
+  public EmprestimoListDTO listLoans(ListarEmprestimosQuery query) {
 
     var page = Integer.parseInt(query.getPage());
     var size = Integer.parseInt(query.getSize());
@@ -235,28 +239,20 @@ public class EmprestimoReadService {
     return plan;
   }
 
-  public HistoricoPagamentoDTO getHistoricoPagamento(String uuid) {
+  public HistoricoPagamentoDTO getPaymentHistory(String uuid) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
-    var payments = rhPagamentoEntityRepository.findByEstadoAndDefp_FunId(Estado.A.name(), loan.getTiprel().getFunId());
-
     var history = new HistoricoPagamentoDTO();
 
-    var rows = payments.stream()
+    var rows = rhPagamentoEntityRepository.findByEstadoAndDefp_FunId(Estado.A.name(), loan.getTiprel().getFunId())
+        .stream()
         .map(p -> new HistoricoPagamentoRowDTO(p.getDataRef(), p.getValor()))
         .toList();
-    history.setPagamentos(rows);
-
-    var totalPago = payments.stream()
-        .map(RhPagamentoEntity::getValor)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
 
     history.setPagamentos(rows);
-    history.setValorTotalPago(totalPago);
-    history.setSaldoDivida(
-        loan.getValorEmprestimo().subtract(totalPago)
-    );
+    history.setValorTotalPago(loan.getValorPago());
+    history.setSaldoDivida(loan.getValorDivida());
 
     return history;
   }
