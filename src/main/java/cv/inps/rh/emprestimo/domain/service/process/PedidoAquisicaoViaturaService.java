@@ -101,7 +101,7 @@ public class PedidoAquisicaoViaturaService {
 
     var funId = loan.getTiprel().getFunId();
 
-    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, TipoPedido.AQUISICAO_VIATURA.name(), Estado.A.name()).orElseThrow();
+    var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
     pedidoEntityRepository.save(order);
 
@@ -144,9 +144,7 @@ public class PedidoAquisicaoViaturaService {
     loan.setDescTaxaEsforco(request.getAvaliacaoTaxaEsforco());
     emprestimoEntityRepository.save(loan);
 
-    var funId = loan.getTiprel().getFunId();
-
-    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, TipoPedido.AQUISICAO_VIATURA.name(), Estado.A.name()).orElseThrow();
+    var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA.name());
     pedidoEntityRepository.save(order);
 
@@ -184,9 +182,9 @@ public class PedidoAquisicaoViaturaService {
 
   public void autorizarComissaoExecutiva(String uuid, AutorizacaoComissaoExecutivaDTO request) {
 
-    var funId = emprestimoEntityRepository.findByUuidOrThrow(uuid).getTiprel().getFunId();
+    var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
-    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, TipoPedido.AQUISICAO_VIATURA.name(), Estado.A.name()).orElseThrow();
+    var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name());
     pedidoEntityRepository.save(order);
 
@@ -219,18 +217,18 @@ public class PedidoAquisicaoViaturaService {
 
   public void elaborarContrato(String uuid, ElaboracaoContratoRequestDTO request) {
 
-    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
-    var funId = entity.getTiprel().getFunId();
+    var funId = loan.getTiprel().getFunId();
 
-    var order = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, TipoPedido.AQUISICAO_VIATURA.name(), Estado.A.name()).orElseThrow();
+    var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO.name());
     pedidoEntityRepository.save(order);
 
     documentService.saveDocuments(
         request.getDocumentos(),
         funId,
-        entity.getUuid(),
+        loan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name()
     );
   }
