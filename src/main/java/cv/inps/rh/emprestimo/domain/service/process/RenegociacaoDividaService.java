@@ -145,12 +145,12 @@ public class RenegociacaoDividaService {
     emprestimoEntityRepository.save(loan);
 
     var order = loan.getPedido();
-    order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA.name());
+    order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_RENEGOCIACAO.name());
     pedidoEntityRepository.save(order);
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
         order,
-        EtapaEmprestimo.ANALISE_FINANCEIRA.name(),
+        EtapaEmprestimo.ANALISE_FINANCEIRA_RENEGOCIACAO.name(),
         Estado.A.name()
     );
 
@@ -166,7 +166,7 @@ public class RenegociacaoDividaService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer());
           newObj.setObs(request.getObservacao());
-          newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA.name());
+          newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_RENEGOCIACAO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
@@ -185,12 +185,12 @@ public class RenegociacaoDividaService {
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
     var order = loan.getPedido();
-    order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name());
+    order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_RENEGOCIACAO.name());
     pedidoEntityRepository.save(order);
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
         order,
-        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name(),
+        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_RENEGOCIACAO.name(),
         Estado.A.name()
     );
 
@@ -206,7 +206,7 @@ public class RenegociacaoDividaService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer());
           newObj.setObs(request.getObservacao());
-          newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name());
+          newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_RENEGOCIACAO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
@@ -222,14 +222,14 @@ public class RenegociacaoDividaService {
     var funId = loan.getTiprel().getFunId();
 
     var order = loan.getPedido();
-    order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO.name());
+    order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_RENEGOCIACAO.name());
     pedidoEntityRepository.save(order);
 
     documentService.saveDocuments(
         request.getDocumentos(),
         funId,
         loan.getUuid(),
-        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name()
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_RENEGOCIACAO.name()
     );
   }
 }

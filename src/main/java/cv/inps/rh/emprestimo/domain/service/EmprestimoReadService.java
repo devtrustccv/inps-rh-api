@@ -94,8 +94,8 @@ public class EmprestimoReadService {
 
     var steps = List.of(
         EtapaEmprestimo.ANALISE_RH_PEDIDO.name(),
-        EtapaEmprestimo.ANALISE_FINANCEIRA.name(),
-        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name(),
+        EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name(),
+        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name(),
         EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name(),
         EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name()
     );
@@ -108,8 +108,8 @@ public class EmprestimoReadService {
         ));
 
     ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_PEDIDO.name())).ifPresent(allDecisions::setAnaliseRhPedido);
-    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_FINANCEIRA.name())).ifPresent(allDecisions::setAnaliseFinanceiro);
-    ofNullable(decisions.get(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name())).ifPresent(allDecisions::setAutorizacaoComissaoExecutiva);
+    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name())).ifPresent(allDecisions::setAnaliseFinanceiro);
+    ofNullable(decisions.get(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name())).ifPresent(allDecisions::setAutorizacaoComissaoExecutiva);
     ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name())).ifPresent(allDecisions::setAnaliseRhAdiantamento);
     ofNullable(decisions.get(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name())).ifPresent(allDecisions::setVerificacaoAdiantamento);
     dto.setDecisao(allDecisions);
@@ -117,7 +117,7 @@ public class EmprestimoReadService {
     var docCodes = List.of(
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.PEDIDO.name(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_PEDIDO.name(),
-        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA.name(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name()
     );
 
