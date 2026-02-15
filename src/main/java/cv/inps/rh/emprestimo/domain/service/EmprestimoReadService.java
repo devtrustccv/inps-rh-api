@@ -75,6 +75,8 @@ public class EmprestimoReadService {
     dto.setFuncionarioId(funId.getUuid().toString());
     dto.setCabimentacaoOrcamental(entity.getDescCabimentacaoOrcamental());
     dto.setAvaliacaoTaxaEsforco(entity.getDescTaxaEsforco());
+    dto.setTipoSituacao(entity.getTipoSituacao());
+    dto.setValorAdiantamento(entity.getValorAdiantado());
 
     var another = emprestimoEntityRepository.findByUuidNotAndTiprel_FunId(entity.getUuid(), funId)
         .stream()
