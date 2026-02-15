@@ -97,7 +97,10 @@ public class EmprestimoReadService {
         EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name(),
         EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name(),
         EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name(),
-        EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name()
+        EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name(),
+        EtapaEmprestimo.ANALISE_RH_RENEGOCIACAO.name(),
+        EtapaEmprestimo.ANALISE_FINANCEIRA_RENEGOCIACAO.name(),
+        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_RENEGOCIACAO.name()
     );
 
     var decisions = pedidoDecisaoEntityRepository
@@ -108,10 +111,14 @@ public class EmprestimoReadService {
         ));
 
     ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_PEDIDO.name())).ifPresent(allDecisions::setAnaliseRhPedido);
-    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name())).ifPresent(allDecisions::setAnaliseFinanceiro);
-    ofNullable(decisions.get(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name())).ifPresent(allDecisions::setAutorizacaoComissaoExecutiva);
+    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name())).ifPresent(allDecisions::setAnaliseFinanceiroPedido);
+    ofNullable(decisions.get(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name())).ifPresent(allDecisions::setAutorizacaoComissaoExecutivaPedido);
     ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name())).ifPresent(allDecisions::setAnaliseRhAdiantamento);
     ofNullable(decisions.get(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name())).ifPresent(allDecisions::setVerificacaoAdiantamento);
+    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_RENEGOCIACAO.name())).ifPresent(allDecisions::setAnaliseRhRenegociacao);
+    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_FINANCEIRA_RENEGOCIACAO.name())).ifPresent(allDecisions::setAnaliseFinanceiroRenegociacao);
+    ofNullable(decisions.get(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_RENEGOCIACAO.name())).ifPresent(allDecisions::setAutorizacaoComissaoExecutivaRenegociacao);
+
     dto.setDecisao(allDecisions);
 
     var docCodes = List.of(
