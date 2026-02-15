@@ -7,6 +7,7 @@ import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.NumberUtils;
 import cv.inps.rh.shared.util.PageMapper;
@@ -201,7 +202,8 @@ public class EmprestimoReadService {
           var funId = e.getTiprel().getFunId();
           dto.setFuncionarioId(funId.getUuid().toString());
           dto.setNomeColaborador(funId.getNome());
-          dto.setEtapa(e.getPedido().getEtapa());
+          PedidoEntity order = e.getPedido();
+          ofNullable(order).ifPresent(o -> dto.setEtapa(o.getEtapa()));
           return dto;
         })
         .toList());

@@ -60,6 +60,7 @@ public class PedidoAquisicaoViaturaService {
     entity.setEstadoViatura(request.getEstadoViatura());
     entity.setValorEmprestimo(request.getValorEmprestimo());
     entity.setNrPrestacao(request.getNumeroPrestacoes());
+    var savedLoan = emprestimoEntityRepository.save(entity);
 
     var funId = currentRelation.getFunId();
 
@@ -77,10 +78,11 @@ public class PedidoAquisicaoViaturaService {
       order.setEtapa(EtapaEmprestimo.PEDIDO.name());
       order.setEstado(Estado.A.name());
       var savedOrder = pedidoEntityRepository.save(order);
-      entity.setPedido(savedOrder);
+      savedLoan.setPedido(savedOrder);
+      emprestimoEntityRepository.save(savedLoan);
     }
 
-    var response = new IdDTO(emprestimoEntityRepository.save(entity).getUuid());
+    var response = new IdDTO(savedLoan.getUuid());
 
     documentService.saveDocuments(
         request.getDocumentos(),
