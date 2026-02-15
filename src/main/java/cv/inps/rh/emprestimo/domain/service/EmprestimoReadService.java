@@ -77,6 +77,12 @@ public class EmprestimoReadService {
     dto.setAvaliacaoTaxaEsforco(entity.getDescTaxaEsforco());
     dto.setTipoSituacao(entity.getTipoSituacao());
     dto.setValorAdiantamento(entity.getValorAdiantado());
+    dto.setNib(entity.getNib());
+    dto.setSwift(entity.getSwift());
+    ofNullable(entity.getBanco()).ifPresent(o -> {
+      dto.setBancoId(o.getId());
+      dto.setNumeroContaBanco(o.getNuConta());
+    });
 
     var another = emprestimoEntityRepository.findByUuidNotAndTiprel_FunId(entity.getUuid(), funId)
         .stream()

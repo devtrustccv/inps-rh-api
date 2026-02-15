@@ -37,6 +37,14 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
 
   private BigDecimal valorAdiantamento;
 
+  private String nib;
+
+  private Long bancoId;
+
+  private Long numeroContaBanco;
+
+  private String swift;
+
   @Valid
   private List<OutrosEmprestimosDTO> outrosEmprestimos = new ArrayList<>();
 
