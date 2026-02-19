@@ -19,6 +19,8 @@ public class GetListaFaltaQuery implements Query {
   private String pageSize;
   @NotBlank(message = "The field <colaborador> is required")
   private String colaborador;
+  @NotBlank(message = "The field <funcionarioUuid> is required")
+  private String funcionarioUuid;
   @NotNull(message = "The field <ilha> is required")
   private Long ilha;
   @NotNull(message = "The field <direcao> is required")

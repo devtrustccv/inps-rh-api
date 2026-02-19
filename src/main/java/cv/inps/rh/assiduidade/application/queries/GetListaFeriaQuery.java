@@ -27,5 +27,7 @@ public class GetListaFeriaQuery implements Query {
   private Long seccao;
   @NotBlank(message = "The field <colaborador> is required")
   private String colaborador;
+  @NotBlank(message = "The field <funcionarioUuid> is required")
+  private String funcionarioUuid;
 
 }

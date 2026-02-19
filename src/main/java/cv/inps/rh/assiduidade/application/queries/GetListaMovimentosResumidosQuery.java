@@ -19,6 +19,8 @@ public class GetListaMovimentosResumidosQuery implements Query {
   private String pageNumber;
   @NotBlank(message = "The field <colaborador> is required")
   private String colaborador;
+  @NotBlank(message = "The field <funcionarioUuid> is required")
+  private String funcionarioUuid;
   @NotNull(message = "The field <mes> is required")
   private Integer mes;
   @NotNull(message = "The field <ano> is required")
