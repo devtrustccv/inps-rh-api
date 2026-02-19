@@ -4,6 +4,7 @@
   "name": "PedidoFeriaReq",
   "template": "classic",
   "enableCustonValidation": false,
+  "readOnly": true,
   "attributes": [
     {
       "name": "validar",

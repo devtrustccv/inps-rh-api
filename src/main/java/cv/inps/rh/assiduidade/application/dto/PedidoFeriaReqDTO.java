@@ -33,6 +33,7 @@ public class PedidoFeriaReqDTO  {
 
   private UUID colaborador ;
 
+  private String colaboradorNome ;
 
   private LocalDate dataInicio ;
 
@@ -51,6 +52,7 @@ public class PedidoFeriaReqDTO  {
 
   private UUID responsavel ;
 
+  private String responsavelNome ;
 
   private String obsParecer ;
 

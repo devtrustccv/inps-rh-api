@@ -139,6 +139,7 @@ public class FeriaReadService {
 
     var req = new PedidoFeriaReqDTO();
     req.setColaborador(entity.getFunId() != null ? entity.getFunId().getUuid() : null);
+    req.setColaboradorNome(entity.getFunId() != null ? entity.getFunId().getNome() : null);
     req.setDataInicio(entity.getDataInicio());
     req.setDataFim(entity.getDataFim());
     req.setNumDias(entity.getNumDia());
@@ -151,9 +152,12 @@ public class FeriaReadService {
     req.setObsConvinienciaServico(entity.getObsInfoConveniencia());
 
     if (entity.getResponsavelId() != null) {
-      var responsavel = responsavelEntityRepository.findById(entity.getResponsavelId()).orElse(null);
-      req.setResponsavel(responsavel != null ? responsavel.getFunId().getUuid()  : null);
-    }
+      responsavelEntityRepository.findById(entity.getResponsavelId())
+          .ifPresent(responsavel -> {
+            req.setResponsavel(responsavel.getFunId().getUuid());
+            req.setResponsavelNome(responsavel.getFunId().getNome());
+          });
+    };
 
     req.setObsParecer(entity.getObsResponsavel());
 

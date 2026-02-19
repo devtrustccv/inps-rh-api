@@ -4,6 +4,7 @@
   "name": "DispensaReq",
   "template": "classic",
   "enableCustonValidation": false,
+  "readOnly": true,
   "attributes": [
     {
       "name": "colaborador",

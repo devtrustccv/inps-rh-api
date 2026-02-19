@@ -56,6 +56,8 @@ public class DispensaReqDTO  {
 
   private UUID responsavel ;
 
+  private String responsavelNome;
+
   private String parecerResponsavel ;
 
 

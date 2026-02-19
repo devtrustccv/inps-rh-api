@@ -11,8 +11,10 @@ import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DispensaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DispensaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ResponsavelEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
@@ -27,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -36,6 +39,7 @@ public class DispensaReadService {
 
   private final DispensaEntityRepository dispensaRepository;
   private final DocumentoEntityRepository documentoEntityRepository;
+  private final ResponsavelEntityRepository responsavelEntityRepository;
 
   @Transactional(readOnly = true)
   public WrapperListaDispensaDTO getListaDispensa(GetListaDispensaQuery query) {
@@ -198,6 +202,15 @@ public class DispensaReadService {
     dto.setTipoMotivo(e.getTipoDispensa());
     dto.setMotivo(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : null);
     dto.setParecerResponsavel(e.getDecisaoResponsavel());
+
+    if (e.getResponsavelId() != null) {
+      responsavelEntityRepository.findById(e.getResponsavelId())
+          .ifPresent(responsavel -> {
+            dto.setResponsavel(responsavel.getFunId().getUuid());
+            dto.setResponsavelNome(responsavel.getFunId().getNome());
+          });
+    };
+
     dto.setObservacaoResponsavel(e.getObsResponsavel());
     dto.setObservacaoRh(e.getObsRh());
 
@@ -260,6 +273,14 @@ public class DispensaReadService {
     dto.setParecerResponsavel(e.getDecisaoResponsavel());
     dto.setObservacaoResponsavel(e.getObsResponsavel());
     dto.setObservacaoRh(e.getObsRh());
+
+    if (e.getResponsavelId() != null) {
+      responsavelEntityRepository.findById(e.getResponsavelId())
+          .ifPresent(responsavel -> {
+            dto.setResponsavel(responsavel.getFunId().getUuid());
+            dto.setResponsavelNome(responsavel.getFunId().getNome());
+          });
+    };
 
     if (dto.getColaborador() != null && dto.getDataDispensa() != null) {
       var inicioMes = dto.getDataDispensa().withDayOfMonth(1);
