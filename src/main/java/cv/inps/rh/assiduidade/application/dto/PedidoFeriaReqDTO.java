@@ -43,6 +43,8 @@ public class PedidoFeriaReqDTO  {
 
   private Integer numDias ;
 
+  private Integer numDiasPorGozar;
+
 
   private UUID substituidoPor ;
 
