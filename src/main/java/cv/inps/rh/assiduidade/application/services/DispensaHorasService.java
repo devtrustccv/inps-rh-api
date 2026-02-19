@@ -20,7 +20,10 @@ public class DispensaHorasService {
     private final AssiduidadeParametroEntityRepository parametroRepository;
     private final FuncionarioEntityRepository funcionarioRepository;
 
-    public HorasDispensaStatusDTO getHorasStatus(UUID funcionarioUuid, Optional<LocalDate> dataReferencia) {
+    public HorasDispensaStatusDTO getHorasStatus(UUID funcionarioUuid, LocalDate dataReferencia) {
+
+      var inicioMes = dataReferencia.withDayOfMonth(1);
+      var fimMes =dataReferencia.withDayOfMonth(dataReferencia.lengthOfMonth());
 
         return new HorasDispensaStatusDTO();
     }

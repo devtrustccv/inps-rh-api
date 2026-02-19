@@ -14,6 +14,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
+import cv.inps.rh.shared.util.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,37 +40,7 @@ public class DispensaWriteService {
 
 
 
-  /**
-   * Converte uma string "HH:MM" em formato aceito por Oracle INTERVAL DAY TO SECOND.
-   * Retorna "+0 HH:MM:SS"
-   */
-  private String hhmmToIntervalFormat(String hhmm) {
-    if (!StringUtils.hasText(hhmm)) {
-      return null; // ou "+0 00:00:00" se preferir default
-    }
 
-    String[] parts = hhmm.trim().split(":");
-    if (parts.length != 2) {
-      throw new IllegalArgumentException("Formato inválido de hora: " + hhmm);
-    }
-
-    int hours = Integer.parseInt(parts[0]);
-    int minutes = Integer.parseInt(parts[1]);
-
-    if (hours < 0 || hours > 23) {
-      throw new IllegalArgumentException("Horas inválidas: " + hours);
-    }
-    if (minutes < 0 || minutes > 59) {
-      throw new IllegalArgumentException("Minutos inválidos: " + minutes);
-    }
-
-    return String.format("+0 %02d:%02d:00", hours, minutes);
-  }
-
-  /**
-   * Converte string de INTERVAL Oracle "+0 HH:MM:SS" para "HH:MM"
-   * Ex.: "+0 08:30:00" -> "08:30"
-   */
 
 
 
@@ -110,8 +81,8 @@ public class DispensaWriteService {
     disp.setTipoDispensa(req.getTipoMotivo());
     disp.setDescricaoMotivo(req.getMotivo());
     disp.setData(req.getDataDispensa());
-    disp.setHoraInicio(hhmmToIntervalFormat(req.getHoraSaida()));
-    disp.setHoraFim(hhmmToIntervalFormat(req.getHoraEntrada()));
+    disp.setHoraInicio(TimeUtils.hhmmToIntervalFormat(req.getHoraSaida()));
+    disp.setHoraFim(TimeUtils.hhmmToIntervalFormat(req.getHoraEntrada()));
     disp.setResponsavelId(responsavel != null ? responsavel.getId() : null);
     disp.setEstado(Estado.P);
     disp.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -191,8 +162,8 @@ public class DispensaWriteService {
     dispensa.setResponsavelId(responsavel != null ? responsavel.getId() : null);
     dispensa.setTiprelId(tipoRelAtual);
     if (req.getDataDispensa() != null) dispensa.setData(req.getDataDispensa());
-    if (StringUtils.hasText(req.getHoraSaida())) dispensa.setHoraInicio(hhmmToIntervalFormat(req.getHoraSaida()));
-    if (StringUtils.hasText(req.getHoraEntrada())) dispensa.setHoraFim(hhmmToIntervalFormat(req.getHoraEntrada()));
+    if (StringUtils.hasText(req.getHoraSaida())) dispensa.setHoraInicio(TimeUtils.hhmmToIntervalFormat(req.getHoraSaida()));
+    if (StringUtils.hasText(req.getHoraEntrada())) dispensa.setHoraFim(TimeUtils.hhmmToIntervalFormat(req.getHoraEntrada()));
     if (StringUtils.hasText(req.getMotivo())) dispensa.setDescricaoMotivo(req.getMotivo());
 
     dispensaRepository.save(dispensa);
@@ -236,7 +207,7 @@ public class DispensaWriteService {
         ausencia.setObs(dispensa.getTipoDispensa());
         ausencia.setDataInicio(dispensa.getData());
         ausencia.setDataFim(dispensa.getData());
-        var minutos = diffMinutes(dispensa.getHoraInicio(), dispensa.getHoraFim());
+        var minutos = TimeUtils.diffMinutes(dispensa.getHoraInicio(), dispensa.getHoraFim());
         ausencia.setHora(minutos != null ? minutos : 0);
         ausencia.setEstado(Estado.A);
         ausencia.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -299,8 +270,8 @@ public class DispensaWriteService {
     dispensa.setEstado(Estado.P);
     dispensa.setTiprelId(tipoRelAtual);
     if (req.getDataDispensa() != null) dispensa.setData(req.getDataDispensa());
-    if (StringUtils.hasText(req.getHoraSaida())) dispensa.setHoraInicio(hhmmToIntervalFormat(req.getHoraSaida()));
-    if (StringUtils.hasText(req.getHoraEntrada())) dispensa.setHoraFim(hhmmToIntervalFormat(req.getHoraEntrada()));
+    if (StringUtils.hasText(req.getHoraSaida())) dispensa.setHoraInicio(TimeUtils.hhmmToIntervalFormat(req.getHoraSaida()));
+    if (StringUtils.hasText(req.getHoraEntrada())) dispensa.setHoraFim(TimeUtils.hhmmToIntervalFormat(req.getHoraEntrada()));
     if (StringUtils.hasText(req.getMotivo())) dispensa.setDescricaoMotivo(req.getMotivo());
 
     dispensaRepository.save(dispensa);
@@ -352,7 +323,7 @@ public class DispensaWriteService {
     return resp;
   }
 
-  private static Integer diffMinutes(String inicio, String fim) {
+ /* private static Integer diffMinutes(String inicio, String fim) {
     try {
       if (!StringUtils.hasText(inicio) || !StringUtils.hasText(fim)) return null;
       var t1 = java.time.LocalTime.parse(inicio);
@@ -361,6 +332,6 @@ public class DispensaWriteService {
     } catch (Exception e) {
       return null;
     }
-  }
+  }*/
 
 }

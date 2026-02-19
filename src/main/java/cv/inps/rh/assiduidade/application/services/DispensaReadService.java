@@ -17,6 +17,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRe
 import cv.inps.rh.shared.infrastructure.persistence.repository.ResponsavelEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
+import cv.inps.rh.shared.util.TimeUtils;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -145,35 +146,13 @@ public class DispensaReadService {
             (StringUtils.hasText(hi) || StringUtils.hasText(hf) ? " / " : "") +
             (StringUtils.hasText(hf) ? hf : ""));
     dto.setTotalHorasDireito(null);
-    dto.setTotalHorasSolicitadas(diffMinutes(hi, hf));
+    dto.setTotalHorasSolicitadas(TimeUtils.diffMinutes(hi, hf));
     dto.setMotivoDispensa(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : e.getTipoDispensa());
     dto.setEstado(e.getEstado() != null ? e.getEstado().name() : null);
     dto.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);
     return dto;
   }
 
-  private static Integer toMinutes(String s) {
-    if (!StringUtils.hasText(s))
-      return null;
-    var parts = s.split(":");
-    try {
-      int h = parts.length > 0 ? Integer.parseInt(parts[0]) : 0;
-      int m = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
-      int sec = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
-      return h * 60 + m + (sec / 60);
-    } catch (NumberFormatException ex) {
-      return null;
-    }
-  }
-
-  private static Integer diffMinutes(String start, String end) {
-    var s = toMinutes(start);
-    var e = toMinutes(end);
-    if (s == null || e == null)
-      return null;
-    var d = e - s;
-    return Math.max(d, 0);
-  }
 
   @Transactional(readOnly = true)
   public DispensaReqDTO getDispensa(GetDispensaQuery query) {
@@ -195,10 +174,10 @@ public class DispensaReadService {
             ? e.getPedidoId().getFunId().getNome()
             : null);
     dto.setDataDispensa(e.getData());
-    dto.setHoraSaida(intervalFormatToHHmm(e.getHoraInicio()));
-    dto.setHoraEntrada(intervalFormatToHHmm(e.getHoraFim()));
-    var mins = diffMinutes(e.getHoraInicio(), e.getHoraFim());
-    dto.setTotalHoras(formatMinutes(mins));
+    dto.setHoraSaida(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
+    dto.setHoraEntrada(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
+    var mins = TimeUtils.diffMinutes(e.getHoraInicio(), e.getHoraFim());
+    dto.setTotalHoras(TimeUtils.formatMinutes(mins));
     dto.setTipoMotivo(e.getTipoDispensa());
     dto.setMotivo(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : null);
     dto.setParecerResponsavel(e.getDecisaoResponsavel());
@@ -221,11 +200,11 @@ public class DispensaReadService {
           dto.getColaborador(), inicioMes, fimMes);
       int totalMin = 0;
       for (var d : listaMes) {
-        var minsItem = diffMinutes(d.getHoraInicio(), d.getHoraFim());
+        var minsItem = TimeUtils.diffMinutes(d.getHoraInicio(), d.getHoraFim());
         if (minsItem != null)
           totalMin += minsItem;
       }
-      dto.setHorasUsadasMes(formatMinutes(totalMin));
+      dto.setHorasUsadasMes(TimeUtils.formatMinutes(totalMin));
     }
 
     var documentos = documentoEntityRepository
@@ -264,10 +243,10 @@ public class DispensaReadService {
             ? e.getPedidoId().getFunId().getNome()
             : null);
     dto.setDataDispensa(e.getData());
-    dto.setHoraSaida(intervalFormatToHHmm(e.getHoraInicio()));
-    dto.setHoraEntrada(intervalFormatToHHmm(e.getHoraFim()));
-    var mins = diffMinutes(e.getHoraInicio(), e.getHoraFim());
-    dto.setTotalHoras(formatMinutes(mins));
+    dto.setHoraSaida(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
+    dto.setHoraEntrada(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
+    var mins = TimeUtils.diffMinutes(e.getHoraInicio(), e.getHoraFim());
+    dto.setTotalHoras(TimeUtils.formatMinutes(mins));
     dto.setTipoMotivo(e.getTipoDispensa());
     dto.setMotivo(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : null);
     dto.setParecerResponsavel(e.getDecisaoResponsavel());
@@ -283,17 +262,19 @@ public class DispensaReadService {
     };
 
     if (dto.getColaborador() != null && dto.getDataDispensa() != null) {
+
       var inicioMes = dto.getDataDispensa().withDayOfMonth(1);
       var fimMes = dto.getDataDispensa().withDayOfMonth(dto.getDataDispensa().lengthOfMonth());
+
       var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataBetween(
           dto.getColaborador(), inicioMes, fimMes);
       int totalMin = 0;
       for (var d : listaMes) {
-        var minsItem = diffMinutes(d.getHoraInicio(), d.getHoraFim());
+        var minsItem = TimeUtils.diffMinutes(d.getHoraInicio(), d.getHoraFim());
         if (minsItem != null)
           totalMin += minsItem;
       }
-      dto.setHorasUsadasMes(formatMinutes(totalMin));
+      dto.setHorasUsadasMes(TimeUtils.formatMinutes(totalMin));
     }
 
     var documentos = documentoEntityRepository
@@ -312,43 +293,5 @@ public class DispensaReadService {
     return dto;
   }
 
-  private static String formatMinutes(Integer minutes) {
-    if (minutes == null)
-      return null;
-    int h = minutes / 60;
-    int m = minutes % 60;
-    String mm = (m < 10 ? "0" : "") + m;
-    return h + ":" + mm;
-  }
-
-  private String intervalFormatToHHmm(String interval) {
-    if (interval == null || interval.isBlank()) {
-      return "00:00";
-    }
-
-    try {
-      // Divide pelo espaço para pegar a parte do tempo
-      String[] parts = interval.trim().split("\\s+");
-      if (parts.length < 2) {
-        throw new IllegalArgumentException("Formato inválido de interval: " + interval);
-      }
-
-      // Pega HH:MM:SS
-      String timePart = parts[1];
-      String[] hm = timePart.split(":");
-
-      if (hm.length < 2) {
-        throw new IllegalArgumentException("Formato inválido de tempo: " + timePart);
-      }
-
-      int hours = Integer.parseInt(hm[0]);
-      int minutes = Integer.parseInt(hm[1]);
-
-      return String.format("%02d:%02d", hours, minutes);
-
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Erro ao converter interval para HH:MM: " + interval, e);
-    }
-  }
 
 }
