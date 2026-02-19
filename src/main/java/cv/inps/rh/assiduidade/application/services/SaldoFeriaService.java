@@ -52,4 +52,8 @@ public class SaldoFeriaService {
     return saldo;
 
   }
+
+  public int getSaldo(UUID funcionarioId) {
+    return getSaldo(funcionarioId, null);
+  }
 }

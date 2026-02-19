@@ -283,6 +283,12 @@ public class FeriaWriteService {
 
 
   private void validatePedido(PedidoFeriaReqDTO req) {
+
+    var saldoFeria = saldoFeriaService.getSaldo(req.getColaborador());
+
+    if (req.getNumDias() > saldoFeria)
+      throw IgrpResponseStatusException.badRequest("Funcionario não tem saldo de ferias suficiente");
+
     if (req.getColaborador() == null)
       throw IgrpResponseStatusException.badRequest("Colaborador obrigatório");
     if (req.getDataInicio() == null)
