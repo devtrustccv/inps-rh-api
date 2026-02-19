@@ -48,12 +48,13 @@ public class AdiantamentoEmprestimoService {
     var newLoan = new EmprestimoEntity();
     BeanUtils.copyProperties(loan, newLoan);
     newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-    newLoan.setValorAdiantado(obj.getValorAdiantamento()); // TODO 09/02/2026 19:12 so se for adiantamento ADIANTAMENTO_PAGAMENTO_ANTECIPADO ou
+    newLoan.setValorAdiantado(obj.getValorAdiantamento());
     newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
     newLoan.setTipoSituacao(tipoSituacao.name());
     newLoan.setVersao(loan.getVersao() + 1);
     newLoan.setValorPago(null);
     newLoan.setEmprestimo(loan);
+    newLoan.setNrPrestacao(obj.getNumeroPrestacao());
     var saved = emprestimoEntityRepository.save(loan);
 
     adiantamentoEmprestimoHelper.saveByTipoSituacao(tipoSituacao, newLoan, obj.getValorAdiantamento(), obj.getNumeroPrestacao());

@@ -25,7 +25,7 @@ public class ListarEmprestimosQueryHandler implements QueryHandler<ListarEmprest
 
     LOGGER.debug("ListarEmprestimosQuery: {}", query);
 
-    var data = emprestimoReadService.listarEmprestimos(query);
+    var data = emprestimoReadService.listLoans(query);
 
     return ResponseEntity.ok(data);
   }

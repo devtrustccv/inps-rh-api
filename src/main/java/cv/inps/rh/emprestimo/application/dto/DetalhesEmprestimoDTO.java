@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,27 +23,33 @@ import java.util.List;
 @IgrpDTO
 public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
 
+  private LocalDate dataInicio;
 
+  private LocalDate dataFim;
 
-  private LocalDate dataInicio ;
+  private BigDecimal valorPrestacao;
 
+  private String cabimentacaoOrcamental;
 
-  private LocalDate dataFim ;
+  private String avaliacaoTaxaEsforco;
 
+  private String tipoSituacao;
 
-  private BigDecimal valorPrestacao ;
+  private BigDecimal valorAdiantamento;
 
+  private String nib;
 
-  private String cabimentacaoOrcamental ;
+  private Long bancoId;
 
+  private Long numeroContaBanco;
 
-  private String avaliacaoTaxaEsforco ;
+  private String swift;
 
   @Valid
   private List<OutrosEmprestimosDTO> outrosEmprestimos = new ArrayList<>();
 
   @Valid
-  private DecisaoEmprestimoDTO decisao ;
+  private DecisaoEmprestimoDTO decisao;
 
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();

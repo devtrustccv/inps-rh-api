@@ -17,7 +17,6 @@ public class GetEmprestimoByIdQueryHandler implements QueryHandler<GetEmprestimo
   private final EmprestimoReadService emprestimoReadService;
 
   public GetEmprestimoByIdQueryHandler(EmprestimoReadService emprestimoReadService) {
-
     this.emprestimoReadService = emprestimoReadService;
   }
 

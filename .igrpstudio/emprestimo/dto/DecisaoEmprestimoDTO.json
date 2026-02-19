@@ -19,7 +19,7 @@
       "module": "emprestimo"
     },
     {
-      "name": "analiseFinanceiro",
+      "name": "analiseFinanceiroPedido",
       "objectType": "dto",
       "type": "BaseDecisao",
       "required": false,
@@ -32,7 +32,7 @@
       "module": "emprestimo"
     },
     {
-      "name": "autorizacaoComissaoExecutiva",
+      "name": "autorizacaoComissaoExecutivaPedido",
       "objectType": "dto",
       "type": "BaseDecisao",
       "required": false,
@@ -59,6 +59,45 @@
     },
     {
       "name": "verificacaoAdiantamento",
+      "objectType": "dto",
+      "type": "BaseDecisao",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "emprestimo"
+    },
+    {
+      "name": "analiseRhRenegociacao",
+      "objectType": "dto",
+      "type": "BaseDecisao",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "emprestimo"
+    },
+    {
+      "name": "analiseFinanceiroRenegociacao",
+      "objectType": "dto",
+      "type": "BaseDecisao",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "emprestimo"
+    },
+    {
+      "name": "autorizacaoComissaoExecutivaRenegociacao",
       "objectType": "dto",
       "type": "BaseDecisao",
       "required": false,

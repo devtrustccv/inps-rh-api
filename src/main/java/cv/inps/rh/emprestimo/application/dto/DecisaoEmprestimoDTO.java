@@ -22,15 +22,24 @@ public class DecisaoEmprestimoDTO  {
   private BaseDecisaoDTO analiseRhPedido ;
 
   @Valid
-  private BaseDecisaoDTO analiseFinanceiro ;
+  private BaseDecisaoDTO analiseFinanceiroPedido ;
 
   @Valid
-  private BaseDecisaoDTO autorizacaoComissaoExecutiva ;
+  private BaseDecisaoDTO autorizacaoComissaoExecutivaPedido ;
 
   @Valid
   private BaseDecisaoDTO analiseRhAdiantamento ;
 
   @Valid
   private BaseDecisaoDTO verificacaoAdiantamento ;
+
+  @Valid
+  private BaseDecisaoDTO analiseRhRenegociacao ;
+
+  @Valid
+  private BaseDecisaoDTO analiseFinanceiroRenegociacao ;
+
+  @Valid
+  private BaseDecisaoDTO autorizacaoComissaoExecutivaRenegociacao ;
 
 }
