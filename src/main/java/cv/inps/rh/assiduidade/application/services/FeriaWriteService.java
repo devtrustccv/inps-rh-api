@@ -46,6 +46,7 @@ public class FeriaWriteService {
   private final TipoDocumentoEntityRepository tipoDocumentoEntityRepository;
   private final EmailService emailService;
   private final ResponsavelEntityRepository responsavelEntityRepository;
+  private final SaldoFeriaService saldoFeriaService;
 
 
   @Transactional
