@@ -1236,6 +1236,41 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getFuncionarioSaldoDispensa",
+      "path": "dispensa/saldo/{funcionarioId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "HorasDispensaStatus",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "data",
+          "isRequired": true
+        }
+      ],
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa-validarHoraExtra-getHoraExtra-getDetalheMapaFeria-verMapa-getDetalheMapaFeria-getPedidoFeria-alterarPedidoFeria-validarPedidoFeria-getListaFalta-getListaHoraExtra-getListaMovimentosResumidos"

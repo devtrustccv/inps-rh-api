@@ -36,6 +36,7 @@ import cv.inps.rh.assiduidade.application.dto.VerMapaDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaMapaFeriaDTO;
 import cv.inps.rh.assiduidade.application.dto.DetalheMapaFeriaDTO;
 import cv.inps.rh.assiduidade.application.dto.JustificarFaltaDTO;
+import cv.inps.rh.assiduidade.application.dto.HorasDispensaStatusDTO;
 
 @IgrpController
 @RestController
@@ -977,6 +978,36 @@ public class AssiduidadeController {
   {
 
       final var query = new GetFuncioarioSaldoFeriasQuery(ano, funcionarioId);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "dispensa/saldo/{funcionarioId}"
+  )
+  @Operation(
+    summary = "Get funcionario saldo dispensa",
+    description = "Get funcionario saldo dispensa",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = HorasDispensaStatusDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<HorasDispensaStatusDTO> getFuncionarioSaldoDispensa(
+    @RequestParam(value = "data") String data, @PathVariable(value = "funcionarioId") String funcionarioId)
+  {
+
+      final var query = new GetFuncionarioSaldoDispensaQuery(data, funcionarioId);
 
       return queryBus.handle(query);
 
