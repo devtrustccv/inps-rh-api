@@ -952,4 +952,34 @@ public class AssiduidadeController {
 
   }
 
+   @GetMapping(
+   value = "feria/saldo/{funcionarioId}"
+  )
+  @Operation(
+    summary = "Get funcioario saldo ferias",
+    description = "Get funcioario saldo ferias",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> getFuncioarioSaldoFerias(
+    @RequestParam(value = "ano", required = false) Integer ano, @PathVariable(value = "funcionarioId") String funcionarioId)
+  {
+
+      final var query = new GetFuncioarioSaldoFeriasQuery(ano, funcionarioId);
+
+      return queryBus.handle(query);
+
+  }
+
 }
