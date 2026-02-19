@@ -11,7 +11,6 @@ import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DispensaEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DispensaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ResponsavelEntityRepository;
@@ -30,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -177,7 +175,7 @@ public class DispensaReadService {
     dto.setHoraSaida(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
     dto.setHoraEntrada(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
     var mins = TimeUtils.diffMinutes(e.getHoraInicio(), e.getHoraFim());
-    dto.setTotalHoras(TimeUtils.formatMinutes(mins));
+    dto.setTotalHoras(TimeUtils.formatMinutesToHHmm(mins));
     dto.setTipoMotivo(e.getTipoDispensa());
     dto.setMotivo(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : null);
     dto.setParecerResponsavel(e.getDecisaoResponsavel());
@@ -204,7 +202,7 @@ public class DispensaReadService {
         if (minsItem != null)
           totalMin += minsItem;
       }
-      dto.setHorasUsadasMes(TimeUtils.formatMinutes(totalMin));
+      dto.setHorasUsadasMes(TimeUtils.formatMinutesToHHmm(totalMin));
     }
 
     var documentos = documentoEntityRepository
@@ -246,7 +244,7 @@ public class DispensaReadService {
     dto.setHoraSaida(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
     dto.setHoraEntrada(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
     var mins = TimeUtils.diffMinutes(e.getHoraInicio(), e.getHoraFim());
-    dto.setTotalHoras(TimeUtils.formatMinutes(mins));
+    dto.setTotalHoras(TimeUtils.formatMinutesToHHmm(mins));
     dto.setTipoMotivo(e.getTipoDispensa());
     dto.setMotivo(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : null);
     dto.setParecerResponsavel(e.getDecisaoResponsavel());
@@ -274,7 +272,7 @@ public class DispensaReadService {
         if (minsItem != null)
           totalMin += minsItem;
       }
-      dto.setHorasUsadasMes(TimeUtils.formatMinutes(totalMin));
+      dto.setHorasUsadasMes(TimeUtils.formatMinutesToHHmm(totalMin));
     }
 
     var documentos = documentoEntityRepository

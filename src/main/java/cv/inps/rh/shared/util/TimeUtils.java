@@ -4,7 +4,7 @@ import org.springframework.util.StringUtils;
 
 public class TimeUtils {
 
-  public static String formatMinutes(Integer minutes) {
+  public static String formatMinutesToHHmm(Integer minutes) {
     if (minutes == null) {
       return null;
     }
