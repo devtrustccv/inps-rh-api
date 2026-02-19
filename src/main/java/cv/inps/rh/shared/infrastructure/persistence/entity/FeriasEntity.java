@@ -48,4 +48,8 @@ public class FeriasEntity extends AuditEntity {
     private UUID uuid;
 
   
+    @Column(name="num_dia")
+    private Integer numDia;
+
+  
 }
