@@ -136,6 +136,11 @@ public class FeriaWriteService {
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador de pedido ferias é obrigatório");
 
+    var saldoFeria = saldoFeriaService.getSaldo(req.getColaborador());
+
+    if (req.getNumDias() > saldoFeria)
+      throw IgrpResponseStatusException.badRequest("Funcionario não tem saldo de ferias suficiente");
+
     var ferias = feriasGozadasRepository.findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
             "Ferias Gozadas not found for id: " + command.getPedidoId()));
