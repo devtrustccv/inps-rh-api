@@ -6,12 +6,25 @@ public class TimeUtils {
 
   public static String formatMinutesToHHmm(Integer minutes) {
     if (minutes == null) {
-      return null;
+      return "00:00";
     }
     int h = minutes / 60;
     int m = minutes % 60;
 
     return String.format("%02d:%02d", h, m);
+  }
+
+  public static int hhmmToMinutes(String hhmm) {
+    if (!StringUtils.hasText(hhmm)) {
+      return 0;
+    }
+
+    try {
+      var time = java.time.LocalTime.parse(hhmm);
+      return time.getHour() * 60 + time.getMinute();
+    } catch (Exception e) {
+      return 0;
+    }
   }
 
 
@@ -52,7 +65,7 @@ public class TimeUtils {
    */
   public static String hhmmToIntervalFormat(String hhmm) {
     if (!StringUtils.hasText(hhmm)) {
-      return null; // ou "+0 00:00:00" se preferir default
+      return "+0 00:00:00";
     }
 
     String[] parts = hhmm.trim().split(":");
@@ -73,21 +86,20 @@ public class TimeUtils {
     return String.format("+0 %02d:%02d:00", hours, minutes);
   }
 
-
-  public static Integer diffMinutes(String inicio, String fim) {
+  public static int diffMinutes(String inicio, String fim) {
     if (!StringUtils.hasText(inicio) || !StringUtils.hasText(fim)) {
-      return null;
+      return 0;
     }
-
     try {
       var t1 = java.time.LocalTime.parse(inicio);
       var t2 = java.time.LocalTime.parse(fim);
       long minutes = java.time.Duration.between(t1, t2).toMinutes();
       return (int) Math.max(minutes, 0);
     } catch (Exception e) {
-      return null;
+      return 0;
     }
+
   }
 
 
-}
+  }

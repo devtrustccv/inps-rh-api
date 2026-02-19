@@ -37,10 +37,7 @@ public class DispensaWriteService {
   private final AusenciaEntityRepository ausenciaEntityRepository;
   private final ParamSituacaoEntityRepository paramSituacaoEntityRepository;
   private final ResponsavelEntityRepository responsavelEntityRepository;
-
-
-
-
+  private final DispensaHorasService dispensaHorasService;
 
 
 
@@ -55,6 +52,17 @@ public class DispensaWriteService {
       throw IgrpResponseStatusException.badRequest("Data da dispensa obrigatória");
     if (!StringUtils.hasText(req.getHoraSaida()) || !StringUtils.hasText(req.getHoraEntrada()))
       throw IgrpResponseStatusException.badRequest("Intervalo de horas obrigatório");
+
+    var dispensaStatus = dispensaHorasService.getHorasStatus(req.getColaborador(), req.getDataDispensa());
+    var horasDisponiveis = TimeUtils.hhmmToMinutes(dispensaStatus.getHorasDisponiveis());
+    var horasUsadas= TimeUtils.hhmmToMinutes(dispensaStatus.getHorasUsadas());
+
+    if (horasUsadas > horasDisponiveis) {
+      throw IgrpResponseStatusException.badRequest(
+          "Funcionário não tem horas suficientes para dispensa"
+      );
+    }
+
 
     var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaborador());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -135,6 +143,16 @@ public class DispensaWriteService {
             "Dispensa não encontrada para esse pedido",
             command.getPedidoId()));
 
+    var dispensaStatus = dispensaHorasService.getHorasStatus(req.getColaborador(), dispensa.getData());
+    var horasDisponiveis = TimeUtils.hhmmToMinutes(dispensaStatus.getHorasDisponiveis());
+    var horasUsadas= TimeUtils.hhmmToMinutes(dispensaStatus.getHorasUsadas());
+
+    if (horasUsadas > horasDisponiveis) {
+      throw IgrpResponseStatusException.badRequest(
+          "Funcionário não tem horas suficientes para dispensa"
+      );
+    }
+
     var pedido = dispensa.getPedidoId();
     if (pedido == null)
       throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
@@ -208,7 +226,7 @@ public class DispensaWriteService {
         ausencia.setDataInicio(dispensa.getData());
         ausencia.setDataFim(dispensa.getData());
         var minutos = TimeUtils.diffMinutes(dispensa.getHoraInicio(), dispensa.getHoraFim());
-        ausencia.setHora(minutos != null ? minutos : 0);
+        ausencia.setHora(minutos);
         ausencia.setEstado(Estado.A);
         ausencia.setUuid(UuidCreator.getTimeOrderedEpoch());
         ausenciaEntityRepository.save(ausencia);
@@ -245,6 +263,16 @@ public class DispensaWriteService {
     var dispensa = dispensaRepository.findByUuid(UUID.fromString(command.getDispensaId()))
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Dispensa nao encontrada",
             command.getDispensaId()));
+
+    var dispensaStatus = dispensaHorasService.getHorasStatus(req.getColaborador(), dispensa.getData());
+    var horasDisponiveis = TimeUtils.hhmmToMinutes(dispensaStatus.getHorasDisponiveis());
+    var horasUsadas= TimeUtils.hhmmToMinutes(dispensaStatus.getHorasUsadas());
+
+    if (horasUsadas > horasDisponiveis) {
+      throw IgrpResponseStatusException.badRequest(
+          "Funcionário não tem horas suficientes para dispensa"
+      );
+    }
 
     var pedido = dispensa.getPedidoId();
     if (pedido == null)

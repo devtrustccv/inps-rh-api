@@ -28,15 +28,14 @@ public class DispensaHorasService {
       int totalMin = 0;
       for (var d : listaMes) {
         var minsItem = TimeUtils.diffMinutes(d.getHoraInicio(), d.getHoraFim());
-        if (minsItem != null)
-          totalMin += minsItem;
+        totalMin += minsItem;
       }
 
       var totalHorasUsadas =  TimeUtils.formatMinutesToHHmm(totalMin);
+
       String totalHorasDisponiveis = assiduidadeParametroEntityRepository
           .findActiveTDispensa()
           .orElse("00:00");
-
 
       var horasDispensaStatus = new HorasDispensaStatusDTO();
       horasDispensaStatus.setHorasUsadas(totalHorasUsadas);

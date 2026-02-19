@@ -199,8 +199,7 @@ public class DispensaReadService {
       int totalMin = 0;
       for (var d : listaMes) {
         var minsItem = TimeUtils.diffMinutes(d.getHoraInicio(), d.getHoraFim());
-        if (minsItem != null)
-          totalMin += minsItem;
+        totalMin += minsItem;
       }
       dto.setHorasUsadasMes(TimeUtils.formatMinutesToHHmm(totalMin));
     }
@@ -269,8 +268,7 @@ public class DispensaReadService {
       int totalMin = 0;
       for (var d : listaMes) {
         var minsItem = TimeUtils.diffMinutes(d.getHoraInicio(), d.getHoraFim());
-        if (minsItem != null)
-          totalMin += minsItem;
+        totalMin += minsItem;
       }
       dto.setHorasUsadasMes(TimeUtils.formatMinutesToHHmm(totalMin));
     }
