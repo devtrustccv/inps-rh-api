@@ -76,8 +76,8 @@ public class MovimentoResumoService {
     return (root, cq, cb) -> {
       var predicates = cb.conjunction();
 
-      Integer mes = query.getMes()!=null ? query.getMes(): LocalDate.now().getMonthValue();
-      Integer ano = query.getAno()!=null ? query.getAno(): LocalDate.now().getYear();
+      Integer mes = query.getMes() != null ? query.getMes() : LocalDate.now().getMonthValue();
+      Integer ano = query.getAno() != null ? query.getAno() : LocalDate.now().getYear();
 
       if (query.getAno() != null) {
         predicates = cb.and(predicates, cb.equal(root.get("ano"), ano));
@@ -90,6 +90,15 @@ public class MovimentoResumoService {
       if (query.getColaborador() != null && !query.getColaborador().isBlank()) {
         predicates = cb.and(predicates,
             cb.like(cb.lower(root.get("nomeFuncionario")), "%" + query.getColaborador().toLowerCase() + "%"));
+      }
+
+      if (StringUtils.hasText(query.getFuncionarioUuid())) {
+        try {
+          var funcUuid = java.util.UUID.fromString(query.getFuncionarioUuid());
+          predicates = cb.and(predicates, cb.equal(root.get("funcionarioUuid"), funcUuid));
+        } catch (IllegalArgumentException ignored) {
+          // Ignore invalid UUIDs
+        }
       }
 
       if (query.getDirecao() != null) {
@@ -112,17 +121,12 @@ public class MovimentoResumoService {
     };
   }
 
-
   private String formatarHoras(BigDecimal horas) {
-    if (horas == null) return "00:00";
+    if (horas == null)
+      return "00:00";
     int h = horas.intValue();
     int m = horas.subtract(new BigDecimal(h)).multiply(new BigDecimal(60)).intValue();
     return String.format("%02d:%02d", h, m);
   }
-
-
-
-
-
 
 }

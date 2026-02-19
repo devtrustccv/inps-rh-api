@@ -93,6 +93,15 @@ public class FeriaReadService {
             .add(cb.like(cb.lower(root.get("nomeColaborador")), "%" + query.getColaborador().toLowerCase() + "%"));
       }
 
+      if (StringUtils.hasText(query.getFuncionarioUuid())) {
+        try {
+          var funcUuid = java.util.UUID.fromString(query.getFuncionarioUuid());
+          predicates.add(cb.equal(root.get("uuidFuncionario"), funcUuid));
+        } catch (IllegalArgumentException ignored) {
+          // Ignore invalid UUIDs
+        }
+      }
+
       return cb.and(predicates.toArray(new Predicate[0]));
     };
   }

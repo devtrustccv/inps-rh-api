@@ -69,6 +69,19 @@ public class HoraExtraReadService {
 
       var predicates = new ArrayList<Predicate>();
 
+     /* if (StringUtils.hasText(query.getColaborador())) {
+        predicates.add(cb.like(cb.lower(root.get("nomeFuncionario")), "%" + query.getColaborador().toLowerCase() + "%"));
+      }*/
+
+      if (StringUtils.hasText(query.getFuncionarioUuid())) {
+        try {
+          var funcUuid = UUID.fromString(query.getFuncionarioUuid());
+          predicates.add(cb.equal(root.get("funcionarioUuid"), funcUuid));
+        } catch (IllegalArgumentException ignored) {
+          // Ignore invalid UUIDs
+        }
+      }
+
       if (query.getIlha() != null) {
         predicates.add(cb.equal(root.get("ilhaId"), query.getIlha()));
       }

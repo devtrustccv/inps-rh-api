@@ -80,6 +80,14 @@ public class FaltaReadService {
         predicates
             .add(cb.like(cb.lower(root.get("nomeFuncionario")), "%" + query.getColaborador().toLowerCase() + "%"));
       }
+      if (StringUtils.hasText(query.getFuncionarioUuid())) {
+        try {
+          var funcUuid = UUID.fromString(query.getFuncionarioUuid());
+          predicates.add(cb.equal(root.get("funcionarioUuid"), funcUuid));
+        } catch (IllegalArgumentException ignored) {
+          // Ignore invalid UUIDs
+        }
+      }
       if (query.getIlha() != null) {
         predicates.add(cb.equal(root.get("idIlha"), query.getIlha()));
       }

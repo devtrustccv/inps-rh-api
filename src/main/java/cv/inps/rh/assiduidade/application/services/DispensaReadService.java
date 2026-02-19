@@ -68,6 +68,15 @@ public class DispensaReadService {
                 "%" + query.getColaborador().toLowerCase() + "%"));
       }
 
+      if (StringUtils.hasText(query.getFuncionarioUuid())) {
+        try {
+          var funcUuid = UUID.fromString(query.getFuncionarioUuid());
+          predicates.add(cb.equal(root.get("pedidoId").get("funId").get("uuid"), funcUuid));
+        } catch (IllegalArgumentException ignored) {
+          // Ignore invalid UUIDs
+        }
+      }
+
       if (StringUtils.hasText(query.getDataInicio())) {
         var di = DateFormatter.stringToLocalDate(query.getDataInicio());
         if (di != null) {
@@ -200,13 +209,14 @@ public class DispensaReadService {
       int totalMin = 0;
       for (var d : listaMes) {
         var minsItem = diffMinutes(d.getHoraInicio(), d.getHoraFim());
-        if (minsItem != null) totalMin += minsItem;
+        if (minsItem != null)
+          totalMin += minsItem;
       }
       dto.setHorasUsadasMes(formatMinutes(totalMin));
     }
 
     var documentos = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(Referencia.DISPENSA.name(),e.getUuid());
+        .findAllByReferenciaNameAndReferenciaUuid(Referencia.DISPENSA.name(), e.getUuid());
 
     if (!CollectionUtils.isEmpty(documentos)) {
       dto.setDocumentos(documentos.stream().map(d -> {
@@ -259,13 +269,14 @@ public class DispensaReadService {
       int totalMin = 0;
       for (var d : listaMes) {
         var minsItem = diffMinutes(d.getHoraInicio(), d.getHoraFim());
-        if (minsItem != null) totalMin += minsItem;
+        if (minsItem != null)
+          totalMin += minsItem;
       }
       dto.setHorasUsadasMes(formatMinutes(totalMin));
     }
 
     var documentos = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(Referencia.DISPENSA.name(),e.getUuid());
+        .findAllByReferenciaNameAndReferenciaUuid(Referencia.DISPENSA.name(), e.getUuid());
 
     if (!CollectionUtils.isEmpty(documentos)) {
       dto.setDocumentos(documentos.stream().map(d -> {
