@@ -1,0 +1,211 @@
+{
+  "type": "controller",
+  "name": "Relatorio",
+  "module": "transversal",
+  "description": "Gestão de Relatórios",
+  "basePath": "api/v1/relatorios",
+  "actions": [
+    {
+      "actionName": "relatorioDossierColaborador",
+      "path": "funcionarios",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DossierColaboradorList",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "transversal"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "search",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direccaoId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccaoId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "cargoId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "idade",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "genero",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "faixaEtaria",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "localTrabalhoId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "carreiraId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "escalaoId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "categoriaId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "grauEscolaridade",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "mobilidade",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "vinculoId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "situacaoLaboralId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "relatorioAssiduidade",
+      "path": "assiduidade",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "AssiduidadeList",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "transversal"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "search",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "direccaoId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "seccaoId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "tipoRelatorio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "downloadRelatorio",
+      "path": "{id}/download",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "undefined-listarDossierColaborador-relatorioDossierColaborador-relatorioDossierColaborador-relatorioAssiduidade"
+}
