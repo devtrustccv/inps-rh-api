@@ -25,6 +25,9 @@ public class RelatorioDossierService {
 
   public DossierColaboradorListDTO get(RelatorioDossierColaboradorQuery request) {
 
+    if(!request.isSearch())
+      return new DossierColaboradorListDTO();
+
     int pageNumber = Integer.parseInt(request.getPageNumber());
     int pageSize = Integer.parseInt(request.getPageSize());
 
@@ -89,6 +92,7 @@ public class RelatorioDossierService {
       if (entity.getMobId().getLocalTrabId() != null) {
         dto.setLocalTrabalho(entity.getMobId().getLocalTrabId().getNome());
       }
+      dto.setMobilidade(entity.getTipoSituacao());
     }
 
     if (entity.getCarreiraId() != null) {

@@ -74,10 +74,11 @@ public class RelatorioController {
     @RequestParam(value = "vinculoId", required = false) Long vinculoId,
     @RequestParam(value = "situacaoLaboralId", required = false) Long situacaoLaboralId,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
-    @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize)
+    @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
+    @RequestParam(value = "search", defaultValue = "false") boolean search)
   {
 
-      final var query = new RelatorioDossierColaboradorQuery(direccaoId, seccaoId, cargoId, idade, genero, faixaEtaria, localTrabalhoId, carreiraId, escalaoId, categoriaId, grauEscolaridade, mobilidade, vinculoId, situacaoLaboralId, pageNumber, pageSize);
+      final var query = new RelatorioDossierColaboradorQuery(direccaoId, seccaoId, cargoId, idade, genero, faixaEtaria, localTrabalhoId, carreiraId, escalaoId, categoriaId, grauEscolaridade, mobilidade, vinculoId, situacaoLaboralId, pageNumber, pageSize, search);
 
       return queryBus.handle(query);
 
@@ -104,7 +105,7 @@ public class RelatorioController {
   )
   
   public ResponseEntity<AssiduidadeListDTO> relatorioAssiduidade(
-    @RequestParam(value = "search", required = false) String search,
+    @RequestParam(value = "search", defaultValue = "false") boolean search,
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
     @RequestParam(value = "dataFim", required = false) String dataFim,
     @RequestParam(value = "direccaoId", required = false) String direccaoId,

@@ -13,8 +13,8 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class RelatorioAssiduidadeQuery implements Query {
 
-  @NotBlank(message = "The field <search> is required")
-  private String search;
+  @NotNull(message = "The field <search> is required")
+  private boolean search;
   @NotBlank(message = "The field <dataInicio> is required")
   private String dataInicio;
   @NotBlank(message = "The field <dataFim> is required")

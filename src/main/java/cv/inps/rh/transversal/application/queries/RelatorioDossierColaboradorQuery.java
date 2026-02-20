@@ -45,5 +45,7 @@ public class RelatorioDossierColaboradorQuery implements Query {
   private String pageNumber;
   @NotBlank(message = "The field <pageSize> is required")
   private String pageSize;
+  @NotNull(message = "The field <search> is required")
+  private boolean search;
 
 }

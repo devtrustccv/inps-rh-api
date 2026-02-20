@@ -107,6 +107,12 @@
           "name": "pageSize",
           "value": "20",
           "isRequired": false
+        },
+        {
+          "type": "boolean",
+          "name": "search",
+          "value": "false",
+          "isRequired": true
         }
       ]
     },
@@ -132,9 +138,10 @@
       },
       "requestParams": [
         {
-          "type": "string",
+          "type": "boolean",
           "name": "search",
-          "isRequired": false
+          "isRequired": true,
+          "value": "false"
         },
         {
           "type": "string",
@@ -202,5 +209,5 @@
       ]
     }
   ],
-  "id": "undefined-listarDossierColaborador-relatorioDossierColaborador-relatorioDossierColaborador-relatorioAssiduidade-relatorioDossierColaborador"
+  "id": "undefined-listarDossierColaborador-relatorioDossierColaborador-relatorioDossierColaborador-relatorioAssiduidade-relatorioDossierColaborador-relatorioAssiduidade"
 }
