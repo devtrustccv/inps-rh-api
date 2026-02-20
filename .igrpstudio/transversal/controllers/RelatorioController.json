@@ -27,11 +27,6 @@
       },
       "requestParams": [
         {
-          "type": "string",
-          "name": "search",
-          "isRequired": false
-        },
-        {
           "type": "long",
           "name": "direccaoId",
           "isRequired": false
@@ -207,5 +202,5 @@
       ]
     }
   ],
-  "id": "undefined-listarDossierColaborador-relatorioDossierColaborador-relatorioDossierColaborador-relatorioAssiduidade"
+  "id": "undefined-listarDossierColaborador-relatorioDossierColaborador-relatorioDossierColaborador-relatorioAssiduidade-relatorioDossierColaborador"
 }

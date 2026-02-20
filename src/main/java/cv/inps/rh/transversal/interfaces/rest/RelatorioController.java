@@ -59,7 +59,6 @@ public class RelatorioController {
   )
   
   public ResponseEntity<DossierColaboradorListDTO> relatorioDossierColaborador(
-    @RequestParam(value = "search", required = false) String search,
     @RequestParam(value = "direccaoId", required = false) Long direccaoId,
     @RequestParam(value = "seccaoId", required = false) Long seccaoId,
     @RequestParam(value = "cargoId", required = false) Long cargoId,
@@ -78,7 +77,7 @@ public class RelatorioController {
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize)
   {
 
-      final var query = new RelatorioDossierColaboradorQuery(search, direccaoId, seccaoId, cargoId, idade, genero, faixaEtaria, localTrabalhoId, carreiraId, escalaoId, categoriaId, grauEscolaridade, mobilidade, vinculoId, situacaoLaboralId, pageNumber, pageSize);
+      final var query = new RelatorioDossierColaboradorQuery(direccaoId, seccaoId, cargoId, idade, genero, faixaEtaria, localTrabalhoId, carreiraId, escalaoId, categoriaId, grauEscolaridade, mobilidade, vinculoId, situacaoLaboralId, pageNumber, pageSize);
 
       return queryBus.handle(query);
 

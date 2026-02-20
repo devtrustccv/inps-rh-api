@@ -13,8 +13,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class RelatorioDossierColaboradorQuery implements Query {
 
-  @NotBlank(message = "The field <search> is required")
-  private String search;
   @NotNull(message = "The field <direccaoId> is required")
   private Long direccaoId;
   @NotNull(message = "The field <seccaoId> is required")
