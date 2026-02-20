@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,6 +55,13 @@ public class RelatorioDossierService {
         predicates.add(cb.equal(root.get("cargoId").get("id"), request.getCargoId()
             )
         );
+      }
+
+      if (request.getIdade() != null) {
+        LocalDate today = LocalDate.now();
+        LocalDate minBirthDate = today.minusYears(request.getIdade() + 1).plusDays(1);
+        LocalDate maxBirthDate = today.minusYears(request.getIdade());
+        predicates.add(cb.between(root.get("funId").get("dataNascimento"), minBirthDate, maxBirthDate));
       }
 
       return cb.and(predicates.toArray(new Predicate[0]));
