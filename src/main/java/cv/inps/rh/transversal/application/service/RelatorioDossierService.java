@@ -64,6 +64,25 @@ public class RelatorioDossierService {
         predicates.add(cb.between(root.get("funId").get("dataNascimento"), minBirthDate, maxBirthDate));
       }
 
+      if (StringUtils.hasText(request.getFaixaEtaria())) {
+        String[] parts = request.getFaixaEtaria().split("-");
+        if (parts.length == 2) {
+          try {
+            int startAge = Integer.parseInt(parts[0].trim());
+            int endAge = Integer.parseInt(parts[1].trim());
+
+            LocalDate today = LocalDate.now();
+            LocalDate maxBirthDate = today.minusYears(startAge);
+            LocalDate minBirthDate = today.minusYears(endAge + 1).plusDays(1);
+
+            predicates.add(cb.between(root.get("funId").get("dataNascimento"), minBirthDate, maxBirthDate));
+
+          } catch (NumberFormatException e) {
+            // Ignore invalid format
+          }
+        }
+      }
+
       if (StringUtils.hasText(request.getGenero())) {
         predicates.add(cb.equal(root.get("funId").get("sexo"), request.getGenero()));
       }
