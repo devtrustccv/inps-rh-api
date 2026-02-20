@@ -124,6 +124,11 @@ public class RelatorioDossierService {
           java.time.LocalDate.now());
       dto.setIdade(period.getYears());
       dto.setGenero(entity.getFunId().getSexo());
+
+      int idade = period.getYears();
+      int faixaInicio = (idade / 10) * 10;
+      int faixaFim = faixaInicio + 9;
+      dto.setFaixaEtaria(faixaInicio + " - " + faixaFim);
     }
 
     return dto;
