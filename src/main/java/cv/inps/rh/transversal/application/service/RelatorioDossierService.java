@@ -1,12 +1,17 @@
 package cv.inps.rh.transversal.application.service;
 
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.HabilitacaoLiterariaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.transversal.application.dto.DossierColaboradorListDTO;
 import cv.inps.rh.transversal.application.dto.DossierColaboradorRowDTO;
 import cv.inps.rh.transversal.application.queries.RelatorioDossierColaboradorQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.flywaydb.core.internal.util.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +31,7 @@ public class RelatorioDossierService {
 
   public DossierColaboradorListDTO get(RelatorioDossierColaboradorQuery request) {
 
-    if(!request.isSearch())
+    if (!request.isSearch())
       return new DossierColaboradorListDTO();
 
     int pageNumber = Integer.parseInt(request.getPageNumber());
@@ -41,20 +46,15 @@ public class RelatorioDossierService {
       predicates.add(cb.equal(root.get("estActAdm"), 1));
 
       if (request.getDireccaoId() != null) {
-        predicates.add(cb.equal(root.get("mobId").get("instidId").get("id"), request.getDireccaoId())
-        );
+        predicates.add(cb.equal(root.get("mobId").get("instidId").get("id"), request.getDireccaoId()));
       }
 
       if (request.getSeccaoId() != null) {
-        predicates.add(cb.equal(root.get("mobId").get("secaoId").get("id"), request.getSeccaoId()
-            )
-        );
+        predicates.add(cb.equal(root.get("mobId").get("secaoId").get("id"), request.getSeccaoId()));
       }
 
       if (request.getCargoId() != null) {
-        predicates.add(cb.equal(root.get("cargoId").get("id"), request.getCargoId()
-            )
-        );
+        predicates.add(cb.equal(root.get("cargoId").get("id"), request.getCargoId()));
       }
 
       if (request.getIdade() != null) {
@@ -62,6 +62,47 @@ public class RelatorioDossierService {
         LocalDate minBirthDate = today.minusYears(request.getIdade() + 1).plusDays(1);
         LocalDate maxBirthDate = today.minusYears(request.getIdade());
         predicates.add(cb.between(root.get("funId").get("dataNascimento"), minBirthDate, maxBirthDate));
+      }
+
+      if (StringUtils.hasText(request.getGenero())) {
+        predicates.add(cb.equal(root.get("funId").get("sexo"), request.getGenero()));
+      }
+
+      if (request.getLocalTrabalhoId() != null) {
+        predicates.add(cb.equal(root.get("mobId").get("localTrabId").get("id"), request.getLocalTrabalhoId()));
+      }
+
+      if (request.getCarreiraId() != null) {
+        predicates.add(cb.equal(root.get("carreiraId").get("carrPccsId").get("id"), request.getCarreiraId()));
+      }
+
+      if (request.getEscalaoId() != null) {
+        predicates.add(cb.equal(root.get("carreiraId").get("escalaoId").get("id"), request.getEscalaoId()));
+      }
+
+      if (request.getCategoriaId() != null) {
+        predicates.add(cb.equal(root.get("carreiraId").get("categoriaId").get("id"), request.getCategoriaId()));
+      }
+
+      if (StringUtils.hasText(request.getGrauEscolaridade())) {
+        Join<TiposRelacionamentoEntity, FuncionarioEntity> funJoin = root.join("funId", JoinType.LEFT);
+        Join<FuncionarioEntity, HabilitacaoLiterariaEntity> habJoin = funJoin.join("habilitacoesLiterarias",
+            JoinType.LEFT);
+        predicates.add(cb.equal(habJoin.get("nivel"), request.getGrauEscolaridade()));
+        cq.distinct(true);
+      }
+
+      if (StringUtils.hasText(request.getMobilidade())) {
+        predicates.add(cb.equal(root.get("mobId").get("tipoSituacao"), request.getMobilidade()));
+      }
+
+      if (request.getVinculoId() != null) {
+        predicates.add(cb.equal(root.get("contrVinculoId").get("vinculoId").get("id"), request.getVinculoId()));
+      }
+
+      if (request.getSituacaoLaboralId() != null) {
+        predicates.add(
+            cb.equal(root.get("situacLaboralId").get("situacaoLaboralId").get("id"), request.getSituacaoLaboralId()));
       }
 
       return cb.and(predicates.toArray(new Predicate[0]));
@@ -88,7 +129,6 @@ public class RelatorioDossierService {
 
   private DossierColaboradorRowDTO mapToDTO(TiposRelacionamentoEntity entity) {
     DossierColaboradorRowDTO dto = new DossierColaboradorRowDTO();
-
 
     if (entity.getMobId() != null) {
       if (entity.getMobId().getInstidId() != null) {
@@ -125,7 +165,6 @@ public class RelatorioDossierService {
     if (entity.getSituacLaboralId() != null && entity.getSituacLaboralId().getSituacaoLaboralId() != null) {
       dto.setSituacaoLaboral(entity.getSituacLaboralId().getSituacaoLaboralId().getNome());
     }
-
 
     if (entity.getFunId() != null && entity.getFunId().getDataNascimento() != null) {
       java.time.Period period = java.time.Period.between(entity.getFunId().getDataNascimento(),
