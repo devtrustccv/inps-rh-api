@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @IgrpDTO
 public class DossierColaboradorRowDTO {
 
-    private String id;
+    private Integer quantidadeColaboradores;
     private String direccao;
     private String seccao;
     private String cargo;
@@ -25,6 +25,7 @@ public class DossierColaboradorRowDTO {
     private String grauEscolaridade;
     private String mobilidade;
     private String estruturaRemuneratoria;
+    private String antiguidade;
     private String vinculo;
     private String situacaoLaboral;
 
