@@ -144,6 +144,26 @@
           "value": "false"
         },
         {
+          "type": "long",
+          "name": "direccaoId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccaoId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "colaborador",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "tipoAssiduidade",
+          "isRequired": false
+        },
+        {
           "type": "string",
           "name": "dataInicio",
           "isRequired": false
@@ -151,21 +171,6 @@
         {
           "type": "string",
           "name": "dataFim",
-          "isRequired": false
-        },
-        {
-          "type": "string",
-          "name": "direccaoId",
-          "isRequired": false
-        },
-        {
-          "type": "string",
-          "name": "seccaoId",
-          "isRequired": false
-        },
-        {
-          "type": "string",
-          "name": "tipoRelatorio",
           "isRequired": false
         },
         {
@@ -209,5 +214,5 @@
       ]
     }
   ],
-  "id": "undefined-listarDossierColaborador-relatorioDossierColaborador-relatorioDossierColaborador-relatorioAssiduidade-relatorioDossierColaborador-relatorioAssiduidade-relatorioDossierColaborador"
+  "id": "undefined-listarDossierColaborador-relatorioDossierColaborador-relatorioDossierColaborador-relatorioAssiduidade-relatorioDossierColaborador-relatorioAssiduidade-relatorioDossierColaborador-relatorioAssiduidade-relatorioAssiduidade"
 }

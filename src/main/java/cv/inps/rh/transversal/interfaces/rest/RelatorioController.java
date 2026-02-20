@@ -106,16 +106,17 @@ public class RelatorioController {
   
   public ResponseEntity<AssiduidadeListDTO> relatorioAssiduidade(
     @RequestParam(value = "search", defaultValue = "false") boolean search,
+    @RequestParam(value = "direccaoId", required = false) Long direccaoId,
+    @RequestParam(value = "seccaoId", required = false) Long seccaoId,
+    @RequestParam(value = "colaborador", required = false) String colaborador,
+    @RequestParam(value = "tipoAssiduidade", required = false) String tipoAssiduidade,
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
     @RequestParam(value = "dataFim", required = false) String dataFim,
-    @RequestParam(value = "direccaoId", required = false) String direccaoId,
-    @RequestParam(value = "seccaoId", required = false) String seccaoId,
-    @RequestParam(value = "tipoRelatorio", required = false) String tipoRelatorio,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize)
   {
 
-      final var query = new RelatorioAssiduidadeQuery(search, dataInicio, dataFim, direccaoId, seccaoId, tipoRelatorio, pageNumber, pageSize);
+      final var query = new RelatorioAssiduidadeQuery(search, direccaoId, seccaoId, colaborador, tipoAssiduidade, dataInicio, dataFim, pageNumber, pageSize);
 
       return queryBus.handle(query);
 
