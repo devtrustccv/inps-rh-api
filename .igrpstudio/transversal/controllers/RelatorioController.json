@@ -42,7 +42,7 @@
           "isRequired": false
         },
         {
-          "type": "string",
+          "type": "integer",
           "name": "idade",
           "isRequired": false
         },
@@ -209,5 +209,5 @@
       ]
     }
   ],
-  "id": "undefined-listarDossierColaborador-relatorioDossierColaborador-relatorioDossierColaborador-relatorioAssiduidade-relatorioDossierColaborador-relatorioAssiduidade"
+  "id": "undefined-listarDossierColaborador-relatorioDossierColaborador-relatorioDossierColaborador-relatorioAssiduidade-relatorioDossierColaborador-relatorioAssiduidade-relatorioDossierColaborador"
 }

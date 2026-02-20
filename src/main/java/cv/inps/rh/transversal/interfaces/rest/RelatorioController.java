@@ -62,7 +62,7 @@ public class RelatorioController {
     @RequestParam(value = "direccaoId", required = false) Long direccaoId,
     @RequestParam(value = "seccaoId", required = false) Long seccaoId,
     @RequestParam(value = "cargoId", required = false) Long cargoId,
-    @RequestParam(value = "idade", required = false) String idade,
+    @RequestParam(value = "idade", required = false) Integer idade,
     @RequestParam(value = "genero", required = false) String genero,
     @RequestParam(value = "faixaEtaria", required = false) String faixaEtaria,
     @RequestParam(value = "localTrabalhoId", required = false) Long localTrabalhoId,

@@ -19,8 +19,8 @@ public class RelatorioDossierColaboradorQuery implements Query {
   private Long seccaoId;
   @NotNull(message = "The field <cargoId> is required")
   private Long cargoId;
-  @NotBlank(message = "The field <idade> is required")
-  private String idade;
+  @NotNull(message = "The field <idade> is required")
+  private Integer idade;
   @NotBlank(message = "The field <genero> is required")
   private String genero;
   @NotBlank(message = "The field <faixaEtaria> is required")
