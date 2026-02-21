@@ -62,6 +62,7 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
     e.setTMovIrregular(dto.getMovimentoIrregular());
     e.setHePartirDe(dto.getHoraAPartirDe());
     e.setHeDiaria(dto.getLimiteDiario());
+    e.setTDispensa(dto.getDispensa());
     e.setHeValorDutil(dto.getPercentagemDiasUteis());
     e.setHeValorDnutil(dto.getPercentagemDiasNaoUteis());
     e.setPrazoJustifFalta(dto.getPeriodoLimiteJustFalta());
@@ -135,6 +136,7 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
     r.setSegundoAtrazo(e.getTAtraso2());
     r.setFaltaAplicadaSegundoAtrazo(e.getTAtrasoApli2());
     r.setMovimentoIrregular(e.getTMovIrregular());
+    r.setDispensa(e.getTDispensa());
     r.setHoraAPartirDe(e.getHePartirDe());
     r.setLimiteDiario(e.getHeDiaria());
     r.setPercentagemDiasUteis(e.getHeValorDutil());
