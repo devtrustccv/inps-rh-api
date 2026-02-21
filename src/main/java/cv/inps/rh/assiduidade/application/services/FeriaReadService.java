@@ -147,6 +147,7 @@ public class FeriaReadService {
     if (entity.getTiprelIdSubstituido() != null) {
       var substituido = tiposRelacionamentoEntityRepository.findById(entity.getTiprelIdSubstituido()).orElse(null);
       req.setSubstituidoPor(substituido != null ? substituido.getUuid() : null);
+      req.setSubstituidoPorNome(substituido != null ? substituido.getFunId().getNome() : null);
     }
 
     req.setObsConvinienciaServico(entity.getObsInfoConveniencia());
@@ -158,7 +159,7 @@ public class FeriaReadService {
             req.setResponsavelNome(responsavel.getFunId().getNome());
           });
     };
-
+    req.setParecer(entity.getDecisaoResponsavel());
     req.setObsParecer(entity.getObsResponsavel());
 
     var documentos = documentoEntityRepository.findAllByReferenciaNameAndReferenciaUuid(
@@ -167,6 +168,7 @@ public class FeriaReadService {
     if (documentos != null && !documentos.isEmpty()) {
       req.setDocumentos(documentos.stream().map(d -> {
         var anexo = new AnexoReqDTO();
+        anexo.setId(d.getId());
         anexo.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
         anexo.setDocumento(d.getUrl());
         return anexo;
