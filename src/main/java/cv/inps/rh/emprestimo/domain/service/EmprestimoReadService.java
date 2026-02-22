@@ -44,11 +44,12 @@ public class EmprestimoReadService {
     return paramEmprestimoEntityRepository.findAll()
         .stream()
         .map(entity -> new InformacaoEmprestimoRequestDTO(
-            entity.getCarrPccs().getUuid().toString(),
+            entity.getCarrPccs().getId(),
             entity.getValorLimite(),
             entity.getNumeroLimite(),
             entity.getEstado(),
-            entity.getUuid()
+            entity.getUuid(),
+            entity.getCarrPccs().getUuid().toString()
         ))
         .toList();
   }

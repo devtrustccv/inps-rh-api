@@ -86,6 +86,13 @@
         "configuracao_geral_type",
         "PARAM_CONFIGURACAO_GERAL"
       ]
+    },
+    {
+      "name": "PARAM_DOMAIN",
+      "attributes": [
+        "domain_type",
+        "PARAM_DOMAIN"
+      ]
     }
   ],
   "attributes": [

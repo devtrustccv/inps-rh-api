@@ -58,12 +58,12 @@ public class VFeriasMensalEntity  {
     private String secao;
 
 
-    @Column(name="ilha_id")
+  /*  @Column(name="ilha_id")
     private Long ilhaId;
 
 
     @Column(name="ilha")
-    private String ilha;
+    private String ilha;*/
 
 
     @Column(name="vinculo")

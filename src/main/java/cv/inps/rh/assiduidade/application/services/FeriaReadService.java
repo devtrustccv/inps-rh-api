@@ -109,7 +109,7 @@ public class FeriaReadService {
   private FeriasListDTO toDTO(VFeriasMensalEntity e) {
     var dto = new FeriasListDTO();
     dto.setPedidoId(e.getPedidoId());
-    dto.setPedidoUuid(e.getUuidPedido().toString());
+    dto.setPedidoUuid(e.getUuidPedido() != null ? e.getUuidPedido().toString() : "");
     dto.setUuidFuncionario(e.getUuidFuncionario().toString());
     dto.setNomeColaborador(e.getNomeColaborador());
     dto.setDirecao(e.getDirecao());

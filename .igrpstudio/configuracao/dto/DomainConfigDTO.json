@@ -1,14 +1,26 @@
 {
   "type": "dto",
-  "module": "emprestimo",
-  "name": "InformacaoEmprestimoRequest",
-  "template": "classic",
+  "module": "configuracao",
+  "name": "DomainConfigDTO",
+  "template": "class",
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "carreiraId",
+      "name": "id",
       "objectType": "java",
       "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dominio",
+      "objectType": "java",
+      "type": "string",
       "required": true,
       "before": false,
       "after": false,
@@ -18,9 +30,9 @@
       "primaryKey": false
     },
     {
-      "name": "valorLimiteEmprestimo",
+      "name": "valor",
       "objectType": "java",
-      "type": "decimal",
+      "type": "string",
       "required": true,
       "before": false,
       "after": false,
@@ -30,9 +42,21 @@
       "primaryKey": false
     },
     {
-      "name": "numeroLimitePrestacaoMeses",
+      "name": "descricao",
       "objectType": "java",
-      "type": "long",
+      "type": "string",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "referencia",
+      "objectType": "java",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -44,31 +68,7 @@
     {
       "name": "estado",
       "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "id",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "carreiraUuid",
-      "objectType": "java",
-      "type": "string",
+      "type": "cv.inps.rh.shared.application.constants.Estado",
       "required": false,
       "before": false,
       "after": false,
@@ -77,6 +77,6 @@
       "isUrl": false,
       "primaryKey": false
     }
-  ],
-  "id": "jlwwdgf62o"
+  ]
 }
+
