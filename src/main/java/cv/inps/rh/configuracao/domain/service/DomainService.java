@@ -76,6 +76,7 @@ public class DomainService extends ConfigurationProcess<DomainConfigDTO> {
     var dominio = filters.getOrDefault("dominio", null);
     var valor = filters.getOrDefault("valor", null);
     var descricao = filters.getOrDefault("descricao", null);
+    var search = filters.getOrDefault("search", null);
     var status = filters.containsKey("estado")
         ? Estado.valueOf(filters.get("estado"))
         : Estado.A;
@@ -92,6 +93,13 @@ public class DomainService extends ConfigurationProcess<DomainConfigDTO> {
       if (StringUtils.hasText(descricao)) {
         var normalized = "%" + ConfigurationUtils.normalizeAndSetToLowerCaseText(descricao) + "%";
         predicates.add(cb.like(cb.lower(root.get("descricao")), normalized));
+      }
+      if (StringUtils.hasText(search)) {
+        var normalized = "%" + ConfigurationUtils.normalizeAndSetToLowerCaseText(search) + "%";
+        var dominioLike = cb.like(cb.lower(root.get("dominio")), normalized);
+        var valorLike = cb.like(cb.lower(root.get("valor")), normalized);
+        var descricaoLike = cb.like(cb.lower(root.get("descricao")), normalized);
+        predicates.add(cb.or(dominioLike, valorLike, descricaoLike));
       }
       return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
     };

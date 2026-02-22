@@ -24,7 +24,8 @@ import lombok.Setter;
 public class DomainEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "seq_domains", sequenceName = "SEQ_DOMAINS", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_domains")
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
