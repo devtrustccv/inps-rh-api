@@ -158,6 +158,7 @@ public class FeriaWriteService {
           () ->
               IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + req.getResponsavel()));
       ferias.setResponsavelId(responsavel.getId());
+      ferias.setDecisaoResponsavel(req.getParecer());
     }
 
 
