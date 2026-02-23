@@ -16,6 +16,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.service.EmailService;
 import lombok.RequiredArgsConstructor;
+import org.flywaydb.core.internal.util.CollectionsUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,10 +26,7 @@ import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.application.enums.SituacaoFalta;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -398,7 +396,7 @@ public class FeriaWriteService {
         pedido.getUuid(),
         1L,
         funId);
-    if (sincronizados != null && !sincronizados.isEmpty()) {
+    if (CollectionsUtils.hasItems(sincronizados)) {
       sincronizados.forEach(d -> { if (d.getUuid() == null) d.setUuid(UuidCreator.getTimeOrderedEpoch()); });
       documentoEntityRepository.saveAll(sincronizados);
     }
