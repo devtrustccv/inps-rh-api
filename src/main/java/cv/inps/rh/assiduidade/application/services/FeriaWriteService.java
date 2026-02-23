@@ -6,6 +6,7 @@ import cv.inps.rh.assiduidade.application.commands.MarcarFeriaCommand;
 import cv.inps.rh.assiduidade.application.commands.ValidarPedidoFeriaCommand;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
@@ -47,6 +48,7 @@ public class FeriaWriteService {
   private final EmailService emailService;
   private final ResponsavelEntityRepository responsavelEntityRepository;
   private final SaldoFeriaService saldoFeriaService;
+  private final DocumentoMapper documentoMapper;
 
 
   @Transactional
@@ -362,7 +364,7 @@ public class FeriaWriteService {
     }
   }
 
-  private void saveDocuments(List<AnexoReqDTO> documentos, FuncionarioEntity funId, PedidoEntity pedido) {
+ /* private void saveDocuments(List<AnexoReqDTO> documentos, FuncionarioEntity funId, PedidoEntity pedido) {
     if (documentos == null || documentos.isEmpty()) {
       return;
     }
@@ -380,5 +382,25 @@ public class FeriaWriteService {
       docs.add(newDoc);
     }
     documentoEntityRepository.saveAll(docs);
+  }
+*/
+
+
+  private void saveDocuments(List<AnexoReqDTO> documentos, FuncionarioEntity funId, PedidoEntity pedido){
+    var anexosExistentes = documentoEntityRepository
+        .findAllByReferenciaNameAndReferenciaUuid(Referencia.FERIA.name(), pedido.getUuid());
+
+    var sincronizados = documentoMapper.syncDocumentos(
+        anexosExistentes != null ? anexosExistentes : new ArrayList<>(),
+        documentos,
+        Referencia.FERIA.name(),
+        pedido.getId(),
+        pedido.getUuid(),
+        1L,
+        funId);
+    if (sincronizados != null && !sincronizados.isEmpty()) {
+      sincronizados.forEach(d -> { if (d.getUuid() == null) d.setUuid(UuidCreator.getTimeOrderedEpoch()); });
+      documentoEntityRepository.saveAll(sincronizados);
+    }
   }
 }
