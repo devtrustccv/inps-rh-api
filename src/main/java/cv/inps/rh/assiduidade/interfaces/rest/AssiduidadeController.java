@@ -78,7 +78,8 @@ public class AssiduidadeController {
   public ResponseEntity<WrapperListaPicagemDTO> getListaPicagem(
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
-    @RequestParam(value = "nomeColaborador", required = false) String nomeColaborador,
+    @RequestParam(value = "colaborador", required = false) String colaborador,
+    @RequestParam(value = "funcionarioUuid", required = false) String funcionarioUuid,
     @RequestParam(value = "direcao", required = false) Long direcao,
     @RequestParam(value = "seccao", required = false) Long seccao,
     @RequestParam(value = "ups", required = false) Long ups,
@@ -86,7 +87,7 @@ public class AssiduidadeController {
     @RequestParam(value = "dataFim", required = false) String dataFim)
   {
 
-      final var query = new GetListaPicagemQuery(pageSize, pageNumber, nomeColaborador, direcao, seccao, ups, dataInicio, dataFim);
+      final var query = new GetListaPicagemQuery(pageSize, pageNumber, colaborador, funcionarioUuid, direcao, seccao, ups, dataInicio, dataFim);
 
       return queryBus.handle(query);
 

@@ -59,6 +59,9 @@ public class ConfiguracaoGeralDTO  {
   
   
   private String movimentoIrregular ;
+  
+  
+  private String dispensa ;
   @NotBlank(message = "The field <horaAPartirDe> is required")
   
   private String horaAPartirDe ;

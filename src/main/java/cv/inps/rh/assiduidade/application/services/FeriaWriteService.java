@@ -93,6 +93,7 @@ public class FeriaWriteService {
     ferias.setTiprelIdSubstituido(tipoRelAtualFuncSubstituto!=null ? tipoRelAtualFuncSubstituto.getId() : null);
     ferias.setObsInfoConveniencia(req.getObsConvinienciaServico());
 
+    ferias.setDecisaoResponsavel(req.getParecer());
     ferias.setObsResponsavel(req.getObsParecer());
     ferias.setEstado(Estado.P);
     ferias.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -157,6 +158,7 @@ public class FeriaWriteService {
           () ->
               IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + req.getResponsavel()));
       ferias.setResponsavelId(responsavel.getId());
+      ferias.setDecisaoResponsavel(req.getParecer());
     }
 
 

@@ -25,10 +25,10 @@ public interface FeriasGozadasEntityRepository extends
     Optional<FeriasGozadasEntity> findByPedidoId_Uuid(UUID uuid);
 
     @Query("SELECT COALESCE(SUM(fg.numDia), 0) FROM FeriasGozadasEntity fg" +
-        " WHERE fg.funId = :funcionarioId AND fg.anoId = :anoId AND fg.estado = 'A'")
+        " WHERE fg.funId.uuid = :funcionarioId AND fg.anoId.id = :anoId AND fg.estado = 'A'")
     Integer sumNumDiaByFuncionarioIdAndAno(@Param("funcionarioId") UUID funcionarioId, @Param("anoId") Long anoId);
 
     @Query("SELECT COALESCE(SUM(fg.numDia), 0) FROM FeriasGozadasEntity fg WHERE " +
-        "fg.funId = :funcionarioId AND fg.estado = 'A'")
+        "fg.funId.uuid = :funcionarioId AND fg.estado = 'A'")
     Integer sumNumDiaByFuncionarioId(@Param("funcionarioId") UUID funcionarioId);
 }

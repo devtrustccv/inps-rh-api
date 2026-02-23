@@ -3,15 +3,16 @@
 
 package cv.inps.rh.configuracao.application.constants;
 
-import cv.igrp.framework.core.domain.IgrpEnum;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import org.springframework.http.HttpStatus;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
+
+import cv.igrp.framework.core.domain.IgrpEnum;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 
 
 public enum ConfigurationType implements IgrpEnum<String> {
@@ -27,7 +28,8 @@ public enum ConfigurationType implements IgrpEnum<String> {
     PARAM_TIPO_DOCUMENTO("tipo_documento_type", "PARAM_TIPO_DOCUMENTO"),
     PARAM_NOTIFICACAO("notificacao_type", "PARAM_NOTIFICACAO"),
     PARAM_TIPO_FALTA_AUSENCIA("tipo_falta_ausencia_type", "PARAM_TIPO_FALTA_AUSENCIA"),
-    PARAM_CONFIGURACAO_GERAL("configuracao_geral_type", "PARAM_CONFIGURACAO_GERAL")
+    PARAM_CONFIGURACAO_GERAL("configuracao_geral_type", "PARAM_CONFIGURACAO_GERAL"),
+    PARAM_DOMAIN("domain_type", "PARAM_DOMAIN")
   ;
 
   private final String code;

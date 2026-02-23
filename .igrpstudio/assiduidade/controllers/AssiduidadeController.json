@@ -40,7 +40,12 @@
         },
         {
           "type": "string",
-          "name": "nomeColaborador",
+          "name": "colaborador",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "funcionarioUuid",
           "isRequired": false
         },
         {
@@ -1273,5 +1278,5 @@
       ]
     }
   ],
-  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa-validarHoraExtra-getHoraExtra-getDetalheMapaFeria-verMapa-getDetalheMapaFeria-getPedidoFeria-alterarPedidoFeria-validarPedidoFeria-getListaFalta-getListaHoraExtra-getListaMovimentosResumidos"
+  "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa-validarHoraExtra-getHoraExtra-getDetalheMapaFeria-verMapa-getDetalheMapaFeria-getPedidoFeria-alterarPedidoFeria-validarPedidoFeria-getListaFalta-getListaHoraExtra-getListaMovimentosResumidos-getListaPicagem"
 }

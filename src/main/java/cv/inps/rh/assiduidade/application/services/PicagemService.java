@@ -41,11 +41,20 @@ public class PicagemService {
       // ===============================
       // Nome colaborador
       // ===============================
-      if (StringUtils.hasText(query.getNomeColaborador())) {
+      if (StringUtils.hasText(query.getColaborador())) {
         predicates.add(
             cb.like(
                 cb.lower(root.get("nomeColaborador")),
-                "%" + query.getNomeColaborador().toLowerCase() + "%"));
+                "%" + query.getColaborador().toLowerCase() + "%"));
+      }
+
+      if (StringUtils.hasText(query.getFuncionarioUuid())) {
+        try {
+          var funcUuid = java.util.UUID.fromString(query.getFuncionarioUuid());
+          predicates.add(cb.equal(root.get("funcionarioUuid"), funcUuid));
+        } catch (IllegalArgumentException ignored) {
+          // Ignore invalid UUIDs
+        }
       }
 
       // ===============================

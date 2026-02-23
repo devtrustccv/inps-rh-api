@@ -54,7 +54,7 @@ public class EmprestimoWriteService {
         entity.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
       }
 
-      entity.setCarrPccs(paramCarreiraEntityRepository.findByUuidOrThrow(UUID.fromString(row.getCarreiraId())));
+      entity.setCarrPccs(paramCarreiraEntityRepository.findByIdOrThrow(row.getCarreiraId()));
       entity.setValorLimite(row.getValorLimiteEmprestimo());
       entity.setNumeroLimite(row.getNumeroLimitePrestacaoMeses());
       entity.setEstado(row.getEstado());

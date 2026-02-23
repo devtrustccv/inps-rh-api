@@ -48,6 +48,8 @@ public class PedidoFeriaReqDTO  {
 
   private UUID substituidoPor ;
 
+  private String substituidoPorNome ;
+
 
   private String obsConvinienciaServico ;
 
@@ -57,6 +59,8 @@ public class PedidoFeriaReqDTO  {
   private String responsavelNome ;
 
   private String obsParecer ;
+
+  private String parecer ;
 
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();
