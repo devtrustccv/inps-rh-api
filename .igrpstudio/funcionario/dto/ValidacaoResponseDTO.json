@@ -4,6 +4,7 @@
   "name": "ValidacaoResponse",
   "template": "classic",
   "enableCustonValidation": false,
+  "readOnly": true,
   "attributes": [
     {
       "name": "id",

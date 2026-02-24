@@ -1,6 +1,8 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import cv.inps.rh.funcionario.application.dto.ValidacaoResponseDTO;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +21,14 @@ public class ValidacaoMapper {
     dto.setUuid(validacao.getUuid() != null ? validacao.getUuid().toString() : null);
     dto.setNomeColaborador(validacao.getFunId() != null ? validacao.getFunId().getNome() : "");
     dto.setTipoOperacao(validacao.getTipoAccao());
+    dto.setTipoOperacaoDesc(
+        TipoAcao.fromString(validacao.getTipoAccao())
+            .map(TipoAcao::getDescricao)
+            .orElse(null)
+    );;
     dto.setReferenciaName(validacao.getReferenciaName());
+    dto.setReferenciaNameDesc(Referencia.fromString(validacao.getReferenciaName())
+        .map(Referencia::getDescricao).orElse(null));
     dto.setDataOperacao(DateFormatter.localDateTimeToString((validacao.getCreatedDate())));
     dto.setUtilizador(validacao.getCreatedBy());
     dto.setReferenciaUuid(validacao.getReferenciaUuid()!=null ? validacao.getReferenciaUuid().toString() : null);

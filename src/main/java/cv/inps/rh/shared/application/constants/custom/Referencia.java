@@ -38,6 +38,10 @@ public enum Referencia {
   }
 
   public static Optional<Referencia> fromString(String value) {
+    if (value == null || value.isBlank()) {
+      return Optional.empty();
+    }
+
     try {
       return Optional.of(Referencia.valueOf(value.toUpperCase()));
     } catch (IllegalArgumentException | NullPointerException e) {

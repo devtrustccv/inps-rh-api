@@ -33,8 +33,12 @@ public class ValidacaoResponseDTO  {
 
   private String tipoOperacao ;
 
+  private String tipoOperacaoDesc ;
+
 
   private String referenciaName ;
+
+  private String referenciaNameDesc ;
 
   private String referenciaUuid;
 
