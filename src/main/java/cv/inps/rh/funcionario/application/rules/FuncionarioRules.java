@@ -1,7 +1,6 @@
 package cv.inps.rh.funcionario.application.rules;
 
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.application.constants.TipoAccao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -13,7 +12,10 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRe
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
