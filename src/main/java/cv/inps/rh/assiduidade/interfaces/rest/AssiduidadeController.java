@@ -36,6 +36,7 @@ import cv.inps.rh.assiduidade.application.dto.VerMapaDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaMapaFeriaDTO;
 import cv.inps.rh.assiduidade.application.dto.DetalheMapaFeriaDTO;
 import cv.inps.rh.assiduidade.application.dto.JustificarFaltaDTO;
+import cv.inps.rh.assiduidade.application.dto.HorasDispensaStatusDTO;
 
 @IgrpController
 @RestController
@@ -77,7 +78,8 @@ public class AssiduidadeController {
   public ResponseEntity<WrapperListaPicagemDTO> getListaPicagem(
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
-    @RequestParam(value = "nomeColaborador", required = false) String nomeColaborador,
+    @RequestParam(value = "colaborador", required = false) String colaborador,
+    @RequestParam(value = "funcionarioUuid", required = false) String funcionarioUuid,
     @RequestParam(value = "direcao", required = false) Long direcao,
     @RequestParam(value = "seccao", required = false) Long seccao,
     @RequestParam(value = "ups", required = false) Long ups,
@@ -85,7 +87,7 @@ public class AssiduidadeController {
     @RequestParam(value = "dataFim", required = false) String dataFim)
   {
 
-      final var query = new GetListaPicagemQuery(pageSize, pageNumber, nomeColaborador, direcao, seccao, ups, dataInicio, dataFim);
+      final var query = new GetListaPicagemQuery(pageSize, pageNumber, colaborador, funcionarioUuid, direcao, seccao, ups, dataInicio, dataFim);
 
       return queryBus.handle(query);
 
@@ -115,6 +117,7 @@ public class AssiduidadeController {
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "colaborador", required = false) String colaborador,
+    @RequestParam(value = "funcionarioUuid", required = false) String funcionarioUuid,
     @RequestParam(value = "mes", required = false) Integer mes,
     @RequestParam(value = "ano", required = false) Integer ano,
     @RequestParam(value = "estado", required = false) String estado,
@@ -123,7 +126,7 @@ public class AssiduidadeController {
     @RequestParam(value = "seccao", required = false) Long seccao)
   {
 
-      final var query = new GetListaMovimentosResumidosQuery(pageSize, pageNumber, colaborador, mes, ano, estado, ilha, direcao, seccao);
+      final var query = new GetListaMovimentosResumidosQuery(pageSize, pageNumber, colaborador, funcionarioUuid, mes, ano, estado, ilha, direcao, seccao);
 
       return queryBus.handle(query);
 
@@ -213,6 +216,7 @@ public class AssiduidadeController {
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "colaborador", required = false) String colaborador,
+    @RequestParam(value = "funcionarioUuid", required = false) String funcionarioUuid,
     @RequestParam(value = "ilha", required = false) Long ilha,
     @RequestParam(value = "direcao", required = false) Long direcao,
     @RequestParam(value = "seccao", required = false) Long seccao,
@@ -221,7 +225,7 @@ public class AssiduidadeController {
     @RequestParam(value = "estado", required = false) String estado)
   {
 
-      final var query = new GetListaFaltaQuery(pageNumber, pageSize, colaborador, ilha, direcao, seccao, dataInicio, dataFim, estado);
+      final var query = new GetListaFaltaQuery(pageNumber, pageSize, colaborador, funcionarioUuid, ilha, direcao, seccao, dataInicio, dataFim, estado);
 
       return queryBus.handle(query);
 
@@ -251,6 +255,7 @@ public class AssiduidadeController {
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "colaborador", required = false) String colaborador,
+    @RequestParam(value = "funcionarioUuid", required = false) String funcionarioUuid,
     @RequestParam(value = "ilha", required = false) Long ilha,
     @RequestParam(value = "direcao", required = false) Long direcao,
     @RequestParam(value = "seccao", required = false) Long seccao,
@@ -259,7 +264,7 @@ public class AssiduidadeController {
     @RequestParam(value = "estado", required = false) String estado)
   {
 
-      final var query = new GetListaDispensaQuery(pageNumber, pageSize, colaborador, ilha, direcao, seccao, dataInicio, dataFim, estado);
+      final var query = new GetListaDispensaQuery(pageNumber, pageSize, colaborador, funcionarioUuid, ilha, direcao, seccao, dataInicio, dataFim, estado);
 
       return queryBus.handle(query);
 
@@ -352,10 +357,11 @@ public class AssiduidadeController {
     @RequestParam(value = "direcao", required = false) Long direcao,
     @RequestParam(value = "seccao", required = false) Long seccao,
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
-    @RequestParam(value = "dataFim", required = false) String dataFim)
+    @RequestParam(value = "dataFim", required = false) String dataFim,
+    @RequestParam(value = "funcionarioUuid", required = false) String funcionarioUuid)
   {
 
-      final var query = new GetListaHoraExtraQuery(pageNumber, pageSize, ilha, direcao, seccao, dataInicio, dataFim);
+      final var query = new GetListaHoraExtraQuery(pageNumber, pageSize, ilha, direcao, seccao, dataInicio, dataFim, funcionarioUuid);
 
       return queryBus.handle(query);
 
@@ -448,10 +454,11 @@ public class AssiduidadeController {
     @RequestParam(value = "ilha", required = false) Long ilha,
     @RequestParam(value = "direcao", required = false) Long direcao,
     @RequestParam(value = "seccao", required = false) Long seccao,
-    @RequestParam(value = "colaborador", required = false) String colaborador)
+    @RequestParam(value = "colaborador", required = false) String colaborador,
+    @RequestParam(value = "funcionarioUuid", required = false) String funcionarioUuid)
   {
 
-      final var query = new GetListaFeriaQuery(pageNumber, pageSize, anoReferente, ilha, direcao, seccao, colaborador);
+      final var query = new GetListaFeriaQuery(pageNumber, pageSize, anoReferente, ilha, direcao, seccao, colaborador, funcionarioUuid);
 
       return queryBus.handle(query);
 
@@ -944,6 +951,66 @@ public class AssiduidadeController {
       final var command = new UpdateDispensaCommand(updateDispensaRequest, dispensaId);
 
       return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "feria/saldo/{funcionarioId}"
+  )
+  @Operation(
+    summary = "Get funcioario saldo ferias",
+    description = "Get funcioario saldo ferias",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> getFuncioarioSaldoFerias(
+    @RequestParam(value = "ano", required = false) Integer ano, @PathVariable(value = "funcionarioId") String funcionarioId)
+  {
+
+      final var query = new GetFuncioarioSaldoFeriasQuery(ano, funcionarioId);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "dispensa/saldo/{funcionarioId}"
+  )
+  @Operation(
+    summary = "Get funcionario saldo dispensa",
+    description = "Get funcionario saldo dispensa",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = HorasDispensaStatusDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<HorasDispensaStatusDTO> getFuncionarioSaldoDispensa(
+    @RequestParam(value = "data") String data, @PathVariable(value = "funcionarioId") String funcionarioId)
+  {
+
+      final var query = new GetFuncionarioSaldoDispensaQuery(data, funcionarioId);
+
+      return queryBus.handle(query);
 
   }
 

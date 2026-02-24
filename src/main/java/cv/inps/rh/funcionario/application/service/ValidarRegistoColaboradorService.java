@@ -74,21 +74,40 @@ public class ValidarRegistoColaboradorService {
     funcionario = funcionarioMapper.toUpdateEntity(funcionario, dadosPessoaisReqDTO);
 
     var contactos = contactoMapper.syncContactos(funcionario.getContactos(),
-        dadosPessoaisReqDTO.getContactos());
-    var familiares = familiarMapper.syncFamiliares(funcionario.getFamiliares(), registroColaborador.getFamiliares());
+        dadosPessoaisReqDTO.getContactos(), funcionario);
+
+    var familiares = familiarMapper
+        .syncFamiliares(funcionario.getFamiliares(),
+            registroColaborador.getFamiliares(),funcionario);
 
     var dadosAcademicosProf = registroColaborador.getDadosAcademicosProf();
 
-    var habilitacoesLiterarias = habilitacaoLiterariaMapper.syncHabilitacoes(funcionario.getHabilitacoesLiterarias(),
-        dadosAcademicosProf.getHabilitacoesLiterarias());
-    var formacoesFeitas = formacaoFeitaMapper.syncFormacoes(funcionario.getFormacoesFeitas(),
-        dadosAcademicosProf.getFormacoesFeitas());
-    var experienciasProfissionais = experienciaProfissionalMapper.syncExperiencias(
-        funcionario.getExperienciasProfissionais(), dadosAcademicosProf.getExperienciasProfssionais());
+    var habilitacoesLiterarias = habilitacaoLiterariaMapper
+        .syncHabilitacoes(funcionario.getHabilitacoesLiterarias(),
+        dadosAcademicosProf.getHabilitacoesLiterarias(), funcionario);
 
-    var documentos = documentoMapper.syncDocumentos(funcionario.getDocumentos(), registroColaborador.getAnexos());
-    var dadosBancarios = dadosBancariosMapper.syncBancarios(funcionario.getDadosBancarios(),
-        registroColaborador.getDadosBancarios());
+    var formacoesFeitas = formacaoFeitaMapper
+        .syncFormacoes(funcionario.getFormacoesFeitas(),
+        dadosAcademicosProf.getFormacoesFeitas(), funcionario);
+
+    var experienciasProfissionais = experienciaProfissionalMapper
+        .syncExperiencias(
+        funcionario.getExperienciasProfissionais(),
+        dadosAcademicosProf.getExperienciasProfssionais(), funcionario);
+
+    var dadosBancarios = dadosBancariosMapper
+        .syncBancarios(funcionario.getDadosBancarios(),
+        registroColaborador.getDadosBancarios(), funcionario);
+
+    var documentos = documentoMapper.syncDocumentos(
+        funcionario.getDocumentos(),
+        registroColaborador.getAnexos(),
+        Referencia.REGISTO_COLABORADOR.name(),
+        funcionario.getId(),
+        funcionario.getUuid(),
+        1L,
+        funcionario);
+
 
     var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, dadosContratuais);
@@ -124,7 +143,6 @@ public class ValidarRegistoColaboradorService {
     funcionario.setFormacoesFeitas(formacoesFeitas);
     funcionario.setExperienciasProfissionais(experienciasProfissionais);
 
-
     if (registroColaborador.getValidar() != null) {
       var estado = registroColaborador.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       if (estado.equals(Estado.A)) {
@@ -147,7 +165,7 @@ public class ValidarRegistoColaboradorService {
     if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
       java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
       for (var rem : saved.getDefinicoesRenumeracoes()) {
-        if(rem.getEstado().equals(Estado.A) || rem.getEstado().equals(Estado.P)) {
+        if (rem.getEstado().equals(Estado.A) || rem.getEstado().equals(Estado.P)) {
           if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndRemId(tiposRelacionamento, rem)) {
             var assoc = new TipoRelRemPagEntity();
             assoc.setTiprelId(tiposRelacionamento);
@@ -165,7 +183,7 @@ public class ValidarRegistoColaboradorService {
     if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
       java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
       for (var pag : saved.getDefinicoesPagamentos()) {
-        if(pag.getEstado().equals(Estado.A) || pag.getEstado().equals(Estado.P)) {
+        if (pag.getEstado().equals(Estado.A) || pag.getEstado().equals(Estado.P)) {
           if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndPagId(tiposRelacionamento, pag)) {
             var assoc = new TipoRelRemPagEntity();
             assoc.setTiprelId(tiposRelacionamento);

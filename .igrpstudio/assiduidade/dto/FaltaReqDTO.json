@@ -116,7 +116,19 @@
     {
       "name": "responsavel",
       "objectType": "java",
-      "type": "long",
+      "type": "uuid",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "responsavelNome",
+      "objectType": "java",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,

@@ -25,7 +25,7 @@ public class SaveFeriadosCommandHandler implements CommandHandler<SaveFeriadosCo
 
     LOGGER.debug("SaveFeriadosCommand : {}", command);
 
-    feriadoService.save(command.getFeriadolistrequest());
+    feriadoService.save(command.getFeriado());
 
     return ResponseEntity.ok().build();
   }

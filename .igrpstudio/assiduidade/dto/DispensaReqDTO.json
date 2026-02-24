@@ -4,11 +4,24 @@
   "name": "DispensaReq",
   "template": "classic",
   "enableCustonValidation": false,
+  "readOnly": true,
   "attributes": [
     {
       "name": "colaborador",
       "objectType": "java",
       "type": "uuid",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "colaboradorNome",
+      "objectType": "java",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -117,6 +130,18 @@
       "name": "parecerResponsavel",
       "objectType": "java",
       "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "responsavel",
+      "objectType": "java",
+      "type": "uuid",
       "required": false,
       "before": false,
       "after": false,

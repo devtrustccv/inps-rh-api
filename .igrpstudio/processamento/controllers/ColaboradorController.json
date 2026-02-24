@@ -114,6 +114,119 @@
           "isRequired": false
         }
       ]
+    },
+    {
+      "actionName": "importarMovimentos",
+      "path": "importar-movimento",
+      "method": "POST",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "file",
+          "name": "ficheiro",
+          "isRequired": true
+        }
+      ],
+      "headers": [
+        {
+          "type": "file",
+          "header": "Content-Type",
+          "value": "multipart/form-data",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getMovimentosImportados",
+      "path": "movimentos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "MovimentosImportados",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "page",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "size",
+          "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataImportacao",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "validarMovimentoImportado",
+      "path": "movimentos/{movimentoId}/validar",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "collectionType": "none",
+              "name": "data",
+              "type": "ValidacaoMovimentoImportado",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "movimentoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "f2v97ka4pz-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica-getListaBaixamedicaCopy"

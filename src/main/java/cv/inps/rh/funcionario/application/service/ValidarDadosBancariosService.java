@@ -48,7 +48,8 @@ public class ValidarDadosBancariosService {
           "Funcionario possui validação pendente de dados bancarios, por favor validar");
     }
 
-    var dadosBancarios = dadosBancariosMapper.syncBancarios(funcionario.getDadosBancarios(), dadosBancariosReqDTO);
+    var dadosBancarios = dadosBancariosMapper
+    .syncBancarios(funcionario.getDadosBancarios(), dadosBancariosReqDTO, funcionario);
     funcionario.setDadosBancarios(dadosBancarios);
 
     if (temPendentes) {

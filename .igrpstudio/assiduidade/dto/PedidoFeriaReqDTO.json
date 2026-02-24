@@ -4,6 +4,7 @@
   "name": "PedidoFeriaReq",
   "template": "classic",
   "enableCustonValidation": false,
+  "readOnly": true,
   "attributes": [
     {
       "name": "validar",
@@ -80,7 +81,7 @@
     {
       "name": "substituidoPor",
       "objectType": "java",
-      "type": "long",
+      "type": "uuid",
       "required": false,
       "before": false,
       "after": false,

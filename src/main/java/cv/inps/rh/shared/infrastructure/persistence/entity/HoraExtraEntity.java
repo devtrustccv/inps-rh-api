@@ -53,7 +53,7 @@ public class HoraExtraEntity extends AuditEntity {
 
 
     @Column(name="horas_diarias")
-    private Integer horasDiarias;
+    private Long horasDiarias;
 
 
     @Column(name="valor_diario")

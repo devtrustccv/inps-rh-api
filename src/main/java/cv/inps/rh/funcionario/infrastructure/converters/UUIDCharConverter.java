@@ -24,15 +24,28 @@ public class UUIDCharConverter implements AttributeConverter<UUID, String> {
       return null;
     }
 
-    // RAW(16) armazenado como hex string sem hífens
-   /* if (dbData.length() == 32 && !dbData.contains("-")) {
-      dbData = dbData.substring(0, 8) + "-" +
-          dbData.substring(8, 12) + "-" +
-          dbData.substring(12, 16) + "-" +
-          dbData.substring(16, 20) + "-" +
-          dbData.substring(20, 32);
-    }*/
+    var s = dbData.trim();
+    try {
+      // formato padrão com hífens
+      if (s.length() == 36) {
+        if (!s.matches("(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")) {
+          return null;
+        }
+        return UUID.fromString(s);
+      }
+      // string hex de 32 caracteres (sem hífens)
+      if (s.length() == 32 && s.matches("(?i)[0-9a-f]{32}")) {
+        s = s.substring(0, 8) + "-" +
+            s.substring(8, 12) + "-" +
+            s.substring(12, 16) + "-" +
+            s.substring(16, 20) + "-" +
+            s.substring(20, 32);
+        return UUID.fromString(s);
+      }
+    } catch (IllegalArgumentException ex) {
+      return null;
+    }
 
-    return UUID.fromString(dbData);
+    return null;
   }
 }

@@ -106,8 +106,8 @@
       "objectType": "java"
     },
     {
-      "name": "flg_falta",
-      "type": "integer",
+      "name": "tipoAusencia",
+      "type": "string",
       "length": 255,
       "nullable": true,
       "unique": false,

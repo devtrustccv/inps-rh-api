@@ -2,22 +2,21 @@ package cv.inps.rh.emprestimo.application.queries;
 
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import cv.inps.rh.emprestimo.domain.service.EmprestimoWriteService;
+import cv.inps.rh.emprestimo.domain.service.process.PedidoAquisicaoViaturaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
 
 @Component
 public class SaveDecisaoAnaliseQueryHandler implements QueryHandler<SaveDecisaoAnaliseQuery, ResponseEntity<String>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SaveDecisaoAnaliseQueryHandler.class);
 
-  private final EmprestimoWriteService emprestimoWriteService;
+  private final PedidoAquisicaoViaturaService pedidoAquisicaoViaturaService;
 
-  public SaveDecisaoAnaliseQueryHandler(EmprestimoWriteService emprestimoWriteService) {
-    this.emprestimoWriteService = emprestimoWriteService;
+  public SaveDecisaoAnaliseQueryHandler(PedidoAquisicaoViaturaService pedidoAquisicaoViaturaService) {
+    this.pedidoAquisicaoViaturaService = pedidoAquisicaoViaturaService;
   }
 
   @IgrpQueryHandler
@@ -25,7 +24,7 @@ public class SaveDecisaoAnaliseQueryHandler implements QueryHandler<SaveDecisaoA
 
     LOGGER.debug("SaveDecisaoAnaliseQuery: {}", query);
 
-    emprestimoWriteService.saveUpdateDecisaoAnaliseRh(query.getEmprestimoId(), query.getAnaliserhrequest());
+    pedidoAquisicaoViaturaService.saveUpdateDecisaoAnaliseRh(query.getEmprestimoId(), query.getAnaliserhrequest());
 
     return ResponseEntity.ok().build();
   }

@@ -1,9 +1,9 @@
 package cv.inps.rh.shared.application.service;
 
-import com.lowagie.text.DocumentException;
 import cv.igrp.platform.filemanager.StorageService;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FilenameUtils;
+import org.openpdf.text.DocumentException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;

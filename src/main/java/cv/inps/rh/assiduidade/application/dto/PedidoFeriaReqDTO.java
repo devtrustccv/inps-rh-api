@@ -23,37 +23,45 @@ import java.util.UUID;
 @IgrpDTO
 public class PedidoFeriaReqDTO  {
 
-  
-  
+
+
   private String validar ;
-  
-  
+
+
   private String obsValidacao ;
-  
-  
+
+
   private UUID colaborador ;
-  
-  
+
+  private String colaboradorNome ;
+
   private LocalDate dataInicio ;
-  
-  
+
+
   private LocalDate dataFim ;
-  
-  
+
+
   private Integer numDias ;
-  
-  
-  private Long substituidoPor ;
-  
-  
+
+  private Integer numDiasPorGozar;
+
+
+  private UUID substituidoPor ;
+
+  private String substituidoPorNome ;
+
+
   private String obsConvinienciaServico ;
-  
-  
-  private Long responsavel ;
-  
-  
+
+
+  private UUID responsavel ;
+
+  private String responsavelNome ;
+
   private String obsParecer ;
-  
+
+  private String parecer ;
+
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();
 

@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.application.dto.ContactoReqDTO;
 import cv.inps.rh.funcionario.application.dto.ContactoRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContactoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,23 +15,24 @@ import java.util.Objects;
 public class ContactoMapper {
 
 
-  public ContactoEntity toEntity(ContactoReqDTO dto, Estado estado) {
+  public ContactoEntity toEntity(ContactoReqDTO dto, Estado estado, FuncionarioEntity fun) {
     if (dto == null) return null;
     ContactoEntity entity = new ContactoEntity();
     entity.setTipoContacto(dto.getTipoContacto());
     entity.setContacto(dto.getContacto());
     entity.setUuid(UuidCreator.getTimeOrderedEpoch());
+    entity.setFunId(fun);
     entity.setEstado(estado);
     return entity;
   }
 
   public List<ContactoEntity> syncContactos(List<ContactoEntity> existingList,
-                                            List<ContactoReqDTO> newList) {
+                                            List<ContactoReqDTO> newList, FuncionarioEntity fun) {
 
     if (newList == null) return existingList; // nada a fazer
 
     for (ContactoReqDTO dto : newList) {
-      addOrUpdate(existingList, dto);
+      addOrUpdate(existingList, dto, fun);
     }
 
     // Soft delete dos que não vêm mais na nova lista
@@ -46,7 +48,7 @@ public class ContactoMapper {
     return existingList;
   }
 
-  private void addOrUpdate(List<ContactoEntity> existingList, ContactoReqDTO dto) {
+  private void addOrUpdate(List<ContactoEntity> existingList, ContactoReqDTO dto, FuncionarioEntity fun) {
     if (dto == null) return;
 
     ContactoEntity found = findById(existingList, dto.getId());
@@ -57,7 +59,7 @@ public class ContactoMapper {
       found.setContacto(dto.getContacto());
     } else {
       // adicionar
-      ContactoEntity novo = this.toEntity(dto, Estado.P);
+      ContactoEntity novo = this.toEntity(dto, Estado.P, fun);
       existingList.add(novo);
     }
   }

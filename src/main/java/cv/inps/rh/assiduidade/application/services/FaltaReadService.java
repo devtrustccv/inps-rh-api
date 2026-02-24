@@ -6,9 +6,12 @@ import cv.inps.rh.assiduidade.application.dto.WrapperListaFaltaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetFaltaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaFaltaQuery;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.VfaltaMensalEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FaltaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.VfaltaMensalEntityRepository;
@@ -24,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -35,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +47,7 @@ public class FaltaReadService {
 
   private final FaltaEntityRepository faltaRepository;
   private final PedidoEntityRepository pedidoEntityRepository;
+  private final DocumentoEntityRepository documentoEntityRepository;
 
   private final VfaltaMensalEntityRepository vfaltaMensalRepository;
 
@@ -71,7 +77,16 @@ public class FaltaReadService {
       List<Predicate> predicates = new ArrayList<>();
 
       if (StringUtils.hasText(query.getColaborador())) {
-        predicates.add(cb.like(cb.lower(root.get("nomeFuncionario")), "%" + query.getColaborador().toLowerCase() + "%"));
+        predicates
+            .add(cb.like(cb.lower(root.get("nomeFuncionario")), "%" + query.getColaborador().toLowerCase() + "%"));
+      }
+      if (StringUtils.hasText(query.getFuncionarioUuid())) {
+        try {
+          var funcUuid = UUID.fromString(query.getFuncionarioUuid());
+          predicates.add(cb.equal(root.get("funcionarioUuid"), funcUuid));
+        } catch (IllegalArgumentException ignored) {
+          // Ignore invalid UUIDs
+        }
       }
       if (query.getIlha() != null) {
         predicates.add(cb.equal(root.get("idIlha"), query.getIlha()));
@@ -90,7 +105,7 @@ public class FaltaReadService {
         predicates.add(cb.greaterThanOrEqualTo(root.get("dataInicio"), dataInicio));
       }
       if (StringUtils.hasText(query.getDataFim())) {
-            var dataFim = DateFormatter.stringToLocalDate(query.getDataFim());
+        var dataFim = DateFormatter.stringToLocalDate(query.getDataFim());
         predicates.add(cb.lessThanOrEqualTo(root.get("dataFim"), dataFim));
       }
 
@@ -116,15 +131,14 @@ public class FaltaReadService {
   }
 
   private String formatarHoras(BigDecimal horas) {
-    if (horas == null) return "00:00";
+    if (horas == null)
+      return "00:00";
     int h = horas.intValue();
     int m = horas.subtract(new BigDecimal(h)).multiply(new BigDecimal(60)).intValue();
     return String.format("%02d:%02d", h, m);
   }
 
-
-
-  //get falta quando esta por validar
+  // get falta quando esta por validar
   @Transactional(readOnly = true)
   public FaltaReqDTO getFalta(GetFaltaQuery query) {
     if (query == null || !StringUtils.hasText(query.getPedidoId())) {
@@ -135,8 +149,7 @@ public class FaltaReadService {
     // Buscar pedido
     var pedido = pedidoEntityRepository.findByUuid(pedidoUuid)
         .orElseThrow(() -> IgrpResponseStatusException.notFound(
-            "Registo de marcacao de falta nao encontrada com: " + query.getPedidoId())
-        );
+            "Registo de marcacao de falta nao encontrada com: " + query.getPedidoId()));
 
     // Buscar todas as faltas desse pedido
     List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
@@ -144,7 +157,8 @@ public class FaltaReadService {
       return new FaltaReqDTO();
     }
 
-    // Usar a primeira falta para os campos comuns (horasAusencia, justificativa, etc.)
+    // Usar a primeira falta para os campos comuns (horasAusencia, justificativa,
+    // etc.)
     var primeiraFalta = faltas.getFirst();
 
     // Montar DTO
@@ -183,7 +197,24 @@ public class FaltaReadService {
     dto.setParecer(primeiraFalta.getDecisaoResponsavel());
     dto.setObservacao(primeiraFalta.getObsResponsavel());
     dto.setDespachoRh(primeiraFalta.getDespachoRh());
+    dto.setResponsavel(
+        primeiraFalta.getResponsavelId() != null ? primeiraFalta.getResponsavelId().getFunId().getUuid() : null);
+    dto.setResponsavelNome(
+        primeiraFalta.getResponsavelId() != null ? primeiraFalta.getResponsavelId().getFunId().getNome() : null);
     dto.setTipoJustificacao(primeiraFalta.getParamSitId() != null ? primeiraFalta.getParamSitId().getId() : null);
+
+    var documentos = documentoEntityRepository
+        .findAllByReferenciaNameAndReferenciaUuid(Referencia.JUSTIFICAR_FALTA.name(),pedido.getUuid());
+
+    if (!CollectionUtils.isEmpty(documentos)) {
+      dto.setDocumentos(documentos.stream().map(d -> {
+        var anexo = new AnexoReqDTO();
+        anexo.setId(d.getId() != null ? d.getId() : null);
+        anexo.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
+        anexo.setDocumento(d.getUrl());
+        return anexo;
+      }).collect(Collectors.toList()));
+    }
 
     return dto;
   }

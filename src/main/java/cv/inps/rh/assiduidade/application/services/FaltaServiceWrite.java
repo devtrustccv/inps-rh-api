@@ -3,10 +3,8 @@ package cv.inps.rh.assiduidade.application.services;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.assiduidade.application.commands.MarcarFaltaCommand;
 import cv.inps.rh.assiduidade.application.commands.ValidarFaltaCommand;
-import cv.inps.rh.assiduidade.application.constants.AssiduidadeDiariaEstado;
 import cv.inps.rh.assiduidade.application.dto.FaltaReqDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
-import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
@@ -40,21 +38,26 @@ public class FaltaServiceWrite {
   private final FuncionarioRules funcionarioRules;
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final AssiduidadeParametroEntityRepository assiduidadeParametroRepository;
-  private final TipoMovimentoHelper tipoMovimentoHelper;
   private final DocumentoMapper documentoMapper;
   private final ParamSituacaoEntityRepository paramSituacaoRepository;
-  private final EntityManager entityManager;
   private final DefPagamentoEntityRepository defPagamentoRepository;
   private final DefPagamentoMapper defPagamentoMapper;
+  private final DocumentoEntityRepository documentoEntityRepository;
+  private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
+  private final FeriasGozadasEntityRepository feriasGozadasRepository;
+  private final AnoEntityRepository anoEntityRepository;
+  private final DispensaEntityRepository dispensaRepository;
+  private final ResponsavelEntityRepository responsavelEntityRepository;
 
-  private final PedidoEntityRepository pedidoEntityRepository;
 
   @Transactional
   public Map<String, ?> marcarFalta(MarcarFaltaCommand command) {
 
     var req = command.getFaltareq();
-    if (req == null) throw IgrpResponseStatusException.badRequest("Dados de falta ausentes");
-    if (req.getColaboradorId() == null) throw IgrpResponseStatusException.badRequest("Colaborador obrigatório");
+    if (req == null)
+      throw IgrpResponseStatusException.badRequest("Dados de falta ausentes");
+    if (req.getColaboradorId() == null)
+      throw IgrpResponseStatusException.badRequest("Colaborador obrigatório");
     if (req.getDataInicio() == null || req.getDataFim() == null)
       throw IgrpResponseStatusException.badRequest("Intervalo de datas obrigatório");
     if (req.getDataFim().isBefore(req.getDataInicio()))
@@ -63,11 +66,14 @@ public class FaltaServiceWrite {
     var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaboradorId());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
-    boolean deveJustificar = "SIM".equalsIgnoreCase(req.getJustificar());
+    boolean deveJustificar = Objects.equals(req.getJustificar(), "SIM");
 
-    //  Criar pedido apenas se justificar
     PedidoEntity pedido = null;
     if (deveJustificar) {
+      /*if (req.getTipoJustificacao() == null || req.getTipoJustificacao() <= 0) {
+        throw IgrpResponseStatusException.badRequest("Tipo de justificação é obrigatório");
+      }*/
+
       pedido = new PedidoEntity();
       pedido.setFunId(funcionario);
       pedido.setTipoPedido("JUSTIFICACAO_FALTA");
@@ -76,19 +82,33 @@ public class FaltaServiceWrite {
       pedido.setOrigem("MANUAL");
       pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
       pedido = pedidoRepository.save(pedido);
+
+      if (req.getDocumentos() != null && !req.getDocumentos().isEmpty()) {
+        List<DocumentoEntity> docs = new ArrayList<>();
+        for (var d : req.getDocumentos()) {
+          var doc = documentoMapper.toEntity(
+              d,
+              Estado.P,
+              Referencia.JUSTIFICAR_FALTA.name(),
+              pedido.getId(),
+              pedido.getUuid(),
+              1L,
+              funcionario);
+          doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+          docs.add(doc);
+        }
+        documentoEntityRepository.saveAll(docs);
+      }
     }
 
-    // Expandir dias do período
     var datas = expandirDias(req.getDataInicio(), req.getDataFim());
     int totalRegistos = 0;
 
     for (var dia : datas) {
-      // Criar síntese diária (sempre)
       var sintese = createSinteseDiaria(funcionario, dia,
           req.getTotalDeHorasAusentes(), deveJustificar);
       sinteseRepository.save(sintese);
 
-      // Criar falta apenas se justificar
       if (deveJustificar) {
         var falta = createFaltaDoDia(req, pedido, dia, tipoRelAtual, sintese);
         faltaRepository.save(falta);
@@ -101,8 +121,7 @@ public class FaltaServiceWrite {
       var validacao = dadosContratuaisMapper.toValidacaoInsert(
           TipoAcao.INSERT.name(),
           Referencia.FALTA.name(),
-          Estado.P
-      );
+          Estado.P);
       validacao.setFunId(funcionario);
       validacao.setTiprelId(tipoRelAtual);
       validacao.setReferenciaId(pedido.getId());
@@ -120,8 +139,6 @@ public class FaltaServiceWrite {
     return resp;
   }
 
-
-
   @Transactional
   public Map<String, Object> validarFalta(ValidarFaltaCommand command) {
 
@@ -134,43 +151,96 @@ public class FaltaServiceWrite {
 
     UUID pedidoUuid = UUID.fromString(command.getPedidoId());
 
-    // Buscar pedido
     var pedido = pedidoRepository.findByUuid(pedidoUuid)
         .orElseThrow(() -> IgrpResponseStatusException.badRequest(
             "Pedido marcação de falta não encontrado com id: " + pedidoUuid));
 
-    // Determinar novo estado
-    var ev = req.getValidar();
-    var novoEstado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
+    var novoEstado = req.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
-    //  Atualizar faltas do pedido
     List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
+
     for (FaltaEntity f : faltas) {
+
       f.setEstado(novoEstado);
 
-      // Desconto de salário
-      if (novoEstado == Estado.A && f.getParamSitId() != null &&
-          f.getParamSitId().getFlgFaltaDecontoSal() != null &&
-          f.getParamSitId().getFlgFaltaDecontoSal() == 1) {
+      if (StringUtils.hasText(req.getParecer()))
+        f.setDecisaoResponsavel(req.getParecer());
+      if (StringUtils.hasText(req.getObservacao()))
+        f.setObsResponsavel(req.getObservacao());
+      if (StringUtils.hasText(req.getDespachoRh()))
+        f.setDespachoRh(req.getDespachoRh());
 
-        // TODO: Criar registro em RH_T_DEF_PAGAMENTOS
-        // Exemplo de campos: funId, tiprelId, referenciaId(pedido.getId), valor, data, estado
+      if (req.getTipoJustificacao() != null && req.getTipoJustificacao() > 0) {
+        var ps = paramSituacaoRepository.findByIdOrThrow(req.getTipoJustificacao());
+        f.setParamSitId(ps);
       }
 
-      // TODO: Desconto de férias (RH_T_FERIAS_GOZADAS)
-      // TODO: Desconto de horas de dispensa (RH_T_DISPENSA)
+      //desconto salário
+      if (Objects.equals(novoEstado, Estado.A) && f.getParamSitId() != null &&
+          Objects.equals( f.getParamSitId().getFlgFaltaDecontoSal(), 1)) {
+
+        var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid());
+        var vinculoId = tipoRel.getContrVinculoId().getVinculoId().getId();
+
+        var mov = paramVinculoMovimentoEntityRepository
+            .findByVinculoId_IdAndTipo(vinculoId, "PAG_FALTA")
+            .getFirst();
+
+        var dp = defPagamentoMapper.createPagamento(
+            f.getValor(),
+            mov.getTmId(),
+            f.getDataInicio().toLocalDate(),
+            f.getDataFim().toLocalDate(),
+            pedido.getFunId());
+
+        defPagamentoRepository.save(dp);
+        f.setFlgDescontoSal(1);
+      }
+
+      // desconto férias
+      if (Objects.equals(novoEstado, Estado.A) &&  f.getParamSitId() != null &&
+      Objects.equals(f.getParamSitId().getFlgAusencia(), 1) &&
+          Objects.equals(f.getParamSitId().getTipoAusencia(), "FERIAS")) {
+
+        var fg = new FeriasGozadasEntity();
+        fg.setFunId(pedido.getFunId());
+        fg.setPedidoId(pedido);
+        fg.setAnoId(resolveAno(f.getDataInicio().toLocalDate()));
+        fg.setDataInicio(f.getDataInicio().toLocalDate());
+        fg.setDataFim(f.getDataInicio().toLocalDate());
+        fg.setNumDia(1);
+        fg.setEstado(Estado.A);
+        fg.setUuid(UuidCreator.getTimeOrderedEpoch());
+        feriasGozadasRepository.save(fg);
+      }
+
+      // desconto dispensa
+      if (Objects.equals(novoEstado, Estado.A) && f.getParamSitId() != null &&
+          Objects.equals(f.getParamSitId().getFlgAusencia(), 1) &&
+          Objects.equals(f.getParamSitId().getTipoAusencia(), "DISPENSA")) {
+
+        var disp = new DispensaEntity();
+        disp.setPedidoId(pedido);
+        disp.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid()));
+        disp.setData(f.getDataInicio().toLocalDate());
+        disp.setHoraInicio("00:00");
+        disp.setHoraFim(intervalToHHmm(f.getHorasAusencia()));
+        disp.setEstado(Estado.A);
+        disp.setUuid(UuidCreator.getTimeOrderedEpoch());
+        dispensaRepository.save(disp);
+      }
     }
+
     faltaRepository.saveAll(faltas);
 
-    // Atualizar estado e etapa do pedido
     pedido.setEstado(novoEstado.name());
-    if (novoEstado == Estado.A) {
+    if (novoEstado == Estado.A)
       pedido.setEtapa("FINALIZADO");
-    }
+
     pedidoRepository.save(pedido);
 
-    // Atualizar validação
-    funcionarioRules.getValidacaoPendente(pedido.getFunId().getUuid(), TipoAcao.INSERT, Referencia.FALTA)
+    funcionarioRules.getValidacaoPendente(
+            pedido.getFunId().getUuid(), TipoAcao.INSERT, Referencia.FALTA)
         .ifPresent(v -> {
           v.setEstado(novoEstado);
           validacaoEntityRepository.save(v);
@@ -178,7 +248,6 @@ public class FaltaServiceWrite {
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("pedidoId", pedido.getId());
-    resp.put("pedidoUuid", pedido.getUuid() != null ? pedido.getUuid().toString() : null);
     resp.put("estado", novoEstado);
     resp.put("totalFaltas", faltas.size());
 
@@ -212,22 +281,49 @@ public class FaltaServiceWrite {
     falta.setDataInicio(LocalDateTime.of(dia, LocalTime.MIN));
     falta.setDataFim(LocalDateTime.of(dia, LocalTime.of(23, 59, 59)));
     falta.setFlgJustificativo(req.getJustificar());
-    falta.setEstado(Estado.P); // Pendente
+    falta.setEstado(Estado.P);
     falta.setUuid(UuidCreator.getTimeOrderedEpoch());
     falta.setSinteseDiarioId(sintese);
 
-    // Responsável
-    if (req.getResponsavel() != null && req.getResponsavel() > 0) {
-      var resp = entityManager.find(ResponsavelEntity.class, req.getResponsavel());
-      falta.setResponsavelId(resp);
+    ResponsavelEntity responsavel = null;
+    if (req.getResponsavel()!=null) {
+      responsavel = responsavelEntityRepository.findByFunId_Uuid(req.getResponsavel()).orElseThrow(
+          () ->
+              IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + req.getResponsavel()));
+      falta.setResponsavelId(responsavel);
     }
 
-    // Tipo justificativa
+    if (StringUtils.hasText(req.getParecer())) {
+      falta.setDecisaoResponsavel(req.getParecer());
+    }
+    if (StringUtils.hasText(req.getObservacao())) {
+      falta.setObsResponsavel(req.getObservacao());
+    }
+
     if (req.getTipoJustificacao() != null && req.getTipoJustificacao() > 0) {
       var paramSituacao = paramSituacaoRepository.findById(req.getTipoJustificacao())
           .orElseThrow(() -> IgrpResponseStatusException.badRequest("Tipo justificativo inválido"));
+      /*if (!"1".equalsIgnoreCase(paramSituacao.getTipoAusencia())) {
+        throw IgrpResponseStatusException.badRequest(
+            "Tipo justificativo não permitido para falta");
+      }*/
       falta.setParamSitId(paramSituacao);
     }
+
+    var jornada = assiduidadeParametroRepository.findAllByEstado(Estado.A.getCode());
+    String diaria = (jornada != null && !jornada.isEmpty())
+        ? jornada.getFirst().getDiaria()
+        : "08:00";
+    int totalMinutosDia = parseMin(diaria);
+    int ausenciaMinutos = parseMin(req.getTotalDeHorasAusentes());
+    java.math.BigDecimal salarioDiario = tipoRel.getSalario() != null ? tipoRel.getSalario()
+        : java.math.BigDecimal.ZERO;
+    java.math.BigDecimal ratio = totalMinutosDia > 0
+        ? java.math.BigDecimal.valueOf(ausenciaMinutos)
+            .divide(java.math.BigDecimal.valueOf(totalMinutosDia), 8, java.math.RoundingMode.HALF_UP)
+        : java.math.BigDecimal.ZERO;
+    java.math.BigDecimal valorDesconto = salarioDiario.multiply(ratio).setScale(2, java.math.RoundingMode.HALF_UP);
+    falta.setValor(valorDesconto);
 
     return falta;
   }
@@ -244,13 +340,13 @@ public class FaltaServiceWrite {
     sintese.setMes(dia.getMonthValue());
     sintese.setAno(dia.getYear());
 
-    // Converter horas de ausência para INTERVAL
     String horasAusenciaInterval = parseInterval(horasAusencia);
     sintese.setHorasAusencia(horasAusenciaInterval);
 
-    // Jornada diária (padrão 8:00)
     var jornada = assiduidadeParametroRepository.findAllByEstado(Estado.A.getCode());
-    String diaria = (jornada != null && !jornada.isEmpty()) ? jornada.getFirst().getDiaria() : "08:00";
+    String diaria = (jornada != null && !jornada.isEmpty())
+        ? jornada.getFirst().getDiaria()
+        : "08:00";
 
     int totalMinutos = parseMin(diaria);
     int ausenciaMinutos = parseMin(horasAusencia);
@@ -261,17 +357,12 @@ public class FaltaServiceWrite {
     String horasTrabalhadasStr = String.format("%02d:%02d", h, m);
     sintese.setHorasTrabalhadas(parseInterval(horasTrabalhadasStr));
 
-    // Falta: 1 = falta total, 0 = não falta
     sintese.setFalta(trabalhadosMinutos == 0 ? 1 : 0);
-
-    sintese.setEstado(justificar ? AssiduidadeDiariaEstado.JUSTIFICADA.name() :AssiduidadeDiariaEstado.INJUSTIFICADA.name());
+    sintese.setEstado(Estado.A.name());
+    sintese.setFlagRececao("1");
 
     return sintese;
   }
-
-
-
-
 
   private int parseMin(String hhmm) {
     if (!StringUtils.hasText(hhmm))
@@ -287,7 +378,8 @@ public class FaltaServiceWrite {
   }
 
   private String parseInterval(String hhmm) {
-    if (!StringUtils.hasText(hhmm)) return null;
+    if (!StringUtils.hasText(hhmm))
+      return null;
 
     try {
       String[] parts = hhmm.split(":");
@@ -299,6 +391,31 @@ public class FaltaServiceWrite {
     }
   }
 
+  private String intervalToHHmm(String interval) {
+    if (!StringUtils.hasText(interval))
+      return "00:00";
+    try {
+      String[] parts = interval.trim().split("\\s+");
+      if (parts.length >= 2) {
+        String time = parts[1];
+        String[] hm = time.split(":");
+        String hh = hm.length > 0 ? hm[0] : "00";
+        String mm = hm.length > 1 ? hm[1] : "00";
+        return String.format("%02d:%02d", Integer.parseInt(hh), Integer.parseInt(mm));
+      }
+      return "00:00";
+    } catch (Exception e) {
+      return "00:00";
+    }
+  }
 
-
+  private AnoEntity resolveAno(LocalDate data) {
+    if (data == null)
+      throw IgrpResponseStatusException.badRequest("Data inválida");
+    var anoStr = String.valueOf(data.getYear());
+    return anoEntityRepository.findAll().stream()
+        .filter(a -> anoStr.equals(a.getAno()))
+        .findFirst()
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Ano não encontrado"));
+  }
 }

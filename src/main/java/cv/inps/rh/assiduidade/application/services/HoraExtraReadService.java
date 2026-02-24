@@ -9,7 +9,10 @@ import cv.inps.rh.assiduidade.application.dto.HorExtraListDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.HoraExtraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.VHoraExtraMensalEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.HoraExtraEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.VHoraExtraMensalEntityRepository;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
@@ -32,6 +35,7 @@ import java.util.UUID;
 public class HoraExtraReadService {
 
   private final HoraExtraEntityRepository horaExtraRepository;
+  private final DocumentoEntityRepository documentoEntityRepository;
   private final VHoraExtraMensalEntityRepository vHoraExtraMensalRepository;
 
   @Transactional(readOnly = true)
@@ -65,6 +69,19 @@ public class HoraExtraReadService {
 
       var predicates = new ArrayList<Predicate>();
 
+     /* if (StringUtils.hasText(query.getColaborador())) {
+        predicates.add(cb.like(cb.lower(root.get("nomeFuncionario")), "%" + query.getColaborador().toLowerCase() + "%"));
+      }*/
+
+      if (StringUtils.hasText(query.getFuncionarioUuid())) {
+        try {
+          var funcUuid = UUID.fromString(query.getFuncionarioUuid());
+          predicates.add(cb.equal(root.get("funcionarioUuid"), funcUuid));
+        } catch (IllegalArgumentException ignored) {
+          // Ignore invalid UUIDs
+        }
+      }
+
       if (query.getIlha() != null) {
         predicates.add(cb.equal(root.get("ilhaId"), query.getIlha()));
       }
@@ -91,13 +108,13 @@ public class HoraExtraReadService {
     };
   }
 
-
   private HorExtraListDTO toDTO(VHoraExtraMensalEntity e) {
 
     var dto = new HorExtraListDTO();
 
     dto.setFuncionarioUuid(e.getFuncionarioUuid().toString());
     dto.setPedidoId(e.getPedidoId());
+    dto.setPedidoUuid(e.getPedidoUuid()!=null? e.getPedidoUuid().toString(): null);
 
     dto.setDirecao(e.getNomeDirecao());
     dto.setDirecaoId(e.getIdDirecao());
@@ -108,21 +125,17 @@ public class HoraExtraReadService {
     dto.setNomeColaborador(e.getNomeFuncionario());
 
     dto.setDataInicio(
-        e.getDataInicio() != null ? e.getDataInicio().toString() : null
-    );
+        e.getDataInicio() != null ? e.getDataInicio().toString() : null);
     dto.setDataFim(
-        e.getDataFim() != null ? e.getDataFim().toString() : null
-    );
+        e.getDataFim() != null ? e.getDataFim().toString() : null);
 
     dto.setHorasContratato(
         e.getHorasContratadoDiario() != null
             ? e.getHorasContratadoDiario() + " / " + e.getHorasContratadoMensal()
-            : null
-    );
+            : null);
 
     dto.setHorasTrabalho(
-        e.getHorasTrabalho() != null ? e.getHorasTrabalho().toPlainString() : null
-    );
+        e.getHorasTrabalho() != null ? e.getHorasTrabalho().toPlainString() : null);
 
     dto.setSalarioMensal(e.getSalarioMensal());
     dto.setValorHorasMensal(e.getValorHorasMensal());
@@ -134,18 +147,6 @@ public class HoraExtraReadService {
     dto.setEstadoDesc(e.getEstadoDesc());
 
     return dto;
-  }
-
-
-  private String formatHorasExtra(String s) {
-    if (!StringUtils.hasText(s))
-      return null;
-
-    var p = s.split(":");
-    if (p.length >= 2) {
-      return p[0] + ":" + p[1];
-    }
-    return s;
   }
 
   @Transactional(readOnly = true)
@@ -170,19 +171,32 @@ public class HoraExtraReadService {
       return dto;
     }
 
+    dto.setHoraExtra(new ArrayList<>()); // Inicializa a lista
     for (HoraExtraEntity e : horasExtra) {
       HoraExtraDTO item = new HoraExtraDTO();
       item.setId(e.getId());
       item.setColaborador(
           e.getTiprelId() != null && e.getTiprelId().getFunId() != null
-                  ? e.getTiprelId().getFunId().getUuid()
-              : null
-      );
+              ? e.getTiprelId().getFunId().getUuid()
+              : null);
+      item.setColaboradorNome(
+          e.getTiprelId() != null && e.getTiprelId().getFunId() != null
+              ? e.getTiprelId().getFunId().getNome()
+              : null);
       item.setDataInicio(e.getDataInicio());
       item.setDataFim(e.getDataFim());
       item.setHorasDiaria(e.getHorasDiarias());
       item.setPercentagemHora(e.getPercentagem());
       item.setValorDiario(e.getValorDiario());
+      var docsHe = documentoEntityRepository
+          .findAllByReferenciaNameAndReferenciaUuid(Referencia.HORA_EXTRA.name(), e.getUuid());
+      if (docsHe != null && !docsHe.isEmpty()) {
+        var d = docsHe.getFirst();
+        AnexoReqDTO ar = new AnexoReqDTO();
+        ar.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
+        ar.setDocumento(d.getUrl());
+        item.setDocumento(ar);
+      }
 
       dto.getHoraExtra().add(item);
     }

@@ -1,39 +1,51 @@
 {
   "type": "dto",
-  "module": "funcionario",
-  "name": "AnexoReq",
+  "module": "emprestimo",
+  "name": "PedidoAdiantamentoRequest",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "id",
-      "objectType": "java",
-      "type": "long",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "TipoDocumentoId",
-      "objectType": "java",
-      "type": "long",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "documento",
+      "name": "emprestimoId",
       "objectType": "java",
       "type": "string",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "valorAdiantamento",
+      "objectType": "java",
+      "type": "decimal",
       "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "numeroPrestacao",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "tipoSituacao",
+      "objectType": "java",
+      "type": "string",
+      "required": true,
       "before": false,
       "after": false,
       "positive": false,
@@ -42,5 +54,5 @@
       "primaryKey": false
     }
   ],
-  "id": "tzyth8gfwh"
+  "id": "o32nu3jaii"
 }

@@ -19,56 +19,58 @@ import java.math.BigDecimal;
 @IgrpDTO
 public class HorExtraListDTO  {
 
-  
-  
+
+
   private String funcionarioUuid ;
-  
-  
+
+
   private Long pedidoId ;
-  
-  
+
+  private String pedidoUuid ;
+
+
   private String direcao ;
-  
-  
+
+
   private Long direcaoId ;
-  
-  
+
+
   private String nomeColaborador ;
-  
-  
+
+
   private String seccao ;
-  
-  
+
+
   private Long seccaoId ;
-  
-  
+
+
   private String dataInicio ;
-  
-  
+
+
   private String dataFim ;
-  
-  
+
+
   private String horasContratato ;
-  
-  
+
+
   private String horasTrabalho ;
-  
-  
+
+
   private BigDecimal salarioMensal ;
-  
-  
+
+
   private BigDecimal valorHorasMensal ;
-  
-  
+
+
   private BigDecimal valorHorasDiario ;
-  
-  
+
+
   private Integer percentagem ;
-  
-  
+
+
   private String estado ;
-  
-  
+
+
   private String estadoDesc ;
 
 }

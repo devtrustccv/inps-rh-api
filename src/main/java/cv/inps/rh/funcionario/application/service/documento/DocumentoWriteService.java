@@ -1,9 +1,10 @@
 package cv.inps.rh.funcionario.application.service.documento;
 
 import com.github.f4b6a3.uuid.UuidCreator;
-import cv.inps.rh.funcionario.application.dto.AnexoReqDTO;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.application.service.OrdemServicoPdfService;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
@@ -46,7 +47,14 @@ public class DocumentoWriteService {
     dto.setDocumento(fileId);
     dto.setTipoDocumentoId(1L);
 
-    var documentoEntity = documentoMapper.toEntity(dto, Estado.A);
+    var documentoEntity = documentoMapper.toEntity(
+        dto,
+        Estado.A,
+        Referencia.ORDEM_SERVICO.name(),
+        funcionario.getId(),
+        funcionario.getUuid(),
+        1L,
+        funcionario);
     documentoEntity.setUuid(UuidCreator.getTimeOrderedEpoch());
     documentoEntity.setFunId(funcionario);
     documentoEntityRepository.save(documentoEntity);

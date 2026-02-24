@@ -26,4 +26,10 @@ public interface DispensaEntityRepository extends
   Optional<DispensaEntity> findByUuid(UUID uuid);
 
   Optional<DispensaEntity> findByPedidoId_Uuid(UUID uuid);
+
+  java.util.List<DispensaEntity> findAllByPedidoId_FunId_UuidAndDataBetween(
+      UUID funUuid,
+      java.time.LocalDate dataInicio,
+      java.time.LocalDate dataFim
+  );
 }

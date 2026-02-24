@@ -1,0 +1,23 @@
+{
+  "type": "dto",
+  "module": "assiduidade",
+  "name": "HorasDispensaStatus",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "id",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "klttehfr7p1"
+}

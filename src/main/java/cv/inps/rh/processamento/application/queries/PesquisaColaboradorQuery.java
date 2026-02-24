@@ -1,10 +1,11 @@
 package cv.inps.rh.processamento.application.queries;
 
 import cv.igrp.framework.core.domain.Query;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.*;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 
 @Data
@@ -12,6 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PesquisaColaboradorQuery implements Query {
 
+  @NotBlank(message = "The field <uuidFuncionario> is required")
+  private String uuidFuncionario;
   @NotBlank(message = "The field <nome> is required")
   private String nome;
   @NotBlank(message = "The field <direccao> is required")

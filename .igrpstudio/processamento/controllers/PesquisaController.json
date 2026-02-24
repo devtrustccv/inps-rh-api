@@ -28,6 +28,11 @@
       "requestParams": [
         {
           "type": "string",
+          "name": "uuidFuncionario",
+          "isRequired": false
+        },
+        {
+          "type": "string",
           "name": "nome",
           "isRequired": false
         },
@@ -96,5 +101,5 @@
       ]
     }
   ],
-  "id": "980jkk64em-pesquisaColaboradorCopy-pesquisaCentroCusto"
+  "id": "980jkk64em-pesquisaColaboradorCopy-pesquisaCentroCusto-pesquisaColaborador"
 }

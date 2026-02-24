@@ -1,12 +1,16 @@
 {
   "type": "dto",
-  "module": "funcionario",
-  "name": "AnexoResp",
+  "module": "emprestimo",
+  "name": "AnaliseRhAdiantamentoRequest",
   "template": "classic",
   "enableCustonValidation": false,
+  "extends": {
+    "name": "BaseDecisao",
+    "module": "emprestimo"
+  },
   "attributes": [
     {
-      "name": "id",
+      "name": "bancoId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -18,19 +22,7 @@
       "primaryKey": false
     },
     {
-      "name": "tipoDocumentoId",
-      "objectType": "java",
-      "type": "long",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "tipoDocumentoDesc",
+      "name": "nib",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -42,7 +34,7 @@
       "primaryKey": false
     },
     {
-      "name": "documento",
+      "name": "swift",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -54,5 +46,5 @@
       "primaryKey": false
     }
   ],
-  "id": "tzyth8gfwh_copy"
+  "id": "7xvpvblslk"
 }

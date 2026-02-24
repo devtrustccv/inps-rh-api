@@ -138,7 +138,6 @@ public class EmprestimoEntity extends AuditEntity {
   private String tipoSituacao;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @OnDelete(action = OnDeleteAction.RESTRICT)
   @JoinColumn(name = "BANCO")
   private BancoEntity banco;
 

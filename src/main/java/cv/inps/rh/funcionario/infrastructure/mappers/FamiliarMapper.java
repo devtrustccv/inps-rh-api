@@ -4,6 +4,7 @@ import cv.inps.rh.funcionario.application.dto.AgregadoDependenteReqDTO;
 import cv.inps.rh.funcionario.application.dto.AgregadoDependenteRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FamiliarEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class FamiliarMapper {
   private final EntityManager em;
 
 
-  public FamiliarEntity toEntity(AgregadoDependenteReqDTO dto, Estado estado) {
+  public FamiliarEntity toEntity(AgregadoDependenteReqDTO dto, Estado estado, FuncionarioEntity fun) {
     if (dto == null) return null;
     FamiliarEntity entity = new FamiliarEntity();
     if (dto.getTipoDocumentoId() != null) {
@@ -32,11 +33,12 @@ public class FamiliarMapper {
     entity.setDependencia(dto.getDependente());
     entity.setMembroAgr(dto.getAgregada());
     entity.setEstado(estado);
+    entity.setFunId(fun);
     return entity;
   }
 
   public java.util.List<FamiliarEntity> syncFamiliares(java.util.List<FamiliarEntity> existingList,
-                             java.util.List<AgregadoDependenteReqDTO> newList) {
+                             java.util.List<AgregadoDependenteReqDTO> newList, FuncionarioEntity fun) {
     if (newList == null) return existingList;
     for (AgregadoDependenteReqDTO dto : newList) {
       FamiliarEntity found = null;
@@ -57,7 +59,7 @@ public class FamiliarMapper {
         found.setDependencia(dto.getDependente());
         found.setMembroAgr(dto.getAgregada());
       } else {
-        FamiliarEntity novo = toEntity(dto, Estado.P);
+        FamiliarEntity novo = toEntity(dto, Estado.P, fun);
         existingList.add(novo);
       }
     }

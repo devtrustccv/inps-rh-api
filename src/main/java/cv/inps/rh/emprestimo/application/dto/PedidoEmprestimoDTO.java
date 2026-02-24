@@ -20,38 +20,40 @@ import java.util.List;
 
 
 @IgrpDTO
-public class PedidoEmprestimoDTO  {
+public class PedidoEmprestimoDTO {
 
   @NotBlank(message = "The field <funcionarioId> is required")
 
-  private String funcionarioId ;
+  private String funcionarioId;
+
+  @NotBlank(message = "The field <tipoSituacao> is required")
+  private String tipoSituacao;
+
+  private String marca;
 
 
-  private String marca ;
+  private Long anoFabrico;
 
 
-  private Long anoFabrico ;
+  private String cilindrada;
 
 
-  private String cilindrada ;
+  private String tipoviatura;
 
 
-  private String tipoviatura ;
+  private String combustivel;
 
 
-  private String combustivel ;
+  private String estadoViatura;
 
 
-  private String estadoViatura ;
+  private BigDecimal valorEmprestimo;
 
 
-  private BigDecimal valorEmprestimo ;
+  private Long numeroPrestacoes;
 
 
-  private Long numeroPrestacoes ;
-
-
-  private BigDecimal juros ;
+  private BigDecimal juros;
 
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();

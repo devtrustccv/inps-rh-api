@@ -87,7 +87,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     e.setNome(dto.getNome());
     e.setClassificacaoArea(dto.getAreaClassificacao());
     e.setFlgFaltaDecontoSal(ConfigurationUtils.parseFlag(dto.getDescontoSalario()));
-    e.setFlgFalta(dto.getFalta());
+    e.setTipoAusencia(dto.getTipoAusencia());
     e.setFlgAbonoBeneficio(ConfigurationUtils.parseFlag(dto.getAbonoBeneficio()));
     e.setFlgSituacaoLaboral(ConfigurationUtils.parseFlag(dto.getAfetaSituacaoLaboral()));
     e.setTipoSituacao(dto.getTipoSituacaoLaboral());
@@ -158,7 +158,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     response.setTempoServicoDesc(e.getFlgContaTempServico() != null ? domain.get(e.getFlgContaTempServico().toString()) : null);
     response.setSuspendeProgressaoPromocao(e.getFlgCessaProgressao() != null ? e.getFlgCessaProgressao().toString() : null);
     response.setSuspendeProgressaoPromocaoDesc(e.getFlgCessaProgressao() != null ? domain.get(e.getFlgCessaProgressao().toString()) : null);
-    response.setEstadoContrato(e.getFlgEstadoContrato() != null ? contractStatus.get(e.getFlgEstadoContrato()) : null);
+    response.setEstadoContrato(e.getFlgEstadoContrato());
     response.setEstado(e.getEstado().getCode());
     response.setEstadoDescricao(e.getEstado().getDescription());
     response.setAfetaSituacaoLaboral(e.getFlgSituacaoLaboral() != null ? e.getFlgSituacaoLaboral().toString() : null);
@@ -173,7 +173,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
     response.setNumeroDias(e.getNumDiasAbonos());
     response.setNumeroDiasDescontado(e.getNumDiasDescontoRh());
     response.setNumeroDiasNaoDescontado(e.getNumDiasNdescontoRh());
-    response.setFalta(e.getFlgFalta());
+    response.setTipoAusencia(e.getTipoAusencia());
     response.setFaltaDesc(domain.getOrDefault(e.getTipoFalta(), e.getTipoFalta()));
     response.setTipoFalta(e.getTipoFalta());
     response.setDescontoSalario(e.getFlgFaltaDecontoSal() != null ? e.getFlgFaltaDecontoSal().toString() : null);

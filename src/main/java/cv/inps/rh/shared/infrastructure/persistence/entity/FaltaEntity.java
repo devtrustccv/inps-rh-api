@@ -109,5 +109,4 @@ public class FaltaEntity extends AuditEntity {
     @Column(name="valor")
     private BigDecimal valor;
 
-
 }

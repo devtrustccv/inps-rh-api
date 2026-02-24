@@ -6,6 +6,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.mappers.BancoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.BancoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DadosBancariosEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,8 @@ public class DadosBancariosMapper {
 
   private final EntityManager entityManager;
 
-  public DadosBancariosEntity toEntity(DadosBancariosReqDTO dto, Estado estado) {
+  public DadosBancariosEntity toEntity(DadosBancariosReqDTO dto, Estado estado,
+                                       FuncionarioEntity funcionario) {
     if (dto == null) return null;
     DadosBancariosEntity entity = new DadosBancariosEntity();
     if (dto.getEntidadeBancariaId() != null) {
@@ -28,11 +30,13 @@ public class DadosBancariosMapper {
     entity.setNumConta(dto.getNumConta());
     entity.setDataInicio(dto.getDataInicio());
     entity.setDataFim(dto.getDataFim());
+    entity.setFunId(funcionario);
     entity.setEstado(estado);
     return entity;
   }
 
-  public List<DadosBancariosEntity> syncBancarios(List<DadosBancariosEntity> existingList, List<DadosBancariosReqDTO> newList) {
+  public List<DadosBancariosEntity> syncBancarios(List<DadosBancariosEntity> existingList,
+                                                  List<DadosBancariosReqDTO> newList, FuncionarioEntity funcionario) {
     if (newList == null) return existingList;
 
     for (DadosBancariosReqDTO dto : newList) {
@@ -53,7 +57,7 @@ public class DadosBancariosMapper {
         found.setDataInicio(dto.getDataInicio());
         found.setDataFim(dto.getDataFim());
       } else {
-        DadosBancariosEntity novo = toEntity(dto, Estado.P);
+        DadosBancariosEntity novo = toEntity(dto, Estado.P, funcionario);
         existingList.add(novo);
       }
     }

@@ -216,6 +216,16 @@
           "name": "size",
           "value": "20",
           "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "funcionarioId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
         }
       ]
     },
@@ -490,7 +500,314 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "savePedidosAdiantamento",
+      "path": "/pedido-adiantamento",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "PedidoAdiantamentoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "emprestimo"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Id",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "emprestimo"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "saveDecisaoAnaliseRhAdiantamento",
+      "path": "/{emprestimoId}/analise-rh-adiantamento",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AnaliseRhAdiantamentoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "emprestimo"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "emprestimoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "verificarPedidoAdiantamento",
+      "path": "/{emprestimoId}/verificar-pedido-adiantamento",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "collectionType": "none",
+              "name": "data",
+              "type": "BaseDecisao",
+              "objectType": "dto",
+              "module": "emprestimo"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "emprestimoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "anexarComprovativoPagamento",
+      "path": "{emprestimoId}/anexar-comprovativo",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "Documento",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "emprestimo"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "emprestimoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "saveDecisaoAnaliseRenegociacao",
+      "path": "/{emprestimoId}/analise-rh-renegociacao",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AnaliseRhRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "emprestimo"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "emprestimoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "saveDecisaoAnaliseFinanceiraRenegociacao",
+      "path": "/{emprestimoId}/analise-financeiro-renegociacao",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AnaliseFinanceiroRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "emprestimo"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "emprestimoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "autorizarComissaoExecutivaRenegociacao",
+      "path": "/{emprestimoId}/autorizar-comissao-executiva-renegociacao",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AutorizacaoComissaoExecutiva",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "emprestimo"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "emprestimoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "elaborarContratoRenegociacao",
+      "path": "/{emprestimoId}/elaborar-contrato-renegociacao",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ElaboracaoContratoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "emprestimo"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "emprestimoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "lls7ig9nio-getConfiguracaoEmprestimo-saveEmprestimo-updateEmprestimo-getEmprestimoById-saveDecisaoAnalise-saveDecisaoAnaliseFinanceira-elaborarContrato-autorizarComissaoExecutiva-saveDecisaoAnaliseFinanceira-saveDecisaoAnalise"
+  "id": "lls7ig9nio-getConfiguracaoEmprestimo-saveEmprestimo-updateEmprestimo-getEmprestimoById-saveDecisaoAnalise-saveDecisaoAnaliseFinanceira-elaborarContrato-autorizarComissaoExecutiva-saveDecisaoAnaliseFinanceira-saveDecisaoAnalise-listarEmprestimos-listarEmprestimos-savePedidosAdiantamento-saveDecisaoAnaliseCopy-saveDecisaoAnaliseFinanceiraCopy-autorizarComissaoExecutivaCopy-elaborarContratoCopy"
 }

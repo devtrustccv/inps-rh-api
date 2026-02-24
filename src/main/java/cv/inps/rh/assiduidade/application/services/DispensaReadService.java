@@ -7,11 +7,16 @@ import cv.inps.rh.assiduidade.application.queries.GetDispensaByPedidoIdQuery;
 import cv.inps.rh.assiduidade.application.queries.GetDispensaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaDispensaQuery;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DispensaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DispensaEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ResponsavelEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
+import cv.inps.rh.shared.util.TimeUtils;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,15 +26,19 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class DispensaReadService {
 
   private final DispensaEntityRepository dispensaRepository;
+  private final DocumentoEntityRepository documentoEntityRepository;
+  private final ResponsavelEntityRepository responsavelEntityRepository;
 
   @Transactional(readOnly = true)
   public WrapperListaDispensaDTO getListaDispensa(GetListaDispensaQuery query) {
@@ -60,6 +69,15 @@ public class DispensaReadService {
             cb.like(
                 cb.lower(root.get("pedidoId").get("funId").get("nome")),
                 "%" + query.getColaborador().toLowerCase() + "%"));
+      }
+
+      if (StringUtils.hasText(query.getFuncionarioUuid())) {
+        try {
+          var funcUuid = UUID.fromString(query.getFuncionarioUuid());
+          predicates.add(cb.equal(root.get("pedidoId").get("funId").get("uuid"), funcUuid));
+        } catch (IllegalArgumentException ignored) {
+          // Ignore invalid UUIDs
+        }
       }
 
       if (StringUtils.hasText(query.getDataInicio())) {
@@ -102,6 +120,8 @@ public class DispensaReadService {
     var dto = new DispensaListDTO();
     dto.setId(e.getId());
     dto.setUuid(e.getUuid() != null ? e.getUuid().toString() : null);
+    dto.setPedidoId(e.getPedidoId() != null ? e.getPedidoId().getId() : null);
+    dto.setPedidoUuid(e.getPedidoId() != null ? e.getPedidoId().getUuid().toString() : null);
     var mob = e.getTiprelId() != null ? e.getTiprelId().getMobId() : null;
     var inst = mob != null ? mob.getInstidId() : null;
     dto.setDirecao(inst != null ? inst.getNome() : null);
@@ -124,36 +144,15 @@ public class DispensaReadService {
             (StringUtils.hasText(hi) || StringUtils.hasText(hf) ? " / " : "") +
             (StringUtils.hasText(hf) ? hf : ""));
     dto.setTotalHorasDireito(null);
-    dto.setTotalHorasSolicitadas(diffMinutes(hi, hf));
+    dto.setTotalHorasSolicitadas(TimeUtils.diffMinutes(hi, hf));
     dto.setMotivoDispensa(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : e.getTipoDispensa());
     dto.setEstado(e.getEstado() != null ? e.getEstado().name() : null);
     dto.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);
     return dto;
   }
 
-  private static Integer toMinutes(String s) {
-    if (!StringUtils.hasText(s))
-      return null;
-    var parts = s.split(":");
-    try {
-      int h = parts.length > 0 ? Integer.parseInt(parts[0]) : 0;
-      int m = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
-      int sec = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
-      return h * 60 + m + (sec / 60);
-    } catch (NumberFormatException ex) {
-      return null;
-    }
-  }
 
-  private static Integer diffMinutes(String start, String end) {
-    var s = toMinutes(start);
-    var e = toMinutes(end);
-    if (s == null || e == null)
-      return null;
-    var d = e - s;
-    return Math.max(d, 0);
-  }
-
+  @Transactional(readOnly = true)
   public DispensaReqDTO getDispensa(GetDispensaQuery query) {
     if (query == null || !StringUtils.hasText(query.getDispensaId())) {
       return new DispensaReqDTO();
@@ -166,21 +165,62 @@ public class DispensaReadService {
     var dto = new DispensaReqDTO();
     dto.setColaborador(
         e.getPedidoId() != null && e.getPedidoId().getFunId() != null
-             ? e.getPedidoId().getFunId().getUuid()
+            ? e.getPedidoId().getFunId().getUuid()
+            : null);
+    dto.setColaboradorNome(
+        e.getPedidoId() != null && e.getPedidoId().getFunId() != null
+            ? e.getPedidoId().getFunId().getNome()
             : null);
     dto.setDataDispensa(e.getData());
-    dto.setHoraSaida(e.getHoraInicio());
-    dto.setHoraEntrada(e.getHoraFim());
-    var mins = diffMinutes(e.getHoraInicio(), e.getHoraFim());
-    dto.setTotalHoras(formatMinutes(mins));
+    dto.setHoraSaida(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
+    dto.setHoraEntrada(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
+    var mins = TimeUtils.diffMinutes(e.getHoraInicio(), e.getHoraFim());
+    dto.setTotalHoras(TimeUtils.formatMinutesToHHmm(mins));
     dto.setTipoMotivo(e.getTipoDispensa());
     dto.setMotivo(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : null);
     dto.setParecerResponsavel(e.getDecisaoResponsavel());
+
+    if (e.getResponsavelId() != null) {
+      responsavelEntityRepository.findById(e.getResponsavelId())
+          .ifPresent(responsavel -> {
+            dto.setResponsavel(responsavel.getFunId().getUuid());
+            dto.setResponsavelNome(responsavel.getFunId().getNome());
+          });
+    };
+
     dto.setObservacaoResponsavel(e.getObsResponsavel());
     dto.setObservacaoRh(e.getObsRh());
+
+    if (dto.getColaborador() != null && dto.getDataDispensa() != null) {
+      var inicioMes = dto.getDataDispensa().withDayOfMonth(1);
+      var fimMes = dto.getDataDispensa().withDayOfMonth(dto.getDataDispensa().lengthOfMonth());
+      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataBetween(
+          dto.getColaborador(), inicioMes, fimMes);
+      int totalMin = 0;
+      for (var d : listaMes) {
+        var minsItem = TimeUtils.diffMinutes(d.getHoraInicio(), d.getHoraFim());
+        totalMin += minsItem;
+      }
+      dto.setHorasUsadasMes(TimeUtils.formatMinutesToHHmm(totalMin));
+    }
+
+    var documentos = documentoEntityRepository
+        .findAllByReferenciaNameAndReferenciaUuid(Referencia.DISPENSA.name(), e.getUuid());
+
+    if (!CollectionUtils.isEmpty(documentos)) {
+      dto.setDocumentos(documentos.stream().map(d -> {
+        var anexo = new AnexoReqDTO();
+        anexo.setId(d.getId() != null ? d.getId() : null);
+        anexo.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
+        anexo.setDocumento(d.getUrl());
+        return anexo;
+      }).collect(Collectors.toList()));
+    }
+
     return dto;
   }
 
+  @Transactional(readOnly = true)
   public DispensaReqDTO getDispensaByPedidoId(GetDispensaByPedidoIdQuery query) {
     if (query == null || !StringUtils.hasText(query.getPedidoId())) {
       return new DispensaReqDTO();
@@ -193,27 +233,61 @@ public class DispensaReadService {
     var dto = new DispensaReqDTO();
     dto.setColaborador(
         e.getPedidoId() != null && e.getPedidoId().getFunId() != null
-             ? e.getPedidoId().getFunId().getUuid()
+            ? e.getPedidoId().getFunId().getUuid()
+            : null);
+    dto.setColaboradorNome(
+        e.getPedidoId() != null && e.getPedidoId().getFunId() != null
+            ? e.getPedidoId().getFunId().getNome()
             : null);
     dto.setDataDispensa(e.getData());
-    dto.setHoraSaida(e.getHoraInicio());
-    dto.setHoraEntrada(e.getHoraFim());
-    var mins = diffMinutes(e.getHoraInicio(), e.getHoraFim());
-    dto.setTotalHoras(formatMinutes(mins));
+    dto.setHoraSaida(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
+    dto.setHoraEntrada(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
+    var mins = TimeUtils.diffMinutes(e.getHoraInicio(), e.getHoraFim());
+    dto.setTotalHoras(TimeUtils.formatMinutesToHHmm(mins));
     dto.setTipoMotivo(e.getTipoDispensa());
     dto.setMotivo(StringUtils.hasText(e.getDescricaoMotivo()) ? e.getDescricaoMotivo() : null);
     dto.setParecerResponsavel(e.getDecisaoResponsavel());
     dto.setObservacaoResponsavel(e.getObsResponsavel());
     dto.setObservacaoRh(e.getObsRh());
+
+    if (e.getResponsavelId() != null) {
+      responsavelEntityRepository.findById(e.getResponsavelId())
+          .ifPresent(responsavel -> {
+            dto.setResponsavel(responsavel.getFunId().getUuid());
+            dto.setResponsavelNome(responsavel.getFunId().getNome());
+          });
+    };
+
+    if (dto.getColaborador() != null && dto.getDataDispensa() != null) {
+
+      var inicioMes = dto.getDataDispensa().withDayOfMonth(1);
+      var fimMes = dto.getDataDispensa().withDayOfMonth(dto.getDataDispensa().lengthOfMonth());
+
+      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataBetween(
+          dto.getColaborador(), inicioMes, fimMes);
+      int totalMin = 0;
+      for (var d : listaMes) {
+        var minsItem = TimeUtils.diffMinutes(d.getHoraInicio(), d.getHoraFim());
+        totalMin += minsItem;
+      }
+      dto.setHorasUsadasMes(TimeUtils.formatMinutesToHHmm(totalMin));
+    }
+
+    var documentos = documentoEntityRepository
+        .findAllByReferenciaNameAndReferenciaUuid(Referencia.DISPENSA.name(), e.getUuid());
+
+    if (!CollectionUtils.isEmpty(documentos)) {
+      dto.setDocumentos(documentos.stream().map(d -> {
+        var anexo = new AnexoReqDTO();
+        anexo.setId(d.getId() != null ? d.getId() : null);
+        anexo.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
+        anexo.setDocumento(d.getUrl());
+        return anexo;
+      }).collect(Collectors.toList()));
+    }
+
     return dto;
   }
 
-  private static String formatMinutes(Integer minutes) {
-    if (minutes == null)
-      return null;
-    int h = minutes / 60;
-    int m = minutes % 60;
-    String mm = (m < 10 ? "0" : "") + m;
-    return h + ":" + mm;
-  }
+
 }

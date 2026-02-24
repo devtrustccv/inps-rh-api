@@ -30,6 +30,18 @@
       "primaryKey": false
     },
     {
+      "name": "colaboradorNome",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "dataInicio",
       "objectType": "java",
       "type": "date",
@@ -56,7 +68,7 @@
     {
       "name": "horasDiaria",
       "objectType": "java",
-      "type": "integer",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -88,6 +100,19 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "documento",
+      "objectType": "dto",
+      "type": "AnexoReq",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "shared"
     }
   ],
   "id": "klttehfr7p"

@@ -2,11 +2,12 @@ package cv.inps.rh.emprestimo.domain.service;
 
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
+import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
+import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.RhPagamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.NumberUtils;
 import cv.inps.rh.shared.util.PageMapper;
@@ -19,11 +20,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -35,16 +38,18 @@ public class EmprestimoReadService {
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
   private final RhPagamentoEntityRepository rhPagamentoEntityRepository;
+  private final EmprestimoDocumentService documentService;
 
   public List<InformacaoEmprestimoRequestDTO> getAllConfiguracaoEmprestimo() {
     return paramEmprestimoEntityRepository.findAll()
         .stream()
         .map(entity -> new InformacaoEmprestimoRequestDTO(
-            entity.getCarrPccs().getUuid().toString(),
+            entity.getCarrPccs().getId(),
             entity.getValorLimite(),
             entity.getNumeroLimite(),
             entity.getEstado(),
-            entity.getUuid()
+            entity.getUuid(),
+            entity.getCarrPccs().getUuid().toString()
         ))
         .toList();
   }
@@ -52,6 +57,8 @@ public class EmprestimoReadService {
   public DetalhesEmprestimoDTO getEmprestimoByUuid(String uuid) {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+
+    var funId = entity.getTiprel().getFunId();
 
     var dto = new DetalhesEmprestimoDTO();
     dto.setDataInicio(entity.getDataInicio());
@@ -66,11 +73,19 @@ public class EmprestimoReadService {
     dto.setValorEmprestimo(entity.getValorEmprestimo());
     dto.setNumeroPrestacoes(entity.getNrPrestacao());
     dto.setJuros(entity.getJuro());
-    dto.setFuncionarioId(entity.getTiprel().getFunId().getUuid().toString());
+    dto.setFuncionarioId(funId.getUuid().toString());
     dto.setCabimentacaoOrcamental(entity.getDescCabimentacaoOrcamental());
     dto.setAvaliacaoTaxaEsforco(entity.getDescTaxaEsforco());
+    dto.setTipoSituacao(entity.getTipoSituacao());
+    dto.setValorAdiantamento(entity.getValorAdiantado());
+    dto.setNib(entity.getNib());
+    dto.setSwift(entity.getSwift());
+    ofNullable(entity.getBanco()).ifPresent(o -> {
+      dto.setBancoId(o.getId());
+      dto.setNumeroContaBanco(o.getNuConta());
+    });
 
-    var another = emprestimoEntityRepository.findByUuidNotAndTiprel_FunId(entity.getUuid(), entity.getTiprel().getFunId())
+    var another = emprestimoEntityRepository.findByUuidNotAndTiprel_FunId(entity.getUuid(), funId)
         .stream()
         .map(obj -> new OutrosEmprestimosDTO(
             obj.getTipoEmprestimo(),
@@ -84,22 +99,48 @@ public class EmprestimoReadService {
 
     var order = entity.getPedido();
 
-    // TODO 02/02/2026 20:10 improve performance of ths later, bring all the decisions at once
-    final var decision = new DecisaoEmprestimoDTO();
-    getDecision(order, EtapaEmprestimo.ANALISE_RH).map(this::buildDecisionData).ifPresent(decision::setAnaliseRh);
-    getDecision(order, EtapaEmprestimo.ANALISE_FINANCEIRA).map(this::buildDecisionData).ifPresent(decision::setAnaliseFinanceiro);
-    getDecision(order, EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA).map(this::buildDecisionData).ifPresent(decision::setAutorizacaoComissaoExecutiva);
-    dto.setDecisao(decision);
+    final var allDecisions = new DecisaoEmprestimoDTO();
+
+    var steps = List.of(
+        EtapaEmprestimo.ANALISE_RH_PEDIDO.name(),
+        EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name(),
+        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name(),
+        EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name(),
+        EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name(),
+        EtapaEmprestimo.ANALISE_RH_RENEGOCIACAO.name(),
+        EtapaEmprestimo.ANALISE_FINANCEIRA_RENEGOCIACAO.name(),
+        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_RENEGOCIACAO.name()
+    );
+
+    var decisions = pedidoDecisaoEntityRepository
+        .findByPedidoAndEtapaInAndEstado(order, steps, Estado.A.name()).stream()
+        .collect(Collectors.toMap(
+            PedidoDecisaoEntity::getEtapa,
+            this::buildDecisionData
+        ));
+
+    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_PEDIDO.name())).ifPresent(allDecisions::setAnaliseRhPedido);
+    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name())).ifPresent(allDecisions::setAnaliseFinanceiroPedido);
+    ofNullable(decisions.get(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name())).ifPresent(allDecisions::setAutorizacaoComissaoExecutivaPedido);
+    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name())).ifPresent(allDecisions::setAnaliseRhAdiantamento);
+    ofNullable(decisions.get(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name())).ifPresent(allDecisions::setVerificacaoAdiantamento);
+    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_RENEGOCIACAO.name())).ifPresent(allDecisions::setAnaliseRhRenegociacao);
+    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_FINANCEIRA_RENEGOCIACAO.name())).ifPresent(allDecisions::setAnaliseFinanceiroRenegociacao);
+    ofNullable(decisions.get(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_RENEGOCIACAO.name())).ifPresent(allDecisions::setAutorizacaoComissaoExecutivaRenegociacao);
+
+    dto.setDecisao(allDecisions);
+
+    var docCodes = List.of(
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.PEDIDO.name(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_PEDIDO.name(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name()
+    );
+
+    var docs = documentService.getDocuments(funId, docCodes, entity.getUuid());
+    dto.setDocumentos(docs);
 
     return dto;
-  }
-
-  private Optional<PedidoDecisaoEntity> getDecision(PedidoEntity order, EtapaEmprestimo etapa) {
-    return pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
-        order,
-        etapa.name(),
-        Estado.A.name()
-    );
   }
 
   private BaseDecisaoDTO buildDecisionData(PedidoDecisaoEntity obj) {
@@ -110,20 +151,24 @@ public class EmprestimoReadService {
     return baseDecision;
   }
 
-  public EmprestimoListDTO listarEmprestimos(ListarEmprestimosQuery query) {
+  public EmprestimoListDTO listLoans(ListarEmprestimosQuery query) {
 
     var page = Integer.parseInt(query.getPage());
     var size = Integer.parseInt(query.getSize());
 
     var pageable = PageRequest.of(page, size, Sort.by("dataInicio").descending());
 
-    Specification<EmprestimoEntity> specification = (root, cq, cb) -> {
+    Specification<EmprestimoEntity> specification = (root, _, cb) -> {
 
       var predicates = new ArrayList<Predicate>();
 
       if (StringUtils.hasText(query.getTipoEmprestimo()))
         predicates.add(cb.equal(root.get("tipoEmprestimo"), query.getTipoEmprestimo()));
 
+      if (StringUtils.hasText(query.getEstado()))
+        predicates.add(cb.equal(root.get("estado"), query.getEstado()));
+      else
+        predicates.add(cb.equal(root.get("estado"), Estado.A.name()));
 
       if (StringUtils.hasText(query.getEstadoEmprestimo()))
         predicates.add(cb.equal(root.get("estado"), query.getEstadoEmprestimo()));
@@ -137,6 +182,13 @@ public class EmprestimoReadService {
         var relacionamento = root.join("tiprel");
         predicates.add(
             cb.equal(relacionamento.get("mobId").get("instidId").get("id"), Long.valueOf(query.getDireccaoId()))
+        );
+      }
+
+      if (StringUtils.hasText(query.getFuncionarioId())) {
+        var relacionamento = root.join("tiprel");
+        predicates.add(
+            cb.equal(relacionamento.get("funId").get("uuid"), UUID.fromString(query.getFuncionarioId()))
         );
       }
 
@@ -157,6 +209,7 @@ public class EmprestimoReadService {
           dto.setRenegociacaoDivida(e.getRenogociacao());
           dto.setValorConcedido(e.getValorEmprestimo());
           dto.setNumeroPrestacoesPagas(e.getNrPrestacao());
+          dto.setTipoSituacao(e.getTipoSituacao());
           dto.setValorPago(e.getValorPago());
           dto.setDataInicioEmprestimo(e.getDataInicio());
           dto.setEmprestimoId(e.getUuid());
@@ -165,7 +218,8 @@ public class EmprestimoReadService {
           var funId = e.getTiprel().getFunId();
           dto.setFuncionarioId(funId.getUuid().toString());
           dto.setNomeColaborador(funId.getNome());
-          dto.setEtapa(e.getPedido().getEtapa());
+          PedidoEntity order = e.getPedido();
+          ofNullable(order).ifPresent(o -> dto.setEtapa(o.getEtapa()));
           return dto;
         })
         .toList());
@@ -203,28 +257,20 @@ public class EmprestimoReadService {
     return plan;
   }
 
-  public HistoricoPagamentoDTO getHistoricoPagamento(String uuid) {
+  public HistoricoPagamentoDTO getPaymentHistory(String uuid) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
-    var payments = rhPagamentoEntityRepository.findByEstadoAndDefp_FunId(Estado.A.name(), loan.getTiprel().getFunId());
-
     var history = new HistoricoPagamentoDTO();
 
-    var rows = payments.stream()
+    var rows = rhPagamentoEntityRepository.findByEstadoAndDefp_FunId(Estado.A.name(), loan.getTiprel().getFunId())
+        .stream()
         .map(p -> new HistoricoPagamentoRowDTO(p.getDataRef(), p.getValor()))
         .toList();
-    history.setPagamentos(rows);
-
-    var totalPago = payments.stream()
-        .map(RhPagamentoEntity::getValor)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
 
     history.setPagamentos(rows);
-    history.setValorTotalPago(totalPago);
-    history.setSaldoDivida(
-        loan.getValorEmprestimo().subtract(totalPago)
-    );
+    history.setValorTotalPago(loan.getValorPago());
+    history.setSaldoDivida(loan.getValorDivida());
 
     return history;
   }

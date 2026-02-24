@@ -32,7 +32,7 @@
     {
       "name": "paisId",
       "objectType": "java",
-      "type": "integer",
+      "type": "Long",
       "required": false,
       "before": false,
       "after": false,
@@ -56,7 +56,7 @@
     {
       "name": "ilhaId",
       "objectType": "java",
-      "type": "integer",
+      "type": "Long",
       "required": false,
       "before": false,
       "after": false,
@@ -80,7 +80,7 @@
     {
       "name": "concelhoId",
       "objectType": "java",
-      "type": "integer",
+      "type": "Long",
       "required": false,
       "before": false,
       "after": false,
@@ -104,7 +104,7 @@
     {
       "name": "freguesiaId",
       "objectType": "java",
-      "type": "integer",
+      "type": "Long",
       "required": false,
       "before": false,
       "after": false,
@@ -128,7 +128,7 @@
     {
       "name": "zonaId",
       "objectType": "java",
-      "type": "integer",
+      "type": "Long",
       "required": false,
       "before": false,
       "after": false,

@@ -1,19 +1,18 @@
 package cv.inps.rh.assiduidade.application.services;
 
-import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaAlterarReqDTO;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFeriaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetListaFeriaQuery;
 import cv.inps.rh.assiduidade.application.dto.FeriasListDTO;
 import cv.inps.rh.assiduidade.application.queries.GetPedidoFeriaQuery;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FeriasGozadasEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FeriasMapaEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.VFeriasMensalEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.PageMapper;
+import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -32,14 +31,21 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 
 @Service
 @RequiredArgsConstructor
 public class FeriaReadService {
 
   private final FeriasGozadasEntityRepository feriasGozadasEntityRepository;
-
   private final VFeriasMensalEntityRepository vFeriasMensalEntityRepository;
+  private final DocumentoEntityRepository documentoEntityRepository;
+  private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
+  private final FuncionarioEntityRepository funcionarioEntityRepository;
+  private final ResponsavelEntityRepository responsavelEntityRepository;
+
 
   @Transactional(readOnly = true)
   public WrapperListaFeriaDTO getListaFeria(GetListaFeriaQuery query) {
@@ -83,7 +89,17 @@ public class FeriaReadService {
         predicates.add(cb.equal(root.get("secaoId"), query.getSeccao()));
       }
       if (StringUtils.hasText(query.getColaborador())) {
-        predicates.add(cb.like(cb.lower(root.get("nomeColaborador")), "%" + query.getColaborador().toLowerCase() + "%"));
+        predicates
+            .add(cb.like(cb.lower(root.get("nomeColaborador")), "%" + query.getColaborador().toLowerCase() + "%"));
+      }
+
+      if (StringUtils.hasText(query.getFuncionarioUuid())) {
+        try {
+          var funcUuid = java.util.UUID.fromString(query.getFuncionarioUuid());
+          predicates.add(cb.equal(root.get("uuidFuncionario"), funcUuid));
+        } catch (IllegalArgumentException ignored) {
+          // Ignore invalid UUIDs
+        }
       }
 
       return cb.and(predicates.toArray(new Predicate[0]));
@@ -92,6 +108,8 @@ public class FeriaReadService {
 
   private FeriasListDTO toDTO(VFeriasMensalEntity e) {
     var dto = new FeriasListDTO();
+    dto.setPedidoId(e.getPedidoId());
+    dto.setPedidoUuid(e.getUuidPedido() != null ? e.getUuidPedido().toString() : "");
     dto.setUuidFuncionario(e.getUuidFuncionario().toString());
     dto.setNomeColaborador(e.getNomeColaborador());
     dto.setDirecao(e.getDirecao());
@@ -109,23 +127,53 @@ public class FeriaReadService {
   }
 
 
-  public PedidoFeriaAlterarReqDTO getPedidoFeria(GetPedidoFeriaQuery query){
+  @Transactional(readOnly = true)
+  public PedidoFeriaAlterarReqDTO getPedidoFeria(GetPedidoFeriaQuery query) {
     if (!StringUtils.hasText(query.getPedidoId()))
-      throw cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException.badRequest("Identificador de pedido férias é obrigatório");
-
+      throw cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException
+          .badRequest("Identificador de pedido férias é obrigatório");
 
     var entity = feriasGozadasEntityRepository.findByPedidoId_Uuid(UuidCreator.fromString(query.getPedidoId()))
-        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"Ferias Gozadas not found for id: " + query.getPedidoId()));
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
+            "Ferias Gozadas not found for id: " + query.getPedidoId()));
 
     var req = new PedidoFeriaReqDTO();
     req.setColaborador(entity.getFunId() != null ? entity.getFunId().getUuid() : null);
+    req.setColaboradorNome(entity.getFunId() != null ? entity.getFunId().getNome() : null);
     req.setDataInicio(entity.getDataInicio());
     req.setDataFim(entity.getDataFim());
     req.setNumDias(entity.getNumDia());
-    req.setSubstituidoPor(entity.getTiprelIdSubstituido());
+
+    if (entity.getTiprelIdSubstituido() != null) {
+      var substituido = tiposRelacionamentoEntityRepository.findById(entity.getTiprelIdSubstituido()).orElse(null);
+      req.setSubstituidoPor(substituido != null ? substituido.getUuid() : null);
+      req.setSubstituidoPorNome(substituido != null ? substituido.getFunId().getNome() : null);
+    }
+
     req.setObsConvinienciaServico(entity.getObsInfoConveniencia());
-    req.setResponsavel(entity.getResponsavelId());
+
+    if (entity.getResponsavelId() != null) {
+      responsavelEntityRepository.findById(entity.getResponsavelId())
+          .ifPresent(responsavel -> {
+            req.setResponsavel(responsavel.getFunId().getUuid());
+            req.setResponsavelNome(responsavel.getFunId().getNome());
+          });
+    };
+    req.setParecer(entity.getDecisaoResponsavel());
     req.setObsParecer(entity.getObsResponsavel());
+
+    var documentos = documentoEntityRepository.findAllByReferenciaNameAndReferenciaUuid(
+        Referencia.FERIA.name(), entity.getPedidoId().getUuid());
+
+    if (documentos != null && !documentos.isEmpty()) {
+      req.setDocumentos(documentos.stream().map(d -> {
+        var anexo = new AnexoReqDTO();
+        anexo.setId(d.getId());
+        anexo.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
+        anexo.setDocumento(d.getUrl());
+        return anexo;
+      }).collect(Collectors.toList()));
+    }
 
     var dto = new PedidoFeriaAlterarReqDTO();
     dto.setFeria(req);

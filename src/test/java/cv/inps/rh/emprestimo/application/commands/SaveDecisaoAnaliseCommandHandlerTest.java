@@ -14,21 +14,11 @@ public class SaveDecisaoAnaliseCommandHandlerTest {
 
     @BeforeEach
     void setUp() {
-      // TODO: initialize mock dependencies if needed
+
     }
 
     @Test
     void testHandle() {
-        // TODO: Implement unit test for handle method
-        // Example:
-        // Given
-        // SaveDecisaoAnaliseCommand command = new SaveDecisaoAnaliseCommand(...);
-        //
-        // When
-        // ResponseEntity<String> response = saveDecisaoAnaliseCommandHandler.handle(command);
-        //
-        // Then
-        // assertNotNull(response);
-        // assertEquals(..., response.getBody());
+
     }
 }

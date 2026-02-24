@@ -27,5 +27,7 @@ public class GetListaHoraExtraQuery implements Query {
   private String dataInicio;
   @NotBlank(message = "The field <dataFim> is required")
   private String dataFim;
+  @NotBlank(message = "The field <funcionarioUuid> is required")
+  private String funcionarioUuid;
 
 }

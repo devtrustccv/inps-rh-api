@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaReqDTO;
 import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.HabilitacaoLiterariaEntity;
 import jakarta.persistence.EntityManager;
@@ -19,7 +20,7 @@ public class HabilitacaoLiterariaMapper {
   private final EntityManager entityManager;
 
 
-  public HabilitacaoLiterariaEntity toEntity(HabilitacaoLiterariaReqDTO dto, Estado estado) {
+  public HabilitacaoLiterariaEntity toEntity(HabilitacaoLiterariaReqDTO dto, Estado estado, FuncionarioEntity fun) {
     if (dto == null) {
       return null;
     }
@@ -41,6 +42,7 @@ public class HabilitacaoLiterariaMapper {
     e.setDataFim(dto.getDataTermino());
     e.setConcluido(dto.getConcluido());
     e.setUuid(UuidCreator.getTimeOrderedEpoch());
+    e.setFunId(fun);
     e.setEstado(estado);
 
 
@@ -48,7 +50,7 @@ public class HabilitacaoLiterariaMapper {
   }
 
   public java.util.List<HabilitacaoLiterariaEntity> syncHabilitacoes(List<HabilitacaoLiterariaEntity> existingList,
-                               java.util.List<HabilitacaoLiterariaReqDTO> newList) {
+                               java.util.List<HabilitacaoLiterariaReqDTO> newList, FuncionarioEntity fun) {
     if (newList == null) return existingList;
     for (HabilitacaoLiterariaReqDTO dto : newList) {
       HabilitacaoLiterariaEntity found = null;
@@ -69,14 +71,15 @@ public class HabilitacaoLiterariaMapper {
         found.setDataFim(dto.getDataTermino());
         found.setConcluido(dto.getConcluido());
       } else {
-        HabilitacaoLiterariaEntity novo = toEntity(dto, Estado.P);
+        HabilitacaoLiterariaEntity novo = toEntity(dto, Estado.P, fun);
         existingList.add(novo);
       }
     }
     // Soft delete
     for (HabilitacaoLiterariaEntity existing : existingList) {
       boolean stillExists = newList.stream()
-          .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
+          .anyMatch(dto ->
+              java.util.Objects.equals(dto.getId(), existing.getId()));
       if (!stillExists) {
         existing.setEstado(Estado.E);
       }

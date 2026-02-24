@@ -17,8 +17,10 @@ public class GetListaPicagemQuery implements Query {
   private String pageSize;
   @NotBlank(message = "The field <pageNumber> is required")
   private String pageNumber;
-  @NotBlank(message = "The field <nomeColaborador> is required")
-  private String nomeColaborador;
+  @NotBlank(message = "The field <colaborador> is required")
+  private String colaborador;
+  @NotBlank(message = "The field <funcionarioUuid> is required")
+  private String funcionarioUuid;
   @NotNull(message = "The field <direcao> is required")
   private Long direcao;
   @NotNull(message = "The field <seccao> is required")

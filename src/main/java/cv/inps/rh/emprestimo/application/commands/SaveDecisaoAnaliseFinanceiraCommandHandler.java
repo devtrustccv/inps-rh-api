@@ -2,7 +2,7 @@ package cv.inps.rh.emprestimo.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.emprestimo.domain.service.EmprestimoWriteService;
+import cv.inps.rh.emprestimo.domain.service.process.PedidoAquisicaoViaturaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +14,10 @@ public class SaveDecisaoAnaliseFinanceiraCommandHandler implements CommandHandle
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SaveDecisaoAnaliseFinanceiraCommandHandler.class);
 
-  private final EmprestimoWriteService emprestimoWriteService;
+  private final PedidoAquisicaoViaturaService pedidoAquisicaoViaturaService;
 
-  public SaveDecisaoAnaliseFinanceiraCommandHandler(EmprestimoWriteService emprestimoWriteService) {
-    this.emprestimoWriteService = emprestimoWriteService;
+  public SaveDecisaoAnaliseFinanceiraCommandHandler(PedidoAquisicaoViaturaService pedidoAquisicaoViaturaService) {
+    this.pedidoAquisicaoViaturaService = pedidoAquisicaoViaturaService;
   }
 
   @IgrpCommandHandler
@@ -25,7 +25,7 @@ public class SaveDecisaoAnaliseFinanceiraCommandHandler implements CommandHandle
 
     LOGGER.debug("SaveDecisaoAnaliseFinanceiraCommand : {}", command);
 
-    emprestimoWriteService.saveUpdateDecisaoAnaliseFinanceira(command.getEmprestimoId(), command.getAnalisefinanceirorequest());
+    pedidoAquisicaoViaturaService.saveUpdateDecisaoAnaliseFinanceira(command.getEmprestimoId(), command.getAnalisefinanceirorequest());
 
     return ResponseEntity.ok().build();
   }
