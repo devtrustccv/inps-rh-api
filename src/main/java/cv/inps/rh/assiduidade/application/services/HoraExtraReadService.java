@@ -6,6 +6,7 @@ import cv.inps.rh.assiduidade.application.dto.WrapperListaHoraExtraDTO;
 import cv.inps.rh.assiduidade.application.queries.GetHoraExtraQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaHoraExtraQuery;
 import cv.inps.rh.assiduidade.application.dto.HorExtraListDTO;
+import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.infrastructure.persistence.entity.HoraExtraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.VHoraExtraMensalEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.HoraExtraEntityRepository;
@@ -189,7 +190,7 @@ public class HoraExtraReadService {
       item.setPercentagemHora(e.getPercentagem());
       item.setValorDiario(e.getValorDiario());
       var docsHe = documentoEntityRepository
-          .findAllByReferenciaNameAndReferenciaUuid(Referencia.HORA_EXTRA.name(), e.getUuid());
+          .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_HORA_EXTRA.name(), e.getUuid());
       if (docsHe != null && !docsHe.isEmpty()) {
         var d = docsHe.getFirst();
         AnexoReqDTO ar = new AnexoReqDTO();

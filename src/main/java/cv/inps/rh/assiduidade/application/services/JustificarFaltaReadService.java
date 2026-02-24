@@ -1,6 +1,7 @@
 package cv.inps.rh.assiduidade.application.services;
 
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
@@ -128,7 +129,7 @@ public class JustificarFaltaReadService {
       item.setComJustificativo(f.getFlgJustificativo());
 
       List<DocumentoEntity> documentos = documentoEntityRepository
-          .findAllByReferenciaNameAndReferenciaUuid(Referencia.JUSTIFICAR_FALTA.name(), f.getUuid());
+          .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_FALTA.name(), f.getUuid());
 
       if (!documentos.isEmpty()) {
         DocumentoEntity doc = documentos.getFirst(); // Pegando o primeiro documento como exemplo

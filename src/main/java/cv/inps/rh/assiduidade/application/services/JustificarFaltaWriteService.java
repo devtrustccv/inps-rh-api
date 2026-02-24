@@ -6,6 +6,7 @@ import cv.inps.rh.assiduidade.application.commands.ValidarFaltaJustificadaComman
 import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
+import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FeriasGozadasEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AnoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FeriasGozadasEntity;
@@ -177,7 +178,7 @@ public class JustificarFaltaWriteService {
       var doc = documentoMapper.toEntity(
           item.getDocumento(),
           Estado.P,
-          Referencia.JUSTIFICAR_FALTA.name(),
+          TableName.RH_T_FALTA.name(),
           faltaRef.getId(),
           faltaRef.getUuid(),
           1L,

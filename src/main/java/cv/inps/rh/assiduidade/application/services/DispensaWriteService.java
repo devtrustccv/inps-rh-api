@@ -9,6 +9,7 @@ import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -193,7 +194,7 @@ public class DispensaWriteService {
         var doc = documentoMapper.toEntity(
             d,
             estado,
-            Referencia.DISPENSA.name(),
+            TableName.RH_T_DISPENSA.name(),
             dispensa.getId(),
             dispensa.getUuid(),
             1L,
@@ -207,7 +208,7 @@ public class DispensaWriteService {
 
     // Propagar estado para anexos existentes da dispensa
     var anexosExistentes = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(Referencia.DISPENSA.name(), dispensa.getUuid());
+        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_DISPENSA.name(), dispensa.getUuid());
     if (anexosExistentes != null && !anexosExistentes.isEmpty()) {
       anexosExistentes.forEach(a -> a.setEstado(estado));
       documentoEntityRepository.saveAll(anexosExistentes);
@@ -220,7 +221,7 @@ public class DispensaWriteService {
         ParamSituacaoEntity param = paramsDispensa.getFirst();
         var ausencia = new AusenciaEntity();
         ausencia.setParamSitId(param);
-        ausencia.setReferenciaName("RH_T_DISPENSA");
+        ausencia.setReferenciaName(TableName.RH_T_DISPENSA.name());
         ausencia.setReferenciaId(dispensa.getId());
         ausencia.setObs(dispensa.getTipoDispensa());
         ausencia.setDataInicio(dispensa.getData());
@@ -306,11 +307,11 @@ public class DispensaWriteService {
 
     // Documentos - substituição/sincronização
     var anexosExistentes = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(Referencia.DISPENSA.name(), dispensa.getUuid());
+        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_DISPENSA.name(), dispensa.getUuid());
     var sincronizados = documentoMapper.syncDocumentos(
         anexosExistentes != null ? anexosExistentes : new ArrayList<>(),
         req.getDocumentos(),
-        Referencia.DISPENSA.name(),
+        TableName.RH_T_DISPENSA.name(),
         dispensa.getId(),
         dispensa.getUuid(),
         1L,
@@ -351,15 +352,5 @@ public class DispensaWriteService {
     return resp;
   }
 
- /* private static Integer diffMinutes(String inicio, String fim) {
-    try {
-      if (!StringUtils.hasText(inicio) || !StringUtils.hasText(fim)) return null;
-      var t1 = java.time.LocalTime.parse(inicio);
-      var t2 = java.time.LocalTime.parse(fim);
-      return (int) java.time.Duration.between(t1, t2).toMinutes();
-    } catch (Exception e) {
-      return null;
-    }
-  }*/
 
 }

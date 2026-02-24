@@ -11,6 +11,7 @@ import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -89,7 +90,7 @@ public class FaltaServiceWrite {
           var doc = documentoMapper.toEntity(
               d,
               Estado.P,
-              Referencia.JUSTIFICAR_FALTA.name(),
+              TableName.RH_T_FALTA.name(),
               pedido.getId(),
               pedido.getUuid(),
               1L,

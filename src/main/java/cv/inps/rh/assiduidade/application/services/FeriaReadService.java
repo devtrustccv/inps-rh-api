@@ -7,6 +7,7 @@ import cv.inps.rh.assiduidade.application.queries.GetListaFeriaQuery;
 import cv.inps.rh.assiduidade.application.dto.FeriasListDTO;
 import cv.inps.rh.assiduidade.application.queries.GetPedidoFeriaQuery;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -163,7 +164,7 @@ public class FeriaReadService {
     req.setObsParecer(entity.getObsResponsavel());
 
     var documentos = documentoEntityRepository.findAllByReferenciaNameAndReferenciaUuid(
-        Referencia.FERIA.name(), entity.getPedidoId().getUuid());
+        TableName.RH_T_FERIAS_GOZADAS.name(), entity.getPedidoId().getUuid());
 
     if (documentos != null && !documentos.isEmpty()) {
       req.setDocumentos(documentos.stream().map(d -> {

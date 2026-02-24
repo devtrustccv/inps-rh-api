@@ -11,6 +11,7 @@ import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -118,7 +119,7 @@ public class HoraExtraServiceWrite {
         var doc = documentoMapper.toEntity(
             dto.getDocumento(),
             Estado.P,
-            Referencia.HORA_EXTRA.name(),
+            TableName.RH_T_HORA_EXTRA.name(),
             he.getId(),
             he.getUuid(),
             1L,
@@ -186,7 +187,7 @@ public class HoraExtraServiceWrite {
     Estado estado = Objects.equals(req.getValidar(), EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
     var anexosExistentes = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(Referencia.HORA_EXTRA.name(), pedido.getUuid());
+        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_HORA_EXTRA.name(), pedido.getUuid());
     if (anexosExistentes != null && !anexosExistentes.isEmpty()) {
       anexosExistentes.forEach(a -> a.setEstado(estado));
       documentoEntityRepository.saveAll(anexosExistentes);
@@ -210,7 +211,7 @@ public class HoraExtraServiceWrite {
 
           if (ajuste.getDocumento() != null) {
             var docsHe = documentoEntityRepository
-                .findAllByReferenciaNameAndReferenciaUuid(Referencia.HORA_EXTRA.name(), he.getUuid());
+                .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_HORA_EXTRA.name(), he.getUuid());
 
             var fun = he.getTiprelId() != null ? he.getTiprelId().getFunId() : null;
 
@@ -219,7 +220,7 @@ public class HoraExtraServiceWrite {
               var mapped = documentoMapper.toEntity(
                   ajuste.getDocumento(),
                   estado,
-                  Referencia.HORA_EXTRA.name(),
+                  TableName.RH_T_HORA_EXTRA.name(),
                   he.getId(),
                   he.getUuid(),
                   1L,
@@ -232,7 +233,7 @@ public class HoraExtraServiceWrite {
               var novo = documentoMapper.toEntity(
                   ajuste.getDocumento(),
                   estado,
-                  Referencia.HORA_EXTRA.name(),
+                  TableName.RH_T_HORA_EXTRA.name(),
                   he.getId(),
                   he.getUuid(),
                   1L,

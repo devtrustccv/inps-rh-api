@@ -7,6 +7,7 @@ import cv.inps.rh.assiduidade.application.queries.GetFaltaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaFaltaQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
@@ -204,7 +205,7 @@ public class FaltaReadService {
     dto.setTipoJustificacao(primeiraFalta.getParamSitId() != null ? primeiraFalta.getParamSitId().getId() : null);
 
     var documentos = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(Referencia.JUSTIFICAR_FALTA.name(),pedido.getUuid());
+        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_FALTA.name(),pedido.getUuid());
 
     if (!CollectionUtils.isEmpty(documentos)) {
       dto.setDocumentos(documentos.stream().map(d -> {

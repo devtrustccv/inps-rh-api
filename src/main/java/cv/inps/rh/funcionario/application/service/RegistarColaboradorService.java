@@ -9,6 +9,7 @@ import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -234,7 +235,7 @@ public class RegistarColaboradorService {
         return documentoMapper.toEntity(
             a,
             Estado.P,
-            Referencia.REGISTO_COLABORADOR.name(),
+            TableName.RH_T_FUNCIONARIOS.name(),
             saved.getId(),
             saved.getUuid(),
             1L,
