@@ -27,11 +27,9 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "FuncionarioResponse",
-                "objectType": "dto",
+                "type": "string",
                 "name": "data",
-                "collectionType": "none",
-                "module": "funcionario"
+                "collectionType": "map"
               }
             }
           }
@@ -580,5 +578,5 @@
       ]
     }
   ],
-  "id": "69p09wi4e0-criarFuncionario-validarRegistoColaborador-createFuncionario-validarRegistoColaborador-createFuncionario-getFuncionarioById-createFuncionario-validarRegistoColaborador-mudarEstadoColaborador-validaDadosPessoais-getDadosFamiliares-getDadosBancarios"
+  "id": "69p09wi4e0-criarFuncionario-validarRegistoColaborador-createFuncionario-validarRegistoColaborador-createFuncionario-getFuncionarioById-createFuncionario-validarRegistoColaborador-mudarEstadoColaborador-validaDadosPessoais-getDadosFamiliares-getDadosBancarios-createFuncionario"
 }

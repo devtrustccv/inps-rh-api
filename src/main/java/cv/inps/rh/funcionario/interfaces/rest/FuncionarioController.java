@@ -1,5 +1,5 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
@@ -21,10 +21,10 @@ import cv.inps.rh.funcionario.application.queries.*;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.funcionario.application.commands.*;
 import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
+import java.util.Map;
 import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaValidacoesDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaFuncionarioDTO;
-import java.util.Map;
 import cv.inps.rh.funcionario.application.dto.AtivarInativarColaboradorDTO;
 import cv.inps.rh.funcionario.application.dto.ValidacaoDadosPessoaisDTO;
 import cv.inps.rh.funcionario.application.dto.ValidarDadosAcademicosDTO;
@@ -39,7 +39,10 @@ import cv.inps.rh.funcionario.application.dto.DadosBancariosRespDTO;
 @IgrpController
 @RestController
 @RequestMapping(path = "api/v1/funcionarios")
-@Tag(name = "Funcionario", description = "gestao de funcionarios")
+@Tag(
+    name = "Funcionario",
+    description = "gestao de funcionarios"
+)
 public class FuncionarioController {
 
   
@@ -58,26 +61,25 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = FuncionarioResponseDTO.class,
-                  type = "object")
+                  implementation = String.class,
+                  type = "String")
           )
       )
     }
   )
   
-  public ResponseEntity<FuncionarioResponseDTO> createFuncionario(@Valid @RequestBody FuncionarioRequestDTO createFuncionarioRequest
+  public ResponseEntity<Map<String, ?>> createFuncionario(@Valid @RequestBody FuncionarioRequestDTO createFuncionarioRequest
     )
   {
 
       final var command = new CreateFuncionarioCommand(createFuncionarioRequest);
 
-       ResponseEntity<FuncionarioResponseDTO> response = commandBus.send(command);
+      return commandBus.send(command);
 
-       return response;
   }
 
    @GetMapping(
@@ -89,7 +91,7 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -106,9 +108,8 @@ public class FuncionarioController {
 
       final var query = new GetFuncionarioByIdQuery(id);
 
-      ResponseEntity<FuncionarioResponseDTO> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -120,7 +121,7 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -143,9 +144,8 @@ public class FuncionarioController {
 
       final var query = new GetValicoesUtilizadoresQuery(nomeColaborador, tipoOperacao, referenciaName, dataInicio, dataFim, pageNumber, pageSize);
 
-      ResponseEntity<WrapperListaValidacoesDTO> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -156,7 +156,7 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -181,9 +181,8 @@ public class FuncionarioController {
 
       final var query = new GetListFuncionariosQuery(pageNumber, pageSize, nome, direccao, seccao, tipoVinculoLaboral, dataInicio, dataFim, estado);
 
-      ResponseEntity<WrapperListaFuncionarioDTO> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @PutMapping(
@@ -195,7 +194,7 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -212,9 +211,8 @@ public class FuncionarioController {
 
       final var command = new ValidarRegistoColaboradorCommand(validarRegistoColaboradorRequest, id);
 
-       ResponseEntity<Map<String, ?>> response = commandBus.send(command);
+      return commandBus.send(command);
 
-       return response;
   }
 
    @PatchMapping(
@@ -226,7 +224,7 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -243,9 +241,8 @@ public class FuncionarioController {
 
       final var command = new InativarAtivarColaboradorCommand(inativarAtivarColaboradorRequest, id);
 
-       ResponseEntity<AtivarInativarColaboradorDTO> response = commandBus.send(command);
+      return commandBus.send(command);
 
-       return response;
   }
 
    @PutMapping(
@@ -257,7 +254,7 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -274,9 +271,8 @@ public class FuncionarioController {
 
       final var command = new ValidaDadosPessoaisCommand(validaDadosPessoaisRequest, idFuncionario);
 
-       ResponseEntity<ValidacaoDadosPessoaisDTO> response = commandBus.send(command);
+      return commandBus.send(command);
 
-       return response;
   }
 
    @PutMapping(
@@ -288,7 +284,7 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -305,9 +301,8 @@ public class FuncionarioController {
 
       final var command = new ValidarDadosAcademicosCommand(validarDadosAcademicosRequest, idFuncionario);
 
-       ResponseEntity<ValidarDadosAcademicosDTO> response = commandBus.send(command);
+      return commandBus.send(command);
 
-       return response;
   }
 
    @PutMapping(
@@ -319,7 +314,7 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -336,9 +331,8 @@ public class FuncionarioController {
 
       final var command = new ValidarDadosFamiliaresCommand(validarDadosFamiliaresRequest, idFuncionario);
 
-       ResponseEntity<ValidarAgregadosDependentesDTO> response = commandBus.send(command);
+      return commandBus.send(command);
 
-       return response;
   }
 
    @PutMapping(
@@ -350,7 +344,7 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -367,9 +361,8 @@ public class FuncionarioController {
 
       final var command = new ValidarDadosBancariosCommand(validarDadosBancariosRequest, idFuncionario);
 
-       ResponseEntity<ValidarDadosBancariosDTO> response = commandBus.send(command);
+      return commandBus.send(command);
 
-       return response;
   }
 
    @GetMapping(
@@ -381,7 +374,7 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -398,9 +391,8 @@ public class FuncionarioController {
 
       final var query = new GetDadosPessoaisQuery(idFuncionario);
 
-      ResponseEntity<DadosPessoaisRespDTO> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -412,7 +404,7 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -429,9 +421,8 @@ public class FuncionarioController {
 
       final var query = new GetDadosAcademicosQuery(idFuncionario);
 
-      ResponseEntity<DadosAcademicosProfResponseDTO> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -443,7 +434,7 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -460,9 +451,8 @@ public class FuncionarioController {
 
       final var query = new GetDadosFamiliaresQuery(idFuncionario);
 
-      ResponseEntity<List<AgregadoDependenteRespDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -474,7 +464,7 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -491,9 +481,8 @@ public class FuncionarioController {
 
       final var query = new GetDadosBancariosQuery(idFuncionario);
 
-      ResponseEntity<List<DadosBancariosRespDTO>> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
    @GetMapping(
@@ -505,7 +494,7 @@ public class FuncionarioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          description = "",
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -522,9 +511,8 @@ public class FuncionarioController {
 
       final var query = new GetSituacaoLaboralColaboradorQuery(id);
 
-      ResponseEntity<AtivarInativarColaboradorDTO> response = queryBus.handle(query);
+      return queryBus.handle(query);
 
-      return response;
   }
 
 }

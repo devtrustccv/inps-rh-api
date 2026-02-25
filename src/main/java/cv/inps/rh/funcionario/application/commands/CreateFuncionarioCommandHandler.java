@@ -9,8 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
-public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFuncionarioCommand, ResponseEntity<FuncionarioResponseDTO>> {
+public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFuncionarioCommand, ResponseEntity<Map<String, ?>>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CreateFuncionarioCommandHandler.class);
 
@@ -21,7 +23,7 @@ public class CreateFuncionarioCommandHandler implements CommandHandler<CreateFun
   }
 
   @IgrpCommandHandler
-  public ResponseEntity<FuncionarioResponseDTO> handle(CreateFuncionarioCommand command) {
+  public ResponseEntity<Map<String, ?>> handle(CreateFuncionarioCommand command) {
 
     LOGGER.debug("Handling CreateFuncionarioCommand: {}", command);
 
