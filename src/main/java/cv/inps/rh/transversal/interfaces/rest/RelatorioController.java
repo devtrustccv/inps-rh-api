@@ -18,9 +18,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.transversal.application.queries.*;
-
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.inps.rh.transversal.application.commands.*;
 import cv.inps.rh.transversal.application.dto.DossierColaboradorListDTO;
 import cv.inps.rh.transversal.application.dto.AssiduidadeListDTO;
+import cv.inps.rh.transversal.application.dto.DossierRequestDTO;
+import cv.inps.rh.transversal.application.dto.DossierResponseDTO;
 
 @IgrpController
 @RestController
@@ -33,10 +36,11 @@ public class RelatorioController {
 
   
   private final QueryBus queryBus;
+  private final CommandBus commandBus;
 
-  public RelatorioController(QueryBus queryBus) {
+  public RelatorioController(QueryBus queryBus, CommandBus commandBus) {
           this.queryBus = queryBus;
-          
+          this.commandBus = commandBus;
   }
    @GetMapping(
    value = "funcionarios"
@@ -149,6 +153,36 @@ public class RelatorioController {
       final var query = new DownloadRelatorioQuery(id);
 
       return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "funcionarios"
+  )
+  @Operation(
+    summary = "Obter dossier colaborador",
+    description = "Obter dossier colaborador",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DossierResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<DossierResponseDTO> obterDossierColaborador(@Valid @RequestBody DossierRequestDTO obterDossierColaboradorRequest
+    )
+  {
+
+      final var command = new ObterDossierColaboradorCommand(obterDossierColaboradorRequest);
+
+      return commandBus.send(command);
 
   }
 

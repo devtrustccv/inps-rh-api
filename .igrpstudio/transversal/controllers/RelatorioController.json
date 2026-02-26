@@ -212,6 +212,40 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "ObterDossierColaborador",
+      "path": "funcionarios",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "DossierRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "transversal"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DossierResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "transversal"
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "id": "undefined-listarDossierColaborador-relatorioDossierColaborador-relatorioDossierColaborador-relatorioAssiduidade-relatorioDossierColaborador-relatorioAssiduidade-relatorioDossierColaborador-relatorioAssiduidade-relatorioAssiduidade"
