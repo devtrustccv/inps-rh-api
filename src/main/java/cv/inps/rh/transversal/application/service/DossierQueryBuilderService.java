@@ -36,9 +36,8 @@ public class DossierQueryBuilderService {
 
         for (String nomeAgrupador : request.getAgrupadores()) {
             DimensaoStrategy strategy = strategyFactory.getStrategy(nomeAgrupador);
-            Expression<?> expression = strategy.getAgrupadorExpression(root, cb);
-            selections.add(expression.alias(nomeAgrupador));
-            groupByExpressions.add(expression);
+            selections.addAll(strategy.getSelectExpressions(root, cb));
+            groupByExpressions.addAll(strategy.getGroupByExpressions(root, cb));
         }
         selections.add(cb.count(root).alias("total"));
 
@@ -49,8 +48,7 @@ public class DossierQueryBuilderService {
         if (request.getFiltros() != null && !request.getFiltros().isEmpty()) {
             for (Map.Entry<String, List<String>> filtro : request.getFiltros().entrySet()) {
                 DimensaoStrategy strategy = strategyFactory.getStrategy(filtro.getKey());
-                Predicate predicate = strategy.getFiltroPredicate(root, cb, filtro.getValue());
-                predicates.add(predicate);
+                predicates.add(strategy.getFiltroPredicate(root, cb, filtro.getValue()));
             }
         }
 
