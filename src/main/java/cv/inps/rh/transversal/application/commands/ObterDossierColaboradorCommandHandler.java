@@ -2,6 +2,7 @@ package cv.inps.rh.transversal.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.transversal.application.service.ResultadoDossierTransformerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ public class ObterDossierColaboradorCommandHandler implements CommandHandler<Obt
 
     private final ValidacaoDossierService validacaoDossierService;
     private final DossierQueryBuilderService dossierQueryBuilderService;
+    private final ResultadoDossierTransformerService resultadoDossierTransformerService;
 
 
     @IgrpCommandHandler
@@ -38,10 +40,11 @@ public class ObterDossierColaboradorCommandHandler implements CommandHandler<Obt
 
         LOGGER.info("Query executada. {} linhas de resultado obtidas.", resultados.size());
 
-        // TODO: Implementar a transformação do resultado plano para hierárquico
+        // 3. Transformar o resultado plano em hierárquico
+        DossierResponseDTO response = resultadoDossierTransformerService.transformar(
+                resultados, command.getDossierrequest().getAgrupadores());
 
-        // Por agora, retorna uma resposta vazia para teste
-        DossierResponseDTO response = new DossierResponseDTO();
+        response.setFiltros(command.getDossierrequest().getFiltros());
 
         return ResponseEntity.ok(response);
     }
