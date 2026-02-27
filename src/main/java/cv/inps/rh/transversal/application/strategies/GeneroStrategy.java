@@ -15,12 +15,6 @@ public class GeneroStrategy implements DimensaoStrategy {
     return DimensaoEnum.GENERO;
   }
 
-  /*
-   * private Expression<String> getRawExpression(Root<TiposRelacionamentoEntity>
-   * root) {
-   * return root.get("funId").<String>get("sexo");
-   * }
-   */
 
   private Expression<String> getTranslatedExpression(
       Root<TiposRelacionamentoEntity> root,

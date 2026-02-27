@@ -57,7 +57,10 @@ public class ResultadoDossierTransformerService {
         for (Map.Entry<Object, List<Tuple>> entry : grupos.entrySet()) {
             AgrupamentoDTO dto = new AgrupamentoDTO();
             dto.setDimensao(agrupadorAtual);
-            dto.setValor(entry.getValue().getFirst().get(aliasNome, String.class));
+            
+            // Correção: Obter como Object e converter para String para suportar tipos numéricos (ex: idade)
+            Object valorObj = entry.getValue().getFirst().get(aliasNome);
+            dto.setValor(valorObj != null ? String.valueOf(valorObj) : null);
 
             // Soma o total para este grupo específico
             long totalGrupo = entry.getValue().stream()
