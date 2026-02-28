@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class SaveFundoSocialCommand implements Command {
 
-
+  
   private List<FundoSocialRequestDTO> fundosocialrequest;
 
 }

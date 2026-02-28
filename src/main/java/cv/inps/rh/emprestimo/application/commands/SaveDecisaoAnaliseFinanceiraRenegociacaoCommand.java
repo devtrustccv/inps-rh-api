@@ -12,7 +12,7 @@ import cv.inps.rh.emprestimo.application.dto.AnaliseFinanceiroRequestDTO;
 @AllArgsConstructor
 public class SaveDecisaoAnaliseFinanceiraRenegociacaoCommand implements Command {
 
-
+  
   private AnaliseFinanceiroRequestDTO analisefinanceirorequest;
   @NotBlank(message = "The field <emprestimoId> is required")
   private String emprestimoId;

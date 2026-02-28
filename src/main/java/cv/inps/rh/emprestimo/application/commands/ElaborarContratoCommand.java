@@ -12,7 +12,7 @@ import cv.inps.rh.emprestimo.application.dto.ElaboracaoContratoRequestDTO;
 @AllArgsConstructor
 public class ElaborarContratoCommand implements Command {
 
-
+  
   private ElaboracaoContratoRequestDTO elaboracaocontratorequest;
   @NotBlank(message = "The field <emprestimoId> is required")
   private String emprestimoId;

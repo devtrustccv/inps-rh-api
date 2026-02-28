@@ -10,28 +10,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
-import java.math.BigDecimal;
-
+import lombok.EqualsAndHashCode;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 
-
+@EqualsAndHashCode(callSuper = true)
 @IgrpDTO
-public class PedidoAdiantamentoRequestDTO  {
+public class PedidoEmprestimoRequestDTO extends PedidoEmprestimoDTO {
 
-  @NotBlank(message = "The field <emprestimoId> is required")
-  
-  private String emprestimoId ;
-  
-  
-  private BigDecimal valorAdiantamento ;
-  
-  
-  private Long numeroPrestacao ;
-  @NotBlank(message = "The field <tipoSituacao> is required")
-  
-  private String tipoSituacao ;
   @NotNull(message = "The field <action> is required")
   
   private ProcessStepAction action ;

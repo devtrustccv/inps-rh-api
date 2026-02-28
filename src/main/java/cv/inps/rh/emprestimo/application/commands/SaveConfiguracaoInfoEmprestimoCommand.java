@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class SaveConfiguracaoInfoEmprestimoCommand implements Command {
 
-
+  
   private List<InformacaoEmprestimoRequestDTO> informacaoemprestimorequest;
 
 }

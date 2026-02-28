@@ -12,7 +12,7 @@ import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
 @AllArgsConstructor
 public class AnexarComprovativoPagamentoCommand implements Command {
 
-
+  
   private DocumentoDTO documento;
   @NotBlank(message = "The field <emprestimoId> is required")
   private String emprestimoId;

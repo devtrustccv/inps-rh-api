@@ -35,7 +35,7 @@ public class PedidoAquisicaoViaturaService {
   private final FuncionarioRules funcionarioRules;
   private final EmprestimoDocumentService documentService;
 
-  public IdDTO saveUpdatePedidoEmprestimo(String uuid, PedidoEmprestimoDTO request) {
+  public IdDTO saveUpdatePedidoEmprestimo(String uuid, PedidoEmprestimoRequestDTO request) {
 
     var currentRelation = funcionarioRules.getTipoRelacionamentoAtual(UUID.fromString(request.getFuncionarioId()));
 
@@ -82,6 +82,12 @@ public class PedidoAquisicaoViaturaService {
       var savedOrder = pedidoEntityRepository.save(order);
       savedLoan.setPedido(savedOrder);
       emprestimoEntityRepository.save(savedLoan);
+    } else {
+      if (request.getAction().equals(ProcessStepAction.NEXT)) {
+        var order = orderOP.get();
+        order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+        pedidoEntityRepository.save(order);
+      }
     }
 
     var response = new IdDTO(savedLoan.getUuid());
@@ -102,8 +108,6 @@ public class PedidoAquisicaoViaturaService {
     loan.setNrPrestacao(request.getNumeroPrestacao());
     loan.setValorEmprestimo(request.getValorEmprestimo());
     loan.setJuro(request.getJuros());
-
-    var funId = loan.getTiprel().getFunId();
 
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
@@ -148,7 +152,7 @@ public class PedidoAquisicaoViaturaService {
 
     documentService.saveDocuments(
         request.getDocumentos(),
-        funId,
+        loan.getTiprel().getFunId(),
         loan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_PEDIDO.name()
     );
@@ -256,15 +260,13 @@ public class PedidoAquisicaoViaturaService {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
-    var funId = loan.getTiprel().getFunId();
-
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name());
     pedidoEntityRepository.save(order);
 
     documentService.saveDocuments(
         request.getDocumentos(),
-        funId,
+        loan.getTiprel().getFunId(),
         loan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name()
     );

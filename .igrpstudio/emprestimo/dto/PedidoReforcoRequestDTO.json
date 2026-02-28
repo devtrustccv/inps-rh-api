@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "emprestimo",
-  "name": "PedidoAdiantamentoRequest",
+  "name": "PedidoReforcoRequest",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
@@ -18,7 +18,7 @@
       "primaryKey": false
     },
     {
-      "name": "valorAdiantamento",
+      "name": "valorReforco",
       "objectType": "java",
       "type": "decimal",
       "required": false,
@@ -42,7 +42,7 @@
       "primaryKey": false
     },
     {
-      "name": "tipoSituacao",
+      "name": "tipoRenegociacao",
       "objectType": "java",
       "type": "string",
       "required": true,
@@ -52,20 +52,7 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
-    },
-    {
-      "name": "action",
-      "objectType": "enum",
-      "type": "ProcessStepAction",
-      "required": true,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false,
-      "module": "emprestimo"
     }
   ],
-  "id": "o32nu3jaii"
+  "id": "o32nu3jaii_copy"
 }

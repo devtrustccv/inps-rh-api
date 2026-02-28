@@ -65,7 +65,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "PedidoEmprestimo",
+              "type": "PedidoEmprestimoRequest",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
@@ -89,46 +89,12 @@
             }
           }
         }
-      }
-    },
-    {
-      "actionName": "updateEmprestimo",
-      "path": "{emprestimoId}",
-      "method": "PUT",
-      "requestBody": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "PedidoEmprestimo",
-              "collectionType": "none",
-              "name": "data",
-              "objectType": "dto",
-              "module": "emprestimo"
-            }
-          }
-        }
       },
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "Id",
-                "objectType": "dto",
-                "name": "data",
-                "collectionType": "none",
-                "module": "emprestimo"
-              }
-            }
-          }
-        }
-      },
-      "pathVariables": [
+      "requestParams": [
         {
-          "name": "emprestimoId",
           "type": "string",
-          "isRequired": true
+          "name": "emprestimoId",
+          "isRequired": false
         }
       ]
     },
@@ -809,5 +775,5 @@
       ]
     }
   ],
-  "id": "lls7ig9nio-getConfiguracaoEmprestimo-saveEmprestimo-updateEmprestimo-getEmprestimoById-saveDecisaoAnalise-saveDecisaoAnaliseFinanceira-elaborarContrato-autorizarComissaoExecutiva-saveDecisaoAnaliseFinanceira-saveDecisaoAnalise-listarEmprestimos-listarEmprestimos-savePedidosAdiantamento-saveDecisaoAnaliseCopy-saveDecisaoAnaliseFinanceiraCopy-autorizarComissaoExecutivaCopy-elaborarContratoCopy-verificarPedidoAdiantamento"
+  "id": "lls7ig9nio-getConfiguracaoEmprestimo-saveEmprestimo-updateEmprestimo-getEmprestimoById-saveDecisaoAnalise-saveDecisaoAnaliseFinanceira-elaborarContrato-autorizarComissaoExecutiva-saveDecisaoAnaliseFinanceira-saveDecisaoAnalise-listarEmprestimos-listarEmprestimos-savePedidosAdiantamento-saveDecisaoAnaliseCopy-saveDecisaoAnaliseFinanceiraCopy-autorizarComissaoExecutivaCopy-elaborarContratoCopy-verificarPedidoAdiantamento-saveEmprestimo-saveEmprestimo"
 }

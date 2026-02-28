@@ -9,7 +9,6 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import java.math.BigDecimal;
 
 @Data
@@ -18,22 +17,19 @@ import java.math.BigDecimal;
 
 
 @IgrpDTO
-public class PedidoAdiantamentoRequestDTO  {
+public class PedidoReforcoRequestDTO  {
 
   @NotBlank(message = "The field <emprestimoId> is required")
   
   private String emprestimoId ;
   
   
-  private BigDecimal valorAdiantamento ;
+  private BigDecimal valorReforco ;
   
   
   private Long numeroPrestacao ;
-  @NotBlank(message = "The field <tipoSituacao> is required")
+  @NotBlank(message = "The field <tipoRenegociacao> is required")
   
-  private String tipoSituacao ;
-  @NotNull(message = "The field <action> is required")
-  
-  private ProcessStepAction action ;
+  private String tipoRenegociacao ;
 
 }

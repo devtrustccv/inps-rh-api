@@ -12,7 +12,7 @@ import cv.inps.rh.emprestimo.application.dto.AutorizacaoComissaoExecutivaDTO;
 @AllArgsConstructor
 public class AutorizarComissaoExecutivaRenegociacaoCommand implements Command {
 
-
+  
   private AutorizacaoComissaoExecutivaDTO autorizacaocomissaoexecutiva;
   @NotBlank(message = "The field <emprestimoId> is required")
   private String emprestimoId;

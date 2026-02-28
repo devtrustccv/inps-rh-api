@@ -1,34 +1,66 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
 import com.github.f4b6a3.uuid.UuidCreator;
-import cv.inps.rh.emprestimo.application.dto.AnaliseFinanceiroRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.AnaliseRhRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.AutorizacaoComissaoExecutivaDTO;
-import cv.inps.rh.emprestimo.application.dto.ElaboracaoContratoRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.domain.service.EmprestimoDocumentService;
-import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
-import cv.inps.rh.emprestimo.domain.service.constants.ProcessType;
-import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
-import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.emprestimo.domain.service.constants.*;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.PlanoFinanceiroEntityRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @RequiredArgsConstructor
 @Service
-public class RenegociacaoDividaService {
+public class ReforcoDividaService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ReforcoDividaService.class);
 
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PedidoEntityRepository pedidoEntityRepository;
-  private final FuncionarioRules funcionarioRules;
   private final EmprestimoDocumentService documentService;
+  private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
+  private final AdiantamentoEmprestimoHelper adiantamentoEmprestimoHelper;
+
+  public String saveUpdatePedidoReforco(PedidoReforcoRequestDTO obj) {
+
+    var loan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
+    var rowsInactivated = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
+    LOGGER.debug("INACTIVATED {} ROWS FOR LOAN ID <{}> : ", rowsInactivated, loan.getId());
+
+    var tipoSituacao = TipoSituacao.valueOf(obj.getTipoRenegociacao());
+
+    var newLoan = new EmprestimoEntity();
+    BeanUtils.copyProperties(loan, newLoan);
+    newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    newLoan.setValorAdiantado(obj.getValorReforco());
+    newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
+    newLoan.setVersao(loan.getVersao() + 1);
+    newLoan.setTipoSituacao(tipoSituacao.name());
+    newLoan.setValorPago(null);
+    newLoan.setEmprestimo(loan);
+    newLoan.setNrPrestacao(obj.getNumeroPrestacao());
+    var saved = emprestimoEntityRepository.save(loan);
+
+    adiantamentoEmprestimoHelper.saveByTipoSituacao(
+        tipoSituacao,
+        newLoan,
+        obj.getValorReforco(),
+        obj.getNumeroPrestacao()
+    );
+
+    return saved.getUuid();
+  }
 
   public void saveUpdateDecisaoAnaliseRh(String uuid, AnaliseRhRequestDTO request) {
 
@@ -45,7 +77,7 @@ public class RenegociacaoDividaService {
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
         order,
-        EtapaEmprestimo.ANALISE_RH_RENEGOCIACAO.name(),
+        EtapaEmprestimo.ANALISE_RH_REFORCO.name(),
         Estado.A.name()
     );
 
@@ -60,7 +92,7 @@ public class RenegociacaoDividaService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
-          newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_RENEGOCIACAO.name());
+          newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
@@ -71,7 +103,7 @@ public class RenegociacaoDividaService {
         request.getDocumentos(),
         funId,
         loan.getUuid(),
-        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_RENEGOCIACAO.name()
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_REFORCO.name()
     );
   }
 
@@ -83,12 +115,12 @@ public class RenegociacaoDividaService {
     emprestimoEntityRepository.save(loan);
 
     var order = loan.getPedido();
-    order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_RENEGOCIACAO.name());
+    order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
     pedidoEntityRepository.save(order);
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
         order,
-        EtapaEmprestimo.ANALISE_FINANCEIRA_RENEGOCIACAO.name(),
+        EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name(),
         Estado.A.name()
     );
 
@@ -104,7 +136,7 @@ public class RenegociacaoDividaService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
-          newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_RENEGOCIACAO.name());
+          newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
@@ -120,12 +152,12 @@ public class RenegociacaoDividaService {
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
     var order = loan.getPedido();
-    order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_RENEGOCIACAO.name());
+    order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name());
     pedidoEntityRepository.save(order);
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
         order,
-        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_RENEGOCIACAO.name(),
+        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name(),
         Estado.A.name()
     );
 
@@ -141,7 +173,7 @@ public class RenegociacaoDividaService {
           newObj.setPedido(order);
           newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
-          newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_RENEGOCIACAO.name());
+          newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
           newObj.setEstado(Estado.A.name());
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
@@ -157,14 +189,14 @@ public class RenegociacaoDividaService {
     var funId = loan.getTiprel().getFunId();
 
     var order = loan.getPedido();
-    order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_RENEGOCIACAO.name());
+    order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name());
     pedidoEntityRepository.save(order);
 
     documentService.saveDocuments(
         request.getDocumentos(),
         funId,
         loan.getUuid(),
-        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_RENEGOCIACAO.name()
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name()
     );
   }
 }

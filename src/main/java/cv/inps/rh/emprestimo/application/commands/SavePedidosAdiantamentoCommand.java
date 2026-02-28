@@ -12,7 +12,7 @@ import cv.inps.rh.emprestimo.application.dto.PedidoAdiantamentoRequestDTO;
 @AllArgsConstructor
 public class SavePedidosAdiantamentoCommand implements Command {
 
-
+  
   private PedidoAdiantamentoRequestDTO pedidoadiantamentorequest;
 
 }
