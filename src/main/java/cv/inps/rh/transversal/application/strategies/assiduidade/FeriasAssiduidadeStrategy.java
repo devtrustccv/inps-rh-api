@@ -148,7 +148,7 @@ public class FeriasAssiduidadeStrategy implements AssiduidadeStrategy {
                 periodo += DateFormatter.localDateToString(min);
             if (max != null)
                 periodo += " a " + DateFormatter.localDateToString(max);
-            dto.setPeriodoFerias(periodo);
+            dto.setPeriodo(periodo);
 
             return dto;
         }).collect(Collectors.toList());

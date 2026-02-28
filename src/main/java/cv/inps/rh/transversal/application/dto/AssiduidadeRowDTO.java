@@ -17,7 +17,7 @@ public class AssiduidadeRowDTO {
 
     // Ferias
     private Integer numDiasFerias;
-    private String periodoFerias;
+    private String periodo;
 
     // Falta
     private Integer numFaltas;
