@@ -4,42 +4,48 @@ import cv.igrp.framework.core.domain.IgrpEnum;
 
 public enum DimensaoEnum implements IgrpEnum<String> {
 
-    DIRECAO,
-    SECCAO,
-    CARGO,
-    GENERO,
-    LOCAL_TRABALHO,
-    CARREIRA,
-    ESCALAO,
-    CATEGORIA,
-    VINCULO,
-    SITUACAO_LABORAL,
-    MOBILIDADE,
-    GRAU_ESCOLARIDADE,
-    IDADE,
-    ANTIGUIDADE,
-    FAIXA_ETARIA,
-    ESTRUTURA_REMUNERATORIA;
+  DIRECAO("Direção"),
+  SECCAO("Secção"),
+  CARGO("Cargo"),
+  GENERO("Género"),
+  LOCAL_TRABALHO("Local de Trabalho"),
+  CARREIRA("Carreira"),
+  ESCALAO("Escalão"),
+  CATEGORIA("Categoria"),
+  VINCULO("Vínculo"),
+  SITUACAO_LABORAL("Situação Laboral"),
+  MOBILIDADE("Mobilidade"),
+  GRAU_ESCOLARIDADE("Grau de Escolaridade"),
+  IDADE("Idade"),
+  ANTIGUIDADE("Antiguidade"),
+  FAIXA_ETARIA("Faixa Etária"),
+  ESTRUTURA_REMUNERATORIA("Estrutura Remuneratória");
 
-    public static boolean exists(String value) {
-        if (value == null || value.isBlank()) {
-            return false;
-        }
-        try {
-            DimensaoEnum.valueOf(value.toUpperCase());
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
+  private final String description;
+
+  DimensaoEnum(String description) {
+    this.description = description;
+  }
+
+  public static boolean exists(String value) {
+    if (value == null || value.isBlank()) {
+      return false;
     }
+    try {
+      DimensaoEnum.valueOf(value.toUpperCase());
+      return true;
+    } catch (IllegalArgumentException e) {
+      return false;
+    }
+  }
 
   @Override
   public String getCode() {
-    return null;
+    return name();
   }
 
   @Override
   public String getDescription() {
-    return "";
+    return description;
   }
 }
