@@ -1,8 +1,10 @@
 package cv.inps.rh.transversal.application.strategies.assiduidade;
 
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.shared.infrastructure.persistence.repository.AssiduidadeParametroEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DispensaEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
+import cv.inps.rh.shared.util.TimeUtils;
 import cv.inps.rh.transversal.application.dto.AssiduidadeRowDTO;
 import cv.inps.rh.transversal.application.queries.RelatorioAssiduidadeQuery;
 import jakarta.persistence.EntityManager;
@@ -17,8 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 public class DispensaAssiduidadeStrategy implements AssiduidadeStrategy {
 
     private final DispensaEntityRepository dispensaRepository;
+    private final AssiduidadeParametroEntityRepository parametroRepository;
 
     @PersistenceContext
     private final EntityManager entityManager;
@@ -36,9 +37,7 @@ public class DispensaAssiduidadeStrategy implements AssiduidadeStrategy {
     public Page<AssiduidadeRowDTO> filtrar(RelatorioAssiduidadeQuery query, Pageable pageable) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-        // ---------------------------------------------------------------------
         // 1. COUNT QUERY (Distinct Funcionario)
-        // ---------------------------------------------------------------------
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<DispensaEntity> rootCount = countQuery.from(DispensaEntity.class);
 
@@ -55,15 +54,7 @@ public class DispensaAssiduidadeStrategy implements AssiduidadeStrategy {
             return new PageImpl<>(List.of(), pageable, 0);
         }
 
-        // ---------------------------------------------------------------------
         // 2. MAIN QUERY - Group By + Fetching raw data for memory calculation
-        // ---------------------------------------------------------------------
-        // Como 'horaInicio' e 'horaFim' são Strings na entidade, não podemos fazer
-        // aritmética direta no JPA/Criteria de forma portável.
-        // A melhor abordagem híbrida é: buscar os dados desagregados (filtrados e
-        // paginados por funcionário) e somar em memória.
-        // Mas para manter o padrão de paginação por funcionário, precisamos buscar os
-        // dados dos funcionários da página atual.
 
         // Passo 2a: Buscar IDs dos funcionários da página atual
         CriteriaQuery<Long> idsQuery = cb.createQuery(Long.class);
@@ -95,7 +86,6 @@ public class DispensaAssiduidadeStrategy implements AssiduidadeStrategy {
         Join<MobilidadeEntity, SecaoEntity> secaoJoinData = mobJoinData.join("secaoId", JoinType.LEFT);
 
         List<Predicate> dataPredicates = buildPredicates(query, cb, rootData, relJoinData, funcJoinData);
-        // Adicionar filtro pelos IDs da página
         dataPredicates.add(funcJoinData.get("id").in(funIds));
 
         dataQuery.multiselect(
@@ -112,10 +102,11 @@ public class DispensaAssiduidadeStrategy implements AssiduidadeStrategy {
 
         List<Tuple> rawData = entityManager.createQuery(dataQuery).getResultList();
 
-        // ---------------------------------------------------------------------
+        // Obter total horas disponíveis globalmente (parametro)
+        String horasDispStr = parametroRepository.findActiveTDispensa().orElse("00:00");
+        int totalMinutosDisponiveis = TimeUtils.hhmmToMinutes(horasDispStr);
+
         // 3. AGGREGATE IN MEMORY
-        // ---------------------------------------------------------------------
-        // Agrupar por Funcionario ID
         List<AssiduidadeRowDTO> dtos = new ArrayList<>();
 
         rawData.stream()
@@ -128,35 +119,35 @@ public class DispensaAssiduidadeStrategy implements AssiduidadeStrategy {
                     dto.setDireccao(first.get("dirNome", String.class));
                     dto.setSeccao(first.get("secNome", String.class));
 
-                    // Calcular total de horas (minutos)
-                    long totalMinutes = 0;
+                    // Calcular total de minutos gozados no período filtrado
+                    long totalMinutesGozados = 0;
                     for (Tuple t : tuples) {
                         String hInicio = t.get("horaInicio", String.class);
                         String hFim = t.get("horaFim", String.class);
-                        if (StringUtils.hasText(hInicio) && StringUtils.hasText(hFim)) {
-                            try {
-                                // Formato esperado HH:mm ou HH:mm:ss
-                                LocalTime start = parseTime(hInicio);
-                                LocalTime end = parseTime(hFim);
-                                totalMinutes += ChronoUnit.MINUTES.between(start, end);
-                            } catch (Exception e) {
-                                // Log erro parsing
-                            }
-                        }
+                        totalMinutesGozados += TimeUtils.diffMinutes(hInicio, hFim);
                     }
+                    dto.setHorasDispensaGozadas(totalMinutesGozados);
 
-                    // Converter minutos para horas decimais ou manter minutos?
-                    // O DTO tem Long horasDispensaGozadas. Vamos assumir minutos ou converter.
-                    // Se o campo for horas, seria totalMinutes / 60.0
-                    dto.setHorasDispensaGozadas(totalMinutes); // Em minutos para precisão, ou converter conforme regra
-                                                               // de negócio
+                    // Calcular Saldo (Disponível - Gozado no Mês Atual)
+                    // A regra do service é mensal. Se o filtro for maior que um mês, o saldo pode
+                    // ser confuso.
+                    // Mas geralmente mostra-se o saldo atual.
+                    // Vamos calcular o saldo subtraindo o total gozado (assumindo que o filtro é
+                    // mensal ou o usuário quer ver o saldo do período).
+                    // Ou deveríamos buscar todas as dispensas do mês atual para calcular o saldo
+                    // real?
+                    // O DTO pede "horasDispensaPorGozar".
+                    // Simplificação: Total Disponível - Total Gozado (neste relatório)
+                    // Se quiser o saldo real do mês, teríamos que fazer outra query.
+                    // Dado o contexto de relatório, vamos mostrar Disponivel - GozadoNestePeriodo.
+
+                    long saldo = Math.max(0, totalMinutosDisponiveis - totalMinutesGozados);
+                    dto.setHorasDispensaPorGozar(saldo);
 
                     dtos.add(dto);
                 });
 
-        // Ordenar DTOs conforme a ordem original dos IDs (para manter consistência da
-        // query de IDs)
-        // Como usamos map, a ordem pode ter perdido. Reordenar:
+        // Reordenar
         List<AssiduidadeRowDTO> sortedDtos = new ArrayList<>();
         for (Long id : funIds) {
             dtos.stream()
@@ -167,15 +158,6 @@ public class DispensaAssiduidadeStrategy implements AssiduidadeStrategy {
         }
 
         return new PageImpl<>(sortedDtos, pageable, totalElements);
-    }
-
-    private LocalTime parseTime(String timeStr) {
-        // Tenta parsear HH:mm ou HH:mm:ss
-        if (timeStr.length() == 5)
-            return LocalTime.parse(timeStr); // 08:30
-        if (timeStr.length() == 8)
-            return LocalTime.parse(timeStr); // 08:30:00
-        return LocalTime.parse(timeStr);
     }
 
     private List<Predicate> buildPredicates(

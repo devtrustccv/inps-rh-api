@@ -27,12 +27,6 @@
       },
       "requestParams": [
         {
-          "type": "boolean",
-          "name": "search",
-          "isRequired": true,
-          "value": "false"
-        },
-        {
           "type": "long",
           "name": "direccaoId",
           "isRequired": false

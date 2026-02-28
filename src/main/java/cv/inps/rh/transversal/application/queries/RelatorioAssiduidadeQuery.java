@@ -12,8 +12,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class RelatorioAssiduidadeQuery implements Query {
 
-  private boolean search;
-
   private Long direccaoId;
 
   private Long seccaoId;
