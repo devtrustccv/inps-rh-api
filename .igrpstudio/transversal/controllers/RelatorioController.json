@@ -77,32 +77,6 @@
       ]
     },
     {
-      "actionName": "downloadRelatorio",
-      "path": "{id}/download",
-      "method": "GET",
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/octet-stream": {
-              "schema": {
-                "type": "string",
-                "name": "data",
-                "collectionType": "none"
-              }
-            }
-          }
-        }
-      },
-      "pathVariables": [
-        {
-          "name": "id",
-          "type": "string",
-          "isRequired": true
-        }
-      ]
-    },
-    {
       "actionName": "ObterDossierColaborador",
       "path": "funcionarios",
       "method": "POST",

@@ -33,7 +33,7 @@ import cv.inps.rh.transversal.application.dto.DossierResponseDTO;
 )
 public class RelatorioController {
 
-
+  
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -50,7 +50,7 @@ public class RelatorioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -60,7 +60,7 @@ public class RelatorioController {
       )
     }
   )
-
+  
   public ResponseEntity<AssiduidadeListDTO> relatorioAssiduidade(
     @RequestParam(value = "search", defaultValue = "false") boolean search,
     @RequestParam(value = "direccaoId", required = false) Long direccaoId,
@@ -79,36 +79,6 @@ public class RelatorioController {
 
   }
 
-   @GetMapping(
-   value = "{id}/download"
-  )
-  @Operation(
-    summary = "Download relatorio",
-    description = "Download relatorio",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-
-          content = @Content(
-              mediaType = "application/octet-stream",
-              schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
-          )
-      )
-    }
-  )
-
-  public ResponseEntity<?> downloadRelatorio(
-    @PathVariable(value = "id") String id)
-  {
-
-      final var query = new DownloadRelatorioQuery(id);
-
-      return queryBus.handle(query);
-
-  }
-
    @PostMapping(
    value = "funcionarios"
   )
@@ -118,7 +88,7 @@ public class RelatorioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -128,7 +98,7 @@ public class RelatorioController {
       )
     }
   )
-
+  
   public ResponseEntity<DossierResponseDTO> obterDossierColaborador(@Valid @RequestBody DossierRequestDTO obterDossierColaboradorRequest
     )
   {
