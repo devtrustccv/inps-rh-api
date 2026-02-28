@@ -1,6 +1,9 @@
 package cv.inps.rh.transversal.application.constants;
 
-public enum DimensaoEnum {
+import cv.igrp.framework.core.domain.IgrpEnum;
+
+public enum DimensaoEnum implements IgrpEnum<String> {
+
     DIRECAO,
     SECCAO,
     CARGO,
@@ -29,4 +32,14 @@ public enum DimensaoEnum {
             return false;
         }
     }
+
+  @Override
+  public String getCode() {
+    return null;
+  }
+
+  @Override
+  public String getDescription() {
+    return "";
+  }
 }
