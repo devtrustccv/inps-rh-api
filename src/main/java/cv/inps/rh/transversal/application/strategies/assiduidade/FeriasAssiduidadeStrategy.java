@@ -138,7 +138,7 @@ public class FeriasAssiduidadeStrategy implements AssiduidadeStrategy {
             dto.setDireccao(t.get("dirNome", String.class));
             dto.setSeccao(t.get("secNome", String.class));
 
-            Long total = t.get("totalDias", Long.class);
+            Number total = t.get("totalDias", Number.class);
             dto.setNumDiasFerias(total != null ? total.intValue() : 0);
 
             LocalDate min = t.get("minInicio", LocalDate.class);
