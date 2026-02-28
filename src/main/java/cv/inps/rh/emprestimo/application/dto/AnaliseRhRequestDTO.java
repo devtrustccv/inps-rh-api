@@ -4,13 +4,14 @@
 package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
+import jakarta.validation.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import lombok.AllArgsConstructor;
+import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
+import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
+import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,14 +33,17 @@ public class AnaliseRhRequestDTO  {
   @NotNull(message = "The field <juros> is required")
 
   private BigDecimal juros ;
-  @NotBlank(message = "The field <parecer> is required")
+  @NotNull(message = "The field <parecer> is required")
 
-  private String parecer ;
+  private ParecerProcesso parecer ;
 
 
   private String observacao ;
 
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();
+  @NotNull(message = "The field <action> is required")
+
+  private ProcessStepAction action ;
 
 }

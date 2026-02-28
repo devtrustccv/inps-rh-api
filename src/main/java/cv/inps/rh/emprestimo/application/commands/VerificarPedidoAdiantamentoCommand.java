@@ -1,11 +1,11 @@
 package cv.inps.rh.emprestimo.application.commands;
 
 import cv.igrp.framework.core.domain.Command;
-import cv.inps.rh.emprestimo.application.dto.BaseDecisaoDTO;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import cv.inps.rh.emprestimo.application.dto.VerificarAdiantamentoRequestDTO;
 
 @Data
 @NoArgsConstructor
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class VerificarPedidoAdiantamentoCommand implements Command {
 
 
-  private BaseDecisaoDTO basedecisao;
+  private VerificarAdiantamentoRequestDTO verificaradiantamentorequest;
   @NotBlank(message = "The field <emprestimoId> is required")
   private String emprestimoId;
 

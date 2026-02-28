@@ -4,10 +4,12 @@
 package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import lombok.AllArgsConstructor;
+import jakarta.validation.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import lombok.AllArgsConstructor;
+import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import java.time.LocalDate;
 
 @Data
@@ -18,9 +20,9 @@ import java.time.LocalDate;
 @IgrpDTO
 public class BaseDecisaoDTO  {
 
+  @NotNull(message = "The field <parecer> is required")
 
-
-  private String parecer ;
+  private ParecerProcesso parecer ;
 
 
   private String observacao ;

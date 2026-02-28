@@ -584,7 +584,7 @@
             "schema": {
               "collectionType": "none",
               "name": "data",
-              "type": "BaseDecisao",
+              "type": "VerificarAdiantamentoRequest",
               "objectType": "dto",
               "module": "emprestimo"
             }
@@ -809,5 +809,5 @@
       ]
     }
   ],
-  "id": "lls7ig9nio-getConfiguracaoEmprestimo-saveEmprestimo-updateEmprestimo-getEmprestimoById-saveDecisaoAnalise-saveDecisaoAnaliseFinanceira-elaborarContrato-autorizarComissaoExecutiva-saveDecisaoAnaliseFinanceira-saveDecisaoAnalise-listarEmprestimos-listarEmprestimos-savePedidosAdiantamento-saveDecisaoAnaliseCopy-saveDecisaoAnaliseFinanceiraCopy-autorizarComissaoExecutivaCopy-elaborarContratoCopy"
+  "id": "lls7ig9nio-getConfiguracaoEmprestimo-saveEmprestimo-updateEmprestimo-getEmprestimoById-saveDecisaoAnalise-saveDecisaoAnaliseFinanceira-elaborarContrato-autorizarComissaoExecutiva-saveDecisaoAnaliseFinanceira-saveDecisaoAnalise-listarEmprestimos-listarEmprestimos-savePedidosAdiantamento-saveDecisaoAnaliseCopy-saveDecisaoAnaliseFinanceiraCopy-autorizarComissaoExecutivaCopy-elaborarContratoCopy-verificarPedidoAdiantamento"
 }

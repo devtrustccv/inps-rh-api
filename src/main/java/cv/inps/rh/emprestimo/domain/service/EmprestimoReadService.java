@@ -1,5 +1,6 @@
 package cv.inps.rh.emprestimo.domain.service;
 
+import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
@@ -145,7 +146,7 @@ public class EmprestimoReadService {
 
   private BaseDecisaoDTO buildDecisionData(PedidoDecisaoEntity obj) {
     var baseDecision = new BaseDecisaoDTO();
-    baseDecision.setParecer(obj.getDecisao());
+    baseDecision.setParecer(ParecerProcesso.fromCode(obj.getDecisao()).orElse(null));
     baseDecision.setObservacao(obj.getObs());
     baseDecision.setData(obj.getCreatedDate().toLocalDate());
     return baseDecision;
@@ -165,14 +166,8 @@ public class EmprestimoReadService {
       if (StringUtils.hasText(query.getTipoEmprestimo()))
         predicates.add(cb.equal(root.get("tipoEmprestimo"), query.getTipoEmprestimo()));
 
-      if (StringUtils.hasText(query.getEstado()))
-        predicates.add(cb.equal(root.get("estado"), query.getEstado()));
-      else
-        predicates.add(cb.equal(root.get("estado"), Estado.A.name()));
-
-      if (StringUtils.hasText(query.getEstadoEmprestimo()))
-        predicates.add(cb.equal(root.get("estado"), query.getEstadoEmprestimo()));
-
+      var status = StringUtils.hasText(query.getEstado()) ? query.getEstado() : Estado.A.name();
+      predicates.add(cb.equal(root.get("estado"), status));
 
       if (StringUtils.hasText(query.getDataInicio()) && StringUtils.hasText(query.getDataFim()))
         predicates.add(cb.between(root.get("dataInicio"), LocalDate.parse(query.getDataInicio()), LocalDate.parse(query.getDataFim()))

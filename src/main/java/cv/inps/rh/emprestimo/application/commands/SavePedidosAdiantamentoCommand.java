@@ -1,10 +1,11 @@
 package cv.inps.rh.emprestimo.application.commands;
 
 import cv.igrp.framework.core.domain.Command;
-import cv.inps.rh.emprestimo.application.dto.PedidoAdiantamentoRequestDTO;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import cv.inps.rh.emprestimo.application.dto.PedidoAdiantamentoRequestDTO;
 
 @Data
 @NoArgsConstructor

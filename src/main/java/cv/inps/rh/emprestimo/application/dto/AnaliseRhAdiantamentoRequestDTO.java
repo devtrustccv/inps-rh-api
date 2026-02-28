@@ -4,10 +4,13 @@
 package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import lombok.AllArgsConstructor;
+import jakarta.validation.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
+import lombok.EqualsAndHashCode;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,6 +20,7 @@ import lombok.NoArgsConstructor;
 public class AnaliseRhAdiantamentoRequestDTO extends BaseDecisaoDTO {
 
 
+
   private Long bancoId ;
 
 
@@ -24,5 +28,8 @@ public class AnaliseRhAdiantamentoRequestDTO extends BaseDecisaoDTO {
 
 
   private String swift ;
+  @NotNull(message = "The field <action> is required")
+
+  private ProcessStepAction action ;
 
 }

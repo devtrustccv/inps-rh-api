@@ -1,6 +1,7 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.domain.service.EmprestimoDocumentService;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
@@ -9,6 +10,7 @@ import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
@@ -105,6 +107,19 @@ public class PedidoAquisicaoViaturaService {
 
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+
+    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+
+      switch (request.getParecer()) {
+        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
+        case RETIFICACAO -> order.setEtapa(EtapaEmprestimo.PEDIDO.name());
+        default -> {
+          loan.setEstado(Estado.I.name());
+          emprestimoEntityRepository.save(loan);
+        }
+      }
+    }
+
     pedidoEntityRepository.save(order);
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
@@ -115,14 +130,14 @@ public class PedidoAquisicaoViaturaService {
 
     decisionOP.ifPresentOrElse(
         obj -> {
-          obj.setDecisao(request.getParecer());
+          obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
           pedidoDecisaoEntityRepository.save(obj);
         },
         () -> {
           var newObj = new PedidoDecisaoEntity();
           newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer());
+          newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
@@ -150,6 +165,18 @@ public class PedidoAquisicaoViaturaService {
     order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
     pedidoEntityRepository.save(order);
 
+    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+
+      switch (request.getParecer()) {
+        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
+        case DESFAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+        default ->
+            throw IgrpResponseStatusException.badRequest("Invalid decison for this step %s".formatted(request.getParecer()));
+      }
+    }
+
+    pedidoEntityRepository.save(order);
+
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
         order,
         EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name(),
@@ -158,7 +185,7 @@ public class PedidoAquisicaoViaturaService {
 
     decisionOP.ifPresentOrElse(
         obj -> {
-          obj.setDecisao(request.getParecer());
+          obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
           obj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(obj);
@@ -166,7 +193,7 @@ public class PedidoAquisicaoViaturaService {
         () -> {
           var newObj = new PedidoDecisaoEntity();
           newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer());
+          newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
@@ -175,9 +202,6 @@ public class PedidoAquisicaoViaturaService {
           newObj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(newObj);
         });
-
-    if ("DESFAVORAVEL".equals(request.getParecer())) // TODO 04/02/2026 22:02 get real code
-      loan.setEstado(Estado.I.name());
 
     emprestimoEntityRepository.save(loan);
   }
@@ -188,6 +212,17 @@ public class PedidoAquisicaoViaturaService {
 
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
+
+    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+
+      switch (request.getParecer()) {
+        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name());
+        case DESFAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+        default ->
+            throw IgrpResponseStatusException.badRequest("Invalid decison for this step %s".formatted(request.getParecer()));
+      }
+    }
+
     pedidoEntityRepository.save(order);
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
@@ -198,7 +233,7 @@ public class PedidoAquisicaoViaturaService {
 
     decisionOP.ifPresentOrElse(
         obj -> {
-          obj.setDecisao(request.getParecer());
+          obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
           obj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(obj);
@@ -206,7 +241,7 @@ public class PedidoAquisicaoViaturaService {
         () -> {
           var newObj = new PedidoDecisaoEntity();
           newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer());
+          newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());

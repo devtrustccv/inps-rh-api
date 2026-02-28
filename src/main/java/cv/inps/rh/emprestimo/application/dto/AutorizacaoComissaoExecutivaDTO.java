@@ -4,12 +4,13 @@
 package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
+import jakarta.validation.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import lombok.AllArgsConstructor;
+import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
+import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import java.time.LocalDate;
 
 @Data
@@ -20,14 +21,17 @@ import java.time.LocalDate;
 @IgrpDTO
 public class AutorizacaoComissaoExecutivaDTO  {
 
-  @NotBlank(message = "The field <parecer> is required")
+  @NotNull(message = "The field <parecer> is required")
 
-  private String parecer ;
+  private ParecerProcesso parecer ;
 
 
   private String observacao ;
   @NotNull(message = "The field <data> is required")
 
   private LocalDate data ;
+  @NotNull(message = "The field <action> is required")
+
+  private ProcessStepAction action ;
 
 }

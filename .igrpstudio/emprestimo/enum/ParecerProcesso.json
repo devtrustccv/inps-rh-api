@@ -1,0 +1,38 @@
+{
+  "type": "enum",
+  "module": "emprestimo",
+  "name": "ParecerProcesso",
+  "values": [
+    {
+      "name": "FAVORAVEL",
+      "attributes": [
+        "FAVORAVEL",
+        "FAVORAVEL"
+      ]
+    },
+    {
+      "name": "DESFAVORAVEL",
+      "attributes": [
+        "DESFAVORAVEL",
+        "DESFAVORAVEL"
+      ]
+    },
+    {
+      "name": "RETIFICACAO",
+      "attributes": [
+        "RETIFICACAO",
+        "RETIFICACAO"
+      ]
+    }
+  ],
+  "attributes": [
+    {
+      "type": "string",
+      "name": "Code"
+    },
+    {
+      "type": "string",
+      "name": "Description"
+    }
+  ]
+}

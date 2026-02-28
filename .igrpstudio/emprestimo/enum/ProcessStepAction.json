@@ -1,0 +1,31 @@
+{
+  "type": "enum",
+  "module": "emprestimo",
+  "name": "ProcessStepAction",
+  "values": [
+    {
+      "name": "SAVE",
+      "attributes": [
+        "SAVE",
+        "Save"
+      ]
+    },
+    {
+      "name": "NEXT",
+      "attributes": [
+        "NEXT",
+        "Next Step"
+      ]
+    }
+  ],
+  "attributes": [
+    {
+      "type": "string",
+      "name": "Code"
+    },
+    {
+      "type": "string",
+      "name": "Description"
+    }
+  ]
+}

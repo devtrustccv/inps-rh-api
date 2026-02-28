@@ -51,14 +51,14 @@ public class RenegociacaoDividaService {
 
     decisionOP.ifPresentOrElse(
         obj -> {
-          obj.setDecisao(request.getParecer());
+          obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
           pedidoDecisaoEntityRepository.save(obj);
         },
         () -> {
           var newObj = new PedidoDecisaoEntity();
           newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer());
+          newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_RENEGOCIACAO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
@@ -94,7 +94,7 @@ public class RenegociacaoDividaService {
 
     decisionOP.ifPresentOrElse(
         obj -> {
-          obj.setDecisao(request.getParecer());
+          obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
           obj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(obj);
@@ -102,7 +102,7 @@ public class RenegociacaoDividaService {
         () -> {
           var newObj = new PedidoDecisaoEntity();
           newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer());
+          newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_RENEGOCIACAO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
@@ -111,9 +111,6 @@ public class RenegociacaoDividaService {
           newObj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(newObj);
         });
-
-    if ("DESFAVORAVEL".equals(request.getParecer())) // TODO 04/02/2026 22:02 get real code
-      loan.setEstado(Estado.I.name());
 
     emprestimoEntityRepository.save(loan);
   }
@@ -134,7 +131,7 @@ public class RenegociacaoDividaService {
 
     decisionOP.ifPresentOrElse(
         obj -> {
-          obj.setDecisao(request.getParecer());
+          obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
           obj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(obj);
@@ -142,7 +139,7 @@ public class RenegociacaoDividaService {
         () -> {
           var newObj = new PedidoDecisaoEntity();
           newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer());
+          newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_RENEGOCIACAO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());

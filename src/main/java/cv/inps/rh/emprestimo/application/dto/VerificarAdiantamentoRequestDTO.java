@@ -9,33 +9,16 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
-import java.time.LocalDate;
-
+import lombok.EqualsAndHashCode;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 
-
+@EqualsAndHashCode(callSuper = true)
 @IgrpDTO
-public class AnaliseFinanceiroRequestDTO  {
+public class VerificarAdiantamentoRequestDTO extends BaseDecisaoDTO {
 
-  @NotBlank(message = "The field <cabimentacaoOrcamental> is required")
-
-  private String cabimentacaoOrcamental ;
-  @NotBlank(message = "The field <avaliacaoTaxaEsforco> is required")
-
-  private String avaliacaoTaxaEsforco ;
-  @NotNull(message = "The field <parecer> is required")
-
-  private ParecerProcesso parecer ;
-
-
-  private String observacao ;
-  @NotNull(message = "The field <data> is required")
-
-  private LocalDate data ;
   @NotNull(message = "The field <action> is required")
 
   private ProcessStepAction action ;

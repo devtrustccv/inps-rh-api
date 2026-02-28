@@ -1,10 +1,11 @@
 package cv.inps.rh.emprestimo.application.queries;
 
 import cv.igrp.framework.core.domain.Query;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.*;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 
 @Data

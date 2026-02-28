@@ -3,22 +3,41 @@
 
 package cv.inps.rh.emprestimo.interfaces.rest;
 
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import cv.inps.rh.emprestimo.application.commands.*;
-import cv.inps.rh.emprestimo.application.dto.*;
-import cv.inps.rh.emprestimo.application.queries.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
+import cv.igrp.framework.core.domain.QueryBus;
+import cv.inps.rh.emprestimo.application.queries.*;
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.inps.rh.emprestimo.application.commands.*;
 import java.util.List;
+import cv.inps.rh.emprestimo.application.dto.InformacaoEmprestimoRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.PedidoEmprestimoDTO;
+import cv.inps.rh.emprestimo.application.dto.IdDTO;
+import cv.inps.rh.emprestimo.application.dto.DetalhesEmprestimoDTO;
+import cv.inps.rh.emprestimo.application.dto.EmprestimoListDTO;
+import cv.inps.rh.emprestimo.application.dto.AnaliseRhRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.AnaliseFinanceiroRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.AutorizacaoComissaoExecutivaDTO;
+import cv.inps.rh.emprestimo.application.dto.ElaboracaoContratoRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroDTO;
+import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
+import cv.inps.rh.emprestimo.application.dto.FundoSocialRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.HistoricoPagamentoDTO;
+import cv.inps.rh.emprestimo.application.dto.PedidoAdiantamentoRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.AnaliseRhAdiantamentoRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.VerificarAdiantamentoRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
 
 @IgrpController
 @RestController
@@ -543,7 +562,7 @@ public class EmprestimoController {
     }
   )
 
-  public ResponseEntity<String> verificarPedidoAdiantamento(@Valid @RequestBody BaseDecisaoDTO verificarPedidoAdiantamentoRequest
+  public ResponseEntity<String> verificarPedidoAdiantamento(@Valid @RequestBody VerificarAdiantamentoRequestDTO verificarPedidoAdiantamentoRequest
     , @PathVariable(value = "emprestimoId") String emprestimoId)
   {
 
