@@ -2,7 +2,7 @@ package cv.inps.rh.transversal.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.transversal.application.service.ResultadoDossierTransformerService;
+import cv.inps.rh.transversal.application.service.DossierTransformerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ public class ObterDossierColaboradorCommandHandler implements CommandHandler<Obt
 
     private final ValidacaoDossierService validacaoDossierService;
     private final DossierQueryBuilderService dossierQueryBuilderService;
-    private final ResultadoDossierTransformerService resultadoDossierTransformerService;
+    private final DossierTransformerService resultadoDossierTransformerService;
 
 
     @IgrpCommandHandler

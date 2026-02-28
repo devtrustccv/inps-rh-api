@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @IgrpDTO
 public class AssiduidadeRowDTO {
 
-    private String id;
     private String direccao;
     private String seccao;
     private String colaborador;
@@ -19,18 +18,15 @@ public class AssiduidadeRowDTO {
     // Ferias
     private Integer numDiasFerias;
     private String periodoFerias;
-    private String quemEstaDeFerias;
-    private String feriasSuspensas;
-    private String feriasAcumuladas;
 
     // Falta
     private Integer numFaltas;
-    private String falta;
 
     // Hora Extra
-    private Double numHorasExtras;
+    private Long numHorasExtras;
 
     // Dispensa
-    private String horasDispensa;
+    private Long horasDispensaGozadas;
+    private Long horasDispensaPorGozar;
 
 }

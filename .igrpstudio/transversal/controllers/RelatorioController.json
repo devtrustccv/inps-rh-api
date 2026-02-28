@@ -50,7 +50,7 @@
         {
           "type": "string",
           "name": "tipoAssiduidade",
-          "isRequired": false
+          "isRequired": true
         },
         {
           "type": "string",

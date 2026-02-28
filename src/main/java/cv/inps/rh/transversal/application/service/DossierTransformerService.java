@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class ResultadoDossierTransformerService {
+public class DossierTransformerService {
 
     public DossierResponseDTO transformar(List<Tuple> resultados, List<String> agrupadores) {
 
@@ -57,7 +57,7 @@ public class ResultadoDossierTransformerService {
         for (Map.Entry<Object, List<Tuple>> entry : grupos.entrySet()) {
             AgrupamentoDTO dto = new AgrupamentoDTO();
             dto.setDimensao(agrupadorAtual);
-            
+
             // Correção: Obter como Object e converter para String para suportar tipos numéricos (ex: idade)
             Object valorObj = entry.getValue().getFirst().get(aliasNome);
             dto.setValor(valorObj != null ? String.valueOf(valorObj) : null);

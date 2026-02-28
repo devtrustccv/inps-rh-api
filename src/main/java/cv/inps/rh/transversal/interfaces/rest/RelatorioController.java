@@ -33,7 +33,7 @@ import cv.inps.rh.transversal.application.dto.DossierResponseDTO;
 )
 public class RelatorioController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -50,7 +50,7 @@ public class RelatorioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -60,13 +60,13 @@ public class RelatorioController {
       )
     }
   )
-  
+
   public ResponseEntity<AssiduidadeListDTO> relatorioAssiduidade(
     @RequestParam(value = "search", defaultValue = "false") boolean search,
     @RequestParam(value = "direccaoId", required = false) Long direccaoId,
     @RequestParam(value = "seccaoId", required = false) Long seccaoId,
     @RequestParam(value = "colaborador", required = false) String colaborador,
-    @RequestParam(value = "tipoAssiduidade", required = false) String tipoAssiduidade,
+    @RequestParam(value = "tipoAssiduidade") String tipoAssiduidade,
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
     @RequestParam(value = "dataFim", required = false) String dataFim,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
@@ -88,7 +88,7 @@ public class RelatorioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/octet-stream",
               schema = @Schema(
@@ -98,7 +98,7 @@ public class RelatorioController {
       )
     }
   )
-  
+
   public ResponseEntity<?> downloadRelatorio(
     @PathVariable(value = "id") String id)
   {
@@ -118,7 +118,7 @@ public class RelatorioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -128,7 +128,7 @@ public class RelatorioController {
       )
     }
   )
-  
+
   public ResponseEntity<DossierResponseDTO> obterDossierColaborador(@Valid @RequestBody DossierRequestDTO obterDossierColaboradorRequest
     )
   {
