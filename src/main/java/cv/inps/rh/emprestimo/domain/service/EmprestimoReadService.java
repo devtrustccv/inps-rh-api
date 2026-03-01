@@ -81,6 +81,7 @@ public class EmprestimoReadService {
     dto.setValorAdiantamento(entity.getValorAdiantado());
     dto.setNib(entity.getNib());
     dto.setSwift(entity.getSwift());
+    dto.setMotivo(entity.getMotivo());
     ofNullable(entity.getBanco()).ifPresent(o -> {
       dto.setBancoId(o.getId());
       dto.setNumeroContaBanco(o.getNuConta());

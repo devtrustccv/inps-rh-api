@@ -52,7 +52,15 @@ public class ReforcoDividaService {
     newLoan.setValorPago(null);
     newLoan.setEmprestimo(loan);
     newLoan.setNrPrestacao(obj.getNumeroPrestacao());
+    newLoan.setMotivo(obj.getMotivoReforco());
     var saved = emprestimoEntityRepository.save(loan);
+
+    documentService.saveDocuments(
+        obj.getDocumentos(),
+        loan.getTiprel().getFunId(),
+        saved.getUuid(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.PEDIDO.name()
+    );
 
     adiantamentoEmprestimoHelper.saveByTipoSituacao(
         tipoSituacao,
