@@ -4,14 +4,14 @@
 package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
-import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;

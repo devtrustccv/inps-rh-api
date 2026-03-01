@@ -3,42 +3,22 @@
 
 package cv.inps.rh.emprestimo.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.emprestimo.application.commands.*;
+import cv.inps.rh.emprestimo.application.dto.*;
+import cv.inps.rh.emprestimo.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.emprestimo.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.emprestimo.application.commands.*;
 import java.util.List;
-import cv.inps.rh.emprestimo.application.dto.InformacaoEmprestimoRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.PedidoEmprestimoRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.IdDTO;
-import cv.inps.rh.emprestimo.application.dto.DetalhesEmprestimoDTO;
-import cv.inps.rh.emprestimo.application.dto.EmprestimoListDTO;
-import cv.inps.rh.emprestimo.application.dto.AnaliseRhRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.AnaliseFinanceiroRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.AutorizacaoComissaoExecutivaDTO;
-import cv.inps.rh.emprestimo.application.dto.ElaboracaoContratoRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroDTO;
-import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
-import cv.inps.rh.emprestimo.application.dto.FundoSocialRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.HistoricoPagamentoDTO;
-import cv.inps.rh.emprestimo.application.dto.PedidoAdiantamentoRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.AnaliseRhAdiantamentoRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.VerificarAdiantamentoRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
-import cv.inps.rh.emprestimo.application.dto.PedidoReforcoRequestDTO;
 
 @IgrpController
 @RestController
@@ -49,7 +29,7 @@ import cv.inps.rh.emprestimo.application.dto.PedidoReforcoRequestDTO;
 )
 public class EmprestimoController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -66,7 +46,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -76,7 +56,7 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<String> saveConfiguracaoInfoEmprestimo(@Valid @RequestBody List<InformacaoEmprestimoRequestDTO> saveConfiguracaoInfoEmprestimoRequest
     )
   {
@@ -96,7 +76,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -106,7 +86,7 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<List<InformacaoEmprestimoRequestDTO>> getConfiguracaoEmprestimo(
     )
   {
@@ -125,7 +105,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "201",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -135,7 +115,7 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<IdDTO> saveEmprestimo(@Valid @RequestBody PedidoEmprestimoRequestDTO saveEmprestimoRequest
     , @RequestParam(value = "emprestimoId", required = false) String emprestimoId)
   {
@@ -155,7 +135,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -165,9 +145,9 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<DetalhesEmprestimoDTO> getEmprestimoById(
-    @PathVariable(value = "emprestimoId") String emprestimoId)
+       @PathVariable String emprestimoId)
   {
 
       final var query = new GetEmprestimoByIdQuery(emprestimoId);
@@ -184,7 +164,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -194,7 +174,7 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<EmprestimoListDTO> listarEmprestimos(
     @RequestParam(value = "tipoEmprestimo", required = false) String tipoEmprestimo,
     @RequestParam(value = "direccaoId", required = false) String direccaoId,
@@ -222,7 +202,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -232,9 +212,9 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<String> saveDecisaoAnalise(@Valid @RequestBody AnaliseRhRequestDTO saveDecisaoAnaliseRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
+    , @PathVariable String emprestimoId)
   {
 
       final var command = new SaveDecisaoAnaliseCommand(saveDecisaoAnaliseRequest, emprestimoId);
@@ -252,7 +232,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -262,9 +242,9 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<String> saveDecisaoAnaliseFinanceira(@Valid @RequestBody AnaliseFinanceiroRequestDTO saveDecisaoAnaliseFinanceiraRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
+    , @PathVariable String emprestimoId)
   {
 
       final var command = new SaveDecisaoAnaliseFinanceiraCommand(saveDecisaoAnaliseFinanceiraRequest, emprestimoId);
@@ -282,7 +262,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -292,9 +272,9 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<String> autorizarComissaoExecutiva(@Valid @RequestBody AutorizacaoComissaoExecutivaDTO autorizarComissaoExecutivaRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
+    , @PathVariable String emprestimoId)
   {
 
       final var command = new AutorizarComissaoExecutivaCommand(autorizarComissaoExecutivaRequest, emprestimoId);
@@ -312,7 +292,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -322,9 +302,9 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<String> elaborarContrato(@Valid @RequestBody ElaboracaoContratoRequestDTO elaborarContratoRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
+    , @PathVariable String emprestimoId)
   {
 
       final var command = new ElaborarContratoCommand(elaborarContratoRequest, emprestimoId);
@@ -342,7 +322,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -352,9 +332,9 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<PlanoFinanceiroDTO> getPlanoFinanceiro(
-    @PathVariable(value = "emprestimoId") String emprestimoId)
+       @PathVariable String emprestimoId)
   {
 
       final var query = new GetPlanoFinanceiroQuery(emprestimoId);
@@ -372,7 +352,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -382,9 +362,9 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<List<PlanoFinanceiroRowDTO>> gerarPlanoFinanceiro(
-    @PathVariable(value = "emprestimoId") String emprestimoId)
+       @PathVariable String emprestimoId)
   {
 
       final var command = new GerarPlanoFinanceiroCommand(emprestimoId);
@@ -402,7 +382,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -412,7 +392,7 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<String> saveFundoSocial(@Valid @RequestBody List<FundoSocialRequestDTO> saveFundoSocialRequest
     )
   {
@@ -432,7 +412,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -442,9 +422,9 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<HistoricoPagamentoDTO> getHistoricoPagamento(
-    @PathVariable(value = "emprestimoId") String emprestimoId)
+       @PathVariable String emprestimoId)
   {
 
       final var query = new GetHistoricoPagamentoQuery(emprestimoId);
@@ -462,7 +442,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -472,7 +452,7 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<IdDTO> savePedidosAdiantamento(@Valid @RequestBody PedidoAdiantamentoRequestDTO savePedidosAdiantamentoRequest
     )
   {
@@ -492,7 +472,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -502,9 +482,9 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<String> saveDecisaoAnaliseRhAdiantamento(@Valid @RequestBody AnaliseRhAdiantamentoRequestDTO saveDecisaoAnaliseRhAdiantamentoRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
+    , @PathVariable String emprestimoId)
   {
 
       final var command = new SaveDecisaoAnaliseRhAdiantamentoCommand(saveDecisaoAnaliseRhAdiantamentoRequest, emprestimoId);
@@ -522,7 +502,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -532,9 +512,9 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<String> verificarPedidoAdiantamento(@Valid @RequestBody VerificarAdiantamentoRequestDTO verificarPedidoAdiantamentoRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
+    , @PathVariable String emprestimoId)
   {
 
       final var command = new VerificarPedidoAdiantamentoCommand(verificarPedidoAdiantamentoRequest, emprestimoId);
@@ -552,7 +532,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -562,132 +542,12 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<String> anexarComprovativoPagamento(@Valid @RequestBody DocumentoDTO anexarComprovativoPagamentoRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
+    , @PathVariable String emprestimoId)
   {
 
       final var command = new AnexarComprovativoPagamentoCommand(anexarComprovativoPagamentoRequest, emprestimoId);
-
-      return commandBus.send(command);
-
-  }
-
-   @PostMapping(
-   value = "/{emprestimoId}/analise-rh-renegociacao"
-  )
-  @Operation(
-    summary = "Save decisao analise renegociacao",
-    description = "Save decisao analise renegociacao",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-          
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
-          )
-      )
-    }
-  )
-  
-  public ResponseEntity<String> saveDecisaoAnaliseRenegociacao(@Valid @RequestBody AnaliseRhRequestDTO saveDecisaoAnaliseRenegociacaoRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
-  {
-
-      final var command = new SaveDecisaoAnaliseRenegociacaoCommand(saveDecisaoAnaliseRenegociacaoRequest, emprestimoId);
-
-      return commandBus.send(command);
-
-  }
-
-   @PostMapping(
-   value = "/{emprestimoId}/analise-financeiro-renegociacao"
-  )
-  @Operation(
-    summary = "Save decisao analise financeira renegociacao",
-    description = "Save decisao analise financeira renegociacao",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-          
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
-          )
-      )
-    }
-  )
-  
-  public ResponseEntity<String> saveDecisaoAnaliseFinanceiraRenegociacao(@Valid @RequestBody AnaliseFinanceiroRequestDTO saveDecisaoAnaliseFinanceiraRenegociacaoRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
-  {
-
-      final var command = new SaveDecisaoAnaliseFinanceiraRenegociacaoCommand(saveDecisaoAnaliseFinanceiraRenegociacaoRequest, emprestimoId);
-
-      return commandBus.send(command);
-
-  }
-
-   @PostMapping(
-   value = "/{emprestimoId}/autorizar-comissao-executiva-renegociacao"
-  )
-  @Operation(
-    summary = "Autorizar comissao executiva renegociacao",
-    description = "Autorizar comissao executiva renegociacao",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-          
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
-          )
-      )
-    }
-  )
-  
-  public ResponseEntity<String> autorizarComissaoExecutivaRenegociacao(@Valid @RequestBody AutorizacaoComissaoExecutivaDTO autorizarComissaoExecutivaRenegociacaoRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
-  {
-
-      final var command = new AutorizarComissaoExecutivaRenegociacaoCommand(autorizarComissaoExecutivaRenegociacaoRequest, emprestimoId);
-
-      return commandBus.send(command);
-
-  }
-
-   @PostMapping(
-   value = "/{emprestimoId}/elaborar-contrato-renegociacao"
-  )
-  @Operation(
-    summary = "Elaborar contrato renegociacao",
-    description = "Elaborar contrato renegociacao",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-          
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
-          )
-      )
-    }
-  )
-  
-  public ResponseEntity<String> elaborarContratoRenegociacao(@Valid @RequestBody ElaboracaoContratoRequestDTO elaborarContratoRenegociacaoRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
-  {
-
-      final var command = new ElaborarContratoRenegociacaoCommand(elaborarContratoRenegociacaoRequest, emprestimoId);
 
       return commandBus.send(command);
 
@@ -702,7 +562,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -712,9 +572,9 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<String> saveDecisaoAnaliseReforco(@Valid @RequestBody AnaliseRhRequestDTO saveDecisaoAnaliseReforcoRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
+    , @PathVariable String emprestimoId)
   {
 
       final var command = new SaveDecisaoAnaliseReforcoCommand(saveDecisaoAnaliseReforcoRequest, emprestimoId);
@@ -732,7 +592,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -742,9 +602,9 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<String> saveDecisaoAnaliseFinanceiraReforco(@Valid @RequestBody AnaliseFinanceiroRequestDTO saveDecisaoAnaliseFinanceiraReforcoRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
+    , @PathVariable String emprestimoId)
   {
 
       final var command = new SaveDecisaoAnaliseFinanceiraReforcoCommand(saveDecisaoAnaliseFinanceiraReforcoRequest, emprestimoId);
@@ -762,7 +622,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -772,9 +632,9 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<String> elaborarContratoReforco(@Valid @RequestBody ElaboracaoContratoRequestDTO elaborarContratoReforcoRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
+    , @PathVariable String emprestimoId)
   {
 
       final var command = new ElaborarContratoReforcoCommand(elaborarContratoReforcoRequest, emprestimoId);
@@ -792,7 +652,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -802,9 +662,9 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<String> autorizarComissaoExecutivaReforco(@Valid @RequestBody AutorizacaoComissaoExecutivaDTO autorizarComissaoExecutivaReforcoRequest
-    , @PathVariable(value = "emprestimoId") String emprestimoId)
+    , @PathVariable String emprestimoId)
   {
 
       final var command = new AutorizarComissaoExecutivaReforcoCommand(autorizarComissaoExecutivaReforcoRequest, emprestimoId);
@@ -822,7 +682,7 @@ public class EmprestimoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -832,7 +692,7 @@ public class EmprestimoController {
       )
     }
   )
-  
+
   public ResponseEntity<IdDTO> savePedidosReforco(@Valid @RequestBody PedidoReforcoRequestDTO savePedidosReforcoRequest
     )
   {

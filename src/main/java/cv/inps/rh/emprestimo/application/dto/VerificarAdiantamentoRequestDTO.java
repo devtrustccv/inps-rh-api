@@ -4,13 +4,12 @@
 package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

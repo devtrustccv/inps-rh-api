@@ -4,11 +4,11 @@
 package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.math.BigDecimal;
 
 @Data
@@ -20,16 +20,16 @@ import java.math.BigDecimal;
 public class PedidoReforcoRequestDTO  {
 
   @NotBlank(message = "The field <emprestimoId> is required")
-  
+
   private String emprestimoId ;
-  
-  
+
+
   private BigDecimal valorReforco ;
-  
-  
+
+
   private Long numeroPrestacao ;
   @NotBlank(message = "The field <tipoRenegociacao> is required")
-  
+
   private String tipoRenegociacao ;
 
 }

@@ -4,12 +4,13 @@
 package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
+
 import java.math.BigDecimal;
 
 @Data
@@ -21,19 +22,19 @@ import java.math.BigDecimal;
 public class PedidoAdiantamentoRequestDTO  {
 
   @NotBlank(message = "The field <emprestimoId> is required")
-  
+
   private String emprestimoId ;
-  
-  
+
+
   private BigDecimal valorAdiantamento ;
-  
-  
+
+
   private Long numeroPrestacao ;
   @NotBlank(message = "The field <tipoSituacao> is required")
-  
+
   private String tipoSituacao ;
   @NotNull(message = "The field <action> is required")
-  
+
   private ProcessStepAction action ;
 
 }
