@@ -37,8 +37,6 @@ public class ReforcoDividaService {
   public String saveUpdatePedidoReforco(PedidoReforcoRequestDTO obj) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
-    var rowsInactivated = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
-    LOGGER.debug("INACTIVATED {} ROWS FOR LOAN ID <{}> : ", rowsInactivated, loan.getId());
 
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoRenegociacao());
 
@@ -62,12 +60,18 @@ public class ReforcoDividaService {
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.PEDIDO.name()
     );
 
-    adiantamentoEmprestimoHelper.saveByTipoSituacao(
-        tipoSituacao,
-        newLoan,
-        obj.getValorReforco(),
-        obj.getNumeroPrestacao()
-    );
+    if (obj.getAction().equals(ProcessStepAction.NEXT)) {
+
+      var rowsInactivated = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
+      LOGGER.debug("INACTIVATED {} ROWS FOR LOAN ID <{}> : ", rowsInactivated, loan.getId());
+
+      adiantamentoEmprestimoHelper.saveByTipoSituacao(
+          tipoSituacao,
+          newLoan,
+          obj.getValorReforco(),
+          obj.getNumeroPrestacao()
+      );
+    }
 
     return saved.getUuid();
   }

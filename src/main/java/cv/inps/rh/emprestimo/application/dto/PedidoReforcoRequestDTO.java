@@ -9,6 +9,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -40,5 +41,8 @@ public class PedidoReforcoRequestDTO  {
   
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();
+  @NotNull(message = "The field <action> is required")
+  
+  private ProcessStepAction action ;
 
 }

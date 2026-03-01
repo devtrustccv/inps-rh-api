@@ -40,8 +40,6 @@ public class AdiantamentoEmprestimoService {
   public String saveUpdatePedidoAdiantamento(PedidoAdiantamentoRequestDTO obj) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
-    var rowsInactivated = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
-    LOGGER.debug("INACTIVATED {} ROWS FOR LOAN ID <{}> : ", rowsInactivated, loan.getId());
 
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoSituacao());
 
@@ -57,12 +55,25 @@ public class AdiantamentoEmprestimoService {
     newLoan.setNrPrestacao(obj.getNumeroPrestacao());
     var saved = emprestimoEntityRepository.save(loan);
 
-    adiantamentoEmprestimoHelper.saveByTipoSituacao(
-        tipoSituacao,
-        newLoan,
-        obj.getValorAdiantamento(),
-        obj.getNumeroPrestacao()
+    documentService.saveDocuments(
+        obj.getDocumentos(),
+        loan.getTiprel().getFunId(),
+        saved.getUuid(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.PEDIDO.name()
     );
+
+    if (obj.getAction().equals(ProcessStepAction.NEXT)) {
+
+      var rowsInactivated = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
+      LOGGER.debug("INACTIVATED {} ROWS FOR LOAN ID <{}> : ", rowsInactivated, loan.getId());
+
+      adiantamentoEmprestimoHelper.saveByTipoSituacao(
+          tipoSituacao,
+          newLoan,
+          obj.getValorAdiantamento(),
+          obj.getNumeroPrestacao()
+      );
+    }
 
     return saved.getUuid();
   }

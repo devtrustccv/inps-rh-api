@@ -28,5 +28,4 @@ public class ElaborarContratoCommandHandler implements CommandHandler<ElaborarCo
 
     return ResponseEntity.ok().build();
   }
-
 }

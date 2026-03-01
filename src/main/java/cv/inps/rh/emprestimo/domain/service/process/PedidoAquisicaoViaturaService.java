@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Transactional
@@ -259,6 +260,10 @@ public class PedidoAquisicaoViaturaService {
   public void elaborarContrato(String uuid, ElaboracaoContratoRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    if (Objects.nonNull(request.getDataInicioEmprestimo())) {
+      loan.setDataInicio(request.getDataInicioEmprestimo());
+      emprestimoEntityRepository.save(loan);
+    }
 
     var step = request.getAction().equals(ProcessStepAction.NEXT) ?
         EtapaEmprestimo.PAGAMENTO :
