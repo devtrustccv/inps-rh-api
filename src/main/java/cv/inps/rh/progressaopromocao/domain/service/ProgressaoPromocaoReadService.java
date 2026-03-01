@@ -1,12 +1,15 @@
 package cv.inps.rh.progressaopromocao.domain.service;
 
-import cv.inps.rh.progressaopromocao.application.dto.ListaProgressaoPromocaoDTO;
+import cv.inps.rh.progressaopromocao.application.dto.ProgressaoPromocaoRowDTO;
 import cv.inps.rh.progressaopromocao.application.queries.GetListaProgressaPromocaoQuery;
+import cv.inps.rh.progressaopromocao.application.queries.GetListaValidacaoProgressaPromocaoQuery;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EvolucaoCarreiraEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ValEvolucaoCarreiraEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
-import cv.inps.rh.shared.util.PageMapper;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -20,29 +23,35 @@ import static java.util.Optional.ofNullable;
 public class ProgressaoPromocaoReadService {
 
   private final EvolucaoCarreiraEntityRepository evolucaoCarreiraEntityRepository;
+  private final ValEvolucaoCarreiraEntityRepository valEvolucaoCarreiraEntityRepository;
 
-  public ListaProgressaoPromocaoDTO getProgressaoPromocaoData(GetListaProgressaPromocaoQuery query) {
-
-    var dataDe = DateFormatter.stringToLocalDate(query.getDataDe());
-    var dataAte = DateFormatter.stringToLocalDate(query.getDataAte());
-    var pageable = PageRequest.of(
-        Integer.parseInt(query.getPage()),
-        Integer.parseInt(query.getSize()),
-        Sort.by(Sort.Direction.DESC, "dataReferente")
-    );
-
-    var page = evolucaoCarreiraEntityRepository.findProgressaoPromocaoWithFilters(
+  public Page<ProgressaoPromocaoRowDTO> getProgressaoPromocaoData(GetListaProgressaPromocaoQuery query) {
+    return evolucaoCarreiraEntityRepository.findProgressaoPromocaoWithFilters(
         query.getProgressaoPromocao(),
-        dataDe,
-        dataAte,
+        DateFormatter.stringToLocalDate(query.getDataDe()),
+        DateFormatter.stringToLocalDate(query.getDataAte()),
         ofNullable(query.getColaborador()).map(String::trim).orElse(null),
         StringUtils.hasText(query.getCarreiraId()) ? UUID.fromString(query.getCarreiraId()) : null,
-        pageable
+        buildPageable(query.getPage(), query.getSize())
     );
+  }
 
-    var data = new ListaProgressaoPromocaoDTO();
-    PageMapper.fillPagination(page, data);
-    data.setContent(page.getContent());
-    return data;
+  public Page<ProgressaoPromocaoRowDTO> getValidacaoProgressaoPromocaoData(GetListaValidacaoProgressaPromocaoQuery query) {
+    return valEvolucaoCarreiraEntityRepository.findProgressaoPromocaoWithFilters(
+        query.getProgressaoPromocao(),
+        DateFormatter.stringToLocalDate(query.getDataDe()),
+        DateFormatter.stringToLocalDate(query.getDataAte()),
+        ofNullable(query.getColaborador()).map(String::trim).orElse(null),
+        StringUtils.hasText(query.getCarreiraId()) ? UUID.fromString(query.getCarreiraId()) : null,
+        buildPageable(query.getPage(), query.getSize())
+    );
+  }
+
+  private Pageable buildPageable(String page, String size) {
+    return PageRequest.of(
+        Integer.parseInt(page),
+        Integer.parseInt(size),
+        Sort.by(Sort.Direction.DESC, "dataReferente")
+    );
   }
 }

@@ -11,22 +11,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GetListaProgressaPromocaoQueryHandler implements QueryHandler<GetListaProgressaPromocaoQuery, ResponseEntity<ListaProgressaoPromocaoDTO>> {
+public class GetListaValidacaoProgressaPromocaoQueryHandler implements QueryHandler<GetListaValidacaoProgressaPromocaoQuery, ResponseEntity<ListaProgressaoPromocaoDTO>> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(GetListaProgressaPromocaoQueryHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(GetListaValidacaoProgressaPromocaoQueryHandler.class);
 
   private final ProgressaoPromocaoReadService progressaoPromocaoReadService;
 
-  public GetListaProgressaPromocaoQueryHandler(ProgressaoPromocaoReadService progressaoPromocaoReadService) {
+  public GetListaValidacaoProgressaPromocaoQueryHandler(ProgressaoPromocaoReadService progressaoPromocaoReadService) {
     this.progressaoPromocaoReadService = progressaoPromocaoReadService;
   }
 
   @IgrpQueryHandler
-  public ResponseEntity<ListaProgressaoPromocaoDTO> handle(GetListaProgressaPromocaoQuery query) {
+  public ResponseEntity<ListaProgressaoPromocaoDTO> handle(GetListaValidacaoProgressaPromocaoQuery query) {
 
-    LOGGER.debug("GetListaProgressaPromocaoQuery: {}", query);
+    LOGGER.debug("GetListaValidacaoProgressaPromocaoQuery: {}", query);
 
-    var data = progressaoPromocaoReadService.getProgressaoPromocaoData(query);
+    var data = progressaoPromocaoReadService.getValidacaoProgressaoPromocaoData(query);
     var response = new ListaProgressaoPromocaoDTO();
     PageMapper.fillPagination(data, response);
     response.setContent(data.getContent());

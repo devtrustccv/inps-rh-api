@@ -32,7 +32,7 @@ import cv.inps.rh.progressaopromocao.application.dto.AnexarOrdemServicoRequestDT
 )
 public class ProgressaoPromocaoController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -48,7 +48,7 @@ public class ProgressaoPromocaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -58,7 +58,7 @@ public class ProgressaoPromocaoController {
       )
     }
   )
-  
+
   public ResponseEntity<ListaProgressaoPromocaoDTO> getListaProgressaPromocao(
     @RequestParam(value = "progressaoPromocao", required = false) String progressaoPromocao,
     @RequestParam(value = "colaborador", required = false) String colaborador,
@@ -75,9 +75,44 @@ public class ProgressaoPromocaoController {
 
   }
 
+   @GetMapping(
+   value = "validacao"
+  )
+  @Operation(
+    summary = "Get lista validacao progressa promocao",
+    description = "Get lista validacao progressa promocao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ListaProgressaoPromocaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<ListaProgressaoPromocaoDTO> getListaValidacaoProgressaPromocao(
+    @RequestParam(value = "progressaoPromocao", required = false) String progressaoPromocao,
+    @RequestParam(value = "colaborador", required = false) String colaborador,
+    @RequestParam(value = "carreiraId", required = false) String carreiraId,
+    @RequestParam(value = "dataDe", required = false) String dataDe,
+    @RequestParam(value = "dataAte", required = false) String dataAte,
+    @RequestParam(value = "page", required = false, defaultValue = "0") String page,
+    @RequestParam(value = "size", required = false, defaultValue = "20") String size)
+  {
+
+      final var query = new GetListaValidacaoProgressaPromocaoQuery(progressaoPromocao, colaborador, carreiraId, dataDe, dataAte, page, size);
+
+      return queryBus.handle(query);
+
+  }
+
    @PostMapping(
-   value = "ordem-servico", 
-    consumes = "multipart/form-data"
+   value = "ordem-servico"
   )
   @Operation(
     summary = "Anexar ordem servico",
@@ -85,7 +120,7 @@ public class ProgressaoPromocaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -95,7 +130,7 @@ public class ProgressaoPromocaoController {
       )
     }
   )
-  
+
   public ResponseEntity<String> anexarOrdemServico(@Valid @RequestBody AnexarOrdemServicoRequestDTO anexarOrdemServicoRequest
     )
   {

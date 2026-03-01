@@ -4,10 +4,11 @@
 package cv.inps.rh.progressaopromocao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import lombok.AllArgsConstructor;
+import jakarta.validation.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 
 @Data
@@ -16,35 +17,40 @@ import java.time.LocalDate;
 
 
 @IgrpDTO
-public class ProgressaoPromocaoRowDTO {
+public class ProgressaoPromocaoRowDTO  {
 
 
-  private String id;
+
+  private String id ;
 
 
-  private String progressaoPromocao;
+  private String progressaoPromocao ;
 
 
-  private LocalDate dataReferente;
+  private LocalDate dataReferente ;
 
 
-  private String nomeColaborador;
+  private String nomeColaborador ;
 
 
-  private String carreira;
+  private String carreira ;
 
 
-  private String cargo;
+  private String cargo ;
 
 
-  private String escalaoDe;
+  private String escalaoDe ;
 
 
-  private String escalaoPara;
+  private String escalaoPara ;
 
 
-  private String observacao;
+  private String observacao ;
 
-  private Long avaliacaoMedia;
+
+  private Long avaliacaoMedia ;
+
+
+  private String historico ;
 
 }
