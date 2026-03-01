@@ -36,7 +36,8 @@ public interface EvolucaoCarreiraEntityRepository extends JpaRepository<Evolucao
           c.nome,
           ed.paramCarrId.nome,
           ep.paramCarrId.nome,
-          e.observacao
+          e.observacao,
+          e.avaliacaoMedia
       )
       FROM EvolucaoCarreiraEntity e
       JOIN e.tiprel tr
