@@ -230,8 +230,12 @@ public class ReforcoDividaService {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
+    var step = request.getAction().equals(ProcessStepAction.NEXT) ?
+        EtapaEmprestimo.PAGAMENTO :
+        EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO;
+
     var order = loan.getPedido();
-    order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name());
+    order.setEtapa(step.name());
     pedidoEntityRepository.save(order);
 
     documentService.saveDocuments(

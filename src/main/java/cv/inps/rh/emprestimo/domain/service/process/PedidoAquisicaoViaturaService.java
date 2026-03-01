@@ -260,8 +260,12 @@ public class PedidoAquisicaoViaturaService {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
+    var step = request.getAction().equals(ProcessStepAction.NEXT) ?
+        EtapaEmprestimo.PAGAMENTO :
+        EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO;
+
     var order = loan.getPedido();
-    order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name());
+    order.setEtapa(step.name());
     pedidoEntityRepository.save(order);
 
     documentService.saveDocuments(
