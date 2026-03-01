@@ -1,6 +1,7 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.progressaopromocao.application.dto.ProgressaoPromocaoRowDTO;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EvolucaoCarreiraEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,11 +12,19 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 
 @Repository
 public interface EvolucaoCarreiraEntityRepository extends JpaRepository<EvolucaoCarreiraEntity, Long>, JpaSpecificationExecutor<EvolucaoCarreiraEntity> {
+
+  Optional<EvolucaoCarreiraEntity> findByUuid(String uuid);
+
+  default EvolucaoCarreiraEntity findByUuidOrThrow(String id) {
+    return this.findByUuid(id)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("OrdemServicoEntity not found for id: " + id));
+  }
 
   @Query("""
       SELECT new cv.inps.rh.progressaopromocao.application.dto.ProgressaoPromocaoRowDTO(

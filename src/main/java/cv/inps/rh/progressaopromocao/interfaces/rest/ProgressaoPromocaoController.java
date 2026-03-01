@@ -18,8 +18,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.progressaopromocao.application.queries.*;
-
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.inps.rh.progressaopromocao.application.commands.*;
 import cv.inps.rh.progressaopromocao.application.dto.ListaProgressaoPromocaoDTO;
+import cv.inps.rh.progressaopromocao.application.dto.AnexarOrdemServicoRequestDTO;
 
 @IgrpController
 @RestController
@@ -32,10 +34,11 @@ public class ProgressaoPromocaoController {
 
   
   private final QueryBus queryBus;
+  private final CommandBus commandBus;
 
-  public ProgressaoPromocaoController(QueryBus queryBus) {
+  public ProgressaoPromocaoController(QueryBus queryBus, CommandBus commandBus) {
           this.queryBus = queryBus;
-          
+          this.commandBus = commandBus;
   }
    @GetMapping(
   )
@@ -69,6 +72,37 @@ public class ProgressaoPromocaoController {
       final var query = new GetListaProgressaPromocaoQuery(progressaoPromocao, colaborador, carreiraId, dataDe, dataAte, page, size);
 
       return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "ordem-servico", 
+    consumes = "multipart/form-data"
+  )
+  @Operation(
+    summary = "Anexar ordem servico",
+    description = "Anexar ordem servico",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<String> anexarOrdemServico(@Valid @RequestBody AnexarOrdemServicoRequestDTO anexarOrdemServicoRequest
+    )
+  {
+
+      final var command = new AnexarOrdemServicoCommand(anexarOrdemServicoRequest);
+
+      return commandBus.send(command);
 
   }
 

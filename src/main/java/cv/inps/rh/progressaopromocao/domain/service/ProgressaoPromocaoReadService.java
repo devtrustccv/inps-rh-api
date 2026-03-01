@@ -25,7 +25,6 @@ public class ProgressaoPromocaoReadService {
 
     var dataDe = DateFormatter.stringToLocalDate(query.getDataDe());
     var dataAte = DateFormatter.stringToLocalDate(query.getDataAte());
-
     var pageable = PageRequest.of(
         Integer.parseInt(query.getPage()),
         Integer.parseInt(query.getSize()),
