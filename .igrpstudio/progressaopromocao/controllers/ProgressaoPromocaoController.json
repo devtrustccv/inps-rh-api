@@ -1,0 +1,69 @@
+{
+  "type": "controller",
+  "name": "ProgressaoPromocao",
+  "module": "progressaopromocao",
+  "description": "Data related t progression and promotion",
+  "basePath": "progressao-promocao",
+  "actions": [
+    {
+      "actionName": "getListaProgressaPromocao",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ListaProgressaoPromocao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "progressaopromocao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "progressaoPromocao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "colaborador",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "carreiraId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataDe",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataAte",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "page",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "size",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
+    }
+  ],
+  "id": "w6juessy9r"
+}
