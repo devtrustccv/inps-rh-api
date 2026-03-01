@@ -38,6 +38,7 @@ import cv.inps.rh.emprestimo.application.dto.PedidoAdiantamentoRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.AnaliseRhAdiantamentoRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.VerificarAdiantamentoRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
+import cv.inps.rh.emprestimo.application.dto.PedidoReforcoRequestDTO;
 
 @IgrpController
 @RestController
@@ -687,6 +688,156 @@ public class EmprestimoController {
   {
 
       final var command = new ElaborarContratoRenegociacaoCommand(elaborarContratoRenegociacaoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/analise-rh-reforco"
+  )
+  @Operation(
+    summary = "Save decisao analise reforco",
+    description = "Save decisao analise reforco",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<String> saveDecisaoAnaliseReforco(@Valid @RequestBody AnaliseRhRequestDTO saveDecisaoAnaliseReforcoRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new SaveDecisaoAnaliseReforcoCommand(saveDecisaoAnaliseReforcoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/analise-financeiro-reforco"
+  )
+  @Operation(
+    summary = "Save decisao analise financeira reforco",
+    description = "Save decisao analise financeira reforco",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<String> saveDecisaoAnaliseFinanceiraReforco(@Valid @RequestBody AnaliseFinanceiroRequestDTO saveDecisaoAnaliseFinanceiraReforcoRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new SaveDecisaoAnaliseFinanceiraReforcoCommand(saveDecisaoAnaliseFinanceiraReforcoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/elaborar-contrato-reforco"
+  )
+  @Operation(
+    summary = "Elaborar contrato reforco",
+    description = "Elaborar contrato reforco",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<String> elaborarContratoReforco(@Valid @RequestBody ElaboracaoContratoRequestDTO elaborarContratoReforcoRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new ElaborarContratoReforcoCommand(elaborarContratoReforcoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "/{emprestimoId}/autorizar-comissao-executiva-reforco"
+  )
+  @Operation(
+    summary = "Autorizar comissao executiva reforco",
+    description = "Autorizar comissao executiva reforco",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<String> autorizarComissaoExecutivaReforco(@Valid @RequestBody AutorizacaoComissaoExecutivaDTO autorizarComissaoExecutivaReforcoRequest
+    , @PathVariable(value = "emprestimoId") String emprestimoId)
+  {
+
+      final var command = new AutorizarComissaoExecutivaReforcoCommand(autorizarComissaoExecutivaReforcoRequest, emprestimoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "/pedido-reforco"
+  )
+  @Operation(
+    summary = "Save pedidos reforco",
+    description = "Save pedidos reforco",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = IdDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<IdDTO> savePedidosReforco(@Valid @RequestBody PedidoReforcoRequestDTO savePedidosReforcoRequest
+    )
+  {
+
+      final var command = new SavePedidosReforcoCommand(savePedidosReforcoRequest);
 
       return commandBus.send(command);
 

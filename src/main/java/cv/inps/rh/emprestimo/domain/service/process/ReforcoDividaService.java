@@ -1,10 +1,12 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.domain.service.EmprestimoDocumentService;
 import cv.inps.rh.emprestimo.domain.service.constants.*;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
@@ -69,10 +71,21 @@ public class ReforcoDividaService {
     loan.setValorEmprestimo(request.getValorEmprestimo());
     loan.setJuro(request.getJuros());
 
-    var funId = loan.getTiprel().getFunId();
-
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+
+    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+
+      switch (request.getParecer()) {
+        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
+        case RETIFICACAO -> order.setEtapa(EtapaEmprestimo.PEDIDO.name());
+        default -> {
+          loan.setEstado(Estado.I.name());
+          emprestimoEntityRepository.save(loan);
+        }
+      }
+    }
+
     pedidoEntityRepository.save(order);
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
@@ -101,7 +114,7 @@ public class ReforcoDividaService {
 
     documentService.saveDocuments(
         request.getDocumentos(),
-        funId,
+        loan.getTiprel().getFunId(),
         loan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_REFORCO.name()
     );
@@ -116,6 +129,18 @@ public class ReforcoDividaService {
 
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
+    pedidoEntityRepository.save(order);
+
+    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+
+      switch (request.getParecer()) {
+        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
+        case DESFAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
+        default ->
+            throw IgrpResponseStatusException.badRequest("Invalid decison for this step %s".formatted(request.getParecer()));
+      }
+    }
+
     pedidoEntityRepository.save(order);
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
@@ -153,6 +178,17 @@ public class ReforcoDividaService {
 
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name());
+
+    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+
+      switch (request.getParecer()) {
+        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name());
+        case DESFAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+        default ->
+            throw IgrpResponseStatusException.badRequest("Invalid decison for this step %s".formatted(request.getParecer()));
+      }
+    }
+
     pedidoEntityRepository.save(order);
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
@@ -186,15 +222,13 @@ public class ReforcoDividaService {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
-    var funId = loan.getTiprel().getFunId();
-
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name());
     pedidoEntityRepository.save(order);
 
     documentService.saveDocuments(
         request.getDocumentos(),
-        funId,
+        loan.getTiprel().getFunId(),
         loan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name()
     );
