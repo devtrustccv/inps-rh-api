@@ -27,7 +27,7 @@ public class SaveEmprestimoCommandHandler implements CommandHandler<SaveEmpresti
 
     LOGGER.debug("SaveEmprestimoCommand : {}", command);
 
-    var uuid = service.saveUpdatePedidoEmprestimo(null, command.getPedidoemprestimo());
+    var uuid = service.saveUpdatePedidoEmprestimo(command.getEmprestimoId(), command.getPedidoemprestimorequest());
 
     return ResponseEntity.status(HttpStatus.CREATED).body(uuid);
   }

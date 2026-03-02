@@ -1,5 +1,6 @@
 package cv.inps.rh.emprestimo.domain.service;
 
+import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
@@ -80,6 +81,7 @@ public class EmprestimoReadService {
     dto.setValorAdiantamento(entity.getValorAdiantado());
     dto.setNib(entity.getNib());
     dto.setSwift(entity.getSwift());
+    dto.setMotivo(entity.getMotivo());
     ofNullable(entity.getBanco()).ifPresent(o -> {
       dto.setBancoId(o.getId());
       dto.setNumeroContaBanco(o.getNuConta());
@@ -107,9 +109,9 @@ public class EmprestimoReadService {
         EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name(),
         EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name(),
         EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name(),
-        EtapaEmprestimo.ANALISE_RH_RENEGOCIACAO.name(),
-        EtapaEmprestimo.ANALISE_FINANCEIRA_RENEGOCIACAO.name(),
-        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_RENEGOCIACAO.name()
+        EtapaEmprestimo.ANALISE_RH_REFORCO.name(),
+        EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name(),
+        EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name()
     );
 
     var decisions = pedidoDecisaoEntityRepository
@@ -124,9 +126,9 @@ public class EmprestimoReadService {
     ofNullable(decisions.get(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name())).ifPresent(allDecisions::setAutorizacaoComissaoExecutivaPedido);
     ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name())).ifPresent(allDecisions::setAnaliseRhAdiantamento);
     ofNullable(decisions.get(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name())).ifPresent(allDecisions::setVerificacaoAdiantamento);
-    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_RENEGOCIACAO.name())).ifPresent(allDecisions::setAnaliseRhRenegociacao);
-    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_FINANCEIRA_RENEGOCIACAO.name())).ifPresent(allDecisions::setAnaliseFinanceiroRenegociacao);
-    ofNullable(decisions.get(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_RENEGOCIACAO.name())).ifPresent(allDecisions::setAutorizacaoComissaoExecutivaRenegociacao);
+    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_RH_REFORCO.name())).ifPresent(allDecisions::setAnaliseRhRenegociacao);
+    ofNullable(decisions.get(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name())).ifPresent(allDecisions::setAnaliseFinanceiroRenegociacao);
+    ofNullable(decisions.get(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name())).ifPresent(allDecisions::setAutorizacaoComissaoExecutivaRenegociacao);
 
     dto.setDecisao(allDecisions);
 
@@ -134,7 +136,8 @@ public class EmprestimoReadService {
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.PEDIDO.name(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_PEDIDO.name(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name(),
-        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name()
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name()
     );
 
     var docs = documentService.getDocuments(funId, docCodes, entity.getUuid());
@@ -145,7 +148,7 @@ public class EmprestimoReadService {
 
   private BaseDecisaoDTO buildDecisionData(PedidoDecisaoEntity obj) {
     var baseDecision = new BaseDecisaoDTO();
-    baseDecision.setParecer(obj.getDecisao());
+    baseDecision.setParecer(ParecerProcesso.fromCode(obj.getDecisao()).orElse(null));
     baseDecision.setObservacao(obj.getObs());
     baseDecision.setData(obj.getCreatedDate().toLocalDate());
     return baseDecision;
@@ -165,14 +168,8 @@ public class EmprestimoReadService {
       if (StringUtils.hasText(query.getTipoEmprestimo()))
         predicates.add(cb.equal(root.get("tipoEmprestimo"), query.getTipoEmprestimo()));
 
-      if (StringUtils.hasText(query.getEstado()))
-        predicates.add(cb.equal(root.get("estado"), query.getEstado()));
-      else
-        predicates.add(cb.equal(root.get("estado"), Estado.A.name()));
-
-      if (StringUtils.hasText(query.getEstadoEmprestimo()))
-        predicates.add(cb.equal(root.get("estado"), query.getEstadoEmprestimo()));
-
+      var status = StringUtils.hasText(query.getEstado()) ? query.getEstado() : Estado.A.name();
+      predicates.add(cb.equal(root.get("estado"), status));
 
       if (StringUtils.hasText(query.getDataInicio()) && StringUtils.hasText(query.getDataFim()))
         predicates.add(cb.between(root.get("dataInicio"), LocalDate.parse(query.getDataInicio()), LocalDate.parse(query.getDataFim()))

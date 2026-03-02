@@ -7,6 +7,7 @@ import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
@@ -102,7 +103,7 @@ public class ValidarRegistoColaboradorService {
     var documentos = documentoMapper.syncDocumentos(
         funcionario.getDocumentos(),
         registroColaborador.getAnexos(),
-        Referencia.REGISTO_COLABORADOR.name(),
+        TableName.RH_T_FUNCIONARIOS.name(),
         funcionario.getId(),
         funcionario.getUuid(),
         1L,

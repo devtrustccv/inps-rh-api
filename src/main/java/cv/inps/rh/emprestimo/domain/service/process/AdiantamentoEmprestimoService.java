@@ -1,19 +1,18 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.emprestimo.application.dto.AnaliseRhAdiantamentoRequestDTO;
-import cv.inps.rh.emprestimo.application.dto.BaseDecisaoDTO;
 import cv.inps.rh.emprestimo.application.dto.DocumentoDTO;
 import cv.inps.rh.emprestimo.application.dto.PedidoAdiantamentoRequestDTO;
+import cv.inps.rh.emprestimo.application.dto.VerificarAdiantamentoRequestDTO;
 import cv.inps.rh.emprestimo.domain.service.EmprestimoDocumentService;
 import cv.inps.rh.emprestimo.domain.service.constants.*;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.BancoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.PlanoFinanceiroEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +31,7 @@ public class AdiantamentoEmprestimoService {
 
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
+  private final PedidoEntityRepository pedidoEntityRepository;
   private final BancoEntityRepository bancoEntityRepository;
   private final EmprestimoDocumentService documentService;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
@@ -40,8 +40,6 @@ public class AdiantamentoEmprestimoService {
   public String saveUpdatePedidoAdiantamento(PedidoAdiantamentoRequestDTO obj) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
-    var rowsInactivated = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
-    LOGGER.debug("INACTIVATED {} ROWS FOR LOAN ID <{}> : ", rowsInactivated, loan.getId());
 
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoSituacao());
 
@@ -57,7 +55,25 @@ public class AdiantamentoEmprestimoService {
     newLoan.setNrPrestacao(obj.getNumeroPrestacao());
     var saved = emprestimoEntityRepository.save(loan);
 
-    adiantamentoEmprestimoHelper.saveByTipoSituacao(tipoSituacao, newLoan, obj.getValorAdiantamento(), obj.getNumeroPrestacao());
+    documentService.saveDocuments(
+        obj.getDocumentos(),
+        loan.getTiprel().getFunId(),
+        saved.getUuid(),
+        ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.PEDIDO.name()
+    );
+
+    if (obj.getAction().equals(ProcessStepAction.NEXT)) {
+
+      var rowsInactivated = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
+      LOGGER.debug("INACTIVATED {} ROWS FOR LOAN ID <{}> : ", rowsInactivated, loan.getId());
+
+      adiantamentoEmprestimoHelper.saveByTipoSituacao(
+          tipoSituacao,
+          newLoan,
+          obj.getValorAdiantamento(),
+          obj.getNumeroPrestacao()
+      );
+    }
 
     return saved.getUuid();
   }
@@ -70,6 +86,26 @@ public class AdiantamentoEmprestimoService {
     loan.setSwift(request.getSwift());
 
     var order = loan.getPedido();
+    order.setEtapa(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name());
+
+    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+      switch (request.getParecer()) {
+        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name());
+        case RETIFICACAO -> order.setEtapa(EtapaEmprestimo.PEDIDO.name());
+        default -> {
+
+          loan.setEstado(Estado.I.name());
+          var rowsActivatedFromLoan = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
+          LOGGER.debug("INACTIVATED {} ROWS FOR CURRENT LOAN ID <{}> : ", rowsActivatedFromLoan, loan.getId());
+
+          var father = loan.getEmprestimo();
+          var rowsActivated = planoFinanceiroEntityRepository.ativarPlanosNaoPagos(father.getId());
+          LOGGER.debug("ACTIVATED {} ROWS FOR LOAN FATHER ID <{}> : ", rowsActivated, father.getId());
+        }
+      }
+    }
+
+    pedidoEntityRepository.save(order);
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
         order,
@@ -79,14 +115,14 @@ public class AdiantamentoEmprestimoService {
 
     decisionOP.ifPresentOrElse(
         obj -> {
-          obj.setDecisao(request.getParecer());
+          obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
           pedidoDecisaoEntityRepository.save(obj);
         },
         () -> {
           var newObj = new PedidoDecisaoEntity();
           newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer());
+          newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_ADIANTAMENTO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
@@ -94,18 +130,6 @@ public class AdiantamentoEmprestimoService {
           newObj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
           pedidoDecisaoEntityRepository.save(newObj);
         });
-
-    if ("DESFAVORAVEL".equals(request.getParecer())) {
-
-      loan.setEstado(Estado.I.name());
-
-      var rowsActivatedFromLoan = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
-      LOGGER.debug("INACTIVATED {} ROWS FOR CURRENT LOAN ID <{}> : ", rowsActivatedFromLoan, loan.getId());
-
-      var father = loan.getEmprestimo();
-      var rowsActivated = planoFinanceiroEntityRepository.ativarPlanosNaoPagos(father.getId());
-      LOGGER.debug("ACTIVATED {} ROWS FOR LOAN FATHER ID <{}> : ", rowsActivated, father.getId());
-    }
 
     emprestimoEntityRepository.save(loan);
   }
@@ -122,11 +146,24 @@ public class AdiantamentoEmprestimoService {
     );
   }
 
-  public void verificar(String emprestimoId, BaseDecisaoDTO request) {
+  public void verificar(String emprestimoId, VerificarAdiantamentoRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
 
     var order = loan.getPedido();
+    order.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
+
+    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+
+      switch (request.getParecer()) {
+        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
+        case RETIFICACAO -> order.setEtapa(EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name());
+        default ->
+            throw IgrpResponseStatusException.badRequest("Invalid action for this step %s", request.getAction());
+      }
+    }
+
+    pedidoEntityRepository.save(order);
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
         order,
@@ -136,14 +173,14 @@ public class AdiantamentoEmprestimoService {
 
     decisionOP.ifPresentOrElse(
         obj -> {
-          obj.setDecisao(request.getParecer());
+          obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
           pedidoDecisaoEntityRepository.save(obj);
         },
         () -> {
           var newObj = new PedidoDecisaoEntity();
           newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer());
+          newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.VERIFICACAO_ADIANTAMENTO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());

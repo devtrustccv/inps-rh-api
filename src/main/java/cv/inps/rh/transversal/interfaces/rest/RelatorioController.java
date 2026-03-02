@@ -18,9 +18,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.transversal.application.queries.*;
-
-import cv.inps.rh.transversal.application.dto.DossierColaboradorListDTO;
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.inps.rh.transversal.application.commands.*;
 import cv.inps.rh.transversal.application.dto.AssiduidadeListDTO;
+import cv.inps.rh.transversal.application.dto.DossierRequestDTO;
+import cv.inps.rh.transversal.application.dto.DossierResponseDTO;
 
 @IgrpController
 @RestController
@@ -31,59 +33,14 @@ import cv.inps.rh.transversal.application.dto.AssiduidadeListDTO;
 )
 public class RelatorioController {
 
-  
+
   private final QueryBus queryBus;
+  private final CommandBus commandBus;
 
-  public RelatorioController(QueryBus queryBus) {
+  public RelatorioController(QueryBus queryBus, CommandBus commandBus) {
           this.queryBus = queryBus;
-          
+          this.commandBus = commandBus;
   }
-   @GetMapping(
-   value = "funcionarios"
-  )
-  @Operation(
-    summary = "Relatorio dossier colaborador",
-    description = "Relatorio dossier colaborador",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-          
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = DossierColaboradorListDTO.class,
-                  type = "object")
-          )
-      )
-    }
-  )
-  
-  public ResponseEntity<DossierColaboradorListDTO> relatorioDossierColaborador(
-    @RequestParam(value = "direccaoId", required = false) Long direccaoId,
-    @RequestParam(value = "seccaoId", required = false) Long seccaoId,
-    @RequestParam(value = "cargoId", required = false) Long cargoId,
-    @RequestParam(value = "idade", required = false) Integer idade,
-    @RequestParam(value = "genero", required = false) String genero,
-    @RequestParam(value = "faixaEtaria", required = false) String faixaEtaria,
-    @RequestParam(value = "localTrabalhoId", required = false) Long localTrabalhoId,
-    @RequestParam(value = "carreiraId", required = false) Long carreiraId,
-    @RequestParam(value = "escalaoId", required = false) Long escalaoId,
-    @RequestParam(value = "categoriaId", required = false) Long categoriaId,
-    @RequestParam(value = "grauEscolaridade", required = false) String grauEscolaridade,
-    @RequestParam(value = "mobilidade", required = false) String mobilidade,
-    @RequestParam(value = "vinculoId", required = false) Long vinculoId,
-    @RequestParam(value = "situacaoLaboralId", required = false) Long situacaoLaboralId,
-    @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
-    @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
-    @RequestParam(value = "search", defaultValue = "false") boolean search)
-  {
-
-      final var query = new RelatorioDossierColaboradorQuery(direccaoId, seccaoId, cargoId, idade, genero, faixaEtaria, localTrabalhoId, carreiraId, escalaoId, categoriaId, grauEscolaridade, mobilidade, vinculoId, situacaoLaboralId, pageNumber, pageSize, search);
-
-      return queryBus.handle(query);
-
-  }
-
    @GetMapping(
    value = "assiduidade"
   )
@@ -93,7 +50,7 @@ public class RelatorioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -103,52 +60,51 @@ public class RelatorioController {
       )
     }
   )
-  
+
   public ResponseEntity<AssiduidadeListDTO> relatorioAssiduidade(
-    @RequestParam(value = "search", defaultValue = "false") boolean search,
     @RequestParam(value = "direccaoId", required = false) Long direccaoId,
     @RequestParam(value = "seccaoId", required = false) Long seccaoId,
     @RequestParam(value = "colaborador", required = false) String colaborador,
-    @RequestParam(value = "tipoAssiduidade", required = false) String tipoAssiduidade,
+    @RequestParam(value = "tipoAssiduidade") String tipoAssiduidade,
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
     @RequestParam(value = "dataFim", required = false) String dataFim,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize)
   {
 
-      final var query = new RelatorioAssiduidadeQuery(search, direccaoId, seccaoId, colaborador, tipoAssiduidade, dataInicio, dataFim, pageNumber, pageSize);
+      final var query = new RelatorioAssiduidadeQuery(direccaoId, seccaoId, colaborador, tipoAssiduidade, dataInicio, dataFim, pageNumber, pageSize);
 
       return queryBus.handle(query);
 
   }
 
-   @GetMapping(
-   value = "{id}/download"
+   @PostMapping(
+   value = "funcionarios"
   )
   @Operation(
-    summary = "Download relatorio",
-    description = "Download relatorio",
+    summary = "Obter dossier colaborador",
+    description = "Obter dossier colaborador",
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
-              mediaType = "application/octet-stream",
+              mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = DossierResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
-  
-  public ResponseEntity<?> downloadRelatorio(
-    @PathVariable(value = "id") String id)
+
+  public ResponseEntity<DossierResponseDTO> obterDossierColaborador(@Valid @RequestBody DossierRequestDTO obterDossierColaboradorRequest
+    )
   {
 
-      final var query = new DownloadRelatorioQuery(id);
+      final var command = new ObterDossierColaboradorCommand(obterDossierColaboradorRequest);
 
-      return queryBus.handle(query);
+      return commandBus.send(command);
 
   }
 

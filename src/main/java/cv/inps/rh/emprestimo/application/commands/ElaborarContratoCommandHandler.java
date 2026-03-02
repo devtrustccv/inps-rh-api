@@ -13,10 +13,10 @@ public class ElaborarContratoCommandHandler implements CommandHandler<ElaborarCo
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ElaborarContratoCommandHandler.class);
 
-  private final PedidoAquisicaoViaturaService service;
+  private final PedidoAquisicaoViaturaService pedidoAquisicaoViaturaService;
 
-  public ElaborarContratoCommandHandler(PedidoAquisicaoViaturaService service) {
-    this.service = service;
+  public ElaborarContratoCommandHandler(PedidoAquisicaoViaturaService pedidoAquisicaoViaturaService) {
+    this.pedidoAquisicaoViaturaService = pedidoAquisicaoViaturaService;
   }
 
   @IgrpCommandHandler
@@ -24,9 +24,8 @@ public class ElaborarContratoCommandHandler implements CommandHandler<ElaborarCo
 
     LOGGER.debug("ElaborarContratoCommand : {}", command);
 
-    service.elaborarContrato(command.getEmprestimoId(), command.getElaboracaocontratorequest());
+    pedidoAquisicaoViaturaService.elaborarContrato(command.getEmprestimoId(), command.getElaboracaocontratorequest());
 
     return ResponseEntity.ok().build();
   }
-
 }

@@ -10,6 +10,7 @@ import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -362,27 +363,6 @@ public class FeriaWriteService {
     }
   }
 
- /* private void saveDocuments(List<AnexoReqDTO> documentos, FuncionarioEntity funId, PedidoEntity pedido) {
-    if (documentos == null || documentos.isEmpty()) {
-      return;
-    }
-    List<DocumentoEntity> docs = new ArrayList<>();
-    for (AnexoReqDTO doc : documentos) {
-      var newDoc = new DocumentoEntity();
-      newDoc.setEstado(Estado.A);
-      newDoc.setReferenciaName(Referencia.FERIA.name());
-      newDoc.setReferenciaId(pedido.getId().toString());
-      newDoc.setReferenciaUuid(pedido.getUuid());
-      newDoc.setUuid(UuidCreator.getTimeOrderedEpoch());
-      newDoc.setTpDocumentoId(tipoDocumentoEntityRepository.findById(doc.getTipoDocumentoId()).orElse(null));
-      newDoc.setFunId(funId);
-      newDoc.setUrl(doc.getDocumento());
-      docs.add(newDoc);
-    }
-    documentoEntityRepository.saveAll(docs);
-  }
-*/
-
 
   private void saveDocuments(List<AnexoReqDTO> documentos, FuncionarioEntity funId, PedidoEntity pedido){
     var anexosExistentes = documentoEntityRepository
@@ -391,7 +371,7 @@ public class FeriaWriteService {
     var sincronizados = documentoMapper.syncDocumentos(
         anexosExistentes != null ? anexosExistentes : new ArrayList<>(),
         documentos,
-        Referencia.FERIA.name(),
+        TableName.RH_T_FERIAS_GOZADAS.name(),
         pedido.getId(),
         pedido.getUuid(),
         1L,

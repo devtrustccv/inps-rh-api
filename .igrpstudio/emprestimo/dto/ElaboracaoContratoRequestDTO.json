@@ -30,6 +30,19 @@
       "primaryKey": false,
       "collectionType": "list",
       "module": "emprestimo"
+    },
+    {
+      "name": "action",
+      "objectType": "enum",
+      "type": "ProcessStepAction",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "emprestimo"
     }
   ],
   "id": "rb0x377l33"

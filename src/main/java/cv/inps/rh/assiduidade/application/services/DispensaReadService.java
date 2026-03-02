@@ -8,6 +8,7 @@ import cv.inps.rh.assiduidade.application.queries.GetDispensaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaDispensaQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DispensaEntity;
@@ -205,7 +206,7 @@ public class DispensaReadService {
     }
 
     var documentos = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(Referencia.DISPENSA.name(), e.getUuid());
+        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_DISPENSA.name(), e.getUuid());
 
     if (!CollectionUtils.isEmpty(documentos)) {
       dto.setDocumentos(documentos.stream().map(d -> {
@@ -274,7 +275,7 @@ public class DispensaReadService {
     }
 
     var documentos = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(Referencia.DISPENSA.name(), e.getUuid());
+        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_DISPENSA.name(), e.getUuid());
 
     if (!CollectionUtils.isEmpty(documentos)) {
       dto.setDocumentos(documentos.stream().map(d -> {

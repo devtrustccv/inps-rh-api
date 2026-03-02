@@ -24,7 +24,7 @@ public class VerificarPedidoAdiantamentoCommandHandler implements CommandHandler
 
     LOGGER.debug("VerificarPedidoAdiantamentoCommand : {}", command);
 
-    service.verificar(command.getEmprestimoId(), command.getBasedecisao());
+    service.verificar(command.getEmprestimoId(), command.getVerificaradiantamentorequest());
 
     return ResponseEntity.ok().build();
   }

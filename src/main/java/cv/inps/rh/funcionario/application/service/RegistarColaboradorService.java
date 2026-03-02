@@ -9,12 +9,14 @@ import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -22,6 +24,7 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -62,7 +65,7 @@ public class RegistarColaboradorService {
   private final DocumentoEntityRepository documentoEntityRepository;
 
   @Transactional
-  public FuncionarioResponseDTO saveDossierColaborador(CreateFuncionarioCommand command) {
+  public Map<String, ?> saveDossierColaborador(CreateFuncionarioCommand command) {
     FuncionarioRequestDTO dto = command.getFuncionariorequest();
 
     var dadosPessoais = dto.getDadosPessoais();
@@ -234,7 +237,7 @@ public class RegistarColaboradorService {
         return documentoMapper.toEntity(
             a,
             Estado.P,
-            Referencia.REGISTO_COLABORADOR.name(),
+            TableName.RH_T_FUNCIONARIOS.name(),
             saved.getId(),
             saved.getUuid(),
             1L,
@@ -274,16 +277,8 @@ public class RegistarColaboradorService {
           validacaoEntityRepository.save(e);
         });
 
-    var funcionarioResponseDTO = funcionarioMapper.toResponseDTO(saved);
+    return Map.of("uuid", saved.getUuid());
 
-    var remuneracoes = funcionarioRules.getRemuneracoesAssociados(tr.getId());
-    var pagamentos = funcionarioRules.getPagamentosDescontosAssociados(tr.getId());
-
-    var dcr = dadosContratuaisMapper.dadosContratuaisRespDTO(tr,
-        pagamentos, remuneracoes);
-    funcionarioResponseDTO.setDadosContratuais(dcr);
-
-    return funcionarioResponseDTO;
   }
 
 }

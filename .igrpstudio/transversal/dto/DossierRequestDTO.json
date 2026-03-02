@@ -1,0 +1,23 @@
+{
+  "type": "dto",
+  "module": "transversal",
+  "name": "DossierRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readonly" : true,
+  "attributes": [
+    {
+      "name": "custom",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "8b1k2vq9in"
+}

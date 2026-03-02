@@ -25,8 +25,6 @@ public class FuncionarioMapper {
   private final HabilitacaoLiterariaMapper habilitacaoLiterariaMapper;
   private final FormacaoFeitaMapper formacaoFeitaMapper;
   private final ExperienciaProfissionalMapper experienciaProfissionalMapper;
-  private final DocumentoMapper documentoMapper;
-
 
   public DadosPessoaisRespDTO toDadosPessoaisRespDTO(FuncionarioEntity entity) {
     if (entity == null) return null;
@@ -103,10 +101,6 @@ public class FuncionarioMapper {
       dto.setDadosBancarios(dadosBancariosRespDTOS);
     }
 
-    if (entity.getDocumentos() != null) {
-      var anexos = documentoMapper.toAnexoRespDTOList(entity.getDocumentos());
-      dto.setAnexos(anexos);
-    }
 
 
     return dto;
