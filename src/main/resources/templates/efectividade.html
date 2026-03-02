@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xml:lang="pt">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Folha de Efetividade</title>
+    <style type="text/css">
+
+        @page {
+            size: A4 landscape;
+            margin-top: 10mm;
+            margin-bottom: 10mm;
+            margin-left: 8mm;
+            margin-right: 8mm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 7pt;
+            color: #000000;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* CABEÇALHO */
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 4pt;
+        }
+
+        .header-logo {
+            width: 60pt;
+            vertical-align: middle;
+            text-align: left;
+        }
+
+        .header-logo img {
+            width: 55pt;
+            height: 45pt;
+        }
+
+        .header-title {
+            text-align: center;
+            vertical-align: middle;
+            padding: 0 10pt;
+        }
+
+        .title-main {
+            font-size: 10pt;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .title-sub {
+            font-size: 9pt;
+            font-weight: bold;
+            margin-top: 4pt;
+            text-transform: uppercase;
+        }
+
+        .title-direcao {
+            font-size: 7pt;
+            margin-top: 3pt;
+            color: #555555;
+        }
+
+        .header-date {
+            text-align: right;
+            vertical-align: top;
+            font-size: 8pt;
+            white-space: nowrap;
+            width: 90pt;
+        }
+
+        /* PERÍODO */
+        .periodo-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0;
+        }
+
+        .periodo-nr {
+            background-color: #E87722;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 8pt;
+            padding: 3pt 5pt;
+            border: 1pt solid #000000;
+            width: 18pt;
+            text-align: center;
+        }
+
+        .periodo-left {
+            background-color: #E87722;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 8pt;
+            padding: 3pt 6pt;
+            border: 1pt solid #000000;
+        }
+
+        .periodo-right {
+            background-color: #E87722;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 8pt;
+            padding: 3pt 6pt;
+            border: 1pt solid #000000;
+            text-align: right;
+        }
+
+        /* TABELA PRINCIPAL */
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1pt solid #000000;
+        }
+
+        .main-table td,
+        .main-table th {
+            border: 1pt solid #000000;
+            text-align: center;
+            vertical-align: middle;
+            padding: 2pt;
+            font-size: 5.5pt;
+        }
+
+        .th-colaborador {
+            width: 90pt;
+            font-weight: bold;
+            font-size: 6pt;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .th-seccao {
+            width: 60pt;
+            font-weight: bold;
+            font-size: 6pt;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .th-abrev {
+            width: 22pt;
+            font-weight: bold;
+            font-size: 5pt;
+            text-align: center;
+            vertical-align: middle;
+            padding: 2pt 1pt;
+        }
+
+        .th-grupo-faltas {
+            background-color: #ffffff;
+            font-weight: bold;
+            font-size: 6pt;
+            text-align: center;
+            border: 1pt solid #000000;
+            padding: 2pt;
+        }
+
+        .th-grupo-licencas {
+            background-color: #E87722;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 6pt;
+            text-align: center;
+            border: 1pt solid #000000;
+            padding: 2pt;
+        }
+
+        .th-grupo-outros {
+            background-color: #ffffff;
+            font-weight: bold;
+            font-size: 6pt;
+            text-align: center;
+            border: 1pt solid #000000;
+            padding: 2pt;
+        }
+
+        .th-grupo-total {
+            background-color: #E87722;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 6pt;
+            text-align: center;
+            border: 1pt solid #000000;
+            padding: 2pt;
+            width: 22pt;
+        }
+
+        .td-nr {
+            width: 12pt;
+            text-align: center;
+            font-size: 6pt;
+        }
+
+        .td-colaborador {
+            width: 90pt;
+            text-align: left;
+            font-size: 6pt;
+            padding-left: 3pt;
+        }
+
+        .td-seccao {
+            width: 60pt;
+            text-align: left;
+            font-size: 6pt;
+            padding-left: 3pt;
+        }
+
+        .td-num {
+            width: 22pt;
+            text-align: center;
+            font-size: 6pt;
+        }
+
+        .td-total {
+            width: 22pt;
+            text-align: center;
+            font-weight: bold;
+            font-size: 6pt;
+        }
+
+        .td-dispensas {
+            width: 26pt;
+            text-align: center;
+            font-size: 6pt;
+        }
+
+        .row-even {
+            background-color: #ffffff;
+        }
+
+        .row-odd {
+            background-color: #f9f9f9;
+        }
+
+        /* LEGENDA */
+        .legenda-wrapper {
+            width: 100%;
+            margin-top: 6pt;
+            border: 1pt solid #cccccc;
+            padding: 5pt;
+        }
+
+        .legenda-titulo {
+            font-size: 7pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #333333;
+            border-bottom: 1pt solid #E87722;
+            padding-bottom: 3pt;
+            margin-bottom: 5pt;
+        }
+
+        .legenda-grid {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .legenda-grid td {
+            font-size: 6pt;
+            padding: 1pt 6pt 1pt 0;
+            vertical-align: top;
+            border: none;
+            width: 25%;
+        }
+
+        .legenda-grupo {
+            font-size: 6pt;
+            font-weight: bold;
+            color: #E87722;
+            text-transform: uppercase;
+            padding-top: 4pt;
+            padding-bottom: 1pt;
+        }
+
+        .legenda-abrev {
+            font-weight: bold;
+            color: #000000;
+        }
+
+        .legenda-sep {
+            color: #999999;
+            padding: 0 3pt;
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- CABEÇALHO -->
+<table class="header-table" cellspacing="0" cellpadding="4">
+    <tr>
+        <td class="header-logo">
+            <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxIPDxUQERAVFRUWFREXGBIVEBAVFREYFREbGBUWFRUYHyggGBolHRcYIzEhJSktLzEuFyA3ODMtQygtLisBCgoKDg0OFxAQFjclHyIwLS0zMzU3KystNDQtLysrOC0vKy0tMC81Ny0tMjctLS0uLTgtNS0rLS0rLS03LS0tK//AABEIAOEA4QMBIgACEQEDEQH/xAAcAAEAAgIDAQAAAAAAAAAAAAAABgcEBQECAwj/xABGEAACAgECAwQFCAcGBAcAAAABAgADEQQSBSExBhNBYQcUIlFxIzJCgZGhsdEVM1JicpLBCCQlogm2btFEbGVEBES1kEiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiID//2Q==" alt="INPS Logo" />
+        </td>
+        <td class="header-title">
+            <div class="title-main" th:text="${direcao}">Dire&#231;&#227;o Administrativa e de Recursos Humanos</div>
+            <div class="title-sub">Folha de Efetividade</div>
+        </td>
+        <td class="header-date">
+            Data <span th:text="${dataEmissao}">01/06/2024</span>
+        </td>
+    </tr>
+</table>
+
+<!-- PERÍODO -->
+<table class="periodo-table" cellspacing="0" cellpadding="0">
+    <tr>
+        <td class="periodo-nr">N&#176;</td>
+        <td class="periodo-left">
+            EFECTIVIDADE REFERENTE A:
+            <span th:text="${mesReferencia}">Janeiro</span>
+            &#160;&#160; ANO <span th:text="${anoReferencia}">2024</span>
+        </td>
+        <td class="periodo-right">
+            PARA O VENCIMENTO DO M&#202;S DE:
+            <span th:text="${mesVencimento}">Fevereiro</span>
+        </td>
+    </tr>
+</table>
+
+<!-- TABELA PRINCIPAL -->
+<table class="main-table" cellspacing="0" cellpadding="0">
+    <thead>
+    <tr>
+        <th class="th-colaborador" rowspan="2">COLABORADOR</th>
+        <th class="th-seccao" rowspan="2">SE&#199;&#195;O</th>
+        <th class="th-abrev" rowspan="2">Dias Venc.</th>
+        <th class="th-abrev" rowspan="2">Dias &#218;teis</th>
+        <th class="th-abrev" rowspan="2">Dias Efet.</th>
+        <th class="th-grupo-faltas" colspan="8">FALTAS JUSTIFICADAS DURANTE O M&#202;S</th>
+        <th class="th-grupo-licencas" colspan="3">LICEN&#199;AS</th>
+        <th class="th-grupo-outros" colspan="3">OUTROS</th>
+        <th class="th-grupo-total" rowspan="2">TOTAL</th>
+        <th class="th-grupo-total" rowspan="2">TOTAL DISP.</th>
+    </tr>
+    <tr>
+        <th class="th-abrev">Doen&#231;a</th>
+        <th class="th-abrev">Nojo</th>
+        <th class="th-abrev">Aut. Empr.</th>
+        <th class="th-abrev">Assist. Fam.</th>
+        <th class="th-abrev">Prova/ Exam.</th>
+        <th class="th-abrev">Obrig. Leg.</th>
+        <th class="th-abrev">Ex. Sindic.</th>
+        <th class="th-abrev">Casamento</th>
+        <th class="th-abrev">Lic. Matern.</th>
+        <th class="th-abrev">Lic. Patern.</th>
+        <th class="th-abrev">Lic. S/Ret.</th>
+        <th class="th-abrev">Injustif.</th>
+        <th class="th-abrev">Suspens&#227;o</th>
+        <th class="th-abrev">F&#233;rias</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <tr th:each="row, stat : ${rows}"
+        th:class="${stat.odd} ? 'row-odd' : 'row-even'">
+        <td class="td-nr" th:text="${stat.count}">1</td>
+        <td class="td-colaborador" th:text="${row.colaborador}">Nome Colaborador</td>
+        <td class="td-seccao" th:text="${row.seccao}">&#160;</td>
+        <td class="td-num" th:text="${row.diasVencimento}">31</td>
+        <td class="td-num" th:text="${row.diasUteis}">22</td>
+        <td class="td-num" th:text="${row.diasEfetivos}">22</td>
+        <td class="td-num" th:text="${row.doenca}">&#160;</td>
+        <td class="td-num" th:text="${row.nojo}">&#160;</td>
+        <td class="td-num" th:text="${row.autEmpr}">&#160;</td>
+        <td class="td-num" th:text="${row.assistFam}">&#160;</td>
+        <td class="td-num" th:text="${row.provaExame}">&#160;</td>
+        <td class="td-num" th:text="${row.obrigLeg}">&#160;</td>
+        <td class="td-num" th:text="${row.exSindic}">&#160;</td>
+        <td class="td-num" th:text="${row.casamento}">&#160;</td>
+        <td class="td-num" th:text="${row.licMatern}">&#160;</td>
+        <td class="td-num" th:text="${row.licPatern}">&#160;</td>
+        <td class="td-num" th:text="${row.licSemRet}">&#160;</td>
+        <td class="td-num" th:text="${row.injustif}">&#160;</td>
+        <td class="td-num" th:text="${row.suspensao}">&#160;</td>
+        <td class="td-num" th:text="${row.ferias}">&#160;</td>
+        <td class="td-total" th:text="${row.totalAusencias}">0</td>
+        <td class="td-dispensas" th:text="${row.totalDispensas}">&#160;</td>
+    </tr>
+
+    <tr th:if="${rows == null or rows.isEmpty()}" class="row-even">
+        <td class="td-nr">1</td>
+        <td class="td-colaborador">NBNB</td>
+        <td class="td-seccao">&#160;</td>
+        <td class="td-num">31</td>
+        <td class="td-num">22</td>
+        <td class="td-num">22</td>
+        <td class="td-num">&#160;</td>
+        <td class="td-num">&#160;</td>
+        <td class="td-num">&#160;</td>
+        <td class="td-num">&#160;</td>
+        <td class="td-num">&#160;</td>
+        <td class="td-num">&#160;</td>
+        <td class="td-num">&#160;</td>
+        <td class="td-num">&#160;</td>
+        <td class="td-num">&#160;</td>
+        <td class="td-num">&#160;</td>
+        <td class="td-num">&#160;</td>
+        <td class="td-num">&#160;</td>
+        <td class="td-num">&#160;</td>
+        <td class="td-num">&#160;</td>
+        <td class="td-total">0</td>
+        <td class="td-dispensas">&#160;</td>
+    </tr>
+
+    </tbody>
+</table>
+
+<!-- LEGENDA -->
+<div class="legenda-wrapper">
+    <div class="legenda-titulo">Legenda</div>
+    <table class="legenda-grid" cellspacing="0" cellpadding="0">
+
+        <!-- Dias -->
+        <tr>
+            <td colspan="4" class="legenda-grupo">Dias</td>
+        </tr>
+        <tr>
+            <td><span class="legenda-abrev">Dias Venc.</span><span class="legenda-sep">&#8212;</span>Dias p/ processamento de vencimento</td>
+            <td><span class="legenda-abrev">Dias &#218;teis</span><span class="legenda-sep">&#8212;</span>Dias &#250;teis do m&#234;s</td>
+            <td><span class="legenda-abrev">Dias Efet.</span><span class="legenda-sep">&#8212;</span>Dias efetivos trabalhados</td>
+            <td>&#160;</td>
+        </tr>
+
+        <!-- Faltas -->
+        <tr>
+            <td colspan="4" class="legenda-grupo">Faltas Justificadas</td>
+        </tr>
+        <tr>
+            <td><span class="legenda-abrev">Doen&#231;a</span><span class="legenda-sep">&#8212;</span>Doen&#231;a do trabalhador</td>
+            <td><span class="legenda-abrev">Nojo</span><span class="legenda-sep">&#8212;</span>Nojo</td>
+            <td><span class="legenda-abrev">Aut. Empr.</span><span class="legenda-sep">&#8212;</span>Autorizadas pelo empregador</td>
+            <td><span class="legenda-abrev">Assist. Fam.</span><span class="legenda-sep">&#8212;</span>Assist&#234;ncia ao agregado familiar</td>
+        </tr>
+        <tr>
+            <td><span class="legenda-abrev">Prova/Exam.</span><span class="legenda-sep">&#8212;</span>Prova ou exame</td>
+            <td><span class="legenda-abrev">Obrig. Leg.</span><span class="legenda-sep">&#8212;</span>Cumprimento de obriga&#231;&#245;es legais</td>
+            <td><span class="legenda-abrev">Ex. Sindic.</span><span class="legenda-sep">&#8212;</span>Exerc&#237;cio sindical</td>
+            <td>&#160;</td>
+        </tr>
+
+        <!-- Licenças -->
+        <tr>
+            <td colspan="4" class="legenda-grupo">Licen&#231;as</td>
+        </tr>
+        <tr>
+            <td><span class="legenda-abrev">Lic. Matern.</span><span class="legenda-sep">&#8212;</span>Licen&#231;a de maternidade</td>
+            <td><span class="legenda-abrev">Lic. Patern.</span><span class="legenda-sep">&#8212;</span>Licen&#231;a de paternidade</td>
+            <td><span class="legenda-abrev">Lic. S/Ret.</span><span class="legenda-sep">&#8212;</span>Licen&#231;a sem retribui&#231;&#227;o</td>
+            <td>&#160;</td>
+        </tr>
+
+        <!-- Outros -->
+        <tr>
+            <td colspan="4" class="legenda-grupo">Outros</td>
+        </tr>
+        <tr>
+            <td><span class="legenda-abrev">Injustif.</span><span class="legenda-sep">&#8212;</span>Faltas injustificadas</td>
+            <td><span class="legenda-abrev">Suspens&#227;o</span><span class="legenda-sep">&#8212;</span>Suspens&#227;o do trabalhador</td>
+            <td><span class="legenda-abrev">F&#233;rias</span><span class="legenda-sep">&#8212;</span>F&#233;rias</td>
+            <td><span class="legenda-abrev">Total Disp.</span><span class="legenda-sep">&#8212;</span>Total de dispensas (horas)</td>
+        </tr>
+
+    </table>
+</div>
+
+</body>
+</html>
