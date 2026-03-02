@@ -26,7 +26,7 @@ public class NotificacaoRequestDTO  {
   private String corpo ;
 
 
-  private String referencia ;
+  private String tipoNotificacao ;
 
 
   private String estado ;

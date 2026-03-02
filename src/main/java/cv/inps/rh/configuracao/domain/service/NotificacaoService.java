@@ -43,7 +43,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
 
     var entity = new ParamNotificacaoEntity();
     entity.setUuid(UuidCreator.getTimeOrderedEpoch());
-    entity.setReferencia(dto.getReferencia());
+    entity.setTipoNotificacao(dto.getTipoNotificacao());
     entity.setAssunto(dto.getAssunto());
     entity.setCorpo(dto.getCorpo());
     entity.setEstado(Estado.A.getCode());
@@ -108,7 +108,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
     dto.setEstadoDescricao(e.getEstado());
     dto.setAssunto(e.getAssunto());
     dto.setCorpo(e.getCorpo());
-    dto.setReferencia(e.getReferencia());
+    dto.setTipoNotificacao(e.getTipoNotificacao());
     dto.setEstado(e.getEstado());
     return dto;
   }

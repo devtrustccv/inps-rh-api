@@ -30,7 +30,7 @@
       "primaryKey": false
     },
     {
-      "name": "referencia",
+      "name": "tipoNotificacao",
       "objectType": "java",
       "type": "string",
       "required": false,
