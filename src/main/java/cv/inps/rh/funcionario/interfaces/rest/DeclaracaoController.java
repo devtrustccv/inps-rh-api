@@ -26,6 +26,7 @@ import cv.inps.rh.funcionario.application.dto.WrapperListaPedidoDeclaracaoDTO;
 import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoResponseDTO;
 import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoAnaliseDTO;
 import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoValidacaoDTO;
+import cv.inps.rh.funcionario.application.dto.NotificacaoResponseDTO;
 
 @IgrpController
 @RestController
@@ -195,6 +196,66 @@ public class DeclaracaoController {
       final var command = new ValidacaoPedidoDeclaracaoCommand(validacaoPedidoDeclaracaoRequest, id);
 
       return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "pedidos/declaracoes/{id}/declaracao"
+  )
+  @Operation(
+    summary = "Visualizar pedido declaracao",
+    description = "Visualizar pedido declaracao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<String> visualizarPedidoDeclaracao(
+    @RequestParam(value = "preview", required = false, defaultValue = "true") boolean preview, @PathVariable(value = "id") String id)
+  {
+
+      final var query = new VisualizarPedidoDeclaracaoQuery(preview, id);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "pedidos/declaracoes/{id}/notificacao"
+  )
+  @Operation(
+    summary = "Get notificacao pedido declaracao",
+    description = "Get notificacao pedido declaracao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = NotificacaoResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<NotificacaoResponseDTO> getNotificacaoPedidoDeclaracao(
+    @PathVariable(value = "id") String id)
+  {
+
+      final var query = new GetNotificacaoPedidoDeclaracaoQuery(id);
+
+      return queryBus.handle(query);
 
   }
 
