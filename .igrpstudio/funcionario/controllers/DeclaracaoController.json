@@ -7,7 +7,7 @@
   "actions": [
     {
       "actionName": "novoPedidoDeclaracao",
-      "path": "pedido/declaracao",
+      "path": "pedidos/declaracoes",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -36,7 +36,163 @@
           }
         }
       }
+    },
+    {
+      "actionName": "getPedidoDeclaracoes",
+      "path": "pedidos/declaracoes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaPedidoDeclaracao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "tipoDeclaracao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataPedidoDe",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataPedidoAte",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "getPedidoDeclaracao",
+      "path": "pedidos/declaracoes/{id}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "PedidoDeclaracaoResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "submeterAnalisePedidoDeclaracao",
+      "path": "pedidos/declaracoes/{id}/analise",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "PedidoDeclaracaoAnalise",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "validacaoPedidoDeclaracao",
+      "path": "pedidos/declaracoes/{id}/validacao",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "PedidoDeclaracaoValidacao",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "gaahn3ko4i-novoPedidoDeclaracao"
+  "id": "gaahn3ko4i-novoPedidoDeclaracao-novoPedidoDeclaracao"
 }
