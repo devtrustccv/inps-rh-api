@@ -1,16 +1,16 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "PedidoDeclaracao",
+  "name": "PedidoDeclaracaoResponse",
   "template": "classic",
   "enableCustonValidation": false,
-  "readOnly" : true,
+  "readOnly": true,
   "attributes": [
     {
       "name": "custon",
       "objectType": "java",
       "type": "string",
-      "required": true,
+      "required": false,
       "before": false,
       "after": false,
       "positive": false,
@@ -19,5 +19,5 @@
       "primaryKey": false
     }
   ],
-  "id": "f9sjqv5f1w"
+  "id": "3yv8uejqn3"
 }

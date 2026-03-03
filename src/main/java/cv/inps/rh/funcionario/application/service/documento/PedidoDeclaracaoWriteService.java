@@ -17,7 +17,7 @@ public class PedidoDeclaracaoWriteService {
 
   public Map<String, ?> saveNovoPedido(NovoPedidoDeclaracaoCommand command) {
 
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(command.getPedidodeclaracao().getFunId());
 
     return null;
   }

@@ -4,35 +4,26 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import jakarta.validation.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-
-import java.time.LocalDate;
+import cv.inps.rh.shared.application.dto.PageDTO;
+import cv.inps.rh.shared.application.dto.PedidoDeclaracaoRowDTO;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
-
+import lombok.EqualsAndHashCode;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 
-
+@EqualsAndHashCode(callSuper = true)
 @IgrpDTO
-public class PedidoDeclaracaoDTO  {
+public class WrapperListaPedidoDeclaracaoDTO extends PageDTO {
 
-  private UUID funId;
-  private String tipoDeclaracao;
-  private String finalidade;
-  private String entidadeDestinado;
-  private LocalDate dataPedido;
-  private String obs;
-
-  private List<AnexoReqDTO> anexo = new ArrayList<>();
-
+  
+  @Valid
+  private List<PedidoDeclaracaoRowDTO> content = new ArrayList<>();
 
 }
