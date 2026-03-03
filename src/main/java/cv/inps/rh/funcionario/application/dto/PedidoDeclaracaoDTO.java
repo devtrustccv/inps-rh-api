@@ -4,10 +4,11 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
+import jakarta.validation.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 
 @Data
@@ -18,14 +19,6 @@ import lombok.NoArgsConstructor;
 @IgrpDTO
 public class PedidoDeclaracaoDTO  {
 
-  @NotBlank(message = "The field <tipoDeclaracao> is required")
 
-  private String tipoDeclaracao ;
-  @NotBlank(message = "The field <finalidade> is required")
-
-  private String finalidade ;
-  @NotBlank(message = "The field <entidadeDestinataria> is required")
-
-  private String entidadeDestinataria ;
 
 }

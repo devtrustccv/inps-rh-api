@@ -7,7 +7,7 @@
   "actions": [
     {
       "actionName": "novoPedidoDeclaracao",
-      "path": "{funcionarioId}/declaracao",
+      "path": "pedido/declaracao",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -30,20 +30,13 @@
               "schema": {
                 "type": "string",
                 "name": "data",
-                "collectionType": "none"
+                "collectionType": "map"
               }
             }
           }
         }
-      },
-      "pathVariables": [
-        {
-          "name": "funcionarioId",
-          "type": "string",
-          "isRequired": true
-        }
-      ]
+      }
     }
   ],
-  "id": "gaahn3ko4i"
+  "id": "gaahn3ko4i-novoPedidoDeclaracao"
 }
