@@ -32,7 +32,7 @@ public class PedidoDeclaracaoDTO  {
   private LocalDate dataPedido;
   private String obs;
 
-  private List<AnexoReqDTO> anexo = new ArrayList<>();
+  private List<AnexoReqDTO> anexos = new ArrayList<>();
 
 
 }
