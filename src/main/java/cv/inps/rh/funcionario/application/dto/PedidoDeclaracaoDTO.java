@@ -23,7 +23,7 @@ import java.util.UUID;
 
 
 @IgrpDTO
-public class PedidoDeclaracaoDTO  {
+public class PedidoDeclaracaoDTO extends PedidoDeclaracaoAnaliseDTO {
 
   private UUID funId;
   private String tipoDeclaracao;
@@ -31,6 +31,9 @@ public class PedidoDeclaracaoDTO  {
   private String entidadeDestinado;
   private LocalDate dataPedido;
   private String obs;
+
+
+
 
   private List<AnexoReqDTO> anexos = new ArrayList<>();
 
