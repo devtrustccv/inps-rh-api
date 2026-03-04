@@ -32,7 +32,7 @@ import cv.inps.rh.progressaopromocao.application.dto.AnexarOrdemServicoRequestDT
 )
 public class ProgressaoPromocaoController {
 
-
+  
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -48,7 +48,7 @@ public class ProgressaoPromocaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -58,7 +58,7 @@ public class ProgressaoPromocaoController {
       )
     }
   )
-
+  
   public ResponseEntity<ListaProgressaoPromocaoDTO> getListaProgressaPromocao(
     @RequestParam(value = "progressaoPromocao", required = false) String progressaoPromocao,
     @RequestParam(value = "colaborador", required = false) String colaborador,
@@ -84,7 +84,7 @@ public class ProgressaoPromocaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -94,7 +94,7 @@ public class ProgressaoPromocaoController {
       )
     }
   )
-
+  
   public ResponseEntity<ListaProgressaoPromocaoDTO> getListaValidacaoProgressaPromocao(
     @RequestParam(value = "progressaoPromocao", required = false) String progressaoPromocao,
     @RequestParam(value = "colaborador", required = false) String colaborador,
@@ -120,7 +120,7 @@ public class ProgressaoPromocaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -130,12 +130,42 @@ public class ProgressaoPromocaoController {
       )
     }
   )
-
+  
   public ResponseEntity<String> anexarOrdemServico(@Valid @RequestBody AnexarOrdemServicoRequestDTO anexarOrdemServicoRequest
     )
   {
 
       final var command = new AnexarOrdemServicoCommand(anexarOrdemServicoRequest);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "simular"
+  )
+  @Operation(
+    summary = "Simular progressao promocao",
+    description = "Simular progressao promocao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<String> simularProgressaoPromocao(
+    )
+  {
+
+      final var command = new SimularProgressaoPromocaoCommand();
 
       return commandBus.send(command);
 
