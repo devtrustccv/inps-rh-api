@@ -7,9 +7,9 @@ import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import jakarta.validation.constraints.NotBlank;
-import java.time.LocalDate;
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
+import java.time.LocalDate;
 
 
 @Getter
@@ -28,9 +28,17 @@ public class NotificacaoEntity extends AuditEntity {
     private Long id;
 
   
-    @NotBlank(message = "referencia is mandatory")
-    @Column(name="referencia", nullable = false)
-    private String referencia;
+    @NotNull(message = "referenciaId is mandatory")
+    @Column(name="referencia_id", nullable = false)
+    private Long referenciaId;
+
+  
+    @Column(name="referencia_name")
+    private String referenciaName;
+
+  
+    @Column(name="referencia_uuid")
+    private UUID referenciaUuid;
 
   
     @Column(name="message")
