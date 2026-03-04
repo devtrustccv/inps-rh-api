@@ -18,9 +18,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.funcionario.application.queries.*;
-
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.inps.rh.funcionario.application.commands.*;
 import cv.inps.rh.shared.application.dto.WrapperListaNotificacoesDTO;
 import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
+import cv.inps.rh.shared.application.dto.NotificacaoEnviarRequestDTO;
+import java.util.Map;
 
 @IgrpController
 @RestController
@@ -33,10 +36,11 @@ public class NotificacaoController {
 
   
   private final QueryBus queryBus;
+  private final CommandBus commandBus;
 
-  public NotificacaoController(QueryBus queryBus) {
+  public NotificacaoController(QueryBus queryBus, CommandBus commandBus) {
           this.queryBus = queryBus;
-          
+          this.commandBus = commandBus;
   }
    @GetMapping(
    value = "notificacoes"
@@ -100,6 +104,36 @@ public class NotificacaoController {
       final var query = new DetalheNotificacaoQuery(id);
 
       return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "notificacoes/{id}/enviar"
+  )
+  @Operation(
+    summary = "Enviar notificacao",
+    description = "Enviar notificacao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> enviarNotificacao(@Valid @RequestBody NotificacaoEnviarRequestDTO enviarNotificacaoRequest
+    , @PathVariable(value = "id") String id)
+  {
+
+      final var command = new EnviarNotificacaoCommand(enviarNotificacaoRequest, id);
+
+      return commandBus.send(command);
 
   }
 
