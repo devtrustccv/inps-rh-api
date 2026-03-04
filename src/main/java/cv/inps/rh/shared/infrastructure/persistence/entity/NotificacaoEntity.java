@@ -78,4 +78,9 @@ public class NotificacaoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "alerta_id", referencedColumnName = "id")
     private AlertaEntity alertaId;
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fun_id", referencedColumnName = "id")
+    private FuncionarioEntity funId;
 }
