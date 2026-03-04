@@ -8,6 +8,8 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
+import java.util.UUID;
 
 
 @Getter
@@ -37,12 +39,17 @@ public class DeclaracaoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tiprel_id", referencedColumnName = "id")
     private TiposRelacionamentoEntity tiprelId;
+
+
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pedido_id", referencedColumnName = "id")
+    private PedidoEntity pedidoId;
     @Column(name="finalidade")
     private String finalidade;
 
   
     @Column(name="data_pedido")
-    private String dataPedido;
+    private LocalDate dataPedido;
 
   
     @Column(name="obs")
@@ -67,6 +74,18 @@ public class DeclaracaoEntity extends AuditEntity {
   
     @Column(name="entrega")
     private String entrega;
+
+  
+    @Column(name="estado")
+    private String estado;
+
+  
+    @Column(name="entidade_destinado")
+    private String entidadeDestinado;
+
+  
+    @Column(name="uuid")
+    private UUID uuid;
 
   
 }

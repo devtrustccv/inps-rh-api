@@ -22,5 +22,6 @@ public class NotificacaoEnviarRequestDTO  {
   private String assunto;
   private String corpo;
   private String email;
+  private String nomeReceptor;
 
 }

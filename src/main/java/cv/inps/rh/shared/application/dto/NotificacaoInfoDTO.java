@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -27,7 +28,7 @@ public class NotificacaoInfoDTO  {
   private String corpo;
   private String nomeReceptor;
   private String email;
-  private LocalDateTime dataEnvio;
+  private LocalDate dataEnvio;
   private String estado;
 
 }

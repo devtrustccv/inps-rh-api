@@ -1,32 +1,31 @@
 package cv.inps.rh.funcionario.application.queries;
 
+import cv.inps.rh.funcionario.application.services.DeclaracaoReportService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import org.springframework.context.event.EventListener;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 
-
 @Component
+@RequiredArgsConstructor
 public class VisualizarPedidoDeclaracaoQueryHandler implements QueryHandler<VisualizarPedidoDeclaracaoQuery, ResponseEntity<String>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(VisualizarPedidoDeclaracaoQueryHandler.class);
-
-
-  public VisualizarPedidoDeclaracaoQueryHandler() {
-
-  }
+  private final DeclaracaoReportService declaracaoReportService;
 
    @IgrpQueryHandler
   public ResponseEntity<String> handle(VisualizarPedidoDeclaracaoQuery query) {
 
     LOGGER.debug("VisualizarPedidoDeclaracaoQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    String reportContent = declaracaoReportService.gerarDeclaracao(query.getId(), query.isPreview());
+
+    return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(reportContent);
   }
 
 }
