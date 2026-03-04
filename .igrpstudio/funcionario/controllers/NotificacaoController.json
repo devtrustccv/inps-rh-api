@@ -1,0 +1,93 @@
+{
+  "type": "controller",
+  "name": "Notificacao",
+  "module": "funcionario",
+  "description": "desc",
+  "basePath": "api/v1/funcionarios",
+  "actions": [
+    {
+      "actionName": "listaNotificacoes",
+      "path": "notificacoes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaNotificacoes",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "shared"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "tipoNotificacao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataEnvioDe",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataEnvioAte",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "detalheNotificacao",
+      "path": "notificacoes/{id}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "NotificacaoInfo",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "shared"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "ua1mely9z7"
+}
