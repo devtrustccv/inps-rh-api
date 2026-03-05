@@ -90,11 +90,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "Alerta",
+                "type": "NotificacaoInfo",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "list",
-                "module": "funcionario"
+                "module": "shared"
               }
             }
           }
@@ -137,5 +137,5 @@
       ]
     }
   ],
-  "id": "p9zgxenge1"
+  "id": "p9zgxenge1-getNotificacoesGeradasByAlerta"
 }

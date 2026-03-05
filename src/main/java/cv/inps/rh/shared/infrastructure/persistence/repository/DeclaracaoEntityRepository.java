@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Repository
 public interface DeclaracaoEntityRepository extends
     JpaRepository<DeclaracaoEntity, Long>,
@@ -16,4 +19,6 @@ public interface DeclaracaoEntityRepository extends
     return this.findById(id)
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "DeclaracaoEntity not found for id: " + id));
   }
+
+  Optional<DeclaracaoEntity> findByUuid(UUID uuid);
 }

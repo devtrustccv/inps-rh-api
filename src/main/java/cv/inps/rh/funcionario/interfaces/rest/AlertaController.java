@@ -21,6 +21,7 @@ import cv.inps.rh.funcionario.application.queries.*;
 
 import cv.inps.rh.funcionario.application.dto.WrapperListAlertaDTO;
 import java.util.List;
+import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
 import cv.inps.rh.funcionario.application.dto.AlertaDTO;
 
 @IgrpController
@@ -91,14 +92,14 @@ public class AlertaController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = AlertaDTO.class,
+                  implementation = NotificacaoInfoDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<List<AlertaDTO>> getNotificacoesGeradasByAlerta(
+  public ResponseEntity<List<NotificacaoInfoDTO>> getNotificacoesGeradasByAlerta(
     @PathVariable(value = "id") String id)
   {
 
