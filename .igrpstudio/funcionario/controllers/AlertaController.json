@@ -7,6 +7,7 @@
   "actions": [
     {
       "actionName": "getListAlerta",
+      "path": "alertas",
       "method": "GET",
       "responses": {
         "200": {
@@ -76,6 +77,62 @@
           "name": "pageSize",
           "value": "20",
           "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "getNotificacoesGeradasByAlerta",
+      "path": "alertas/{id}/notificacoes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Alerta",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getAlerta",
+      "path": "alertas/{id}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Alerta",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "id",
+          "type": "string",
+          "isRequired": true
         }
       ]
     }

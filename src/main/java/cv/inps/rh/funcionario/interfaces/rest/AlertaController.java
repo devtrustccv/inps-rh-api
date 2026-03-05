@@ -20,6 +20,8 @@ import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.funcionario.application.queries.*;
 
 import cv.inps.rh.funcionario.application.dto.WrapperListAlertaDTO;
+import java.util.List;
+import cv.inps.rh.funcionario.application.dto.AlertaDTO;
 
 @IgrpController
 @RestController
@@ -38,6 +40,7 @@ public class AlertaController {
           
   }
    @GetMapping(
+   value = "alertas"
   )
   @Operation(
     summary = "Get list alerta",
@@ -70,6 +73,66 @@ public class AlertaController {
   {
 
       final var query = new GetListAlertaQuery(referencia, tipoAlerta, nomeColaborador, direcaoId, seccaoId, estado, dataRegistoDe, dataRegistoAte, pageNumber, pageSize);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "alertas/{id}/notificacoes"
+  )
+  @Operation(
+    summary = "Get notificacoes geradas by alerta",
+    description = "Get notificacoes geradas by alerta",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = AlertaDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<List<AlertaDTO>> getNotificacoesGeradasByAlerta(
+    @PathVariable(value = "id") String id)
+  {
+
+      final var query = new GetNotificacoesGeradasByAlertaQuery(id);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "alertas/{id}"
+  )
+  @Operation(
+    summary = "Get alerta",
+    description = "Get alerta",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = AlertaDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<AlertaDTO> getAlerta(
+    @PathVariable(value = "id") String id)
+  {
+
+      final var query = new GetAlertaQuery(id);
 
       return queryBus.handle(query);
 
