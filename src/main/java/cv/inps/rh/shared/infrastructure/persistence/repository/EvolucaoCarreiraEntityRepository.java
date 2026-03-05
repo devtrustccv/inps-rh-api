@@ -28,32 +28,32 @@ public interface EvolucaoCarreiraEntityRepository extends JpaRepository<Evolucao
   }
 
   @Query("""
-          SELECT new cv.inps.rh.progressaopromocao.application.dto.ProgressaoPromocaoRowDTO(
-              e.uuid,
-              e.tipo,
-              e.dataReferente,
-              f.nome,
-              cd.cargoId.nome,
-              c.nome,
-              ed.paramCarrId.nome,
-              ep.paramCarrId.nome,
-              e.observacao,
-              e.avaliacaoMedia,
-              null
-          )
-          FROM EvolucaoCarreiraEntity e
-          JOIN e.tiprel tr
-          JOIN tr.funId f
-          LEFT JOIN e.carreiraIdDe cd
-          LEFT JOIN tr.cargoId c
-          LEFT JOIN e.escalaoIdDe ed
-          LEFT JOIN e.escalaoIdPara ep
-          WHERE (:tipo IS NULL OR e.tipo = :tipo)
-            AND (:dataDe IS NULL OR e.dataReferente >= :dataDe)
-            AND (:dataAte IS NULL OR e.dataReferente <= :dataAte)
-            AND (:carreiraId IS NULL OR cd.id = :carreiraId)
-            AND (:nome IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
-          """)
+      SELECT new cv.inps.rh.progressaopromocao.application.dto.ProgressaoPromocaoRowDTO(
+          e.uuid,
+          e.tipo,
+          e.dataReferente,
+          f.nome,
+          cd.cargoId.nome,
+          c.nome,
+          ed.paramCarrId.nome,
+          ep.paramCarrId.nome,
+          e.observacao,
+          e.avaliacaoMedia,
+          null
+      )
+      FROM EvolucaoCarreiraEntity e
+      JOIN e.tiprel tr
+      JOIN tr.funId f
+      LEFT JOIN e.carreiraIdDe cd
+      LEFT JOIN tr.cargoId c
+      LEFT JOIN e.escalaoIdDe ed
+      LEFT JOIN e.escalaoIdPara ep
+      WHERE (:tipo IS NULL OR e.tipo = :tipo)
+        AND (:dataDe IS NULL OR e.dataReferente >= :dataDe)
+        AND (:dataAte IS NULL OR e.dataReferente <= :dataAte)
+        AND (:carreiraId IS NULL OR cd.id = :carreiraId)
+        AND (:nome IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+      """)
   Page<ProgressaoPromocaoRowDTO> findProgressaoPromocaoWithFilters(
       @Param("tipo") String tipo,
       @Param("dataDe") LocalDate dataDe,
@@ -74,6 +74,6 @@ public interface EvolucaoCarreiraEntityRepository extends JpaRepository<Evolucao
       Pageable pageable
   );
 
-  List<EvolucaoCarreiraEntity> findByCarreiraIdDeId(Long carreiraId);
+  boolean existsByCarreiraIdDeId(Long carreiraId);
 
 }

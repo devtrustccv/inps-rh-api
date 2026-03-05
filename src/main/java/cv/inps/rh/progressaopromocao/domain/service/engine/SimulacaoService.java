@@ -2,6 +2,7 @@ package cv.inps.rh.progressaopromocao.domain.service.engine;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.progressaopromocao.domain.service.engine.model.MediaResultado;
+import cv.inps.rh.progressaopromocao.domain.service.engine.model.ProgessionPromotionType;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
@@ -17,27 +18,24 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class SimulacaoService {
 
+  private static final int NIVEL_MAXIMO = 16;
+
   private final SimEvolucaoCarreiraEntityRepository simEvolucaoCarreiraEntityRepository;
   private final ParamEscalaoEntityRepository escalaoRepository;
 
-  public void registarSimulacao(CarreiraEntity career, MediaResultado result, String type) {
+  public void registarSimulacao(CarreiraEntity career, MediaResultado result, ProgessionPromotionType type) {
 
     var proximoEscalao = buscarProximoEscalao(career);
-    if (proximoEscalao == null)
-      return;
-
-    // TODO 04/03/2026 21:45 put missing values for commented code
 
     var e = new SimEvolucaoCarreiraEntity();
-    //e.setFlgHistorico();
     //e.setTiprel();
-    //e.setObservacao();
+    e.setObservacao("TODO TODO TODO");
     e.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
     e.setCarreiraIdDe(career);
     e.setEscalaoIdDe(career.getEscalaoId());
     e.setEscalaoIdPara(proximoEscalao);
     e.setDataReferente(LocalDate.now());
-    e.setTipo(type); // "P" ou "M" todo put domain value here domain
+    e.setTipo(type.name());
     e.setAvaliacaoMedia(result.media().longValue());
 
     simEvolucaoCarreiraEntityRepository.save(e);
@@ -45,18 +43,37 @@ public class SimulacaoService {
 
   public ParamEscalaoEntity buscarProximoEscalao(CarreiraEntity career) {
 
-    // TODO 05/03/2026 16:51 validate this
+    var escalaoId = career.getEscalaoId();
+    var nivelAtual = escalaoId.getNivelReferencia();
+    var escalaoAtual = escalaoId.getEscalao();
 
-    var escalao = career.getEscalaoId().getEscalao();
-    var nivel = career.getEscalaoId().getNivelReferencia();
+    var proximo = calcularProximoNivel(nivelAtual, escalaoAtual);
 
-    var nextLevel = career.getEscalaoId().getNivelReferencia() + 1;
-
-    return escalaoRepository.findByParamCarrIdIdAndNivelReferenciaAndEstado(
-            career.getCarrPccsId().getId(),
-            nextLevel,
+    return escalaoRepository
+        .findByNivelReferenciaAndEscalaoAndEstado(
+            proximo.nivelReferencia(),
+            proximo.escalao(),
             Estado.A
-        )
-        .orElse(null);
+        );
+  }
+
+  private record ProximoNivel(Integer nivelReferencia, String escalao) {
+  }
+
+  private static ProximoNivel calcularProximoNivel(Integer nivelAtual, String escalaoAtual) {
+
+    if (nivelAtual == NIVEL_MAXIMO && escalaoAtual.equals("F")) {
+      return null; // já está no último nível
+    }
+
+    return switch (escalaoAtual) {
+      case "F" -> new ProximoNivel(nivelAtual, "E");
+      case "E" -> new ProximoNivel(nivelAtual, "D");
+      case "D" -> new ProximoNivel(nivelAtual, "C");
+      case "C" -> new ProximoNivel(nivelAtual, "B");
+      case "B" -> new ProximoNivel(nivelAtual, "A");
+      case "A" -> new ProximoNivel(nivelAtual + 1, "F");
+      default -> throw new IllegalArgumentException("Escalão inválido: " + escalaoAtual);
+    };
   }
 }
