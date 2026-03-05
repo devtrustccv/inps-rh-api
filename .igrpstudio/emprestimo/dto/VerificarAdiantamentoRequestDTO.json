@@ -1,0 +1,27 @@
+{
+  "type": "dto",
+  "module": "emprestimo",
+  "name": "VerificarAdiantamentoRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "BaseDecisao",
+    "module": "emprestimo"
+  },
+  "attributes": [
+    {
+      "name": "action",
+      "objectType": "enum",
+      "type": "ProcessStepAction",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "emprestimo"
+    }
+  ],
+  "id": "0ythvradzg"
+}

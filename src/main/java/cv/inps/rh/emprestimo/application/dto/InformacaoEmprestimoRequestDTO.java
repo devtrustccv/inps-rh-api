@@ -4,11 +4,11 @@
 package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.math.BigDecimal;
 
 @Data
@@ -20,22 +20,22 @@ import java.math.BigDecimal;
 public class InformacaoEmprestimoRequestDTO  {
 
   @NotNull(message = "The field <carreiraId> is required")
-  
+
   private Long carreiraId ;
   @NotNull(message = "The field <valorLimiteEmprestimo> is required")
-  
+
   private BigDecimal valorLimiteEmprestimo ;
-  
-  
+
+
   private Long numeroLimitePrestacaoMeses ;
-  
-  
+
+
   private String estado ;
-  
-  
+
+
   private String id ;
-  
-  
+
+
   private String carreiraUuid ;
 
 }

@@ -4,6 +4,8 @@
 package cv.inps.rh.emprestimo.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
+import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,6 +19,7 @@ import lombok.NoArgsConstructor;
 public class AnaliseRhAdiantamentoRequestDTO extends BaseDecisaoDTO {
 
 
+
   private Long bancoId ;
 
 
@@ -24,5 +27,8 @@ public class AnaliseRhAdiantamentoRequestDTO extends BaseDecisaoDTO {
 
 
   private String swift ;
+  @NotNull(message = "The field <action> is required")
+
+  private ProcessStepAction action ;
 
 }

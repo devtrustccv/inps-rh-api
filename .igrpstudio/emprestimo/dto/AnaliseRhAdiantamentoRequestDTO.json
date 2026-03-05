@@ -44,6 +44,19 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "action",
+      "objectType": "enum",
+      "type": "ProcessStepAction",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "emprestimo"
     }
   ],
   "id": "7xvpvblslk"

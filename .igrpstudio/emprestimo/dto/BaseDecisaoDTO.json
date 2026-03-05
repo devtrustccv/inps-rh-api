@@ -7,15 +7,16 @@
   "attributes": [
     {
       "name": "parecer",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
+      "objectType": "enum",
+      "type": "ParecerProcesso",
+      "required": true,
       "before": false,
       "after": false,
       "positive": false,
       "isEmail": false,
       "isUrl": false,
-      "primaryKey": false
+      "primaryKey": false,
+      "module": "emprestimo"
     },
     {
       "name": "observacao",

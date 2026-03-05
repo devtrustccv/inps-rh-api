@@ -1,6 +1,7 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.domain.service.EmprestimoDocumentService;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
@@ -9,6 +10,7 @@ import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Transactional
@@ -33,7 +36,7 @@ public class PedidoAquisicaoViaturaService {
   private final FuncionarioRules funcionarioRules;
   private final EmprestimoDocumentService documentService;
 
-  public IdDTO saveUpdatePedidoEmprestimo(String uuid, PedidoEmprestimoDTO request) {
+  public IdDTO saveUpdatePedidoEmprestimo(String uuid, PedidoEmprestimoRequestDTO request) {
 
     var currentRelation = funcionarioRules.getTipoRelacionamentoAtual(UUID.fromString(request.getFuncionarioId()));
 
@@ -80,6 +83,12 @@ public class PedidoAquisicaoViaturaService {
       var savedOrder = pedidoEntityRepository.save(order);
       savedLoan.setPedido(savedOrder);
       emprestimoEntityRepository.save(savedLoan);
+    } else {
+      if (request.getAction().equals(ProcessStepAction.NEXT)) {
+        var order = orderOP.get();
+        order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+        pedidoEntityRepository.save(order);
+      }
     }
 
     var response = new IdDTO(savedLoan.getUuid());
@@ -101,10 +110,21 @@ public class PedidoAquisicaoViaturaService {
     loan.setValorEmprestimo(request.getValorEmprestimo());
     loan.setJuro(request.getJuros());
 
-    var funId = loan.getTiprel().getFunId();
-
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+
+    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+
+      switch (request.getParecer()) {
+        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
+        case RETIFICACAO -> order.setEtapa(EtapaEmprestimo.PEDIDO.name());
+        default -> {
+          loan.setEstado(Estado.I.name());
+          emprestimoEntityRepository.save(loan);
+        }
+      }
+    }
+
     pedidoEntityRepository.save(order);
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
@@ -115,14 +135,14 @@ public class PedidoAquisicaoViaturaService {
 
     decisionOP.ifPresentOrElse(
         obj -> {
-          obj.setDecisao(request.getParecer());
+          obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
           pedidoDecisaoEntityRepository.save(obj);
         },
         () -> {
           var newObj = new PedidoDecisaoEntity();
           newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer());
+          newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
@@ -133,7 +153,7 @@ public class PedidoAquisicaoViaturaService {
 
     documentService.saveDocuments(
         request.getDocumentos(),
-        funId,
+        loan.getTiprel().getFunId(),
         loan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_PEDIDO.name()
     );
@@ -150,6 +170,18 @@ public class PedidoAquisicaoViaturaService {
     order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
     pedidoEntityRepository.save(order);
 
+    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+
+      switch (request.getParecer()) {
+        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
+        case DESFAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+        default ->
+            throw IgrpResponseStatusException.badRequest("Invalid decison for this step %s".formatted(request.getParecer()));
+      }
+    }
+
+    pedidoEntityRepository.save(order);
+
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
         order,
         EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name(),
@@ -158,7 +190,7 @@ public class PedidoAquisicaoViaturaService {
 
     decisionOP.ifPresentOrElse(
         obj -> {
-          obj.setDecisao(request.getParecer());
+          obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
           obj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(obj);
@@ -166,7 +198,7 @@ public class PedidoAquisicaoViaturaService {
         () -> {
           var newObj = new PedidoDecisaoEntity();
           newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer());
+          newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
@@ -175,9 +207,6 @@ public class PedidoAquisicaoViaturaService {
           newObj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(newObj);
         });
-
-    if ("DESFAVORAVEL".equals(request.getParecer())) // TODO 04/02/2026 22:02 get real code
-      loan.setEstado(Estado.I.name());
 
     emprestimoEntityRepository.save(loan);
   }
@@ -188,6 +217,17 @@ public class PedidoAquisicaoViaturaService {
 
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
+
+    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+
+      switch (request.getParecer()) {
+        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name());
+        case DESFAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+        default ->
+            throw IgrpResponseStatusException.badRequest("Invalid decison for this step %s".formatted(request.getParecer()));
+      }
+    }
+
     pedidoEntityRepository.save(order);
 
     var decisionOP = pedidoDecisaoEntityRepository.findByPedidoAndEtapaAndEstado(
@@ -198,7 +238,7 @@ public class PedidoAquisicaoViaturaService {
 
     decisionOP.ifPresentOrElse(
         obj -> {
-          obj.setDecisao(request.getParecer());
+          obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
           obj.setCreatedDate(request.getData().atStartOfDay());
           pedidoDecisaoEntityRepository.save(obj);
@@ -206,7 +246,7 @@ public class PedidoAquisicaoViaturaService {
         () -> {
           var newObj = new PedidoDecisaoEntity();
           newObj.setPedido(order);
-          newObj.setDecisao(request.getParecer());
+          newObj.setDecisao(request.getParecer().name());
           newObj.setObs(request.getObservacao());
           newObj.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_PEDIDO.name());
           newObj.setReferencia(ProcessType.EMPRESTIMO.name());
@@ -220,16 +260,22 @@ public class PedidoAquisicaoViaturaService {
   public void elaborarContrato(String uuid, ElaboracaoContratoRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    if (Objects.nonNull(request.getDataInicioEmprestimo())) {
+      loan.setDataInicio(request.getDataInicioEmprestimo());
+      emprestimoEntityRepository.save(loan);
+    }
 
-    var funId = loan.getTiprel().getFunId();
+    var step = request.getAction().equals(ProcessStepAction.NEXT) ?
+        EtapaEmprestimo.PAGAMENTO :
+        EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO;
 
     var order = loan.getPedido();
-    order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name());
+    order.setEtapa(step.name());
     pedidoEntityRepository.save(order);
 
     documentService.saveDocuments(
         request.getDocumentos(),
-        funId,
+        loan.getTiprel().getFunId(),
         loan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ELABORAR_CONTRATO_PEDIDO.name()
     );

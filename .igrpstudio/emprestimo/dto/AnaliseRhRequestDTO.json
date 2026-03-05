@@ -43,15 +43,16 @@
     },
     {
       "name": "parecer",
-      "objectType": "java",
-      "type": "string",
+      "objectType": "enum",
+      "type": "ParecerProcesso",
       "required": true,
       "before": false,
       "after": false,
       "positive": false,
       "isEmail": false,
       "isUrl": false,
-      "primaryKey": false
+      "primaryKey": false,
+      "module": "emprestimo"
     },
     {
       "name": "observacao",
@@ -77,6 +78,19 @@
       "isUrl": false,
       "primaryKey": false,
       "collectionType": "list",
+      "module": "emprestimo"
+    },
+    {
+      "name": "action",
+      "objectType": "enum",
+      "type": "ProcessStepAction",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
       "module": "emprestimo"
     }
   ],

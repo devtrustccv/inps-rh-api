@@ -32,4 +32,10 @@ public interface ParamEscalaoEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.notFound("ParamEscalaoEntity not found for id: " + uuid));
   }
 
+  Optional<ParamEscalaoEntity> findByParamCarrIdIdAndNivelReferenciaAndEstado(
+      Long paramCarrId,
+      Integer nivelReferencia,
+      Estado estado
+  );
+
 }

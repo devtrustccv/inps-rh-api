@@ -52,6 +52,33 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "action",
+      "objectType": "enum",
+      "type": "ProcessStepAction",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "emprestimo"
+    },
+    {
+      "name": "documentos",
+      "objectType": "dto",
+      "type": "Documento",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "emprestimo"
     }
   ],
   "id": "o32nu3jaii"
