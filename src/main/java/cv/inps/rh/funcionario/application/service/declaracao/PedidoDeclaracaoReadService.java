@@ -4,6 +4,7 @@ import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoResponseDTO;
 import cv.inps.rh.funcionario.application.queries.GetPedidoDeclaracoesQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.PedidoDeclaracaoMapper;
 import cv.inps.rh.funcionario.application.dto.WrapperListaPedidoDeclaracaoDTO;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DeclaracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DeclaracaoEntityRepository;
 import jakarta.persistence.criteria.JoinType;
@@ -21,6 +22,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,7 +74,10 @@ public class PedidoDeclaracaoReadService {
     }
 
     public PedidoDeclaracaoResponseDTO findById(String id) {
-        DeclaracaoEntity entity = declaracaoRepository.findByIdOrThrow(Long.parseLong(id));
+      var uuid = UUID.fromString(id);
+        DeclaracaoEntity entity = declaracaoRepository.findByUuid(uuid).orElseThrow(
+            () -> IgrpResponseStatusException.notFound("Declaracao not found for id: " + id)
+        );
         return pedidoDeclaracaoMapper.toResponseDto(entity);
     }
 }

@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.service.declaracao;
 import cv.inps.rh.funcionario.application.commands.NovoPedidoDeclaracaoCommand;
 import cv.inps.rh.funcionario.application.commands.SubmeterAnalisePedidoDeclaracaoCommand;
 import cv.inps.rh.funcionario.application.commands.ValidacaoPedidoDeclaracaoCommand;
+import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DeclaracaoEntity;
@@ -36,40 +37,46 @@ public class PedidoDeclaracaoWriteService {
     private final ParamNotificacaoEntityRepository paramNotificacaoRepository;
     private final EmailService emailService;
 
+    private final FuncionarioRules funcionarioRules;
+
     @Transactional
     public Map<String, ?> saveNovoPedido(NovoPedidoDeclaracaoCommand command) {
 
         FuncionarioEntity funcionario = funcionarioRepository
                 .findByUuidOrThrow(command.getPedidodeclaracao().getFunId());
 
-        // 1. Criar PedidoEntity
+        var tiposRelacionamento = funcionarioRules
+            .getTipoRelacionamentoAtual(funcionario.getUuid());
+
         PedidoEntity pedido = new PedidoEntity();
         pedido.setFunId(funcionario);
-        pedido.setOrigem("RH"); // Conforme documentação
-        pedido.setTipoPedido("DECLARACAO"); // Conforme documentação
-        pedido.setEtapa("PEDIDO"); // Etapa inicial
+        pedido.setOrigem("RH");
+        pedido.setTipoPedido("DECLARACAO");
+        pedido.setEtapa("PEDIDO");
         pedido.setEstado(Estado.A.name());
         pedido.setUuid(UUID.randomUUID());
 
         PedidoEntity savedPedido = pedidoRepository.save(pedido);
 
-        // 2. Criar DeclaracaoEntity
+
         DeclaracaoEntity declaracao = new DeclaracaoEntity();
         declaracao.setPedidoId(savedPedido);
+        declaracao.setFunId(funcionario);
+        declaracao.setTiprelId(tiposRelacionamento);
+
         declaracao.setTipoDeclaracao(command.getPedidodeclaracao().getTipoDeclaracao());
         declaracao.setFinalidade(command.getPedidodeclaracao().getFinalidade());
         declaracao.setEntidadeDestinado(command.getPedidodeclaracao().getEntidadeDestinado());
         declaracao.setDataPedido(command.getPedidodeclaracao().getDataPedido());
         declaracao.setObs(command.getPedidodeclaracao().getObs());
-        declaracao.setEstado(Estado.P.name()); // Pendente
+        declaracao.setEstado(Estado.P.name());
         declaracao.setUuid(UUID.randomUUID());
 
-        // Lógica para BackOffice vs Portal (conforme documentação)
-        // Se for BackOffice, a análise já vem junto.
+
         if (command.getPedidodeclaracao().getDecisaoAnalise() != null) {
             declaracao.setDecisaoAnalise(command.getPedidodeclaracao().getDecisaoAnalise());
             declaracao.setObsAnalise(command.getPedidodeclaracao().getObsAnalise());
-            savedPedido.setEtapa("ANALISE"); // Avança a etapa
+            savedPedido.setEtapa("ANALISE");
         }
 
         DeclaracaoEntity savedDeclaracao = declaracaoRepository.save(declaracao);
@@ -96,7 +103,6 @@ public class PedidoDeclaracaoWriteService {
         declaracao.setDecisaoAnalise(command.getPedidodeclaracaoanalise().getDecisaoAnalise());
         declaracao.setObsAnalise(command.getPedidodeclaracaoanalise().getObsAnalise());
 
-        // Avança a etapa no pedido associado
         PedidoEntity pedido = declaracao.getPedidoId();
         if (pedido != null) {
             pedido.setEtapa("ANALISE");
@@ -116,19 +122,19 @@ public class PedidoDeclaracaoWriteService {
         declaracao.setDecisaoRh(command.getPedidodeclaracaovalidacao().getValidar());
         declaracao.setEntrega(command.getPedidodeclaracaovalidacao().getEntregaPorEmail());
 
-        if ("Sim".equalsIgnoreCase(declaracao.getDecisaoRh())) {
+        if ("SIM".equalsIgnoreCase(declaracao.getDecisaoRh())) {
             declaracao.setEstado(Estado.A.name()); // Aprovado
             if (pedido != null) {
                 pedido.setEtapa("FINALIZADO");
                 pedidoRepository.save(pedido);
             }
 
-            if ("Sim".equalsIgnoreCase(declaracao.getEntrega())) {
+            if ("SIM".equalsIgnoreCase(declaracao.getEntrega())) {
                 // Enviar notificação por email
                 enviarNotificacaoDeclaracao(declaracao);
             }
         } else {
-            declaracao.setEstado(Estado.I.name()); // Indeferido/Rejeitado
+            declaracao.setEstado(Estado.I.name());
             if (pedido != null) {
                 pedido.setEtapa("FINALIZADO");
                 pedidoRepository.save(pedido);
@@ -161,6 +167,7 @@ public class PedidoDeclaracaoWriteService {
         notificacao.setNomeReceptor(funcionario.getNome());
         notificacao.setEstado("Enviado");
         notificacao.setDataEnvio(LocalDate.now());
+        notificacao.setFunId(funcionario);
         notificacao.setReferenciaName("RH_T_DECLARACAO");
         notificacao.setReferenciaId(declaracao.getId());
         notificacao.setReferenciaUuid(declaracao.getUuid());
