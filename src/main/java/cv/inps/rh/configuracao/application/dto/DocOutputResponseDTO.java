@@ -10,6 +10,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.util.UUID;
+
 
 @Data
 @NoArgsConstructor
@@ -20,6 +22,7 @@ import lombok.AllArgsConstructor;
 public class DocOutputResponseDTO  {
 
   private Long id;
+  private UUID uuid;
   private String tipoDocumento;
   private String titulo;
   private String corpo;
@@ -27,5 +30,6 @@ public class DocOutputResponseDTO  {
   private Long responsavelId;
   private String responsavelNome;
   private String estado;
+
 
 }

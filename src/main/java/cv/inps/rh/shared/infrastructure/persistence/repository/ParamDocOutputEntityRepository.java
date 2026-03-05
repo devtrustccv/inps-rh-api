@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import java.util.Optional;
-
+import java.util.UUID;
 
 
 @Repository
@@ -21,4 +21,5 @@ public interface ParamDocOutputEntityRepository extends
           .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"ParamDocOutputEntity not found for id: " + id));
       }
 
+  Optional<ParamDocOutputEntity> findByUuid(UUID uuid);
 }

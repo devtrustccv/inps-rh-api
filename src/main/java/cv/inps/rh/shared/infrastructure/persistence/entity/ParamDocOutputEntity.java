@@ -8,6 +8,8 @@ import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 
 @Getter
 @Setter
@@ -43,6 +45,9 @@ public class ParamDocOutputEntity extends AuditEntity {
 
   @Column(name = "ESTADO")
   private String estado;
+
+  @Column(name = "UUID")
+  private UUID uuid;
 
 
 }
