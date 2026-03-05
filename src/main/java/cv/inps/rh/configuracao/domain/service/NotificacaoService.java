@@ -105,6 +105,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
   private NotificacaoResponseDTO buildResponse(ParamNotificacaoEntity e) {
     var dto = new NotificacaoResponseDTO();
     dto.setId(e.getId().toString());
+    dto.setUuid(e.getUuid().toString());
     dto.setEstadoDescricao(e.getEstado());
     dto.setAssunto(e.getAssunto());
     dto.setCorpo(e.getCorpo());
