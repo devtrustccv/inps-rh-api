@@ -1,12 +1,13 @@
 package cv.inps.rh.progressaopromocao.domain.service.engine;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.progressaopromocao.domain.service.engine.model.MediaResultado;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.EvolucaoCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.EvolucaoCarreiraEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.SimEvolucaoCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamEscalaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.SimEvolucaoCarreiraEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,42 +17,44 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class SimulacaoService {
 
-  private final EvolucaoCarreiraEntityRepository repository;
-
+  private final SimEvolucaoCarreiraEntityRepository simEvolucaoCarreiraEntityRepository;
   private final ParamEscalaoEntityRepository escalaoRepository;
 
-  public void registarSimulacao(CarreiraEntity carreira, MediaResultado media, String tipo) {
+  public void registarSimulacao(CarreiraEntity career, MediaResultado result, String type) {
 
-    var proximoEscalao = buscarProximoEscalao(carreira);
-    if (proximoEscalao == null) return;
+    var proximoEscalao = buscarProximoEscalao(career);
+    if (proximoEscalao == null)
+      return;
 
-    // TODO 04/03/2026 21:45 put missing values for comented code
+    // TODO 04/03/2026 21:45 put missing values for commented code
 
-    var e = new EvolucaoCarreiraEntity();
+    var e = new SimEvolucaoCarreiraEntity();
+    //e.setFlgHistorico();
     //e.setTiprel();
-    e.setCarreiraIdDe(carreira);
-    e.setEscalaoIdDe(carreira.getEscalaoId());
+    //e.setObservacao();
+    e.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    e.setCarreiraIdDe(career);
+    e.setEscalaoIdDe(career.getEscalaoId());
     e.setEscalaoIdPara(proximoEscalao);
     e.setDataReferente(LocalDate.now());
-    e.setTipo(tipo); // "P" ou "M" todo put domain value here
-    e.setEstado(Estado.A.name());
-    e.setAvaliacaoMedia((long) media.media());
-    //e.setObservacao();
+    e.setTipo(type); // "P" ou "M" todo put domain value here domain
+    e.setAvaliacaoMedia(result.media().longValue());
 
-    repository.save(e);
+    simEvolucaoCarreiraEntityRepository.save(e);
   }
 
-  public ParamEscalaoEntity buscarProximoEscalao(CarreiraEntity carreira) {
+  public ParamEscalaoEntity buscarProximoEscalao(CarreiraEntity career) {
 
-    var escalaoAtual = carreira.getEscalaoId();
-    if (escalaoAtual == null)
-      return null;
+    // TODO 05/03/2026 16:51 validate this
 
-    var proximoNivel = escalaoAtual.getNivelReferencia() + 1;
+    var escalao = career.getEscalaoId().getEscalao();
+    var nivel = career.getEscalaoId().getNivelReferencia();
+
+    var nextLevel = career.getEscalaoId().getNivelReferencia() + 1;
 
     return escalaoRepository.findByParamCarrIdIdAndNivelReferenciaAndEstado(
-            carreira.getCarrPccsId().getId(),
-            proximoNivel,
+            career.getCarrPccsId().getId(),
+            nextLevel,
             Estado.A
         )
         .orElse(null);

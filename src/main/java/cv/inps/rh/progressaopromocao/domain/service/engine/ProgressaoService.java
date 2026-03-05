@@ -22,52 +22,33 @@ public class ProgressaoService {
 
   public void simular() {
 
-    var carreiras = carreiraRepository.findCarreirasAtivas();
+    var careers = carreiraRepository.findCarreirasAtivas();
 
-    for (var carreira : carreiras) {
+    for (var career : careers) {
 
-      if (!validaRegrasBasicas(carreira) || !atingiuTempoMinimo(carreira)) continue;
+      // TODO 05/03/2026 17:41 colaborador em licensa sem vencimento por exemplo nao deve progredir
+      // TODO 05/03/2026 17:41 	O colabordor não deve uma situação laboral na qual não evolui na carreira no intervalo de data que supostamente deverá evoluir. deve iniciar a partir da situacao laboral
 
-      var media = avaliacaoService.calcularMedia(carreira.getContrVinculoId().getFunId(), 3);
+      if (!atingiuTempoMinimo(career))
+        continue;
 
-      if (!media.elegivelProgressao()) continue;
+      var media = avaliacaoService.calcularMedia(career.getContrVinculoId().getFunId(), 3);
+      if (!media.elegivelProgressao())
+        continue;
 
-      simulacaoService.registarSimulacao(carreira, media, "P"); // Progressão
+      simulacaoService.registarSimulacao(career, media, "P"); // Progressão todo: create enum for this
     }
   }
 
-  /**
-   * Regras básicas:
-   * - Tem contrato associado
-   * - Tem funcionário associado
-   */
-  private boolean validaRegrasBasicas(CarreiraEntity carreira) {
-
-    if (carreira.getContrVinculoId() == null) return false;
-
-    if (carreira.getContrVinculoId().getFunId() == null) return false;
-
-    return carreira.getDataInicio() != null;
-  }
-
-  /**
-   * Regra dos 3 anos para progressão
-   */
   private boolean atingiuTempoMinimo(CarreiraEntity carreira) {
 
-    if (!regraPrimeiraEntrada
-        .atingiuTempoPrimeiraProgressao(carreira)) {
+    if (!regraPrimeiraEntrada.atingiuTempoPrimeiraProgressao(carreira))
       return false;
-    }
 
-    if (carreira.getDataInicio() == null) return false;
-
-    int anosMinimos =
-        regraTempoProgressaoService
-            .determinarTempoMinimoProgressao(carreira);
+    int anosMinimos = regraTempoProgressaoService.determinarTempoMinimoProgressao(carreira);
 
     return carreira.getDataInicio()
         .plusYears(anosMinimos)
-        .isBefore(LocalDate.now());
+        .isBefore(LocalDate.now()); // TODO 05/03/2026 15:10 validate if it is Localdate.now().plusdays(1)
   }
 }

@@ -11,22 +11,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GetListaProgressaPromocaoQueryHandler implements QueryHandler<GetListaProgressaPromocaoQuery, ResponseEntity<ListaProgressaoPromocaoDTO>> {
+public class GetHistoricoProgressaPromocaoQueryHandler implements QueryHandler<GetHistoricoProgressaPromocaoQuery, ResponseEntity<ListaProgressaoPromocaoDTO>> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(GetListaProgressaPromocaoQueryHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(GetHistoricoProgressaPromocaoQueryHandler.class);
 
   private final ProgressaoPromocaoReadService progressaoPromocaoReadService;
 
-  public GetListaProgressaPromocaoQueryHandler(ProgressaoPromocaoReadService progressaoPromocaoReadService) {
+  public GetHistoricoProgressaPromocaoQueryHandler(ProgressaoPromocaoReadService progressaoPromocaoReadService) {
+
     this.progressaoPromocaoReadService = progressaoPromocaoReadService;
   }
 
   @IgrpQueryHandler
-  public ResponseEntity<ListaProgressaoPromocaoDTO> handle(GetListaProgressaPromocaoQuery query) {
+  public ResponseEntity<ListaProgressaoPromocaoDTO> handle(GetHistoricoProgressaPromocaoQuery query) {
 
-    LOGGER.debug("GetListaProgressaPromocaoQuery: {}", query);
+    LOGGER.debug("GetHistoricoProgressaPromocaoQuery: {}", query);
 
-    var data = progressaoPromocaoReadService.getProgressaoPromocaoData(query);
+    var data = progressaoPromocaoReadService.getHistoricoProgressaoPromocao(query);
     var response = new ListaProgressaoPromocaoDTO();
     PageMapper.fillPagination(data, response);
     response.setContent(data.getContent());

@@ -1,14 +1,14 @@
 package cv.inps.rh.progressaopromocao.domain.service.engine.model;
 
 public record MediaResultado(
-    double media,
+    Double media,
     boolean elegivelProgressao,
     boolean elegivelPromocao
 ) {
 
   public static MediaResultado invalido() {
     return new MediaResultado(
-        0,
+        0.0,
         false,
         false
     );
