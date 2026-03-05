@@ -1,28 +1,26 @@
 package cv.inps.rh.funcionario.application.service.declaracao;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.NovoPedidoDeclaracaoCommand;
 import cv.inps.rh.funcionario.application.commands.SubmeterAnalisePedidoDeclaracaoCommand;
 import cv.inps.rh.funcionario.application.commands.ValidacaoPedidoDeclaracaoCommand;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.infrastructure.persistence.entity.DeclaracaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DeclaracaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TableName;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import cv.inps.rh.shared.infrastructure.persistence.repository.NotificacaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamNotificacaoEntityRepository;
+
 import cv.inps.rh.shared.application.services.EmailService;
-import cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity;
 import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
@@ -33,6 +31,7 @@ public class PedidoDeclaracaoWriteService {
     private final PedidoEntityRepository pedidoRepository;
     private final DeclaracaoEntityRepository declaracaoRepository;
     private final DocumentoMapper documentoMapper;
+    private final DocumentoEntityRepository documentoEntityRepository;
     private final NotificacaoEntityRepository notificacaoRepository;
     private final ParamNotificacaoEntityRepository paramNotificacaoRepository;
     private final EmailService emailService;
@@ -81,17 +80,23 @@ public class PedidoDeclaracaoWriteService {
 
         DeclaracaoEntity savedDeclaracao = declaracaoRepository.save(declaracao);
 
-        // 3. Processar Anexos
-        /*if (command.getPedidodeclaracao().getAnexos() != null && !command.getPedidodeclaracao().getAnexos().isEmpty()) {
-            documentoMapper.syncDocumentos(
-                    savedDeclaracao.getAnexos(),
-                    command.getPedidodeclaracao().getAnexos(),
-                    "RH_T_DECLARACAO",
-                    savedDeclaracao.getId(),
-                    savedDeclaracao.getUuid(),
-                    null, // docId
-                    funcionario);
-        }*/
+      if (command.getPedidodeclaracao().getAnexos() != null && !command.getPedidodeclaracao().getAnexos().isEmpty()) {
+        List<DocumentoEntity> documentos = new java.util.ArrayList<>();
+        for (var d : command.getPedidodeclaracao().getAnexos()) {
+          var doc = documentoMapper.toEntity(
+              d,
+              Estado.P,
+              TableName.RH_T_DECLARACAO.name(),
+              savedDeclaracao.getId(),
+              savedDeclaracao.getUuid(),
+              1L,
+              funcionario);
+          doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+          documentos.add(doc);
+        }
+        documentoEntityRepository.saveAll(documentos);
+      }
+
 
         return Map.of("id", savedDeclaracao.getId(), "uuid", savedDeclaracao.getUuid().toString());
     }

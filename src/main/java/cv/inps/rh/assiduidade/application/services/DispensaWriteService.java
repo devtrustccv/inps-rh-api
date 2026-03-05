@@ -103,7 +103,7 @@ public class DispensaWriteService {
         var doc = documentoMapper.toEntity(
             d,
             Estado.P,
-            Referencia.DISPENSA.name(),
+            TableName.RH_T_DISPENSA.name(),
             disp.getId(),
             disp.getUuid(),
             1L,
