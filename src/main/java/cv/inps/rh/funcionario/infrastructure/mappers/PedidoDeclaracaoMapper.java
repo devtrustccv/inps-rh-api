@@ -99,9 +99,6 @@ public class PedidoDeclaracaoMapper {
             }
         }
 
-        // Mapear Anexos (se o DocumentoMapper estiver disponível e injetado)
-        // dto.setAnexos(documentoMapper.toAnexoRespDTOList(entity.getAnexos()));
-
         return dto;
     }
 }
