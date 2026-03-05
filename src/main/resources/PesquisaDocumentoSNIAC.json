@@ -1,0 +1,91 @@
+postman request POST 'https://gateway-pdex.gov.cv/t/sniac.gov/PesquisaDoSNIAC/1.0/pesquisaDocumentoSNIAC' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer eyJ4NXQiOiJNRGd4WkRNd09XTmxZV0kxTUdVNVlUQTVORE15TlRjMU1XRmtabVV4WVRRell6RTROelZtTnpkaU9EVm1Zemd3TVdNeFlqQTFaV1l6TW1NMk1tVmtNZyIsImtpZCI6Ik1EZ3haRE13T1dObFlXSTFNR1U1WVRBNU5ETXlOVGMxTVdGa1ptVXhZVFF6WXpFNE56Vm1OemRpT0RWbVl6Z3dNV014WWpBMVpXWXpNbU0yTW1Wa01nX1JTMjU2IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJkZ2VmcGVwQG1mLmdvdi5jdkBzbmlhYy5nb3YiLCJhdXQiOiJBUFBMSUNBVElPTiIsImF1ZCI6IjhpSjVyalMxUjMwX2FmNlZ4OE93Y09GbEN6a2EiLCJuYmYiOjE3NDI4MjUxNjMsImF6cCI6IjhpSjVyalMxUjMwX2FmNlZ4OE93Y09GbEN6a2EiLCJzY29wZSI6ImRlZmF1bHQiLCJpc3MiOiJodHRwczpcL1wvbG9jYWxob3N0Ojk0NDNcL29hdXRoMlwvdG9rZW4iLCJleHAiOjkyMjMzNzIwMzY4NTQ3NzUsImlhdCI6MTc0MjgyNTE2MywianRpIjoiZTAwNTNjYTQtYmZkZi00MTRiLWJlMGYtYjNkNThmNGIzMThhIn0.qFTD9IeiAC8m54hfU8epY5LRnQn5Jd2CZwLerhGX8zXWxQFsI0wo1sZn20ibTwvxUOqTzfmqOoFTmovKUun0Jlg5IPwMozaA2HEFuAmCF5n5JKz6-9aIAP9uROG4DF2dzmATgDsPRDoCcpdyAOor2SKm5KF5T_nmfET1cdEAhQubt67ww-PxWcTFvN2TW2NiwpwjVq5zJNMUS-xVOV-0fyetwlSGsHaYWHiH4hkk04ykrCaCWDmW2STAGanqoECDHCFQXmJ1MTsMkBKzgmGQ0iRDtFw3E_AiQQVH2E-UaYDf187zfyuVrN_Lh5hDaS2XQs8GFUe5PbXr78IfleDZYQ' \
+  --body '{
+  "PesquisaDocumentoSNIAC": {
+    "P_NOME_COMPLETO": "",
+    "P_DATA_NASC": "",
+    "P_NIC": "20230125F005P"
+  }
+}' \
+  --auth-bearer-token 'eyJ4NXQiOiJNRGd4WkRNd09XTmxZV0kxTUdVNVlUQTVORE15TlRjMU1XRmtabVV4WVRRell6RTROelZtTnpkaU9EVm1Zemd3TVdNeFlqQTFaV1l6TW1NMk1tVmtNZyIsImtpZCI6Ik1EZ3haRE13T1dObFlXSTFNR1U1WVRBNU5ETXlOVGMxTVdGa1ptVXhZVFF6WXpFNE56Vm1OemRpT0RWbVl6Z3dNV014WWpBMVpXWXpNbU0yTW1Wa01nX1JTMjU2IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJkZ2VmcGVwQG1mLmdvdi5jdkBzbmlhYy5nb3YiLCJhdXQiOiJBUFBMSUNBVElPTiIsImF1ZCI6IjhpSjVyalMxUjMwX2FmNlZ4OE93Y09GbEN6a2EiLCJuYmYiOjE3NDI4MjUxNjMsImF6cCI6IjhpSjVyalMxUjMwX2FmNlZ4OE93Y09GbEN6a2EiLCJzY29wZSI6ImRlZmF1bHQiLCJpc3MiOiJodHRwczpcL1wvbG9jYWxob3N0Ojk0NDNcL29hdXRoMlwvdG9rZW4iLCJleHAiOjkyMjMzNzIwMzY4NTQ3NzUsImlhdCI6MTc0MjgyNTE2MywianRpIjoiZTAwNTNjYTQtYmZkZi00MTRiLWJlMGYtYjNkNThmNGIzMThhIn0.qFTD9IeiAC8m54hfU8epY5LRnQn5Jd2CZwLerhGX8zXWxQFsI0wo1sZn20ibTwvxUOqTzfmqOoFTmovKUun0Jlg5IPwMozaA2HEFuAmCF5n5JKz6-9aIAP9uROG4DF2dzmATgDsPRDoCcpdyAOor2SKm5KF5T_nmfET1cdEAhQubt67ww-PxWcTFvN2TW2NiwpwjVq5zJNMUS-xVOV-0fyetwlSGsHaYWHiH4hkk04ykrCaCWDmW2STAGanqoECDHCFQXmJ1MTsMkBKzgmGQ0iRDtFw3E_AiQQVH2E-UaYDf187zfyuVrN_Lh5hDaS2XQs8GFUe5PbXr78IfleDZYQ'
+
+Response:
+{
+    "Entries": {
+        "Entry": {
+            "ID_CIVIL": "20230125F005P",
+            "ID_NASCIMENTO": 3381075,
+            "PROFISSAO": {
+                "@nil": "true"
+            },
+            "NOME_PROPRIO": "Kathaleya Layane",
+            "NOME_APELIDO": "Moreira Monteiro Mendes",
+            "NOME_COMPLETO": "Kathaleya Layane Moreira Monteiro Mendes",
+            "NOME_PAI_PROPRIO": "Manuel Mauricio",
+            "NOME_PAI_APELIDO": "Monteiro Mendes",
+            "NOME_MAE_PROPRIO": "Sandra Isabel",
+            "NOME_MAE_APELIDO": "Moreira Moreno",
+            "DATA_NASC": "25-01-2023",
+            "NACIONALIDADE_ID": 238,
+            "NACIONALIDADE": "CABO VERDE",
+            "NATURALIDADE_ID": 238,
+            "NATURALIDADE": "CABO VERDE",
+            "ESTADO_CIVIL": "S",
+            "SEXO": "F",
+            "NIF": {
+                "@nil": "true"
+            },
+            "DT_EMISSAO": "21-08-2024",
+            "DT_VALIDADE": "20-08-2029",
+            "NUM_DOCUMENTO": "20230125F005P",
+            "id_tp_doc": "CNI",
+            "PAIS": 238,
+            "FREGUESIA": {
+                "@nil": "true"
+            },
+            "LOCALIDADE": "CASTELÃO / COQUEIRO",
+            "BAIRRO": {
+                "@nil": "true"
+            },
+            "TELEFONE": {
+                "@nil": "true"
+            },
+            "TELEMOVEL": 9286635,
+            "RUA": {
+                "@nil": "true"
+            },
+            "PORTA": {
+                "@nil": "true"
+            },
+            "ANDAR": {
+                "@nil": "true"
+            },
+            "CODIGO_POSTAL": {
+                "@nil": "true"
+            },
+            "EMAIL": "duc_mai@pn.gov.cv",
+            "ALTURA": 0.82,
+            "FREGUESIA_ID": 238704001,
+            "LOCALIDADE_ID": 238704001001009,
+            "CONCELHO_ID": 238704,
+            "ILHA_ID": 2387,
+            "FACE": "https://sniacapps.gov.cv/sniac_prod/SNIAC.IGRP_PORTAL.download_file_img_bio?p_tipo_doc=1&p_id_pessoa=2015102448238&p_id_tp_imagem=1&p_id_documento=84639050",
+            "EMISSOR_DOC": "CCPSP",
+            "EMISSOR_DESCRICAO": "CASA DO CIDADÃO DA PRAIA",
+            "GRAYSCALE": "https://sniacapps.gov.cv/sniac_prod/SNIAC.IGRP_PORTAL.download_file_img_bio?p_tipo_doc=1&p_id_pessoa=2015102448238&p_id_tp_imagem=8&p_id_documento=84639050",
+            "FINGER_LEFT": "https://sniacapps.gov.cv/sniac_prod/SNIAC.IGRP_PORTAL.download_file_img_bio?p_tipo_doc=1&p_id_pessoa=2015102448238&p_id_tp_imagem=2&p_id_documento=84639050",
+            "FINGER_RIGHT": "https://sniacapps.gov.cv/sniac_prod/SNIAC.IGRP_PORTAL.download_file_img_bio?p_tipo_doc=1&p_id_pessoa=2015102448238&p_id_tp_imagem=3&p_id_documento=84639050",
+            "SIGNATURE": "https://sniacapps.gov.cv/sniac_prod/SNIAC.IGRP_PORTAL.download_file_img_bio?p_tipo_doc=1&p_id_pessoa=2015102448238&p_id_tp_imagem=4&p_id_documento=84639050",
+            "FINGER_POSITION_LEFT": 7,
+            "FINGER_POSITION_RIGHT": 2,
+            "DT_RECEBIDO": "09-09-2024",
+            "DT_ENTREGA": "09-09-2024",
+            "NR_PROCESSO": "0000008463905001",
+            "MORADA": "Praia",
+            "TIPO_MORADA": "P",
+            "LOCALIDADE_NOME": "CASTELÃO / COQUEIRO",
+            "LOCAL_NASCIMENTO_ID": 2387
+        }
+    }
+}
