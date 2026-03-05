@@ -74,7 +74,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
   public List<Object> list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
-    var reference = filters.get("referencia");
+    var reference = filters.get("tipoNotificacao");
     var estado = filters.containsKey("estado") ? filters.get("estado") : Estado.A.getCode();
 
     Specification<ParamNotificacaoEntity> spec = (root, _, cb) -> {
@@ -83,7 +83,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
       predicates.add(cb.equal(root.get("estado"), estado));
 
       if (StringUtils.hasText(reference))
-        predicates.add(cb.like(cb.lower(root.get("referencia")), reference));
+        predicates.add(cb.like(cb.lower(root.get("tipoNotificacao")), reference));
 
       return cb.and(predicates.toArray(new Predicate[0]));
     };
