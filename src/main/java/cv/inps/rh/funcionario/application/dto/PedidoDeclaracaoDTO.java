@@ -4,10 +4,17 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
+import jakarta.validation.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 
 @Data
@@ -16,16 +23,19 @@ import lombok.NoArgsConstructor;
 
 
 @IgrpDTO
-public class PedidoDeclaracaoDTO  {
+public class PedidoDeclaracaoDTO extends PedidoDeclaracaoAnaliseDTO {
 
-  @NotBlank(message = "The field <tipoDeclaracao> is required")
+  private UUID funId;
+  private String tipoDeclaracao;
+  private String finalidade;
+  private String entidadeDestinado;
+  private LocalDate dataPedido;
+  private String obs;
 
-  private String tipoDeclaracao ;
-  @NotBlank(message = "The field <finalidade> is required")
 
-  private String finalidade ;
-  @NotBlank(message = "The field <entidadeDestinataria> is required")
 
-  private String entidadeDestinataria ;
+
+  private List<AnexoReqDTO> anexos = new ArrayList<>();
+
 
 }

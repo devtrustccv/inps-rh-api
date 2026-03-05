@@ -2,14 +2,16 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.funcionario.application.service.documento.PedidoDeclaracaoWriteService;
+import cv.inps.rh.funcionario.application.service.declaracao.PedidoDeclaracaoWriteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
-public class NovoPedidoDeclaracaoCommandHandler implements CommandHandler<NovoPedidoDeclaracaoCommand, ResponseEntity<String>> {
+public class NovoPedidoDeclaracaoCommandHandler implements CommandHandler<NovoPedidoDeclaracaoCommand, ResponseEntity<Map<String, ?>>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NovoPedidoDeclaracaoCommandHandler.class);
 
@@ -20,14 +22,15 @@ public class NovoPedidoDeclaracaoCommandHandler implements CommandHandler<NovoPe
   }
 
   @IgrpCommandHandler
-  public ResponseEntity<String> handle(NovoPedidoDeclaracaoCommand command) {
+  public ResponseEntity<Map<String, ?>> handle(NovoPedidoDeclaracaoCommand command) {
 
     LOGGER.debug("NovoPedidoDeclaracaoCommand : {}", command);
 
-    var id = pedidoDeclaracaoWriteService.saveNovoPedido(command.getFuncionarioId(), command.getPedidodeclaracao());
+    var response =
+        pedidoDeclaracaoWriteService.saveNovoPedido(command);
 
 
-    return ResponseEntity.ok(id.toString());
+    return ResponseEntity.ok(response);
   }
 
 }

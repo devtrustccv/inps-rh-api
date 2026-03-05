@@ -43,7 +43,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
 
     var entity = new ParamNotificacaoEntity();
     entity.setUuid(UuidCreator.getTimeOrderedEpoch());
-    entity.setReferencia(dto.getReferencia());
+    entity.setTipoNotificacao(dto.getTipoNotificacao());
     entity.setAssunto(dto.getAssunto());
     entity.setCorpo(dto.getCorpo());
     entity.setEstado(Estado.A.getCode());
@@ -74,7 +74,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
   public List<Object> list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
-    var reference = filters.get("referencia");
+    var reference = filters.get("tipoNotificacao");
     var estado = filters.containsKey("estado") ? filters.get("estado") : Estado.A.getCode();
 
     Specification<ParamNotificacaoEntity> spec = (root, _, cb) -> {
@@ -83,7 +83,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
       predicates.add(cb.equal(root.get("estado"), estado));
 
       if (StringUtils.hasText(reference))
-        predicates.add(cb.like(cb.lower(root.get("referencia")), reference));
+        predicates.add(cb.like(cb.lower(root.get("tipoNotificacao")), reference));
 
       return cb.and(predicates.toArray(new Predicate[0]));
     };
@@ -108,7 +108,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
     dto.setEstadoDescricao(e.getEstado());
     dto.setAssunto(e.getAssunto());
     dto.setCorpo(e.getCorpo());
-    dto.setReferencia(e.getReferencia());
+    dto.setTipoNotificacao(e.getTipoNotificacao());
     dto.setEstado(e.getEstado());
     return dto;
   }

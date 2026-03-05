@@ -4,33 +4,10 @@
   "name": "PedidoDeclaracao",
   "template": "classic",
   "enableCustonValidation": false,
+  "readOnly" : true,
   "attributes": [
     {
-      "name": "tipoDeclaracao",
-      "objectType": "java",
-      "type": "string",
-      "required": true,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "finalidade",
-      "objectType": "java",
-      "type": "string",
-      "required": true,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "entidadeDestinataria",
+      "name": "custon",
       "objectType": "java",
       "type": "string",
       "required": true,

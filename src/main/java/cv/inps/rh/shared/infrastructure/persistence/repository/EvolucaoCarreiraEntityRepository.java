@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -61,5 +62,18 @@ public interface EvolucaoCarreiraEntityRepository extends JpaRepository<Evolucao
       @Param("carreiraId") UUID carreiraId,
       Pageable pageable
   );
+
+  @Query("""
+          SELECT e
+          FROM EvolucaoCarreiraEntity e
+          WHERE e.carreiraIdDe.id = :carreiraId
+          ORDER BY e.dataReferente DESC
+      """)
+  List<EvolucaoCarreiraEntity> findUltimaEvolucao(
+      @Param("carreiraId") Long carreiraId,
+      Pageable pageable
+  );
+
+  List<EvolucaoCarreiraEntity> findByCarreiraIdDeId(Long carreiraId);
 
 }
