@@ -3,7 +3,6 @@ package cv.inps.rh.progressaopromocao.domain.service.engine;
 import cv.inps.rh.progressaopromocao.domain.service.engine.rule.AvaliacaoService;
 import cv.inps.rh.progressaopromocao.domain.service.engine.rule.DisciplinaService;
 import cv.inps.rh.progressaopromocao.domain.service.engine.rule.FaltaService;
-import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EvolucaoCarreiraEntityRepository;
@@ -26,6 +25,7 @@ public class PromocaoService {
 
   public void simular() {
 
+    // TODO 05/03/2026 18:00 with only carreiras base without cargo
     var carreiras = carreiraRepository.findCarreirasAtivas();
 
     for (var carreira : carreiras) {
@@ -56,9 +56,6 @@ public class PromocaoService {
    */
   private boolean validaElegibilidadePromocao(CarreiraEntity carreira) {
 
-    // deve estar ativa
-    if (carreira.getEstado() != Estado.A) return false;
-
     // deve ter contrato
     if (carreira.getContrVinculoId() == null) return false;
 
@@ -88,8 +85,7 @@ public class PromocaoService {
 
     if (carreira.getDataInicio() == null) return false;
 
-    LocalDate dataElegibilidade =
-        carreira.getDataInicio().plusYears(6);
+    var dataElegibilidade = carreira.getDataInicio().plusYears(6);
 
     return !LocalDate.now().isBefore(dataElegibilidade);
   }
@@ -102,9 +98,8 @@ public class PromocaoService {
             PageRequest.of(0, 1)
         );
 
-    if (ultima.isEmpty()) {
+    if (ultima.isEmpty())
       return true; // nunca evoluiu
-    }
 
     var evolucao = ultima.getFirst();
 
