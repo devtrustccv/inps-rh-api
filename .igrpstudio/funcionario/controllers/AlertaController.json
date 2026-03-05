@@ -1,0 +1,84 @@
+{
+  "type": "controller",
+  "name": "Alerta",
+  "module": "funcionario",
+  "description": "alerta",
+  "basePath": "api/v1/funcionarios",
+  "actions": [
+    {
+      "actionName": "getListAlerta",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListAlerta",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "referencia",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "tipoAlerta",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "nomeColaborador",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcaoId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccaoId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataRegistoDe",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataRegistoAte",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
+    }
+  ],
+  "id": "p9zgxenge1"
+}
