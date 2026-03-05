@@ -17,6 +17,7 @@ public class PedidoDeclaracaoMapper {
 
         PedidoDeclaracaoRowDTO dto = new PedidoDeclaracaoRowDTO();
         dto.setId(entity.getId());
+        dto.setUuid(entity.getUuid());
         dto.setTipoDeclaracao(entity.getTipoDeclaracao());
         dto.setEfeito(entity.getPedidoId().getTipoPedido()); // Assumindo que este campo existe
         dto.setEstadoPedido(entity.getEstado());
@@ -27,16 +28,9 @@ public class PedidoDeclaracaoMapper {
 
             if (entity.getPedidoId().getFunId() != null) {
                 dto.setNomeColaborador(entity.getPedidoId().getFunId().getNome());
+                dto.setUuidColaborador(entity.getPedidoId().getFunId().getUuid());
 
-                // Para Direção, Secção e Vínculo, precisamos da relação ativa do funcionário
-                // Esta lógica pode ser complexa e pode precisar de uma busca adicional
-                // ou de um DTO de projeção mais completo da query.
-                // Por agora, vamos deixar como placeholder.
-
-                // Exemplo simplificado (pode não funcionar diretamente):
-                TiposRelacionamentoEntity relacao = entity.getPedidoId().getFunId().getTiposrelacionamentos().stream()
-                        .filter(tr -> "1".equals(tr.getEstActAdm())) // Assumindo que '1' é ativo
-                        .findFirst().orElse(null);
+                TiposRelacionamentoEntity relacao = entity.getTiprelId();
 
                 if (relacao != null) {
                     if (relacao.getMobId() != null && relacao.getMobId().getInstidId() != null) {
@@ -89,10 +83,7 @@ public class PedidoDeclaracaoMapper {
                 dto.setFunId(funcionario.getId());
                 dto.setNomeColaborador(funcionario.getNome());
 
-                // Lógica para buscar a relação ativa
-                TiposRelacionamentoEntity relacao = funcionario.getTiposrelacionamentos().stream()
-                        .filter(tr -> "1".equals(tr.getEstActAdm()))
-                        .findFirst().orElse(null);
+              TiposRelacionamentoEntity relacao = entity.getTiprelId();
 
                 if (relacao != null) {
                     if (relacao.getMobId() != null && relacao.getMobId().getInstidId() != null) {
