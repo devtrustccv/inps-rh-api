@@ -13,7 +13,12 @@ public class CarreiraEvolucaoService {
 
   @Transactional
   public void executarSimulacao() {
+
+    // primeiro executar promocao, depois progressao
+
+    // TODO 05/03/2026 17:44 eliminar dados da tabela simulacao evolucao de carreira sempre
+
+    //promocaoService.simular();
     progressaoService.simular();
-    promocaoService.simular();
   }
 }

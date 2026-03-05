@@ -41,10 +41,11 @@ public class ProgressaoPromocaoController {
           this.commandBus = commandBus;
   }
    @GetMapping(
+   value = "historico"
   )
   @Operation(
-    summary = "Get lista progressa promocao",
-    description = "Get lista progressa promocao",
+    summary = "Get historico progressa promocao",
+    description = "Get historico progressa promocao",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -59,7 +60,7 @@ public class ProgressaoPromocaoController {
     }
   )
   
-  public ResponseEntity<ListaProgressaoPromocaoDTO> getListaProgressaPromocao(
+  public ResponseEntity<ListaProgressaoPromocaoDTO> getHistoricoProgressaPromocao(
     @RequestParam(value = "progressaoPromocao", required = false) String progressaoPromocao,
     @RequestParam(value = "colaborador", required = false) String colaborador,
     @RequestParam(value = "carreiraId", required = false) String carreiraId,
@@ -69,7 +70,7 @@ public class ProgressaoPromocaoController {
     @RequestParam(value = "size", required = false, defaultValue = "20") String size)
   {
 
-      final var query = new GetListaProgressaPromocaoQuery(progressaoPromocao, colaborador, carreiraId, dataDe, dataAte, page, size);
+      final var query = new GetHistoricoProgressaPromocaoQuery(progressaoPromocao, colaborador, carreiraId, dataDe, dataAte, page, size);
 
       return queryBus.handle(query);
 
@@ -168,6 +169,42 @@ public class ProgressaoPromocaoController {
       final var command = new SimularProgressaoPromocaoCommand();
 
       return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "simulacao"
+  )
+  @Operation(
+    summary = "Get lista simulacao progressa promocao",
+    description = "Get lista simulacao progressa promocao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ListaProgressaoPromocaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<ListaProgressaoPromocaoDTO> getListaSimulacaoProgressaPromocao(
+    @RequestParam(value = "progressaoPromocao", required = false) String progressaoPromocao,
+    @RequestParam(value = "colaborador", required = false) String colaborador,
+    @RequestParam(value = "carreiraId", required = false) String carreiraId,
+    @RequestParam(value = "dataDe", required = false) String dataDe,
+    @RequestParam(value = "dataAte", required = false) String dataAte,
+    @RequestParam(value = "page", required = false, defaultValue = "0") String page,
+    @RequestParam(value = "size", required = false, defaultValue = "20") String size)
+  {
+
+      final var query = new GetListaSimulacaoProgressaPromocaoQuery(progressaoPromocao, colaborador, carreiraId, dataDe, dataAte, page, size);
+
+      return queryBus.handle(query);
 
   }
 

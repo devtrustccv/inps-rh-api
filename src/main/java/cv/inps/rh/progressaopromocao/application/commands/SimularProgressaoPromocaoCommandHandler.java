@@ -2,29 +2,31 @@ package cv.inps.rh.progressaopromocao.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import cv.inps.rh.progressaopromocao.domain.service.engine.CarreiraEvolucaoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 @Component
 public class SimularProgressaoPromocaoCommandHandler implements CommandHandler<SimularProgressaoPromocaoCommand, ResponseEntity<String>> {
 
-   private static final Logger LOGGER = LoggerFactory.getLogger(SimularProgressaoPromocaoCommandHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SimularProgressaoPromocaoCommandHandler.class);
 
-   public SimularProgressaoPromocaoCommandHandler() {
+  private final CarreiraEvolucaoService carreiraEvolucaoService;
 
-   }
+  public SimularProgressaoPromocaoCommandHandler(CarreiraEvolucaoService carreiraEvolucaoService) {
+    this.carreiraEvolucaoService = carreiraEvolucaoService;
+  }
 
-   @IgrpCommandHandler
-   public ResponseEntity<String> handle(SimularProgressaoPromocaoCommand command) {
+  @IgrpCommandHandler
+  public ResponseEntity<String> handle(SimularProgressaoPromocaoCommand command) {
 
-      LOGGER.debug("SimularProgressaoPromocaoCommand : {}", command);
+    LOGGER.debug("SIMULATION STARTED");
 
-      // TODO: Implement the command handling logic here
-      return null;
-   }
+    carreiraEvolucaoService.executarSimulacao();
+
+    return ResponseEntity.ok().build();
+  }
 
 }
