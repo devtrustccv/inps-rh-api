@@ -4,6 +4,8 @@ import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class NotificacaoMapper {
 
@@ -22,6 +24,10 @@ public class NotificacaoMapper {
         // Adicionar outros campos se necessário
 
         return dto;
+    }
+
+    public List<NotificacaoInfoDTO> toDtoList(List<NotificacaoEntity> entities) {
+      return entities.stream().map(this::toDto).toList();
     }
 
 }

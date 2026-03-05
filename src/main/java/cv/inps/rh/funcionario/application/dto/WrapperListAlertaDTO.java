@@ -1,29 +1,13 @@
-/* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
-
 package cv.inps.rh.funcionario.application.dto;
 
-import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.AlertaDTO;
 import cv.inps.rh.shared.application.dto.PageDTO;
-import java.util.ArrayList;
-import java.util.List;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.List;
+
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-
 @EqualsAndHashCode(callSuper = true)
-@IgrpDTO
 public class WrapperListAlertaDTO extends PageDTO {
-
-  
-  @Valid
-  private List<AlertaDTO> content = new ArrayList<>();
-
+    private List<AlertaDTO> content;
 }

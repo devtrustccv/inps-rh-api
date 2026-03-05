@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+import java.util.UUID;
+
 
 @Repository
 public interface AlertaEntityRepository extends
@@ -15,8 +18,11 @@ public interface AlertaEntityRepository extends
 {
 
       default AlertaEntity findByIdOrThrow(Long id) {
-          return this.findById(id)
-          .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"AlertaEntity not found for id: " + id));
-      }
+    return this.findById(id)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound( "AlertaEntity not found for id: " + id));
+  }
+
+  Optional<AlertaEntity> findByUuid(UUID uuid);
+
 
 }
