@@ -24,18 +24,4 @@ public class NotificacaoMapper {
         return dto;
     }
 
-    public cv.inps.rh.funcionario.application.dto.NotificacaoResponseDTO toResponseDto(NotificacaoEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-        cv.inps.rh.funcionario.application.dto.NotificacaoResponseDTO dto = new cv.inps.rh.funcionario.application.dto.NotificacaoResponseDTO();
-        dto.setId(entity.getId());
-        dto.setAssunto(entity.getAssunto());
-        dto.setCorpo(entity.getMessage());
-        dto.setNomeReceptor(entity.getNomeReceptor());
-        dto.setEmail(entity.getEmail());
-        dto.setDataEnvio(entity.getDataEnvio() != null ? entity.getDataEnvio().toString() : null);
-        dto.setEstado(entity.getEstado());
-        return dto;
-    }
 }

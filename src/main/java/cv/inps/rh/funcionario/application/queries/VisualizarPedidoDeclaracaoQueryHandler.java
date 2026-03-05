@@ -1,6 +1,6 @@
 package cv.inps.rh.funcionario.application.queries;
 
-import cv.inps.rh.funcionario.application.services.DeclaracaoReportService;
+import cv.inps.rh.funcionario.application.service.DeclaracaoReportService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

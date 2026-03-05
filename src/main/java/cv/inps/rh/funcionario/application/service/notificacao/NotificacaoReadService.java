@@ -1,11 +1,12 @@
 package cv.inps.rh.funcionario.application.service.notificacao;
 
-import cv.inps.rh.funcionario.application.dto.NotificacaoResponseDTO;
 import cv.inps.rh.funcionario.application.queries.ListaNotificacoesQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.NotificacaoMapper;
+import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
 import cv.inps.rh.shared.application.dto.WrapperListaNotificacoesDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.NotificacaoEntityRepository;
 import jakarta.persistence.criteria.Predicate;
@@ -79,11 +80,13 @@ public class NotificacaoReadService {
         return notificacaoMapper.toDto(entity);
     }
 
-    public NotificacaoResponseDTO findByDeclaracaoId(String declaracaoId) {
+    public NotificacaoInfoDTO findByDeclaracaoId(String declaracaoId) {
+
+      var uuid = IdentificadorUnico.from(declaracaoId).valor();
         NotificacaoEntity entity = notificacaoRepository
-                .findByReferenciaNameAndReferenciaId("RH_T_DECLARACAO", Long.parseLong(declaracaoId))
+                .findByReferenciaNameAndReferenciaUuid(TableName.RH_T_DECLARACAO.name(), uuid)
                 .orElseThrow(() -> IgrpResponseStatusException.badRequest(
                     "Notificação não encontrada para a declaração com id: " + declaracaoId));
-        return notificacaoMapper.toResponseDto(entity);
+        return notificacaoMapper.toDto(entity);
     }
 }

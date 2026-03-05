@@ -26,7 +26,7 @@ import cv.inps.rh.funcionario.application.dto.WrapperListaPedidoDeclaracaoDTO;
 import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoResponseDTO;
 import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoAnaliseDTO;
 import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoValidacaoDTO;
-import cv.inps.rh.funcionario.application.dto.NotificacaoResponseDTO;
+import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
 
 @IgrpController
 @RestController
@@ -242,14 +242,14 @@ public class DeclaracaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = NotificacaoResponseDTO.class,
+                  implementation = NotificacaoInfoDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<NotificacaoResponseDTO> getNotificacaoPedidoDeclaracao(
+  public ResponseEntity<NotificacaoInfoDTO> getNotificacaoPedidoDeclaracao(
     @PathVariable(value = "id") String id)
   {
 

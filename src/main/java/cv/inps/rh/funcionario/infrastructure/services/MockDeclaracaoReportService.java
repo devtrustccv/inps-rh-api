@@ -1,6 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.services;
 
-import cv.inps.rh.funcionario.application.services.DeclaracaoReportService;
+import cv.inps.rh.funcionario.application.service.DeclaracaoReportService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DeclaracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DeclaracaoEntityRepository;
 import lombok.RequiredArgsConstructor;

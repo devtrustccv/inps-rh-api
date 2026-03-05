@@ -237,11 +237,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "NotificacaoResponse",
+                "type": "NotificacaoInfo",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
-                "module": "funcionario"
+                "module": "shared"
               }
             }
           }
@@ -256,5 +256,5 @@
       ]
     }
   ],
-  "id": "gaahn3ko4i-novoPedidoDeclaracao-novoPedidoDeclaracao"
+  "id": "gaahn3ko4i-novoPedidoDeclaracao-novoPedidoDeclaracao-getNotificacaoPedidoDeclaracao"
 }

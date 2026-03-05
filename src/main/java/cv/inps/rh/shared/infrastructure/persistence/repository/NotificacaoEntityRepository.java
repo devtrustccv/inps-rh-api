@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 
 @Repository
@@ -21,6 +22,9 @@ public interface NotificacaoEntityRepository extends
   }
 
   Optional<NotificacaoEntity> findByReferenciaNameAndReferenciaId(String referenciaName, Long referenciaId);
+
+  Optional<NotificacaoEntity> findByReferenciaNameAndReferenciaUuid(String referenciaName, UUID referenciaUuid);
+
 
 
 }
