@@ -11,26 +11,21 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class RegraPrimeiraEntradaEfetivoService {
 
+  private static final int YEARS_FOR_FIRST_PROGRESS = 6;
+
   private final EvolucaoCarreiraEntityRepository evolucaoRepository;
 
-  public boolean atingiuTempoPrimeiraProgressao(CarreiraEntity carreira) {
+  public boolean atingiuTempoPrimeiraProgressao(CarreiraEntity career) {
 
-    if (!isPrimeiraProgressao(carreira))
-      return true; // não é primeira progressão
+    if (!isPrimeiraProgressao(career.getId()))
+      return true;
 
-    var inicio = carreira.getDataInicio();
-    if (inicio == null)
-      return false;
-
-    return inicio.plusYears(6) // TODO 05/03/2026 17:27 remove this magic number
-        .isBefore(LocalDate.now()); // TODO 05/03/2026 15:10 validate if it is Localdate.now().plusdays(1)
+    return career.getDataInicio()
+        .plusYears(YEARS_FOR_FIRST_PROGRESS)
+        .isBefore(LocalDate.now().plusDays(1));
   }
 
-  private boolean isPrimeiraProgressao(CarreiraEntity carreira) {
-
-    // TODO 05/03/2026 15:11 optimize query with bollean
-    var evolucoes = evolucaoRepository.findByCarreiraIdDeId(carreira.getId());
-
-    return evolucoes.isEmpty();
+  private boolean isPrimeiraProgressao(Long careerId) {
+    return evolucaoRepository.existsByCarreiraIdDeId(careerId);
   }
 }
