@@ -8,7 +8,6 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.ParamDocOutputEnt
 import cv.inps.rh.shared.util.PdfGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +17,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class MockDeclaracaoReportService implements DeclaracaoReportService {
+public class DeclaracaoReportServiceImpl implements DeclaracaoReportService {
 
     private final DeclaracaoEntityRepository declaracaoRepository;
     private final ParamDocOutputEntityRepository paramDocOutputRepository;
