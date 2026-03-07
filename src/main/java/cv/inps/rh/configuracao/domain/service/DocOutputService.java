@@ -64,9 +64,10 @@ public class DocOutputService {
     entity.setAssinadoPor(request.getAssinadoPor());
     entity.setTipoDocumento(request.getTipoDocumento());
     entity.setUuid(UuidCreator.getTimeOrderedEpoch());
-    entity.setEstado("A"); // Regra: Sempre ativo na criação
+    entity.setEstado("A");
 
     ResponsavelEntity responsavel = null;
+
     if (request.getResponsavel()!=null) {
       responsavel = responsavelRepository.findByFunId_Uuid(request.getResponsavel()).orElseThrow(
           () ->
