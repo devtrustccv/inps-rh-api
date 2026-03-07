@@ -4,11 +4,16 @@ import cv.inps.rh.funcionario.application.service.DeclaracaoReportService;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DeclaracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DeclaracaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ParamDocOutputEntityRepository;
+import cv.inps.rh.shared.util.PdfGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -16,29 +21,41 @@ import java.util.UUID;
 public class MockDeclaracaoReportService implements DeclaracaoReportService {
 
     private final DeclaracaoEntityRepository declaracaoRepository;
+    private final ParamDocOutputEntityRepository paramDocOutputRepository;
+    private final ResourceLoader resourceLoader;
+    private final PdfGenerator pdfGenerator;
 
     @Transactional(readOnly = true)
     @Override
-    public String gerarDeclaracao(String declaracaoId) {
+    public byte[] gerarDeclaracao(String declaracaoId) {
 
         var id = UUID.fromString(declaracaoId);
         DeclaracaoEntity declaracao = declaracaoRepository.findByUuid(id).orElseThrow(
             () -> IgrpResponseStatusException.notFound("Declaracao not found for id: " + declaracaoId)
         );
 
-        StringBuilder reportContent = new StringBuilder();
-        reportContent.append("<h1>Declaração de Vencimento</h1>");
-        reportContent.append("<p>Declaramos que o(a) Sr(a). ")
-                     .append(declaracao.getPedidoId().getFunId().getNome())
-                     .append(" aufere o vencimento mensal de X.</p>");
+        var paramDocOutput = paramDocOutputRepository
+            .findByTipoDocumentoAndEstado(declaracao.getTipoDeclaracao(), "A").orElseThrow(
+                () -> IgrpResponseStatusException.notFound("Documento Output not found para tipo declaracao: " + declaracao.getTipoDeclaracao())
+            );
 
-        // Aplica a marca d'água se for preview ou se a declaração não estiver validada
-        boolean aplicarMarcaAgua = !"SIM".equalsIgnoreCase(declaracao.getDecisaoRh());
+      var templateName = "declaracao/" + declaracao.getTipoDeclaracao().toLowerCase();
 
-        if (aplicarMarcaAgua) {
-            reportContent.append("<h2 style='color:red;'>NÃO VÁLIDO</h2>");
-        }
+      var resource = resourceLoader.getResource(
+          "classpath:/templates/" + templateName + ".html");
 
-        return reportContent.toString();
+      if (!resource.exists()) {
+        throw IgrpResponseStatusException.badRequest(
+            "Template não implementado para tipo: " + declaracao.getTipoDeclaracao());
+      }
+
+      boolean watermark = !"SIM".equalsIgnoreCase(declaracao.getDecisaoRh());
+
+      Map<String, Object> data = new HashMap<>();
+      data.put("declaracao", declaracao);
+      data.put("param", paramDocOutput);
+      data.put("watermark", watermark);
+
+      return pdfGenerator.generate(templateName, data);
     }
 }

@@ -201,9 +201,9 @@
         "200": {
           "name": "OK",
           "content": {
-            "application/json": {
+            "application/pdf": {
               "schema": {
-                "type": "string",
+                "type": "binary",
                 "name": "data",
                 "collectionType": "none"
               }
@@ -248,5 +248,5 @@
       ]
     }
   ],
-  "id": "gaahn3ko4i-novoPedidoDeclaracao-novoPedidoDeclaracao-getNotificacaoPedidoDeclaracao-visualizarPedidoDeclaracao"
+  "id": "gaahn3ko4i-novoPedidoDeclaracao-novoPedidoDeclaracao-getNotificacaoPedidoDeclaracao-visualizarPedidoDeclaracao-visualizarPedidoDeclaracao"
 }

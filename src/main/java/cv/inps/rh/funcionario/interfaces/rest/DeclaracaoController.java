@@ -210,16 +210,16 @@ public class DeclaracaoController {
           responseCode = "200",
           
           content = @Content(
-              mediaType = "application/json",
+              mediaType = "application/pdf",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = byte[].class,
+                  type = "byte[]")
           )
       )
     }
   )
   
-  public ResponseEntity<String> visualizarPedidoDeclaracao(
+  public ResponseEntity<?> visualizarPedidoDeclaracao(
     @PathVariable(value = "id") String id)
   {
 
