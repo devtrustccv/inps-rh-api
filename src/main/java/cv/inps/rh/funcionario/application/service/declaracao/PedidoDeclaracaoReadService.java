@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -39,6 +40,7 @@ public class PedidoDeclaracaoReadService {
   private final PedidoDeclaracaoMapper pedidoDeclaracaoMapper;
   private final DocumentoEntityRepository documentoEntityRepository;
 
+  @Transactional(readOnly = true)
   public WrapperListaPedidoDeclaracaoDTO findAll(GetPedidoDeclaracoesQuery query) {
     Pageable pageable = PageRequest.of(
         Integer.parseInt(query.getPageNumber()),
@@ -80,6 +82,7 @@ public class PedidoDeclaracaoReadService {
     return response;
   }
 
+  @Transactional(readOnly = true)
   public PedidoDeclaracaoResponseDTO findById(String id) {
     var uuid = UUID.fromString(id);
     DeclaracaoEntity entity = declaracaoRepository.findByUuid(uuid).orElseThrow(

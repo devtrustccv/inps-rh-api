@@ -22,4 +22,6 @@ public interface ParamDocOutputEntityRepository extends
       }
 
   Optional<ParamDocOutputEntity> findByUuid(UUID uuid);
+  Optional<ParamDocOutputEntity> findByTipoDocumentoAndEstado(String tipoDocumento, String estado);
+
 }

@@ -220,10 +220,10 @@ public class DeclaracaoController {
   )
   
   public ResponseEntity<String> visualizarPedidoDeclaracao(
-    @RequestParam(value = "preview", required = false, defaultValue = "true") boolean preview, @PathVariable(value = "id") String id)
+    @PathVariable(value = "id") String id)
   {
 
-      final var query = new VisualizarPedidoDeclaracaoQuery(preview, id);
+      final var query = new VisualizarPedidoDeclaracaoQuery(id);
 
       return queryBus.handle(query);
 

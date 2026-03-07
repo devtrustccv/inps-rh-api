@@ -23,7 +23,7 @@ public class VisualizarPedidoDeclaracaoQueryHandler implements QueryHandler<Visu
 
     LOGGER.debug("VisualizarPedidoDeclaracaoQuery: {}", query);
 
-    String reportContent = declaracaoReportService.gerarDeclaracao(query.getId(), query.isPreview());
+    String reportContent = declaracaoReportService.gerarDeclaracao(query.getId());
 
     return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(reportContent);
   }

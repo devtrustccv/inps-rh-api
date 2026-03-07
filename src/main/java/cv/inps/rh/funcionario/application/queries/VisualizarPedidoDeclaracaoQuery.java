@@ -13,8 +13,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class VisualizarPedidoDeclaracaoQuery implements Query {
 
-  @NotNull(message = "The field <preview> is required")
-  private boolean preview;
   @NotBlank(message = "The field <id> is required")
   private String id;
 

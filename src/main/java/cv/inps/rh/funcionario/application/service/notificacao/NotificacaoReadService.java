@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
@@ -29,64 +30,67 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class NotificacaoReadService {
 
-    private final NotificacaoEntityRepository notificacaoRepository;
-    private final NotificacaoMapper notificacaoMapper;
+  private final NotificacaoEntityRepository notificacaoRepository;
+  private final NotificacaoMapper notificacaoMapper;
 
-    public WrapperListaNotificacoesDTO findAll(ListaNotificacoesQuery query) {
+  @Transactional(readOnly = true)
+  public WrapperListaNotificacoesDTO findAll(ListaNotificacoesQuery query) {
 
-        Pageable pageable = PageRequest.of(
-                Integer.parseInt(query.getPageNumber()),
-                Integer.parseInt(query.getPageSize()),
-                Sort.by(Sort.Direction.DESC, "dataRegisto"));
+    Pageable pageable = PageRequest.of(
+        Integer.parseInt(query.getPageNumber()),
+        Integer.parseInt(query.getPageSize()),
+        Sort.by(Sort.Direction.DESC, "createdDate"));
 
-        Specification<NotificacaoEntity> spec = (root, criteriaQuery, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
+    Specification<NotificacaoEntity> spec = (root, criteriaQuery, cb) -> {
+      List<Predicate> predicates = new ArrayList<>();
 
-            if (StringUtils.hasText(query.getTipoNotificacao())) {
-                predicates.add(cb.equal(root.get("tipoNotificacao"), query.getTipoNotificacao()));
-            }
+      if (StringUtils.hasText(query.getTipoNotificacao())) {
+        predicates.add(cb.equal(root.get("tipoNotificacao"), query.getTipoNotificacao()));
+      }
 
-            if (StringUtils.hasText(query.getDataEnvioDe())) {
-                LocalDate dataDe = LocalDate.parse(query.getDataEnvioDe(), DateTimeFormatter.ISO_LOCAL_DATE);
-                predicates.add(cb.greaterThanOrEqualTo(root.get("dataRegisto"), dataDe));
-            }
+      if (StringUtils.hasText(query.getDataEnvioDe())) {
+        LocalDate dataDe = LocalDate.parse(query.getDataEnvioDe(), DateTimeFormatter.ISO_LOCAL_DATE);
+        predicates.add(cb.greaterThanOrEqualTo(root.get("createdDate"), dataDe));
+      }
 
-            if (StringUtils.hasText(query.getDataEnvioAte())) {
-                LocalDate dataAte = LocalDate.parse(query.getDataEnvioAte(), DateTimeFormatter.ISO_LOCAL_DATE);
-                predicates.add(cb.lessThanOrEqualTo(root.get("dataRegisto"), dataAte));
-            }
+      if (StringUtils.hasText(query.getDataEnvioAte())) {
+        LocalDate dataAte = LocalDate.parse(query.getDataEnvioAte(), DateTimeFormatter.ISO_LOCAL_DATE);
+        predicates.add(cb.lessThanOrEqualTo(root.get("createdDate"), dataAte));
+      }
 
-            if (StringUtils.hasText(query.getEstado())) {
-                predicates.add(cb.equal(root.get("estado"), query.getEstado()));
-            }
+      if (StringUtils.hasText(query.getEstado())) {
+        predicates.add(cb.equal(root.get("estado"), query.getEstado()));
+      }
 
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
 
-        Page<NotificacaoEntity> page = notificacaoRepository.findAll(spec, pageable);
+    Page<NotificacaoEntity> page = notificacaoRepository.findAll(spec, pageable);
 
-        WrapperListaNotificacoesDTO response = new WrapperListaNotificacoesDTO();
-        response.setContent(page.getContent().stream().map(notificacaoMapper::toDto).collect(Collectors.toList()));
-        response.setTotalPages(page.getTotalPages());
-        response.setTotalElements(page.getTotalElements());
-        response.setPageNumber(page.getNumber());
-        response.setPageSize(page.getSize());
+    WrapperListaNotificacoesDTO response = new WrapperListaNotificacoesDTO();
+    response.setContent(page.getContent().stream().map(notificacaoMapper::toDto).collect(Collectors.toList()));
+    response.setTotalPages(page.getTotalPages());
+    response.setTotalElements(page.getTotalElements());
+    response.setPageNumber(page.getNumber());
+    response.setPageSize(page.getSize());
 
-        return response;
-    }
+    return response;
+  }
 
-    public NotificacaoInfoDTO findById(String id) {
-        NotificacaoEntity entity = notificacaoRepository.findByIdOrThrow(Long.parseLong(id));
-        return notificacaoMapper.toDto(entity);
-    }
+  @Transactional(readOnly = true)
+  public NotificacaoInfoDTO findById(String id) {
+    NotificacaoEntity entity = notificacaoRepository.findByIdOrThrow(Long.parseLong(id));
+    return notificacaoMapper.toDto(entity);
+  }
 
-    public NotificacaoInfoDTO findByDeclaracaoId(String declaracaoId) {
+  @Transactional(readOnly = true)
+  public NotificacaoInfoDTO findNotificacaoByDeclaracaoId(String declaracaoId) {
 
-      var uuid = IdentificadorUnico.from(declaracaoId).valor();
-        NotificacaoEntity entity = notificacaoRepository
-                .findByReferenciaNameAndReferenciaUuid(TableName.RH_T_DECLARACAO.name(), uuid)
-                .orElseThrow(() -> IgrpResponseStatusException.badRequest(
-                    "Notificação não encontrada para a declaração com id: " + declaracaoId));
-        return notificacaoMapper.toDto(entity);
-    }
+    var uuid = IdentificadorUnico.from(declaracaoId).valor();
+    NotificacaoEntity entity = notificacaoRepository
+        .findByReferenciaNameAndReferenciaUuid(TableName.RH_T_DECLARACAO.name(), uuid)
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest(
+            "Notificação não encontrada para a declaração com id: " + declaracaoId));
+    return notificacaoMapper.toDto(entity);
+  }
 }

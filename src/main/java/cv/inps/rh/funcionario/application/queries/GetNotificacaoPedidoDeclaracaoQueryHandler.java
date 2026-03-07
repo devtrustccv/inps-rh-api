@@ -24,7 +24,7 @@ public class GetNotificacaoPedidoDeclaracaoQueryHandler implements QueryHandler<
 
     LOGGER.debug("GetNotificacaoPedidoDeclaracaoQuery: {}", query);
 
-    var response = notificacaoReadService.findByDeclaracaoId(query.getId());
+    var response = notificacaoReadService.findNotificacaoByDeclaracaoId(query.getId());
 
     return ResponseEntity.ok(response);
   }

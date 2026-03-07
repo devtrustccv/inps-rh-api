@@ -211,14 +211,6 @@
           }
         }
       },
-      "requestParams": [
-        {
-          "type": "boolean",
-          "name": "preview",
-          "value": "true",
-          "isRequired": false
-        }
-      ],
       "pathVariables": [
         {
           "name": "id",
@@ -256,5 +248,5 @@
       ]
     }
   ],
-  "id": "gaahn3ko4i-novoPedidoDeclaracao-novoPedidoDeclaracao-getNotificacaoPedidoDeclaracao"
+  "id": "gaahn3ko4i-novoPedidoDeclaracao-novoPedidoDeclaracao-getNotificacaoPedidoDeclaracao-visualizarPedidoDeclaracao"
 }
