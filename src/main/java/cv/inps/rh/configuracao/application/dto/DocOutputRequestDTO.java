@@ -10,6 +10,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.util.UUID;
+
 
 @Data
 @NoArgsConstructor
@@ -23,6 +25,6 @@ public class DocOutputRequestDTO  {
   private String titulo;
   private String corpo;
   private String assinadoPor;
-  private Long responsavelId;
+  private UUID responsavel;
 
 }

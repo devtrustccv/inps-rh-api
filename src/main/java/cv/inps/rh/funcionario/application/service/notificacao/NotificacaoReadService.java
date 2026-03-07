@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,7 +80,11 @@ public class NotificacaoReadService {
 
   @Transactional(readOnly = true)
   public NotificacaoInfoDTO findById(String id) {
-    NotificacaoEntity entity = notificacaoRepository.findByIdOrThrow(Long.parseLong(id));
+    var uuid = UUID.fromString(id);
+    NotificacaoEntity entity = notificacaoRepository.findByUuid((uuid))
+        .orElseThrow(() -> IgrpResponseStatusException.notFound(
+            "Notificacão not found with id"+uuid
+        ));
     return notificacaoMapper.toDto(entity);
   }
 

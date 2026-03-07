@@ -56,17 +56,23 @@ public class DocOutputService {
 
   @Transactional
   public ParamDocOutputEntity create(DocOutputRequestDTO request) {
-    ResponsavelEntity responsavel = responsavelRepository.findById(request.getResponsavelId())
-        .orElseThrow(() -> IgrpResponseStatusException.notFound("Responsável não encontrado"));
+
 
     ParamDocOutputEntity entity = mapper.toEntity(request);
-    entity.setResponsavel(responsavel);
     entity.setTitulo(request.getTitulo());
     entity.setCorpo(request.getCorpo());
     entity.setAssinadoPor(request.getAssinadoPor());
     entity.setTipoDocumento(request.getTipoDocumento());
     entity.setUuid(UuidCreator.getTimeOrderedEpoch());
     entity.setEstado("A"); // Regra: Sempre ativo na criação
+
+    ResponsavelEntity responsavel = null;
+    if (request.getResponsavel()!=null) {
+      responsavel = responsavelRepository.findByFunId_Uuid(request.getResponsavel()).orElseThrow(
+          () ->
+              IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + request.getResponsavel()));
+      entity.setResponsavel(responsavel);
+    }
 
     return repository.save(entity);
   }
@@ -78,18 +84,22 @@ public class DocOutputService {
     oldEntity.setEstado("I");
     repository.save(oldEntity);
 
-    // Passo 2: Criar um novo registo com os dados atualizados
-    ResponsavelEntity responsavel = responsavelRepository.findById(request.getResponsavelId())
-        .orElseThrow(() -> IgrpResponseStatusException.notFound("Responsável não encontrado"));
 
     ParamDocOutputEntity newEntity = mapper.toEntity(request);
-    newEntity.setResponsavel(responsavel);
     newEntity.setTitulo(request.getTitulo());
     newEntity.setCorpo(request.getCorpo());
     newEntity.setAssinadoPor(request.getAssinadoPor());
     newEntity.setTipoDocumento(request.getTipoDocumento());
     newEntity.setUuid(UuidCreator.getTimeOrderedEpoch());
     newEntity.setEstado("A");
+
+    ResponsavelEntity responsavel = null;
+    if (request.getResponsavel()!=null) {
+      responsavel = responsavelRepository.findByFunId_Uuid(request.getResponsavel()).orElseThrow(
+          () ->
+              IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + request.getResponsavel()));
+      newEntity.setResponsavel(responsavel);
+    }
 
     return repository.save(newEntity);
   }

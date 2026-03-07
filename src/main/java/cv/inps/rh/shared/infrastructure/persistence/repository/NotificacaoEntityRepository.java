@@ -29,4 +29,6 @@ public interface NotificacaoEntityRepository extends
 
 
   List<NotificacaoEntity> findByAlertaId(AlertaEntity alertaId);
+
+  Optional<NotificacaoEntity> findByUuid(UUID uuid);
 }

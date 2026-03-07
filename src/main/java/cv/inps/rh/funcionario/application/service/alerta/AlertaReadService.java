@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
@@ -28,68 +29,72 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AlertaReadService {
 
-    private final AlertaEntityRepository alertaRepository;
-    private final NotificacaoEntityRepository notificacaoRepository;
-    private final AlertaMapper alertaMapper;
-    private final NotificacaoMapper notificacaoMapper;
+  private final AlertaEntityRepository alertaRepository;
+  private final NotificacaoEntityRepository notificacaoRepository;
+  private final AlertaMapper alertaMapper;
+  private final NotificacaoMapper notificacaoMapper;
 
-    public WrapperListAlertaDTO findAll(GetListAlertaQuery query) {
+  @Transactional(readOnly = true)
+  public WrapperListAlertaDTO findAll(GetListAlertaQuery query) {
 
-        PageRequest pageRequest = PageRequest.of(Integer.parseInt(query.getPageNumber()), Integer.parseInt(query.getPageSize()));
+    PageRequest pageRequest = PageRequest.of(Integer.parseInt(query.getPageNumber()), Integer.parseInt(query.getPageSize()));
 
-        Specification<AlertaEntity> spec = (root, q, cb) -> {
-            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+    Specification<AlertaEntity> spec = (root, q, cb) -> {
+      List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
 
-            if (StringUtils.hasText(query.getReferencia())) {
-                predicates.add(cb.like(root.get("referenciaName"), "%" + query.getReferencia() + "%"));
-            }
-            if (StringUtils.hasText(query.getTipoAlerta())) {
-                predicates.add(cb.equal(root.get("tipoAlerta"), query.getTipoAlerta()));
-            }
-            if (StringUtils.hasText(query.getEstado())) {
-                predicates.add(cb.equal(root.get("estado"), query.getEstado()));
-            }
-            if (StringUtils.hasText(query.getDataRegistoDe())) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("createdDate").as(LocalDate.class), LocalDate.parse(query.getDataRegistoDe(), DateTimeFormatter.ISO_LOCAL_DATE)));
-            }
-            if (StringUtils.hasText(query.getDataRegistoAte())) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("createdDate").as(LocalDate.class), LocalDate.parse(query.getDataRegistoAte(), DateTimeFormatter.ISO_LOCAL_DATE)));
-            }
+      if (StringUtils.hasText(query.getReferencia())) {
+        predicates.add(cb.like(root.get("referenciaName"), "%" + query.getReferencia() + "%"));
+      }
+      if (StringUtils.hasText(query.getTipoAlerta())) {
+        predicates.add(cb.equal(root.get("tipoAlerta"), query.getTipoAlerta()));
+      }
+      if (StringUtils.hasText(query.getEstado())) {
+        predicates.add(cb.equal(root.get("estado"), query.getEstado()));
+      }
+      if (StringUtils.hasText(query.getDataRegistoDe())) {
+        predicates.add(cb.greaterThanOrEqualTo(root.get("createdDate").as(LocalDate.class), LocalDate.parse(query.getDataRegistoDe(), DateTimeFormatter.ISO_LOCAL_DATE)));
+      }
+      if (StringUtils.hasText(query.getDataRegistoAte())) {
+        predicates.add(cb.lessThanOrEqualTo(root.get("createdDate").as(LocalDate.class), LocalDate.parse(query.getDataRegistoAte(), DateTimeFormatter.ISO_LOCAL_DATE)));
+      }
 
-            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
-        };
+      return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+    };
 
-        Page<AlertaEntity> page = alertaRepository.findAll(spec, pageRequest);
+    Page<AlertaEntity> page = alertaRepository.findAll(spec, pageRequest);
 
-        WrapperListAlertaDTO result = new WrapperListAlertaDTO();
-        result.setTotalElements(page.getTotalElements());
-        result.setTotalPages(page.getTotalPages());
-        result.setPageNumber(page.getNumber());
-        result.setPageSize(page.getSize());
-        result.setContent(alertaMapper.toDtoList(page.getContent()));
+    WrapperListAlertaDTO result = new WrapperListAlertaDTO();
+    result.setTotalElements(page.getTotalElements());
+    result.setTotalPages(page.getTotalPages());
+    result.setPageNumber(page.getNumber());
+    result.setPageSize(page.getSize());
+    result.setContent(alertaMapper.toDtoList(page.getContent()));
 
-        return result;
-    }
+    return result;
+  }
 
-    public AlertaDTO findById(String id) {
 
-        var entity = getById(id);
-        return alertaMapper.toDto(entity);
-    }
+  @Transactional(readOnly = true)
+  public AlertaDTO findById(String id) {
 
-    private AlertaEntity getById(String id){
-      var uuid = UUID.fromString(id);
+    var entity = getById(id);
+    return alertaMapper.toDto(entity);
+  }
 
-      AlertaEntity entity = alertaRepository.findByUuid(uuid).orElseThrow(
-          () -> IgrpResponseStatusException.notFound("Alerta not found for id: " + id)
-      );
 
-      return entity;
-    }
+  private AlertaEntity getById(String id) {
+    var uuid = UUID.fromString(id);
 
-    public List<NotificacaoInfoDTO> findNotificacoesByAlertaId(String alertaId) {
-      var entity = getById(alertaId);
-         List<NotificacaoEntity> notificacoes = notificacaoRepository.findByAlertaId(entity);
-        return notificacaoMapper.toDtoList(notificacoes);
-    }
+    AlertaEntity entity = alertaRepository.findByUuid(uuid).orElseThrow(
+        () -> IgrpResponseStatusException.notFound("Alerta not found for id: " + id)
+    );
+
+    return entity;
+  }
+  @Transactional(readOnly = true)
+  public List<NotificacaoInfoDTO> findNotificacoesByAlertaId(String alertaId) {
+    var entity = getById(alertaId);
+    List<NotificacaoEntity> notificacoes = notificacaoRepository.findByAlertaId(entity);
+    return notificacaoMapper.toDtoList(notificacoes);
+  }
 }
