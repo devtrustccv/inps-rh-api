@@ -129,8 +129,8 @@ public class RelatorioController {
   )
   
   public ResponseEntity<?> extrairFichaEfetividade(
-    @RequestParam(value = "ano") Integer ano,
-    @RequestParam(value = "mes") Integer mes)
+    @RequestParam(value = "ano", required = false) Integer ano,
+    @RequestParam(value = "mes", required = false) Integer mes)
   {
 
       final var query = new ExtrairFichaEfetividadeQuery(ano, mes);

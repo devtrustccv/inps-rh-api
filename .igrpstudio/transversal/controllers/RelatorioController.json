@@ -126,12 +126,12 @@
         {
           "type": "integer",
           "name": "ano",
-          "isRequired": true
+          "isRequired": false
         },
         {
           "type": "integer",
           "name": "mes",
-          "isRequired": true
+          "isRequired": false
         }
       ]
     }
