@@ -120,11 +120,11 @@ public class SniacEntryDTO {
 
   @JsonProperty("concelhoId")
   @JsonAlias("CONCELHO_ID")
-  private Long concelhoId;
+  private String concelhoId;
 
   @JsonProperty("ilhaId")
   @JsonAlias("ILHA_ID")
-  private Long ilhaId;
+  private String ilhaId;
 
   @JsonProperty("face")
   @JsonAlias("FACE")
