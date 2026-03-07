@@ -9,6 +9,7 @@ import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -18,6 +19,7 @@ public class GetOutputDocumentsQueryHandler implements QueryHandler<GetOutputDoc
     private final DocOutputService service;
 
     @IgrpQueryHandler
+    @Transactional(readOnly=true)
     public ResponseEntity<WrapperDocOutputListDTO> handle(GetOutputDocumentsQuery query) {
         LOGGER.debug("GetOutputDocumentsQuery: {}", query);
         WrapperDocOutputListDTO result = service.findAll(
