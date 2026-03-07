@@ -33,7 +33,7 @@ import cv.inps.rh.transversal.application.dto.DossierResponseDTO;
 )
 public class RelatorioController {
 
-
+  
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -50,7 +50,7 @@ public class RelatorioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -60,7 +60,7 @@ public class RelatorioController {
       )
     }
   )
-
+  
   public ResponseEntity<AssiduidadeListDTO> relatorioAssiduidade(
     @RequestParam(value = "direccaoId", required = false) Long direccaoId,
     @RequestParam(value = "seccaoId", required = false) Long seccaoId,
@@ -87,7 +87,7 @@ public class RelatorioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-
+          
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -97,7 +97,7 @@ public class RelatorioController {
       )
     }
   )
-
+  
   public ResponseEntity<DossierResponseDTO> obterDossierColaborador(@Valid @RequestBody DossierRequestDTO obterDossierColaboradorRequest
     )
   {
@@ -105,6 +105,37 @@ public class RelatorioController {
       final var command = new ObterDossierColaboradorCommand(obterDossierColaboradorRequest);
 
       return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "assiduidade/ficha-efectividade"
+  )
+  @Operation(
+    summary = "Extrair ficha efetividade",
+    description = "Extrair ficha efetividade",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/pdf",
+              schema = @Schema(
+                  implementation = byte[].class,
+                  type = "byte[]")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<?> extrairFichaEfetividade(
+    @RequestParam(value = "ano") Integer ano,
+    @RequestParam(value = "mes") Integer mes)
+  {
+
+      final var query = new ExtrairFichaEfetividadeQuery(ano, mes);
+
+      return queryBus.handle(query);
 
   }
 
