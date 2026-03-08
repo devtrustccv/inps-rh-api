@@ -1,0 +1,26 @@
+{
+  "type": "dto",
+  "module": "parametrizacao",
+  "name": "TipoDocumento",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "Parametrizacao",
+    "module": "parametrizacao"
+  },
+  "attributes": [
+    {
+      "name": "codigo",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "auy0bzoi6m"
+}
