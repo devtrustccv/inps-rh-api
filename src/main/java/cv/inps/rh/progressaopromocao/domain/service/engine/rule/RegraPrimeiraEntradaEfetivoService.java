@@ -17,7 +17,7 @@ public class RegraPrimeiraEntradaEfetivoService {
 
   public boolean atingiuTempoPrimeiraProgressao(CarreiraEntity career) {
 
-    if (!isPrimeiraProgressao(career.getId()))
+    if (isNotPrimeiraProgressao(career.getId()))
       return true;
 
     return career.getDataInicio()
@@ -25,7 +25,7 @@ public class RegraPrimeiraEntradaEfetivoService {
         .isBefore(LocalDate.now().plusDays(1));
   }
 
-  private boolean isPrimeiraProgressao(Long careerId) {
-    return evolucaoRepository.existsByCarreiraIdDeId(careerId);
+  private boolean isNotPrimeiraProgressao(Long careerId) {
+    return !evolucaoRepository.existsByCarreiraIdDeId(careerId);
   }
 }

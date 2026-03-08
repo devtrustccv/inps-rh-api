@@ -25,7 +25,9 @@ public class SimulacaoService {
 
   public void registarSimulacao(CarreiraEntity career, MediaResultado result, ProgessionPromotionType type) {
 
-    var proximoEscalao = buscarProximoEscalao(career);
+    simEvolucaoCarreiraEntityRepository.deleteAll();
+
+    var proximoEscalao = getProximoEscalao(career);
 
     var e = new SimEvolucaoCarreiraEntity();
     //e.setTiprel();
@@ -41,7 +43,7 @@ public class SimulacaoService {
     simEvolucaoCarreiraEntityRepository.save(e);
   }
 
-  public ParamEscalaoEntity buscarProximoEscalao(CarreiraEntity career) {
+  public ParamEscalaoEntity getProximoEscalao(CarreiraEntity career) {
 
     var escalaoId = career.getEscalaoId();
     var nivelAtual = escalaoId.getNivelReferencia();

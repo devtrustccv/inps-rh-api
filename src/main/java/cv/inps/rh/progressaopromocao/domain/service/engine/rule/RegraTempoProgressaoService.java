@@ -10,7 +10,8 @@ public class RegraTempoProgressaoService {
 
     if (isCargoChefia(carreira)) {
       return 4; // chefia
-      // TODO 05/03/2026 17:37 verificar se o funcionario ja tem uma carreira base
+      // TODO 05/03/2026 17:37 o funcionario tem uma carreira base
+
       // return 2; carreira base
     }
 
