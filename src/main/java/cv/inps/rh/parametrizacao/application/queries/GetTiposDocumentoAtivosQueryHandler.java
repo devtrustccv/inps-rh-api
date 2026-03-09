@@ -3,6 +3,7 @@ package cv.inps.rh.parametrizacao.application.queries;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.parametrizacao.application.dto.TipoDocumentoDTO;
 import cv.inps.rh.parametrizacao.domain.repository.TipoDocumentoRepository;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.TipoDocumentoMapper;
 import org.slf4j.Logger;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class GetTiposDocumentoAtivosQueryHandler implements QueryHandler<GetTiposDocumentoAtivosQuery, ResponseEntity<List<ParametrizacaoDTO>>>{
+public class GetTiposDocumentoAtivosQueryHandler implements QueryHandler<GetTiposDocumentoAtivosQuery, ResponseEntity<List<TipoDocumentoDTO>>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetTiposDocumentoAtivosQueryHandler.class);
 
@@ -27,9 +28,9 @@ public class GetTiposDocumentoAtivosQueryHandler implements QueryHandler<GetTipo
   }
 
    @IgrpQueryHandler
-  public ResponseEntity<List<ParametrizacaoDTO>> handle(GetTiposDocumentoAtivosQuery query) {
+  public ResponseEntity<List<TipoDocumentoDTO>> handle(GetTiposDocumentoAtivosQuery query) {
      var tiposDocumentos =  tipoDocumentoRepository.findAllActive(query.getReferencia());
-     List<ParametrizacaoDTO> parametrizacoes = tiposDocumentos.stream()
+     List<TipoDocumentoDTO> parametrizacoes = tiposDocumentos.stream()
          .map(tipoDocumentoMapper::toParametrizacaoDto)
          .toList();
      return ResponseEntity.ok(parametrizacoes);

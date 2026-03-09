@@ -103,6 +103,37 @@
           }
         }
       }
+    },
+    {
+      "actionName": "extrairFichaEfetividade",
+      "path": "assiduidade/ficha-efectividade",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/pdf": {
+              "schema": {
+                "type": "binary",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "integer",
+          "name": "ano",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "mes",
+          "isRequired": false
+        }
+      ]
     }
   ],
   "id": "undefined-listarDossierColaborador-relatorioDossierColaborador-relatorioDossierColaborador-relatorioAssiduidade-relatorioDossierColaborador-relatorioAssiduidade-relatorioDossierColaborador-relatorioAssiduidade-relatorioAssiduidade"

@@ -36,11 +36,11 @@ public interface CarreiraEntityRepository extends
   }
 
   @Query("""
-        SELECT c
-        FROM CarreiraEntity c
-        WHERE c.estado = cv.inps.rh.shared.application.constants.Estado.A
-        AND c.dataFim IS NULL
-    """)
+          SELECT c
+          FROM CarreiraEntity c
+          WHERE c.estado = cv.inps.rh.shared.application.constants.Estado.A
+          AND c.dataInicio IS NOT NULL AND c.dataFim IS NULL AND c.contrVinculoId IS NOT NULL
+      """)
   List<CarreiraEntity> findCarreirasAtivas();
 
 }

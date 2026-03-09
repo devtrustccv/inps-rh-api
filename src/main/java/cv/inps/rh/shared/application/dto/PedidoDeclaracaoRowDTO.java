@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 
 @Data
@@ -21,10 +22,12 @@ import java.time.LocalDate;
 @IgrpDTO
 public class PedidoDeclaracaoRowDTO  {
   private Long id;
+  private UUID uuid;
   private String tipoDeclaracao;
   private String efeito;
   private LocalDate dataPedido;
   private String nomeColaborador;
+  private UUID uuidColaborador;
   private String direcao;
   private String seccao;
   private String vinculo;

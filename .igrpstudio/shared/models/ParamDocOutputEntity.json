@@ -1,0 +1,27 @@
+{
+  "type": "model",
+  "module": "shared",
+  "name": "ParamDocOutputEntity",
+  "tableName": "RH_T_PARAM_DOC_OUTPUT",
+  "audit": true,
+  "crud": false,
+  "revision": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "id",
+      "type": "long",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": true,
+      "generationType": "SEQUENCE",
+      "skipFieldRevision": false,
+      "sequenceName": "RH_S_PARAM_DOC_OUTPUT",
+      "objectType": "java"
+    }
+  ],
+  "id": "rdmhyptv1l",
+  "uniqueConstraints": [],
+  "indexes": []
+}

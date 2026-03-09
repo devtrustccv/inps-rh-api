@@ -6,6 +6,7 @@
   "audit": true,
   "crud": false,
   "revision": false,
+  "readOnly": true,
   "attributes": [
     {
       "name": "id",

@@ -1,73 +1,60 @@
 package cv.inps.rh.progressaopromocao.domain.service.engine;
 
+import cv.inps.rh.progressaopromocao.domain.service.engine.model.ProgessionPromotionType;
 import cv.inps.rh.progressaopromocao.domain.service.engine.rule.AvaliacaoService;
 import cv.inps.rh.progressaopromocao.domain.service.engine.rule.RegraPrimeiraEntradaEfetivoService;
 import cv.inps.rh.progressaopromocao.domain.service.engine.rule.RegraTempoProgressaoService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ProgressaoService {
 
-  private final CarreiraEntityRepository carreiraRepository;
+  private static final Logger LOGGER = LoggerFactory.getLogger(ProgressaoService.class);
+
   private final AvaliacaoService avaliacaoService;
   private final SimulacaoService simulacaoService;
   private final RegraTempoProgressaoService regraTempoProgressaoService;
   private final RegraPrimeiraEntradaEfetivoService regraPrimeiraEntrada;
 
-  public void simular() {
+  public void simular(List<CarreiraEntity> careers) {
 
-    var carreiras = carreiraRepository.findCarreirasAtivas();
+    for (var career : careers) {
 
-    for (var carreira : carreiras) {
+      // TODO 05/03/2026 17:41 colaborador em licensa sem vencimento por exemplo nao deve progredir
+      // TODO 05/03/2026 17:41 O colabordor não deve uma situação laboral na qual não evolui na carreira no intervalo de data que supostamente deverá evoluir. deve iniciar a partir da situacao laboral
 
-      if (!validaRegrasBasicas(carreira) || !atingiuTempoMinimo(carreira)) continue;
+      if (!atingiuTempoMinimo(career))
+        continue;
 
-      var media = avaliacaoService.calcularMedia(carreira.getContrVinculoId().getFunId(), 3);
-
-      if (!media.elegivelProgressao()) continue;
-
-      simulacaoService.registarSimulacao(carreira, media, "P"); // Progressão
+      var media = avaliacaoService.calcularMedia(career.getContrVinculoId().getFunId(), 3);
+      if (media.elegivelProgressao())
+        simulacaoService.registarSimulacao(career, media, ProgessionPromotionType.PROGRESSAO);
     }
   }
 
-  /**
-   * Regras básicas:
-   * - Tem contrato associado
-   * - Tem funcionário associado
-   */
-  private boolean validaRegrasBasicas(CarreiraEntity carreira) {
+  private boolean atingiuTempoMinimo(CarreiraEntity career) {
 
-    if (carreira.getContrVinculoId() == null) return false;
-
-    if (carreira.getContrVinculoId().getFunId() == null) return false;
-
-    return carreira.getDataInicio() != null;
-  }
-
-  /**
-   * Regra dos 3 anos para progressão
-   */
-  private boolean atingiuTempoMinimo(CarreiraEntity carreira) {
-
-    if (!regraPrimeiraEntrada
-        .atingiuTempoPrimeiraProgressao(carreira)) {
+    var atingiuTempoPrimeiraProgressao = regraPrimeiraEntrada.atingiuTempoPrimeiraProgressao(career);
+    LOGGER.debug("ATINGIU TEMPO PRIMEIRA PROGRESSAO: {}", atingiuTempoPrimeiraProgressao);
+    if (!atingiuTempoPrimeiraProgressao)
       return false;
-    }
 
-    if (carreira.getDataInicio() == null) return false;
+    int minimalYears = regraTempoProgressaoService.determinarTempoMinimoProgressao(career);
+    LOGGER.debug("TEMPO MINIMO: {}", minimalYears);
 
-    int anosMinimos =
-        regraTempoProgressaoService
-            .determinarTempoMinimoProgressao(carreira);
+    var before = career.getDataInicio()
+        .plusYears(minimalYears)
+        .isBefore(LocalDate.now().plusDays(1));
+    LOGGER.debug("TEMPO MINIMO ATINGIDO: {}, {}, {}", before, career.getDataInicio(), LocalDate.now().plusDays(1));
 
-    return carreira.getDataInicio()
-        .plusYears(anosMinimos)
-        .isBefore(LocalDate.now());
+    return before;
   }
 }

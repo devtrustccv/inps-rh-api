@@ -1,6 +1,7 @@
 package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.parametrizacao.application.dto.TipoDocumentoDTO;
 import cv.inps.rh.parametrizacao.domain.models.TipoDocumento;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import org.springframework.stereotype.Component;
@@ -42,12 +43,13 @@ public class TipoDocumentoMapper {
     return entity;
   }
 
-  public ParametrizacaoDTO toParametrizacaoDto(TipoDocumento domain) {
+  public TipoDocumentoDTO toParametrizacaoDto(TipoDocumento domain) {
     if (domain == null) return null;
 
-    ParametrizacaoDTO dto = new ParametrizacaoDTO();
+    TipoDocumentoDTO dto = new TipoDocumentoDTO();
     dto.setLabel(domain.nome());
     dto.setValue(domain.id());
+    dto.setCodigo(domain.codigo());
     return dto;
   }
 

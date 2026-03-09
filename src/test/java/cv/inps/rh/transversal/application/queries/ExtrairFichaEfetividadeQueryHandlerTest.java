@@ -1,4 +1,4 @@
-package cv.inps.rh.progressaopromocao.application.queries;
+package cv.inps.rh.transversal.application.queries;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -10,13 +10,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import cv.inps.rh.progressaopromocao.application.queries.*;
+import cv.inps.rh.transversal.application.queries.*;
 
 @ExtendWith(MockitoExtension.class)
-public class GetListaProgressaPromocaoQueryHandlerTest {
+public class ExtrairFichaEfetividadeQueryHandlerTest {
 
   @InjectMocks
-  private GetListaProgressaPromocaoQueryHandler getListaProgressaPromocaoQueryHandler;
+  private ExtrairFichaEfetividadeQueryHandler extrairFichaEfetividadeQueryHandler;
 
   @BeforeEach
   void setUp() {
@@ -24,14 +24,14 @@ public class GetListaProgressaPromocaoQueryHandlerTest {
   }
 
   @Test
-  void testHandleGetListaProgressaPromocaoQuery() {
+  void testHandleExtrairFichaEfetividadeQuery() {
     // TODO: Implement unit test for handle method
     // Example:
     // Given
-    // GetListaProgressaPromocaoQuery query = new GetListaProgressaPromocaoQuery(...);
+    // ExtrairFichaEfetividadeQuery query = new ExtrairFichaEfetividadeQuery(...);
     //
     // When
-    // ResponseEntity<ListaProgressaoPromocaoDTO> response = getListaProgressaPromocaoQueryHandler.handle(query);
+    // ResponseEntity<?> response = extrairFichaEfetividadeQueryHandler.handle(query);
     //
     // Then
     // assertNotNull(response);

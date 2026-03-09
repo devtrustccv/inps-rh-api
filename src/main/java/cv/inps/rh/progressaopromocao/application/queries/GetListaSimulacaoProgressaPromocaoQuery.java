@@ -11,7 +11,7 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetListaProgressaPromocaoQuery implements Query {
+public class GetListaSimulacaoProgressaPromocaoQuery implements Query {
 
   @NotBlank(message = "The field <progressaoPromocao> is required")
   private String progressaoPromocao;

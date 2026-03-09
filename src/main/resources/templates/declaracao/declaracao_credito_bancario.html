@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+
+    <style>
+
+        body{
+            font-family: Arial, sans-serif;
+            margin:40px;
+            font-size:12pt;
+        }
+
+        h1{
+            text-align:center;
+        }
+
+        .watermark{
+            position: fixed;
+            top:40%;
+            left:20%;
+            font-size:90px;
+            color:rgba(200,0,0,0.15);
+            transform:rotate(-35deg);
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="watermark" th:if="${watermark}">
+    NÃO VÁLIDO
+</div>
+
+<h1 th:text="${param.titulo}">Declaração</h1>
+
+<p>
+    Declaramos para os devidos efeitos que o funcionário
+    <strong th:text="${declaracao.pedidoId.funId.nome}">
+        Nome
+    </strong>
+    é funcionário desta instituição.
+</p>
+
+<p th:text="${param.corpo}">
+    Texto da declaração configurado na parametrização.
+</p>
+
+<br/><br/>
+
+<p>
+    Assinado por:
+    <strong th:text="${param.assinadoPor}">
+        Responsável RH
+    </strong>
+</p>
+
+</body>
+</html>

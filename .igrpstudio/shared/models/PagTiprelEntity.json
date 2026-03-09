@@ -1,1 +1,93 @@
-{"type":"model","module":"shared","name":"PagTiprelEntity","tableName":"RH_T_PAG_TIPREL","audit":true,"crud":false,"revision":false,"attributes":[{"name":"id","type":"long","length":255,"nullable":true,"unique":false,"primaryKey":true,"generationType":"SEQUENCE","skipFieldRevision":false,"objectType":"java","sequenceName":"SEQ_DEF_PAG_TIPREL"},{"name":"pag_id","type":"relation","length":255,"nullable":false,"unique":false,"primaryKey":false,"skipFieldRevision":false,"relation":{"type":"ManyToOne","entity":"DefPagamentoEntity","referencedColumnName":"id","cardinality":"oneWay","fetchType":"lazy","module":"shared","orphanRemoval":false}},{"name":"tiprel_id","type":"relation","length":255,"nullable":true,"unique":false,"primaryKey":false,"skipFieldRevision":false,"relation":{"type":"ManyToOne","entity":"TiposRelacionamentoEntity","referencedColumnName":"id","cardinality":"oneWay","fetchType":"lazy","module":"shared","orphanRemoval":false}},{"name":"estado","type":"Estado","length":255,"nullable":true,"unique":false,"primaryKey":false,"skipFieldRevision":false,"objectType":"enum","module":"shared"},{"name":"obs","type":"string","length":4000,"nullable":true,"unique":false,"primaryKey":false,"skipFieldRevision":false},{"name":"uuid","type":"uuid","length":255,"nullable":true,"unique":false,"primaryKey":false,"skipFieldRevision":false,"objectType":"java"}],"id":"pgvpm95dd4","uniqueConstraints":[],"indexes":[]}
+{
+    "type": "model",
+    "module": "shared",
+    "name": "PagTiprelEntity",
+    "tableName": "RH_T_PAG_TIPREL",
+    "audit": true,
+    "crud": false,
+    "revision": false,
+    "readOnly": true,
+    "attributes": [
+        {
+            "name": "id",
+            "type": "long",
+            "length": 255,
+            "nullable": true,
+            "unique": false,
+            "primaryKey": true,
+            "generationType": "SEQUENCE",
+            "skipFieldRevision": false,
+            "objectType": "java",
+            "sequenceName": "SEQ_DEF_PAG_TIPREL"
+        },
+        {
+            "name": "pag_id",
+            "type": "relation",
+            "length": 255,
+            "nullable": false,
+            "unique": false,
+            "primaryKey": false,
+            "skipFieldRevision": false,
+            "relation": {
+                "type": "ManyToOne",
+                "entity": "DefPagamentoEntity",
+                "referencedColumnName": "id",
+                "cardinality": "oneWay",
+                "fetchType": "lazy",
+                "module": "shared",
+                "orphanRemoval": false
+            }
+        },
+        {
+            "name": "tiprel_id",
+            "type": "relation",
+            "length": 255,
+            "nullable": true,
+            "unique": false,
+            "primaryKey": false,
+            "skipFieldRevision": false,
+            "relation": {
+                "type": "ManyToOne",
+                "entity": "TiposRelacionamentoEntity",
+                "referencedColumnName": "id",
+                "cardinality": "oneWay",
+                "fetchType": "lazy",
+                "module": "shared",
+                "orphanRemoval": false
+            }
+        },
+        {
+            "name": "estado",
+            "type": "Estado",
+            "length": 255,
+            "nullable": true,
+            "unique": false,
+            "primaryKey": false,
+            "skipFieldRevision": false,
+            "objectType": "enum",
+            "module": "shared"
+        },
+        {
+            "name": "obs",
+            "type": "string",
+            "length": 4000,
+            "nullable": true,
+            "unique": false,
+            "primaryKey": false,
+            "skipFieldRevision": false
+        },
+        {
+            "name": "uuid",
+            "type": "uuid",
+            "length": 255,
+            "nullable": true,
+            "unique": false,
+            "primaryKey": false,
+            "skipFieldRevision": false,
+            "objectType": "java"
+        }
+    ],
+    "id": "pgvpm95dd4",
+    "uniqueConstraints": [],
+    "indexes": []
+}

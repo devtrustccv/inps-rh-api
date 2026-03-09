@@ -1,7 +1,6 @@
 package cv.inps.rh.progressaopromocao.domain.service.engine.rule;
 
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.EvolucaoCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EvolucaoCarreiraEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,29 +11,21 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class RegraPrimeiraEntradaEfetivoService {
 
+  private static final int YEARS_FOR_FIRST_PROGRESS = 6;
+
   private final EvolucaoCarreiraEntityRepository evolucaoRepository;
 
-  public boolean atingiuTempoPrimeiraProgressao(CarreiraEntity carreira) {
+  public boolean atingiuTempoPrimeiraProgressao(CarreiraEntity career) {
 
-    if (!isPrimeiraProgressao(carreira)) {
-      return true; // não é primeira progressão
-    }
+    if (isNotPrimeiraProgressao(career.getId()))
+      return true;
 
-    LocalDate inicio = carreira.getDataInicio();
-
-    if (inicio == null) return false;
-
-    return inicio.plusYears(6)
-        .isBefore(LocalDate.now());
+    return career.getDataInicio()
+        .plusYears(YEARS_FOR_FIRST_PROGRESS)
+        .isBefore(LocalDate.now().plusDays(1));
   }
 
-  private boolean isPrimeiraProgressao(CarreiraEntity carreira) {
-
-    var evolucoes =
-        evolucaoRepository.findByCarreiraIdDeId(
-            carreira.getId()
-        );
-
-    return evolucoes.isEmpty();
+  private boolean isNotPrimeiraProgressao(Long careerId) {
+    return !evolucaoRepository.existsByCarreiraIdDeId(careerId);
   }
 }

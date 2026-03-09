@@ -11,7 +11,9 @@ import lombok.Setter;
 public class AvaliacaoEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_avd")
+  @SequenceGenerator(name = "seq_avd", sequenceName = "RH_T_AVD_SEQ", allocationSize = 1)
+  @Column(name = "id", unique = true, nullable = false)
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)

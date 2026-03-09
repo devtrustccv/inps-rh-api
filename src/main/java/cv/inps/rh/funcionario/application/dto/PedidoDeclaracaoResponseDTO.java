@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 
 @Data
@@ -24,6 +25,7 @@ import java.util.List;
 public class PedidoDeclaracaoResponseDTO{
 
   private Long id;
+  private UUID uuid;
   private String tipoDeclaracao;
   private String efeito;
   private LocalDate dataPedido;
@@ -32,6 +34,7 @@ public class PedidoDeclaracaoResponseDTO{
 
   // Colaborador
   private Long funId;
+  private UUID uuidColaborador;
   private String nomeColaborador;
   private String direcao;
   private String seccao;

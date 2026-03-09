@@ -26,7 +26,7 @@ public class GetListaValidacaoProgressaPromocaoQueryHandler implements QueryHand
 
     LOGGER.debug("GetListaValidacaoProgressaPromocaoQuery: {}", query);
 
-    var data = progressaoPromocaoReadService.getValidacaoProgressaoPromocaoData(query);
+    var data = progressaoPromocaoReadService.getValidacaoProgressaoPromocao(query);
     var response = new ListaProgressaoPromocaoDTO();
     PageMapper.fillPagination(data, response);
     response.setContent(data.getContent());
