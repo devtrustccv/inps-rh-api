@@ -40,6 +40,9 @@ public interface CarreiraEntityRepository extends
           FROM CarreiraEntity c
           WHERE c.estado = cv.inps.rh.shared.application.constants.Estado.A
           AND c.dataInicio IS NOT NULL AND c.dataFim IS NULL AND c.contrVinculoId IS NOT NULL
+          ORDER BY
+              CASE WHEN c.cargoId IS NULL THEN 1 ELSE 0 END,
+              c.cargoId.id DESC
       """)
   List<CarreiraEntity> findCarreirasAtivas();
 

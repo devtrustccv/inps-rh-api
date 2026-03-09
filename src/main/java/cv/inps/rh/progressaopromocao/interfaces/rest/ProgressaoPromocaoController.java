@@ -22,6 +22,7 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.progressaopromocao.application.commands.*;
 import cv.inps.rh.progressaopromocao.application.dto.ListaProgressaoPromocaoDTO;
 import cv.inps.rh.progressaopromocao.application.dto.AnexarOrdemServicoRequestDTO;
+import cv.inps.rh.progressaopromocao.application.dto.HistoricoIdsDTO;
 
 @IgrpController
 @RestController
@@ -205,6 +206,36 @@ public class ProgressaoPromocaoController {
       final var query = new GetListaSimulacaoProgressaPromocaoQuery(progressaoPromocao, colaborador, carreiraId, dataDe, dataAte, page, size);
 
       return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "enviar-historico"
+  )
+  @Operation(
+    summary = "Enviar historico progressao promocao",
+    description = "Enviar historico progressao promocao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<String> enviarHistoricoProgressaoPromocao(@Valid @RequestBody HistoricoIdsDTO enviarHistoricoProgressaoPromocaoRequest
+    )
+  {
+
+      final var command = new EnviarHistoricoProgressaoPromocaoCommand(enviarHistoricoProgressaoPromocaoRequest);
+
+      return commandBus.send(command);
 
   }
 

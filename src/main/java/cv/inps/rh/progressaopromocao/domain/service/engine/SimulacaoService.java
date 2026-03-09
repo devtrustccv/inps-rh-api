@@ -50,13 +50,14 @@ public class SimulacaoService {
     var escalaoAtual = escalaoId.getEscalao();
 
     var proximo = calcularProximoNivel(nivelAtual, escalaoAtual);
+    if (proximo == null)
+      return null;
 
-    return escalaoRepository
-        .findByNivelReferenciaAndEscalaoAndEstado(
-            proximo.nivelReferencia(),
-            proximo.escalao(),
-            Estado.A
-        );
+    return escalaoRepository.findByNivelReferenciaAndEscalaoAndEstado(
+        proximo.nivelReferencia(),
+        proximo.escalao(),
+        Estado.A
+    );
   }
 
   private record ProximoNivel(Integer nivelReferencia, String escalao) {

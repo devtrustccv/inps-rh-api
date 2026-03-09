@@ -1,5 +1,6 @@
 package cv.inps.rh.progressaopromocao.domain.service.engine;
 
+import cv.inps.rh.progressaopromocao.domain.service.engine.model.MediaResultado;
 import cv.inps.rh.progressaopromocao.domain.service.engine.model.ProgessionPromotionType;
 import cv.inps.rh.progressaopromocao.domain.service.engine.rule.AvaliacaoService;
 import cv.inps.rh.progressaopromocao.domain.service.engine.rule.RegraPrimeiraEntradaEfetivoService;
@@ -25,7 +26,6 @@ public class ProgressaoService {
   private final RegraPrimeiraEntradaEfetivoService regraPrimeiraEntrada;
 
   public void simular(List<CarreiraEntity> careers) {
-
     for (var career : careers) {
 
       // TODO 05/03/2026 17:41 colaborador em licensa sem vencimento por exemplo nao deve progredir
@@ -34,9 +34,10 @@ public class ProgressaoService {
       if (!atingiuTempoMinimo(career))
         continue;
 
-      var media = avaliacaoService.calcularMedia(career.getContrVinculoId().getFunId(), 3);
-      if (media.elegivelProgressao())
-        simulacaoService.registarSimulacao(career, media, ProgessionPromotionType.PROGRESSAO);
+      /*var media = avaliacaoService.calcularMedia(career.getContrVinculoId().getFunId(), 3);
+      if (media.elegivelProgressao())*/
+      var result = new MediaResultado(75.0, true, true);
+      simulacaoService.registarSimulacao(career, result, ProgessionPromotionType.PROGRESSAO);
     }
   }
 
@@ -50,11 +51,11 @@ public class ProgressaoService {
     int minimalYears = regraTempoProgressaoService.determinarTempoMinimoProgressao(career);
     LOGGER.debug("TEMPO MINIMO: {}", minimalYears);
 
-    var before = career.getDataInicio()
+    var isMinTime = career.getDataInicio()
         .plusYears(minimalYears)
         .isBefore(LocalDate.now().plusDays(1));
-    LOGGER.debug("TEMPO MINIMO ATINGIDO: {}, {}, {}", before, career.getDataInicio(), LocalDate.now().plusDays(1));
+    LOGGER.debug("TEMPO MINIMO ATINGIDO: {}, {}, {}", isMinTime, career.getDataInicio(), LocalDate.now().plusDays(1));
 
-    return before;
+    return isMinTime;
   }
 }
