@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
+import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @Table(name = "RH_T_AVD")
 @Getter
 @Setter
-public class AvaliacaoEntity {
+public class AvaliacaoEntity extends AuditEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_avd")
