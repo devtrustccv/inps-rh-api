@@ -58,6 +58,7 @@ public class PedidoDeclaracaoMapper {
 
         // Dados da Declaração
         dto.setId(entity.getId());
+        dto.setUuid(entity.getUuid());
         dto.setTipoDeclaracao(entity.getTipoDeclaracao());
         dto.setEfeito(entity.getPedidoId().getTipoPedido());
         dto.setEstadoPedido(entity.getEstado());
@@ -82,6 +83,7 @@ public class PedidoDeclaracaoMapper {
                 FuncionarioEntity funcionario = entity.getPedidoId().getFunId();
                 dto.setFunId(funcionario.getId());
                 dto.setNomeColaborador(funcionario.getNome());
+                dto.setUuidColaborador(funcionario.getUuid());
 
               TiposRelacionamentoEntity relacao = entity.getTiprelId();
 
