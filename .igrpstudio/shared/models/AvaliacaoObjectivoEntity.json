@@ -1,0 +1,12 @@
+{
+  "type": "model",
+  "module": "shared",
+  "name": "AvaliacaoObjectivoEntity",
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "id",
+      "type": "long"
+    }
+  ]
+}

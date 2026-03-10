@@ -1,0 +1,12 @@
+{
+  "type": "model",
+  "module": "shared",
+  "name": "ParamManualFuncaoEntity",
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "id",
+      "type": "long"
+    }
+  ]
+}

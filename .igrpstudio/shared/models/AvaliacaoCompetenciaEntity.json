@@ -1,0 +1,12 @@
+{
+  "type": "model",
+  "module": "shared",
+  "name": "AvaliacaoCompetenciaEntity",
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "id",
+      "type": "long"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "type": "model",
+  "module": "shared",
+  "name": "AvaliacaoEntity",
+  "tableName": "RH_T_AVD",
+  "audit": true,
+  "crud": false,
+  "revision": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "id",
+      "type": "long",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": true,
+      "generationType": "SEQUENCE",
+      "skipFieldRevision": false,
+      "objectType": "java",
+      "sequenceName": "RH_T_AVD_SEQ"
+    }
+  ],
+  "id": "awm5n2gy9ve",
+  "uniqueConstraints": [],
+  "indexes": []
+}

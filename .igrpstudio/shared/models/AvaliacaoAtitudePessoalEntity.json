@@ -1,0 +1,12 @@
+{
+  "type": "model",
+  "module": "shared",
+  "name": "AvaliacaoAtitudePessoalEntity",
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "id",
+      "type": "long"
+    }
+  ]
+}

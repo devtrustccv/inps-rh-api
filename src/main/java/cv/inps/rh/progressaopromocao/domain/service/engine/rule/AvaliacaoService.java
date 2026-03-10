@@ -3,7 +3,7 @@ package cv.inps.rh.progressaopromocao.domain.service.engine.rule;
 import cv.inps.rh.progressaopromocao.domain.service.engine.model.MediaResultado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AvaliacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.AvaliacaoRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.AvaliacaoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AvaliacaoService {
 
-  private final AvaliacaoRepository repository;
+  private final AvaliacaoEntityRepository repository;
 
   public MediaResultado calcularMedia(FuncionarioEntity fun, int anos) {
 
