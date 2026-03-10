@@ -52,7 +52,7 @@ public class AvaliacaoEntity extends AuditEntity {
   private String estado;                       // 'A' | 'P' | 'C'
 
   @Column(name = "AVALIACAO_FINAL")
-  private BigDecimal avaliacaoFinal;
+  private Double avaliacaoFinal;
 
   @Column(name = "PESO_COMPORTAMENTAIS")
   private BigDecimal pesoComportamentais;
