@@ -26,6 +26,6 @@ public class CarreiraEvolucaoService {
     LOGGER.info("SIMULANDO PROGRESSÃO PARA {} CARREIRAS", careers.size());
 
     //promocaoService.simular(careers);
-    progressaoService.simular(careers);
+    progressaoService.simular();
   }
 }

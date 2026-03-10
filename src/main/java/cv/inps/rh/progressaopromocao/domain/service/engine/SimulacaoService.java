@@ -7,9 +7,12 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SimEvolucaoCarreiraEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.VwRhProgressaoInputEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamEscalaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SimEvolucaoCarreiraEntityRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -18,10 +21,20 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class SimulacaoService {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(SimulacaoService.class);
+
   private static final int NIVEL_MAXIMO = 16;
 
   private final SimEvolucaoCarreiraEntityRepository simEvolucaoCarreiraEntityRepository;
   private final ParamEscalaoEntityRepository escalaoRepository;
+
+  public void registarSimulacao(VwRhProgressaoInputEntity career, Long result, ProgessionPromotionType type) {
+
+    LOGGER.debug("REGISTAR SIMULACAO: {}, {}, {}", career, result, type);
+
+    // TODO 10/03/2026 21:45 save here
+
+  }
 
   public void registarSimulacao(CarreiraEntity career, MediaResultado result, ProgessionPromotionType type) {
 

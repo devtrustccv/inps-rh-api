@@ -1,61 +1,51 @@
 package cv.inps.rh.progressaopromocao.domain.service.engine;
 
-import cv.inps.rh.progressaopromocao.domain.service.engine.model.MediaResultado;
 import cv.inps.rh.progressaopromocao.domain.service.engine.model.ProgessionPromotionType;
-import cv.inps.rh.progressaopromocao.domain.service.engine.rule.AvaliacaoService;
-import cv.inps.rh.progressaopromocao.domain.service.engine.rule.RegraPrimeiraEntradaEfetivoService;
-import cv.inps.rh.progressaopromocao.domain.service.engine.rule.RegraTempoProgressaoService;
-import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.VwRhProgressaoInputEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.List;
-
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class ProgressaoService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProgressaoService.class);
 
-  private final AvaliacaoService avaliacaoService;
   private final SimulacaoService simulacaoService;
-  private final RegraTempoProgressaoService regraTempoProgressaoService;
-  private final RegraPrimeiraEntradaEfetivoService regraPrimeiraEntrada;
+  private final VwRhProgressaoInputEntityRepository vwRhProgressaoInputEntityRepository;
 
-  public void simular(List<CarreiraEntity> careers) {
-    for (var career : careers) {
+  public void simular() {
 
-      // TODO 05/03/2026 17:41 colaborador em licensa sem vencimento por exemplo nao deve progredir
-      // TODO 05/03/2026 17:41 O colabordor não deve uma situação laboral na qual não evolui na carreira no intervalo de data que supostamente deverá evoluir. deve iniciar a partir da situacao laboral
+    // TODO 05/03/2026 17:41 colaborador em licença sem vencimento não deve progredir
+    // TODO 05/03/2026 17:41 O colaborador não deve estar em situação laboral em que não evolui na carreira no período de progressão; deve iniciar a partir da situação laboral atual
+    // TODO 10/03/2026 21:55 avaliar se já é possível filtrar na query
 
-      if (!atingiuTempoMinimo(career))
+    for (var c : vwRhProgressaoInputEntityRepository.findAll()) {
+
+      // Verifica se já existe evolução ou tempo mínimo de progressão
+      if (c.getExisteEvolucao() == 0L && c.getAtingiuPrimeiraProgressao() == 0L) {
+        LOGGER.debug("Ignorando carreira {} do funcionário {}: sem evolução e sem tempo mínimo de progressão", c.getCarreiraId(), c.getNomeFuncionario());
         continue;
+      }
 
-      /*var media = avaliacaoService.calcularMedia(career.getContrVinculoId().getFunId(), 3);
-      if (media.elegivelProgressao())*/
-      var result = new MediaResultado(75.0, true, true);
-      simulacaoService.registarSimulacao(career, result, ProgessionPromotionType.PROGRESSAO);
+      // Verifica se atingiu tempo mínimo para progressão
+      if (c.getAtingiuTempMinProgressao() == 0L) {
+        LOGGER.debug("Ignorando carreira {} do funcionário {}: não atingiu tempo mínimo para progressão", c.getCarreiraId(), c.getNomeFuncionario());
+        continue;
+      }
+
+      // Verifica se a média das avaliações atende ao mínimo para progressão
+      var media = c.getMediaAvaliacoes();
+      if (media != null && media >= 2.5) {
+        LOGGER.debug("Processando carreira {} do funcionário {}: média {} >= 2.5, registrando simulação", c.getCarreiraId(), c.getNomeFuncionario(), media);
+        simulacaoService.registarSimulacao(c, media, ProgessionPromotionType.PROGRESSAO);
+      } else {
+        LOGGER.debug("Ignorando carreira {} do funcionário {}: média {} abaixo do limite", c.getCarreiraId(), c.getNomeFuncionario(), media);
+      }
     }
-  }
-
-  private boolean atingiuTempoMinimo(CarreiraEntity career) {
-
-    var atingiuTempoPrimeiraProgressao = regraPrimeiraEntrada.atingiuTempoPrimeiraProgressao(career);
-    LOGGER.debug("ATINGIU TEMPO PRIMEIRA PROGRESSAO: {}", atingiuTempoPrimeiraProgressao);
-    if (!atingiuTempoPrimeiraProgressao)
-      return false;
-
-    int minimalYears = regraTempoProgressaoService.determinarTempoMinimoProgressao(career);
-    LOGGER.debug("TEMPO MINIMO: {}", minimalYears);
-
-    var isMinTime = career.getDataInicio()
-        .plusYears(minimalYears)
-        .isBefore(LocalDate.now().plusDays(1));
-    LOGGER.debug("TEMPO MINIMO ATINGIDO: {}, {}, {}", isMinTime, career.getDataInicio(), LocalDate.now().plusDays(1));
-
-    return isMinTime;
   }
 }
