@@ -1,24 +1,23 @@
 {
   "type": "dto",
   "module": "configuracao",
-  "name": "EscalaAvaliacaoRequest",
+  "name": "EscalaAvaliacaoRow",
   "template": "classic",
   "enableCustonValidation": false,
+  "readOnly": true,
   "attributes": [
     {
-      "name": "row",
-      "objectType": "dto",
-      "type": "EscalaAvaliacaoRow",
+      "name": "custom",
+      "objectType": "java",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
       "positive": false,
       "isEmail": false,
       "isUrl": false,
-      "primaryKey": false,
-      "collectionType": "list",
-      "module": "configuracao"
+      "primaryKey": false
     }
   ],
-  "id": "bol8k9u4ho"
+  "id": "avd5u1m4e8"
 }

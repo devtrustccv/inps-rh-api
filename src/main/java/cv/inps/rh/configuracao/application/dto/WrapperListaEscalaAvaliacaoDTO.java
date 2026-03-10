@@ -9,20 +9,21 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO;
+import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoResponseDTO;
+import cv.inps.rh.shared.application.dto.PageDTO;
 import java.util.ArrayList;
 import java.util.List;
-
+import lombok.EqualsAndHashCode;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 
-
+@EqualsAndHashCode(callSuper = true)
 @IgrpDTO
-public class EscalaAvaliacaoRequestDTO  {
+public class WrapperListaEscalaAvaliacaoDTO extends PageDTO {
 
   
   @Valid
-  private List<EscalaAvaliacaoRowDTO> row = new ArrayList<>();
+  private List<EscalaAvaliacaoResponseDTO> content = new ArrayList<>();
 
 }
