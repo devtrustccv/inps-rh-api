@@ -35,6 +35,61 @@
           }
         }
       }
+    },
+    {
+      "actionName": "getListaManualFuncao",
+      "path": "avaliacao-desempenho/manual-funcao",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaManualFuncao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "configuracao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "cargoId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "carrPccsId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "institId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccaoId",
+          "isRequired": false
+        }
+      ]
     }
   ],
   "id": "d3wgc2dppi"

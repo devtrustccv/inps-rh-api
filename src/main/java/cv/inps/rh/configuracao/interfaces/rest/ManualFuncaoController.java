@@ -15,10 +15,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import cv.igrp.framework.core.domain.QueryBus;
+import cv.inps.rh.configuracao.application.queries.*;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.configuracao.application.commands.*;
 import cv.inps.rh.configuracao.application.dto.ManualFuncaoRequestDTO;
 import java.util.Map;
+import cv.inps.rh.configuracao.application.dto.WrapperListaManualFuncaoDTO;
 
 @IgrpController
 @RestController
@@ -30,10 +34,11 @@ import java.util.Map;
 public class ManualFuncaoController {
 
   
+  private final QueryBus queryBus;
   private final CommandBus commandBus;
 
-  public ManualFuncaoController(CommandBus commandBus) {
-          
+  public ManualFuncaoController(QueryBus queryBus, CommandBus commandBus) {
+          this.queryBus = queryBus;
           this.commandBus = commandBus;
   }
    @PostMapping(
@@ -62,6 +67,41 @@ public class ManualFuncaoController {
       final var command = new CreateManualFuncaoCommand(createManualFuncaoRequest);
 
       return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "avaliacao-desempenho/manual-funcao"
+  )
+  @Operation(
+    summary = "Get lista manual funcao",
+    description = "Get lista manual funcao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = WrapperListaManualFuncaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<WrapperListaManualFuncaoDTO> getListaManualFuncao(
+    @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
+    @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
+    @RequestParam(value = "cargoId", required = false) Long cargoId,
+    @RequestParam(value = "carrPccsId", required = false) Long carrPccsId,
+    @RequestParam(value = "institId", required = false) Long institId,
+    @RequestParam(value = "seccaoId", required = false) Long seccaoId)
+  {
+
+      final var query = new GetListaManualFuncaoQuery(pageNumber, pageSize, cargoId, carrPccsId, institId, seccaoId);
+
+      return queryBus.handle(query);
 
   }
 
