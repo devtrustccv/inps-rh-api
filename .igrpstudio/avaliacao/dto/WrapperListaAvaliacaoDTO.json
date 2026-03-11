@@ -12,7 +12,7 @@
     {
       "name": "content",
       "objectType": "dto",
-      "type": "AvaliacaoResumoResponse",
+      "type": "ObjetivoAvaliacaoResumo",
       "required": false,
       "before": false,
       "after": false,
