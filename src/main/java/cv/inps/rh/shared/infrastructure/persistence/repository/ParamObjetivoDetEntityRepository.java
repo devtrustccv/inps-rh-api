@@ -9,16 +9,13 @@ import org.springframework.http.HttpStatus;
 import java.util.Optional;
 import java.util.UUID;
 
-
 @Repository
 public interface ParamObjetivoDetEntityRepository extends
     JpaRepository<ParamObjetivoDetEntity, Long>,
-    JpaSpecificationExecutor<ParamObjetivoDetEntity>
-{
-
+    JpaSpecificationExecutor<ParamObjetivoDetEntity> {
 
   Optional<ParamObjetivoDetEntity> findByUuid(UUID uuid);
 
-
+  boolean existsByAno(Integer ano);
 
 }
