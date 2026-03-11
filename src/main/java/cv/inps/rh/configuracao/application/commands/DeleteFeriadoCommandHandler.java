@@ -7,8 +7,7 @@ import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cv.inps.rh.configuracao.domain.service.FeriadoService;
-import lombok.RequiredArgsConstructor;
+import cv.inps.rh.configuracao.application.services.FeriadoService;
 
 @Component
 public class DeleteFeriadoCommandHandler implements CommandHandler<DeleteFeriadoCommand, ResponseEntity<String>> {

@@ -2,7 +2,7 @@ package cv.inps.rh.configuracao.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.configuracao.domain.service.DocOutputService;
+import cv.inps.rh.configuracao.application.services.DocOutputService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamDocOutputEntity;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

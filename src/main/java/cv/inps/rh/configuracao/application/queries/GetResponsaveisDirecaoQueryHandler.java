@@ -3,7 +3,7 @@ package cv.inps.rh.configuracao.application.queries;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.configuracao.application.dto.ResponsaveisDirecaoResponseDTO;
-import cv.inps.rh.configuracao.domain.service.ResponsavelService;
+import cv.inps.rh.configuracao.application.services.ResponsavelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;

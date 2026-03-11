@@ -9,9 +9,10 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
 
 @Data
 @NoArgsConstructor
@@ -19,10 +20,24 @@ import java.util.List;
 
 
 @IgrpDTO
-public class EscalaAvaliacaoRequestDTO  {
+public class EscalaAvaliacaoRowDTO  {
 
-  
-  @Valid
-  private List<EscalaAvaliacaoRowDTO> row = new ArrayList<>();
+
+  private UUID id;
+
+  @NotNull
+  private Integer nivel;
+
+  @NotBlank
+  private String qualitativa;
+
+  @NotBlank
+  private String descricao;
+
+  @NotNull
+  private BigDecimal quantitativaDe;
+
+  @NotNull
+  private BigDecimal quantitativaAte;
 
 }

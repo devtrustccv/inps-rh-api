@@ -1,14 +1,18 @@
 {
   "type": "dto",
   "module": "configuracao",
-  "name": "EscalaAvaliacaoRequest",
+  "name": "WrapperListaEscalaAvaliacao",
   "template": "classic",
   "enableCustonValidation": false,
+  "extends": {
+    "name": "Page",
+    "module": "shared"
+  },
   "attributes": [
     {
-      "name": "row",
+      "name": "content",
       "objectType": "dto",
-      "type": "EscalaAvaliacaoRow",
+      "type": "EscalaAvaliacaoResponse",
       "required": false,
       "before": false,
       "after": false,
@@ -20,5 +24,5 @@
       "module": "configuracao"
     }
   ],
-  "id": "bol8k9u4ho"
+  "id": "nsenvxpc59"
 }
