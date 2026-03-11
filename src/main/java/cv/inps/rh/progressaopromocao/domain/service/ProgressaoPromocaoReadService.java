@@ -4,7 +4,6 @@ import cv.inps.rh.progressaopromocao.application.dto.ProgressaoPromocaoRowDTO;
 import cv.inps.rh.progressaopromocao.application.queries.GetHistoricoProgressaPromocaoQuery;
 import cv.inps.rh.progressaopromocao.application.queries.GetListaSimulacaoProgressaPromocaoQuery;
 import cv.inps.rh.progressaopromocao.application.queries.GetListaValidacaoProgressaPromocaoQuery;
-import cv.inps.rh.shared.infrastructure.persistence.repository.EvolucaoCarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SimEvolucaoCarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValEvolucaoCarreiraEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
@@ -24,17 +23,17 @@ import static java.util.Optional.ofNullable;
 @Service
 public class ProgressaoPromocaoReadService {
 
-  private final EvolucaoCarreiraEntityRepository evolucaoCarreiraEntityRepository;
   private final SimEvolucaoCarreiraEntityRepository simEvolucaoCarreiraEntityRepository;
   private final ValEvolucaoCarreiraEntityRepository valEvolucaoCarreiraEntityRepository;
 
   public Page<ProgressaoPromocaoRowDTO> getHistoricoProgressaoPromocao(GetHistoricoProgressaPromocaoQuery query) {
-    return evolucaoCarreiraEntityRepository.findProgressaoPromocaoWithFilters(
+    return valEvolucaoCarreiraEntityRepository.findProgressaoPromocaoWithFilters(
         query.getProgressaoPromocao(),
         DateFormatter.stringToLocalDate(query.getDataDe()),
         DateFormatter.stringToLocalDate(query.getDataAte()),
         ofNullable(query.getColaborador()).map(String::trim).orElse(null),
         StringUtils.hasText(query.getCarreiraId()) ? UUID.fromString(query.getCarreiraId()) : null,
+        "S",
         buildPageable(query.getPage(), query.getSize())
     );
   }
@@ -57,6 +56,7 @@ public class ProgressaoPromocaoReadService {
         DateFormatter.stringToLocalDate(query.getDataAte()),
         ofNullable(query.getColaborador()).map(String::trim).orElse(null),
         StringUtils.hasText(query.getCarreiraId()) ? UUID.fromString(query.getCarreiraId()) : null,
+        null,
         buildPageable(query.getPage(), query.getSize())
     );
   }

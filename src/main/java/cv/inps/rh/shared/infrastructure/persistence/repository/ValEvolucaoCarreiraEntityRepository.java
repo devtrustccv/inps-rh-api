@@ -54,6 +54,7 @@ public interface ValEvolucaoCarreiraEntityRepository extends JpaRepository<ValEv
         AND (:dataDe IS NULL OR e.dataReferente >= :dataDe)
         AND (:dataAte IS NULL OR e.dataReferente <= :dataAte)
         AND (:carreiraId IS NULL OR cd.id = :carreiraId)
+        AND (:historico IS NULL OR e.flgHistorico = :historico)
         AND (:nome IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
       """)
   Page<ProgressaoPromocaoRowDTO> findProgressaoPromocaoWithFilters(
@@ -62,6 +63,7 @@ public interface ValEvolucaoCarreiraEntityRepository extends JpaRepository<ValEv
       @Param("dataAte") LocalDate dataAte,
       @Param("nome") String nome,
       @Param("carreiraId") UUID carreiraId,
+      @Param("historico") String historico,
       Pageable pageable
   );
 
