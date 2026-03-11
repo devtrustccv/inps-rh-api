@@ -1,0 +1,41 @@
+{
+  "type": "controller",
+  "name": "ManualFuncao",
+  "module": "configuracao",
+  "description": "gestao manual de funcao",
+  "basePath": "configuracao",
+  "actions": [
+    {
+      "actionName": "createManualFuncao",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ManualFuncaoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "configuracao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "id": "d3wgc2dppi"
+}
