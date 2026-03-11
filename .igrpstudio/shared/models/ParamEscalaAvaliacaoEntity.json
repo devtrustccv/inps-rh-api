@@ -1,0 +1,28 @@
+{
+  "type": "model",
+  "module": "shared",
+  "name": "ParamEscalaAvaliacaoEntity",
+  "tableName": "RH_T_PARAM_ESCALA",
+  "audit": true,
+  "crud": false,
+  "revision": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "id",
+      "type": "long",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": true,
+      "generationType": "SEQUENCE",
+      "skipFieldRevision": false,
+      "objectType": "java",
+      "sequenceName": "SEQ_PARAM_ESCALA"
+    }
+  ],
+  "id": "avdscalaj1",
+  "uniqueConstraints": [],
+  "indexes": []
+}
+

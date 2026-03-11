@@ -2,6 +2,7 @@ package cv.inps.rh.configuracao.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.configuracao.application.services.EscalaAvaliacaoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -14,7 +15,10 @@ public class CreateEscalaAvaliacaoCommandHandler implements CommandHandler<Creat
 
    private static final Logger LOGGER = LoggerFactory.getLogger(CreateEscalaAvaliacaoCommandHandler.class);
 
-   public CreateEscalaAvaliacaoCommandHandler() {
+   private final EscalaAvaliacaoService escalaAvaliacaoService;
+
+   public CreateEscalaAvaliacaoCommandHandler(EscalaAvaliacaoService escalaAvaliacaoService) {
+      this.escalaAvaliacaoService = escalaAvaliacaoService;
 
    }
 
@@ -23,8 +27,7 @@ public class CreateEscalaAvaliacaoCommandHandler implements CommandHandler<Creat
 
       LOGGER.debug("CreateEscalaAvaliacaoCommand : {}", command);
 
-      // TODO: Implement the command handling logic here
-      return null;
+      return escalaAvaliacaoService.registar(command);
    }
 
 }
