@@ -26,25 +26,28 @@ public class ProgressaoService {
 
     for (var c : vwRhProgressaoInputEntityRepository.findAll()) {
 
+      LOGGER.debug("\n---------------------------------------------------------------------------------------------------------------------------");
+      LOGGER.debug("Simulando progressao para {}", c);
+
       // Verifica se já existe evolução ou tempo mínimo de progressão
       if (c.getExisteEvolucao() == 0L && c.getAtingiuPrimeiraProgressao() == 0L) {
-        LOGGER.debug("Ignorando carreira {} do funcionário {}: sem evolução e sem tempo mínimo de progressão", c.getCarreiraId(), c.getNomeFuncionario());
+        LOGGER.debug("Sem evolucao e sem tempo minimo de progressao");
         continue;
       }
 
       // Verifica se atingiu tempo mínimo para progressão
       if (c.getAtingiuTempMinProgressao() == 0L) {
-        LOGGER.debug("Ignorando carreira {} do funcionário {}: não atingiu tempo mínimo para progressão", c.getCarreiraId(), c.getNomeFuncionario());
+        LOGGER.debug("Nao atingiu tempo minimo para progressao");
         continue;
       }
 
       // Verifica se a média das avaliações atende ao mínimo para progressão
       var media = c.getMediaAvaliacoes();
       if (media != null && media >= 2.5) {
-        LOGGER.debug("Processando carreira {} do funcionário {}: média {} >= 2.5, registrando simulação", c.getCarreiraId(), c.getNomeFuncionario(), media);
+        LOGGER.debug("Media {} >= 2.5, registrando simulacao", media);
         simulacaoService.registarSimulacao(c, media, ProgessionPromotionType.PROGRESSAO);
       } else {
-        LOGGER.debug("Ignorando carreira {} do funcionário {}: média {} abaixo do limite", c.getCarreiraId(), c.getNomeFuncionario(), media);
+        LOGGER.debug("Media <{}> abaixo do limite", media);
       }
     }
   }

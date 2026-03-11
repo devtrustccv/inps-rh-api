@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.ToString;
 import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 @Entity
 @Immutable
 @Table(name = "VW_RH_PROGRESSAO_INPUT")
+@ToString
 public class VwRhProgressaoInputEntity {
 
   @Id
@@ -65,6 +67,4 @@ public class VwRhProgressaoInputEntity {
 
   @Column(name = "ATINGIU_TEMP_MIN_PROGRESSAO")
   private Long atingiuTempMinProgressao;
-
-
 }
