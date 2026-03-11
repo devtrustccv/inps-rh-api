@@ -7,6 +7,7 @@
   "actions": [
     {
       "actionName": "createManualFuncao",
+      "path": "avaliacao-desempenho/manual-funcao",
       "method": "POST",
       "requestBody": {
         "content": {
@@ -92,5 +93,5 @@
       ]
     }
   ],
-  "id": "d3wgc2dppi"
+  "id": "d3wgc2dppi-createManualFuncao"
 }

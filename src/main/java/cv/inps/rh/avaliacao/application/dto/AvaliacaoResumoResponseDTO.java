@@ -15,15 +15,17 @@ public class AvaliacaoResumoResponseDTO {
 
   private Long id;
   private String uuid;
-  private Long funId;
-  private String nomeColaborador;
   private Integer ano;
   private String semestre;
   private Long institId;
+  private String institNome;
   private Long seccaoId;
+  private String seccaoNome;
   private Long cargoId;
+  private String cargoNome;
   private Long carrPccsId;
+  private String carrPccsNome;
   private String estado;
-  private BigDecimal avaliacaoFinal;
+  private Double avaliacaoFinal;
 }
 

@@ -18,4 +18,9 @@ public interface ParamObjetivoDetEntityRepository extends
 
   boolean existsByAno(Integer ano);
 
+  Optional<ParamObjetivoDetEntity> findTopByAnoOrderByIdDesc(Integer ano);
+
+
 }
+
+

@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -17,7 +18,7 @@ import java.util.List;
 public class AvaliacaoInicializarRequestDTO {
 
   @NotEmpty
-  private List<Long> funIds;
+  private List<UUID> funIds;
 
   @NotNull
   private Integer ano;

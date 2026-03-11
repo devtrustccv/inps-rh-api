@@ -42,6 +42,7 @@ public class ManualFuncaoController {
           this.commandBus = commandBus;
   }
    @PostMapping(
+   value = "avaliacao-desempenho/manual-funcao"
   )
   @Operation(
     summary = "Create manual funcao",

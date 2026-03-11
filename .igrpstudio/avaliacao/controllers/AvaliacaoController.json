@@ -57,7 +57,7 @@
       },
       "requestParams": [
         {
-          "type": "string",
+          "type": "integer",
           "name": "ano",
           "isRequired": false
         },
@@ -83,11 +83,6 @@
         },
         {
           "type": "string",
-          "name": "funId",
-          "isRequired": false
-        },
-        {
-          "type": "string",
           "name": "pageNumber",
           "value": "0",
           "isRequired": false
@@ -101,5 +96,5 @@
       ]
     }
   ],
-  "id": "z90a939h7d"
+  "id": "z90a939h7d-getListaDefinicaoObjectivos"
 }

@@ -1,7 +1,7 @@
 package cv.inps.rh.progressaopromocao.domain.service.engine;
 
+import cv.inps.rh.avaliacao.application.services.AvaliacaoService;
 import cv.inps.rh.progressaopromocao.domain.service.engine.model.ProgessionPromotionType;
-import cv.inps.rh.progressaopromocao.domain.service.engine.rule.AvaliacaoService;
 import cv.inps.rh.progressaopromocao.domain.service.engine.rule.DisciplinaService;
 import cv.inps.rh.progressaopromocao.domain.service.engine.rule.FaltaService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;

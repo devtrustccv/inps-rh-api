@@ -13,8 +13,8 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class GetListaDefinicaoObjectivosQuery implements Query {
 
-  @NotBlank(message = "The field <ano> is required")
-  private String ano;
+  @NotNull(message = "The field <ano> is required")
+  private Integer ano;
   @NotBlank(message = "The field <semestre> is required")
   private String semestre;
   @NotBlank(message = "The field <estado> is required")
@@ -23,8 +23,6 @@ public class GetListaDefinicaoObjectivosQuery implements Query {
   private Long institId;
   @NotNull(message = "The field <cargoId> is required")
   private Long cargoId;
-  @NotBlank(message = "The field <funId> is required")
-  private String funId;
   @NotBlank(message = "The field <pageNumber> is required")
   private String pageNumber;
   @NotBlank(message = "The field <pageSize> is required")

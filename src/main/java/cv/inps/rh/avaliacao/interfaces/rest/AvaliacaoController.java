@@ -90,17 +90,16 @@ public class AvaliacaoController {
   )
   
   public ResponseEntity<WrapperListaAvaliacaoDTO> getListaDefinicaoObjectivos(
-    @RequestParam(value = "ano", required = false) String ano,
+    @RequestParam(value = "ano", required = false) Integer ano,
     @RequestParam(value = "semestre", required = false) String semestre,
     @RequestParam(value = "estado", required = false) String estado,
     @RequestParam(value = "institId", required = false) Long institId,
     @RequestParam(value = "cargoId", required = false) Long cargoId,
-    @RequestParam(value = "funId", required = false) String funId,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize)
   {
 
-      final var query = new GetListaDefinicaoObjectivosQuery(ano, semestre, estado, institId, cargoId, funId, pageNumber, pageSize);
+      final var query = new GetListaDefinicaoObjectivosQuery(ano, semestre, estado, institId, cargoId, pageNumber, pageSize);
 
       return queryBus.handle(query);
 

@@ -8,13 +8,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service("AvaliacaoService2")
 @RequiredArgsConstructor
 public class AvaliacaoService {
 
   private final AvaliacaoEntityRepository repository;
 
-  public MediaResultado calcularMedia(FuncionarioEntity fun, int anos) {
+  /*public MediaResultado calcularMedia(FuncionarioEntity fun, int anos) {
 
     var evaluations = repository.findUltimasAvaliacoes(
         fun.getId(),
@@ -35,5 +35,5 @@ public class AvaliacaoService {
     var elegivelPromocao = media >= 90;
 
     return new MediaResultado(media, elegivelProgressao, elegivelPromocao);
-  }
+  }*/
 }
