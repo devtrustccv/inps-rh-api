@@ -5,11 +5,9 @@ package cv.inps.rh.avaliacao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
 import jakarta.validation.*;
-import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.avaliacao.application.dto.AvaliacaoResumoResponseDTO;
 import cv.inps.rh.shared.application.dto.PageDTO;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +20,8 @@ import lombok.EqualsAndHashCode;
 @IgrpDTO
 public class WrapperListaAvaliacaoDTO extends PageDTO {
 
-  
+
   @Valid
-  private List<AvaliacaoResumoResponseDTO> content = new ArrayList<>();
+  private List<ObjetivoAvaliacaoResumoDTO> content = new ArrayList<>();
 
 }
