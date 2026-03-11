@@ -9,14 +9,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import cv.inps.rh.configuracao.application.dto.WrapperListaManualFuncaoDTO;
+import cv.inps.rh.configuracao.application.services.ManualFuncaoService;
 
 @Component
 public class GetListaManualFuncaoQueryHandler implements QueryHandler<GetListaManualFuncaoQuery, ResponseEntity<WrapperListaManualFuncaoDTO>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetListaManualFuncaoQueryHandler.class);
 
+  private final ManualFuncaoService manualFuncaoService;
 
-  public GetListaManualFuncaoQueryHandler() {
+  public GetListaManualFuncaoQueryHandler(ManualFuncaoService manualFuncaoService) {
+    this.manualFuncaoService = manualFuncaoService;
 
   }
 
@@ -25,8 +28,7 @@ public class GetListaManualFuncaoQueryHandler implements QueryHandler<GetListaMa
 
     LOGGER.debug("GetListaManualFuncaoQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    return ResponseEntity.ok(manualFuncaoService.listar(query));
   }
 
 }
