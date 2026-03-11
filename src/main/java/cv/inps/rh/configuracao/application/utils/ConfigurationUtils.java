@@ -1,4 +1,4 @@
-package cv.inps.rh.configuracao.domain.utils;
+package cv.inps.rh.configuracao.application.utils;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.util.StringUtils;

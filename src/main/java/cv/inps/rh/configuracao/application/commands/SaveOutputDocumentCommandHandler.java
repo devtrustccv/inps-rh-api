@@ -1,6 +1,6 @@
 package cv.inps.rh.configuracao.application.commands;
 
-import cv.inps.rh.configuracao.domain.service.DocOutputService;
+import cv.inps.rh.configuracao.application.services.DocOutputService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamDocOutputEntity;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

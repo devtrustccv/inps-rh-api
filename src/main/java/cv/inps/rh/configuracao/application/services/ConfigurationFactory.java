@@ -1,4 +1,4 @@
-package cv.inps.rh.configuracao.domain.service.engine;
+package cv.inps.rh.configuracao.application.services;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;

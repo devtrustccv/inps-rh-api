@@ -1,9 +1,8 @@
-package cv.inps.rh.configuracao.domain.service;
+package cv.inps.rh.configuracao.application.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cv.inps.rh.configuracao.application.dto.ConfiguracaoGeralDTO;
 import cv.inps.rh.configuracao.application.dto.FusoHorarioDTO;
-import cv.inps.rh.configuracao.domain.service.engine.ConfigurationProcess;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeParametroEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FusoHorarioUpsEntity;

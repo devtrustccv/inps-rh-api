@@ -1,7 +1,7 @@
 package cv.inps.rh.configuracao.application.queries;
 
 import cv.inps.rh.configuracao.application.dto.DocOutputResponseDTO;
-import cv.inps.rh.configuracao.domain.service.DocOutputService;
+import cv.inps.rh.configuracao.application.services.DocOutputService;
 import cv.inps.rh.configuracao.infrastructure.mappers.DocOutputMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamDocOutputEntity;
 import lombok.RequiredArgsConstructor;

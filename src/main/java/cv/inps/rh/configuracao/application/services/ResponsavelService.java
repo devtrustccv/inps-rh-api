@@ -1,4 +1,4 @@
-package cv.inps.rh.configuracao.domain.service;
+package cv.inps.rh.configuracao.application.services;
 
 import cv.inps.rh.configuracao.application.dto.AssociarResponsaveisRequestDTO;
 import cv.inps.rh.configuracao.application.dto.ResponsaveisDirecaoResponseDTO;

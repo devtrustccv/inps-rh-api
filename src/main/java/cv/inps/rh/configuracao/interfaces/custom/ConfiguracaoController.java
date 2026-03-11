@@ -2,7 +2,7 @@ package cv.inps.rh.configuracao.interfaces.custom;
 
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.configuracao.application.constants.ConfigurationType;
-import cv.inps.rh.configuracao.domain.service.engine.Configuration;
+import cv.inps.rh.configuracao.application.services.Configuration;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

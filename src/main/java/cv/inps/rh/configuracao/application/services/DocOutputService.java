@@ -1,9 +1,8 @@
-package cv.inps.rh.configuracao.domain.service;
+package cv.inps.rh.configuracao.application.services;
 
 import cv.inps.rh.configuracao.application.dto.DocOutputRequestDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperDocOutputListDTO;
 import cv.inps.rh.configuracao.infrastructure.mappers.DocOutputMapper;
-import cv.inps.rh.funcionario.application.commands.CreateFuncionarioCommand;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamDocOutputEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;

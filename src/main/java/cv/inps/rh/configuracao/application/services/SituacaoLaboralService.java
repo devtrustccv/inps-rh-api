@@ -1,4 +1,4 @@
-package cv.inps.rh.configuracao.domain.service;
+package cv.inps.rh.configuracao.application.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
@@ -6,8 +6,7 @@ import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.SituacaoLaboralMotivoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.SituacaoLaboralRequestDTO;
 import cv.inps.rh.configuracao.application.dto.SituacaoLaboralResponseDTO;
-import cv.inps.rh.configuracao.domain.service.engine.ConfigurationProcess;
-import cv.inps.rh.configuracao.domain.utils.ConfigurationUtils;
+import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoDetalheEntity;

@@ -1,7 +1,7 @@
 package cv.inps.rh.configuracao.application.queries;
 
 import cv.inps.rh.configuracao.application.dto.WrapperDocOutputListDTO;
-import cv.inps.rh.configuracao.domain.service.DocOutputService;
+import cv.inps.rh.configuracao.application.services.DocOutputService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

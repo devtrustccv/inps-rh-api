@@ -1,12 +1,11 @@
-package cv.inps.rh.configuracao.domain.service;
+package cv.inps.rh.configuracao.application.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.CarreiraRequestDTO;
 import cv.inps.rh.configuracao.application.dto.CarreiraResponseDTO;
 import cv.inps.rh.configuracao.application.dto.CategoriaCarreiraResponseDTO;
-import cv.inps.rh.configuracao.domain.service.engine.ConfigurationProcess;
-import cv.inps.rh.configuracao.domain.utils.ConfigurationUtils;
+import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;

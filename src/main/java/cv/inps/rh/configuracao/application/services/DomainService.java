@@ -1,10 +1,9 @@
-package cv.inps.rh.configuracao.domain.service;
+package cv.inps.rh.configuracao.application.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.DomainConfigDTO;
-import cv.inps.rh.configuracao.domain.service.engine.ConfigurationProcess;
-import cv.inps.rh.configuracao.domain.utils.ConfigurationUtils;
+import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DomainEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
