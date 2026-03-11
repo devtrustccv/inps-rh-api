@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,96 +25,74 @@ public class PromocaoService {
   private final DisciplinaService disciplinaService;
   private final SimulacaoService simulacaoService;
 
-  public void simular() {
+  public void simular(List<CarreiraEntity> careers) {
 
-    // TODO 05/03/2026 18:00 with only carreiras base without cargo
-    var carreiras = carreiraRepository.findCarreirasAtivas();
+    for (var career : careers) {
 
-    for (var carreira : carreiras) {
+      if (!validaElegibilidadePromocao(career)) continue;
 
-      if (!validaElegibilidadePromocao(carreira)) continue;
+      if (!atingiuTempoPromocao(career)) continue;
 
-      if (!atingiuTempoPromocao(carreira)) continue;
-
-      if (!podePromoverNovamente(carreira)) continue;
+      if (!podePromoverNovamente(career)) continue;
 
       var media = avaliacaoService.calcularMedia(
-          carreira.getContrVinculoId().getFunId(),
+          career.getContrVinculoId().getFunId(),
           2
       );
-
       if (!media.elegivelPromocao()) continue;
 
-      if (!faltaService.valida(carreira)) continue;
+      if (!faltaService.valida(career)) continue;
 
-      if (!disciplinaService.valida(carreira)) continue;
+      if (!disciplinaService.valida(career)) continue;
 
-      simulacaoService.registarSimulacao(carreira, media, ProgessionPromotionType.PROMOCAO);
+      simulacaoService.registarSimulacao(career, media, ProgessionPromotionType.PROMOCAO);
     }
   }
 
   /**
    * Regras básicas para promoção
    */
-  private boolean validaElegibilidadePromocao(CarreiraEntity carreira) {
-
-    // deve ter contrato
-    if (carreira.getContrVinculoId() == null) return false;
-
-    // deve ter funcionário
-    if (carreira.getContrVinculoId().getFunId() == null) return false;
+  private boolean validaElegibilidadePromocao(CarreiraEntity career) {
 
     // diretores não promovem
-    if (carreira.getCargoId() != null
-        && carreira.getCargoId().getNome() != null
-        && carreira.getCargoId().getNome().toLowerCase().contains("diretor")) {
+    if (career.getCargoId() != null)
       return false;
-    }
 
-    // não pode ter sido promoção anterior
-    if ("M".equalsIgnoreCase(carreira.getTipoSituacao())) {
-      return false;
-    }
-
-    return true;
+    // não pode ter tido promoção anterior
+    return !ProgessionPromotionType.PROMOCAO.name().equals(career.getTipoSituacao());
   }
 
   /**
    * Regra tempo mínimo para promoção
    * - 6 anos desde entrada como efetivo (por agora simplificado)
    */
-  private boolean atingiuTempoPromocao(CarreiraEntity carreira) {
+  private boolean atingiuTempoPromocao(CarreiraEntity career) {
 
-    if (carreira.getDataInicio() == null) return false;
-
-    var dataElegibilidade = carreira.getDataInicio().plusYears(6);
+    var dataElegibilidade = career.getDataInicio().plusYears(6);
 
     return !LocalDate.now().isBefore(dataElegibilidade);
   }
 
-  private boolean podePromoverNovamente(CarreiraEntity carreira) {
+  private boolean podePromoverNovamente(CarreiraEntity career) {
 
     var ultima =
         evolucaoRepository.findUltimaEvolucao(
-            carreira.getId(),
+            career.getId(),
             PageRequest.of(0, 1)
         );
-
     if (ultima.isEmpty())
       return true; // nunca evoluiu
 
     var evolucao = ultima.getFirst();
 
     // Se não foi promoção, pode promover
-    if (!"M".equalsIgnoreCase(evolucao.getTipo())) {
+    if (!ProgessionPromotionType.PROMOCAO.name().equals(evolucao.getTipo()))
       return true;
-    }
 
     // Se foi promoção, verificar 3 anos
-    LocalDate dataUltimaPromocao = evolucao.getDataReferente();
+    var dataUltimaPromocao = evolucao.getDataReferente();
 
-    LocalDate dataLimite =
-        dataUltimaPromocao.plusYears(3);
+    var dataLimite = dataUltimaPromocao.plusYears(3);
 
     return !LocalDate.now().isBefore(dataLimite);
   }
