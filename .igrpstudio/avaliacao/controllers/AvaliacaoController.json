@@ -1,0 +1,105 @@
+{
+  "type": "controller",
+  "name": "Avaliacao",
+  "module": "avaliacao",
+  "description": "gest avaliacao",
+  "basePath": "avaliacao-desempenho/avaliacoes",
+  "actions": [
+    {
+      "actionName": "initAvaliacao",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AvaliacaoInicializarRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "avaliacao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "getListaDefinicaoObjectivos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaAvaliacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "avaliacao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "ano",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "semestre",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "institId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "cargoId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "funId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
+    }
+  ],
+  "id": "z90a939h7d"
+}
