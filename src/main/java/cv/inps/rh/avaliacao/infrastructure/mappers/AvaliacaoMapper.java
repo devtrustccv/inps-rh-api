@@ -19,12 +19,24 @@ public class AvaliacaoMapper {
         dto.setAno(entity.getAno());
         dto.setSemestre(entity.getSemestre());
         dto.setEstado(entity.getEstado());
-        dto.setAvaliacaoFinal(entity.getAvaliacaoFinal());
+        dto.setAvaliacaoFinal(entity.getAvaliacaoFinal() != null ? entity.getAvaliacaoFinal().doubleValue() : null);
 
-        ofNullable(entity.getInstitId()).ifPresent(i -> dto.setInstitId(i.getId()));
-        ofNullable(entity.getSeccaoId()).ifPresent(s -> dto.setSeccaoId(s.getId()));
-        ofNullable(entity.getCargo()).ifPresent(c -> dto.setCargoId(c.getId()));
-        ofNullable(entity.getCarreira()).ifPresent(c -> dto.setCarrPccsId(c.getId()));
+        ofNullable(entity.getInstitId()).ifPresent(i -> {
+            dto.setInstitId(i.getId());
+            dto.setInstitNome(i.getNome());
+        });
+        ofNullable(entity.getSeccaoId()).ifPresent(s -> {
+            dto.setSeccaoId(s.getId());
+            dto.setSeccaoNome(s.getNome());
+        });
+        ofNullable(entity.getCargo()).ifPresent(c -> {
+            dto.setCargoId(c.getId());
+            dto.setCargoNome(c.getNome());
+        });
+        ofNullable(entity.getCarreira()).ifPresent(c -> {
+            dto.setCarrPccsId(c.getId());
+            dto.setCarrPccsNome(c.getNome());
+        });
 
         return dto;
     }
