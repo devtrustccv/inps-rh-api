@@ -31,9 +31,13 @@ public class DefinicaoObjectivoDTO  {
   private Integer ano;
   private String semestre;
   private Long institId;
+  private String instituicaoNome;
   private Long seccaoId;
+  private Long seccaoNome;
   private Long cargoId;
+  private Long cargoNome;
   private Long carrPccsId;
+  private Long carrPccsNome;
 
   private List<ObjectivoDTO> objectivos;
 

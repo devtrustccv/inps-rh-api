@@ -9,14 +9,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import cv.inps.rh.avaliacao.application.dto.WrapperListaAvaliacaoDTO;
+import cv.inps.rh.avaliacao.application.services.AvaliacaoService;
 
 @Component
 public class GetListaAvaliacaoQueryHandler implements QueryHandler<GetListaAvaliacaoQuery, ResponseEntity<WrapperListaAvaliacaoDTO>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetListaAvaliacaoQueryHandler.class);
 
+  private final AvaliacaoService avaliacaoService;
 
-  public GetListaAvaliacaoQueryHandler() {
+  public GetListaAvaliacaoQueryHandler(AvaliacaoService avaliacaoService) {
+    this.avaliacaoService = avaliacaoService;
 
   }
 
@@ -25,8 +28,7 @@ public class GetListaAvaliacaoQueryHandler implements QueryHandler<GetListaAvali
 
     LOGGER.debug("GetListaAvaliacaoQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    return ResponseEntity.ok(avaliacaoService.getListaAvaliacao(query));
   }
 
 }

@@ -2,15 +2,20 @@ package cv.inps.rh.avaliacao.application.services;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.avaliacao.application.commands.DefinicaoObjetivoCommand;
+import cv.inps.rh.avaliacao.application.dto.WrapperListaAvaliacaoDTO;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaDefinicaoObjetivoDTO;
+import cv.inps.rh.avaliacao.application.queries.GetListaAvaliacaoQuery;
 import cv.inps.rh.avaliacao.application.queries.GetListaDefinicaoObjectivosQuery;
+import cv.inps.rh.avaliacao.infrastructure.mappers.AvaliacaoListagemMapper;
 import cv.inps.rh.avaliacao.infrastructure.mappers.AvaliacaoMapper;
 import cv.inps.rh.progressaopromocao.domain.service.engine.model.MediaResultado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,9 +26,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class AvaliacaoService {
@@ -41,7 +49,9 @@ public class AvaliacaoService {
   private final ParamCarreiraEntityRepository carreiraRepository;
   private final ParamObjetivoDetEntityRepository objetivoDetRepository;
   private final ParamManualFuncaoEntityRepository manualFuncaoRepository;
+  private final ParamEscalaAvaliacaoEntityRepository escalaAvaliacaoRepository;
   private final AvaliacaoMapper avaliacaoMapper;
+  private final AvaliacaoListagemMapper avaliacaoListagemMapper;
 
   public AvaliacaoService(
       AvaliacaoEntityRepository avaliacaoRepository,
@@ -55,7 +65,9 @@ public class AvaliacaoService {
       ParamCarreiraEntityRepository carreiraRepository,
       ParamObjetivoDetEntityRepository objetivoDetRepository,
       ParamManualFuncaoEntityRepository manualFuncaoRepository,
-      AvaliacaoMapper avaliacaoMapper) {
+      ParamEscalaAvaliacaoEntityRepository escalaAvaliacaoRepository,
+      AvaliacaoMapper avaliacaoMapper,
+      AvaliacaoListagemMapper avaliacaoListagemMapper) {
     this.avaliacaoRepository = avaliacaoRepository;
     this.objectivoRepository = objectivoRepository;
     this.competenciaRepository = competenciaRepository;
@@ -67,7 +79,9 @@ public class AvaliacaoService {
     this.carreiraRepository = carreiraRepository;
     this.objetivoDetRepository = objetivoDetRepository;
     this.manualFuncaoRepository = manualFuncaoRepository;
+    this.escalaAvaliacaoRepository = escalaAvaliacaoRepository;
     this.avaliacaoMapper = avaliacaoMapper;
+    this.avaliacaoListagemMapper = avaliacaoListagemMapper;
   }
 
   @Transactional
@@ -78,7 +92,6 @@ public class AvaliacaoService {
     if (!StringUtils.hasText(dto.getSemestre()) || (!"1".equals(dto.getSemestre()) && !"2".equals(dto.getSemestre()))) {
       throw IgrpResponseStatusException.badRequest("semestre deve ser '1' ou '2'");
     }
-
 
     var det = objetivoDetRepository.findTopByAnoOrderByIdDesc(dto.getAno())
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
@@ -92,8 +105,8 @@ public class AvaliacaoService {
 
     var cargo = dto.getCargoId() != null
         ? cargoRepository.findById(dto.getCargoId())
-        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
-            "ParamCargoEntity not found for id: " + dto.getCargoId()))
+            .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
+                "ParamCargoEntity not found for id: " + dto.getCargoId()))
         : null;
 
     var carreira = dto.getCarrPccsId() != null
@@ -109,7 +122,6 @@ public class AvaliacaoService {
       }
 
       var funcionario = funcionarioRepository.findByUuidOrThrow(funId);
-
 
       var avaliacao = new AvaliacaoEntity();
       avaliacao.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -179,6 +191,101 @@ public class AvaliacaoService {
     var response = new WrapperListaDefinicaoObjetivoDTO();
     cv.inps.rh.shared.util.PageMapper.fillPagination(page, response);
     response.setContent(page.getContent().stream().map(avaliacaoMapper::toResumo).toList());
+    return response;
+  }
+
+  @Transactional(readOnly = true)
+  public WrapperListaAvaliacaoDTO getListaAvaliacao(GetListaAvaliacaoQuery query) {
+
+    var pageNumber = StringUtils.hasText(query.getPageNumber()) ? Integer.parseInt(query.getPageNumber()) : 0;
+    var pageSize = StringUtils.hasText(query.getPageSize()) ? Integer.parseInt(query.getPageSize()) : 20;
+
+    var pageable = PageRequest.of(pageNumber, pageSize);
+
+    Specification<AvaliacaoEntity> spec = (root, cq, cb) -> {
+      if (cq.getResultType() != Long.class) {
+        root.fetch("funcionario", JoinType.LEFT);
+        root.fetch("institId", JoinType.LEFT);
+        root.fetch("seccaoId", JoinType.LEFT);
+        root.fetch("cargo", JoinType.LEFT);
+        root.fetch("carreira", JoinType.LEFT);
+      }
+
+      List<Predicate> predicates = new ArrayList<>();
+
+      if (query.getAno() != null) {
+        predicates.add(cb.equal(root.get("ano"), query.getAno()));
+      }
+      if (query.getDirecao() != null) {
+        predicates.add(cb.equal(root.get("institId").get("id"), query.getDirecao()));
+      }
+      if (query.getCargo() != null) {
+        predicates.add(cb.equal(root.get("cargo").get("id"), query.getCargo()));
+      }
+      if (StringUtils.hasText(query.getColaborador())) {
+        var raw = query.getColaborador().trim();
+        try {
+          predicates.add(cb.equal(root.get("funcionario").get("uuid"), UUID.fromString(raw)));
+        } catch (Exception ignored) {
+          try {
+            predicates.add(cb.equal(root.get("funcionario").get("id"), Long.valueOf(raw)));
+          } catch (Exception ignored2) {
+            predicates.add(cb.like(cb.lower(root.get("funcionario").get("nome")), "%" + raw.toLowerCase() + "%"));
+          }
+        }
+      }
+
+      predicates.add(cb.notEqual(root.get("estado"), "E"));
+
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
+
+    var rows = avaliacaoRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "ano").and(Sort.by("id")));
+
+    var grouped = new LinkedHashMap<GroupKey, List<AvaliacaoEntity>>();
+
+    for (var e : rows) {
+      var key = new GroupKey(
+          e.getAno(),
+          e.getInstitId() != null ? e.getInstitId().getId() : null,
+          e.getCargo() != null ? e.getCargo().getId() : null,
+          e.getFuncionario() != null ? e.getFuncionario().getUuid() : null);
+      grouped.computeIfAbsent(key, _ -> new ArrayList<>()).add(e);
+    }
+
+    var escala = escalaAvaliacaoRepository.findAll();
+
+    var contentAll = grouped.values().stream().map(list -> {
+      var base = list.getFirst();
+      BigDecimal s1 = null;
+      BigDecimal s2 = null;
+      for (var a : list) {
+        if ("1".equals(a.getSemestre()) && a.getAvaliacaoFinal() != null) {
+          s1 = BigDecimal.valueOf(a.getAvaliacaoFinal());
+        } else if ("2".equals(a.getSemestre()) && a.getAvaliacaoFinal() != null) {
+          s2 = BigDecimal.valueOf(a.getAvaliacaoFinal());
+        }
+      }
+
+      var estadoGrupo = resolveEstadoGrupo(list);
+
+      var notaFinal = (s1 != null ? s1 : BigDecimal.ZERO).add(s2 != null ? s2 : BigDecimal.ZERO);
+      if (s1 == null && s2 == null) {
+        notaFinal = null;
+      }
+
+      var qualitativa = notaFinal != null ? resolveQualitativa(escala, notaFinal) : null;
+
+      return avaliacaoListagemMapper.toListagem(base, estadoGrupo, s1, s2, notaFinal, qualitativa);
+    }).toList();
+
+    var start = Math.min(pageNumber * pageSize, contentAll.size());
+    var end = Math.min(start + pageSize, contentAll.size());
+    var page = new PageImpl<>(contentAll.subList(start, end), pageable, contentAll.size());
+
+    var response = new WrapperListaAvaliacaoDTO();
+    PageMapper.fillPagination(page, response);
+    response.setContent(page.getContent());
     return response;
   }
 
@@ -301,13 +408,45 @@ public class AvaliacaoService {
     return p.getSeccaoId() == null || seccaoId != null;
   }
 
+  private String resolveEstadoGrupo(List<AvaliacaoEntity> list) {
+    boolean anyP = list.stream().anyMatch(a -> "P".equalsIgnoreCase(a.getEstado()));
+    if (anyP)
+      return "P";
+
+    boolean has1 = list.stream().anyMatch(a -> "1".equals(a.getSemestre()));
+    boolean has2 = list.stream().anyMatch(a -> "2".equals(a.getSemestre()));
+    boolean allC = list.stream().allMatch(a -> "C".equalsIgnoreCase(a.getEstado()));
+    if (has1 && has2 && allC)
+      return "C";
+
+    return "A";
+  }
+
+  private String resolveQualitativa(List<ParamEscalaAvaliacaoEntity> escala, BigDecimal notaFinal) {
+    if (notaFinal == null)
+      return null;
+    for (var e : escala) {
+      if (e == null || e.getEstado() != cv.inps.rh.shared.application.constants.Estado.A)
+        continue;
+      if (e.getQuantitativaDe() == null || e.getQuantitativaAte() == null)
+        continue;
+      boolean ge = notaFinal.compareTo(e.getQuantitativaDe()) >= 0;
+      boolean le = notaFinal.compareTo(e.getQuantitativaAte()) <= 0;
+      if (ge && le) {
+        return e.getQualitativa();
+      }
+    }
+    return null;
+  }
+
+  private record GroupKey(Integer ano, Long institId, Long cargoId, UUID funUuid) {
+  }
 
   public MediaResultado calcularMedia(FuncionarioEntity fun, int anos) {
 
     var evaluations = avaliacaoRepository.findUltimasAvaliacoes(
         fun.getId(),
-        PageRequest.of(0, anos)
-    );
+        PageRequest.of(0, anos));
     if (evaluations.size() < anos)
       return MediaResultado.invalido();
 
