@@ -126,6 +126,7 @@
         {
           "type": "string",
           "name": "pageSize",
+          "value": "20",
           "isRequired": false
         },
         {

@@ -129,7 +129,7 @@ public class AvaliacaoController {
   
   public ResponseEntity<WrapperListaAvaliacaoDTO> getListaAvaliacao(
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
-    @RequestParam(value = "pageSize", required = false) String pageSize,
+    @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "ano", required = false) Integer ano,
     @RequestParam(value = "direcao", required = false) Long direcao,
     @RequestParam(value = "cargo", required = false) Long cargo,
