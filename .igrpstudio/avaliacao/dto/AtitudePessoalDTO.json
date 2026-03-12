@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "avaliacao",
-  "name": "AvaliacaoDetalheResponse",
+  "name": "AtitudePessoal",
   "template": "classic",
   "enableCustonValidation": false,
   "readOnly": true,
@@ -19,6 +19,5 @@
       "primaryKey": false
     }
   ],
-  "id": "avd4b5c6d7"
+  "id": "le4p1cpzii"
 }
-
