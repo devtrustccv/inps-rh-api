@@ -2,6 +2,7 @@ package cv.inps.rh.avaliacao.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.avaliacao.application.services.ProcessoAvaliacaoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -14,7 +15,10 @@ public class AutoAvaliacaoCommandHandler implements CommandHandler<AutoAvaliacao
 
    private static final Logger LOGGER = LoggerFactory.getLogger(AutoAvaliacaoCommandHandler.class);
 
-   public AutoAvaliacaoCommandHandler() {
+   private final ProcessoAvaliacaoService processoAvaliacaoService;
+
+   public AutoAvaliacaoCommandHandler(ProcessoAvaliacaoService processoAvaliacaoService) {
+      this.processoAvaliacaoService = processoAvaliacaoService;
 
    }
 
@@ -23,8 +27,7 @@ public class AutoAvaliacaoCommandHandler implements CommandHandler<AutoAvaliacao
 
       LOGGER.debug("AutoAvaliacaoCommand : {}", command);
 
-      // TODO: Implement the command handling logic here
-      return null;
+      return ResponseEntity.ok(processoAvaliacaoService.gravarAutoAvaliacao(command.getUuid(), command.getAvaliacao()));
    }
 
 }

@@ -2,6 +2,7 @@ package cv.inps.rh.avaliacao.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.avaliacao.application.services.ProcessoAvaliacaoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -14,7 +15,10 @@ public class ProcessoObservacaoGeralCommandHandler implements CommandHandler<Pro
 
    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessoObservacaoGeralCommandHandler.class);
 
-   public ProcessoObservacaoGeralCommandHandler() {
+   private final ProcessoAvaliacaoService processoAvaliacaoService;
+
+   public ProcessoObservacaoGeralCommandHandler(ProcessoAvaliacaoService processoAvaliacaoService) {
+      this.processoAvaliacaoService = processoAvaliacaoService;
 
    }
 
@@ -23,8 +27,7 @@ public class ProcessoObservacaoGeralCommandHandler implements CommandHandler<Pro
 
       LOGGER.debug("ProcessoObservacaoGeralCommand : {}", command);
 
-      // TODO: Implement the command handling logic here
-      return null;
+      return ResponseEntity.ok(processoAvaliacaoService.gravarObservacaoGeral(command.getUuid(), command.getObservacaogeral()));
    }
 
 }

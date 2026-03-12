@@ -9,14 +9,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import cv.inps.rh.avaliacao.application.dto.AvaliacaoDTO;
+import cv.inps.rh.avaliacao.application.services.AvaliacaoReadService;
 
 @Component
 public class GetAvaliacaoQueryHandler implements QueryHandler<GetAvaliacaoQuery, ResponseEntity<AvaliacaoDTO>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetAvaliacaoQueryHandler.class);
 
+  private final AvaliacaoReadService avaliacaoReadService;
 
-  public GetAvaliacaoQueryHandler() {
+  public GetAvaliacaoQueryHandler(AvaliacaoReadService avaliacaoReadService) {
+    this.avaliacaoReadService = avaliacaoReadService;
 
   }
 
@@ -25,8 +28,7 @@ public class GetAvaliacaoQueryHandler implements QueryHandler<GetAvaliacaoQuery,
 
     LOGGER.debug("GetAvaliacaoQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    return ResponseEntity.ok(avaliacaoReadService.getAvaliacao(query.getUuid()));
   }
 
 }

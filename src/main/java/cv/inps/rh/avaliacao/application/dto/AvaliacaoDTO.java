@@ -19,11 +19,13 @@ import lombok.EqualsAndHashCode;
 @IgrpDTO
 public class AvaliacaoDTO extends BaseAvaliacaoObjetivoDTO {
 
-  
-  
+
+
   private String nomeColaborador ;
-  
-  
+
+
   private UUID uuidColaborador ;
+
+  private String estado;
 
 }

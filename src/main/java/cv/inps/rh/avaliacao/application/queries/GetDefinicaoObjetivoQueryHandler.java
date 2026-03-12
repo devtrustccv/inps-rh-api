@@ -10,14 +10,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import cv.inps.rh.avaliacao.application.dto.DefinicaoObjectivoDTO;
+import cv.inps.rh.avaliacao.application.services.AvaliacaoReadService;
 
 @Component
 public class GetDefinicaoObjetivoQueryHandler implements QueryHandler<GetDefinicaoObjetivoQuery, ResponseEntity<AvaliacaoDTO>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetDefinicaoObjetivoQueryHandler.class);
 
+  private final AvaliacaoReadService avaliacaoReadService;
 
-  public GetDefinicaoObjetivoQueryHandler() {
+  public GetDefinicaoObjetivoQueryHandler(AvaliacaoReadService avaliacaoReadService) {
+    this.avaliacaoReadService = avaliacaoReadService;
 
   }
 
@@ -26,8 +29,7 @@ public class GetDefinicaoObjetivoQueryHandler implements QueryHandler<GetDefinic
 
     LOGGER.debug("GetDefinicaoObjetivoQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    return ResponseEntity.ok(avaliacaoReadService.getDefinicaoObjetivo(query.getUuid()));
   }
 
 }
