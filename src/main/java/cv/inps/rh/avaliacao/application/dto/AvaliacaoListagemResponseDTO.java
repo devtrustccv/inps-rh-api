@@ -21,11 +21,15 @@ public class AvaliacaoListagemResponseDTO {
   private Long institId;                  // Direção
   private String nomeInstituicao;
   private Long cargoId;
-  private String nomeCargo;
+  private String cargoNome;
+  private Long seccaoId;
+  private String seccaoNome;
+  private Long carrPccsId;
+  private String carrPccsNome;
   private String estado;                  // 'A' | 'P' | 'C' → controla a cor e o tab
   private String semestreNota;            // texto composto ex: "1º Sem: 8.5 / 2º Sem: 7.2"
   private BigDecimal avaliacaoFinalSemestre1;
   private BigDecimal avaliacaoFinalSemestre2;
   private BigDecimal notaFinal;           // expressiva quantitativa (soma ponderada)
-  private String notaFinalQualitativa;    // lookup RH_T_PARAM_ESCALA
+  private String notaFinalQualitativa;
 }
