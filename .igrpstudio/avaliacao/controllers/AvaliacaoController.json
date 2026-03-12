@@ -6,13 +6,14 @@
   "basePath": "avaliacao-desempenho/avaliacoes",
   "actions": [
     {
-      "actionName": "initAvaliacao",
+      "actionName": "definicaoObjetivo",
+      "path": "objectivos",
       "method": "POST",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "type": "AvaliacaoInicializarRequest",
+              "type": "DefinicaoObjectivo",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
@@ -38,6 +39,7 @@
     },
     {
       "actionName": "getListaDefinicaoObjectivos",
+      "path": "objectivos",
       "method": "GET",
       "responses": {
         "200": {
@@ -96,5 +98,5 @@
       ]
     }
   ],
-  "id": "z90a939h7d-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos"
+  "id": "z90a939h7d-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos-initAvaliacao"
 }

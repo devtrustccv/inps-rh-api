@@ -26,9 +26,8 @@ public class DefinicaoObjectivoDTO  {
 
   private Long id;
   private String uuid;
-  private Long funId;
-  private UUID funUuid;
-  private String nomeColaborador;
+  private List<UUID> funUuids;
+  private List<String> nomeColaborador;
   private Integer ano;
   private String semestre;
   private Long institId;

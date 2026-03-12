@@ -5,14 +5,14 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.avaliacao.application.dto.AvaliacaoInicializarRequestDTO;
+import cv.inps.rh.avaliacao.application.dto.DefinicaoObjectivoDTO;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class InitAvaliacaoCommand implements Command {
+public class DefinicaoObjetivoCommand implements Command {
 
   
-  private AvaliacaoInicializarRequestDTO avaliacaoinicializarrequest;
+  private DefinicaoObjectivoDTO definicaoobjectivo;
 
 }

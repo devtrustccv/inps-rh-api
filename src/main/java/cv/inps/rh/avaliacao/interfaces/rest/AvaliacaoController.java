@@ -20,7 +20,7 @@ import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.avaliacao.application.queries.*;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.avaliacao.application.commands.*;
-import cv.inps.rh.avaliacao.application.dto.AvaliacaoInicializarRequestDTO;
+import cv.inps.rh.avaliacao.application.dto.DefinicaoObjectivoDTO;
 import java.util.Map;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaDefinicaoObjetivoDTO;
 
@@ -42,10 +42,11 @@ public class AvaliacaoController {
           this.commandBus = commandBus;
   }
    @PostMapping(
+   value = "objectivos"
   )
   @Operation(
-    summary = "Init avaliacao",
-    description = "Init avaliacao",
+    summary = "Definicao objetivo",
+    description = "Definicao objetivo",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -60,17 +61,18 @@ public class AvaliacaoController {
     }
   )
   
-  public ResponseEntity<Map<String, ?>> initAvaliacao(@Valid @RequestBody AvaliacaoInicializarRequestDTO initAvaliacaoRequest
+  public ResponseEntity<Map<String, ?>> definicaoObjetivo(@Valid @RequestBody DefinicaoObjectivoDTO definicaoObjetivoRequest
     )
   {
 
-      final var command = new InitAvaliacaoCommand(initAvaliacaoRequest);
+      final var command = new DefinicaoObjetivoCommand(definicaoObjetivoRequest);
 
       return commandBus.send(command);
 
   }
 
    @GetMapping(
+   value = "objectivos"
   )
   @Operation(
     summary = "Get lista definicao objectivos",

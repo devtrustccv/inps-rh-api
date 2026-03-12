@@ -1,22 +1,16 @@
 package cv.inps.rh.avaliacao.application.commands;
 
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
-import cv.inps.rh.avaliacao.application.commands.*;
-import cv.inps.rh.avaliacao.application.commands.*;
 
 @ExtendWith(MockitoExtension.class)
-public class InitAvaliacaoCommandHandlerTest {
+public class DefinicaoObjetivoCommandHandlerTest {
 
     @InjectMocks
-    private InitAvaliacaoCommandHandler initAvaliacaoCommandHandler;
+    private DefinicaoObjetivoCommandHandler definicaoObjetivoCommandHandler;
 
     @BeforeEach
     void setUp() {

@@ -11,25 +11,25 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 @Component
-public class InitAvaliacaoCommandHandler implements CommandHandler<InitAvaliacaoCommand, ResponseEntity<Map<String, ?>>> {
+public class DefinicaoObjetivoCommandHandler implements CommandHandler<DefinicaoObjetivoCommand, ResponseEntity<Map<String, ?>>> {
 
   //Registo de Objectivos por Colaborador
 
-   private static final Logger LOGGER = LoggerFactory.getLogger(InitAvaliacaoCommandHandler.class);
+   private static final Logger LOGGER = LoggerFactory.getLogger(DefinicaoObjetivoCommandHandler.class);
 
    private final AvaliacaoService avaliacaoService;
 
-   public InitAvaliacaoCommandHandler(AvaliacaoService avaliacaoService) {
+   public DefinicaoObjetivoCommandHandler(AvaliacaoService avaliacaoService) {
       this.avaliacaoService = avaliacaoService;
 
    }
 
    @IgrpCommandHandler
-   public ResponseEntity<Map<String, ?>> handle(InitAvaliacaoCommand command) {
+   public ResponseEntity<Map<String, ?>> handle(DefinicaoObjetivoCommand command) {
 
-      LOGGER.debug("InitAvaliacaoCommand : {}", command);
+      LOGGER.debug("DefinicaoObjetivoCommand : {}", command);
 
-      return avaliacaoService.initAvaliacao(command);
+      return avaliacaoService.definicaoObjetivos(command);
    }
 
 }

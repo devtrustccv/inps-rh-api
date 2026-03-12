@@ -1,42 +1,29 @@
 package cv.inps.rh.avaliacao.application.services;
 
 import com.github.f4b6a3.uuid.UuidCreator;
-import cv.inps.rh.avaliacao.application.commands.InitAvaliacaoCommand;
-import cv.inps.rh.avaliacao.application.dto.WrapperListaAvaliacaoDTO;
+import cv.inps.rh.avaliacao.application.commands.DefinicaoObjetivoCommand;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaDefinicaoObjetivoDTO;
 import cv.inps.rh.avaliacao.application.queries.GetListaDefinicaoObjectivosQuery;
 import cv.inps.rh.avaliacao.infrastructure.mappers.AvaliacaoMapper;
 import cv.inps.rh.progressaopromocao.domain.service.engine.model.MediaResultado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
-import cv.inps.rh.shared.infrastructure.persistence.repository.AvaliacaoAtitudePessoalEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.AvaliacaoCompetenciaEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.AvaliacaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.AvaliacaoObjectivoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.InstituicaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCarreiraEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCargoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamManualFuncaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamObjetivoDetEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.SecaoEntityRepository;
-import org.springframework.stereotype.Service;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 public class AvaliacaoService {
@@ -84,17 +71,14 @@ public class AvaliacaoService {
   }
 
   @Transactional
-  public ResponseEntity<Map<String, ?>> initAvaliacao(InitAvaliacaoCommand command) {
+  public ResponseEntity<Map<String, ?>> definicaoObjetivos(DefinicaoObjetivoCommand command) {
 
-    var dto = command.getAvaliacaoinicializarrequest();
+    var dto = command.getDefinicaoobjectivo();
 
     if (!StringUtils.hasText(dto.getSemestre()) || (!"1".equals(dto.getSemestre()) && !"2".equals(dto.getSemestre()))) {
       throw IgrpResponseStatusException.badRequest("semestre deve ser '1' ou '2'");
     }
 
-    if (CollectionUtils.isEmpty(dto.getFunIds())) {
-      throw IgrpResponseStatusException.badRequest("funIds não pode estar vazio");
-    }
 
     var det = objetivoDetRepository.findTopByAnoOrderByIdDesc(dto.getAno())
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
@@ -108,17 +92,17 @@ public class AvaliacaoService {
 
     var cargo = dto.getCargoId() != null
         ? cargoRepository.findById(dto.getCargoId())
-            .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
-                "ParamCargoEntity not found for id: " + dto.getCargoId()))
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
+            "ParamCargoEntity not found for id: " + dto.getCargoId()))
         : null;
 
     var carreira = dto.getCarrPccsId() != null
         ? carreiraRepository.findByIdOrThrow(dto.getCarrPccsId())
         : null;
 
-    var created = new ArrayList<String>(dto.getFunIds().size());
+    var created = new ArrayList<String>(dto.getFunUuids().size());
 
-    for (var funId : dto.getFunIds()) {
+    for (var funId : dto.getFunUuids()) {
 
       if (avaliacaoRepository.existsByFuncionario_UuidAndAnoAndSemestre(funId, dto.getAno(), dto.getSemestre())) {
         continue;
@@ -316,7 +300,6 @@ public class AvaliacaoService {
     }
     return p.getSeccaoId() == null || seccaoId != null;
   }
-
 
 
   public MediaResultado calcularMedia(FuncionarioEntity fun, int anos) {
