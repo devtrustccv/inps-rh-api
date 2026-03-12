@@ -1,5 +1,6 @@
 package cv.inps.rh.avaliacao.application.queries;
 
+import cv.inps.rh.avaliacao.application.dto.WrapperListaDefinicaoObjetivoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -12,7 +13,7 @@ import cv.inps.rh.avaliacao.application.dto.WrapperListaAvaliacaoDTO;
 import cv.inps.rh.avaliacao.application.services.AvaliacaoService;
 
 @Component
-public class GetListaDefinicaoObjectivosQueryHandler implements QueryHandler<GetListaDefinicaoObjectivosQuery, ResponseEntity<WrapperListaAvaliacaoDTO>>{
+public class GetListaDefinicaoObjectivosQueryHandler implements QueryHandler<GetListaDefinicaoObjectivosQuery, ResponseEntity<WrapperListaDefinicaoObjetivoDTO>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetListaDefinicaoObjectivosQueryHandler.class);
 
@@ -24,7 +25,7 @@ public class GetListaDefinicaoObjectivosQueryHandler implements QueryHandler<Get
   }
 
    @IgrpQueryHandler
-  public ResponseEntity<WrapperListaAvaliacaoDTO> handle(GetListaDefinicaoObjectivosQuery query) {
+  public ResponseEntity<WrapperListaDefinicaoObjetivoDTO> handle(GetListaDefinicaoObjectivosQuery query) {
 
     LOGGER.debug("GetListaDefinicaoObjectivosQuery: {}", query);
 

@@ -22,7 +22,7 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.avaliacao.application.commands.*;
 import cv.inps.rh.avaliacao.application.dto.AvaliacaoInicializarRequestDTO;
 import java.util.Map;
-import cv.inps.rh.avaliacao.application.dto.WrapperListaAvaliacaoDTO;
+import cv.inps.rh.avaliacao.application.dto.WrapperListaDefinicaoObjetivoDTO;
 
 @IgrpController
 @RestController
@@ -82,14 +82,14 @@ public class AvaliacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = WrapperListaAvaliacaoDTO.class,
+                  implementation = WrapperListaDefinicaoObjetivoDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<WrapperListaAvaliacaoDTO> getListaDefinicaoObjectivos(
+  public ResponseEntity<WrapperListaDefinicaoObjetivoDTO> getListaDefinicaoObjectivos(
     @RequestParam(value = "ano", required = false) Integer ano,
     @RequestParam(value = "semestre", required = false) String semestre,
     @RequestParam(value = "estado", required = false) String estado,

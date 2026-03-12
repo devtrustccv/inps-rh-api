@@ -45,7 +45,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "WrapperListaAvaliacao",
+                "type": "WrapperListaDefinicaoObjetivo",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -96,5 +96,5 @@
       ]
     }
   ],
-  "id": "z90a939h7d-getListaDefinicaoObjectivos"
+  "id": "z90a939h7d-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos"
 }

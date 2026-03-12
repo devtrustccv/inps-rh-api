@@ -3,6 +3,7 @@ package cv.inps.rh.avaliacao.application.services;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.avaliacao.application.commands.InitAvaliacaoCommand;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaAvaliacaoDTO;
+import cv.inps.rh.avaliacao.application.dto.WrapperListaDefinicaoObjetivoDTO;
 import cv.inps.rh.avaliacao.application.queries.GetListaDefinicaoObjectivosQuery;
 import cv.inps.rh.avaliacao.infrastructure.mappers.AvaliacaoMapper;
 import cv.inps.rh.progressaopromocao.domain.service.engine.model.MediaResultado;
@@ -152,7 +153,7 @@ public class AvaliacaoService {
   }
 
   @Transactional(readOnly = true)
-  public WrapperListaAvaliacaoDTO getListaDefinicaoObjectivos(GetListaDefinicaoObjectivosQuery query) {
+  public WrapperListaDefinicaoObjetivoDTO getListaDefinicaoObjectivos(GetListaDefinicaoObjectivosQuery query) {
 
     var pageNumber = StringUtils.hasText(query.getPageNumber()) ? Integer.parseInt(query.getPageNumber()) : 0;
     var pageSize = StringUtils.hasText(query.getPageSize()) ? Integer.parseInt(query.getPageSize()) : 20;
@@ -191,7 +192,7 @@ public class AvaliacaoService {
 
     var page = avaliacaoRepository.findAll(spec, pageable);
 
-    var response = new WrapperListaAvaliacaoDTO();
+    var response = new WrapperListaDefinicaoObjetivoDTO();
     cv.inps.rh.shared.util.PageMapper.fillPagination(page, response);
     response.setContent(page.getContent().stream().map(avaliacaoMapper::toResumo).toList());
     return response;
