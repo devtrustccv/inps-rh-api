@@ -142,4 +142,34 @@ public class AvaliacaoController {
 
   }
 
+   @GetMapping(
+   value = "objectivos/{uuid}"
+  )
+  @Operation(
+    summary = "Get definicao objetivo",
+    description = "Get definicao objetivo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = DefinicaoObjectivoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<DefinicaoObjectivoDTO> getDefinicaoObjetivo(
+    @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var query = new GetDefinicaoObjetivoQuery(uuid);
+
+      return queryBus.handle(query);
+
+  }
+
 }
