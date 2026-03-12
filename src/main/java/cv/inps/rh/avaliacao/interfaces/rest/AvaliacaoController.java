@@ -25,6 +25,9 @@ import java.util.Map;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaDefinicaoObjetivoDTO;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaAvaliacaoDTO;
 import cv.inps.rh.avaliacao.application.dto.AvaliacaoDTO;
+import cv.inps.rh.avaliacao.application.dto.ObservacaoGeralDTO;
+import cv.inps.rh.avaliacao.application.dto.ParecerColaboradorDTO;
+import cv.inps.rh.avaliacao.application.dto.ComissaoExecutivaDTO;
 
 @IgrpController
 @RestController
@@ -204,7 +207,7 @@ public class AvaliacaoController {
   }
 
    @PutMapping(
-   value = "{uuid}"
+   value = "processos-avaliacao/{uuid}"
   )
   @Operation(
     summary = "Avaliacao",
@@ -258,6 +261,96 @@ public class AvaliacaoController {
   {
 
       final var command = new AutoAvaliacaoCommand(autoAvaliacaoRequest, uuid);
+
+      return commandBus.send(command);
+
+  }
+
+   @PutMapping(
+   value = "processos-avaliacao/{uuid}/observacao-geral"
+  )
+  @Operation(
+    summary = "Processo observacao geral",
+    description = "Processo observacao geral",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> processoObservacaoGeral(@Valid @RequestBody ObservacaoGeralDTO processoObservacaoGeralRequest
+    , @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var command = new ProcessoObservacaoGeralCommand(processoObservacaoGeralRequest, uuid);
+
+      return commandBus.send(command);
+
+  }
+
+   @PutMapping(
+   value = "processos-avaliacao/{uuid}/parecer-colaborador"
+  )
+  @Operation(
+    summary = "Processo parecer colaborador",
+    description = "Processo parecer colaborador",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> processoParecerColaborador(@Valid @RequestBody ParecerColaboradorDTO processoParecerColaboradorRequest
+    , @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var command = new ProcessoParecerColaboradorCommand(processoParecerColaboradorRequest, uuid);
+
+      return commandBus.send(command);
+
+  }
+
+   @PutMapping(
+   value = "processos-avaliacao/{uuid}/comissao-executiva"
+  )
+  @Operation(
+    summary = "Processo comissao executiva",
+    description = "Processo comissao executiva",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> processoComissaoExecutiva(@Valid @RequestBody ComissaoExecutivaDTO processoComissaoExecutivaRequest
+    , @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var command = new ProcessoComissaoExecutivaCommand(processoComissaoExecutivaRequest, uuid);
 
       return commandBus.send(command);
 

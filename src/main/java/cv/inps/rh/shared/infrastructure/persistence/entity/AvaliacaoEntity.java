@@ -48,7 +48,7 @@ public class AvaliacaoEntity extends AuditEntity {
   @JoinColumn(name = "CARR_PCCS_ID")
   private ParamCarreiraEntity carreira;
 
-  @Column(name = "ESTADO", length = 1, nullable = false)
+  @Column(name = "ESTADO")
   private String estado;                       // 'A' | 'P' | 'C'
 
   @Column(name = "AVALIACAO_FINAL")

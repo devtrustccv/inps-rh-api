@@ -209,7 +209,7 @@
     },
     {
       "actionName": "avaliacao",
-      "path": "{uuid}",
+      "path": "processos-avaliacao/{uuid}",
       "method": "PUT",
       "requestBody": {
         "content": {
@@ -255,6 +255,123 @@
           "application/json": {
             "schema": {
               "type": "Avaliacao",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "avaliacao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "processoObservacaoGeral",
+      "path": "processos-avaliacao/{uuid}/observacao-geral",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ObservacaoGeral",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "avaliacao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "processoParecerColaborador",
+      "path": "processos-avaliacao/{uuid}/parecer-colaborador",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ParecerColaborador",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "avaliacao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "processoComissaoExecutiva",
+      "path": "processos-avaliacao/{uuid}/comissao-executiva",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ComissaoExecutiva",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
