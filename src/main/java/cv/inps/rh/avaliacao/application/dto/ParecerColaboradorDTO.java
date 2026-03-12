@@ -7,22 +7,23 @@ import cv.igrp.framework.stereotype.IgrpDTO;
 import jakarta.validation.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
 
-
-@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@IgrpDTO
-public class DefinicaoObjectivoDTO extends BaseAvaliacaoObjetivoDTO {
+@AllArgsConstructor
 
-  private List<UUID> funUuids;
+
+@IgrpDTO
+public class ParecerColaboradorDTO  {
+
+  @NotBlank(message = "The field <parecer> is required")
+  
+  private String parecer ;
+  @NotBlank(message = "The field <justificar> is required")
+  
+  private String justificar ;
 
 }

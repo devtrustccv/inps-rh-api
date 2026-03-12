@@ -1,0 +1,38 @@
+{
+  "type": "dto",
+  "module": "avaliacao",
+  "name": "Avaliacao",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "BaseAvaliacaoObjetivo",
+    "module": "avaliacao"
+  },
+  "attributes": [
+    {
+      "name": "nomeColaborador",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "uuidColaborador",
+      "objectType": "java",
+      "type": "uuid",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "n04qipe6be"
+}

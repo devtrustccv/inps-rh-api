@@ -1,13 +1,12 @@
 {
   "type": "dto",
   "module": "avaliacao",
-  "name": "AvaliacaoInicializarRequest",
+  "name": "ComissaoExecutiva",
   "template": "classic",
   "enableCustonValidation": false,
-  "readOnly": true,
   "attributes": [
     {
-      "name": "custom",
+      "name": "observacao",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -19,6 +18,5 @@
       "primaryKey": false
     }
   ],
-  "id": "avd6a1b2c3"
+  "id": "vws23rkk7l"
 }
-

@@ -24,6 +24,7 @@ import cv.inps.rh.avaliacao.application.dto.DefinicaoObjectivoDTO;
 import java.util.Map;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaDefinicaoObjetivoDTO;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaAvaliacaoDTO;
+import cv.inps.rh.avaliacao.application.dto.AvaliacaoDTO;
 
 @IgrpController
 @RestController
@@ -155,20 +156,110 @@ public class AvaliacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = DefinicaoObjectivoDTO.class,
+                  implementation = AvaliacaoDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<DefinicaoObjectivoDTO> getDefinicaoObjetivo(
+  public ResponseEntity<AvaliacaoDTO> getDefinicaoObjetivo(
     @PathVariable(value = "uuid") String uuid)
   {
 
       final var query = new GetDefinicaoObjetivoQuery(uuid);
 
       return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "{uuid}"
+  )
+  @Operation(
+    summary = "Get avaliacao",
+    description = "Get avaliacao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = AvaliacaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<AvaliacaoDTO> getAvaliacao(
+    @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var query = new GetAvaliacaoQuery(uuid);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "{uuid}"
+  )
+  @Operation(
+    summary = "Avaliacao",
+    description = "Avaliacao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> avaliacao(@Valid @RequestBody AvaliacaoDTO avaliacaoRequest
+    , @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var command = new AvaliacaoCommand(avaliacaoRequest, uuid);
+
+      return commandBus.send(command);
+
+  }
+
+   @PutMapping(
+   value = "{uuid}/auto-avaliacao"
+  )
+  @Operation(
+    summary = "Auto avaliacao",
+    description = "Auto avaliacao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> autoAvaliacao(@Valid @RequestBody AvaliacaoDTO autoAvaliacaoRequest
+    , @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var command = new AutoAvaliacaoCommand(autoAvaliacaoRequest, uuid);
+
+      return commandBus.send(command);
 
   }
 

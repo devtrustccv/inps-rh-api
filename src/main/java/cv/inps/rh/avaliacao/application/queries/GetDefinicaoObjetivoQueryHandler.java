@@ -1,5 +1,6 @@
 package cv.inps.rh.avaliacao.application.queries;
 
+import cv.inps.rh.avaliacao.application.dto.AvaliacaoDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 import cv.inps.rh.avaliacao.application.dto.DefinicaoObjectivoDTO;
 
 @Component
-public class GetDefinicaoObjetivoQueryHandler implements QueryHandler<GetDefinicaoObjetivoQuery, ResponseEntity<DefinicaoObjectivoDTO>>{
+public class GetDefinicaoObjetivoQueryHandler implements QueryHandler<GetDefinicaoObjetivoQuery, ResponseEntity<AvaliacaoDTO>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetDefinicaoObjetivoQueryHandler.class);
 
@@ -21,7 +22,7 @@ public class GetDefinicaoObjetivoQueryHandler implements QueryHandler<GetDefinic
   }
 
    @IgrpQueryHandler
-  public ResponseEntity<DefinicaoObjectivoDTO> handle(GetDefinicaoObjetivoQuery query) {
+  public ResponseEntity<AvaliacaoDTO> handle(GetDefinicaoObjetivoQuery query) {
 
     LOGGER.debug("GetDefinicaoObjetivoQuery: {}", query);
 
