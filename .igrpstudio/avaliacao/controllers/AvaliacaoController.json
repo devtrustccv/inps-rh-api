@@ -96,6 +96,59 @@
           "isRequired": false
         }
       ]
+    },
+    {
+      "actionName": "getListaAvaliacao",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaAvaliacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "avaliacao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "ano",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "cargo",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "colaborador",
+          "isRequired": false
+        }
+      ]
     }
   ],
   "id": "z90a939h7d-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos-initAvaliacao"

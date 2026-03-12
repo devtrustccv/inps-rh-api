@@ -23,6 +23,7 @@ import cv.inps.rh.avaliacao.application.commands.*;
 import cv.inps.rh.avaliacao.application.dto.DefinicaoObjectivoDTO;
 import java.util.Map;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaDefinicaoObjetivoDTO;
+import cv.inps.rh.avaliacao.application.dto.WrapperListaAvaliacaoDTO;
 
 @IgrpController
 @RestController
@@ -102,6 +103,40 @@ public class AvaliacaoController {
   {
 
       final var query = new GetListaDefinicaoObjectivosQuery(ano, semestre, estado, institId, cargoId, pageNumber, pageSize);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+  )
+  @Operation(
+    summary = "Get lista avaliacao",
+    description = "Get lista avaliacao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = WrapperListaAvaliacaoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<WrapperListaAvaliacaoDTO> getListaAvaliacao(
+    @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
+    @RequestParam(value = "pageSize", required = false) String pageSize,
+    @RequestParam(value = "ano", required = false) Integer ano,
+    @RequestParam(value = "direcao", required = false) Long direcao,
+    @RequestParam(value = "cargo", required = false) Long cargo,
+    @RequestParam(value = "colaborador", required = false) String colaborador)
+  {
+
+      final var query = new GetListaAvaliacaoQuery(pageNumber, pageSize, ano, direcao, cargo, colaborador);
 
       return queryBus.handle(query);
 
