@@ -90,7 +90,30 @@ public class EscalaAvaliacaoService {
 
   @Transactional(readOnly = true)
   public EscalaAvaliacaoRequestDTO obter(GetEscalaAvaliacaoQuery query) {
-    return null;
+    Specification<cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaAvaliacaoEntity> spec = (root, _,
+        cb) -> {
+      var predicates = new ArrayList<Predicate>();
+      predicates.add(cb.equal(root.get("estado"), Estado.A));
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
+
+    var rows = repository.findAll(spec, Sort.by(Sort.Direction.DESC, "id"))
+        .stream()
+        .map(entity -> {
+          var row = new EscalaAvaliacaoRowDTO();
+          row.setId(entity.getId());
+          row.setNivel(entity.getNivel());
+          row.setQualitativa(entity.getQualitativa());
+          row.setDescricao(entity.getDescricao());
+          row.setQuantitativaDe(entity.getQuantitativaDe());
+          row.setQuantitativaAte(entity.getQuantitativaAte());
+          return row;
+        })
+        .toList();
+
+    var dto = new EscalaAvaliacaoRequestDTO();
+    dto.setRow(rows);
+    return dto;
   }
 
   @Transactional(readOnly = true)
