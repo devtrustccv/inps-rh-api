@@ -9,14 +9,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import cv.inps.rh.configuracao.application.dto.ManualFuncaoResponseDTO;
+import cv.inps.rh.configuracao.application.services.ManualFuncaoService;
 
 @Component
 public class GetManualFuncaoQueryHandler implements QueryHandler<GetManualFuncaoQuery, ResponseEntity<ManualFuncaoResponseDTO>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetManualFuncaoQueryHandler.class);
 
+  private final ManualFuncaoService manualFuncaoService;
 
-  public GetManualFuncaoQueryHandler() {
+  public GetManualFuncaoQueryHandler(ManualFuncaoService manualFuncaoService) {
+    this.manualFuncaoService = manualFuncaoService;
 
   }
 
@@ -25,8 +28,7 @@ public class GetManualFuncaoQueryHandler implements QueryHandler<GetManualFuncao
 
     LOGGER.debug("GetManualFuncaoQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    return ResponseEntity.ok(manualFuncaoService.obter(query));
   }
 
 }

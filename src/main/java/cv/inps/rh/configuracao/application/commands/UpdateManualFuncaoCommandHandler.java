@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import cv.inps.rh.configuracao.application.services.ManualFuncaoService;
 
 import java.util.Map;
 
@@ -14,7 +15,10 @@ public class UpdateManualFuncaoCommandHandler implements CommandHandler<UpdateMa
 
    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateManualFuncaoCommandHandler.class);
 
-   public UpdateManualFuncaoCommandHandler() {
+   private final ManualFuncaoService manualFuncaoService;
+
+   public UpdateManualFuncaoCommandHandler(ManualFuncaoService manualFuncaoService) {
+      this.manualFuncaoService = manualFuncaoService;
 
    }
 
@@ -23,8 +27,7 @@ public class UpdateManualFuncaoCommandHandler implements CommandHandler<UpdateMa
 
       LOGGER.debug("UpdateManualFuncaoCommand : {}", command);
 
-      // TODO: Implement the command handling logic here
-      return null;
+      return manualFuncaoService.atualizar(command);
    }
 
 }

@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import cv.inps.rh.configuracao.application.services.EscalaAvaliacaoService;
 
 import java.util.Map;
 
@@ -14,7 +15,10 @@ public class UpdateEscalaAvaliacaoCommandHandler implements CommandHandler<Updat
 
    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateEscalaAvaliacaoCommandHandler.class);
 
-   public UpdateEscalaAvaliacaoCommandHandler() {
+   private final EscalaAvaliacaoService escalaAvaliacaoService;
+
+   public UpdateEscalaAvaliacaoCommandHandler(EscalaAvaliacaoService escalaAvaliacaoService) {
+      this.escalaAvaliacaoService = escalaAvaliacaoService;
 
    }
 
@@ -23,8 +27,7 @@ public class UpdateEscalaAvaliacaoCommandHandler implements CommandHandler<Updat
 
       LOGGER.debug("UpdateEscalaAvaliacaoCommand : {}", command);
 
-      // TODO: Implement the command handling logic here
-      return null;
+      return escalaAvaliacaoService.atualizar(command);
    }
 
 }

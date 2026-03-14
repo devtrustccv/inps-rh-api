@@ -9,14 +9,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import cv.inps.rh.configuracao.application.dto.WrapperListaEscalaAvaliacaoDTO;
+import cv.inps.rh.configuracao.application.services.EscalaAvaliacaoService;
 
 @Component
 public class GetListaEscalaAvaliacaoQueryHandler implements QueryHandler<GetListaEscalaAvaliacaoQuery, ResponseEntity<WrapperListaEscalaAvaliacaoDTO>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetListaEscalaAvaliacaoQueryHandler.class);
 
+  private final EscalaAvaliacaoService escalaAvaliacaoService;
 
-  public GetListaEscalaAvaliacaoQueryHandler() {
+  public GetListaEscalaAvaliacaoQueryHandler(EscalaAvaliacaoService escalaAvaliacaoService) {
+    this.escalaAvaliacaoService = escalaAvaliacaoService;
 
   }
 
@@ -25,8 +28,7 @@ public class GetListaEscalaAvaliacaoQueryHandler implements QueryHandler<GetList
 
     LOGGER.debug("GetListaEscalaAvaliacaoQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    return ResponseEntity.ok(escalaAvaliacaoService.listar(query));
   }
 
 }
