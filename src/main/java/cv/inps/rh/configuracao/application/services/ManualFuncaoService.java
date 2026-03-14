@@ -2,8 +2,11 @@ package cv.inps.rh.configuracao.application.services;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.commands.CreateManualFuncaoCommand;
+import cv.inps.rh.configuracao.application.commands.UpdateManualFuncaoCommand;
+import cv.inps.rh.configuracao.application.dto.ManualFuncaoResponseDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperListaManualFuncaoDTO;
 import cv.inps.rh.configuracao.infrastructure.mappers.ManualFuncaoMapper;
+import cv.inps.rh.configuracao.application.queries.GetManualFuncaoQuery;
 import cv.inps.rh.configuracao.application.queries.GetListaManualFuncaoQuery;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamManualFuncaoEntity;
@@ -24,6 +27,7 @@ import jakarta.persistence.criteria.Predicate;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class ManualFuncaoService {
@@ -121,5 +125,62 @@ public class ManualFuncaoService {
     PageMapper.fillPagination(resultPage, response);
     response.setContent(resultPage.getContent().stream().map(mapper::toResponse).toList());
     return response;
+  }
+
+  @Transactional(readOnly = true)
+  public ManualFuncaoResponseDTO obter(GetManualFuncaoQuery query) {
+    return obter(query.getId());
+  }
+
+  @Transactional(readOnly = true)
+  public ManualFuncaoResponseDTO obter(String id) {
+    var uuid = parseUuid(id);
+    var entity = manualRepository.findByUuid(uuid)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("ParamManualFuncaoEntity not found for id: " + uuid));
+    return mapper.toResponse(entity);
+  }
+
+  @Transactional
+  public ResponseEntity<Map<String, ?>> atualizar(UpdateManualFuncaoCommand command) {
+    var uuid = parseUuid(command.getId());
+    var dto = command.getManualfuncaorequest();
+
+    var entity = manualRepository.findByUuid(uuid)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("ParamManualFuncaoEntity not found for id: " + uuid));
+
+    entity.setDescricao(dto.getDescricao());
+    entity.setInstitId(instituicaoRepository.findByIdOrThrow(dto.getInstitId()));
+
+    if (dto.getSeccaoId() != null) {
+      entity.setSeccaoId(secaoRepository.findByIdOrThrow(dto.getSeccaoId()));
+    } else {
+      entity.setSeccaoId(null);
+    }
+
+    var cargo = cargoRepository.findById(dto.getCargoId())
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "ParamCargoEntity not found for id: " + dto.getCargoId()));
+    entity.setCargo(cargo);
+
+    if (dto.getCarrPccsId() != null) {
+      entity.setCarreira(carreiraRepository.findByIdOrThrow(dto.getCarrPccsId()));
+    } else {
+      entity.setCarreira(null);
+    }
+
+    if (!ESTADO_ATIVO.equals(entity.getEstado())) {
+      entity.setEstado(ESTADO_ATIVO);
+    }
+
+    manualRepository.save(entity);
+
+    return ResponseEntity.ok(Map.of("id", entity.getUuid()));
+  }
+
+  private UUID parseUuid(String raw) {
+    try {
+      return UUID.fromString(raw);
+    } catch (Exception e) {
+      throw IgrpResponseStatusException.badRequest("UUID inválido: " + raw);
+    }
   }
 }
