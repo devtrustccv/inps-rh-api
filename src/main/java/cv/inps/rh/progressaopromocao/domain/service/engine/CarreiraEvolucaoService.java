@@ -1,31 +1,29 @@
 package cv.inps.rh.progressaopromocao.domain.service.engine;
 
-import cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.SimEvolucaoCarreiraEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.VwRhProgressaoInputEntityRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class CarreiraEvolucaoService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CarreiraEvolucaoService.class);
-
-  private final CarreiraEntityRepository carreiraRepository;
   private final ProgressaoService progressaoService;
   private final PromocaoService promocaoService;
+  private final VwRhProgressaoInputEntityRepository vwRhProgressaoInputEntityRepository;
+  private final SimEvolucaoCarreiraEntityRepository simEvolucaoCarreiraEntityRepository;
 
   @Transactional
   public void executarSimulacao() {
 
-    // todo: primeiro executar promocao, depois progressao
+    simEvolucaoCarreiraEntityRepository.deleteAll();
 
-    var careers = carreiraRepository.findCarreirasAtivas();
-    LOGGER.info("SIMULANDO PROGRESSÃO PARA {} CARREIRAS", careers.size());
-
-    //promocaoService.simular(careers);
-    progressaoService.simular();
+    var promotionCandidates = vwRhProgressaoInputEntityRepository.findAll();
+    for (var candidate : promotionCandidates) {
+      promocaoService.simular(candidate);
+      progressaoService.simular(candidate);
+    }
   }
 }

@@ -1,7 +1,6 @@
 package cv.inps.rh.progressaopromocao.domain.service.engine;
 
-import cv.inps.rh.progressaopromocao.domain.service.engine.model.ProgessionPromotionType;
-import cv.inps.rh.shared.infrastructure.persistence.repository.VwRhProgressaoInputEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.VwRhProgressaoInputEntity;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,40 +14,38 @@ public class ProgressaoService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProgressaoService.class);
 
-  private final SimulacaoService simulacaoService;
-  private final VwRhProgressaoInputEntityRepository vwRhProgressaoInputEntityRepository;
+  private static final double MIN_MEDIA_AVALIACOES = 3.0;
 
-  public void simular() {
+  private final SimulacaoService simulacaoService;
+
+  public void simular(VwRhProgressaoInputEntity c) {
 
     // TODO 05/03/2026 17:41 colaborador em licença sem vencimento não deve progredir
     // TODO 05/03/2026 17:41 O colaborador não deve estar em situação laboral em que não evolui na carreira no período de progressão; deve iniciar a partir da situação laboral atual
-    // TODO 10/03/2026 21:55 avaliar se já é possível filtrar na query
 
-    for (var c : vwRhProgressaoInputEntityRepository.findAll()) {
+    LOGGER.debug("\n---------------------------------------------------------------------------------------------------------------------------");
+    LOGGER.debug("Simulando progressao para {}", c);
 
-      LOGGER.debug("\n---------------------------------------------------------------------------------------------------------------------------");
-      LOGGER.debug("Simulando progressao para {}", c);
-
-      // Verifica se já existe evolução ou tempo mínimo de progressão
-      if (c.getExisteEvolucao() == 0L && c.getAtingiuPrimeiraProgressao() == 0L) {
-        LOGGER.debug("Sem evolucao e sem tempo minimo de progressao");
-        continue;
-      }
-
-      // Verifica se atingiu tempo mínimo para progressão
-      if (c.getAtingiuTempMinProgressao() == 0L) {
-        LOGGER.debug("Nao atingiu tempo minimo para progressao");
-        continue;
-      }
-
-      // Verifica se a média das avaliações atende ao mínimo para progressão
-      var media = c.getMediaAvaliacoes();
-      if (media != null && media >= 2.5) {
-        LOGGER.debug("Media {} >= 2.5, registrando simulacao", media);
-        simulacaoService.registarSimulacao(c, media, ProgessionPromotionType.PROGRESSAO);
-      } else {
-        LOGGER.debug("Media <{}> abaixo do limite", media);
-      }
+    // Verifica se já existe evolução ou tempo mínimo de progressão
+    if (c.getExisteProgressao() == 0L && c.getAtingiuPrimeiraProgressao() == 0L) {
+      LOGGER.debug("Sem evolucao e sem tempo minimo de progressao");
+      return;
     }
+
+    // Verifica se atingiu tempo mínimo para progressão
+    if (c.getAtingiuTempMinProgressao() == 0L) {
+      LOGGER.debug("Nao atingiu tempo minimo para progressao");
+      return;
+    }
+
+    // Verifica se a média das avaliações atende ao mínimo para progressão
+    var media = c.getMediaAvaliacoes3Anos();
+    if (media >= MIN_MEDIA_AVALIACOES) {
+      LOGGER.debug("Media {} >= 3.0, registrando simulacao", media);
+      simulacaoService.registarProgressao(c, media);
+      return;
+    }
+
+    LOGGER.debug("Media <{}> abaixo do limite", media);
   }
 }

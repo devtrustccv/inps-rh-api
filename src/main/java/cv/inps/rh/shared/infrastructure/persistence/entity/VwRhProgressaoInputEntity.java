@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Getter
 @Entity
 @Immutable
-@Table(name = "VW_RH_PROGRESSAO_INPUT")
+@Table(name = "VW_PROGRESSAO_PROMOCAO")
 @ToString
 public class VwRhProgressaoInputEntity {
 
@@ -23,10 +23,6 @@ public class VwRhProgressaoInputEntity {
   @NotNull
   @Column(name = "CARREIRA_ID", nullable = false)
   private Long carreiraId;
-
-  @Size(max = 30)
-  @Column(name = "TIPO_CARREIRA", length = 30)
-  private String tipoCarreira;
 
   @NotNull
   @Column(name = "FUNCIONARIO_ID", nullable = false)
@@ -37,11 +33,11 @@ public class VwRhProgressaoInputEntity {
   @Column(name = "NOME_FUNCIONARIO", nullable = false)
   private String nomeFuncionario;
 
+  @Column(name = "TIPO_CARREIRA")
+  private String tipoCarreira;
+
   @Column(name = "DATA_INICIO_CARREIRA")
   private LocalDate dataInicioCarreira;
-
-  @Column(name = "CARGO_ID")
-  private Long cargoId;
 
   @Column(name = "NIVEL_REFERENCIA")
   private Long nivelReferencia;
@@ -50,11 +46,17 @@ public class VwRhProgressaoInputEntity {
   @Column(name = "ESCALAO", length = 100)
   private String escalao;
 
-  @Column(name = "MEDIA_AVALIACOES")
-  private Long mediaAvaliacoes;
+  @Column(name = "MEDIA_AVALIACOES_3ANOS")
+  private Long mediaAvaliacoes3Anos;
 
-  @Column(name = "EXISTE_EVOLUCAO")
-  private Long existeEvolucao;
+  @Column(name = "MEDIA_AVALIACOES_2ANOS")
+  private Long mediaAvaliacoes2Anos;
+
+  @Column(name = "EXISTE_PROGRESSAO")
+  private Long existeProgressao;
+
+  @Column(name = "RELACIONAMENTO_ID")
+  private Long relacionamentoId;
 
   @Column(name = "ATINGIU_PRIMEIRA_PROGRESSAO")
   private Long atingiuPrimeiraProgressao;

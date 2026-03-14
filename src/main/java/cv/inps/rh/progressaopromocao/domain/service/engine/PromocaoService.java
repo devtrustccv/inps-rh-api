@@ -5,18 +5,25 @@ import cv.inps.rh.progressaopromocao.domain.service.engine.model.ProgessionPromo
 import cv.inps.rh.progressaopromocao.domain.service.engine.rule.DisciplinaService;
 import cv.inps.rh.progressaopromocao.domain.service.engine.rule.FaltaService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.VwRhProgressaoInputEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EvolucaoCarreiraEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.VwRhProgressaoInputEntityRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class PromocaoService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(PromocaoService.class);
+
+  private static final double MIN_MEDIA_AVALIACOES = 4.5;
 
   private final EvolucaoCarreiraEntityRepository evolucaoRepository;
   private final CarreiraEntityRepository carreiraRepository;
@@ -24,42 +31,41 @@ public class PromocaoService {
   private final FaltaService faltaService;
   private final DisciplinaService disciplinaService;
   private final SimulacaoService simulacaoService;
+  private final VwRhProgressaoInputEntityRepository vwRhProgressaoInputEntityRepository;
 
-  public void simular(List<CarreiraEntity> careers) {
+  public void simular(VwRhProgressaoInputEntity c) {
 
-    for (var career : careers) {
+    LOGGER.debug("\n---------------------------------------------------------------------------------------------------------------------------");
+    LOGGER.debug("Simulando progressao para {}", c);
 
-      if (!validaElegibilidadePromocao(career)) continue;
-
-      if (!atingiuTempoPromocao(career)) continue;
-
-      if (!podePromoverNovamente(career)) continue;
-
-      var media = avaliacaoService.calcularMedia(
-          career.getContrVinculoId().getFunId(),
-          2
-      );
-      if (!media.elegivelPromocao()) continue;
-
-      if (!faltaService.valida(career)) continue;
-
-      if (!disciplinaService.valida(career)) continue;
-
-      simulacaoService.registarSimulacao(career, media, ProgessionPromotionType.PROMOCAO);
+    if (c.getTipoCarreira().equals("DIRECTOR") || c.getTipoCarreira().equals("DIRECTOR_BASE")) {
+      LOGGER.debug("Tipo de carreira não permitido para promoção");
+      return;
     }
-  }
 
-  /**
-   * Regras básicas para promoção
-   */
-  private boolean validaElegibilidadePromocao(CarreiraEntity career) {
+    // Verifica se já existe evolução ou tempo mínimo de progressão
+    if (c.getExisteProgressao() == 0L && c.getAtingiuPrimeiraProgressao() == 0L) {
+      LOGGER.debug("Sem progressao");
+      return;
+    }
 
-    // diretores não promovem
-    if (career.getCargoId() != null)
-      return false;
+    // Verifica se a média das avaliações atende ao mínimo para progressão
+    var media = c.getMediaAvaliacoes2Anos();
+    if (media >= MIN_MEDIA_AVALIACOES) {
+      LOGGER.debug("Media {} >= 3.0, registrando simulacao", media);
+      simulacaoService.registarProgressao(c, media);
+      return;
+    }
 
-    // não pode ter tido promoção anterior
-    return !ProgessionPromotionType.PROMOCAO.name().equals(career.getTipoSituacao());
+/*    if (!atingiuTempoPromocao(career)) continue;
+
+    if (!podePromoverNovamente(career)) continue;
+
+    if (!faltaService.valida(career)) continue;
+
+    if (!disciplinaService.valida(career)) continue;*/
+
+    simulacaoService.registarPromocao(c, media);
   }
 
   /**

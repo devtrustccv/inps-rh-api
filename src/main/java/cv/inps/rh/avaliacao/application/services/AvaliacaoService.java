@@ -8,7 +8,6 @@ import cv.inps.rh.avaliacao.application.queries.GetListaAvaliacaoQuery;
 import cv.inps.rh.avaliacao.application.queries.GetListaDefinicaoObjectivosQuery;
 import cv.inps.rh.avaliacao.infrastructure.mappers.AvaliacaoListagemMapper;
 import cv.inps.rh.avaliacao.infrastructure.mappers.AvaliacaoMapper;
-import cv.inps.rh.progressaopromocao.domain.service.engine.model.MediaResultado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -23,15 +22,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class AvaliacaoService {
@@ -440,27 +434,5 @@ public class AvaliacaoService {
   }
 
   private record GroupKey(Integer ano, Long institId, Long cargoId, UUID funUuid) {
-  }
-
-  public MediaResultado calcularMedia(FuncionarioEntity fun, int anos) {
-
-    var evaluations = avaliacaoRepository.findUltimasAvaliacoes(
-        fun.getId(),
-        PageRequest.of(0, anos));
-    if (evaluations.size() < anos)
-      return MediaResultado.invalido();
-
-    var media = evaluations.stream()
-        .mapToDouble(AvaliacaoEntity::getAvaliacaoFinal)
-        .average()
-        .orElse(0);
-
-    var abaixo50 = evaluations.stream().anyMatch(a -> a.getAvaliacaoFinal() < 50);
-
-    var elegivelProgressao = media >= 60 && !abaixo50;
-
-    var elegivelPromocao = media >= 90;
-
-    return new MediaResultado(media, elegivelProgressao, elegivelPromocao);
   }
 }
