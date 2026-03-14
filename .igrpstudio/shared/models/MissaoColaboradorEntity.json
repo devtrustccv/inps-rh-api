@@ -68,14 +68,12 @@
     },
     {
       "name": "estado",
-      "type": "Estado",
-      "length": 255,
+      "type": "string",
+      "length": 1,
       "nullable": true,
       "unique": false,
       "primaryKey": false,
-      "skipFieldRevision": false,
-      "objectType": "enum",
-      "module": "shared"
+      "skipFieldRevision": false
     },
     {
       "name": "uuid",
@@ -92,4 +90,3 @@
   "uniqueConstraints": [],
   "indexes": []
 }
-

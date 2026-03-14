@@ -69,13 +69,11 @@
     {
       "name": "estado",
       "type": "string",
-      "length": 255,
+      "length": 1,
       "nullable": false,
       "unique": false,
       "primaryKey": false,
-      "skipFieldRevision": false,
-      "objectType": "java",
-      "module": "shared"
+      "skipFieldRevision": false
     },
     {
       "name": "uuid",
@@ -92,4 +90,3 @@
   "uniqueConstraints": [],
   "indexes": []
 }
-
