@@ -19,7 +19,6 @@ public class EscalaAvaliacaoMapper {
     entity.setDescricao(dto.getDescricao());
     entity.setQuantitativaDe(dto.getQuantitativaDe());
     entity.setQuantitativaAte(dto.getQuantitativaAte());
-    entity.setUuid(dto.getId());
     return entity;
   }
 
@@ -30,7 +29,7 @@ public class EscalaAvaliacaoMapper {
 
     var dto = new EscalaAvaliacaoResponseDTO();
     dto.setId(entity.getId());
-    dto.setUuid(entity.getUuid() != null ? entity.getUuid().toString() : null);
+    dto.setUuid(entity.getUuid());
     dto.setNivel(entity.getNivel());
     dto.setQualitativa(entity.getQualitativa());
     dto.setDescricao(entity.getDescricao());

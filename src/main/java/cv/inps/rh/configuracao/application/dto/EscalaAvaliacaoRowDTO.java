@@ -23,7 +23,7 @@ import java.util.UUID;
 public class EscalaAvaliacaoRowDTO  {
 
 
-  private UUID id;
+  private Long id;
 
   @NotNull
   private Integer nivel;
