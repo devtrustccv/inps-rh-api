@@ -58,10 +58,9 @@ public class MissaoPrestadorEntity extends AuditEntity {
     @JoinColumn(name = "missao_serv_id", referencedColumnName = "id", nullable = false)
     private MissaoServicoEntity missaoServId;
 
-    @NotNull(message = "estado is mandatory")
-    @Enumerated(EnumType.STRING)
+
     @Column(name = "estado", length = 1, nullable = false)
-    private Estado estado;
+    private String estado;
 
     @NotNull(message = "uuid is mandatory")
     @Column(name = "uuid", nullable = false, length = 100)

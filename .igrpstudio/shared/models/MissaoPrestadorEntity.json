@@ -68,13 +68,13 @@
     },
     {
       "name": "estado",
-      "type": "Estado",
+      "type": "string",
       "length": 255,
       "nullable": false,
       "unique": false,
       "primaryKey": false,
       "skipFieldRevision": false,
-      "objectType": "enum",
+      "objectType": "java",
       "module": "shared"
     },
     {
