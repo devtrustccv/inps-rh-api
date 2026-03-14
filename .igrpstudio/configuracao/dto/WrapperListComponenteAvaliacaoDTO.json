@@ -1,0 +1,28 @@
+{
+  "type": "dto",
+  "module": "configuracao",
+  "name": "WrapperListComponenteAvaliacao",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "Page",
+    "module": "shared"
+  },
+  "attributes": [
+    {
+      "name": "content",
+      "objectType": "dto",
+      "type": "ComponenteAvaliacaoResumoResponse",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "configuracao"
+    }
+  ],
+  "id": "92wgxhgtyt"
+}

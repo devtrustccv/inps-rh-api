@@ -23,6 +23,7 @@ import cv.inps.rh.configuracao.application.commands.*;
 import cv.inps.rh.configuracao.application.dto.ManualFuncaoRequestDTO;
 import java.util.Map;
 import cv.inps.rh.configuracao.application.dto.WrapperListaManualFuncaoDTO;
+import cv.inps.rh.configuracao.application.dto.ManualFuncaoResponseDTO;
 
 @IgrpController
 @RestController
@@ -103,6 +104,66 @@ public class ManualFuncaoController {
       final var query = new GetListaManualFuncaoQuery(pageNumber, pageSize, cargoId, carrPccsId, institId, seccaoId);
 
       return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "avaliacao-desempenho/manual-funcao/{id}"
+  )
+  @Operation(
+    summary = "Get manual funcao",
+    description = "Get manual funcao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ManualFuncaoResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<ManualFuncaoResponseDTO> getManualFuncao(
+    @PathVariable(value = "id") String id)
+  {
+
+      final var query = new GetManualFuncaoQuery(id);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "avaliacao-desempenho/manual-funcao/{id}"
+  )
+  @Operation(
+    summary = "Update manual funcao",
+    description = "Update manual funcao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> updateManualFuncao(@Valid @RequestBody ManualFuncaoRequestDTO updateManualFuncaoRequest
+    , @PathVariable(value = "id") String id)
+  {
+
+      final var command = new UpdateManualFuncaoCommand(updateManualFuncaoRequest, id);
+
+      return commandBus.send(command);
 
   }
 
