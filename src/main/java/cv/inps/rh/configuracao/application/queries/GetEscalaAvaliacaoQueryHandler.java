@@ -2,6 +2,7 @@ package cv.inps.rh.configuracao.application.queries;
 
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
+import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoResponseDTO;
 import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO;
 import cv.inps.rh.configuracao.application.services.EscalaAvaliacaoService;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GetEscalaAvaliacaoQueryHandler
-    implements QueryHandler<GetEscalaAvaliacaoQuery, ResponseEntity<EscalaAvaliacaoResponseDTO>> {
+    implements QueryHandler<GetEscalaAvaliacaoQuery, ResponseEntity<EscalaAvaliacaoRequestDTO>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetEscalaAvaliacaoQueryHandler.class);
 
@@ -24,7 +25,7 @@ public class GetEscalaAvaliacaoQueryHandler
   }
 
   @IgrpQueryHandler
-  public ResponseEntity<EscalaAvaliacaoResponseDTO> handle(GetEscalaAvaliacaoQuery query) {
+  public ResponseEntity<EscalaAvaliacaoRequestDTO> handle(GetEscalaAvaliacaoQuery query) {
 
     LOGGER.debug("GetEscalaAvaliacaoQuery: {}", query);
 

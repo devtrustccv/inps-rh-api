@@ -47,7 +47,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "EscalaAvaliacaoResponse",
+                "type": "EscalaAvaliacaoRequest",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -140,5 +140,5 @@
       ]
     }
   ],
-  "id": "2x6omne3i8-createEscalaAvaliacao-getEscalaAvaliacao"
+  "id": "2x6omne3i8-createEscalaAvaliacao-getEscalaAvaliacao-getEscalaAvaliacao"
 }

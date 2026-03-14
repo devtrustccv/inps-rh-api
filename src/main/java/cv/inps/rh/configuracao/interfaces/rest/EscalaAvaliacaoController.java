@@ -22,7 +22,6 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.configuracao.application.commands.*;
 import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRequestDTO;
 import java.util.Map;
-import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoResponseDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperListaEscalaAvaliacaoDTO;
 import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO;
 
@@ -86,14 +85,14 @@ public class EscalaAvaliacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = EscalaAvaliacaoResponseDTO.class,
+                  implementation = EscalaAvaliacaoRequestDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<EscalaAvaliacaoResponseDTO> getEscalaAvaliacao(
+  public ResponseEntity<EscalaAvaliacaoRequestDTO> getEscalaAvaliacao(
     @PathVariable(value = "id") String id)
   {
 

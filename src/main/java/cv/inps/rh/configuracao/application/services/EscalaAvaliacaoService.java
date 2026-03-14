@@ -3,6 +3,7 @@ package cv.inps.rh.configuracao.application.services;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.commands.CreateEscalaAvaliacaoCommand;
 import cv.inps.rh.configuracao.application.commands.UpdateEscalaAvaliacaoCommand;
+import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoResponseDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperListaEscalaAvaliacaoDTO;
 import cv.inps.rh.configuracao.application.queries.GetEscalaAvaliacaoQuery;
@@ -74,16 +75,11 @@ public class EscalaAvaliacaoService {
   }
 
   @Transactional(readOnly = true)
-  public EscalaAvaliacaoResponseDTO obter(GetEscalaAvaliacaoQuery query) {
-    return obter(query.getId());
+  public EscalaAvaliacaoRequestDTO obter(GetEscalaAvaliacaoQuery query) {
+    return null;
   }
 
-  @Transactional(readOnly = true)
-  public EscalaAvaliacaoResponseDTO obter(String id) {
-    var uuid = parseUuid(id);
-    var entity = repository.findByUuidOrThrow(uuid);
-    return mapper.toResponse(entity);
-  }
+
 
   @Transactional(readOnly = true)
   public WrapperListaEscalaAvaliacaoDTO listar(GetListaEscalaAvaliacaoQuery query) {
