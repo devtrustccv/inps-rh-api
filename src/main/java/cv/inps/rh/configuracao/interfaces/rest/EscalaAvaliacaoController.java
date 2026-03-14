@@ -71,7 +71,7 @@ public class EscalaAvaliacaoController {
   }
 
    @GetMapping(
-   value = "avaliacao-desempenho/escala/{id}"
+   value = "avaliacao-desempenho/escala"
   )
   @Operation(
     summary = "Get escala avaliacao",
@@ -91,10 +91,10 @@ public class EscalaAvaliacaoController {
   )
   
   public ResponseEntity<EscalaAvaliacaoRequestDTO> getEscalaAvaliacao(
-    @PathVariable(value = "id") String id)
+    )
   {
 
-      final var query = new GetEscalaAvaliacaoQuery(id);
+      final var query = new GetEscalaAvaliacaoQuery();
 
       return queryBus.handle(query);
 

@@ -5,6 +5,7 @@ import cv.inps.rh.configuracao.application.commands.CreateEscalaAvaliacaoCommand
 import cv.inps.rh.configuracao.application.commands.UpdateEscalaAvaliacaoCommand;
 import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoResponseDTO;
+import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperListaEscalaAvaliacaoDTO;
 import cv.inps.rh.configuracao.application.queries.GetEscalaAvaliacaoQuery;
 import cv.inps.rh.configuracao.application.queries.GetListaEscalaAvaliacaoQuery;
@@ -59,7 +60,20 @@ public class EscalaAvaliacaoService {
         throw IgrpResponseStatusException.badRequest("quantitativaDe não pode ser maior que quantitativaAte");
       }
 
-      var entity = mapper.toEntity(row);
+      var entity = row.getId() != null
+          ? repository.findById(row.getId())
+              .orElseThrow(() -> IgrpResponseStatusException.of(org.springframework.http.HttpStatus.NOT_FOUND,
+                  "ParamEscalaAvaliacaoEntity not found for id: " + row.getId()))
+          : mapper.toEntity(row);
+
+      if (row.getId() != null) {
+        entity.setNivel(row.getNivel());
+        entity.setQualitativa(row.getQualitativa());
+        entity.setDescricao(row.getDescricao());
+        entity.setQuantitativaDe(row.getQuantitativaDe());
+        entity.setQuantitativaAte(row.getQuantitativaAte());
+      }
+
       if (entity.getUuid() == null) {
         entity.setUuid(UuidCreator.getTimeOrderedEpoch());
       }
@@ -78,8 +92,6 @@ public class EscalaAvaliacaoService {
   public EscalaAvaliacaoRequestDTO obter(GetEscalaAvaliacaoQuery query) {
     return null;
   }
-
-
 
   @Transactional(readOnly = true)
   public WrapperListaEscalaAvaliacaoDTO listar(GetListaEscalaAvaliacaoQuery query) {

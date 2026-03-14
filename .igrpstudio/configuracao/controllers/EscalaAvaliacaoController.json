@@ -39,7 +39,7 @@
     },
     {
       "actionName": "getEscalaAvaliacao",
-      "path": "avaliacao-desempenho/escala/{id}",
+      "path": "avaliacao-desempenho/escala",
       "method": "GET",
       "responses": {
         "200": {
@@ -56,15 +56,8 @@
             }
           }
         }
-      },
-      "pathVariables": [
-        {
-          "name": "id",
-          "type": "string",
-          "isRequired": true
-        }
-      ]
+      }
     }
   ],
-  "id": "2x6omne3i8-createEscalaAvaliacao-getEscalaAvaliacao-getEscalaAvaliacao"
+  "id": "2x6omne3i8-createEscalaAvaliacao-getEscalaAvaliacao-getEscalaAvaliacao-getEscalaAvaliacao"
 }
