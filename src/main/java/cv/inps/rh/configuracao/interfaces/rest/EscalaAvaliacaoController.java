@@ -22,8 +22,6 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.configuracao.application.commands.*;
 import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRequestDTO;
 import java.util.Map;
-import cv.inps.rh.configuracao.application.dto.WrapperListaEscalaAvaliacaoDTO;
-import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO;
 
 @IgrpController
 @RestController
@@ -99,67 +97,6 @@ public class EscalaAvaliacaoController {
       final var query = new GetEscalaAvaliacaoQuery(id);
 
       return queryBus.handle(query);
-
-  }
-
-   @GetMapping(
-   value = "avaliacao-desempenho/escala"
-  )
-  @Operation(
-    summary = "Get lista escala avaliacao",
-    description = "Get lista escala avaliacao",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-          
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = WrapperListaEscalaAvaliacaoDTO.class,
-                  type = "object")
-          )
-      )
-    }
-  )
-  
-  public ResponseEntity<WrapperListaEscalaAvaliacaoDTO> getListaEscalaAvaliacao(
-    @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
-    @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize)
-  {
-
-      final var query = new GetListaEscalaAvaliacaoQuery(pageNumber, pageSize);
-
-      return queryBus.handle(query);
-
-  }
-
-   @PutMapping(
-   value = "avaliacao-desempenho/escala/{id}"
-  )
-  @Operation(
-    summary = "Update escala avaliacao",
-    description = "Update escala avaliacao",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-          
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
-          )
-      )
-    }
-  )
-  
-  public ResponseEntity<Map<String, ?>> updateEscalaAvaliacao(@Valid @RequestBody EscalaAvaliacaoRowDTO updateEscalaAvaliacaoRequest
-    , @PathVariable(value = "id") String id)
-  {
-
-      final var command = new UpdateEscalaAvaliacaoCommand(updateEscalaAvaliacaoRequest, id);
-
-      return commandBus.send(command);
 
   }
 
