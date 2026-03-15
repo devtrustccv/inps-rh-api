@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CarreiraEvolucaoService {
 
   private final ProgressaoService progressaoService;
@@ -15,7 +16,6 @@ public class CarreiraEvolucaoService {
   private final VwRhProgressaoInputEntityRepository vwRhProgressaoInputEntityRepository;
   private final SimEvolucaoCarreiraEntityRepository simEvolucaoCarreiraEntityRepository;
 
-  @Transactional
   public void executarSimulacao() {
 
     simEvolucaoCarreiraEntityRepository.deleteAll();

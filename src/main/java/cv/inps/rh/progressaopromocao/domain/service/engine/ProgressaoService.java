@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+
 @Transactional
 @Service
 @RequiredArgsConstructor
@@ -23,23 +25,16 @@ public class ProgressaoService {
     // TODO 05/03/2026 17:41 colaborador em licença sem vencimento não deve progredir
     // TODO 05/03/2026 17:41 O colaborador não deve estar em situação laboral em que não evolui na carreira no período de progressão; deve iniciar a partir da situação laboral atual
 
-    LOGGER.debug("\n---------------------------------------------------------------------------------------------------------------------------");
-    LOGGER.debug("Simulando progressao para {}", c);
+    LOGGER.debug("\n--------------------------------------------------PROGRESSAO-------------------------------------------------------------------------");
 
-    // Verifica se já existe evolução ou tempo mínimo de progressão
-    if (c.getExisteProgressao() == 0L && c.getAtingiuPrimeiraProgressao() == 0L) {
-      LOGGER.debug("Sem evolucao e sem tempo minimo de progressao");
-      return;
-    }
-
-    // Verifica se atingiu tempo mínimo para progressão
-    if (c.getAtingiuTempMinProgressao() == 0L) {
+    var dataMinProgressao = c.getDataInicio().plusYears(c.getTempoMinProgressaoAnos());
+    var atingiuTempoProgressao = dataMinProgressao.isBefore(LocalDate.now());
+    if (atingiuTempoProgressao) {
       LOGGER.debug("Nao atingiu tempo minimo para progressao");
       return;
     }
 
-    // Verifica se a média das avaliações atende ao mínimo para progressão
-    var media = c.getMediaAvaliacoes3Anos();
+    var media = c.getMedia3anos();
     if (media >= MIN_MEDIA_AVALIACOES) {
       LOGGER.debug("Media {} >= 3.0, registrando simulacao", media);
       simulacaoService.registarProgressao(c, media);
