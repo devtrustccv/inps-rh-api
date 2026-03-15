@@ -20,8 +20,7 @@ public class CarreiraEvolucaoService {
 
     simEvolucaoCarreiraEntityRepository.deleteAll();
 
-    var promotionCandidates = vwRhProgressaoInputEntityRepository.findAll();
-    for (var candidate : promotionCandidates) {
+    for (var candidate : vwRhProgressaoInputEntityRepository.findAll()) {
       promocaoService.simular(candidate);
       progressaoService.simular(candidate);
     }
