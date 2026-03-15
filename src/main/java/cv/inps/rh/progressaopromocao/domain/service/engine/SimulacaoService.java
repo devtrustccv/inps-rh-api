@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +38,7 @@ public class SimulacaoService {
 
     var car = carreiraEntityRepository.getReferenceById(career.getCarreiraId());
 
-    var proximoEscalao = getProximoEscalao(car);
+    var proximoEscalao = getProximoEscalao(car, ProgessionPromotionType.PROGRESSAO);
     if (!proximoEscalao.values().stream().findFirst().orElseThrow().allowedToProgressPromote) {
       LOGGER.debug("Carreira ja se encontra no ultimo nivel para progressao");
       return;
@@ -66,7 +67,7 @@ public class SimulacaoService {
 
     var car = carreiraEntityRepository.getReferenceById(career.getCarreiraId());
 
-    var proximoEscalao = getProximoEscalao(car);
+    var proximoEscalao = getProximoEscalao(car, ProgessionPromotionType.PROMOCAO);
     if (!proximoEscalao.values().stream().findFirst().orElseThrow().allowedToProgressPromote) {
       LOGGER.debug("Carreira ja se encontra no ultimo nivel para promocao");
       return;
@@ -77,12 +78,14 @@ public class SimulacaoService {
     saveEvolution(career, media, car, paramEscalao, ProgessionPromotionType.PROMOCAO);
   }
 
-  public Map<ParamEscalaoEntity, ProximoNivel> getProximoEscalao(CarreiraEntity career) {
+  private Map<ParamEscalaoEntity, ProximoNivel> getProximoEscalao(CarreiraEntity career, ProgessionPromotionType type) {
 
     var escalaoId = career.getEscalaoId();
-    var nivelAtual = escalaoId.getNivelReferencia();
+    var nivelAtual = Objects.requireNonNull(escalaoId.getNivelReferencia());
     var escalaoAtual = escalaoId.getEscalao();
-    var proximo = calcularProximoNivel(nivelAtual, escalaoAtual);
+    var proximo = type.equals(ProgessionPromotionType.PROMOCAO) ?
+        calcularProximoNivelPromocao(nivelAtual) :
+        calcularProximoNivelProgressao(nivelAtual, escalaoAtual);
     LOGGER.debug("Calculando proximo escalao para nivel {} e escalao {}", nivelAtual, escalaoAtual);
     LOGGER.debug("Proximo escalao: nivel {} e escalao {}", proximo.nivelReferencia(), proximo.escalao());
 
@@ -97,7 +100,17 @@ public class SimulacaoService {
     return Map.of(escalo, proximo);
   }
 
-  private static ProximoNivel calcularProximoNivel(Integer nivelAtual, String escalaoAtual) {
+  private ProximoNivel calcularProximoNivelPromocao(Integer nivelAtual) {
+
+    if (nivelAtual == NIVEL_MAXIMO)
+      return new ProximoNivel(nivelAtual, "F", false);
+
+    int proximoNivel = nivelAtual + 1;
+
+    return new ProximoNivel(proximoNivel, "F", true);
+  }
+
+  private ProximoNivel calcularProximoNivelProgressao(Integer nivelAtual, String escalaoAtual) {
 
     if (nivelAtual == NIVEL_MAXIMO && escalaoAtual.equals("F"))
       return new ProximoNivel(nivelAtual, escalaoAtual, false);

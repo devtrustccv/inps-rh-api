@@ -26,16 +26,17 @@ public class ProgressaoService {
     // TODO 05/03/2026 17:41 O colaborador não deve estar em situação laboral em que não evolui na carreira no período de progressão; deve iniciar a partir da situação laboral atual
 
     LOGGER.debug("\n--------------------------------------------------PROGRESSAO-------------------------------------------------------------------------");
+    LOGGER.debug("{}", c);
 
     var dataMinProgressao = c.getDataInicio().plusYears(c.getTempoMinProgressaoAnos());
     var atingiuTempoProgressao = dataMinProgressao.isBefore(LocalDate.now());
-    if (atingiuTempoProgressao) {
+    if (!atingiuTempoProgressao) {
       LOGGER.debug("Nao atingiu tempo minimo para progressao");
       return;
     }
 
     var media = c.getMedia3anos();
-    if (media >= MIN_MEDIA_AVALIACOES) {
+    if (media != null && media >= MIN_MEDIA_AVALIACOES) {
       LOGGER.debug("Media {} >= 3.0, registrando simulacao", media);
       simulacaoService.registarProgressao(c, media);
       return;
