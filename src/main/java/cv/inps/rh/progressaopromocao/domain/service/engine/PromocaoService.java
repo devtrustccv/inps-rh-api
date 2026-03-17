@@ -1,99 +1,69 @@
 package cv.inps.rh.progressaopromocao.domain.service.engine;
 
-import cv.inps.rh.avaliacao.application.services.AvaliacaoService;
 import cv.inps.rh.progressaopromocao.domain.service.engine.model.ProgessionPromotionType;
-import cv.inps.rh.progressaopromocao.domain.service.engine.rule.DisciplinaService;
-import cv.inps.rh.progressaopromocao.domain.service.engine.rule.FaltaService;
-import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.EvolucaoCarreiraEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.VwRhProgressaoInputEntity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class PromocaoService {
 
-  private final EvolucaoCarreiraEntityRepository evolucaoRepository;
-  private final CarreiraEntityRepository carreiraRepository;
-  private final AvaliacaoService avaliacaoService;
-  private final FaltaService faltaService;
-  private final DisciplinaService disciplinaService;
+  private static final Logger LOGGER = LoggerFactory.getLogger(PromocaoService.class);
+
+  private static final double MIN_MEDIA_AVALIACOES = 4.5;
+  private static final String DIRECTOR = "DIRECTOR";
+  private static final String DIRECTOR_BASE = "DIRECTOR_BASE";
   private final SimulacaoService simulacaoService;
 
-  public void simular(List<CarreiraEntity> careers) {
+  public void simular(VwRhProgressaoInputEntity c) {
 
-    for (var career : careers) {
+    // TODO 05/03/2026 17:41 colaborador em licença sem vencimento não deve progredir
+    // TODO 05/03/2026 17:41 O colaborador não deve estar em situação laboral em que não evolui na carreira no período de progressão; deve iniciar a partir da situação laboral atual
 
-      if (!validaElegibilidadePromocao(career)) continue;
+    LOGGER.debug("-----------------------------------------------------PROMOCAO--------------------------------------------------------------------");
+    LOGGER.debug("{}", c);
 
-      if (!atingiuTempoPromocao(career)) continue;
-
-      if (!podePromoverNovamente(career)) continue;
-
-      var media = avaliacaoService.calcularMedia(
-          career.getContrVinculoId().getFunId(),
-          2
-      );
-      if (!media.elegivelPromocao()) continue;
-
-      if (!faltaService.valida(career)) continue;
-
-      if (!disciplinaService.valida(career)) continue;
-
-      simulacaoService.registarSimulacao(career, media, ProgessionPromotionType.PROMOCAO);
+    if (c.getTipoCarreira().equals(DIRECTOR) || c.getTipoCarreira().equals(DIRECTOR_BASE)) {
+      LOGGER.debug("Tipo de carreira não permitido para promoção <{}>", c.getTipoCarreira());
+      return;
     }
-  }
 
-  /**
-   * Regras básicas para promoção
-   */
-  private boolean validaElegibilidadePromocao(CarreiraEntity career) {
+    // Verifica se já existe evolução ou tempo mínimo de progressão
+    if (c.getEvolucaoAtual() == null || c.getEvolucaoAtual().equals(ProgessionPromotionType.PROMOCAO.name())) {
+      LOGGER.debug("Sem progressao ou evolucao atual is PROMOCAO <{}>", c.getEvolucaoAtual());
+      return;
+    }
 
-    // diretores não promovem
-    if (career.getCargoId() != null)
-      return false;
+    var media = c.getMedia2anos();
+    if (media != null && media >= MIN_MEDIA_AVALIACOES) {
+      LOGGER.debug("Media {} >= 4.5, registrando simulacao", media);
+      simulacaoService.registarProgressao(c, media);
+      return;
+    } else
+      LOGGER.debug("Media <{}> abaixo do limite", media);
 
-    // não pode ter tido promoção anterior
-    return !ProgessionPromotionType.PROMOCAO.name().equals(career.getTipoSituacao());
-  }
+    var dataProgressao = c.getDataInicio().plusYears(3);
+    var atingiuTempoProgressao = dataProgressao.isBefore(LocalDate.now());
+    if (atingiuTempoProgressao) {
+      LOGGER.debug("Nao atingiu tempo minimo para promocao");
+      return;
+    }
 
-  /**
-   * Regra tempo mínimo para promoção
-   * - 6 anos desde entrada como efetivo (por agora simplificado)
-   */
-  private boolean atingiuTempoPromocao(CarreiraEntity career) {
+    if (c.getAptoPorFaltas() == 0) {
+      LOGGER.debug("Colaborador sem aptidao por faltas: Faltas ano atual <{}>, Faltas ano anterior <{}>", c.getFaltasAnoAtual(), c.getFaltasAnoAnterior());
+      return;
+    }
 
-    var dataElegibilidade = career.getDataInicio().plusYears(6);
+    if (c.getAptoPorProcessoDisciplinar() == 0) {
+      LOGGER.debug("Colaborador sem aptidao por processo disciplinar: Processos ano atual <{}>, Processos ano anterior <{}>", c.getProcessoAnoAtual(), c.getProcessoAnoAnterior());
+      return;
+    }
 
-    return !LocalDate.now().isBefore(dataElegibilidade);
-  }
-
-  private boolean podePromoverNovamente(CarreiraEntity career) {
-
-    var ultima =
-        evolucaoRepository.findUltimaEvolucao(
-            career.getId(),
-            PageRequest.of(0, 1)
-        );
-    if (ultima.isEmpty())
-      return true; // nunca evoluiu
-
-    var evolucao = ultima.getFirst();
-
-    // Se não foi promoção, pode promover
-    if (!ProgessionPromotionType.PROMOCAO.name().equals(evolucao.getTipo()))
-      return true;
-
-    // Se foi promoção, verificar 3 anos
-    var dataUltimaPromocao = evolucao.getDataReferente();
-
-    var dataLimite = dataUltimaPromocao.plusYears(3);
-
-    return !LocalDate.now().isBefore(dataLimite);
+    simulacaoService.registarPromocao(c, media);
   }
 }
