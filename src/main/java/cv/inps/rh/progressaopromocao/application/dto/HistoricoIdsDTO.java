@@ -4,11 +4,12 @@
 package cv.inps.rh.progressaopromocao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class HistoricoIdsDTO  {
 
   @NotNull(message = "The field <ids> is required")
 	@NotEmpty(message = "The field <ids> must not be empty")
-  
+
   private List<Long> ids = new ArrayList<>();
 
 }
