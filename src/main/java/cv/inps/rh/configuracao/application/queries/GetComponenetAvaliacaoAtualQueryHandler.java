@@ -4,19 +4,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import cv.inps.rh.configuracao.application.dto.ComponenteAvaliacaoResponseDTO;
+import cv.inps.rh.configuracao.application.services.ComponenteAvaliacaoService;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ParamObjetivoDetEntityRepository;
+
+import java.time.Year;
 
 @Component
 public class GetComponenetAvaliacaoAtualQueryHandler implements QueryHandler<GetComponenetAvaliacaoAtualQuery, ResponseEntity<ComponenteAvaliacaoResponseDTO>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetComponenetAvaliacaoAtualQueryHandler.class);
 
+  private final ParamObjetivoDetEntityRepository objetivoDetRepository;
+  private final ComponenteAvaliacaoService componenteAvaliacaoService;
 
-  public GetComponenetAvaliacaoAtualQueryHandler() {
+  public GetComponenetAvaliacaoAtualQueryHandler(
+      ParamObjetivoDetEntityRepository objetivoDetRepository,
+      ComponenteAvaliacaoService componenteAvaliacaoService
+  ) {
+    this.objetivoDetRepository = objetivoDetRepository;
+    this.componenteAvaliacaoService = componenteAvaliacaoService;
 
   }
 
@@ -25,8 +36,13 @@ public class GetComponenetAvaliacaoAtualQueryHandler implements QueryHandler<Get
 
     LOGGER.debug("GetComponenetAvaliacaoAtualQuery: {}", query);
 
-    // TODO: Implement the query handling logic here
-    return null;
+    var anoAtual = Year.now().getValue();
+
+    var det = objetivoDetRepository.findTopByAnoOrderByIdDesc(anoAtual)
+        .or(() -> objetivoDetRepository.findTopByOrderByAnoDescIdDesc())
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Nenhuma parametrização encontrada em RH_T_PARAM_OBJETIVO_DET"));
+
+    return ResponseEntity.ok(componenteAvaliacaoService.obter(det.getUuid().toString()));
   }
 
 }
