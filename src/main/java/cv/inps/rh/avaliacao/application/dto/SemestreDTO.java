@@ -17,12 +17,13 @@ import lombok.AllArgsConstructor;
 
 
 @IgrpDTO
-public class AvaliacaoFinalDTO  {
+public class SemestreDTO  {
 
-  private SemestreDTO primeiroSemestre;
-  private SemestreDTO segundoSemestre;
-
-  private String avaliacaoExpressivaQuantitativa;
-  private String avaliacaoExpressivaQualitativa;
+  
+  
+  private String avaliacaoFinal ;
+  
+  
+  private String ponderacao ;
 
 }
