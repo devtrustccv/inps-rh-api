@@ -112,7 +112,7 @@ public class EscalaAvaliacaoService {
 
   @Transactional(readOnly = true)
   public EscalaAvaliacaoRequestDTO obter(GetEscalaAvaliacaoQuery query) {
-    Specification<cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaAvaliacaoEntity> spec = (root, _,
+    Specification<ParamEscalaAvaliacaoEntity> spec = (root, _,
         cb) -> {
       var predicates = new ArrayList<Predicate>();
       predicates.add(cb.equal(root.get("estado"), Estado.A));
@@ -145,7 +145,7 @@ public class EscalaAvaliacaoService {
     var pageSize = Integer.parseInt(query.getPageSize());
     var pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "id"));
 
-    Specification<cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaAvaliacaoEntity> spec = (root, _,
+    Specification<ParamEscalaAvaliacaoEntity> spec = (root, _,
         cb) -> {
       var predicates = new ArrayList<Predicate>();
       predicates.add(cb.equal(root.get("estado"), Estado.A));
