@@ -401,6 +401,34 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getAvaliacaoFinal",
+      "path": "{uuid}/avaliacao-final",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "AvaliacaoFinal",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "avaliacao"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "z90a939h7d-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos-initAvaliacao-getDefinicaoObjetivo"

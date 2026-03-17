@@ -163,4 +163,34 @@ public class ComponenteAvaliacaoController {
 
   }
 
+   @GetMapping(
+   value = "avaliacao-desempenho/componentes/versao-atual"
+  )
+  @Operation(
+    summary = "Get componenet avaliacao atual",
+    description = "Get componenet avaliacao atual",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ComponenteAvaliacaoResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<ComponenteAvaliacaoResponseDTO> getComponenetAvaliacaoAtual(
+    )
+  {
+
+      final var query = new GetComponenetAvaliacaoAtualQuery();
+
+      return queryBus.handle(query);
+
+  }
+
 }

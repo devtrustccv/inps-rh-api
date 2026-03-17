@@ -138,6 +138,27 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getComponenetAvaliacaoAtual",
+      "path": "avaliacao-desempenho/componentes/versao-atual",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ComponenteAvaliacaoResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "configuracao"
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "id": "er0udf66nw"

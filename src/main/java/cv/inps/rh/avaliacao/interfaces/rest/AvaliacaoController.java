@@ -28,6 +28,7 @@ import cv.inps.rh.avaliacao.application.dto.AvaliacaoDTO;
 import cv.inps.rh.avaliacao.application.dto.ObservacaoGeralDTO;
 import cv.inps.rh.avaliacao.application.dto.ParecerColaboradorDTO;
 import cv.inps.rh.avaliacao.application.dto.ComissaoExecutivaDTO;
+import cv.inps.rh.avaliacao.application.dto.AvaliacaoFinalDTO;
 
 @IgrpController
 @RestController
@@ -353,6 +354,36 @@ public class AvaliacaoController {
       final var command = new ProcessoComissaoExecutivaCommand(processoComissaoExecutivaRequest, uuid);
 
       return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "{uuid}/avaliacao-final"
+  )
+  @Operation(
+    summary = "Get avaliacao final",
+    description = "Get avaliacao final",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = AvaliacaoFinalDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<AvaliacaoFinalDTO> getAvaliacaoFinal(
+    @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var query = new GetAvaliacaoFinalQuery(uuid);
+
+      return queryBus.handle(query);
 
   }
 
