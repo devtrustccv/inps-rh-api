@@ -12,6 +12,7 @@ import cv.inps.rh.configuracao.application.queries.GetListaEscalaAvaliacaoQuery;
 import cv.inps.rh.configuracao.infrastructure.mappers.EscalaAvaliacaoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaAvaliacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamEscalaAvaliacaoEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
@@ -25,7 +26,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -52,6 +55,7 @@ public class EscalaAvaliacaoService {
     }
 
     var uuids = new ArrayList<String>(rows.size());
+    Set<Long> keepIds = new HashSet<>();
 
     for (var row : rows) {
       if (row.getQuantitativaDe() != null
@@ -80,7 +84,25 @@ public class EscalaAvaliacaoService {
       entity.setEstado(Estado.A);
 
       repository.save(entity);
+      keepIds.add(entity.getId());
       uuids.add(entity.getUuid().toString());
+    }
+
+    Specification<ParamEscalaAvaliacaoEntity> spec = (root, _, cb) -> {
+      var predicates = new ArrayList<Predicate>();
+      predicates.add(cb.equal(root.get("estado"), Estado.A));
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
+
+    var toDeactivate = new ArrayList<ParamEscalaAvaliacaoEntity>();
+    for (var entity : repository.findAll(spec)) {
+      if (!keepIds.contains(entity.getId())) {
+        entity.setEstado(Estado.I);
+        toDeactivate.add(entity);
+      }
+    }
+    if (!toDeactivate.isEmpty()) {
+      repository.saveAll(toDeactivate);
     }
 
     return ResponseEntity.ok(Map.of(
