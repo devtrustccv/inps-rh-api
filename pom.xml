@@ -5,13 +5,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.10</version>
+        <version>3.5.11</version>
         <relativePath/>
     </parent>
     <groupId>cv.inps</groupId>
     <artifactId>rh-service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>RHINPSSERVICE</name>
+    <version>0.0.1-SNAPSHOT</version>
     <description>RH INPS Service</description>
     <url/>
     <licenses>
@@ -40,7 +40,7 @@
         <igrp.version>0.1.0-beta.1</igrp.version>
         <java.version>23</java.version>
         <spring-cloud.version>2025.0.1</spring-cloud.version>
-        <springdoc.version>2.8.15</springdoc.version>
+        <springdoc.version>2.8.16</springdoc.version>
     </properties>
     <dependencies>
 

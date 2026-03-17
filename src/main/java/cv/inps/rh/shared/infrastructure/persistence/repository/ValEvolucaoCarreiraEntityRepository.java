@@ -8,11 +8,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -52,6 +54,7 @@ public interface ValEvolucaoCarreiraEntityRepository extends JpaRepository<ValEv
         AND (:dataDe IS NULL OR e.dataReferente >= :dataDe)
         AND (:dataAte IS NULL OR e.dataReferente <= :dataAte)
         AND (:carreiraId IS NULL OR cd.id = :carreiraId)
+        AND (:historico IS NULL OR e.flgHistorico = :historico)
         AND (:nome IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
       """)
   Page<ProgressaoPromocaoRowDTO> findProgressaoPromocaoWithFilters(
@@ -60,7 +63,16 @@ public interface ValEvolucaoCarreiraEntityRepository extends JpaRepository<ValEv
       @Param("dataAte") LocalDate dataAte,
       @Param("nome") String nome,
       @Param("carreiraId") UUID carreiraId,
+      @Param("historico") String historico,
       Pageable pageable
   );
+
+  @Modifying
+  @Query("""
+      UPDATE ValEvolucaoCarreiraEntity c
+      SET c.flgHistorico = 'S'
+      WHERE c.id IN :ids
+      """)
+  int marcarComoHistorico(@Param("ids") List<Long> ids);
 
 }

@@ -1,0 +1,407 @@
+{
+  "type": "controller",
+  "name": "Avaliacao",
+  "module": "avaliacao",
+  "description": "gest avaliacao",
+  "basePath": "avaliacao-desempenho/avaliacoes",
+  "actions": [
+    {
+      "actionName": "definicaoObjetivo",
+      "path": "objectivos",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "DefinicaoObjectivo",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "avaliacao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "getListaDefinicaoObjectivos",
+      "path": "objectivos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaDefinicaoObjetivo",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "avaliacao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "integer",
+          "name": "ano",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "semestre",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "institId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "cargoId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "getListaAvaliacao",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListaAvaliacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "avaliacao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "ano",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "direcao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "cargo",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "colaborador",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "getDefinicaoObjetivo",
+      "path": "objectivos/{uuid}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Avaliacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "avaliacao"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getAvaliacao",
+      "path": "{uuid}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Avaliacao",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "avaliacao"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "avaliacao",
+      "path": "processos-avaliacao/{uuid}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "Avaliacao",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "avaliacao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "autoAvaliacao",
+      "path": "{uuid}/auto-avaliacao",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "Avaliacao",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "avaliacao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "processoObservacaoGeral",
+      "path": "processos-avaliacao/{uuid}/observacao-geral",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ObservacaoGeral",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "avaliacao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "processoParecerColaborador",
+      "path": "processos-avaliacao/{uuid}/parecer-colaborador",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ParecerColaborador",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "avaliacao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "processoComissaoExecutiva",
+      "path": "processos-avaliacao/{uuid}/comissao-executiva",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ComissaoExecutiva",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "avaliacao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "id": "z90a939h7d-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos-initAvaliacao-getDefinicaoObjetivo"
+}

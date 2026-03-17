@@ -1,0 +1,23 @@
+{
+  "type": "dto",
+  "module": "avaliacao",
+  "name": "AtitudePessoal",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "custom",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "le4p1cpzii"
+}

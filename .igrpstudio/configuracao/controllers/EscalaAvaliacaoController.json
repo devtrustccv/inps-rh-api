@@ -1,0 +1,63 @@
+{
+  "type": "controller",
+  "name": "EscalaAvaliacao",
+  "module": "configuracao",
+  "description": "desc",
+  "basePath": "configuracao",
+  "actions": [
+    {
+      "actionName": "createEscalaAvaliacao",
+      "path": "avaliacao-desempenho/escala",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "EscalaAvaliacaoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "configuracao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "getEscalaAvaliacao",
+      "path": "avaliacao-desempenho/escala",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "EscalaAvaliacaoRequest",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "configuracao"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "id": "2x6omne3i8-createEscalaAvaliacao-getEscalaAvaliacao-getEscalaAvaliacao-getEscalaAvaliacao"
+}

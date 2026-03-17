@@ -1,0 +1,28 @@
+{
+  "type": "dto",
+  "module": "configuracao",
+  "name": "WrapperListaManualFuncao",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "Page",
+    "module": "shared"
+  },
+  "attributes": [
+    {
+      "name": "content",
+      "objectType": "dto",
+      "type": "ManualFuncaoResponse",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "configuracao"
+    }
+  ],
+  "id": "vb1v0nribl"
+}

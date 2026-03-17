@@ -9,10 +9,14 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EvolucaoCarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.OrdemServicoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ValEvolucaoCarreiraEntityRepository;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Transactional
@@ -20,7 +24,10 @@ import java.util.UUID;
 @Service
 public class ProgressaoPromocaoWriteService {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(ProgressaoPromocaoWriteService.class);
+
   private final EvolucaoCarreiraEntityRepository evolucaoCarreiraEntityRepository;
+  private final ValEvolucaoCarreiraEntityRepository valEvolucaoCarreiraEntityRepository;
   private final OrdemServicoEntityRepository ordemServicoEntityRepository;
   private final DocumentoEntityRepository documentoEntityRepository;
 
@@ -62,5 +69,13 @@ public class ProgressaoPromocaoWriteService {
 
     ev.setOrdemServicoId(osUuid);
     evolucaoCarreiraEntityRepository.save(ev);
+  }
+
+  public void sendToHistory(List<Long> ids) {
+
+    var numberOfRows = valEvolucaoCarreiraEntityRepository.marcarComoHistorico(ids);
+
+    LOGGER.debug("Number of rows sent to History: {}", numberOfRows);
+
   }
 }

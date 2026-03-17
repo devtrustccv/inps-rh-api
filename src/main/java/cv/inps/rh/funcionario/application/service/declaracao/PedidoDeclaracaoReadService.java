@@ -91,7 +91,9 @@ public class PedidoDeclaracaoReadService {
     var pedidoDeclaracao = pedidoDeclaracaoMapper.toResponseDto(entity);
 
     var documentos = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_DECLARACAO.name(), pedidoDeclaracao.getUuid());
+        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_DECLARACAO.name(), entity.getUuid());
+
+
 
     if (!CollectionUtils.isEmpty(documentos)) {
       pedidoDeclaracao.setAnexos(documentos.stream().map(d -> {

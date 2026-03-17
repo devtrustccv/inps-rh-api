@@ -1,14 +1,10 @@
 package cv.inps.rh.progressaopromocao.domain.service.engine;
 
 import cv.inps.rh.progressaopromocao.domain.service.engine.model.ProgessionPromotionType;
-import cv.inps.rh.progressaopromocao.domain.service.engine.rule.AvaliacaoService;
-import cv.inps.rh.progressaopromocao.domain.service.engine.rule.DisciplinaService;
-import cv.inps.rh.progressaopromocao.domain.service.engine.rule.FaltaService;
-import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.EvolucaoCarreiraEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.VwRhProgressaoInputEntity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -17,104 +13,57 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class PromocaoService {
 
-  private final EvolucaoCarreiraEntityRepository evolucaoRepository;
-  private final CarreiraEntityRepository carreiraRepository;
-  private final AvaliacaoService avaliacaoService;
-  private final FaltaService faltaService;
-  private final DisciplinaService disciplinaService;
+  private static final Logger LOGGER = LoggerFactory.getLogger(PromocaoService.class);
+
+  private static final double MIN_MEDIA_AVALIACOES = 4.5;
+  private static final String DIRECTOR = "DIRECTOR";
+  private static final String DIRECTOR_BASE = "DIRECTOR_BASE";
   private final SimulacaoService simulacaoService;
 
-  public void simular() {
+  public void simular(VwRhProgressaoInputEntity c) {
 
-    // TODO 05/03/2026 18:00 with only carreiras base without cargo
-    var carreiras = carreiraRepository.findCarreirasAtivas();
+    // TODO 05/03/2026 17:41 colaborador em licença sem vencimento não deve progredir
+    // TODO 05/03/2026 17:41 O colaborador não deve estar em situação laboral em que não evolui na carreira no período de progressão; deve iniciar a partir da situação laboral atual
 
-    for (var carreira : carreiras) {
+    LOGGER.debug("-----------------------------------------------------PROMOCAO--------------------------------------------------------------------");
+    LOGGER.debug("{}", c);
 
-      if (!validaElegibilidadePromocao(carreira)) continue;
-
-      if (!atingiuTempoPromocao(carreira)) continue;
-
-      if (!podePromoverNovamente(carreira)) continue;
-
-      var media = avaliacaoService.calcularMedia(
-          carreira.getContrVinculoId().getFunId(),
-          2
-      );
-
-      if (!media.elegivelPromocao()) continue;
-
-      if (!faltaService.valida(carreira)) continue;
-
-      if (!disciplinaService.valida(carreira)) continue;
-
-      simulacaoService.registarSimulacao(carreira, media, ProgessionPromotionType.PROMOCAO);
-    }
-  }
-
-  /**
-   * Regras básicas para promoção
-   */
-  private boolean validaElegibilidadePromocao(CarreiraEntity carreira) {
-
-    // deve ter contrato
-    if (carreira.getContrVinculoId() == null) return false;
-
-    // deve ter funcionário
-    if (carreira.getContrVinculoId().getFunId() == null) return false;
-
-    // diretores não promovem
-    if (carreira.getCargoId() != null
-        && carreira.getCargoId().getNome() != null
-        && carreira.getCargoId().getNome().toLowerCase().contains("diretor")) {
-      return false;
+    if (c.getTipoCarreira().equals(DIRECTOR) || c.getTipoCarreira().equals(DIRECTOR_BASE)) {
+      LOGGER.debug("Tipo de carreira não permitido para promoção <{}>", c.getTipoCarreira());
+      return;
     }
 
-    // não pode ter sido promoção anterior
-    if ("M".equalsIgnoreCase(carreira.getTipoSituacao())) {
-      return false;
+    // Verifica se já existe evolução ou tempo mínimo de progressão
+    if (c.getEvolucaoAtual() == null || c.getEvolucaoAtual().equals(ProgessionPromotionType.PROMOCAO.name())) {
+      LOGGER.debug("Sem progressao ou evolucao atual is PROMOCAO <{}>", c.getEvolucaoAtual());
+      return;
     }
 
-    return true;
-  }
+    var media = c.getMedia2anos();
+    if (media != null && media >= MIN_MEDIA_AVALIACOES) {
+      LOGGER.debug("Media {} >= 4.5, registrando simulacao", media);
+      simulacaoService.registarProgressao(c, media);
+      return;
+    } else
+      LOGGER.debug("Media <{}> abaixo do limite", media);
 
-  /**
-   * Regra tempo mínimo para promoção
-   * - 6 anos desde entrada como efetivo (por agora simplificado)
-   */
-  private boolean atingiuTempoPromocao(CarreiraEntity carreira) {
-
-    if (carreira.getDataInicio() == null) return false;
-
-    var dataElegibilidade = carreira.getDataInicio().plusYears(6);
-
-    return !LocalDate.now().isBefore(dataElegibilidade);
-  }
-
-  private boolean podePromoverNovamente(CarreiraEntity carreira) {
-
-    var ultima =
-        evolucaoRepository.findUltimaEvolucao(
-            carreira.getId(),
-            PageRequest.of(0, 1)
-        );
-
-    if (ultima.isEmpty())
-      return true; // nunca evoluiu
-
-    var evolucao = ultima.getFirst();
-
-    // Se não foi promoção, pode promover
-    if (!"M".equalsIgnoreCase(evolucao.getTipo())) {
-      return true;
+    var dataProgressao = c.getDataInicio().plusYears(3);
+    var atingiuTempoProgressao = dataProgressao.isBefore(LocalDate.now());
+    if (atingiuTempoProgressao) {
+      LOGGER.debug("Nao atingiu tempo minimo para promocao");
+      return;
     }
 
-    // Se foi promoção, verificar 3 anos
-    LocalDate dataUltimaPromocao = evolucao.getDataReferente();
+    if (c.getAptoPorFaltas() == 0) {
+      LOGGER.debug("Colaborador sem aptidao por faltas: Faltas ano atual <{}>, Faltas ano anterior <{}>", c.getFaltasAnoAtual(), c.getFaltasAnoAnterior());
+      return;
+    }
 
-    LocalDate dataLimite =
-        dataUltimaPromocao.plusYears(3);
+    if (c.getAptoPorProcessoDisciplinar() == 0) {
+      LOGGER.debug("Colaborador sem aptidao por processo disciplinar: Processos ano atual <{}>, Processos ano anterior <{}>", c.getProcessoAnoAtual(), c.getProcessoAnoAnterior());
+      return;
+    }
 
-    return !LocalDate.now().isBefore(dataLimite);
+    simulacaoService.registarPromocao(c, media);
   }
 }

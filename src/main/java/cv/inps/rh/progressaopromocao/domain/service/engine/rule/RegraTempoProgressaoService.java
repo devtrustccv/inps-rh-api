@@ -6,19 +6,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class RegraTempoProgressaoService {
 
-  public int determinarTempoMinimoProgressao(CarreiraEntity carreira) {
+  private static final int TEMPO_MINIMO_COMISSAO_SERVICO = 4;
+  private static final int TEMPO_MINIMO_CARREIRA_NORMAL = 3;
+  private static final int TEMPO_MINIMO_CARREIRA_BASE = 2;
 
-    if (isCargoChefia(carreira)) {
-      return 4; // chefia
-      // TODO 05/03/2026 17:37 o funcionario tem uma carreira base
+  public int determinarTempoMinimoProgressao(CarreiraEntity career) {
 
-      // return 2; carreira base
+    if (career.getCargoId() != null) {
+      return TEMPO_MINIMO_COMISSAO_SERVICO;
+
+      // todo add new field to carreira to know type
+
+      // TODO 05/03/2026 17:37 o funcionario tem uma carreira base, um funcionario que é chefe tem uma carreira base obrigatoriamente
+
+      // return TEMPO_MINIMO_CARREIRA_BASE;
     }
 
-    return 3; // carreira normal
-  }
-
-  private boolean isCargoChefia(CarreiraEntity carreira) {
-    return carreira.getCargoId() != null;
+    return TEMPO_MINIMO_CARREIRA_NORMAL;
   }
 }

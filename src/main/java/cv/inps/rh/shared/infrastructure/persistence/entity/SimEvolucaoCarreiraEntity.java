@@ -18,6 +18,8 @@ import java.time.LocalDate;
 public class SimEvolucaoCarreiraEntity extends AuditEntity {
 
   @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SIM_EVOLUCAO_CARREIRA_id_gen")
+  @SequenceGenerator(name = "SEQ_SIM_EVOLUCAO_CARREIRA_id_gen", sequenceName = "SEQ_SIM_EVOLUCAO_CARREIRA", allocationSize = 1)
   @Column(name = "ID", nullable = false)
   private Long id;
 
@@ -54,13 +56,12 @@ public class SimEvolucaoCarreiraEntity extends AuditEntity {
   private String observacao;
 
   @Size(max = 1)
-  @NotNull
-  @Column(name = "FLG_HISTORICO", nullable = false, length = 1)
+  @Column(name = "FLG_HISTORICO", length = 1)
   private String flgHistorico;
 
-  @Size(max = 1)
+  @Size(min = 1, max = 20)
   @NotNull
-  @Column(name = "TIPO", nullable = false, length = 1)
+  @Column(name = "TIPO", nullable = false, length = 20)
   private String tipo;
 
   @Column(name = "AVALIACAO_MEDIA")
@@ -70,6 +71,4 @@ public class SimEvolucaoCarreiraEntity extends AuditEntity {
   @NotNull
   @Column(name = "UUID", nullable = false, length = 100)
   private String uuid;
-
-
 }

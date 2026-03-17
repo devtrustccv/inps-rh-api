@@ -1,0 +1,24 @@
+{
+  "type": "dto",
+  "module": "configuracao",
+  "name": "ManualFuncaoRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "custom",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "avd2r8c6j0"
+}
+
