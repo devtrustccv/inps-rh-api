@@ -1,0 +1,42 @@
+{
+  "type": "controller",
+  "name": "Missao",
+  "module": "missaoservico",
+  "description": "gestao missao servico",
+  "basePath": "api/v1/missao-servico",
+  "actions": [
+    {
+      "actionName": "submeterMissaoServico",
+      "path": "submissao",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "MissaoSubmissaoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "missaoservico"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "id": "h8k8g5w99k"
+}
