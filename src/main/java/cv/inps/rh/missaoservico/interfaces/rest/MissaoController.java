@@ -19,6 +19,7 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.missaoservico.application.commands.*;
 import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoRequestDTO;
 import java.util.Map;
+import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseRequestDTO;
 
 @IgrpController
 @RestController
@@ -61,6 +62,66 @@ public class MissaoController {
   {
 
       final var command = new SubmeterMissaoServicoCommand(submeterMissaoServicoRequest);
+
+      return commandBus.send(command);
+
+  }
+
+   @PutMapping(
+   value = "{uuid}/analise"
+  )
+  @Operation(
+    summary = "Save analise processo missao servico",
+    description = "Save analise processo missao servico",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> saveAnaliseProcessoMissaoServico(@Valid @RequestBody MissaoAnaliseRequestDTO saveAnaliseProcessoMissaoServicoRequest
+    , @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var command = new SaveAnaliseProcessoMissaoServicoCommand(saveAnaliseProcessoMissaoServicoRequest, uuid);
+
+      return commandBus.send(command);
+
+  }
+
+   @PutMapping(
+   value = "{uuid}/analise"
+  )
+  @Operation(
+    summary = "Avancar analise processo missao servico",
+    description = "Avancar analise processo missao servico",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> avancarAnaliseProcessoMissaoServico(@Valid @RequestBody MissaoAnaliseRequestDTO avancarAnaliseProcessoMissaoServicoRequest
+    , @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var command = new AvancarAnaliseProcessoMissaoServicoCommand(avancarAnaliseProcessoMissaoServicoRequest, uuid);
 
       return commandBus.send(command);
 
