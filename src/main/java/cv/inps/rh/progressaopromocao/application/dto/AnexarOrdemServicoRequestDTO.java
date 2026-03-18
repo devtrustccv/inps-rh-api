@@ -4,11 +4,10 @@
 package cv.inps.rh.progressaopromocao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 
 @Data
@@ -20,19 +19,19 @@ import lombok.AllArgsConstructor;
 public class AnexarOrdemServicoRequestDTO  {
 
   @NotBlank(message = "The field <evolucaoCarreiraUuid> is required")
-  
+
   private String evolucaoCarreiraUuid ;
   @NotBlank(message = "The field <descricao> is required")
-  
+
   private String descricao ;
   @NotBlank(message = "The field <requerente> is required")
-  
+
   private String requerente ;
   @NotBlank(message = "The field <numero> is required")
-  
+
   private String numero ;
   @NotBlank(message = "The field <ordemServicoUrl> is required")
-  
+
   private String ordemServicoUrl ;
 
 }

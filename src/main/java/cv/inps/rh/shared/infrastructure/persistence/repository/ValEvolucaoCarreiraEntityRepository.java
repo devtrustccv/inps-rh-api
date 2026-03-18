@@ -1,6 +1,8 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.progressaopromocao.application.dto.ProgressaoPromocaoRowDTO;
+import cv.inps.rh.progressaopromocao.domain.service.ProgressaoPromocaoWriteService;
+import cv.inps.rh.progressaopromocao.domain.service.model.CollaboratorDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EvolucaoCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValEvolucaoCarreiraEntity;
@@ -75,4 +77,27 @@ public interface ValEvolucaoCarreiraEntityRepository extends JpaRepository<ValEv
       """)
   int marcarComoHistorico(@Param("ids") List<Long> ids);
 
+  @Modifying
+  @Query("""
+      UPDATE ValEvolucaoCarreiraEntity c
+      SET c.fileId = :fileId
+      WHERE c.id IN :ids
+      """)
+  int setFileIdToRows(@Param("ids") List<Long> ids, @Param("fileId") String fileId);
+
+  @Query("""
+            SELECT NEW cv.inps.rh.progressaopromocao.domain.service.model.CollaboratorDTO(
+                    c.contrVinculoId.funId.nome,
+                    c.cargoId.nome,
+                    v.escalaoIdDe.nivelReferencia || v.escalaoIdDe.escalao,
+                    v.escalaoIdDe.escalao,
+                    v.escalaoIdPara.nivelReferencia || v.escalaoIdPara.escalao,
+                    v.escalaoIdPara.escalao,
+                    v.dataReferente
+            )
+            FROM ValEvolucaoCarreiraEntity v
+                  JOIN CarreiraEntity c ON v.carreiraIdDe.id = c.id
+            WHERE c.id IN :ids
+      """)
+  List<CollaboratorDTO> getInformacaoColaboradores(@Param("ids") List<Long> ids);
 }

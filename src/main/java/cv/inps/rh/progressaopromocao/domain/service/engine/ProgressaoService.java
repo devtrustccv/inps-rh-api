@@ -18,12 +18,13 @@ public class ProgressaoService {
 
   private static final double MIN_MEDIA_AVALIACOES = 3.0;
 
+  // todo anexar ordem servico registar para cada colaborador, colocar ficheiro
+  // todo param situacao laboral flag evolui na carreira, deve calcular o tempo em que esteve nessa situacao e subtrair no tempo geral
+  // todo tabela situacao situacao laboral, tem id situacao, ligado ku vinculo, funcionario
+
   private final SimulacaoService simulacaoService;
 
   public void simular(VwRhProgressaoInputEntity c) {
-
-    // TODO 05/03/2026 17:41 colaborador em licença sem vencimento não deve progredir
-    // TODO 05/03/2026 17:41 O colaborador não deve estar em situação laboral em que não evolui na carreira no período de progressão; deve iniciar a partir da situação laboral atual
 
     LOGGER.debug("\n--------------------------------------------------PROGRESSAO-------------------------------------------------------------------------");
     LOGGER.debug("{}", c);

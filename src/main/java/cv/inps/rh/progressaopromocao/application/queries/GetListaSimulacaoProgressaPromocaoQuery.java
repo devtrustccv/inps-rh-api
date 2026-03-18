@@ -1,11 +1,10 @@
 package cv.inps.rh.progressaopromocao.application.queries;
 
 import cv.igrp.framework.core.domain.Query;
-import jakarta.validation.constraints.*;
-
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 
 @Data
