@@ -31,7 +31,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
-public class MissaoServicoService {
+public class MissaoServicoServiceWrite {
 
   private static final String ESTADO_ATIVO = "A";
   private static final Integer DESTINO_NACIONAL = 1;

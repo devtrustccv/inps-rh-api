@@ -52,7 +52,7 @@ public class MissaoServicoServiceTest {
   private DocumentoMapper documentoMapper;
 
   @InjectMocks
-  private MissaoServicoService service;
+  private MissaoServicoServiceWrite service;
 
   @Test
   void submeterCriaMissaoComNrMissaoSequencial() {
