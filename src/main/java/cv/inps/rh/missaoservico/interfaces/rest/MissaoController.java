@@ -98,7 +98,7 @@ public class MissaoController {
   }
 
    @PutMapping(
-   value = "{uuid}/analise"
+   value = "{uuid}/analise/avancar"
   )
   @Operation(
     summary = "Avancar analise processo missao servico",

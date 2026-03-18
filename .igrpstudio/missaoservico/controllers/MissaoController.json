@@ -78,7 +78,7 @@
     },
     {
       "actionName": "avancarAnaliseProcessoMissaoServico",
-      "path": "{uuid}/analise",
+      "path": "{uuid}/analise/avancar",
       "method": "PUT",
       "requestBody": {
         "content": {
@@ -116,5 +116,5 @@
       ]
     }
   ],
-  "id": "h8k8g5w99k"
+  "id": "h8k8g5w99k-avancarAnaliseProcessoMissaoServico"
 }
