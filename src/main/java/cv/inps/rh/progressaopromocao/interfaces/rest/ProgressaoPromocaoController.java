@@ -6,10 +6,7 @@ package cv.inps.rh.progressaopromocao.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import cv.inps.rh.progressaopromocao.application.commands.AnexarOrdemServicoCommand;
-import cv.inps.rh.progressaopromocao.application.commands.EnviarHistoricoProgressaoPromocaoCommand;
-import cv.inps.rh.progressaopromocao.application.commands.ExtrairOrdemServicoCommand;
-import cv.inps.rh.progressaopromocao.application.commands.SimularProgressaoPromocaoCommand;
+import cv.inps.rh.progressaopromocao.application.commands.*;
 import cv.inps.rh.progressaopromocao.application.dto.AnexarOrdemServicoRequestDTO;
 import cv.inps.rh.progressaopromocao.application.dto.HistoricoIdsDTO;
 import cv.inps.rh.progressaopromocao.application.dto.ListaProgressaoPromocaoDTO;
@@ -62,7 +59,7 @@ public class ProgressaoPromocaoController {
     }
   )
 
-  public ResponseEntity<ListaProgressaoPromocaoDTO> getHistoricoProgressaPromocao(
+   public ResponseEntity<ListaProgressaoPromocaoDTO> getHistoricoProgressaPromocao(
     @RequestParam(value = "progressaoPromocao", required = false) String progressaoPromocao,
     @RequestParam(value = "colaborador", required = false) String colaborador,
     @RequestParam(value = "carreiraId", required = false) String carreiraId,
@@ -98,7 +95,7 @@ public class ProgressaoPromocaoController {
     }
   )
 
-  public ResponseEntity<ListaProgressaoPromocaoDTO> getListaValidacaoProgressaPromocao(
+   public ResponseEntity<ListaProgressaoPromocaoDTO> getListaValidacaoProgressaPromocao(
     @RequestParam(value = "progressaoPromocao", required = false) String progressaoPromocao,
     @RequestParam(value = "colaborador", required = false) String colaborador,
     @RequestParam(value = "carreiraId", required = false) String carreiraId,
@@ -134,7 +131,7 @@ public class ProgressaoPromocaoController {
     }
   )
 
-  public ResponseEntity<String> anexarOrdemServico(@Valid @RequestBody AnexarOrdemServicoRequestDTO anexarOrdemServicoRequest
+   public ResponseEntity<String> anexarOrdemServico(@Valid @RequestBody AnexarOrdemServicoRequestDTO anexarOrdemServicoRequest
     )
   {
 
@@ -164,7 +161,7 @@ public class ProgressaoPromocaoController {
     }
   )
 
-  public ResponseEntity<String> simularProgressaoPromocao(
+   public ResponseEntity<String> simularProgressaoPromocao(
     )
   {
 
@@ -194,7 +191,7 @@ public class ProgressaoPromocaoController {
     }
   )
 
-  public ResponseEntity<ListaProgressaoPromocaoDTO> getListaSimulacaoProgressaPromocao(
+   public ResponseEntity<ListaProgressaoPromocaoDTO> getListaSimulacaoProgressaPromocao(
     @RequestParam(value = "progressaoPromocao", required = false) String progressaoPromocao,
     @RequestParam(value = "colaborador", required = false) String colaborador,
     @RequestParam(value = "carreiraId", required = false) String carreiraId,
@@ -230,7 +227,7 @@ public class ProgressaoPromocaoController {
     }
   )
 
-  public ResponseEntity<String> enviarHistoricoProgressaoPromocao(@Valid @RequestBody HistoricoIdsDTO enviarHistoricoProgressaoPromocaoRequest
+   public ResponseEntity<String> enviarHistoricoProgressaoPromocao(@Valid @RequestBody HistoricoIdsDTO enviarHistoricoProgressaoPromocaoRequest
     )
   {
 
@@ -260,11 +257,40 @@ public class ProgressaoPromocaoController {
     }
   )
 
-  public ResponseEntity<byte[]> extrairOrdemServico(@Valid @RequestBody HistoricoIdsDTO extrairOrdemServicoRequest
+   public ResponseEntity<byte[]> extrairOrdemServico(@Valid @RequestBody HistoricoIdsDTO extrairOrdemServicoRequest
     )
   {
 
       final var command = new ExtrairOrdemServicoCommand(extrairOrdemServicoRequest);
+
+    return commandBus.send(command);
+
+  }
+
+  @PostMapping(
+      value = "validar"
+  )
+  @Operation(
+      summary = "Validar simulacao",
+      description = "Validar simulacao",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<String> validarSimulacao(@Valid @RequestBody HistoricoIdsDTO validarSimulacaoRequest
+  ) {
+
+    final var command = new ValidarSimulacaoCommand(validarSimulacaoRequest);
 
       return commandBus.send(command);
 

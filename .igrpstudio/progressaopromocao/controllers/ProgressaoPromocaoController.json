@@ -299,6 +299,38 @@
           }
         }
       }
+    },
+    {
+      "actionName": "validarSimulacao",
+      "path": "validar",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "HistoricoIds",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "progressaopromocao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "id": "w6juessy9r-getListaValidacaoProgressaPromocao-getListaValidacaoProgressaPromocaoCopy-getListaProgressaPromocao-simularProgressaoPromocaoCopy-enviarHistoricoProgressaoPromocao-extrairOrdemServico"
