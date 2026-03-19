@@ -18,6 +18,8 @@ public interface MissaoColaboradorEntityRepository extends
 
   List<MissaoColaboradorEntity> findAllByMissaoServId_Uuid(UUID missaoUuid);
 
+  Optional<MissaoColaboradorEntity> findByMissaoServId_UuidAndFunId_Uuid(UUID missaoUuid, UUID funUuid);
+
   Optional<MissaoColaboradorEntity> findByUuid(UUID uuid);
 
   default MissaoColaboradorEntity findByUuidOrThrow(UUID uuid) {

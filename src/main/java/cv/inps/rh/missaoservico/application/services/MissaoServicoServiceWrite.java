@@ -5,18 +5,21 @@ import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.commands.CancelarMissaoServicoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveAnaliseProcessoMissaoServicoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveSubmissaoServicoCommand;
+import cv.inps.rh.missaoservico.application.commands.SaveSubmissaoServicoEmissaoRequisicaoCommand;
 import cv.inps.rh.missaoservico.application.commands.SubmeterMissaoServicoCommand;
 import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCancelarRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoColaboradorRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoPrestadorDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoRequisicaoItemRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoRequestDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoColaboradorEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoPrestadorEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoRequisicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoServicoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
@@ -54,6 +57,8 @@ public class MissaoServicoServiceWrite {
   private static final Integer DESTINO_ESTRANGEIRO = 2;
   private static final String ETAPA_1 = "ETAPA_1_SUBMISSAO_AUTORIZACAO";
   private static final String ETAPA_2 = "ETAPA_2_ANALISE_RH";
+  private static final String ETAPA_3 = "ETAPA_3_EMISSAO_REQUISICAO";
+  private static final String ETAPA_4 = "ETAPA_4_PROCESSAMENTO_LOGISTICO";
 
   private final MissaoServicoEntityRepository missaoServicoRepository;
   private final MissaoColaboradorEntityRepository missaoColaboradorRepository;
@@ -176,6 +181,137 @@ public class MissaoServicoServiceWrite {
   }
 
   @Transactional
+  public ResponseEntity<Map<String, ?>> salvarEmissaoRequisicao(SaveSubmissaoServicoEmissaoRequisicaoCommand command) {
+    var missaoUuid = parseUuid(command != null ? command.getUui() : null, "uui");
+    var dto = command != null ? command.getMissaoemissaorequisicaorequest() : null;
+    if (dto == null) {
+      throw IgrpResponseStatusException.badRequest("Payload inválido");
+    }
+
+    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    validarEmissaoRequisicao(dto.getRequisicoes());
+
+    var existentes = missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid);
+
+    var desired = new HashSet<String>();
+    var propostaByPrestador = new HashMap<Long, cv.inps.rh.shared.application.dto.AnexoReqDTO>();
+
+    for (var item : dto.getRequisicoes()) {
+      if (item == null)
+        continue;
+      if (item.getSelecionado() == null || !item.getSelecionado())
+        continue;
+      if (item.getMissaoPrestId() == null)
+        continue;
+
+      propostaByPrestador.putIfAbsent(item.getMissaoPrestId(), item.getDocumentoProposta());
+
+      var prest = missaoPrestadorRepository.findById(item.getMissaoPrestId())
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest("Prestador inválido: " + item.getMissaoPrestId()));
+      if (prest.getMissaoServId() == null || prest.getMissaoServId().getUuid() == null
+          || !prest.getMissaoServId().getUuid().equals(missaoUuid)) {
+        throw IgrpResponseStatusException.badRequest("Prestador não pertence à missão: " + item.getMissaoPrestId());
+      }
+
+      for (var funUuid : item.getMissaoColabIds()) {
+        if (funUuid == null)
+          continue;
+        var colab = missaoColaboradorRepository.findByMissaoServId_UuidAndFunId_Uuid(missaoUuid, funUuid)
+            .orElseThrow(() -> IgrpResponseStatusException.badRequest("Colaborador inválido: " + funUuid));
+        desired.add(key(item.getMissaoPrestId(), colab.getId()));
+      }
+    }
+
+    var toSave = new ArrayList<MissaoRequisicaoEntity>();
+    var byKey = new HashMap<String, MissaoRequisicaoEntity>();
+    if (!CollectionUtils.isEmpty(existentes)) {
+      for (var e : existentes) {
+        if (e == null || e.getMissaoPrestId() == null || e.getMissaoColabId() == null)
+          continue;
+        byKey.put(key(e.getMissaoPrestId().getId(), e.getMissaoColabId().getId()), e);
+      }
+    }
+
+    for (var entry : byKey.entrySet()) {
+      var req = entry.getValue();
+      if (desired.contains(entry.getKey())) {
+        req.setEstado(ESTADO_ATIVO);
+      } else {
+        req.setEstado(ESTADO_INATIVO);
+      }
+      toSave.add(req);
+    }
+
+    for (var k : desired) {
+      if (byKey.containsKey(k))
+        continue;
+      var parts = k.split(":");
+      var prestId = Long.parseLong(parts[0]);
+      var colabId = Long.parseLong(parts[1]);
+
+      var prest = missaoPrestadorRepository.findById(prestId)
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest("Prestador inválido: " + prestId));
+      var colab = missaoColaboradorRepository.findById(colabId)
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest("Colaborador inválido: " + colabId));
+
+      var req = new MissaoRequisicaoEntity();
+      req.setUuid(UuidCreator.getTimeOrderedEpoch());
+      req.setEstado(ESTADO_ATIVO);
+      req.setMissaoPrestId(prest);
+      req.setMissaoColabId(colab);
+      toSave.add(req);
+    }
+
+    if (!toSave.isEmpty()) {
+      toSave = new ArrayList<>(missaoRequisicaoRepository.saveAll(toSave));
+    }
+
+    for (var req : toSave) {
+      if (req == null || req.getUuid() == null || req.getMissaoPrestId() == null)
+        continue;
+      if (!ESTADO_ATIVO.equals(req.getEstado()))
+        continue;
+
+      var proposta = propostaByPrestador.get(req.getMissaoPrestId().getId());
+      List<cv.inps.rh.shared.application.dto.AnexoReqDTO> novos = proposta != null ? List.of(proposta) : List.of();
+
+      var existentesDocs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(
+          TableName.RH_T_MISSAO_REQUISICAO.name(),
+          req.getUuid());
+
+      var sync = documentoMapper.syncDocumentos(
+          existentesDocs != null ? existentesDocs : new ArrayList<>(),
+          novos,
+          TableName.RH_T_MISSAO_REQUISICAO.name(),
+          req.getId(),
+          req.getUuid(),
+          1L,
+          null);
+
+      if (sync != null && !sync.isEmpty()) {
+        sync.forEach(d -> {
+          if (d.getUuid() == null)
+            d.setUuid(UuidCreator.getTimeOrderedEpoch());
+          if (d.getEstado() == null)
+            d.setEstado(Estado.A);
+        });
+        documentoRepository.saveAll(sync);
+      }
+    }
+
+    missao.setEtapa(ETAPA_3);
+    if (dto.getProcessoEtapaAction() != null && dto.getProcessoEtapaAction().getCode().equals("NEXT")) {
+      missao.setEtapa(ETAPA_4);
+    }
+    missaoServicoRepository.save(missao);
+
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("id", missao.getUuid() != null ? missao.getUuid().toString() : null);
+    return ResponseEntity.ok(resp);
+  }
+
+  @Transactional
   public ResponseEntity<String> cancelar(CancelarMissaoServicoCommand command) {
     var missaoUuid = parseUuid(command != null ? command.getId() : null, "id");
     var dto = command != null ? command.getMissaocancelarrequest() : null;
@@ -228,6 +364,36 @@ public class MissaoServicoServiceWrite {
     }
 
     return ResponseEntity.ok().build();
+  }
+
+  private void validarEmissaoRequisicao(List<MissaoRequisicaoItemRequestDTO> requisicoes) {
+    if (CollectionUtils.isEmpty(requisicoes)) {
+      throw IgrpResponseStatusException.badRequest("requisicoes é obrigatório");
+    }
+
+    boolean anySelected = false;
+    for (var item : requisicoes) {
+      if (item == null)
+        continue;
+      if (item.getSelecionado() == null || !item.getSelecionado())
+        continue;
+      anySelected = true;
+
+      if (item.getMissaoPrestId() == null) {
+        throw IgrpResponseStatusException.badRequest("missaoPrestId é obrigatório");
+      }
+      if (CollectionUtils.isEmpty(item.getMissaoColabIds())) {
+        throw IgrpResponseStatusException.badRequest("missaoColabIds é obrigatório");
+      }
+    }
+
+    if (!anySelected) {
+      throw IgrpResponseStatusException.badRequest("Selecione pelo menos um prestador");
+    }
+  }
+
+  private String key(Long prestId, Long colabId) {
+    return prestId + ":" + colabId;
   }
 
   private void validarSubmissao(MissaoSubmissaoRequestDTO dto) {
