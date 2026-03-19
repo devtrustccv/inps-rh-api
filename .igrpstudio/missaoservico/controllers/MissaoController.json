@@ -553,6 +553,34 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getMissaoServicoPagamento",
+      "path": "{uuid}/pagamento",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "MissaoPagamentoResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "h8k8g5w99k-avancarAnaliseProcessoMissaoServico"
