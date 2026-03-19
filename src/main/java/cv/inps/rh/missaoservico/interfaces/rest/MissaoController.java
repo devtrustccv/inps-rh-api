@@ -15,11 +15,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import cv.igrp.framework.core.domain.QueryBus;
+import cv.inps.rh.missaoservico.application.queries.*;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.missaoservico.application.commands.*;
 import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoRequestDTO;
 import java.util.Map;
 import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.WrapperListMissaoServicoDTO;
 
 @IgrpController
 @RestController
@@ -31,10 +35,11 @@ import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseRequestDTO;
 public class MissaoController {
 
   
+  private final QueryBus queryBus;
   private final CommandBus commandBus;
 
-  public MissaoController(CommandBus commandBus) {
-          
+  public MissaoController(QueryBus queryBus, CommandBus commandBus) {
+          this.queryBus = queryBus;
           this.commandBus = commandBus;
   }
    @PostMapping(
@@ -124,6 +129,39 @@ public class MissaoController {
       final var command = new AvancarAnaliseProcessoMissaoServicoCommand(avancarAnaliseProcessoMissaoServicoRequest, uuid);
 
       return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+  )
+  @Operation(
+    summary = "Get lista missao servico",
+    description = "Get lista missao servico",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = WrapperListMissaoServicoDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<WrapperListMissaoServicoDTO> getListaMissaoServico(
+    @RequestParam(value = "nrMissao", required = false) String nrMissao,
+    @RequestParam(value = "periodoDe", required = false) String periodoDe,
+    @RequestParam(value = "periodoAte", required = false) String periodoAte,
+    @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
+    @RequestParam(value = "pageSize", required = false) String pageSize)
+  {
+
+      final var query = new GetListaMissaoServicoQuery(nrMissao, periodoDe, periodoAte, pageNumber, pageSize);
+
+      return queryBus.handle(query);
 
   }
 

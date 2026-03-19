@@ -114,6 +114,54 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getListaMissaoServico",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListMissaoServico",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "nrMissao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "periodoDe",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "periodoAte",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "isRequired": false
+        }
+      ]
     }
   ],
   "id": "h8k8g5w99k-avancarAnaliseProcessoMissaoServico"
