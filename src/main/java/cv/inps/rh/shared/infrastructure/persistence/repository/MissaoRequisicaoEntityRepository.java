@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,11 +16,13 @@ public interface MissaoRequisicaoEntityRepository extends
     JpaRepository<MissaoRequisicaoEntity, Long>,
     JpaSpecificationExecutor<MissaoRequisicaoEntity> {
 
+  List<MissaoRequisicaoEntity> findAllByMissaoPrestId_MissaoServId_Uuid(UUID missaoUuid);
+
   Optional<MissaoRequisicaoEntity> findByUuid(UUID uuid);
 
   default MissaoRequisicaoEntity findByUuidOrThrow(UUID uuid) {
     return findByUuid(uuid)
-        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "MissaoRequisicaoEntity not found for id: " + uuid));
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
+            "MissaoRequisicaoEntity not found for id: " + uuid));
   }
 }
-

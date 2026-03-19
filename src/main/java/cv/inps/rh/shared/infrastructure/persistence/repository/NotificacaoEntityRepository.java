@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-
 @Repository
 public interface NotificacaoEntityRepository extends
     JpaRepository<NotificacaoEntity, Long>,
@@ -20,13 +19,15 @@ public interface NotificacaoEntityRepository extends
 
   default NotificacaoEntity findByIdOrThrow(Long id) {
     return this.findById(id)
-        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "NotificacaoEntity not found for id: " + id));
+        .orElseThrow(
+            () -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "NotificacaoEntity not found for id: " + id));
   }
 
   Optional<NotificacaoEntity> findByReferenciaNameAndReferenciaId(String referenciaName, Long referenciaId);
 
   Optional<NotificacaoEntity> findByReferenciaNameAndReferenciaUuid(String referenciaName, UUID referenciaUuid);
 
+  List<NotificacaoEntity> findAllByReferenciaNameAndReferenciaUuid(String referenciaName, UUID referenciaUuid);
 
   List<NotificacaoEntity> findByAlertaId(AlertaEntity alertaId);
 

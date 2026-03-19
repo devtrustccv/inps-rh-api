@@ -2,10 +2,12 @@ package cv.inps.rh.missaoservico.application.services;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
+import cv.inps.rh.missaoservico.application.commands.CancelarMissaoServicoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveAnaliseProcessoMissaoServicoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveSubmissaoServicoCommand;
 import cv.inps.rh.missaoservico.application.commands.SubmeterMissaoServicoCommand;
 import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoCancelarRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoColaboradorRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoPrestadorDTO;
@@ -21,7 +23,10 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRe
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.GeografiaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoColaboradorEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoLogisticaDetEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoLogisticaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoPrestadorEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoRequisicaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoServicoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.NotificacaoEntityRepository;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +58,9 @@ public class MissaoServicoServiceWrite {
   private final MissaoServicoEntityRepository missaoServicoRepository;
   private final MissaoColaboradorEntityRepository missaoColaboradorRepository;
   private final MissaoPrestadorEntityRepository missaoPrestadorRepository;
+  private final MissaoLogisticaEntityRepository missaoLogisticaRepository;
+  private final MissaoLogisticaDetEntityRepository missaoLogisticaDetRepository;
+  private final MissaoRequisicaoEntityRepository missaoRequisicaoRepository;
   private final GeografiaEntityRepository geografiaRepository;
   private final FuncionarioEntityRepository funcionarioRepository;
   private final DocumentoEntityRepository documentoRepository;
@@ -165,6 +173,61 @@ public class MissaoServicoServiceWrite {
     resp.put("id", missao.getUuid() != null ? missao.getUuid().toString() : null);
     resp.put("nrMissao", missao.getNrMissao());
     return ResponseEntity.ok(resp);
+  }
+
+  @Transactional
+  public ResponseEntity<String> cancelar(CancelarMissaoServicoCommand command) {
+    var missaoUuid = parseUuid(command != null ? command.getId() : null, "id");
+    var dto = command != null ? command.getMissaocancelarrequest() : null;
+
+    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    missao.setMotivoCancelamento(dto != null ? dto.getMotivoCancelamento() : null);
+    missao.setEstado(ESTADO_INATIVO);
+    missaoServicoRepository.save(missao);
+
+    var colaboradores = missaoColaboradorRepository.findAllByMissaoServId_Uuid(missaoUuid);
+    if (!CollectionUtils.isEmpty(colaboradores)) {
+      colaboradores.forEach(c -> c.setEstado(ESTADO_INATIVO));
+      missaoColaboradorRepository.saveAll(colaboradores);
+    }
+
+    var prestadores = missaoPrestadorRepository.findAllByMissaoServId_Uuid(missaoUuid);
+    if (!CollectionUtils.isEmpty(prestadores)) {
+      prestadores.forEach(p -> p.setEstado(ESTADO_INATIVO));
+      missaoPrestadorRepository.saveAll(prestadores);
+    }
+
+    var logistica = missaoLogisticaRepository.findAllByMissaoServId_Uuid(missaoUuid);
+    if (!CollectionUtils.isEmpty(logistica)) {
+      logistica.forEach(l -> l.setEstado(ESTADO_INATIVO));
+      missaoLogisticaRepository.saveAll(logistica);
+    }
+
+    var logisticaDet = missaoLogisticaDetRepository.findAllByMissaoLogistId_MissaoServId_Uuid(missaoUuid);
+    if (!CollectionUtils.isEmpty(logisticaDet)) {
+      logisticaDet.forEach(d -> d.setEstado(ESTADO_INATIVO));
+      missaoLogisticaDetRepository.saveAll(logisticaDet);
+    }
+
+    var requisicoes = missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid);
+    if (!CollectionUtils.isEmpty(requisicoes)) {
+      requisicoes.forEach(r -> r.setEstado(ESTADO_INATIVO));
+      missaoRequisicaoRepository.saveAll(requisicoes);
+    }
+
+    var documentos = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_MISSAO_SERVICO.name(),
+        missaoUuid);
+    if (!CollectionUtils.isEmpty(documentos)) {
+      documentos.forEach(d -> d.setEstado(Estado.I));
+      documentoRepository.saveAll(documentos);
+    }
+
+    if (deveNotificarCancelamento(missao)) {
+      persistirNotificacaoCancelamento(missao, dto);
+    }
+
+    return ResponseEntity.ok().build();
   }
 
   private void validarSubmissao(MissaoSubmissaoRequestDTO dto) {
@@ -379,6 +442,61 @@ public class MissaoServicoServiceWrite {
     }
 
     return toSave;
+  }
+
+  private boolean deveNotificarCancelamento(MissaoServicoEntity missao) {
+    if (missao == null)
+      return false;
+    if (!StringUtils.hasText(missao.getEtapa()))
+      return false;
+    return !ETAPA_1.equals(missao.getEtapa()) && !ETAPA_2.equals(missao.getEtapa());
+  }
+
+  private void persistirNotificacaoCancelamento(MissaoServicoEntity missao, MissaoCancelarRequestDTO dto) {
+    var anteriores = notificacaoRepository.findAllByReferenciaNameAndReferenciaUuid(
+        TableName.RH_T_MISSAO_SERVICO.name(),
+        missao.getUuid());
+
+    if (CollectionUtils.isEmpty(anteriores))
+      return;
+
+    var seen = new HashSet<String>();
+    var toSave = new ArrayList<NotificacaoEntity>();
+
+    String assunto = "Cancelamento de Missão Nº " + missao.getNrMissao();
+    String message = buildMensagemCancelamento(missao, dto);
+
+    for (var n0 : anteriores) {
+      var email = n0 != null ? n0.getEmail() : null;
+      if (!StringUtils.hasText(email))
+        continue;
+      if (!seen.add(email.trim().toLowerCase()))
+        continue;
+
+      var n = new NotificacaoEntity();
+      n.setUuid(UuidCreator.getTimeOrderedEpoch());
+      n.setReferenciaId(missao.getId());
+      n.setReferenciaName(TableName.RH_T_MISSAO_SERVICO.name());
+      n.setReferenciaUuid(missao.getUuid());
+      n.setAssunto(assunto);
+      n.setMessage(message);
+      n.setEmail(email);
+      n.setNomeReceptor(n0.getNomeReceptor());
+      n.setEstado(ESTADO_ATIVO);
+      toSave.add(n);
+    }
+
+    if (!toSave.isEmpty()) {
+      notificacaoRepository.saveAll(toSave);
+    }
+  }
+
+  private String buildMensagemCancelamento(MissaoServicoEntity missao, MissaoCancelarRequestDTO dto) {
+    var motivo = dto != null ? dto.getMotivoCancelamento() : null;
+    if (StringUtils.hasText(motivo)) {
+      return "A missão Nº " + missao.getNrMissao() + " foi cancelada. Motivo: " + motivo;
+    }
+    return "A missão Nº " + missao.getNrMissao() + " foi cancelada.";
   }
 
   private Long parseLong(String raw) {
