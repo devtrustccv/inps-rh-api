@@ -27,6 +27,7 @@ import cv.inps.rh.missaoservico.application.dto.WrapperListMissaoServicoDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoServicoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCancelarRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseResponseDTO;
 
 @IgrpController
 @RestController
@@ -253,6 +254,36 @@ public class MissaoController {
   {
 
       final var query = new GetSubmissaoServicoProcessQuery(uuid);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "{uuid}/analise"
+  )
+  @Operation(
+    summary = "Get missao analise process",
+    description = "Get missao analise process",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = MissaoAnaliseResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<MissaoAnaliseResponseDTO> getMissaoAnaliseProcess(
+    @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var query = new GetMissaoAnaliseProcessQuery(uuid);
 
       return queryBus.handle(query);
 
