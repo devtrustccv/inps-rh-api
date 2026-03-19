@@ -4,6 +4,7 @@
 package cv.inps.rh.missaoservico.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
+import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import jakarta.validation.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -23,4 +24,5 @@ public class MissaoCabimentoRequestDTO  {
 
   private List<MissaoCabimentoItemRequestDTO> itens;
 
+  private ProcessStepAction processoEtapaAction;
 }

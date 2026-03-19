@@ -4,6 +4,7 @@
 package cv.inps.rh.missaoservico.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
+import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import jakarta.validation.*;
 import jakarta.validation.constraints.*;
@@ -37,4 +38,6 @@ public class MissaoSubmissaoRequestDTO  {
   private List<AnexoReqDTO> documentos = new ArrayList<>();
 
   private String estado;                  // default: "A"
+
+  private ProcessStepAction processoEtapaAction;
 }
