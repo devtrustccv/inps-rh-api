@@ -17,6 +17,8 @@ public interface MissaoLogisticaDetEntityRepository extends
 
   List<MissaoLogisticaDetEntity> findAllByMissaoLogistId_MissaoServId_Uuid(UUID missaoUuid);
 
+  List<MissaoLogisticaDetEntity> findAllByMissaoLogistId_IdIn(List<Long> logistIds);
+
   default MissaoLogisticaDetEntity findByIdOrThrow(Long id) {
     return findById(id)
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,

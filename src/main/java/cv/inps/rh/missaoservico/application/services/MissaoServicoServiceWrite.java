@@ -4,20 +4,28 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.commands.CancelarMissaoServicoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveAnaliseProcessoMissaoServicoCommand;
+import cv.inps.rh.missaoservico.application.commands.SaveMissaoServicoLogisticaCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveSubmissaoServicoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveSubmissaoServicoEmissaoRequisicaoCommand;
 import cv.inps.rh.missaoservico.application.commands.SubmeterMissaoServicoCommand;
+import cv.inps.rh.missaoservico.application.dto.AjudaCustoRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.AlojamentoRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.BilhetePassagemRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCancelarRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoColaboradorRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoPrestadorDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoRequisicaoItemRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.SeguroViagemRequestDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoColaboradorEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaDetEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoPrestadorEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoRequisicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoServicoEntity;
@@ -312,6 +320,42 @@ public class MissaoServicoServiceWrite {
   }
 
   @Transactional
+  public ResponseEntity<Map<String, ?>> salvarLogistica(SaveMissaoServicoLogisticaCommand command) {
+    var missaoUuid = parseUuid(command != null ? command.getUuid() : null, "uuid");
+    var dto = command != null ? command.getMissaologisticarequest() : null;
+    if (dto == null) {
+      throw IgrpResponseStatusException.badRequest("Payload inválido");
+    }
+
+    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    var requisicoes = missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid);
+    var logisticasExistentes = missaoLogisticaRepository.findAllByMissaoServId_Uuid(missaoUuid);
+
+    if (dto.getBilhetesPassagem() != null) {
+      syncLogisticaBilhete(missao, dto.getBilhetesPassagem(), logisticasExistentes, requisicoes);
+    }
+    if (dto.getSegurosViagem() != null) {
+      syncLogisticaSeguro(missao, dto.getSegurosViagem(), logisticasExistentes, requisicoes);
+    }
+    if (dto.getAlojamentos() != null) {
+      syncLogisticaAlojamento(missao, dto.getAlojamentos(), logisticasExistentes, requisicoes);
+    }
+    if (dto.getAjudasCusto() != null) {
+      syncLogisticaAjudaCusto(missao, dto.getAjudasCusto(), logisticasExistentes, requisicoes);
+    }
+
+    if (dto.getProcessoEtapaAction() != null && "NEXT".equals(dto.getProcessoEtapaAction().getCode())) {
+      missao.setEtapa(ETAPA_4);
+      missaoServicoRepository.save(missao);
+    }
+
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("id", missao.getUuid() != null ? missao.getUuid().toString() : null);
+    return ResponseEntity.ok(resp);
+  }
+
+  @Transactional
   public ResponseEntity<String> cancelar(CancelarMissaoServicoCommand command) {
     var missaoUuid = parseUuid(command != null ? command.getId() : null, "id");
     var dto = command != null ? command.getMissaocancelarrequest() : null;
@@ -394,6 +438,361 @@ public class MissaoServicoServiceWrite {
 
   private String key(Long prestId, Long colabId) {
     return prestId + ":" + colabId;
+  }
+
+  private void syncLogisticaBilhete(
+      MissaoServicoEntity missao,
+      List<BilhetePassagemRequestDTO> items,
+      List<MissaoLogisticaEntity> existentes,
+      List<MissaoRequisicaoEntity> requisicoes) {
+    syncLogisticaGenerico(missao, "BILHETE_PASSAGEM", existentes, items, (bilhete) -> {
+      if (bilhete == null)
+        return null;
+      if (CollectionUtils.isEmpty(bilhete.getColaboradorIds())) {
+        throw IgrpResponseStatusException.badRequest("colaboradorIds é obrigatório");
+      }
+      if (bilhete.getValor() == null) {
+        throw IgrpResponseStatusException.badRequest("valor é obrigatório");
+      }
+
+      var colabs = new ArrayList<MissaoColaboradorEntity>();
+      for (var colabUuid : bilhete.getColaboradorIds()) {
+        if (colabUuid == null)
+          continue;
+        colabs.add(missaoColaboradorRepository.findByUuidOrThrow(colabUuid));
+      }
+      if (colabs.isEmpty()) {
+        throw IgrpResponseStatusException.badRequest("colaboradorIds inválido");
+      }
+
+      var prestador = derivePrestadorFromRequisicao(missao.getUuid(), colabs, requisicoes);
+
+      var log = new MissaoLogisticaEntity();
+      log.setUuid(UuidCreator.getTimeOrderedEpoch());
+      log.setEstado(ESTADO_ATIVO);
+      log.setMissaoServId(missao);
+      log.setPrestadorServId(prestador);
+      log.setReferencia("BILHETE_PASSAGEM");
+      log.setMoeda("CVE");
+      log.setValorTotal(bilhete.getValor());
+      log.setDataInicio(missao.getDataInicio());
+      log.setDataFim(missao.getDataFim());
+      log.setNrDias(missao.getNrDias());
+
+      return new LogisticaPersist(log, colabs, bilhete.getAnexo());
+    });
+  }
+
+  private void syncLogisticaSeguro(
+      MissaoServicoEntity missao,
+      List<SeguroViagemRequestDTO> items,
+      List<MissaoLogisticaEntity> existentes,
+      List<MissaoRequisicaoEntity> requisicoes) {
+    syncLogisticaGenerico(missao, "SEGURO_VIAGEM", existentes, items, (seguro) -> {
+      if (seguro == null)
+        return null;
+      if (CollectionUtils.isEmpty(seguro.getColaboradorIds())) {
+        throw IgrpResponseStatusException.badRequest("colaboradorIds é obrigatório");
+      }
+      if (seguro.getValor() == null) {
+        throw IgrpResponseStatusException.badRequest("valor é obrigatório");
+      }
+      if (seguro.getEntId() == null) {
+        throw IgrpResponseStatusException.badRequest("entId é obrigatório");
+      }
+      if (!StringUtils.hasText(seguro.getNomeSeguradora())) {
+        throw IgrpResponseStatusException.badRequest("nomeSeguradora é obrigatório");
+      }
+
+      var colabs = new ArrayList<MissaoColaboradorEntity>();
+      for (var colabUuid : seguro.getColaboradorIds()) {
+        if (colabUuid == null)
+          continue;
+        colabs.add(missaoColaboradorRepository.findByUuidOrThrow(colabUuid));
+      }
+      if (colabs.isEmpty()) {
+        throw IgrpResponseStatusException.badRequest("colaboradorIds inválido");
+      }
+
+      var prestador = derivePrestadorFromRequisicao(missao.getUuid(), colabs, requisicoes);
+
+      var log = new MissaoLogisticaEntity();
+      log.setUuid(UuidCreator.getTimeOrderedEpoch());
+      log.setEstado(ESTADO_ATIVO);
+      log.setMissaoServId(missao);
+      log.setPrestadorServId(prestador);
+      log.setReferencia("SEGURO_VIAGEM");
+      log.setMoeda("CVE");
+      log.setValorTotal(seguro.getValor());
+      log.setDataInicio(missao.getDataInicio());
+      log.setDataFim(missao.getDataFim());
+      log.setNrDias(missao.getNrDias());
+      log.setEntId(seguro.getEntId());
+      log.setNomeSeguradora(seguro.getNomeSeguradora());
+
+      return new LogisticaPersist(log, colabs, seguro.getAnexo());
+    });
+  }
+
+  private void syncLogisticaAlojamento(
+      MissaoServicoEntity missao,
+      List<AlojamentoRequestDTO> items,
+      List<MissaoLogisticaEntity> existentes,
+      List<MissaoRequisicaoEntity> requisicoes) {
+    syncLogisticaGenerico(missao, "ALOJAMENTO", existentes, items, (aloj) -> {
+      if (aloj == null)
+        return null;
+      if (aloj.getColaboradorId() == null) {
+        throw IgrpResponseStatusException.badRequest("colaboradorId é obrigatório");
+      }
+      if (!StringUtils.hasText(aloj.getLugarHospedagem())) {
+        throw IgrpResponseStatusException.badRequest("lugarHospedagem é obrigatório");
+      }
+      if (aloj.getValorTotal() == null) {
+        throw IgrpResponseStatusException.badRequest("valorTotal é obrigatório");
+      }
+      if (aloj.getValorDiario() == null) {
+        throw IgrpResponseStatusException.badRequest("valorDiario é obrigatório");
+      }
+      if (aloj.getDataInicio() == null) {
+        throw IgrpResponseStatusException.badRequest("dataInicio é obrigatório");
+      }
+      if (aloj.getDataFim() == null) {
+        throw IgrpResponseStatusException.badRequest("dataFim é obrigatório");
+      }
+      if (aloj.getDataFim().isBefore(aloj.getDataInicio())) {
+        throw IgrpResponseStatusException.badRequest("dataFim não pode ser anterior a dataInicio");
+      }
+      if (!StringUtils.hasText(aloj.getFlgAlimentacao())) {
+        throw IgrpResponseStatusException.badRequest("flgAlimentacao é obrigatório");
+      }
+
+      var colab = missaoColaboradorRepository.findById(aloj.getColaboradorId())
+          .orElseThrow(
+              () -> IgrpResponseStatusException.badRequest("colaboradorId inválido: " + aloj.getColaboradorId()));
+
+      var prestador = derivePrestadorFromRequisicao(missao.getUuid(), List.of(colab), requisicoes);
+
+      var log = new MissaoLogisticaEntity();
+      log.setUuid(UuidCreator.getTimeOrderedEpoch());
+      log.setEstado(ESTADO_ATIVO);
+      log.setMissaoServId(missao);
+      log.setPrestadorServId(prestador);
+      log.setReferencia("ALOJAMENTO");
+      log.setMoeda(StringUtils.hasText(aloj.getMoeda()) ? aloj.getMoeda() : "CVE");
+      log.setValorDiario(aloj.getValorDiario());
+      log.setValorTotal(aloj.getValorTotal());
+      log.setLugarHospedagem(aloj.getLugarHospedagem());
+      log.setDataInicio(aloj.getDataInicio());
+      log.setDataFim(aloj.getDataFim());
+      log.setNrDias(calcularNrDias(aloj.getDataInicio(), aloj.getDataFim()));
+      log.setFlgAlimentacao(aloj.getFlgAlimentacao());
+
+      return new LogisticaPersist(log, List.of(colab), aloj.getAnexo());
+    });
+  }
+
+  private void syncLogisticaAjudaCusto(
+      MissaoServicoEntity missao,
+      List<AjudaCustoRequestDTO> items,
+      List<MissaoLogisticaEntity> existentes,
+      List<MissaoRequisicaoEntity> requisicoes) {
+    syncLogisticaGenerico(missao, "AJUDA_CUSTO", existentes, items, (ajuda) -> {
+      if (ajuda == null)
+        return null;
+      if (ajuda.getColaboradorId() == null) {
+        throw IgrpResponseStatusException.badRequest("colaboradorId é obrigatório");
+      }
+      if (ajuda.getNumeroDiasAlojamento() == null) {
+        throw IgrpResponseStatusException.badRequest("numeroDiasAlojamento é obrigatório");
+      }
+
+      var colab = missaoColaboradorRepository.findByUuidOrThrow(ajuda.getColaboradorId());
+      var prestador = derivePrestadorFromRequisicao(missao.getUuid(), List.of(colab), requisicoes);
+
+      var log = new MissaoLogisticaEntity();
+      log.setUuid(UuidCreator.getTimeOrderedEpoch());
+      log.setEstado(ESTADO_ATIVO);
+      log.setMissaoServId(missao);
+      log.setPrestadorServId(prestador);
+      log.setReferencia("AJUDA_CUSTO");
+      log.setMoeda("CVE");
+      log.setNrDias(ajuda.getNumeroDiasAlojamento());
+      log.setFlgAlojamento(ajuda.getFlgAlojamento() != null && ajuda.getFlgAlojamento() ? "SIM" : "NAO");
+
+      return new LogisticaPersist(log, List.of(colab), null);
+    });
+  }
+
+  private <T> void syncLogisticaGenerico(
+      MissaoServicoEntity missao,
+      String referencia,
+      List<MissaoLogisticaEntity> existentes,
+      List<T> items,
+      java.util.function.Function<T, LogisticaPersist> mapper) {
+    var existentesRef = new ArrayList<MissaoLogisticaEntity>();
+    if (!CollectionUtils.isEmpty(existentes)) {
+      for (var e : existentes) {
+        if (e != null && referencia.equals(e.getReferencia()) && ESTADO_ATIVO.equals(e.getEstado())) {
+          existentesRef.add(e);
+        }
+      }
+    }
+
+    if (!existentesRef.isEmpty()) {
+      existentesRef.forEach(e -> e.setEstado(ESTADO_INATIVO));
+      missaoLogisticaRepository.saveAll(existentesRef);
+
+      var ids = existentesRef.stream().map(MissaoLogisticaEntity::getId).filter(java.util.Objects::nonNull).toList();
+      if (!ids.isEmpty()) {
+        var dets = missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(ids);
+        if (!CollectionUtils.isEmpty(dets)) {
+          dets.forEach(d -> d.setEstado(ESTADO_INATIVO));
+          missaoLogisticaDetRepository.saveAll(dets);
+        }
+      }
+
+      for (var e : existentesRef) {
+        if (e == null || e.getUuid() == null)
+          continue;
+        var docs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(
+            TableName.RH_T_MISSAO_LOGISTICA.name(),
+            e.getUuid());
+        if (!CollectionUtils.isEmpty(docs)) {
+          docs.forEach(d -> d.setEstado(Estado.I));
+          documentoRepository.saveAll(docs);
+        }
+      }
+    }
+
+    if (CollectionUtils.isEmpty(items)) {
+      return;
+    }
+
+    var novosLogs = new ArrayList<MissaoLogisticaEntity>();
+    var novos = new ArrayList<LogisticaPersist>();
+    for (var raw : items) {
+      var p = mapper.apply(raw);
+      if (p == null)
+        continue;
+      novos.add(p);
+      novosLogs.add(p.logistica);
+    }
+
+    if (novosLogs.isEmpty())
+      return;
+
+    novosLogs = new ArrayList<>(missaoLogisticaRepository.saveAll(novosLogs));
+
+    var detsToSave = new ArrayList<MissaoLogisticaDetEntity>();
+
+    for (int i = 0; i < novos.size(); i++) {
+      var p = novos.get(i);
+      var log = novosLogs.get(i);
+
+      for (var colab : p.colaboradores) {
+        var det = new MissaoLogisticaDetEntity();
+        det.setEstado(ESTADO_ATIVO);
+        det.setMissaoLogistId(log);
+        det.setMissaoColabId(colab);
+        detsToSave.add(det);
+      }
+
+      if (p.anexo != null) {
+        var existentesDocs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(
+            TableName.RH_T_MISSAO_LOGISTICA.name(),
+            log.getUuid());
+        var sync = documentoMapper.syncDocumentos(
+            existentesDocs != null ? existentesDocs : new ArrayList<>(),
+            List.of(p.anexo),
+            TableName.RH_T_MISSAO_LOGISTICA.name(),
+            log.getId(),
+            log.getUuid(),
+            1L,
+            null);
+
+        if (sync != null && !sync.isEmpty()) {
+          sync.forEach(d -> {
+            if (d.getUuid() == null)
+              d.setUuid(UuidCreator.getTimeOrderedEpoch());
+            if (d.getEstado() == null)
+              d.setEstado(Estado.A);
+          });
+          documentoRepository.saveAll(sync);
+        }
+      }
+    }
+
+    if (!detsToSave.isEmpty()) {
+      missaoLogisticaDetRepository.saveAll(detsToSave);
+    }
+  }
+
+  private MissaoPrestadorEntity derivePrestadorFromRequisicao(
+      UUID missaoUuid,
+      List<MissaoColaboradorEntity> colabs,
+      List<MissaoRequisicaoEntity> requisicoes) {
+    var prestadores = new HashSet<Long>();
+    Long lastPrestId = null;
+
+    for (var colab : colabs) {
+      if (colab == null || colab.getId() == null)
+        continue;
+
+      Long prestId = null;
+      if (!CollectionUtils.isEmpty(requisicoes)) {
+        for (var req : requisicoes) {
+          if (req == null)
+            continue;
+          if (!ESTADO_ATIVO.equals(req.getEstado()))
+            continue;
+          if (req.getMissaoPrestId() == null || req.getMissaoPrestId().getId() == null)
+            continue;
+          if (req.getMissaoColabId() == null || req.getMissaoColabId().getId() == null)
+            continue;
+          if (!colab.getId().equals(req.getMissaoColabId().getId()))
+            continue;
+          prestId = req.getMissaoPrestId().getId();
+          break;
+        }
+      }
+
+      if (prestId == null) {
+        throw IgrpResponseStatusException.badRequest("Requisição não encontrada para colaborador: " + colab.getUuid());
+      }
+      prestadores.add(prestId);
+      lastPrestId = prestId;
+    }
+
+    if (prestadores.size() != 1 || lastPrestId == null) {
+      throw IgrpResponseStatusException.badRequest("Prestador inconsistente para os colaboradores selecionados");
+    }
+
+    var prestOpt = missaoPrestadorRepository.findById(lastPrestId);
+    if (prestOpt.isEmpty()) {
+      throw IgrpResponseStatusException.badRequest("Prestador inválido: " + lastPrestId);
+    }
+    var prest = prestOpt.get();
+    if (prest.getMissaoServId() == null || prest.getMissaoServId().getUuid() == null
+        || !prest.getMissaoServId().getUuid().equals(missaoUuid)) {
+      throw IgrpResponseStatusException.badRequest("Prestador não pertence à missão: " + lastPrestId);
+    }
+    return prest;
+  }
+
+  private static final class LogisticaPersist {
+    private final MissaoLogisticaEntity logistica;
+    private final List<MissaoColaboradorEntity> colaboradores;
+    private final cv.inps.rh.shared.application.dto.AnexoReqDTO anexo;
+
+    private LogisticaPersist(
+        MissaoLogisticaEntity logistica,
+        List<MissaoColaboradorEntity> colaboradores,
+        cv.inps.rh.shared.application.dto.AnexoReqDTO anexo) {
+      this.logistica = logistica;
+      this.colaboradores = colaboradores;
+      this.anexo = anexo;
+    }
   }
 
   private void validarSubmissao(MissaoSubmissaoRequestDTO dto) {
