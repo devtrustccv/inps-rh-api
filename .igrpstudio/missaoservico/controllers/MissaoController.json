@@ -352,6 +352,34 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getMissaoServicoLogistica",
+      "path": "{uuid}/logistica",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "MissaoLogisticaResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "h8k8g5w99k-avancarAnaliseProcessoMissaoServico"
