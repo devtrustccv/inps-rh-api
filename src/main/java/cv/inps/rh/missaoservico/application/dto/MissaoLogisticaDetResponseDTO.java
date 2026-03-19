@@ -21,11 +21,10 @@ import java.util.UUID;
 @IgrpDTO
 public class MissaoLogisticaDetResponseDTO  {
 
-  private Long id;
-  private Long missaoColabId;
-  private UUID missaoColabUuid;
-  private UUID uuidColaborador;
-  private String nomeColaborador;         // FuncionarioEntity.nome
+  private Long id;                    // id de RH_T_MISSAO_LOGISTICA_DET — usado internamente
+  private UUID missaoColabUuid;       // uuid de RH_T_MISSAO_COLABORADOR — usado na sincronização dos items
+  private UUID funcionarioUuid;       // uuid de RH_T_FUNCIONARIOS — identificador do colaborador na API
+  private String nomeColaborador;     // FuncionarioEntity.nome
   private String estado;
 
 }
