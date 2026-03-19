@@ -77,45 +77,6 @@
       ]
     },
     {
-      "actionName": "avancarAnaliseProcessoMissaoServico",
-      "path": "{uuid}/analise/avancar",
-      "method": "PUT",
-      "requestBody": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "MissaoAnaliseRequest",
-              "collectionType": "none",
-              "name": "data",
-              "objectType": "dto",
-              "module": "missaoservico"
-            }
-          }
-        }
-      },
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string",
-                "name": "data",
-                "collectionType": "map"
-              }
-            }
-          }
-        }
-      },
-      "pathVariables": [
-        {
-          "name": "uuid",
-          "type": "string",
-          "isRequired": true
-        }
-      ]
-    },
-    {
       "actionName": "getListaMissaoServico",
       "method": "GET",
       "responses": {
@@ -326,14 +287,42 @@
       ]
     },
     {
-      "actionName": "avancarSubmissaoServico",
-      "path": "{uuid}/submissao/avancar",
+      "actionName": "getSubmissaoServicoEmissaoRequisicao",
+      "path": "{uui}/emissao-requisicao",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "MissaoEmissaoReqResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uui",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "saveSubmissaoServicoEmissaoRequisicao",
+      "path": "{uui}/emissao-requisicao",
       "method": "PUT",
       "requestBody": {
         "content": {
           "application/json": {
             "schema": {
-              "type": "MissaoSubmissaoRequest",
+              "type": "MissaoEmissaoRequisicaoRequest",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
@@ -358,7 +347,7 @@
       },
       "pathVariables": [
         {
-          "name": "uuid",
+          "name": "uui",
           "type": "string",
           "isRequired": true
         }

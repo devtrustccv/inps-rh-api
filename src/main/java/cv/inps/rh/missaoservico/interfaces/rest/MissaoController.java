@@ -28,6 +28,8 @@ import cv.inps.rh.missaoservico.application.dto.MissaoServicoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCancelarRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoEmissaoReqResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoEmissaoRequisicaoRequestDTO;
 
 @IgrpController
 @RestController
@@ -101,36 +103,6 @@ public class MissaoController {
   {
 
       final var command = new SaveAnaliseProcessoMissaoServicoCommand(saveAnaliseProcessoMissaoServicoRequest, uuid);
-
-      return commandBus.send(command);
-
-  }
-
-   @PutMapping(
-   value = "{uuid}/analise/avancar"
-  )
-  @Operation(
-    summary = "Avancar analise processo missao servico",
-    description = "Avancar analise processo missao servico",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-          
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
-          )
-      )
-    }
-  )
-  
-  public ResponseEntity<Map<String, ?>> avancarAnaliseProcessoMissaoServico(@Valid @RequestBody MissaoAnaliseRequestDTO avancarAnaliseProcessoMissaoServicoRequest
-    , @PathVariable(value = "uuid") String uuid)
-  {
-
-      final var command = new AvancarAnaliseProcessoMissaoServicoCommand(avancarAnaliseProcessoMissaoServicoRequest, uuid);
 
       return commandBus.send(command);
 
@@ -319,12 +291,42 @@ public class MissaoController {
 
   }
 
-   @PutMapping(
-   value = "{uuid}/submissao/avancar"
+   @GetMapping(
+   value = "{uui}/emissao-requisicao"
   )
   @Operation(
-    summary = "Avancar submissao servico",
-    description = "Avancar submissao servico",
+    summary = "Get submissao servico emissao requisicao",
+    description = "Get submissao servico emissao requisicao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = MissaoEmissaoReqResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<MissaoEmissaoReqResponseDTO> getSubmissaoServicoEmissaoRequisicao(
+    @PathVariable(value = "uui") String uui)
+  {
+
+      final var query = new GetSubmissaoServicoEmissaoRequisicaoQuery(uui);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "{uui}/emissao-requisicao"
+  )
+  @Operation(
+    summary = "Save submissao servico emissao requisicao",
+    description = "Save submissao servico emissao requisicao",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -339,11 +341,11 @@ public class MissaoController {
     }
   )
   
-  public ResponseEntity<Map<String, ?>> avancarSubmissaoServico(@Valid @RequestBody MissaoSubmissaoRequestDTO avancarSubmissaoServicoRequest
-    , @PathVariable(value = "uuid") String uuid)
+  public ResponseEntity<Map<String, ?>> saveSubmissaoServicoEmissaoRequisicao(@Valid @RequestBody MissaoEmissaoRequisicaoRequestDTO saveSubmissaoServicoEmissaoRequisicaoRequest
+    , @PathVariable(value = "uui") String uui)
   {
 
-      final var command = new AvancarSubmissaoServicoCommand(avancarSubmissaoServicoRequest, uuid);
+      final var command = new SaveSubmissaoServicoEmissaoRequisicaoCommand(saveSubmissaoServicoEmissaoRequisicaoRequest, uui);
 
       return commandBus.send(command);
 
