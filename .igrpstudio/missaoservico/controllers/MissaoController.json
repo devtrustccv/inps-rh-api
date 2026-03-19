@@ -514,6 +514,45 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "saveMissaoServicoAutorizacao",
+      "path": "{uuid}/autorizacao",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "MissaoAutorizacaoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "missaoservico"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "h8k8g5w99k-avancarAnaliseProcessoMissaoServico"
