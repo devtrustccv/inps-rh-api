@@ -289,4 +289,34 @@ public class MissaoController {
 
   }
 
+   @PutMapping(
+   value = "{uuid}/submissao"
+  )
+  @Operation(
+    summary = "Save submissao servico",
+    description = "Save submissao servico",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> saveSubmissaoServico(@Valid @RequestBody MissaoSubmissaoRequestDTO saveSubmissaoServicoRequest
+    , @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var command = new SaveSubmissaoServicoCommand(saveSubmissaoServicoRequest, uuid);
+
+      return commandBus.send(command);
+
+  }
+
 }
