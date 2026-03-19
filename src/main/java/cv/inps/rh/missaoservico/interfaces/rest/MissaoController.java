@@ -24,6 +24,7 @@ import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoRequestDTO;
 import java.util.Map;
 import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.WrapperListMissaoServicoDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoServicoResponseDTO;
 
 @IgrpController
 @RestController
@@ -160,6 +161,36 @@ public class MissaoController {
   {
 
       final var query = new GetListaMissaoServicoQuery(nrMissao, periodoDe, periodoAte, pageNumber, pageSize);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "{uuid}"
+  )
+  @Operation(
+    summary = "Get detalhe missao servico",
+    description = "Get detalhe missao servico",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = MissaoServicoResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<MissaoServicoResponseDTO> getDetalheMissaoServico(
+    @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var query = new GetDetalheMissaoServicoQuery(uuid);
 
       return queryBus.handle(query);
 
