@@ -37,6 +37,7 @@ import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoAutorizacaoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoAutorizacaoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoPagamentoResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoPagamentoRequestDTO;
 
 @IgrpController
 @RestController
@@ -565,6 +566,36 @@ public class MissaoController {
       final var query = new GetMissaoServicoPagamentoQuery(uuid);
 
       return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "{uuid}/pagamento"
+  )
+  @Operation(
+    summary = "Save missao servico pagamento",
+    description = "Save missao servico pagamento",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<Map<String, ?>> saveMissaoServicoPagamento(@Valid @RequestBody MissaoPagamentoRequestDTO saveMissaoServicoPagamentoRequest
+    , @PathVariable(value = "uuid") String uuid)
+  {
+
+      final var command = new SaveMissaoServicoPagamentoCommand(saveMissaoServicoPagamentoRequest, uuid);
+
+      return commandBus.send(command);
 
   }
 
