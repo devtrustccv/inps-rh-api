@@ -25,6 +25,7 @@ import java.util.Map;
 import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.WrapperListMissaoServicoDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoServicoResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoCancelarRequestDTO;
 
 @IgrpController
 @RestController
@@ -193,6 +194,36 @@ public class MissaoController {
       final var query = new GetDetalheMissaoServicoQuery(uuid);
 
       return queryBus.handle(query);
+
+  }
+
+   @PatchMapping(
+   value = "{id}/cancelar"
+  )
+  @Operation(
+    summary = "Cancelar missao servico",
+    description = "Cancelar missao servico",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<String> cancelarMissaoServico(@Valid @RequestBody MissaoCancelarRequestDTO cancelarMissaoServicoRequest
+    , @PathVariable(value = "id") String id)
+  {
+
+      final var command = new CancelarMissaoServicoCommand(cancelarMissaoServicoRequest, id);
+
+      return commandBus.send(command);
 
   }
 
