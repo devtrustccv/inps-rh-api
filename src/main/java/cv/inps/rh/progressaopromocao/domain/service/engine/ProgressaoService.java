@@ -18,7 +18,7 @@ public class ProgressaoService {
 
   private static final double MIN_MEDIA_AVALIACOES = 3.0;
 
-  // todo anexar ordem servico registar para cada colaborador, colocar ficheiro
+  // todo anexar ordem servico registar para cada colaborador, colocar ficheiro ao confirmar
   // todo param situacao laboral flag evolui na carreira, deve calcular o tempo em que esteve nessa situacao e subtrair no tempo geral
   // todo tabela situacao situacao laboral, tem id situacao, ligado ku vinculo, funcionario
 

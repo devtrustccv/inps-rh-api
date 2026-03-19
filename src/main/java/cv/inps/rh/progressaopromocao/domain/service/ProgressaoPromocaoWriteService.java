@@ -8,10 +8,8 @@ import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.EvolucaoCarreiraEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.OrdemServicoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ValEvolucaoCarreiraEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ValEvolucaoCarreiraEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.PdfGenerator;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -37,6 +35,7 @@ public class ProgressaoPromocaoWriteService {
 
   private final EvolucaoCarreiraEntityRepository evolucaoCarreiraEntityRepository;
   private final ValEvolucaoCarreiraEntityRepository valEvolucaoCarreiraEntityRepository;
+  private final SimEvolucaoCarreiraEntityRepository simEvolucaoCarreiraEntityRepository;
   private final OrdemServicoEntityRepository ordemServicoEntityRepository;
   private final DocumentoEntityRepository documentoEntityRepository;
   private final PdfGenerator pdfGenerator;
@@ -80,6 +79,27 @@ public class ProgressaoPromocaoWriteService {
 
     ev.setOrdemServicoId(osUuid);
     evolucaoCarreiraEntityRepository.save(ev);
+  }
+
+  public void validar(List<Long> ids) {
+
+    var rowsToBeValidated = simEvolucaoCarreiraEntityRepository.findAllById(ids);
+
+    for (var row : rowsToBeValidated) {
+      var obj = new ValEvolucaoCarreiraEntity();
+      obj.setCarreiraIdDe(row.getCarreiraIdDe());
+      obj.setEscalaoIdDe(row.getEscalaoIdDe());
+      obj.setEscalaoIdPara(row.getEscalaoIdPara());
+      obj.setDataReferente(row.getDataReferente());
+      obj.setTiprel(row.getTiprel());
+      obj.setObservacao(row.getObservacao());
+      obj.setTipo(row.getTipo());
+      obj.setEstado(Estado.A.name());
+      obj.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+      valEvolucaoCarreiraEntityRepository.save(obj);
+    }
+
+    simEvolucaoCarreiraEntityRepository.deleteAll(rowsToBeValidated);
   }
 
   public void sendToHistory(List<Long> ids) {
