@@ -2,6 +2,7 @@ package cv.inps.rh.missaoservico.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.missaoservico.application.services.MissaoServicoServiceWrite;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
@@ -14,8 +15,10 @@ public class SaveAnaliseProcessoMissaoServicoCommandHandler implements CommandHa
 
    private static final Logger LOGGER = LoggerFactory.getLogger(SaveAnaliseProcessoMissaoServicoCommandHandler.class);
 
-   public SaveAnaliseProcessoMissaoServicoCommandHandler() {
+   private final MissaoServicoServiceWrite missaoServicoServiceWrite;
 
+   public SaveAnaliseProcessoMissaoServicoCommandHandler(MissaoServicoServiceWrite missaoServicoServiceWrite) {
+      this.missaoServicoServiceWrite = missaoServicoServiceWrite;
    }
 
    @IgrpCommandHandler
@@ -23,8 +26,7 @@ public class SaveAnaliseProcessoMissaoServicoCommandHandler implements CommandHa
 
       LOGGER.debug("SaveAnaliseProcessoMissaoServicoCommand : {}", command);
 
-      // TODO: Implement the command handling logic here
-      return null;
+      return missaoServicoServiceWrite.salvarAnalise(command);
    }
 
 }
