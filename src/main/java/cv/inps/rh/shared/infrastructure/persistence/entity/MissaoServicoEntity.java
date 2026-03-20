@@ -82,6 +82,12 @@ public class MissaoServicoEntity extends AuditEntity {
     @Column(name = "motivo_cancelamento", length = 500)
     private String motivoCancelamento;
 
+    @Column(name = "referencia_pagamento", length = 200)
+    private String referenciaPagamento;
+
+    @Column(name = "data_pagamento")
+    private LocalDate dataPagamento;
+
     @NotNull(message = "uuid is mandatory")
     @Column(name = "uuid", nullable = false, length = 100)
     private UUID uuid;

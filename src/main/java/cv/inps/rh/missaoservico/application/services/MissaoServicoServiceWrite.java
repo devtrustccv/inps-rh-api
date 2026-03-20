@@ -7,6 +7,7 @@ import cv.inps.rh.missaoservico.application.commands.SaveAnaliseProcessoMissaoSe
 import cv.inps.rh.missaoservico.application.commands.SaveMissaoServicoAutorizacaoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveMissaoServicoCabimentoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveMissaoServicoLogisticaCommand;
+import cv.inps.rh.missaoservico.application.commands.SaveMissaoServicoPagamentoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveSubmissaoServicoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveSubmissaoServicoEmissaoRequisicaoCommand;
 import cv.inps.rh.missaoservico.application.commands.SubmeterMissaoServicoCommand;
@@ -22,6 +23,7 @@ import cv.inps.rh.missaoservico.application.dto.MissaoCancelarRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoColaboradorRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoPagamentoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoPrestadorDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoRequisicaoItemRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoRequestDTO;
@@ -514,6 +516,28 @@ public class MissaoServicoServiceWrite {
   }
 
   @Transactional
+  public ResponseEntity<Map<String, ?>> salvarPagamento(SaveMissaoServicoPagamentoCommand command) {
+    var missaoUuid = parseUuid(command != null ? command.getUuid() : null, "uuid");
+    var dto = command != null ? command.getMissaopagamentorequest() : null;
+    if (dto == null) {
+      throw IgrpResponseStatusException.badRequest("Payload inválido");
+    }
+
+    validarPagamento(dto);
+
+    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    missao.setReferenciaPagamento(dto.getReferenciaPagamento());
+    missao.setDataPagamento(dto.getDataPagamento());
+    missao.setEtapa(ETAPA_7);
+    missaoServicoRepository.save(missao);
+
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("id", missao.getUuid() != null ? missao.getUuid().toString() : null);
+    return ResponseEntity.ok(resp);
+  }
+
+  @Transactional
   public ResponseEntity<String> cancelar(CancelarMissaoServicoCommand command) {
     var missaoUuid = parseUuid(command != null ? command.getId() : null, "id");
     var dto = command != null ? command.getMissaocancelarrequest() : null;
@@ -643,6 +667,18 @@ public class MissaoServicoServiceWrite {
 
     if (!anySelected) {
       throw IgrpResponseStatusException.badRequest("Selecione pelo menos um item");
+    }
+  }
+
+  private void validarPagamento(MissaoPagamentoRequestDTO dto) {
+    if (dto == null) {
+      throw IgrpResponseStatusException.badRequest("Payload inválido");
+    }
+    if (!StringUtils.hasText(dto.getReferenciaPagamento())) {
+      throw IgrpResponseStatusException.badRequest("referenciaPagamento é obrigatório");
+    }
+    if (dto.getDataPagamento() == null) {
+      throw IgrpResponseStatusException.badRequest("dataPagamento é obrigatório");
     }
   }
 
