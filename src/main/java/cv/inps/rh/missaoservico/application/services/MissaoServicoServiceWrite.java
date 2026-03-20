@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.commands.CancelarMissaoServicoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveAnaliseProcessoMissaoServicoCommand;
+import cv.inps.rh.missaoservico.application.commands.SaveMissaoServicoCabimentoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveMissaoServicoLogisticaCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveSubmissaoServicoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveSubmissaoServicoEmissaoRequisicaoCommand;
@@ -12,6 +13,8 @@ import cv.inps.rh.missaoservico.application.dto.AjudaCustoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.AlojamentoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.BilhetePassagemRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoItemRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCancelarRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoColaboradorRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaRequestDTO;
@@ -68,6 +71,9 @@ public class MissaoServicoServiceWrite {
   private static final String ETAPA_2 = "ETAPA_2_ANALISE_RH";
   private static final String ETAPA_3 = "ETAPA_3_EMISSAO_REQUISICAO";
   private static final String ETAPA_4 = "ETAPA_4_PROCESSAMENTO_LOGISTICO";
+  private static final String ETAPA_5 = "ETAPA_5_CABIMENTACAO_SGAL";
+  private static final String ETAPA_6 = "ETAPA_6_AUTORIZACAO_RH";
+  private static final String ETAPA_7 = "ETAPA_7_PAGAMENTO_FINANCEIRO";
 
   private final MissaoServicoEntityRepository missaoServicoRepository;
   private final MissaoColaboradorEntityRepository missaoColaboradorRepository;
@@ -367,6 +373,88 @@ public class MissaoServicoServiceWrite {
   }
 
   @Transactional
+  public ResponseEntity<Map<String, ?>> salvarCabimento(SaveMissaoServicoCabimentoCommand command) {
+    var missaoUuid = parseUuid(command != null ? command.getUuid() : null, "uuid");
+    var dto = command != null ? command.getMissaocabimentorequest() : null;
+    if (dto == null) {
+      throw IgrpResponseStatusException.badRequest("Payload inválido");
+    }
+
+    validarCabimento(dto);
+
+    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    var toSave = new ArrayList<MissaoLogisticaEntity>();
+
+    for (var item : dto.getItens()) {
+      if (item == null)
+        continue;
+      if (item.getSelecionado() == null || !item.getSelecionado())
+        continue;
+      if (item.getLogisticaId() == null)
+        continue;
+
+      if (item.getCabId() == null) {
+        throw IgrpResponseStatusException.badRequest("cabId é obrigatório");
+      }
+
+      var log = missaoLogisticaRepository.findById(item.getLogisticaId())
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest("logisticaId inválido: " + item.getLogisticaId()));
+
+      if (log.getMissaoServId() == null || log.getMissaoServId().getUuid() == null
+          || !log.getMissaoServId().getUuid().equals(missaoUuid)) {
+        throw IgrpResponseStatusException.badRequest("logisticaId não pertence à missão: " + item.getLogisticaId());
+      }
+
+      log.setCabId(item.getCabId());
+      log.setEstadoCabimento("CABIMENTADO");
+      if (!ESTADO_ATIVO.equals(log.getEstado())) {
+        log.setEstado(ESTADO_ATIVO);
+      }
+      toSave.add(log);
+
+      if (item.getAnexo() != null && log.getUuid() != null) {
+        var existentesDocs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(
+            TableName.RH_T_MISSAO_LOGISTICA.name(),
+            log.getUuid());
+
+        var sync = documentoMapper.syncDocumentos(
+            existentesDocs != null ? existentesDocs : new ArrayList<>(),
+            List.of(item.getAnexo()),
+            TableName.RH_T_MISSAO_LOGISTICA.name(),
+            log.getId(),
+            log.getUuid(),
+            1L,
+            null);
+
+        if (sync != null && !sync.isEmpty()) {
+          sync.forEach(d -> {
+            if (d.getUuid() == null)
+              d.setUuid(UuidCreator.getTimeOrderedEpoch());
+            if (d.getEstado() == null)
+              d.setEstado(Estado.A);
+          });
+          documentoRepository.saveAll(sync);
+        }
+      }
+    }
+
+    if (!toSave.isEmpty()) {
+      missaoLogisticaRepository.saveAll(toSave);
+    }
+
+    missao.setEtapa(ETAPA_5);
+    if (dto.getProcessoEtapaAction() != null && "NEXT".equals(dto.getProcessoEtapaAction().getCode())) {
+      missao.setEtapa(ETAPA_6);
+    }
+    missaoServicoRepository.save(missao);
+
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("id", missao.getUuid() != null ? missao.getUuid().toString() : null);
+    return ResponseEntity.ok(resp);
+  }
+
+  @Transactional
   public ResponseEntity<String> cancelar(CancelarMissaoServicoCommand command) {
     var missaoUuid = parseUuid(command != null ? command.getId() : null, "id");
     var dto = command != null ? command.getMissaocancelarrequest() : null;
@@ -449,6 +537,32 @@ public class MissaoServicoServiceWrite {
 
   private String key(Long prestId, Long colabId) {
     return prestId + ":" + colabId;
+  }
+
+  private void validarCabimento(MissaoCabimentoRequestDTO dto) {
+    if (dto == null || CollectionUtils.isEmpty(dto.getItens())) {
+      throw IgrpResponseStatusException.badRequest("itens é obrigatório");
+    }
+
+    boolean anySelected = false;
+    for (var item : dto.getItens()) {
+      if (item == null)
+        continue;
+      if (item.getSelecionado() == null || !item.getSelecionado())
+        continue;
+      anySelected = true;
+
+      if (item.getLogisticaId() == null) {
+        throw IgrpResponseStatusException.badRequest("logisticaId é obrigatório");
+      }
+      if (item.getCabId() == null) {
+        throw IgrpResponseStatusException.badRequest("cabId é obrigatório");
+      }
+    }
+
+    if (!anySelected) {
+      throw IgrpResponseStatusException.badRequest("Selecione pelo menos um item");
+    }
   }
 
   private void syncLogisticaBilhete(
