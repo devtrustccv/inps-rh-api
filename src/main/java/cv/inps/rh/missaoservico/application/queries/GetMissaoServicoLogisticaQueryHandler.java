@@ -4,29 +4,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaResponseDTO;
+import cv.inps.rh.missaoservico.application.services.MissaoServicoServiceRead;
 
 @Component
-public class GetMissaoServicoLogisticaQueryHandler implements QueryHandler<GetMissaoServicoLogisticaQuery, ResponseEntity<MissaoLogisticaResponseDTO>>{
+public class GetMissaoServicoLogisticaQueryHandler
+    implements QueryHandler<GetMissaoServicoLogisticaQuery, ResponseEntity<MissaoLogisticaResponseDTO>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetMissaoServicoLogisticaQueryHandler.class);
 
+  private final MissaoServicoServiceRead missaoServicoServiceRead;
 
-  public GetMissaoServicoLogisticaQueryHandler() {
+  public GetMissaoServicoLogisticaQueryHandler(MissaoServicoServiceRead missaoServicoServiceRead) {
+    this.missaoServicoServiceRead = missaoServicoServiceRead;
 
   }
 
-   @IgrpQueryHandler
+  @IgrpQueryHandler
   public ResponseEntity<MissaoLogisticaResponseDTO> handle(GetMissaoServicoLogisticaQuery query) {
 
     LOGGER.debug("GetMissaoServicoLogisticaQuery: {}", query);
-
-    // TODO: Implement the query handling logic here
-    return null;
+    return missaoServicoServiceRead.getLogistica(query);
   }
-
 }
