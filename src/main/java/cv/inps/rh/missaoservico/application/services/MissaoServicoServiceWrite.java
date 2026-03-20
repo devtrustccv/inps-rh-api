@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.commands.CancelarMissaoServicoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveAnaliseProcessoMissaoServicoCommand;
+import cv.inps.rh.missaoservico.application.commands.SaveMissaoServicoAutorizacaoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveMissaoServicoCabimentoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveMissaoServicoLogisticaCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveSubmissaoServicoCommand;
@@ -13,6 +14,8 @@ import cv.inps.rh.missaoservico.application.dto.AjudaCustoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.AlojamentoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.BilhetePassagemRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoAutorizacaoItemRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoAutorizacaoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoItemRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCancelarRequestDTO;
@@ -455,6 +458,62 @@ public class MissaoServicoServiceWrite {
   }
 
   @Transactional
+  public ResponseEntity<Map<String, ?>> salvarAutorizacao(SaveMissaoServicoAutorizacaoCommand command) {
+    var missaoUuid = parseUuid(command != null ? command.getUuid() : null, "uuid");
+    var dto = command != null ? command.getMissaoautorizacaorequest() : null;
+    if (dto == null) {
+      throw IgrpResponseStatusException.badRequest("Payload inválido");
+    }
+
+    validarAutorizacao(dto);
+
+    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    var toSave = new ArrayList<MissaoLogisticaEntity>();
+
+    for (var item : dto.getItens()) {
+      if (item == null)
+        continue;
+      if (item.getAutorizado() == null || !item.getAutorizado())
+        continue;
+      if (item.getLogisticaId() == null)
+        continue;
+
+      var log = missaoLogisticaRepository.findById(item.getLogisticaId())
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest("logisticaId inválido: " + item.getLogisticaId()));
+
+      if (log.getMissaoServId() == null || log.getMissaoServId().getUuid() == null
+          || !log.getMissaoServId().getUuid().equals(missaoUuid)) {
+        throw IgrpResponseStatusException.badRequest("logisticaId não pertence à missão: " + item.getLogisticaId());
+      }
+
+      if (log.getCabId() == null) {
+        throw IgrpResponseStatusException.badRequest("Item sem cabimento: " + item.getLogisticaId());
+      }
+
+      log.setEstadoCabimento("AUTORIZADO");
+      if (!ESTADO_ATIVO.equals(log.getEstado())) {
+        log.setEstado(ESTADO_ATIVO);
+      }
+      toSave.add(log);
+    }
+
+    if (!toSave.isEmpty()) {
+      missaoLogisticaRepository.saveAll(toSave);
+    }
+
+    missao.setEtapa(ETAPA_6);
+    if (dto.getProcessoEtapaAction() != null && "NEXT".equals(dto.getProcessoEtapaAction().getCode())) {
+      missao.setEtapa(ETAPA_7);
+    }
+    missaoServicoRepository.save(missao);
+
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("id", missao.getUuid() != null ? missao.getUuid().toString() : null);
+    return ResponseEntity.ok(resp);
+  }
+
+  @Transactional
   public ResponseEntity<String> cancelar(CancelarMissaoServicoCommand command) {
     var missaoUuid = parseUuid(command != null ? command.getId() : null, "id");
     var dto = command != null ? command.getMissaocancelarrequest() : null;
@@ -557,6 +616,28 @@ public class MissaoServicoServiceWrite {
       }
       if (item.getCabId() == null) {
         throw IgrpResponseStatusException.badRequest("cabId é obrigatório");
+      }
+    }
+
+    if (!anySelected) {
+      throw IgrpResponseStatusException.badRequest("Selecione pelo menos um item");
+    }
+  }
+
+  private void validarAutorizacao(MissaoAutorizacaoRequestDTO dto) {
+    if (dto == null || CollectionUtils.isEmpty(dto.getItens())) {
+      throw IgrpResponseStatusException.badRequest("itens é obrigatório");
+    }
+
+    boolean anySelected = false;
+    for (var item : dto.getItens()) {
+      if (item == null)
+        continue;
+      if (item.getAutorizado() == null || !item.getAutorizado())
+        continue;
+      anySelected = true;
+      if (item.getLogisticaId() == null) {
+        throw IgrpResponseStatusException.badRequest("logisticaId é obrigatório");
       }
     }
 
