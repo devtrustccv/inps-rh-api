@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 
@@ -19,7 +20,7 @@ import java.util.UUID;
 
 
 @IgrpDTO
-public class AjudaCustoRequestDTO  {
+public class AjudaCustoRequestDTO {
 
   private UUID colaboradorId;             // MissaoColaboradorEntity.id — obrigatório
   private Boolean flgAlojamento;          // checkbox "Inclui alojamento?" — obrigatório
@@ -29,5 +30,7 @@ public class AjudaCustoRequestDTO  {
   //   2/3  se empresa paga alojamento sem alimentação
   //   1/3  se empresa paga alojamento com alimentação
   // valorTotal = valorDiario × numeroDiasAlojamento → calculado no service
+  private BigDecimal valorDiario;         // calculado pelo service
+  private BigDecimal valorTotal;
 
 }
