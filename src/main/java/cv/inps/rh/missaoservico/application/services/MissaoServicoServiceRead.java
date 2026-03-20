@@ -9,22 +9,27 @@ import cv.inps.rh.missaoservico.application.dto.MissaoAutorizacaoItemResponseDTO
 import cv.inps.rh.missaoservico.application.dto.MissaoAutorizacaoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoItemResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoColaboradorResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaDetResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoPagamentoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoPrestadorResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.SeguroViagemResponseDTO;
 import cv.inps.rh.missaoservico.application.queries.GetAnaliseProcessoMissaoServicoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoCabimentoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoAutorizacaoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoLogisticaQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoPagamentoQuery;
+import cv.inps.rh.missaoservico.application.queries.GetSubmissaoServicoProcessQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
+import cv.inps.rh.shared.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoColaboradorEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoPrestadorEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoLogisticaDetEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoLogisticaEntityRepository;
@@ -42,6 +47,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @Service
@@ -56,6 +62,7 @@ public class MissaoServicoServiceRead {
   private final DocumentoMapper documentoMapper;
   private final MissaoPrestadorEntityRepository missaoPrestadorRepository;
   private final NotificacaoEntityRepository notificacaoRepository;
+  private final MissaoColaboradorEntityRepository missaoColaboradorRepository;
 
   @Transactional(readOnly = true)
   public ResponseEntity<MissaoCabimentoResponseDTO> getCabimento(GetMissaoServicoCabimentoQuery query) {
@@ -351,6 +358,69 @@ public class MissaoServicoServiceRead {
     return ResponseEntity.ok(response);
   }
 
+  @Transactional(readOnly = true)
+  public ResponseEntity<MissaoSubmissaoResponseDTO> getSubmissao(GetSubmissaoServicoProcessQuery query) {
+    var missaoUuid = IdentificadorUnico.from(query.getUuid()).valor();
+    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    var colaboradores = missaoColaboradorRepository.findAllByMissaoServId_Uuid(missaoUuid)
+        .stream()
+        .filter(c -> c != null && ESTADO_ATIVO.equals(c.getEstado()))
+        .map(c -> {
+          var dto = new MissaoColaboradorResponseDTO();
+          dto.setId(c.getId());
+          dto.setUuid(c.getUuid());
+          dto.setEstado(c.getEstado());
+          dto.setNumDocumento(c.getNumDocumento() != null ? String.valueOf(c.getNumDocumento()) : null);
+          dto.setFunId(c.getFunId() != null ? c.getFunId().getId() : null);
+          dto.setFunUuid(c.getFunId() != null ? c.getFunId().getUuid() : null);
+          dto.setNomeColaborador(c.getFunId() != null ? c.getFunId().getNome() : null);
+          return dto;
+        })
+        .toList();
+
+    var docs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_MISSAO_SERVICO.name(),
+        missaoUuid);
+    var documentos = docs == null
+        ? List.<AnexoRespDTO>of()
+        : docs.stream()
+            .filter(d -> d != null && d.getEstado() != Estado.E)
+            .sorted(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
+                Comparator.nullsLast(Comparator.naturalOrder())))
+            .map(documentoMapper::toRespDto)
+            .filter(Objects::nonNull)
+            .toList();
+
+    var response = new MissaoSubmissaoResponseDTO();
+    response.setId(missao.getId());
+    response.setUuid(missao.getUuid());
+    response.setNrMissao(missao.getNrMissao());
+    response.setEtapaAtual(missao.getEtapa());
+    response.setPaisDestinoId(missao.getPaisDestinoId() != null ? missao.getPaisDestinoId().getId() : null);
+    response.setPaisDestinoNome(missao.getPaisDestinoId() != null ? missao.getPaisDestinoId().getNome() : null);
+    response.setFlgDestino(missao.getFlgDestino());
+    response.setDescricaoDestino(missao.getDescricaoDestino());
+    response.setAmbitoMissao(resolveAmbitoMissao(missao.getFlgDestino()));
+    response.setDataInicio(missao.getDataInicio());
+    response.setDataFim(missao.getDataFim());
+    response.setNrDias(missao.getNrDias());
+    response.setAutorizadoPor(missao.getAutorizadoPor());
+    response.setDataAutorizacao(missao.getDataAutorizacao());
+    response.setEtapa(missao.getEtapa());
+    response.setEstado(missao.getEstado());
+    response.setColaboradores(colaboradores);
+    response.setDocumentos(documentos);
+
+    response.setDataRegisto(toLocalDate(missao.getCreatedDate()));
+    response.setUserRegistoId(missao.getCreatedById());
+    response.setUserRegistoName(missao.getCreatedBy());
+    response.setUserAlteracaoId(missao.getLastModifiedById());
+    response.setUserAlteracaoName(missao.getLastModifiedBy());
+    response.setDataAlteracao(toLocalDate(missao.getLastModifiedDate()));
+
+    return ResponseEntity.ok(response);
+  }
+
   private String resolveNome(
       MissaoLogisticaEntity logistica,
       List<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaDetEntity> dets) {
@@ -409,5 +479,19 @@ public class MissaoServicoServiceRead {
         ? d.getMissaoColabId().getFunId().getNome()
         : null);
     return dto;
+  }
+
+  private String resolveAmbitoMissao(Integer flgDestino) {
+    if (flgDestino == null)
+      return null;
+    if (Integer.valueOf(1).equals(flgDestino))
+      return "NACIONAL";
+    if (Integer.valueOf(2).equals(flgDestino))
+      return "INTERNACIONAL";
+    return null;
+  }
+
+  private java.time.LocalDate toLocalDate(LocalDateTime dt) {
+    return dt != null ? dt.toLocalDate() : null;
   }
 }
