@@ -1,9 +1,12 @@
 package cv.inps.rh.missaoservico.application.services;
 
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
+import cv.inps.rh.missaoservico.application.dto.MissaoAutorizacaoItemResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoAutorizacaoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoItemResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoResponseDTO;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoCabimentoQuery;
+import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoAutorizacaoQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
@@ -98,6 +101,54 @@ public class MissaoServicoServiceRead {
     response.setEtapaAtual(missao.getEtapa());
     response.setItens(itens);
 
+    return ResponseEntity.ok(response);
+  }
+
+  @Transactional(readOnly = true)
+  public ResponseEntity<MissaoAutorizacaoResponseDTO> getAutorizacao(GetMissaoServicoAutorizacaoQuery query) {
+    var missaoUuid = IdentificadorUnico.from(query.getUuid()).valor();
+    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    var logistica = missaoLogisticaRepository.findAllByMissaoServId_Uuid(missaoUuid)
+        .stream()
+        .filter(e -> e != null && ESTADO_ATIVO.equals(e.getEstado()))
+        .toList();
+
+    var detByLogId = new HashMap<Long, List<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaDetEntity>>();
+    var ids = logistica.stream()
+        .map(MissaoLogisticaEntity::getId)
+        .filter(java.util.Objects::nonNull)
+        .toList();
+    if (!ids.isEmpty()) {
+      var dets = missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(ids);
+      if (!CollectionUtils.isEmpty(dets)) {
+        for (var d : dets) {
+          if (d == null || d.getMissaoLogistId() == null || d.getMissaoLogistId().getId() == null)
+            continue;
+          detByLogId.computeIfAbsent(d.getMissaoLogistId().getId(), _ -> new ArrayList<>()).add(d);
+        }
+      }
+    }
+
+    var itens = new ArrayList<MissaoAutorizacaoItemResponseDTO>();
+    for (var l : logistica) {
+      if (l == null)
+        continue;
+
+      var item = new MissaoAutorizacaoItemResponseDTO();
+      item.setLogisticaId(l.getId());
+      item.setReferencia(l.getReferencia());
+      item.setNome(resolveNome(l, detByLogId.get(l.getId())));
+      item.setValorTotal(l.getValorTotal());
+      item.setNumeroCabimento(l.getCabId());
+      item.setEstadoCabimento(l.getEstadoCabimento());
+      itens.add(item);
+    }
+
+    var response = new MissaoAutorizacaoResponseDTO();
+    response.setMissaoId(missao.getId());
+    response.setEtapaAtual(missao.getEtapa());
+    response.setItens(itens);
     return ResponseEntity.ok(response);
   }
 
