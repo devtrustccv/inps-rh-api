@@ -4,14 +4,18 @@ import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.dto.AjudaCustoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.AlojamentoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.BilhetePassagemResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoAutorizacaoItemResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoAutorizacaoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoItemResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaDetResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoPagamentoResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoPrestadorResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.SeguroViagemResponseDTO;
+import cv.inps.rh.missaoservico.application.queries.GetAnaliseProcessoMissaoServicoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoCabimentoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoAutorizacaoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoLogisticaQuery;
@@ -21,9 +25,11 @@ import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoPrestadorEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoLogisticaDetEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoLogisticaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoServicoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.NotificacaoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -48,6 +54,8 @@ public class MissaoServicoServiceRead {
   private final MissaoLogisticaDetEntityRepository missaoLogisticaDetRepository;
   private final DocumentoEntityRepository documentoRepository;
   private final DocumentoMapper documentoMapper;
+  private final MissaoPrestadorEntityRepository missaoPrestadorRepository;
+  private final NotificacaoEntityRepository notificacaoRepository;
 
   @Transactional(readOnly = true)
   public ResponseEntity<MissaoCabimentoResponseDTO> getCabimento(GetMissaoServicoCabimentoQuery query) {
@@ -295,6 +303,51 @@ public class MissaoServicoServiceRead {
     response.setEstado(missao.getEstado());
     response.setReferenciaPagamento(missao.getReferenciaPagamento());
     response.setDataPagamento(missao.getDataPagamento());
+    return ResponseEntity.ok(response);
+  }
+
+  @Transactional(readOnly = true)
+  public ResponseEntity<MissaoAnaliseResponseDTO> getAnalise(GetAnaliseProcessoMissaoServicoQuery query) {
+    var missaoUuid = IdentificadorUnico.from(query.getUuid()).valor();
+    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    var prestadores = missaoPrestadorRepository.findAllByMissaoServId_Uuid(missaoUuid)
+        .stream()
+        .filter(p -> p != null && ESTADO_ATIVO.equals(p.getEstado()))
+        .map(p -> {
+          var dto = new MissaoPrestadorResponseDTO();
+          dto.setId(p.getId());
+          dto.setUuid(p.getUuid());
+          dto.setEntId(p.getEntId());
+          dto.setNome(p.getNome());
+          dto.setEmail(p.getEmail());
+          dto.setEstado(p.getEstado());
+          return dto;
+        })
+        .toList();
+
+    MissaoNotificacaoResponseDTO notificacao = null;
+    var notificacoes = notificacaoRepository.findAllByReferenciaNameAndReferenciaUuid(
+        TableName.RH_T_MISSAO_SERVICO.name(),
+        missaoUuid);
+    if (!CollectionUtils.isEmpty(notificacoes)) {
+      var latest = notificacoes.stream()
+          .filter(n -> n != null && (StringUtils.hasText(n.getAssunto()) || StringUtils.hasText(n.getMessage())))
+          .max(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity::getId,
+              Comparator.nullsLast(Comparator.naturalOrder())))
+          .orElse(null);
+      if (latest != null) {
+        notificacao = new MissaoNotificacaoResponseDTO();
+        notificacao.setAssunto(latest.getAssunto());
+        notificacao.setCorpoEmail(latest.getMessage());
+      }
+    }
+
+    var response = new MissaoAnaliseResponseDTO();
+    response.setMissaoId(missao.getId());
+    response.setEtapaAtual(missao.getEtapa());
+    response.setPrestadores(prestadores);
+    response.setNotificacao(notificacao);
     return ResponseEntity.ok(response);
   }
 
