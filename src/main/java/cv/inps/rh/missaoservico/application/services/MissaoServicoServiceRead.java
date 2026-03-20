@@ -10,10 +10,12 @@ import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoItemResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaDetResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoPagamentoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.SeguroViagemResponseDTO;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoCabimentoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoAutorizacaoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoLogisticaQuery;
+import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoPagamentoQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
@@ -279,6 +281,20 @@ public class MissaoServicoServiceRead {
     response.setSegurosViagem(seguros);
     response.setAlojamentos(alojamentos);
     response.setAjudasCusto(ajudas);
+    return ResponseEntity.ok(response);
+  }
+
+  @Transactional(readOnly = true)
+  public ResponseEntity<MissaoPagamentoResponseDTO> getPagamento(GetMissaoServicoPagamentoQuery query) {
+    var missaoUuid = IdentificadorUnico.from(query.getUuid()).valor();
+    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    var response = new MissaoPagamentoResponseDTO();
+    response.setMissaoId(missao.getId());
+    response.setEtapaAtual(missao.getEtapa());
+    response.setEstado(missao.getEstado());
+    response.setReferenciaPagamento(missao.getReferenciaPagamento());
+    response.setDataPagamento(missao.getDataPagamento());
     return ResponseEntity.ok(response);
   }
 
