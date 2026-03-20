@@ -15,16 +15,19 @@ import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoPagamentoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoPrestadorResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoServicoResumoDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoServicoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.SeguroViagemResponseDTO;
 import cv.inps.rh.missaoservico.application.queries.GetAnaliseProcessoMissaoServicoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetDetalheMissaoServicoQuery;
+import cv.inps.rh.missaoservico.application.queries.GetListaMissaoServicoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoCabimentoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoAutorizacaoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoLogisticaQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoPagamentoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetSubmissaoServicoProcessQuery;
+import cv.inps.rh.missaoservico.application.dto.WrapperListMissaoServicoDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoRespDTO;
@@ -41,13 +44,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.time.LocalDateTime;
 
@@ -456,6 +465,100 @@ public class MissaoServicoServiceRead {
     return ResponseEntity.ok(response);
   }
 
+  @Transactional(readOnly = true)
+  public ResponseEntity<WrapperListMissaoServicoDTO> getLista(GetListaMissaoServicoQuery query) {
+    var nrMissao = parseLongSafe(query != null ? query.getNrMissao() : null);
+    var periodoDe = parseDateSafe(query != null ? query.getPeriodoDe() : null);
+    var periodoAte = parseDateSafe(query != null ? query.getPeriodoAte() : null);
+    int pageNumber = parseIntSafe(query != null ? query.getPageNumber() : null, 0);
+    int pageSize = parseIntSafe(query != null ? query.getPageSize() : null, 10);
+
+    var pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "nrMissao"));
+
+    Specification<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoServicoEntity> spec = (root, q, cb) -> {
+      var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
+      if (nrMissao != null) {
+        predicates.add(cb.equal(root.get("nrMissao"), nrMissao));
+      }
+      if (periodoDe != null) {
+        predicates.add(cb.greaterThanOrEqualTo(root.get("dataInicio"), periodoDe));
+      }
+      if (periodoAte != null) {
+        predicates.add(cb.lessThanOrEqualTo(root.get("dataInicio"), periodoAte));
+      }
+      return cb.and(predicates.toArray(jakarta.persistence.criteria.Predicate[]::new));
+    };
+
+    var page = missaoServicoRepository.findAll(spec, pageable);
+    var missoes = page.getContent() != null ? page.getContent()
+        : List.<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoServicoEntity>of();
+
+    var missaoById = new HashMap<Long, cv.inps.rh.shared.infrastructure.persistence.entity.MissaoServicoEntity>();
+    var missaoIds = new ArrayList<Long>();
+    for (var m : missoes) {
+      if (m == null || m.getId() == null)
+        continue;
+      missaoById.put(m.getId(), m);
+      missaoIds.add(m.getId());
+    }
+
+    var totalsByMissao = new HashMap<Long, Map<String, BigDecimal>>();
+    if (!missaoIds.isEmpty()) {
+      Specification<MissaoLogisticaEntity> logSpec = (root, q, cb) -> cb.and(
+          root.get("missaoServId").get("id").in(missaoIds),
+          cb.equal(root.get("estado"), ESTADO_ATIVO));
+      var logs = missaoLogisticaRepository.findAll(logSpec);
+      if (!CollectionUtils.isEmpty(logs)) {
+        for (var l : logs) {
+          if (l == null || l.getMissaoServId() == null || l.getMissaoServId().getId() == null)
+            continue;
+          var mid = l.getMissaoServId().getId();
+          var ref = l.getReferencia();
+          if (!StringUtils.hasText(ref))
+            continue;
+          var v = l.getValorTotal();
+          if (v == null)
+            continue;
+          totalsByMissao
+              .computeIfAbsent(mid, _ -> new HashMap<>())
+              .merge(ref.toUpperCase(), v, BigDecimal::add);
+        }
+      }
+    }
+
+    var content = new ArrayList<MissaoServicoResumoDTO>();
+    for (var m : missoes) {
+      if (m == null)
+        continue;
+      var sums = totalsByMissao.getOrDefault(m.getId(), java.util.Map.of());
+      var dto = new MissaoServicoResumoDTO();
+      dto.setId(m.getId());
+      dto.setUuid(m.getUuid());
+      dto.setNrMissao(m.getNrMissao());
+      dto.setDestino(m.getDescricaoDestino());
+      dto.setNacionalInternacional(resolveNacionalInternacional(m.getFlgDestino()));
+      dto.setDataMissao(m.getDataInicio());
+      dto.setEtapa(m.getEtapa());
+      dto.setEstado(resolveEstadoLista(m));
+      dto.setValorAC(sums.get("AJUDA_CUSTO"));
+      dto.setValorBP(sums.get("BILHETE_PASSAGEM"));
+      dto.setValorAlojamento(sums.get("ALOJAMENTO"));
+      dto.setValorSeguro(sums.get("SEGURO_VIAGEM"));
+      content.add(dto);
+    }
+
+    var wrapper = new WrapperListMissaoServicoDTO();
+    wrapper.setContent(content);
+    wrapper.setPageNumber(page.getNumber());
+    wrapper.setPageSize(page.getSize());
+    wrapper.setTotalElements(page.getTotalElements());
+    wrapper.setTotalPages(page.getTotalPages());
+    wrapper.setFirst(page.isFirst());
+    wrapper.setLast(page.isLast());
+
+    return ResponseEntity.ok(wrapper);
+  }
+
   private String resolveNome(
       MissaoLogisticaEntity logistica,
       List<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaDetEntity> dets) {
@@ -524,6 +627,62 @@ public class MissaoServicoServiceRead {
     if (Integer.valueOf(2).equals(flgDestino))
       return "INTERNACIONAL";
     return null;
+  }
+
+  private String resolveNacionalInternacional(Integer flgDestino) {
+    if (flgDestino == null)
+      return null;
+    if (Integer.valueOf(1).equals(flgDestino))
+      return "Nacional";
+    if (Integer.valueOf(2).equals(flgDestino))
+      return "Internacional";
+    return null;
+  }
+
+  private String resolveEstadoLista(cv.inps.rh.shared.infrastructure.persistence.entity.MissaoServicoEntity missao) {
+    if (missao == null || !StringUtils.hasText(missao.getEtapa()))
+      return null;
+    var etapa = missao.getEtapa();
+    if ("ETAPA_7_PAGAMENTO_FINANCEIRO".equals(etapa)) {
+      return (missao.getReferenciaPagamento() != null || missao.getDataPagamento() != null) ? "PAGO" : "POR_PAGAR";
+    }
+    if ("ETAPA_6_AUTORIZACAO_RH".equals(etapa) || "ETAPA_5_CABIMENTACAO_SGAL".equals(etapa)) {
+      return "POR_PAGAR";
+    }
+    if ("ETAPA_4_PROCESSAMENTO_LOGISTICO".equals(etapa)) {
+      return "PENDENTE_FATURA";
+    }
+    return "PENDENTE_REQUISICAO";
+  }
+
+  private Long parseLongSafe(String raw) {
+    if (!StringUtils.hasText(raw))
+      return null;
+    try {
+      return Long.valueOf(raw.trim());
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  private int parseIntSafe(String raw, int defaultValue) {
+    if (!StringUtils.hasText(raw))
+      return defaultValue;
+    try {
+      return Integer.parseInt(raw.trim());
+    } catch (Exception e) {
+      return defaultValue;
+    }
+  }
+
+  private LocalDate parseDateSafe(String raw) {
+    if (!StringUtils.hasText(raw))
+      return null;
+    try {
+      return LocalDate.parse(raw.trim());
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   private java.time.LocalDate toLocalDate(LocalDateTime dt) {
