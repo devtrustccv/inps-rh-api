@@ -48,6 +48,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.temporal.ChronoUnit;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -342,7 +343,17 @@ public class MissaoServicoServiceWrite {
       syncLogisticaAlojamento(missao, dto.getAlojamentos(), logisticasExistentes, requisicoes);
     }
     if (dto.getAjudasCusto() != null) {
-      syncLogisticaAjudaCusto(missao, dto.getAjudasCusto(), logisticasExistentes, requisicoes);
+      var alimentacaoByColabId = new HashMap<Long, String>();
+      if (dto.getAlojamentos() != null) {
+        for (var a : dto.getAlojamentos()) {
+          if (a == null || a.getColaboradorId() == null)
+            continue;
+          if (StringUtils.hasText(a.getFlgAlimentacao())) {
+            alimentacaoByColabId.putIfAbsent(a.getColaboradorId(), a.getFlgAlimentacao());
+          }
+        }
+      }
+      syncLogisticaAjudaCusto(missao, dto.getAjudasCusto(), alimentacaoByColabId, logisticasExistentes, requisicoes);
     }
 
     if (dto.getProcessoEtapaAction() != null && "NEXT".equals(dto.getProcessoEtapaAction().getCode())) {
@@ -595,6 +606,7 @@ public class MissaoServicoServiceWrite {
   private void syncLogisticaAjudaCusto(
       MissaoServicoEntity missao,
       List<AjudaCustoRequestDTO> items,
+      Map<Long, String> alimentacaoByColabId,
       List<MissaoLogisticaEntity> existentes,
       List<MissaoRequisicaoEntity> requisicoes) {
     syncLogisticaGenerico(missao, "AJUDA_CUSTO", existentes, items, (ajuda) -> {
@@ -603,12 +615,23 @@ public class MissaoServicoServiceWrite {
       if (ajuda.getColaboradorId() == null) {
         throw IgrpResponseStatusException.badRequest("colaboradorId é obrigatório");
       }
+      if (ajuda.getFlgAlojamento() == null) {
+        throw IgrpResponseStatusException.badRequest("flgAlojamento é obrigatório");
+      }
       if (ajuda.getNumeroDiasAlojamento() == null) {
         throw IgrpResponseStatusException.badRequest("numeroDiasAlojamento é obrigatório");
+      }
+      if (ajuda.getValorDiario() == null) {
+        throw IgrpResponseStatusException.badRequest("valorDiario é obrigatório");
       }
 
       var colab = missaoColaboradorRepository.findByUuidOrThrow(ajuda.getColaboradorId());
       var prestador = derivePrestadorFromRequisicao(missao.getUuid(), List.of(colab), requisicoes);
+
+      var baseValorDiario = ajuda.getValorDiario();
+      var valorDiarioCalculado = calcularValorDiarioAjudaCusto(baseValorDiario, ajuda.getFlgAlojamento(),
+          alimentacaoByColabId != null ? alimentacaoByColabId.get(colab.getId()) : null);
+      var valorTotal = valorDiarioCalculado.multiply(java.math.BigDecimal.valueOf(ajuda.getNumeroDiasAlojamento()));
 
       var log = new MissaoLogisticaEntity();
       log.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -618,10 +641,32 @@ public class MissaoServicoServiceWrite {
       log.setReferencia("AJUDA_CUSTO");
       log.setMoeda("CVE");
       log.setNrDias(ajuda.getNumeroDiasAlojamento());
-      log.setFlgAlojamento(ajuda.getFlgAlojamento() != null && ajuda.getFlgAlojamento() ? "SIM" : "NAO");
+      log.setFlgAlojamento(ajuda.getFlgAlojamento() ? "SIM" : "NAO");
+      log.setValorDiario(valorDiarioCalculado);
+      log.setValorTotal(valorTotal);
+      log.setDataInicio(missao.getDataInicio());
+      log.setDataFim(missao.getDataFim());
 
       return new LogisticaPersist(log, List.of(colab), null);
     });
+  }
+
+  private java.math.BigDecimal calcularValorDiarioAjudaCusto(
+      java.math.BigDecimal baseValorDiario,
+      boolean incluiAlojamento,
+      String flgAlimentacao) {
+    if (baseValorDiario == null)
+      return null;
+    if (!incluiAlojamento)
+      return baseValorDiario;
+
+    if ("SIM".equalsIgnoreCase(flgAlimentacao)) {
+      return baseValorDiario.multiply(java.math.BigDecimal.ONE)
+          .divide(java.math.BigDecimal.valueOf(3), 2, RoundingMode.HALF_UP);
+    }
+
+    return baseValorDiario.multiply(java.math.BigDecimal.valueOf(2))
+        .divide(java.math.BigDecimal.valueOf(3), 2, RoundingMode.HALF_UP);
   }
 
   private <T> void syncLogisticaGenerico(
