@@ -16,8 +16,10 @@ import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoPagamentoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoPrestadorResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoServicoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.SeguroViagemResponseDTO;
 import cv.inps.rh.missaoservico.application.queries.GetAnaliseProcessoMissaoServicoQuery;
+import cv.inps.rh.missaoservico.application.queries.GetDetalheMissaoServicoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoCabimentoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoAutorizacaoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoLogisticaQuery;
@@ -410,6 +412,39 @@ public class MissaoServicoServiceRead {
     response.setEstado(missao.getEstado());
     response.setColaboradores(colaboradores);
     response.setDocumentos(documentos);
+
+    response.setDataRegisto(toLocalDate(missao.getCreatedDate()));
+    response.setUserRegistoId(missao.getCreatedById());
+    response.setUserRegistoName(missao.getCreatedBy());
+    response.setUserAlteracaoId(missao.getLastModifiedById());
+    response.setUserAlteracaoName(missao.getLastModifiedBy());
+    response.setDataAlteracao(toLocalDate(missao.getLastModifiedDate()));
+
+    return ResponseEntity.ok(response);
+  }
+
+  @Transactional(readOnly = true)
+  public ResponseEntity<MissaoServicoResponseDTO> getDetalhe(GetDetalheMissaoServicoQuery query) {
+    var missaoUuid = IdentificadorUnico.from(query.getUuid()).valor();
+    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    var response = new MissaoServicoResponseDTO();
+    response.setId(missao.getId());
+    response.setUuid(missao.getUuid());
+    response.setNrMissao(missao.getNrMissao());
+    response.setPaisDestinoId(missao.getPaisDestinoId() != null ? missao.getPaisDestinoId().getId() : null);
+    response.setPaisDestinoNome(missao.getPaisDestinoId() != null ? missao.getPaisDestinoId().getNome() : null);
+    response.setFlgDestino(missao.getFlgDestino());
+    response.setDescricaoDestino(missao.getDescricaoDestino());
+    response.setAmbitoMissao(resolveAmbitoMissao(missao.getFlgDestino()));
+    response.setDataInicio(missao.getDataInicio());
+    response.setDataFim(missao.getDataFim());
+    response.setNrDias(missao.getNrDias());
+    response.setAutorizadoPor(missao.getAutorizadoPor());
+    response.setDataAutorizacao(missao.getDataAutorizacao());
+    response.setEtapa(missao.getEtapa());
+    response.setEstado(missao.getEstado());
+    response.setMotivoCancelamento(missao.getMotivoCancelamento());
 
     response.setDataRegisto(toLocalDate(missao.getCreatedDate()));
     response.setUserRegistoId(missao.getCreatedById());
