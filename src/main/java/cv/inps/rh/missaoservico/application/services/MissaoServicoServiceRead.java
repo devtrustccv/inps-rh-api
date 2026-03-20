@@ -15,6 +15,8 @@ import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoPagamentoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoPrestadorResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoEmissaoReqResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.MissaoReqItemResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoServicoResumoDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoServicoResponseDTO;
@@ -27,6 +29,7 @@ import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoAutorizacaoQ
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoLogisticaQuery;
 import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoPagamentoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetSubmissaoServicoProcessQuery;
+import cv.inps.rh.missaoservico.application.queries.GetSubmissaoServicoEmissaoRequisicaoQuery;
 import cv.inps.rh.missaoservico.application.dto.WrapperListMissaoServicoDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
@@ -38,6 +41,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoColaborador
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoPrestadorEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoLogisticaDetEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoLogisticaEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoRequisicaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoServicoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.NotificacaoEntityRepository;
 import lombok.RequiredArgsConstructor;
@@ -74,6 +78,7 @@ public class MissaoServicoServiceRead {
   private final MissaoPrestadorEntityRepository missaoPrestadorRepository;
   private final NotificacaoEntityRepository notificacaoRepository;
   private final MissaoColaboradorEntityRepository missaoColaboradorRepository;
+  private final MissaoRequisicaoEntityRepository missaoRequisicaoRepository;
 
   @Transactional(readOnly = true)
   public ResponseEntity<MissaoCabimentoResponseDTO> getCabimento(GetMissaoServicoCabimentoQuery query) {
@@ -433,6 +438,81 @@ public class MissaoServicoServiceRead {
   }
 
   @Transactional(readOnly = true)
+  public ResponseEntity<MissaoEmissaoReqResponseDTO> getEmissaoRequisicao(
+      GetSubmissaoServicoEmissaoRequisicaoQuery query) {
+    var missaoUuid = IdentificadorUnico.from(query.getUui()).valor();
+    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    var requisicoes = missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid)
+        .stream()
+        .filter(r -> r != null && ESTADO_ATIVO.equals(r.getEstado()))
+        .toList();
+
+    var byPrest = new HashMap<Long, List<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoRequisicaoEntity>>();
+    for (var r : requisicoes) {
+      var prestId = r.getMissaoPrestId() != null ? r.getMissaoPrestId().getId() : null;
+      if (prestId == null)
+        continue;
+      byPrest.computeIfAbsent(prestId, _ -> new ArrayList<>()).add(r);
+    }
+
+    var itens = new ArrayList<MissaoReqItemResponseDTO>();
+    for (var entry : byPrest.entrySet()) {
+      var list = entry.getValue();
+      if (CollectionUtils.isEmpty(list))
+        continue;
+      var any = list.get(0);
+      var prest = any != null ? any.getMissaoPrestId() : null;
+      if (prest == null)
+        continue;
+
+      var colaboradores = new ArrayList<MissaoColaboradorResponseDTO>();
+      for (var r : list) {
+        var c = r != null ? r.getMissaoColabId() : null;
+        if (c == null || !ESTADO_ATIVO.equals(c.getEstado()))
+          continue;
+        colaboradores.add(toColaboradorDto(c));
+      }
+
+      AnexoRespDTO proposta = null;
+      for (var r : list) {
+        if (r == null || r.getUuid() == null)
+          continue;
+        var docs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(
+            TableName.RH_T_MISSAO_REQUISICAO.name(),
+            r.getUuid());
+        if (CollectionUtils.isEmpty(docs))
+          continue;
+        proposta = docs.stream()
+            .filter(d -> d != null && d.getEstado() != Estado.E)
+            .max(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
+                Comparator.nullsLast(Comparator.naturalOrder())))
+            .map(documentoMapper::toRespDto)
+            .orElse(null);
+        if (proposta != null)
+          break;
+      }
+
+      var item = new MissaoReqItemResponseDTO();
+      item.setId(prest.getId());
+      item.setUuid(prest.getUuid());
+      item.setMissaoPrestId(prest.getId());
+      item.setNomePrestador(prest.getNome());
+      item.setEmailPrestador(prest.getEmail());
+      item.setColaboradores(colaboradores);
+      item.setProposta(proposta);
+      item.setEstado(ESTADO_ATIVO);
+      itens.add(item);
+    }
+
+    var response = new MissaoEmissaoReqResponseDTO();
+    response.setMissaoId(missao.getId());
+    response.setEtapaAtual(missao.getEtapa());
+    response.setRequisicoes(itens);
+    return ResponseEntity.ok(response);
+  }
+
+  @Transactional(readOnly = true)
   public ResponseEntity<MissaoServicoResponseDTO> getDetalhe(GetDetalheMissaoServicoQuery query) {
     var missaoUuid = IdentificadorUnico.from(query.getUuid()).valor();
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
@@ -616,6 +696,21 @@ public class MissaoServicoServiceRead {
     dto.setNomeColaborador(d.getMissaoColabId() != null && d.getMissaoColabId().getFunId() != null
         ? d.getMissaoColabId().getFunId().getNome()
         : null);
+    return dto;
+  }
+
+  private MissaoColaboradorResponseDTO toColaboradorDto(
+      cv.inps.rh.shared.infrastructure.persistence.entity.MissaoColaboradorEntity c) {
+    if (c == null)
+      return null;
+    var dto = new MissaoColaboradorResponseDTO();
+    dto.setId(c.getId());
+    dto.setUuid(c.getUuid());
+    dto.setEstado(c.getEstado());
+    dto.setNumDocumento(c.getNumDocumento() != null ? String.valueOf(c.getNumDocumento()) : null);
+    dto.setFunId(c.getFunId() != null ? c.getFunId().getId() : null);
+    dto.setFunUuid(c.getFunId() != null ? c.getFunId().getUuid() : null);
+    dto.setNomeColaborador(c.getFunId() != null ? c.getFunId().getNome() : null);
     return dto;
   }
 
