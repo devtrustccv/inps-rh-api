@@ -75,5 +75,8 @@ public class ValEvolucaoCarreiraEntity extends AuditEntity {
   @Column(name = "AVALIACAO_MEDIA")
   private Long avaliacaoMedia;
 
+  @Column(name = "FILE_ID")
+  private String fileId;
+
 
 }

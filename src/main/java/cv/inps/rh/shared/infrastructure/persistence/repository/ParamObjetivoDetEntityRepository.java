@@ -20,7 +20,6 @@ public interface ParamObjetivoDetEntityRepository extends
 
   Optional<ParamObjetivoDetEntity> findTopByAnoOrderByIdDesc(Integer ano);
 
+  Optional<ParamObjetivoDetEntity> findTopByOrderByAnoDescIdDesc();
 
 }
-
-

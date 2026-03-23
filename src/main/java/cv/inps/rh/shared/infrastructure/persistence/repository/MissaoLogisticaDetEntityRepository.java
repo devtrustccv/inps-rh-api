@@ -7,14 +7,21 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.UUID;
+
 @Repository
 public interface MissaoLogisticaDetEntityRepository extends
     JpaRepository<MissaoLogisticaDetEntity, Long>,
     JpaSpecificationExecutor<MissaoLogisticaDetEntity> {
 
+  List<MissaoLogisticaDetEntity> findAllByMissaoLogistId_MissaoServId_Uuid(UUID missaoUuid);
+
+  List<MissaoLogisticaDetEntity> findAllByMissaoLogistId_IdIn(List<Long> logistIds);
+
   default MissaoLogisticaDetEntity findByIdOrThrow(Long id) {
     return findById(id)
-        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "MissaoLogisticaDetEntity not found for id: " + id));
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
+            "MissaoLogisticaDetEntity not found for id: " + id));
   }
 }
-

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,11 +16,15 @@ public interface MissaoColaboradorEntityRepository extends
     JpaRepository<MissaoColaboradorEntity, Long>,
     JpaSpecificationExecutor<MissaoColaboradorEntity> {
 
+  List<MissaoColaboradorEntity> findAllByMissaoServId_Uuid(UUID missaoUuid);
+
+  Optional<MissaoColaboradorEntity> findByMissaoServId_UuidAndFunId_Uuid(UUID missaoUuid, UUID funUuid);
+
   Optional<MissaoColaboradorEntity> findByUuid(UUID uuid);
 
   default MissaoColaboradorEntity findByUuidOrThrow(UUID uuid) {
     return findByUuid(uuid)
-        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "MissaoColaboradorEntity not found for id: " + uuid));
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
+            "MissaoColaboradorEntity not found for id: " + uuid));
   }
 }
-

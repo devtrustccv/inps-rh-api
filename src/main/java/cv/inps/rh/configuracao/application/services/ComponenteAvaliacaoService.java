@@ -83,6 +83,7 @@ public class ComponenteAvaliacaoService {
     det.setPonderacaoObjetivo(dto.getPonderacaoObjetivo());
     det.setPonderacaoCompetencia(dto.getPonderacaoCompetencia());
     det.setPonderacaoAtitudePess(dto.getPonderacaoAtitudePessoal());
+    det.setVersao(1);
     det.setEstado(ESTADO_ATIVO);
 
     var linhas = new ArrayList<ParamObjetivoEntity>(dto.getObjectivosInps().size()

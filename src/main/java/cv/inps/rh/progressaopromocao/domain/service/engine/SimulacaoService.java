@@ -1,7 +1,7 @@
 package cv.inps.rh.progressaopromocao.domain.service.engine;
 
 import com.github.f4b6a3.uuid.UuidCreator;
-import cv.inps.rh.progressaopromocao.domain.service.engine.model.ProgessionPromotionType;
+import cv.inps.rh.progressaopromocao.domain.service.engine.constants.ProgessionPromotionType;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;

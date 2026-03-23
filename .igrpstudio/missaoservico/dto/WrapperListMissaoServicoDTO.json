@@ -1,0 +1,28 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "WrapperListMissaoServico",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "Page",
+    "module": "shared"
+  },
+  "attributes": [
+    {
+      "name": "content",
+      "objectType": "dto",
+      "type": "MissaoServicoResumo",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "missaoservico"
+    }
+  ],
+  "id": "vv9qrbw361"
+}

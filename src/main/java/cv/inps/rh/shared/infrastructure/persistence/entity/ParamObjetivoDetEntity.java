@@ -52,6 +52,9 @@ public class ParamObjetivoDetEntity extends AuditEntity {
   @Column(name = "UUID")
   private UUID uuid;
 
+  @Column(name = "VERSAO")
+  private Integer versao;
+
   @OneToMany(mappedBy = "paramObjetivoDet", cascade = CascadeType.ALL)
   private List<ParamObjetivoEntity> objetivos;
 

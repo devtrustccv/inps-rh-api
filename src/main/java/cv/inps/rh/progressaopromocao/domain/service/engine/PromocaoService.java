@@ -1,6 +1,6 @@
 package cv.inps.rh.progressaopromocao.domain.service.engine;
 
-import cv.inps.rh.progressaopromocao.domain.service.engine.model.ProgessionPromotionType;
+import cv.inps.rh.progressaopromocao.domain.service.engine.constants.ProgessionPromotionType;
 import cv.inps.rh.shared.infrastructure.persistence.entity.VwRhProgressaoInputEntity;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

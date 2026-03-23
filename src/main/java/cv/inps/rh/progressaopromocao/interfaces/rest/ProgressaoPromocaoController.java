@@ -3,26 +3,24 @@
 
 package cv.inps.rh.progressaopromocao.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.progressaopromocao.application.commands.*;
+import cv.inps.rh.progressaopromocao.application.dto.AnexarOrdemServicoRequestDTO;
+import cv.inps.rh.progressaopromocao.application.dto.HistoricoIdsDTO;
+import cv.inps.rh.progressaopromocao.application.dto.ListaProgressaoPromocaoDTO;
+import cv.inps.rh.progressaopromocao.application.queries.GetHistoricoProgressaPromocaoQuery;
+import cv.inps.rh.progressaopromocao.application.queries.GetListaSimulacaoProgressaPromocaoQuery;
+import cv.inps.rh.progressaopromocao.application.queries.GetListaValidacaoProgressaPromocaoQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.progressaopromocao.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.progressaopromocao.application.commands.*;
-import cv.inps.rh.progressaopromocao.application.dto.ListaProgressaoPromocaoDTO;
-import cv.inps.rh.progressaopromocao.application.dto.AnexarOrdemServicoRequestDTO;
-import cv.inps.rh.progressaopromocao.application.dto.HistoricoIdsDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
@@ -33,7 +31,7 @@ import cv.inps.rh.progressaopromocao.application.dto.HistoricoIdsDTO;
 )
 public class ProgressaoPromocaoController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -50,7 +48,7 @@ public class ProgressaoPromocaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -60,8 +58,8 @@ public class ProgressaoPromocaoController {
       )
     }
   )
-  
-  public ResponseEntity<ListaProgressaoPromocaoDTO> getHistoricoProgressaPromocao(
+
+   public ResponseEntity<ListaProgressaoPromocaoDTO> getHistoricoProgressaPromocao(
     @RequestParam(value = "progressaoPromocao", required = false) String progressaoPromocao,
     @RequestParam(value = "colaborador", required = false) String colaborador,
     @RequestParam(value = "carreiraId", required = false) String carreiraId,
@@ -86,7 +84,7 @@ public class ProgressaoPromocaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -96,8 +94,8 @@ public class ProgressaoPromocaoController {
       )
     }
   )
-  
-  public ResponseEntity<ListaProgressaoPromocaoDTO> getListaValidacaoProgressaPromocao(
+
+   public ResponseEntity<ListaProgressaoPromocaoDTO> getListaValidacaoProgressaPromocao(
     @RequestParam(value = "progressaoPromocao", required = false) String progressaoPromocao,
     @RequestParam(value = "colaborador", required = false) String colaborador,
     @RequestParam(value = "carreiraId", required = false) String carreiraId,
@@ -122,7 +120,7 @@ public class ProgressaoPromocaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -132,8 +130,8 @@ public class ProgressaoPromocaoController {
       )
     }
   )
-  
-  public ResponseEntity<String> anexarOrdemServico(@Valid @RequestBody AnexarOrdemServicoRequestDTO anexarOrdemServicoRequest
+
+   public ResponseEntity<String> anexarOrdemServico(@Valid @RequestBody AnexarOrdemServicoRequestDTO anexarOrdemServicoRequest
     )
   {
 
@@ -152,7 +150,7 @@ public class ProgressaoPromocaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -162,8 +160,8 @@ public class ProgressaoPromocaoController {
       )
     }
   )
-  
-  public ResponseEntity<String> simularProgressaoPromocao(
+
+   public ResponseEntity<String> simularProgressaoPromocao(
     )
   {
 
@@ -182,7 +180,7 @@ public class ProgressaoPromocaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -192,8 +190,8 @@ public class ProgressaoPromocaoController {
       )
     }
   )
-  
-  public ResponseEntity<ListaProgressaoPromocaoDTO> getListaSimulacaoProgressaPromocao(
+
+   public ResponseEntity<ListaProgressaoPromocaoDTO> getListaSimulacaoProgressaPromocao(
     @RequestParam(value = "progressaoPromocao", required = false) String progressaoPromocao,
     @RequestParam(value = "colaborador", required = false) String colaborador,
     @RequestParam(value = "carreiraId", required = false) String carreiraId,
@@ -218,7 +216,7 @@ public class ProgressaoPromocaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -228,12 +226,71 @@ public class ProgressaoPromocaoController {
       )
     }
   )
-  
-  public ResponseEntity<String> enviarHistoricoProgressaoPromocao(@Valid @RequestBody HistoricoIdsDTO enviarHistoricoProgressaoPromocaoRequest
+
+   public ResponseEntity<String> enviarHistoricoProgressaoPromocao(@Valid @RequestBody HistoricoIdsDTO enviarHistoricoProgressaoPromocaoRequest
     )
   {
 
       final var command = new EnviarHistoricoProgressaoPromocaoCommand(enviarHistoricoProgressaoPromocaoRequest);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "extrair-ordem-servico"
+  )
+  @Operation(
+    summary = "Extrair ordem servico",
+    description = "Extrair ordem servico",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = byte[].class,
+                  type = "byte[]")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<byte[]> extrairOrdemServico(@Valid @RequestBody HistoricoIdsDTO extrairOrdemServicoRequest
+    )
+  {
+
+      final var command = new ExtrairOrdemServicoCommand(extrairOrdemServicoRequest);
+
+    return commandBus.send(command);
+
+  }
+
+  @PostMapping(
+      value = "validar"
+  )
+  @Operation(
+      summary = "Validar simulacao",
+      description = "Validar simulacao",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<String> validarSimulacao(@Valid @RequestBody HistoricoIdsDTO validarSimulacaoRequest
+  ) {
+
+    final var command = new ValidarSimulacaoCommand(validarSimulacaoRequest);
 
       return commandBus.send(command);
 
