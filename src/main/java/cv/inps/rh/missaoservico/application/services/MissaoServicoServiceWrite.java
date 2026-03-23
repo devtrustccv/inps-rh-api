@@ -185,6 +185,9 @@ public class MissaoServicoServiceWrite {
     }
     missao.setEtapa(ETAPA_1);
 
+    if (dto.getProcessoEtapaAction() != null && dto.getProcessoEtapaAction().getCode().equals("NEXT")) {
+      missao.setEtapa(ETAPA_2);
+    }
     missao = missaoServicoRepository.save(missao);
 
     var colaboradores = syncColaboradores(missao, dto.getColaboradores());
