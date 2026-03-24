@@ -35,7 +35,9 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
+import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaDetEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoRequisicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoColaboradorEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoPrestadorEntityRepository;
@@ -204,7 +206,7 @@ public class MissaoServicoServiceRead {
         .filter(e -> e != null && ESTADO_ATIVO.equals(e.getEstado()))
         .toList();
 
-    var detByLogId = new HashMap<Long, List<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaDetEntity>>();
+    var detByLogId = new HashMap<Long, List<MissaoLogisticaDetEntity>>();
     var ids = logistica.stream()
         .map(MissaoLogisticaEntity::getId)
         .filter(Objects::nonNull)
@@ -448,7 +450,7 @@ public class MissaoServicoServiceRead {
         .filter(r -> r != null && ESTADO_ATIVO.equals(r.getEstado()))
         .toList();
 
-    var byPrest = new HashMap<Long, List<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoRequisicaoEntity>>();
+    var byPrest = new HashMap<Long, List<MissaoRequisicaoEntity>>();
     for (var r : requisicoes) {
       var prestId = r.getMissaoPrestId() != null ? r.getMissaoPrestId().getId() : null;
       if (prestId == null)
@@ -457,52 +459,104 @@ public class MissaoServicoServiceRead {
     }
 
     var itens = new ArrayList<MissaoReqItemResponseDTO>();
-    for (var entry : byPrest.entrySet()) {
-      var list = entry.getValue();
-      if (CollectionUtils.isEmpty(list))
-        continue;
-      var any = list.get(0);
-      var prest = any != null ? any.getMissaoPrestId() : null;
-      if (prest == null)
-        continue;
+    var prestadores = missaoPrestadorRepository.findAllByMissaoServId_Uuid(missaoUuid)
+        .stream()
+        .filter(p -> p != null && ESTADO_ATIVO.equals(p.getEstado()))
+        .toList();
 
-      var colaboradores = new ArrayList<MissaoColaboradorResponseDTO>();
-      for (var r : list) {
-        var c = r != null ? r.getMissaoColabId() : null;
-        if (c == null || !ESTADO_ATIVO.equals(c.getEstado()))
+    if (!CollectionUtils.isEmpty(prestadores)) {
+      for (var prest : prestadores) {
+        if (prest == null || prest.getId() == null)
           continue;
-        colaboradores.add(toColaboradorDto(c));
+
+        var list = byPrest.getOrDefault(prest.getId(), List.of());
+
+        var colaboradores = new ArrayList<MissaoColaboradorResponseDTO>();
+        for (var r : list) {
+          var c = r != null ? r.getMissaoColabId() : null;
+          if (c == null || !ESTADO_ATIVO.equals(c.getEstado()))
+            continue;
+          colaboradores.add(toColaboradorDto(c));
+        }
+
+        AnexoRespDTO proposta = null;
+        for (var r : list) {
+          if (r == null || r.getUuid() == null)
+            continue;
+          var docs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(
+              TableName.RH_T_MISSAO_REQUISICAO.name(),
+              r.getUuid());
+          if (CollectionUtils.isEmpty(docs))
+            continue;
+          proposta = docs.stream()
+              .filter(d -> d != null && d.getEstado() != Estado.E)
+              .max(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
+                  Comparator.nullsLast(Comparator.naturalOrder())))
+              .map(documentoMapper::toRespDto)
+              .orElse(null);
+          if (proposta != null)
+            break;
+        }
+
+        var item = new MissaoReqItemResponseDTO();
+        item.setId(prest.getId());
+        item.setUuid(prest.getUuid());
+        item.setMissaoPrestId(prest.getId());
+        item.setNomePrestador(prest.getNome());
+        item.setEmailPrestador(prest.getEmail());
+        item.setColaboradores(colaboradores);
+        item.setProposta(proposta);
+        item.setEstado(ESTADO_ATIVO);
+        itens.add(item);
       }
+    } else {
+      for (var entry : byPrest.entrySet()) {
+        var list = entry.getValue();
+        if (CollectionUtils.isEmpty(list))
+          continue;
+        var any = list.get(0);
+        var prest = any != null ? any.getMissaoPrestId() : null;
+        if (prest == null)
+          continue;
 
-      AnexoRespDTO proposta = null;
-      for (var r : list) {
-        if (r == null || r.getUuid() == null)
-          continue;
-        var docs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(
-            TableName.RH_T_MISSAO_REQUISICAO.name(),
-            r.getUuid());
-        if (CollectionUtils.isEmpty(docs))
-          continue;
-        proposta = docs.stream()
-            .filter(d -> d != null && d.getEstado() != Estado.E)
-            .max(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
-                Comparator.nullsLast(Comparator.naturalOrder())))
-            .map(documentoMapper::toRespDto)
-            .orElse(null);
-        if (proposta != null)
-          break;
+        var colaboradores = new ArrayList<MissaoColaboradorResponseDTO>();
+        for (var r : list) {
+          var c = r != null ? r.getMissaoColabId() : null;
+          if (c == null || !ESTADO_ATIVO.equals(c.getEstado()))
+            continue;
+          colaboradores.add(toColaboradorDto(c));
+        }
+
+        AnexoRespDTO proposta = null;
+        for (var r : list) {
+          if (r == null || r.getUuid() == null)
+            continue;
+          var docs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(
+              TableName.RH_T_MISSAO_REQUISICAO.name(),
+              r.getUuid());
+          if (CollectionUtils.isEmpty(docs))
+            continue;
+          proposta = docs.stream()
+              .filter(d -> d != null && d.getEstado() != Estado.E)
+              .max(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
+                  Comparator.nullsLast(Comparator.naturalOrder())))
+              .map(documentoMapper::toRespDto)
+              .orElse(null);
+          if (proposta != null)
+            break;
+        }
+
+        var item = new MissaoReqItemResponseDTO();
+        item.setId(prest.getId());
+        item.setUuid(prest.getUuid());
+        item.setMissaoPrestId(prest.getId());
+        item.setNomePrestador(prest.getNome());
+        item.setEmailPrestador(prest.getEmail());
+        item.setColaboradores(colaboradores);
+        item.setProposta(proposta);
+        item.setEstado(ESTADO_ATIVO);
+        itens.add(item);
       }
-
-      var item = new MissaoReqItemResponseDTO();
-      item.setId(prest.getId());
-      item.setUuid(prest.getUuid());
-      item.setMissaoPrestId(prest.getId());
-      item.setNomePrestador(prest.getNome());
-      item.setEmailPrestador(prest.getEmail());
-      item.setColaboradores(colaboradores);
-      item.setProposta(proposta);
-      item.setEstado(ESTADO_ATIVO);
-      itens.add(item);
     }
 
     var response = new MissaoEmissaoReqResponseDTO();
