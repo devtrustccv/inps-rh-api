@@ -152,6 +152,9 @@ public class MissaoServicoServiceWrite {
     persistirNotificacoesAnalise(missao, dto.getNotificacao(), dto.getPrestadores());
 
     missao.setEtapa(ETAPA_2);
+    if (dto.getProcessoEtapaAction() != null && dto.getProcessoEtapaAction().getCode().equals("NEXT")) {
+      missao.setEtapa(ETAPA_3);
+    }
     missaoServicoRepository.save(missao);
 
     Map<String, Object> resp = new HashMap<>();
