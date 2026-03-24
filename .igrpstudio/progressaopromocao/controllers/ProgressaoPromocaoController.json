@@ -331,6 +331,32 @@
           }
         }
       }
+    },
+    {
+      "actionName": "confirmarProgressao",
+      "path": "confirmar",
+      "method": "POST",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "validacaoId",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "w6juessy9r-getListaValidacaoProgressaPromocao-getListaValidacaoProgressaPromocaoCopy-getListaProgressaPromocao-simularProgressaoPromocaoCopy-enviarHistoricoProgressaoPromocao-extrairOrdemServico"

@@ -292,6 +292,35 @@ public class ProgressaoPromocaoController {
 
     final var command = new ValidarSimulacaoCommand(validarSimulacaoRequest);
 
+    return commandBus.send(command);
+
+  }
+
+  @PostMapping(
+      value = "confirmar"
+  )
+  @Operation(
+      summary = "Confirmar progressao",
+      description = "Confirmar progressao",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<String> confirmarProgressao(
+      @RequestParam(value = "validacaoId") String validacaoId) {
+
+    final var command = new ConfirmarProgressaoCommand(validacaoId);
+
       return commandBus.send(command);
 
   }
