@@ -717,7 +717,7 @@ public class MissaoServicoServiceRead {
   }
 
   private List<MissaoLogisticaDetResponseDTO> mapDet(
-      List<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaDetEntity> dets) {
+      List<MissaoLogisticaDetEntity> dets) {
     if (CollectionUtils.isEmpty(dets))
       return List.of();
     var out = new ArrayList<MissaoLogisticaDetResponseDTO>();
