@@ -35,9 +35,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaDetEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoRequisicaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoColaboradorEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoPrestadorEntityRepository;
@@ -92,7 +90,7 @@ public class MissaoServicoServiceRead {
         .filter(e -> e != null && ESTADO_ATIVO.equals(e.getEstado()))
         .toList();
 
-    var detByLogId = new HashMap<Long, List<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaDetEntity>>();
+    var detByLogId = new HashMap<Long, List<MissaoLogisticaDetEntity>>();
     var ids = logistica.stream()
         .map(MissaoLogisticaEntity::getId)
         .filter(java.util.Objects::nonNull)
@@ -158,7 +156,7 @@ public class MissaoServicoServiceRead {
         .filter(e -> e != null && ESTADO_ATIVO.equals(e.getEstado()))
         .toList();
 
-    var detByLogId = new HashMap<Long, List<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaDetEntity>>();
+    var detByLogId = new HashMap<Long, List<MissaoLogisticaDetEntity>>();
     var ids = logistica.stream()
         .map(MissaoLogisticaEntity::getId)
         .filter(java.util.Objects::nonNull)
@@ -695,7 +693,7 @@ public class MissaoServicoServiceRead {
 
   private String resolveNome(
       MissaoLogisticaEntity logistica,
-      List<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaDetEntity> dets) {
+      List<MissaoLogisticaDetEntity> dets) {
     if (logistica == null)
       return null;
 
@@ -730,14 +728,14 @@ public class MissaoServicoServiceRead {
   }
 
   private MissaoLogisticaDetResponseDTO firstDet(
-      List<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaDetEntity> dets) {
+      List<MissaoLogisticaDetEntity> dets) {
     if (CollectionUtils.isEmpty(dets))
       return null;
     return toDetDto(dets.get(0));
   }
 
   private MissaoLogisticaDetResponseDTO toDetDto(
-      cv.inps.rh.shared.infrastructure.persistence.entity.MissaoLogisticaDetEntity d) {
+     MissaoLogisticaDetEntity d) {
     if (d == null)
       return null;
     var dto = new MissaoLogisticaDetResponseDTO();
@@ -753,8 +751,7 @@ public class MissaoServicoServiceRead {
     return dto;
   }
 
-  private MissaoColaboradorResponseDTO toColaboradorDto(
-      cv.inps.rh.shared.infrastructure.persistence.entity.MissaoColaboradorEntity c) {
+  private MissaoColaboradorResponseDTO toColaboradorDto(MissaoColaboradorEntity c) {
     if (c == null)
       return null;
     var dto = new MissaoColaboradorResponseDTO();
@@ -788,7 +785,7 @@ public class MissaoServicoServiceRead {
     return null;
   }
 
-  private String resolveEstadoLista(cv.inps.rh.shared.infrastructure.persistence.entity.MissaoServicoEntity missao) {
+  private String resolveEstadoLista(MissaoServicoEntity missao) {
     if (missao == null || !StringUtils.hasText(missao.getEtapa()))
       return null;
     var etapa = missao.getEtapa();
