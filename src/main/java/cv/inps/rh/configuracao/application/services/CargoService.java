@@ -7,6 +7,7 @@ import cv.inps.rh.configuracao.application.dto.CargoResponseDTO;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCargoEntityRepository;
@@ -88,7 +89,8 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
   @Override
   public Object read(String uuid) {
     var cargo = cargoRepository.findByUuidOrThrow(UUID.fromString(uuid));
-    return buildResponse(cargo);
+    var estadoValidacaoMap = EstadoValidacao.codeDescriptionMap();
+    return buildResponse(cargo, estadoValidacaoMap);
   }
 
   @Override
@@ -96,7 +98,7 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
-    var cargo = filters.getOrDefault("cargo", null);
+    var cargo = filters.getOrDefault("search", null);
     var status = filters.containsKey(ParamCargoEntity_.ESTADO)
         ? Estado.valueOf(filters.get(ParamCargoEntity_.ESTADO))
         : Estado.A;
@@ -112,14 +114,14 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
     };
 
     var data = cargoRepository.findAll(spec, pageable);
-
+    var estadoValidacaoMap = EstadoValidacao.codeDescriptionMap();
     return data.stream()
-        .map(this::buildResponse)
+        .map(e-> buildResponse(e, estadoValidacaoMap))
         .toList();
   }
 
   @NotNull
-  private Object buildResponse(ParamCargoEntity cargo) {
+  private Object buildResponse(ParamCargoEntity cargo, Map<String, String> estadoValidacaoMap) {
     var response = new CargoResponseDTO();
     response.setId(cargo.getUuid().toString());
     response.setDescricao(cargo.getNome());
@@ -128,6 +130,7 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
       response.setCarreiraDesc(c.getNome());
     });
     response.setDirigente(cargo.getDirigente());
+    response.setDirigenteDesc(estadoValidacaoMap.getOrDefault(cargo.getDirigente(),cargo.getDirigente()));
     response.setEstado(cargo.getEstado().getCode());
     response.setEstadoDescricao(cargo.getEstado().getDescription());
     return response;
