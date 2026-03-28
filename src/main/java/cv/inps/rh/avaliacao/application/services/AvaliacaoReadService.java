@@ -81,7 +81,6 @@ public class AvaliacaoReadService {
   }
 
 
-
   @Transactional(readOnly = true)
   public AvaliacaoDTO getDefinicaoObjetivo(String uuid) {
     return getAvaliacao(uuid);
@@ -89,11 +88,6 @@ public class AvaliacaoReadService {
 
   @Transactional(readOnly = true)
   public AvaliacaoResponseDTO getAvaliacao2(String uuid){
-    return null;
-  }
-
-  @Transactional(readOnly = true)
-  public DefinicaoObjectivoDTO getDefinicaoObjetivo2(String uuid) {
     return null;
   }
 
