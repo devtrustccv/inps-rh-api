@@ -115,7 +115,7 @@ public class EscalaoService extends ConfigurationProcess<EscalaoRequestDTO> {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
-    var carreiraId = filters.get("carreira");
+    var carreiraId = filters.get(ParamEscalaoEntity_.PARAM_CARR_ID);
     var escalao = filters.get(ParamEscalaoEntity_.ESCALAO);
     var estado = filters.containsKey(ParamEscalaoEntity_.ESTADO)
         ? Estado.valueOf(filters.get(ParamEscalaoEntity_.ESTADO))

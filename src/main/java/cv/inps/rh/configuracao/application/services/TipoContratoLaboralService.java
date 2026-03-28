@@ -9,17 +9,20 @@ import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamContratoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamContratoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -100,6 +103,7 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
     r.setCodigo(e.getCodigo());
     r.setDescricao(e.getNome());
     r.setNatureza(nature.getOrDefault(e.getNatureza(), e.getNatureza()));
+    r.setNaturezaId(e.getNatureza());
     r.setDuracao(e.getDuracaoRenovavel());
     r.setMaxNumeroRenovacao(e.getMaxRenovacao());
     r.setEstado(e.getEstado().getCode());
@@ -107,10 +111,12 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
     ofNullable(e.getFlgRenovavel()).ifPresent(y -> {
       var v = y.toString();
       r.setRenovavel(yesNo.getOrDefault(v, v));
+      r.setFlgRenovavel(v);
     });
     ofNullable(e.getPrazoObrigatorio()).ifPresent(x -> {
       var v = x.toString();
       r.setPrazo(yesNo.getOrDefault(v, v));
+      r.setPrazoId(v);
     });
     /*ofNullable(e.getParamVinculoId()).ifPresent(x -> {
       r.setVinculoId(x.getUuid().toString());
@@ -122,9 +128,21 @@ public class TipoContratoLaboralService extends ConfigurationProcess<TipoContrat
   @Override
   public List<Object> list(Map<String, String> filters) {
 
+    var search = filters.get("search");
+
+    Specification<ParamContratoEntity> spec = (root, _, cb) -> {
+
+      var predicates = new ArrayList<Predicate>();
+
+      if (StringUtils.hasText(search))
+        predicates.add(cb.like(cb.lower(root.get(ParamContratoEntity_.NOME)), "%" +search.toLowerCase() + "%"));
+
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
+
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
-    var data = repository.findAll(pageable);
+    var data = repository.findAll(spec, pageable);
     if (data.isEmpty())
       return List.of();
 
