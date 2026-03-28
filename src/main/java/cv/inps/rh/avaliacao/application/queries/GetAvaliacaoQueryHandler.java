@@ -28,7 +28,7 @@ public class GetAvaliacaoQueryHandler implements QueryHandler<GetAvaliacaoQuery,
 
     LOGGER.debug("GetAvaliacaoQuery: {}", query);
 
-    return ResponseEntity.ok(avaliacaoReadService.getAvaliacao2(query.getUuid()));
+    return ResponseEntity.ok(avaliacaoReadService.getAvaliacaoFull(query.getUuid()));
   }
 
 }

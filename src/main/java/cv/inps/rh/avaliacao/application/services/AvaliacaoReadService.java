@@ -86,7 +86,7 @@ public class AvaliacaoReadService {
   }
 
   @Transactional(readOnly = true)
-  public AvaliacaoResponseDTO getAvaliacao2(String uuid) {
+  public AvaliacaoResponseDTO getAvaliacaoFull(String uuid) {
     var id = parseUuid(uuid);
 
     var avaliacao = avaliacaoRepository.findByUuidOrThrow(id);
