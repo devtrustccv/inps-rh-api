@@ -80,13 +80,20 @@ public class AvaliacaoReadService {
     return dto;
   }
 
+
+
   @Transactional(readOnly = true)
   public AvaliacaoDTO getDefinicaoObjetivo(String uuid) {
     return getAvaliacao(uuid);
   }
 
   @Transactional(readOnly = true)
-  public DefinicaoObjectivoDTO getDefinicaoObjetivo1(String uuid) {
+  public AvaliacaoResponseDTO getAvaliacao2(String uuid){
+    return null;
+  }
+
+  @Transactional(readOnly = true)
+  public DefinicaoObjectivoDTO getDefinicaoObjetivo2(String uuid) {
     return null;
   }
 
