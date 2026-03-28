@@ -5,10 +5,13 @@ import cv.inps.rh.avaliacao.application.dto.AvaliacaoDTO;
 import cv.inps.rh.avaliacao.application.dto.CompetenciaComportAvaliacaoDTO;
 import cv.inps.rh.avaliacao.application.dto.CompetenciaTecAvaliacaoDTO;
 import cv.inps.rh.avaliacao.application.dto.ObjectivoAvaliacaoDTO;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AvaliacaoAtitudePessoalEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AvaliacaoCompetenciaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AvaliacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AvaliacaoObjectivoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaAvaliacaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamObjetivoDetEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamObjetivoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AvaliacaoAtitudePessoalEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AvaliacaoCompetenciaEntityRepository;
@@ -24,16 +27,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ProcessoAvaliacaoServiceAutoAvaliacaoTest {
+public class ProcessoAvaliacaoServiceAvaliacaoTest {
 
   @Mock
   private AvaliacaoEntityRepository avaliacaoRepository;
@@ -57,7 +60,7 @@ public class ProcessoAvaliacaoServiceAutoAvaliacaoTest {
   private ProcessoAvaliacaoService service;
 
   @Test
-  void gravarAutoAvaliacaoAtualizaAutoCamposSemRecalculo() {
+  void gravarAvaliacaoAtualizaCamposEAvaliaGlobalConformeFormulario() {
     var avaliacaoUuid = UUID.randomUUID();
 
     var avaliacao = new AvaliacaoEntity();
@@ -65,6 +68,7 @@ public class ProcessoAvaliacaoServiceAutoAvaliacaoTest {
     avaliacao.setAno(2026);
     avaliacao.setSemestre("1");
     when(avaliacaoRepository.findByUuidOrThrow(avaliacaoUuid)).thenReturn(avaliacao);
+    when(avaliacaoRepository.save(any(AvaliacaoEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
     var o1 = new AvaliacaoObjectivoEntity();
     o1.setNumeroOrdem(1);
@@ -104,14 +108,29 @@ public class ProcessoAvaliacaoServiceAutoAvaliacaoTest {
     when(atitudeRepository.findAllByAvaliacao_Uuid(avaliacaoUuid)).thenReturn(List.of(at));
     when(atitudeRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
 
+    var det = new ParamObjetivoDetEntity();
+    det.setAno(2026);
+    det.setPonderacaoObjetivo(BigDecimal.valueOf(50));
+    det.setPonderacaoCompetencia(BigDecimal.valueOf(30));
+    det.setPonderacaoAtitudePess(BigDecimal.valueOf(20));
+    when(objetivoDetRepository.findTopByAnoOrderByIdDesc(2026)).thenReturn(Optional.of(det));
+
+    var e = new ParamEscalaAvaliacaoEntity();
+    e.setEstado(Estado.A);
+    e.setQuantitativaDe(BigDecimal.valueOf(3));
+    e.setQuantitativaAte(BigDecimal.valueOf(4.99));
+    e.setQualitativa("Bom");
+    when(escalaRepository.findAll()).thenReturn(List.of(e));
+
     var dto = new AvaliacaoDTO();
+
     var oDto1 = new ObjectivoAvaliacaoDTO();
     oDto1.setNumero(1);
-    oDto1.setRealizado("REAL-1");
+    oDto1.setRealizado("R1");
     oDto1.setAvaliacao(4);
     var oDto2 = new ObjectivoAvaliacaoDTO();
     oDto2.setNumero(2);
-    oDto2.setRealizado("REAL-2");
+    oDto2.setRealizado("R2");
     oDto2.setAvaliacao(2);
     dto.setObjectivos(List.of(oDto1, oDto2));
 
@@ -130,23 +149,25 @@ public class ProcessoAvaliacaoServiceAutoAvaliacaoTest {
     ap.setAvaliacao(4);
     dto.setAtitudesPessoais(List.of(ap));
 
-    var resp = service.gravarAutoAvaliacao(avaliacaoUuid.toString(), dto);
+    var resp = service.gravarAvaliacao(avaliacaoUuid.toString(), dto);
 
     assertNotNull(resp.getBody());
     assertEquals(avaliacaoUuid, resp.getBody().get("id"));
 
-    assertEquals("REAL-1", o1.getAutoRealizado());
-    assertEquals(BigDecimal.valueOf(4), o1.getAutoAvaliacao());
-    assertEquals("REAL-2", o2.getAutoRealizado());
-    assertEquals(BigDecimal.valueOf(2), o2.getAutoAvaliacao());
+    assertEquals("R1", o1.getRealizado());
+    assertEquals(BigDecimal.valueOf(4), o1.getAvaliacao());
+    assertEquals("R2", o2.getRealizado());
+    assertEquals(BigDecimal.valueOf(2), o2.getAvaliacao());
 
-    assertEquals(BigDecimal.valueOf(5), cComport.getAutoAvaliacao());
-    assertEquals(BigDecimal.valueOf(3), cTec.getAutoAvaliacao());
-    assertEquals(BigDecimal.valueOf(4), at.getAutoAvaliacao());
+    assertEquals(BigDecimal.valueOf(5), cComport.getAvaliacaoProcessual());
+    assertEquals(BigDecimal.valueOf(3), cTec.getAvaliacaoProcessual());
+    assertEquals(BigDecimal.valueOf(4), at.getAvaliacaoProcessual());
 
-    assertNull(avaliacao.getAvaliacaoObjectivo());
-    assertNull(avaliacao.getAvaliacaoCompetencia());
-    assertNull(avaliacao.getAvaliacaoAtitudePess());
-    assertNull(avaliacao.getAvaliacaoQualitativa());
+    assertEquals(new BigDecimal("1.50"), avaliacao.getAvaliacaoObjectivo());
+    assertEquals(new BigDecimal("2.40"), avaliacao.getAvaliacaoCompetencia());
+    assertEquals(new BigDecimal("0.80"), avaliacao.getAvaliacaoAtitudePess());
+    assertEquals("Bom", avaliacao.getAvaliacaoQualitativa());
+    assertEquals("P", avaliacao.getEstado());
   }
 }
+

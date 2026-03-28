@@ -23,4 +23,6 @@ public class AtitudePessoalAvaliacaoDTO extends AtitudePessoalDTO {
   
   private Integer avaliacao ;
 
+  private Integer autoAvaliacao ;
+
 }

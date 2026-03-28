@@ -26,4 +26,8 @@ public class ObjectivoAvaliacaoDTO extends ObjectivoDTO {
   
   private Integer avaliacao ;
 
+  private String autoRealizado ;
+
+  private Integer autoAvaliacao ;
+
 }

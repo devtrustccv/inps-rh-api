@@ -23,4 +23,6 @@ public class CompetenciaTecAvaliacaoDTO extends CompetenciaTecnicaDTO {
   
   private Integer avaliacao ;
 
+  private Integer autoAvaliacao ;
+
 }

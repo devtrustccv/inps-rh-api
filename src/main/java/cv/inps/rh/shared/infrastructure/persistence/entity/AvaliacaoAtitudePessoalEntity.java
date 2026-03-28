@@ -43,7 +43,7 @@ public class AvaliacaoAtitudePessoalEntity extends AuditEntity {
   @Column(name = "AUTO_AVALIACAO", precision = 5, scale = 2)
   private BigDecimal autoAvaliacao;
 
-  @Column(name = "avaliacao", precision = 5, scale = 2)
+  @Column(name = "AVALIACAO", precision = 5, scale = 2)
   private BigDecimal avaliacaoProcessual;
 
   @Column(name = "ESTADO", length = 1)

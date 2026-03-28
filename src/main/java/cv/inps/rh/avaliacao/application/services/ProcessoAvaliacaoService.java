@@ -54,30 +54,7 @@ public class ProcessoAvaliacaoService {
   }
 
   @Transactional
-  public Map<String, ?> gravarAvaliacao(String uuid, AvaliacaoDTO dto) {
-    var avaliacao = load(uuid);
-
-    if (dto != null && dto.getObjectivos() != null) {
-      var objetivos = objectivoRepository.findAllByAvaliacaoObj_Uuid(avaliacao.getUuid());
-      dto.getObjectivos().forEach(o -> {
-        if (o == null || o.getNumero() == null)
-          return;
-        objetivos.stream()
-            .filter(e -> o.getNumero().equals(e.getNumeroOrdem()))
-            .findFirst()
-            .ifPresent(e -> e.setMeta(o.getMeta()));
-      });
-    }
-
-    recalcularAvaliacaoSemestral(avaliacao);
-    atualizarEstadoSemestre(avaliacao);
-
-    avaliacaoRepository.save(avaliacao);
-    return Map.of("id", avaliacao.getUuid());
-  }
-
-  @Transactional
-  public ResponseEntity<Map<String, ?>> gravarAutoAvaliacao(String uuid, AvaliacaoDTO dto) {
+  public ResponseEntity<Map<String, ?>> gravarAvaliacao(String uuid, AvaliacaoDTO dto) {
     var avaliacao = load(uuid);
 
     var objetivos = objectivoRepository.findAllByAvaliacaoObj_Uuid(avaliacao.getUuid());
@@ -89,8 +66,8 @@ public class ProcessoAvaliacaoService {
             .filter(e -> e != null && o.getNumero().equals(e.getNumeroOrdem()))
             .findFirst()
             .ifPresent(e -> {
-              e.setAutoRealizado(o.getRealizado());
-              e.setAutoAvaliacao(o.getAvaliacao() != null ? BigDecimal.valueOf(o.getAvaliacao()) : null);
+              e.setRealizado(o.getRealizado());
+              e.setAvaliacao(o.getAvaliacao() != null ? BigDecimal.valueOf(o.getAvaliacao()) : null);
             });
       });
       objectivoRepository.saveAll(objetivos);
@@ -107,8 +84,8 @@ public class ProcessoAvaliacaoService {
                   && "COMPETENCIA_COMPORTAMENTAL".equalsIgnoreCase(e.getComponente())
                   && c.getNumeroOrdem().equals(e.getNumeroOrdem()))
               .findFirst()
-              .ifPresent(
-                  e -> e.setAutoAvaliacao(c.getAvaliacao() != null ? BigDecimal.valueOf(c.getAvaliacao()) : null));
+              .ifPresent(e -> e
+                  .setAvaliacaoProcessual(c.getAvaliacao() != null ? BigDecimal.valueOf(c.getAvaliacao()) : null));
         });
       }
       if (dto.getCompetenciasTecnicas() != null) {
@@ -120,8 +97,8 @@ public class ProcessoAvaliacaoService {
                   && "COMPETENCIA_TECNICA".equalsIgnoreCase(e.getComponente())
                   && c.getNumeroOrdem().equals(e.getNumeroOrdem()))
               .findFirst()
-              .ifPresent(
-                  e -> e.setAutoAvaliacao(c.getAvaliacao() != null ? BigDecimal.valueOf(c.getAvaliacao()) : null));
+              .ifPresent(e -> e
+                  .setAvaliacaoProcessual(c.getAvaliacao() != null ? BigDecimal.valueOf(c.getAvaliacao()) : null));
         });
       }
       competenciaRepository.saveAll(competencias);
@@ -137,14 +114,93 @@ public class ProcessoAvaliacaoService {
                 && e.getParamObjetivo() != null
                 && a.getNumeroOrdem().equals(e.getParamObjetivo().getNumeroOrdem()))
             .findFirst()
-            .ifPresent(e -> e.setAutoAvaliacao(a.getAvaliacao() != null ? BigDecimal.valueOf(a.getAvaliacao()) : null));
+            .ifPresent(
+                e -> e.setAvaliacaoProcessual(a.getAvaliacao() != null ? BigDecimal.valueOf(a.getAvaliacao()) : null));
       });
       atitudeRepository.saveAll(atitudes);
     }
 
     recalcularAvaliacaoSemestral(avaliacao);
+    atualizarEstadoSemestre(avaliacao);
 
     avaliacaoRepository.save(avaliacao);
+    return ResponseEntity.ok(Map.of("id", avaliacao.getUuid()));
+  }
+
+  @Transactional
+  public ResponseEntity<Map<String, ?>> gravarAutoAvaliacao(String uuid, AvaliacaoDTO dto) {
+    var avaliacao = load(uuid);
+
+    var objetivos = objectivoRepository.findAllByAvaliacaoObj_Uuid(avaliacao.getUuid());
+    if (dto != null && dto.getObjectivos() != null && objetivos != null) {
+      dto.getObjectivos().forEach(o -> {
+        if (o == null || o.getNumero() == null)
+          return;
+        objetivos.stream()
+            .filter(e -> e != null && o.getNumero().equals(e.getNumeroOrdem()))
+            .findFirst()
+            .ifPresent(e -> {
+              var realizado = o.getAutoRealizado() != null ? o.getAutoRealizado() : o.getRealizado();
+              var avaliacaoNota = o.getAutoAvaliacao() != null ? o.getAutoAvaliacao() : o.getAvaliacao();
+              e.setAutoRealizado(realizado);
+              e.setAutoAvaliacao(avaliacaoNota != null ? BigDecimal.valueOf(avaliacaoNota) : null);
+            });
+      });
+      objectivoRepository.saveAll(objetivos);
+    }
+
+    var competencias = competenciaRepository.findAllByAvaliacao_Uuid(avaliacao.getUuid());
+    if (dto != null && competencias != null) {
+      if (dto.getCompetenciasComportamentais() != null) {
+        dto.getCompetenciasComportamentais().forEach(c -> {
+          if (c == null || c.getNumeroOrdem() == null)
+            return;
+          competencias.stream()
+              .filter(e -> e != null
+                  && "COMPETENCIA_COMPORTAMENTAL".equalsIgnoreCase(e.getComponente())
+                  && c.getNumeroOrdem().equals(e.getNumeroOrdem()))
+              .findFirst()
+              .ifPresent(e -> {
+                var nota = c.getAutoAvaliacao() != null ? c.getAutoAvaliacao() : c.getAvaliacao();
+                e.setAutoAvaliacao(nota != null ? BigDecimal.valueOf(nota) : null);
+              });
+        });
+      }
+      if (dto.getCompetenciasTecnicas() != null) {
+        dto.getCompetenciasTecnicas().forEach(c -> {
+          if (c == null || c.getNumeroOrdem() == null)
+            return;
+          competencias.stream()
+              .filter(e -> e != null
+                  && "COMPETENCIA_TECNICA".equalsIgnoreCase(e.getComponente())
+                  && c.getNumeroOrdem().equals(e.getNumeroOrdem()))
+              .findFirst()
+              .ifPresent(e -> {
+                var nota = c.getAutoAvaliacao() != null ? c.getAutoAvaliacao() : c.getAvaliacao();
+                e.setAutoAvaliacao(nota != null ? BigDecimal.valueOf(nota) : null);
+              });
+        });
+      }
+      competenciaRepository.saveAll(competencias);
+    }
+
+    var atitudes = atitudeRepository.findAllByAvaliacao_Uuid(avaliacao.getUuid());
+    if (dto != null && dto.getAtitudesPessoais() != null && atitudes != null) {
+      dto.getAtitudesPessoais().forEach(a -> {
+        if (a == null || a.getNumeroOrdem() == null)
+          return;
+        atitudes.stream()
+            .filter(e -> e != null
+                && e.getParamObjetivo() != null
+                && a.getNumeroOrdem().equals(e.getParamObjetivo().getNumeroOrdem()))
+            .findFirst()
+            .ifPresent(e -> {
+              var nota = a.getAutoAvaliacao() != null ? a.getAutoAvaliacao() : a.getAvaliacao();
+              e.setAutoAvaliacao(nota != null ? BigDecimal.valueOf(nota) : null);
+            });
+      });
+      atitudeRepository.saveAll(atitudes);
+    }
     return ResponseEntity.ok(Map.of("id", avaliacao.getUuid()));
   }
 
@@ -233,8 +289,7 @@ public class ProcessoAvaliacaoService {
 
     var resultadoObjetivos = objetivos.stream()
         .filter(o -> o.getEstado() == null || !o.getEstado().equals("E"))
-        .map(
-            o -> multiplyPercent(o.getAvaliacao() != null ? o.getAvaliacao() : o.getAutoAvaliacao(), o.getPonderacao()))
+        .map(o -> multiplyPercent(o.getAvaliacao(), o.getPonderacao()))
         .reduce(BigDecimal.ZERO, BigDecimal::add);
 
     var avaliacaoObjetivo = multiplyPercent(resultadoObjetivos, det.getPonderacaoObjetivo());
@@ -246,7 +301,7 @@ public class ProcessoAvaliacaoService {
         .stream()
         .filter(c -> c != null && (c.getEstado() == null || !"E".equalsIgnoreCase(c.getEstado())))
         .filter(c -> "COMPETENCIA_COMPORTAMENTAL".equalsIgnoreCase(c.getComponente()))
-        .map(c -> multiplyPercent(c.getAutoAvaliacao(), c.getPonderacao()))
+        .map(c -> multiplyPercent(c.getAvaliacaoProcessual(), c.getPonderacao()))
         .reduce(BigDecimal.ZERO, BigDecimal::add);
 
     var resultadoTec = (competencias == null
@@ -255,16 +310,10 @@ public class ProcessoAvaliacaoService {
         .stream()
         .filter(c -> c != null && (c.getEstado() == null || !"E".equalsIgnoreCase(c.getEstado())))
         .filter(c -> "COMPETENCIA_TECNICA".equalsIgnoreCase(c.getComponente()))
-        .map(c -> multiplyPercent(c.getAutoAvaliacao(), c.getPonderacao()))
+        .map(c -> multiplyPercent(c.getAvaliacaoProcessual(), c.getPonderacao()))
         .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-    var resultadoCompetencias = BigDecimal.ZERO;
-    if (det.getPesoComportamentais() != null || det.getPesoTecnica() != null) {
-      resultadoCompetencias = multiplyPercent(resultadoComport, det.getPesoComportamentais())
-          .add(multiplyPercent(resultadoTec, det.getPesoTecnica()));
-    } else {
-      resultadoCompetencias = resultadoComport.add(resultadoTec);
-    }
+    var resultadoCompetencias = resultadoComport.add(resultadoTec);
 
     var avaliacaoCompetencia = multiplyPercent(resultadoCompetencias, det.getPonderacaoCompetencia());
 
@@ -274,7 +323,7 @@ public class ProcessoAvaliacaoService {
         : atitudes)
         .stream()
         .filter(a -> a != null && (a.getEstado() == null || !"E".equalsIgnoreCase(a.getEstado())))
-        .map(a -> multiplyPercent(a.getAutoAvaliacao(), a.getPonderacao()))
+        .map(a -> multiplyPercent(a.getAvaliacaoProcessual(), a.getPonderacao()))
         .reduce(BigDecimal.ZERO, BigDecimal::add);
     var avaliacaoAtitude = multiplyPercent(resultadoAtitudes, det.getPonderacaoAtitudePess());
 
@@ -285,8 +334,6 @@ public class ProcessoAvaliacaoService {
     avaliacao.setAvaliacaoObjectivo(scale2(avaliacaoObjetivo));
     avaliacao.setAvaliacaoCompetencia(scale2(avaliacaoCompetencia));
     avaliacao.setAvaliacaoAtitudePess(scale2(avaliacaoAtitude));
-    avaliacao.setPesoComportamentais(det.getPesoComportamentais());
-    avaliacao.setPesoTecnica(det.getPesoTecnica());
 
     avaliacao.setAvaliacaoFinal(avaliacaoFinal != null ? avaliacaoFinal.doubleValue() : null);
 

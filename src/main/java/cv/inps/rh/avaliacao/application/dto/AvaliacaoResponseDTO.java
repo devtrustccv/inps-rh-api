@@ -17,12 +17,10 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @IgrpDTO
-public class CompetenciaComportAvaliacaoDTO extends CompetenciaComportamentalDTO {
+public class AvaliacaoResponseDTO extends AvaliacaoDTO {
 
-  
-  
-  private Integer avaliacao ;
-
-  private Integer autoAvaliacao ;
+  private ObservacaoGeralDTO observacaoGeral;
+  private ParecerColaboradorDTO parecerColaborador;
+  private ComissaoExecutivaDTO comissaoExecutiva;
 
 }

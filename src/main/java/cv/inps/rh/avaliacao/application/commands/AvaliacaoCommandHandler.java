@@ -27,7 +27,7 @@ public class AvaliacaoCommandHandler implements CommandHandler<AvaliacaoCommand,
 
       LOGGER.debug("AvaliacaoCommand : {}", command);
 
-      return ResponseEntity.ok(processoAvaliacaoService.gravarAvaliacao(command.getUuid(), command.getAvaliacao()));
+      return processoAvaliacaoService.gravarAvaliacao(command.getUuid(), command.getAvaliacao());
    }
 
 }
