@@ -140,8 +140,8 @@ public class ProcessoAvaliacaoService {
             .filter(e -> e != null && o.getNumero().equals(e.getNumeroOrdem()))
             .findFirst()
             .ifPresent(e -> {
-              var realizado = o.getAutoRealizado() != null ? o.getAutoRealizado() : o.getRealizado();
-              var avaliacaoNota = o.getAutoAvaliacao() != null ? o.getAutoAvaliacao() : o.getAvaliacao();
+              var realizado = o.getAutoRealizado() != null ? o.getAutoRealizado() : null;
+              var avaliacaoNota = o.getAutoAvaliacao() != null ? o.getAutoAvaliacao() : null;
               e.setAutoRealizado(realizado);
               e.setAutoAvaliacao(avaliacaoNota != null ? BigDecimal.valueOf(avaliacaoNota) : null);
             });
@@ -161,7 +161,7 @@ public class ProcessoAvaliacaoService {
                   && c.getNumeroOrdem().equals(e.getNumeroOrdem()))
               .findFirst()
               .ifPresent(e -> {
-                var nota = c.getAutoAvaliacao() != null ? c.getAutoAvaliacao() : c.getAvaliacao();
+                var nota = c.getAutoAvaliacao() != null ? c.getAutoAvaliacao() : null;
                 e.setAutoAvaliacao(nota != null ? BigDecimal.valueOf(nota) : null);
               });
         });
@@ -176,7 +176,7 @@ public class ProcessoAvaliacaoService {
                   && c.getNumeroOrdem().equals(e.getNumeroOrdem()))
               .findFirst()
               .ifPresent(e -> {
-                var nota = c.getAutoAvaliacao() != null ? c.getAutoAvaliacao() : c.getAvaliacao();
+                var nota = c.getAutoAvaliacao() != null ? c.getAutoAvaliacao() : null;
                 e.setAutoAvaliacao(nota != null ? BigDecimal.valueOf(nota) : null);
               });
         });
@@ -195,7 +195,7 @@ public class ProcessoAvaliacaoService {
                 && a.getNumeroOrdem().equals(e.getParamObjetivo().getNumeroOrdem()))
             .findFirst()
             .ifPresent(e -> {
-              var nota = a.getAutoAvaliacao() != null ? a.getAutoAvaliacao() : a.getAvaliacao();
+              var nota = a.getAutoAvaliacao() != null ? a.getAutoAvaliacao() : null;
               e.setAutoAvaliacao(nota != null ? BigDecimal.valueOf(nota) : null);
             });
       });
