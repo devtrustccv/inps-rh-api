@@ -11,7 +11,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 @Component
-public class AutoAvaliacaoCommandHandler implements CommandHandler<AutoAvaliacaoCommand, ResponseEntity<Map<String, ?>>> {
+public class AutoAvaliacaoCommandHandler
+      implements CommandHandler<AutoAvaliacaoCommand, ResponseEntity<Map<String, ?>>> {
 
    private static final Logger LOGGER = LoggerFactory.getLogger(AutoAvaliacaoCommandHandler.class);
 
@@ -27,7 +28,7 @@ public class AutoAvaliacaoCommandHandler implements CommandHandler<AutoAvaliacao
 
       LOGGER.debug("AutoAvaliacaoCommand : {}", command);
 
-      return ResponseEntity.ok(processoAvaliacaoService.gravarAutoAvaliacao(command.getUuid(), command.getAvaliacao()));
+      return processoAvaliacaoService.gravarAutoAvaliacao(command.getUuid(), command.getAvaliacao());
    }
 
 }
