@@ -82,7 +82,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
       predicates.add(cb.equal(root.get("estado"), estado));
 
       if (StringUtils.hasText(reference))
-        predicates.add(cb.like(cb.lower(root.get("tipoNotificacao")), reference));
+        predicates.add(cb.like(cb.lower(root.get("tipoNotificacao")), reference.toLowerCase()));
 
       return cb.and(predicates.toArray(new Predicate[0]));
     };

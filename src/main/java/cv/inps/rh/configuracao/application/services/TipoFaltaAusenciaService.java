@@ -47,6 +47,7 @@ public class TipoFaltaAusenciaService extends ConfigurationProcess<TipoFaltaAuse
     entity.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
     entity.setEstado(Estado.A);
     entity.setNome(dto.getDescricao());
+    entity.setFalta(dto.getDescricao());
     entity.setTipo(dto.getCodigo());
     entity.setSituacao(dto.getSituacao());
     entity.setDescontoRemuneracao(dto.getDescontoRemuneracao());
@@ -65,6 +66,7 @@ public class TipoFaltaAusenciaService extends ConfigurationProcess<TipoFaltaAuse
       throw IgrpResponseStatusException.conflict("O código informado já está em uso por outro tipo de falta");
 
     entity.setNome(dto.getDescricao());
+    entity.setFalta(dto.getDescricao());
     entity.setTipo(dto.getCodigo());
     entity.setSituacao(dto.getSituacao());
     entity.setDescontoRemuneracao(dto.getDescontoRemuneracao());

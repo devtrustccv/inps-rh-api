@@ -83,6 +83,7 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     e.setCodigo(dto.getCodigo());
     e.setFlgContrato(ConfigurationUtils.parseFlag(dto.getContrato()));
     e.setNome(dto.getDescricao().trim());
+    e.setNomeNormalizado(ConfigurationUtils.normalizeAndSetToLowerCaseText(dto.getDescricao()));
     e.setFlgCarreira(ConfigurationUtils.parseFlag(dto.getCarreira()));
     e.setFlgSalario(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
     e.setParamContratoId(StringUtils.hasText(dto.getContratoId()) ? paramContratoEntityRepository.findByUuidOrThrow(UUID.fromString(dto.getContratoId())) : null);

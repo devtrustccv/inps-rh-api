@@ -210,11 +210,11 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
       predicates.add(cb.equal(root.get(SecaoEntity_.ESTADO), estado));
 
       if (StringUtils.hasText(classificacaoArea))
-        predicates.add(cb.equal(root.get(ParamSituacaoEntity_.classificacaoArea), classificacaoArea));
+        predicates.add(cb.equal(root.get(ParamSituacaoEntity_.classificacaoArea), Integer.valueOf(classificacaoArea)));
       if (StringUtils.hasText(afetaSituacaoLaboral))
-        predicates.add(cb.equal(root.get(ParamSituacaoEntity_.flgSituacaoLaboral), afetaSituacaoLaboral));
+        predicates.add(cb.equal(root.get(ParamSituacaoEntity_.flgSituacaoLaboral), Integer.valueOf(afetaSituacaoLaboral)));
       if (StringUtils.hasText(abonoBeneficio))
-        predicates.add(cb.equal(root.get(ParamSituacaoEntity_.flgAbonoBeneficio), abonoBeneficio));
+        predicates.add(cb.equal(root.get(ParamSituacaoEntity_.flgAbonoBeneficio), Integer.valueOf(abonoBeneficio)));
       if (StringUtils.hasText(ausenciaLocalTrabalho))
         predicates.add(cb.equal(root.get(ParamSituacaoEntity_.flgAusencia), ausenciaLocalTrabalho));
 
