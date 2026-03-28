@@ -1,0 +1,26 @@
+{
+  "type": "dto",
+  "module": "avaliacao",
+  "name": "AtitudePessoalAvaliacao",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "AtitudePessoal",
+    "module": "avaliacao"
+  },
+  "attributes": [
+    {
+      "name": "avaliacao",
+      "objectType": "java",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "z655ydvoml"
+}

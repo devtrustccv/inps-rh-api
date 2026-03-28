@@ -50,7 +50,7 @@ public class AvaliacaoReadService {
 
     var objectivos = objectivoRepository.findAllByAvaliacaoObj_Uuid(id).stream()
         .sorted(Comparator.comparing(AvaliacaoObjectivoEntity::getNumeroOrdem, Comparator.nullsLast(Comparator.naturalOrder())))
-        .map(this::toObjectivoDto)
+        .map(this::toObjectivoAvaliacaoDTO)
         .toList();
     dto.setObjectivos(objectivos);
 
@@ -60,13 +60,13 @@ public class AvaliacaoReadService {
     dto.setCompetenciasComportamentais(
         competencias.stream()
             .filter(c -> "COMPETENCIA_COMPORTAMENTAL".equalsIgnoreCase(c.getComponente()))
-            .map(this::toCompetenciaComportamentalDto)
+            .map(this::toCompetenciaComportAvaliacaoDTO)
             .toList()
     );
     dto.setCompetenciasTecnicas(
         competencias.stream()
             .filter(c -> "COMPETENCIA_TECNICA".equalsIgnoreCase(c.getComponente()))
-            .map(this::toCompetenciaTecnicaDto)
+            .map(this::toCompetenciaTecAvaliacaoDTO)
             .toList()
     );
 
@@ -74,7 +74,7 @@ public class AvaliacaoReadService {
         atitudeRepository.findAllByAvaliacao_Uuid(id).stream()
             .sorted(Comparator.comparing(a -> a.getParamObjetivo() != null ? a.getParamObjetivo().getNumeroOrdem() : null,
                 Comparator.nullsLast(Comparator.naturalOrder())))
-            .map(this::toAtitudePessoalDto)
+            .map(this::toAtitudePessoalAvaliacaoDTO)
             .toList()
     );
 
@@ -110,42 +110,50 @@ public class AvaliacaoReadService {
     });
   }
 
-  private ObjectivoDTO toObjectivoDto(AvaliacaoObjectivoEntity e) {
-    var dto = new ObjectivoDTO();
+
+  private ObjectivoAvaliacaoDTO toObjectivoAvaliacaoDTO(AvaliacaoObjectivoEntity e) {
+    var dto = new ObjectivoAvaliacaoDTO();
     dto.setNumero(e.getNumeroOrdem());
     dto.setAbrangencia(e.getAbrangencia());
     dto.setObjectivo(e.getObjectivos());
     dto.setKpi(e.getKpi());
     dto.setMeta(e.getMeta());
+    dto.setAvaliacao(e.getAvaliacao()!=null ? e.getAvaliacao().intValue(): null);
+    dto.setRealizado(e.getRealizado());
     return dto;
   }
 
-  private CompetenciaComportamentalDTO toCompetenciaComportamentalDto(AvaliacaoCompetenciaEntity e) {
-    var dto = new CompetenciaComportamentalDTO();
+
+
+  private CompetenciaComportAvaliacaoDTO toCompetenciaComportAvaliacaoDTO(AvaliacaoCompetenciaEntity e) {
+    var dto = new CompetenciaComportAvaliacaoDTO();
     dto.setNumeroOrdem(e.getNumeroOrdem());
     dto.setAbrangencia(e.getAbrangencia());
     dto.setCompetencia(e.getDescricao());
     dto.setPeso(e.getPeso());
     dto.setPonderacao(e.getPonderacao());
+    dto.setAvaliacao(null);
     return dto;
   }
 
-  private CompetenciaTecnicaDTO toCompetenciaTecnicaDto(AvaliacaoCompetenciaEntity e) {
-    var dto = new CompetenciaTecnicaDTO();
+  private CompetenciaTecAvaliacaoDTO toCompetenciaTecAvaliacaoDTO(AvaliacaoCompetenciaEntity e) {
+    var dto = new CompetenciaTecAvaliacaoDTO();
     dto.setNumeroOrdem(e.getNumeroOrdem());
     dto.setAbrangencia(e.getAbrangencia());
     dto.setCompetencia(e.getDescricao());
     dto.setPeso(e.getPeso());
     dto.setPonderacao(e.getPonderacao());
+    dto.setAvaliacao(null);
     return dto;
   }
 
-  private AtitudePessoalDTO toAtitudePessoalDto(AvaliacaoAtitudePessoalEntity e) {
-    var dto = new AtitudePessoalDTO();
+  private AtitudePessoalAvaliacaoDTO toAtitudePessoalAvaliacaoDTO(AvaliacaoAtitudePessoalEntity e) {
+    var dto = new AtitudePessoalAvaliacaoDTO();
     dto.setNumeroOrdem(e.getParamObjetivo() != null ? e.getParamObjetivo().getNumeroOrdem() : null);
     dto.setAbrangencia(e.getAbrangencia());
     dto.setAtitudePessoal(e.getParamObjetivo() != null ? e.getParamObjetivo().getDescricao() : null);
     dto.setPonderacao(e.getPonderacao());
+    dto.setAvaliacao(null);
     return dto;
   }
 }

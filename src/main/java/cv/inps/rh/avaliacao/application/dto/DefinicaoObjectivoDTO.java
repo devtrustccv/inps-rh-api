@@ -25,4 +25,9 @@ public class DefinicaoObjectivoDTO extends BaseAvaliacaoObjetivoDTO {
 
   private List<UUID> funUuids;
 
+  private List<ObjectivoDTO> objectivos;
+  private List<CompetenciaComportamentalDTO> competenciasComportamentais;
+  private List<CompetenciaTecnicaDTO> competenciasTecnicas;
+  private List<AtitudePessoalDTO> atitudesPessoais;
+
 }

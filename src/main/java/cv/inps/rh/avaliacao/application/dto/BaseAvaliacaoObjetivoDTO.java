@@ -35,12 +35,6 @@ public class BaseAvaliacaoObjetivoDTO  {
   private Long carrPccsId;
   private Long carrPccsNome;
 
-  private List<ObjectivoDTO> objectivos;
 
-  private List<CompetenciaComportamentalDTO> competenciasComportamentais;
-
-  private List<CompetenciaTecnicaDTO> competenciasTecnicas;
-
-  private List<AtitudePessoalDTO> atitudesPessoais;
 
 }
