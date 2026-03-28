@@ -80,15 +80,84 @@ public class AvaliacaoReadService {
     return dto;
   }
 
-
   @Transactional(readOnly = true)
   public AvaliacaoDTO getDefinicaoObjetivo(String uuid) {
     return getAvaliacao(uuid);
   }
 
   @Transactional(readOnly = true)
-  public AvaliacaoResponseDTO getAvaliacao2(String uuid){
-    return null;
+  public AvaliacaoResponseDTO getAvaliacao2(String uuid) {
+    var id = parseUuid(uuid);
+
+    var avaliacao = avaliacaoRepository.findByUuidOrThrow(id);
+
+    var dto = new AvaliacaoResponseDTO();
+    fillHeader(avaliacao, dto);
+
+    var objectivos = objectivoRepository.findAllByAvaliacaoObj_Uuid(id).stream()
+        .sorted(Comparator.comparing(AvaliacaoObjectivoEntity::getNumeroOrdem,
+            Comparator.nullsLast(Comparator.naturalOrder())))
+        .map(this::toObjectivoAvaliacaoDTO)
+        .toList();
+    dto.setObjectivos(objectivos);
+
+    var competencias = competenciaRepository.findAllByAvaliacao_Uuid(id).stream()
+        .sorted(Comparator.comparing(AvaliacaoCompetenciaEntity::getNumeroOrdem,
+            Comparator.nullsLast(Comparator.naturalOrder())))
+        .toList();
+    dto.setCompetenciasComportamentais(
+        competencias.stream()
+            .filter(c -> "COMPETENCIA_COMPORTAMENTAL".equalsIgnoreCase(c.getComponente()))
+            .map(this::toCompetenciaComportAvaliacaoDTO)
+            .toList());
+    dto.setCompetenciasTecnicas(
+        competencias.stream()
+            .filter(c -> "COMPETENCIA_TECNICA".equalsIgnoreCase(c.getComponente()))
+            .map(this::toCompetenciaTecAvaliacaoDTO)
+            .toList());
+
+    dto.setAtitudesPessoais(
+        atitudeRepository.findAllByAvaliacao_Uuid(id).stream()
+            .sorted(
+                Comparator.comparing(a -> a.getParamObjetivo() != null ? a.getParamObjetivo().getNumeroOrdem() : null,
+                    Comparator.nullsLast(Comparator.naturalOrder())))
+            .map(this::toAtitudePessoalAvaliacaoDTO)
+            .toList());
+
+    var hasObservacao = hasText(avaliacao.getObservacaoGeral())
+        || hasText(avaliacao.getDescricaoPlano())
+        || avaliacao.getDataInicioEntrevista() != null
+        || hasText(avaliacao.getHoraInicioEntrevista())
+        || hasText(avaliacao.getHoraFimEntrevista());
+    if (hasObservacao) {
+      var obs = new ObservacaoGeralDTO();
+      obs.setObservacaoGeralAvaliacao(avaliacao.getObservacaoGeral());
+      obs.setDescPlanoDesenvolvimento(avaliacao.getDescricaoPlano());
+      obs.setDataInicio(avaliacao.getDataInicioEntrevista());
+      obs.setHoraInicio(avaliacao.getHoraInicioEntrevista());
+      obs.setHoraFim(avaliacao.getHoraFimEntrevista());
+      dto.setObservacaoGeral(obs);
+    }
+
+    var hasParecer = hasText(avaliacao.getParecerColaborador()) || hasText(avaliacao.getJustificacaoMotivo());
+    if (hasParecer) {
+      var parecer = new ParecerColaboradorDTO();
+      parecer.setParecer(avaliacao.getParecerColaborador());
+      parecer.setJustificar(avaliacao.getJustificacaoMotivo());
+      dto.setParecerColaborador(parecer);
+    }
+
+    if (hasText(avaliacao.getObsComissaoExec())) {
+      var ce = new ComissaoExecutivaDTO();
+      ce.setObservacao(avaliacao.getObsComissaoExec());
+      dto.setComissaoExecutiva(ce);
+    }
+
+    return dto;
+  }
+
+  private boolean hasText(String s) {
+    return s != null && !s.trim().isEmpty();
   }
 
   private UUID parseUuid(String raw) {
