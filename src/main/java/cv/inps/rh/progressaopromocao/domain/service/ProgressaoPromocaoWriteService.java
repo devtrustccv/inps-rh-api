@@ -81,9 +81,9 @@ public class ProgressaoPromocaoWriteService {
     os.setEstado(Estado.A);
     os.setUuid(UuidCreator.getTimeOrderedEpoch());
     os.setFunId(funId);
-    var osUuid = ordemServicoEntityRepository.save(os).getUuid().toString();
+    var id = ordemServicoEntityRepository.save(os).getId().toString();
 
-    ev.setOrdemServicoId(osUuid);
+    ev.setOrdemServicoId(id);
     evolucaoCarreiraEntityRepository.save(ev);
   }
 
@@ -110,6 +110,8 @@ public class ProgressaoPromocaoWriteService {
 
   public void confirmar(Long id) {
 
+    var ev = evolucaoCarreiraEntityRepository.findById(id).orElseThrow();
+
     var call = new SimpleJdbcCall(dataSource)
         .withoutProcedureColumnMetaDataAccess()
         .withProcedureName("CONFIRMAR_PROGRESSAO_PROMO")
@@ -120,7 +122,7 @@ public class ProgressaoPromocaoWriteService {
 
     call.execute(Map.of(
         "P_val_evol_carr_ID", id,
-        "P_ORDEM_SERVICO_ID", id // todo set correct value here
+        "P_ORDEM_SERVICO_ID", ev.getOrdemServicoId()
     ));
   }
 
