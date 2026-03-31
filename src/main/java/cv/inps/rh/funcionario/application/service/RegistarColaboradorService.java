@@ -221,7 +221,7 @@ public class RegistarColaboradorService {
     tr.setCarreiraId(carreira);
     tr.setRegimeId(regime);
     tr.setMobId(mobilidade);
-    tr.setFlgProcessa(0);
+    tr.setFlgProcessa(1);
     tr.setEstActAdm(1);
     tr.setSituacLaboralId(situacaoLaboral);
     fun.setTiposrelacionamentos(new ArrayList<>(List.of(tr)));

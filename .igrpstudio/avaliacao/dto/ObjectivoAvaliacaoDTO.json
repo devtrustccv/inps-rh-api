@@ -1,0 +1,38 @@
+{
+  "type": "dto",
+  "module": "avaliacao",
+  "name": "ObjectivoAvaliacaoDTO",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "Objectivo",
+    "module": "avaliacao"
+  },
+  "attributes": [
+    {
+      "name": "realizado",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "avaliacao",
+      "objectType": "java",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "lwvn72rbwv"
+}

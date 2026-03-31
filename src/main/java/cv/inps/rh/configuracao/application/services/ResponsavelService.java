@@ -4,12 +4,14 @@ import cv.inps.rh.configuracao.application.dto.AssociarResponsaveisRequestDTO;
 import cv.inps.rh.configuracao.application.dto.ResponsaveisDirecaoResponseDTO;
 import cv.inps.rh.configuracao.application.dto.ResponsavelResponseDTO;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.InstituicaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ResponsavelEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SecaoEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -45,9 +47,9 @@ public class ResponsavelService {
     });
   }
 
-  public ResponsaveisDirecaoResponseDTO getResponsavelData(Long institutoId) {
+  public ResponsaveisDirecaoResponseDTO getResponsavelData(Long institutoId, @NotBlank(message = "The field <seccaoId> is required") String seccaoId) {
 
-    var savedData = responsavelEntityRepository.findAllByInstitId_id(institutoId);
+    var savedData = responsavelEntityRepository.findAllByInstitId_idAndSecaoId_uuid(institutoId, UUID.fromString(seccaoId));
 
     var arraySavedData = new ArrayList<ResponsavelResponseDTO>();
 

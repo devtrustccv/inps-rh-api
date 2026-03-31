@@ -115,6 +115,8 @@ public class MissaoServicoServiceReadEmissaoRequisicaoTest {
     req2.setMissaoPrestId(prest);
     req2.setMissaoColabId(colab2);
 
+    prest.setEstado("A");
+    when(missaoPrestadorRepository.findAllByMissaoServId_Uuid(missaoUuid)).thenReturn(List.of(prest));
     when(missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid)).thenReturn(List.of(req1, req2));
 
     var doc = new DocumentoEntity();
@@ -133,5 +135,31 @@ public class MissaoServicoServiceReadEmissaoRequisicaoTest {
     assertEquals(2, resp.getBody().getRequisicoes().get(0).getColaboradores().size());
     assertNotNull(resp.getBody().getRequisicoes().get(0).getProposta());
   }
-}
 
+  @Test
+  void getEmissaoRequisicaoRetornaPrestadoresMesmoSemRequisicoes() {
+    var missaoUuid = UUID.randomUUID();
+    var missao = new MissaoServicoEntity();
+    missao.setId(1L);
+    missao.setUuid(missaoUuid);
+    missao.setEtapa("ETAPA_3_EMISSAO_REQUISICAO");
+    when(missaoServicoRepository.findByUuidOrThrow(missaoUuid)).thenReturn(missao);
+
+    var prest = new MissaoPrestadorEntity();
+    prest.setId(10L);
+    prest.setUuid(UUID.randomUUID());
+    prest.setNome("Prestador 1");
+    prest.setEmail("p1@mail");
+    prest.setEstado("A");
+
+    when(missaoPrestadorRepository.findAllByMissaoServId_Uuid(missaoUuid)).thenReturn(List.of(prest));
+    when(missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid)).thenReturn(List.of());
+
+    var resp = service.getEmissaoRequisicao(new GetSubmissaoServicoEmissaoRequisicaoQuery(missaoUuid.toString()));
+
+    assertNotNull(resp.getBody());
+    assertEquals(1, resp.getBody().getRequisicoes().size());
+    assertEquals(10L, resp.getBody().getRequisicoes().get(0).getMissaoPrestId());
+    assertEquals(0, resp.getBody().getRequisicoes().get(0).getColaboradores().size());
+  }
+}

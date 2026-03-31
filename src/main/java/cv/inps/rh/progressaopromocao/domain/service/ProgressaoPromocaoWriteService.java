@@ -16,14 +16,19 @@ import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 
+import javax.sql.DataSource;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 @Transactional
@@ -40,6 +45,7 @@ public class ProgressaoPromocaoWriteService {
   private final DocumentoEntityRepository documentoEntityRepository;
   private final PdfGenerator pdfGenerator;
   private final StorageService storageService;
+  private final DataSource dataSource;
 
   public void anexarOrdemServico(AnexarOrdemServicoRequestDTO request) {
 
@@ -75,9 +81,9 @@ public class ProgressaoPromocaoWriteService {
     os.setEstado(Estado.A);
     os.setUuid(UuidCreator.getTimeOrderedEpoch());
     os.setFunId(funId);
-    var osUuid = ordemServicoEntityRepository.save(os).getUuid().toString();
+    var id = ordemServicoEntityRepository.save(os).getId().toString();
 
-    ev.setOrdemServicoId(osUuid);
+    ev.setOrdemServicoId(id);
     evolucaoCarreiraEntityRepository.save(ev);
   }
 
@@ -100,6 +106,24 @@ public class ProgressaoPromocaoWriteService {
     }
 
     simEvolucaoCarreiraEntityRepository.deleteAll(rowsToBeValidated);
+  }
+
+  public void confirmar(Long id) {
+
+    var ev = evolucaoCarreiraEntityRepository.findById(id).orElseThrow();
+
+    var call = new SimpleJdbcCall(dataSource)
+        .withoutProcedureColumnMetaDataAccess()
+        .withProcedureName("CONFIRMAR_PROGRESSAO_PROMO")
+        .declareParameters(
+            new SqlParameter("P_val_evol_carr_ID", Types.NUMERIC),
+            new SqlParameter("P_ORDEM_SERVICO_ID", Types.NUMERIC)
+        );
+
+    call.execute(Map.of(
+        "P_val_evol_carr_ID", id,
+        "P_ORDEM_SERVICO_ID", ev.getOrdemServicoId()
+    ));
   }
 
   public void sendToHistory(List<Long> ids) {

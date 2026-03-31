@@ -18,10 +18,6 @@ public class ProgressaoService {
 
   private static final double MIN_MEDIA_AVALIACOES = 3.0;
 
-  // todo anexar ordem servico registar para cada colaborador, colocar ficheiro ao confirmar
-  // todo param situacao laboral flag evolui na carreira, deve calcular o tempo em que esteve nessa situacao e subtrair no tempo geral
-  // todo tabela situacao situacao laboral, tem id situacao, ligado ku vinculo, funcionario
-
   private final SimulacaoService simulacaoService;
 
   public void simular(VwRhProgressaoInputEntity c) {
@@ -29,7 +25,7 @@ public class ProgressaoService {
     LOGGER.debug("\n--------------------------------------------------PROGRESSAO-------------------------------------------------------------------------");
     LOGGER.debug("{}", c);
 
-    var dataMinProgressao = c.getDataInicio().plusYears(c.getTempoMinProgressaoAnos());
+    var dataMinProgressao = c.getDataInicio().plusYears(c.getTempoMinProgressaoAnos()).minusDays(c.getDiasEmSituacaoLaboral());
     var atingiuTempoProgressao = dataMinProgressao.isBefore(LocalDate.now());
     if (!atingiuTempoProgressao) {
       LOGGER.debug("Nao atingiu tempo minimo para progressao");

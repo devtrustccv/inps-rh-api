@@ -10,8 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.util.List;
-import java.util.UUID;
 import lombok.EqualsAndHashCode;
 @Data
 @NoArgsConstructor
@@ -19,20 +17,10 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @IgrpDTO
-public class AvaliacaoDTO extends BaseAvaliacaoObjetivoDTO {
+public class AvaliacaoResponseDTO extends AvaliacaoDTO {
 
-
-
-  private String nomeColaborador ;
-
-
-  private UUID uuidColaborador ;
-
-  private String estado;
-
-  private List<ObjectivoAvaliacaoDTO> objectivos;
-  private List<CompetenciaComportAvaliacaoDTO> competenciasComportamentais;
-  private List<CompetenciaTecAvaliacaoDTO> competenciasTecnicas;
-  private List<AtitudePessoalAvaliacaoDTO> atitudesPessoais;
+  private ObservacaoGeralDTO observacaoGeral;
+  private ParecerColaboradorDTO parecerColaborador;
+  private ComissaoExecutivaDTO comissaoExecutiva;
 
 }

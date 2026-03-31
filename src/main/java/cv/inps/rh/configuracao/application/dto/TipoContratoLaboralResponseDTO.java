@@ -21,6 +21,9 @@ public class TipoContratoLaboralResponseDTO extends TipoContratoLaboralRequestDT
 
   private String id ;
   private String vinculoDesc;
+  private String naturezaId;
+  private String FlgRenovavel;
+  private String prazoId;
 
 
   private String descricaoEstado ;

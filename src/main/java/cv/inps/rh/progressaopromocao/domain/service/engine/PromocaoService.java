@@ -22,9 +22,6 @@ public class PromocaoService {
 
   public void simular(VwRhProgressaoInputEntity c) {
 
-    // TODO 05/03/2026 17:41 colaborador em licença sem vencimento não deve progredir
-    // TODO 05/03/2026 17:41 O colaborador não deve estar em situação laboral em que não evolui na carreira no período de progressão; deve iniciar a partir da situação laboral atual
-
     LOGGER.debug("-----------------------------------------------------PROMOCAO--------------------------------------------------------------------");
     LOGGER.debug("{}", c);
 
@@ -47,7 +44,7 @@ public class PromocaoService {
     } else
       LOGGER.debug("Media <{}> abaixo do limite", media);
 
-    var dataProgressao = c.getDataInicio().plusYears(3);
+    var dataProgressao = c.getDataInicio().plusYears(3).minusDays(c.getDiasEmSituacaoLaboral());
     var atingiuTempoProgressao = dataProgressao.isBefore(LocalDate.now());
     if (atingiuTempoProgressao) {
       LOGGER.debug("Nao atingiu tempo minimo para promocao");

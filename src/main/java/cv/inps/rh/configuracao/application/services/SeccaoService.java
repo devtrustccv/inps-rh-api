@@ -21,10 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -127,8 +124,10 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
 
   private SeccaoResponseDTO buildResponse(SecaoEntity s) {
     var dto = new SeccaoResponseDTO();
-    dto.setDirecaoId(s.getInstId().getId().toString());
-    dto.setDireccao(s.getInstId().getNome());
+    if(Objects.nonNull(s.getInstId())) {
+      dto.setDirecaoId(s.getInstId().getId().toString());
+      dto.setDireccao(s.getInstId().getNome());
+    }
     dto.setDescricao(s.getNome());
     dto.setId(s.getUuid().toString());
     dto.setEstadoDescricao(s.getEstado().getDescription());
