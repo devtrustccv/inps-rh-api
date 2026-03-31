@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @IgrpDTO
 public class CompetenciaTecnicaLinhaResponseDTO extends ParamLinhaBaseResponseDTO {
 
+  private String abrangencia;
   private Integer numeroOrdem;
 }
 

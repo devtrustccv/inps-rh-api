@@ -81,6 +81,7 @@ public class ComponenteAvaliacaoMapper {
       return null;
     var entity = baseEntity(det, dto.getAplicarATodos(), dto.getCargoId(), dto.getCarrPccsId(), dto.getPonderacao(),
         componente);
+    entity.setDescricao(dto.getDescricao());
     entity.setNumeroOrdem(numeroOrdem);
     entity.setAbrangencia(abrangencia);
     return entity;
