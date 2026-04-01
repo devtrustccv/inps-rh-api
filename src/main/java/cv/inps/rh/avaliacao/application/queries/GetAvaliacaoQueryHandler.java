@@ -1,5 +1,6 @@
 package cv.inps.rh.avaliacao.application.queries;
 
+import cv.inps.rh.avaliacao.application.dto.AvaliacaoResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
@@ -12,7 +13,7 @@ import cv.inps.rh.avaliacao.application.dto.AvaliacaoDTO;
 import cv.inps.rh.avaliacao.application.services.AvaliacaoReadService;
 
 @Component
-public class GetAvaliacaoQueryHandler implements QueryHandler<GetAvaliacaoQuery, ResponseEntity<AvaliacaoDTO>>{
+public class GetAvaliacaoQueryHandler implements QueryHandler<GetAvaliacaoQuery, ResponseEntity<AvaliacaoResponseDTO>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetAvaliacaoQueryHandler.class);
 
@@ -24,7 +25,7 @@ public class GetAvaliacaoQueryHandler implements QueryHandler<GetAvaliacaoQuery,
   }
 
    @IgrpQueryHandler
-  public ResponseEntity<AvaliacaoDTO> handle(GetAvaliacaoQuery query) {
+  public ResponseEntity<AvaliacaoResponseDTO> handle(GetAvaliacaoQuery query) {
 
     LOGGER.debug("GetAvaliacaoQuery: {}", query);
 
