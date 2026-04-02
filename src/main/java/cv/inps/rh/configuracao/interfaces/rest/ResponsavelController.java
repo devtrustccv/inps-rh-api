@@ -22,6 +22,7 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.configuracao.application.commands.*;
 import cv.inps.rh.configuracao.application.dto.ResponsaveisDirecaoResponseDTO;
 import cv.inps.rh.configuracao.application.dto.AssociarResponsaveisRequestDTO;
+import cv.inps.rh.configuracao.application.dto.WrapperListResponsaveisDTO;
 
 @IgrpController
 @RestController
@@ -97,6 +98,42 @@ public class ResponsavelController {
       final var command = new SaveResponsaveisDirecaoCommand(saveResponsaveisDirecaoRequest);
 
       return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "responsaveis/search"
+  )
+  @Operation(
+    summary = "Get responsaveis",
+    description = "Get responsaveis",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = WrapperListResponsaveisDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<WrapperListResponsaveisDTO> getResponsaveis(
+    @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
+    @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
+    @RequestParam(value = "nomeFuncionario", required = false) String nomeFuncionario,
+    @RequestParam(value = "nomeInstituicao", required = false) String nomeInstituicao,
+    @RequestParam(value = "idInstituicao", required = false) Long idInstituicao,
+    @RequestParam(value = "nomeSecccao", required = false) String nomeSecccao,
+    @RequestParam(value = "idSeccao", required = false) Long idSeccao)
+  {
+
+      final var query = new GetResponsaveisQuery(pageNumber, pageSize, nomeFuncionario, nomeInstituicao, idInstituicao, nomeSecccao, idSeccao);
+
+      return queryBus.handle(query);
 
   }
 

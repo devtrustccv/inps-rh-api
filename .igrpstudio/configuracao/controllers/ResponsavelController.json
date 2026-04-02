@@ -71,6 +71,66 @@
           }
         }
       }
+    },
+    {
+      "actionName": "getResponsaveis",
+      "path": "responsaveis/search",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListResponsaveis",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "configuracao"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "nomeFuncionario",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "nomeInstituicao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "idInstituicao",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "nomeSecccao",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "idSeccao",
+          "isRequired": false
+        }
+      ]
     }
   ],
   "id": "l70rzcsd9p-getResponsaveisDirecao-getResponsaveisDirecao"

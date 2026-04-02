@@ -3,6 +3,8 @@ package cv.inps.rh.configuracao.application.services;
 import cv.inps.rh.configuracao.application.dto.AssociarResponsaveisRequestDTO;
 import cv.inps.rh.configuracao.application.dto.ResponsaveisDirecaoResponseDTO;
 import cv.inps.rh.configuracao.application.dto.ResponsavelResponseDTO;
+import cv.inps.rh.configuracao.application.dto.WrapperListResponsaveisDTO;
+import cv.inps.rh.configuracao.application.queries.GetResponsaveisQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
@@ -87,6 +89,12 @@ public class ResponsavelService {
     });
 
     return new ResponsaveisDirecaoResponseDTO(arraySavedData);
+  }
+
+
+  public WrapperListResponsaveisDTO getResponsaveis(GetResponsaveisQuery query){
+
+    return new WrapperListResponsaveisDTO();
   }
 
 }
