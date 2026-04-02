@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -25,6 +26,8 @@ public class BaseAvaliacaoObjetivoDTO  {
   private Long id;
   private String uuid;
   private Integer ano;
+  private BigDecimal pesoComportamentais;
+  private BigDecimal pesoTecnica;
   private String semestre;
   private Long institId;
   private String instituicaoNome;

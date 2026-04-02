@@ -189,7 +189,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "Avaliacao",
+                "type": "AvaliacaoResponse",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -431,5 +431,5 @@
       ]
     }
   ],
-  "id": "z90a939h7d-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos-initAvaliacao-getDefinicaoObjetivo"
+  "id": "z90a939h7d-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos-getListaDefinicaoObjectivos-initAvaliacao-getDefinicaoObjetivo-getAvaliacao"
 }

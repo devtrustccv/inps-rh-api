@@ -172,6 +172,8 @@ public class AvaliacaoReadService {
     target.setId(entity.getId());
     target.setUuid(entity.getUuid() != null ? entity.getUuid().toString() : null);
     target.setAno(entity.getAno());
+    target.setPesoComportamentais(entity.getPesoComportamentais());
+    target.setPesoTecnica(entity.getPesoTecnica());
     target.setSemestre(entity.getSemestre());
     target.setEstado(entity.getEstado());
     ofNullable(entity.getInstitId()).ifPresent(i -> target.setInstitId(i.getId()));
@@ -190,6 +192,7 @@ public class AvaliacaoReadService {
     dto.setAbrangencia(e.getAbrangencia());
     dto.setObjectivo(e.getObjectivos());
     dto.setKpi(e.getKpi());
+    dto.setPonderacao(e.getPonderacao());
     dto.setMeta(e.getMeta());
     dto.setAvaliacao(e.getAvaliacao() != null ? e.getAvaliacao().intValue() : null);
     dto.setRealizado(e.getRealizado());

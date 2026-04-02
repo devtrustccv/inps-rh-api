@@ -10,6 +10,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.math.BigDecimal;
+
 
 @Data
 @NoArgsConstructor
@@ -18,6 +20,7 @@ import lombok.AllArgsConstructor;
 
 @IgrpDTO
 public class ObjectivoDTO  {
+  private Long paramId;
 
   private Integer numero;
 
@@ -26,6 +29,8 @@ public class ObjectivoDTO  {
   private String objectivo;
 
   private String kpi;
+
+  private BigDecimal ponderacao;
 
   private String meta;
 

@@ -25,6 +25,7 @@ import java.util.Map;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaDefinicaoObjetivoDTO;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaAvaliacaoDTO;
 import cv.inps.rh.avaliacao.application.dto.AvaliacaoDTO;
+import cv.inps.rh.avaliacao.application.dto.AvaliacaoResponseDTO;
 import cv.inps.rh.avaliacao.application.dto.ObservacaoGeralDTO;
 import cv.inps.rh.avaliacao.application.dto.ParecerColaboradorDTO;
 import cv.inps.rh.avaliacao.application.dto.ComissaoExecutivaDTO;
@@ -190,14 +191,14 @@ public class AvaliacaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = AvaliacaoDTO.class,
+                  implementation = AvaliacaoResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
   
-  public ResponseEntity<AvaliacaoDTO> getAvaliacao(
+  public ResponseEntity<AvaliacaoResponseDTO> getAvaliacao(
     @PathVariable(value = "uuid") String uuid)
   {
 

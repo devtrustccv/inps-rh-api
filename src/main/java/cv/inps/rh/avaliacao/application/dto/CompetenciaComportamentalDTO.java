@@ -21,6 +21,8 @@ import java.math.BigDecimal;
 @IgrpDTO
 public class CompetenciaComportamentalDTO  {
 
+  private Long paramId;
+
   private Integer numeroOrdem;
 
   private String abrangencia;
