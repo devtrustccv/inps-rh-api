@@ -25,7 +25,7 @@ public class GetResponsaveisDirecaoQueryHandler implements QueryHandler<GetRespo
 
     LOGGER.debug("GetResponsaveisDirecaoQuery: {}", query);
 
-    var data = responsavelService.getResponsavelData(Long.valueOf(query.getInstitutoId()));
+    var data = responsavelService.getResponsavelData(Long.valueOf(query.getInstitutoId()), query.getSeccaoId());
 
     return ResponseEntity.ok(data);
   }

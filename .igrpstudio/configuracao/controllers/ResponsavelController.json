@@ -25,6 +25,13 @@
           }
         }
       },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "seccaoId",
+          "isRequired": true
+        }
+      ],
       "pathVariables": [
         {
           "name": "institutoId",
@@ -66,5 +73,5 @@
       }
     }
   ],
-  "id": "l70rzcsd9p-getResponsaveisDirecao"
+  "id": "l70rzcsd9p-getResponsaveisDirecao-getResponsaveisDirecao"
 }

@@ -62,4 +62,6 @@ public class VwRhProgressaoInputEntity {
   private int processoAnoAnterior;
   @Column(name = "APTO_PROC_DISCIPLINAR")
   private int aptoPorProcessoDisciplinar;
+  @Column(name = "NR_DIAS_EM_SIT_LAB")
+  private int diasEmSituacaoLaboral;
 }

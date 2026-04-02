@@ -1,15 +1,16 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
 
 
 @Repository
@@ -24,5 +25,7 @@ public interface ResponsavelEntityRepository extends
 
   List<ResponsavelEntity> findAllByInstitId_id(Long institutoId);
 
-    Optional<ResponsavelEntity> findByFunId_Uuid(UUID funcionarioUuid);
+  List<ResponsavelEntity> findAllByInstitId_idAndSecaoId_uuid(Long institutoId, UUID seccaoUuid);
+
+  Optional<ResponsavelEntity> findByFunId_Uuid(UUID funcionarioUuid);
 }

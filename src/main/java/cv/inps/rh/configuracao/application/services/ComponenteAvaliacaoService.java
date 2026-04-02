@@ -328,6 +328,7 @@ public class ComponenteAvaliacaoService {
   private CompetenciaComportamentalLinhaResponseDTO toCompComportamentalLinha(ParamObjetivoEntity e) {
     var dto = new CompetenciaComportamentalLinhaResponseDTO();
     fillBase(dto, e);
+    setField(dto, "abrangencia", e.getAbrangencia());
     dto.setNumeroOrdem(e.getNumeroOrdem());
     return dto;
   }
@@ -335,6 +336,7 @@ public class ComponenteAvaliacaoService {
   private CompetenciaTecnicaLinhaResponseDTO toCompTecnicaLinha(ParamObjetivoEntity e) {
     var dto = new CompetenciaTecnicaLinhaResponseDTO();
     fillBase(dto, e);
+    setField(dto, "abrangencia", e.getAbrangencia());
     dto.setNumeroOrdem(e.getNumeroOrdem());
     return dto;
   }
@@ -342,6 +344,8 @@ public class ComponenteAvaliacaoService {
   private AtitudePessoalLinhaResponseDTO toAtitudeLinha(ParamObjetivoEntity e) {
     var dto = new AtitudePessoalLinhaResponseDTO();
     fillBase(dto, e);
+    setField(dto, "abrangencia", e.getAbrangencia());
+    setField(dto, "descricao", e.getDescricao());
     return dto;
   }
 
