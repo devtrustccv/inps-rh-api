@@ -192,6 +192,7 @@ public class AvaliacaoReadService {
     dto.setAbrangencia(e.getAbrangencia());
     dto.setObjectivo(e.getObjectivos());
     dto.setKpi(e.getKpi());
+    dto.setPonderacao(e.getPonderacao());
     dto.setMeta(e.getMeta());
     dto.setAvaliacao(e.getAvaliacao() != null ? e.getAvaliacao().intValue() : null);
     dto.setRealizado(e.getRealizado());
