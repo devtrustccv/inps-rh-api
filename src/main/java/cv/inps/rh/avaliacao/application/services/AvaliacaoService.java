@@ -2,6 +2,7 @@ package cv.inps.rh.avaliacao.application.services;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.avaliacao.application.commands.DefinicaoObjetivoCommand;
+import cv.inps.rh.avaliacao.application.dto.DefinicaoObjectivoDTO;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaAvaliacaoDTO;
 import cv.inps.rh.avaliacao.application.dto.WrapperListaDefinicaoObjetivoDTO;
 import cv.inps.rh.avaliacao.application.queries.GetListaAvaliacaoQuery;
@@ -26,6 +27,8 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class AvaliacaoService {
@@ -99,8 +102,8 @@ public class AvaliacaoService {
 
     var cargo = dto.getCargoId() != null
         ? cargoRepository.findById(dto.getCargoId())
-            .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
-                "ParamCargoEntity not found for id: " + dto.getCargoId()))
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
+            "ParamCargoEntity not found for id: " + dto.getCargoId()))
         : null;
 
     var carreira = dto.getCarrPccsId() != null
@@ -108,6 +111,9 @@ public class AvaliacaoService {
         : null;
 
     var created = new ArrayList<String>(dto.getFunUuids().size());
+
+    var mapParamObjectives = det.getObjetivos().stream()
+        .collect(Collectors.toMap(ParamObjetivoEntity::getId, Function.identity()));
 
     for (var funId : dto.getFunUuids()) {
 
@@ -132,8 +138,12 @@ public class AvaliacaoService {
 
       avaliacaoRepository.save(avaliacao);
 
-      criarLinhasAvaliacao(avaliacao, det.getObjetivos(), dto.getInstitId(), dto.getSeccaoId(), dto.getCargoId(),
-          dto.getCarrPccsId());
+      criarLinhasAvaliacao(
+          avaliacao,
+          det.getObjetivos(),
+          /*dto.getInstitId(), dto.getSeccaoId(), dto.getCargoId(), dto.getCarrPccsId(),*/
+          mapParamObjectives, dto
+      );
 
       created.add(avaliacao.getUuid().toString());
     }
@@ -286,16 +296,77 @@ public class AvaliacaoService {
   private void criarLinhasAvaliacao(
       AvaliacaoEntity avaliacao,
       List<ParamObjetivoEntity> params,
-      Long institId,
+      /*Long institId,
       Long seccaoId,
       Long cargoId,
-      Long carrPccsId) {
+      Long carrPccsId, */
+      Map<Long, ParamObjetivoEntity> mapParamObjectives,
+      DefinicaoObjectivoDTO dto) {
     if (params == null)
       return;
 
-    var manualDescricao = resolverDescricaoManual(institId, seccaoId, cargoId, carrPccsId);
+    //var manualDescricao = resolverDescricaoManual(institId, seccaoId, cargoId, carrPccsId);
 
-    for (var p : params) {
+    dto.getObjectivos().forEach(obj -> {
+      var p = mapParamObjectives.get(obj.getParamId());
+      var e = new AvaliacaoObjectivoEntity();
+      e.setUuid(UuidCreator.getTimeOrderedEpoch());
+      e.setEstado(ESTADO_ATIVO);
+      e.setAvaliacaoObj(avaliacao);
+      e.setParamObjetivo(p);
+      e.setNumeroOrdem(p.getNumeroOrdem());
+      e.setAbrangencia(p.getAbrangencia());
+      e.setObjectivos("INDIVIDUAL".equalsIgnoreCase(p.getAbrangencia()) ? obj.getObjectivo() : p.getDescricao());
+      e.setKpi("INDIVIDUAL".equalsIgnoreCase(p.getAbrangencia()) ? obj.getKpi() : p.getKpi());
+      e.setMeta(obj.getMeta());
+      e.setPonderacao(p.getPonderacao());
+      objectivoRepository.save(e);
+    });
+
+    dto.getCompetenciasComportamentais().forEach(obj -> {
+      var p = mapParamObjectives.get(obj.getParamId());
+      var e = new AvaliacaoCompetenciaEntity();
+      e.setUuid(UuidCreator.getTimeOrderedEpoch());
+      e.setEstado(ESTADO_ATIVO);
+      e.setAvaliacao(avaliacao);
+      e.setParamObjetivo(p);
+      e.setNumeroOrdem(p.getNumeroOrdem());
+      e.setAbrangencia(p.getAbrangencia());
+      e.setDescricao(obj.getCompetencia());
+      e.setPonderacao(p.getPonderacao());
+      e.setComponente(p.getComponente());
+      competenciaRepository.save(e);
+    });
+
+    dto.getCompetenciasTecnicas().forEach(obj -> {
+      var p = mapParamObjectives.get(obj.getParamId());
+      var e = new AvaliacaoCompetenciaEntity();
+      e.setUuid(UuidCreator.getTimeOrderedEpoch());
+      e.setEstado(ESTADO_ATIVO);
+      e.setAvaliacao(avaliacao);
+      e.setParamObjetivo(p);
+      e.setNumeroOrdem(p.getNumeroOrdem());
+      e.setAbrangencia(p.getAbrangencia());
+      e.setDescricao(obj.getCompetencia());
+      e.setPonderacao(p.getPonderacao());
+      e.setComponente(p.getComponente());
+      competenciaRepository.save(e);
+    });
+
+    dto.getAtitudesPessoais().forEach(obj -> {
+      var p = mapParamObjectives.get(obj.getParamId());
+      var e = new AvaliacaoAtitudePessoalEntity();
+      e.setUuid(UuidCreator.getTimeOrderedEpoch());
+      e.setEstado(ESTADO_ATIVO);
+      e.setAvaliacao(avaliacao);
+      e.setParamObjetivo(p);
+      e.setAbrangencia(p.getAbrangencia());
+      e.setPonderacao(p.getPonderacao());
+      atitudeRepository.save(e);
+    });
+
+
+    /*for (var p : params) {
       if (p == null || !StringUtils.hasText(p.getComponente())) {
         continue;
       }
@@ -345,7 +416,7 @@ public class AvaliacaoService {
         e.setPonderacao(p.getPonderacao());
         atitudeRepository.save(e);
       }
-    }
+    }*/
   }
 
   private String resolverDescricaoManual(Long institId, Long seccaoId, Long cargoId, Long carrPccsId) {

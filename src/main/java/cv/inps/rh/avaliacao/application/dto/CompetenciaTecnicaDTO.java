@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 
 @IgrpDTO
 public class CompetenciaTecnicaDTO  {
+  private Long paramId;
 
   private Integer numeroOrdem;
 

@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 
 @IgrpDTO
 public class ObjectivoDTO  {
+  private Long paramId;
 
   private Integer numero;
 
