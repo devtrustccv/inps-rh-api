@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 
 @Data
@@ -31,7 +32,7 @@ public class AlojamentoRequestDTO  {
   private LocalDate dataInicio;           // default: dataInicio da missão — editável
   private LocalDate dataFim;              // default: dataFim da missão — editável
   // nrDias calculado no service: ChronoUnit.DAYS.between(dataInicio, dataFim)
-  private Long colaboradorId;             // MissaoColaboradorEntity.id — um colaborador por registo
+  private UUID colaboradorId;             // MissaoColaboradorEntity.id — um colaborador por registo
   private AnexoReqDTO anexo;  // upload PDF — opcional
 
 }

@@ -360,7 +360,7 @@ public class MissaoServicoServiceWrite {
       syncLogisticaAlojamento(missao, dto.getAlojamentos(), logisticasExistentes, requisicoes);
     }
     if (dto.getAjudasCusto() != null) {
-      var alimentacaoByColabId = new HashMap<Long, String>();
+      var alimentacaoByColabId = new HashMap<UUID, String>();
       if (dto.getAlojamentos() != null) {
         for (var a : dto.getAlojamentos()) {
           if (a == null || a.getColaboradorId() == null)
@@ -372,9 +372,9 @@ public class MissaoServicoServiceWrite {
       }
       syncLogisticaAjudaCusto(missao, dto.getAjudasCusto(), alimentacaoByColabId, logisticasExistentes, requisicoes);
     }
-
+    missao.setEtapa(ETAPA_4);
     if (dto.getProcessoEtapaAction() != null && "NEXT".equals(dto.getProcessoEtapaAction().getCode())) {
-      missao.setEtapa(ETAPA_4);
+      missao.setEtapa(ETAPA_5);
       missaoServicoRepository.save(missao);
     }
 
@@ -815,9 +815,7 @@ public class MissaoServicoServiceWrite {
         throw IgrpResponseStatusException.badRequest("flgAlimentacao é obrigatório");
       }
 
-      var colab = missaoColaboradorRepository.findById(aloj.getColaboradorId())
-          .orElseThrow(
-              () -> IgrpResponseStatusException.badRequest("colaboradorId inválido: " + aloj.getColaboradorId()));
+      var colab = missaoColaboradorRepository.findByUuidOrThrow(aloj.getColaboradorId());
 
       var prestador = derivePrestadorFromRequisicao(missao.getUuid(), List.of(colab), requisicoes);
 
@@ -843,7 +841,7 @@ public class MissaoServicoServiceWrite {
   private void syncLogisticaAjudaCusto(
       MissaoServicoEntity missao,
       List<AjudaCustoRequestDTO> items,
-      Map<Long, String> alimentacaoByColabId,
+      Map<UUID, String> alimentacaoByColabId,
       List<MissaoLogisticaEntity> existentes,
       List<MissaoRequisicaoEntity> requisicoes) {
     syncLogisticaGenerico(missao, "AJUDA_CUSTO", existentes, items, (ajuda) -> {
@@ -867,7 +865,7 @@ public class MissaoServicoServiceWrite {
 
       var baseValorDiario = ajuda.getValorDiario();
       var valorDiarioCalculado = calcularValorDiarioAjudaCusto(baseValorDiario, ajuda.getFlgAlojamento(),
-          alimentacaoByColabId != null ? alimentacaoByColabId.get(colab.getId()) : null);
+          alimentacaoByColabId != null ? alimentacaoByColabId.get(colab.getFunId().getUuid()) : null);
       var valorTotal = valorDiarioCalculado.multiply(java.math.BigDecimal.valueOf(ajuda.getNumeroDiasAlojamento()));
 
       var log = new MissaoLogisticaEntity();

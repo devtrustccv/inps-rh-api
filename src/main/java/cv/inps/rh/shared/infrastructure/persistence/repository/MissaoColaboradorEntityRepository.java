@@ -20,10 +20,10 @@ public interface MissaoColaboradorEntityRepository extends
 
   Optional<MissaoColaboradorEntity> findByMissaoServId_UuidAndFunId_Uuid(UUID missaoUuid, UUID funUuid);
 
-  Optional<MissaoColaboradorEntity> findByUuid(UUID uuid);
+  Optional<MissaoColaboradorEntity> findByFunId_Uuid(UUID uuid);
 
   default MissaoColaboradorEntity findByUuidOrThrow(UUID uuid) {
-    return findByUuid(uuid)
+    return findByFunId_Uuid(uuid)
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
             "MissaoColaboradorEntity not found for id: " + uuid));
   }
