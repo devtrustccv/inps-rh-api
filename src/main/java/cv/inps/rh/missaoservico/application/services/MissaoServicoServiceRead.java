@@ -468,6 +468,7 @@ public class MissaoServicoServiceRead {
           continue;
 
         var list = byPrest.getOrDefault(prest.getId(), List.of());
+        var selecionado = !CollectionUtils.isEmpty(list);
 
         var colaboradores = new ArrayList<MissaoColaboradorResponseDTO>();
         for (var r : list) {
@@ -504,6 +505,7 @@ public class MissaoServicoServiceRead {
         item.setEmailPrestador(prest.getEmail());
         item.setColaboradores(colaboradores);
         item.setProposta(proposta);
+        item.setSelecionado(selecionado);
         item.setEstado(ESTADO_ATIVO);
         itens.add(item);
       }
@@ -517,6 +519,7 @@ public class MissaoServicoServiceRead {
         if (prest == null)
           continue;
 
+        var selecionado = !CollectionUtils.isEmpty(list);
         var colaboradores = new ArrayList<MissaoColaboradorResponseDTO>();
         for (var r : list) {
           var c = r != null ? r.getMissaoColabId() : null;
@@ -552,6 +555,7 @@ public class MissaoServicoServiceRead {
         item.setEmailPrestador(prest.getEmail());
         item.setColaboradores(colaboradores);
         item.setProposta(proposta);
+        item.setSelecionado(selecionado);
         item.setEstado(ESTADO_ATIVO);
         itens.add(item);
       }

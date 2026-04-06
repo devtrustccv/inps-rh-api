@@ -14,14 +14,12 @@ import lombok.AllArgsConstructor;
 import java.util.List;
 import java.util.UUID;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 
-
 @IgrpDTO
-public class MissaoReqItemResponseDTO  {
+public class MissaoReqItemResponseDTO {
 
   private Long id;
   private UUID uuid;
@@ -30,6 +28,7 @@ public class MissaoReqItemResponseDTO  {
   private String emailPrestador;
   private List<MissaoColaboradorResponseDTO> colaboradores;
   private AnexoRespDTO proposta;
+  private Boolean selecionado;
   private String estado;
 
 }
