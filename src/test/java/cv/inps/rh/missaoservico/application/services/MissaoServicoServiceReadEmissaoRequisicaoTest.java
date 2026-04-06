@@ -133,6 +133,7 @@ public class MissaoServicoServiceReadEmissaoRequisicaoTest {
     assertEquals(1, resp.getBody().getRequisicoes().size());
     assertEquals(10L, resp.getBody().getRequisicoes().get(0).getMissaoPrestId());
     assertEquals(2, resp.getBody().getRequisicoes().get(0).getColaboradores().size());
+    assertEquals(true, resp.getBody().getRequisicoes().get(0).getSelecionado());
     assertNotNull(resp.getBody().getRequisicoes().get(0).getProposta());
   }
 
@@ -161,5 +162,6 @@ public class MissaoServicoServiceReadEmissaoRequisicaoTest {
     assertEquals(1, resp.getBody().getRequisicoes().size());
     assertEquals(10L, resp.getBody().getRequisicoes().get(0).getMissaoPrestId());
     assertEquals(0, resp.getBody().getRequisicoes().get(0).getColaboradores().size());
+    assertEquals(false, resp.getBody().getRequisicoes().get(0).getSelecionado());
   }
 }

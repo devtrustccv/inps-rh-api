@@ -180,7 +180,7 @@ public class MissaoServicoServiceWriteLogisticaTest {
     when(missaoLogisticaDetRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
     var aloj = new AlojamentoRequestDTO("SIM", "Hotel", BigDecimal.valueOf(50), BigDecimal.valueOf(150), "CVE",
-        LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 3), 20L, null);
+        LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 3), colabUuid, null);
 
     var ajuda = new AjudaCustoRequestDTO(colabUuid, true, 3, BigDecimal.valueOf(300), null);
 
