@@ -106,8 +106,10 @@ public class FuncionarioReadService {
               .map(Estado::getDescription)
               .orElse("Desconhecido")
       );
-      dto.setEstadoRegisto(null);
-      dto.setEstadoRegistoDesc(null);
+      dto.setEstadoRegisto(d.getEstadoColaborador());
+      dto.setEstadoRegistoDesc(  Estado.fromCode(d.getEstadoColaborador())
+          .map(Estado::getDescription)
+          .orElse("Desconhecido"));
       return dto;
     }).toList();
 
