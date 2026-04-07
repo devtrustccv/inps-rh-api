@@ -113,7 +113,6 @@ public class FuncionarioReadService {
       return dto;
     }).toList();
 
-    // wrapper de resposta
     WrapperListaFuncionarioDTO wrapper = new WrapperListaFuncionarioDTO();
     wrapper.setContent(content);
     wrapper.setPageNumber(page.getNumber());
