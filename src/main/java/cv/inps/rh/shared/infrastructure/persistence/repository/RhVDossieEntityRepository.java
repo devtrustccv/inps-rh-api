@@ -16,9 +16,5 @@ public interface RhVDossieEntityRepository extends
     JpaSpecificationExecutor<RhVDossieEntity>
 {
 
-      default RhVDossieEntity findByIdOrThrow(Long id) {
-          return this.findById(id)
-          .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"RhVDossieEntity not found for id: " + id));
-      }
 
 }
