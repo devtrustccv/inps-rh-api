@@ -107,7 +107,7 @@ public class ConfiguracaoController {
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
   })
-  public ResponseEntity<List<Object>> list(
+  public ResponseEntity<Object> list(
       @Parameter(description = "Filtros da consulta (dinâmicos)") @RequestParam Map<String, String> params,
       @Parameter(description = "Tipo de configuração a listar") @RequestParam ConfigurationType configurationType
   ) {
