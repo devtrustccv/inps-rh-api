@@ -1,0 +1,26 @@
+{
+  "type": "model",
+  "module": "shared",
+  "name": "RhVDossieEntity",
+  "tableName": "RH_V_DOSSIE",
+  "audit": false,
+  "crud": false,
+  "revision": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "fun_id",
+      "type": "long",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": true,
+      "generationType": "IDENTITY",
+      "skipFieldRevision": false,
+      "objectType": "java"
+    }
+  ],
+  "id": "k0u3xpwulp",
+  "uniqueConstraints": [],
+  "indexes": []
+}
