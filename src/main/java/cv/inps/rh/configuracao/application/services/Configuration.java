@@ -41,7 +41,7 @@ public class Configuration implements IConfiguration {
   }
 
   @Override
-  public List<Object> list(Map<String, String> filters, String configurationType) {
+  public Object list(Map<String, String> filters, String configurationType) {
 
     LOGGER.debug("LIST - CONFIGURATION TYPE: {}, FILTERS: {}", configurationType, filters);
 

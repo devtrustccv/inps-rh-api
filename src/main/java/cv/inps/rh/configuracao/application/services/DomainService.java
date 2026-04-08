@@ -3,10 +3,12 @@ package cv.inps.rh.configuracao.application.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.DomainConfigDTO;
+import cv.inps.rh.configuracao.application.dto.WrapperListDomainDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DomainEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -16,7 +18,6 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Transactional
 @Service("domain_type")
@@ -68,7 +69,7 @@ public class DomainService extends ConfigurationProcess<DomainConfigDTO> {
   }
 
   @Override
-  public List<Object> list(Map<String, String> filters) {
+  public Object list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
@@ -103,20 +104,24 @@ public class DomainService extends ConfigurationProcess<DomainConfigDTO> {
       return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
     };
 
-    var page = repository.findAll(spec, pageable);
-    if (page.isEmpty()) {
-      return List.of();
-    }
+    var resultPage = repository.findAll(spec, pageable);
 
-    return page.stream()
-        .map(e -> new DomainConfigDTO(
-            e.getId(),
-            e.getDominio(),
-            e.getValor(),
-            e.getDescricao(),
-            e.getReferencia(),
-            e.getEstado()
-        )).collect(Collectors.toList());
+    var response = new WrapperListDomainDTO();
+    PageMapper.fillPagination(resultPage, response);
+    response.setContent(resultPage.getContent().stream().map(this::toResponse).toList());
+
+    return response;
+  }
+
+  private DomainConfigDTO toResponse(DomainEntity e) {
+    var dto = new DomainConfigDTO();
+    dto.setId(e.getId());
+    dto.setDominio(e.getDominio());
+    dto.setValor(e.getValor());
+    dto.setDescricao(e.getDescricao());
+    dto.setReferencia(e.getReferencia());
+    dto.setEstado(e.getEstado());
+    return dto;
   }
 
   @Override

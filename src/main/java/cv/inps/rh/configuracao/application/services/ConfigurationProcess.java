@@ -37,7 +37,7 @@ public abstract class ConfigurationProcess<T> {
 
   protected abstract Object read(String id);
 
-  public abstract List<Object> list(Map<String, String> filters);
+  public abstract Object list(Map<String, String> filters);
 
   public abstract void delete(String id);
 
