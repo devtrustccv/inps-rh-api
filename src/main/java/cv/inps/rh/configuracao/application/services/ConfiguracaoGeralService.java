@@ -106,7 +106,7 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
   }
 
   @Override
-  public List<Object> list(Map<String, String> filters) {
+  public Object list(Map<String, String> filters) {
     var data = repository.findAll();
     return data.stream().map(this::buildResponse).collect(Collectors.toList());
   }

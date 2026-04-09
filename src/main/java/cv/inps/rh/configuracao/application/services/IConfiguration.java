@@ -11,7 +11,7 @@ public interface IConfiguration {
 
   Object read(String id, String configurationType);
 
-  List<Object> list(Map<String, String> filters, String configurationType);
+  Object list(Map<String, String> filters, String configurationType);
 
   void delete(String id, String configurationType);
 }
