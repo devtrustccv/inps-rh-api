@@ -41,8 +41,8 @@ public class FuncionarioReadService {
     Specification<RhVDossieEntity> spec = (root, cq, cb) -> {
       List<Predicate> predicates = new ArrayList<>();
 
-      //predicates.add(cb.equal(root.get("ultimoVinculoDesc"), 1));
-      
+      predicates.add(cb.equal(root.get("ultimoVinculoDesc"), 1));
+
       // filtro pelo nome
       if (StringUtils.hasText(query.getNome())) {
         String nome = query.getNome().toLowerCase();
