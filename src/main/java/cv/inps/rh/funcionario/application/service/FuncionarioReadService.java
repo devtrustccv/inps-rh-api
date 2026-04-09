@@ -41,6 +41,8 @@ public class FuncionarioReadService {
     Specification<RhVDossieEntity> spec = (root, cq, cb) -> {
       List<Predicate> predicates = new ArrayList<>();
 
+      //predicates.add(cb.equal(root.get("ultimoVinculoDesc"), 1));
+      
       // filtro pelo nome
       if (StringUtils.hasText(query.getNome())) {
         String nome = query.getNome().toLowerCase();
@@ -82,7 +84,7 @@ public class FuncionarioReadService {
       return cb.and(predicates.toArray(new Predicate[0]));
     };
 
-    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "funId"));
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "id"));
     Page<RhVDossieEntity> page = dossieRepository.findAll(spec, pageable);
 
     // mapear para DTO
