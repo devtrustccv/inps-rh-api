@@ -106,23 +106,30 @@ public interface TiposRelacionamentoEntityRepository extends
 
   @Query("""
       SELECT new cv.inps.rh.processamento.application.dto.PesquisaColaboradorResponseDTO(
-               t.id,
-               t.funId.uuid,
-               t.funId.nome,
-               t.mobId.instidId.nome,
-               t.mobId.instidId.id,
-               null,
-               t.carreiraId.categoriaId.nome,
-               t.carreiraId.salario,
-               t.carreiraId.cargoId.nome,
-               t.carreiraId.escalaoId.valor
-           )
+             t.id,
+             f.uuid,
+             f.nome,
+             i.nome,
+             i.id,
+             null,
+             cat.nome,
+             c.salario,
+             cargo.nome,
+             esc.valor
+      )
       FROM TiposRelacionamentoEntity t
+      LEFT JOIN t.funId f
+      LEFT JOIN t.mobId m
+      LEFT JOIN m.instidId i
+      LEFT JOIN t.carreiraId c
+      LEFT JOIN c.categoriaId cat
+      LEFT JOIN c.cargoId cargo
+      LEFT JOIN c.escalaoId esc
       WHERE t.estActAdm = 1
-           AND (:processado IS NULL OR t.flgProcessa = :processado)
-           AND (:directionId IS NULL OR t.mobId.instidId.id = :directionId)
-           AND (:nome IS NULL OR LOWER(t.funId.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
-           AND (:uuidFuncionario IS NULL OR t.funId.uuid = :uuidFuncionario)
+         AND (:processado IS NULL OR t.flgProcessa = :processado)
+         AND (:directionId IS NULL OR i.id = :directionId)
+         AND (:nome IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+         AND (:uuidFuncionario IS NULL OR f.uuid = :uuidFuncionario)
       """)
   Page<PesquisaColaboradorResponseDTO> pesquisaColaborador(
       @Param("directionId") Long directionId,
