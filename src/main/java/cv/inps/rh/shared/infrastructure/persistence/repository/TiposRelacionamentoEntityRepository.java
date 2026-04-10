@@ -118,7 +118,7 @@ public interface TiposRelacionamentoEntityRepository extends
              esc.valor
       )
       FROM TiposRelacionamentoEntity t
-      LEFT JOIN t.funId f
+       JOIN t.funId f
       LEFT JOIN t.mobId m
       LEFT JOIN m.instidId i
       LEFT JOIN t.carreiraId c
