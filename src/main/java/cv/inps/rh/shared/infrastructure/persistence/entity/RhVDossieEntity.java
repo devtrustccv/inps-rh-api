@@ -24,6 +24,9 @@ import java.util.UUID;
 public class RhVDossieEntity  {
 
   @Id
+  @Column(name = "id")
+  private Long id;
+
   @Column(name = "FUN_ID")
   private Long funId;
 

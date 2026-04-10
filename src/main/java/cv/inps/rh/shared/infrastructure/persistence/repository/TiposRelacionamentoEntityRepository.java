@@ -1,10 +1,13 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
+import cv.inps.rh.funcionario.domain.projections.HistoricoLaboralViewRow;
+import cv.inps.rh.funcionario.domain.projections.RelacaoLaboralView;
+import cv.inps.rh.processamento.application.dto.ColaboradorResponseDTO;
+import cv.inps.rh.processamento.application.dto.PesquisaCentroCustoResponseDTO;
+import cv.inps.rh.processamento.application.dto.PesquisaColaboradorResponseDTO;
+import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,20 +17,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
-import cv.inps.rh.funcionario.domain.projections.HistoricoLaboralViewRow;
-import cv.inps.rh.funcionario.domain.projections.RelacaoLaboralView;
-import cv.inps.rh.processamento.application.dto.ColaboradorResponseDTO;
-import cv.inps.rh.processamento.application.dto.PesquisaCentroCustoResponseDTO;
-import cv.inps.rh.processamento.application.dto.PesquisaColaboradorResponseDTO;
-import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface TiposRelacionamentoEntityRepository extends
@@ -113,27 +106,36 @@ public interface TiposRelacionamentoEntityRepository extends
 
   @Query("""
       SELECT new cv.inps.rh.processamento.application.dto.PesquisaColaboradorResponseDTO(
-               t.id,
-               t.funId.uuid,
-               t.funId.nome,
-               t.mobId.instidId.nome,
-               t.mobId.instidId.id,
-               null,
-               t.carreiraId.categoriaId.nome,
-               t.carreiraId.salario,
-               t.carreiraId.cargoId.nome,
-               t.carreiraId.escalaoId.valor
-           )
+             t.id,
+             f.uuid,
+             f.nome,
+             i.nome,
+             i.id,
+             null,
+             cat.nome,
+             c.salario,
+             cargo.nome,
+             esc.valor
+      )
       FROM TiposRelacionamentoEntity t
-      WHERE t.estActAdm = 1 AND t.flgProcessa = 1
-           AND (:directionId IS NULL OR t.mobId.instidId.id = :directionId)
-           AND (:nome IS NULL OR LOWER(t.funId.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
-           AND (:uuidFuncionario IS NULL OR t.funId.uuid = :uuidFuncionario)
+       JOIN t.funId f
+      LEFT JOIN t.mobId m
+      LEFT JOIN m.instidId i
+      LEFT JOIN t.carreiraId c
+      LEFT JOIN c.categoriaId cat
+      LEFT JOIN c.cargoId cargo
+      LEFT JOIN c.escalaoId esc
+      WHERE t.estActAdm = 1
+         AND (:processado IS NULL OR t.flgProcessa = :processado)
+         AND (:directionId IS NULL OR i.id = :directionId)
+         AND (:nome IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+         AND (:uuidFuncionario IS NULL OR f.uuid = :uuidFuncionario)
       """)
   Page<PesquisaColaboradorResponseDTO> pesquisaColaborador(
       @Param("directionId") Long directionId,
       @Param("nome") String nome,
       @Param("uuidFuncionario") UUID uuidFuncionario,
+      @Param("processado") Integer processado,
       Pageable pageable);
 
   @Query("""

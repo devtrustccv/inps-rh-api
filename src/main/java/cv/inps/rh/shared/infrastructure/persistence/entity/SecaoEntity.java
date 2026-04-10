@@ -40,7 +40,7 @@ public class SecaoEntity extends AuditEntity {
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inst_id", referencedColumnName = "id")
+    @JoinColumn(name = "instit_id", referencedColumnName = "id")
     private InstituicaoEntity instId;
     @Enumerated(EnumType.STRING)
     @Column(name="estado")

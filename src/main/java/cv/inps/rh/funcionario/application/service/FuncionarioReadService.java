@@ -24,6 +24,9 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +43,8 @@ public class FuncionarioReadService {
     // Specification para filtros dinâmicos
     Specification<RhVDossieEntity> spec = (root, cq, cb) -> {
       List<Predicate> predicates = new ArrayList<>();
+
+      predicates.add(cb.equal(root.get("ultimoVinculoDesc"), 1));
 
       // filtro pelo nome
       if (StringUtils.hasText(query.getNome())) {
@@ -82,7 +87,7 @@ public class FuncionarioReadService {
       return cb.and(predicates.toArray(new Predicate[0]));
     };
 
-    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "funId"));
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "id"));
     Page<RhVDossieEntity> page = dossieRepository.findAll(spec, pageable);
 
     // mapear para DTO
@@ -94,9 +99,13 @@ public class FuncionarioReadService {
       dto.setCargo(d.getCargoDesc());
       dto.setDireccao(d.getDirecaoDesc());
       dto.setSeccao(d.getSeccaoDesc());
+      String carreiraCategoria = Stream.of(d.getCarreiraDesc(), d.getCategoriaDesc())
+          .filter(Objects::nonNull)
+          .filter(s -> !s.isBlank())
+          .collect(Collectors.joining("/"));
+
       dto.setCarreiraCategoria(
-          (d.getCarreiraDesc() != null ? d.getCarreiraDesc() : "") + "/" +
-              (d.getCategoriaDesc() != null ? d.getCategoriaDesc() : "")
+          carreiraCategoria.isEmpty() ? null : carreiraCategoria
       );
       dto.setDataInicio(d.getDataInicioContrato() != null ? d.getDataInicioContrato().toString() : null);
       dto.setVinculoId(d.getVinculoId());

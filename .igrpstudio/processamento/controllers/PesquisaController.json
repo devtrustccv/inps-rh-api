@@ -57,6 +57,11 @@
           "name": "size",
           "value": "20",
           "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "processado",
+          "isRequired": false
         }
       ]
     },
@@ -101,5 +106,5 @@
       ]
     }
   ],
-  "id": "980jkk64em-pesquisaColaboradorCopy-pesquisaCentroCusto-pesquisaColaborador"
+  "id": "980jkk64em-pesquisaColaboradorCopy-pesquisaCentroCusto-pesquisaColaborador-pesquisaColaborador"
 }
