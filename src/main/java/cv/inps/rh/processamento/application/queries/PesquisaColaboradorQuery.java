@@ -1,11 +1,10 @@
 package cv.inps.rh.processamento.application.queries;
 
 import cv.igrp.framework.core.domain.Query;
-import jakarta.validation.constraints.*;
-
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 
 @Data
@@ -25,5 +24,7 @@ public class PesquisaColaboradorQuery implements Query {
   private String page;
   @NotBlank(message = "The field <size> is required")
   private String size;
+  @NotBlank(message = "The field <processado> is required")
+  private String processado;
 
 }

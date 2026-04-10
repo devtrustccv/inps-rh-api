@@ -1,10 +1,13 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
+import cv.inps.rh.funcionario.domain.projections.HistoricoLaboralViewRow;
+import cv.inps.rh.funcionario.domain.projections.RelacaoLaboralView;
+import cv.inps.rh.processamento.application.dto.ColaboradorResponseDTO;
+import cv.inps.rh.processamento.application.dto.PesquisaCentroCustoResponseDTO;
+import cv.inps.rh.processamento.application.dto.PesquisaColaboradorResponseDTO;
+import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,20 +17,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
-import cv.inps.rh.funcionario.domain.projections.HistoricoLaboralViewRow;
-import cv.inps.rh.funcionario.domain.projections.RelacaoLaboralView;
-import cv.inps.rh.processamento.application.dto.ColaboradorResponseDTO;
-import cv.inps.rh.processamento.application.dto.PesquisaCentroCustoResponseDTO;
-import cv.inps.rh.processamento.application.dto.PesquisaColaboradorResponseDTO;
-import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface TiposRelacionamentoEntityRepository extends
@@ -125,7 +118,8 @@ public interface TiposRelacionamentoEntityRepository extends
                t.carreiraId.escalaoId.valor
            )
       FROM TiposRelacionamentoEntity t
-      WHERE t.estActAdm = 1 AND t.flgProcessa = 1
+      WHERE t.estActAdm = 1
+           AND (:processado IS NULL OR t.flgProcessa = :processado)
            AND (:directionId IS NULL OR t.mobId.instidId.id = :directionId)
            AND (:nome IS NULL OR LOWER(t.funId.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
            AND (:uuidFuncionario IS NULL OR t.funId.uuid = :uuidFuncionario)
@@ -134,6 +128,7 @@ public interface TiposRelacionamentoEntityRepository extends
       @Param("directionId") Long directionId,
       @Param("nome") String nome,
       @Param("uuidFuncionario") UUID uuidFuncionario,
+      @Param("processado") Integer processado,
       Pageable pageable);
 
   @Query("""
