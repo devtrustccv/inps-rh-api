@@ -1,19 +1,16 @@
 package cv.inps.rh.assiduidade.application.queries;
 
-import cv.inps.rh.assiduidade.application.services.MovimentoResumoService;
-import cv.inps.rh.assiduidade.application.services.PicagemService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import org.springframework.context.event.EventListener;
+import cv.inps.rh.assiduidade.application.dto.WrapperListaAssiduidadadeDTO;
+import cv.inps.rh.assiduidade.application.services.MovimentoResumoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import cv.inps.rh.assiduidade.application.dto.WrapperListaAssiduidadadeDTO;
-
 @Component
-public class GetListaMovimentosResumidosQueryHandler implements QueryHandler<GetListaMovimentosResumidosQuery, ResponseEntity<WrapperListaAssiduidadadeDTO>>{
+public class GetListaMovimentosResumidosQueryHandler implements QueryHandler<GetListaMovimentosResumidosQuery, ResponseEntity<WrapperListaAssiduidadadeDTO>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetListaMovimentosResumidosQueryHandler.class);
 
@@ -24,11 +21,10 @@ public class GetListaMovimentosResumidosQueryHandler implements QueryHandler<Get
     this.movimentoResumoService = movimentoResumoService;
   }
 
-   @IgrpQueryHandler
+  @IgrpQueryHandler
   public ResponseEntity<WrapperListaAssiduidadadeDTO> handle(GetListaMovimentosResumidosQuery query) {
 
     LOGGER.debug("GetListaMovimentosResumidosQuery: {}", query);
-
 
     return ResponseEntity.ok(movimentoResumoService.getListaMovimentosResumidos(query));
   }

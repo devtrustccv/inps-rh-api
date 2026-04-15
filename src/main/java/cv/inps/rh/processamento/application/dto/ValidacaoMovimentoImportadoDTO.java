@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,6 +20,6 @@ public class ValidacaoMovimentoImportadoDTO extends MovRowDTO {
 
   @NotBlank(message = "The field <validacao> is required")
 
-  private String validacao ;
+  private String validacao;
 
 }

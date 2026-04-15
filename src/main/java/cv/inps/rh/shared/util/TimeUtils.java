@@ -4,6 +4,9 @@ import org.springframework.util.StringUtils;
 
 public class TimeUtils {
 
+  private TimeUtils() {
+  }
+
   public static String formatMinutesToHHmm(Integer minutes) {
     if (minutes == null) {
       return "00:00";
@@ -22,11 +25,10 @@ public class TimeUtils {
     try {
       var time = java.time.LocalTime.parse(hhmm);
       return time.getHour() * 60 + time.getMinute();
-    } catch (Exception e) {
+    } catch (Exception _) {
       return 0;
     }
   }
-
 
 
   public static String intervalFormatToHHmm(String interval) {
@@ -102,4 +104,4 @@ public class TimeUtils {
   }
 
 
-  }
+}

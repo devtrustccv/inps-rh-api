@@ -4,9 +4,11 @@
 package cv.inps.rh.processamento.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
+import cv.inps.rh.shared.application.dto.PageDTO;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
@@ -16,15 +18,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 
-
+@EqualsAndHashCode(callSuper = true)
 @IgrpDTO
-public class ResumoProcessamentoDTO {
+public class ListaFosDTO extends PageDTO {
 
 
   @Valid
-  private List<ResumoProcessamentoRowDTO> remuneracao = new ArrayList<>();
-
-  @Valid
-  private List<ResumoProcPagamentoDTO> pagamento = new ArrayList<>();
+  private List<FosRowDTO> content = new ArrayList<>();
 
 }

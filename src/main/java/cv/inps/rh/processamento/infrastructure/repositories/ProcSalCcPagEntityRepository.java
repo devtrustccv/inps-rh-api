@@ -28,7 +28,7 @@ public interface ProcSalCcPagEntityRepository extends
           WHERE e.procSalId = :procId
           GROUP BY e.itemActo,e.descricao, e.shortDesc
       """)
-  List<ResumoProcPagamentoDTO> getPagamentos(@Param("procId")Long procId);
+  List<ResumoProcPagamentoDTO> getPagamentos(@Param("procId") Long procId);
 
 
   @Query("""
