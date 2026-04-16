@@ -33,74 +33,73 @@ public class PesquisaController {
   private final QueryBus queryBus;
 
   public PesquisaController(QueryBus queryBus) {
-          this.queryBus = queryBus;
+    this.queryBus = queryBus;
 
   }
-   @GetMapping(
-   value = "colaborador"
+
+  @GetMapping(
+      value = "colaborador"
   )
   @Operation(
-    summary = "Pesquisa colaborador",
-    description = "Pesquisa colaborador",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
+      summary = "Pesquisa colaborador",
+      description = "Pesquisa colaborador",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
 
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = WrapperPesquisaColaboradorDTO.class,
-                  type = "object")
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = WrapperPesquisaColaboradorDTO.class,
+                      type = "object")
+              )
           )
-      )
-    }
+      }
   )
 
   public ResponseEntity<WrapperPesquisaColaboradorDTO> pesquisaColaborador(
-    @RequestParam(value = "uuidFuncionario", required = false) String uuidFuncionario,
-    @RequestParam(value = "nome", required = false) String nome,
-    @RequestParam(value = "direccao", required = false) String direccao,
-    @RequestParam(value = "centroCusto", required = false) String centroCusto,
-    @RequestParam(value = "page", required = false, defaultValue = "0") String page,
-    @RequestParam(value = "size", required = false, defaultValue = "20") String size,
-    @RequestParam(value = "processado", required = false) String processado)
-  {
+      @RequestParam(value = "uuidFuncionario", required = false) String uuidFuncionario,
+      @RequestParam(value = "nome", required = false) String nome,
+      @RequestParam(value = "direccao", required = false) String direccao,
+      @RequestParam(value = "centroCusto", required = false) String centroCusto,
+      @RequestParam(value = "page", required = false, defaultValue = "0") String page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") String size,
+      @RequestParam(value = "processado", required = false) String processado) {
 
     final var query = new PesquisaColaboradorQuery(uuidFuncionario, nome, direccao, centroCusto, page, size, processado);
 
-      return queryBus.handle(query);
+    return queryBus.handle(query);
 
   }
 
-   @GetMapping(
-   value = "centro-custo"
+  @GetMapping(
+      value = "centro-custo"
   )
   @Operation(
-    summary = "Pesquisa centro custo",
-    description = "Pesquisa centro custo",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
+      summary = "Pesquisa centro custo",
+      description = "Pesquisa centro custo",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
 
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = WrapperPesquisaCentroCustoDTO.class,
-                  type = "object")
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = WrapperPesquisaCentroCustoDTO.class,
+                      type = "object")
+              )
           )
-      )
-    }
+      }
   )
 
   public ResponseEntity<WrapperPesquisaCentroCustoDTO> pesquisaCentroCusto(
-    @RequestParam(value = "nome", required = false) String nome,
-    @RequestParam(value = "page", required = false, defaultValue = "0") String page,
-    @RequestParam(value = "size", required = false, defaultValue = "20") String size)
-  {
+      @RequestParam(value = "nome", required = false) String nome,
+      @RequestParam(value = "page", required = false, defaultValue = "0") String page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") String size) {
 
-      final var query = new PesquisaCentroCustoQuery(nome, page, size);
+    final var query = new PesquisaCentroCustoQuery(nome, page, size);
 
-      return queryBus.handle(query);
+    return queryBus.handle(query);
 
   }
 

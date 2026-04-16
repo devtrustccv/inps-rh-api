@@ -37,11 +37,10 @@ public interface ProcSalCcRemunEntityRepository extends
       """)
   List<ResumoProcessamentoRowDTO> getRemuneracoes(
       @Param("procId") Long procId,
-      @Param("ccId")   Long ccId,
-      @Param("ano")    Integer ano,
-      @Param("mes")    Integer mes
+      @Param("ccId") Long ccId,
+      @Param("ano") Integer ano,
+      @Param("mes") Integer mes
   );
-
 
 
   @Query("""

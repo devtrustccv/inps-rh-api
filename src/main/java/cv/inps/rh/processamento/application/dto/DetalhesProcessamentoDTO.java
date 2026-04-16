@@ -18,7 +18,7 @@ import java.util.List;
 
 
 @IgrpDTO
-public class DetalhesProcessamentoDTO  {
+public class DetalhesProcessamentoDTO {
 
 
   @Valid

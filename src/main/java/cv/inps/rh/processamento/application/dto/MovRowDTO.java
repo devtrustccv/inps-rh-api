@@ -17,40 +17,39 @@ import java.time.LocalDate;
 
 
 @IgrpDTO
-public class MovRowDTO  {
+public class MovRowDTO {
 
 
-
-  private String movimentoId ;
-
-
-  private String nomeFicheiro ;
+  private String movimentoId;
 
 
-  private String funcionarioId ;
+  private String nomeFicheiro;
 
 
-  private String nomeFuncionario ;
+  private String funcionarioId;
 
 
-  private String movimentoRetencao ;
+  private String nomeFuncionario;
 
 
-  private String movimentoRemuneracao ;
+  private String movimentoRetencao;
 
 
-  private BigDecimal percentagem ;
+  private String movimentoRemuneracao;
 
 
-  private BigDecimal valor ;
+  private BigDecimal percentagem;
 
 
-  private LocalDate dataInicio ;
+  private BigDecimal valor;
 
 
-  private LocalDate dataFim ;
+  private LocalDate dataInicio;
 
 
-  private String situacao ;
+  private LocalDate dataFim;
+
+
+  private String situacao;
 
 }

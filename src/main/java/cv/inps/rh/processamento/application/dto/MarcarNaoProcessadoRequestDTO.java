@@ -19,10 +19,10 @@ import java.util.List;
 
 
 @IgrpDTO
-public class MarcarNaoProcessadoRequestDTO  {
+public class MarcarNaoProcessadoRequestDTO {
 
   @NotNull(message = "The field <funcionarios> is required")
-	@NotEmpty(message = "The field <funcionarios> must not be empty")
+  @NotEmpty(message = "The field <funcionarios> must not be empty")
 
   private List<String> funcionarios = new ArrayList<>();
 

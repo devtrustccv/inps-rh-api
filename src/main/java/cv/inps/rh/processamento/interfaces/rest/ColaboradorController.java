@@ -38,169 +38,165 @@ public class ColaboradorController {
   private final CommandBus commandBus;
 
   public ColaboradorController(QueryBus queryBus, CommandBus commandBus) {
-          this.queryBus = queryBus;
-          this.commandBus = commandBus;
+    this.queryBus = queryBus;
+    this.commandBus = commandBus;
   }
-   @GetMapping(
-   value = "baixa-medica"
+
+  @GetMapping(
+      value = "baixa-medica"
   )
   @Operation(
-    summary = "Get lista baixamedica",
-    description = "Get lista baixamedica",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
+      summary = "Get lista baixamedica",
+      description = "Get lista baixamedica",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
 
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = WrapperListaColaboradorDTO.class,
-                  type = "object")
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = WrapperListaColaboradorDTO.class,
+                      type = "object")
+              )
           )
-      )
-    }
+      }
   )
 
   public ResponseEntity<WrapperListaColaboradorDTO> getListaBaixamedica(
-    @RequestParam(value = "dataInicio", required = false) String dataInicio,
-    @RequestParam(value = "dataFim", required = false) String dataFim,
-    @RequestParam(value = "colaborador", required = false) String colaborador,
-    @RequestParam(value = "direccao", required = false) String direccao,
-    @RequestParam(value = "page", required = false, defaultValue = "0") String page,
-    @RequestParam(value = "size", required = false, defaultValue = "20") String size)
-  {
+      @RequestParam(value = "dataInicio", required = false) String dataInicio,
+      @RequestParam(value = "dataFim", required = false) String dataFim,
+      @RequestParam(value = "colaborador", required = false) String colaborador,
+      @RequestParam(value = "direccao", required = false) String direccao,
+      @RequestParam(value = "page", required = false, defaultValue = "0") String page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") String size) {
 
-      final var query = new GetListaBaixamedicaQuery(dataInicio, dataFim, colaborador, direccao, page, size);
+    final var query = new GetListaBaixamedicaQuery(dataInicio, dataFim, colaborador, direccao, page, size);
 
-      return queryBus.handle(query);
+    return queryBus.handle(query);
 
   }
 
-   @GetMapping(
-   value = "licensa-sem-vencimento"
+  @GetMapping(
+      value = "licensa-sem-vencimento"
   )
   @Operation(
-    summary = "Get lista licensa sem vencimento",
-    description = "Get lista licensa sem vencimento",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
+      summary = "Get lista licensa sem vencimento",
+      description = "Get lista licensa sem vencimento",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
 
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = WrapperListaColaboradorDTO.class,
-                  type = "object")
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = WrapperListaColaboradorDTO.class,
+                      type = "object")
+              )
           )
-      )
-    }
+      }
   )
 
   public ResponseEntity<WrapperListaColaboradorDTO> getListaLicensaSemVencimento(
-    @RequestParam(value = "dataInicio", required = false) String dataInicio,
-    @RequestParam(value = "dataFim", required = false) String dataFim,
-    @RequestParam(value = "colaborador", required = false) String colaborador,
-    @RequestParam(value = "direccao", required = false) String direccao,
-    @RequestParam(value = "page", required = false, defaultValue = "0") String page,
-    @RequestParam(value = "size", required = false, defaultValue = "20") String size)
-  {
+      @RequestParam(value = "dataInicio", required = false) String dataInicio,
+      @RequestParam(value = "dataFim", required = false) String dataFim,
+      @RequestParam(value = "colaborador", required = false) String colaborador,
+      @RequestParam(value = "direccao", required = false) String direccao,
+      @RequestParam(value = "page", required = false, defaultValue = "0") String page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") String size) {
 
-      final var query = new GetListaLicensaSemVencimentoQuery(dataInicio, dataFim, colaborador, direccao, page, size);
+    final var query = new GetListaLicensaSemVencimentoQuery(dataInicio, dataFim, colaborador, direccao, page, size);
 
-      return queryBus.handle(query);
+    return queryBus.handle(query);
 
   }
 
-   @PostMapping(
-   value = "importar-movimento",
-    consumes = "multipart/form-data"
+  @PostMapping(
+      value = "importar-movimento",
+      consumes = "multipart/form-data"
   )
   @Operation(
-    summary = "Importar movimentos",
-    description = "Importar movimentos",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
+      summary = "Importar movimentos",
+      description = "Importar movimentos",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
 
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
           )
-      )
-    }
+      }
   )
 
   public ResponseEntity<String> importarMovimentos(
-    @RequestParam(value = "ficheiro") MultipartFile ficheiro)
-  {
+      @RequestParam(value = "ficheiro") MultipartFile ficheiro) {
 
-      final var command = new ImportarMovimentosCommand(ficheiro);
+    final var command = new ImportarMovimentosCommand(ficheiro);
 
-      return commandBus.send(command);
+    return commandBus.send(command);
 
   }
 
-   @GetMapping(
-   value = "movimentos"
+  @GetMapping(
+      value = "movimentos"
   )
   @Operation(
-    summary = "Get movimentos importados",
-    description = "Get movimentos importados",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
+      summary = "Get movimentos importados",
+      description = "Get movimentos importados",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
 
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = MovimentosImportadosDTO.class,
-                  type = "object")
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = MovimentosImportadosDTO.class,
+                      type = "object")
+              )
           )
-      )
-    }
+      }
   )
 
   public ResponseEntity<MovimentosImportadosDTO> getMovimentosImportados(
-    @RequestParam(value = "page", required = false, defaultValue = "0") String page,
-    @RequestParam(value = "size", required = false, defaultValue = "20") String size,
-    @RequestParam(value = "dataImportacao", required = false) String dataImportacao)
-  {
+      @RequestParam(value = "page", required = false, defaultValue = "0") String page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") String size,
+      @RequestParam(value = "dataImportacao", required = false) String dataImportacao) {
 
-      final var query = new GetMovimentosImportadosQuery(page, size, dataImportacao);
+    final var query = new GetMovimentosImportadosQuery(page, size, dataImportacao);
 
-      return queryBus.handle(query);
+    return queryBus.handle(query);
 
   }
 
-   @PostMapping(
-   value = "movimentos/{movimentoId}/validar"
+  @PostMapping(
+      value = "movimentos/{movimentoId}/validar"
   )
   @Operation(
-    summary = "Validar movimento importado",
-    description = "Validar movimento importado",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
+      summary = "Validar movimento importado",
+      description = "Validar movimento importado",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
 
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
           )
-      )
-    }
+      }
   )
 
   public ResponseEntity<String> validarMovimentoImportado(@Valid @RequestBody ValidacaoMovimentoImportadoDTO validarMovimentoImportadoRequest
-    , @PathVariable(value = "movimentoId") String movimentoId)
-  {
+      , @PathVariable(value = "movimentoId") String movimentoId) {
 
-      final var command = new ValidarMovimentoImportadoCommand(validarMovimentoImportadoRequest, movimentoId);
+    final var command = new ValidarMovimentoImportadoCommand(validarMovimentoImportadoRequest, movimentoId);
 
-      return commandBus.send(command);
+    return commandBus.send(command);
 
   }
 

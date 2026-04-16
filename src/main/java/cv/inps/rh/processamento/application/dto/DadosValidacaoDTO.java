@@ -16,46 +16,45 @@ import java.math.BigDecimal;
 
 
 @IgrpDTO
-public class DadosValidacaoDTO  {
+public class DadosValidacaoDTO {
 
 
-
-  private String nomeColaborador ;
-
-
-  private String nib ;
+  private String nomeColaborador;
 
 
-  private BigDecimal valorAnterior ;
+  private String nib;
 
 
-  private BigDecimal valorAtual ;
+  private BigDecimal valorAnterior;
 
 
-  private String tipoMovimento ;
+  private BigDecimal valorAtual;
 
 
-  private String mesAnterior ;
+  private String tipoMovimento;
 
 
-  private String mesAtual ;
+  private String mesAnterior;
 
 
-  private BigDecimal valorEscalao ;
+  private String mesAtual;
 
 
-  private Integer numero ;
+  private BigDecimal valorEscalao;
 
 
-  private String situacaoLaboral ;
+  private Integer numero;
 
 
-  private String tipoFiltro ;
+  private String situacaoLaboral;
 
 
-  private Integer processamentoId ;
+  private String tipoFiltro;
 
 
-  private Integer funId ;
+  private Integer processamentoId;
+
+
+  private Integer funId;
 
 }

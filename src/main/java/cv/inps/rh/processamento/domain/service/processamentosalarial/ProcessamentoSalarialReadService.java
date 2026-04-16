@@ -84,10 +84,6 @@ public class ProcessamentoSalarialReadService {
     return data;
   }
 
-  private enum TipoDetalhe {
-    REMUNERACAO, PAGAMENTO
-  }
-
   public List<DadosValidacaoDTO> getDadosValidacao(GetDadosValidacaoQuery query) {
     try {
 
@@ -135,5 +131,9 @@ public class ProcessamentoSalarialReadService {
       LOGGER.error(e.getMessage(), e);
     }
     throw IgrpResponseStatusException.internalServerError("Error getting data...");
+  }
+
+  private enum TipoDetalhe {
+    REMUNERACAO, PAGAMENTO
   }
 }

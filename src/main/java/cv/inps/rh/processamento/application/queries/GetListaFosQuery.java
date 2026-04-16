@@ -10,10 +10,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PesquisaCentroCustoQuery implements Query {
+public class GetListaFosQuery implements Query {
 
-  @NotBlank(message = "The field <nome> is required")
-  private String nome;
+  @NotBlank(message = "The field <dataInicio> is required")
+  private String dataInicio;
+  @NotBlank(message = "The field <dataFim> is required")
+  private String dataFim;
   @NotBlank(message = "The field <page> is required")
   private String page;
   @NotBlank(message = "The field <size> is required")
