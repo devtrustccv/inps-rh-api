@@ -6,6 +6,7 @@ import cv.inps.rh.shared.infrastructure.persistence.projections.InstituicaoProje
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
@@ -41,4 +42,8 @@ public interface InstituicaoEntityRepository extends
     )
     """, nativeQuery = true)
   List<InstituicaoProjection> findInstituicoesList();
+
+
+  @Query(value = "SELECT GET_NOME_CENTRO_CUSTO(:institId) FROM dual", nativeQuery = true)
+  String getNomeCentroCusto(@Param("institId") Long institId);
 }

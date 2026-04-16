@@ -8,10 +8,7 @@ import cv.inps.rh.shared.application.service.ParametrizacaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -44,6 +41,16 @@ public class ParametrizacaoController {
   @Operation(summary = "Lista tipos de movimento de remuneração ativos")
   public ResponseEntity<List<ParametrizacaoDTO>> getInstituicoesAtivas() {
     return ResponseEntity.ok(parametrizacaoService.getInstituicoes());
+  }
+
+  @GetMapping("/instituicoes/{institId}/centros-custo")
+  @Operation(summary = "Obter centro de custo por instituição")
+  public ResponseEntity<String> getCentroCustoByInstituicao(
+      @PathVariable Long institId) {
+
+    return ResponseEntity.ok(
+        parametrizacaoService.getCentroByInstituicao(institId)
+    );
   }
 
   @GetMapping("/geografias")

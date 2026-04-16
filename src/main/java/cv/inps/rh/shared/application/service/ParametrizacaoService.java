@@ -58,4 +58,7 @@ public class ParametrizacaoService {
     return bancoEntityRepository.findAll().stream().map(bancoMapper::toParametrizacaoDto).toList();
   }
 
+  public String getCentroByInstituicao(Long institId) {
+    return instituicaoEntityRepository.getNomeCentroCusto(institId);
+  }
 }
