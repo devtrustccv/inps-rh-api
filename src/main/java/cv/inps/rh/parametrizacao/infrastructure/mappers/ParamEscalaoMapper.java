@@ -12,6 +12,10 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Component
 @RequiredArgsConstructor
 public class ParamEscalaoMapper {
@@ -85,7 +89,14 @@ public class ParamEscalaoMapper {
     if (domain == null) return null;
 
     EscalaoDTO dto = new EscalaoDTO();
-    dto.setLabel(domain.getCodigo() != null ? domain.getCodigo() : "");
+    String label = Stream.of(
+            Optional.ofNullable(domain.getNivelReferencia()).map(Object::toString).orElse("").trim(),
+            Optional.ofNullable(domain.getEscalao()).orElse("").trim()
+        )
+        .filter(s -> !s.isEmpty())
+        .collect(Collectors.joining("/"));
+
+    dto.setLabel(label);
     dto.setValue(domain.getId());
     dto.setValor(domain.getValor());
     return dto;

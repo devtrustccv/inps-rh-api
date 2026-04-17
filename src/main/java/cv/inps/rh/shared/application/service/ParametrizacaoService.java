@@ -36,10 +36,13 @@ public class ParametrizacaoService {
   public List<ParametrizacaoDTO> getTiposMovimentosPagamentosDesconto(){
     return tipoMovimentoEntityRepository.findAllByTipo("PAG").stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
-  public List<ParametrizacaoDTO> getInstituicoes(){
-    return instituicaoEntityRepository.findAll().stream().map(instituicaoMapper::toParametrizacaoDto).toList();
-  }
 
+  public List<ParametrizacaoDTO> getInstituicoes() {
+    return instituicaoEntityRepository.findInstituicoesList()
+        .stream()
+        .map(p -> new ParametrizacaoDTO(p.getNome(), p.getId()))
+        .toList();
+  }
   public List<ParametrizacaoDTO> getGeografias(Long nivelDetalhe, Long geogrId) {
     return geografiaEntityRepository.findByNivelDetalheAndGeogrId(nivelDetalhe, geogrId)
         .stream()
@@ -55,4 +58,7 @@ public class ParametrizacaoService {
     return bancoEntityRepository.findAll().stream().map(bancoMapper::toParametrizacaoDto).toList();
   }
 
+  public String getCentroByInstituicao(Long institId) {
+    return instituicaoEntityRepository.getNomeCentroCusto(institId);
+  }
 }
