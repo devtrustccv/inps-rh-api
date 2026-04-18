@@ -1,5 +1,6 @@
 package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
+import cv.inps.rh.processamento.application.dto.DetalheXmlRequestDTO;
 import cv.inps.rh.processamento.application.dto.DetalhesFosXmlDTO;
 import cv.inps.rh.processamento.application.dto.ListaFosDTO;
 import cv.inps.rh.processamento.application.queries.GetListaFosQuery;
@@ -56,18 +57,18 @@ public class FosService {
   }
 
   @Transactional(readOnly = true)
-  public DetalhesFosXmlDTO getFosDetalhes(Long fosId) {
+  public DetalhesFosXmlDTO getFosDetalhes(Long fosId, Integer directionId) {
 
     var fos = fosEntityRepository.findByIdOrThrow(fosId);
 
-    var rows = detalheXmlFosEntityRepository.findDetalhesByFos(fos.getId());
+    var fosDetails = detalheXmlFosEntityRepository.findDetalhesByFos(fos.getId(), directionId);
 
     return new DetalhesFosXmlDTO(
         fos.getId(),
         fos.getMes(),
         fos.getTpEntrega(),
         fos.getDtEntrega(),
-        rows
+        fosDetails
     );
   }
 
@@ -134,6 +135,36 @@ public class FosService {
     return (String) result.get("P_MSG");
   }
 
+  public void gravarNovaLinhaFos(DetalheXmlRequestDTO dto) {
+
+    buildSimpleJdbcCall("RH_PK_GERA_XML_DB", "gravarNovaLinhaXML")
+        .declareParameters(
+            new SqlParameter("p_id_xml", Types.NUMERIC),
+            new SqlParameter("p_id_row", Types.VARCHAR),
+            new SqlParameter("p_mes_ref", Types.VARCHAR),
+            new SqlParameter("p_tp_remuneracao", Types.VARCHAR),
+            new SqlParameter("p_remuneracao", Types.NUMERIC),
+            new SqlParameter("p_dia_trab", Types.NUMERIC),
+            new SqlParameter("p_fun_id", Types.NUMERIC),
+            new SqlParameter("p_nu_segurado", Types.VARCHAR),
+            new SqlParameter("p_dir_serv_id", Types.NUMERIC),
+            new SqlParameter("p_user_id", Types.NUMERIC)
+        )
+        .execute(
+            new MapSqlParameterSource()
+                .addValue("p_id_xml", dto.getFosId())
+                .addValue("p_id_row", normalizeIdRow(dto.getDetaildId()))
+                .addValue("p_mes_ref", dto.getMesReferencia())
+                .addValue("p_tp_remuneracao", dto.getTipoRemuneracao())
+                .addValue("p_remuneracao", dto.getRemuneracao())
+                .addValue("p_dia_trab", dto.getDiasTrabalho())
+                .addValue("p_fun_id", dto.getFuncionarioId())
+                .addValue("p_nu_segurado", dto.getNumeroSegurado())
+                .addValue("p_dir_serv_id", dto.getDirecaoServicoId())
+                .addValue("p_user_id", 1) // TODO 18/04/2026 22:53 see this
+        );
+  }
+
   private SimpleJdbcCall buildSimpleJdbcCall(String catalogName, String procedureName) {
     return new SimpleJdbcCall(dataSource)
         .withoutProcedureColumnMetaDataAccess()
@@ -149,7 +180,11 @@ public class FosService {
     return YearMonth.of(ano, mes).atDay(1);
   }
 
-  public String buildReferenceMonth(LocalDate referenceDate) {
+  private String buildReferenceMonth(LocalDate referenceDate) {
     return "%04d%02d".formatted(referenceDate.getYear(), referenceDate.getMonthValue());
+  }
+
+  private String normalizeIdRow(Long detailId) {
+    return detailId == null ? null : String.valueOf(detailId);
   }
 }

@@ -25,7 +25,7 @@ public class GetDetalheFosXmlQueryHandler implements QueryHandler<GetDetalheFosX
 
     LOGGER.debug("GetDetalheFosXmlQuery: {}", query);
 
-    var data = fosService.getFosDetalhes(query.getFosId());
+    var data = fosService.getFosDetalhes(query.getFosId(), query.getDirecaoId());
 
     return ResponseEntity.ok(data);
   }

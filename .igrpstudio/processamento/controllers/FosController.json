@@ -164,9 +164,46 @@
           "type": "long",
           "name": "fosId",
           "isRequired": true
+        },
+        {
+          "type": "integer",
+          "name": "direcaoId",
+          "isRequired": false
         }
       ]
+    },
+    {
+      "actionName": "registarAtualizarRegisto",
+      "path": "registar-atualizar-registo",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "DetalheXmlRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
     }
   ],
-  "id": "swsviwfo1n-novoSegurado-restaurarFos"
+  "id": "swsviwfo1n-novoSegurado-restaurarFos-getDetalheFosXml"
 }

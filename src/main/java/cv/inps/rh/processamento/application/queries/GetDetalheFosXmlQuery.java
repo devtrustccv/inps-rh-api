@@ -14,5 +14,7 @@ public class GetDetalheFosXmlQuery implements Query {
 
   @NotNull(message = "The field <fosId> is required")
   private Long fosId;
+  @NotNull(message = "The field <direcaoId> is required")
+  private Integer direcaoId;
 
 }

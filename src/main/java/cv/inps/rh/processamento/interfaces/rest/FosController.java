@@ -7,8 +7,10 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.processamento.application.commands.NovoSeguradoCommand;
+import cv.inps.rh.processamento.application.commands.RegistarAtualizarRegistoCommand;
 import cv.inps.rh.processamento.application.commands.RemoverDetalheFosCommand;
 import cv.inps.rh.processamento.application.commands.RestaurarFosCommand;
+import cv.inps.rh.processamento.application.dto.DetalheXmlRequestDTO;
 import cv.inps.rh.processamento.application.dto.DetalhesFosXmlDTO;
 import cv.inps.rh.processamento.application.dto.ListaFosDTO;
 import cv.inps.rh.processamento.application.queries.GetDetalheFosXmlQuery;
@@ -18,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -180,11 +183,41 @@ public class FosController {
   )
 
   public ResponseEntity<DetalhesFosXmlDTO> getDetalheFosXml(
-      @RequestParam(value = "fosId") Long fosId) {
+      @RequestParam(value = "fosId") Long fosId,
+      @RequestParam(value = "direcaoId", required = false) Integer direcaoId) {
 
-    final var query = new GetDetalheFosXmlQuery(fosId);
+    final var query = new GetDetalheFosXmlQuery(fosId, direcaoId);
 
     return queryBus.handle(query);
+
+  }
+
+  @PostMapping(
+      value = "registar-atualizar-registo"
+  )
+  @Operation(
+      summary = "Registar atualizar registo",
+      description = "Registar atualizar registo",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<String> registarAtualizarRegisto(@Valid @RequestBody DetalheXmlRequestDTO registarAtualizarRegistoRequest
+  ) {
+
+    final var command = new RegistarAtualizarRegistoCommand(registarAtualizarRegistoRequest);
+
+    return commandBus.send(command);
 
   }
 

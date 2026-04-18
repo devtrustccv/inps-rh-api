@@ -35,7 +35,7 @@ public interface DetalheXmlFosEntityRepository extends
           )
           FROM DetalheXmlFosEntity d
           JOIN d.idFunc f
-          WHERE d.idXmlFos.id = :fosId
+          WHERE d.idXmlFos.id = :fosId AND (:direcaoId IS NULL OR d.dirServId = :direcaoId)
       """)
-  List<DetalhesFosXmlRowDTO> findDetalhesByFos(@Param("fosId") Long fosId);
+  List<DetalhesFosXmlRowDTO> findDetalhesByFos(@Param("fosId") Long fosId, @Param("direcaoId") Integer direcaoId);
 }
