@@ -9,7 +9,9 @@ import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.processamento.application.commands.NovoSeguradoCommand;
 import cv.inps.rh.processamento.application.commands.RemoverDetalheFosCommand;
 import cv.inps.rh.processamento.application.commands.RestaurarFosCommand;
+import cv.inps.rh.processamento.application.dto.DetalhesFosXmlDTO;
 import cv.inps.rh.processamento.application.dto.ListaFosDTO;
+import cv.inps.rh.processamento.application.queries.GetDetalheFosXmlQuery;
 import cv.inps.rh.processamento.application.queries.GetListaFosQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -154,6 +156,35 @@ public class FosController {
     final var command = new RestaurarFosCommand(referenceMonth, fosId);
 
     return commandBus.send(command);
+
+  }
+
+  @GetMapping(
+      value = "detalhe-fos"
+  )
+  @Operation(
+      summary = "Get detalhe fos xml",
+      description = "Get detalhe fos xml",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = DetalhesFosXmlDTO.class,
+                      type = "object")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<DetalhesFosXmlDTO> getDetalheFosXml(
+      @RequestParam(value = "fosId") Long fosId) {
+
+    final var query = new GetDetalheFosXmlQuery(fosId);
+
+    return queryBus.handle(query);
 
   }
 

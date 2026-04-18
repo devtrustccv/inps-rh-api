@@ -138,6 +138,34 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getDetalheFosXml",
+      "path": "detalhe-fos",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "DetalhesFosXml",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "fosId",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "swsviwfo1n-novoSegurado-restaurarFos"

@@ -66,5 +66,5 @@ public class DetalheXmlFosEntity extends AuditEntity {
   private LocalDate dataUpdate;
 
   @Column(name = "DIR_SERV_ID")
-  private Long dirServId;
+  private Integer dirServId;
 }

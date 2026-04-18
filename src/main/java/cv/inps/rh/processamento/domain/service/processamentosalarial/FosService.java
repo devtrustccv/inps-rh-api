@@ -1,5 +1,6 @@
 package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
+import cv.inps.rh.processamento.application.dto.DetalhesFosXmlDTO;
 import cv.inps.rh.processamento.application.dto.ListaFosDTO;
 import cv.inps.rh.processamento.application.queries.GetListaFosQuery;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -52,6 +53,22 @@ public class FosService {
     wrapper.setContent(page.getContent());
 
     return wrapper;
+  }
+
+  @Transactional(readOnly = true)
+  public DetalhesFosXmlDTO getFosDetalhes(Long fosId) {
+
+    var fos = fosEntityRepository.findByIdOrThrow(fosId);
+
+    var rows = detalheXmlFosEntityRepository.findDetalhesByFos(fos.getId());
+
+    return new DetalhesFosXmlDTO(
+        fos.getId(),
+        fos.getMes(),
+        fos.getTpEntrega(),
+        fos.getDtEntrega(),
+        rows
+    );
   }
 
   public void novosSegurado(Integer ano, Integer mes) {
