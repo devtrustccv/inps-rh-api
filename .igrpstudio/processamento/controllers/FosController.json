@@ -71,15 +71,43 @@
         {
           "type": "integer",
           "name": "ano",
-          "isRequired": true
+          "isRequired": true,
+          "description": "Ano de origem, exemplo 2026"
         },
         {
           "type": "integer",
           "name": "mes",
+          "isRequired": true,
+          "description": "Mês de referencia, entre 1 a 12"
+        }
+      ]
+    },
+    {
+      "actionName": "removerDetalheFos",
+      "path": "remover-detalhe-fos",
+      "method": "POST",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "detalheFosId",
           "isRequired": true
         }
       ]
     }
   ],
-  "id": "swsviwfo1n"
+  "id": "swsviwfo1n-novoSegurado"
 }

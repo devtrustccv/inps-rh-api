@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Setter
 @Entity
 @Table(name = "RH_XML_FOS")
-public class RhXmlFosEntity extends AuditEntity {
+public class XmlFosEntity extends AuditEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "RH_XML_FOS_id_gen")
