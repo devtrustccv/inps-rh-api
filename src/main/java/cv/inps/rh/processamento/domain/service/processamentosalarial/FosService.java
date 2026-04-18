@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
 import java.sql.Types;
 import java.time.LocalDate;
+import java.time.YearMonth;
 
 @Transactional
 @Service
@@ -55,18 +56,15 @@ public class FosService {
 
   public void novosSegurado(Integer ano, Integer mes) {
 
-    if (mes == null || mes < 1 || mes > 12)
-      throw IgrpResponseStatusException.badRequest("Mês inválido. Deve estar entre 1 e 12");
-
-    var referenceDate = LocalDate.of(ano, mes, 1);
+    var referenceDate = getReferenceDate(ano, mes);
 
     var currentMonth = LocalDate.now().withDayOfMonth(1);
 
     if (referenceDate.isAfter(currentMonth))
       throw IgrpResponseStatusException.badRequest("Não pode ser gerado! Mês de Referência não pode ser superior ao mês atual");
 
-    var mesReferencia = String.format("%04d%02d", ano, mes);
-    LOGGER.debug("REFERENCE MONTH: {}", mesReferencia);
+    var referenceMonth = buildReferenceMonth(referenceDate);
+    LOGGER.debug("Novo segurado reference date: {}", referenceMonth);
 
     buildSimpleJdbcCall("RH_PK_GERA_XML_DB", "configXML")
         .declareParameters(
@@ -76,9 +74,29 @@ public class FosService {
         )
         .execute(
             new MapSqlParameterSource()
-                .addValue("p_mes_referencia", mesReferencia)
+                .addValue("p_mes_referencia", referenceMonth)
                 .addValue("p_tipo", "PRIME")
                 .addValue("p_user_id", 1) // TODO 18/04/2026 21:34 check this later
+        );
+  }
+
+  public void restaurar(String referenceMonth, Long fosId) {
+
+    var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
+    if (fosXml.getDtEntrega() != null)
+      throw IgrpResponseStatusException.badRequest("Já existe uma declaração entregue!");
+
+    LOGGER.debug("Restauration reference date: {}", referenceMonth);
+
+    buildSimpleJdbcCall("RH_PK_GERA_XML_DB", "restaurarXML")
+        .declareParameters(
+            new SqlParameter("p_mes_referencia", Types.VARCHAR),
+            new SqlOutParameter("P_ID", Types.NUMERIC)
+        )
+        .execute(
+            new MapSqlParameterSource()
+                .addValue("p_mes_referencia", referenceMonth)
+                .addValue("P_ID", fosXml.getId())
         );
   }
 
@@ -104,5 +122,17 @@ public class FosService {
         .withoutProcedureColumnMetaDataAccess()
         .withCatalogName(catalogName)
         .withProcedureName(procedureName);
+  }
+
+  private LocalDate getReferenceDate(Integer ano, Integer mes) {
+
+    if (mes == null || mes < 1 || mes > 12)
+      throw IgrpResponseStatusException.badRequest("Mês inválido. Deve estar entre 1 e 12");
+
+    return YearMonth.of(ano, mes).atDay(1);
+  }
+
+  public String buildReferenceMonth(LocalDate referenceDate) {
+    return "%04d%02d".formatted(referenceDate.getYear(), referenceDate.getMonthValue());
   }
 }

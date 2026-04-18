@@ -107,7 +107,38 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "restaurarFos",
+      "path": "restaurar",
+      "method": "POST",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "referenceMonth",
+          "isRequired": true
+        },
+        {
+          "type": "long",
+          "name": "fosId",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "swsviwfo1n-novoSegurado"
+  "id": "swsviwfo1n-novoSegurado-restaurarFos"
 }

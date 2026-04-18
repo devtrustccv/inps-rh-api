@@ -8,6 +8,7 @@ import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.processamento.application.commands.NovoSeguradoCommand;
 import cv.inps.rh.processamento.application.commands.RemoverDetalheFosCommand;
+import cv.inps.rh.processamento.application.commands.RestaurarFosCommand;
 import cv.inps.rh.processamento.application.dto.ListaFosDTO;
 import cv.inps.rh.processamento.application.queries.GetListaFosQuery;
 import io.swagger.v3.oas.annotations.Operation;
@@ -121,6 +122,36 @@ public class FosController {
       @RequestParam(value = "detalheFosId") Long detalheFosId) {
 
     final var command = new RemoverDetalheFosCommand(detalheFosId);
+
+    return commandBus.send(command);
+
+  }
+
+  @PostMapping(
+      value = "restaurar"
+  )
+  @Operation(
+      summary = "Restaurar fos",
+      description = "Restaurar fos",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<String> restaurarFos(
+      @RequestParam(value = "referenceMonth") String referenceMonth,
+      @RequestParam(value = "fosId") Long fosId) {
+
+    final var command = new RestaurarFosCommand(referenceMonth, fosId);
 
     return commandBus.send(command);
 
