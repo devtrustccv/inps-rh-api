@@ -250,4 +250,33 @@ public class FosController {
 
   }
 
+  @PostMapping(
+      value = "enviar-folha"
+  )
+  @Operation(
+      summary = "Enviar folha",
+      description = "Enviar folha",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<String> enviarFolha(
+      @RequestParam(value = "fosId") Long fosId) {
+
+    final var command = new EnviarFolhaCommand(fosId);
+
+    return commandBus.send(command);
+
+  }
+
 }

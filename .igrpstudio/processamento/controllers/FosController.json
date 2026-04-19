@@ -244,6 +244,32 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "enviarFolha",
+      "path": "enviar-folha",
+      "method": "POST",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "fosId",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "swsviwfo1n-novoSegurado-restaurarFos-getDetalheFosXml"

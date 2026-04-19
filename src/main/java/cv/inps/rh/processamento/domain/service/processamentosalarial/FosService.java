@@ -201,6 +201,16 @@ public class FosService {
         .withProcedureName(procedureName);
   }
 
+  public void enviarFolha(Long fosId) {
+
+    var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
+    if (fosXml.getDtEntrega() != null)
+      throw IgrpResponseStatusException.badRequest("Já existe uma declaração entregue!");
+
+    // TODO 18/04/2026 23:21 api INPS
+
+  }
+
   private LocalDate getReferenceDate(Integer ano, Integer mes) {
 
     if (mes == null || mes < 1 || mes > 12)
