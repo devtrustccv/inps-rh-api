@@ -8,13 +8,14 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.customizers.OpenApiCustomizer;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @OpenAPIDefinition(
-    security = { @SecurityRequirement(name = "bearerAuth") }
+    security = {@SecurityRequirement(name = "bearerAuth")}
 )
 @SecurityScheme(
     name = "bearerAuth",
@@ -47,5 +48,21 @@ public class SwaggerConfig {
             .title("iGRP INPS RH API")
             .version("1.0.0")
             .description("Automatically generated OpenAPI definition"));
+  }
+
+  @Bean
+  public GroupedOpenApi allApis() {
+    return GroupedOpenApi.builder()
+        .group("All Api's")
+        .pathsToMatch("/**")
+        .build();
+  }
+
+  @Bean
+  public GroupedOpenApi fosApis() {
+    return GroupedOpenApi.builder()
+        .group("Fos")
+        .pathsToMatch("/fos/**")
+        .build();
   }
 }
