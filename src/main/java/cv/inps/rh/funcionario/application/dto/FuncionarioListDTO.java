@@ -58,5 +58,8 @@ public class FuncionarioListDTO  {
   
   
   private Long vinculoId ;
+  
+  
+  private String numColaborador ;
 
 }

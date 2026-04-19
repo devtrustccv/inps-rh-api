@@ -81,7 +81,7 @@ public class ResponsavelService {
       obj.setNomeDirecao(direction.getNome());
 
       var funId = e.getFunId();
-      obj.setIdFuncionario(funId.getId().toString());
+      obj.setIdFuncionario(funId.getUuid().toString());
       obj.setNomeFuncionario(funId.getNome());
       arraySavedData.add(obj);
     });

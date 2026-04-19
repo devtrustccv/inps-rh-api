@@ -6,8 +6,10 @@ import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.NotificacaoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.NotificacaoResponseDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
+import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamNotificacaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamNotificacaoEntityRepository;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
@@ -27,14 +29,17 @@ import java.util.stream.Collectors;
 public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestDTO> {
 
   private final ParamNotificacaoEntityRepository notificacaoRepository;
+  private final DomainEntityRepository domainEntityRepository;
 
   protected NotificacaoService(
       Validator validator, ObjectMapper jsonMapper,
-      ParamNotificacaoEntityRepository notificacaoRepository
+      ParamNotificacaoEntityRepository notificacaoRepository,
+      DomainEntityRepository domainEntityRepository
   ) {
 
     super(validator, jsonMapper, NotificacaoRequestDTO.class);
     this.notificacaoRepository = notificacaoRepository;
+    this.domainEntityRepository = domainEntityRepository;
   }
 
   @Override
@@ -66,7 +71,8 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
   @Override
   public Object read(String id) {
     var entity = notificacaoRepository.findByUuidOrThrow(UUID.fromString(id));
-    return buildResponse(entity);
+    var tpNotif = domainEntityRepository.getActiveDomainByCode(Domains.TIPO_ALERTA_NOTIFICACAO.name());
+    return buildResponse(entity, tpNotif);
   }
 
   @Override
@@ -88,9 +94,9 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
     };
 
     var data = notificacaoRepository.findAll(spec, pageable);
-
+    var tpNotif = domainEntityRepository.getActiveDomainByCode(Domains.TIPO_ALERTA_NOTIFICACAO.name());
     return data.stream()
-        .map(this::buildResponse)
+        .map(e -> buildResponse(e, tpNotif))
         .collect(Collectors.toList());
   }
 
@@ -101,7 +107,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
     notificacaoRepository.save(entity);
   }
 
-  private NotificacaoResponseDTO buildResponse(ParamNotificacaoEntity e) {
+  private NotificacaoResponseDTO buildResponse(ParamNotificacaoEntity e, Map<String, String> tpNotif) {
     var dto = new NotificacaoResponseDTO();
     dto.setId(e.getId().toString());
     dto.setUuid(e.getUuid().toString());
@@ -109,6 +115,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
     dto.setAssunto(e.getAssunto());
     dto.setCorpo(e.getCorpo());
     dto.setTipoNotificacao(e.getTipoNotificacao());
+    dto.setTipoNotificacaoDesc(e.getTipoNotificacao() != null ? tpNotif.get(e.getTipoNotificacao()) : null);
     dto.setEstado(e.getEstado());
     return dto;
   }

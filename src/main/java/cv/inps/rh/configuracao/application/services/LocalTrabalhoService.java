@@ -13,6 +13,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity_
 import cv.inps.rh.shared.infrastructure.persistence.repository.GeografiaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamLocalTrabEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.UpsEntityRepository;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
@@ -35,16 +36,18 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
   private final ParamLocalTrabEntityRepository localRepository;
   private final GeografiaEntityRepository geografiaRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoRepository;
+  private final UpsEntityRepository upsRepository;
 
   protected LocalTrabalhoService(
       ParamLocalTrabEntityRepository localRepository,
       GeografiaEntityRepository geografiaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository,
-      Validator validator, ObjectMapper jsonMapper
+      Validator validator, ObjectMapper jsonMapper, UpsEntityRepository upsRepository
   ) {
     super(validator, jsonMapper, LocalTrabalhoRequestDTO.class);
     this.localRepository = localRepository;
     this.geografiaRepository = geografiaRepository;
     this.tiposRelacionamentoRepository = tiposRelacionamentoRepository;
+    this.upsRepository = upsRepository;
   }
 
   @Override
@@ -55,7 +58,7 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
     entity.setEstado(Estado.A);
     entity.setNome(dto.getLocal());
     entity.setNomeNormalizado(ConfigurationUtils.normalizeAndSetToLowerCaseText(dto.getLocal()));
-    entity.setUpsId(Long.valueOf(dto.getUps()));
+    entity.setUpsId(upsRepository.findByIdOrThrow(Long.valueOf(dto.getUps())));
     entity.setPaisId(geografiaRepository.findByIdOrThrow(Long.valueOf(dto.getPais())));
 
     if (StringUtils.hasText(dto.getIlha())) {
@@ -74,7 +77,7 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
     var entity = localRepository.findByUuidOrThrow(UUID.fromString(uuid));
     entity.setNome(dto.getLocal());
     entity.setNomeNormalizado(ConfigurationUtils.normalizeAndSetToLowerCaseText(dto.getLocal()));
-    entity.setUpsId(Long.valueOf(dto.getUps()));
+    entity.setUpsId(upsRepository.findByIdOrThrow(Long.valueOf(dto.getUps())));
     entity.setPaisId(geografiaRepository.findByIdOrThrow(Long.valueOf(dto.getPais())));
 
     if (StringUtils.hasText(dto.getEstado()))
@@ -154,7 +157,8 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
     dto.setPaisId(country.getId().toString());
     dto.setEstado(e.getEstado().name());
     dto.setEstadoDescricao(e.getEstado().getDescription());
-    dto.setUps(e.getUpsId().toString());
+    dto.setUps(e.getUpsId().getNome());
+    dto.setUpsId(e.getUpsId().getId().toString());
 
     ofNullable(e.getIlhaId()).ifPresent(island -> {
       dto.setIlhaId(island.getId().toString());

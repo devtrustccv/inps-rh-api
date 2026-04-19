@@ -98,10 +98,11 @@ public class ManualFuncaoController {
     @RequestParam(value = "cargoId", required = false) Long cargoId,
     @RequestParam(value = "carrPccsId", required = false) Long carrPccsId,
     @RequestParam(value = "institId", required = false) Long institId,
-    @RequestParam(value = "seccaoId", required = false) Long seccaoId)
+    @RequestParam(value = "seccaoId", required = false) Long seccaoId,
+    @RequestParam(value = "conteudo", required = false) String conteudo)
   {
 
-      final var query = new GetListaManualFuncaoQuery(pageNumber, pageSize, cargoId, carrPccsId, institId, seccaoId);
+      final var query = new GetListaManualFuncaoQuery(pageNumber, pageSize, cargoId, carrPccsId, institId, seccaoId, conteudo);
 
       return queryBus.handle(query);
 

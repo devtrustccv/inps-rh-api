@@ -29,7 +29,7 @@ public class EquipamentoService {
 
     var local = localRepository.findByUuidOrThrow(UUID.fromString(localId));
 
-    var ups = upsEntityRepository.findById(local.getUpsId());
+    var ups = local.getUpsId();
 
     var data = new ArrayList<EquipamentoEntity>();
 
@@ -48,7 +48,7 @@ public class EquipamentoService {
       equipment.setIpAddress(obj.getIpAddress());
       equipment.setTipo(obj.getTipo());
       equipment.setPicagem(obj.getPicagem());
-      equipment.setIdUps(ups.orElse(null));
+      equipment.setIdUps(local.getUpsId());
       equipment.setTpMovimento(obj.getDescricaoTipoMovimento());
       equipment.setTpMovimentoDesc(obj.getTipoMovimento());
       data.add(equipment);
@@ -61,7 +61,7 @@ public class EquipamentoService {
 
     var local = localRepository.findByUuidOrThrow(UUID.fromString(localId));
 
-    var data = equipamentoEntityRepository.findAllByIdUps_idAndEstado(local.getUpsId(), Estado.A);
+    var data = equipamentoEntityRepository.findAllByIdUps_idAndEstado(local.getUpsId().getId(), Estado.A);
 
     var response = new ArrayList<EquipamentoRequestDTO>();
 

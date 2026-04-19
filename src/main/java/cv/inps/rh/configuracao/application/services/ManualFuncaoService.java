@@ -116,6 +116,10 @@ public class ManualFuncaoService {
         predicates.add(cb.equal(root.get("seccaoId").get("id"), query.getSeccaoId()));
       }
 
+      if (query.getConteudo() != null) {
+        predicates.add(cb.like(cb.lower(root.get("descricao")), "%"+query.getConteudo().toLowerCase()+ "%"));
+      }
+
       return cb.and(predicates.toArray(new Predicate[0]));
     };
 

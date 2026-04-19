@@ -10,6 +10,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.AssiduidadeParame
 import cv.inps.rh.shared.infrastructure.persistence.repository.FusoHorarioUpsEntityRepository;
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,7 +108,7 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
 
   @Override
   public Object list(Map<String, String> filters) {
-    var data = repository.findAll();
+    var data = repository.findAll(Sort.by(Sort.Direction.DESC, "dtRegisto"));
     return data.stream().map(this::buildResponse).collect(Collectors.toList());
   }
 

@@ -25,5 +25,7 @@ public class GetListaManualFuncaoQuery implements Query {
   private Long institId;
   @NotNull(message = "The field <seccaoId> is required")
   private Long seccaoId;
+  @NotBlank(message = "The field <conteudo> is required")
+  private String conteudo;
 
 }

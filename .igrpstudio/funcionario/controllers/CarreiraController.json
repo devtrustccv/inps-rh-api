@@ -172,6 +172,34 @@
       ]
     },
     {
+      "actionName": "getCarreiraAtual",
+      "path": "carreiras/{uuidFuncionario}/atual",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "CarreiraResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuidFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
       "actionName": "eliminarCarreira",
       "path": "carreiras/{carreiraId}",
       "method": "DELETE",
@@ -242,5 +270,5 @@
       ]
     }
   ],
-  "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-validarCarreira-getCarreiraById-getCarreiraById-novaCarreira-validarCarreira"
+  "id": "hgbnpfs107-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-getCarreiraList-validarCarreira-getCarreiraById-getCarreiraById-novaCarreira-validarCarreira-getCarreiraAtual"
 }

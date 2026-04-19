@@ -27,20 +27,20 @@ public class ParamLocalTrabEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
     @NotBlank(message = "nome is mandatory")
     @Column(name="nome", nullable = false)
     private String nome;
 
-  
+
     @Column(name="nome_normalizado")
     private String nomeNormalizado;
 
-  
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -51,13 +51,15 @@ public class ParamLocalTrabEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ilha_id", referencedColumnName = "id")
     private GeografiaEntity ilhaId;
-    @Column(name="ups_id")
-    private Long upsId;
 
-  
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "ups_id", referencedColumnName = "id")
+    private UpsEntity upsId;
+
+
     @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
+
 }
