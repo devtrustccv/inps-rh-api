@@ -208,7 +208,19 @@ public class FosService {
       throw IgrpResponseStatusException.badRequest("Já existe uma declaração entregue!");
 
     // TODO 18/04/2026 23:21 api INPS
+  }
 
+  public void substituirXml(String referenceMonth, Long id) {
+    buildSimpleJdbcCall("configXML")
+        .declareParameters(
+            new SqlParameter("p_mes_referencia", Types.VARCHAR),
+            new SqlParameter("p_id", Types.NUMERIC)
+        )
+        .execute(
+            new MapSqlParameterSource()
+                .addValue("p_mes_referencia", referenceMonth)
+                .addValue("p_tipo", id)
+        );
   }
 
   private LocalDate getReferenceDate(Integer ano, Integer mes) {

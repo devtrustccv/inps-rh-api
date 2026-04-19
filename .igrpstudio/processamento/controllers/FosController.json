@@ -270,7 +270,38 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "substituirXml",
+      "path": "substituir-xml",
+      "method": "POST",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "mesReferencia",
+          "isRequired": true
+        },
+        {
+          "type": "long",
+          "name": "fosId",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "swsviwfo1n-novoSegurado-restaurarFos-getDetalheFosXml"
+  "id": "swsviwfo1n-novoSegurado-restaurarFos-getDetalheFosXml-substituirXml"
 }

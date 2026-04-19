@@ -53,7 +53,7 @@ public class SwaggerConfig {
   @Bean
   public GroupedOpenApi allApis() {
     return GroupedOpenApi.builder()
-        .group("All Api's")
+        .group("All")
         .pathsToMatch("/**")
         .build();
   }

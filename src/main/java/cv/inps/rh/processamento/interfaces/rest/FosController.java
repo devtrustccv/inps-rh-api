@@ -279,4 +279,34 @@ public class FosController {
 
   }
 
+  @PostMapping(
+      value = "substituir-xml"
+  )
+  @Operation(
+      summary = "Substituir xml",
+      description = "Substituir xml",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<String> substituirXml(
+      @RequestParam(value = "mesReferencia") String mesReferencia,
+      @RequestParam(value = "fosId") Long fosId) {
+
+    final var command = new SubstituirXmlCommand(mesReferencia, fosId);
+
+    return commandBus.send(command);
+
+  }
+
 }
