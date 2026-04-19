@@ -1,5 +1,6 @@
 package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
+import cv.inps.rh.processamento.application.commands.AdicionarFuncionarioCommand;
 import cv.inps.rh.processamento.application.dto.DetalheXmlRequestDTO;
 import cv.inps.rh.processamento.application.dto.DetalhesFosXmlDTO;
 import cv.inps.rh.processamento.application.dto.ListaFosDTO;
@@ -79,12 +80,12 @@ public class FosService {
     var currentMonth = LocalDate.now().withDayOfMonth(1);
 
     if (referenceDate.isAfter(currentMonth))
-      throw IgrpResponseStatusException.badRequest("Não pode ser gerado! Mês de Referência não pode ser superior ao mês atual");
+      throw IgrpResponseStatusException.badRequest("Mês de Referência não pode ser superior ao mês atual");
 
     var referenceMonth = buildReferenceMonth(referenceDate);
     LOGGER.debug("Novo segurado reference date: {}", referenceMonth);
 
-    buildSimpleJdbcCall("RH_PK_GERA_XML_DB", "configXML")
+    buildSimpleJdbcCall("configXML")
         .declareParameters(
             new SqlParameter("p_mes_referencia", Types.VARCHAR),
             new SqlParameter("p_tipo", Types.VARCHAR),
@@ -106,7 +107,7 @@ public class FosService {
 
     LOGGER.debug("Restauration reference date: {}", referenceMonth);
 
-    buildSimpleJdbcCall("RH_PK_GERA_XML_DB", "restaurarXML")
+    buildSimpleJdbcCall("restaurarXML")
         .declareParameters(
             new SqlParameter("p_mes_referencia", Types.VARCHAR),
             new SqlOutParameter("P_ID", Types.NUMERIC)
@@ -122,7 +123,7 @@ public class FosService {
 
     var obj = detalheXmlFosEntityRepository.findByIdOrThrow(fosDetailId);
 
-    var result = buildSimpleJdbcCall("RH_PK_GERA_XML_DB", "removerBodyXML")
+    var result = buildSimpleJdbcCall("removerBodyXML")
         .declareParameters(
             new SqlParameter("p_id_body_xml", Types.NUMERIC),
             new SqlOutParameter("P_MSG", Types.VARCHAR)
@@ -137,7 +138,7 @@ public class FosService {
 
   public void gravarNovaLinhaFos(DetalheXmlRequestDTO dto) {
 
-    buildSimpleJdbcCall("RH_PK_GERA_XML_DB", "gravarNovaLinhaXML")
+    buildSimpleJdbcCall("gravarNovaLinhaXML")
         .declareParameters(
             new SqlParameter("p_id_xml", Types.NUMERIC),
             new SqlParameter("p_id_row", Types.VARCHAR),
@@ -165,10 +166,38 @@ public class FosService {
         );
   }
 
-  private SimpleJdbcCall buildSimpleJdbcCall(String catalogName, String procedureName) {
+  public void adicionarFuncionario(AdicionarFuncionarioCommand command) {
+
+    var fosXml = fosEntityRepository.findByIdOrThrow(command.getFosId());
+    if (fosXml.getDtEntrega() != null)
+      throw IgrpResponseStatusException.badRequest("Já existe uma declaração entregue!");
+
+    var referenceDate = getReferenceDate(command.getAno(), command.getMes());
+    var currentMonth = LocalDate.now().withDayOfMonth(1);
+    if (referenceDate.isAfter(currentMonth))
+      throw IgrpResponseStatusException.badRequest("Não pode ser gerado! Mês de Referência não pode ser superior ao mês atual");
+
+    var referenceMonth = buildReferenceMonth(referenceDate);
+    LOGGER.debug("Novo funcionario reference date: {}", referenceMonth);
+
+    buildSimpleJdbcCall("configSeguradoXML")
+        .declareParameters(
+            new SqlParameter("p_mes_referencia", Types.VARCHAR),
+            new SqlParameter("p_id_xml_fos", Types.NUMERIC),
+            new SqlParameter("p_nr_segurado", Types.NUMERIC)
+        )
+        .execute(
+            new MapSqlParameterSource()
+                .addValue("p_mes_referencia", referenceMonth)
+                .addValue("p_id_xml_fos", command.getFosId())
+                .addValue("p_nr_segurado", command.getNumeroSegurado())
+        );
+  }
+
+  private SimpleJdbcCall buildSimpleJdbcCall(String procedureName) {
     return new SimpleJdbcCall(dataSource)
         .withoutProcedureColumnMetaDataAccess()
-        .withCatalogName(catalogName)
+        .withCatalogName("RH_PK_GERA_XML_DB")
         .withProcedureName(procedureName);
   }
 

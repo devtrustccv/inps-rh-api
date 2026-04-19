@@ -6,10 +6,7 @@ package cv.inps.rh.processamento.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import cv.inps.rh.processamento.application.commands.NovoSeguradoCommand;
-import cv.inps.rh.processamento.application.commands.RegistarAtualizarRegistoCommand;
-import cv.inps.rh.processamento.application.commands.RemoverDetalheFosCommand;
-import cv.inps.rh.processamento.application.commands.RestaurarFosCommand;
+import cv.inps.rh.processamento.application.commands.*;
 import cv.inps.rh.processamento.application.dto.DetalheXmlRequestDTO;
 import cv.inps.rh.processamento.application.dto.DetalhesFosXmlDTO;
 import cv.inps.rh.processamento.application.dto.ListaFosDTO;
@@ -216,6 +213,38 @@ public class FosController {
   ) {
 
     final var command = new RegistarAtualizarRegistoCommand(registarAtualizarRegistoRequest);
+
+    return commandBus.send(command);
+
+  }
+
+  @PostMapping(
+      value = "novo-funcionario"
+  )
+  @Operation(
+      summary = "Adicionar funcionario",
+      description = "Adicionar funcionario",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<String> adicionarFuncionario(
+      @RequestParam(value = "ano") Integer ano,
+      @RequestParam(value = "mes") Integer mes,
+      @RequestParam(value = "fosId") Long fosId,
+      @RequestParam(value = "numeroSegurado") Long numeroSegurado) {
+
+    final var command = new AdicionarFuncionarioCommand(ano, mes, fosId, numeroSegurado);
 
     return commandBus.send(command);
 
