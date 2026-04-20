@@ -20,11 +20,13 @@ import cv.igrp.framework.core.domain.QueryBus;
 import cv.inps.rh.funcionario.application.queries.*;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.inps.rh.funcionario.application.commands.*;
-import cv.inps.rh.funcionario.application.dto.WrapperListRenumeracaoDTO;
-import cv.inps.rh.funcionario.application.dto.NovoRemuneracaoRequestDTO;
+import cv.inps.rh.funcionario.application.dto.CalcularRemuneracaoRequestDTO;
+import cv.inps.rh.funcionario.application.dto.CalcularRemuneracaoResponseDTO;
 import cv.inps.rh.funcionario.application.dto.NovoPagamentoRequestDTO;
-import cv.inps.rh.funcionario.application.dto.ValidarRemuneracaoRequestDTO;
+import cv.inps.rh.funcionario.application.dto.NovoRemuneracaoRequestDTO;
 import cv.inps.rh.funcionario.application.dto.ValidarPagamentoRequestDTO;
+import cv.inps.rh.funcionario.application.dto.ValidarRemuneracaoRequestDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperListRenumeracaoDTO;
 
 @IgrpController
 @RestController
@@ -237,7 +239,7 @@ public class RenumeracaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -247,12 +249,42 @@ public class RenumeracaoController {
       )
     }
   )
-  
+
   public ResponseEntity<NovoRemuneracaoRequestDTO> getPagamentosDescontosById(
     @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "pagamentoId") String pagamentoId)
   {
 
       final var query = new GetPagamentosDescontosByIdQuery(idFuncionario, pagamentoId);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "calcular-remuneracao"
+  )
+  @Operation(
+    summary = "Calcular remuneracao",
+    description = "Calcula Remuneracao Bruta, Total Desconto e Remuneracao Liquida para o formulario de registo de colaborador",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = CalcularRemuneracaoResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<CalcularRemuneracaoResponseDTO> calcularRemuneracao(
+    @Valid @RequestBody CalcularRemuneracaoRequestDTO calcularRemuneracaoRequest)
+  {
+
+      final var query = new CalcularRemuneracaoQuery(calcularRemuneracaoRequest);
 
       return queryBus.handle(query);
 
