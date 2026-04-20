@@ -6,7 +6,7 @@
   "attributes": [
     {
       "name": "items",
-      "type": "CalcularSubstituicaoResponseItemDTO",
+      "type": "CalcularSubstituicaoResponseItem",
       "objectType": "dto",
       "required": false,
       "collectionType": "list",

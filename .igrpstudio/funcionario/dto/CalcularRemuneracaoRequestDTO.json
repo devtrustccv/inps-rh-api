@@ -24,7 +24,7 @@
     },
     {
       "name": "subsidios",
-      "type": "SubsidioItemDTO",
+      "type": "SubsidioItem",
       "objectType": "dto",
       "required": true,
       "collectionType": "list",
@@ -32,7 +32,7 @@
     },
     {
       "name": "descontos",
-      "type": "DescontoItemDTO",
+      "type": "DescontoItem",
       "objectType": "dto",
       "required": true,
       "collectionType": "list",

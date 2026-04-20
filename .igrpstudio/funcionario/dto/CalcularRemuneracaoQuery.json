@@ -6,7 +6,7 @@
   "attributes": [
     {
       "name": "request",
-      "type": "CalcularRemuneracaoRequestDTO",
+      "type": "CalcularRemuneracaoRequest",
       "objectType": "dto",
       "required": true,
       "module": "funcionario"
