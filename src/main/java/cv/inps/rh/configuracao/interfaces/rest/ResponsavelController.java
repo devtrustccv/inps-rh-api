@@ -3,26 +3,23 @@
 
 package cv.inps.rh.configuracao.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.configuracao.application.commands.SaveResponsaveisDirecaoCommand;
+import cv.inps.rh.configuracao.application.dto.AssociarResponsaveisRequestDTO;
+import cv.inps.rh.configuracao.application.dto.ResponsaveisDirecaoResponseDTO;
+import cv.inps.rh.configuracao.application.dto.WrapperListResponsaveisDTO;
+import cv.inps.rh.configuracao.application.queries.GetResponsaveisDirecaoQuery;
+import cv.inps.rh.configuracao.application.queries.GetResponsaveisQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.configuracao.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.configuracao.application.commands.*;
-import cv.inps.rh.configuracao.application.dto.ResponsaveisDirecaoResponseDTO;
-import cv.inps.rh.configuracao.application.dto.AssociarResponsaveisRequestDTO;
-import cv.inps.rh.configuracao.application.dto.WrapperListResponsaveisDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
@@ -33,7 +30,7 @@ import cv.inps.rh.configuracao.application.dto.WrapperListResponsaveisDTO;
 )
 public class ResponsavelController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -50,7 +47,7 @@ public class ResponsavelController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -60,9 +57,9 @@ public class ResponsavelController {
       )
     }
   )
-  
-  public ResponseEntity<ResponsaveisDirecaoResponseDTO> getResponsaveisDirecao(
-    @RequestParam(value = "seccaoId") String seccaoId, @PathVariable(value = "institutoId") String institutoId)
+
+   public ResponseEntity<ResponsaveisDirecaoResponseDTO> getResponsaveisDirecao(
+       @RequestParam(value = "seccaoId") String seccaoId, @PathVariable String institutoId)
   {
 
       final var query = new GetResponsaveisDirecaoQuery(seccaoId, institutoId);
@@ -80,7 +77,7 @@ public class ResponsavelController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -90,8 +87,8 @@ public class ResponsavelController {
       )
     }
   )
-  
-  public ResponseEntity<String> saveResponsaveisDirecao(@Valid @RequestBody AssociarResponsaveisRequestDTO saveResponsaveisDirecaoRequest
+
+   public ResponseEntity<String> saveResponsaveisDirecao(@Valid @RequestBody AssociarResponsaveisRequestDTO saveResponsaveisDirecaoRequest
     )
   {
 
@@ -110,7 +107,7 @@ public class ResponsavelController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -120,8 +117,8 @@ public class ResponsavelController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListResponsaveisDTO> getResponsaveis(
+
+   public ResponseEntity<WrapperListResponsaveisDTO> getResponsaveis(
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
     @RequestParam(value = "nomeFuncionario", required = false) String nomeFuncionario,

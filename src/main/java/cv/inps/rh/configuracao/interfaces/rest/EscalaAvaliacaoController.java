@@ -3,24 +3,21 @@
 
 package cv.inps.rh.configuracao.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.configuracao.application.commands.CreateEscalaAvaliacaoCommand;
+import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRequestDTO;
+import cv.inps.rh.configuracao.application.queries.GetEscalaAvaliacaoQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.configuracao.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.configuracao.application.commands.*;
-import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRequestDTO;
 import java.util.Map;
 
 @IgrpController
@@ -32,7 +29,7 @@ import java.util.Map;
 )
 public class EscalaAvaliacaoController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -49,7 +46,7 @@ public class EscalaAvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -59,8 +56,8 @@ public class EscalaAvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> createEscalaAvaliacao(@Valid @RequestBody EscalaAvaliacaoRequestDTO createEscalaAvaliacaoRequest
+
+   public ResponseEntity<Map<String, ?>> createEscalaAvaliacao(@Valid @RequestBody EscalaAvaliacaoRequestDTO createEscalaAvaliacaoRequest
     )
   {
 
@@ -79,7 +76,7 @@ public class EscalaAvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -89,8 +86,8 @@ public class EscalaAvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<EscalaAvaliacaoRequestDTO> getEscalaAvaliacao(
+
+   public ResponseEntity<EscalaAvaliacaoRequestDTO> getEscalaAvaliacao(
     )
   {
 

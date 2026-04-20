@@ -6,6 +6,7 @@ import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.LocalTrabalhoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.LocalTrabalhoResponseDTO;
 import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -15,6 +16,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.GeografiaEntityRe
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamLocalTrabEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.UpsEntityRepository;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
@@ -23,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -102,7 +103,7 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
   }
 
   @Override
-  public List<Object> list(Map<String, String> filters) {
+  public Object list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
     var workPlace = filters.get("local");
@@ -130,9 +131,12 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
 
     var page = localRepository.findAll(spec, pageable);
 
-    return page.stream()
+    var response = new WrapperListDTO();
+    PageMapper.fillPagination(page, response);
+    response.setContent(page.getContent().stream()
         .map(this::buildResponse)
-        .collect(Collectors.toList());
+        .collect(Collectors.toList()));
+    return response;
   }
 
   @Override

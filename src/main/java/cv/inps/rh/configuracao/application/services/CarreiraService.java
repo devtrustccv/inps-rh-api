@@ -6,6 +6,7 @@ import cv.inps.rh.configuracao.application.dto.CarreiraRequestDTO;
 import cv.inps.rh.configuracao.application.dto.CarreiraResponseDTO;
 import cv.inps.rh.configuracao.application.dto.CategoriaCarreiraResponseDTO;
 import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -15,13 +16,13 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepos
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCategoriaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -152,15 +153,18 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
   }
 
   @Override
-  public List<Object> list(Map<String, String> filters) {
+  public Object list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
     var data = carreiraRepository.findAll(pageable);
 
-    return data.stream()
+    var response = new WrapperListDTO();
+    PageMapper.fillPagination(data, response);
+    response.setContent(data.getContent().stream()
         .map(this::buildResponse)
-        .collect(Collectors.toList());
+            .collect(Collectors.toList()));
+    return response;
   }
 
   private CarreiraResponseDTO buildResponse(ParamCarreiraEntity c) {

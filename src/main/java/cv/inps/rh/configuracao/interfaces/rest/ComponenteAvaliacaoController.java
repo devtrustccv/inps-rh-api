@@ -3,27 +3,27 @@
 
 package cv.inps.rh.configuracao.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.configuracao.application.commands.CreateComponentesAvaliacaoCommand;
+import cv.inps.rh.configuracao.application.commands.UpdateComponenteAvaliacaoCommand;
+import cv.inps.rh.configuracao.application.dto.ComponenteAvaliacaoRequestDTO;
+import cv.inps.rh.configuracao.application.dto.ComponenteAvaliacaoResponseDTO;
+import cv.inps.rh.configuracao.application.dto.WrapperListComponenteAvaliacaoDTO;
+import cv.inps.rh.configuracao.application.queries.GetComponenetAvaliacaoAtualQuery;
+import cv.inps.rh.configuracao.application.queries.GetComponenteAvaliacaoQuery;
+import cv.inps.rh.configuracao.application.queries.GetListaComponentesAvaliacaoQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.configuracao.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.configuracao.application.commands.*;
-import cv.inps.rh.configuracao.application.dto.ComponenteAvaliacaoRequestDTO;
 import java.util.Map;
-import cv.inps.rh.configuracao.application.dto.ComponenteAvaliacaoResponseDTO;
-import cv.inps.rh.configuracao.application.dto.WrapperListComponenteAvaliacaoDTO;
 
 @IgrpController
 @RestController
@@ -34,7 +34,7 @@ import cv.inps.rh.configuracao.application.dto.WrapperListComponenteAvaliacaoDTO
 )
 public class ComponenteAvaliacaoController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -51,7 +51,7 @@ public class ComponenteAvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "201",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -61,8 +61,8 @@ public class ComponenteAvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> createComponentesAvaliacao(@Valid @RequestBody ComponenteAvaliacaoRequestDTO createComponentesAvaliacaoRequest
+
+   public ResponseEntity<Map<String, ?>> createComponentesAvaliacao(@Valid @RequestBody ComponenteAvaliacaoRequestDTO createComponentesAvaliacaoRequest
     )
   {
 
@@ -81,7 +81,7 @@ public class ComponenteAvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -91,9 +91,9 @@ public class ComponenteAvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<ComponenteAvaliacaoResponseDTO> getComponenteAvaliacao(
-    @PathVariable(value = "id") String id)
+
+   public ResponseEntity<ComponenteAvaliacaoResponseDTO> getComponenteAvaliacao(
+       @PathVariable String id)
   {
 
       final var query = new GetComponenteAvaliacaoQuery(id);
@@ -111,7 +111,7 @@ public class ComponenteAvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -121,8 +121,8 @@ public class ComponenteAvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListComponenteAvaliacaoDTO> getListaComponentesAvaliacao(
+
+   public ResponseEntity<WrapperListComponenteAvaliacaoDTO> getListaComponentesAvaliacao(
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize)
   {
@@ -142,7 +142,7 @@ public class ComponenteAvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -152,9 +152,9 @@ public class ComponenteAvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> updateComponenteAvaliacao(@Valid @RequestBody ComponenteAvaliacaoRequestDTO updateComponenteAvaliacaoRequest
-    , @PathVariable(value = "id") String id)
+
+   public ResponseEntity<Map<String, ?>> updateComponenteAvaliacao(@Valid @RequestBody ComponenteAvaliacaoRequestDTO updateComponenteAvaliacaoRequest
+       , @PathVariable String id)
   {
 
       final var command = new UpdateComponenteAvaliacaoCommand(updateComponenteAvaliacaoRequest, id);
@@ -172,7 +172,7 @@ public class ComponenteAvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -182,8 +182,8 @@ public class ComponenteAvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<ComponenteAvaliacaoResponseDTO> getComponenetAvaliacaoAtual(
+
+   public ResponseEntity<ComponenteAvaliacaoResponseDTO> getComponenetAvaliacaoAtual(
     )
   {
 

@@ -3,8 +3,6 @@ package cv.inps.rh.configuracao.application.queries;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRequestDTO;
-import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoResponseDTO;
-import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO;
 import cv.inps.rh.configuracao.application.services.EscalaAvaliacaoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

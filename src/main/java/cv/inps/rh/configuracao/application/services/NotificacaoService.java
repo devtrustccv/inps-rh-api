@@ -6,12 +6,14 @@ import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.NotificacaoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.NotificacaoResponseDTO;
 import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamNotificacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamNotificacaoEntityRepository;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -77,7 +78,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
   }
 
   @Override
-  public List<Object> list(Map<String, String> filters) {
+  public Object list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
     var reference = filters.get("tipoNotificacao");
@@ -96,9 +97,13 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
 
     var data = notificacaoRepository.findAll(spec, pageable);
     var tpNotif = domainEntityRepository.getActiveDomainByCode(Domains.TIPO_ALERTA_NOTIFICACAO.name());
-    return data.stream()
+
+    var response = new WrapperListDTO();
+    PageMapper.fillPagination(data, response);
+    response.setContent(data.getContent().stream()
         .map(e -> buildResponse(e, tpNotif))
-        .collect(Collectors.toList());
+        .collect(Collectors.toList()));
+    return response;
   }
 
   @Override

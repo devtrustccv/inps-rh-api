@@ -6,6 +6,7 @@ import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.EscalaoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.EscalaoResponseDTO;
 import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -16,6 +17,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCarreiraEnti
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCategoriaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamEscalaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,7 +27,6 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -112,7 +113,7 @@ public class EscalaoService extends ConfigurationProcess<EscalaoRequestDTO> {
   }
 
   @Override
-  public List<Object> list(Map<String, String> filters) {
+  public Object list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
@@ -138,9 +139,12 @@ public class EscalaoService extends ConfigurationProcess<EscalaoRequestDTO> {
 
     var page = escalaoRepository.findAll(spec, pageable);
 
-    return page.stream()
+    var response = new WrapperListDTO();
+    PageMapper.fillPagination(page, response);
+    response.setContent(page.getContent().stream()
         .map(this::buildResponse)
-        .collect(Collectors.toList());
+        .collect(Collectors.toList()));
+    return response;
   }
 
   @Override

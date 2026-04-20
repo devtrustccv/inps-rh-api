@@ -3,26 +3,25 @@
 
 package cv.inps.rh.configuracao.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.configuracao.application.commands.SaveOutputDocumentCommand;
+import cv.inps.rh.configuracao.application.commands.UpdateOutputDocumentCommand;
+import cv.inps.rh.configuracao.application.dto.DocOutputRequestDTO;
+import cv.inps.rh.configuracao.application.dto.DocOutputResponseDTO;
+import cv.inps.rh.configuracao.application.dto.WrapperDocOutputListDTO;
+import cv.inps.rh.configuracao.application.queries.GetOutputDocumentByIdQuery;
+import cv.inps.rh.configuracao.application.queries.GetOutputDocumentsQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.configuracao.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.configuracao.application.commands.*;
-import cv.inps.rh.configuracao.application.dto.WrapperDocOutputListDTO;
-import cv.inps.rh.configuracao.application.dto.DocOutputResponseDTO;
-import cv.inps.rh.configuracao.application.dto.DocOutputRequestDTO;
 import java.util.Map;
 
 @IgrpController
@@ -34,7 +33,7 @@ import java.util.Map;
 )
 public class DocumentoOutputController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -51,7 +50,7 @@ public class DocumentoOutputController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -61,8 +60,8 @@ public class DocumentoOutputController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperDocOutputListDTO> getOutputDocuments(
+
+   public ResponseEntity<WrapperDocOutputListDTO> getOutputDocuments(
     @RequestParam(value = "tipoDocumento", required = false) String tipoDocumento,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize)
@@ -83,7 +82,7 @@ public class DocumentoOutputController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -93,9 +92,9 @@ public class DocumentoOutputController {
       )
     }
   )
-  
-  public ResponseEntity<DocOutputResponseDTO> getOutputDocumentById(
-    @PathVariable(value = "id") String id)
+
+   public ResponseEntity<DocOutputResponseDTO> getOutputDocumentById(
+       @PathVariable String id)
   {
 
       final var query = new GetOutputDocumentByIdQuery(id);
@@ -113,7 +112,7 @@ public class DocumentoOutputController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -123,8 +122,8 @@ public class DocumentoOutputController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> saveOutputDocument(@Valid @RequestBody DocOutputRequestDTO saveOutputDocumentRequest
+
+   public ResponseEntity<Map<String, ?>> saveOutputDocument(@Valid @RequestBody DocOutputRequestDTO saveOutputDocumentRequest
     )
   {
 
@@ -143,7 +142,7 @@ public class DocumentoOutputController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -153,9 +152,9 @@ public class DocumentoOutputController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> updateOutputDocument(@Valid @RequestBody DocOutputRequestDTO updateOutputDocumentRequest
-    , @PathVariable(value = "id") String id)
+
+   public ResponseEntity<Map<String, ?>> updateOutputDocument(@Valid @RequestBody DocOutputRequestDTO updateOutputDocumentRequest
+       , @PathVariable String id)
   {
 
       final var command = new UpdateOutputDocumentCommand(updateOutputDocumentRequest, id);

@@ -4,11 +4,10 @@
 package cv.inps.rh.configuracao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 
 @Data
@@ -20,19 +19,19 @@ import lombok.AllArgsConstructor;
 public class NotificacaoRequestDTO  {
 
   @NotBlank(message = "The field <assunto> is required")
-  
+
   private String assunto ;
   @NotBlank(message = "The field <corpo> is required")
-  
+
   private String corpo ;
-  
-  
+
+
   private String tipoNotificacao ;
-  
-  
+
+
   private String tipoNotificacaoDesc ;
-  
-  
+
+
   private String estado ;
 
 }

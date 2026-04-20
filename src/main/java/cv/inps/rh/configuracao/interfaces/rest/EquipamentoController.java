@@ -57,7 +57,7 @@ public class EquipamentoController {
   )
 
   public ResponseEntity<String> saveEquipamentosLocalTrabalho(@Valid @RequestBody EquipamentoListRequestDTO saveEquipamentosLocalTrabalhoRequest
-      , @PathVariable(value = "localTrabalhoId") String localTrabalhoId) {
+      , @PathVariable String localTrabalhoId) {
 
     final var command = new SaveEquipamentosLocalTrabalhoCommand(saveEquipamentosLocalTrabalhoRequest, localTrabalhoId);
 
@@ -86,7 +86,7 @@ public class EquipamentoController {
   )
 
   public ResponseEntity<EquipamentoListRequestDTO> getEquipamentosLocalTrabalho(
-      @PathVariable(value = "localTrabalhoId") String localTrabalhoId) {
+      @PathVariable String localTrabalhoId) {
 
     final var query = new GetEquipamentosLocalTrabalhoQuery(localTrabalhoId);
 

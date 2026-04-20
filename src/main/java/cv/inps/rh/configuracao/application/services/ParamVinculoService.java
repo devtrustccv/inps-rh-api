@@ -6,6 +6,7 @@ import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoLaboralRequestDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoLaboralResponseDTO;
 import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -14,6 +15,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSitLaboralEntity
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -133,7 +134,7 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
   }
 
   @Override
-  public List<Object> list(Map<String, String> filters) {
+  public Object list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
@@ -153,14 +154,14 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     };
 
     var data = repository.findAll(spec, pageable);
-    if (data.isEmpty())
-      return List.of();
-
     var domain = domainEntityRepository.getActiveDomainByCode(Domains.SIM_NAO_NUMBER.name());
 
-    return data.stream()
+    var response = new WrapperListDTO();
+    PageMapper.fillPagination(data, response);
+    response.setContent(data.getContent().stream()
         .map(e -> buildResponse(e, domain))
-        .toList();
+            .toList());
+    return response;
   }
 
   @Override

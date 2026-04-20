@@ -7,6 +7,7 @@ import cv.inps.rh.configuracao.application.dto.SituacaoLaboralMotivoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.SituacaoLaboralRequestDTO;
 import cv.inps.rh.configuracao.application.dto.SituacaoLaboralResponseDTO;
 import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -17,6 +18,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoDetalheEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoEntityRepository;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
@@ -195,7 +197,7 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
 
 
   @Override
-  public List<Object> list(Map<String, String> filters) {
+  public Object list(Map<String, String> filters) {
 
     var classificacaoArea = filters.get("classificacaoArea");
     var afetaSituacaoLaboral = filters.get("afetaSituacaoLaboral");
@@ -224,17 +226,17 @@ public class SituacaoLaboralService extends ConfigurationProcess<SituacaoLaboral
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
     var data = repository.findAll(spec, pageable);
-    if (data.isEmpty())
-      return List.of();
-
     var domain = domainEntityRepository.getActiveDomainByCode(Domains.SIM_NAO_NUMBER.name());
     var type = domainEntityRepository.getActiveDomainByCode(Domains.SITUACAO_LABORAL.name());
     var contractStatus = domainEntityRepository.getActiveDomainByCode(Domains.ESTADO_CONTRATO.name());
     var areaClassification = domainEntityRepository.getActiveDomainByCode(Domains.CLASSIFICACAO_SITUACAO.name());
 
-    return data.stream()
+    var response = new WrapperListDTO();
+    PageMapper.fillPagination(data, response);
+    response.setContent(data.getContent().stream()
         .map(e -> buildResponse(e, domain, type, contractStatus, areaClassification))
-        .collect(Collectors.toList());
+            .collect(Collectors.toList()));
+    return response;
   }
 
   @Override

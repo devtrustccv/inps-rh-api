@@ -4,13 +4,12 @@
 package cv.inps.rh.configuracao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
-
+import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,19 +19,19 @@ import lombok.EqualsAndHashCode;
 public class LocalTrabalhoResponseDTO extends LocalTrabalhoRequestDTO {
 
   @NotBlank(message = "The field <id> is required")
-  
+
   private String id ;
-  
-  
+
+
   private String paisId ;
-  
-  
+
+
   private String ilhaId ;
-  
-  
+
+
   private String upsId ;
-  
-  
+
+
   private String estadoDescricao ;
 
 }

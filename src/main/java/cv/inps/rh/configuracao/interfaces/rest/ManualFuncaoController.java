@@ -3,27 +3,26 @@
 
 package cv.inps.rh.configuracao.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.configuracao.application.commands.CreateManualFuncaoCommand;
+import cv.inps.rh.configuracao.application.commands.UpdateManualFuncaoCommand;
+import cv.inps.rh.configuracao.application.dto.ManualFuncaoRequestDTO;
+import cv.inps.rh.configuracao.application.dto.ManualFuncaoResponseDTO;
+import cv.inps.rh.configuracao.application.dto.WrapperListaManualFuncaoDTO;
+import cv.inps.rh.configuracao.application.queries.GetListaManualFuncaoQuery;
+import cv.inps.rh.configuracao.application.queries.GetManualFuncaoQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.configuracao.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.configuracao.application.commands.*;
-import cv.inps.rh.configuracao.application.dto.ManualFuncaoRequestDTO;
 import java.util.Map;
-import cv.inps.rh.configuracao.application.dto.WrapperListaManualFuncaoDTO;
-import cv.inps.rh.configuracao.application.dto.ManualFuncaoResponseDTO;
 
 @IgrpController
 @RestController
@@ -34,7 +33,7 @@ import cv.inps.rh.configuracao.application.dto.ManualFuncaoResponseDTO;
 )
 public class ManualFuncaoController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -51,7 +50,7 @@ public class ManualFuncaoController {
     responses = {
       @ApiResponse(
           responseCode = "201",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -61,8 +60,8 @@ public class ManualFuncaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> createManualFuncao(@Valid @RequestBody ManualFuncaoRequestDTO createManualFuncaoRequest
+
+   public ResponseEntity<Map<String, ?>> createManualFuncao(@Valid @RequestBody ManualFuncaoRequestDTO createManualFuncaoRequest
     )
   {
 
@@ -81,7 +80,7 @@ public class ManualFuncaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -91,8 +90,8 @@ public class ManualFuncaoController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListaManualFuncaoDTO> getListaManualFuncao(
+
+   public ResponseEntity<WrapperListaManualFuncaoDTO> getListaManualFuncao(
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "cargoId", required = false) Long cargoId,
@@ -117,7 +116,7 @@ public class ManualFuncaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -127,9 +126,9 @@ public class ManualFuncaoController {
       )
     }
   )
-  
-  public ResponseEntity<ManualFuncaoResponseDTO> getManualFuncao(
-    @PathVariable(value = "id") String id)
+
+   public ResponseEntity<ManualFuncaoResponseDTO> getManualFuncao(
+       @PathVariable String id)
   {
 
       final var query = new GetManualFuncaoQuery(id);
@@ -147,7 +146,7 @@ public class ManualFuncaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -157,9 +156,9 @@ public class ManualFuncaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> updateManualFuncao(@Valid @RequestBody ManualFuncaoRequestDTO updateManualFuncaoRequest
-    , @PathVariable(value = "id") String id)
+
+   public ResponseEntity<Map<String, ?>> updateManualFuncao(@Valid @RequestBody ManualFuncaoRequestDTO updateManualFuncaoRequest
+       , @PathVariable String id)
   {
 
       final var command = new UpdateManualFuncaoCommand(updateManualFuncaoRequest, id);

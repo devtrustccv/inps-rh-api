@@ -6,6 +6,7 @@ import cv.inps.rh.configuracao.application.dto.CargoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.CargoResponseDTO;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
@@ -13,6 +14,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCargoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCarreiraEntityRepository;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -95,7 +96,7 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
   }
 
   @Override
-  public List<Object> list(Map<String, String> filters) {
+  public Object list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
@@ -116,9 +117,13 @@ public class CargoService extends ConfigurationProcess<CargoRequestDTO> {
 
     var data = cargoRepository.findAll(spec, pageable);
     var estadoValidacaoMap = EstadoValidacao.codeDescriptionMap();
-    return data.stream()
-        .map(e-> buildResponse(e, estadoValidacaoMap))
-        .toList();
+
+    var response = new WrapperListDTO();
+    PageMapper.fillPagination(data, response);
+    response.setContent(data.getContent().stream()
+        .map(e -> buildResponse(e, estadoValidacaoMap))
+        .toList());
+    return response;
   }
 
   @NotNull
