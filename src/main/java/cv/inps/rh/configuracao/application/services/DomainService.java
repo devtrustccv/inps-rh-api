@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.DomainConfigDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperListDomainDTO;
+import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DomainEntity;
@@ -16,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 @Transactional

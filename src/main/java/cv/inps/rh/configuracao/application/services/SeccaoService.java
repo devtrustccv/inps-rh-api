@@ -5,6 +5,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.SeccaoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.SeccaoResponseDTO;
+import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;

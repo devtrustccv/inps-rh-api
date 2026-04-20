@@ -6,6 +6,7 @@ import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.SituacaoLaboralMotivoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.SituacaoLaboralRequestDTO;
 import cv.inps.rh.configuracao.application.dto.SituacaoLaboralResponseDTO;
+import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;

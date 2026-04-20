@@ -1,11 +1,11 @@
-package cv.inps.rh.configuracao.application.services;
+package cv.inps.rh.configuracao.application.services.engine;
 
+import cv.inps.rh.configuracao.application.services.ConfigurationFactory;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 
 @Service
