@@ -33,7 +33,7 @@ public class FeriadoService {
     String currentUuid = StringUtils.hasText(dto.getIdFeriado()) ? dto.getIdFeriado() : null;
 
     boolean duplicateExists = existing.stream()
-        .filter(f -> currentUuid == null || !f.getUuid().equals(currentUuid))
+        .filter(f -> !f.getUuid().equals(currentUuid))
         .anyMatch(f -> {
           boolean sameRegion =
               (f.getGeogrId() == null && dto.getGeogrId() == null) ||

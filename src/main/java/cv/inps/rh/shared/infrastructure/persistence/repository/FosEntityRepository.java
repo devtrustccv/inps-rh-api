@@ -2,7 +2,7 @@ package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.processamento.application.dto.FosRowDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.RhXmlFosEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.XmlFosEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,9 +14,9 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 
 @Repository
-public interface FosEntityRepository extends JpaRepository<RhXmlFosEntity, Long>, JpaSpecificationExecutor<RhXmlFosEntity> {
+public interface FosEntityRepository extends JpaRepository<XmlFosEntity, Long>, JpaSpecificationExecutor<XmlFosEntity> {
 
-  default RhXmlFosEntity findByIdOrThrow(Long id) {
+  default XmlFosEntity findByIdOrThrow(Long id) {
     return this.findById(id)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("RhXmlFosEntity not found for id: " + id));
   }
@@ -32,7 +32,7 @@ public interface FosEntityRepository extends JpaRepository<RhXmlFosEntity, Long>
           f.obs,
           f.numDc
       )
-      FROM RhXmlFosEntity f
+      FROM XmlFosEntity f
       WHERE (:startDate IS NULL OR f.createdDate >= :startDate)
         AND (:endDate IS NULL OR f.createdDate <= :endDate)
       ORDER BY f.ano ASC, f.mes ASC

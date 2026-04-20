@@ -3,16 +3,15 @@
 
 package cv.inps.rh.configuracao.application.constants;
 
+import cv.igrp.framework.core.domain.IgrpEnum;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import org.springframework.http.HttpStatus;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.springframework.http.HttpStatus;
-
-import cv.igrp.framework.core.domain.IgrpEnum;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 
 
 public enum ConfigurationType implements IgrpEnum<String> {

@@ -2,11 +2,11 @@ package cv.inps.rh.configuracao.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import cv.inps.rh.configuracao.application.services.ManualFuncaoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cv.inps.rh.configuracao.application.services.ManualFuncaoService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 

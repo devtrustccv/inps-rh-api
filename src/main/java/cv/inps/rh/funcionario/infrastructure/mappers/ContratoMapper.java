@@ -31,6 +31,7 @@ public class ContratoMapper {
     dto.setId(contrato.getId());
     dto.setUuid(contrato.getUuid() != null ? contrato.getUuid().toString() : null);
     dto.setFuncionarioId(contrato.getFunId().getId());
+    dto.setTipoContrato(contrato.getTpContratoId() != null ? contrato.getTpContratoId().getNome() : null);
     dto.setUuidFuncionario(contrato.getFunId() != null ? contrato.getFunId().getUuid().toString() : null);
     dto.setSituacao(contrato.getTipoSituacao());
     dto.setTipoVinculo(contrato.getVinculoId() != null ? contrato.getVinculoId().getNome() : null);

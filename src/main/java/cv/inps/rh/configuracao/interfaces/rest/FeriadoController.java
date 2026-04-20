@@ -3,25 +3,22 @@
 
 package cv.inps.rh.configuracao.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.configuracao.application.commands.DeleteFeriadoCommand;
+import cv.inps.rh.configuracao.application.commands.SaveFeriadosCommand;
+import cv.inps.rh.configuracao.application.dto.FeriadoDTO;
+import cv.inps.rh.configuracao.application.dto.FeriadoListRequestDTO;
+import cv.inps.rh.configuracao.application.queries.GetFeriadosPorAnoQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.configuracao.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.configuracao.application.commands.*;
-import cv.inps.rh.configuracao.application.dto.FeriadoDTO;
-import cv.inps.rh.configuracao.application.dto.FeriadoListRequestDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
@@ -32,7 +29,7 @@ import cv.inps.rh.configuracao.application.dto.FeriadoListRequestDTO;
 )
 public class FeriadoController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -49,7 +46,7 @@ public class FeriadoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -59,8 +56,8 @@ public class FeriadoController {
       )
     }
   )
-  
-  public ResponseEntity<String> saveFeriados(@Valid @RequestBody FeriadoDTO saveFeriadosRequest
+
+   public ResponseEntity<String> saveFeriados(@Valid @RequestBody FeriadoDTO saveFeriadosRequest
     )
   {
 
@@ -79,7 +76,7 @@ public class FeriadoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -89,9 +86,9 @@ public class FeriadoController {
       )
     }
   )
-  
-  public ResponseEntity<FeriadoListRequestDTO> getFeriadosPorAno(
-    @PathVariable(value = "anoReferente") String anoReferente)
+
+   public ResponseEntity<FeriadoListRequestDTO> getFeriadosPorAno(
+       @PathVariable String anoReferente)
   {
 
       final var query = new GetFeriadosPorAnoQuery(anoReferente);
@@ -109,7 +106,7 @@ public class FeriadoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -119,9 +116,9 @@ public class FeriadoController {
       )
     }
   )
-  
-  public ResponseEntity<String> deleteFeriado(
-    @PathVariable(value = "idFeriado") String idFeriado)
+
+   public ResponseEntity<String> deleteFeriado(
+       @PathVariable String idFeriado)
   {
 
       final var command = new DeleteFeriadoCommand(idFeriado);

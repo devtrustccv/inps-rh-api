@@ -89,6 +89,11 @@
           "type": "long",
           "name": "seccaoId",
           "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "conteudo",
+          "isRequired": false
         }
       ]
     },
@@ -160,5 +165,5 @@
       ]
     }
   ],
-  "id": "d3wgc2dppi-createManualFuncao"
+  "id": "d3wgc2dppi-createManualFuncao-getListaManualFuncao"
 }

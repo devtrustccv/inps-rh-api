@@ -5,10 +5,15 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.NotificacaoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.NotificacaoResponseDTO;
+import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
+import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamNotificacaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamNotificacaoEntityRepository;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
@@ -17,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,14 +31,17 @@ import java.util.stream.Collectors;
 public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestDTO> {
 
   private final ParamNotificacaoEntityRepository notificacaoRepository;
+  private final DomainEntityRepository domainEntityRepository;
 
   protected NotificacaoService(
       Validator validator, ObjectMapper jsonMapper,
-      ParamNotificacaoEntityRepository notificacaoRepository
+      ParamNotificacaoEntityRepository notificacaoRepository,
+      DomainEntityRepository domainEntityRepository
   ) {
 
     super(validator, jsonMapper, NotificacaoRequestDTO.class);
     this.notificacaoRepository = notificacaoRepository;
+    this.domainEntityRepository = domainEntityRepository;
   }
 
   @Override
@@ -66,11 +73,12 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
   @Override
   public Object read(String id) {
     var entity = notificacaoRepository.findByUuidOrThrow(UUID.fromString(id));
-    return buildResponse(entity);
+    var tpNotif = domainEntityRepository.getActiveDomainByCode(Domains.TIPO_ALERTA_NOTIFICACAO.name());
+    return buildResponse(entity, tpNotif);
   }
 
   @Override
-  public List<Object> list(Map<String, String> filters) {
+  public Object list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
     var reference = filters.get("tipoNotificacao");
@@ -88,10 +96,14 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
     };
 
     var data = notificacaoRepository.findAll(spec, pageable);
+    var tpNotif = domainEntityRepository.getActiveDomainByCode(Domains.TIPO_ALERTA_NOTIFICACAO.name());
 
-    return data.stream()
-        .map(this::buildResponse)
-        .collect(Collectors.toList());
+    var response = new WrapperListDTO();
+    PageMapper.fillPagination(data, response);
+    response.setContent(data.getContent().stream()
+        .map(e -> buildResponse(e, tpNotif))
+        .collect(Collectors.toList()));
+    return response;
   }
 
   @Override
@@ -101,7 +113,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
     notificacaoRepository.save(entity);
   }
 
-  private NotificacaoResponseDTO buildResponse(ParamNotificacaoEntity e) {
+  private NotificacaoResponseDTO buildResponse(ParamNotificacaoEntity e, Map<String, String> tpNotif) {
     var dto = new NotificacaoResponseDTO();
     dto.setId(e.getId().toString());
     dto.setUuid(e.getUuid().toString());
@@ -109,6 +121,7 @@ public class NotificacaoService extends ConfigurationProcess<NotificacaoRequestD
     dto.setAssunto(e.getAssunto());
     dto.setCorpo(e.getCorpo());
     dto.setTipoNotificacao(e.getTipoNotificacao());
+    dto.setTipoNotificacaoDesc(e.getTipoNotificacao() != null ? tpNotif.get(e.getTipoNotificacao()) : null);
     dto.setEstado(e.getEstado());
     return dto;
   }

@@ -1,16 +1,15 @@
 package cv.inps.rh.configuracao.application.queries;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-
 import cv.inps.rh.configuracao.application.dto.ComponenteAvaliacaoResponseDTO;
 import cv.inps.rh.configuracao.application.services.ComponenteAvaliacaoService;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamObjetivoDetEntityRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 import java.time.Year;
 
@@ -39,7 +38,7 @@ public class GetComponenetAvaliacaoAtualQueryHandler implements QueryHandler<Get
     var anoAtual = Year.now().getValue();
 
     var det = objetivoDetRepository.findTopByAnoOrderByIdDesc(anoAtual)
-        .or(() -> objetivoDetRepository.findTopByOrderByAnoDescIdDesc())
+        .or(objetivoDetRepository::findTopByOrderByAnoDescIdDesc)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Nenhuma parametrização encontrada em RH_T_PARAM_OBJETIVO_DET"));
 
     return ResponseEntity.ok(componenteAvaliacaoService.obter(det.getUuid().toString()));

@@ -2,7 +2,9 @@ package cv.inps.rh.funcionario.application.service.carreira;
 
 import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
+import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.application.service.DominioService;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
@@ -15,6 +17,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamen
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -35,6 +38,7 @@ public class CarreiraReadService {
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final DominioService dominioService;
+  private final FuncionarioRules funcionarioRules;
 
   @Transactional(readOnly = true)
   public WrapperCarreiraListDTO list(GetCarreiraListQuery query) {
@@ -124,11 +128,20 @@ public class CarreiraReadService {
   }
 
   public CarreiraResponseDTO getCarreiraById(String carreiraId) {
-
     var tr = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(UUID.fromString(carreiraId));
+    return getCarreiraResponseDTO(tr);
+  }
+
+  public CarreiraResponseDTO getCarreiraAtualByUuidFuncionario(String uuidFuncionario) {
+    var tr = funcionarioRules.getTipoRelacionamentoAtual(parseUuid(uuidFuncionario, "uuidFuncionario"));
+    return getCarreiraResponseDTO(tr);
+  }
+
+  private @NonNull CarreiraResponseDTO getCarreiraResponseDTO(TiposRelacionamentoEntity tr) {
     var car = tr.getCarreiraId();
+    var contrato = tr.getContrVinculoId();
     var fun = tr.getFunId();
-    var vinc = tr.getContrVinculoId().getVinculoId();
+    var vinc = contrato.getVinculoId();
     var carrPcc = tr.getCarreiraId() !=null ? tr.getCarreiraId().getCarrPccsId() : null;
     var esc = tr.getCarreiraId() !=null ? tr.getCarreiraId().getEscalaoId() : null;
     var categoria = tr.getCarreiraId()!=null ? tr.getCarreiraId().getEscalaoId(): null;
@@ -137,11 +150,15 @@ public class CarreiraReadService {
     dto.setMoeda(tr.getMoeda());
     dto.setFuncionarioId(fun != null && fun.getUuid() != null ? fun.getUuid().toString() : null);
     dto.setTipoCarreira(car!=null ? car.getTipoSituacao() : null);
+    dto.setTipoContratoId(contrato.getTpContratoId().getId());
     dto.setCargoId(tr.getCargoId() != null ? tr.getCargoId().getId() : null);
     dto.setCarreiraId(carrPcc != null ? carrPcc.getId() : null);
     dto.setEscalaoId(esc != null ? esc.getId() : null);
     dto.setSalario(car!=null ? car.getSalario().toString() : null);
     dto.setTipoVinculoLaboral(vinc != null ? vinc.getNome() : null);
+    dto.setTipoVinculoLaboralId(vinc != null ? vinc.getId() : null);
+    dto.setSituacaoLaboralId(tr.getSituacLaboralId().getSituacaoLaboralId().getId());
+
     dto.setDataInicio(DateFormatter.localDateToString(tr.getDataInicio()));
     dto.setDataFim(DateFormatter.localDateToString(tr.getDataFim()));
     dto.setProcessaSalarioNestaCarreira(tr.getFlgProcessa()== 1 ? "SIM" : "NAO");
@@ -187,4 +204,14 @@ public class CarreiraReadService {
 
     return dto;
   }
+
+  private UUID parseUuid(String raw, String field) {
+    try {
+      return UUID.fromString(raw);
+    } catch (Exception e) {
+      throw IgrpResponseStatusException.badRequest("UUID inválido para " + field + ": " + raw);
+    }
+  }
 }
+
+
