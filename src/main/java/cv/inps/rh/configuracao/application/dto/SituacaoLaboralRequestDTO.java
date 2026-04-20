@@ -4,12 +4,12 @@
 package cv.inps.rh.configuracao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.configuracao.application.dto.SituacaoLaboralMotivoRequestDTO;
+
 import java.util.ArrayList;
 import java.util.List;
 

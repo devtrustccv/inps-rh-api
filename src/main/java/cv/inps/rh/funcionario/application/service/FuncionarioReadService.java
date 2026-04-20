@@ -96,6 +96,7 @@ public class FuncionarioReadService {
       dto.setId(d.getFunId());
       dto.setUuid(d.getFunUuid() != null ? d.getFunUuid().toString() : null);
       dto.setNome(d.getNome());
+      dto.setNumColaborador(d.getIdColaborador()+"");
       dto.setCargo(d.getCargoDesc());
       dto.setDireccao(d.getDirecaoDesc());
       dto.setSeccao(d.getSeccaoDesc());

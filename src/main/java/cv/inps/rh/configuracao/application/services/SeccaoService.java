@@ -5,6 +5,8 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.SeccaoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.SeccaoResponseDTO;
+import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -14,6 +16,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.InstituicaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SecaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,7 +24,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -77,7 +83,7 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
   }
 
   @Override
-  public List<Object> list(Map<String, String> filters) {
+  public Object list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
@@ -105,9 +111,12 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
 
     var data = secaoRepository.findAll(spec, pageable);
 
-    return data.stream()
+    var response = new WrapperListDTO();
+    PageMapper.fillPagination(data, response);
+    response.setContent(data.getContent().stream()
         .map(this::buildResponse)
-        .collect(Collectors.toList());
+        .collect(Collectors.toList()));
+    return response;
   }
 
   @Override

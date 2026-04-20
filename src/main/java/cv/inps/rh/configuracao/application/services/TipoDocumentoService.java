@@ -5,12 +5,17 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.TipoDocumentoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.TipoDocumentoResponseDTO;
+import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
+import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoDocumentoEntityRepository;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,15 +34,17 @@ public class TipoDocumentoService extends ConfigurationProcess<TipoDocumentoRequ
 
   private final TipoDocumentoEntityRepository tipoDocumentoRepository;
   private final DocumentoEntityRepository documentoEntityRepository;
+  private final DomainEntityRepository domainEntityRepository;
 
   protected TipoDocumentoService(
       Validator validator, ObjectMapper jsonMapper,
-      TipoDocumentoEntityRepository tipoDocumentoRepository, DocumentoEntityRepository documentoEntityRepository
+      TipoDocumentoEntityRepository tipoDocumentoRepository, DocumentoEntityRepository documentoEntityRepository, DomainEntityRepository domainEntityRepository
   ) {
 
     super(validator, jsonMapper, TipoDocumentoRequestDTO.class);
     this.tipoDocumentoRepository = tipoDocumentoRepository;
     this.documentoEntityRepository = documentoEntityRepository;
+    this.domainEntityRepository = domainEntityRepository;
   }
 
   @Override
@@ -74,11 +80,12 @@ public class TipoDocumentoService extends ConfigurationProcess<TipoDocumentoRequ
   @Override
   public Object read(String uuid) {
     var entity = tipoDocumentoRepository.findByUuidOrThrow(UUID.fromString(uuid));
-    return buildResponse(entity);
+    var reference = domainEntityRepository.getActiveDomainByCode(Domains.ACCAO_REFERENTE.name());
+    return buildResponse(entity, reference);
   }
 
   @Override
-  public List<Object> list(Map<String, String> filters) {
+  public Object list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
@@ -103,10 +110,14 @@ public class TipoDocumentoService extends ConfigurationProcess<TipoDocumentoRequ
     };
 
     var data = tipoDocumentoRepository.findAll(spec, pageable);
+    var reference = domainEntityRepository.getActiveDomainByCode(Domains.ACCAO_REFERENTE.name());
 
-    return data.stream()
-        .map(this::buildResponse)
-        .collect(Collectors.toList());
+    var response = new WrapperListDTO();
+    PageMapper.fillPagination(data, response);
+    response.setContent(data.getContent().stream()
+        .map(e -> buildResponse(e, reference))
+        .collect(Collectors.toList()));
+    return response;
   }
 
   @Override
@@ -121,13 +132,14 @@ public class TipoDocumentoService extends ConfigurationProcess<TipoDocumentoRequ
     tipoDocumentoRepository.save(entity);
   }
 
-  private TipoDocumentoResponseDTO buildResponse(TipoDocumentoEntity e) {
+  private TipoDocumentoResponseDTO buildResponse(TipoDocumentoEntity e, Map<String, String> reference) {
     var dto = new TipoDocumentoResponseDTO();
     dto.setId(e.getUuid().toString());
     dto.setEstadoDescricao(e.getEstado().getDescription());
     dto.setCodigo(e.getCodigo());
     dto.setDescricao(e.getNome());
     dto.setReferencia(e.getReferencia());
+    dto.setReferenciaDesc(e.getReferencia() != null ? reference.get(e.getReferencia()) : null);
     dto.setEstado(e.getEstado().getCode());
     return dto;
   }

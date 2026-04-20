@@ -6,12 +6,7 @@ import cv.inps.rh.configuracao.application.dto.ResponsavelResponseDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperListResponsaveisDTO;
 import cv.inps.rh.configuracao.application.queries.GetResponsaveisQuery;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity_;
-import cv.inps.rh.shared.infrastructure.persistence.entity.InstituicaoEntity_;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity_;
-import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity_;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.InstituicaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ResponsavelEntityRepository;
@@ -81,7 +76,7 @@ public class ResponsavelService {
       obj.setNomeDirecao(direction.getNome());
 
       var funId = e.getFunId();
-      obj.setIdFuncionario(funId.getId().toString());
+      obj.setIdFuncionario(funId.getUuid().toString());
       obj.setNomeFuncionario(funId.getNome());
       arraySavedData.add(obj);
     });

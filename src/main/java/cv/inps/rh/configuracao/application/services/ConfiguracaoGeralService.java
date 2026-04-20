@@ -3,11 +3,15 @@ package cv.inps.rh.configuracao.application.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cv.inps.rh.configuracao.application.dto.ConfiguracaoGeralDTO;
 import cv.inps.rh.configuracao.application.dto.FusoHorarioDTO;
+import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
+import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeParametroEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FusoHorarioUpsEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AssiduidadeParametroEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FusoHorarioUpsEntityRepository;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -15,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -107,8 +110,13 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
 
   @Override
   public Object list(Map<String, String> filters) {
-    var data = repository.findAll();
-    return data.stream().map(this::buildResponse).collect(Collectors.toList());
+    var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
+    var data = repository.findAll(pageable);
+
+    var response = new WrapperListDTO();
+    PageMapper.fillPagination(data, response);
+    response.setContent(data.getContent().stream().map(this::buildResponse).collect(Collectors.toList()));
+    return response;
   }
 
   @Override

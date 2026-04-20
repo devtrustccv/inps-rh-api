@@ -1,5 +1,6 @@
 package cv.inps.rh.configuracao.application.services;
 
+import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 

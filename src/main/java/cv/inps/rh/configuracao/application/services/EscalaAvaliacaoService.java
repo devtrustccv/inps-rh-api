@@ -4,7 +4,6 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.commands.CreateEscalaAvaliacaoCommand;
 import cv.inps.rh.configuracao.application.commands.UpdateEscalaAvaliacaoCommand;
 import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRequestDTO;
-import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoResponseDTO;
 import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperListaEscalaAvaliacaoDTO;
 import cv.inps.rh.configuracao.application.queries.GetEscalaAvaliacaoQuery;
@@ -25,11 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class EscalaAvaliacaoService {
@@ -106,7 +101,7 @@ public class EscalaAvaliacaoService {
     }
 
     return ResponseEntity.ok(Map.of(
-        "id", uuids.get(0),
+        "id", uuids.getFirst(),
         "ids", uuids));
   }
 

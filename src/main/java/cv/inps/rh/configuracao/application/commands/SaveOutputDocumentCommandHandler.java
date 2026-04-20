@@ -1,12 +1,12 @@
 package cv.inps.rh.configuracao.application.commands;
 
+import cv.igrp.framework.core.domain.CommandHandler;
+import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.configuracao.application.services.DocOutputService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamDocOutputEntity;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cv.igrp.framework.core.domain.CommandHandler;
-import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 

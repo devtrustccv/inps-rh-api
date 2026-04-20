@@ -2,7 +2,7 @@ package cv.inps.rh.configuracao.interfaces.custom;
 
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.configuracao.application.constants.ConfigurationType;
-import cv.inps.rh.configuracao.application.services.Configuration;
+import cv.inps.rh.configuracao.application.services.engine.Configuration;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @IgrpController

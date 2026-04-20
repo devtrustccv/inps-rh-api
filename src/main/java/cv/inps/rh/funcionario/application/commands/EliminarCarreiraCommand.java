@@ -1,10 +1,10 @@
 package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.Command;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 
 @Data

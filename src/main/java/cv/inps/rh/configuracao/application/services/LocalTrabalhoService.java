@@ -5,6 +5,8 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.LocalTrabalhoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.LocalTrabalhoResponseDTO;
+import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -13,6 +15,8 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity_
 import cv.inps.rh.shared.infrastructure.persistence.repository.GeografiaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamLocalTrabEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.UpsEntityRepository;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,16 +38,18 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
   private final ParamLocalTrabEntityRepository localRepository;
   private final GeografiaEntityRepository geografiaRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoRepository;
+  private final UpsEntityRepository upsRepository;
 
   protected LocalTrabalhoService(
       ParamLocalTrabEntityRepository localRepository,
       GeografiaEntityRepository geografiaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository,
-      Validator validator, ObjectMapper jsonMapper
+      Validator validator, ObjectMapper jsonMapper, UpsEntityRepository upsRepository
   ) {
     super(validator, jsonMapper, LocalTrabalhoRequestDTO.class);
     this.localRepository = localRepository;
     this.geografiaRepository = geografiaRepository;
     this.tiposRelacionamentoRepository = tiposRelacionamentoRepository;
+    this.upsRepository = upsRepository;
   }
 
   @Override
@@ -55,7 +60,7 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
     entity.setEstado(Estado.A);
     entity.setNome(dto.getLocal());
     entity.setNomeNormalizado(ConfigurationUtils.normalizeAndSetToLowerCaseText(dto.getLocal()));
-    entity.setUpsId(Long.valueOf(dto.getUps()));
+    entity.setUpsId(upsRepository.findByIdOrThrow(Long.valueOf(dto.getUps())));
     entity.setPaisId(geografiaRepository.findByIdOrThrow(Long.valueOf(dto.getPais())));
 
     if (StringUtils.hasText(dto.getIlha())) {
@@ -74,7 +79,7 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
     var entity = localRepository.findByUuidOrThrow(UUID.fromString(uuid));
     entity.setNome(dto.getLocal());
     entity.setNomeNormalizado(ConfigurationUtils.normalizeAndSetToLowerCaseText(dto.getLocal()));
-    entity.setUpsId(Long.valueOf(dto.getUps()));
+    entity.setUpsId(upsRepository.findByIdOrThrow(Long.valueOf(dto.getUps())));
     entity.setPaisId(geografiaRepository.findByIdOrThrow(Long.valueOf(dto.getPais())));
 
     if (StringUtils.hasText(dto.getEstado()))
@@ -98,7 +103,7 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
   }
 
   @Override
-  public List<Object> list(Map<String, String> filters) {
+  public Object list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
     var workPlace = filters.get("local");
@@ -126,9 +131,12 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
 
     var page = localRepository.findAll(spec, pageable);
 
-    return page.stream()
+    var response = new WrapperListDTO();
+    PageMapper.fillPagination(page, response);
+    response.setContent(page.getContent().stream()
         .map(this::buildResponse)
-        .collect(Collectors.toList());
+        .collect(Collectors.toList()));
+    return response;
   }
 
   @Override
@@ -154,7 +162,8 @@ public class LocalTrabalhoService extends ConfigurationProcess<LocalTrabalhoRequ
     dto.setPaisId(country.getId().toString());
     dto.setEstado(e.getEstado().name());
     dto.setEstadoDescricao(e.getEstado().getDescription());
-    dto.setUps(e.getUpsId().toString());
+    dto.setUps(e.getUpsId().getNome());
+    dto.setUpsId(e.getUpsId().getId().toString());
 
     ofNullable(e.getIlhaId()).ifPresent(island -> {
       dto.setIlhaId(island.getId().toString());

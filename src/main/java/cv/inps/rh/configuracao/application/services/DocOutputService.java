@@ -1,5 +1,6 @@
 package cv.inps.rh.configuracao.application.services;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.DocOutputRequestDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperDocOutputListDTO;
 import cv.inps.rh.configuracao.infrastructure.mappers.DocOutputMapper;
@@ -15,8 +16,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import com.github.f4b6a3.uuid.UuidCreator;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +64,7 @@ public class DocOutputService {
     entity.setUuid(UuidCreator.getTimeOrderedEpoch());
     entity.setEstado("A");
 
-    ResponsavelEntity responsavel = null;
+    ResponsavelEntity responsavel;
 
     if (request.getResponsavel()!=null) {
       responsavel = responsavelRepository.findByFunId_Uuid(request.getResponsavel()).orElseThrow(
@@ -93,7 +92,7 @@ public class DocOutputService {
     newEntity.setUuid(UuidCreator.getTimeOrderedEpoch());
     newEntity.setEstado("A");
 
-    ResponsavelEntity responsavel = null;
+    ResponsavelEntity responsavel;
     if (request.getResponsavel()!=null) {
       responsavel = responsavelRepository.findByFunId_Uuid(request.getResponsavel()).orElseThrow(
           () ->

@@ -6,6 +6,7 @@ import cv.inps.rh.parametrizacao.domain.models.ParamLocalTrab;
 import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.UpsEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -27,7 +28,7 @@ public class ParamLocalTrabMapper {
         entity.getNome(),
         geografiaMapper.toDomain(entity.getPaisId()),
         geografiaMapper.toDomain(entity.getIlhaId()),
-        entity.getUpsId(),
+        entity.getUpsId().getId(),
         entity.getEstado()
     );
   }
@@ -49,7 +50,7 @@ public class ParamLocalTrabMapper {
       entity.setIlhaId(entityManager.getReference(GeografiaEntity.class, domain.getIlha().id()));
     }
 
-    entity.setUpsId(domain.getUps());
+    entity.setUpsId(entityManager.getReference(UpsEntity.class,domain.getUps()));
     entity.setEstado(domain.getEstado());
 
     return entity;

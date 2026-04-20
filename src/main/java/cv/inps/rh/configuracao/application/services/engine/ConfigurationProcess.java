@@ -1,10 +1,9 @@
-package cv.inps.rh.configuracao.application.services;
+package cv.inps.rh.configuracao.application.services.engine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import jakarta.validation.Validator;
 
-import java.util.List;
 import java.util.Map;
 
 public abstract class ConfigurationProcess<T> {

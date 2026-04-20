@@ -1,6 +1,5 @@
-package cv.inps.rh.configuracao.application.services;
+package cv.inps.rh.configuracao.application.services.engine;
 
-import java.util.List;
 import java.util.Map;
 
 public interface IConfiguration {
