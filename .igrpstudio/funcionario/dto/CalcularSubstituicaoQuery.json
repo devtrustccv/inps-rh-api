@@ -1,0 +1,32 @@
+{
+  "type": "query",
+  "module": "funcionario",
+  "name": "CalcularSubstituicao",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "dataInicio",
+      "type": "string",
+      "objectType": "java",
+      "required": true
+    },
+    {
+      "name": "dataFim",
+      "type": "string",
+      "objectType": "java",
+      "required": true
+    },
+    {
+      "name": "tiprelDeId",
+      "type": "long",
+      "objectType": "java",
+      "required": true
+    },
+    {
+      "name": "tiprelParaId",
+      "type": "long",
+      "objectType": "java",
+      "required": true
+    }
+  ]
+}

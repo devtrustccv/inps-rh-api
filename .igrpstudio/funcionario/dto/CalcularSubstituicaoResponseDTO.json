@@ -1,0 +1,16 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "CalcularSubstituicaoResponse",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "items",
+      "type": "CalcularSubstituicaoResponseItemDTO",
+      "objectType": "dto",
+      "required": false,
+      "collectionType": "list",
+      "module": "funcionario"
+    }
+  ]
+}

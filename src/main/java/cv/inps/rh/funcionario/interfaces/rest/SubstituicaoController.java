@@ -8,8 +8,10 @@ import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.funcionario.application.commands.RegistarSubstituicaoCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarSubstituicaoCommand;
+import cv.inps.rh.funcionario.application.dto.CalcularSubstituicaoResponseDTO;
 import cv.inps.rh.funcionario.application.dto.SubstituicaoDTO;
 import cv.inps.rh.funcionario.application.dto.SubstituicaoSumaryDTO;
+import cv.inps.rh.funcionario.application.queries.CalcularSubstituicaoQuery;
 import cv.inps.rh.funcionario.application.queries.ListaSubstituicaoQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -129,6 +131,39 @@ public class SubstituicaoController {
       ResponseEntity<List<SubstituicaoSumaryDTO>> response = queryBus.handle(query);
 
       return response;
+  }
+
+   @GetMapping(
+   value = "substituicoes/calcular"
+  )
+  @Operation(
+    summary = "Calcular substituicao",
+    description = "Calcula detalhe mensal da substituicao entre dois colaboradores num intervalo de datas",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = CalcularSubstituicaoResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<CalcularSubstituicaoResponseDTO> calcularSubstituicao(
+    @RequestParam(value = "dataInicio") String dataInicio,
+    @RequestParam(value = "dataFim") String dataFim,
+    @RequestParam(value = "tiprelDeId") Long tiprelDeId,
+    @RequestParam(value = "tiprelParaId") Long tiprelParaId)
+  {
+
+      final var query = new CalcularSubstituicaoQuery(dataInicio, dataFim, tiprelDeId, tiprelParaId);
+
+      return queryBus.handle(query);
+
   }
 
 }
