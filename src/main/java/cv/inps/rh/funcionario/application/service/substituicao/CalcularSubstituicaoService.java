@@ -3,9 +3,9 @@ package cv.inps.rh.funcionario.application.service.substituicao;
 import cv.inps.rh.funcionario.application.dto.CalcularSubstituicaoResponseDTO;
 import cv.inps.rh.funcionario.application.dto.CalcularSubstituicaoResponseItemDTO;
 import cv.inps.rh.funcionario.application.queries.CalcularSubstituicaoQuery;
+import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.domain.repository.ICalcularSubstituicaoRepository;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,13 +16,14 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class CalcularSubstituicaoService {
 
   private final ICalcularSubstituicaoRepository calcularSubstituicaoRepository;
-  private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
+  private final FuncionarioRules funcionarioRules;
 
   @Transactional(readOnly = true)
   public CalcularSubstituicaoResponseDTO calcular(CalcularSubstituicaoQuery query) {
@@ -34,10 +35,8 @@ public class CalcularSubstituicaoService {
       throw IgrpResponseStatusException.badRequest("Data fim não pode ser anterior à data início");
     }
 
-    var tiprelDe   = tiposRelacionamentoEntityRepository.findById(query.getTiprelDeId())
-        .orElseThrow(() -> IgrpResponseStatusException.notFound("Colaborador substituto não encontrado: " + query.getTiprelDeId()));
-    var tiprelPara = tiposRelacionamentoEntityRepository.findById(query.getTiprelParaId())
-        .orElseThrow(() -> IgrpResponseStatusException.notFound("Colaborador substituído não encontrado: " + query.getTiprelParaId()));
+    var tiprelDe   = funcionarioRules.getTipoRelacionamentoAtual(UUID.fromString(query.getFuncionarioDeId()));
+    var tiprelPara = funcionarioRules.getTipoRelacionamentoAtual(UUID.fromString(query.getFuncionarioParaId()));
 
     BigDecimal valorDe   = tiprelDe.getSalario()  != null ? tiprelDe.getSalario()  : BigDecimal.ZERO;
     BigDecimal valorPara = tiprelPara.getSalario() != null ? tiprelPara.getSalario() : BigDecimal.ZERO;

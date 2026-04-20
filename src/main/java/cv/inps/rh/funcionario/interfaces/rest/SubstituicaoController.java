@@ -156,11 +156,11 @@ public class SubstituicaoController {
   public ResponseEntity<CalcularSubstituicaoResponseDTO> calcularSubstituicao(
     @RequestParam(value = "dataInicio") String dataInicio,
     @RequestParam(value = "dataFim") String dataFim,
-    @RequestParam(value = "tiprelDeId") Long tiprelDeId,
-    @RequestParam(value = "tiprelParaId") Long tiprelParaId)
+    @RequestParam(value = "funcionarioDeId") String funcionarioDeId,
+    @RequestParam(value = "funcionarioParaId") String funcionarioParaId)
   {
 
-      final var query = new CalcularSubstituicaoQuery(dataInicio, dataFim, tiprelDeId, tiprelParaId);
+      final var query = new CalcularSubstituicaoQuery(dataInicio, dataFim, funcionarioDeId, funcionarioParaId);
 
       return queryBus.handle(query);
 

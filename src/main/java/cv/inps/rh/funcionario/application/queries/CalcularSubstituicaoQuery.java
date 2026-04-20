@@ -2,7 +2,6 @@ package cv.inps.rh.funcionario.application.queries;
 
 import cv.igrp.framework.core.domain.Query;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,10 +17,10 @@ public class CalcularSubstituicaoQuery implements Query {
   @NotBlank(message = "The field <dataFim> is required")
   private String dataFim;
 
-  @NotNull(message = "The field <tiprelDeId> is required")
-  private Long tiprelDeId;
+  @NotBlank(message = "The field <funcionarioDeId> is required")
+  private String funcionarioDeId;
 
-  @NotNull(message = "The field <tiprelParaId> is required")
-  private Long tiprelParaId;
+  @NotBlank(message = "The field <funcionarioParaId> is required")
+  private String funcionarioParaId;
 
 }

@@ -17,14 +17,14 @@
       "required": true
     },
     {
-      "name": "tiprelDeId",
-      "type": "long",
+      "name": "funcionarioDeId",
+      "type": "string",
       "objectType": "java",
       "required": true
     },
     {
-      "name": "tiprelParaId",
-      "type": "long",
+      "name": "funcionarioParaId",
+      "type": "string",
       "objectType": "java",
       "required": true
     }

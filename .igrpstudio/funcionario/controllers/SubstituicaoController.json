@@ -164,13 +164,13 @@
           "isRequired": true
         },
         {
-          "type": "long",
-          "name": "tiprelDeId",
+          "type": "string",
+          "name": "funcionarioDeId",
           "isRequired": true
         },
         {
-          "type": "long",
-          "name": "tiprelParaId",
+          "type": "string",
+          "name": "funcionarioParaId",
           "isRequired": true
         }
       ]
