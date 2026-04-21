@@ -1,0 +1,26 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "CalcularRemuneracaoResponse",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "remuneracaoBruta",
+      "type": "BigDecimal",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "totalDesconto",
+      "type": "BigDecimal",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "remuneracaoLiquida",
+      "type": "BigDecimal",
+      "objectType": "java",
+      "required": false
+    }
+  ]
+}

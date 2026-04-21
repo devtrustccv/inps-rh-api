@@ -1,0 +1,42 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "CalcularRemuneracaoRequest",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "salario",
+      "type": "BigDecimal",
+      "objectType": "java",
+      "required": true
+    },
+    {
+      "name": "moeda",
+      "type": "string",
+      "objectType": "java",
+      "required": true
+    },
+    {
+      "name": "dataInicio",
+      "type": "string",
+      "objectType": "java",
+      "required": true
+    },
+    {
+      "name": "subsidios",
+      "type": "SubsidioItem",
+      "objectType": "dto",
+      "required": true,
+      "collectionType": "list",
+      "module": "funcionario"
+    },
+    {
+      "name": "descontos",
+      "type": "DescontoItem",
+      "objectType": "dto",
+      "required": true,
+      "collectionType": "list",
+      "module": "funcionario"
+    }
+  ]
+}

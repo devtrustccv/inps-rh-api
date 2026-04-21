@@ -291,6 +291,40 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "calcularRemuneracao",
+      "path": "calcular-remuneracao",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "CalcularRemuneracaoRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "CalcularRemuneracaoResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "id": "ixh1ofde84-getListAbonosSubsidios-getListAbonosSubsidios-getListRenumeracoes-getListRenumeracoes-validarNovoRemuneracao-AdicionarNovoRemuneracao-adicionarNovoPagamento-validarNovoRemuneracao-validarNovoRemuneracaoCopy-validarNovoRemuneracao-validarNovoPagamento-validarNovoRemuneracao"

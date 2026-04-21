@@ -1,0 +1,32 @@
+{
+  "type": "query",
+  "module": "funcionario",
+  "name": "CalcularSubstituicao",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "dataInicio",
+      "type": "string",
+      "objectType": "java",
+      "required": true
+    },
+    {
+      "name": "dataFim",
+      "type": "string",
+      "objectType": "java",
+      "required": true
+    },
+    {
+      "name": "funcionarioDeId",
+      "type": "string",
+      "objectType": "java",
+      "required": true
+    },
+    {
+      "name": "funcionarioParaId",
+      "type": "string",
+      "objectType": "java",
+      "required": true
+    }
+  ]
+}

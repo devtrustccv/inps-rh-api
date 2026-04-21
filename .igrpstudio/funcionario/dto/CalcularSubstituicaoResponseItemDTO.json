@@ -1,0 +1,38 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "CalcularSubstituicaoResponseItem",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "mesAno",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "nrDias",
+      "type": "integer",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "valorSubstituto",
+      "type": "BigDecimal",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "valorSubstituido",
+      "type": "BigDecimal",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "valorReceber",
+      "type": "BigDecimal",
+      "objectType": "java",
+      "required": false
+    }
+  ]
+}

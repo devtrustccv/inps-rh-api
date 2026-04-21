@@ -1,0 +1,20 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "SubsidioItem",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "tmId",
+      "type": "long",
+      "objectType": "java",
+      "required": true
+    },
+    {
+      "name": "valor",
+      "type": "BigDecimal",
+      "objectType": "java",
+      "required": true
+    }
+  ]
+}

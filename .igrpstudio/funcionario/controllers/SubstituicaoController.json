@@ -131,6 +131,49 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "calcularSubstituicao",
+      "path": "substituicoes/calcular",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "CalcularSubstituicaoResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "funcionarioDeId",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "funcionarioParaId",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "alqrgnd0ly-registarSubstituicao-listaSubstituicao-registarSubstituicao-validarSubstituicao-listaSubstituicao"
