@@ -6,7 +6,9 @@ import cv.inps.rh.funcionario.application.dto.WrapperListMobilidadeDTO;
 import cv.inps.rh.funcionario.application.queries.GetListMobilidadesQuery;
 import cv.inps.rh.funcionario.application.queries.GetMobilidadeByIdQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.MobilidadeMapper;
+import cv.inps.rh.shared.application.constants.Domains;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
@@ -33,6 +35,7 @@ public class MobilidadeReadService {
 
   private final MobilidadeEntityRepository mobilidadeEntityRepository;
   private final MobilidadeMapper mobilidadeMapper;
+  private final DomainEntityRepository domainEntityRepository;
 
   @Transactional(readOnly = true)
   public WrapperListMobilidadeDTO getListMobilidade(GetListMobilidadesQuery query) {
@@ -71,7 +74,7 @@ public class MobilidadeReadService {
 
     Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
     Page<MobilidadeEntity> page = mobilidadeEntityRepository.findAll(spec, pageable);
-
+    var domain = domainEntityRepository.getActiveDomainAndReferenciaByCode(Domains.TIPO_MOV_LABORAL.name(), "MOBILIDADE");
     List<MobilidadeListDTO> content = page.getContent().stream().map(m -> {
       MobilidadeListDTO dto = new MobilidadeListDTO();
       dto.setId(m.getId());
@@ -87,6 +90,8 @@ public class MobilidadeReadService {
       dto.setEstado(m.getEstado() != null ? m.getEstado().getCode() : null);
       dto.setEstadoDesc(m.getEstado() != null ? m.getEstado().getDescription() : null);
       dto.setTipoMobilidade(m.getTipoSituacao());
+      dto.setTipoMobilidadeDesc(domain.getOrDefault(m.getTipoSituacao(), m.getTipoSituacao()));
+
       return dto;
     }).toList();
 

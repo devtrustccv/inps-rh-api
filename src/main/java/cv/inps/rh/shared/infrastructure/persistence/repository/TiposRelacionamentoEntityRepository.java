@@ -109,19 +109,26 @@ public interface TiposRelacionamentoEntityRepository extends
              t.id,
              f.uuid,
              f.nome,
+             f.numDocumento,
              i.nome,
+             s.nome,
              i.id,
              null,
              cat.nome,
+             pcc.nome,
              c.salario,
              cargo.nome,
-             esc.valor
+             esc.valor,
+             esc.nivelReferencia,
+             esc.escalao
       )
       FROM TiposRelacionamentoEntity t
        JOIN t.funId f
       LEFT JOIN t.mobId m
       LEFT JOIN m.instidId i
+      LEFT JOIN m.secaoId s
       LEFT JOIN t.carreiraId c
+      LEFT JOIN c.carrPccsId pcc
       LEFT JOIN c.categoriaId cat
       LEFT JOIN c.cargoId cargo
       LEFT JOIN c.escalaoId esc
