@@ -73,7 +73,7 @@ public class FosService {
     );
   }
 
-  public void novosSegurado(Integer ano, Integer mes) {
+  public void novoSegurado(Integer ano, Integer mes) {
 
     var referenceDate = getReferenceDate(ano, mes);
 
