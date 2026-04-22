@@ -219,7 +219,7 @@ public class FosService {
         .execute(
             new MapSqlParameterSource()
                 .addValue("p_mes_referencia", referenceMonth)
-                .addValue("p_tipo", id)
+                .addValue("p_id", id)
         );
   }
 
