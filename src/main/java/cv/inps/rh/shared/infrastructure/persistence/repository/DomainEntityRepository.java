@@ -31,6 +31,10 @@ public interface DomainEntityRepository extends
     return findByDominioAndEstado(dominio, Estado.A).stream()
         .collect(Collectors.toMap(DomainEntity::getValor, DomainEntity::getDescricao));
   }
+  default Map<String, String> getActiveDomainAndReferenciaByCode(String dominio, String referencia) {
+    return findByDominioAndReferenciaAndEstado(dominio, referencia, Estado.A).stream()
+        .collect(Collectors.toMap(DomainEntity::getValor, DomainEntity::getDescricao));
+  }
 
 
 }

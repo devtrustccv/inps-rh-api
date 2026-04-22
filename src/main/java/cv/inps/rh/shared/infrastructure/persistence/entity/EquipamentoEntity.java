@@ -27,8 +27,9 @@ import java.util.UUID;
 public class EquipamentoEntity extends AuditEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id", unique = true, nullable = false)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_RH_EQUIP_CONTR_ACESSO_id_gen")
+  @SequenceGenerator(name = "SEQ_RH_EQUIP_CONTR_ACESSO_id_gen", sequenceName = "SEQ_RH_EQUIP_CONTR_ACESSO", allocationSize = 1)
+  @Column(name = "ID", nullable = false)
   private Long id;
 
 
