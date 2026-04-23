@@ -37,6 +37,12 @@ public class PagamentosDescontoListDTO  {
   private String valor ;
 
 
+  private String percentagem ;
+
+
+  private String obs ;
+
+
   private String dataInicio ;
 
 
@@ -44,5 +50,20 @@ public class PagamentosDescontoListDTO  {
 
 
   private String ultimoProc ;
+
+
+  private Long contrVinculoId ;
+
+
+  private Long carreiraId ;
+
+
+  private Long situacLaboralId ;
+
+
+  private String userRegistoName ;
+
+
+  private String userAlteracaoName ;
 
 }

@@ -19,32 +19,53 @@ import lombok.AllArgsConstructor;
 @IgrpDTO
 public class RenumeracaoListDTO  {
 
-  
-  
+
+
   private Long id ;
-  
-  
+
+
   private String uuid ;
-  
-  
+
+
   private String estado ;
-  
-  
+
+
   private String estadoDesc ;
-  
-  
+
+
   private String movimento ;
-  
-  
+
+
   private String valor ;
-  
-  
+
+
+  private String percentagem ;
+
+
+  private String obs ;
+
+
   private String ultimoPRoc ;
-  
-  
+
+
   private String dataInicio ;
-  
-  
+
+
   private String dataFim ;
+
+
+  private Long contrVinculoId ;
+
+
+  private Long carreiraId ;
+
+
+  private Long situacLaboralId ;
+
+
+  private String userRegistoName ;
+
+
+  private String userAlteracaoName ;
 
 }

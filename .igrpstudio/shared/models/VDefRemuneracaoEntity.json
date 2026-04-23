@@ -1,0 +1,26 @@
+{
+  "type": "model",
+  "module": "shared",
+  "name": "VDefRemuneracaoEntity",
+  "tableName": "RH_V_DEF_REMUNERACAO",
+  "audit": false,
+  "crud": false,
+  "revision": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "rem_id",
+      "type": "long",
+      "length": 255,
+      "nullable": false,
+      "unique": true,
+      "primaryKey": true,
+      "generationType": "IDENTITY",
+      "skipFieldRevision": false,
+      "objectType": "java"
+    }
+  ],
+  "id": "vdefrem001",
+  "uniqueConstraints": [],
+  "indexes": []
+}

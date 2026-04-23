@@ -2,22 +2,19 @@ package cv.inps.rh.funcionario.application.service.remuneracao;
 
 import cv.inps.rh.funcionario.application.dto.NovoPagamentoRequestDTO;
 import cv.inps.rh.funcionario.application.dto.NovoRemuneracaoRequestDTO;
-import cv.inps.rh.funcionario.application.dto.RenumeracaoReqDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListRenumeracaoDTO;
 import cv.inps.rh.funcionario.application.queries.GetListRenumeracoesQuery;
 import cv.inps.rh.funcionario.application.queries.GetPagamentosDescontosByIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetRenumeracaoByIdQuery;
-import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
+import cv.inps.rh.funcionario.infrastructure.mappers.VDefRemuneracaoMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.VDefRemuneracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
-import jakarta.persistence.criteria.Join;
+import cv.inps.rh.shared.infrastructure.persistence.repository.VDefRemuneracaoEntityRepository;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -38,7 +35,8 @@ import java.util.Objects;
 public class RenumeracoesReadService {
 
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
-  private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
+  private final VDefRemuneracaoEntityRepository vDefRemuneracaoEntityRepository;
+  private final VDefRemuneracaoMapper vDefRemuneracaoMapper;
 
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
 
@@ -50,14 +48,11 @@ public class RenumeracoesReadService {
 
     var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
 
-    Specification<DefinicaoRemuneracaoEntity> spec = (root, cq, cb) -> {
+    Specification<VDefRemuneracaoEntity> spec = (root, cq, cb) -> {
       List<Predicate> predicates = new java.util.ArrayList<>();
 
-      /*Join<DefinicaoRemuneracaoEntity, TipoMovimentoEntity> tm = root.join("tmId");
-      predicates.add(cb.equal(tm.get("tipo"), "REM"));*/
-
-      Join<DefinicaoRemuneracaoEntity, FuncionarioEntity> fun = root.join("funId");
-      predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
+      predicates.add(cb.equal(root.get("funUuid"), idFuncionario));
+      predicates.add(cb.equal(root.get("estActAdm"), 1));
 
       var estadosPermitidos = EnumSet.of(Estado.A, Estado.I);
 
@@ -87,10 +82,10 @@ public class RenumeracoesReadService {
     };
 
     Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
-    Page<DefinicaoRemuneracaoEntity> page = definicaoRemuneracaoEntityRepository.findAll(spec, pageable);
+    Page<VDefRemuneracaoEntity> page = vDefRemuneracaoEntityRepository.findAll(spec, pageable);
 
     var content = page.getContent().stream()
-        .map(definicaoRemuneracaoMapper::toDTO)
+        .map(vDefRemuneracaoMapper::toDTO)
         .toList();
 
     var wrapper = new WrapperListRenumeracaoDTO();

@@ -2,15 +2,12 @@ package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.dto.WrapperListPagamentosDescontoDTO;
 import cv.inps.rh.funcionario.application.queries.GetListPagamentosDescontoQuery;
-import cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper;
+import cv.inps.rh.funcionario.infrastructure.mappers.VDefPagamentoMapper;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import cv.inps.rh.shared.infrastructure.persistence.entity.DefPagamentoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository;
-import jakarta.persistence.criteria.Join;
+import cv.inps.rh.shared.infrastructure.persistence.entity.VDefPagamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.VDefPagamentoEntityRepository;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,8 +26,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PagamentosDescontoReadService {
 
-  private final DefPagamentoEntityRepository defPagamentoEntityRepository;
-  private final DefPagamentoMapper definicaoPagamentoMapper;
+  private final VDefPagamentoEntityRepository vDefPagamentoEntityRepository;
+  private final VDefPagamentoMapper vDefPagamentoMapper;
 
   @Transactional(readOnly = true)
   public WrapperListPagamentosDescontoDTO getListPagamentosDesconto(GetListPagamentosDescontoQuery query) {
@@ -40,15 +37,11 @@ public class PagamentosDescontoReadService {
 
     var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
 
-    Specification<DefPagamentoEntity> spec = (root, cq, cb) -> {
+    Specification<VDefPagamentoEntity> spec = (root, cq, cb) -> {
       List<Predicate> predicates = new java.util.ArrayList<>();
 
-      /*Join<DefPagamentoEntity, TipoMovimentoEntity> tm = root.join("tmId");
-      predicates.add(cb.equal(tm.get("tipo"), "PAG"));*/
-
-      Join<DefPagamentoEntity, FuncionarioEntity> fun = root.join("funId");
-      predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
-
+      predicates.add(cb.equal(root.get("funUuid"), idFuncionario));
+      predicates.add(cb.equal(root.get("estActAdm"), 1));
 
       var estadosPermitidos = EnumSet.of(Estado.A, Estado.I);
 
@@ -65,13 +58,6 @@ public class PagamentosDescontoReadService {
           root.get("estado").in(estadosPermitidos)
       );
 
-      if (StringUtils.hasText(query.getEstado())) {
-        try {
-          Estado estado = Estado.fromCodeOrThrow(query.getEstado());
-          predicates.add(cb.equal(root.get("estado"), estado));
-        } catch (Exception ignored) {}
-      }
-
       if (StringUtils.hasText(query.getDataInicio())) {
         var di = DateFormatter.stringToLocalDate(query.getDataInicio());
         predicates.add(cb.greaterThanOrEqualTo(root.get("dataInicio"), di));
@@ -85,10 +71,10 @@ public class PagamentosDescontoReadService {
     };
 
     Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
-    Page<DefPagamentoEntity> page = defPagamentoEntityRepository.findAll(spec, pageable);
+    Page<VDefPagamentoEntity> page = vDefPagamentoEntityRepository.findAll(spec, pageable);
 
     var content = page.getContent().stream()
-        .map(definicaoPagamentoMapper::toDTO)
+        .map(vDefPagamentoMapper::toDTO)
         .toList();
 
     var wrapper = new WrapperListPagamentosDescontoDTO();
