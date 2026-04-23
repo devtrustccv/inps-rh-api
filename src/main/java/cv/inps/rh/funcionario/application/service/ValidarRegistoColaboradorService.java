@@ -13,7 +13,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.TipoRelRemPagEntity;
+import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -44,7 +44,7 @@ public class ValidarRegistoColaboradorService {
   private final FuncionarioRules funcionarioRules;
   private final TipoMovimentoHelper tipoMovimentoHelper;
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
-  private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
+  private final TipoRelRemPagHelper tipoRelRemPagHelper;
 
   @Transactional
   public Map<String, ?> validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -163,41 +163,7 @@ public class ValidarRegistoColaboradorService {
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    if (saved.getDefinicoesRenumeracoes() != null && !saved.getDefinicoesRenumeracoes().isEmpty()) {
-      java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
-      for (var rem : saved.getDefinicoesRenumeracoes()) {
-        if (rem.getEstado().equals(Estado.A) || rem.getEstado().equals(Estado.P)) {
-          if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndRemId(tiposRelacionamento, rem)) {
-            var assoc = new TipoRelRemPagEntity();
-            assoc.setTiprelId(tiposRelacionamento);
-            assoc.setRemId(rem);
-            assoc.setPagId(null);
-            lista.add(assoc);
-          }
-        }
-      }
-      if (!lista.isEmpty()) {
-        tipoRelRemPagEntityRepository.saveAll(lista);
-      }
-    }
-
-    if (saved.getDefinicoesPagamentos() != null && !saved.getDefinicoesPagamentos().isEmpty()) {
-      java.util.List<TipoRelRemPagEntity> lista = new java.util.ArrayList<>();
-      for (var pag : saved.getDefinicoesPagamentos()) {
-        if (pag.getEstado().equals(Estado.A) || pag.getEstado().equals(Estado.P)) {
-          if (!tipoRelRemPagEntityRepository.existsByTiprelIdAndPagId(tiposRelacionamento, pag)) {
-            var assoc = new TipoRelRemPagEntity();
-            assoc.setTiprelId(tiposRelacionamento);
-            assoc.setPagId(pag);
-            assoc.setRemId(null);
-            lista.add(assoc);
-          }
-        }
-      }
-      if (!lista.isEmpty()) {
-        tipoRelRemPagEntityRepository.saveAll(lista);
-      }
-    }
+    tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
 
     return java.util.Map.of(
         "id", funcionario.getId(),

@@ -13,6 +13,7 @@ import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +57,7 @@ public class RegistarColaboradorService {
 
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
 
-  private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
+  private final TipoRelRemPagHelper tipoRelRemPagHelper;
 
   private final FuncionarioRules funcionarioRules;
 
@@ -246,29 +247,7 @@ public class RegistarColaboradorService {
       documentoEntityRepository.saveAll(list);
     }
 
-    if (!CollectionUtils.isEmpty(saved.getDefinicoesRenumeracoes())) {
-      var lista = new ArrayList<TipoRelRemPagEntity>();
-      for (var rem : saved.getDefinicoesRenumeracoes()) {
-        var assoc = new TipoRelRemPagEntity();
-        assoc.setTiprelId(tr);
-        assoc.setRemId(rem);
-        assoc.setPagId(null);
-        lista.add(assoc);
-      }
-      tipoRelRemPagEntityRepository.saveAll(lista);
-    }
-
-    if (!CollectionUtils.isEmpty(saved.getDefinicoesPagamentos())) {
-      var lista = new ArrayList<TipoRelRemPagEntity>();
-      for (var pag : saved.getDefinicoesPagamentos()) {
-        var assoc = new TipoRelRemPagEntity();
-        assoc.setTiprelId(tr);
-        assoc.setPagId(pag);
-        assoc.setRemId(null);
-        lista.add(assoc);
-      }
-      tipoRelRemPagEntityRepository.saveAll(lista);
-    }
+    tipoRelRemPagHelper.associarNovos(tr, saved);
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {

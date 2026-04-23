@@ -11,6 +11,7 @@ import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
@@ -40,7 +41,7 @@ public class CarreiraWriteService {
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final MobilidadeEntityRepository mobilidadeEntityRepository;
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
-  private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
+  private final TipoRelRemPagHelper tipoRelRemPagHelper;
   private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
   private final CarreiraMapper carreiraMapper;
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
@@ -161,62 +162,7 @@ public class CarreiraWriteService {
 
     var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    var listAssociacoes = new ArrayList<TipoRelRemPagEntity>();
-    var renumeracoesAtivasAntigas = funcionarioRules.getRemuneracoesAssociadosAtivos(relacionamentoAtual.getId());
-    var pagamentosAtivosAntigos = funcionarioRules.getPagamentosDescontosAssociadosAtivos(relacionamentoAtual.getId());
-
-    var remIdsAdicionados = new java.util.HashSet<Long>();
-    var pagIdsAdicionados = new java.util.HashSet<Long>();
-
-    if (renumeracoesAtivasAntigas != null) {
-      for (var rem : renumeracoesAtivasAntigas) {
-        if (rem != null && rem.getId() != null && remIdsAdicionados.add(rem.getId())) {
-          var assoc = new TipoRelRemPagEntity();
-          assoc.setTiprelId(novoRelacionamento);
-          assoc.setRemId(rem);
-          assoc.setPagId(null);
-          listAssociacoes.add(assoc);
-        }
-      }
-    }
-    if (pagamentosAtivosAntigos != null) {
-      for (var pag : pagamentosAtivosAntigos) {
-        if (pag != null && pag.getId() != null && pagIdsAdicionados.add(pag.getId())) {
-          var assoc = new TipoRelRemPagEntity();
-          assoc.setTiprelId(novoRelacionamento);
-          assoc.setPagId(pag);
-          assoc.setRemId(null);
-          listAssociacoes.add(assoc);
-        }
-      }
-    }
-
-    if (!novasRemuneracoes.isEmpty()) {
-      for (var rem : novasRemuneracoes) {
-        if (rem != null && rem.getId() != null && remIdsAdicionados.add(rem.getId())) {
-          var assoc = new TipoRelRemPagEntity();
-          assoc.setTiprelId(novoRelacionamento);
-          assoc.setRemId(rem);
-          assoc.setPagId(null);
-          listAssociacoes.add(assoc);
-        }
-      }
-    }
-    if (!novosPagamentos.isEmpty()) {
-      for (var pag : novosPagamentos) {
-        if (pag != null && pag.getId() != null && pagIdsAdicionados.add(pag.getId())) {
-          var assoc = new TipoRelRemPagEntity();
-          assoc.setTiprelId(novoRelacionamento);
-          assoc.setPagId(pag);
-          assoc.setRemId(null);
-          listAssociacoes.add(assoc);
-        }
-      }
-    }
-
-    if (!listAssociacoes.isEmpty()) {
-      tipoRelRemPagEntityRepository.saveAll(listAssociacoes);
-    }
+    tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(relacionamentoAtual, novoRelacionamento, novasRemuneracoes, novosPagamentos);
 
     var mobilidade = mobilidadeEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
 
