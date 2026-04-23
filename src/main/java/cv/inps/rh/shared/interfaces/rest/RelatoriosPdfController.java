@@ -2,6 +2,7 @@ package cv.inps.rh.shared.interfaces.rest;
 
 import cv.inps.rh.shared.application.constants.custom.RelatorioTemplate;
 import cv.inps.rh.shared.application.dto.MinioFileDataDTO;
+import cv.inps.rh.shared.domain.service.OrdemServicoService;
 import cv.inps.rh.shared.domain.service.RelatoriosService;
 import cv.inps.rh.shared.util.PdfGenerator;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,10 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class RelatoriosPdfController {
 
   private final RelatoriosService service;
+  private final OrdemServicoService osService;
   private final PdfGenerator pdfGenerator;
 
-  public RelatoriosPdfController(RelatoriosService service, PdfGenerator pdfGenerator) {
+  public RelatoriosPdfController(RelatoriosService service, OrdemServicoService osService, PdfGenerator pdfGenerator) {
     this.service = service;
+    this.osService = osService;
     this.pdfGenerator = pdfGenerator;
   }
 
@@ -41,6 +44,14 @@ public class RelatoriosPdfController {
     return pdfResponse(
         pdfGenerator.generate("processamento-salarios", service.processamentoSalarios(processamentoId, tipo)),
         "processamento-salarios.pdf"
+    );
+  }
+
+  @GetMapping("/os/fim-comissao-servico")
+  public ResponseEntity<byte[]> fimComissaoServico(@RequestParam Long funcionarioId) {
+    return pdfResponse(
+        pdfGenerator.generate("os-fim-comissao-servico", osService.fimComissaoServico(funcionarioId)),
+        "Fim Comissão Serviço.pdf"
     );
   }
 

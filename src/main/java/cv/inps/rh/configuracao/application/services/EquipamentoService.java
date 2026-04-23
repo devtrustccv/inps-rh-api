@@ -29,8 +29,6 @@ public class EquipamentoService {
 
     var local = localRepository.findByUuidOrThrow(UUID.fromString(localId));
 
-    var ups = local.getUpsId();
-
     var data = new ArrayList<EquipamentoEntity>();
 
     for (var obj : dto.getEquipamentos()) {

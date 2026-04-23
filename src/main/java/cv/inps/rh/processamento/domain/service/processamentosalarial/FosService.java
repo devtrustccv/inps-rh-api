@@ -73,7 +73,7 @@ public class FosService {
     );
   }
 
-  public void novosSegurado(Integer ano, Integer mes) {
+  public void novoSegurado(Integer ano, Integer mes) {
 
     var referenceDate = getReferenceDate(ano, mes);
 
@@ -219,7 +219,7 @@ public class FosService {
         .execute(
             new MapSqlParameterSource()
                 .addValue("p_mes_referencia", referenceMonth)
-                .addValue("p_tipo", id)
+                .addValue("p_id", id)
         );
   }
 
