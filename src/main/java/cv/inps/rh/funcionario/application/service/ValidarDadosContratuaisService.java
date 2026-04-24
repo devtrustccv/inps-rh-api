@@ -72,8 +72,8 @@ public class ValidarDadosContratuaisService {
       if (dc.getCarreiraId() == null)
         throw IgrpResponseStatusException.badRequest("Carreira é obrigatória para este tipo de vínculo.");
 
-      if (dc.getCategoriaId() == null)
-        throw IgrpResponseStatusException.badRequest("Categoria é obrigatória para este tipo de vínculo.");
+      /*if (dc.getCategoriaId() == null)
+        throw IgrpResponseStatusException.badRequest("Categoria é obrigatória para este tipo de vínculo.");*/
 
       if (dc.getEscalaoReferenciaId() == null)
         throw IgrpResponseStatusException.badRequest("Escalão é obrigatório para este tipo de vínculo.");

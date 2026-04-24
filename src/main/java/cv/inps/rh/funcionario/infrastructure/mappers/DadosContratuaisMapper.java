@@ -117,10 +117,12 @@ public class DadosContratuaisMapper {
         tiposRelacionamento.getCarreiraId().getCarrPccsId().getNome(): null);
 
     dcr.setCategoriaId(tiposRelacionamento.getCarreiraId()!=null ?
-        tiposRelacionamento.getCarreiraId().getCategoriaId().getId() : null);
+        tiposRelacionamento.getCarreiraId().getCategoriaId() != null ?
+            tiposRelacionamento.getCarreiraId().getCategoriaId().getId() : null : null);
 
     dcr.setCategoriaDesc(tiposRelacionamento.getCarreiraId()!=null ?
-        tiposRelacionamento.getCarreiraId().getCategoriaId().getNome() : null);
+        tiposRelacionamento.getCarreiraId().getCategoriaId()!=null ?
+            tiposRelacionamento.getCarreiraId().getCategoriaId().getNome() : null : null);
 
     dcr.setEscalaoReferenciaId(tiposRelacionamento.getCarreiraId()!=null ?
         tiposRelacionamento.getCarreiraId().getEscalaoId().getId() : null);
