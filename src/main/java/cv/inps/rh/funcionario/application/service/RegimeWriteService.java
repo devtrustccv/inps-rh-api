@@ -10,6 +10,7 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeModalidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
@@ -30,6 +31,7 @@ public class RegimeWriteService {
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final EntityManager entityManager;
   private final ValidacaoEntityRepository validacaoEntityRepository;
+  private final OrdemServicoWriteService ordemServicoWriteService;
 
 
   @Transactional
@@ -174,6 +176,9 @@ public class RegimeWriteService {
       funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGIME)
           .ifPresent(v -> v.setEstado(estado));
 
+      if (estado == Estado.A) {
+        ordemServicoWriteService.criar(funcionario, tipoRelacionamentoAtual, dto.getTipoOrdemServico());
+      }
     }
 
     funcionarioEntityRepository.save(funcionario);

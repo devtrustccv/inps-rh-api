@@ -52,6 +52,7 @@ public class PedidoDeclaracaoResponseDTO{
   // Validação
   private String validar ;
   private String entregaPorEmail ;
+  private String tipoOrdemServico ;
 
   List<AnexoRespDTO> anexos ;
 

@@ -65,4 +65,6 @@ public class PedidoFeriaReqDTO  {
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();
 
+  private String tipoOrdemServico ;
+
 }

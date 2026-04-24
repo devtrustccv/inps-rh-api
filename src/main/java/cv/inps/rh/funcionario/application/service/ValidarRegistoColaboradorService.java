@@ -12,7 +12,7 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
+import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +45,7 @@ public class ValidarRegistoColaboradorService {
   private final TipoMovimentoHelper tipoMovimentoHelper;
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
+  private final OrdemServicoWriteService ordemServicoWriteService;
 
   @Transactional
   public Map<String, ?> validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -147,15 +148,7 @@ public class ValidarRegistoColaboradorService {
     if (registroColaborador.getValidar() != null) {
       var estado = registroColaborador.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       if (estado.equals(Estado.A)) {
-        OrdemServicoEntity ordemServicoEntity = new OrdemServicoEntity();
-        ordemServicoEntity.setFunId(funcionario);
-        ordemServicoEntity.setTiprelId(tiposRelacionamento);
-        ordemServicoEntity.setReferente(Referencia.REGISTO_COLABORADOR.name());
-        ordemServicoEntity.setDescricao("Registro de colaborador");
-        ordemServicoEntity.setNuOrdem("1");
-        ordemServicoEntity.setEstado(Estado.A);
-        funcionario.getOrdemServicos().add(ordemServicoEntity);
-
+        ordemServicoWriteService.criar(funcionario, tiposRelacionamento, registroColaborador.getTipoOrdemServico());
       }
       mudaEstado(funcionario, estado);
 

@@ -50,4 +50,6 @@ public class MobilidadeDTO  {
 
   private Long localTrabalhoDepois ;
 
+  private String tipoOrdemServico ;
+
 }

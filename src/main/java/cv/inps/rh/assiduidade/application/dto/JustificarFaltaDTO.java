@@ -53,8 +53,10 @@ public class JustificarFaltaDTO  {
   
   
   private Integer ano ;
-  
-  
+
+
   private Integer mes ;
+
+  private String tipoOrdemServico ;
 
 }

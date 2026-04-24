@@ -46,4 +46,6 @@ public class SubstituicaoDTO  {
   @Valid
   private List<AnexoReqDTO> anexo = new ArrayList<>();
 
+  private String tipoOrdemServico ;
+
 }

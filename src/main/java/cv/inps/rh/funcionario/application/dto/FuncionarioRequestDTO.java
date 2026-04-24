@@ -49,4 +49,6 @@ public class FuncionarioRequestDTO  {
   
   private EstadoValidacao validar ;
 
+  private String tipoOrdemServico ;
+
 }

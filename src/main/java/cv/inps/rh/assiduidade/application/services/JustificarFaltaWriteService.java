@@ -5,6 +5,7 @@ import cv.inps.rh.assiduidade.application.commands.JustificarFaltaCommand;
 import cv.inps.rh.assiduidade.application.commands.ValidarFaltaJustificadaCommand;
 import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FeriasGozadasEntityRepository;
@@ -58,6 +59,7 @@ public class JustificarFaltaWriteService {
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
   private final FeriasGozadasEntityRepository feriasGozadasRepository;
   private final AnoEntityRepository anoRepository;
+  private final OrdemServicoWriteService ordemServicoWriteService;
 
   @Transactional
   public Map<String, ?> justificarFalta(JustificarFaltaCommand command) {
@@ -311,6 +313,11 @@ public class JustificarFaltaWriteService {
     }
 
     faltaRepository.saveAll(faltas);
+
+    if (estadoFinal == Estado.A) {
+      var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+      ordemServicoWriteService.criar(funcionario, tipoRelAtual, dto.getTipoOrdemServico());
+    }
 
     // Atualizar pedido
     pedido.setEstado(estadoFinal.name());

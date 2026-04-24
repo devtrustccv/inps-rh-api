@@ -12,6 +12,7 @@ import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
+import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import jakarta.persistence.EntityManager;
@@ -45,6 +46,7 @@ public class HistoricoLaboralWriteService {
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
+  private final OrdemServicoWriteService ordemServicoWriteService;
 
   @Transactional
   public RelacaoLaboralDTO validar(NovaRelacaoLaboralCommand command) {
@@ -101,9 +103,10 @@ public class HistoricoLaboralWriteService {
         var novoEstado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
         updateEstadoOnRelAndChildren(atual, novoEstado);
         updateValidacaoPendentes(funcionario.getUuid(), novoEstado);
+        if (novoEstado == Estado.A) {
+          ordemServicoWriteService.criar(funcionario, atual, dto.getTipoOrdemServico());
+        }
       }
-
-      gerarOrdemServicoIfRequested(funcionario, atual, dto);
 
       funcionarioEntityRepository.save(funcionario);
       return dto;
@@ -218,9 +221,10 @@ public class HistoricoLaboralWriteService {
       var novoEstado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       updateEstadoOnRelAndChildren(novoRelacionamento, novoEstado);
       updateValidacaoPendentes(funcionario.getUuid(), novoEstado);
+      if (novoEstado == Estado.A) {
+        ordemServicoWriteService.criar(funcionario, novoRelacionamento, dto.getTipoOrdemServico());
+      }
     }
-
-    gerarOrdemServicoIfRequested(funcionario, novoRelacionamento, dto);
 
     funcionarioEntityRepository.save(funcionario);
     return dto;
@@ -305,9 +309,10 @@ public class HistoricoLaboralWriteService {
       var novoEstado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       updateEstadoOnRelAndChildren(relacionamento, novoEstado);
       updateValidacaoPendentes(funcionario.getUuid(), novoEstado);
+      if (novoEstado == Estado.A) {
+        ordemServicoWriteService.criar(funcionario, relacionamento, dto.getTipoOrdemServico());
+      }
     }
-
-    gerarOrdemServicoIfRequested(funcionario, relacionamento, dto);
 
     tiposRelacionamentoEntityRepository.save(relacionamento);
     funcionarioEntityRepository.save(funcionario);
@@ -434,23 +439,6 @@ public class HistoricoLaboralWriteService {
         .ifPresent(v -> v.setEstado(estado));
     funcionarioRules.getValidacaoPendente(uuid, TipoAcao.INSERT, Referencia.SITUACAO_LABORAL)
         .ifPresent(v -> v.setEstado(estado));
-  }
-
-  private void gerarOrdemServicoIfRequested(FuncionarioEntity funcionario, TiposRelacionamentoEntity rel,
-                                            RelacaoLaboralDTO dto) {
-    if (dto.getGerarOrdemServico() != null && ("SIM".equalsIgnoreCase(dto.getGerarOrdemServico())
-        || "TRUE".equalsIgnoreCase(dto.getGerarOrdemServico()))) {
-      var numero = "OS-" + System.currentTimeMillis();
-      var ordem = new OrdemServicoEntity();
-      ordem.setNuOrdem(numero);
-      ordem.setDescricao(dto.getOrdemServico());
-      ordem.setReferente("HISTORICO_LABORAL");
-      ordem.setEstado(Estado.A);
-      ordem.setUuid(IdentificadorUnico.create().valor());
-      ordem.setFunId(funcionario);
-      ordem.setTiprelId(rel);
-      funcionario.getOrdemServicos().add(ordem);
-    }
   }
 
 }

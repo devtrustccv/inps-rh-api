@@ -10,6 +10,7 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
@@ -41,6 +42,7 @@ public class ValidarContratoService {
   private final TipoMovimentoHelper tipoMovimentoHelper;
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
   private final EntityManager entityManager;
+  private final OrdemServicoWriteService ordemServicoWriteService;
 
   @Transactional
   public ResponseEntity<DadosContratuaisRespDTO> validar(ValidarContratoCommand command) {
@@ -95,6 +97,9 @@ public class ValidarContratoService {
       if (dto.getValidar() != null) {
         var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
         mudarEstado(funcionario, estado);
+        if (estado == Estado.A) {
+          ordemServicoWriteService.criar(funcionario, tiposRelacionamento, dto.getTipoOrdemServico());
+        }
       }
     }
 

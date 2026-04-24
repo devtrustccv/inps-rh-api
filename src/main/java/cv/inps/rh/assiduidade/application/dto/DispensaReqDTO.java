@@ -72,4 +72,6 @@ public class DispensaReqDTO  {
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();
 
+  private String tipoOrdemServico ;
+
 }

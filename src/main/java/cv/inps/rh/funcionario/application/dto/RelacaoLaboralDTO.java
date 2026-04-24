@@ -30,8 +30,11 @@ public class RelacaoLaboralDTO  {
   
   
   private String gerarOrdemServico ;
-  
-  
+
+
+  private String tipoOrdemServico ;
+
+
   private String situacaoAtual ;
   
   
