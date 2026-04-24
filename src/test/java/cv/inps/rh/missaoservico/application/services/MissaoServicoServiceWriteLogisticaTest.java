@@ -156,7 +156,6 @@ public class MissaoServicoServiceWriteLogisticaTest {
     colab.setUuid(colabUuid);
     colab.setMissaoServId(missao);
     when(missaoColaboradorRepository.findByUuidOrThrow(colabUuid)).thenReturn(colab);
-    when(missaoColaboradorRepository.findById(20L)).thenReturn(Optional.of(colab));
 
     var reqEnt = new MissaoRequisicaoEntity();
     reqEnt.setEstado("A");

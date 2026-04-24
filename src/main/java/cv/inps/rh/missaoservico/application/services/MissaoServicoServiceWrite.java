@@ -865,7 +865,7 @@ public class MissaoServicoServiceWrite {
 
       var baseValorDiario = ajuda.getValorDiario();
       var valorDiarioCalculado = calcularValorDiarioAjudaCusto(baseValorDiario, ajuda.getFlgAlojamento(),
-          alimentacaoByColabId != null ? alimentacaoByColabId.get(colab.getFunId().getUuid()) : null);
+          alimentacaoByColabId != null ? alimentacaoByColabId.get(colab.getUuid()) : null);
       var valorTotal = valorDiarioCalculado.multiply(java.math.BigDecimal.valueOf(ajuda.getNumeroDiasAlojamento()));
 
       var log = new MissaoLogisticaEntity();
