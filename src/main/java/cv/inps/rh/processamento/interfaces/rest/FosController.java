@@ -101,7 +101,7 @@ public class FosController {
   }
 
   @PostMapping(
-      value = "remover-detalhe-fos"
+      value = "remover-fos"
   )
   @Operation(
       summary = "Remover detalhe fos",

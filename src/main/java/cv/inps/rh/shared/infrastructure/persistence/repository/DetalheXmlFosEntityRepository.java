@@ -3,6 +3,7 @@ package cv.inps.rh.shared.infrastructure.persistence.repository;
 import cv.inps.rh.processamento.application.dto.DetalhesFosXmlRowDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DetalheXmlFosEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.XmlFosEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -21,6 +22,8 @@ public interface DetalheXmlFosEntityRepository extends
     return this.findById(id)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("DetalheXmlFosEntity not found for id: " + id));
   }
+
+  void deleteAllByIdXmlFos(XmlFosEntity idXmlFos);
 
   @Query("""
           SELECT new cv.inps.rh.processamento.application.dto.DetalhesFosXmlRowDTO(

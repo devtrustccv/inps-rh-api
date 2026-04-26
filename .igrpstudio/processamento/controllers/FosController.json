@@ -84,7 +84,7 @@
     },
     {
       "actionName": "removerDetalheFos",
-      "path": "remover-detalhe-fos",
+      "path": "remover-fos",
       "method": "POST",
       "responses": {
         "200": {

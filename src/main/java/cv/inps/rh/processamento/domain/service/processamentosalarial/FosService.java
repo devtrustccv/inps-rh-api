@@ -102,8 +102,7 @@ public class FosService {
   public void restaurar(String referenceMonth, Long fosId) {
 
     var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
-    if (fosXml.getDtEntrega() != null)
-      throw IgrpResponseStatusException.badRequest("Já existe uma declaração entregue!");
+    validateDeliveryDate(fosXml.getDtEntrega());
 
     LOGGER.debug("Restauration reference date: {}", referenceMonth);
 
@@ -119,21 +118,15 @@ public class FosService {
         );
   }
 
-  public String removerDetalheFos(Long fosDetailId) {
+  public void removerFos(Long fosId) {
 
-    var obj = detalheXmlFosEntityRepository.findByIdOrThrow(fosDetailId);
+    var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
 
-    var result = buildSimpleJdbcCall("removerBodyXML")
-        .declareParameters(
-            new SqlParameter("p_id_body_xml", Types.NUMERIC),
-            new SqlOutParameter("P_MSG", Types.VARCHAR)
-        )
-        .execute(
-            new MapSqlParameterSource()
-                .addValue("p_id_body_xml", obj.getId())
-        );
+    validateDeliveryDate(fosXml.getDtEntrega());
 
-    return (String) result.get("P_MSG");
+    detalheXmlFosEntityRepository.deleteAllByIdXmlFos(fosXml);
+
+    fosEntityRepository.delete(fosXml);
   }
 
   public void gravarNovaLinhaFos(DetalheXmlRequestDTO dto) {
@@ -169,8 +162,7 @@ public class FosService {
   public void adicionarFuncionario(AdicionarFuncionarioCommand command) {
 
     var fosXml = fosEntityRepository.findByIdOrThrow(command.getFosId());
-    if (fosXml.getDtEntrega() != null)
-      throw IgrpResponseStatusException.badRequest("Já existe uma declaração entregue!");
+    validateDeliveryDate(fosXml.getDtEntrega());
 
     var referenceDate = getReferenceDate(command.getAno(), command.getMes());
     var currentMonth = LocalDate.now().withDayOfMonth(1);
@@ -204,8 +196,8 @@ public class FosService {
   public void enviarFolha(Long fosId) {
 
     var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
-    if (fosXml.getDtEntrega() != null)
-      throw IgrpResponseStatusException.badRequest("Já existe uma declaração entregue!");
+
+    validateDeliveryDate(fosXml.getDtEntrega());
 
     // TODO 18/04/2026 23:21 api INPS
   }
@@ -237,5 +229,10 @@ public class FosService {
 
   private String normalizeIdRow(Long detailId) {
     return detailId == null ? null : String.valueOf(detailId);
+  }
+
+  private void validateDeliveryDate(LocalDate deliveryDate) {
+    if (deliveryDate != null)
+      throw IgrpResponseStatusException.badRequest("Já existe uma declaração entregue!");
   }
 }
