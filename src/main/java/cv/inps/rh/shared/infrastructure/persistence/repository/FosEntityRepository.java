@@ -43,7 +43,7 @@ public interface FosEntityRepository extends JpaRepository<XmlFosEntity, Long>, 
         AND (:endDate IS NULL OR f.createdDate <= :endDate)
       ORDER BY f.ano ASC, f.mes ASC
       """)
-  Page<FosRowDTO> findFosProjected(
+  Page<FosRowDTO> getFos(
       @Param("startDate") LocalDateTime startDate,
       @Param("endDate") LocalDateTime endDate,
       Pageable pageable

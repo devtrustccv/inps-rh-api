@@ -48,7 +48,7 @@ public class FosService {
     var startDate = DateFormatter.stringToLocalDateTime(query.getDataInicio());
     var endDate = DateFormatter.stringToLocalDateTime(query.getDataFim());
 
-    var page = fosEntityRepository.findFosProjected(startDate, endDate, pageable);
+    var page = fosEntityRepository.getFos(startDate, endDate, pageable);
 
     var wrapper = new ListaFosDTO();
     PageMapper.fillPagination(page, wrapper);
@@ -85,6 +85,10 @@ public class FosService {
     var referenceMonth = FosUtil.buildReferenceMonth(referenceDate);
     LOGGER.debug("Novo segurado reference date: {}", referenceMonth);
 
+    configXml(referenceMonth, "PRIME");
+  }
+
+  private void configXml(String referenceMonth, String tipo) {
     buildSimpleJdbcCall("configXML")
         .declareParameters(
             new SqlParameter("p_mes_referencia", Types.VARCHAR),
@@ -94,28 +98,23 @@ public class FosService {
         .execute(
             new MapSqlParameterSource()
                 .addValue("p_mes_referencia", referenceMonth)
-                .addValue("p_tipo", "PRIME")
+                .addValue("p_tipo", tipo)
                 .addValue("p_user_id", 1) // TODO 18/04/2026 21:34 check this later
         );
   }
 
-  public void restaurar(String referenceMonth, Long fosId) {
+  public void restaurarXml(Long fosId) {
 
     var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
     FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
 
-    LOGGER.debug("Restauration reference date: {}", referenceMonth);
+    var referenceMonth = fosXml.getMes() + fosXml.getAno();
+    var type = fosXml.getTpEntrega();
 
-    buildSimpleJdbcCall("restaurarXML")
-        .declareParameters(
-            new SqlParameter("p_mes_referencia", Types.VARCHAR),
-            new SqlOutParameter("P_ID", Types.NUMERIC)
-        )
-        .execute(
-            new MapSqlParameterSource()
-                .addValue("p_mes_referencia", referenceMonth)
-                .addValue("P_ID", fosXml.getId())
-        );
+    detalheXmlFosEntityRepository.deleteAllByIdXmlFos(fosXml);
+    fosEntityRepository.delete(fosXml);
+
+    configXml(referenceMonth, type);
   }
 
   public void removerFos(Long fosId) {
@@ -215,16 +214,12 @@ public class FosService {
   }
 
   public void substituirXml(String referenceMonth, Long id) {
-    buildSimpleJdbcCall("configXML")
-        .declareParameters(
-            new SqlParameter("p_mes_referencia", Types.VARCHAR),
-            new SqlParameter("p_id", Types.NUMERIC)
-        )
-        .execute(
-            new MapSqlParameterSource()
-                .addValue("p_mes_referencia", referenceMonth)
-                .addValue("p_id", id)
-        );
+
+    var fosXml = fosEntityRepository.findByIdOrThrow(id);
+
+    FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
+
+    configXml(referenceMonth, "SUBST");
   }
 
   private SimpleJdbcCall buildSimpleJdbcCall(String procedureName) {

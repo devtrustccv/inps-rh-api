@@ -128,11 +128,6 @@
       },
       "requestParams": [
         {
-          "type": "string",
-          "name": "referenceMonth",
-          "isRequired": true
-        },
-        {
           "type": "long",
           "name": "fosId",
           "isRequired": true
@@ -329,5 +324,5 @@
       ]
     }
   ],
-  "id": "swsviwfo1n-novoSegurado-restaurarFos-getDetalheFosXml-substituirXml-getDetalheFosXml-removerDetalheFos-removerFosCopy"
+  "id": "swsviwfo1n-novoSegurado-restaurarFos-getDetalheFosXml-substituirXml-getDetalheFosXml-removerDetalheFos-removerFosCopy-restaurarFos"
 }

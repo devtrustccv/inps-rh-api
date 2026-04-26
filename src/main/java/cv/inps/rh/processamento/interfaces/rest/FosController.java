@@ -150,10 +150,9 @@ public class FosController {
   )
 
   public ResponseEntity<String> restaurarFos(
-      @RequestParam(value = "referenceMonth") String referenceMonth,
       @RequestParam(value = "fosId") Long fosId) {
 
-    final var command = new RestaurarFosCommand(referenceMonth, fosId);
+    final var command = new RestaurarFosCommand(fosId);
 
     return commandBus.send(command);
 
