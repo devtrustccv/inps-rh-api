@@ -47,7 +47,6 @@ public class FosService {
 
     var startDate = DateFormatter.stringToLocalDateTime(query.getDataInicio());
     var endDate = DateFormatter.stringToLocalDateTime(query.getDataFim());
-
     var page = fosEntityRepository.getFos(startDate, endDate, pageable);
 
     var wrapper = new ListaFosDTO();
