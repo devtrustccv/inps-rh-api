@@ -10,6 +10,7 @@ import cv.inps.rh.processamento.application.commands.*;
 import cv.inps.rh.processamento.application.dto.DetalheXmlRequestDTO;
 import cv.inps.rh.processamento.application.dto.DetalhesFosXmlDTO;
 import cv.inps.rh.processamento.application.dto.ListaFosDTO;
+import cv.inps.rh.processamento.application.queries.DownloadXmlQuery;
 import cv.inps.rh.processamento.application.queries.GetDetalheFosXmlQuery;
 import cv.inps.rh.processamento.application.queries.GetListaFosQuery;
 import io.swagger.v3.oas.annotations.Operation;
@@ -333,6 +334,35 @@ public class FosController {
     final var command = new RemoverDetalheFosCommand(fosDetailId);
 
     return commandBus.send(command);
+
+  }
+
+  @GetMapping(
+      value = "dowload-xml"
+  )
+  @Operation(
+      summary = "Download xml",
+      description = "Download xml",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = byte[].class,
+                      type = "byte[]")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<byte[]> downloadXml(
+      @RequestParam(value = "fosId") Long fosId) {
+
+    final var query = new DownloadXmlQuery(fosId);
+
+    return queryBus.handle(query);
 
   }
 

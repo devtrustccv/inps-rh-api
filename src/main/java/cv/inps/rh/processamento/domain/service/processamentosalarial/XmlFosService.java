@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class XmlFosService {
 
   private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -19,13 +20,13 @@ public class XmlFosService {
   private final FosEntityRepository fosEntityRepository;
   private final DetalheXmlFosEntityRepository detalheXmlFosEntityRepository;
 
-  @Transactional(readOnly = true)
   public String buildXml(Long idXml) {
 
     var header = fosEntityRepository.findByIdOrThrow(idXml);
 
-    var rows = detalheXmlFosEntityRepository.findDtosByIdXmlFos(idXml).stream()
-        .map(det -> "      <linha nu_segurado=\"%s\" nome_segurado=\"%s\" nu_dias_trabalho=\"%s\" vl_remuneracao=\"%s\" tp_remuneracao=\"%s\" />".formatted(
+    var details = detalheXmlFosEntityRepository.findDtosByIdXmlFos(idXml)
+        .stream()
+        .map(det -> "<linha nu_segurado=\"%s\" nome_segurado=\"%s\" nu_dias_trabalho=\"%s\" vl_remuneracao=\"%s\" tp_remuneracao=\"%s\" />".formatted(
             safe(det.nuSegurado()),
             safe(det.nomeFuncionario()),
             safe(det.nuTrabMan()),
@@ -55,10 +56,11 @@ public class XmlFosService {
         safe(header.getMes()),
         LocalDate.now().format(DATE_FORMATTER),
         safe(header.getNuContribuinte()),
-        rows,
+        details,
         safe(header.getTtRemuneracao()),
         safe(header.getTtContribuicao()),
-        safe(header.getObs()));
+        safe(header.getObs())
+    );
   }
 
   private String safe(String value) {
