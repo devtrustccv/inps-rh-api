@@ -32,7 +32,7 @@ public interface FosEntityRepository extends JpaRepository<XmlFosEntity, Long>, 
               WHEN f.tpEntrega = 'CORRE' THEN 'Correção'
               ELSE f.tpEntrega
           END,
-          f.mes,
+          f.ano || f.mes,
           f.ttRemuneracao,
           f.ttContribCalc,
           f.obs,
