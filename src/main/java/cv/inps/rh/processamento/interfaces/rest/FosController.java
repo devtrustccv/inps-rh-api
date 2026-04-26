@@ -279,7 +279,7 @@ public class FosController {
   }
 
   @PostMapping(
-      value = "substituir-xml"
+      value = "substituir"
   )
   @Operation(
       summary = "Substituir xml",
@@ -299,10 +299,9 @@ public class FosController {
   )
 
   public ResponseEntity<String> substituirXml(
-      @RequestParam(value = "mesReferencia") String mesReferencia,
       @RequestParam(value = "fosId") Long fosId) {
 
-    final var command = new SubstituirXmlCommand(mesReferencia, fosId);
+    final var command = new SubstituirXmlCommand(fosId);
 
     return commandBus.send(command);
 

@@ -268,7 +268,7 @@
     },
     {
       "actionName": "substituirXml",
-      "path": "substituir-xml",
+      "path": "substituir",
       "method": "POST",
       "responses": {
         "200": {
@@ -285,11 +285,6 @@
         }
       },
       "requestParams": [
-        {
-          "type": "string",
-          "name": "mesReferencia",
-          "isRequired": true
-        },
         {
           "type": "long",
           "name": "fosId",
@@ -324,5 +319,5 @@
       ]
     }
   ],
-  "id": "swsviwfo1n-novoSegurado-restaurarFos-getDetalheFosXml-substituirXml-getDetalheFosXml-removerDetalheFos-removerFosCopy-restaurarFos"
+  "id": "swsviwfo1n-novoSegurado-restaurarFos-getDetalheFosXml-substituirXml-getDetalheFosXml-removerDetalheFos-removerFosCopy-restaurarFos-substituirXml"
 }

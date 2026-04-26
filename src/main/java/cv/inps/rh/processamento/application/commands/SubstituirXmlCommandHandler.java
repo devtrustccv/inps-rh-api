@@ -24,7 +24,7 @@ public class SubstituirXmlCommandHandler implements CommandHandler<SubstituirXml
 
     LOGGER.debug("SubstituirXmlCommand : {}", command);
 
-    fosService.substituirXml(command.getMesReferencia(), command.getFosId());
+    fosService.substituirXml(command.getFosId());
 
     return ResponseEntity.ok().build();
   }

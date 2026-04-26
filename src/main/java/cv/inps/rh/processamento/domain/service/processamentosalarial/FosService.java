@@ -108,8 +108,8 @@ public class FosService {
     var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
     FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
 
-    var referenceMonth = fosXml.getMes() + fosXml.getAno();
-    var type = fosXml.getTpEntrega();
+    final var referenceMonth = fosXml.getMes() + fosXml.getAno();
+    final var type = fosXml.getTpEntrega();
 
     detalheXmlFosEntityRepository.deleteAllByIdXmlFos(fosXml);
     fosEntityRepository.delete(fosXml);
@@ -213,13 +213,13 @@ public class FosService {
     // TODO 18/04/2026 23:21 api INPS
   }
 
-  public void substituirXml(String referenceMonth, Long id) {
+  public void substituirXml(Long id) {
 
     var fosXml = fosEntityRepository.findByIdOrThrow(id);
 
     FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
 
-    configXml(referenceMonth, "SUBST");
+    configXml(fosXml.getAno() + fosXml.getMes(), "SUBST");
   }
 
   private SimpleJdbcCall buildSimpleJdbcCall(String procedureName) {
