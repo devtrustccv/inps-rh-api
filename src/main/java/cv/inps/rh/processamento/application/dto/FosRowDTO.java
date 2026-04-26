@@ -15,6 +15,7 @@ public record FosRowDTO(
     LocalDate dataEntrega,
 
     String tipoEntrega,
+    String tipoEntregaDesc,
 
     String mesReferencia,
 

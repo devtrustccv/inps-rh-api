@@ -100,12 +100,12 @@ public class FosController {
 
   }
 
-  @PostMapping(
-      value = "remover-fos"
+  @DeleteMapping(
+      value = "remover"
   )
   @Operation(
-      summary = "Remover detalhe fos",
-      description = "Remover detalhe fos",
+      summary = "Remover fos",
+      description = "Remover fos",
       responses = {
           @ApiResponse(
               responseCode = "200",
@@ -120,10 +120,10 @@ public class FosController {
       }
   )
 
-  public ResponseEntity<String> removerDetalheFos(
-      @RequestParam(value = "detalheFosId") Long detalheFosId) {
+  public ResponseEntity<String> removerFos(
+      @RequestParam(value = "fosId") Long fosId) {
 
-    final var command = new RemoverDetalheFosCommand(detalheFosId);
+    final var command = new RemoverFosCommand(fosId);
 
     return commandBus.send(command);
 
@@ -160,7 +160,7 @@ public class FosController {
   }
 
   @GetMapping(
-      value = "detalhe-fos"
+      value = "detalhe"
   )
   @Operation(
       summary = "Get detalhe fos xml",

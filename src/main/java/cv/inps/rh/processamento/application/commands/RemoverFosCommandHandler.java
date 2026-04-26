@@ -8,25 +8,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-
 @Component
-public class RemoverDetalheFosCommandHandler implements CommandHandler<RemoverDetalheFosCommand, ResponseEntity<String>> {
+public class RemoverFosCommandHandler implements CommandHandler<RemoverFosCommand, ResponseEntity<String>> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RemoverDetalheFosCommandHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(RemoverFosCommandHandler.class);
 
   private final FosService fosService;
 
-  public RemoverDetalheFosCommandHandler(FosService fosService) {
+  public RemoverFosCommandHandler(FosService fosService) {
     this.fosService = fosService;
   }
 
   @IgrpCommandHandler
-  public ResponseEntity<String> handle(RemoverDetalheFosCommand command) {
+  public ResponseEntity<String> handle(RemoverFosCommand command) {
 
-    LOGGER.debug("RemoverDetalheFosCommand : {}", command);
+    LOGGER.debug("RemoverFosCommand : {}", command);
 
-    fosService.removerFos(command.getDetalheFosId());
+    fosService.removerFos(command.getFosId());
 
     return ResponseEntity.noContent().build();
   }
+
 }

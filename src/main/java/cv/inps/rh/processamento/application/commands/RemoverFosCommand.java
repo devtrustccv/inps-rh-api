@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RemoverDetalheFosCommand implements Command {
+public class RemoverFosCommand implements Command {
 
-  @NotNull(message = "The field <detalheFosId> is required")
-  private Long detalheFosId;
+  @NotNull(message = "The field <fosId> is required")
+  private Long fosId;
 
 }

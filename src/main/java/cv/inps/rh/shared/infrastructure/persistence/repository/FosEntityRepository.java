@@ -26,6 +26,12 @@ public interface FosEntityRepository extends JpaRepository<XmlFosEntity, Long>, 
           f.id,
           f.dtEntrega,
           f.tpEntrega,
+          CASE
+              WHEN f.tpEntrega = 'PRIME' THEN 'Primeira'
+              WHEN f.tpEntrega = 'SUBST' THEN 'Substituição'
+              WHEN f.tpEntrega = 'CORRE' THEN 'Correção'
+              ELSE f.tpEntrega
+          END,
           f.mes,
           f.ttRemuneracao,
           f.ttContribCalc,

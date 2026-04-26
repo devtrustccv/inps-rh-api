@@ -5,6 +5,7 @@ import cv.inps.rh.processamento.application.dto.DetalheXmlRequestDTO;
 import cv.inps.rh.processamento.application.dto.DetalhesFosXmlDTO;
 import cv.inps.rh.processamento.application.dto.ListaFosDTO;
 import cv.inps.rh.processamento.application.queries.GetListaFosQuery;
+import cv.inps.rh.processamento.domain.service.processamentosalarial.util.FosUtil;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DetalheXmlFosEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FosEntityRepository;
@@ -24,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
 import java.sql.Types;
 import java.time.LocalDate;
-import java.time.YearMonth;
 
 @Transactional
 @Service
@@ -75,14 +75,14 @@ public class FosService {
 
   public void novoSegurado(Integer ano, Integer mes) {
 
-    var referenceDate = getReferenceDate(ano, mes);
+    var referenceDate = FosUtil.getReferenceDate(ano, mes);
 
     var currentMonth = LocalDate.now().withDayOfMonth(1);
 
     if (referenceDate.isAfter(currentMonth))
       throw IgrpResponseStatusException.badRequest("Mês de Referência não pode ser superior ao mês atual");
 
-    var referenceMonth = buildReferenceMonth(referenceDate);
+    var referenceMonth = FosUtil.buildReferenceMonth(referenceDate);
     LOGGER.debug("Novo segurado reference date: {}", referenceMonth);
 
     buildSimpleJdbcCall("configXML")
@@ -102,7 +102,7 @@ public class FosService {
   public void restaurar(String referenceMonth, Long fosId) {
 
     var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
-    validateDeliveryDate(fosXml.getDtEntrega());
+    FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
 
     LOGGER.debug("Restauration reference date: {}", referenceMonth);
 
@@ -122,7 +122,7 @@ public class FosService {
 
     var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
 
-    validateDeliveryDate(fosXml.getDtEntrega());
+    FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
 
     detalheXmlFosEntityRepository.deleteAllByIdXmlFos(fosXml);
 
@@ -147,7 +147,7 @@ public class FosService {
         .execute(
             new MapSqlParameterSource()
                 .addValue("p_id_xml", dto.getFosId())
-                .addValue("p_id_row", normalizeIdRow(dto.getDetaildId()))
+                .addValue("p_id_row", FosUtil.normalizeIdRow(dto.getDetaildId()))
                 .addValue("p_mes_ref", dto.getMesReferencia())
                 .addValue("p_tp_remuneracao", dto.getTipoRemuneracao())
                 .addValue("p_remuneracao", dto.getRemuneracao())
@@ -162,14 +162,14 @@ public class FosService {
   public void adicionarFuncionario(AdicionarFuncionarioCommand command) {
 
     var fosXml = fosEntityRepository.findByIdOrThrow(command.getFosId());
-    validateDeliveryDate(fosXml.getDtEntrega());
+    FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
 
-    var referenceDate = getReferenceDate(command.getAno(), command.getMes());
+    var referenceDate = FosUtil.getReferenceDate(command.getAno(), command.getMes());
     var currentMonth = LocalDate.now().withDayOfMonth(1);
     if (referenceDate.isAfter(currentMonth))
       throw IgrpResponseStatusException.badRequest("Não pode ser gerado! Mês de Referência não pode ser superior ao mês atual");
 
-    var referenceMonth = buildReferenceMonth(referenceDate);
+    var referenceMonth = FosUtil.buildReferenceMonth(referenceDate);
     LOGGER.debug("Novo funcionario reference date: {}", referenceMonth);
 
     buildSimpleJdbcCall("configSeguradoXML")
@@ -186,18 +186,11 @@ public class FosService {
         );
   }
 
-  private SimpleJdbcCall buildSimpleJdbcCall(String procedureName) {
-    return new SimpleJdbcCall(dataSource)
-        .withoutProcedureColumnMetaDataAccess()
-        .withCatalogName("RH_PK_GERA_XML_DB")
-        .withProcedureName(procedureName);
-  }
-
   public void enviarFolha(Long fosId) {
 
     var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
 
-    validateDeliveryDate(fosXml.getDtEntrega());
+    FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
 
     // TODO 18/04/2026 23:21 api INPS
   }
@@ -215,24 +208,10 @@ public class FosService {
         );
   }
 
-  private LocalDate getReferenceDate(Integer ano, Integer mes) {
-
-    if (mes == null || mes < 1 || mes > 12)
-      throw IgrpResponseStatusException.badRequest("Mês inválido. Deve estar entre 1 e 12");
-
-    return YearMonth.of(ano, mes).atDay(1);
-  }
-
-  private String buildReferenceMonth(LocalDate referenceDate) {
-    return "%04d%02d".formatted(referenceDate.getYear(), referenceDate.getMonthValue());
-  }
-
-  private String normalizeIdRow(Long detailId) {
-    return detailId == null ? null : String.valueOf(detailId);
-  }
-
-  private void validateDeliveryDate(LocalDate deliveryDate) {
-    if (deliveryDate != null)
-      throw IgrpResponseStatusException.badRequest("Já existe uma declaração entregue!");
+  private SimpleJdbcCall buildSimpleJdbcCall(String procedureName) {
+    return new SimpleJdbcCall(dataSource)
+        .withoutProcedureColumnMetaDataAccess()
+        .withCatalogName("RH_PK_GERA_XML_DB")
+        .withProcedureName(procedureName);
   }
 }

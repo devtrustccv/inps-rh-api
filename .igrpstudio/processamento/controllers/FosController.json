@@ -83,9 +83,9 @@
       ]
     },
     {
-      "actionName": "removerDetalheFos",
-      "path": "remover-fos",
-      "method": "POST",
+      "actionName": "removerFos",
+      "path": "remover",
+      "method": "DELETE",
       "responses": {
         "200": {
           "name": "OK",
@@ -103,7 +103,7 @@
       "requestParams": [
         {
           "type": "long",
-          "name": "detalheFosId",
+          "name": "fosId",
           "isRequired": true
         }
       ]
@@ -141,7 +141,7 @@
     },
     {
       "actionName": "getDetalheFosXml",
-      "path": "detalhe-fos",
+      "path": "detalhe",
       "method": "GET",
       "responses": {
         "200": {
@@ -303,5 +303,5 @@
       ]
     }
   ],
-  "id": "swsviwfo1n-novoSegurado-restaurarFos-getDetalheFosXml-substituirXml"
+  "id": "swsviwfo1n-novoSegurado-restaurarFos-getDetalheFosXml-substituirXml-getDetalheFosXml-removerDetalheFos"
 }
