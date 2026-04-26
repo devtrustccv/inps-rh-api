@@ -129,6 +129,25 @@ public class FosService {
     fosEntityRepository.delete(fosXml);
   }
 
+  public String removerDetalheFos(Long fosDetailId) {
+
+    var obj = detalheXmlFosEntityRepository.findByIdOrThrow(fosDetailId);
+
+    FosUtil.validateDeliveryDate(obj.getIdXmlFos().getDtEntrega());
+
+    var result = buildSimpleJdbcCall("removerBodyXML")
+        .declareParameters(
+            new SqlParameter("p_id_body_xml", Types.NUMERIC),
+            new SqlOutParameter("P_MSG", Types.VARCHAR)
+        )
+        .execute(
+            new MapSqlParameterSource()
+                .addValue("p_id_body_xml", obj.getId())
+        );
+
+    return (String) result.get("P_MSG");
+  }
+
   public void gravarNovaLinhaFos(DetalheXmlRequestDTO dto) {
 
     buildSimpleJdbcCall("gravarNovaLinhaXML")

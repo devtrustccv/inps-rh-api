@@ -108,7 +108,7 @@ public class FosController {
       description = "Remover fos",
       responses = {
           @ApiResponse(
-              responseCode = "200",
+              responseCode = "204",
 
               content = @Content(
                   mediaType = "application/json",
@@ -304,6 +304,35 @@ public class FosController {
       @RequestParam(value = "fosId") Long fosId) {
 
     final var command = new SubstituirXmlCommand(mesReferencia, fosId);
+
+    return commandBus.send(command);
+
+  }
+
+  @DeleteMapping(
+      value = "detalhe/remover"
+  )
+  @Operation(
+      summary = "Remover detalhe fos",
+      description = "Remover detalhe fos",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<String> removerDetalheFos(
+      @RequestParam(value = "fosDetailId") Long fosDetailId) {
+
+    final var command = new RemoverDetalheFosCommand(fosDetailId);
 
     return commandBus.send(command);
 
