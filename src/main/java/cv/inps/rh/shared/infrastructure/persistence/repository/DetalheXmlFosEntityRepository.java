@@ -23,6 +23,15 @@ public interface DetalheXmlFosEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.notFound("DetalheXmlFosEntity not found for id: " + id));
   }
 
+  @Query("""
+          SELECT COALESCE(SUM(
+              FUNCTION('TO_NUMBER', d.vlRemunMan)
+          ), 0)
+          FROM DetalheXmlFosEntity d
+          WHERE d.idXmlFos.id = :xmlId
+      """)
+  Double sumVlRemunManByXmlId(@Param("xmlId") Long xmlId);
+
   void deleteAllByIdXmlFos(XmlFosEntity idXmlFos);
 
   @Query("""
