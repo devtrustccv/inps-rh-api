@@ -14,6 +14,7 @@ import org.thymeleaf.context.Context;
 
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -24,9 +25,9 @@ public class OrdemServicoService {
   private final FuncionarioRules rules;
   private final ParamDocOutputEntityRepository paramDocOutputEntityRepository;
 
-  public Context fimComissaoServico(Long funcionarioId) {
+  public Context fimComissaoServico(String funcionarioId) {
 
-    var fun = funcionarioEntityRepository.findByIdOrThrow(funcionarioId);
+    var fun = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
 
     var tipoDoc = getByDocType("os-fim-comissao-servico");
 
