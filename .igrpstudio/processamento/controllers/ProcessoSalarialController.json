@@ -182,24 +182,9 @@
       },
       "requestParams": [
         {
-          "type": "string",
+          "type": "long",
           "name": "processamentoId",
           "isRequired": true
-        },
-        {
-          "type": "string",
-          "name": "ccId",
-          "isRequired": false
-        },
-        {
-          "type": "string",
-          "name": "ano",
-          "isRequired": false
-        },
-        {
-          "type": "string",
-          "name": "mes",
-          "isRequired": false
         }
       ]
     },
@@ -285,5 +270,5 @@
       ]
     }
   ],
-  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao"
+  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento"
 }

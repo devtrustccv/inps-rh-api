@@ -26,21 +26,13 @@ public interface ProcSalCcRemunEntityRepository extends
               SUM(e.valor)
           )
           FROM ProcSalCcRemunEntity e
-          WHERE (:procId IS NULL OR e.procSalId = :procId)
-            AND (:ccId   IS NULL OR e.ccId = :ccId)
-            AND (:ano    IS NULL OR YEAR(e.dataProcessamento) = :ano)
-            AND (:mes    IS NULL OR MONTH(e.dataProcessamento) = :mes)
+          WHERE e.procSalId = :procId
           GROUP BY e.itemActo,
                    e.tipo,
                    e.shortDesc,
                    e.procSalId
       """)
-  List<ResumoProcessamentoRowDTO> getRemuneracoes(
-      @Param("procId") Long procId,
-      @Param("ccId") Long ccId,
-      @Param("ano") Integer ano,
-      @Param("mes") Integer mes
-  );
+  List<ResumoProcessamentoRowDTO> getRemuneracoes(@Param("procId") Long procId);
 
 
   @Query("""

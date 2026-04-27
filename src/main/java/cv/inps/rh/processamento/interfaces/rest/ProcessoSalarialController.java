@@ -185,12 +185,9 @@ public class ProcessoSalarialController {
   )
 
   public ResponseEntity<ResumoProcessamentoDTO> getResumoProcessamento(
-      @RequestParam(value = "processamentoId") String processamentoId,
-      @RequestParam(value = "ccId", required = false) String ccId,
-      @RequestParam(value = "ano", required = false) String ano,
-      @RequestParam(value = "mes", required = false) String mes) {
+      @RequestParam(value = "processamentoId") Long processamentoId) {
 
-    final var query = new GetResumoProcessamentoQuery(processamentoId, ccId, ano, mes);
+    final var query = new GetResumoProcessamentoQuery(processamentoId);
 
     return queryBus.handle(query);
 
