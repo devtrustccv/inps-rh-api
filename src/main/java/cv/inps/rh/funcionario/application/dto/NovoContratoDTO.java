@@ -25,4 +25,6 @@ public class NovoContratoDTO  {
   @Valid
   private DadosContratuaisReqDTO dadosContratuais ;
 
+  private String tipoOrdemServico ;
+
 }

@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.application.commands.NovoPedidoDeclaracaoCommand;
 import cv.inps.rh.funcionario.application.commands.SubmeterAnalisePedidoDeclaracaoCommand;
 import cv.inps.rh.funcionario.application.commands.ValidacaoPedidoDeclaracaoCommand;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
@@ -37,6 +38,7 @@ public class PedidoDeclaracaoWriteService {
     private final EmailService emailService;
 
     private final FuncionarioRules funcionarioRules;
+    private final OrdemServicoWriteService ordemServicoWriteService;
 
     @Transactional
     public Map<String, ?> saveNovoPedido(NovoPedidoDeclaracaoCommand command) {
@@ -128,14 +130,18 @@ public class PedidoDeclaracaoWriteService {
         declaracao.setEntrega(command.getPedidodeclaracaovalidacao().getEntregaPorEmail());
 
         if ("SIM".equalsIgnoreCase(declaracao.getDecisaoRh())) {
-            declaracao.setEstado(Estado.A.name()); // Aprovado
+            declaracao.setEstado(Estado.A.name());
             if (pedido != null) {
                 pedido.setEtapa("FINALIZADO");
                 pedidoRepository.save(pedido);
             }
 
+            ordemServicoWriteService.criar(
+                declaracao.getFunId(),
+                declaracao.getTiprelId(),
+                command.getPedidodeclaracaovalidacao().getTipoOrdemServico());
+
             if ("SIM".equalsIgnoreCase(declaracao.getEntrega())) {
-                // Enviar notificação por email
                 enviarNotificacaoDeclaracao(declaracao);
             }
         } else {

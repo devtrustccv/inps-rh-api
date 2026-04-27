@@ -104,10 +104,14 @@ public class DadosContratuaisMapper {
 
 
     if(tiposRelacionamento.getMobId()!=null){
-      dcr.setDirecaoId(tiposRelacionamento.getMobId().getInstidId().getId());
-      dcr.setDirecaoDesc(tiposRelacionamento.getMobId().getInstidId().getNome());
-      dcr.setSeccaoId(tiposRelacionamento.getMobId().getSecaoId().getId());
-      dcr.setSeccaoDesc(tiposRelacionamento.getMobId().getSecaoId().getNome());
+      if(tiposRelacionamento.getMobId().getInstidId() != null) {
+        dcr.setDirecaoId(tiposRelacionamento.getMobId().getInstidId().getId());
+        dcr.setDirecaoDesc(tiposRelacionamento.getMobId().getInstidId().getNome());
+      }
+      if(tiposRelacionamento.getMobId().getSecaoId() != null) {
+        dcr.setSeccaoId(tiposRelacionamento.getMobId().getSecaoId().getId());
+        dcr.setSeccaoDesc(tiposRelacionamento.getMobId().getSecaoId().getNome());
+      }
     }
 
     dcr.setCarreiraId(tiposRelacionamento.getCarreiraId()!=null ?
@@ -117,10 +121,12 @@ public class DadosContratuaisMapper {
         tiposRelacionamento.getCarreiraId().getCarrPccsId().getNome(): null);
 
     dcr.setCategoriaId(tiposRelacionamento.getCarreiraId()!=null ?
-        tiposRelacionamento.getCarreiraId().getCategoriaId().getId() : null);
+        tiposRelacionamento.getCarreiraId().getCategoriaId() != null ?
+            tiposRelacionamento.getCarreiraId().getCategoriaId().getId() : null : null);
 
     dcr.setCategoriaDesc(tiposRelacionamento.getCarreiraId()!=null ?
-        tiposRelacionamento.getCarreiraId().getCategoriaId().getNome() : null);
+        tiposRelacionamento.getCarreiraId().getCategoriaId()!=null ?
+            tiposRelacionamento.getCarreiraId().getCategoriaId().getNome() : null : null);
 
     dcr.setEscalaoReferenciaId(tiposRelacionamento.getCarreiraId()!=null ?
         tiposRelacionamento.getCarreiraId().getEscalaoId().getId() : null);
@@ -129,8 +135,10 @@ public class DadosContratuaisMapper {
         tiposRelacionamento.getCarreiraId().getEscalaoId().getEscalao() : null);
 
     if(tiposRelacionamento.getMobId()!=null){
-      dcr.setLocalTrabalhoId(tiposRelacionamento.getMobId().getLocalTrabId().getId());
-      dcr.setLocalTrabalhoDesc(tiposRelacionamento.getMobId().getLocalTrabId().getNome());
+      if(tiposRelacionamento.getMobId().getLocalTrabId() != null) {
+        dcr.setLocalTrabalhoId(tiposRelacionamento.getMobId().getLocalTrabId().getId());
+        dcr.setLocalTrabalhoDesc(tiposRelacionamento.getMobId().getLocalTrabId().getNome());
+      }
     }
 
     dcr.setTipoVinculoLaboralId(tiposRelacionamento.getContrVinculoId() != null ? tiposRelacionamento.getContrVinculoId().getVinculoId().getId() : null);

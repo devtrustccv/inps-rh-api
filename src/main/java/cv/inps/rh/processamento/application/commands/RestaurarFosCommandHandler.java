@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-
 @Component
 public class RestaurarFosCommandHandler implements CommandHandler<RestaurarFosCommand, ResponseEntity<String>> {
 
@@ -25,7 +24,7 @@ public class RestaurarFosCommandHandler implements CommandHandler<RestaurarFosCo
 
     LOGGER.debug("RestaurarFosCommand : {}", command);
 
-    fosService.restaurar(command.getReferenceMonth(), command.getFosId());
+    fosService.restaurarXml(command.getFosId());
 
     return ResponseEntity.ok().build();
   }

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-23.0.2.7-hotspot\" mvn test -Dtest=TipoRelRemPagHelperTest -q)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-23.0.2.7-hotspot\" mvn test -Dtest=TipoRelRemPagHelperTest)"
+    ]
+  }
+}

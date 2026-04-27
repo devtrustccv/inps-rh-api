@@ -10,8 +10,8 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SubstituicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoEntityRepository;
@@ -27,6 +27,7 @@ public class SubstituicaoWriteService {
   private final SubstituicaoEntityRepository substituicaoEntityRepository;
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final FuncionarioRules funcionarioRules;
+  private final OrdemServicoWriteService ordemServicoWriteService;
 
   @Transactional
   public SubstituicaoDTO registrar(RegistarSubstituicaoCommand command) {
@@ -96,15 +97,10 @@ public class SubstituicaoWriteService {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
       if(estado.equals(Estado.A)){
-        OrdemServicoEntity ordemServicoEntity = new OrdemServicoEntity();
-        ordemServicoEntity.setFunId(funcionarioSubstituido);
-        ordemServicoEntity.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid()) );
-        ordemServicoEntity.setReferente(Referencia.SUBSTITUICAO.name());
-        ordemServicoEntity.setDescricao("Substituicao");
-        ordemServicoEntity.setNuOrdem("1"); // todo fix later
-        ordemServicoEntity.setEstado(Estado.A);
-        funcionarioSubstituido.getOrdemServicos().add(ordemServicoEntity);
-
+        ordemServicoWriteService.criar(
+            funcionarioSubstituido,
+            funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid()),
+            dto.getTipoOrdemServico());
       }
 
       substituicao.setEstado(estado);

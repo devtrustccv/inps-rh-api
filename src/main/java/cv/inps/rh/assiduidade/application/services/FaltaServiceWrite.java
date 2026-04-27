@@ -14,6 +14,7 @@ import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import jakarta.persistence.EntityManager;
@@ -49,6 +50,7 @@ public class FaltaServiceWrite {
   private final AnoEntityRepository anoEntityRepository;
   private final DispensaEntityRepository dispensaRepository;
   private final ResponsavelEntityRepository responsavelEntityRepository;
+  private final OrdemServicoWriteService ordemServicoWriteService;
 
 
   @Transactional
@@ -235,8 +237,13 @@ public class FaltaServiceWrite {
     faltaRepository.saveAll(faltas);
 
     pedido.setEstado(novoEstado.name());
-    if (novoEstado == Estado.A)
+    if (novoEstado == Estado.A) {
       pedido.setEtapa("FINALIZADO");
+      var funId = pedido.getFunId();
+      ordemServicoWriteService.criar(funId,
+          funcionarioRules.getTipoRelacionamentoAtual(funId.getUuid()),
+          req.getTipoOrdemServico());
+    }
 
     pedidoRepository.save(pedido);
 

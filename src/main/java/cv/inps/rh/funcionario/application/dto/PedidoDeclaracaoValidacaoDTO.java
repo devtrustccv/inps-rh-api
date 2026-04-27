@@ -22,8 +22,10 @@ public class PedidoDeclaracaoValidacaoDTO  {
   
   
   private String validar ;
-  
-  
+
+
   private String entregaPorEmail ;
+
+  private String tipoOrdemServico ;
 
 }

@@ -13,6 +13,7 @@ import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.service.EmailService;
@@ -48,6 +49,7 @@ public class FeriaWriteService {
   private final ResponsavelEntityRepository responsavelEntityRepository;
   private final SaldoFeriaService saldoFeriaService;
   private final DocumentoMapper documentoMapper;
+  private final OrdemServicoWriteService ordemServicoWriteService;
 
 
   @Transactional
@@ -178,6 +180,7 @@ public class FeriaWriteService {
     }
 
     if (estado == Estado.A) {
+      ordemServicoWriteService.criar(funcionario, tipoRelAtual, req.getTipoOrdemServico());
       criarAusenciaNaValidacao(ferias);
       // Send email notification
       /*String subject = "Validação do Pedido de Férias";

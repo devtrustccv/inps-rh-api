@@ -1,0 +1,26 @@
+{
+  "type": "model",
+  "module": "shared",
+  "name": "VDefPagamentoEntity",
+  "tableName": "RH_V_DEF_PAGAMENTO",
+  "audit": false,
+  "crud": false,
+  "revision": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "pag_id",
+      "type": "long",
+      "length": 255,
+      "nullable": false,
+      "unique": true,
+      "primaryKey": true,
+      "generationType": "IDENTITY",
+      "skipFieldRevision": false,
+      "objectType": "java"
+    }
+  ],
+  "id": "vdefpag001",
+  "uniqueConstraints": [],
+  "indexes": []
+}

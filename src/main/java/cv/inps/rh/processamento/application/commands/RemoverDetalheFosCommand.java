@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RemoverDetalheFosCommand implements Command {
 
-  @NotNull(message = "The field <detalheFosId> is required")
-  private Long detalheFosId;
+  @NotNull(message = "The field <fosDetailId> is required")
+  private Long fosDetailId;
 
 }

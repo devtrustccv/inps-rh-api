@@ -8,12 +8,21 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public final class DateFormatter {
 
+  public static final DateTimeFormatter EXTENDED_DATE_PT = DateTimeFormatter.ofPattern(
+      "dd 'de' MMMM 'de' yyyy",
+      Locale.of("pt")
+  );
+
   public static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
   public static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+  private DateFormatter() {
+  }
 
   private static final List<DateTimeFormatter> DATE_TIME_FORMATTERS = List.of(
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),

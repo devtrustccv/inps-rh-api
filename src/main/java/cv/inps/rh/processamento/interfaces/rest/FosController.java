@@ -10,6 +10,7 @@ import cv.inps.rh.processamento.application.commands.*;
 import cv.inps.rh.processamento.application.dto.DetalheXmlRequestDTO;
 import cv.inps.rh.processamento.application.dto.DetalhesFosXmlDTO;
 import cv.inps.rh.processamento.application.dto.ListaFosDTO;
+import cv.inps.rh.processamento.application.queries.DownloadXmlQuery;
 import cv.inps.rh.processamento.application.queries.GetDetalheFosXmlQuery;
 import cv.inps.rh.processamento.application.queries.GetListaFosQuery;
 import io.swagger.v3.oas.annotations.Operation;
@@ -100,15 +101,15 @@ public class FosController {
 
   }
 
-  @PostMapping(
-      value = "remover-detalhe-fos"
+  @DeleteMapping(
+      value = "remover"
   )
   @Operation(
-      summary = "Remover detalhe fos",
-      description = "Remover detalhe fos",
+      summary = "Remover fos",
+      description = "Remover fos",
       responses = {
           @ApiResponse(
-              responseCode = "200",
+              responseCode = "204",
 
               content = @Content(
                   mediaType = "application/json",
@@ -120,10 +121,10 @@ public class FosController {
       }
   )
 
-  public ResponseEntity<String> removerDetalheFos(
-      @RequestParam(value = "detalheFosId") Long detalheFosId) {
+  public ResponseEntity<String> removerFos(
+      @RequestParam(value = "fosId") Long fosId) {
 
-    final var command = new RemoverDetalheFosCommand(detalheFosId);
+    final var command = new RemoverFosCommand(fosId);
 
     return commandBus.send(command);
 
@@ -150,17 +151,16 @@ public class FosController {
   )
 
   public ResponseEntity<String> restaurarFos(
-      @RequestParam(value = "referenceMonth") String referenceMonth,
       @RequestParam(value = "fosId") Long fosId) {
 
-    final var command = new RestaurarFosCommand(referenceMonth, fosId);
+    final var command = new RestaurarFosCommand(fosId);
 
     return commandBus.send(command);
 
   }
 
   @GetMapping(
-      value = "detalhe-fos"
+      value = "detalhe"
   )
   @Operation(
       summary = "Get detalhe fos xml",
@@ -280,7 +280,7 @@ public class FosController {
   }
 
   @PostMapping(
-      value = "substituir-xml"
+      value = "substituir"
   )
   @Operation(
       summary = "Substituir xml",
@@ -300,12 +300,69 @@ public class FosController {
   )
 
   public ResponseEntity<String> substituirXml(
-      @RequestParam(value = "mesReferencia") String mesReferencia,
       @RequestParam(value = "fosId") Long fosId) {
 
-    final var command = new SubstituirXmlCommand(mesReferencia, fosId);
+    final var command = new SubstituirXmlCommand(fosId);
 
     return commandBus.send(command);
+
+  }
+
+  @DeleteMapping(
+      value = "detalhe/remover"
+  )
+  @Operation(
+      summary = "Remover detalhe fos",
+      description = "Remover detalhe fos",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<String> removerDetalheFos(
+      @RequestParam(value = "fosDetailId") Long fosDetailId) {
+
+    final var command = new RemoverDetalheFosCommand(fosDetailId);
+
+    return commandBus.send(command);
+
+  }
+
+  @GetMapping(
+      value = "dowload-xml"
+  )
+  @Operation(
+      summary = "Download xml",
+      description = "Download xml",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = byte[].class,
+                      type = "byte[]")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<byte[]> downloadXml(
+      @RequestParam(value = "fosId") Long fosId) {
+
+    final var query = new DownloadXmlQuery(fosId);
+
+    return queryBus.handle(query);
 
   }
 

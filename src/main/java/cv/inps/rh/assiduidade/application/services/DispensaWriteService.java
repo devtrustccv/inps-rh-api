@@ -12,6 +12,7 @@ import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
@@ -39,6 +40,7 @@ public class DispensaWriteService {
   private final ParamSituacaoEntityRepository paramSituacaoEntityRepository;
   private final ResponsavelEntityRepository responsavelEntityRepository;
   private final DispensaHorasService dispensaHorasService;
+  private final OrdemServicoWriteService ordemServicoWriteService;
 
 
 
@@ -216,6 +218,7 @@ public class DispensaWriteService {
 
     // Criar ausência quando validação for SIM (estado A)
     if (estado == Estado.A) {
+      ordemServicoWriteService.criar(funcionario, tipoRelAtual, req.getTipoOrdemServico());
       var paramsDispensa = paramSituacaoEntityRepository.findByFlgAusenciaAndTipoAusencia(1, "DISPENSA");
       if (paramsDispensa != null && !paramsDispensa.isEmpty()) {
         ParamSituacaoEntity param = paramsDispensa.getFirst();

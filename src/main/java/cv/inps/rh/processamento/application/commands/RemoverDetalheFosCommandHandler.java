@@ -25,7 +25,7 @@ public class RemoverDetalheFosCommandHandler implements CommandHandler<RemoverDe
 
     LOGGER.debug("RemoverDetalheFosCommand : {}", command);
 
-    var msg = fosService.removerDetalheFos(command.getDetalheFosId());
+    var msg = fosService.removerDetalheFos(command.getFosDetailId());
 
     return ResponseEntity.ok(msg);
   }

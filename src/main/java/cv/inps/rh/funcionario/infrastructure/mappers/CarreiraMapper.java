@@ -77,9 +77,9 @@ public class CarreiraMapper {
     ce.setEscalaoId(dc.getEscalaoReferenciaId() != null
             ? entityManager.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId())
             : null);
-    ce.setCategoriaId(dc.getCategoriaId() != null
+    /*ce.setCategoriaId(dc.getCategoriaId() != null
             ? entityManager.getReference(ParamCategoriaEntity.class, dc.getCategoriaId())
-            : null);
+            : null);*/
     ce.setCarrPccsId(dc.getCarreiraId() != null
             ? entityManager.getReference(ParamCarreiraEntity.class, dc.getCarreiraId())
             : null);
@@ -98,7 +98,7 @@ public class CarreiraMapper {
     if (dc == null) return;
     carreira.setCargoId(entityManager.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
     carreira.setEscalaoId(entityManager.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
-    carreira.setCategoriaId(entityManager.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
+    //carreira.setCategoriaId(entityManager.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
     carreira.setCarrPccsId(entityManager.getReference(ParamCarreiraEntity.class, dc.getCarreiraId()));
     carreira.setSalario(dc.getSalario());
     carreira.setFlgProcessa(1);

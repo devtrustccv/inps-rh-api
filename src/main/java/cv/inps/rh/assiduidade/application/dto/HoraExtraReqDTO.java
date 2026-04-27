@@ -25,8 +25,10 @@ public class HoraExtraReqDTO  {
   
   
   private EstadoValidacao validar ;
-  
+
   @Valid
   private List<HoraExtraDTO> horaExtra = new ArrayList<>();
+
+  private String tipoOrdemServico ;
 
 }

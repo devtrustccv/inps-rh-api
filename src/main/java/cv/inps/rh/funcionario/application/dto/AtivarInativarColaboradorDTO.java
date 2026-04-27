@@ -31,4 +31,6 @@ public class AtivarInativarColaboradorDTO  {
 
   private String observacao ;
 
+  private String tipoOrdemServico ;
+
 }

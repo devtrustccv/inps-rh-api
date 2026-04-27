@@ -5,6 +5,7 @@ import cv.inps.rh.assiduidade.application.commands.MarcarHoraExtraCommand;
 import cv.inps.rh.assiduidade.application.commands.ValidarHoraExtraCommand;
 import cv.inps.rh.assiduidade.application.dto.HoraExtraDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
@@ -52,6 +53,7 @@ public class HoraExtraServiceWrite {
   private final PedidoEntityRepository pedidoRepository;
   private final DocumentoEntityRepository documentoEntityRepository;
   private final DocumentoMapper documentoMapper;
+  private final OrdemServicoWriteService ordemServicoWriteService;
 
   @Transactional
   public Map<String, ?> marcarHoraExtra(MarcarHoraExtraCommand command) {
@@ -253,6 +255,11 @@ public class HoraExtraServiceWrite {
 
     pedido.setEstado(estado.name());
     pedidoRepository.save(pedido);
+
+    if (estado == Estado.A && !horasExtra.isEmpty()) {
+      var tiprel = horasExtra.get(0).getTiprelId();
+      ordemServicoWriteService.criar(tiprel.getFunId(), tiprel, req.getTipoOrdemServico());
+    }
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("pedidoId", pedido.getId());

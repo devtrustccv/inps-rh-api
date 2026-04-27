@@ -11,6 +11,7 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
@@ -32,6 +33,7 @@ public class MobilidadeWriteService {
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final EntityManager entityManager;
   private final ValidacaoEntityRepository validacaoEntityRepository;
+  private final OrdemServicoWriteService ordemServicoWriteService;
 
   @Transactional
   public MobilidadeDTO save(SaveMobilidadeCommand command) {
@@ -160,14 +162,7 @@ public class MobilidadeWriteService {
       }
 
       if(estado.equals(Estado.A)){
-        OrdemServicoEntity ordemServicoEntity = new OrdemServicoEntity();
-        ordemServicoEntity.setFunId(funcionario);
-        ordemServicoEntity.setTiprelId(tipoRelacionamentoAtual);
-        ordemServicoEntity.setReferente("MOBILIDADE");
-        ordemServicoEntity.setDescricao("Mobilidae do colaborador - "+funcionario.getNome());
-        ordemServicoEntity.setNuOrdem("1"); // todo fix later
-        ordemServicoEntity.setEstado(Estado.A);
-        funcionario.getOrdemServicos().add(ordemServicoEntity);
+        ordemServicoWriteService.criar(funcionario, tipoRelacionamentoAtual, mobilidadeDto.getTipoOrdemServico());
       }
 
     }

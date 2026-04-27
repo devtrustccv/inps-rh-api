@@ -38,4 +38,6 @@ public class RegimeTrabalhoDTO  {
   @Valid
   private List<RegimeModalidadeDTO> regimeModalidade = new ArrayList<>();
 
+  private String tipoOrdemServico ;
+
 }

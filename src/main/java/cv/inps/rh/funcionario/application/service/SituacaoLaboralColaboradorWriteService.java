@@ -11,6 +11,7 @@ import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SituacaoLaboralEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -31,6 +32,7 @@ public class SituacaoLaboralColaboradorWriteService {
   private final DadosContratuaisMapper dadosContratuaisMapper;
 
   private final ParamSituacaoDetalheEntityRepository paramSituacaoDetalheEntityRepository;
+  private final OrdemServicoWriteService ordemServicoWriteService;
 
   @Transactional
   public AtivarInativarColaboradorDTO execute(InativarAtivarColaboradorCommand command) {
@@ -88,6 +90,10 @@ public class SituacaoLaboralColaboradorWriteService {
             .forEach(r -> r.setDataFim(LocalDate.now()));
 
         funcionario.getDefinicoesPagamentos().forEach(p -> p.setDataFim(LocalDate.now()));
+      }
+
+      if (estado == Estado.A) {
+        ordemServicoWriteService.criar(funcionario, tiposRelacionamentoAtual, dto.getTipoOrdemServico());
       }
 
       funcionarioEntityRepository.save(funcionario);
