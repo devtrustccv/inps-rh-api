@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
@@ -23,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Types;
 import java.time.LocalDate;
 
@@ -127,23 +128,26 @@ public class FosService {
     fosEntityRepository.delete(fosXml);
   }
 
-  public String removerDetalheFos(Long fosDetailId) {
+  public void removerDetalheFos(Long fosDetailId) {
 
-    var obj = detalheXmlFosEntityRepository.findByIdOrThrow(fosDetailId);
+    var detail = detalheXmlFosEntityRepository.findByIdOrThrow(fosDetailId);
 
-    FosUtil.validateDeliveryDate(obj.getIdXmlFos().getDtEntrega());
+    FosUtil.validateDeliveryDate(detail.getIdXmlFos().getDtEntrega());
 
-    var result = buildSimpleJdbcCall("removerBodyXML")
-        .declareParameters(
-            new SqlParameter("p_id_body_xml", Types.NUMERIC),
-            new SqlOutParameter("P_MSG", Types.VARCHAR)
-        )
-        .execute(
-            new MapSqlParameterSource()
-                .addValue("p_id_body_xml", obj.getId())
-        );
+    var xmlFos = detail.getIdXmlFos();
 
-    return (String) result.get("P_MSG");
+    detalheXmlFosEntityRepository.delete(detail);
+
+    var sum = BigDecimal.valueOf(detalheXmlFosEntityRepository.sumVlRemunManByXmlId(xmlFos.getId()));
+
+    var totalContribution = sum
+        .multiply(BigDecimal.valueOf(0.245))
+        .setScale(2, RoundingMode.HALF_UP);
+
+    xmlFos.setTtRemuneracao(sum.toString());
+    xmlFos.setTtContribuicao(totalContribution.toString());
+    xmlFos.setTtContribCalc(totalContribution.longValue());
+    fosEntityRepository.save(xmlFos);
   }
 
   public void gravarNovaLinhaFos(DetalheXmlRequestDTO dto) {

@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 @Component
 public class GetResumoProcessamentoQueryHandler implements QueryHandler<GetResumoProcessamentoQuery, ResponseEntity<ResumoProcessamentoDTO>> {
@@ -26,12 +25,7 @@ public class GetResumoProcessamentoQueryHandler implements QueryHandler<GetResum
 
     LOGGER.debug("GetResumoProcessamentoQuery: {}", query);
 
-    var procId = StringUtils.hasText(query.getProcessamentoId()) ? Long.valueOf(query.getProcessamentoId()) : null;
-    var ccId = StringUtils.hasText(query.getCcId()) ? Long.valueOf(query.getCcId()) : null;
-    var ano = StringUtils.hasText(query.getAno()) ? Integer.valueOf(query.getAno()) : null;
-    var mes = StringUtils.hasText(query.getMes()) ? Integer.valueOf(query.getMes()) : null;
-
-    var data = processamentoSalarialService.getResumoProcessamentoSalarial(procId, ccId, ano, mes);
+    var data = processamentoSalarialService.getResumoProcessamentoSalarial(query.getProcessamentoId());
 
     return ResponseEntity.ok(data);
   }
