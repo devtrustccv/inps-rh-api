@@ -31,5 +31,11 @@ public class GetListFuncionariosQuery implements Query {
   private String dataFim;
   @NotBlank(message = "The field <estado> is required")
   private String estado;
+  @NotNull(message = "The field <local> is required")
+  private Long local;
+  @NotNull(message = "The field <cargo> is required")
+  private Long cargo;
+  @NotNull(message = "The field <carreira> is required")
+  private Long carreira;
 
 }

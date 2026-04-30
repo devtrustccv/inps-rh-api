@@ -67,8 +67,12 @@ public class FamiliarEntity extends AuditEntity {
     private String dependencia;
 
 
-    @Column(name="membro_agr")
-    private String membroAgr;
+  @Column(name="membro_agr")
+  private String membroAgr;
+
+
+  @Column(name="responsavel")
+  private String responsavel;
 
 
     @Column(name="nm_pai")
