@@ -32,6 +32,7 @@ public class FamiliarMapper {
     entity.setGdpId(dto.getGrauParentesco());
     entity.setDependencia(dto.getDependente());
     entity.setMembroAgr(dto.getAgregada());
+    entity.setResponsavel(dto.getResponsavel());
     entity.setEstado(estado);
     entity.setFunId(fun);
     return entity;
@@ -58,6 +59,7 @@ public class FamiliarMapper {
         found.setGdpId(dto.getGrauParentesco());
         found.setDependencia(dto.getDependente());
         found.setMembroAgr(dto.getAgregada());
+        found.setResponsavel(dto.getResponsavel());
       } else {
         FamiliarEntity novo = toEntity(dto, Estado.P, fun);
         existingList.add(novo);
@@ -87,7 +89,8 @@ public class FamiliarMapper {
       fr.setGenero(f.getSexo());
       fr.setGrauParentesco(f.getGdpId());
       fr.setDependente(f.getDependencia());
-      fr.setAgregada(f.getMembroAgr());
+     fr.setAgregada(f.getMembroAgr());
+     fr.setResponsavel(f.getResponsavel());
       fr.setEstado(f.getEstado() != null ? f.getEstado().name() : null);
       return fr;
     }).toList();

@@ -53,6 +53,15 @@ public class FuncionarioReadService {
       if (query.getSeccao() != null)
         predicates.add(cb.equal(root.get(RhVDossieEntity_.seccaoId), query.getSeccao()));
 
+      if (query.getLocal() != null)
+        predicates.add(cb.equal(root.get(RhVDossieEntity_.localTrabalhoId), query.getLocal()));
+
+      if (query.getCargo() != null)
+        predicates.add(cb.equal(root.get(RhVDossieEntity_.cargoId), query.getCargo()));
+
+      if (query.getCarreira() != null)
+        predicates.add(cb.equal(root.get(RhVDossieEntity_.carreiraId), query.getCarreira()));
+
       if (StringUtils.hasText(query.getEstado()))
         predicates.add(cb.equal(root.get(RhVDossieEntity_.estadoColaborador), query.getEstado()));
 
