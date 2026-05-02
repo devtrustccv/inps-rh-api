@@ -14,6 +14,7 @@ import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcPagEntityRe
 import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcRemunEntityRepository;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.RhVListaProcessamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.EntityManager;
@@ -37,6 +38,7 @@ public class ProcessamentoSalarialReadService {
   private final ProcessamentoSalarialEntityRepository processamentoSalarialEntityRepository;
   private final ProcSalCcRemunEntityRepository procSalCcRemunEntityRepository;
   private final ProcSalCcPagEntityRepository procSalCcPagEntityRepository;
+  private final RhVListaProcessamentoEntityRepository listaProcessamentoEntityRepository;
   private final ObjectMapper objectMapper;
 
   @PersistenceContext
@@ -53,7 +55,7 @@ public class ProcessamentoSalarialReadService {
     var type = StringUtils.hasText(query.getTipo()) ? query.getTipo() : null;
     var status = StringUtils.hasText(query.getEstado()) ? query.getEstado() : null;
 
-    var page = processamentoSalarialEntityRepository.list(startDate, endDate, directionId, type, status, pageRequest);
+    var page = listaProcessamentoEntityRepository.list(startDate, endDate, directionId, type, status, pageRequest);
 
     var response = new WrapperProcessamentoSalarialDTO();
     PageMapper.fillPagination(page, response);
