@@ -2,6 +2,7 @@ package cv.inps.rh.shared.domain.service;
 
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.dto.ReportHtmlDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamDocOutputEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamDocOutputEntityRepository;
@@ -25,27 +26,30 @@ public class OrdemServicoService {
   private final FuncionarioRules rules;
   private final ParamDocOutputEntityRepository paramDocOutputEntityRepository;
 
-  public Context fimComissaoServico(String funcionarioId) {
-
-    var fun = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
+  public Context fimComissaoServico(String funcionarioId, String htmlBody) {
 
     var documentOutputType = getByDocType("os-fim-comissao-servico");
 
+    var ctx = new Context();
+    ctx.setVariable("numeroOrdem", "1"); // todo verify this
+    ctx.setVariable("assunto", documentOutputType.getTitulo());
+    ctx.setVariable("conteudo", htmlBody);
+    ctx.setVariable("dataEmissao", DateFormatter.EXTENDED_DATE_PT.format(LocalDate.now()));
+    ctx.setVariable("nomePresidente", "Mário Rui Fernandes"); // TODO 22/04/2026 21:33 set this in BD
+
+    return ctx;
+  }
+
+  public ReportHtmlDTO getFimComissaoServicoContent(String funcionarioId) {
+    var fun = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
     var currentContract = rules.getContratoComMaiorVersao(fun.getUuid());
+    var documentOutputType = getByDocType("os-fim-comissao-servico");
     var values = Map.of(
         "nomeColaborador", fun.getNome(),
         "cargoColaborador", currentContract.getVinculoId().getNome(),
         "dataEfeito", DateFormatter.EXTENDED_DATE_PT.format(currentContract.getDataInicio())
     );
-
-    var ctx = new Context();
-    ctx.setVariable("numeroOrdem", "1"); // todo verify this
-    ctx.setVariable("assunto", documentOutputType.getTitulo());
-    ctx.setVariable("conteudo", StringSubstitutor.replace(documentOutputType.getCorpo(), values));
-    ctx.setVariable("dataEmissao", DateFormatter.EXTENDED_DATE_PT.format(LocalDate.now()));
-    ctx.setVariable("nomePresidente", "Mário Rui Fernandes"); // TODO 22/04/2026 21:33 set this in BD
-
-    return ctx;
+    return new ReportHtmlDTO(StringSubstitutor.replace(documentOutputType.getCorpo(), values));
   }
 
   private ParamDocOutputEntity getByDocType(String type) {
