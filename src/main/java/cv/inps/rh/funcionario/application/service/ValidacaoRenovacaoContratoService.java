@@ -65,8 +65,7 @@ public class ValidacaoRenovacaoContratoService {
 
       ContratoEntity contrato = tr.getContrVinculoId();
       if (contrato != null) {
-        contrato.setEstado(estado);
-        contratoHistoricoWriteService.aplicarEstado(contrato, estado);
+        contratoHistoricoWriteService.transicionarEstado(contrato, estado);
       }
     }
 

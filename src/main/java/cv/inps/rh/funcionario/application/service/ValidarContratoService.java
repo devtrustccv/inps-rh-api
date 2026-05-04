@@ -126,11 +126,7 @@ public class ValidarContratoService {
       tr.setEstado(estado);
       var contrato = tr.getContrVinculoId();
       if (contrato != null) {
-        contrato.setEstado(estado);
-        contratoHistoricoWriteService.aplicarEstado(contrato, estado);
-        contrato.getSituacoesLaborais().stream()
-            .filter(o -> o.getEstado() == Estado.P)
-            .findFirst().ifPresent(situacaoLaboralEntity -> situacaoLaboralEntity.setEstado(estado));
+        contratoHistoricoWriteService.transicionarEstado(contrato, estado);
       }
 
       var mob = tr.getMobId();

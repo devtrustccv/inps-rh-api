@@ -48,9 +48,19 @@ public class ContratoHistoricoWriteService {
   }
 
   /**
-   * Transita o registo de historico pendente (Estado.P) de um contrato para o estado dado.
-   * Deve ser chamado pelos serviços de validação após mudar o estado do contrato.
+   * Transita contrato + situacaoLaboral pendente + historico pendente num único passo.
+   * Deve ser chamado pelos serviços de validação em substituição do padrão
+   * setEstado / getSituacoesLaborais / aplicarEstado espalhado.
    */
+  public void transicionarEstado(ContratoEntity contrato, Estado estado) {
+    contrato.setEstado(estado);
+    contrato.getSituacoesLaborais().stream()
+        .filter(s -> s.getEstado() == Estado.P)
+        .findFirst()
+        .ifPresent(s -> s.setEstado(estado));
+    aplicarEstado(contrato, estado);
+  }
+
   public void aplicarEstado(ContratoEntity contrato, Estado estado) {
     contratoHistoricoEntityRepository
         .findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.P)
