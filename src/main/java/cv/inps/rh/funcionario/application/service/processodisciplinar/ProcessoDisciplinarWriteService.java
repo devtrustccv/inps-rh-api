@@ -2,12 +2,12 @@ package cv.inps.rh.funcionario.application.service.processodisciplinar;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.ProcessoDisciplinarRequestDTO;
-import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ProcessoDisciplinarEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessoDisciplinarEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
+import cv.inps.rh.shared.util.DateFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,11 +34,9 @@ public class ProcessoDisciplinarWriteService {
     return processoDisciplinarEntityRepository.save(process).getUuid();
   }
 
-
   public void updateProcessoDisciplinar(String processoDisciplinarId, ProcessoDisciplinarRequestDTO request) {
 
     var process = processoDisciplinarEntityRepository.findByUuidOrThrow(UUID.fromString(processoDisciplinarId));
-
     process.setTiprelId(tiposRelacionamentoEntityRepository.findByUuidOrThrow(UUID.fromString(request.getVinculoReferente())));
     populateEntity(request, process);
 
@@ -50,17 +48,13 @@ public class ProcessoDisciplinarWriteService {
     process.setEntidade(request.getEntidade());
     process.setTpProcesso(request.getTipoProcesso());
     process.setPenaDiscp(request.getPenaDisciplinar());
-    process.setNumBo(request.getNumeroBO());
     process.setEstado(request.getEstadoProcesso());
     process.setDateInicPd(DateFormatter.stringToLocalDate(request.getDataInicioPd()));
     process.setDateFimPd(DateFormatter.stringToLocalDate(request.getDataFimPd()));
     process.setDateInicPena(DateFormatter.stringToLocalDate(request.getDataInicioPena()));
     process.setDateFimPena(DateFormatter.stringToLocalDate(request.getDataFimPena()));
-    process.setDataPublBo(DateFormatter.stringToLocalDate(request.getDatPublicacaoBO()));
     process.setDataOrdemServ(DateFormatter.stringToLocalDate(request.getDataOrdemServico()));
-    process.setDataEmissOfa(DateFormatter.stringToLocalDate(request.getDataEmissaoOfa()));
     process.setNumOrdemServ(request.getNumeroOrdemServico());
-    process.setNumOfa(request.getNumeroOfa());
   }
 
   public void deleteProcessoDisciplinar(String processoDisciplinarId) {

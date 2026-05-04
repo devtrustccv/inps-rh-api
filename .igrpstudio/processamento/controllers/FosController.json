@@ -83,11 +83,11 @@
       ]
     },
     {
-      "actionName": "removerDetalheFos",
-      "path": "remover-detalhe-fos",
-      "method": "POST",
+      "actionName": "removerFos",
+      "path": "remover",
+      "method": "DELETE",
       "responses": {
-        "200": {
+        "204": {
           "name": "OK",
           "content": {
             "application/json": {
@@ -103,7 +103,7 @@
       "requestParams": [
         {
           "type": "long",
-          "name": "detalheFosId",
+          "name": "fosId",
           "isRequired": true
         }
       ]
@@ -128,11 +128,6 @@
       },
       "requestParams": [
         {
-          "type": "string",
-          "name": "referenceMonth",
-          "isRequired": true
-        },
-        {
           "type": "long",
           "name": "fosId",
           "isRequired": true
@@ -141,7 +136,7 @@
     },
     {
       "actionName": "getDetalheFosXml",
-      "path": "detalhe-fos",
+      "path": "detalhe",
       "method": "GET",
       "responses": {
         "200": {
@@ -273,7 +268,7 @@
     },
     {
       "actionName": "substituirXml",
-      "path": "substituir-xml",
+      "path": "substituir",
       "method": "POST",
       "responses": {
         "200": {
@@ -291,10 +286,57 @@
       },
       "requestParams": [
         {
-          "type": "string",
-          "name": "mesReferencia",
+          "type": "long",
+          "name": "fosId",
           "isRequired": true
-        },
+        }
+      ]
+    },
+    {
+      "actionName": "removerDetalheFos",
+      "path": "detalhe/remover",
+      "method": "DELETE",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "fosDetailId",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "downloadXml",
+      "path": "dowload-xml",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "binary",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
         {
           "type": "long",
           "name": "fosId",
@@ -303,5 +345,5 @@
       ]
     }
   ],
-  "id": "swsviwfo1n-novoSegurado-restaurarFos-getDetalheFosXml-substituirXml"
+  "id": "swsviwfo1n-novoSegurado-restaurarFos-getDetalheFosXml-substituirXml-getDetalheFosXml-removerDetalheFos-removerFosCopy-restaurarFos-substituirXml"
 }

@@ -28,6 +28,7 @@ public class DadosBancariosMapper {
       entity.setRhbId(entityManager.getReference(BancoEntity.class, dto.getEntidadeBancariaId()));
     }
     entity.setNumConta(dto.getNumConta());
+    entity.setNib(dto.getNib());
     entity.setDataInicio(dto.getDataInicio());
     entity.setDataFim(dto.getDataFim());
     entity.setFunId(funcionario);
@@ -54,6 +55,7 @@ public class DadosBancariosMapper {
           found.setRhbId(entityManager.getReference(BancoEntity.class, dto.getEntidadeBancariaId()));
         }
         found.setNumConta(dto.getNumConta());
+        found.setNib(dto.getNib());
         found.setDataInicio(dto.getDataInicio());
         found.setDataFim(dto.getDataFim());
       } else {
@@ -79,6 +81,7 @@ public class DadosBancariosMapper {
       br.setEntidadeBancariaId(b.getRhbId() != null ? b.getRhbId().getId() : null);
       br.setEntidadeBancariaDesc(b.getRhbId() != null ? b.getRhbId().getNmBanco() : null);
       br.setNumConta(b.getNumConta());
+      br.setNib(b.getNib());
       br.setDataInicio(b.getDataInicio());
       br.setDataFim(b.getDataFim());
       return br;

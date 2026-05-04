@@ -4,8 +4,14 @@
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
 import cv.igrp.framework.stereotype.IgrpEntity;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Immutable;
 
 import java.math.BigDecimal;
@@ -37,10 +43,10 @@ public class RhVDossieEntity  {
   private String nome;
 
   @Column(name = "ULTIMO_VINCULO")
-  private String ultimoVinculo;
+  private Integer ultimoVinculo;
 
   @Column(name = "ULTIMO_VINCULO_DESC")
-  private Integer ultimoVinculoDesc;
+  private String ultimoVinculoDesc;
 
   @Column(name = "ESTADO_COLABORADOR")
   private String estadoColaborador;

@@ -4,18 +4,14 @@ import cv.inps.rh.funcionario.application.dto.FuncionarioListDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListaFuncionarioDTO;
 import cv.inps.rh.funcionario.application.queries.GetListFuncionariosQuery;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.shared.infrastructure.persistence.entity.RhVDossieEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.RhVDossieEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.RhVDossieEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
-import cv.inps.rh.shared.util.ValidationUtil;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -41,96 +37,91 @@ public class FuncionarioReadService {
     int pageSize = Integer.parseInt(query.getPageSize());
 
     // Specification para filtros dinâmicos
-    Specification<RhVDossieEntity> spec = (root, cq, cb) -> {
-      List<Predicate> predicates = new ArrayList<>();
+    Specification<RhVDossieEntity> spec = (root, _, cb) -> {
 
-      predicates.add(cb.equal(root.get("ultimoVinculoDesc"), 1));
+      var predicates = new ArrayList<Predicate>();
+      predicates.add(cb.equal(root.get(RhVDossieEntity_.ultimoVinculo), 1));
 
-      // filtro pelo nome
       if (StringUtils.hasText(query.getNome())) {
-        String nome = query.getNome().toLowerCase();
-        predicates.add(cb.like(cb.lower(root.get("nome")), "%" + nome + "%"));
+        var nome = query.getNome().toLowerCase();
+        predicates.add(cb.like(cb.lower(root.get(RhVDossieEntity_.nome)), "%" + nome + "%"));
       }
 
-      // filtro direcção
-      if (query.getDireccao() != null) {
-        predicates.add(cb.equal(root.get("direcaoId"), query.getDireccao()));
-      }
+      if (query.getDireccao() != null)
+        predicates.add(cb.equal(root.get(RhVDossieEntity_.direcaoId), query.getDireccao()));
 
-      // filtro secção
-      if (query.getSeccao() != null) {
-        predicates.add(cb.equal(root.get("seccaoId"), query.getSeccao()));
-      }
+      if (query.getSeccao() != null)
+        predicates.add(cb.equal(root.get(RhVDossieEntity_.seccaoId), query.getSeccao()));
 
-      // filtro estado colaborador
-      if (StringUtils.hasText(query.getEstado())) {
-        predicates.add(cb.equal(root.get("estadoColaborador"), query.getEstado()));
-      }
+      if (query.getLocal() != null)
+        predicates.add(cb.equal(root.get(RhVDossieEntity_.localTrabalhoId), query.getLocal()));
 
-      // filtro data inicio contrato
+      if (query.getCargo() != null)
+        predicates.add(cb.equal(root.get(RhVDossieEntity_.cargoId), query.getCargo()));
+
+      if (query.getCarreira() != null)
+        predicates.add(cb.equal(root.get(RhVDossieEntity_.carreiraId), query.getCarreira()));
+
+      if (StringUtils.hasText(query.getEstado()))
+        predicates.add(cb.equal(root.get(RhVDossieEntity_.estadoColaborador), query.getEstado()));
+
       if (StringUtils.hasText(query.getDataInicio())) {
         var di = DateFormatter.stringToLocalDate(query.getDataInicio());
-        predicates.add(cb.greaterThanOrEqualTo(root.get("dataInicioContrato"), di));
+        predicates.add(cb.greaterThanOrEqualTo(root.get(RhVDossieEntity_.dataInicioContrato), di));
       }
 
-      // filtro data fim contrato
       if (StringUtils.hasText(query.getDataFim())) {
         var df = DateFormatter.stringToLocalDate(query.getDataFim());
-        predicates.add(cb.lessThanOrEqualTo(root.get("dataFimContrato"), df));
+        predicates.add(cb.lessThanOrEqualTo(root.get(RhVDossieEntity_.dataFimContrato), df));
       }
 
-      // filtro tipo de vinculo laboral
-      if (query.getTipoVinculoLaboral() != null) {
-        predicates.add(cb.equal(root.get("vinculoId"), query.getTipoVinculoLaboral()));
-      }
+      if (query.getTipoVinculoLaboral() != null)
+        predicates.add(cb.equal(root.get(RhVDossieEntity_.vinculoId), query.getTipoVinculoLaboral()));
 
       return cb.and(predicates.toArray(new Predicate[0]));
     };
 
-    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "id"));
-    Page<RhVDossieEntity> page = dossieRepository.findAll(spec, pageable);
+    var pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "id"));
+    var page = dossieRepository.findAll(spec, pageable);
 
     // mapear para DTO
-    List<FuncionarioListDTO> content = page.getContent().stream().map(d -> {
-      FuncionarioListDTO dto = new FuncionarioListDTO();
-      dto.setId(d.getFunId());
-      dto.setUuid(d.getFunUuid() != null ? d.getFunUuid().toString() : null);
-      dto.setNome(d.getNome());
-      dto.setNumColaborador(d.getIdColaborador()+"");
-      dto.setCargo(d.getCargoDesc());
-      dto.setDireccao(d.getDirecaoDesc());
-      dto.setSeccao(d.getSeccaoDesc());
-      String carreiraCategoria = Stream.of(d.getCarreiraDesc(), d.getCategoriaDesc())
-          .filter(Objects::nonNull)
-          .filter(s -> !s.isBlank())
-          .collect(Collectors.joining("/"));
+    List<FuncionarioListDTO> content = page.getContent()
+        .stream()
+        .map(d -> {
+          FuncionarioListDTO dto = new FuncionarioListDTO();
+          dto.setId(d.getFunId());
+          dto.setUuid(d.getFunUuid() != null ? d.getFunUuid().toString() : null);
+          dto.setNome(d.getNome());
+          dto.setNumColaborador(d.getIdColaborador() + "");
+          dto.setCargo(d.getCargoDesc());
+          dto.setDireccao(d.getDirecaoDesc());
+          dto.setSeccao(d.getSeccaoDesc());
+          String carreiraCategoria = Stream.of(d.getCarreiraDesc(), d.getCategoriaDesc())
+              .filter(Objects::nonNull)
+              .filter(s -> !s.isBlank())
+              .collect(Collectors.joining("/"));
 
-      dto.setCarreiraCategoria(
-          carreiraCategoria.isEmpty() ? null : carreiraCategoria
-      );
-      dto.setDataInicio(d.getDataInicioContrato() != null ? d.getDataInicioContrato().toString() : null);
-      dto.setVinculoId(d.getVinculoId());
-      dto.setEstadoColaborador(d.getEstadoColaborador());
-      dto.setEstadoColaboradorDesc(
-          Estado.fromCode(d.getEstadoColaborador())
+          dto.setCarreiraCategoria(
+              carreiraCategoria.isEmpty() ? null : carreiraCategoria
+          );
+          dto.setDataInicio(d.getDataInicioContrato() != null ? d.getDataInicioContrato().toString() : null);
+          dto.setVinculoId(d.getVinculoId());
+          dto.setEstadoColaborador(d.getEstadoColaborador());
+          dto.setEstadoColaboradorDesc(
+              Estado.fromCode(d.getEstadoColaborador())
+                  .map(Estado::getDescription)
+                  .orElse("Desconhecido")
+          );
+          dto.setEstadoRegisto(d.getEstadoColaborador());
+          dto.setEstadoRegistoDesc(Estado.fromCode(d.getEstadoColaborador())
               .map(Estado::getDescription)
-              .orElse("Desconhecido")
-      );
-      dto.setEstadoRegisto(d.getEstadoColaborador());
-      dto.setEstadoRegistoDesc(  Estado.fromCode(d.getEstadoColaborador())
-          .map(Estado::getDescription)
-          .orElse("Desconhecido"));
-      return dto;
-    }).toList();
+              .orElse("Desconhecido"));
+          return dto;
+        }).toList();
 
-    WrapperListaFuncionarioDTO wrapper = new WrapperListaFuncionarioDTO();
+    var wrapper = new WrapperListaFuncionarioDTO();
+    PageMapper.fillPagination(page, wrapper);
     wrapper.setContent(content);
-    wrapper.setPageNumber(page.getNumber());
-    wrapper.setPageSize(page.getSize());
-    wrapper.setTotalElements(page.getTotalElements());
-    wrapper.setTotalPages(page.getTotalPages());
-    wrapper.setFirst(page.isFirst());
-    wrapper.setLast(page.isLast());
 
     return wrapper;
   }

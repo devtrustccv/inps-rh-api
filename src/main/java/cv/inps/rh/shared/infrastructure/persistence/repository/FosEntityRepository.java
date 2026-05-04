@@ -22,25 +22,40 @@ public interface FosEntityRepository extends JpaRepository<XmlFosEntity, Long>, 
   }
 
   @Query("""
-      SELECT new cv.inps.rh.processamento.application.dto.FosRowDTO(
-          f.id,
-          f.dtEntrega,
-          f.tpEntrega,
-          f.mes,
-          f.ttRemuneracao,
-          f.ttContribCalc,
-          f.obs,
-          f.numDc
-      )
-      FROM XmlFosEntity f
-      WHERE (:startDate IS NULL OR f.createdDate >= :startDate)
-        AND (:endDate IS NULL OR f.createdDate <= :endDate)
-      ORDER BY f.ano ASC, f.mes ASC
+          SELECT new cv.inps.rh.processamento.application.dto.FosRowDTO(
+              f.id,
+              f.dtEntrega,
+              f.tpEntrega,
+              CASE
+                  WHEN f.tpEntrega = 'PRIME' THEN 'Primeira'
+                  WHEN f.tpEntrega = 'SUBST' THEN 'Substituição'
+                  WHEN f.tpEntrega = 'CORRE' THEN 'Correção'
+                  ELSE f.tpEntrega
+              END,
+              f.ano || f.mes,
+              f.ttRemuneracao,
+              f.ttContribCalc,
+              f.obs,
+              f.numDc
+          )
+          FROM XmlFosEntity f
+          WHERE (:startDate IS NULL OR f.createdDate >= :startDate)
+            AND (:endDate IS NULL OR f.createdDate <= :endDate)
+            AND (
+                  f.tpEntrega <> 'PRIME'
+                  OR NOT EXISTS (
+                      SELECT 1
+                      FROM XmlFosEntity f2
+                      WHERE f2.ano = f.ano
+                        AND f2.mes = f.mes
+                        AND f2.tpEntrega = 'SUBST'
+                  )
+            )
+          ORDER BY f.ano ASC, f.mes ASC
       """)
-  Page<FosRowDTO> findFosProjected(
+  Page<FosRowDTO> getFos(
       @Param("startDate") LocalDateTime startDate,
       @Param("endDate") LocalDateTime endDate,
       Pageable pageable
   );
-
 }

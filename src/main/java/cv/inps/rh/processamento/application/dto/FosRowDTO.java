@@ -16,6 +16,8 @@ public record FosRowDTO(
 
     String tipoEntrega,
 
+    String tipoEntregaDesc,
+
     String mesReferencia,
 
     String totalRemuneracao,

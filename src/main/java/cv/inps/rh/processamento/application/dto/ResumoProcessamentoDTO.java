@@ -4,27 +4,14 @@
 package cv.inps.rh.processamento.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-
-
 @IgrpDTO
-public class ResumoProcessamentoDTO {
+public record ResumoProcessamentoDTO(
 
+    List<ResumoProcessamentoRowDTO> remuneracao,
 
-  @Valid
-  private List<ResumoProcessamentoRowDTO> remuneracao = new ArrayList<>();
-
-  @Valid
-  private List<ResumoProcPagamentoDTO> pagamento = new ArrayList<>();
-
+    List<ResumoProcPagamentoDTO> pagamento
+) {
 }

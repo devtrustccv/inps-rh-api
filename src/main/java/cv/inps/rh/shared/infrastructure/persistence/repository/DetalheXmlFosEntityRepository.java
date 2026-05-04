@@ -1,8 +1,10 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.processamento.application.dto.DetalhesFosXmlRowDTO;
+import cv.inps.rh.processamento.domain.service.processamentosalarial.model.DetalheXmlFosDto;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DetalheXmlFosEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.XmlFosEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +12,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
 
 @Repository
 public interface DetalheXmlFosEntityRepository extends
@@ -21,6 +22,17 @@ public interface DetalheXmlFosEntityRepository extends
     return this.findById(id)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("DetalheXmlFosEntity not found for id: " + id));
   }
+
+  @Query("""
+          SELECT COALESCE(SUM(
+              FUNCTION('TO_NUMBER', d.vlRemunMan)
+          ), 0)
+          FROM DetalheXmlFosEntity d
+          WHERE d.idXmlFos.id = :xmlId
+      """)
+  Double sumVlRemunManByXmlId(@Param("xmlId") Long xmlId);
+
+  void deleteAllByIdXmlFos(XmlFosEntity idXmlFos);
 
   @Query("""
           SELECT new cv.inps.rh.processamento.application.dto.DetalhesFosXmlRowDTO(
@@ -38,4 +50,19 @@ public interface DetalheXmlFosEntityRepository extends
           WHERE d.idXmlFos.id = :fosId AND (:direcaoId IS NULL OR d.dirServId = :direcaoId)
       """)
   List<DetalhesFosXmlRowDTO> findDetalhesByFos(@Param("fosId") Long fosId, @Param("direcaoId") Integer direcaoId);
+
+  @Query("""
+      SELECT new cv.inps.rh.processamento.domain.service.processamentosalarial.model.DetalheXmlFosDto(
+          d.nuSegurado,
+          f.nome,
+          d.nuTrabMan,
+          d.vlRemunMan,
+          d.tipo
+      )
+      FROM DetalheXmlFosEntity d
+      JOIN d.idFunc f
+      WHERE d.idXmlFos.id = :idXmlFos
+      ORDER BY f.nome ASC
+      """)
+  List<DetalheXmlFosDto> findDtosByIdXmlFos(@Param("idXmlFos") Long idXmlFos);
 }

@@ -14,6 +14,7 @@ import org.thymeleaf.context.Context;
 
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -24,13 +25,11 @@ public class OrdemServicoService {
   private final FuncionarioRules rules;
   private final ParamDocOutputEntityRepository paramDocOutputEntityRepository;
 
-  public Context fimComissaoServico(Long funcionarioId) {
+  public Context fimComissaoServico(String funcionarioId) {
 
-    var fun = funcionarioEntityRepository.findByIdOrThrow(funcionarioId);
+    var fun = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
 
-    var tipoDoc = getByDocType("os-fim-comissao-servico");
-
-    var ctx = new Context();
+    var documentOutputType = getByDocType("os-fim-comissao-servico");
 
     var currentContract = rules.getContratoComMaiorVersao(fun.getUuid());
     var values = Map.of(
@@ -39,9 +38,10 @@ public class OrdemServicoService {
         "dataEfeito", DateFormatter.EXTENDED_DATE_PT.format(currentContract.getDataInicio())
     );
 
-    ctx.setVariable("numeroOrdem", "1");
-    ctx.setVariable("assunto", tipoDoc.getTitulo());
-    ctx.setVariable("conteudo", StringSubstitutor.replace(tipoDoc.getCorpo(), values));
+    var ctx = new Context();
+    ctx.setVariable("numeroOrdem", "1"); // todo verify this
+    ctx.setVariable("assunto", documentOutputType.getTitulo());
+    ctx.setVariable("conteudo", StringSubstitutor.replace(documentOutputType.getCorpo(), values));
     ctx.setVariable("dataEmissao", DateFormatter.EXTENDED_DATE_PT.format(LocalDate.now()));
     ctx.setVariable("nomePresidente", "Mário Rui Fernandes"); // TODO 22/04/2026 21:33 set this in BD
 

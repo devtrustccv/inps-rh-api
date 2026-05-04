@@ -48,7 +48,7 @@ public class RelatoriosPdfController {
   }
 
   @GetMapping("/os/fim-comissao-servico")
-  public ResponseEntity<byte[]> fimComissaoServico(@RequestParam Long funcionarioId) {
+  public ResponseEntity<byte[]> fimComissaoServico(@RequestParam String funcionarioId) {
     return pdfResponse(
         pdfGenerator.generate("os-fim-comissao-servico", osService.fimComissaoServico(funcionarioId)),
         "Fim Comissão Serviço.pdf"

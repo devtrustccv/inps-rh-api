@@ -16,55 +16,42 @@ import lombok.NoArgsConstructor;
 
 
 @IgrpDTO
-public class ProcessoDisciplinarRequestDTO  {
+public class ProcessoDisciplinarRequestDTO {
 
   @NotBlank(message = "The field <vinculoReferente> is required")
 
-  private String vinculoReferente ;
-  @NotBlank(message = "The field <numeroProcesso> is required")
+  private String vinculoReferente;
 
-  private String numeroProcesso ;
+  private String numeroProcesso;
   @NotBlank(message = "The field <entidade> is required")
 
-  private String entidade ;
+  private String entidade;
   @NotBlank(message = "The field <tipoProcesso> is required")
 
-  private String tipoProcesso ;
+  private String tipoProcesso;
 
 
-  private String estadoProcesso ;
+  private String estadoProcesso;
 
 
-  private String PenaDisciplinar ;
+  private String penaDisciplinar;
 
 
-  private String dataInicioPd ;
+  private String dataInicioPd;
 
 
-  private String dataFimPd ;
+  private String dataFimPd;
 
 
-  private String dataInicioPena ;
+  private String dataInicioPena;
 
 
-  private String dataFimPena ;
+  private String dataFimPena;
 
 
-  private String numeroBO ;
+  private String numeroOrdemServico;
 
 
-  private String datPublicacaoBO ;
-
-
-  private String numeroOrdemServico ;
-
-
-  private String dataOrdemServico ;
-
-
-  private String numeroOfa ;
-
-
-  private String dataEmissaoOfa ;
+  private String dataOrdemServico;
 
 }

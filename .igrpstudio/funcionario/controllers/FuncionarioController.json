@@ -190,6 +190,21 @@
           "type": "string",
           "name": "estado",
           "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "local",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "cargo",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "carreira",
+          "isRequired": false
         }
       ]
     },
@@ -578,5 +593,5 @@
       ]
     }
   ],
-  "id": "69p09wi4e0-criarFuncionario-validarRegistoColaborador-createFuncionario-validarRegistoColaborador-createFuncionario-getFuncionarioById-createFuncionario-validarRegistoColaborador-mudarEstadoColaborador-validaDadosPessoais-getDadosFamiliares-getDadosBancarios-createFuncionario"
+  "id": "69p09wi4e0-criarFuncionario-validarRegistoColaborador-createFuncionario-validarRegistoColaborador-createFuncionario-getFuncionarioById-createFuncionario-validarRegistoColaborador-mudarEstadoColaborador-validaDadosPessoais-getDadosFamiliares-getDadosBancarios-createFuncionario-getListFuncionarios"
 }

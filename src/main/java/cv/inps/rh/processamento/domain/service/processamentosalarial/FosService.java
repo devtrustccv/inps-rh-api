@@ -5,6 +5,7 @@ import cv.inps.rh.processamento.application.dto.DetalheXmlRequestDTO;
 import cv.inps.rh.processamento.application.dto.DetalhesFosXmlDTO;
 import cv.inps.rh.processamento.application.dto.ListaFosDTO;
 import cv.inps.rh.processamento.application.queries.GetListaFosQuery;
+import cv.inps.rh.processamento.domain.service.processamentosalarial.util.FosUtil;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DetalheXmlFosEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FosEntityRepository;
@@ -14,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
@@ -22,9 +22,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Types;
 import java.time.LocalDate;
-import java.time.YearMonth;
 
 @Transactional
 @Service
@@ -47,8 +48,7 @@ public class FosService {
 
     var startDate = DateFormatter.stringToLocalDateTime(query.getDataInicio());
     var endDate = DateFormatter.stringToLocalDateTime(query.getDataFim());
-
-    var page = fosEntityRepository.findFosProjected(startDate, endDate, pageable);
+    var page = fosEntityRepository.getFos(startDate, endDate, pageable);
 
     var wrapper = new ListaFosDTO();
     PageMapper.fillPagination(page, wrapper);
@@ -75,16 +75,20 @@ public class FosService {
 
   public void novoSegurado(Integer ano, Integer mes) {
 
-    var referenceDate = getReferenceDate(ano, mes);
+    var referenceDate = FosUtil.getReferenceDate(ano, mes);
 
     var currentMonth = LocalDate.now().withDayOfMonth(1);
 
     if (referenceDate.isAfter(currentMonth))
       throw IgrpResponseStatusException.badRequest("Mês de Referência não pode ser superior ao mês atual");
 
-    var referenceMonth = buildReferenceMonth(referenceDate);
+    var referenceMonth = FosUtil.buildReferenceMonth(referenceDate);
     LOGGER.debug("Novo segurado reference date: {}", referenceMonth);
 
+    configXml(referenceMonth, "PRIME");
+  }
+
+  private void configXml(String referenceMonth, String tipo) {
     buildSimpleJdbcCall("configXML")
         .declareParameters(
             new SqlParameter("p_mes_referencia", Types.VARCHAR),
@@ -94,46 +98,56 @@ public class FosService {
         .execute(
             new MapSqlParameterSource()
                 .addValue("p_mes_referencia", referenceMonth)
-                .addValue("p_tipo", "PRIME")
+                .addValue("p_tipo", tipo)
                 .addValue("p_user_id", 1) // TODO 18/04/2026 21:34 check this later
         );
   }
 
-  public void restaurar(String referenceMonth, Long fosId) {
+  public void restaurarXml(Long fosId) {
 
     var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
-    if (fosXml.getDtEntrega() != null)
-      throw IgrpResponseStatusException.badRequest("Já existe uma declaração entregue!");
+    FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
 
-    LOGGER.debug("Restauration reference date: {}", referenceMonth);
+    final var referenceMonth = fosXml.getMes() + fosXml.getAno();
+    final var type = fosXml.getTpEntrega();
 
-    buildSimpleJdbcCall("restaurarXML")
-        .declareParameters(
-            new SqlParameter("p_mes_referencia", Types.VARCHAR),
-            new SqlOutParameter("P_ID", Types.NUMERIC)
-        )
-        .execute(
-            new MapSqlParameterSource()
-                .addValue("p_mes_referencia", referenceMonth)
-                .addValue("P_ID", fosXml.getId())
-        );
+    detalheXmlFosEntityRepository.deleteAllByIdXmlFos(fosXml);
+    fosEntityRepository.delete(fosXml);
+
+    configXml(referenceMonth, type);
   }
 
-  public String removerDetalheFos(Long fosDetailId) {
+  public void removerFos(Long fosId) {
 
-    var obj = detalheXmlFosEntityRepository.findByIdOrThrow(fosDetailId);
+    var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
 
-    var result = buildSimpleJdbcCall("removerBodyXML")
-        .declareParameters(
-            new SqlParameter("p_id_body_xml", Types.NUMERIC),
-            new SqlOutParameter("P_MSG", Types.VARCHAR)
-        )
-        .execute(
-            new MapSqlParameterSource()
-                .addValue("p_id_body_xml", obj.getId())
-        );
+    FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
 
-    return (String) result.get("P_MSG");
+    detalheXmlFosEntityRepository.deleteAllByIdXmlFos(fosXml);
+
+    fosEntityRepository.delete(fosXml);
+  }
+
+  public void removerDetalheFos(Long fosDetailId) {
+
+    var detail = detalheXmlFosEntityRepository.findByIdOrThrow(fosDetailId);
+
+    FosUtil.validateDeliveryDate(detail.getIdXmlFos().getDtEntrega());
+
+    var xmlFos = detail.getIdXmlFos();
+
+    detalheXmlFosEntityRepository.delete(detail);
+
+    var sum = BigDecimal.valueOf(detalheXmlFosEntityRepository.sumVlRemunManByXmlId(xmlFos.getId()));
+
+    var totalContribution = sum
+        .multiply(BigDecimal.valueOf(0.245))
+        .setScale(2, RoundingMode.HALF_UP);
+
+    xmlFos.setTtRemuneracao(sum.toString());
+    xmlFos.setTtContribuicao(totalContribution.toString());
+    xmlFos.setTtContribCalc(totalContribution.longValue());
+    fosEntityRepository.save(xmlFos);
   }
 
   public void gravarNovaLinhaFos(DetalheXmlRequestDTO dto) {
@@ -154,7 +168,7 @@ public class FosService {
         .execute(
             new MapSqlParameterSource()
                 .addValue("p_id_xml", dto.getFosId())
-                .addValue("p_id_row", normalizeIdRow(dto.getDetaildId()))
+                .addValue("p_id_row", FosUtil.normalizeIdRow(dto.getDetaildId()))
                 .addValue("p_mes_ref", dto.getMesReferencia())
                 .addValue("p_tp_remuneracao", dto.getTipoRemuneracao())
                 .addValue("p_remuneracao", dto.getRemuneracao())
@@ -169,15 +183,14 @@ public class FosService {
   public void adicionarFuncionario(AdicionarFuncionarioCommand command) {
 
     var fosXml = fosEntityRepository.findByIdOrThrow(command.getFosId());
-    if (fosXml.getDtEntrega() != null)
-      throw IgrpResponseStatusException.badRequest("Já existe uma declaração entregue!");
+    FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
 
-    var referenceDate = getReferenceDate(command.getAno(), command.getMes());
+    var referenceDate = FosUtil.getReferenceDate(command.getAno(), command.getMes());
     var currentMonth = LocalDate.now().withDayOfMonth(1);
     if (referenceDate.isAfter(currentMonth))
       throw IgrpResponseStatusException.badRequest("Não pode ser gerado! Mês de Referência não pode ser superior ao mês atual");
 
-    var referenceMonth = buildReferenceMonth(referenceDate);
+    var referenceMonth = FosUtil.buildReferenceMonth(referenceDate);
     LOGGER.debug("Novo funcionario reference date: {}", referenceMonth);
 
     buildSimpleJdbcCall("configSeguradoXML")
@@ -194,48 +207,28 @@ public class FosService {
         );
   }
 
+  public void enviarFolha(Long fosId) {
+
+    var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
+
+    FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
+
+    // TODO 18/04/2026 23:21 api INPS
+  }
+
+  public void substituirXml(Long id) {
+
+    var fosXml = fosEntityRepository.findByIdOrThrow(id);
+
+    FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
+
+    configXml(fosXml.getAno() + fosXml.getMes(), "SUBST");
+  }
+
   private SimpleJdbcCall buildSimpleJdbcCall(String procedureName) {
     return new SimpleJdbcCall(dataSource)
         .withoutProcedureColumnMetaDataAccess()
         .withCatalogName("RH_PK_GERA_XML_DB")
         .withProcedureName(procedureName);
-  }
-
-  public void enviarFolha(Long fosId) {
-
-    var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
-    if (fosXml.getDtEntrega() != null)
-      throw IgrpResponseStatusException.badRequest("Já existe uma declaração entregue!");
-
-    // TODO 18/04/2026 23:21 api INPS
-  }
-
-  public void substituirXml(String referenceMonth, Long id) {
-    buildSimpleJdbcCall("configXML")
-        .declareParameters(
-            new SqlParameter("p_mes_referencia", Types.VARCHAR),
-            new SqlParameter("p_id", Types.NUMERIC)
-        )
-        .execute(
-            new MapSqlParameterSource()
-                .addValue("p_mes_referencia", referenceMonth)
-                .addValue("p_id", id)
-        );
-  }
-
-  private LocalDate getReferenceDate(Integer ano, Integer mes) {
-
-    if (mes == null || mes < 1 || mes > 12)
-      throw IgrpResponseStatusException.badRequest("Mês inválido. Deve estar entre 1 e 12");
-
-    return YearMonth.of(ano, mes).atDay(1);
-  }
-
-  private String buildReferenceMonth(LocalDate referenceDate) {
-    return "%04d%02d".formatted(referenceDate.getYear(), referenceDate.getMonthValue());
-  }
-
-  private String normalizeIdRow(Long detailId) {
-    return detailId == null ? null : String.valueOf(detailId);
   }
 }
