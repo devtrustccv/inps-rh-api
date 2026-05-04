@@ -46,6 +46,7 @@ public class ValidarRegistoColaboradorService {
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
   private final OrdemServicoWriteService ordemServicoWriteService;
+  private final ContratoHistoricoWriteService contratoHistoricoWriteService;
 
   @Transactional
   public Map<String, ?> validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -248,6 +249,7 @@ public class ValidarRegistoColaboradorService {
       var contrato = tr.getContrVinculoId();
       if (contrato != null) {
         contrato.setEstado(estado);
+        contratoHistoricoWriteService.aplicarEstado(contrato, estado);
         contrato.getSituacoesLaborais().stream()
             .filter(o -> o.getEstado() == Estado.P)
             .findFirst().ifPresent(situacaoLaboralEntity -> situacaoLaboralEntity.setEstado(estado));

@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoHistoricoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,5 +27,9 @@ public interface ContratoHistoricoEntityRepository extends
   Optional<ContratoHistoricoEntity> findByUuid(UUID uuid);
 
   List<ContratoHistoricoEntity> findByContratoId_IdOrderByVersaoDesc(Long contratoId);
+
+  Optional<ContratoHistoricoEntity> findTopByContratoId_IdOrderByVersaoDesc(Long contratoId);
+
+  Optional<ContratoHistoricoEntity> findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(Long contratoId, Estado estado);
 
 }

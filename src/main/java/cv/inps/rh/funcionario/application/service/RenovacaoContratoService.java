@@ -11,9 +11,7 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,41 +24,36 @@ public class RenovacaoContratoService {
 
   private final ContratoMapper contratoMapper;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
-  private final DadosContratuaisMapper  dadosContratuaisMapper;
+  private final DadosContratuaisMapper dadosContratuaisMapper;
   private final FuncionarioRules funcionarioRules;
   private final ValidacaoEntityRepository validacaoEntityRepository;
+  private final ContratoHistoricoWriteService contratoHistoricoWriteService;
 
   @Transactional
   public RenovacaoContratoDTO renovarContrato(RenovarContratoCommand command) {
 
     var dto = command.getRenovacaocontrato();
-
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
-
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
-    var contratoPai = funcionarioRules.getPrimeiroContrato(funcionario.getUuid());
-    if (contratoPai == null)
-      throw IgrpResponseStatusException.notFound("Funcionario com id '%s' não possui contrato pai".formatted(idFunc));
-
-    var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
-    if (contratoAtual == null)
-      throw IgrpResponseStatusException.notFound("Funcionario com id '%s' não possui contrato ativo".formatted(idFunc));
-
-    var validacaoPendente = funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.RENOVACAO_CONTRATO);
-    if (validacaoPendente)
-      throw IgrpResponseStatusException.conflict("Funcionario com id '%s' possui uma validação pendente de renovação de contrato".formatted(idFunc));
-
-    var novoContrato = contratoMapper.toRenovarContrato(dto.getDadosRenovacao(), Estado.P);
-    novoContrato.setContratoId(contratoPai);
-    novoContrato.setVersao(contratoAtual.getVersao() + 1);
-    novoContrato.setFunId(funcionario);
-    funcionario.getContratos().add(novoContrato);
-
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-
     if (tipoRelacionamentoAtual == null)
-      throw IgrpResponseStatusException.notFound("Funcionario com id '%s' não possui tipo de relacionamento atual".formatted(idFunc));
+      throw IgrpResponseStatusException.notFound(
+          "Funcionario com id '%s' não possui tipo de relacionamento atual".formatted(idFunc));
+
+    var contratoAtual = tipoRelacionamentoAtual.getContrVinculoId();
+    if (contratoAtual == null)
+      throw IgrpResponseStatusException.notFound(
+          "Funcionario com id '%s' não possui contrato ativo".formatted(idFunc));
+
+    if (funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.RENOVACAO_CONTRATO))
+      throw IgrpResponseStatusException.conflict(
+          "Funcionario com id '%s' possui uma validação pendente de renovação de contrato".formatted(idFunc));
+
+    // Regista as novas datas propostas no historico (Estado.P) — sem criar novo ContratoEntity
+    contratoHistoricoWriteService.registrarRenovacaoPendente(contratoAtual, dto.getDadosRenovacao());
+
+    // Fecha o TipoRelacionamento atual e cria novo apontando para o mesmo contrato
     tipoRelacionamentoAtual.setEstActAdm(0);
     tipoRelacionamentoAtual.setDataFim(LocalDate.now());
 
@@ -71,11 +64,11 @@ public class RenovacaoContratoService {
     novoTipoRelacionamento.setObs("RENOVACAO_CONTRATO");
     novoTipoRelacionamento.setTipoSituacao("RENOVACAO");
     novoTipoRelacionamento.setReferente("CONTRATO");
-    novoTipoRelacionamento.setContrVinculoId(novoContrato);
+    novoTipoRelacionamento.setContrVinculoId(contratoAtual);
     funcionario.getTiposrelacionamentos().add(novoTipoRelacionamento);
 
-
-    var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(),Referencia.RENOVACAO_CONTRATO.name(), Estado.P);
+    var valid = dadosContratuaisMapper.toValidacaoInsert(
+        TipoAcao.INSERT.name(), Referencia.RENOVACAO_CONTRATO.name(), Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
     funcionario.getValidacoes().add(valid);
@@ -84,16 +77,12 @@ public class RenovacaoContratoService {
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {
-          e.setReferenciaId(novoContrato.getId());
+          e.setReferenciaId(contratoAtual.getId());
           validacaoEntityRepository.save(e);
         });
 
-    var renovacaoContratoReqDTO = contratoMapper.toRenovacaoContratoReqDTO(novoContrato);
-
     var renovacaoContratoDTO = new RenovacaoContratoDTO();
-    renovacaoContratoDTO.setDadosRenovacao(renovacaoContratoReqDTO);
-
+    renovacaoContratoDTO.setDadosRenovacao(contratoMapper.toRenovacaoContratoReqDTO(contratoAtual));
     return renovacaoContratoDTO;
-
   }
 }

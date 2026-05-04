@@ -65,6 +65,8 @@ public class RegistarColaboradorService {
 
   private final DocumentoEntityRepository documentoEntityRepository;
 
+  private final ContratoHistoricoWriteService contratoHistoricoWriteService;
+
   @Transactional
   public Map<String, ?> saveDossierColaborador(CreateFuncionarioCommand command) {
     FuncionarioRequestDTO dto = command.getFuncionariorequest();
@@ -232,6 +234,8 @@ public class RegistarColaboradorService {
     valid.setTiprelId(tr);
     fun.setValidacoes(new ArrayList<>(List.of(valid)));
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(fun);
+
+    contratoHistoricoWriteService.registrarNovo(contrato);
 
     if (dto.getAnexos() != null) {
       var list = dto.getAnexos().stream().map(a -> {

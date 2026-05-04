@@ -52,6 +52,8 @@ public class NovoContratoService {
 
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
 
+  private final ContratoHistoricoWriteService contratoHistoricoWriteService;
+
 
   @Transactional
   public DadosContratuaisRespDTO registrar(NovoContratoCommand command) {
@@ -224,6 +226,8 @@ public class NovoContratoService {
     /******************** FIM PAGAMENTOS DESCONTOS ********************************/
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+
+    contratoHistoricoWriteService.registrarNovo(contratoNovo);
 
     List<DefinicaoRemuneracaoEntity> novasRems = saved.getDefinicoesRenumeracoes() != null
         ? saved.getDefinicoesRenumeracoes().stream().filter(r -> r.getEstado() == Estado.P).collect(Collectors.toList())
@@ -451,6 +455,8 @@ public class NovoContratoService {
 
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+
+    contratoHistoricoWriteService.registrarNovo(contrato);
 
     tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
 
