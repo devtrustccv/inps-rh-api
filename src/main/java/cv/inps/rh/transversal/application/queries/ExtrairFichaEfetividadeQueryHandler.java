@@ -1,11 +1,10 @@
 package cv.inps.rh.transversal.application.queries;
 
+import cv.igrp.framework.core.domain.QueryHandler;
+import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.shared.util.PdfGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import cv.igrp.framework.core.domain.QueryHandler;
-import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,12 +44,14 @@ public class ExtrairFichaEfetividadeQueryHandler implements QueryHandler<Extrair
          .map(URL::toExternalForm)
          .orElse("");
 
+     var ptLocale = Locale.of("pt", "PT");
+
      Map<String, Object> context = Map.of(
          "direcao", "Direção Administrativa e de Recursos Humanos",
          "dataEmissao", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-         "mesReferencia", Month.of(mesReferencia).getDisplayName(TextStyle.FULL, new Locale("pt", "PT")),
+         "mesReferencia", Month.of(mesReferencia).getDisplayName(TextStyle.FULL, ptLocale),
          "anoReferencia", anoReferencia,
-         "mesVencimento", Month.of(mesReferencia).getDisplayName(TextStyle.FULL, new Locale("pt", "PT")),
+         "mesVencimento", Month.of(mesReferencia).getDisplayName(TextStyle.FULL, ptLocale),
              "logoPath", logoPath
      );
 

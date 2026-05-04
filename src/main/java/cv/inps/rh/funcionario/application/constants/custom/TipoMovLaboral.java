@@ -1,7 +1,9 @@
 package cv.inps.rh.funcionario.application.constants.custom;
 
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import lombok.Getter;
 
+@Getter
 public enum TipoMovLaboral {
 
   // Grupo CONTRATO
@@ -34,7 +36,4 @@ public enum TipoMovLaboral {
     this.referencia = referencia;
   }
 
-  public Referencia getReferencia() {
-    return referencia;
-  }
 }

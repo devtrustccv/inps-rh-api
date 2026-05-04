@@ -3,8 +3,8 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import cv.inps.rh.funcionario.application.dto.ValidacaoResponseDTO;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
-import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
+import cv.inps.rh.shared.util.DateFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +25,7 @@ public class ValidacaoMapper {
         TipoAcao.fromString(validacao.getTipoAccao())
             .map(TipoAcao::getDescricao)
             .orElse(null)
-    );;
+    );
     dto.setReferenciaName(validacao.getReferenciaName());
     dto.setReferenciaNameDesc(Referencia.fromString(validacao.getReferenciaName())
         .map(Referencia::getDescricao).orElse(null));

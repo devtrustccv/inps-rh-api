@@ -5,24 +5,22 @@ import cv.inps.rh.funcionario.application.commands.NovoPedidoDeclaracaoCommand;
 import cv.inps.rh.funcionario.application.commands.SubmeterAnalisePedidoDeclaracaoCommand;
 import cv.inps.rh.funcionario.application.commands.ValidacaoPedidoDeclaracaoCommand;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
-import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TableName;
+import cv.inps.rh.shared.application.services.EmailService;
+import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import cv.inps.rh.shared.application.services.EmailService;
-import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 @Service
@@ -159,7 +157,7 @@ public class PedidoDeclaracaoWriteService {
 
     private void enviarNotificacaoDeclaracao(DeclaracaoEntity declaracao) {
         FuncionarioEntity funcionario = declaracao.getPedidoId().getFunId();
-        if (funcionario == null || !StringUtils.hasText(funcionario.getContactos().get(0).getContacto())) {
+      if (funcionario == null || !StringUtils.hasText(funcionario.getContactos().getFirst().getContacto())) {
             // Log ou lança exceção: não é possível notificar sem email.
             return;
         }
@@ -174,7 +172,7 @@ public class PedidoDeclaracaoWriteService {
         notificacao.setTipoNotificacao(TIPO_NOTIFICACAO);
         notificacao.setAssunto(assunto);
         notificacao.setMessage(corpo);
-        notificacao.setEmail(funcionario.getContactos().get(0).getContacto());
+      notificacao.setEmail(funcionario.getContactos().getFirst().getContacto());
         notificacao.setNomeReceptor(funcionario.getNome());
         notificacao.setEstado("Enviado");
         notificacao.setDataEnvio(LocalDate.now());

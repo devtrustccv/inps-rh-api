@@ -5,8 +5,6 @@ import cv.inps.rh.assiduidade.application.dto.FaltaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFaltaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetFaltaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaFaltaQuery;
-import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -18,7 +16,6 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepos
 import cv.inps.rh.shared.infrastructure.persistence.repository.VfaltaMensalEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
-import io.micrometer.core.instrument.binder.BaseUnits;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,7 +31,6 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -172,14 +168,14 @@ public class FaltaReadService {
     // Determinar período
     LocalDate dataInicio = faltas.stream()
         .map(FaltaEntity::getDataInicio)
-        .filter(d -> d != null)
+            .filter(Objects::nonNull)
         .map(LocalDateTime::toLocalDate)
         .min(LocalDate::compareTo)
         .orElse(null);
 
     LocalDate dataFim = faltas.stream()
         .map(FaltaEntity::getDataFim)
-        .filter(d -> d != null)
+            .filter(Objects::nonNull)
         .map(LocalDateTime::toLocalDate)
         .max(LocalDate::compareTo)
         .orElse(null);

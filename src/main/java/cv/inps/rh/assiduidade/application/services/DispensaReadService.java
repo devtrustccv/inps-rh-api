@@ -1,13 +1,12 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import cv.inps.rh.assiduidade.application.dto.DispensaListDTO;
 import cv.inps.rh.assiduidade.application.dto.DispensaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaDispensaDTO;
-import cv.inps.rh.assiduidade.application.dto.DispensaListDTO;
 import cv.inps.rh.assiduidade.application.queries.GetDispensaByPedidoIdQuery;
 import cv.inps.rh.assiduidade.application.queries.GetDispensaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaDispensaQuery;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -187,7 +186,7 @@ public class DispensaReadService {
             dto.setResponsavel(responsavel.getFunId().getUuid());
             dto.setResponsavelNome(responsavel.getFunId().getNome());
           });
-    };
+    }
 
     dto.setObservacaoResponsavel(e.getObsResponsavel());
     dto.setObservacaoRh(e.getObsRh());
@@ -257,7 +256,7 @@ public class DispensaReadService {
             dto.setResponsavel(responsavel.getFunId().getUuid());
             dto.setResponsavelNome(responsavel.getFunId().getNome());
           });
-    };
+    }
 
     if (dto.getColaborador() != null && dto.getDataDispensa() != null) {
 

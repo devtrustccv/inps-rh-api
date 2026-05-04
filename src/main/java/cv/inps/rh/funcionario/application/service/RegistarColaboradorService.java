@@ -1,23 +1,22 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.CreateFuncionarioCommand;
-import cv.inps.rh.funcionario.application.constants.SituacaoLaboral;
 import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
-import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
-import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
+import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.*;
-import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
+import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -238,16 +237,14 @@ public class RegistarColaboradorService {
     contratoHistoricoWriteService.registrarNovo(contrato);
 
     if (dto.getAnexos() != null) {
-      var list = dto.getAnexos().stream().map(a -> {
-        return documentoMapper.toEntity(
-            a,
-            Estado.P,
-            TableName.RH_T_FUNCIONARIOS.name(),
-            saved.getId(),
-            saved.getUuid(),
-            1L,
-            saved);
-      }).collect(Collectors.toList());
+      var list = dto.getAnexos().stream().map(a -> documentoMapper.toEntity(
+          a,
+          Estado.P,
+          TableName.RH_T_FUNCIONARIOS.name(),
+          saved.getId(),
+          saved.getUuid(),
+          1L,
+          saved)).collect(Collectors.toList());
       documentoEntityRepository.saveAll(list);
     }
 
