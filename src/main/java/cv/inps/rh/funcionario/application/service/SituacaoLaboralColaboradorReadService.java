@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.application.dto.AtivarInativarColaboradorDTO;
 import cv.inps.rh.funcionario.application.queries.GetSituacaoLaboralColaboradorQuery;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoDetalheEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,8 +28,11 @@ public class SituacaoLaboralColaboradorReadService {
     var tiposRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var situacaoLaboral = new AtivarInativarColaboradorDTO();
-    situacaoLaboral.setSituacaoLaboralId(tiposRelacionamentoAtual.getSituacLaboralId().getMotivoSitLabId().getSituacaoId().getId());
-    situacaoLaboral.setMotivoId(tiposRelacionamentoAtual.getSituacLaboralId().getMotivoSitLabId().getId());
+    var motivoSitLabId = tiposRelacionamentoAtual.getSituacLaboralId().getMotivoSitLabId();
+    if(motivoSitLabId != null) {
+      situacaoLaboral.setSituacaoLaboralId(motivoSitLabId.getSituacaoId().getId());
+      situacaoLaboral.setMotivoId(motivoSitLabId.getId());
+    }
     situacaoLaboral.setObservacao(tiposRelacionamentoAtual.getSituacLaboralId().getObs());
 
     return situacaoLaboral;

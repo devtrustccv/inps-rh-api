@@ -26,7 +26,7 @@ public class ProcessamentoSalarialDTO {
   private String mesReferencia;
 
 
-  private Long codigoCC;
+  private String codigoCC;
 
 
   private String direcao;

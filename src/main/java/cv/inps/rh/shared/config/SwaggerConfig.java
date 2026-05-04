@@ -51,7 +51,7 @@ public class SwaggerConfig {
   }
 
   @Bean
-  public GroupedOpenApi allApis() {
+  public GroupedOpenApi all() {
     return GroupedOpenApi.builder()
         .group("All")
         .pathsToMatch("/**")
@@ -59,10 +59,21 @@ public class SwaggerConfig {
   }
 
   @Bean
-  public GroupedOpenApi fosApis() {
+  public GroupedOpenApi fos() {
     return GroupedOpenApi.builder()
         .group("Fos")
         .pathsToMatch("/fos/**")
+        .build();
+  }
+
+  @Bean
+  public GroupedOpenApi processoDisciplinar() {
+    return GroupedOpenApi.builder()
+        .group("Processo Disciplinar")
+        .pathsToMatch(
+            "/api/v1/funcionarios/processo-disciplinar/**",
+            "/api/v1/funcionarios/**/processo-disciplinar"
+        )
         .build();
   }
 }

@@ -5,8 +5,9 @@ import io.prometheus.client.SimpleCollector;
 import java.util.Optional;
 
 public enum TipoAcao {
-  INSERT("insert"),
-  UPDATE("update");
+  INSERT("Registo"),
+  UPDATE("Atualização"),
+  DELETE("Eliminação");
 
 
   private final String descricao;
