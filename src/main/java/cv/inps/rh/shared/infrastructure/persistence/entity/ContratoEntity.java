@@ -94,5 +94,8 @@ private List<CarreiraEntity> carreiras = new ArrayList<>();   @ManyToOne(fetch =
    @JoinColumn(name = "fun_id")
    private FuncionarioEntity funId;
 
+  @OneToMany(mappedBy = "contratoId", fetch = FetchType.LAZY)
+private List<ContratoHistoricoEntity> historicos = new ArrayList<>();
+
 
 }
