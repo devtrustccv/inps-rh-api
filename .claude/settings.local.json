@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-23.0.2.7-hotspot\" mvn test -Dtest=TipoRelRemPagHelperTest -q)",
-      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-23.0.2.7-hotspot\" mvn test -Dtest=TipoRelRemPagHelperTest)"
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-23.0.2.7-hotspot\" mvn test -Dtest=TipoRelRemPagHelperTest)",
+      "Bash(grep -E \"\\\\\\\\.java$\")",
+      "Bash(mvn clean *)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-23.0.2.7-hotspot\" mvn clean package -DskipTests)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-23.0.2.7-hotspot\" mvn test)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Eclipse Adoptium/jdk-23.0.2.7-hotspot\" mvn test -Dtest=\"ProcessoAvaliacaoServiceAutoAvaliacaoTest,MissaoServicoServiceWriteLogisticaTest\")",
+      "PowerShell($env:JAVA_HOME)",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\Java\\\\\"; $env:JAVA_HOME = \"C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-25.0.2.10-hotspot\" ; $env:JAVA_HOME)",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-25.0.2.10-hotspot\"; cd \"c:\\\\Users\\\\ivanick.santos\\\\Nick-personal\\\\personal-workspace\\\\projects\\\\RH_INPS_SERVICE\"; mvn clean package -DskipTests 2>&1 | Select-String -Pattern \"BUILD|ERROR|error:|WARN\" | Select-Object -Last 30)",
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-25.0.2.10-hotspot\"; Set-Location \"c:\\\\Users\\\\ivanick.santos\\\\Nick-personal\\\\personal-workspace\\\\projects\\\\RH_INPS_SERVICE\"; & mvn clean package \"-Dmaven.test.skip=true\" 2>&1 | Select-String -Pattern \"BUILD|ERROR|error:\" | Select-Object -Last 20)"
     ]
   }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,5 +32,7 @@ public interface ContratoHistoricoEntityRepository extends
   Optional<ContratoHistoricoEntity> findTopByContratoId_IdOrderByVersaoDesc(Long contratoId);
 
   Optional<ContratoHistoricoEntity> findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(Long contratoId, Estado estado);
+
+  List<ContratoHistoricoEntity> findByContratoId_IdInOrderByContratoId_IdAscVersaoDesc(Collection<Long> contratoIds);
 
 }
