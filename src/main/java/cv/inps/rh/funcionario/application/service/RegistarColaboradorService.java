@@ -166,12 +166,14 @@ public class RegistarColaboradorService {
         fun.setDefinicoesRenumeracoes(remList);
       }
 
-      var vinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
-          .findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
-              "REM")
-          .getFirst(); // so é associado um tipo REM SALL ao vinculo
+      var listVinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
+          .findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(), "REM");
 
-      if (!Objects.isNull(vinculoTipoMovimentoREM)) {
+      if (!CollectionUtils.isEmpty(listVinculoTipoMovimentoREM)) {
+        var vinculoTipoMovimentoREM = listVinculoTipoMovimentoREM.getFirst();
+        if (fun.getDefinicoesRenumeracoes() == null) {
+          fun.setDefinicoesRenumeracoes(new ArrayList<>());
+        }
         var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
             dadosContratuais.getSalario(),
             vinculoTipoMovimentoREM.getTmId(),
