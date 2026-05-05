@@ -1,9 +1,10 @@
 package cv.inps.rh.shared.application.constants.custom;
 
-import io.prometheus.client.SimpleCollector;
+import lombok.Getter;
 
 import java.util.Optional;
 
+@Getter
 public enum TipoAcao {
   INSERT("Registo"),
   UPDATE("Atualização"),
@@ -14,10 +15,6 @@ public enum TipoAcao {
 
   TipoAcao(String descricao) {
     this.descricao = descricao;
-  }
-
-  public String getDescricao() {
-    return descricao;
   }
 
   public static Optional<TipoAcao> fromString(String value) {

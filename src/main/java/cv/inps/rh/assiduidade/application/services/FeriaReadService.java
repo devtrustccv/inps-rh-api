@@ -1,21 +1,18 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.assiduidade.application.dto.FeriasListDTO;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaAlterarReqDTO;
 import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFeriaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetListaFeriaQuery;
-import cv.inps.rh.assiduidade.application.dto.FeriasListDTO;
 import cv.inps.rh.assiduidade.application.queries.GetPedidoFeriaQuery;
-import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.shared.infrastructure.persistence.entity.VFeriasMensalEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.PageMapper;
-import com.github.f4b6a3.uuid.UuidCreator;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,13 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -159,7 +152,7 @@ public class FeriaReadService {
             req.setResponsavel(responsavel.getFunId().getUuid());
             req.setResponsavelNome(responsavel.getFunId().getNome());
           });
-    };
+    }
     req.setParecer(entity.getDecisaoResponsavel());
     req.setObsParecer(entity.getObsResponsavel());
 

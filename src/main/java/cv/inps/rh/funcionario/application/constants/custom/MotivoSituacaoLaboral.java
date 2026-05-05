@@ -1,7 +1,9 @@
 package cv.inps.rh.funcionario.application.constants.custom;
 
 import cv.inps.rh.funcionario.application.constants.SituacaoLaboral;
+import lombok.Getter;
 
+@Getter
 public enum MotivoSituacaoLaboral {
   // ATIVO
   RETORNO_DE_LICENCA(SituacaoLaboral.ATIVO),
@@ -43,7 +45,4 @@ public enum MotivoSituacaoLaboral {
     this.categoria = categoria;
   }
 
-  public SituacaoLaboral getCategoria() {
-    return categoria;
-  }
 }

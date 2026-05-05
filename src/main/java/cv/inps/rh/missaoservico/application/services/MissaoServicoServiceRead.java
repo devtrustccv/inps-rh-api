@@ -1,68 +1,28 @@
 package cv.inps.rh.missaoservico.application.services;
 
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
-import cv.inps.rh.missaoservico.application.dto.AjudaCustoResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.AlojamentoResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.BilhetePassagemResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoAutorizacaoItemResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoAutorizacaoResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoItemResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoColaboradorResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaDetResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoPagamentoResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoPrestadorResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoEmissaoReqResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoReqItemResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoServicoResumoDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoServicoResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.SeguroViagemResponseDTO;
-import cv.inps.rh.missaoservico.application.queries.GetAnaliseProcessoMissaoServicoQuery;
-import cv.inps.rh.missaoservico.application.queries.GetDetalheMissaoServicoQuery;
-import cv.inps.rh.missaoservico.application.queries.GetListaMissaoServicoQuery;
-import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoCabimentoQuery;
-import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoAutorizacaoQuery;
-import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoLogisticaQuery;
-import cv.inps.rh.missaoservico.application.queries.GetMissaoServicoPagamentoQuery;
-import cv.inps.rh.missaoservico.application.queries.GetSubmissaoServicoProcessQuery;
-import cv.inps.rh.missaoservico.application.queries.GetSubmissaoServicoEmissaoRequisicaoQuery;
-import cv.inps.rh.missaoservico.application.dto.WrapperListMissaoServicoDTO;
+import cv.inps.rh.missaoservico.application.dto.*;
+import cv.inps.rh.missaoservico.application.queries.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoColaboradorEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoPrestadorEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoLogisticaDetEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoLogisticaEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoRequisicaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoServicoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.NotificacaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.time.LocalDateTime;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -514,7 +474,7 @@ public class MissaoServicoServiceRead {
         var list = entry.getValue();
         if (CollectionUtils.isEmpty(list))
           continue;
-        var any = list.get(0);
+        var any = list.getFirst();
         var prest = any != null ? any.getMissaoPrestId() : null;
         if (prest == null)
           continue;
@@ -703,7 +663,7 @@ public class MissaoServicoServiceRead {
 
     if ("AJUDA_CUSTO".equalsIgnoreCase(logistica.getReferencia())) {
       if (!CollectionUtils.isEmpty(dets)) {
-        var d0 = dets.get(0);
+        var d0 = dets.getFirst();
         if (d0 != null && d0.getMissaoColabId() != null && d0.getMissaoColabId().getFunId() != null) {
           return d0.getMissaoColabId().getFunId().getNome();
         }
@@ -735,7 +695,7 @@ public class MissaoServicoServiceRead {
       List<MissaoLogisticaDetEntity> dets) {
     if (CollectionUtils.isEmpty(dets))
       return null;
-    return toDetDto(dets.get(0));
+    return toDetDto(dets.getFirst());
   }
 
   private MissaoLogisticaDetResponseDTO toDetDto(

@@ -2,6 +2,7 @@ package cv.inps.rh.shared.interfaces.rest;
 
 import cv.inps.rh.shared.application.constants.custom.RelatorioTemplate;
 import cv.inps.rh.shared.application.dto.MinioFileDataDTO;
+import cv.inps.rh.shared.application.dto.ReportHtmlDTO;
 import cv.inps.rh.shared.domain.service.OrdemServicoService;
 import cv.inps.rh.shared.domain.service.RelatoriosService;
 import cv.inps.rh.shared.util.PdfGenerator;
@@ -9,10 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/relatorios/pdf")
@@ -47,12 +45,17 @@ public class RelatoriosPdfController {
     );
   }
 
-  @GetMapping("/os/fim-comissao-servico")
-  public ResponseEntity<byte[]> fimComissaoServico(@RequestParam String funcionarioId) {
+  @PostMapping("/os/fim-comissao-servico")
+  public ResponseEntity<byte[]> fimComissaoServico(@RequestParam String funcionarioId, @RequestBody ReportHtmlDTO htmlBody) {
     return pdfResponse(
-        pdfGenerator.generate("os-fim-comissao-servico", osService.fimComissaoServico(funcionarioId)),
+        pdfGenerator.generate("os-fim-comissao-servico", osService.fimComissaoServico(funcionarioId, htmlBody.getHtml())),
         "Fim Comissão Serviço.pdf"
     );
+  }
+
+  @GetMapping("/os/fim-comissao-servico/content")
+  public ResponseEntity<ReportHtmlDTO> fimComissaoServico(@RequestParam String funcionarioId) {
+    return ResponseEntity.ok(osService.getFimComissaoServicoContent(funcionarioId));
   }
 
   private ResponseEntity<byte[]> pdfResponse(byte[] pdf, String filename) {

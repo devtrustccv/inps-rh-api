@@ -113,7 +113,7 @@ public class DispensaAssiduidadeStrategy implements AssiduidadeStrategy {
                 .collect(Collectors.groupingBy(t -> t.get("funId", Long.class)))
                 .forEach((funId, tuples) -> {
                     AssiduidadeRowDTO dto = new AssiduidadeRowDTO();
-                    Tuple first = tuples.get(0);
+                  Tuple first = tuples.getFirst();
 
                     dto.setColaborador(first.get("funNome", String.class));
                     dto.setDireccao(first.get("dirNome", String.class));
