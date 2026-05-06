@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -64,5 +65,7 @@ public class ContratoListDTO  {
   
   
   private boolean atual ;
+
+  private List<ContratoHistoricoDTO> historicos ;
 
 }

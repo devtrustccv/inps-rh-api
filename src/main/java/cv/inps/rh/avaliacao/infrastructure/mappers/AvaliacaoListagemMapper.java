@@ -18,8 +18,8 @@ public class AvaliacaoListagemMapper {
             BigDecimal avaliacaoFinalSemestre2,
             BigDecimal notaFinal,
             String notaFinalQualitativa) {
+
         if (base == null)
-            if (base == null)
                 return null;
 
         var dto = new AvaliacaoListagemResponseDTO();

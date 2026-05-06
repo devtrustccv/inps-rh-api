@@ -43,6 +43,7 @@ public class ValidarContratoService {
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
   private final EntityManager entityManager;
   private final OrdemServicoWriteService ordemServicoWriteService;
+  private final ContratoHistoricoWriteService contratoHistoricoWriteService;
 
   @Transactional
   public ResponseEntity<DadosContratuaisRespDTO> validar(ValidarContratoCommand command) {
@@ -125,10 +126,7 @@ public class ValidarContratoService {
       tr.setEstado(estado);
       var contrato = tr.getContrVinculoId();
       if (contrato != null) {
-        contrato.setEstado(estado);
-        contrato.getSituacoesLaborais().stream()
-            .filter(o -> o.getEstado() == Estado.P)
-            .findFirst().ifPresent(situacaoLaboralEntity -> situacaoLaboralEntity.setEstado(estado));
+        contratoHistoricoWriteService.transicionarEstado(contrato, estado);
       }
 
       var mob = tr.getMobId();

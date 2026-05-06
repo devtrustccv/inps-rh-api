@@ -1,9 +1,10 @@
 package cv.inps.rh.shared.application.constants.custom;
 
-import io.prometheus.client.SimpleCollector;
+import lombok.Getter;
 
 import java.util.Optional;
 
+@Getter
 public enum Referencia {
   RENDIMENTO("Rendimento"),
   DESCONTO("Desconto"),
@@ -31,10 +32,6 @@ public enum Referencia {
 
   Referencia(String descricao) {
     this.descricao = descricao;
-  }
-
-  public String getDescricao() {
-    return descricao;
   }
 
   public static Optional<Referencia> fromString(String value) {

@@ -1,8 +1,11 @@
 package cv.inps.rh.shared.application.enums;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.Optional;
 
+@Getter
 public enum OrdemServicoDeclaracao {
 
   CONVERSAO_CONTRATO("CONVERSAO_CONTRATO", "Conversão de Contratos", "ORDEM_SERVICO"),
@@ -29,18 +32,6 @@ public enum OrdemServicoDeclaracao {
     this.codigo = codigo;
     this.descricao = descricao;
     this.referencia = referencia;
-  }
-
-  public String getCodigo() {
-    return codigo;
-  }
-
-  public String getDescricao() {
-    return descricao;
-  }
-
-  public String getReferencia() {
-    return referencia;
   }
 
   public static Optional<OrdemServicoDeclaracao> from(String codigo, String referencia) {

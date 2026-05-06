@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "ContratoList",
+  "name": "ContratoHistorico",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
@@ -30,9 +30,9 @@
       "primaryKey": false
     },
     {
-      "name": "funcionarioId",
+      "name": "versao",
       "objectType": "java",
-      "type": "long",
+      "type": "integer",
       "required": false,
       "before": false,
       "after": false,
@@ -42,19 +42,7 @@
       "primaryKey": false
     },
     {
-      "name": "uuidFuncionario",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "situacao",
+      "name": "estado",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -66,19 +54,7 @@
       "primaryKey": false
     },
     {
-      "name": "tipoContrato",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "tipoVinculo",
+      "name": "estadoDesc",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -116,42 +92,6 @@
     {
       "name": "duracao",
       "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "estado",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "estadoDesc",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "versao",
-      "objectType": "java",
       "type": "integer",
       "required": false,
       "before": false,
@@ -162,9 +102,9 @@
       "primaryKey": false
     },
     {
-      "name": "inicial",
+      "name": "obs",
       "objectType": "java",
-      "type": "boolean",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -172,33 +112,7 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
-    },
-    {
-      "name": "atual",
-      "objectType": "java",
-      "type": "boolean",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "historicos",
-      "objectType": "dto",
-      "type": "ContratoHistorico",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false,
-      "collectionType": "list",
-      "module": "funcionario"
     }
   ],
-  "id": "9flr1hr05a"
+  "id": "ch1st0r1c0a"
 }
