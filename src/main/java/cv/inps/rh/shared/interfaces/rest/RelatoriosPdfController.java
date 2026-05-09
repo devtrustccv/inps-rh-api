@@ -46,9 +46,9 @@ public class RelatoriosPdfController {
   }
 
   @PostMapping("/os/fim-comissao-servico")
-  public ResponseEntity<byte[]> fimComissaoServico(@RequestParam String funcionarioId, @RequestBody ReportHtmlDTO htmlBody) {
+  public ResponseEntity<byte[]> fimComissaoServico(@RequestBody ReportHtmlDTO htmlBody) {
     return pdfResponse(
-        pdfGenerator.generate("os-fim-comissao-servico", osService.fimComissaoServico(funcionarioId, htmlBody.getHtml())),
+        pdfGenerator.generate("os-general", osService.fimComissaoServico(htmlBody.getHtml())),
         "Fim Comissão Serviço.pdf"
     );
   }
@@ -56,6 +56,19 @@ public class RelatoriosPdfController {
   @GetMapping("/os/fim-comissao-servico/content")
   public ResponseEntity<ReportHtmlDTO> fimComissaoServico(@RequestParam String funcionarioId) {
     return ResponseEntity.ok(osService.getFimComissaoServicoContent(funcionarioId));
+  }
+
+  @PostMapping("/os/conversao-contrato")
+  public ResponseEntity<byte[]> conversaoContrato(@RequestBody ReportHtmlDTO htmlBody) {
+    return pdfResponse(
+        pdfGenerator.generate("os-general", osService.conversaoContrato(htmlBody.getHtml())),
+        "Conversao Contrato.pdf"
+    );
+  }
+
+  @GetMapping("/os/conversao-contrato/content")
+  public ResponseEntity<ReportHtmlDTO> conversaoContrato(@RequestParam String funcionarioId) {
+    return ResponseEntity.ok(osService.conversaoContratoContent(funcionarioId));
   }
 
   private ResponseEntity<byte[]> pdfResponse(byte[] pdf, String filename) {

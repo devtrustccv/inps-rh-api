@@ -3,7 +3,10 @@ package cv.inps.rh.shared.domain.service;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.dto.ReportHtmlDTO;
+import cv.inps.rh.shared.domain.service.model.OrdemServico;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamDocOutputEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamDocOutputEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
@@ -15,6 +18,7 @@ import org.thymeleaf.context.Context;
 
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -26,24 +30,24 @@ public class OrdemServicoService {
   private final FuncionarioRules rules;
   private final ParamDocOutputEntityRepository paramDocOutputEntityRepository;
 
-  public Context fimComissaoServico(String funcionarioId, String htmlBody) {
+  public Context fimComissaoServico(String htmlBody) {
 
-    var documentOutputType = getByDocType("os-fim-comissao-servico");
+    var documentOutputType = getByDocType(OrdemServico.FIM_COMISSAO_SERVICO.name());
 
     var ctx = new Context();
-    ctx.setVariable("numeroOrdem", "1"); // todo verify this
     ctx.setVariable("assunto", documentOutputType.getTitulo());
     ctx.setVariable("conteudo", htmlBody);
     ctx.setVariable("dataEmissao", DateFormatter.EXTENDED_DATE_PT.format(LocalDate.now()));
-    ctx.setVariable("nomePresidente", "Mário Rui Fernandes"); // TODO 22/04/2026 21:33 set this in BD
+    ctx.setVariable("nomePresidente", getResponsavel(documentOutputType.getResponsavel()));
 
     return ctx;
   }
 
+
   public ReportHtmlDTO getFimComissaoServicoContent(String funcionarioId) {
     var fun = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
     var currentContract = rules.getContratoComMaiorVersao(fun.getUuid());
-    var documentOutputType = getByDocType("os-fim-comissao-servico");
+    var documentOutputType = getByDocType(OrdemServico.FIM_COMISSAO_SERVICO.name());
     var values = Map.of(
         "nomeColaborador", fun.getNome(),
         "cargoColaborador", currentContract.getVinculoId().getNome(),
@@ -52,8 +56,38 @@ public class OrdemServicoService {
     return new ReportHtmlDTO(StringSubstitutor.replace(documentOutputType.getCorpo(), values));
   }
 
+  public Context conversaoContrato(String htmlBody) {
+
+    var documentOutputType = getByDocType(OrdemServico.CONVERSAO_CONTRATO.name());
+
+    var ctx = new Context();
+    ctx.setVariable("assunto", documentOutputType.getTitulo());
+    ctx.setVariable("conteudo", htmlBody);
+    ctx.setVariable("dataEmissao", DateFormatter.EXTENDED_DATE_PT.format(LocalDate.now()));
+    ctx.setVariable("nomePresidente", getResponsavel(documentOutputType.getResponsavel()));
+
+    return ctx;
+  }
+
+  public ReportHtmlDTO conversaoContratoContent(String funcionarioId) {
+
+    var fun = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
+    var documentOutputType = getByDocType(OrdemServico.CONVERSAO_CONTRATO.name());
+    var values = Map.of(
+        "nomeColaborador", fun.getNome()
+    );
+    return new ReportHtmlDTO(StringSubstitutor.replace(documentOutputType.getCorpo(), values));
+  }
+
   private ParamDocOutputEntity getByDocType(String type) {
     return paramDocOutputEntityRepository.findByTipoDocumentoAndEstado(type, Estado.A.name()).orElseThrow();
+  }
+
+  private String getResponsavel(ResponsavelEntity responsavel) {
+    return Optional.ofNullable(responsavel)
+        .map(ResponsavelEntity::getFunId)
+        .map(FuncionarioEntity::getNome)
+        .orElse("NOT DEFINED");
   }
 
 }
