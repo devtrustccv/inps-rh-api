@@ -3,13 +3,17 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.config.AuditEntity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
 import java.util.UUID;
 
 
@@ -28,8 +32,8 @@ public class DispensaEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-    @NotNull(message = "tiprelId is mandatory")
+
+  @NotNull(message = "tiprelId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -43,46 +47,46 @@ public class DispensaEntity extends AuditEntity {
     @Column(name="tipo_dispensa")
     private String tipoDispensa;
 
-  
-    @Column(name="descricao_motivo")
+
+  @Column(name="descricao_motivo")
     private String descricaoMotivo;
 
-  
-    @Column(name="data")
+
+  @Column(name="data")
     private LocalDate data;
 
-  
-    @Column(name="hora_inicio")
+
+  @Column(name="hora_inicio")
     private String horaInicio;
 
-  
-    @Column(name="hora_fim")
+
+  @Column(name="hora_fim")
     private String horaFim;
 
-  
-    @Enumerated(EnumType.STRING)
+
+  @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
-    @Column(name="decisao_responsavel")
+
+  @Column(name="decisao_responsavel")
     private String decisaoResponsavel;
 
-  
-    @Column(name="obs_rh")
+
+  @Column(name="obs_rh")
     private String obsRh;
 
-  
-    @Column(name="obs_responsavel")
+
+  @Column(name="obs_responsavel")
     private String obsResponsavel;
 
-  
-    @Column(name="responsavel_id")
+
+  @Column(name="responsavel_id")
     private Long responsavelId;
 
-  
-    @Column(name="uuid")
+
+  @Column(name="uuid")
     private UUID uuid;
 
-  
+
 }

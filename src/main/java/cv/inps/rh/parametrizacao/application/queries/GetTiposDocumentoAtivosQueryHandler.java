@@ -2,7 +2,6 @@ package cv.inps.rh.parametrizacao.application.queries;
 
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.application.dto.TipoDocumentoDTO;
 import cv.inps.rh.parametrizacao.domain.repository.TipoDocumentoRepository;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.TipoDocumentoMapper;

@@ -1,7 +1,6 @@
 package cv.inps.rh.shared.application.service;
 
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
-import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.mappers.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;

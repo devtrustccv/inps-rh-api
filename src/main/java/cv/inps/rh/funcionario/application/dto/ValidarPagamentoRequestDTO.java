@@ -4,12 +4,10 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.NovoPagamentoRequestDTO;
 
 @Data
 @NoArgsConstructor
@@ -19,10 +17,9 @@ import cv.inps.rh.funcionario.application.dto.NovoPagamentoRequestDTO;
 @IgrpDTO
 public class ValidarPagamentoRequestDTO  {
 
-  
-  
+
   private String validacao ;
-  
+
   @Valid
   private NovoPagamentoRequestDTO dados ;
 

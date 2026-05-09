@@ -2,17 +2,16 @@ package cv.inps.rh.transversal.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.transversal.application.service.DossierTransformerService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import cv.inps.rh.transversal.application.dto.DossierResponseDTO;
 import cv.inps.rh.transversal.application.service.DossierQueryBuilderService;
+import cv.inps.rh.transversal.application.service.DossierTransformerService;
 import cv.inps.rh.transversal.application.service.ValidacaoDossierService;
 import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 

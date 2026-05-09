@@ -4,12 +4,11 @@
 package cv.inps.rh.assiduidade.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.assiduidade.application.dto.VerMapaContentDTO;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +20,7 @@ import java.util.List;
 @IgrpDTO
 public class VerMapaDTO  {
 
-  
+
   @Valid
   private List<VerMapaContentDTO> content = new ArrayList<>();
 

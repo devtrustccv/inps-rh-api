@@ -3,15 +3,19 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
 import cv.inps.rh.shared.application.constants.Estado;
-import java.util.UUID;
+import cv.inps.rh.shared.config.AuditEntity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 
 @Getter

@@ -5,11 +5,9 @@ package cv.inps.rh.missaoservico.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
 

@@ -3,12 +3,16 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
+import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
-import lombok.*;
-import java.time.LocalDate;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
 import java.util.UUID;
 
 
@@ -27,16 +31,14 @@ public class FeriasMapaEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-    @NotNull(message = "dataInicio is mandatory")
+
+  @NotNull(message = "dataInicio is mandatory")
     @Column(name="data_inicio", nullable = false)
     private LocalDate dataInicio;
 
-  
-    @Column(name="data_fim")
-    private LocalDate dataFim;
 
-  
+  @Column(name="data_fim")
+    private LocalDate dataFim;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -50,5 +52,5 @@ public class FeriasMapaEntity extends AuditEntity {
     @Column(name="uuid")
     private UUID uuid;
 
-  
+
 }

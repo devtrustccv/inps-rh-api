@@ -4,12 +4,12 @@
 package cv.inps.rh.assiduidade.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.shared.application.dto.AnexoReqDTO;
+
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -21,31 +21,30 @@ import java.util.UUID;
 @IgrpDTO
 public class HoraExtraDTO  {
 
-  
-  
+
   private Long id ;
-  
-  
+
+
   private UUID colaborador ;
-  
-  
+
+
   private String colaboradorNome ;
-  
-  
+
+
   private LocalDate dataInicio ;
-  
-  
+
+
   private LocalDate dataFim ;
-  
-  
+
+
   private Long horasDiaria ;
-  
-  
+
+
   private Integer percentagemHora ;
-  
-  
+
+
   private Integer valorDiario ;
-  
+
   @Valid
   private AnexoReqDTO documento ;
 

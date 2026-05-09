@@ -3,30 +3,28 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.funcionario.application.commands.NovoPedidoDeclaracaoCommand;
+import cv.inps.rh.funcionario.application.commands.SubmeterAnalisePedidoDeclaracaoCommand;
+import cv.inps.rh.funcionario.application.commands.ValidacaoPedidoDeclaracaoCommand;
+import cv.inps.rh.funcionario.application.dto.*;
+import cv.inps.rh.funcionario.application.queries.GetNotificacaoPedidoDeclaracaoQuery;
+import cv.inps.rh.funcionario.application.queries.GetPedidoDeclaracaoQuery;
+import cv.inps.rh.funcionario.application.queries.GetPedidoDeclaracoesQuery;
+import cv.inps.rh.funcionario.application.queries.VisualizarPedidoDeclaracaoQuery;
+import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.funcionario.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.funcionario.application.commands.*;
-import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoDTO;
 import java.util.Map;
-import cv.inps.rh.funcionario.application.dto.WrapperListaPedidoDeclaracaoDTO;
-import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoResponseDTO;
-import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoAnaliseDTO;
-import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoValidacaoDTO;
-import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
 
 @IgrpController
 @RestController
@@ -37,7 +35,7 @@ import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
 )
 public class DeclaracaoController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -54,7 +52,7 @@ public class DeclaracaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -64,8 +62,8 @@ public class DeclaracaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> novoPedidoDeclaracao(@Valid @RequestBody PedidoDeclaracaoDTO novoPedidoDeclaracaoRequest
+
+   public ResponseEntity<Map<String, ?>> novoPedidoDeclaracao(@Valid @RequestBody PedidoDeclaracaoDTO novoPedidoDeclaracaoRequest
     )
   {
 
@@ -84,7 +82,7 @@ public class DeclaracaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -94,8 +92,8 @@ public class DeclaracaoController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListaPedidoDeclaracaoDTO> getPedidoDeclaracoes(
+
+   public ResponseEntity<WrapperListaPedidoDeclaracaoDTO> getPedidoDeclaracoes(
     @RequestParam(value = "tipoDeclaracao", required = false) String tipoDeclaracao,
     @RequestParam(value = "dataPedidoDe", required = false) String dataPedidoDe,
     @RequestParam(value = "dataPedidoAte", required = false) String dataPedidoAte,
@@ -118,7 +116,7 @@ public class DeclaracaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -128,8 +126,8 @@ public class DeclaracaoController {
       )
     }
   )
-  
-  public ResponseEntity<PedidoDeclaracaoResponseDTO> getPedidoDeclaracao(
+
+   public ResponseEntity<PedidoDeclaracaoResponseDTO> getPedidoDeclaracao(
     @PathVariable(value = "id") String id)
   {
 
@@ -148,7 +146,7 @@ public class DeclaracaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -158,8 +156,8 @@ public class DeclaracaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> submeterAnalisePedidoDeclaracao(@Valid @RequestBody PedidoDeclaracaoAnaliseDTO submeterAnalisePedidoDeclaracaoRequest
+
+   public ResponseEntity<Map<String, ?>> submeterAnalisePedidoDeclaracao(@Valid @RequestBody PedidoDeclaracaoAnaliseDTO submeterAnalisePedidoDeclaracaoRequest
     , @PathVariable(value = "id") String id)
   {
 
@@ -178,7 +176,7 @@ public class DeclaracaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -188,8 +186,8 @@ public class DeclaracaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> validacaoPedidoDeclaracao(@Valid @RequestBody PedidoDeclaracaoValidacaoDTO validacaoPedidoDeclaracaoRequest
+
+   public ResponseEntity<Map<String, ?>> validacaoPedidoDeclaracao(@Valid @RequestBody PedidoDeclaracaoValidacaoDTO validacaoPedidoDeclaracaoRequest
     , @PathVariable(value = "id") String id)
   {
 
@@ -208,7 +206,7 @@ public class DeclaracaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/pdf",
               schema = @Schema(
@@ -218,8 +216,8 @@ public class DeclaracaoController {
       )
     }
   )
-  
-  public ResponseEntity<?> visualizarPedidoDeclaracao(
+
+   public ResponseEntity<?> visualizarPedidoDeclaracao(
     @PathVariable(value = "id") String id)
   {
 
@@ -238,7 +236,7 @@ public class DeclaracaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -248,8 +246,8 @@ public class DeclaracaoController {
       )
     }
   )
-  
-  public ResponseEntity<NotificacaoInfoDTO> getNotificacaoPedidoDeclaracao(
+
+   public ResponseEntity<NotificacaoInfoDTO> getNotificacaoPedidoDeclaracao(
     @PathVariable(value = "id") String id)
   {
 

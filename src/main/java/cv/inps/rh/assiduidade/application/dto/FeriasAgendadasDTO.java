@@ -4,11 +4,10 @@
 package cv.inps.rh.assiduidade.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.time.LocalDate;
 
 @Data
@@ -19,20 +18,19 @@ import java.time.LocalDate;
 @IgrpDTO
 public class FeriasAgendadasDTO  {
 
-  
-  
+
   private String nomeColaborador ;
-  
-  
+
+
   private Integer totalDireito ;
-  
-  
+
+
   private Integer totalDireitoPorAno ;
-  
-  
+
+
   private LocalDate dataInicio ;
-  
-  
+
+
   private LocalDate dataFim ;
 
 }

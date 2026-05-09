@@ -3,11 +3,15 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
+import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
-import lombok.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.UUID;
 
 
@@ -26,26 +30,26 @@ public class ParamNotificacaoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-    @NotBlank(message = "tipoNotificacao is mandatory")
+
+  @NotBlank(message = "tipoNotificacao is mandatory")
     @Column(name="tipo_notificacao", nullable = false)
     private String tipoNotificacao;
 
-  
-    @Column(name="assunto")
+
+  @Column(name="assunto")
     private String assunto;
 
-  
-    @Column(name="corpo")
+
+  @Column(name="corpo")
     private String corpo;
 
-  
-    @Column(name="estado")
+
+  @Column(name="estado")
     private String estado;
 
-  
-    @Column(name="uuid")
+
+  @Column(name="uuid")
     private UUID uuid;
 
-  
+
 }

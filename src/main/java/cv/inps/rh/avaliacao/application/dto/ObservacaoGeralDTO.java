@@ -4,11 +4,10 @@
 package cv.inps.rh.avaliacao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.time.LocalDate;
 
 @Data
@@ -19,20 +18,19 @@ import java.time.LocalDate;
 @IgrpDTO
 public class ObservacaoGeralDTO  {
 
-  
-  
+
   private String observacaoGeralAvaliacao ;
-  
-  
+
+
   private String descPlanoDesenvolvimento ;
-  
-  
+
+
   private LocalDate dataInicio ;
-  
-  
+
+
   private String horaInicio ;
-  
-  
+
+
   private String HoraFim ;
 
 }

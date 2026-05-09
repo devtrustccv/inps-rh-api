@@ -3,27 +3,28 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.funcionario.application.commands.AtualizarCarreiraCommand;
+import cv.inps.rh.funcionario.application.commands.EliminarCarreiraCommand;
+import cv.inps.rh.funcionario.application.commands.NovaCarreiraCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarCarreiraCommand;
+import cv.inps.rh.funcionario.application.dto.CarreiraResponseDTO;
+import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.funcionario.application.dto.ValidacaoCarreiraDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
+import cv.inps.rh.funcionario.application.queries.GetCarreiraAtualQuery;
+import cv.inps.rh.funcionario.application.queries.GetCarreiraByIdQuery;
+import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.funcionario.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.funcionario.application.commands.*;
-import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
-import cv.inps.rh.funcionario.application.dto.ValidacaoCarreiraDTO;
-import cv.inps.rh.funcionario.application.dto.CarreiraResponseDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
@@ -34,7 +35,7 @@ import cv.inps.rh.funcionario.application.dto.CarreiraResponseDTO;
 )
 public class CarreiraController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -51,7 +52,7 @@ public class CarreiraController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -61,8 +62,8 @@ public class CarreiraController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperCarreiraListDTO> getCarreiraList(
+
+   public ResponseEntity<WrapperCarreiraListDTO> getCarreiraList(
     @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
@@ -86,7 +87,7 @@ public class CarreiraController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -96,8 +97,8 @@ public class CarreiraController {
       )
     }
   )
-  
-  public ResponseEntity<String> novaCarreira(@Valid @RequestBody DadosContratuaisReqDTO novaCarreiraRequest
+
+   public ResponseEntity<String> novaCarreira(@Valid @RequestBody DadosContratuaisReqDTO novaCarreiraRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
@@ -116,7 +117,7 @@ public class CarreiraController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -126,8 +127,8 @@ public class CarreiraController {
       )
     }
   )
-  
-  public ResponseEntity<String> validarCarreira(@Valid @RequestBody ValidacaoCarreiraDTO validarCarreiraRequest
+
+   public ResponseEntity<String> validarCarreira(@Valid @RequestBody ValidacaoCarreiraDTO validarCarreiraRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId,@PathVariable(value = "carreiraId") String carreiraId)
   {
 
@@ -146,7 +147,7 @@ public class CarreiraController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -156,8 +157,8 @@ public class CarreiraController {
       )
     }
   )
-  
-  public ResponseEntity<CarreiraResponseDTO> getCarreiraById(
+
+   public ResponseEntity<CarreiraResponseDTO> getCarreiraById(
     @PathVariable(value = "carreiraId") String carreiraId)
   {
 
@@ -176,7 +177,7 @@ public class CarreiraController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -186,8 +187,8 @@ public class CarreiraController {
       )
     }
   )
-  
-  public ResponseEntity<CarreiraResponseDTO> getCarreiraAtual(
+
+   public ResponseEntity<CarreiraResponseDTO> getCarreiraAtual(
     @PathVariable(value = "uuidFuncionario") String uuidFuncionario)
   {
 
@@ -206,7 +207,7 @@ public class CarreiraController {
     responses = {
       @ApiResponse(
           responseCode = "204",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -216,8 +217,8 @@ public class CarreiraController {
       )
     }
   )
-  
-  public ResponseEntity<String> eliminarCarreira(
+
+   public ResponseEntity<String> eliminarCarreira(
     @PathVariable(value = "carreiraId") String carreiraId)
   {
 
@@ -236,7 +237,7 @@ public class CarreiraController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -246,8 +247,8 @@ public class CarreiraController {
       )
     }
   )
-  
-  public ResponseEntity<String> atualizarCarreira(@Valid @RequestBody DadosContratuaisReqDTO atualizarCarreiraRequest
+
+   public ResponseEntity<String> atualizarCarreira(@Valid @RequestBody DadosContratuaisReqDTO atualizarCarreiraRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId,@PathVariable(value = "carreiraId") String carreiraId)
   {
 

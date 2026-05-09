@@ -1,18 +1,17 @@
 package cv.inps.rh.parametrizacao.application.queries;
 
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.repository.SecaoRepository;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.SecaoMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Component
 public class GetSeccoesAtivosQueryHandler implements QueryHandler<GetSeccoesAtivosQuery, ResponseEntity<List<ParametrizacaoDTO>>>{

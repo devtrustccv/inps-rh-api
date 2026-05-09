@@ -3,11 +3,15 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
+import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
-import lombok.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -27,8 +31,8 @@ public class DeclaracaoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-    @NotNull(message = "funId is mandatory")
+
+  @NotNull(message = "funId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -47,45 +51,45 @@ public class DeclaracaoEntity extends AuditEntity {
     @Column(name="finalidade")
     private String finalidade;
 
-  
-    @Column(name="data_pedido")
+
+  @Column(name="data_pedido")
     private LocalDate dataPedido;
 
-  
-    @Column(name="obs")
+
+  @Column(name="obs")
     private String obs;
 
-  
-    @Column(name="tipo_declaracao")
+
+  @Column(name="tipo_declaracao")
     private String tipoDeclaracao;
 
-  
-    @Column(name="decisao_analise")
+
+  @Column(name="decisao_analise")
     private String decisaoAnalise;
 
-  
-    @Column(name="obs_analise")
+
+  @Column(name="obs_analise")
     private String obsAnalise;
 
-  
-    @Column(name="decisao_rh")
+
+  @Column(name="decisao_rh")
     private String decisaoRh;
 
-  
-    @Column(name="entrega")
+
+  @Column(name="entrega")
     private String entrega;
 
-  
-    @Column(name="estado")
+
+  @Column(name="estado")
     private String estado;
 
-  
-    @Column(name="entidade_destinado")
+
+  @Column(name="entidade_destinado")
     private String entidadeDestinado;
 
-  
-    @Column(name="uuid")
+
+  @Column(name="uuid")
     private UUID uuid;
 
-  
+
 }

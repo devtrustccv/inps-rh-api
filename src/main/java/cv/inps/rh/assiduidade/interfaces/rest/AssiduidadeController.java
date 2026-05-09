@@ -3,40 +3,22 @@
 
 package cv.inps.rh.assiduidade.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.assiduidade.application.commands.*;
+import cv.inps.rh.assiduidade.application.dto.*;
+import cv.inps.rh.assiduidade.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.assiduidade.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.assiduidade.application.commands.*;
-import cv.inps.rh.assiduidade.application.dto.WrapperListaPicagemDTO;
-import cv.inps.rh.assiduidade.application.dto.WrapperListaAssiduidadadeDTO;
-import cv.inps.rh.assiduidade.application.dto.FaltaReqDTO;
 import java.util.Map;
-import cv.inps.rh.assiduidade.application.dto.WrapperListaFaltaDTO;
-import cv.inps.rh.assiduidade.application.dto.WrapperListaDispensaDTO;
-import cv.inps.rh.assiduidade.application.dto.DispensaReqDTO;
-import cv.inps.rh.assiduidade.application.dto.WrapperListaHoraExtraDTO;
-import cv.inps.rh.assiduidade.application.dto.HoraExtraReqDTO;
-import cv.inps.rh.assiduidade.application.dto.WrapperListaFeriaDTO;
-import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
-import cv.inps.rh.assiduidade.application.dto.PedidoFeriaAlterarReqDTO;
-import cv.inps.rh.assiduidade.application.dto.VerMapaDTO;
-import cv.inps.rh.assiduidade.application.dto.WrapperListaMapaFeriaDTO;
-import cv.inps.rh.assiduidade.application.dto.DetalheMapaFeriaDTO;
-import cv.inps.rh.assiduidade.application.dto.JustificarFaltaDTO;
-import cv.inps.rh.assiduidade.application.dto.HorasDispensaStatusDTO;
 
 @IgrpController
 @RestController
@@ -47,7 +29,7 @@ import cv.inps.rh.assiduidade.application.dto.HorasDispensaStatusDTO;
 )
 public class AssiduidadeController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -64,7 +46,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -74,8 +56,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListaPicagemDTO> getListaPicagem(
+
+   public ResponseEntity<WrapperListaPicagemDTO> getListaPicagem(
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "colaborador", required = false) String colaborador,
@@ -102,7 +84,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -112,8 +94,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListaAssiduidadadeDTO> getListaMovimentosResumidos(
+
+   public ResponseEntity<WrapperListaAssiduidadadeDTO> getListaMovimentosResumidos(
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "colaborador", required = false) String colaborador,
@@ -141,7 +123,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -151,8 +133,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> marcarFalta(@Valid @RequestBody FaltaReqDTO marcarFaltaRequest
+
+   public ResponseEntity<Map<String, ?>> marcarFalta(@Valid @RequestBody FaltaReqDTO marcarFaltaRequest
     )
   {
 
@@ -171,7 +153,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -181,8 +163,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> validarFalta(@Valid @RequestBody FaltaReqDTO validarFaltaRequest
+
+   public ResponseEntity<Map<String, ?>> validarFalta(@Valid @RequestBody FaltaReqDTO validarFaltaRequest
     , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
@@ -201,7 +183,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -211,8 +193,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListaFaltaDTO> getListaFalta(
+
+   public ResponseEntity<WrapperListaFaltaDTO> getListaFalta(
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "colaborador", required = false) String colaborador,
@@ -240,7 +222,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -250,8 +232,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListaDispensaDTO> getListaDispensa(
+
+   public ResponseEntity<WrapperListaDispensaDTO> getListaDispensa(
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "colaborador", required = false) String colaborador,
@@ -279,7 +261,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -289,8 +271,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> marcarDispensa(@Valid @RequestBody DispensaReqDTO marcarDispensaRequest
+
+   public ResponseEntity<Map<String, ?>> marcarDispensa(@Valid @RequestBody DispensaReqDTO marcarDispensaRequest
     )
   {
 
@@ -309,7 +291,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -319,8 +301,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> validarDispensa(@Valid @RequestBody DispensaReqDTO validarDispensaRequest
+
+   public ResponseEntity<Map<String, ?>> validarDispensa(@Valid @RequestBody DispensaReqDTO validarDispensaRequest
     , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
@@ -339,7 +321,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -349,8 +331,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListaHoraExtraDTO> getListaHoraExtra(
+
+   public ResponseEntity<WrapperListaHoraExtraDTO> getListaHoraExtra(
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "ilha", required = false) Long ilha,
@@ -376,7 +358,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -386,8 +368,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> marcarHoraExtra(@Valid @RequestBody HoraExtraReqDTO marcarHoraExtraRequest
+
+   public ResponseEntity<Map<String, ?>> marcarHoraExtra(@Valid @RequestBody HoraExtraReqDTO marcarHoraExtraRequest
     )
   {
 
@@ -406,7 +388,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -416,8 +398,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> validarHoraExtra(@Valid @RequestBody HoraExtraReqDTO validarHoraExtraRequest
+
+   public ResponseEntity<Map<String, ?>> validarHoraExtra(@Valid @RequestBody HoraExtraReqDTO validarHoraExtraRequest
     , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
@@ -436,7 +418,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -446,8 +428,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListaFeriaDTO> getListaFeria(
+
+   public ResponseEntity<WrapperListaFeriaDTO> getListaFeria(
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "anoReferente", required = false) Integer anoReferente,
@@ -473,7 +455,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -483,8 +465,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> marcarFeria(@Valid @RequestBody PedidoFeriaReqDTO marcarFeriaRequest
+
+   public ResponseEntity<Map<String, ?>> marcarFeria(@Valid @RequestBody PedidoFeriaReqDTO marcarFeriaRequest
     )
   {
 
@@ -503,7 +485,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -513,8 +495,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> alterarPedidoFeria(@Valid @RequestBody PedidoFeriaAlterarReqDTO alterarPedidoFeriaRequest
+
+   public ResponseEntity<Map<String, ?>> alterarPedidoFeria(@Valid @RequestBody PedidoFeriaAlterarReqDTO alterarPedidoFeriaRequest
     , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
@@ -533,7 +515,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -543,8 +525,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> validarPedidoFeria(@Valid @RequestBody PedidoFeriaReqDTO validarPedidoFeriaRequest
+
+   public ResponseEntity<Map<String, ?>> validarPedidoFeria(@Valid @RequestBody PedidoFeriaReqDTO validarPedidoFeriaRequest
     , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
@@ -563,7 +545,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -573,8 +555,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<VerMapaDTO> verMapa(
+
+   public ResponseEntity<VerMapaDTO> verMapa(
     @RequestParam(value = "ano", required = false) Integer ano,
     @RequestParam(value = "direcaoId", required = false) Long direcaoId,
     @RequestParam(value = "funcionarioUuid", required = false) String funcionarioUuid)
@@ -595,7 +577,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -605,8 +587,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListaMapaFeriaDTO> listaMapaFeria(
+
+   public ResponseEntity<WrapperListaMapaFeriaDTO> listaMapaFeria(
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "anoReferente", required = false) Integer anoReferente,
@@ -631,7 +613,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -641,8 +623,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<DetalheMapaFeriaDTO> getDetalheMapaFeria(
+
+   public ResponseEntity<DetalheMapaFeriaDTO> getDetalheMapaFeria(
     @RequestParam(value = "ano") Integer ano,
     @RequestParam(value = "direcao") Long direcao)
   {
@@ -662,7 +644,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -672,8 +654,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> justificarFalta(@Valid @RequestBody JustificarFaltaDTO justificarFaltaRequest
+
+   public ResponseEntity<Map<String, ?>> justificarFalta(@Valid @RequestBody JustificarFaltaDTO justificarFaltaRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
@@ -692,7 +674,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -702,8 +684,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<FaltaReqDTO> getFalta(
+
+   public ResponseEntity<FaltaReqDTO> getFalta(
     @PathVariable(value = "pedidoId") String pedidoId)
   {
 
@@ -722,7 +704,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -732,8 +714,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<DispensaReqDTO> getDispensa(
+
+   public ResponseEntity<DispensaReqDTO> getDispensa(
     @PathVariable(value = "dispensaId") String dispensaId)
   {
 
@@ -752,7 +734,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -762,8 +744,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<HoraExtraReqDTO> getHoraExtra(
+
+   public ResponseEntity<HoraExtraReqDTO> getHoraExtra(
     @PathVariable(value = "pedidoId") String pedidoId)
   {
 
@@ -782,7 +764,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -792,8 +774,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<PedidoFeriaAlterarReqDTO> getPedidoFeria(
+
+   public ResponseEntity<PedidoFeriaAlterarReqDTO> getPedidoFeria(
     @PathVariable(value = "pedidoId") String pedidoId)
   {
 
@@ -812,7 +794,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -822,8 +804,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> validarFaltaJustificada(@Valid @RequestBody JustificarFaltaDTO validarFaltaJustificadaRequest
+
+   public ResponseEntity<Map<String, ?>> validarFaltaJustificada(@Valid @RequestBody JustificarFaltaDTO validarFaltaJustificadaRequest
     , @PathVariable(value = "pedidoId") String pedidoId)
   {
 
@@ -842,7 +824,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -852,8 +834,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<JustificarFaltaDTO> getJustificacaoFalta(
+
+   public ResponseEntity<JustificarFaltaDTO> getJustificacaoFalta(
     @RequestParam(value = "ano") Integer ano,
     @RequestParam(value = "mes") Integer mes, @PathVariable(value = "funcionarioId") String funcionarioId)
   {
@@ -873,7 +855,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -883,8 +865,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<JustificarFaltaDTO> getJustificacaoFaltaByPedido(
+
+   public ResponseEntity<JustificarFaltaDTO> getJustificacaoFaltaByPedido(
     @PathVariable(value = "pedidoId") String pedidoId)
   {
 
@@ -903,7 +885,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -913,8 +895,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<DispensaReqDTO> getDispensaByPedidoId(
+
+   public ResponseEntity<DispensaReqDTO> getDispensaByPedidoId(
     @PathVariable(value = "pedidoId") String pedidoId)
   {
 
@@ -933,7 +915,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -943,8 +925,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> updateDispensa(@Valid @RequestBody DispensaReqDTO updateDispensaRequest
+
+   public ResponseEntity<Map<String, ?>> updateDispensa(@Valid @RequestBody DispensaReqDTO updateDispensaRequest
     , @PathVariable(value = "dispensaId") String dispensaId)
   {
 
@@ -963,7 +945,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -973,8 +955,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> getFuncioarioSaldoFerias(
+
+   public ResponseEntity<Map<String, ?>> getFuncioarioSaldoFerias(
     @RequestParam(value = "ano", required = false) Integer ano, @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
@@ -993,7 +975,7 @@ public class AssiduidadeController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -1003,8 +985,8 @@ public class AssiduidadeController {
       )
     }
   )
-  
-  public ResponseEntity<HorasDispensaStatusDTO> getFuncionarioSaldoDispensa(
+
+   public ResponseEntity<HorasDispensaStatusDTO> getFuncionarioSaldoDispensa(
     @RequestParam(value = "data") String data, @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 

@@ -1,7 +1,6 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.progressaopromocao.application.dto.ProgressaoPromocaoRowDTO;
-import cv.inps.rh.progressaopromocao.domain.service.ProgressaoPromocaoWriteService;
 import cv.inps.rh.progressaopromocao.domain.service.model.CollaboratorDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EvolucaoCarreiraEntity;

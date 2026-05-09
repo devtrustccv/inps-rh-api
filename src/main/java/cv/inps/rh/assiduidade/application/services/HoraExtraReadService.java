@@ -1,29 +1,27 @@
 package cv.inps.rh.assiduidade.application.services;
 
-import cv.inps.rh.assiduidade.application.dto.HoraExtraReqDTO;
+import cv.inps.rh.assiduidade.application.dto.HorExtraListDTO;
 import cv.inps.rh.assiduidade.application.dto.HoraExtraDTO;
+import cv.inps.rh.assiduidade.application.dto.HoraExtraReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaHoraExtraDTO;
 import cv.inps.rh.assiduidade.application.queries.GetHoraExtraQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaHoraExtraQuery;
-import cv.inps.rh.assiduidade.application.dto.HorExtraListDTO;
 import cv.inps.rh.shared.application.constants.custom.TableName;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.HoraExtraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.VHoraExtraMensalEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.HoraExtraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.HoraExtraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.VHoraExtraMensalEntityRepository;
-import cv.inps.rh.shared.application.constants.custom.Referencia;
-import cv.inps.rh.shared.application.dto.AnexoReqDTO;
-import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 

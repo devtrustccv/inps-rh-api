@@ -1,15 +1,14 @@
 package cv.inps.rh.parametrizacao.infrastructure.persistence.repository;
 
-import java.util.List;
-
-import org.springframework.stereotype.Repository;
-
 import cv.inps.rh.parametrizacao.domain.models.Secao;
 import cv.inps.rh.parametrizacao.domain.repository.SecaoRepository;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.SecaoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SecaoEntityRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor

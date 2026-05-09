@@ -5,8 +5,11 @@ package cv.inps.rh.shared.infrastructure.persistence.entity;
 
 import cv.igrp.framework.stereotype.IgrpEntity;
 import jakarta.persistence.*;
-import lombok.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 @Getter
@@ -24,8 +27,8 @@ public class TipoRelRemPagEntity  {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-    @NotNull(message = "tiprelId is mandatory")
+
+  @NotNull(message = "tiprelId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)

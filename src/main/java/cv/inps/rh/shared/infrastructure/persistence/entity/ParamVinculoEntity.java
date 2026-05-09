@@ -3,13 +3,17 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import java.util.UUID;
-import jakarta.validation.constraints.NotBlank;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.config.AuditEntity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.UUID;
 
 
 @Getter
@@ -27,45 +31,43 @@ public class ParamVinculoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-    @Column(name="uuid")
+
+  @Column(name="uuid")
     private UUID uuid;
 
-  
-    @NotBlank(message = "codigo is mandatory")
+
+  @NotBlank(message = "codigo is mandatory")
     @Column(name="codigo", nullable = false)
     private String codigo;
 
-  
-    @Column(name="nome")
+
+  @Column(name="nome")
     private String nome;
 
-  
-    @Column(name="nome_normalizado")
+
+  @Column(name="nome_normalizado")
     private String nomeNormalizado;
 
-  
-    @Column(name="flg_carreira")
+
+  @Column(name="flg_carreira")
     private Integer flgCarreira;
 
-  
-    @Column(name="flg_salario")
+
+  @Column(name="flg_salario")
     private Integer flgSalario;
 
-  
-    @Column(name="flg_contrato")
+
+  @Column(name="flg_contrato")
     private Integer flgContrato;
 
-  
-    @Column(name="flg_tempo_servico")
+
+  @Column(name="flg_tempo_servico")
     private Integer flgTempoServico;
 
-  
-    @Enumerated(EnumType.STRING)
+
+  @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
-
-  
 
 
   @ManyToOne(fetch = FetchType.LAZY)

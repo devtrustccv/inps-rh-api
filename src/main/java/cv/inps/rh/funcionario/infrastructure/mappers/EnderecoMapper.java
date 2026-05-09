@@ -5,7 +5,6 @@ import cv.inps.rh.funcionario.application.dto.EnderecoReqDTO;
 import cv.inps.rh.funcionario.application.dto.EnderecoRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EnderecoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.EntidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;

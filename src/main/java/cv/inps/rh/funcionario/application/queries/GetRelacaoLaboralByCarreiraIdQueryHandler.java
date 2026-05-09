@@ -1,14 +1,13 @@
 package cv.inps.rh.funcionario.application.queries;
 
-import cv.inps.rh.funcionario.application.dto.RelacaoLaboralDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
+import cv.inps.rh.funcionario.application.dto.RelacaoLaboralDTO;
+import cv.inps.rh.funcionario.application.service.historicolaboral.HistoricoLaboralReadService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
-import cv.inps.rh.funcionario.application.service.historicolaboral.HistoricoLaboralReadService;
 
 @Component
 public class GetRelacaoLaboralByCarreiraIdQueryHandler implements QueryHandler<GetRelacaoLaboralByCarreiraIdQuery, ResponseEntity<RelacaoLaboralDTO>>{

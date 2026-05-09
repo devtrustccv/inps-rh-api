@@ -3,26 +3,23 @@
 
 package cv.inps.rh.transversal.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.transversal.application.commands.ObterDossierColaboradorCommand;
+import cv.inps.rh.transversal.application.dto.AssiduidadeListDTO;
+import cv.inps.rh.transversal.application.dto.DossierRequestDTO;
+import cv.inps.rh.transversal.application.dto.DossierResponseDTO;
+import cv.inps.rh.transversal.application.queries.ExtrairFichaEfetividadeQuery;
+import cv.inps.rh.transversal.application.queries.RelatorioAssiduidadeQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.transversal.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.transversal.application.commands.*;
-import cv.inps.rh.transversal.application.dto.AssiduidadeListDTO;
-import cv.inps.rh.transversal.application.dto.DossierRequestDTO;
-import cv.inps.rh.transversal.application.dto.DossierResponseDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
@@ -33,7 +30,7 @@ import cv.inps.rh.transversal.application.dto.DossierResponseDTO;
 )
 public class RelatorioController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -50,7 +47,7 @@ public class RelatorioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -60,7 +57,7 @@ public class RelatorioController {
       )
     }
   )
-  
+
   public ResponseEntity<AssiduidadeListDTO> relatorioAssiduidade(
     @RequestParam(value = "direccaoId", required = false) Long direccaoId,
     @RequestParam(value = "seccaoId", required = false) Long seccaoId,
@@ -87,7 +84,7 @@ public class RelatorioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -97,7 +94,7 @@ public class RelatorioController {
       )
     }
   )
-  
+
   public ResponseEntity<DossierResponseDTO> obterDossierColaborador(@Valid @RequestBody DossierRequestDTO obterDossierColaboradorRequest
     )
   {
@@ -117,7 +114,7 @@ public class RelatorioController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/pdf",
               schema = @Schema(
@@ -127,7 +124,7 @@ public class RelatorioController {
       )
     }
   )
-  
+
   public ResponseEntity<?> extrairFichaEfetividade(
     @RequestParam(value = "ano", required = false) Integer ano,
     @RequestParam(value = "mes", required = false) Integer mes)

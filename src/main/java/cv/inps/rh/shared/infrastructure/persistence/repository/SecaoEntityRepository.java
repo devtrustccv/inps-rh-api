@@ -1,16 +1,15 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
+import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 
 @Repository

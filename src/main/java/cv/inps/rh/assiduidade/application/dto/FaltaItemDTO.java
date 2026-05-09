@@ -4,12 +4,11 @@
 package cv.inps.rh.assiduidade.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 
 @Data
 @NoArgsConstructor
@@ -19,31 +18,30 @@ import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 @IgrpDTO
 public class FaltaItemDTO  {
 
-  
-  
+
   private boolean selecionar ;
-  
-  
+
+
   private Long id ;
-  
-  
+
+
   private String data ;
-  
-  
+
+
   private String tipoFalta ;
-  
-  
+
+
   private String horasAusencia ;
-  
-  
+
+
   private Integer valorAusencia ;
-  
-  
+
+
   private String motivo ;
-  
-  
+
+
   private String comJustificativo ;
-  
+
   @Valid
   private AnexoReqDTO documento ;
 

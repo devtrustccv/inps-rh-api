@@ -4,12 +4,12 @@ import cv.inps.rh.assiduidade.application.dto.*;
 import cv.inps.rh.assiduidade.application.queries.GetDetalheMapaFeriaQuery;
 import cv.inps.rh.assiduidade.application.queries.ListaMapaFeriaQuery;
 import cv.inps.rh.assiduidade.application.queries.VerMapaQuery;
-import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.infrastructure.persistence.entity.*;
-import cv.inps.rh.shared.infrastructure.persistence.repository.*;
-import cv.inps.rh.shared.util.DateFormatter;
+import cv.inps.rh.shared.infrastructure.persistence.entity.VFeriasDetalheColaboradorEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.VMapaFeriaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.VFeriasDetalheColaboradorEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.VMapaFeriaEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.VMapaFeriasDetalheEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,9 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
