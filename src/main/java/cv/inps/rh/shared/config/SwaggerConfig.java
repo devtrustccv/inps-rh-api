@@ -67,6 +67,14 @@ public class SwaggerConfig {
   }
 
   @Bean
+  public GroupedOpenApi ordemServico() {
+    return GroupedOpenApi.builder()
+        .group("Ordem Serviço")
+        .pathsToMatch("/api/relatorios/pdf/os/**")
+        .build();
+  }
+
+  @Bean
   public GroupedOpenApi processoDisciplinar() {
     return GroupedOpenApi.builder()
         .group("Processo Disciplinar")
