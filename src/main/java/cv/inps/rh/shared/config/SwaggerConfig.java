@@ -70,7 +70,7 @@ public class SwaggerConfig {
   public GroupedOpenApi ordemServico() {
     return GroupedOpenApi.builder()
         .group("Ordem Serviço")
-        .pathsToMatch("/api/relatorios/pdf/os/**")
+        .pathsToMatch("/api/relatorios/pdf/ordem-servico/**")
         .build();
   }
 
