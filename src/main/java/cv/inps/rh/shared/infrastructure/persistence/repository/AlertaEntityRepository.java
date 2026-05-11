@@ -23,5 +23,6 @@ public interface AlertaEntityRepository extends
 
   Optional<AlertaEntity> findByUuid(UUID uuid);
 
+  boolean existsByReferenciaIdAndTipoAlerta(Long referenciaId, String tipoAlerta);
 
 }

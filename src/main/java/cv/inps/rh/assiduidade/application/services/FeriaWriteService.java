@@ -18,7 +18,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
-import cv.inps.rh.shared.service.EmailService;
+import cv.inps.rh.shared.application.services.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.flywaydb.core.internal.util.CollectionsUtils;
 import org.springframework.http.HttpStatus;
