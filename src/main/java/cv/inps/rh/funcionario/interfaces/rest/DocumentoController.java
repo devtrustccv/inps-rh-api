@@ -5,6 +5,8 @@ package cv.inps.rh.funcionario.interfaces.rest;
 
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.funcionario.application.dto.WrapperListReciboDTO;
+import cv.inps.rh.funcionario.application.queries.GetListRecibosQuery;
 import cv.inps.rh.funcionario.application.queries.GetOrdemServicoQuery;
 import cv.inps.rh.funcionario.application.queries.GetUrlTemporarioQuery;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -91,6 +94,40 @@ public class DocumentoController {
   ) {
 
     final var query = new GetUrlTemporarioQuery();
+
+    return queryBus.handle(query);
+
+  }
+
+  @GetMapping(
+   value = "recibos"
+  )
+  @Operation(
+    summary = "Get list recibos",
+    description = "Get list recibos",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = WrapperListReciboDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<WrapperListReciboDTO> getListRecibos(
+    @RequestParam(value = "idFuncionario") String idFuncionario,
+    @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
+    @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
+    @RequestParam(value = "dataInicio", required = false) String dataInicio,
+    @RequestParam(value = "dataFim", required = false) String dataFim)
+  {
+
+    final var query = new GetListRecibosQuery(idFuncionario, pageSize, pageNumber, dataInicio, dataFim);
 
     return queryBus.handle(query);
 

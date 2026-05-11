@@ -50,4 +50,6 @@ public interface ProcSalCcRemunEntityRepository extends
       @Param("procId") Long procSalId
   );
 
+  List<ProcSalCcRemunEntity> findByProcFuncId(Long procFuncId);
+
 }
