@@ -99,6 +99,105 @@
           "isRequired": false
         }
       ]
+    },
+    {
+      "actionName": "getListOrdemServico",
+      "path": "lista-os/{funcionarioUuid}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListOrdemServico",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioUuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ],
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "20",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "gerarOrdemServicoPdf",
+      "path": "gerar-os/{osUuid}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "osUuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "anexarDocOrdemServico",
+      "path": "ordem-servico/{osUuid}/anexar",
+      "method": "POST",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "osUuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ],
+      "requestBody": {
+        "type": "AnexoReq",
+        "objectType": "dto",
+        "module": "shared"
+      }
     }
   ],
   "id": "7tpuueo0n8-getOrdemServico"

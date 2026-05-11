@@ -35,6 +35,35 @@ public class OrdemServicoPdfService {
   }
 
   @SneakyThrows
+  public String generate(Context context) {
+
+    var htmlContent = templateEngine.process("ordem-servico", context);
+
+    try (var outputStream = new ByteArrayOutputStream()) {
+
+      var renderer = new ITextRenderer();
+      renderer.setDocumentFromString(htmlContent);
+      renderer.layout();
+      renderer.createPDF(outputStream);
+
+      byte[] bytes = outputStream.toByteArray();
+
+      var uniqueFilename = buildUniqueFilename("ordem-servico.pdf");
+
+      storageService.uploadFile(
+          bytes,
+          uniqueFilename,
+          "application/pdf"
+      );
+
+      return uniqueFilename;
+
+    } catch (DocumentException | IOException e) {
+      throw new IllegalStateException("Erro ao gerar PDF da Ordem de Serviço", e);
+    }
+  }
+
+  @SneakyThrows
   public String generate(Map<String, Object> model) {
 
     var context = new Context();
