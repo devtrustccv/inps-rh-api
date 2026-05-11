@@ -4,13 +4,11 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO;
-import cv.inps.rh.funcionario.application.dto.SubsidioReqDTO;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,61 +22,60 @@ import java.util.List;
 @IgrpDTO
 public class DadosContratuaisReqDTO  {
 
-  
-  
+
   private Long tipoContratoId ;
-  
-  
+
+
   private Long tipoVinculoLaboralId ;
-  
-  
+
+
   private Long situacaoLaboralId ;
-  
-  
+
+
   private Long direcaoId ;
-  
-  
+
+
   private Long seccaoId ;
-  
-  
+
+
   private String centroCusto ;
-  
-  
+
+
   private Long carreiraId ;
-  
-  
+
+
   private Long categoriaId ;
-  
-  
+
+
   private Long escalaoReferenciaId ;
-  
-  
+
+
   private Long cargoPosicaoId ;
-  
-  
+
+
   private BigDecimal salario ;
-  
-  
+
+
   private String moeda ;
-  
-  
+
+
   private String regimeTrabalho ;
-  
-  
+
+
   private LocalDate dataInicio ;
-  
-  
+
+
   private Integer duracaoMeses ;
-  
-  
+
+
   private LocalDate dataFim ;
-  
-  
+
+
   private Long localTrabalhoId ;
-  
+
   @Valid
   private List<SubsidioReqDTO> subsidios = new ArrayList<>();
-  
+
   @Valid
   private List<EncargosDescontosReqDTO> encargosDescontos = new ArrayList<>();
 

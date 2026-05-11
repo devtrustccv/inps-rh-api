@@ -1,8 +1,11 @@
 package cv.inps.rh.parametrizacao.application.queries;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import cv.igrp.framework.core.domain.QueryHandler;
+import cv.igrp.framework.stereotype.IgrpQueryHandler;
+import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoEntityRepository;
+import jakarta.persistence.criteria.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
@@ -10,12 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import cv.igrp.framework.core.domain.QueryHandler;
-import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoEntityRepository;
-import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class GetParamSituacoesAtivoQueryHandler implements QueryHandler<GetParamSituacoesAtivoQuery, ResponseEntity<List<ParametrizacaoDTO>>> {

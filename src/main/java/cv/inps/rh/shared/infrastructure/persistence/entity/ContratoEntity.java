@@ -3,16 +3,20 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import jakarta.validation.constraints.NotNull;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.config.AuditEntity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDate;
-import java.util.UUID;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 
 @Getter
@@ -30,41 +34,39 @@ public class ContratoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-    @NotNull(message = "estado is mandatory")
+
+  @NotNull(message = "estado is mandatory")
     @Enumerated(EnumType.STRING)
     @Column(name="estado", nullable = false)
     private Estado estado;
 
-  
-    @Column(name="data_inicio")
+
+  @Column(name="data_inicio")
     private LocalDate dataInicio;
 
-  
-    @Column(name="data_fim")
+
+  @Column(name="data_fim")
     private LocalDate dataFim;
 
-  
-    @Column(name="duracao")
+
+  @Column(name="duracao")
     private Integer duracao;
 
-  
-    @Column(name="versao")
+
+  @Column(name="versao")
     private Integer versao;
 
-  
-    @Column(name="tipo_situacao")
+
+  @Column(name="tipo_situacao")
     private String tipoSituacao;
 
-  
-    @Column(name="obs")
+
+  @Column(name="obs")
     private String obs;
 
-  
-    @Column(name="uuid")
-    private UUID uuid;
 
-  
+  @Column(name="uuid")
+    private UUID uuid;
 
 
   @ManyToOne(fetch = FetchType.LAZY)

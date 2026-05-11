@@ -2,13 +2,10 @@ package cv.inps.rh.transversal.application.strategies;
 
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.transversal.application.constants.DimensaoEnum;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Selection;
-import java.util.List;
+import jakarta.persistence.criteria.*;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class SeccaoStrategy implements DimensaoStrategy {

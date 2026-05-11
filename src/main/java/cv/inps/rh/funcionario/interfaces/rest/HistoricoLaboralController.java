@@ -3,26 +3,26 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.funcionario.application.commands.AtualizarRelacaoLaboralCommand;
+import cv.inps.rh.funcionario.application.commands.NovaRelacaoLaboralCommand;
+import cv.inps.rh.funcionario.application.dto.RelacaoLaboralDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperRelacaoLaboralSumaryDTO;
+import cv.inps.rh.funcionario.application.queries.GetHistoricoLaboralQuery;
+import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByCarreiraIdQuery;
+import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByFunIdQuery;
+import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.funcionario.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.funcionario.application.commands.*;
-import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
-import cv.inps.rh.funcionario.application.dto.RelacaoLaboralDTO;
-import cv.inps.rh.funcionario.application.dto.WrapperRelacaoLaboralSumaryDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
@@ -33,7 +33,7 @@ import cv.inps.rh.funcionario.application.dto.WrapperRelacaoLaboralSumaryDTO;
 )
 public class HistoricoLaboralController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -50,7 +50,7 @@ public class HistoricoLaboralController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -60,8 +60,8 @@ public class HistoricoLaboralController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperHistLaboralResponseDTO> getHistoricoLaboral(
+
+   public ResponseEntity<WrapperHistLaboralResponseDTO> getHistoricoLaboral(
     @RequestParam(value = "referencia", required = false) String referencia,
     @RequestParam(value = "tipoSituacao", required = false) String tipoSituacao,
     @RequestParam(value = "situacaoLaboral", required = false) String situacaoLaboral,
@@ -86,7 +86,7 @@ public class HistoricoLaboralController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -96,8 +96,8 @@ public class HistoricoLaboralController {
       )
     }
   )
-  
-  public ResponseEntity<RelacaoLaboralDTO> novaRelacaoLaboral(@Valid @RequestBody RelacaoLaboralDTO novaRelacaoLaboralRequest
+
+   public ResponseEntity<RelacaoLaboralDTO> novaRelacaoLaboral(@Valid @RequestBody RelacaoLaboralDTO novaRelacaoLaboralRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
@@ -116,7 +116,7 @@ public class HistoricoLaboralController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -126,8 +126,8 @@ public class HistoricoLaboralController {
       )
     }
   )
-  
-  public ResponseEntity<RelacaoLaboralDTO> atualizarRelacaoLaboral(@Valid @RequestBody RelacaoLaboralDTO atualizarRelacaoLaboralRequest
+
+   public ResponseEntity<RelacaoLaboralDTO> atualizarRelacaoLaboral(@Valid @RequestBody RelacaoLaboralDTO atualizarRelacaoLaboralRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "carreiraId") String carreiraId)
   {
 
@@ -146,7 +146,7 @@ public class HistoricoLaboralController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -156,8 +156,8 @@ public class HistoricoLaboralController {
       )
     }
   )
-  
-  public ResponseEntity<RelacaoLaboralDTO> getRelacaoLaboralByCarreiraId(
+
+   public ResponseEntity<RelacaoLaboralDTO> getRelacaoLaboralByCarreiraId(
     @PathVariable(value = "carreiraId") String carreiraId)
   {
 
@@ -176,7 +176,7 @@ public class HistoricoLaboralController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -186,8 +186,8 @@ public class HistoricoLaboralController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperRelacaoLaboralSumaryDTO> getRelacaoLaboral(
+
+   public ResponseEntity<WrapperRelacaoLaboralSumaryDTO> getRelacaoLaboral(
     @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
@@ -206,7 +206,7 @@ public class HistoricoLaboralController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -216,8 +216,8 @@ public class HistoricoLaboralController {
       )
     }
   )
-  
-  public ResponseEntity<RelacaoLaboralDTO> getRelacaoLaboralByFunId(
+
+   public ResponseEntity<RelacaoLaboralDTO> getRelacaoLaboralByFunId(
     @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 

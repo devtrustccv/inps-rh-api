@@ -4,11 +4,10 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.time.LocalDate;
 
 @Data
@@ -19,35 +18,34 @@ import java.time.LocalDate;
 @IgrpDTO
 public class AgregadoDependenteReqDTO  {
 
-  
-  
+
   private Long id ;
-  
-  
+
+
   private Long tipoDocumentoId ;
-  
-  
+
+
   private String numDocumento ;
-  
-  
+
+
   private String nome ;
-  
-  
+
+
   private LocalDate dataNascimento ;
-  
-  
+
+
   private String genero ;
-  
-  
+
+
   private String grauParentesco ;
-  
-  
+
+
   private String dependente ;
-  
-  
+
+
   private String agregada ;
-  
-  
+
+
   private String responsavel ;
 
 }

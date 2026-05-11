@@ -6,18 +6,15 @@ import cv.inps.rh.funcionario.infrastructure.mappers.ExperienciaProfissionalMapp
 import cv.inps.rh.funcionario.infrastructure.mappers.FormacaoFeitaMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.HabilitacaoLiterariaMapper;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ExperienciaProfEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FormacaoFeitaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.HabilitacaoLiterariaEntityRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.EnumSet;
 import java.util.List;
 
 @Service

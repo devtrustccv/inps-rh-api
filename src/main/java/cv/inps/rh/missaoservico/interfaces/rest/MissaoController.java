@@ -3,41 +3,22 @@
 
 package cv.inps.rh.missaoservico.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.missaoservico.application.commands.*;
+import cv.inps.rh.missaoservico.application.dto.*;
+import cv.inps.rh.missaoservico.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.missaoservico.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.missaoservico.application.commands.*;
-import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoRequestDTO;
 import java.util.Map;
-import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseRequestDTO;
-import cv.inps.rh.missaoservico.application.dto.WrapperListMissaoServicoDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoServicoResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoCancelarRequestDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoSubmissaoResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoAnaliseResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoEmissaoReqResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoEmissaoRequisicaoRequestDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaRequestDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoCabimentoRequestDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoAutorizacaoResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoAutorizacaoRequestDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoPagamentoResponseDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoPagamentoRequestDTO;
 
 @IgrpController
 @RestController
@@ -48,7 +29,7 @@ import cv.inps.rh.missaoservico.application.dto.MissaoPagamentoRequestDTO;
 )
 public class MissaoController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -65,7 +46,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -75,8 +56,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> submeterMissaoServico(@Valid @RequestBody MissaoSubmissaoRequestDTO submeterMissaoServicoRequest
+
+   public ResponseEntity<Map<String, ?>> submeterMissaoServico(@Valid @RequestBody MissaoSubmissaoRequestDTO submeterMissaoServicoRequest
     )
   {
 
@@ -95,7 +76,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -105,8 +86,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> saveAnaliseProcessoMissaoServico(@Valid @RequestBody MissaoAnaliseRequestDTO saveAnaliseProcessoMissaoServicoRequest
+
+   public ResponseEntity<Map<String, ?>> saveAnaliseProcessoMissaoServico(@Valid @RequestBody MissaoAnaliseRequestDTO saveAnaliseProcessoMissaoServicoRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 
@@ -124,7 +105,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -134,8 +115,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListMissaoServicoDTO> getListaMissaoServico(
+
+   public ResponseEntity<WrapperListMissaoServicoDTO> getListaMissaoServico(
     @RequestParam(value = "nrMissao", required = false) String nrMissao,
     @RequestParam(value = "periodoDe", required = false) String periodoDe,
     @RequestParam(value = "periodoAte", required = false) String periodoAte,
@@ -158,7 +139,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -168,8 +149,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<MissaoServicoResponseDTO> getDetalheMissaoServico(
+
+   public ResponseEntity<MissaoServicoResponseDTO> getDetalheMissaoServico(
     @PathVariable(value = "uuid") String uuid)
   {
 
@@ -188,7 +169,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -198,8 +179,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<String> cancelarMissaoServico(@Valid @RequestBody MissaoCancelarRequestDTO cancelarMissaoServicoRequest
+
+   public ResponseEntity<String> cancelarMissaoServico(@Valid @RequestBody MissaoCancelarRequestDTO cancelarMissaoServicoRequest
     , @PathVariable(value = "id") String id)
   {
 
@@ -218,7 +199,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -228,8 +209,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<MissaoSubmissaoResponseDTO> getSubmissaoServicoProcess(
+
+   public ResponseEntity<MissaoSubmissaoResponseDTO> getSubmissaoServicoProcess(
     @PathVariable(value = "uuid") String uuid)
   {
 
@@ -248,7 +229,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -258,8 +239,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<MissaoAnaliseResponseDTO> getAnaliseProcessoMissaoServico(
+
+   public ResponseEntity<MissaoAnaliseResponseDTO> getAnaliseProcessoMissaoServico(
     @PathVariable(value = "uuid") String uuid)
   {
 
@@ -278,7 +259,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -288,8 +269,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> saveSubmissaoServico(@Valid @RequestBody MissaoSubmissaoRequestDTO saveSubmissaoServicoRequest
+
+   public ResponseEntity<Map<String, ?>> saveSubmissaoServico(@Valid @RequestBody MissaoSubmissaoRequestDTO saveSubmissaoServicoRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 
@@ -308,7 +289,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -318,8 +299,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<MissaoEmissaoReqResponseDTO> getSubmissaoServicoEmissaoRequisicao(
+
+   public ResponseEntity<MissaoEmissaoReqResponseDTO> getSubmissaoServicoEmissaoRequisicao(
     @PathVariable(value = "uui") String uui)
   {
 
@@ -338,7 +319,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -348,8 +329,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> saveSubmissaoServicoEmissaoRequisicao(@Valid @RequestBody MissaoEmissaoRequisicaoRequestDTO saveSubmissaoServicoEmissaoRequisicaoRequest
+
+   public ResponseEntity<Map<String, ?>> saveSubmissaoServicoEmissaoRequisicao(@Valid @RequestBody MissaoEmissaoRequisicaoRequestDTO saveSubmissaoServicoEmissaoRequisicaoRequest
     , @PathVariable(value = "uui") String uui)
   {
 
@@ -368,7 +349,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -378,8 +359,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<MissaoLogisticaResponseDTO> getMissaoServicoLogistica(
+
+   public ResponseEntity<MissaoLogisticaResponseDTO> getMissaoServicoLogistica(
     @PathVariable(value = "uuid") String uuid)
   {
 
@@ -398,7 +379,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -408,8 +389,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> saveMissaoServicoLogistica(@Valid @RequestBody MissaoLogisticaRequestDTO saveMissaoServicoLogisticaRequest
+
+   public ResponseEntity<Map<String, ?>> saveMissaoServicoLogistica(@Valid @RequestBody MissaoLogisticaRequestDTO saveMissaoServicoLogisticaRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 
@@ -428,7 +409,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -438,8 +419,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<MissaoCabimentoResponseDTO> getMissaoServicoCabimento(
+
+   public ResponseEntity<MissaoCabimentoResponseDTO> getMissaoServicoCabimento(
     @PathVariable(value = "uuid") String uuid)
   {
 
@@ -458,7 +439,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -468,8 +449,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> saveMissaoServicoCabimento(@Valid @RequestBody MissaoCabimentoRequestDTO saveMissaoServicoCabimentoRequest
+
+   public ResponseEntity<Map<String, ?>> saveMissaoServicoCabimento(@Valid @RequestBody MissaoCabimentoRequestDTO saveMissaoServicoCabimentoRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 
@@ -488,7 +469,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -498,8 +479,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<MissaoAutorizacaoResponseDTO> getMissaoServicoAutorizacao(
+
+   public ResponseEntity<MissaoAutorizacaoResponseDTO> getMissaoServicoAutorizacao(
     @PathVariable(value = "uuid") String uuid)
   {
 
@@ -518,7 +499,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -528,8 +509,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> saveMissaoServicoAutorizacao(@Valid @RequestBody MissaoAutorizacaoRequestDTO saveMissaoServicoAutorizacaoRequest
+
+   public ResponseEntity<Map<String, ?>> saveMissaoServicoAutorizacao(@Valid @RequestBody MissaoAutorizacaoRequestDTO saveMissaoServicoAutorizacaoRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 
@@ -548,7 +529,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -558,8 +539,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<MissaoPagamentoResponseDTO> getMissaoServicoPagamento(
+
+   public ResponseEntity<MissaoPagamentoResponseDTO> getMissaoServicoPagamento(
     @PathVariable(value = "uuid") String uuid)
   {
 
@@ -578,7 +559,7 @@ public class MissaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -588,8 +569,8 @@ public class MissaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> saveMissaoServicoPagamento(@Valid @RequestBody MissaoPagamentoRequestDTO saveMissaoServicoPagamentoRequest
+
+   public ResponseEntity<Map<String, ?>> saveMissaoServicoPagamento(@Valid @RequestBody MissaoPagamentoRequestDTO saveMissaoServicoPagamentoRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 

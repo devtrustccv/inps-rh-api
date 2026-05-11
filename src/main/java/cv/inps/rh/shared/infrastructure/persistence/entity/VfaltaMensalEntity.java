@@ -4,12 +4,19 @@
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
 import cv.igrp.framework.stereotype.IgrpEntity;
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-import java.util.UUID;
-import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
 
 
 @Getter
@@ -25,98 +32,98 @@ public class VfaltaMensalEntity  {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-    @NotNull(message = "funcionarioId is mandatory")
+
+  @NotNull(message = "funcionarioId is mandatory")
     @Column(name="funcionario_id", nullable = false)
     private Long funcionarioId;
 
-  
-    @Column(name="funcionario_uuid")
+
+  @Column(name="funcionario_uuid")
     private UUID funcionarioUuid;
 
-  
-    @Column(name="nome_funcionario")
+
+  @Column(name="nome_funcionario")
     private String nomeFuncionario;
 
-  
-    @Column(name="id_direcao")
+
+  @Column(name="id_direcao")
     private Long idDirecao;
 
-  
-    @Column(name="nome_direcao")
+
+  @Column(name="nome_direcao")
     private String nomeDirecao;
 
-  
-    @Column(name="id_secao")
+
+  @Column(name="id_secao")
     private Long idSecao;
 
-  
-    @Column(name="nome_secao")
+
+  @Column(name="nome_secao")
     private String nomeSecao;
 
-  
-    @Column(name="id_ilha")
+
+  @Column(name="id_ilha")
     private Long idIlha;
 
-  
-    @Column(name="nome_ilha")
+
+  @Column(name="nome_ilha")
     private String nomeIlha;
 
-  
-    @Column(name="cargo_id")
+
+  @Column(name="cargo_id")
     private Long cargoId;
 
-  
-    @Column(name="nome_cargo")
+
+  @Column(name="nome_cargo")
     private String nomeCargo;
 
-  
-    @Column(name="ano")
+
+  @Column(name="ano")
     private Integer ano;
 
-  
-    @Column(name="mes")
+
+  @Column(name="mes")
     private Integer mes;
 
-  
-    @Column(name="data_inicio")
+
+  @Column(name="data_inicio")
     private LocalDate dataInicio;
 
-  
-    @Column(name="data_fim")
+
+  @Column(name="data_fim")
     private LocalDate dataFim;
 
-  
-    @Column(name="tot_faltas")
+
+  @Column(name="tot_faltas")
     private Integer totFaltas;
 
-  
-    @Column(name="tot_hor_aus")
+
+  @Column(name="tot_hor_aus")
     private BigDecimal totHorAus;
 
-  
-    @Column(name="tot_val_desc")
+
+  @Column(name="tot_val_desc")
     private BigDecimal totValDesc;
 
-  
-    @Column(name="tot_inj")
+
+  @Column(name="tot_inj")
     private Integer totInj;
 
-  
-    @Column(name="tot_jus")
+
+  @Column(name="tot_jus")
     private Integer totJus;
 
-  
-    @Column(name="est_mensal")
+
+  @Column(name="est_mensal")
     private String estMensal;
 
-  
-    @Column(name="est_proc")
+
+  @Column(name="est_proc")
     private String estProc;
 
-  
-    @Column(name="flg_desc_sal")
+
+  @Column(name="flg_desc_sal")
     private String flgDescSal;
 
-  
+
 }

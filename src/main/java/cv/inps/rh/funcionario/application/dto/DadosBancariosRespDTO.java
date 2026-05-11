@@ -4,11 +4,10 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.time.LocalDate;
 
 @Data
@@ -19,26 +18,25 @@ import java.time.LocalDate;
 @IgrpDTO
 public class DadosBancariosRespDTO  {
 
-  
-  
+
   private Long id ;
-  
-  
+
+
   private Long entidadeBancariaId ;
-  
-  
+
+
   private String entidadeBancariaDesc ;
-  
-  
+
+
   private Long numConta ;
-  
-  
+
+
   private String nib ;
-  
-  
+
+
   private LocalDate dataInicio ;
-  
-  
+
+
   private LocalDate dataFim ;
 
 }

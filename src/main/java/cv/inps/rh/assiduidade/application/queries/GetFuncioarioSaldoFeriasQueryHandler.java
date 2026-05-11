@@ -1,16 +1,10 @@
 package cv.inps.rh.assiduidade.application.queries;
 
-import cv.inps.rh.assiduidade.application.services.SaldoFeriaService;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FeriasEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.AnoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FeriasEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FeriasGozadasEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import org.springframework.context.event.EventListener;
+import cv.inps.rh.assiduidade.application.services.SaldoFeriaService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 

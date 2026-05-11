@@ -3,17 +3,19 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
+import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
-import lombok.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import cv.inps.rh.shared.application.constants.Estado;
 import java.util.UUID;
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Getter
@@ -31,8 +33,8 @@ public class DefPagamentoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-    @NotNull(message = "tmId is mandatory")
+
+  @NotNull(message = "tmId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -41,44 +43,42 @@ public class DefPagamentoEntity extends AuditEntity {
     @Column(name="valor")
     private BigDecimal valor;
 
-  
-    @Column(name="data_inicio")
+
+  @Column(name="data_inicio")
     private LocalDate dataInicio;
 
-  
-    @Column(name="data_fim")
+
+  @Column(name="data_fim")
     private LocalDate dataFim;
 
-  
-    @Enumerated(EnumType.STRING)
+
+  @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
-    @Column(name="obs")
+
+  @Column(name="obs")
     private String obs;
 
-  
-    @Column(name="uuid")
+
+  @Column(name="uuid")
     private UUID uuid;
 
-  
-    @Column(name="percentagem")
+
+  @Column(name="percentagem")
     private BigDecimal percentagem;
 
-  
-    @Column(name="nib")
+
+  @Column(name="nib")
     private String nib;
 
-  
-    @Column(name="nif")
+
+  @Column(name="nif")
     private Integer nif;
 
-  
-    @Column(name="nm_entidade")
-    private String nmEntidade;
 
-  
+  @Column(name="nm_entidade")
+    private String nmEntidade;
 
 
   @ManyToOne(fetch = FetchType.LAZY)

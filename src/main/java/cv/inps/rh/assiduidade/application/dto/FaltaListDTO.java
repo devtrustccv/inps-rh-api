@@ -4,11 +4,10 @@
 package cv.inps.rh.assiduidade.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.math.BigDecimal;
 
 @Data
@@ -19,41 +18,40 @@ import java.math.BigDecimal;
 @IgrpDTO
 public class FaltaListDTO  {
 
-  
-  
+
   private String nomeColaborador ;
-  
-  
+
+
   private String direcao ;
-  
-  
+
+
   private String categoria ;
-  
-  
+
+
   private String dataInicio ;
-  
-  
+
+
   private String dataFim ;
-  
-  
+
+
   private String totalHorasAusente ;
-  
-  
+
+
   private Integer numFalta ;
-  
-  
+
+
   private BigDecimal valorADescontar ;
-  
-  
+
+
   private boolean descontoRenumeracao ;
-  
-  
+
+
   private String estadoProcessamento ;
-  
-  
+
+
   private String estado ;
-  
-  
+
+
   private String estadoDesc ;
 
 }

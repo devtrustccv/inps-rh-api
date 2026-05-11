@@ -1,17 +1,15 @@
 package cv.inps.rh.funcionario.application.service.declaracao;
 
 import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoResponseDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperListaPedidoDeclaracaoDTO;
 import cv.inps.rh.funcionario.application.queries.GetPedidoDeclaracoesQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.PedidoDeclaracaoMapper;
-import cv.inps.rh.funcionario.application.dto.WrapperListaPedidoDeclaracaoDTO;
 import cv.inps.rh.shared.application.constants.custom.TableName;
-import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DeclaracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DeclaracaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ResponsavelEntityRepository;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;

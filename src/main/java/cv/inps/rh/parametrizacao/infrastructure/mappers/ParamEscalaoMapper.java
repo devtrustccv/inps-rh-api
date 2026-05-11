@@ -1,7 +1,6 @@
 package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
 import cv.inps.rh.parametrizacao.application.dto.EscalaoDTO;
-import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamCarreira;
 import cv.inps.rh.parametrizacao.domain.models.ParamCategoria;
 import cv.inps.rh.parametrizacao.domain.models.ParamEscalao;

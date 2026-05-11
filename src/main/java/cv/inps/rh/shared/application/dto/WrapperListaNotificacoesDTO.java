@@ -4,15 +4,15 @@
 package cv.inps.rh.shared.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.List;
-import lombok.EqualsAndHashCode;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,7 +21,7 @@ import lombok.EqualsAndHashCode;
 @IgrpDTO
 public class WrapperListaNotificacoesDTO extends PageDTO {
 
-  
+
   @Valid
   private List<NotificacaoInfoDTO> content = new ArrayList<>();
 

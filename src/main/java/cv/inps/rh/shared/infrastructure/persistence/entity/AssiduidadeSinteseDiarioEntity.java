@@ -3,11 +3,15 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
+import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
-import lombok.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDate;
 
 
@@ -26,8 +30,8 @@ public class AssiduidadeSinteseDiarioEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-    @NotNull(message = "funcionarioId is mandatory")
+
+  @NotNull(message = "funcionarioId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -36,57 +40,57 @@ public class AssiduidadeSinteseDiarioEntity extends AuditEntity {
     @Column(name="data")
     private LocalDate data;
 
-  
-    @Column(name="mes")
+
+  @Column(name="mes")
     private Integer mes;
 
-  
-    @Column(name="ano")
+
+  @Column(name="ano")
     private Integer ano;
 
-  
-    @Column(name="hora_primeira_entrada")
+
+  @Column(name="hora_primeira_entrada")
     private String horaPrimeiraEntrada;
 
-  
-    @Column(name="hora_ultima_saida")
+
+  @Column(name="hora_ultima_saida")
     private String horaUltimaSaida;
 
-  
-    @Column(name="horas_trabalhadas")
+
+  @Column(name="horas_trabalhadas")
     private String horasTrabalhadas;
 
-  
-    @Column(name="hora_primeira_saida_almoco")
+
+  @Column(name="hora_primeira_saida_almoco")
     private String horaPrimeiraSaidaAlmoco;
 
-  
-    @Column(name="hora_ultima_entrada_almoco")
+
+  @Column(name="hora_ultima_entrada_almoco")
     private String horaUltimaEntradaAlmoco;
 
-  
-    @Column(name="horas_almoco")
+
+  @Column(name="horas_almoco")
     private String horasAlmoco;
 
-  
-    @Column(name="horas_extras")
+
+  @Column(name="horas_extras")
     private String horasExtras;
 
-  
-    @Column(name="horas_ausencia")
+
+  @Column(name="horas_ausencia")
     private String horasAusencia;
 
-  
-    @Column(name="falta")
+
+  @Column(name="falta")
     private Integer falta;
 
-  
-    @Column(name="estado")
+
+  @Column(name="estado")
     private String estado;
 
-  
-    @Column(name="flag_rececao")
+
+  @Column(name="flag_rececao")
     private String flagRececao;
 
-  
+
 }

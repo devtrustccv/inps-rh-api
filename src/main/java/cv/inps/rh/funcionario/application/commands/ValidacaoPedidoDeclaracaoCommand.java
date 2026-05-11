@@ -1,18 +1,18 @@
 package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.Command;
-import jakarta.validation.constraints.*;
+import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoValidacaoDTO;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoValidacaoDTO;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ValidacaoPedidoDeclaracaoCommand implements Command {
 
-  
+
   private PedidoDeclaracaoValidacaoDTO pedidodeclaracaovalidacao;
   @NotBlank(message = "The field <id> is required")
   private String id;

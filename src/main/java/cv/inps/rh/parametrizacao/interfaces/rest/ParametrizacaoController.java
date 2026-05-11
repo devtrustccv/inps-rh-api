@@ -3,29 +3,22 @@
 
 package cv.inps.rh.parametrizacao.interfaces.rest;
 
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.parametrizacao.application.dto.*;
+import cv.inps.rh.parametrizacao.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.parametrizacao.application.queries.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import cv.inps.rh.parametrizacao.application.dto.DominioDTO;
-import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
-import cv.inps.rh.parametrizacao.application.dto.EscalaoDTO;
-import cv.inps.rh.parametrizacao.application.dto.LocalTrabalhoDTO;
-import cv.inps.rh.parametrizacao.application.dto.VinculoDTO;
-import cv.inps.rh.parametrizacao.application.dto.TipoDocumentoDTO;
 
 @IgrpController
 @RestController
@@ -36,12 +29,12 @@ import cv.inps.rh.parametrizacao.application.dto.TipoDocumentoDTO;
 )
 public class ParametrizacaoController {
 
-  
+
   private final QueryBus queryBus;
 
   public ParametrizacaoController(QueryBus queryBus) {
           this.queryBus = queryBus;
-          
+
   }
    @GetMapping(
    value = "dominios"
@@ -52,7 +45,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -62,8 +55,8 @@ public class ParametrizacaoController {
       )
     }
   )
-  
-  public ResponseEntity<List<DominioDTO>> getDominios(
+
+   public ResponseEntity<List<DominioDTO>> getDominios(
     @RequestParam(value = "dominio") String dominio,
     @RequestParam(value = "referencia", required = false) String referencia)
   {
@@ -83,7 +76,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -93,8 +86,8 @@ public class ParametrizacaoController {
       )
     }
   )
-  
-  public ResponseEntity<List<ParametrizacaoDTO>> getCargosAtivos(
+
+   public ResponseEntity<List<ParametrizacaoDTO>> getCargosAtivos(
     )
   {
 
@@ -113,7 +106,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -123,8 +116,8 @@ public class ParametrizacaoController {
       )
     }
   )
-  
-  public ResponseEntity<List<ParametrizacaoDTO>> getCarreirasAtivos(
+
+   public ResponseEntity<List<ParametrizacaoDTO>> getCarreirasAtivos(
     )
   {
 
@@ -143,7 +136,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -153,8 +146,8 @@ public class ParametrizacaoController {
       )
     }
   )
-  
-  public ResponseEntity<List<ParametrizacaoDTO>> getCategoriasAtivos(
+
+   public ResponseEntity<List<ParametrizacaoDTO>> getCategoriasAtivos(
     )
   {
 
@@ -173,7 +166,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -183,8 +176,8 @@ public class ParametrizacaoController {
       )
     }
   )
-  
-  public ResponseEntity<List<ParametrizacaoDTO>> getParamContratosAtivos(
+
+   public ResponseEntity<List<ParametrizacaoDTO>> getParamContratosAtivos(
     )
   {
 
@@ -203,7 +196,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -213,8 +206,8 @@ public class ParametrizacaoController {
       )
     }
   )
-  
-  public ResponseEntity<List<EscalaoDTO>> getEscaloesAtivos(
+
+   public ResponseEntity<List<EscalaoDTO>> getEscaloesAtivos(
     )
   {
 
@@ -233,7 +226,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -243,8 +236,8 @@ public class ParametrizacaoController {
       )
     }
   )
-  
-  public ResponseEntity<List<LocalTrabalhoDTO>> getLocalTrabalhoAtivos(
+
+   public ResponseEntity<List<LocalTrabalhoDTO>> getLocalTrabalhoAtivos(
     @RequestParam(value = "paisId", required = false) Long paisId)
   {
 
@@ -263,7 +256,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -273,8 +266,8 @@ public class ParametrizacaoController {
       )
     }
   )
-  
-  public ResponseEntity<List<VinculoDTO>> getVinculosAtivos(
+
+   public ResponseEntity<List<VinculoDTO>> getVinculosAtivos(
     @RequestParam(value = "paramContratoId", required = false) Long paramContratoId)
   {
 
@@ -293,7 +286,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -303,8 +296,8 @@ public class ParametrizacaoController {
       )
     }
   )
-  
-  public ResponseEntity<List<ParametrizacaoDTO>> getSeccoesAtivos(
+
+   public ResponseEntity<List<ParametrizacaoDTO>> getSeccoesAtivos(
     @RequestParam(value = "institId") Long institId)
   {
 
@@ -323,7 +316,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -333,8 +326,8 @@ public class ParametrizacaoController {
       )
     }
   )
-  
-  public ResponseEntity<List<TipoDocumentoDTO>> getTiposDocumentoAtivos(
+
+   public ResponseEntity<List<TipoDocumentoDTO>> getTiposDocumentoAtivos(
     @RequestParam(value = "referencia", required = false) String referencia)
   {
 
@@ -353,7 +346,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -363,8 +356,8 @@ public class ParametrizacaoController {
       )
     }
   )
-  
-  public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacaoDetalheAtivo(
+
+   public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacaoDetalheAtivo(
     @RequestParam(value = "situacaoLaboralId") Long situacaoLaboralId)
   {
 
@@ -383,7 +376,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -393,8 +386,8 @@ public class ParametrizacaoController {
       )
     }
   )
-  
-  public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacoesAtivo(
+
+   public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacoesAtivo(
     @RequestParam(value = "flgSituacaoLaboral", required = false) Integer flgSituacaoLaboral,
     @RequestParam(value = "flgAusencia", required = false) String flgAusencia,
     @RequestParam(value = "tipoAusencia", required = false) String tipoAusencia,
@@ -416,7 +409,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -426,8 +419,8 @@ public class ParametrizacaoController {
       )
     }
   )
-  
-  public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacoesLaboraisByVinculo(
+
+   public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacoesLaboraisByVinculo(
     @RequestParam(value = "vinculoId") Long vinculoId,
     @RequestParam(value = "flgEstadoContrato", required = false) String flgEstadoContrato)
   {
@@ -447,7 +440,7 @@ public class ParametrizacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -457,8 +450,8 @@ public class ParametrizacaoController {
       )
     }
   )
-  
-  public ResponseEntity<List<ParametrizacaoDTO>> getUps(
+
+   public ResponseEntity<List<ParametrizacaoDTO>> getUps(
     )
   {
 

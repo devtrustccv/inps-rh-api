@@ -3,10 +3,9 @@ package cv.inps.rh.transversal.application.strategies;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.transversal.application.constants.DimensaoEnum;
 import jakarta.persistence.criteria.*;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
-
-import org.springframework.stereotype.Component;
 
 @Component
 public class DirecaoStrategy implements DimensaoStrategy {

@@ -2,7 +2,6 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.funcionario.application.dto.FuncionarioResponseDTO;
 import cv.inps.rh.funcionario.application.service.RegistarColaboradorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
