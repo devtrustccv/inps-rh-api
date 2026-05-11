@@ -2,9 +2,7 @@ package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamContrato;
-import cv.inps.rh.parametrizacao.domain.models.ParamVinculo;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamContratoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

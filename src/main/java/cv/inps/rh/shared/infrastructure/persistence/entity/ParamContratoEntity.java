@@ -3,13 +3,17 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import java.util.UUID;
-import jakarta.validation.constraints.NotBlank;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.config.AuditEntity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.UUID;
 
 
 @Getter
@@ -27,46 +31,43 @@ public class ParamContratoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-    @Column(name="uuid")
+
+  @Column(name="uuid")
     private UUID uuid;
 
-  
-    @NotBlank(message = "codigo is mandatory")
+
+  @NotBlank(message = "codigo is mandatory")
     @Column(name="codigo", nullable = false)
     private String codigo;
 
-  
-    @Column(name="nome")
+
+  @Column(name="nome")
     private String nome;
 
-  
-    @Column(name="natureza")
+
+  @Column(name="natureza")
     private String natureza;
 
-  
-    @Column(name="flg_renovavel")
+
+  @Column(name="flg_renovavel")
     private Integer flgRenovavel;
 
-  
-    @Column(name="duracao_renovavel")
+
+  @Column(name="duracao_renovavel")
     private Integer duracaoRenovavel;
 
-  
-    @Column(name="prazo_obrigatorio")
+
+  @Column(name="prazo_obrigatorio")
     private Integer prazoObrigatorio;
 
-  
-    @Column(name="max_renovacao")
+
+  @Column(name="max_renovacao")
     private Integer maxRenovacao;
 
-  
 
-
-  
-    @Enumerated(EnumType.STRING)
+  @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
+
 }

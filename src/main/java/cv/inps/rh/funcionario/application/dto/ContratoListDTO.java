@@ -4,11 +4,9 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 import java.util.List;
 
@@ -20,50 +18,49 @@ import java.util.List;
 @IgrpDTO
 public class ContratoListDTO  {
 
-  
-  
+
   private Long id ;
-  
-  
+
+
   private String uuid ;
-  
-  
+
+
   private Long funcionarioId ;
-  
-  
+
+
   private String uuidFuncionario ;
-  
-  
+
+
   private String situacao ;
-  
-  
+
+
   private String tipoContrato ;
-  
-  
+
+
   private String tipoVinculo ;
-  
-  
+
+
   private String dataInicio ;
-  
-  
+
+
   private String dataFim ;
-  
-  
+
+
   private String duracao ;
-  
-  
+
+
   private String estado ;
-  
-  
+
+
   private String estadoDesc ;
-  
-  
+
+
   private Integer versao ;
-  
-  
+
+
   private boolean inicial ;
-  
-  
+
+
   private boolean atual ;
 
   private List<ContratoHistoricoDTO> historicos ;

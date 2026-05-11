@@ -3,7 +3,6 @@ package cv.inps.rh.parametrizacao.application.queries;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.parametrizacao.application.dto.EscalaoDTO;
-import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.repository.ParamEscalaoRepository;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamEscalaoMapper;
 import org.slf4j.Logger;

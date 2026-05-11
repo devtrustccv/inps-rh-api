@@ -4,13 +4,11 @@
 package cv.inps.rh.avaliacao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-
+import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,11 +17,10 @@ import lombok.EqualsAndHashCode;
 @IgrpDTO
 public class ObjectivoAvaliacaoDTO extends ObjectivoDTO {
 
-  
-  
+
   private String realizado ;
-  
-  
+
+
   private Integer avaliacao ;
 
   private String autoRealizado ;

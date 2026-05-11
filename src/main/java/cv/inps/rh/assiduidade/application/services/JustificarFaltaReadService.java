@@ -1,33 +1,26 @@
 package cv.inps.rh.assiduidade.application.services;
 
-import cv.inps.rh.shared.application.constants.custom.Referencia;
-import cv.inps.rh.shared.application.constants.custom.TableName;
-import cv.inps.rh.shared.application.dto.AnexoReqDTO;
-import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
-import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
-import cv.inps.rh.assiduidade.application.dto.JustificarFaltaDTO;
 import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
+import cv.inps.rh.assiduidade.application.dto.JustificarFaltaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetJustificacaoFaltaByPedidoQuery;
 import cv.inps.rh.assiduidade.application.queries.GetJustificacaoFaltaQuery;
-import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
+import cv.inps.rh.shared.application.constants.custom.TableName;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeSinteseDiarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
-import cv.inps.rh.shared.util.DateFormatter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.data.jpa.domain.Specification;
+
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

@@ -4,16 +4,16 @@
 package cv.inps.rh.assiduidade.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.assiduidade.application.dto.DispensaListDTO;
 import cv.inps.rh.shared.application.dto.PageDTO;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.List;
-import lombok.EqualsAndHashCode;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,7 +22,7 @@ import lombok.EqualsAndHashCode;
 @IgrpDTO
 public class WrapperListaDispensaDTO extends PageDTO {
 
-  
+
   @Valid
   private List<DispensaListDTO> content = new ArrayList<>();
 

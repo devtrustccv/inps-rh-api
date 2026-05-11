@@ -3,33 +3,22 @@
 
 package cv.inps.rh.avaliacao.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.avaliacao.application.commands.*;
+import cv.inps.rh.avaliacao.application.dto.*;
+import cv.inps.rh.avaliacao.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.avaliacao.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.avaliacao.application.commands.*;
-import cv.inps.rh.avaliacao.application.dto.DefinicaoObjectivoDTO;
 import java.util.Map;
-import cv.inps.rh.avaliacao.application.dto.WrapperListaDefinicaoObjetivoDTO;
-import cv.inps.rh.avaliacao.application.dto.WrapperListaAvaliacaoDTO;
-import cv.inps.rh.avaliacao.application.dto.AvaliacaoDTO;
-import cv.inps.rh.avaliacao.application.dto.AvaliacaoResponseDTO;
-import cv.inps.rh.avaliacao.application.dto.ObservacaoGeralDTO;
-import cv.inps.rh.avaliacao.application.dto.ParecerColaboradorDTO;
-import cv.inps.rh.avaliacao.application.dto.ComissaoExecutivaDTO;
-import cv.inps.rh.avaliacao.application.dto.AvaliacaoFinalDTO;
 
 @IgrpController
 @RestController
@@ -40,7 +29,7 @@ import cv.inps.rh.avaliacao.application.dto.AvaliacaoFinalDTO;
 )
 public class AvaliacaoController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -57,7 +46,7 @@ public class AvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -67,8 +56,8 @@ public class AvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> definicaoObjetivo(@Valid @RequestBody DefinicaoObjectivoDTO definicaoObjetivoRequest
+
+   public ResponseEntity<Map<String, ?>> definicaoObjetivo(@Valid @RequestBody DefinicaoObjectivoDTO definicaoObjetivoRequest
     )
   {
 
@@ -87,7 +76,7 @@ public class AvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -97,8 +86,8 @@ public class AvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListaDefinicaoObjetivoDTO> getListaDefinicaoObjectivos(
+
+   public ResponseEntity<WrapperListaDefinicaoObjetivoDTO> getListaDefinicaoObjectivos(
     @RequestParam(value = "ano", required = false) Integer ano,
     @RequestParam(value = "semestre", required = false) String semestre,
     @RequestParam(value = "estado", required = false) String estado,
@@ -122,7 +111,7 @@ public class AvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -132,8 +121,8 @@ public class AvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListaAvaliacaoDTO> getListaAvaliacao(
+
+   public ResponseEntity<WrapperListaAvaliacaoDTO> getListaAvaliacao(
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize,
     @RequestParam(value = "ano", required = false) Integer ano,
@@ -157,7 +146,7 @@ public class AvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -167,8 +156,8 @@ public class AvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<AvaliacaoDTO> getDefinicaoObjetivo(
+
+   public ResponseEntity<AvaliacaoDTO> getDefinicaoObjetivo(
     @PathVariable(value = "uuid") String uuid)
   {
 
@@ -187,7 +176,7 @@ public class AvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -197,8 +186,8 @@ public class AvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<AvaliacaoResponseDTO> getAvaliacao(
+
+   public ResponseEntity<AvaliacaoResponseDTO> getAvaliacao(
     @PathVariable(value = "uuid") String uuid)
   {
 
@@ -217,7 +206,7 @@ public class AvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -227,8 +216,8 @@ public class AvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> avaliacao(@Valid @RequestBody AvaliacaoDTO avaliacaoRequest
+
+   public ResponseEntity<Map<String, ?>> avaliacao(@Valid @RequestBody AvaliacaoDTO avaliacaoRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 
@@ -247,7 +236,7 @@ public class AvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -257,8 +246,8 @@ public class AvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> autoAvaliacao(@Valid @RequestBody AvaliacaoDTO autoAvaliacaoRequest
+
+   public ResponseEntity<Map<String, ?>> autoAvaliacao(@Valid @RequestBody AvaliacaoDTO autoAvaliacaoRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 
@@ -277,7 +266,7 @@ public class AvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -287,8 +276,8 @@ public class AvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> processoObservacaoGeral(@Valid @RequestBody ObservacaoGeralDTO processoObservacaoGeralRequest
+
+   public ResponseEntity<Map<String, ?>> processoObservacaoGeral(@Valid @RequestBody ObservacaoGeralDTO processoObservacaoGeralRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 
@@ -307,7 +296,7 @@ public class AvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -317,8 +306,8 @@ public class AvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> processoParecerColaborador(@Valid @RequestBody ParecerColaboradorDTO processoParecerColaboradorRequest
+
+   public ResponseEntity<Map<String, ?>> processoParecerColaborador(@Valid @RequestBody ParecerColaboradorDTO processoParecerColaboradorRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 
@@ -337,7 +326,7 @@ public class AvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -347,8 +336,8 @@ public class AvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> processoComissaoExecutiva(@Valid @RequestBody ComissaoExecutivaDTO processoComissaoExecutivaRequest
+
+   public ResponseEntity<Map<String, ?>> processoComissaoExecutiva(@Valid @RequestBody ComissaoExecutivaDTO processoComissaoExecutivaRequest
     , @PathVariable(value = "uuid") String uuid)
   {
 
@@ -367,7 +356,7 @@ public class AvaliacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -377,8 +366,8 @@ public class AvaliacaoController {
       )
     }
   )
-  
-  public ResponseEntity<AvaliacaoFinalDTO> getAvaliacaoFinal(
+
+   public ResponseEntity<AvaliacaoFinalDTO> getAvaliacaoFinal(
     @PathVariable(value = "uuid") String uuid)
   {
 

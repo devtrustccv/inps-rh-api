@@ -4,12 +4,11 @@
 package cv.inps.rh.assiduidade.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
+
 import java.time.LocalDate;
 
 @Data
@@ -20,17 +19,17 @@ import java.time.LocalDate;
 @IgrpDTO
 public class PedidoFeriaAlterarReqDTO  {
 
-  
+
   @Valid
   private PedidoFeriaReqDTO feria ;
-  
-  
+
+
   private String tipoAlteracao ;
-  
-  
+
+
   private LocalDate novaDataFim ;
-  
-  
+
+
   private String motivo ;
 
 }

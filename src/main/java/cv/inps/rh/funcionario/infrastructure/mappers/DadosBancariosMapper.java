@@ -3,7 +3,6 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import cv.inps.rh.funcionario.application.dto.DadosBancariosReqDTO;
 import cv.inps.rh.funcionario.application.dto.DadosBancariosRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.infrastructure.mappers.BancoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.BancoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DadosBancariosEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;

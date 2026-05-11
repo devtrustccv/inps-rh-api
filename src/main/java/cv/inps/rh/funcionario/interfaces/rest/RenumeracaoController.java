@@ -3,30 +3,26 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.funcionario.application.commands.AdicionarNovoPagamentoCommand;
+import cv.inps.rh.funcionario.application.commands.AdicionarNovoRemuneracaoCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarNovoPagamentoCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarNovoRemuneracaoCommand;
+import cv.inps.rh.funcionario.application.dto.*;
+import cv.inps.rh.funcionario.application.queries.CalcularRemuneracaoQuery;
+import cv.inps.rh.funcionario.application.queries.GetListRenumeracoesQuery;
+import cv.inps.rh.funcionario.application.queries.GetPagamentosDescontosByIdQuery;
+import cv.inps.rh.funcionario.application.queries.GetRenumeracaoByIdQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.funcionario.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.funcionario.application.commands.*;
-import cv.inps.rh.funcionario.application.dto.CalcularRemuneracaoRequestDTO;
-import cv.inps.rh.funcionario.application.dto.CalcularRemuneracaoResponseDTO;
-import cv.inps.rh.funcionario.application.dto.NovoPagamentoRequestDTO;
-import cv.inps.rh.funcionario.application.dto.NovoRemuneracaoRequestDTO;
-import cv.inps.rh.funcionario.application.dto.ValidarPagamentoRequestDTO;
-import cv.inps.rh.funcionario.application.dto.ValidarRemuneracaoRequestDTO;
-import cv.inps.rh.funcionario.application.dto.WrapperListRenumeracaoDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
@@ -37,7 +33,7 @@ import cv.inps.rh.funcionario.application.dto.WrapperListRenumeracaoDTO;
 )
 public class RenumeracaoController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -54,7 +50,7 @@ public class RenumeracaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -64,8 +60,8 @@ public class RenumeracaoController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListRenumeracaoDTO> getListRenumeracoes(
+
+   public ResponseEntity<WrapperListRenumeracaoDTO> getListRenumeracoes(
     @RequestParam(value = "idFuncionario") String idFuncionario,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
@@ -89,7 +85,7 @@ public class RenumeracaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -99,8 +95,8 @@ public class RenumeracaoController {
       )
     }
   )
-  
-  public ResponseEntity<String> adicionarNovoRemuneracao(@Valid @RequestBody NovoRemuneracaoRequestDTO adicionarNovoRemuneracaoRequest
+
+   public ResponseEntity<String> adicionarNovoRemuneracao(@Valid @RequestBody NovoRemuneracaoRequestDTO adicionarNovoRemuneracaoRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
@@ -119,7 +115,7 @@ public class RenumeracaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -129,8 +125,8 @@ public class RenumeracaoController {
       )
     }
   )
-  
-  public ResponseEntity<String> adicionarNovoPagamento(@Valid @RequestBody NovoPagamentoRequestDTO adicionarNovoPagamentoRequest
+
+   public ResponseEntity<String> adicionarNovoPagamento(@Valid @RequestBody NovoPagamentoRequestDTO adicionarNovoPagamentoRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
@@ -149,7 +145,7 @@ public class RenumeracaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -159,8 +155,8 @@ public class RenumeracaoController {
       )
     }
   )
-  
-  public ResponseEntity<String> validarNovoRemuneracao(@Valid @RequestBody ValidarRemuneracaoRequestDTO validarNovoRemuneracaoRequest
+
+   public ResponseEntity<String> validarNovoRemuneracao(@Valid @RequestBody ValidarRemuneracaoRequestDTO validarNovoRemuneracaoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "remuneracaoId") String remuneracaoId)
   {
 
@@ -179,7 +175,7 @@ public class RenumeracaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -189,8 +185,8 @@ public class RenumeracaoController {
       )
     }
   )
-  
-  public ResponseEntity<String> validarNovoPagamento(@Valid @RequestBody ValidarPagamentoRequestDTO validarNovoPagamentoRequest
+
+   public ResponseEntity<String> validarNovoPagamento(@Valid @RequestBody ValidarPagamentoRequestDTO validarNovoPagamentoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "pagamentoId") String pagamentoId)
   {
 
@@ -209,7 +205,7 @@ public class RenumeracaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -219,8 +215,8 @@ public class RenumeracaoController {
       )
     }
   )
-  
-  public ResponseEntity<NovoRemuneracaoRequestDTO> getRenumeracaoById(
+
+   public ResponseEntity<NovoRemuneracaoRequestDTO> getRenumeracaoById(
     @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "remuneracaoId") String remuneracaoId)
   {
 

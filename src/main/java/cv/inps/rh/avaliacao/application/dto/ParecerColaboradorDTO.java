@@ -4,11 +4,10 @@
 package cv.inps.rh.avaliacao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 
 @Data
@@ -20,10 +19,10 @@ import lombok.AllArgsConstructor;
 public class ParecerColaboradorDTO  {
 
   @NotBlank(message = "The field <parecer> is required")
-  
+
   private String parecer ;
   @NotBlank(message = "The field <justificar> is required")
-  
+
   private String justificar ;
 
 }

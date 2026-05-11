@@ -5,7 +5,6 @@ import cv.inps.rh.funcionario.application.dto.ValidarDadosBancariosDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosBancariosMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
-import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;

@@ -2,6 +2,7 @@ package cv.inps.rh.avaliacao.application.queries;
 
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
+import cv.inps.rh.avaliacao.application.dto.AvaliacaoFinalDTO;
 import cv.inps.rh.avaliacao.application.dto.SemestreDTO;
 import cv.inps.rh.parametrizacao.domain.models.Dominio;
 import cv.inps.rh.parametrizacao.domain.repository.DomainsRepository;
@@ -13,15 +14,14 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.AvaliacaoEntityRe
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamEscalaAvaliacaoEntityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
-import cv.inps.rh.avaliacao.application.dto.AvaliacaoFinalDTO;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Component
@@ -125,7 +125,7 @@ public class GetAvaliacaoFinalQueryHandler implements QueryHandler<GetAvaliacaoF
   }
 
   private boolean eq(Object a, Object b) {
-    return a == null ? b == null : a.equals(b);
+    return Objects.equals(a, b);
   }
 
   private SemestreDTO buildSemestre(AvaliacaoEntity avaliacao, BigDecimal ponderacaoPercent) {

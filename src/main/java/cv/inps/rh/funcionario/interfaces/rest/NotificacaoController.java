@@ -3,26 +3,24 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.funcionario.application.commands.EnviarNotificacaoCommand;
+import cv.inps.rh.funcionario.application.queries.DetalheNotificacaoQuery;
+import cv.inps.rh.funcionario.application.queries.ListaNotificacoesQuery;
+import cv.inps.rh.shared.application.dto.NotificacaoEnviarRequestDTO;
+import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
+import cv.inps.rh.shared.application.dto.WrapperListaNotificacoesDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.funcionario.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.funcionario.application.commands.*;
-import cv.inps.rh.shared.application.dto.WrapperListaNotificacoesDTO;
-import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
-import cv.inps.rh.shared.application.dto.NotificacaoEnviarRequestDTO;
 import java.util.Map;
 
 @IgrpController
@@ -34,7 +32,7 @@ import java.util.Map;
 )
 public class NotificacaoController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -51,7 +49,7 @@ public class NotificacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -61,8 +59,8 @@ public class NotificacaoController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListaNotificacoesDTO> listaNotificacoes(
+
+   public ResponseEntity<WrapperListaNotificacoesDTO> listaNotificacoes(
     @RequestParam(value = "tipoNotificacao", required = false) String tipoNotificacao,
     @RequestParam(value = "dataEnvioDe", required = false) String dataEnvioDe,
     @RequestParam(value = "dataEnvioAte", required = false) String dataEnvioAte,
@@ -86,7 +84,7 @@ public class NotificacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -96,8 +94,8 @@ public class NotificacaoController {
       )
     }
   )
-  
-  public ResponseEntity<NotificacaoInfoDTO> detalheNotificacao(
+
+   public ResponseEntity<NotificacaoInfoDTO> detalheNotificacao(
     @PathVariable(value = "id") String id)
   {
 
@@ -116,7 +114,7 @@ public class NotificacaoController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -126,8 +124,8 @@ public class NotificacaoController {
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> enviarNotificacao(@Valid @RequestBody NotificacaoEnviarRequestDTO enviarNotificacaoRequest
+
+   public ResponseEntity<Map<String, ?>> enviarNotificacao(@Valid @RequestBody NotificacaoEnviarRequestDTO enviarNotificacaoRequest
     , @PathVariable(value = "id") String id)
   {
 

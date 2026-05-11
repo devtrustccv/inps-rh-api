@@ -3,13 +3,17 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
+import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
-import lombok.*;
 import jakarta.validation.constraints.NotNull;
-import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDate;
+import java.util.UUID;
 
 
 @Getter
@@ -27,52 +31,50 @@ public class NotificacaoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-    @NotNull(message = "referenciaId is mandatory")
+
+  @NotNull(message = "referenciaId is mandatory")
     @Column(name="referencia_id", nullable = false)
     private Long referenciaId;
 
-  
-    @Column(name="referencia_name")
+
+  @Column(name="referencia_name")
     private String referenciaName;
 
-  
-    @Column(name="referencia_uuid")
+
+  @Column(name="referencia_uuid")
     private UUID referenciaUuid;
 
-  
-    @Column(name="message")
+
+  @Column(name="message")
     private String message;
 
-  
-    @Column(name="assunto")
+
+  @Column(name="assunto")
     private String assunto;
 
-  
-    @Column(name="email")
+
+  @Column(name="email")
     private String email;
 
-  
-    @Column(name="nome_receptor")
+
+  @Column(name="nome_receptor")
     private String nomeReceptor;
 
-  
-    @Column(name="data_envio")
+
+  @Column(name="data_envio")
     private LocalDate dataEnvio;
 
-  
-    @Column(name="url")
+
+  @Column(name="url")
     private String url;
 
-  
-    @Column(name="estado")
+
+  @Column(name="estado")
     private String estado;
 
-  
-    @Column(name="uuid")
-    private UUID uuid;
 
-  
+  @Column(name="uuid")
+    private UUID uuid;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -86,5 +88,5 @@ public class NotificacaoEntity extends AuditEntity {
     @Column(name="tipo_notificacao")
     private String tipoNotificacao;
 
-  
+
 }

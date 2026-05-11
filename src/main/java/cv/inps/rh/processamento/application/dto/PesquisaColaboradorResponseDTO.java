@@ -4,7 +4,6 @@
 package cv.inps.rh.processamento.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.persistence.Column;
 
 import java.math.BigDecimal;
 import java.util.UUID;

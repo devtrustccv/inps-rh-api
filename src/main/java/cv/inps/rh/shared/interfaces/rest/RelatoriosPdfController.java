@@ -1,10 +1,9 @@
 package cv.inps.rh.shared.interfaces.rest;
 
-import cv.inps.rh.shared.application.constants.custom.RelatorioTemplate;
-import cv.inps.rh.shared.application.dto.MinioFileDataDTO;
 import cv.inps.rh.shared.application.dto.ReportHtmlDTO;
 import cv.inps.rh.shared.domain.service.OrdemServicoService;
 import cv.inps.rh.shared.domain.service.RelatoriosService;
+import cv.inps.rh.shared.domain.service.model.OrdemServico;
 import cv.inps.rh.shared.util.PdfGenerator;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpHeaders;
@@ -27,11 +26,6 @@ public class RelatoriosPdfController {
     this.pdfGenerator = pdfGenerator;
   }
 
-  @GetMapping("/ordem-servico")
-  public ResponseEntity<MinioFileDataDTO> ordemServicoPdf(@RequestParam RelatorioTemplate template) {
-    return ResponseEntity.ok(service.ordemServico(template));
-  }
-
   @GetMapping("/recibos-salario")
   public ResponseEntity<byte[]> recibosSalarioPdf() {
     return pdfResponse(pdfGenerator.generate("recibo-salario", service.recibosSalario()), "recibos-salario.pdf");
@@ -45,17 +39,30 @@ public class RelatoriosPdfController {
     );
   }
 
-  @PostMapping("/os/fim-comissao-servico")
-  public ResponseEntity<byte[]> fimComissaoServico(@RequestParam String funcionarioId, @RequestBody ReportHtmlDTO htmlBody) {
+  @PostMapping("/ordem-servico/{tipo}")
+  public ResponseEntity<byte[]> generate(
+      @PathVariable OrdemServico tipo,
+      @RequestBody ReportHtmlDTO htmlBody
+  ) {
+
     return pdfResponse(
-        pdfGenerator.generate("os-fim-comissao-servico", osService.fimComissaoServico(funcionarioId, htmlBody.getHtml())),
-        "Fim Comissão Serviço.pdf"
+        pdfGenerator.generate(
+            "os-general",
+            osService.generate(tipo, htmlBody.getHtml())
+        ),
+        tipo.name() + ".pdf"
     );
   }
 
-  @GetMapping("/os/fim-comissao-servico/content")
-  public ResponseEntity<ReportHtmlDTO> fimComissaoServico(@RequestParam String funcionarioId) {
-    return ResponseEntity.ok(osService.getFimComissaoServicoContent(funcionarioId));
+  @GetMapping("/ordem-servico/{tipo}/content")
+  public ResponseEntity<ReportHtmlDTO> content(
+      @PathVariable OrdemServico tipo,
+      @RequestParam String funcionarioId
+  ) {
+
+    return ResponseEntity.ok(
+        osService.content(tipo, funcionarioId)
+    );
   }
 
   private ResponseEntity<byte[]> pdfResponse(byte[] pdf, String filename) {

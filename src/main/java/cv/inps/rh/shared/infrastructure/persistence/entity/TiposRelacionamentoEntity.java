@@ -3,17 +3,19 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import java.math.BigDecimal;
 import cv.inps.rh.shared.application.constants.Estado;
-import java.time.LocalDate;
+import cv.inps.rh.shared.config.AuditEntity;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Getter
@@ -31,8 +33,6 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-
 
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cargo_id", referencedColumnName = "id")
@@ -40,15 +40,13 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     @Column(name="salario")
     private BigDecimal salario;
 
-  
-    @Column(name="moeda")
+
+  @Column(name="moeda")
     private String moeda;
 
-  
-    @Column(name="tipo_situacao")
-    private String tipoSituacao;
 
-  
+  @Column(name="tipo_situacao")
+    private String tipoSituacao;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -57,24 +55,22 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     @Column(name="flg_processa")
     private Integer flgProcessa;
 
-  
-    @Enumerated(EnumType.STRING)
+
+  @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
-    @Column(name="obs", length=4000)
+
+  @Column(name="obs", length=4000)
     private String obs;
 
-  
-    @Column(name="data_inicio")
+
+  @Column(name="data_inicio")
     private LocalDate dataInicio;
 
-  
-    @Column(name="data_fim")
-    private LocalDate dataFim;
 
-  
+  @Column(name="data_fim")
+    private LocalDate dataFim;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -94,8 +90,6 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     @Column(name="uuid", nullable = false)
     private UUID uuid;
 
-  
-
 
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "regime_id", referencedColumnName = "id")
@@ -103,15 +97,13 @@ public class TiposRelacionamentoEntity extends AuditEntity {
     @Column(name="referente")
     private String referente;
 
-  
-    @Column(name="ult_proc")
+
+  @Column(name="ult_proc")
     private LocalDate ultProc;
 
-  
-    @Column(name="motivo_sit_lab")
-    private String motivoSitLab;
 
-  
+  @Column(name="motivo_sit_lab")
+    private String motivoSitLab;
 
 
   @ManyToOne(fetch = FetchType.LAZY)

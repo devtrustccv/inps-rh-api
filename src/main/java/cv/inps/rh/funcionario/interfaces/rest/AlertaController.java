@@ -3,26 +3,23 @@
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.funcionario.application.dto.AlertaDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperListAlertaDTO;
+import cv.inps.rh.funcionario.application.queries.GetAlertaQuery;
+import cv.inps.rh.funcionario.application.queries.GetListAlertaQuery;
+import cv.inps.rh.funcionario.application.queries.GetNotificacoesGeradasByAlertaQuery;
+import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.funcionario.application.queries.*;
-
-import cv.inps.rh.funcionario.application.dto.WrapperListAlertaDTO;
 import java.util.List;
-import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
-import cv.inps.rh.funcionario.application.dto.AlertaDTO;
 
 @IgrpController
 @RestController
@@ -33,12 +30,12 @@ import cv.inps.rh.funcionario.application.dto.AlertaDTO;
 )
 public class AlertaController {
 
-  
+
   private final QueryBus queryBus;
 
   public AlertaController(QueryBus queryBus) {
           this.queryBus = queryBus;
-          
+
   }
    @GetMapping(
    value = "alertas"
@@ -49,7 +46,7 @@ public class AlertaController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -59,8 +56,8 @@ public class AlertaController {
       )
     }
   )
-  
-  public ResponseEntity<WrapperListAlertaDTO> getListAlerta(
+
+   public ResponseEntity<WrapperListAlertaDTO> getListAlerta(
     @RequestParam(value = "referencia", required = false) String referencia,
     @RequestParam(value = "tipoAlerta", required = false) String tipoAlerta,
     @RequestParam(value = "nomeColaborador", required = false) String nomeColaborador,
@@ -88,7 +85,7 @@ public class AlertaController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -98,8 +95,8 @@ public class AlertaController {
       )
     }
   )
-  
-  public ResponseEntity<List<NotificacaoInfoDTO>> getNotificacoesGeradasByAlerta(
+
+   public ResponseEntity<List<NotificacaoInfoDTO>> getNotificacoesGeradasByAlerta(
     @PathVariable(value = "id") String id)
   {
 
@@ -118,7 +115,7 @@ public class AlertaController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -128,8 +125,8 @@ public class AlertaController {
       )
     }
   )
-  
-  public ResponseEntity<AlertaDTO> getAlerta(
+
+   public ResponseEntity<AlertaDTO> getAlerta(
     @PathVariable(value = "id") String id)
   {
 

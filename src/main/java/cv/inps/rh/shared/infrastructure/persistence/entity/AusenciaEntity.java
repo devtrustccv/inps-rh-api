@@ -3,14 +3,18 @@
 
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import cv.igrp.framework.stereotype.IgrpEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import jakarta.validation.constraints.NotNull;
-import java.util.UUID;
-import java.time.LocalDate;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.config.AuditEntity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.util.UUID;
 
 
 @Getter
@@ -28,8 +32,8 @@ public class AusenciaEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
-    @NotNull(message = "paramSitId is mandatory")
+
+  @NotNull(message = "paramSitId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -38,34 +42,34 @@ public class AusenciaEntity extends AuditEntity {
     @Column(name="referencia_name")
     private String referenciaName;
 
-  
-    @Column(name="referencia_id")
+
+  @Column(name="referencia_id")
     private Long referenciaId;
 
-  
-    @Column(name="obs")
+
+  @Column(name="obs")
     private String obs;
 
-  
-    @Column(name="uuid")
+
+  @Column(name="uuid")
     private UUID uuid;
 
-  
-    @Column(name="hora")
+
+  @Column(name="hora")
     private Integer hora;
 
-  
-    @Column(name="data_inicio")
+
+  @Column(name="data_inicio")
     private LocalDate dataInicio;
 
-  
-    @Column(name="data_fim")
+
+  @Column(name="data_fim")
     private LocalDate dataFim;
 
-  
-    @Enumerated(EnumType.STRING)
+
+  @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 
-  
+
 }

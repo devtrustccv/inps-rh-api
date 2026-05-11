@@ -4,10 +4,17 @@
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
 import cv.igrp.framework.stereotype.IgrpEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import java.util.UUID;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.math.BigDecimal;
+import java.util.UUID;
 
 
 @Getter
@@ -23,77 +30,77 @@ public class VResumoAssiduidadeEntity  {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-  
+
     @Column(name="funcionario_id")
     private Long funcionarioId;
 
-  
+
     @Column(name="funcionario_uuid")
     private UUID funcionarioUuid;
 
-  
+
     @Column(name="nome_funcionario")
     private String nomeFuncionario;
 
-  
+
     @Column(name="id_direcao")
     private Long idDirecao;
 
-  
+
     @Column(name="nome_direcao")
     private String nomeDirecao;
 
-  
+
     @Column(name="id_secao")
     private Long idSecao;
 
-  
+
     @Column(name="nome_secao")
     private String nomeSecao;
 
-  
+
     @Column(name="id_ilha")
     private Long idIlha;
 
-  
+
     @Column(name="nome_ilha")
     private String nomeIlha;
 
-  
+
     @Column(name="ano")
     private Integer ano;
 
-  
+
     @Column(name="mes")
     private Integer mes;
 
-  
+
     @Column(name="total_dias")
     private Integer totalDias;
 
-  
+
     @Column(name="total_faltas")
     private Integer totalFaltas;
 
-  
+
     @Column(name="horas_trabalhadas")
     private BigDecimal horasTrabalhadas;
 
-  
+
     @Column(name="horas_almoco")
     private BigDecimal horasAlmoco;
 
-  
+
     @Column(name="horas_extras")
     private BigDecimal horasExtras;
 
-  
+
     @Column(name="horas_ausencia")
     private BigDecimal horasAusencia;
 
-  
+
     @Column(name="estado")
     private String estado;
 
-  
+
 }

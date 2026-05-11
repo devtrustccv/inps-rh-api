@@ -4,11 +4,12 @@
 package cv.inps.rh.processamento.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.time.LocalDate;
 
 @Data
@@ -20,22 +21,22 @@ import java.time.LocalDate;
 public class ProcessamentoSalarioRequestDTO  {
 
   @NotNull(message = "The field <dataInicio> is required")
-  
+
   private LocalDate dataInicio ;
   @NotNull(message = "The field <dataFim> is required")
-  
+
   private LocalDate dataFim ;
   @NotBlank(message = "The field <tipo> is required")
-  
+
   private String tipo ;
-  
-  
+
+
   private Long direccaoId ;
-  
-  
+
+
   private String observacao ;
-  
-  
+
+
   private Long relacionamentoId ;
 
 }

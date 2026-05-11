@@ -168,20 +168,24 @@ public class RegistarColaboradorService {
       var listVinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
           .findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(), "REM");
 
-      if (!CollectionUtils.isEmpty(listVinculoTipoMovimentoREM)) {
-        var vinculoTipoMovimentoREM = listVinculoTipoMovimentoREM.getFirst();
-        if (fun.getDefinicoesRenumeracoes() == null) {
-          fun.setDefinicoesRenumeracoes(new ArrayList<>());
-        }
-        var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
-            dadosContratuais.getSalario(),
-            vinculoTipoMovimentoREM.getTmId(),
-            dadosContratuais.getDataInicio(),
-            dadosContratuais.getDataFim(),
-            fun,
-            dadosContratuais.getMoeda());
-        fun.getDefinicoesRenumeracoes().add(renumeracao);
+      if (CollectionUtils.isEmpty(listVinculoTipoMovimentoREM)) {
+        throw IgrpResponseStatusException.badRequest(
+            "O tipo de vínculo selecionado não tem tipo de movimento salarial (REM) parametrizado. " +
+            "Parametrize o vínculo antes de registar o colaborador.");
       }
+
+      var vinculoTipoMovimentoREM = listVinculoTipoMovimentoREM.getFirst();
+      if (fun.getDefinicoesRenumeracoes() == null) {
+        fun.setDefinicoesRenumeracoes(new ArrayList<>());
+      }
+      var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
+          dadosContratuais.getSalario(),
+          vinculoTipoMovimentoREM.getTmId(),
+          dadosContratuais.getDataInicio(),
+          dadosContratuais.getDataFim(),
+          fun,
+          dadosContratuais.getMoeda());
+      fun.getDefinicoesRenumeracoes().add(renumeracao);
       /******************** FIM RENUMERACOES ********************************/
 
       /******************** INI PAGAMENTOS DESCONTOS ********************************/
@@ -196,17 +200,24 @@ public class RegistarColaboradorService {
           dadosContratuais.getTipoVinculoLaboralId(),
           "PAG");
 
-      if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
-        listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
-          var pagamento = defPagamentoMapper.createPagamento(
-              BigDecimal.ZERO,
-              movimento.getTmId(),
-              dadosContratuais.getDataInicio(),
-              dadosContratuais.getDataFim(),
-              fun);
-          fun.getDefinicoesPagamentos().add(pagamento);
-        });
+      if (CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
+        throw IgrpResponseStatusException.badRequest(
+            "O tipo de vínculo selecionado não tem tipos de movimento de pagamento (PAG) parametrizados. " +
+            "Parametrize o vínculo antes de registar o colaborador.");
       }
+
+      if (fun.getDefinicoesPagamentos() == null) {
+        fun.setDefinicoesPagamentos(new ArrayList<>());
+      }
+      listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
+        var pagamento = defPagamentoMapper.createPagamento(
+            BigDecimal.ZERO,
+            movimento.getTmId(),
+            dadosContratuais.getDataInicio(),
+            dadosContratuais.getDataFim(),
+            fun);
+        fun.getDefinicoesPagamentos().add(pagamento);
+      });
     }
     /******************** FIM PAGAMENTOS DESCONTOS ********************************/
 

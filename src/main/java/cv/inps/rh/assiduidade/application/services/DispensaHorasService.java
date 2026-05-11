@@ -3,7 +3,6 @@ package cv.inps.rh.assiduidade.application.services;
 import cv.inps.rh.assiduidade.application.dto.HorasDispensaStatusDTO;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AssiduidadeParametroEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DispensaEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.util.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

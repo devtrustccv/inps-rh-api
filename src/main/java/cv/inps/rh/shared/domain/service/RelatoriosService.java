@@ -2,13 +2,9 @@ package cv.inps.rh.shared.domain.service;
 
 import cv.igrp.platform.filemanager.StorageService;
 import cv.inps.rh.processamento.domain.service.processamentosalarial.report.model.ProcessamentoSalarialReport;
-import cv.inps.rh.shared.application.constants.custom.RelatorioTemplate;
-import cv.inps.rh.shared.application.dto.MinioFileDataDTO;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PdfGenerator;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
@@ -29,30 +25,6 @@ public class RelatoriosService {
   private final PdfGenerator pdf;
   private final StorageService storageService;
   private final JdbcTemplate jdbcTemplate;
-
-  @SneakyThrows
-  public MinioFileDataDTO ordemServico(RelatorioTemplate template) {
-
-    Map<String, Object> data = Map.ofEntries(
-        Map.entry("numeroOrdem", "15"),
-        Map.entry("ano", "2025"),
-        Map.entry("assunto", "Pedido de Licença sem Vencimento"),
-        Map.entry("periodoMeses", "2"),
-        Map.entry("periodoExtenso", "dois"),
-        Map.entry("cargo", "Coordenadora"),
-        Map.entry("nome", "Maria Fernandes Silva"),
-        Map.entry("categoria", "14 E"),
-        Map.entry("dataEfeito", "20 de maio de 2025"),
-        Map.entry("dataEmissao", "30 de abril de 2025"),
-        Map.entry("nomePresidente", "Mário Rui Lopes Fernandes")
-    );
-
-    var bytes = pdf.generate("ordem-servico", data);
-
-    storageService.uploadPublicFile(bytes, "ordem-servico.pdf", MediaType.APPLICATION_PDF_VALUE);
-
-    return new MinioFileDataDTO("ordem-servico.pdf", "ordem-servico.pdf");
-  }
 
   public Map<String, Object> recibosSalario() {
 

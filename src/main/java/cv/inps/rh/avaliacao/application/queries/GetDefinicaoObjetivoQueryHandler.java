@@ -1,16 +1,13 @@
 package cv.inps.rh.avaliacao.application.queries;
 
-import cv.inps.rh.avaliacao.application.dto.AvaliacaoDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import org.springframework.context.event.EventListener;
+import cv.inps.rh.avaliacao.application.dto.AvaliacaoDTO;
+import cv.inps.rh.avaliacao.application.services.AvaliacaoReadService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
-import cv.inps.rh.avaliacao.application.dto.DefinicaoObjectivoDTO;
-import cv.inps.rh.avaliacao.application.services.AvaliacaoReadService;
 
 @Component
 public class GetDefinicaoObjetivoQueryHandler implements QueryHandler<GetDefinicaoObjetivoQuery, ResponseEntity<AvaliacaoDTO>>{
