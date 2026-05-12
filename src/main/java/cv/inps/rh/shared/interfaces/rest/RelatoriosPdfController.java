@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.context.Context;
 
 @RestController
 @RequestMapping("/api/relatorios/pdf")
@@ -27,8 +28,8 @@ public class RelatoriosPdfController {
   }
 
   @GetMapping("/recibos-salario")
-  public ResponseEntity<byte[]> recibosSalarioPdf() {
-    return pdfResponse(pdfGenerator.generate("recibo-salario", service.recibosSalario()), "recibos-salario.pdf");
+  public ResponseEntity<byte[]> recibosSalarioPdf(@RequestParam Long procFuncionarioId) {
+    return pdfResponse(pdfGenerator.generate("recibo-salario", service.recibosSalario(procFuncionarioId)), "recibos-salario.pdf");
   }
 
   @GetMapping("/processamento-salarios")
@@ -40,29 +41,20 @@ public class RelatoriosPdfController {
   }
 
   @PostMapping("/ordem-servico/{tipo}")
-  public ResponseEntity<byte[]> generate(
-      @PathVariable OrdemServico tipo,
-      @RequestBody ReportHtmlDTO htmlBody
-  ) {
-
+  public ResponseEntity<byte[]> generate(@PathVariable OrdemServico tipo, @RequestBody ReportHtmlDTO htmlBody) {
     return pdfResponse(
-        pdfGenerator.generate(
-            "os-general",
-            osService.generate(tipo, htmlBody.getHtml())
-        ),
+        pdfGenerator.generateFromHtml(htmlBody.getHtml()),
         tipo.name() + ".pdf"
     );
   }
 
   @GetMapping("/ordem-servico/{tipo}/content")
-  public ResponseEntity<ReportHtmlDTO> content(
-      @PathVariable OrdemServico tipo,
-      @RequestParam String funcionarioId
-  ) {
-
-    return ResponseEntity.ok(
-        osService.content(tipo, funcionarioId)
+  public ResponseEntity<ReportHtmlDTO> content(@PathVariable OrdemServico tipo, @RequestParam String funcionarioId) {
+    var html = pdfGenerator.generateAsString(
+        "os-general",
+        osService.generate(tipo, osService.content(tipo, funcionarioId).getHtml())
     );
+    return ResponseEntity.ok(new ReportHtmlDTO(html));
   }
 
   private ResponseEntity<byte[]> pdfResponse(byte[] pdf, String filename) {

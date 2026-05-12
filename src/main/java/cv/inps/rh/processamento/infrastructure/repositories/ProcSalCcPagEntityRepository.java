@@ -46,5 +46,6 @@ public interface ProcSalCcPagEntityRepository extends
       @Param("procId") Long procSalId
   );
 
+  List<ProcSalCcPagEntity> findByProcFuncId(Long procFuncId);
 
 }

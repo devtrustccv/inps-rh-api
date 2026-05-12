@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,6 +70,32 @@ public interface ContratoEntityRepository extends
 
   ContratoEntity findTopByFunId_UuidOrderByVersaoDesc(UUID funUuid);
 
+  @Query("""
+      SELECT c FROM ContratoEntity c
+      JOIN FETCH c.tpContratoId tp
+      JOIN FETCH c.funId f
+      WHERE tp.flgRenovavel = 1
+        AND c.estado = :estado
+        AND c.dataFim BETWEEN :dataInicio AND :dataFim
+      """)
+  List<ContratoEntity> findRenovaveisProximosAoFim(
+      @Param("estado") Estado estado,
+      @Param("dataInicio") LocalDate dataInicio,
+      @Param("dataFim") LocalDate dataFim
+  );
 
+  @Query("""
+      SELECT c FROM ContratoEntity c
+      JOIN FETCH c.tpContratoId tp
+      JOIN FETCH c.funId f
+      WHERE c.estado = :estado
+        AND c.contratoId IS NULL
+        AND c.dataInicio BETWEEN :dataInicioMin AND :dataInicioMax
+      """)
+  List<ContratoEntity> findParaConversao(
+      @Param("estado") Estado estado,
+      @Param("dataInicioMin") LocalDate dataInicioMin,
+      @Param("dataInicioMax") LocalDate dataInicioMax
+  );
 
 }

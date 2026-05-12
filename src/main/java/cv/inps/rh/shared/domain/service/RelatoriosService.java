@@ -2,6 +2,10 @@ package cv.inps.rh.shared.domain.service;
 
 import cv.igrp.platform.filemanager.StorageService;
 import cv.inps.rh.processamento.domain.service.processamentosalarial.report.model.ProcessamentoSalarialReport;
+import cv.inps.rh.processamento.infrastructure.persistence.entity.ProcSalCcPagEntity;
+import cv.inps.rh.processamento.infrastructure.persistence.entity.ProcSalCcRemunEntity;
+import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcPagEntityRepository;
+import cv.inps.rh.processamento.infrastructure.repositories.ProcSalCcRemunEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PdfGenerator;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -22,36 +27,53 @@ public class RelatoriosService {
 
   private static final String AREM = "AREM";
   private static final String SEPARATOR = " - ";
+  private static final DateTimeFormatter MONTH_YEAR = DateTimeFormatter.ofPattern("MM/yyyy");
   private final PdfGenerator pdf;
   private final StorageService storageService;
   private final JdbcTemplate jdbcTemplate;
+  private final ProcSalCcRemunEntityRepository procSalCcRemunEntityRepository;
+  private final ProcSalCcPagEntityRepository procSalCcPagEntityRepository;
 
-  public Map<String, Object> recibosSalario() {
+  public Map<String, Object> recibosSalario(Long procFuncionarioId) {
 
-    Map<String, Object> recibo = Map.of(
-        "entidade", "Processar Remunerações Gabinete Sistemas de Informação",
-        "dataProcessamento", "10/2025",
-        "dataEmissao", "27-10-2025 10:54:16",
-        "funcionario", Map.of(
-            "numero", "10458041",
-            "nome", "Nivaldo Cardoso Tavares",
-            "vinculo", "Contratado (Contratado - Contratado)"
-        ),
-        "totais", Map.of(
-            "remuneracoes", "112.167",
-            "descontos", "22.364",
-            "liquido", "89.803"
-        ),
-        "remuneracoes", List.of(
-            Map.of("descricao", "Vencimento Pessoal Contratado (IUR SS)", "valor", "112.167")
-        ),
-        "descontos", List.of(
-            Map.of("descricao", "Retenção Previdência Social (8,5%)", "valor", "9.534"),
-            Map.of("descricao", "Retenção IUR (Pessoal INPS)", "valor", "12.830")
-        )
+    var remunRows = procSalCcRemunEntityRepository.findByProcFuncId(procFuncionarioId);
+    var pagRows = procSalCcPagEntityRepository.findByProcFuncId(procFuncionarioId);
+
+    if (remunRows.isEmpty() && pagRows.isEmpty()) {
+      return Map.of("recibos", List.of());
+    }
+
+    ProcSalCcRemunEntity header = remunRows.isEmpty() ? null : remunRows.getFirst();
+
+    String entidade = header != null ? ("Processar Remunerações " + header.getCentroDeCusto()) : "";
+    String dataProcessamento = header != null ? header.getDataProcessamento().format(MONTH_YEAR) : "";
+    String dataEmissao = LocalDateTime.now().format(DateFormatter.DATE_TIME);
+    String nome = header != null ? header.getNome() : "";
+    String vinculo = header != null ? header.getRelacao() : "";
+    String nif = header != null ? String.valueOf(header.getNif()) : "";
+    Long totRemun = header != null ? header.getTotalRemuneracoes() : 0L;
+    Long totDes = header != null ? header.getTotalDescontos() : 0L;
+    Long totLiq = header != null ? header.getTotalLiquido() : 0L;
+
+    var remuneracoes = remunRows.stream()
+        .map(r -> Map.of("descricao", (Object) r.getDescricao(), "valor", (Object) r.getValor()))
+        .toList();
+
+    var descontos = pagRows.stream()
+        .map(r -> Map.of("descricao", (Object) r.getDescricao(), "valor", (Object) r.getValor()))
+        .toList();
+
+    var recibo = Map.ofEntries(
+        Map.entry("entidade", entidade),
+        Map.entry("dataProcessamento", dataProcessamento),
+        Map.entry("dataEmissao", dataEmissao),
+        Map.entry("funcionario", Map.of("numero", nif, "nome", nome, "vinculo", vinculo)),
+        Map.entry("totais", Map.of("remuneracoes", totRemun, "descontos", totDes, "liquido", totLiq)),
+        Map.entry("remuneracoes", remuneracoes),
+        Map.entry("descontos", descontos)
     );
 
-    return Map.of("recibos", List.of(recibo, recibo));
+    return Map.of("recibos", List.of(recibo));
   }
 
   public Context processamentoSalarios(Long processamentoId, String tipo) {

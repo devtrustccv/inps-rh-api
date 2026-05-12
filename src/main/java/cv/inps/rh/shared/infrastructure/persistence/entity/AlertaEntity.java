@@ -77,5 +77,8 @@ public class AlertaEntity extends AuditEntity {
     @Column(name="uuid")
     private UUID uuid;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fun_id", referencedColumnName = "id")
+    private FuncionarioEntity funId;
 
 }

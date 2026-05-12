@@ -15,12 +15,15 @@ import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.service.NotificacaoDispatchService;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +37,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class JustificarFaltaWriteService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(JustificarFaltaWriteService.class);
 
   private final FaltaEntityRepository faltaRepository;
   private final PedidoEntityRepository pedidoRepository;
@@ -53,6 +58,7 @@ public class JustificarFaltaWriteService {
   private final FeriasGozadasEntityRepository feriasGozadasRepository;
   private final AnoEntityRepository anoRepository;
   private final OrdemServicoWriteService ordemServicoWriteService;
+  private final NotificacaoDispatchService notificacaoDispatchService;
 
   @Transactional
   public Map<String, ?> justificarFalta(JustificarFaltaCommand command) {
@@ -317,6 +323,8 @@ public class JustificarFaltaWriteService {
     pedido.setEtapa("FINALIZADO");
     pedidoRepository.save(pedido);
 
+    enviarNotificacaoJustificacaoFalta(pedido, funcionario);
+
     // Atualizar validação pendente
     funcionarioRules.getValidacaoPendente(
         funcionario.getUuid(),
@@ -378,6 +386,24 @@ public class JustificarFaltaWriteService {
      *
      * =============================================================================
      */
+  }
+
+  private void enviarNotificacaoJustificacaoFalta(PedidoEntity pedido, FuncionarioEntity funcionario) {
+    var emailOpt = funcionario.getContactos().stream()
+        .filter(c -> "EMAIL".equalsIgnoreCase(c.getTipoContacto()))
+        .map(ContactoEntity::getContacto)
+        .findFirst();
+    if (emailOpt.isEmpty()) {
+      LOGGER.warn("Funcionário {} sem email para notificação de justificação de falta", funcionario.getUuid());
+      return;
+    }
+    var vars = Map.of(
+        "nome", funcionario.getNome() != null ? funcionario.getNome() : "",
+        "estado", pedido.getEstado() != null ? pedido.getEstado() : ""
+    );
+    notificacaoDispatchService.enviar(
+        "JUSTIFICACAO_FALTA", emailOpt.get(), funcionario.getNome(),
+        pedido.getId(), "RH_T_PEDIDO", pedido.getUuid(), funcionario, vars);
   }
 
 }

@@ -7,6 +7,7 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.assiduidade.application.commands.*;
+import cv.inps.rh.assiduidade.application.commands.EnviarDireitoFeriasCommand;
 import cv.inps.rh.assiduidade.application.dto.*;
 import cv.inps.rh.assiduidade.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -994,6 +995,28 @@ public class AssiduidadeController {
 
       return queryBus.handle(query);
 
+  }
+
+  @PostMapping(
+    value = "feria/{pedidoId}/direito-ferias"
+  )
+  @Operation(
+    summary = "Enviar direito de ferias",
+    description = "Envia email dos direitos de ferias ao colaborador e ao responsavel",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = String.class, type = "String")
+          )
+      )
+    }
+  )
+  public ResponseEntity<Map<String, ?>> enviarDireitoFerias(
+      @PathVariable(value = "pedidoId") String pedidoId) {
+    final var command = new EnviarDireitoFeriasCommand(pedidoId);
+    return commandBus.send(command);
   }
 
 }

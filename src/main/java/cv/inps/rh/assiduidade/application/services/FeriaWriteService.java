@@ -18,9 +18,13 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
-import cv.inps.rh.shared.service.EmailService;
+import cv.inps.rh.shared.application.services.EmailService;
+import cv.inps.rh.shared.domain.service.NotificacaoDispatchService;
+import cv.inps.rh.assiduidade.application.commands.EnviarDireitoFeriasCommand;
 import lombok.RequiredArgsConstructor;
 import org.flywaydb.core.internal.util.CollectionsUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,10 +35,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class FeriaWriteService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(FeriaWriteService.class);
 
   private final FeriasGozadasEntityRepository feriasGozadasRepository;
   private final PedidoEntityRepository pedidoRepository;
@@ -52,6 +59,7 @@ public class FeriaWriteService {
   private final SaldoFeriaService saldoFeriaService;
   private final DocumentoMapper documentoMapper;
   private final OrdemServicoWriteService ordemServicoWriteService;
+  private final NotificacaoDispatchService notificacaoDispatchService;
 
 
   @Transactional
@@ -184,19 +192,7 @@ public class FeriaWriteService {
     if (estado == Estado.A) {
       ordemServicoWriteService.criar(funcionario, tipoRelAtual, req.getTipoOrdemServico());
       criarAusenciaNaValidacao(ferias);
-      // Send email notification
-      /*String subject = "Validação do Pedido de Férias";
-      String text = String.format(
-          "O seu pedido de férias com início em %s e fim em %s foi aprovado.",
-          ferias.getDataInicio(),
-          ferias.getDataFim());
-      var funcEmail = funcionario.getContactos().stream()
-          .filter(c -> c.getTipoContacto().equals("EMAIL"))
-          .findFirst()
-          .map(ContactoEntity::getContacto)
-          .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
-              "Email not found for funcionario: " + funcionario.getUuid()));
-      emailService.sendSimpleMessage(funcEmail, subject, text);*/
+      enviarNotificacaoValidacaoFerias(ferias, funcionario);
     }
 
     funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.FERIA)
@@ -294,6 +290,72 @@ public class FeriaWriteService {
     return resp;
   }
 
+
+  @Transactional
+  public Map<String, ?> enviarDireitoFerias(EnviarDireitoFeriasCommand command) {
+    var ferias = feriasGozadasRepository
+        .findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Pedido de férias não encontrado"));
+
+    var funcionario = ferias.getFunId();
+    int saldo = saldoFeriaService.getSaldo(funcionario.getUuid());
+
+    var vars = Map.of(
+        "nome", funcionario.getNome() != null ? funcionario.getNome() : "",
+        "dataInicio", ferias.getDataInicio() != null ? ferias.getDataInicio().toString() : "",
+        "dataFim", ferias.getDataFim() != null ? ferias.getDataFim().toString() : "",
+        "numDias", ferias.getNumDia() != null ? ferias.getNumDia().toString() : "0",
+        "saldoRestante", String.valueOf(saldo)
+    );
+
+    funcionario.getContactos().stream()
+        .filter(c -> "EMAIL".equalsIgnoreCase(c.getTipoContacto()))
+        .map(ContactoEntity::getContacto)
+        .findFirst()
+        .ifPresentOrElse(
+            email -> notificacaoDispatchService.enviar(
+                "DIREITO_FERIAS", email, funcionario.getNome(),
+                ferias.getId(), "RH_T_FERIAS_GOZADAS", ferias.getUuid(), funcionario, vars),
+            () -> LOGGER.warn("Funcionário {} sem email para envio de direito de férias", funcionario.getUuid())
+        );
+
+    if (ferias.getResponsavelId() != null) {
+      responsavelEntityRepository.findById(ferias.getResponsavelId()).ifPresent(responsavel -> {
+        String emailResp = responsavel.getEmail();
+        if (emailResp != null && !emailResp.isBlank()) {
+          var respFun = responsavel.getFunId();
+          notificacaoDispatchService.enviar(
+              "DIREITO_FERIAS", emailResp,
+              respFun != null ? respFun.getNome() : emailResp,
+              ferias.getId(), "RH_T_FERIAS_GOZADAS", ferias.getUuid(), respFun, vars);
+        }
+      });
+    }
+
+    return Map.of("pedidoId", command.getPedidoId(), "enviado", true);
+  }
+
+  private void enviarNotificacaoValidacaoFerias(FeriasGozadasEntity ferias, FuncionarioEntity funcionario) {
+    var emailOpt = funcionario.getContactos().stream()
+        .filter(c -> "EMAIL".equalsIgnoreCase(c.getTipoContacto()))
+        .map(ContactoEntity::getContacto)
+        .findFirst();
+    if (emailOpt.isEmpty()) {
+      LOGGER.warn("Funcionário {} sem email para notificação de validação de férias", funcionario.getUuid());
+      return;
+    }
+    int saldo = saldoFeriaService.getSaldo(funcionario.getUuid());
+    var vars = Map.of(
+        "nome", funcionario.getNome() != null ? funcionario.getNome() : "",
+        "dataInicio", ferias.getDataInicio() != null ? ferias.getDataInicio().toString() : "",
+        "dataFim", ferias.getDataFim() != null ? ferias.getDataFim().toString() : "",
+        "numDias", ferias.getNumDia() != null ? ferias.getNumDia().toString() : "0",
+        "saldoRestante", String.valueOf(saldo)
+    );
+    notificacaoDispatchService.enviar(
+        "VALIDACAO_FERIAS", emailOpt.get(), funcionario.getNome(),
+        ferias.getId(), "RH_T_FERIAS_GOZADAS", ferias.getUuid(), funcionario, vars);
+  }
 
   private void validatePedido(PedidoFeriaReqDTO req) {
 

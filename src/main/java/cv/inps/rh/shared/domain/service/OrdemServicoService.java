@@ -17,6 +17,7 @@ import org.thymeleaf.context.Context;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -49,23 +50,14 @@ public class OrdemServicoService {
     ctx.setVariable("assunto", documentOutputType.getTitulo());
     ctx.setVariable("conteudo", htmlBody);
     ctx.setVariable("dataEmissao", formatNow());
-    ctx.setVariable(
-        "nomePresidente",
-        getResponsavel(documentOutputType.getResponsavel())
-    );
+    ctx.setVariable("nomePresidente", getResponsavel(documentOutputType.getResponsavel()));
 
     return ctx;
   }
 
   public ReportHtmlDTO content(OrdemServico tipo, String funcionarioId) {
 
-    var provider = providers.get(tipo);
-
-    if (provider == null) {
-      throw new IllegalArgumentException(
-          "No provider found for ordem de serviço: " + tipo
-      );
-    }
+    var provider = Objects.requireNonNull(providers.get(tipo), "No provider found for ordem de serviço: " + tipo);
 
     var values = provider.buildVariables(funcionarioId);
 
