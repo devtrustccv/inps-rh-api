@@ -311,6 +311,61 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "ativarInactivarSubsidioNatal",
+      "path": "activar-inactivar-subsidio-natal",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "SubsidioResponseNatal",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "subsidioId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "ano",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "funcionarioId",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "status",
+          "description": "possiveis valores: A/I",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento"

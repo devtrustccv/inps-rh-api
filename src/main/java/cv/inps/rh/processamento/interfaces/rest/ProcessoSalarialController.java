@@ -300,4 +300,37 @@ public class ProcessoSalarialController {
 
   }
 
+   @PostMapping(
+   value = "activar-inactivar-subsidio-natal"
+  )
+  @Operation(
+    summary = "Ativar inactivar subsidio natal",
+    description = "Ativar inactivar subsidio natal",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<String> ativarInactivarSubsidioNatal(@Valid @RequestBody SubsidioResponseNatalDTO ativarInactivarSubsidioNatalRequest
+    , @RequestParam(value = "subsidioId", required = false) Long subsidioId,
+    @RequestParam(value = "ano") Long ano,
+    @RequestParam(value = "funcionarioId") String funcionarioId,
+    @RequestParam(value = "status") String status)
+  {
+
+      final var command = new AtivarInactivarSubsidioNatalCommand(ativarInactivarSubsidioNatalRequest, subsidioId, ano, funcionarioId, status);
+
+      return commandBus.send(command);
+
+  }
+
 }

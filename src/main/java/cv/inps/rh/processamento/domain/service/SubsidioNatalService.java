@@ -1,6 +1,16 @@
 package cv.inps.rh.processamento.domain.service;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.processamento.application.dto.SubsidioResponseNatalDTO;
+import cv.inps.rh.processamento.domain.models.SubsidioNatalStatus;
+import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.infrastructure.persistence.entity.SubsidioNatalEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.SubsidioNatalEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -9,14 +19,66 @@ import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.sql.Types;
+import java.util.UUID;
 
+@AllArgsConstructor
 @Service
 public class SubsidioNatalService {
 
   private final DataSource dataSource;
+  private final SubsidioNatalEntityRepository subsidioNatalEntityRepository;
+  private final ValidacaoEntityRepository validacaoEntityRepository;
+  private final FuncionarioEntityRepository funcionarioEntityRepository;
+  private final FuncionarioRules funcionarioRules;
 
-  public SubsidioNatalService(DataSource dataSource) {
-    this.dataSource = dataSource;
+  public void activateInactivate(Long subsidioId, Long ano, String funId, SubsidioNatalStatus status, SubsidioResponseNatalDTO data) {
+    switch (status) {
+      case ATIVAR -> {
+
+        var uuid = UuidCreator.getTimeOrderedEpoch();
+
+        var fun = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funId));
+
+        var subs = new SubsidioNatalEntity();
+        subs.setFun(fun);
+        subs.setAnoReferente(ano);
+        subs.setValorSalarioBase(safeValueOf(data.salario()));
+        subs.setMesTrab(data.mesesTrabalho());
+        subs.setPercSalario(safeValueOf(data.percSalario()));
+        subs.setFaltas(safeValueOf(data.faltas()));
+        subs.setPercFalta(safeValueOf(data.percFalta()));
+        subs.setValorSubsidio(safeValueOf(data.valorSubsidio()));
+        subs.setChequeBrinde(safeValueOf(data.valorChequeBrinde()));
+        subs.setPrendaNatal(safeValueOf(data.valorPrendaNatal()));
+        subs.setReferenciaId(1L); // TODO 12/05/2026 22:03 fix this later;
+        subs.setEstado(Estado.P.name());
+        subs.setUuid(uuid.toString());
+        var saved = subsidioNatalEntityRepository.save(subs);
+
+        var validation = new ValidacaoEntity();
+        validation.setTipoAccao("SUBSIDIO_NATAL");
+        validation.setReferenciaName("RH_T_SUBSIDIO_NATAL");
+        validation.setReferenciaId(saved.getId());
+        validation.setFunId(fun);
+        validation.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(fun.getUuid()));
+        validation.setEstado(Estado.A);
+        validation.setUuid(uuid);
+        validacaoEntityRepository.save(validation);
+      }
+      case INATIVAR -> {
+        var obj = subsidioNatalEntityRepository.findByIdOrThrow(subsidioId);
+        obj.setEstado(status.getCode());
+        subsidioNatalEntityRepository.save(obj);
+      }
+    }
+  }
+
+  private Long safeValueOf(String val) {
+    try {
+      return Long.parseLong(val);
+    } catch (Exception _) {
+      return null;
+    }
   }
 
   public SubsidioResponseNatalDTO getData(Long direcaoId, Long funId, Double valorCBrinde, Long anoProcessamento) {
