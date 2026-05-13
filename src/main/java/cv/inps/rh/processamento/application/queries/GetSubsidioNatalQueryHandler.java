@@ -9,10 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
-public class GetSubsidioNatalQueryHandler implements QueryHandler<GetSubsidioNatalQuery, ResponseEntity<SubsidioResponseNatalDTO>> {
+public class GetSubsidioNatalQueryHandler implements QueryHandler<GetSubsidioNatalQuery, ResponseEntity<List<SubsidioResponseNatalDTO>>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetSubsidioNatalQueryHandler.class);
 
@@ -23,7 +24,7 @@ public class GetSubsidioNatalQueryHandler implements QueryHandler<GetSubsidioNat
   }
 
   @IgrpQueryHandler
-  public ResponseEntity<SubsidioResponseNatalDTO> handle(GetSubsidioNatalQuery query) {
+  public ResponseEntity<List<SubsidioResponseNatalDTO>> handle(GetSubsidioNatalQuery query) {
 
     LOGGER.debug("GetSubsidioNatalQuery: {}", query);
 

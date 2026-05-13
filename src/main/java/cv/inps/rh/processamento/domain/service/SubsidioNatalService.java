@@ -11,21 +11,27 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntity
 import cv.inps.rh.shared.infrastructure.persistence.repository.SubsidioNatalEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.jdbc.core.SqlOutParameter;
-import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import oracle.jdbc.internal.OracleCallableStatement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
 @Service
 public class SubsidioNatalService {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(SubsidioNatalService.class);
+
   private final DataSource dataSource;
+  private final JdbcTemplate jdbcTemplate;
   private final SubsidioNatalEntityRepository subsidioNatalEntityRepository;
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
@@ -81,53 +87,79 @@ public class SubsidioNatalService {
     }
   }
 
-  public SubsidioResponseNatalDTO getData(Long direcaoId, Long funId, Double valorCBrinde, Long anoProcessamento) {
+  public List<SubsidioResponseNatalDTO> getData(
+      Long direcaoId,
+      Long funId,
+      Double valorCBrinde,
+      Long anoProcessamento
+  ) {
 
-    var result = new SimpleJdbcCall(dataSource)
-        .withoutProcedureColumnMetaDataAccess()
-        .withCatalogName("RH_PK_SUBSISIO_NATAL_F_DB")
-        .withProcedureName("load_list")
-        .declareParameters(
+    var list = new ArrayList<SubsidioResponseNatalDTO>();
 
-            new SqlParameter("P_DIRECAO_ID", Types.NUMERIC),
-            new SqlParameter("P_FUN_ID", Types.NUMERIC),
-            new SqlParameter("p_VALOR_C_BRINDE", Types.NUMERIC),
-            new SqlParameter("p_ano_processamento", Types.NUMERIC),
+    var sql = """
+        BEGIN
+            RH_PK_SUBSISIO_NATAL_F_DB.LOAD_LIST(
+                ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            );
+        END;
+        """;
 
-            new SqlOutParameter("p_ls_nome", Types.VARCHAR),
-            new SqlOutParameter("p_ls_salario", Types.VARCHAR),
-            new SqlOutParameter("p_ls_meses_trabalho", Types.VARCHAR),
-            new SqlOutParameter("p_ls_perc_salario", Types.VARCHAR),
-            new SqlOutParameter("p_ls_faltas", Types.VARCHAR),
-            new SqlOutParameter("p_ls_perc_falta", Types.VARCHAR),
-            new SqlOutParameter("p_ls_valor_subsidio", Types.VARCHAR),
-            new SqlOutParameter("p_ls_valor_cheque_brid", Types.VARCHAR),
-            new SqlOutParameter("p_ls_valor_prenda_natal", Types.VARCHAR),
-            new SqlOutParameter("P_ESTADO", Types.VARCHAR)
-        )
-        .execute(
-            new MapSqlParameterSource()
-                .addValue("P_DIRECAO_ID", direcaoId)
-                .addValue("P_FUN_ID", funId)
-                .addValue("p_VALOR_C_BRINDE", valorCBrinde)
-                .addValue("p_ano_processamento", anoProcessamento)
-        );
+    jdbcTemplate.execute((Connection con) -> {
 
-    return new SubsidioResponseNatalDTO(
-        str(result.get("p_ls_nome")),
-        str(result.get("p_ls_salario")),
-        str(result.get("p_ls_meses_trabalho")),
-        str(result.get("p_ls_perc_salario")),
-        str(result.get("p_ls_faltas")),
-        str(result.get("p_ls_perc_falta")),
-        str(result.get("p_ls_valor_subsidio")),
-        str(result.get("p_ls_valor_cheque_brid")),
-        str(result.get("p_ls_valor_prenda_natal")),
-        str(result.get("P_ESTADO"))
-    );
+      var cs = con.prepareCall(sql).unwrap(OracleCallableStatement.class);
+
+      cs.setObject(1, direcaoId);
+      cs.setObject(2, funId);
+      cs.setObject(3, valorCBrinde);
+      cs.setObject(4, anoProcessamento);
+
+      cs.registerIndexTableOutParameter(5, 1000, Types.VARCHAR, 4000);
+      cs.registerIndexTableOutParameter(6, 1000, Types.VARCHAR, 4000);
+      cs.registerIndexTableOutParameter(7, 1000, Types.VARCHAR, 4000);
+      cs.registerIndexTableOutParameter(8, 1000, Types.VARCHAR, 4000);
+      cs.registerIndexTableOutParameter(9, 1000, Types.VARCHAR, 4000);
+      cs.registerIndexTableOutParameter(10, 1000, Types.VARCHAR, 4000);
+      cs.registerIndexTableOutParameter(11, 1000, Types.VARCHAR, 4000);
+      cs.registerIndexTableOutParameter(12, 1000, Types.VARCHAR, 4000);
+      cs.registerIndexTableOutParameter(13, 1000, Types.VARCHAR, 4000);
+      cs.registerIndexTableOutParameter(14, 1000, Types.VARCHAR, 4000);
+
+      cs.execute();
+
+      String[] nomes = (String[]) cs.getPlsqlIndexTable(5);
+      String[] salarios = (String[]) cs.getPlsqlIndexTable(6);
+      String[] meses = (String[]) cs.getPlsqlIndexTable(7);
+      String[] percSalario = (String[]) cs.getPlsqlIndexTable(8);
+      String[] faltas = (String[]) cs.getPlsqlIndexTable(9);
+      String[] percFalta = (String[]) cs.getPlsqlIndexTable(10);
+      String[] subsidios = (String[]) cs.getPlsqlIndexTable(11);
+      String[] brindes = (String[]) cs.getPlsqlIndexTable(12);
+      String[] prendas = (String[]) cs.getPlsqlIndexTable(13);
+      String[] estados = (String[]) cs.getPlsqlIndexTable(14);
+
+      if (nomes != null) {
+        for (int i = 0; i < nomes.length; i++) {
+
+          list.add(new SubsidioResponseNatalDTO(
+              nomes[i],
+              salarios[i],
+              meses[i],
+              percSalario[i],
+              faltas[i],
+              percFalta[i],
+              subsidios[i],
+              brindes[i],
+              prendas[i],
+              estados[i]
+          ));
+        }
+      }
+
+      return null;
+    });
+
+    return list;
   }
 
-  private String str(Object value) {
-    return value != null ? value.toString() : null;
-  }
 }

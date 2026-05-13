@@ -282,7 +282,7 @@
                 "type": "SubsidioResponseNatal",
                 "objectType": "dto",
                 "name": "data",
-                "collectionType": "none",
+                "collectionType": "list",
                 "module": "processamento"
               }
             }
@@ -368,5 +368,5 @@
       ]
     }
   ],
-  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento"
+  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal"
 }

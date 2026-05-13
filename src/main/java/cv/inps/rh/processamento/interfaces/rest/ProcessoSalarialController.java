@@ -287,7 +287,7 @@ public class ProcessoSalarialController {
     }
   )
   
-  public ResponseEntity<SubsidioResponseNatalDTO> getSubsidioNatal(
+  public ResponseEntity<List<SubsidioResponseNatalDTO>> getSubsidioNatal(
     @RequestParam(value = "direcaoId", required = false) Long direcaoId,
     @RequestParam(value = "funcionarioId") Long funcionarioId,
     @RequestParam(value = "valorBrinde", required = false) Long valorBrinde,
