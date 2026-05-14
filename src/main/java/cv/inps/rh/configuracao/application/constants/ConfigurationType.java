@@ -28,7 +28,8 @@ public enum ConfigurationType implements IgrpEnum<String> {
     PARAM_NOTIFICACAO("notificacao_type", "PARAM_NOTIFICACAO"),
     PARAM_TIPO_FALTA_AUSENCIA("tipo_falta_ausencia_type", "PARAM_TIPO_FALTA_AUSENCIA"),
     PARAM_CONFIGURACAO_GERAL("configuracao_geral_type", "PARAM_CONFIGURACAO_GERAL"),
-    PARAM_DOMAIN("domain_type", "PARAM_DOMAIN")
+    PARAM_DOMAIN("domain_type", "PARAM_DOMAIN"),
+    PARAM_PCCS("pccs_type", "PARAM_PCCS")
   ;
 
   private final String code;

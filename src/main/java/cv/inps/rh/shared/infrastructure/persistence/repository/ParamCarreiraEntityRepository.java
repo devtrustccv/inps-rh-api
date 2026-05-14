@@ -25,6 +25,8 @@ public interface ParamCarreiraEntityRepository extends
 
   List<ParamCarreiraEntity> findAllByEstado(Estado estado);
 
+  List<ParamCarreiraEntity> findAllByPccsId(cv.inps.rh.shared.infrastructure.persistence.entity.ParamPccsEntity pccsId);
+
   Optional<ParamCarreiraEntity> findByUuid(UUID uuid);
 
   default ParamCarreiraEntity findByUuidOrThrow(UUID uuid) {
