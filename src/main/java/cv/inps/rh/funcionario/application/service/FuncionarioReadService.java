@@ -84,7 +84,7 @@ public class FuncionarioReadService {
     var pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "id"));
     var page = dossieRepository.findAll(spec, pageable);
 
-    // mapear para DTO
+    //mapear para DTO
     List<FuncionarioListDTO> content = page.getContent()
         .stream()
         .map(d -> {

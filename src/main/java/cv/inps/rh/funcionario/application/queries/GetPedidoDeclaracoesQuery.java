@@ -1,10 +1,11 @@
 package cv.inps.rh.funcionario.application.queries;
 
 import cv.igrp.framework.core.domain.Query;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.*;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 
 @Data
@@ -12,6 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GetPedidoDeclaracoesQuery implements Query {
 
+  @NotBlank(message = "The field <idFuncionario> is required")
+  private String idFuncionario;
   @NotBlank(message = "The field <tipoDeclaracao> is required")
   private String tipoDeclaracao;
   @NotBlank(message = "The field <dataPedidoDe> is required")

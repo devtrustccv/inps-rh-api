@@ -28,7 +28,7 @@ public class DocOutputMapper {
         dto.setEstado(entity.getEstado());
 
         if (entity.getResponsavel() != null) {
-            dto.setResponsavelId(entity.getResponsavel().getId());
+            dto.setResponsavelId(entity.getResponsavel().getFunId().getUuid().toString());
             dto.setResponsavelNome(entity.getResponsavel().getFunId().getNome());
         }
 

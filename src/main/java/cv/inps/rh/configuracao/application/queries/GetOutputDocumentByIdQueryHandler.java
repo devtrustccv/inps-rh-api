@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ public class GetOutputDocumentByIdQueryHandler implements QueryHandler<GetOutput
     private final DocOutputMapper mapper;
 
     @IgrpQueryHandler
+    @Transactional(readOnly = true)
     public ResponseEntity<DocOutputResponseDTO> handle(GetOutputDocumentByIdQuery query) {
         LOGGER.debug("GetOutputDocumentByIdQuery: {}", query);
         ParamDocOutputEntity entity = service.findById(query.getId());

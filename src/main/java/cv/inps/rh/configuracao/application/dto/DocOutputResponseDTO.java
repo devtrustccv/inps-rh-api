@@ -25,7 +25,7 @@ public class DocOutputResponseDTO  {
   private String titulo;
   private String corpo;
   private String assinadoPor;
-  private Long responsavelId;
+  private String responsavelId;
   private String responsavelNome;
   private String estado;
 
