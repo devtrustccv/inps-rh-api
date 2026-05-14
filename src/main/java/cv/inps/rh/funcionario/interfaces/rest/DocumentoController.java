@@ -6,7 +6,8 @@ package cv.inps.rh.funcionario.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import cv.inps.rh.funcionario.application.commands.AnexarDocOrdemServicoCommand;
+import cv.inps.rh.funcionario.application.commands.SalvarOrdemServicoCommand;
+import cv.inps.rh.funcionario.application.dto.OrdemServicoItemReqDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListOrdemServicoDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListReciboDTO;
 import cv.inps.rh.funcionario.application.queries.GerarOrdemServicoPdfQuery;
@@ -14,7 +15,6 @@ import cv.inps.rh.funcionario.application.queries.GetListOrdemServicoQuery;
 import cv.inps.rh.funcionario.application.queries.GetListRecibosQuery;
 import cv.inps.rh.funcionario.application.queries.GetOrdemServicoQuery;
 import cv.inps.rh.funcionario.application.queries.GetUrlTemporarioQuery;
-import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -207,11 +208,11 @@ public class DocumentoController {
   }
 
   @PostMapping(
-    value = "ordem-servico/{osUuid}/anexar"
+    value = "ordem-servico/{funcionarioUuid}/salvar"
   )
   @Operation(
-    summary = "Anexar documento a ordem servico",
-    description = "Anexar documento a ordem servico",
+    summary = "Salvar ordens de servico",
+    description = "Salvar ordens de servico",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -225,12 +226,12 @@ public class DocumentoController {
     }
   )
 
-  public ResponseEntity<Map<String, ?>> anexarDocOrdemServico(
-      @PathVariable(value = "osUuid") String osUuid,
-      @RequestBody AnexoReqDTO anexo)
+  public ResponseEntity<Map<String, ?>> salvarOrdemServico(
+      @PathVariable(value = "funcionarioUuid") String funcionarioUuid,
+      @RequestBody List<OrdemServicoItemReqDTO> items)
   {
 
-    final var command = new AnexarDocOrdemServicoCommand(osUuid, anexo);
+    final var command = new SalvarOrdemServicoCommand(funcionarioUuid, items);
 
     return commandBus.send(command);
 

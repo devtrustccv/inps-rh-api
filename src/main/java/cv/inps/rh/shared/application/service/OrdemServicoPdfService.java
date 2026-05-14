@@ -37,7 +37,7 @@ public class OrdemServicoPdfService {
   @SneakyThrows
   public String generate(Context context) {
 
-    var htmlContent = templateEngine.process("ordem-servico", context);
+    var htmlContent = templateEngine.process("os-general", context);
 
     try (var outputStream = new ByteArrayOutputStream()) {
 

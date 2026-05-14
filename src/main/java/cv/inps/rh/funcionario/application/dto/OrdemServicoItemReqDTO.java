@@ -4,11 +4,10 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
+import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.UUID;
 
 
 @Data
@@ -17,13 +16,10 @@ import java.util.UUID;
 
 
 @IgrpDTO
-public class OrdemServicoListDTO  {
+public class OrdemServicoItemReqDTO  {
 
 
   private Long id ;
-
-
-  private UUID uuid ;
 
 
   private String descricao ;
@@ -35,9 +31,6 @@ public class OrdemServicoListDTO  {
   private String nuOrdem ;
 
 
-  private String estado ;
-
-
-  private String documentoUrl ;
+  private AnexoReqDTO documento ;
 
 }

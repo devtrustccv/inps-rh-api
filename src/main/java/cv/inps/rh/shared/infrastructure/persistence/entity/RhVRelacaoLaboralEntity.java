@@ -128,7 +128,7 @@ public class RhVRelacaoLaboralEntity {
   @Column(name = "LOCAL_TRAB_ILHA", length = 100)
   private String localTrabIlha;
 
-  @Column(name = "\"lOCAL_UPS\"")
+  @Column(name = "LOCAL_UPS")
   private Long localUps;
 
   @Column(name = "CONCELHO_UPS")

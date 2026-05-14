@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "OrdemServicoList",
+  "name": "OrdemServicoItemReq",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
@@ -9,18 +9,6 @@
       "name": "id",
       "objectType": "java",
       "type": "long",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "uuid",
-      "objectType": "java",
-      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -66,29 +54,19 @@
       "primaryKey": false
     },
     {
-      "name": "estado",
-      "objectType": "java",
-      "type": "string",
+      "name": "documento",
+      "objectType": "dto",
+      "type": "AnexoReq",
       "required": false,
       "before": false,
       "after": false,
       "positive": false,
       "isEmail": false,
       "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "documentoUrl",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
+      "primaryKey": false,
+      "collectionType": "none",
+      "module": "shared"
     }
   ],
-  "id": "ordemservicolist001"
+  "id": "ordemservicoitemreq001"
 }
