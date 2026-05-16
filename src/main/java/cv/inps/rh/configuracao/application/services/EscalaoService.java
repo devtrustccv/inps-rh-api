@@ -13,6 +13,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity_;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamPccsEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCategoriaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamEscalaoEntityRepository;
@@ -119,6 +120,7 @@ public class EscalaoService extends ConfigurationProcess<EscalaoRequestDTO> {
 
     var carreiraId = filters.get(ParamEscalaoEntity_.PARAM_CARR_ID);
     var escalao = filters.get(ParamEscalaoEntity_.ESCALAO);
+    var pccsId = filters.get(ParamCarreiraEntity_.PCCS_ID);
     var estado = filters.containsKey(ParamEscalaoEntity_.ESTADO)
         ? Estado.valueOf(filters.get(ParamEscalaoEntity_.ESTADO))
         : Estado.A;
@@ -133,6 +135,11 @@ public class EscalaoService extends ConfigurationProcess<EscalaoRequestDTO> {
 
       if (StringUtils.hasText(escalao))
         predicates.add(cb.like(cb.lower(root.get(ParamEscalaoEntity_.escalao)), "%" + escalao.toLowerCase() + "%"));
+
+      if (StringUtils.hasText(pccsId))
+        predicates.add(cb.equal(
+            root.get(ParamEscalaoEntity_.paramCarrId).get(ParamCarreiraEntity_.pccsId).get(ParamPccsEntity_.uuid),
+            UUID.fromString(pccsId)));
 
       return cb.and(predicates.toArray(new Predicate[0]));
     };

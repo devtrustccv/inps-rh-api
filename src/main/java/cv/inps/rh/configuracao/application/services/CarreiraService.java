@@ -12,12 +12,17 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCategoriaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity_;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamPccsEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCategoriaEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ParamPccsEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -27,6 +32,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
+
 @Transactional
 @Service("carreira_type")
 public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
@@ -35,13 +42,15 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
   private final ParamCategoriaEntityRepository categoriaRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoRepository;
   private final DomainEntityRepository domainEntityRepository;
+  private final ParamPccsEntityRepository pccsRepository;
 
-  public CarreiraService(Validator validator, ObjectMapper jsonMapper, ParamCarreiraEntityRepository carreiraRepository, ParamCategoriaEntityRepository categoriaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository, DomainEntityRepository domainEntityRepository) {
+  public CarreiraService(Validator validator, ObjectMapper jsonMapper, ParamCarreiraEntityRepository carreiraRepository, ParamCategoriaEntityRepository categoriaRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoRepository, DomainEntityRepository domainEntityRepository, ParamPccsEntityRepository pccsRepository) {
     super(validator, jsonMapper, CarreiraRequestDTO.class);
     this.carreiraRepository = carreiraRepository;
     this.categoriaRepository = categoriaRepository;
     this.tiposRelacionamentoRepository = tiposRelacionamentoRepository;
     this.domainEntityRepository = domainEntityRepository;
+    this.pccsRepository = pccsRepository;
   }
 
   @Override
@@ -52,6 +61,8 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
     e.setEstado(Estado.A);
     e.setNome(dto.getDescricao().trim());
     e.setCodigo(dto.getCodigo());
+    if (StringUtils.hasText(dto.getPccsId()))
+      e.setPccsId(pccsRepository.findByUuidOrThrow(UUID.fromString(dto.getPccsId())));
     carreiraRepository.save(e);
 
     var category = new ArrayList<CategoriaCarreiraResponseDTO>();
@@ -90,6 +101,10 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
     e.setCodigo(dto.getCodigo());
     if (StringUtils.hasText(dto.getEstado()))
       e.setEstado(Estado.valueOf(dto.getEstado()));
+    if (StringUtils.hasText(dto.getPccsId()))
+      e.setPccsId(pccsRepository.findByUuidOrThrow(UUID.fromString(dto.getPccsId())));
+    else
+      e.setPccsId(null);
 
     carreiraRepository.save(e);
 
@@ -156,8 +171,18 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
   public Object list(Map<String, String> filters) {
 
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
+    var pccsIdFilter = filters.get(ParamCarreiraEntity_.PCCS_ID);
 
-    var data = carreiraRepository.findAll(pageable);
+    Specification<ParamCarreiraEntity> spec = (root, _, cb) -> {
+      var predicates = new ArrayList<Predicate>();
+      if (StringUtils.hasText(pccsIdFilter))
+        predicates.add(cb.equal(
+            root.get(ParamCarreiraEntity_.pccsId).get(ParamPccsEntity_.uuid),
+            UUID.fromString(pccsIdFilter)));
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
+
+    var data = carreiraRepository.findAll(spec, pageable);
 
     var response = new WrapperListDTO();
     PageMapper.fillPagination(data, response);
@@ -174,6 +199,10 @@ public class CarreiraService extends ConfigurationProcess<CarreiraRequestDTO> {
     dto.setCodigo(c.getCodigo());
     dto.setEstadoDescricao(c.getEstado().getDescription());
     dto.setEstado(c.getEstado().getCode());
+    ofNullable(c.getPccsId()).ifPresent(p -> {
+      dto.setPccsId(p.getUuid().toString());
+      dto.setPccsDesc(p.getDescricao());
+    });
     return dto;
   }
 
