@@ -57,7 +57,7 @@ public class ProcessoSalarialController {
     }
   )
 
-  public ResponseEntity<String> removerFuncionariosProcessamentoSalarial(@Valid @RequestBody MarcarNaoProcessadoRequestDTO removerFuncionariosProcessamentoSalarialRequest
+   public ResponseEntity<String> removerFuncionariosProcessamentoSalarial(@Valid @RequestBody MarcarNaoProcessadoRequestDTO removerFuncionariosProcessamentoSalarialRequest
     )
   {
 
@@ -86,7 +86,7 @@ public class ProcessoSalarialController {
     }
   )
 
-  public ResponseEntity<WrapperProcessamentoSalarialDTO> getProcessamentoSalarial(
+   public ResponseEntity<WrapperProcessamentoSalarialDTO> getProcessamentoSalarial(
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
     @RequestParam(value = "dataFim", required = false) String dataFim,
     @RequestParam(value = "direcaoId", required = false) String direcaoId,
@@ -122,7 +122,7 @@ public class ProcessoSalarialController {
     }
   )
 
-  public ResponseEntity<String> executarAcaoNoProcessamento(@Valid @RequestBody ProcessamentoActionRequestDTO executarAcaoNoProcessamentoRequest
+   public ResponseEntity<String> executarAcaoNoProcessamento(@Valid @RequestBody ProcessamentoActionRequestDTO executarAcaoNoProcessamentoRequest
     )
   {
 
@@ -152,7 +152,7 @@ public class ProcessoSalarialController {
     }
   )
 
-  public ResponseEntity<String> processarSalario(@Valid @RequestBody ProcessamentoSalarioRequestDTO processarSalarioRequest
+   public ResponseEntity<String> processarSalario(@Valid @RequestBody ProcessamentoSalarioRequestDTO processarSalarioRequest
     )
   {
 
@@ -182,7 +182,7 @@ public class ProcessoSalarialController {
     }
   )
 
-  public ResponseEntity<ResumoProcessamentoDTO> getResumoProcessamento(
+   public ResponseEntity<ResumoProcessamentoDTO> getResumoProcessamento(
     @RequestParam(value = "processamentoId") Long processamentoId)
   {
 
@@ -212,7 +212,7 @@ public class ProcessoSalarialController {
     }
   )
 
-  public ResponseEntity<DetalhesProcessamentoDTO> getDetalhesProcessamento(
+   public ResponseEntity<DetalhesProcessamentoDTO> getDetalhesProcessamento(
     @RequestParam(value = "tipoMovimento") String tipoMovimento,
     @RequestParam(value = "procSalId") String procSalId,
     @RequestParam(value = "tipoDetalhe") String tipoDetalhe)
@@ -244,7 +244,7 @@ public class ProcessoSalarialController {
     }
   )
 
-  public ResponseEntity<List<DadosValidacaoDTO>> getDadosValidacao(
+   public ResponseEntity<List<DadosValidacaoDTO>> getDadosValidacao(
     @RequestParam(value = "tipoValidacao", required = false) String tipoValidacao,
     @RequestParam(value = "mesAtual", required = false) String mesAtual,
     @RequestParam(value = "mesAnterior", required = false) String mesAnterior,
@@ -277,7 +277,7 @@ public class ProcessoSalarialController {
     }
   )
 
-  public ResponseEntity<List<SubsidioResponseNatalDTO>> getSubsidioNatal(
+   public ResponseEntity<List<SubsidioResponseNatalDTO>> getSubsidioNatal(
     @RequestParam(value = "direcaoId", required = false) Long direcaoId,
     @RequestParam(value = "funcionarioId") Long funcionarioId,
     @RequestParam(value = "valorBrinde", required = false) Long valorBrinde,
@@ -310,7 +310,7 @@ public class ProcessoSalarialController {
     }
   )
 
-  public ResponseEntity<String> ativarInactivarSubsidioNatal(@Valid @RequestBody SubsidioResponseNatalDTO ativarInactivarSubsidioNatalRequest
+   public ResponseEntity<String> ativarInactivarSubsidioNatal(@Valid @RequestBody SubsidioResponseNatalDTO ativarInactivarSubsidioNatalRequest
     , @RequestParam(value = "subsidioId", required = false) Long subsidioId,
     @RequestParam(value = "ano") Long ano,
     @RequestParam(value = "funcionarioId") String funcionarioId,
@@ -343,7 +343,7 @@ public class ProcessoSalarialController {
     }
   )
 
-  public ResponseEntity<AumentoListDTO> getListaAumentoSalarial(
+   public ResponseEntity<AumentoListDTO> getListaAumentoSalarial(
     @RequestParam(value = "ano", required = false) Integer ano,
     @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
     @RequestParam(value = "size", required = false, defaultValue = "20") Integer size)
@@ -375,7 +375,7 @@ public class ProcessoSalarialController {
     }
   )
 
-  public ResponseEntity<String> saveAumentoSalarial(@Valid @RequestBody AumentoSalarialRequestDTO saveAumentoSalarialRequest
+   public ResponseEntity<String> saveAumentoSalarial(@Valid @RequestBody AumentoSalarialRequestDTO saveAumentoSalarialRequest
     )
   {
 
@@ -405,7 +405,7 @@ public class ProcessoSalarialController {
     }
   )
 
-  public ResponseEntity<String> validarAumentoSalarial(
+   public ResponseEntity<String> validarAumentoSalarial(
     @PathVariable(value = "aumentoSalarialId") String aumentoSalarialId)
   {
 
@@ -441,6 +441,35 @@ public class ProcessoSalarialController {
     final var query = new GetDetalhesAumentoSalarialQuery(aumentoSalarialId);
 
     return queryBus.handle(query);
+
+  }
+
+  @PutMapping(
+      value = "aumento-salarial/{aumentoSalarialId}"
+  )
+  @Operation(
+      summary = "Update aumento salarial",
+      description = "Update aumento salarial",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<String> updateAumentoSalarial(@Valid @RequestBody AumentoSalarialRequestDTO updateAumentoSalarialRequest
+      , @PathVariable(value = "aumentoSalarialId") String aumentoSalarialId) {
+
+    final var command = new UpdateAumentoSalarialCommand(updateAumentoSalarialRequest, aumentoSalarialId);
+
+    return commandBus.send(command);
 
   }
 

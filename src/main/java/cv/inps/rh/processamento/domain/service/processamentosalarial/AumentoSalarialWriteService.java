@@ -52,6 +52,16 @@ public class AumentoSalarialWriteService {
     validacaoEntityRepository.save(validation);
   }
 
+  public void updateAumentoSalarial(String salaryIncreaseId, AumentoSalarialRequestDTO request) {
+
+    var salaryIncrease = aumentoSalarialEntityRepository.findByUuid(salaryIncreaseId).orElseThrow();
+    salaryIncrease.setDescricao(request.getDesignacao());
+    salaryIncrease.setMotivo(request.getMotivo());
+    salaryIncrease.setDataReferente(request.getDataReferente());
+    salaryIncrease.setPercentagem(request.getPercentagem());
+    aumentoSalarialEntityRepository.save(salaryIncrease);
+  }
+
   public void validar(String salaryIncreaseId) {
 
     var salaryIncrease = aumentoSalarialEntityRepository.findByUuid(salaryIncreaseId).orElseThrow();
