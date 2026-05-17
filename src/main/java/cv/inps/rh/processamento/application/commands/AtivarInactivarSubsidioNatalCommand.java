@@ -1,18 +1,19 @@
 package cv.inps.rh.processamento.application.commands;
 
 import cv.igrp.framework.core.domain.Command;
-import jakarta.validation.constraints.*;
+import cv.inps.rh.processamento.application.dto.SubsidioResponseNatalDTO;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import cv.inps.rh.processamento.application.dto.SubsidioResponseNatalDTO;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class AtivarInactivarSubsidioNatalCommand implements Command {
 
-  
+
   private SubsidioResponseNatalDTO subsidioresponsenatal;
   @NotNull(message = "The field <subsidioId> is required")
   private Long subsidioId;

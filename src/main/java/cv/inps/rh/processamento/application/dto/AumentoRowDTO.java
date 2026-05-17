@@ -4,11 +4,10 @@
 package cv.inps.rh.processamento.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -20,26 +19,25 @@ import java.time.LocalDateTime;
 @IgrpDTO
 public class AumentoRowDTO  {
 
-  
-  
+
   private String designacao ;
-  
-  
+
+
   private String motivo ;
-  
-  
+
+
   private LocalDate dataReferente ;
-  
-  
+
+
   private Long percentagem ;
-  
-  
+
+
   private LocalDateTime dataRegisto ;
-  
-  
+
+
   private String id ;
-  
-  
+
+
   private String estado ;
 
 }
