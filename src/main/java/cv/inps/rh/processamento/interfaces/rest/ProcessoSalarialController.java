@@ -30,6 +30,7 @@ import java.util.List;
 import cv.inps.rh.processamento.application.dto.DadosValidacaoDTO;
 import cv.inps.rh.processamento.application.dto.SubsidioResponseNatalDTO;
 import cv.inps.rh.processamento.application.dto.AumentoListDTO;
+import cv.inps.rh.processamento.application.dto.AumentoSalarialRequestDTO;
 
 @IgrpController
 @RestController
@@ -363,6 +364,66 @@ public class ProcessoSalarialController {
       final var query = new GetListaAumentoSalarialQuery(ano, page, size);
 
       return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "aumento-salarial"
+  )
+  @Operation(
+    summary = "Save aumento salarial",
+    description = "Save aumento salarial",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<String> saveAumentoSalarial(@Valid @RequestBody AumentoSalarialRequestDTO saveAumentoSalarialRequest
+    )
+  {
+
+      final var command = new SaveAumentoSalarialCommand(saveAumentoSalarialRequest);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "aumento-salarial/{aumentoSalarialId}/validar"
+  )
+  @Operation(
+    summary = "Validar aumento salarial",
+    description = "Validar aumento salarial",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<String> validarAumentoSalarial(
+    @PathVariable(value = "aumentoSalarialId") String aumentoSalarialId)
+  {
+
+      final var command = new ValidarAumentoSalarialCommand(aumentoSalarialId);
+
+      return commandBus.send(command);
 
   }
 

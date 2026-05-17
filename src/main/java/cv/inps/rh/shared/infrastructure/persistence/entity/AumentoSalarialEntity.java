@@ -47,4 +47,9 @@ public class AumentoSalarialEntity extends AuditEntity {
   @Size(max = 50)
   @Column(name = "UUID", length = 50)
   private String uuid;
+
+  @NotNull
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "PCCS_ID", nullable = false)
+  private ParamPccsEntity pccs;
 }
