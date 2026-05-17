@@ -1,0 +1,28 @@
+{
+  "type": "dto",
+  "module": "processamento",
+  "name": "AumentoList",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "extends": {
+    "name": "Page",
+    "module": "shared"
+  },
+  "attributes": [
+    {
+      "name": "content",
+      "objectType": "dto",
+      "type": "AumentoRow",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "processamento"
+    }
+  ],
+  "id": "doub4s3276"
+}

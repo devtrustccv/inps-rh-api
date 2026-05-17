@@ -29,6 +29,7 @@ import cv.inps.rh.processamento.application.dto.DetalhesProcessamentoDTO;
 import java.util.List;
 import cv.inps.rh.processamento.application.dto.DadosValidacaoDTO;
 import cv.inps.rh.processamento.application.dto.SubsidioResponseNatalDTO;
+import cv.inps.rh.processamento.application.dto.AumentoListDTO;
 
 @IgrpController
 @RestController
@@ -330,6 +331,38 @@ public class ProcessoSalarialController {
       final var command = new AtivarInactivarSubsidioNatalCommand(ativarInactivarSubsidioNatalRequest, subsidioId, ano, funcionarioId, status);
 
       return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "aumento-salarial"
+  )
+  @Operation(
+    summary = "Get lista aumento salarial",
+    description = "Get lista aumento salarial",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = AumentoListDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+  
+  public ResponseEntity<AumentoListDTO> getListaAumentoSalarial(
+    @RequestParam(value = "ano", required = false) Integer ano,
+    @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+    @RequestParam(value = "size", required = false, defaultValue = "20") Integer size)
+  {
+
+      final var query = new GetListaAumentoSalarialQuery(ano, page, size);
+
+      return queryBus.handle(query);
 
   }
 

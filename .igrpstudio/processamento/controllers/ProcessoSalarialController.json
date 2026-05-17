@@ -366,6 +366,46 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getListaAumentoSalarial",
+      "path": "aumento-salarial",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "AumentoList",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "integer",
+          "name": "ano",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "page",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "size",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
     }
   ],
   "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal"
