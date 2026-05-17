@@ -3,34 +3,22 @@
 
 package cv.inps.rh.processamento.interfaces.rest;
 
+import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import cv.inps.rh.processamento.application.commands.*;
+import cv.inps.rh.processamento.application.dto.*;
+import cv.inps.rh.processamento.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import cv.igrp.framework.core.domain.QueryBus;
-import cv.inps.rh.processamento.application.queries.*;
-import cv.igrp.framework.core.domain.CommandBus;
-import cv.inps.rh.processamento.application.commands.*;
-import cv.inps.rh.processamento.application.dto.MarcarNaoProcessadoRequestDTO;
-import cv.inps.rh.processamento.application.dto.WrapperProcessamentoSalarialDTO;
-import cv.inps.rh.processamento.application.dto.ProcessamentoActionRequestDTO;
-import cv.inps.rh.processamento.application.dto.ProcessamentoSalarioRequestDTO;
-import cv.inps.rh.processamento.application.dto.ResumoProcessamentoDTO;
-import cv.inps.rh.processamento.application.dto.DetalhesProcessamentoDTO;
 import java.util.List;
-import cv.inps.rh.processamento.application.dto.DadosValidacaoDTO;
-import cv.inps.rh.processamento.application.dto.SubsidioResponseNatalDTO;
-import cv.inps.rh.processamento.application.dto.AumentoListDTO;
-import cv.inps.rh.processamento.application.dto.AumentoSalarialRequestDTO;
 
 @IgrpController
 @RestController
@@ -41,7 +29,7 @@ import cv.inps.rh.processamento.application.dto.AumentoSalarialRequestDTO;
 )
 public class ProcessoSalarialController {
 
-  
+
   private final QueryBus queryBus;
   private final CommandBus commandBus;
 
@@ -58,7 +46,7 @@ public class ProcessoSalarialController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -68,7 +56,7 @@ public class ProcessoSalarialController {
       )
     }
   )
-  
+
   public ResponseEntity<String> removerFuncionariosProcessamentoSalarial(@Valid @RequestBody MarcarNaoProcessadoRequestDTO removerFuncionariosProcessamentoSalarialRequest
     )
   {
@@ -87,7 +75,7 @@ public class ProcessoSalarialController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -97,7 +85,7 @@ public class ProcessoSalarialController {
       )
     }
   )
-  
+
   public ResponseEntity<WrapperProcessamentoSalarialDTO> getProcessamentoSalarial(
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
     @RequestParam(value = "dataFim", required = false) String dataFim,
@@ -123,7 +111,7 @@ public class ProcessoSalarialController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -133,7 +121,7 @@ public class ProcessoSalarialController {
       )
     }
   )
-  
+
   public ResponseEntity<String> executarAcaoNoProcessamento(@Valid @RequestBody ProcessamentoActionRequestDTO executarAcaoNoProcessamentoRequest
     )
   {
@@ -153,7 +141,7 @@ public class ProcessoSalarialController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -163,7 +151,7 @@ public class ProcessoSalarialController {
       )
     }
   )
-  
+
   public ResponseEntity<String> processarSalario(@Valid @RequestBody ProcessamentoSalarioRequestDTO processarSalarioRequest
     )
   {
@@ -183,7 +171,7 @@ public class ProcessoSalarialController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -193,7 +181,7 @@ public class ProcessoSalarialController {
       )
     }
   )
-  
+
   public ResponseEntity<ResumoProcessamentoDTO> getResumoProcessamento(
     @RequestParam(value = "processamentoId") Long processamentoId)
   {
@@ -213,7 +201,7 @@ public class ProcessoSalarialController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -223,7 +211,7 @@ public class ProcessoSalarialController {
       )
     }
   )
-  
+
   public ResponseEntity<DetalhesProcessamentoDTO> getDetalhesProcessamento(
     @RequestParam(value = "tipoMovimento") String tipoMovimento,
     @RequestParam(value = "procSalId") String procSalId,
@@ -245,7 +233,7 @@ public class ProcessoSalarialController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -255,7 +243,7 @@ public class ProcessoSalarialController {
       )
     }
   )
-  
+
   public ResponseEntity<List<DadosValidacaoDTO>> getDadosValidacao(
     @RequestParam(value = "tipoValidacao", required = false) String tipoValidacao,
     @RequestParam(value = "mesAtual", required = false) String mesAtual,
@@ -278,7 +266,7 @@ public class ProcessoSalarialController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -288,7 +276,7 @@ public class ProcessoSalarialController {
       )
     }
   )
-  
+
   public ResponseEntity<List<SubsidioResponseNatalDTO>> getSubsidioNatal(
     @RequestParam(value = "direcaoId", required = false) Long direcaoId,
     @RequestParam(value = "funcionarioId") Long funcionarioId,
@@ -311,7 +299,7 @@ public class ProcessoSalarialController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -321,7 +309,7 @@ public class ProcessoSalarialController {
       )
     }
   )
-  
+
   public ResponseEntity<String> ativarInactivarSubsidioNatal(@Valid @RequestBody SubsidioResponseNatalDTO ativarInactivarSubsidioNatalRequest
     , @RequestParam(value = "subsidioId", required = false) Long subsidioId,
     @RequestParam(value = "ano") Long ano,
@@ -344,7 +332,7 @@ public class ProcessoSalarialController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -354,7 +342,7 @@ public class ProcessoSalarialController {
       )
     }
   )
-  
+
   public ResponseEntity<AumentoListDTO> getListaAumentoSalarial(
     @RequestParam(value = "ano", required = false) Integer ano,
     @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
@@ -376,7 +364,7 @@ public class ProcessoSalarialController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -386,7 +374,7 @@ public class ProcessoSalarialController {
       )
     }
   )
-  
+
   public ResponseEntity<String> saveAumentoSalarial(@Valid @RequestBody AumentoSalarialRequestDTO saveAumentoSalarialRequest
     )
   {
@@ -406,7 +394,7 @@ public class ProcessoSalarialController {
     responses = {
       @ApiResponse(
           responseCode = "200",
-          
+
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
@@ -416,7 +404,7 @@ public class ProcessoSalarialController {
       )
     }
   )
-  
+
   public ResponseEntity<String> validarAumentoSalarial(
     @PathVariable(value = "aumentoSalarialId") String aumentoSalarialId)
   {
@@ -424,6 +412,35 @@ public class ProcessoSalarialController {
       final var command = new ValidarAumentoSalarialCommand(aumentoSalarialId);
 
       return commandBus.send(command);
+
+  }
+
+  @GetMapping(
+      value = "aumento-salarial/{aumentoSalarialId}"
+  )
+  @Operation(
+      summary = "Get detalhes aumento salarial",
+      description = "Get detalhes aumento salarial",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = AumentoSalarialResponseDTO.class,
+                      type = "object")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<AumentoSalarialResponseDTO> getDetalhesAumentoSalarial(
+      @PathVariable(value = "aumentoSalarialId") String aumentoSalarialId) {
+
+    final var query = new GetDetalhesAumentoSalarialQuery(aumentoSalarialId);
+
+    return queryBus.handle(query);
 
   }
 

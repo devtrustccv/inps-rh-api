@@ -464,7 +464,35 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getDetalhesAumentoSalarial",
+      "path": "aumento-salarial/{aumentoSalarialId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "AumentoSalarialResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "aumentoSalarialId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal"
+  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial"
 }
