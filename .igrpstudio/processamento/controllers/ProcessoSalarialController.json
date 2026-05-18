@@ -508,7 +508,52 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getColaboresAumentoSalarial",
+      "path": "aumento-salarial/colaboradores",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ColaboradorAumento",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "direcaoId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "organicaId",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "page",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "size",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
     }
   ],
-  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial-ativarInactivarSubsidioNatal"
+  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial-ativarInactivarSubsidioNatal-getColaboresAumentoSalarial-getColaboresAumentoSalarial"
 }

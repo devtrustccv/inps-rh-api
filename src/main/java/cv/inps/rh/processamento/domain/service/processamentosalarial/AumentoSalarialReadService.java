@@ -2,8 +2,11 @@ package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
 import cv.inps.rh.processamento.application.dto.AumentoListDTO;
 import cv.inps.rh.processamento.application.dto.AumentoSalarialResponseDTO;
+import cv.inps.rh.processamento.application.dto.ColaboradorAumentoDTO;
+import cv.inps.rh.processamento.application.queries.GetColaboresAumentoSalarialQuery;
 import cv.inps.rh.processamento.application.queries.GetListaAumentoSalarialQuery;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AumentoSalarialEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.AumentoSimulacaoEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +23,7 @@ import java.util.Optional;
 public class AumentoSalarialReadService {
 
   private final AumentoSalarialEntityRepository aumentoSalarialEntityRepository;
+  private final AumentoSimulacaoEntityRepository aumentoSimulacaoEntityRepository;
 
   public AumentoListDTO getProcessamentoSalarial(GetListaAumentoSalarialQuery query) {
 
@@ -55,6 +59,22 @@ public class AumentoSalarialReadService {
           response.setPccsDescricao(obj.getDescricao());
         });
 
+    return response;
+  }
+
+  public ColaboradorAumentoDTO getColaboradores(GetColaboresAumentoSalarialQuery query) {
+
+    var pageRequest = PageRequest.of(query.getPage(), query.getSize());
+
+    var page = aumentoSimulacaoEntityRepository.list(
+        query.getDirecaoId(),
+        query.getOrganicaId(),
+        pageRequest
+    );
+
+    var response = new ColaboradorAumentoDTO();
+    PageMapper.fillPagination(page, response);
+    response.setContent(page.getContent());
     return response;
   }
 }

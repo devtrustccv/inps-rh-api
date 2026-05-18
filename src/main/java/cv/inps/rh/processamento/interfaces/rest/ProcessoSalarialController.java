@@ -470,4 +470,36 @@ public class ProcessoSalarialController {
 
   }
 
+  @GetMapping(
+      value = "aumento-salarial/colaboradores"
+  )
+  @Operation(
+      summary = "Get colabores aumento salarial",
+      description = "Get colabores aumento salarial",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = ColaboradorAumentoDTO.class,
+                      type = "object")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<ColaboradorAumentoDTO> getColaboresAumentoSalarial(
+      @RequestParam(value = "direcaoId", required = false) Long direcaoId,
+      @RequestParam(value = "organicaId", required = false) Long organicaId,
+      @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") Integer size) {
+
+    final var query = new GetColaboresAumentoSalarialQuery(direcaoId, organicaId, page, size);
+
+    return queryBus.handle(query);
+
+  }
+
 }
