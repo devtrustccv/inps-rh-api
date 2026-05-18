@@ -320,7 +320,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "SubsidioResponseNatal",
+              "type": "AtivarInativarSubsidioNatal",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
@@ -342,30 +342,7 @@
             }
           }
         }
-      },
-      "requestParams": [
-        {
-          "type": "long",
-          "name": "subsidioId",
-          "isRequired": false
-        },
-        {
-          "type": "long",
-          "name": "ano",
-          "isRequired": true
-        },
-        {
-          "type": "string",
-          "name": "funcionarioId",
-          "isRequired": true
-        },
-        {
-          "type": "string",
-          "name": "status",
-          "description": "possiveis valores: A/I",
-          "isRequired": true
-        }
-      ]
+      }
     },
     {
       "actionName": "getListaAumentoSalarial",
@@ -533,5 +510,5 @@
       ]
     }
   ],
-  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial"
+  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial-ativarInactivarSubsidioNatal"
 }

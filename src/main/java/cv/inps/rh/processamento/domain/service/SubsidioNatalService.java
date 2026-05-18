@@ -12,12 +12,9 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.SubsidioNatalEnti
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import lombok.AllArgsConstructor;
 import oracle.jdbc.internal.OracleCallableStatement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -28,9 +25,6 @@ import java.util.UUID;
 @Service
 public class SubsidioNatalService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SubsidioNatalService.class);
-
-  private final DataSource dataSource;
   private final JdbcTemplate jdbcTemplate;
   private final SubsidioNatalEntityRepository subsidioNatalEntityRepository;
   private final ValidacaoEntityRepository validacaoEntityRepository;
@@ -41,12 +35,18 @@ public class SubsidioNatalService {
     switch (status) {
       case ATIVAR -> {
 
-        var uuid = UuidCreator.getTimeOrderedEpoch();
+        final SubsidioNatalEntity subs;
 
-        var fun = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funId));
-
-        var subs = new SubsidioNatalEntity();
-        subs.setFun(fun);
+        if (subsidioId != null) {
+          subs = subsidioNatalEntityRepository.findByIdOrThrow(subsidioId);
+        } else {
+          var fun = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funId));
+          subs = new SubsidioNatalEntity();
+          subs.setFun(fun);
+          subs.setEstado(Estado.P.name());
+          subs.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+          subs.setReferenciaId(fun.getId());
+        }
         subs.setAnoReferente(ano);
         subs.setValorSalarioBase(safeValueOf(data.salario()));
         subs.setMesTrab(data.mesesTrabalho());
@@ -56,26 +56,23 @@ public class SubsidioNatalService {
         subs.setValorSubsidio(safeValueOf(data.valorSubsidio()));
         subs.setChequeBrinde(safeValueOf(data.valorChequeBrinde()));
         subs.setPrendaNatal(safeValueOf(data.valorPrendaNatal()));
-        subs.setReferenciaId(1L); // TODO 12/05/2026 22:03 fix this later;
-        subs.setEstado(Estado.P.name());
-        subs.setUuid(uuid.toString());
+
         var saved = subsidioNatalEntityRepository.save(subs);
 
-        var validation = new ValidacaoEntity();
-        validation.setTipoAccao("SUBSIDIO_NATAL");
-        validation.setReferenciaName("RH_T_SUBSIDIO_NATAL");
-        validation.setReferenciaId(saved.getId());
-        validation.setFunId(fun);
-        validation.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(fun.getUuid()));
-        validation.setEstado(Estado.A);
-        validation.setUuid(uuid);
-        validacaoEntityRepository.save(validation);
+        if (subsidioId == null) {
+          var fun = subs.getFun();
+          var validation = new ValidacaoEntity();
+          validation.setTipoAccao("SUBSIDIO_NATAL");
+          validation.setReferenciaName("RH_T_SUBSIDIO_NATAL");
+          validation.setReferenciaId(saved.getId());
+          validation.setFunId(fun);
+          validation.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(fun.getUuid()));
+          validation.setEstado(Estado.A);
+          validation.setUuid(UuidCreator.getTimeOrderedEpoch());
+          validacaoEntityRepository.save(validation);
+        }
       }
-      case INATIVAR -> {
-        var obj = subsidioNatalEntityRepository.findByIdOrThrow(subsidioId);
-        obj.setEstado(status.getCode());
-        subsidioNatalEntityRepository.save(obj);
-      }
+      case INATIVAR -> subsidioNatalEntityRepository.updateEstadoById(subsidioId, status.getCode());
     }
   }
 
@@ -87,12 +84,7 @@ public class SubsidioNatalService {
     }
   }
 
-  public List<SubsidioResponseNatalDTO> getData(
-      Long direcaoId,
-      Long funId,
-      Double valorCBrinde,
-      Long anoProcessamento
-  ) {
+  public List<SubsidioResponseNatalDTO> getData(Long direcaoId, Long funId, Double valorCBrinde, Long anoProcessamento) {
 
     var list = new ArrayList<SubsidioResponseNatalDTO>();
 
@@ -127,21 +119,20 @@ public class SubsidioNatalService {
 
       cs.execute();
 
-      String[] nomes = (String[]) cs.getPlsqlIndexTable(5);
-      String[] salarios = (String[]) cs.getPlsqlIndexTable(6);
-      String[] meses = (String[]) cs.getPlsqlIndexTable(7);
-      String[] percSalario = (String[]) cs.getPlsqlIndexTable(8);
-      String[] faltas = (String[]) cs.getPlsqlIndexTable(9);
-      String[] percFalta = (String[]) cs.getPlsqlIndexTable(10);
-      String[] subsidios = (String[]) cs.getPlsqlIndexTable(11);
-      String[] brindes = (String[]) cs.getPlsqlIndexTable(12);
-      String[] prendas = (String[]) cs.getPlsqlIndexTable(13);
-      String[] estados = (String[]) cs.getPlsqlIndexTable(14);
+      var nomes = (String[]) cs.getPlsqlIndexTable(5);
+      var salarios = (String[]) cs.getPlsqlIndexTable(6);
+      var meses = (String[]) cs.getPlsqlIndexTable(7);
+      var percSalario = (String[]) cs.getPlsqlIndexTable(8);
+      var faltas = (String[]) cs.getPlsqlIndexTable(9);
+      var percFalta = (String[]) cs.getPlsqlIndexTable(10);
+      var subsidios = (String[]) cs.getPlsqlIndexTable(11);
+      var brindes = (String[]) cs.getPlsqlIndexTable(12);
+      var prendas = (String[]) cs.getPlsqlIndexTable(13);
+      var estados = (String[]) cs.getPlsqlIndexTable(14);
 
       if (nomes != null) {
         for (int i = 0; i < nomes.length; i++) {
-
-          list.add(new SubsidioResponseNatalDTO(
+          var responseRow = new SubsidioResponseNatalDTO(
               nomes[i],
               salarios[i],
               meses[i],
@@ -152,7 +143,8 @@ public class SubsidioNatalService {
               brindes[i],
               prendas[i],
               estados[i]
-          ));
+          );
+          list.add(responseRow);
         }
       }
 

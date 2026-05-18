@@ -310,14 +310,11 @@ public class ProcessoSalarialController {
     }
   )
 
-   public ResponseEntity<String> ativarInactivarSubsidioNatal(@Valid @RequestBody SubsidioResponseNatalDTO ativarInactivarSubsidioNatalRequest
-    , @RequestParam(value = "subsidioId", required = false) Long subsidioId,
-    @RequestParam(value = "ano") Long ano,
-    @RequestParam(value = "funcionarioId") String funcionarioId,
-    @RequestParam(value = "status") String status)
+   public ResponseEntity<String> ativarInactivarSubsidioNatal(@Valid @RequestBody AtivarInativarSubsidioNatalDTO ativarInactivarSubsidioNatalRequest
+   )
   {
 
-      final var command = new AtivarInactivarSubsidioNatalCommand(ativarInactivarSubsidioNatalRequest, subsidioId, ano, funcionarioId, status);
+    final var command = new AtivarInactivarSubsidioNatalCommand(ativarInactivarSubsidioNatalRequest);
 
       return commandBus.send(command);
 

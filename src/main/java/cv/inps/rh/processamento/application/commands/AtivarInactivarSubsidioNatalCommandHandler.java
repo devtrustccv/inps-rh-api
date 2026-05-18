@@ -26,13 +26,17 @@ public class AtivarInactivarSubsidioNatalCommandHandler implements CommandHandle
 
     LOGGER.debug("AtivarInactivarSubsidioNatalCommand : {}", command);
 
-    subsidioNatalService.activateInactivate(
-        command.getSubsidioId(),
-        command.getAno(),
-        command.getFuncionarioId(),
-        SubsidioNatalStatus.valueOf(command.getStatus()),
-        command.getSubsidioresponsenatal()
-    );
+    var ano = command.getAtivarinativarsubsidionatal().getAno();
+
+    for (var row : command.getAtivarinativarsubsidionatal().getRows()) {
+      subsidioNatalService.activateInactivate(
+          row.getSubsidioId(),
+          ano,
+          row.getFuncionarioId(),
+          SubsidioNatalStatus.valueOf(row.getStatus()),
+          row.getData()
+      );
+    }
     return ResponseEntity.ok().build();
   }
 
