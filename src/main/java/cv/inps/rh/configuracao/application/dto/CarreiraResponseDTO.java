@@ -35,7 +35,10 @@ public class CarreiraResponseDTO  {
 
   private String estado ;
 
-
   private String estadoDescricao ;
+
+  private String pccsId;
+
+  private String pccsDesc;
 
 }

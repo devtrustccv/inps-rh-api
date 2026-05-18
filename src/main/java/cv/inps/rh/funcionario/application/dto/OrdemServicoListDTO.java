@@ -37,4 +37,7 @@ public class OrdemServicoListDTO  {
 
   private String estado ;
 
+
+  private String documentoUrl ;
+
 }

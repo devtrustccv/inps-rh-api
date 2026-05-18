@@ -84,4 +84,12 @@ public class SwaggerConfig {
         )
         .build();
   }
+
+  @Bean
+  public GroupedOpenApi aumentoSalarial() {
+    return GroupedOpenApi.builder()
+        .group("Aumento Salarial")
+        .pathsToMatch("/**/aumento-salarial/**")
+        .build();
+  }
 }

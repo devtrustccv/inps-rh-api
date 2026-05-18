@@ -29,7 +29,7 @@ public class GetCarreirasAtivosQueryHandler implements QueryHandler<GetCarreiras
    @IgrpQueryHandler
   public ResponseEntity<List<ParametrizacaoDTO>> handle(GetCarreirasAtivosQuery query) {
 
-     var paramCarreiras =  paramCarreiraRepository.findAllActive();
+     var paramCarreiras = paramCarreiraRepository.findAllActive(query.getPccsId());
      List<ParametrizacaoDTO> parametrizacoes = paramCarreiras.stream()
          .map(paramCarreiraMapper::toParametrizacaoDto)
          .toList();

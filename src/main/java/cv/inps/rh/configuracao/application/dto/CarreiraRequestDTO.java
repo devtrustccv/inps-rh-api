@@ -29,6 +29,8 @@ public class CarreiraRequestDTO {
 
   private String estado;
 
+  private String pccsId;
+
   @Valid
   private List<CategoriaCarreiraResponseDTO> categorias = new ArrayList<>();
 

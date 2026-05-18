@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface ParamCarreiraRepository {
 
-   List<ParamCarreira> findAllActive();
+   List<ParamCarreira> findAllActive(String pccsId);
 }

@@ -19,6 +19,8 @@ public interface ParamCargoEntityRepository extends
 
   List<ParamCargoEntity> findAllByEstado(Estado estado);
 
+  List<ParamCargoEntity> findAllByParamCarrId(cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity paramCarrId);
+
   Optional<ParamCargoEntity> findByUuid(UUID uuid);
 
   default ParamCargoEntity findByUuidOrThrow(UUID uuid) {

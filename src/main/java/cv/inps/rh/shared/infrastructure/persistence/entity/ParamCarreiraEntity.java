@@ -49,5 +49,8 @@ public class ParamCarreiraEntity extends AuditEntity {
     @Column(name="estado")
     private Estado estado;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pccs_id", referencedColumnName = "id")
+    private ParamPccsEntity pccsId;
 
 }

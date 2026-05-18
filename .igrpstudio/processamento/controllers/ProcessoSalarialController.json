@@ -268,7 +268,270 @@
           "isRequired": false
         }
       ]
+    },
+    {
+      "actionName": "getSubsidioNatal",
+      "path": "subsidio-natal",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "SubsidioResponseNatal",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "direcaoId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "funcionarioId",
+          "isRequired": true
+        },
+        {
+          "type": "long",
+          "name": "valorBrinde",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "anoProcessamento",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "ativarInactivarSubsidioNatal",
+      "path": "activar-inactivar-subsidio-natal",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "SubsidioResponseNatal",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "subsidioId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "ano",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "funcionarioId",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "status",
+          "description": "possiveis valores: A/I",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getListaAumentoSalarial",
+      "path": "aumento-salarial",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "AumentoList",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "integer",
+          "name": "ano",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "page",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "size",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "saveAumentoSalarial",
+      "path": "aumento-salarial",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AumentoSalarialRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "validarAumentoSalarial",
+      "path": "aumento-salarial/{aumentoSalarialId}/validar",
+      "method": "POST",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "aumentoSalarialId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "getDetalhesAumentoSalarial",
+      "path": "aumento-salarial/{aumentoSalarialId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "AumentoSalarialResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "aumentoSalarialId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "updateAumentoSalarial",
+      "path": "aumento-salarial/{aumentoSalarialId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AumentoSalarialRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "none"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "aumentoSalarialId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento"
+  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial"
 }

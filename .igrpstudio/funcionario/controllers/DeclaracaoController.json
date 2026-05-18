@@ -60,6 +60,11 @@
       "requestParams": [
         {
           "type": "string",
+          "name": "idFuncionario",
+          "isRequired": false
+        },
+        {
+          "type": "string",
           "name": "tipoDeclaracao",
           "isRequired": false
         },
@@ -248,5 +253,5 @@
       ]
     }
   ],
-  "id": "gaahn3ko4i-novoPedidoDeclaracao-novoPedidoDeclaracao-getNotificacaoPedidoDeclaracao-visualizarPedidoDeclaracao-visualizarPedidoDeclaracao"
+  "id": "gaahn3ko4i-novoPedidoDeclaracao-novoPedidoDeclaracao-getNotificacaoPedidoDeclaracao-visualizarPedidoDeclaracao-visualizarPedidoDeclaracao-getPedidoDeclaracoes"
 }

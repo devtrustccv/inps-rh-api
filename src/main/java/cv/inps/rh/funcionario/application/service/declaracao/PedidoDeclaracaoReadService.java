@@ -51,6 +51,10 @@ public class PedidoDeclaracaoReadService {
 
       List<Predicate> predicates = new ArrayList<>();
 
+      if (StringUtils.hasText(query.getIdFuncionario())) {
+        predicates.add(cb.equal(root.get("funId").get("uuid"), UUID.fromString(query.getIdFuncionario())));
+      }
+
       if (StringUtils.hasText(query.getTipoDeclaracao())) {
         predicates.add(cb.equal(root.get("tipoDeclaracao"), query.getTipoDeclaracao()));
       }

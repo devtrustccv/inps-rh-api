@@ -24,8 +24,8 @@ public class ValidarDadosContratuaisService {
     if (dc.getTipoContratoId() == null)
       throw IgrpResponseStatusException.badRequest("Tipo de contrato é obrigatório.");
 
-    if (dc.getCargoPosicaoId() == null)
-      throw IgrpResponseStatusException.badRequest("Cargo/posição é obrigatório.");
+    /*if (dc.getCargoPosicaoId() == null)
+      throw IgrpResponseStatusException.badRequest("Cargo/posição é obrigatório.");*/
 
     if (dc.getDirecaoId() == null)
       throw IgrpResponseStatusException.badRequest("Direção é obrigatória.");

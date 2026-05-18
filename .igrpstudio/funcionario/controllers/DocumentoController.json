@@ -150,9 +150,9 @@
         "200": {
           "name": "OK",
           "content": {
-            "application/json": {
+            "application/pdf": {
               "schema": {
-                "type": "string",
+                "type": "binary",
                 "name": "data",
                 "collectionType": "none"
               }
@@ -169,8 +169,8 @@
       ]
     },
     {
-      "actionName": "anexarDocOrdemServico",
-      "path": "ordem-servico/{osUuid}/anexar",
+      "actionName": "salvarOrdemServico",
+      "path": "ordem-servico/{funcionarioUuid}/salvar",
       "method": "POST",
       "responses": {
         "200": {
@@ -188,15 +188,16 @@
       },
       "pathVariables": [
         {
-          "name": "osUuid",
+          "name": "funcionarioUuid",
           "type": "string",
           "isRequired": true
         }
       ],
       "requestBody": {
-        "type": "AnexoReq",
+        "type": "OrdemServicoItemReq",
         "objectType": "dto",
-        "module": "shared"
+        "collectionType": "list",
+        "module": "funcionario"
       }
     }
   ],
