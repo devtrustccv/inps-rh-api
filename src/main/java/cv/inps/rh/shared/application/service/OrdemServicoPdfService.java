@@ -35,7 +35,7 @@ public class OrdemServicoPdfService {
   }
 
   @SneakyThrows
-  public String generate(Context context) {
+  public byte[] generate(Context context) {
 
     var htmlContent = templateEngine.process("os-general", context);
 
@@ -46,17 +46,7 @@ public class OrdemServicoPdfService {
       renderer.layout();
       renderer.createPDF(outputStream);
 
-      byte[] bytes = outputStream.toByteArray();
-
-      var uniqueFilename = buildUniqueFilename("ordem-servico.pdf");
-
-      storageService.uploadFile(
-          bytes,
-          uniqueFilename,
-          "application/pdf"
-      );
-
-      return uniqueFilename;
+      return outputStream.toByteArray();
 
     } catch (DocumentException | IOException e) {
       throw new IllegalStateException("Erro ao gerar PDF da Ordem de Serviço", e);

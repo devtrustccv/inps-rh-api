@@ -112,7 +112,7 @@ public class OrdemServicoReadService {
   }
 
   @Transactional(readOnly = true)
-  public String gerarPdf(String osUuid) {
+  public byte[] gerarPdf(String osUuid) {
     var os = ordemServicoRepository.findByUuidOrThrow(UUID.fromString(osUuid));
     var tipo = OrdemServico.valueOf(os.getReferente());
     var funcionarioUuid = os.getFunId().getUuid().toString();

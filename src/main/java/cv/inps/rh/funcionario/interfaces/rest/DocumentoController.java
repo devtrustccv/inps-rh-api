@@ -178,7 +178,8 @@ public class DocumentoController {
   }
 
   @GetMapping(
-    value = "gerar-os/{osUuid}"
+    value = "gerar-os/{osUuid}",
+    produces = "application/pdf"
   )
   @Operation(
     summary = "Gerar ordem servico PDF",
@@ -188,16 +189,16 @@ public class DocumentoController {
           responseCode = "200",
 
           content = @Content(
-              mediaType = "application/json",
+              mediaType = "application/pdf",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  type = "string",
+                  format = "binary")
           )
       )
     }
   )
 
-  public ResponseEntity<String> gerarOrdemServicoPdf(
+  public ResponseEntity<byte[]> gerarOrdemServicoPdf(
       @PathVariable(value = "osUuid") String osUuid)
   {
 
