@@ -313,6 +313,44 @@
       ]
     },
     {
+      "actionName": "getSubsidioFerias",
+      "path": "subsidio-feria",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "SubsidioFeriasResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "direcaoId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "funcionarioId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataProcessamento",
+          "isRequired": false
+        }
+      ]
+    },
+    {
       "actionName": "ativarInactivarSubsidioNatal",
       "path": "activar-inactivar-subsidio-natal",
       "method": "POST",
@@ -555,5 +593,5 @@
       ]
     }
   ],
-  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial-ativarInactivarSubsidioNatal-getColaboresAumentoSalarial-getColaboresAumentoSalarial"
+  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial-ativarInactivarSubsidioNatal-getColaboresAumentoSalarial-getColaboresAumentoSalarial-getSubsidioFerias"
 }

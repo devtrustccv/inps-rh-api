@@ -290,6 +290,37 @@ public class ProcessoSalarialController {
 
   }
 
+  @GetMapping(
+      value = "subsidio-feria"
+  )
+  @Operation(
+      summary = "Get subsidio ferias",
+      description = "Get subsidio ferias",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = SubsidioFeriasResponseDTO.class,
+                      type = "object")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<List<SubsidioFeriasResponseDTO>> getSubsidioFerias(
+      @RequestParam(value = "direcaoId", required = false) Long direcaoId,
+      @RequestParam(value = "funcionarioId", required = false) Long funcionarioId,
+      @RequestParam(value = "dataProcessamento", required = false) String dataProcessamento) {
+
+    final var query = new GetSubsidioFeriasQuery(direcaoId, funcionarioId, dataProcessamento);
+
+    return queryBus.handle(query);
+
+  }
+
    @PostMapping(
    value = "activar-inactivar-subsidio-natal"
   )
