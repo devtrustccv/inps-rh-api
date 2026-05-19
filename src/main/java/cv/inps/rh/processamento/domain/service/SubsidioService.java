@@ -23,7 +23,7 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @Service
-public class SubsidioNatalService {
+public class SubsidioService {
 
   private final JdbcTemplate jdbcTemplate;
   private final SubsidioNatalEntityRepository subsidioNatalEntityRepository;
@@ -31,7 +31,7 @@ public class SubsidioNatalService {
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final FuncionarioRules funcionarioRules;
 
-  public void activateInactivate(Long subsidioId, Long ano, String funId, SubsidioNatalStatus status, SubsidioResponseNatalDTO data) {
+  public void activateInactivateSubsidioNatal(Long subsidioId, Long ano, String funId, SubsidioNatalStatus status, SubsidioResponseNatalDTO data) {
     switch (status) {
       case ATIVAR -> {
 
@@ -84,7 +84,7 @@ public class SubsidioNatalService {
     }
   }
 
-  public List<SubsidioResponseNatalDTO> getData(Long direcaoId, Long funId, Double valorCBrinde, Long anoProcessamento) {
+  public List<SubsidioResponseNatalDTO> getDataSubsidioNatal(Long direcaoId, Long funId, Double valorCBrinde, Long anoProcessamento) {
 
     var list = new ArrayList<SubsidioResponseNatalDTO>();
 
