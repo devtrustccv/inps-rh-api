@@ -92,7 +92,7 @@ public class SubsidioService {
         BEGIN
             RH_PK_SUBSISIO_NATAL_F_DB.LOAD_LIST(
                 ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?
             );
         END;
         """;
@@ -116,6 +116,7 @@ public class SubsidioService {
       cs.registerIndexTableOutParameter(12, 1000, Types.VARCHAR, 4000);
       cs.registerIndexTableOutParameter(13, 1000, Types.VARCHAR, 4000);
       cs.registerIndexTableOutParameter(14, 1000, Types.VARCHAR, 4000);
+      cs.registerIndexTableOutParameter(15, 1000, Types.VARCHAR, 4000);
 
       cs.execute();
 
@@ -129,6 +130,7 @@ public class SubsidioService {
       var brindes = (String[]) cs.getPlsqlIndexTable(12);
       var prendas = (String[]) cs.getPlsqlIndexTable(13);
       var estados = (String[]) cs.getPlsqlIndexTable(14);
+      var ids = (String[]) cs.getPlsqlIndexTable(15);
 
       if (nomes != null) {
         for (int i = 0; i < nomes.length; i++) {
@@ -142,7 +144,8 @@ public class SubsidioService {
               subsidios[i],
               brindes[i],
               prendas[i],
-              estados[i]
+              estados[i],
+              ids[i]
           );
           list.add(responseRow);
         }

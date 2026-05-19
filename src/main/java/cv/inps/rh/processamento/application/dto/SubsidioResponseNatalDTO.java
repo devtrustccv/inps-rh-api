@@ -27,6 +27,8 @@ public record SubsidioResponseNatalDTO(
 
     String valorPrendaNatal,
 
-    String estado
+    String estado,
+
+    String subsisioId
 ) {
 }
