@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "processamento",
-  "name": "SubsidioResponseNatal",
+  "name": "SubsidioFeriasResponse",
   "template": "record",
   "enableCustonValidation": false,
   "attributes": [
@@ -18,7 +18,7 @@
       "primaryKey": false
     },
     {
-      "name": "salario",
+      "name": "numero",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -30,7 +30,7 @@
       "primaryKey": false
     },
     {
-      "name": "mesesTrabalho",
+      "name": "dataInicio",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -42,7 +42,7 @@
       "primaryKey": false
     },
     {
-      "name": "percSalario",
+      "name": "dataFim",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -54,7 +54,7 @@
       "primaryKey": false
     },
     {
-      "name": "faltas",
+      "name": "escalao",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -66,7 +66,127 @@
       "primaryKey": false
     },
     {
-      "name": "percFalta",
+      "name": "valorEscalao",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "meses",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dias",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "mesesValor",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "diasValor",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "total",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "id",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "totalRemun",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "descSalBase",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "valorSalBase",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "descSubsidio",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -90,7 +210,7 @@
       "primaryKey": false
     },
     {
-      "name": "valorChequeBrinde",
+      "name": "mesTotal",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -102,31 +222,7 @@
       "primaryKey": false
     },
     {
-      "name": "valorPrendaNatal",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "estado",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "subsisioId",
+      "name": "diasTotal",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -138,5 +234,5 @@
       "primaryKey": false
     }
   ],
-  "id": "ur9qk01s6x"
+  "id": "subsidio-feria-response-01-vf"
 }

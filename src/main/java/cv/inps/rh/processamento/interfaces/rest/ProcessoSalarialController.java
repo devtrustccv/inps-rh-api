@@ -290,6 +290,37 @@ public class ProcessoSalarialController {
 
   }
 
+  @GetMapping(
+      value = "subsidio-feria"
+  )
+  @Operation(
+      summary = "Get subsidio ferias",
+      description = "Get subsidio ferias",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = SubsidioFeriasResponseDTO.class,
+                      type = "object")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<List<SubsidioFeriasResponseDTO>> getSubsidioFerias(
+      @RequestParam(value = "direcaoId", required = false) Long direcaoId,
+      @RequestParam(value = "funcionarioId", required = false) Long funcionarioId,
+      @RequestParam(value = "dataProcessamento", required = false) String dataProcessamento) {
+
+    final var query = new GetSubsidioFeriasQuery(direcaoId, funcionarioId, dataProcessamento);
+
+    return queryBus.handle(query);
+
+  }
+
    @PostMapping(
    value = "activar-inactivar-subsidio-natal"
   )
@@ -310,14 +341,11 @@ public class ProcessoSalarialController {
     }
   )
 
-   public ResponseEntity<String> ativarInactivarSubsidioNatal(@Valid @RequestBody SubsidioResponseNatalDTO ativarInactivarSubsidioNatalRequest
-    , @RequestParam(value = "subsidioId", required = false) Long subsidioId,
-    @RequestParam(value = "ano") Long ano,
-    @RequestParam(value = "funcionarioId") String funcionarioId,
-    @RequestParam(value = "status") String status)
+   public ResponseEntity<String> ativarInactivarSubsidioNatal(@Valid @RequestBody AtivarInativarSubsidioNatalDTO ativarInactivarSubsidioNatalRequest
+   )
   {
 
-      final var command = new AtivarInactivarSubsidioNatalCommand(ativarInactivarSubsidioNatalRequest, subsidioId, ano, funcionarioId, status);
+    final var command = new AtivarInactivarSubsidioNatalCommand(ativarInactivarSubsidioNatalRequest);
 
       return commandBus.send(command);
 
@@ -470,6 +498,38 @@ public class ProcessoSalarialController {
     final var command = new UpdateAumentoSalarialCommand(updateAumentoSalarialRequest, aumentoSalarialId);
 
     return commandBus.send(command);
+
+  }
+
+  @GetMapping(
+      value = "aumento-salarial/colaboradores"
+  )
+  @Operation(
+      summary = "Get colabores aumento salarial",
+      description = "Get colabores aumento salarial",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = ColaboradorAumentoDTO.class,
+                      type = "object")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<ColaboradorAumentoDTO> getColaboresAumentoSalarial(
+      @RequestParam(value = "direcaoId", required = false) Long direcaoId,
+      @RequestParam(value = "organicaId", required = false) Long organicaId,
+      @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") Integer size) {
+
+    final var query = new GetColaboresAumentoSalarialQuery(direcaoId, organicaId, page, size);
+
+    return queryBus.handle(query);
 
   }
 
