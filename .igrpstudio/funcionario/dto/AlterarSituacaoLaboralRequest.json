@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "AtivarInativarColaborador",
+  "name": "AlterarSituacaoLaboralRequest",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
@@ -43,7 +43,43 @@
       "primaryKey": false
     },
     {
+      "name": "dataInicio",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dataFim",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "observacao",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "tipoOrdemServico",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -55,5 +91,5 @@
       "primaryKey": false
     }
   ],
-  "id": "qfyvxtsg8m"
+  "id": "altsilab001"
 }

@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 
 
 @IgrpDTO
-public class AtivarInativarColaboradorDTO  {
+public class AlterarSituacaoLaboralRequest  {
 
 
 
@@ -28,6 +28,10 @@ public class AtivarInativarColaboradorDTO  {
 
   private Long motivoId ;
 
+
+  private String dataInicio ;
+
+  private String dataFim ;
 
   private String observacao ;
 

@@ -203,35 +203,6 @@ public class FuncionarioController {
 
   }
 
-   @PatchMapping(
-   value = "status/{id}"
-  )
-  @Operation(
-    summary = "Inativar ativar colaborador",
-    description = "Inativar ativar colaborador",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = AtivarInativarColaboradorDTO.class,
-                  type = "object")
-          )
-      )
-    }
-  )
-
-   public ResponseEntity<AtivarInativarColaboradorDTO> inativarAtivarColaborador(@Valid @RequestBody AtivarInativarColaboradorDTO inativarAtivarColaboradorRequest
-    , @PathVariable(value = "id") String id)
-  {
-
-      final var command = new InativarAtivarColaboradorCommand(inativarAtivarColaboradorRequest, id);
-
-      return commandBus.send(command);
-
-  }
 
    @PutMapping(
    value = "{idFuncionario}/dados-pessoais"
@@ -473,34 +444,56 @@ public class FuncionarioController {
 
   }
 
+
    @GetMapping(
-   value = "status/{id}"
+   value = "{idFuncionario}/situacao-laboral"
   )
   @Operation(
-    summary = "Get situacao laboral colaborador",
-    description = "Get situacao laboral colaborador",
+    summary = "Get situacao laboral do funcionario",
+    description = "Get situacao laboral do funcionario",
     responses = {
       @ApiResponse(
           responseCode = "200",
-
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = AtivarInativarColaboradorDTO.class,
+                  implementation = AlterarSituacaoLaboralRequest.class,
                   type = "object")
           )
       )
     }
   )
-
-   public ResponseEntity<AtivarInativarColaboradorDTO> getSituacaoLaboralColaborador(
-    @PathVariable(value = "id") String id)
+   public ResponseEntity<AlterarSituacaoLaboralRequest> getAlterarSituacaoLaboral(
+    @PathVariable(value = "idFuncionario") String idFuncionario)
   {
-
-      final var query = new GetSituacaoLaboralColaboradorQuery(id);
-
+      final var query = new GetAlterarSituacaoLaboralQuery(idFuncionario);
       return queryBus.handle(query);
+  }
 
+   @PatchMapping(
+   value = "{idFuncionario}/situacao-laboral"
+  )
+  @Operation(
+    summary = "Alterar situacao laboral do funcionario",
+    description = "Alterar situacao laboral do funcionario (inclui Licença S/Vencimento e outras situacoes)",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = AlterarSituacaoLaboralRequest.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+   public ResponseEntity<AlterarSituacaoLaboralRequest> alterarSituacaoLaboral(
+    @Valid @RequestBody AlterarSituacaoLaboralRequest alterarSituacaoLaboralRequest,
+    @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+      final var command = new AlterarSituacaoLaboralCommand(alterarSituacaoLaboralRequest, idFuncionario);
+      return commandBus.send(command);
   }
 
 }
