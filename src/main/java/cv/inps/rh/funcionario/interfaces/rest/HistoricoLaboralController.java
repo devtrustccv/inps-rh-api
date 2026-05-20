@@ -14,7 +14,9 @@ import cv.inps.rh.funcionario.application.dto.WrapperRelacaoLaboralSumaryDTO;
 import cv.inps.rh.funcionario.application.queries.GetHistoricoLaboralQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByCarreiraIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByFunIdQuery;
+import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralComboQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralQuery;
+import cv.inps.rh.shared.application.dto.ComboItemDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,6 +25,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @IgrpController
 @RestController
@@ -222,6 +226,36 @@ public class HistoricoLaboralController {
   {
 
       final var query = new GetRelacaoLaboralByFunIdQuery(idFuncionario);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "{funcionarioId}/relacao-laboral/combo"
+  )
+  @Operation(
+    summary = "Get relacao laboral combo",
+    description = "Get relacao laboral combo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ComboItemDTO.class,
+                  type = "array")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<List<ComboItemDTO>> getRelacaoLaboralCombo(
+    @PathVariable(value = "funcionarioId") String funcionarioId)
+  {
+
+      final var query = new GetRelacaoLaboralComboQuery(funcionarioId);
 
       return queryBus.handle(query);
 

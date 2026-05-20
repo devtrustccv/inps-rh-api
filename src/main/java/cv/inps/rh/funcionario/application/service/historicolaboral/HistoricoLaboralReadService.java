@@ -4,7 +4,9 @@ import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.application.queries.GetHistoricoLaboralQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByCarreiraIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByFunIdQuery;
+import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralComboQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralQuery;
+import cv.inps.rh.shared.application.dto.ComboItemDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -314,6 +317,25 @@ public class HistoricoLaboralReadService {
     }
 
     return dto;
+  }
+
+  public List<ComboItemDTO> getRelacaoLaboralCombo(GetRelacaoLaboralComboQuery query) {
+    var uuid = UUID.fromString(query.getFuncionarioId());
+    return tiposRelacionamentoEntityRepository
+        .findAllAtivosComboByFuncionarioUuid(uuid)
+        .stream()
+        .map(t -> {
+          var item = new ComboItemDTO();
+          var contrato = t.getContrVinculoId();
+          var tipoContratoNome = (contrato != null && contrato.getTpContratoId() != null)
+              ? contrato.getTpContratoId().getNome() : "";
+          var vinculoNome = (contrato != null && contrato.getVinculoId() != null)
+              ? contrato.getVinculoId().getNome() : "";
+          item.setValue(t.getUuid().toString());
+          item.setLabel(tipoContratoNome + " / " + vinculoNome);
+          return item;
+        })
+        .toList();
   }
 
 }
