@@ -1,0 +1,36 @@
+{
+  "type": "dto",
+  "module": "processamento",
+  "name": "AtivarInativarSubsidioNatal",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "ano",
+      "objectType": "java",
+      "type": "long",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "rows",
+      "objectType": "dto",
+      "type": "AtivarInativarSubsidioNatalRow",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "processamento"
+    }
+  ],
+  "id": "dfdp2wdbk3"
+}

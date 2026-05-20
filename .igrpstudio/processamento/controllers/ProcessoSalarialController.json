@@ -313,6 +313,44 @@
       ]
     },
     {
+      "actionName": "getSubsidioFerias",
+      "path": "subsidio-feria",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "SubsidioFeriasResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "direcaoId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "funcionarioId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataProcessamento",
+          "isRequired": false
+        }
+      ]
+    },
+    {
       "actionName": "ativarInactivarSubsidioNatal",
       "path": "activar-inactivar-subsidio-natal",
       "method": "POST",
@@ -320,7 +358,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "SubsidioResponseNatal",
+              "type": "AtivarInativarSubsidioNatal",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
@@ -342,30 +380,7 @@
             }
           }
         }
-      },
-      "requestParams": [
-        {
-          "type": "long",
-          "name": "subsidioId",
-          "isRequired": false
-        },
-        {
-          "type": "long",
-          "name": "ano",
-          "isRequired": true
-        },
-        {
-          "type": "string",
-          "name": "funcionarioId",
-          "isRequired": true
-        },
-        {
-          "type": "string",
-          "name": "status",
-          "description": "possiveis valores: A/I",
-          "isRequired": true
-        }
-      ]
+      }
     },
     {
       "actionName": "getListaAumentoSalarial",
@@ -531,7 +546,52 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getColaboresAumentoSalarial",
+      "path": "aumento-salarial/colaboradores",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ColaboradorAumento",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "direcaoId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "organicaId",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "page",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "integer",
+          "name": "size",
+          "value": "20",
+          "isRequired": false
+        }
+      ]
     }
   ],
-  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial"
+  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial-ativarInactivarSubsidioNatal-getColaboresAumentoSalarial-getColaboresAumentoSalarial-getSubsidioFerias"
 }
