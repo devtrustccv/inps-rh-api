@@ -24,5 +24,6 @@ public class GetListPagamentosDescontoQuery implements Query {
   private String dataFim;
   @NotBlank(message = "The field <estado> is required")
   private String estado;
+  private String tiprelUuid;
 
 }

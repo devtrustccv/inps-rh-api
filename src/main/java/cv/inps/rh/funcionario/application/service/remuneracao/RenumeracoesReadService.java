@@ -13,6 +13,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.VDefRemuneracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.VDefRemuneracaoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import jakarta.persistence.criteria.Predicate;
@@ -29,6 +30,7 @@ import org.springframework.util.StringUtils;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -37,8 +39,8 @@ public class RenumeracoesReadService {
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final VDefRemuneracaoEntityRepository vDefRemuneracaoEntityRepository;
   private final VDefRemuneracaoMapper vDefRemuneracaoMapper;
-
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
+  private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
 
   @Transactional(readOnly = true)
   public WrapperListRenumeracaoDTO getListRenumeracoes(GetListRenumeracoesQuery query) {
@@ -48,11 +50,22 @@ public class RenumeracoesReadService {
 
     var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
 
+    Long tiprelId = null;
+    if (org.springframework.util.StringUtils.hasText(query.getTiprelUuid())) {
+      tiprelId = tiposRelacionamentoEntityRepository
+          .findByUuidOrThrow(UUID.fromString(query.getTiprelUuid())).getId();
+    }
+    final Long resolvedTiprelId = tiprelId;
+
     Specification<VDefRemuneracaoEntity> spec = (root, cq, cb) -> {
       List<Predicate> predicates = new java.util.ArrayList<>();
 
       predicates.add(cb.equal(root.get("funUuid"), idFuncionario));
-      predicates.add(cb.equal(root.get("estActAdm"), 1));
+      if (resolvedTiprelId != null) {
+        predicates.add(cb.equal(root.get("tiprelId"), resolvedTiprelId));
+      } else {
+        predicates.add(cb.equal(root.get("estActAdm"), 1));
+      }
 
       var estadosPermitidos = EnumSet.of(Estado.A, Estado.I);
 

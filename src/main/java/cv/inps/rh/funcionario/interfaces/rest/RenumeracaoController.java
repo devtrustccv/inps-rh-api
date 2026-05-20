@@ -67,10 +67,11 @@ public class RenumeracaoController {
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
     @RequestParam(value = "dataFim", required = false) String dataFim,
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
-    @RequestParam(value = "estado", required = false) String estado)
+    @RequestParam(value = "estado", required = false) String estado,
+    @RequestParam(value = "tiprelUuid", required = false) String tiprelUuid)
   {
 
-      final var query = new GetListRenumeracoesQuery(idFuncionario, pageSize, pageNumber, dataFim, dataInicio, estado);
+      final var query = new GetListRenumeracoesQuery(idFuncionario, pageSize, pageNumber, dataFim, dataInicio, estado, tiprelUuid);
 
       return queryBus.handle(query);
 

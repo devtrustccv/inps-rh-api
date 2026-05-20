@@ -26,7 +26,7 @@ public class GetListPagamentosDescontoQueryHandlerTest {
   @Test
   void testHandleGetListPagamentosDescontoQuery_delegatesToServiceAndReturnsOk() {
     GetListPagamentosDescontoQuery query = new GetListPagamentosDescontoQuery(
-        "11111111-1111-1111-1111-111111111111", "0", "20", null, null, null);
+        "11111111-1111-1111-1111-111111111111", "0", "20", null, null, null, null);
     WrapperListPagamentosDescontoDTO expected = new WrapperListPagamentosDescontoDTO();
     when(pagamentosDescontoReadService.getListPagamentosDesconto(any(GetListPagamentosDescontoQuery.class)))
         .thenReturn(expected);

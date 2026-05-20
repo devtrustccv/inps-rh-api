@@ -57,10 +57,11 @@ public class PagamentoDescontoController {
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
     @RequestParam(value = "dataFim", required = false) String dataFim,
-    @RequestParam(value = "estado", required = false) String estado)
+    @RequestParam(value = "estado", required = false) String estado,
+    @RequestParam(value = "tiprelUuid", required = false) String tiprelUuid)
   {
 
-      final var query = new GetListPagamentosDescontoQuery(idFuncionario, pageNumber, pageSize, dataInicio, dataFim, estado);
+      final var query = new GetListPagamentosDescontoQuery(idFuncionario, pageNumber, pageSize, dataInicio, dataFim, estado, tiprelUuid);
 
       ResponseEntity<WrapperListPagamentosDescontoDTO> response = queryBus.handle(query);
 

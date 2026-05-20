@@ -6,6 +6,7 @@ import cv.inps.rh.funcionario.infrastructure.mappers.VDefPagamentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.VDefPagamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.VDefPagamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import jakarta.persistence.criteria.Predicate;
@@ -21,6 +22,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class PagamentosDescontoReadService {
 
   private final VDefPagamentoEntityRepository vDefPagamentoEntityRepository;
   private final VDefPagamentoMapper vDefPagamentoMapper;
+  private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
 
   @Transactional(readOnly = true)
   public WrapperListPagamentosDescontoDTO getListPagamentosDesconto(GetListPagamentosDescontoQuery query) {
@@ -37,11 +40,22 @@ public class PagamentosDescontoReadService {
 
     var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
 
+    Long tiprelId = null;
+    if (org.springframework.util.StringUtils.hasText(query.getTiprelUuid())) {
+      tiprelId = tiposRelacionamentoEntityRepository
+          .findByUuidOrThrow(UUID.fromString(query.getTiprelUuid())).getId();
+    }
+    final Long resolvedTiprelId = tiprelId;
+
     Specification<VDefPagamentoEntity> spec = (root, cq, cb) -> {
       List<Predicate> predicates = new java.util.ArrayList<>();
 
       predicates.add(cb.equal(root.get("funUuid"), idFuncionario));
-      predicates.add(cb.equal(root.get("estActAdm"), 1));
+      if (resolvedTiprelId != null) {
+        predicates.add(cb.equal(root.get("tiprelId"), resolvedTiprelId));
+      } else {
+        predicates.add(cb.equal(root.get("estActAdm"), 1));
+      }
 
       var estadosPermitidos = EnumSet.of(Estado.A, Estado.I);
 
