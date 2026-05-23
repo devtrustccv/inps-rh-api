@@ -22,8 +22,13 @@ public class AlterarSituacaoLaboralRequest  {
   private EstadoValidacao validar ;
 
 
-  private Long situacaoLaboralId ;
+  private Long vinculoId ;
 
+
+  private String estadoContrato ;
+
+
+  private Long situacaoLaboralId ;
 
 
   private Long motivoId ;

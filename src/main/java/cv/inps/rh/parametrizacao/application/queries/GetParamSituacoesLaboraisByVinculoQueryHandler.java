@@ -33,6 +33,7 @@ public class GetParamSituacoesLaboraisByVinculoQueryHandler implements QueryHand
 
      var result = paramSitLaboralEntityRepository.findAllByVinculoId(query.getVinculoId())
          .stream()
+         .filter(obj -> Objects.isNull(query.getFlgAbonoBeneficio()) || obj.getParamSit().getFlgAbonoBeneficio().equals(Integer.parseInt(query.getFlgAbonoBeneficio())))
          .filter(obj -> Objects.isNull(query.getFlgEstadoContrato()) || obj.getParamSit().getFlgEstadoContrato().equals(query.getFlgEstadoContrato()))
          .map(r -> new ParametrizacaoDTO(
              r.getParamSit().getNome(),
