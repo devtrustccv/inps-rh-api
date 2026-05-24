@@ -28,7 +28,7 @@ public class AlterarSituacaoLaboralReadService {
     var dto = new AlterarSituacaoLaboralRequest();
     var sitLab = tiposRelacionamentoAtual.getSituacLaboralId();
     var motivoSitLabId = sitLab.getMotivoSitLabId();
-    dto.setSituacaoLaboralId(sitLab.getId());
+    dto.setSituacaoLaboralId(sitLab.getSituacaoLaboralId().getId());
     dto.setVinculoId(tiposRelacionamentoAtual.getContrVinculoId().getVinculoId().getId());
     dto.setEstadoContrato(sitLab.getSituacaoLaboralId().getFlgEstadoContrato());
     if (motivoSitLabId != null) {
