@@ -248,47 +248,6 @@
       ]
     },
     {
-      "actionName": "inativarAtivarColaborador",
-      "path": "status/{id}",
-      "method": "PATCH",
-      "requestBody": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "AtivarInativarColaborador",
-              "collectionType": "none",
-              "name": "data",
-              "objectType": "dto",
-              "module": "funcionario"
-            }
-          }
-        }
-      },
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "AtivarInativarColaborador",
-                "objectType": "dto",
-                "name": "data",
-                "collectionType": "none",
-                "module": "funcionario"
-              }
-            }
-          }
-        }
-      },
-      "pathVariables": [
-        {
-          "name": "id",
-          "type": "string",
-          "isRequired": true
-        }
-      ]
-    },
-    {
       "actionName": "validaDadosPessoais",
       "path": "{idFuncionario}/dados-pessoais",
       "method": "PUT",
@@ -565,8 +524,8 @@
       ]
     },
     {
-      "actionName": "getSituacaoLaboralColaborador",
-      "path": "status/{id}",
+      "actionName": "getAlterarSituacaoLaboral",
+      "path": "{idFuncionario}/situacao-laboral",
       "method": "GET",
       "responses": {
         "200": {
@@ -574,7 +533,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "AtivarInativarColaborador",
+                "type": "AlterarSituacaoLaboralRequest",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -586,7 +545,48 @@
       },
       "pathVariables": [
         {
-          "name": "id",
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "alterarSituacaoLaboral",
+      "path": "{idFuncionario}/situacao-laboral",
+      "method": "PATCH",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AlterarSituacaoLaboralRequest",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "AlterarSituacaoLaboralRequest",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
           "type": "string",
           "isRequired": true
         }

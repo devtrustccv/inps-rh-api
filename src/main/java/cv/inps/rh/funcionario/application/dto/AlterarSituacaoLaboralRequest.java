@@ -15,19 +15,28 @@ import lombok.NoArgsConstructor;
 
 
 @IgrpDTO
-public class AtivarInativarColaboradorDTO  {
+public class AlterarSituacaoLaboralRequest  {
 
 
 
   private EstadoValidacao validar ;
 
 
-  private Long situacaoLaboralId ;
+  private Long vinculoId ;
 
+
+  private String estadoContrato ;
+
+
+  private Long situacaoLaboralId ;
 
 
   private Long motivoId ;
 
+
+  private String dataInicio ;
+
+  private String dataFim ;
 
   private String observacao ;
 

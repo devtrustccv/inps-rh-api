@@ -57,6 +57,11 @@
           "type": "string",
           "name": "estado",
           "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "tiprelUuid",
+          "isRequired": false
         }
       ]
     },

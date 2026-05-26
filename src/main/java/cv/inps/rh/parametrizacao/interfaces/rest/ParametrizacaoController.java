@@ -428,11 +428,13 @@ public class ParametrizacaoController {
   )
   
   public ResponseEntity<List<ParametrizacaoDTO>> getParamSituacoesLaboraisByVinculo(
-    @RequestParam(value = "vinculoId") Long vinculoId,
-    @RequestParam(value = "flgEstadoContrato", required = false) String flgEstadoContrato)
+    @RequestParam(value = "vinculoId", required = false) Long vinculoId,
+    @RequestParam(value = "flgEstadoContrato", required = false) String flgEstadoContrato,
+    @RequestParam(value = "flgAbonoBeneficio", required = false) String flgAbonoBeneficio,
+    @RequestParam(value = "codigo", required = false) String codigo)
   {
 
-      final var query = new GetParamSituacoesLaboraisByVinculoQuery(vinculoId, flgEstadoContrato);
+      final var query = new GetParamSituacoesLaboraisByVinculoQuery(vinculoId, flgEstadoContrato, flgAbonoBeneficio, codigo);
 
       return queryBus.handle(query);
 

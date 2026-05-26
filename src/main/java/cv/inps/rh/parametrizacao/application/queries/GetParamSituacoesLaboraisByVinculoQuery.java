@@ -17,5 +17,9 @@ public class GetParamSituacoesLaboraisByVinculoQuery implements Query {
   private Long vinculoId;
   @NotBlank(message = "The field <flgEstadoContrato> is required")
   private String flgEstadoContrato;
+  @NotBlank(message = "The field <flgAbonoBeneficio> is required")
+  private String flgAbonoBeneficio;
+  @NotBlank(message = "The field <codigo> is required")
+  private String codigo;
 
 }

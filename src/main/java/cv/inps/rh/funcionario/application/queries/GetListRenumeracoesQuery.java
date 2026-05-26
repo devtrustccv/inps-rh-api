@@ -24,5 +24,6 @@ public class GetListRenumeracoesQuery implements Query {
   private String dataInicio;
   @NotBlank(message = "The field <estado> is required")
   private String estado;
+  private String tiprelUuid;
 
 }

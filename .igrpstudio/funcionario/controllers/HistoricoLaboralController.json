@@ -242,7 +242,35 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getRelacaoLaboralCombo",
+      "path": "{funcionarioId}/relacao-laboral/combo",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ComboItem",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "shared"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "yr7hgkcuf8-getHistoricoLaboral-getHistoricoLaboral-atualizarHistoricoLaboral-novaRelacaoLaboral-getRelacaoLaboralById-getRelacaoLaboralByCarreiraId-atualizarRelacaoLaboral-getRelacaoLaboral-getRelacaoLaboralByCarreiraId-getRelacaoLaboral-getRelacaoLaboralByFunId"
+  "id": "yr7hgkcuf8-getHistoricoLaboral-getHistoricoLaboral-atualizarHistoricoLaboral-novaRelacaoLaboral-getRelacaoLaboralById-getRelacaoLaboralByCarreiraId-atualizarRelacaoLaboral-getRelacaoLaboral-getRelacaoLaboralByCarreiraId-getRelacaoLaboral-getRelacaoLaboralByFunId-getRelacaoLaboralCombo"
 }

@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetSituacaoLaboralColaboradorQuery implements Query {
+public class GetRelacaoLaboralComboQuery implements Query {
 
-  @NotBlank(message = "The field <id> is required")
-  private String id;
+  @NotBlank(message = "The field <funcionarioId> is required")
+  private String funcionarioId;
 
 }

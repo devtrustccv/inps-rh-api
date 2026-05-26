@@ -77,6 +77,18 @@ public interface TiposRelacionamentoEntityRepository extends
   Optional<TiposRelacionamentoEntity> findAtualByFuncionarioUuid(@Param("funcionarioUuid") UUID funcionarioUuid);
 
   @Query("""
+      select t
+      from TiposRelacionamentoEntity t
+      left join fetch t.contrVinculoId c
+      left join fetch c.tpContratoId
+      left join fetch c.vinculoId
+      where t.funId.uuid = :funcionarioUuid
+        and t.estActAdm = 1
+      order by t.id, t.dataInicio desc
+      """)
+  List<TiposRelacionamentoEntity> findAllAtivosComboByFuncionarioUuid(@Param("funcionarioUuid") UUID funcionarioUuid);
+
+  @Query("""
       SELECT new cv.inps.rh.processamento.application.dto.ColaboradorResponseDTO(
                null,
                t.situacLaboralId.estado,
