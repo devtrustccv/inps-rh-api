@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @Repository
@@ -22,6 +23,10 @@ public interface ParamVinculoMovimentoEntityRepository extends
       }
 
       List<ParamVinculoMovimentoEntity> findByVinculoId_IdAndTipo(Long vinculoId, String tipo);
+
+      List<ParamVinculoMovimentoEntity> findByVinculoId_Id(Long vinculoId);
+
+      List<ParamVinculoMovimentoEntity> findByVinculoId_Uuid(UUID vinculoUuid);
 
   //Optional<ParamVinculoMovimentoEntity> findByVinculoId_IdAndTipo(Long vinculoId, String tipo);
 
