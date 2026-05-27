@@ -26,52 +26,52 @@ import java.util.UUID;
 @Table(name = "RH_T_SITUACAO_LABORAL")
 public class SituacaoLaboralEntity extends AuditEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_situacao_laboral")
-    @SequenceGenerator(name = "seq_situacao_laboral", sequenceName = "SEQ_SITUACAO_LABORAL", allocationSize = 1)
-    @Column(name = "id", unique = true, nullable = false)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_situacao_laboral")
+  @SequenceGenerator(name = "seq_situacao_laboral", sequenceName = "SEQ_SITUACAO_LABORAL", allocationSize = 1)
+  @Column(name = "id", unique = true, nullable = false)
+  private Long id;
 
 
-    @NotNull(message = "situacaoLaboralId is mandatory")
-
-
-  @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "situacao_laboral_id", referencedColumnName = "id")
-    private ParamSituacaoEntity situacaoLaboralId;
+  @NotNull(message = "situacaoLaboralId is mandatory")
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "motivo_sit_lab_id", referencedColumnName = "id")
-    private ParamSituacaoDetalheEntity motivoSitLabId;
-
-    @Column(name="tipo_situacao")
-    private String tipoSituacao;
+  @JoinColumn(name = "situacao_laboral_id", referencedColumnName = "id")
+  private ParamSituacaoEntity situacaoLaboralId;
 
 
-    @Column(name="data_inicio")
-    private LocalDate dataInicio;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "motivo_sit_lab_id", referencedColumnName = "id")
+  private ParamSituacaoDetalheEntity motivoSitLabId;
+
+  @Column(name = "tipo_situacao")
+  private String tipoSituacao;
 
 
-    @Column(name="data_fim")
-    private LocalDate dataFim;
+  @Column(name = "data_inicio")
+  private LocalDate dataInicio;
 
 
-    @Enumerated(EnumType.STRING)
-    @Column(name="estado")
-    private Estado estado;
+  @Column(name = "data_fim")
+  private LocalDate dataFim;
 
 
-    @Column(name="obs", length=4000)
-    private String obs;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "estado")
+  private Estado estado;
 
 
-    @Column(name="uuid")
-    private UUID uuid;
+  @Column(name = "obs", length = 4000)
+  private String obs;
 
-     @ManyToOne(fetch = FetchType.LAZY)
-   @JoinColumn(name = "contr_vinculo_id")
-   private ContratoEntity contrVinculoId;
+
+  @Column(name = "uuid")
+  private UUID uuid;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "contr_vinculo_id")
+  private ContratoEntity contrVinculoId;
 
 
 }

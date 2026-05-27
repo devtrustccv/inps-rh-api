@@ -357,11 +357,21 @@
         {
           "type": "long",
           "name": "vinculoId",
-          "isRequired": true
+          "isRequired": false
         },
         {
           "type": "string",
           "name": "flgEstadoContrato",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "flgAbonoBeneficio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "codigo",
           "isRequired": false
         }
       ]
@@ -388,5 +398,5 @@
       }
     }
   ],
-  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos-getParamSituacaoDetalheAtivo-getParamSituacaoLaboralAtivo-getTiposDocumentoAtivos-getVinculosAtivos-getParamSituacoesLaboraisByVinculo-getEscaloesAtivos-getParamSituacoesLaboraisByVinculo-getParamSituacoesLaboraisByVinculo-getParamSituacoesAtivo-getParamSituacoesAtivo-getParamSituacoesAtivo-getTiposDocumentoAtivos-getLocalTrabalhoAtivos-getCarreirasAtivos"
+  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos-getParamSituacaoDetalheAtivo-getParamSituacaoLaboralAtivo-getTiposDocumentoAtivos-getVinculosAtivos-getParamSituacoesLaboraisByVinculo-getEscaloesAtivos-getParamSituacoesLaboraisByVinculo-getParamSituacoesLaboraisByVinculo-getParamSituacoesAtivo-getParamSituacoesAtivo-getParamSituacoesAtivo-getTiposDocumentoAtivos-getLocalTrabalhoAtivos-getCarreirasAtivos-getParamSituacoesLaboraisByVinculo"
 }
