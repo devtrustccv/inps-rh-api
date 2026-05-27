@@ -136,6 +136,8 @@ public class ValidarRegistoColaboradorService {
     var definicoesPagamentos = defPagamentoMapper.syncPagamentos(funcionario.getDefinicoesPagamentos(),
         dadosContratuais.getEncargosDescontos());
 
+    var alertas = funcionarioRules.validarContactosDuplicados(dadosPessoaisReqDTO.getContactos(), funcionario.getUuid());
+
     funcionario.setContactos(contactos);
     funcionario.setFamiliares(familiares);
     funcionario.setDocumentos(documentos);
@@ -159,9 +161,11 @@ public class ValidarRegistoColaboradorService {
 
     tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
 
-    return java.util.Map.of(
-        "id", funcionario.getId(),
-        "uuid", funcionario.getUuid());
+    var result = new java.util.HashMap<String, Object>();
+    result.put("id", funcionario.getId());
+    result.put("uuid", funcionario.getUuid());
+    result.put("alertas", alertas);
+    return result;
 
   }
 

@@ -245,6 +245,9 @@ public class RegistarColaboradorService {
     valid.setFunId(fun);
     valid.setTiprelId(tr);
     fun.setValidacoes(new ArrayList<>(List.of(valid)));
+
+    var alertas = funcionarioRules.validarContactosDuplicados(dadosPessoais.getContactos(), null);
+
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(fun);
 
     contratoHistoricoWriteService.registrarNovo(contrato);
@@ -270,7 +273,10 @@ public class RegistarColaboradorService {
           validacaoEntityRepository.save(e);
         });
 
-    return Map.of("uuid", saved.getUuid());
+    var result = new java.util.HashMap<String, Object>();
+    result.put("uuid", saved.getUuid());
+    result.put("alertas", alertas);
+    return result;
 
   }
 

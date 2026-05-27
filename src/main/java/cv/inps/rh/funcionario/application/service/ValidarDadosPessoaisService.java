@@ -1,7 +1,6 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidaDadosPessoaisCommand;
-import cv.inps.rh.funcionario.application.dto.ValidacaoDadosPessoaisDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContactoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
@@ -12,6 +11,9 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRe
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +29,7 @@ public class ValidarDadosPessoaisService {
   private final ContactoMapper contactoMapper;
 
   @Transactional
-  public ValidacaoDadosPessoaisDTO executar(ValidaDadosPessoaisCommand command) {
+  public Map<String, ?> executar(ValidaDadosPessoaisCommand command) {
 
     var dto = command.getValidacaodadospessoais();
     var dadosPessoaisReqDTO = dto.getDadosPessoais();
@@ -47,6 +49,11 @@ public class ValidarDadosPessoaisService {
     }*/
 
     // 2) Fazer UPDATE dos dados (sempre permitido)
+    var alertas = funcionarioRules.validarContactosDuplicados(
+        dadosPessoaisReqDTO != null ? dadosPessoaisReqDTO.getContactos() : null,
+        funcionario.getUuid()
+    );
+
     var contactos = contactoMapper.syncContactos(
         funcionario.getContactos(),
         dadosPessoaisReqDTO != null ? dadosPessoaisReqDTO.getContactos() : null,
@@ -85,7 +92,7 @@ public class ValidarDadosPessoaisService {
 
     funcionario.getValidacoes().add(validacao);*/
 
-    var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+    funcionarioEntityRepository.saveAndFlush(funcionario);
 
    /* validacaoEntityRepository
         .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(
@@ -99,7 +106,10 @@ public class ValidarDadosPessoaisService {
           validacaoEntityRepository.save(v);
         });*/
 
-    return dto;
+    var result = new HashMap<String, Object>();
+    result.put("dadosPessoais", dto);
+    result.put("alertas", alertas);
+    return result;
   }
 
 

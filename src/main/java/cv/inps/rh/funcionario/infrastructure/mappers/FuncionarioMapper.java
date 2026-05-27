@@ -189,8 +189,10 @@ public class FuncionarioMapper {
         enderecoMapper.toUpdateEntity(funParam.getEndereco(), dadosPessoais.getEndereco())
         : enderecoMapper.toEntity(dadosPessoais.getEndereco(), Estado.P);
 
-
-    e.setFunId(funParam);
+    if (e != null) {
+      e.setFunId(funParam);
+      funParam.setEndereco(e);
+    }
 
     return funParam;
 
