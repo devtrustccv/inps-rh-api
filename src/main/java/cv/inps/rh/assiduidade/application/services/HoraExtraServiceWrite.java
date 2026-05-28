@@ -202,6 +202,9 @@ public class HoraExtraServiceWrite {
     }
 
     for (var he : horasExtra) {
+      he.setEstado(estado);
+      horaExtraRepository.save(he);
+
       var ajuste = ajustes.get(he.getDataInicio());
 
       if (ajuste != null) {
