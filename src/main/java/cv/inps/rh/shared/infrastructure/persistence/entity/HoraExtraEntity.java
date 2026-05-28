@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -61,7 +62,11 @@ public class HoraExtraEntity extends AuditEntity {
 
 
     @Column(name="valor_diario")
-    private Integer valorDiario;
+    private BigDecimal valorDiario;
+
+
+    @Column(name="percentagem_referente", length=50)
+    private String percentagemReferente;
 
 
     @Column(name="percentagem")

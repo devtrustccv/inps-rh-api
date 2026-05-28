@@ -411,6 +411,39 @@ public class AssiduidadeController {
   }
 
    @GetMapping(
+   value = "hora-extra/calculo-valor"
+  )
+  @Operation(
+    summary = "Calcular valor hora extra",
+    description = "Calcula o valor diário de hora extra sem gravar. Usa o procedimento RH_PROCESSAMENTO_SALARIAL_DB.CALCULO_HORA_EXTRA.",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = CalcValorHoraExtraDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<CalcValorHoraExtraDTO> getCalculoValorHoraExtra(
+    @RequestParam(value = "funcionarioUuid") String funcionarioUuid,
+    @RequestParam(value = "dataInicio") String dataInicio,
+    @RequestParam(value = "dataFim") String dataFim,
+    @RequestParam(value = "percentagemReferente") String percentagemReferente,
+    @RequestParam(value = "horasDiaria") Long horasDiaria)
+  {
+
+      final var query = new GetCalcValorHoraExtraQuery(funcionarioUuid, dataInicio, dataFim, percentagemReferente, horasDiaria);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
    value = "feria"
   )
   @Operation(

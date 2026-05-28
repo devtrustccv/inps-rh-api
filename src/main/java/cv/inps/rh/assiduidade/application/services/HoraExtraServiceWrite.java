@@ -19,12 +19,16 @@ import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.ConnectionCallback;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.CallableStatement;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -46,6 +50,7 @@ public class HoraExtraServiceWrite {
   private final DocumentoEntityRepository documentoEntityRepository;
   private final DocumentoMapper documentoMapper;
   private final OrdemServicoWriteService ordemServicoWriteService;
+  private final JdbcTemplate jdbcTemplate;
 
   @Transactional
   public Map<String, ?> marcarHoraExtra(MarcarHoraExtraCommand command) {
@@ -90,17 +95,18 @@ public class HoraExtraServiceWrite {
       var sintese = buildSinteseDia(funcionario, dto.getDataInicio(), dto.getHorasDiaria());
       sintese = sinteseRepository.save(sintese);
 
-      int valorDiario = calcularValorHoraExtra(tipoRelAtual, dto.getHorasDiaria(), dto.getPercentagemHora());
+      BigDecimal valorDiario = calcularValorHoraExtra(
+          tipoRelAtual.getId(), dto.getDataInicio(), dto.getDataFim(),
+          dto.getPercentagemReferente(), dto.getHorasDiaria());
 
-      // Cria UMA hora extra por registo do JSON
       var he = new HoraExtraEntity();
       he.setPedidoId(pedido);
       he.setTiprelId(tipoRelAtual);
       he.setSinteseDiarioId(sintese);
-      he.setDataInicio(dto.getDataInicio()); // Usa a data do DTO
-      he.setDataFim(dto.getDataFim()); // Usa a data do DTO
+      he.setDataInicio(dto.getDataInicio());
+      he.setDataFim(dto.getDataFim());
       he.setHorasDiarias(dto.getHorasDiaria());
-      he.setPercentagem(dto.getPercentagemHora());
+      he.setPercentagemReferente(dto.getPercentagemReferente());
       he.setValorDiario(valorDiario);
       he.setEstado(Estado.P);
       he.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -140,24 +146,24 @@ public class HoraExtraServiceWrite {
     return resp;
   }
 
-  private int calcularValorHoraExtra(TiposRelacionamentoEntity tipoRel, Long horasDiarias, Integer percentagem) {
-    if (percentagem == null)
-      percentagem = 100;
-    BigDecimal salarioDiario = tipoRel.getSalario() != null ? tipoRel.getSalario() : BigDecimal.ZERO;
-    BigDecimal valor = salarioDiario.multiply(BigDecimal.valueOf(horasDiarias))
-        .multiply(BigDecimal.valueOf(percentagem))
-        .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
-    return valor.intValue();
-  }
+  public BigDecimal calcularValorHoraExtra(
+      Long tiprelId, LocalDate dataInicio, LocalDate dataFim,
+      String percentagemReferente, Long horasDiaria) {
 
-  private List<LocalDate> expandirDias(LocalDate inicio, LocalDate fim) {
-    List<LocalDate> dias = new ArrayList<>();
-    LocalDate d = inicio;
-    while (!d.isAfter(fim)) {
-      dias.add(d);
-      d = d.plusDays(1);
-    }
-    return dias;
+    return jdbcTemplate.execute((ConnectionCallback<BigDecimal>) conn -> {
+      try (CallableStatement cs = conn.prepareCall(
+          "{ ? = call INPSRH.RH_PROCESSAMENTO_SALARIAL_DB.CALCULO_HORA_EXTRA(?, ?, ?, ?, ?) }")) {
+        cs.registerOutParameter(1, Types.NUMERIC);
+        cs.setLong(2, tiprelId);
+        cs.setDate(3, java.sql.Date.valueOf(dataInicio));
+        cs.setDate(4, java.sql.Date.valueOf(dataFim));
+        cs.setString(5, percentagemReferente != null ? percentagemReferente : "DIAS_UTEIS");
+        cs.setLong(6, horasDiaria != null ? horasDiaria : 0);
+        cs.execute();
+        BigDecimal result = cs.getBigDecimal(1);
+        return result != null ? result.setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+      }
+    });
   }
 
   @Transactional
@@ -201,9 +207,18 @@ public class HoraExtraServiceWrite {
       if (ajuste != null) {
         if (ajuste.getHorasDiaria() != null)
           he.setHorasDiarias(ajuste.getHorasDiaria());
-        if (ajuste.getPercentagemHora() != null)
+        if (ajuste.getPercentagemReferente() != null)
+          he.setPercentagemReferente(ajuste.getPercentagemReferente());
 
-          if (ajuste.getDocumento() != null) {
+        // Recalcula valor se houve ajuste de horas ou percentagem
+        if (ajuste.getHorasDiaria() != null || ajuste.getPercentagemReferente() != null) {
+          BigDecimal novoValor = calcularValorHoraExtra(
+              he.getTiprelId().getId(), he.getDataInicio(), he.getDataFim(),
+              he.getPercentagemReferente(), he.getHorasDiarias());
+          he.setValorDiario(novoValor);
+        }
+
+        if (ajuste.getDocumento() != null) {
             var docsHe = documentoEntityRepository
                 .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_HORA_EXTRA.name(), he.getUuid());
 
