@@ -229,6 +229,7 @@ public class DispensaWriteService {
       if (paramsDispensa != null && !paramsDispensa.isEmpty()) {
         ParamSituacaoEntity param = paramsDispensa.getFirst();
         var ausencia = new AusenciaEntity();
+        ausencia.setFunId(funcionario);
         ausencia.setParamSitId(param);
         ausencia.setReferenciaName(TableName.RH_T_DISPENSA.name());
         ausencia.setReferenciaId(dispensa.getId());
@@ -337,9 +338,9 @@ public class DispensaWriteService {
     pedido.setEstado(Estado.P.name());
     pedidoRepository.save(pedido);
 
-    // Validação
+    // Registo de UPDATE — editar cria UPDATE (não um novo INSERT) para não duplicar a validação pendente
     var validacao = dadosContratuaisMapper.toValidacaoInsert(
-        TipoAcao.INSERT.name(),
+        TipoAcao.UPDATE.name(),
         Referencia.DISPENSA.name(),
         Estado.P
     );
