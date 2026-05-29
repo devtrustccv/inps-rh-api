@@ -101,6 +101,7 @@ public class JustificarFaltaWriteService {
     pedido.setFunId(funcionario);
     pedido.setTipoPedido("JUSTIFICACAO_FALTA");
     pedido.setOrigem("RH");
+    pedido.setEtapa("DESPACHO_RH");
     pedido.setEstado(Estado.P.name());
     pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
     pedido = pedidoRepository.save(pedido);
