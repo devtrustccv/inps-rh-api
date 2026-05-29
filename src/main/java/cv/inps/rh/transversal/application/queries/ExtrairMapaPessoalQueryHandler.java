@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -37,7 +38,10 @@ public class ExtrairMapaPessoalQueryHandler implements QueryHandler<ExtrairMapaP
     public ResponseEntity<?> handle(ExtrairMapaPessoalQuery query) {
         LOGGER.debug("ExtrairMapaPessoalQuery: {}", query);
 
-        List<RhVMapaPessoalEntity> rows = repository.findAll();
+        List<RhVMapaPessoalEntity> rows = repository.findAll()
+            .stream()
+            .filter(Objects::nonNull)
+            .toList();
 
         String logoPath = Optional.ofNullable(getClass().getResource("/static/img/inps_logo.png"))
             .map(URL::toExternalForm)
