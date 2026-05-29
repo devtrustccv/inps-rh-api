@@ -35,8 +35,6 @@ public interface ValidacaoEntityRepository extends
 
   Optional<ValidacaoEntity> findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(UUID funIdUuid, Estado estado, String tipoAccao, String referenciaName);
 
-  Optional<ValidacaoEntity> findFirstByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaNameOrderByIdDesc(UUID funIdUuid, Estado estado, String tipoAccao, String referenciaName);
-
   Optional<ValidacaoEntity>
   findByTiprelIdAndEstadoAndTipoAccaoAndReferenciaName(TiposRelacionamentoEntity tiposRelacionamento, Estado estado, String tipoAccao, String referenciaName);
 
