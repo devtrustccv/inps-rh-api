@@ -1,0 +1,24 @@
+{
+  "type": "model",
+  "module": "shared",
+  "name": "RhVMapaPessoalEntity",
+  "tableName": "RH_V_MAPA_PESSOAL",
+  "audit": false,
+  "crud": false,
+  "revision": false,
+  "readOnly": true,
+  "attributes": [
+    {
+      "name": "fun_id",
+      "type": "long",
+      "nullable": true,
+      "unique": false,
+      "primaryKey": true,
+      "generationType": "NONE",
+      "skipFieldRevision": false,
+      "objectType": "java"
+    }
+  ],
+  "uniqueConstraints": [],
+  "indexes": []
+}
