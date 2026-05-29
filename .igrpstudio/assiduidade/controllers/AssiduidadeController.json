@@ -1350,6 +1350,31 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "exportarDireitoFerias",
+      "path": "feria/exportar-direito",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {}
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "anoReferente",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "direcaoId",
+          "isRequired": false
+        }
+      ]
     }
   ],
   "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa-validarHoraExtra-getHoraExtra-getDetalheMapaFeria-verMapa-getDetalheMapaFeria-getPedidoFeria-alterarPedidoFeria-validarPedidoFeria-getListaFalta-getListaHoraExtra-getListaMovimentosResumidos-getListaPicagem"

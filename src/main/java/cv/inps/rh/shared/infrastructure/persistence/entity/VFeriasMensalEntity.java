@@ -49,12 +49,20 @@ public class VFeriasMensalEntity  {
     private String nomeColaborador;
 
 
+    @Column(name="id_colaborador")
+    private String idColaborador;
+
+
     @Column(name="direcao_id")
     private Long direcaoId;
 
 
     @Column(name="direcao")
     private String direcao;
+
+
+    @Column(name="codigo_direcao")
+    private String codigoDirecao;
 
 
     @Column(name="secao_id")

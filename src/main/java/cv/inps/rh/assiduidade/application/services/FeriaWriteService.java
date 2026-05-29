@@ -262,6 +262,14 @@ public class FeriaWriteService {
 
     feriasGozadasRepository.save(ferias);
 
+    // F4: Inactivar ausência anterior ligada a estas férias (quando as datas mudam)
+    var ausenciasAnteriores = ausenciaRepository
+        .findAllByReferenciaNameAndReferenciaId("RH_T_FERIAS_GOZADAS", ferias.getId());
+    if (!ausenciasAnteriores.isEmpty()) {
+      ausenciasAnteriores.forEach(a -> a.setEstado(Estado.I));
+      ausenciaRepository.saveAll(ausenciasAnteriores);
+    }
+
     // 3. Pedido também volta a pendente
     pedido.setEstado(Estado.P.name());
     pedido.setEtapa("DESPACHO_RH");

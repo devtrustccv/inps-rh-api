@@ -1052,4 +1052,19 @@ public class AssiduidadeController {
     return commandBus.send(command);
   }
 
+  @GetMapping(value = "feria/exportar-direito", produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+  @Operation(
+    summary = "Exportar direito ferias",
+    description = "Gera ficheiro Excel com os direitos de férias por colaborador e direção. Colunas: CODIGO_DIRECAO, NOME_DIRECAO, ID_COLABORADOR, NOME_COLABORADOR, TOTAL_DIREITO, TOTAL_DIREITO_ANO.",
+    responses = {
+      @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+    }
+  )
+  public ResponseEntity<byte[]> exportarDireitoFerias(
+    @RequestParam(value = "anoReferente", required = false) Integer anoReferente,
+    @RequestParam(value = "direcaoId", required = false) Long direcaoId) {
+
+    return queryBus.handle(new GetExportDireitoFeriasQuery(anoReferente, direcaoId));
+  }
+
 }
