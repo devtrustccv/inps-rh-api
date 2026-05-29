@@ -124,15 +124,9 @@ public class FeriaWriteService {
 
     var validacao = buildValidacao(funcionario, tipoRelAtual, TipoAcao.INSERT.name(), Referencia.FERIA.name(),
         Estado.P);
-    funcionario.getValidacoes().add(validacao);
-    funcionarioRepository.saveAndFlush(funcionario);
-
-    var finalPedido = pedido;
-    validacaoEntityRepository.findById(validacao.getId()).ifPresent(v -> {
-      v.setReferenciaId(finalPedido.getId());
-      v.setReferenciaUuid(finalPedido.getUuid());
-      validacaoEntityRepository.save(v);
-    });
+    validacao.setReferenciaId(pedido.getId());
+    validacao.setReferenciaUuid(pedido.getUuid());
+    validacaoEntityRepository.save(validacao);
 
     saveDocuments(req.getDocumentos(), funcionario, pedido);
 
@@ -150,16 +144,16 @@ public class FeriaWriteService {
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador de pedido ferias é obrigatório");
 
-    var saldoFeria = saldoFeriaService.getSaldo(req.getColaborador());
-
-    if (req.getNumDias() > saldoFeria)
-      throw IgrpResponseStatusException.badRequest("Funcionario não tem saldo de ferias suficiente");
-
     var ferias = feriasGozadasRepository.findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
             "Ferias Gozadas not found for id: " + command.getPedidoId()));
 
     var funcionario = ferias.getFunId();
+
+    // Verificar saldo usando funcionario das ferias (colaborador pode não vir no request de validação)
+    var saldoFeria = saldoFeriaService.getSaldo(funcionario.getUuid());
+    if (req.getNumDias() != null && req.getNumDias() > saldoFeria)
+      throw IgrpResponseStatusException.badRequest("Funcionario não tem saldo de ferias suficiente");
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
