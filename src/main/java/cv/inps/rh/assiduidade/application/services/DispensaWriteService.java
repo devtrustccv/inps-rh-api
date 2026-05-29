@@ -94,6 +94,9 @@ public class DispensaWriteService {
     disp.setData(req.getDataDispensa());
     disp.setHoraInicio(TimeUtils.hhmmToIntervalFormat(req.getHoraSaida()));
     disp.setHoraFim(TimeUtils.hhmmToIntervalFormat(req.getHoraEntrada()));
+    disp.setTotalHora(TimeUtils.diffMinutes(
+        TimeUtils.hhmmToIntervalFormat(req.getHoraSaida()),
+        TimeUtils.hhmmToIntervalFormat(req.getHoraEntrada())));
     disp.setResponsavelId(responsavel != null ? responsavel.getId() : null);
     disp.setEstado(Estado.P);
     disp.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -146,7 +149,16 @@ public class DispensaWriteService {
             "Dispensa não encontrada para esse pedido",
             command.getPedidoId()));
 
-    var dispensaStatus = dispensaHorasService.getHorasStatus(req.getColaborador(), dispensa.getData());
+    var pedido = dispensa.getPedidoId();
+    if (pedido == null)
+      throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
+
+    var funcionario = pedido.getFunId();
+    if (funcionario == null)
+      throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
+
+    // Usar funcionario do pedido (não do request — pode não vir preenchido na validação)
+    var dispensaStatus = dispensaHorasService.getHorasStatus(funcionario.getUuid(), dispensa.getData());
     var horasDisponiveis = TimeUtils.hhmmToMinutes(dispensaStatus.getHorasDisponiveis());
     var horasUsadas= TimeUtils.hhmmToMinutes(dispensaStatus.getHorasUsadas());
 
@@ -156,19 +168,12 @@ public class DispensaWriteService {
       );
     }
 
-    var pedido = dispensa.getPedidoId();
-    if (pedido == null)
-      throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
-
-    var funcionario = pedido.getFunId();
-    if (funcionario == null)
-      throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
-
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
     var estado = ev.equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
     ResponsavelEntity responsavel = null;
+
     if (req.getResponsavel()!=null) {
       responsavel = responsavelEntityRepository.findByFunId_Uuid(req.getResponsavel()).orElseThrow(
           () -> IgrpResponseStatusException.notFound("Responsável não encontrado para o funcionário " + req.getResponsavel()));
@@ -179,6 +184,7 @@ public class DispensaWriteService {
     dispensa.setDecisaoResponsavel(req.getParecerResponsavel());
     dispensa.setObsResponsavel(req.getObservacaoResponsavel());
     dispensa.setObsRh(req.getObservacaoRh());
+    dispensa.setDecisaoRh(req.getValidar()); // SIM ou NAO — spec: RH_T_DISPENSA.DECISAO_RH
     dispensa.setEstado(estado);
     dispensa.setResponsavelId(responsavel != null ? responsavel.getId() : null);
     dispensa.setTiprelId(tipoRelAtual);
@@ -305,6 +311,9 @@ public class DispensaWriteService {
     if (StringUtils.hasText(req.getHoraSaida())) dispensa.setHoraInicio(TimeUtils.hhmmToIntervalFormat(req.getHoraSaida()));
     if (StringUtils.hasText(req.getHoraEntrada())) dispensa.setHoraFim(TimeUtils.hhmmToIntervalFormat(req.getHoraEntrada()));
     if (StringUtils.hasText(req.getMotivo())) dispensa.setDescricaoMotivo(req.getMotivo());
+    // Recalcular TOTAL_HORA se horas foram alteradas
+    if (dispensa.getHoraInicio() != null && dispensa.getHoraFim() != null)
+      dispensa.setTotalHora(TimeUtils.diffMinutes(dispensa.getHoraInicio(), dispensa.getHoraFim()));
 
     dispensaRepository.save(dispensa);
 
@@ -336,15 +345,6 @@ public class DispensaWriteService {
     );
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRelAtual);
-    validacaoEntityRepository.save(validacao); // salva para gerar ID
-
-    if (funcionario.getValidacoes() == null)
-      funcionario.setValidacoes(new ArrayList<>());
-     funcionario.getValidacoes().add(validacao);
-
-    funcionarioRepository.saveAndFlush(funcionario);
-
-    // Atualizar referencia na validação
     validacao.setReferenciaId(pedido.getId());
     validacao.setReferenciaUuid(pedido.getUuid());
     validacaoEntityRepository.save(validacao);
