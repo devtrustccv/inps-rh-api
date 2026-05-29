@@ -26,7 +26,7 @@ public interface FeriasEntityRepository extends
 
   Optional<FeriasEntity> findByFunId_UuidAndAnoId(UUID funIdUuid, AnoEntity anoId);
 
-    @Query("SELECT SUM(f.numDia) FROM FeriasEntity f WHERE f.funId.uuid = :funcionarioId")
+    @Query("SELECT COALESCE(SUM(f.numDia), 0) FROM FeriasEntity f WHERE f.funId.uuid = :funcionarioId")
     Integer sumNumDiaByFuncionarioId(@Param("funcionarioId") UUID funcionarioId);
 
 }

@@ -28,7 +28,7 @@ import java.util.UUID;
 public class VMapaFeriasDetalheEntity  {
 
     @Id
-    @Column(name = "id", unique = true, nullable = false)
+    @Column(name = "ferias_id", unique = true, nullable = false)
     private Long id;
 
 
