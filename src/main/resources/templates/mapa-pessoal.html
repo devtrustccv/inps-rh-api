@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xml:lang="pt">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Mapa do Pessoal</title>
+    <style type="text/css">
+
+        @page {
+            size: A4 landscape;
+            margin-top: 10mm;
+            margin-bottom: 10mm;
+            margin-left: 8mm;
+            margin-right: 8mm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 6.5pt;
+            color: #000000;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .header-logo {
+            width: 60pt;
+            vertical-align: middle;
+            text-align: left;
+        }
+
+        .header-logo img {
+            width: 55pt;
+            height: 45pt;
+        }
+
+        .header-title {
+            text-align: center;
+            vertical-align: middle;
+            padding-left: 10pt;
+            padding-right: 10pt;
+        }
+
+        .title-main {
+            font-size: 10pt;
+            font-weight: bold;
+        }
+
+        .title-sub {
+            font-size: 9pt;
+            font-weight: bold;
+        }
+
+        .header-date {
+            text-align: right;
+            vertical-align: top;
+            font-size: 8pt;
+            width: 90pt;
+        }
+
+        .main-table {
+            margin-top: 6pt;
+        }
+
+        .main-table th {
+            background-color: #003366;
+            color: #ffffff;
+            font-size: 5.5pt;
+            font-weight: bold;
+            text-align: center;
+            padding-top: 3pt;
+            padding-bottom: 3pt;
+            padding-left: 2pt;
+            padding-right: 2pt;
+            border: 0.5pt solid #aaaaaa;
+        }
+
+        .main-table td {
+            font-size: 5.5pt;
+            padding-top: 2pt;
+            padding-bottom: 2pt;
+            padding-left: 2pt;
+            padding-right: 2pt;
+            border: 0.5pt solid #cccccc;
+            vertical-align: middle;
+        }
+
+        .row-odd  { background-color: #eef3ff; }
+        .row-even { background-color: #ffffff; }
+
+        .text-center { text-align: center; }
+        .text-right  { text-align: right; }
+
+        .no-data {
+            text-align: center;
+            padding-top: 12pt;
+            padding-bottom: 12pt;
+            color: #888888;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- CABEÇALHO -->
+    <table>
+        <tr>
+            <td class="header-logo">
+                <img th:src="${logoPath}" alt="INPS" />
+            </td>
+            <td class="header-title">
+                <div class="title-main">Instituto Nacional de Previdência Social</div>
+                <div class="title-sub">Mapa do Pessoal</div>
+            </td>
+            <td class="header-date">
+                Data de emissão:<br />
+                <strong th:text="${dataEmissao}">01/01/2025</strong>
+            </td>
+        </tr>
+    </table>
+
+    <!-- TABELA MAPA DO PESSOAL -->
+    <table class="main-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>COLABORADOR</th>
+                <th>ESTADO</th>
+                <th>GÉNERO</th>
+                <th>DIREÇÃO</th>
+                <th>SEÇÃO</th>
+                <th>LOCAL</th>
+                <th>CARREIRA</th>
+                <th>DATA NASC.</th>
+                <th>IDADE</th>
+                <th>DATA ENTRADA</th>
+                <th>ANOS INPS</th>
+                <th>CARGO</th>
+                <th>ESC. ATUAL</th>
+                <th>SAL. ATUAL</th>
+                <th>ESC. CAT.</th>
+                <th>SAL. CAT.</th>
+                <th>SAL. FUNÇÃO</th>
+                <th>VÍNCULO</th>
+                <th>HABILITAÇÕES</th>
+                <th>CURSO</th>
+                <th>EMAIL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:if="${rows == null or rows.isEmpty()}">
+                <td colspan="22" class="no-data">Sem registos para apresentar.</td>
+            </tr>
+            <tr th:each="row, rowStat : ${rows}"
+                th:class="${rowStat.odd} ? 'row-odd' : 'row-even'">
+                <td class="text-center" th:text="${row.funId}"></td>
+                <td th:text="${row.nome}"></td>
+                <td class="text-center" th:text="${row.estado}"></td>
+                <td class="text-center" th:text="${row.genero}"></td>
+                <td th:text="${row.direcao}"></td>
+                <td th:text="${row.seccao}"></td>
+                <td th:text="${row.local}"></td>
+                <td th:text="${row.carreira}"></td>
+                <td class="text-center"
+                    th:text="${row.dataNascimento != null ? #temporals.format(row.dataNascimento, 'dd/MM/yyyy') : ''}"></td>
+                <td class="text-center" th:text="${row.idade}"></td>
+                <td class="text-center"
+                    th:text="${row.dataEntrada != null ? #temporals.format(row.dataEntrada, 'dd/MM/yyyy') : ''}"></td>
+                <td class="text-center" th:text="${row.anosInps}"></td>
+                <td th:text="${row.cargo}"></td>
+                <td class="text-center" th:text="${row.escalaoActual}"></td>
+                <td class="text-right"
+                    th:text="${row.salarioAtual != null ? #numbers.formatDecimal(row.salarioAtual, 1, 'POINT', 2, 'COMMA') : ''}"></td>
+                <td class="text-center" th:text="${row.escalaoCategoria}"></td>
+                <td class="text-right"
+                    th:text="${row.salarioCategoria != null ? #numbers.formatDecimal(row.salarioCategoria, 1, 'POINT', 2, 'COMMA') : ''}"></td>
+                <td class="text-right"
+                    th:text="${row.salarioFuncao != null ? #numbers.formatDecimal(row.salarioFuncao, 1, 'POINT', 2, 'COMMA') : ''}"></td>
+                <td th:text="${row.vinculoLaboral}"></td>
+                <td th:text="${row.habilitacaoLiteraria}"></td>
+                <td th:text="${row.curso}"></td>
+                <td th:text="${row.email}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>

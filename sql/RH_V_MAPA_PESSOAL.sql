@@ -1,0 +1,34 @@
+-- ============================================================
+-- VIEW: RH_V_MAPA_PESSOAL
+-- Descrição: Mapa do Pessoal — stub com estrutura de colunas.
+-- Fonte: Especificação Tecnica Funcional - TRANSVERSAL, §2.1.1 Mapa do Pessoal
+--
+-- ATENÇÃO: Esta view retorna zero linhas (FROM DUAL).
+-- Substituir o SELECT por uma query real quando o mapeamento
+-- de dados estiver concluído.
+-- ============================================================
+CREATE OR REPLACE VIEW RH_V_MAPA_PESSOAL AS
+SELECT
+    CAST(NULL AS NUMBER)        AS FUN_ID,
+    CAST(NULL AS VARCHAR2(255)) AS NOME,
+    CAST(NULL AS VARCHAR2(1))   AS ESTADO,
+    CAST(NULL AS VARCHAR2(1))   AS GENERO,
+    CAST(NULL AS VARCHAR2(200)) AS DIRECAO,
+    CAST(NULL AS VARCHAR2(200)) AS SECCAO,
+    CAST(NULL AS VARCHAR2(200)) AS LOCAL,
+    CAST(NULL AS VARCHAR2(200)) AS CARREIRA,
+    CAST(NULL AS DATE)          AS DATA_NASCIMENTO,
+    CAST(NULL AS NUMBER)        AS IDADE,
+    CAST(NULL AS DATE)          AS DATA_ENTRADA,
+    CAST(NULL AS NUMBER)        AS ANOS_INPS,
+    CAST(NULL AS VARCHAR2(200)) AS CARGO,
+    CAST(NULL AS VARCHAR2(100)) AS ESCALAO_ACTUAL,
+    CAST(NULL AS NUMBER(15,2))  AS SALARIO_ATUAL,
+    CAST(NULL AS VARCHAR2(100)) AS ESCALAO_CATEGORIA,
+    CAST(NULL AS NUMBER(15,2))  AS SALARIO_CATEGORIA,
+    CAST(NULL AS NUMBER(15,2))  AS SALARIO_FUNCAO,
+    CAST(NULL AS VARCHAR2(200)) AS VINCULO_LABORAL,
+    CAST(NULL AS VARCHAR2(200)) AS HABILITACAO_LITERARIA,
+    CAST(NULL AS VARCHAR2(200)) AS CURSO,
+    CAST(NULL AS VARCHAR2(255)) AS EMAIL
+FROM DUAL;

@@ -11,6 +11,7 @@ import cv.inps.rh.transversal.application.dto.AssiduidadeListDTO;
 import cv.inps.rh.transversal.application.dto.DossierRequestDTO;
 import cv.inps.rh.transversal.application.dto.DossierResponseDTO;
 import cv.inps.rh.transversal.application.queries.ExtrairFichaEfetividadeQuery;
+import cv.inps.rh.transversal.application.queries.ExtrairMapaPessoalQuery;
 import cv.inps.rh.transversal.application.queries.RelatorioAssiduidadeQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -103,6 +104,32 @@ public class RelatorioController {
 
       return commandBus.send(command);
 
+  }
+
+   @GetMapping(
+   value = "mapa-pessoal"
+  )
+  @Operation(
+    summary = "Extrair Mapa do Pessoal",
+    description = "Gera o relatório PDF Mapa do Pessoal",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          content = @Content(
+              mediaType = "application/pdf",
+              schema = @Schema(implementation = byte[].class, type = "byte[]")
+          )
+      )
+    }
+  )
+  public ResponseEntity<?> extrairMapaPessoal(
+    @RequestParam(value = "direcaoId", required = false) Long direcaoId,
+    @RequestParam(value = "seccaoId", required = false) Long seccaoId,
+    @RequestParam(value = "colaborador", required = false) String colaborador,
+    @RequestParam(value = "estado", required = false) String estado)
+  {
+      final var query = new ExtrairMapaPessoalQuery(direcaoId, seccaoId, colaborador, estado);
+      return queryBus.handle(query);
   }
 
    @GetMapping(
