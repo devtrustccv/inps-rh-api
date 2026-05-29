@@ -19,6 +19,7 @@ import cv.inps.rh.shared.domain.service.NotificacaoDispatchService;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.TimeUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -57,6 +58,7 @@ public class JustificarFaltaWriteService {
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
   private final FeriasGozadasEntityRepository feriasGozadasRepository;
   private final AnoEntityRepository anoRepository;
+  private final DispensaEntityRepository dispensaEntityRepository;
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final NotificacaoDispatchService notificacaoDispatchService;
 
@@ -89,7 +91,8 @@ public class JustificarFaltaWriteService {
 
     // Buscar ParamSituação (obrigatório)
     var paramSituacao = paramSituacaoEntityRepository.findByIdOrThrow(dto.getTipoJustificacao());
-    if (!"1".equalsIgnoreCase(paramSituacao.getTipoAusencia())) {
+    // tipoFalta não nulo indica que este paramSituacao é válido para justificação de falta
+    if (paramSituacao.getTipoFalta() == null) {
       throw IgrpResponseStatusException.badRequest("Tipo justificativo não permitido para falta");
     }
 
@@ -308,6 +311,23 @@ public class JustificarFaltaWriteService {
         feriasGozadas.setEstado(Estado.A);
         feriasGozadas.setUuid(UuidCreator.getTimeOrderedEpoch());
         feriasGozadasRepository.save(feriasGozadas);
+      }
+
+      // desconto dispensa — spec: "caso desconto nas horas de Dispensa → Regista na RH_T_DISPENSA"
+      if (Objects.equals(estadoFinal, Estado.A) && falta.getParamSitId() != null &&
+          Objects.equals(falta.getParamSitId().getFlgAusencia(), 1) &&
+          Objects.equals(falta.getParamSitId().getTipoAusencia(), "DISPENSA")) {
+
+        var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+        var disp = new DispensaEntity();
+        disp.setPedidoId(pedido);
+        disp.setTiprelId(tipoRel);
+        disp.setData(falta.getDataInicio().toLocalDate());
+        disp.setHoraInicio("+0 00:00:00");
+        disp.setHoraFim(falta.getHorasAusencia() != null ? falta.getHorasAusencia() : "+0 00:00:00");
+        disp.setEstado(Estado.A);
+        disp.setUuid(UuidCreator.getTimeOrderedEpoch());
+        dispensaEntityRepository.save(disp);
       }
     }
 
