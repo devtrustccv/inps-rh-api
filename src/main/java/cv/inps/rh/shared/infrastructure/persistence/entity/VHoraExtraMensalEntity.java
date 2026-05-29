@@ -122,6 +122,10 @@ public class VHoraExtraMensalEntity  {
     private Integer percentagem;
 
 
+    @Column(name="percentagem_referente")
+    private String percentagemReferente;
+
+
     @Column(name="pedido_id")
     private Long pedidoId;
 
