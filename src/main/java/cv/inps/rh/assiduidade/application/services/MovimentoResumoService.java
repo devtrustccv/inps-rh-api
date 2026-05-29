@@ -42,7 +42,7 @@ public class MovimentoResumoService {
       AssiduidadeListDTO dto = new AssiduidadeListDTO();
       dto.setId(entity.getId());
       dto.setUuid(entity.getFuncionarioUuid());
-      dto.setUuidFuncionairio(entity.getFuncionarioUuid());
+      dto.setUuidFuncionario(entity.getFuncionarioUuid());
       dto.setNomeColaborador(entity.getNomeFuncionario());
       dto.setDirecao(entity.getNomeDirecao());
       dto.setTotalDias(entity.getTotalDias());

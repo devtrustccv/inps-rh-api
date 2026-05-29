@@ -30,7 +30,7 @@
       "primaryKey": false
     },
     {
-      "name": "uuidFuncionairio",
+      "name": "uuidFuncionario",
       "objectType": "java",
       "type": "uuid",
       "required": false,
