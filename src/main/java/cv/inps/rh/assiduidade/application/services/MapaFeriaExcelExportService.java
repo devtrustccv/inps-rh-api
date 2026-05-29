@@ -1,5 +1,6 @@
 package cv.inps.rh.assiduidade.application.services;
 
+import cv.inps.rh.assiduidade.application.queries.GetDetalheMapaFeriaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetExportarMapaFeriaQuery;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
@@ -18,7 +19,8 @@ public class MapaFeriaExcelExportService {
 
     @Transactional(readOnly = true)
     public byte[] exportarMapaFeria(GetExportarMapaFeriaQuery query) {
-        var detalhe = mapaFeriaReadService.getDetalheMapaFeria(query);
+        var detalhe = mapaFeriaReadService.getDetalheMapaFeria(
+            new GetDetalheMapaFeriaQuery(query.getAno(), query.getDirecao()));
 
         try (Workbook wb = new XSSFWorkbook();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -39,7 +41,7 @@ public class MapaFeriaExcelExportService {
                 Row row = sheetAgendadas.createRow(rowIdx++);
                 row.createCell(0).setCellValue(item.getNomeColaborador() != null ? item.getNomeColaborador() : "");
                 row.createCell(1).setCellValue(item.getTotalDireito() != null ? item.getTotalDireito() : 0);
-                row.createCell(2).setCellValue(item.getTotalDireitoAno() != null ? item.getTotalDireitoAno() : 0);
+                row.createCell(2).setCellValue(item.getTotalDireitoPorAno() != null ? item.getTotalDireitoPorAno() : 0);
                 row.createCell(3).setCellValue(item.getDataInicio() != null ? item.getDataInicio().toString() : "");
                 row.createCell(4).setCellValue(item.getDataFim() != null ? item.getDataFim().toString() : "");
             }
@@ -59,7 +61,7 @@ public class MapaFeriaExcelExportService {
                 Row row = sheetPorAgendar.createRow(rowIdx++);
                 row.createCell(0).setCellValue(item.getNomeColaborador() != null ? item.getNomeColaborador() : "");
                 row.createCell(1).setCellValue(item.getTotalDireito() != null ? item.getTotalDireito() : 0);
-                row.createCell(2).setCellValue(item.getTotalDireitoAno() != null ? item.getTotalDireitoAno() : 0);
+                row.createCell(2).setCellValue(item.getTotalDireitoPorAno() != null ? item.getTotalDireitoPorAno() : 0);
             }
             for (int i = 0; i < colsPorAgendar.length; i++) sheetPorAgendar.autoSizeColumn(i);
 
