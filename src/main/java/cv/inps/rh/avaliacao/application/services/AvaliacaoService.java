@@ -317,6 +317,8 @@ public class AvaliacaoService {
 
     dto.getObjectivos().forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
+      if (p == null) throw IgrpResponseStatusException.badRequest(
+          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
       var e = new AvaliacaoObjectivoEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
@@ -333,6 +335,8 @@ public class AvaliacaoService {
 
     dto.getCompetenciasComportamentais().forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
+      if (p == null) throw IgrpResponseStatusException.badRequest(
+          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
       var e = new AvaliacaoCompetenciaEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
@@ -349,6 +353,8 @@ public class AvaliacaoService {
 
     dto.getCompetenciasTecnicas().forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
+      if (p == null) throw IgrpResponseStatusException.badRequest(
+          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
       var e = new AvaliacaoCompetenciaEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
@@ -365,6 +371,8 @@ public class AvaliacaoService {
 
     dto.getAtitudesPessoais().forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
+      if (p == null) throw IgrpResponseStatusException.badRequest(
+          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
       var e = new AvaliacaoAtitudePessoalEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
