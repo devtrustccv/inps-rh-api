@@ -73,8 +73,18 @@ public class FeriaWriteService {
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
 
+    boolean temSubstituicao = req.getSubstituidoPor() != null;
+
+    // Regra: substituição só permitida para férias >= 15 dias
+    if (temSubstituicao && req.getNumDias() != null && req.getNumDias() < 15)
+      throw IgrpResponseStatusException.badRequest("Substituição só aplicável a férias com duração igual ou superior a 15 dias");
+
+    // Regra: substituição só permitida se colaborador ocupa um cargo (cargoId != null)
+    if (temSubstituicao && tipoRelAtual.getCargoId() == null)
+      throw IgrpResponseStatusException.badRequest("Substituição não aplicável: colaborador não ocupa nenhum cargo");
+
     TiposRelacionamentoEntity tipoRelAtualFuncSubstituto = null;
-    if(req.getSubstituidoPor()!=null) {
+    if (temSubstituicao) {
       var funcionarioSubstituto = funcionarioRepository.findByUuidOrThrow(req.getSubstituidoPor());
       tipoRelAtualFuncSubstituto = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid());
       var s = new SubstituicaoEntity();
@@ -91,8 +101,9 @@ public class FeriaWriteService {
     pedido.setFunId(funcionario);
     pedido.setTipoPedido("FERIA");
     pedido.setOrigem("ASSIDUIDADE");
-    pedido.setEtapa("DESPACHO_RH");
-    pedido.setEstado(Estado.P.name());
+    // Regra: só vai para validação (DESPACHO_RH) se tiver substituição
+    pedido.setEtapa(temSubstituicao ? "DESPACHO_RH" : "FINALIZADO");
+    pedido.setEstado(temSubstituicao ? Estado.P.name() : Estado.A.name());
     pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
     pedido = pedidoRepository.save(pedido);
 
@@ -119,14 +130,20 @@ public class FeriaWriteService {
       ferias.setResponsavelId(responsavel.getId());
     }
 
+    // Férias sem substituição ficam directamente activas
+    ferias.setEstado(temSubstituicao ? Estado.P : Estado.A);
     ferias = feriasGozadasRepository.save(ferias);
 
-
-    var validacao = buildValidacao(funcionario, tipoRelAtual, TipoAcao.INSERT.name(), Referencia.FERIA.name(),
-        Estado.P);
-    validacao.setReferenciaId(pedido.getId());
-    validacao.setReferenciaUuid(pedido.getUuid());
-    validacaoEntityRepository.save(validacao);
+    // Regra: validação RH só necessária quando há substituição (implica salário)
+    if (temSubstituicao) {
+      var validacao = buildValidacao(funcionario, tipoRelAtual, TipoAcao.INSERT.name(), Referencia.FERIA.name(), Estado.P);
+      validacao.setReferenciaId(pedido.getId());
+      validacao.setReferenciaUuid(pedido.getUuid());
+      validacaoEntityRepository.save(validacao);
+    } else {
+      // Sem substituição: criar ausência directamente (já aprovado)
+      criarAusenciaNaValidacao(ferias);
+    }
 
     saveDocuments(req.getDocumentos(), funcionario, pedido);
 
