@@ -486,15 +486,16 @@ public class AvaliacaoService {
   }
 
   private String resolveEstadoGrupo(List<AvaliacaoEntity> list) {
+    // Ano completo: 2º semestre concluído (C) — independente do estado do 1º
+    boolean sem2Concluido = list.stream()
+        .anyMatch(a -> "2".equals(a.getSemestre()) && "C".equalsIgnoreCase(a.getEstado()));
+    if (sem2Concluido)
+      return "C";
+
+    // Parcial: 1º semestre avaliado mas sem 2º semestre concluído
     boolean anyP = list.stream().anyMatch(a -> "P".equalsIgnoreCase(a.getEstado()));
     if (anyP)
       return "P";
-
-    boolean has1 = list.stream().anyMatch(a -> "1".equals(a.getSemestre()));
-    boolean has2 = list.stream().anyMatch(a -> "2".equals(a.getSemestre()));
-    boolean allC = list.stream().allMatch(a -> "C".equalsIgnoreCase(a.getEstado()));
-    if (has1 && has2 && allC)
-      return "C";
 
     return "A";
   }

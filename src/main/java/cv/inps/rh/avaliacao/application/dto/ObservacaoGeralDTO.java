@@ -31,6 +31,6 @@ public class ObservacaoGeralDTO  {
   private String horaInicio ;
 
 
-  private String HoraFim ;
+  private String horaFim ;
 
 }
