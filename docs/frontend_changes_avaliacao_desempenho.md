@@ -121,7 +121,30 @@ O script encontra-se em `src/main/resources/db/migration/V3__avd_atitude_pessoal
 
 ---
 
-## 6. Resumo das alterações por endpoint
+## 6. Correcção crítica — campo `horaFim` no `ObservacaoGeralDTO`
+
+**Endpoint afectado:** `PUT /avaliacao-desempenho/avaliacoes/processos-avaliacao/{uuid}/observacao-geral`
+
+| Campo | Antes (errado) | Depois (correcto) |
+|---|---|---|
+| Hora de fim da entrevista | `"HoraFim"` (H maiúsculo) | `"horaFim"` (h minúsculo) |
+
+Se o frontend enviava `"HoraFim"` com H maiúsculo, o campo era ignorado e ficava `null` na BD. **O campo correcto é `"horaFim"`** (camelCase standard).
+
+```json
+// ✅ Correcto
+{
+  "observacaoGeralAvaliacao": "...",
+  "descPlanoDesenvolvimento": "...",
+  "dataInicio": "2026-06-15",
+  "horaInicio": "09:00",
+  "horaFim": "10:30"
+}
+```
+
+---
+
+## 7. Resumo das alterações por endpoint
 
 | Endpoint | Alteração |
 |---|---|

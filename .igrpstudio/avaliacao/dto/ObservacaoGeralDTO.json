@@ -54,7 +54,7 @@
       "primaryKey": false
     },
     {
-      "name": "HoraFim",
+      "name": "horaFim",
       "objectType": "java",
       "type": "string",
       "required": false,
