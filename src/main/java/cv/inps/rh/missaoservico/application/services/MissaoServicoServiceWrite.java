@@ -681,7 +681,8 @@ public class MissaoServicoServiceWrite {
       for (var colabUuid : bilhete.getColaboradorIds()) {
         if (colabUuid == null)
           continue;
-        colabs.add(missaoColaboradorRepository.findByUuidOrThrow(colabUuid));
+        colabs.add(missaoColaboradorRepository.findByMissaoServId_UuidAndFunId_Uuid(missao.getUuid(), colabUuid)
+            .orElseThrow(() -> IgrpResponseStatusException.badRequest("Colaborador inválido: " + colabUuid)));
       }
       if (colabs.isEmpty()) {
         throw IgrpResponseStatusException.badRequest("colaboradorIds inválido");
@@ -730,7 +731,8 @@ public class MissaoServicoServiceWrite {
       for (var colabUuid : seguro.getColaboradorIds()) {
         if (colabUuid == null)
           continue;
-        colabs.add(missaoColaboradorRepository.findByUuidOrThrow(colabUuid));
+        colabs.add(missaoColaboradorRepository.findByMissaoServId_UuidAndFunId_Uuid(missao.getUuid(), colabUuid)
+            .orElseThrow(() -> IgrpResponseStatusException.badRequest("Colaborador inválido: " + colabUuid)));
       }
       if (colabs.isEmpty()) {
         throw IgrpResponseStatusException.badRequest("colaboradorIds inválido");
@@ -789,7 +791,8 @@ public class MissaoServicoServiceWrite {
         throw IgrpResponseStatusException.badRequest("flgAlimentacao é obrigatório");
       }
 
-      var colab = missaoColaboradorRepository.findByUuidOrThrow(aloj.getColaboradorId());
+      var colab = missaoColaboradorRepository.findByMissaoServId_UuidAndFunId_Uuid(missao.getUuid(), aloj.getColaboradorId())
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest("Colaborador inválido: " + aloj.getColaboradorId()));
 
       var prestador = derivePrestadorFromRequisicao(missao.getUuid(), List.of(colab), requisicoes);
 
@@ -834,12 +837,16 @@ public class MissaoServicoServiceWrite {
         throw IgrpResponseStatusException.badRequest("valorDiario é obrigatório");
       }
 
-      var colab = missaoColaboradorRepository.findByUuidOrThrow(ajuda.getColaboradorId());
+      var colab = missaoColaboradorRepository.findByMissaoServId_UuidAndFunId_Uuid(missao.getUuid(), ajuda.getColaboradorId())
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest("Colaborador inválido: " + ajuda.getColaboradorId()));
       var prestador = derivePrestadorFromRequisicao(missao.getUuid(), List.of(colab), requisicoes);
 
       var baseValorDiario = ajuda.getValorDiario();
+      // alimentacaoByColabId é indexado por UUID do funcionário (ajuda.getColaboradorId()),
+      // por isso o lookup usa colab.getFunId().getUuid() e não colab.getUuid() (missaoColab UUID)
+      UUID funUuidParaLookup = colab.getFunId() != null ? colab.getFunId().getUuid() : null;
       var valorDiarioCalculado = calcularValorDiarioAjudaCusto(baseValorDiario, ajuda.getFlgAlojamento(),
-          alimentacaoByColabId != null ? alimentacaoByColabId.get(colab.getUuid()) : null);
+          alimentacaoByColabId != null ? alimentacaoByColabId.get(funUuidParaLookup) : null);
       var valorTotal = valorDiarioCalculado.multiply(java.math.BigDecimal.valueOf(ajuda.getNumeroDiasAlojamento()));
 
       var log = new MissaoLogisticaEntity();
