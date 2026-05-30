@@ -78,7 +78,7 @@ public class MissaoServicoServiceReadListaTest {
     missao.setFlgDestino(1);
     missao.setDescricaoDestino("Praia");
     missao.setDataInicio(LocalDate.of(2026, 3, 1));
-    missao.setEtapa("ETAPA_4_PROCESSAMENTO_LOGISTICO");
+    missao.setEtapa("LOGISTICA");
     missao.setEstado("A");
 
     var page = new PageImpl<>(List.of(missao), PageRequest.of(0, 10), 1);
@@ -113,7 +113,7 @@ public class MissaoServicoServiceReadListaTest {
     assertEquals(99L, row.getNrMissao());
     assertEquals("Praia", row.getDestino());
     assertEquals("Nacional", row.getNacionalInternacional());
-    assertEquals("ETAPA_4_PROCESSAMENTO_LOGISTICO", row.getEtapa());
+    assertEquals("LOGISTICA", row.getEtapa());
     assertEquals("PENDENTE_FATURA", row.getEstado());
     assertEquals(0, BigDecimal.valueOf(50).compareTo(row.getValorAC()));
     assertEquals(0, BigDecimal.valueOf(150).compareTo(row.getValorBP()));

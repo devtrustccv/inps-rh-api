@@ -25,5 +25,7 @@ public class MissaoLogisticaRequestDTO  {
   private List<AlojamentoRequestDTO> alojamentos;
   private List<AjudaCustoRequestDTO> ajudasCusto;
 
+  private MissaoNotificacaoRequestDTO notificacao;
+
   private ProcessStepAction processoEtapaAction;
 }

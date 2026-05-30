@@ -83,7 +83,7 @@ public class MissaoServicoServiceReadSubmissaoTest {
     missao.setNrDias(3);
     missao.setAutorizadoPor("User");
     missao.setDataAutorizacao(LocalDate.of(2026, 2, 28));
-    missao.setEtapa("ETAPA_1_SUBMISSAO");
+    missao.setEtapa("SUBMISSAO");
     missao.setEstado("A");
     missao.setCreatedDate(LocalDateTime.of(2026, 2, 28, 10, 0));
     missao.setCreatedBy("creator");
@@ -130,7 +130,7 @@ public class MissaoServicoServiceReadSubmissaoTest {
     assertEquals(10L, resp.getBody().getId());
     assertEquals(missaoUuid, resp.getBody().getUuid());
     assertEquals(99L, resp.getBody().getNrMissao());
-    assertEquals("ETAPA_1_SUBMISSAO", resp.getBody().getEtapaAtual());
+    assertEquals("SUBMISSAO", resp.getBody().getEtapaAtual());
     assertEquals("NACIONAL", resp.getBody().getAmbitoMissao());
     assertEquals(1, resp.getBody().getColaboradores().size());
     assertEquals("Colab 1", resp.getBody().getColaboradores().get(0).getNomeColaborador());

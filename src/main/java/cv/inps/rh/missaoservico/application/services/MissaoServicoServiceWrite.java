@@ -6,10 +6,14 @@ import cv.inps.rh.missaoservico.application.commands.*;
 import cv.inps.rh.missaoservico.application.dto.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
+import cv.inps.rh.shared.application.services.EmailService;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.service.NotificacaoDispatchService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +21,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -24,17 +29,25 @@ import java.util.*;
 @Service
 public class MissaoServicoServiceWrite {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(MissaoServicoServiceWrite.class);
+
   private static final String ESTADO_ATIVO = "A";
   private static final String ESTADO_INATIVO = "I";
   private static final Integer DESTINO_NACIONAL = 1;
   private static final Integer DESTINO_ESTRANGEIRO = 2;
-  private static final String ETAPA_1 = "ETAPA_1_SUBMISSAO_AUTORIZACAO";
-  private static final String ETAPA_2 = "ETAPA_2_ANALISE_RH";
-  private static final String ETAPA_3 = "ETAPA_3_EMISSAO_REQUISICAO";
-  private static final String ETAPA_4 = "ETAPA_4_PROCESSAMENTO_LOGISTICO";
-  private static final String ETAPA_5 = "ETAPA_5_CABIMENTACAO_SGAL";
-  private static final String ETAPA_6 = "ETAPA_6_AUTORIZACAO_RH";
-  private static final String ETAPA_7 = "ETAPA_7_PAGAMENTO_FINANCEIRO";
+  private static final String ETAPA_1 = "SUBMISSAO";
+  private static final String ETAPA_2 = "ANALISE";
+  private static final String ETAPA_3 = "EMISSAO_REQUISICAO";
+  private static final String ETAPA_4 = "LOGISTICA";
+  private static final String ETAPA_5 = "CABIMENTO";
+  private static final String ETAPA_7 = "PAGAMENTO";
+
+  private static final int MAX_PRESTADORES = 3;
+
+  private static final String TIPO_NOTIF_PEDIDO_PROPOSTA    = "MISSAO_PEDIDO_PROPOSTA";
+  private static final String TIPO_NOTIF_EMISSAO_REQUISICAO = "MISSAO_EMISSAO_REQUISICAO";
+  private static final String TIPO_NOTIF_LOGISTICA_COLAB    = "MISSAO_LOGISTICA_COLABORADOR";
+  private static final String TIPO_NOTIF_CANCELAMENTO       = "MISSAO_CANCELAMENTO";
 
   private final MissaoServicoEntityRepository missaoServicoRepository;
   private final MissaoColaboradorEntityRepository missaoColaboradorRepository;
@@ -47,6 +60,8 @@ public class MissaoServicoServiceWrite {
   private final DocumentoEntityRepository documentoRepository;
   private final NotificacaoEntityRepository notificacaoRepository;
   private final DocumentoMapper documentoMapper;
+  private final EmailService emailService;
+  private final NotificacaoDispatchService notificacaoDispatchService;
 
   @Transactional
   public ResponseEntity<Map<String, ?>> submeter(SubmeterMissaoServicoCommand command) {
@@ -101,15 +116,15 @@ public class MissaoServicoServiceWrite {
     validarAnalise(dto);
 
     var prestadoresPersistidos = syncPrestadores(missao, dto.getPrestadores());
+    var prestadoresSalvos = new ArrayList<MissaoPrestadorEntity>();
     if (!prestadoresPersistidos.isEmpty()) {
-      missaoPrestadorRepository.saveAll(prestadoresPersistidos);
+      prestadoresSalvos = new ArrayList<>(missaoPrestadorRepository.saveAll(prestadoresPersistidos));
     }
-
-    persistirNotificacoesAnalise(missao, dto.getNotificacao(), dto.getPrestadores());
 
     missao.setEtapa(ETAPA_2);
     if (dto.getProcessoEtapaAction() != null && dto.getProcessoEtapaAction().getCode().equals("NEXT")) {
       missao.setEtapa(ETAPA_3);
+      enviarNotificacoesPedidoSimulacao(missao, prestadoresSalvos, dto.getNotificacao());
     }
     missaoServicoRepository.save(missao);
 
@@ -178,6 +193,7 @@ public class MissaoServicoServiceWrite {
 
     var desired = new HashSet<String>();
     var propostaByPrestador = new HashMap<Long, cv.inps.rh.shared.application.dto.AnexoReqDTO>();
+    var selectedPrestIds = new LinkedHashSet<Long>();
 
     for (var item : dto.getRequisicoes()) {
       if (item == null)
@@ -187,6 +203,7 @@ public class MissaoServicoServiceWrite {
       if (item.getMissaoPrestId() == null)
         continue;
 
+      selectedPrestIds.add(item.getMissaoPrestId());
       propostaByPrestador.putIfAbsent(item.getMissaoPrestId(), item.getDocumentoProposta());
 
       var prest = missaoPrestadorRepository.findById(item.getMissaoPrestId())
@@ -285,6 +302,7 @@ public class MissaoServicoServiceWrite {
     missao.setEtapa(ETAPA_3);
     if (dto.getProcessoEtapaAction() != null && dto.getProcessoEtapaAction().getCode().equals("NEXT")) {
       missao.setEtapa(ETAPA_4);
+      enviarNotificacoesEmissaoRequisicao(missao, selectedPrestIds);
     }
     missaoServicoRepository.save(missao);
 
@@ -331,7 +349,10 @@ public class MissaoServicoServiceWrite {
     missao.setEtapa(ETAPA_4);
     if (dto.getProcessoEtapaAction() != null && "NEXT".equals(dto.getProcessoEtapaAction().getCode())) {
       missao.setEtapa(ETAPA_5);
-      missaoServicoRepository.save(missao);
+    }
+    missaoServicoRepository.save(missao);
+    if (ETAPA_5.equals(missao.getEtapa())) {
+      enviarNotificacoesLogisticaColaborador(missao, dto.getNotificacao());
     }
 
     Map<String, Object> resp = new HashMap<>();
@@ -411,9 +432,6 @@ public class MissaoServicoServiceWrite {
     }
 
     missao.setEtapa(ETAPA_5);
-    if (dto.getProcessoEtapaAction() != null && "NEXT".equals(dto.getProcessoEtapaAction().getCode())) {
-      missao.setEtapa(ETAPA_6);
-    }
     missaoServicoRepository.save(missao);
 
     Map<String, Object> resp = new HashMap<>();
@@ -466,7 +484,7 @@ public class MissaoServicoServiceWrite {
       missaoLogisticaRepository.saveAll(toSave);
     }
 
-    missao.setEtapa(ETAPA_6);
+    missao.setEtapa(ETAPA_5);
     if (dto.getProcessoEtapaAction() != null && "NEXT".equals(dto.getProcessoEtapaAction().getCode())) {
       missao.setEtapa(ETAPA_7);
     }
@@ -1062,6 +1080,10 @@ public class MissaoServicoServiceWrite {
     if (CollectionUtils.isEmpty(dto.getPrestadores())) {
       throw IgrpResponseStatusException.badRequest("prestadores é obrigatório");
     }
+    if (dto.getPrestadores().size() > MAX_PRESTADORES) {
+      throw IgrpResponseStatusException.badRequest(
+          "Máximo de " + MAX_PRESTADORES + " prestadores permitidos por missão");
+    }
   }
 
   private ArrayList<MissaoPrestadorEntity> syncPrestadores(MissaoServicoEntity missao, List<MissaoPrestadorDTO> dtos) {
@@ -1117,36 +1139,149 @@ public class MissaoServicoServiceWrite {
     return toSave;
   }
 
-  private void persistirNotificacoesAnalise(
+  private void enviarNotificacoesPedidoSimulacao(
       MissaoServicoEntity missao,
-      MissaoNotificacaoRequestDTO notificacao,
-      List<MissaoPrestadorDTO> prestadores) {
-    if (notificacao == null)
-      return;
-    if (!StringUtils.hasText(notificacao.getAssunto()) && !StringUtils.hasText(notificacao.getCorpoEmail()))
-      return;
+      List<MissaoPrestadorEntity> prestadores,
+      MissaoNotificacaoRequestDTO notifReq) {
     if (CollectionUtils.isEmpty(prestadores))
       return;
 
-    var toSave = new ArrayList<NotificacaoEntity>();
-    for (var p : prestadores) {
-      if (p == null || !StringUtils.hasText(p.getEmail()))
+    var vars = Map.of(
+        "nrMissao", String.valueOf(missao.getNrMissao()),
+        "destino", missao.getDescricaoDestino() != null ? missao.getDescricaoDestino() : "",
+        "dataInicio", missao.getDataInicio() != null ? missao.getDataInicio().toString() : "",
+        "dataFim", missao.getDataFim() != null ? missao.getDataFim().toString() : "",
+        "nrDias", String.valueOf(missao.getNrDias())
+    );
+
+    // Assunto e corpo: vêm do request (editável pelo RH) com fallback para template
+    String assuntoOverride = notifReq != null ? notifReq.getAssunto() : null;
+    String corpoOverride   = notifReq != null ? notifReq.getCorpoEmail() : null;
+
+    for (var prest : prestadores) {
+      if (prest == null || !StringUtils.hasText(prest.getEmail()) || !ESTADO_ATIVO.equals(prest.getEstado()))
         continue;
+
+      String assunto = StringUtils.hasText(assuntoOverride)
+          ? assuntoOverride
+          : "Pedido de Proposta - Missão Nº " + missao.getNrMissao();
+      String corpo = StringUtils.hasText(corpoOverride)
+          ? corpoOverride
+          : buildCorpoSimulacao(missao, vars);
+
+      String estado = "Enviado";
+      try {
+        emailService.sendEmail(prest.getEmail(), assunto, corpo);
+      } catch (Exception e) {
+        LOGGER.warn("Erro ao enviar email de proposta para {}: {}", prest.getEmail(), e.getMessage());
+        estado = "Erro";
+      }
+
       var n = new NotificacaoEntity();
       n.setUuid(UuidCreator.getTimeOrderedEpoch());
-      n.setReferenciaId(missao.getId());
-      n.setReferenciaName(TableName.RH_T_MISSAO_SERVICO.name());
-      n.setReferenciaUuid(missao.getUuid());
-      n.setAssunto(notificacao.getAssunto());
-      n.setMessage(notificacao.getCorpoEmail());
-      n.setEmail(p.getEmail());
-      n.setNomeReceptor(p.getNome());
-      toSave.add(n);
+      n.setTipoNotificacao(TIPO_NOTIF_PEDIDO_PROPOSTA);
+      n.setReferenciaId(prest.getId());
+      n.setReferenciaName(TableName.RH_T_MISSAO_PRESTADOR.name());
+      n.setReferenciaUuid(prest.getUuid());
+      n.setAssunto(assunto);
+      n.setMessage(corpo);
+      n.setEmail(prest.getEmail());
+      n.setNomeReceptor(prest.getNome());
+      n.setDataEnvio(LocalDate.now());
+      n.setEstado(estado);
+      notificacaoRepository.save(n);
     }
+  }
 
-    if (!toSave.isEmpty()) {
-      notificacaoRepository.saveAll(toSave);
+  private void enviarNotificacoesEmissaoRequisicao(
+      MissaoServicoEntity missao,
+      Set<Long> selectedPrestIds) {
+    if (CollectionUtils.isEmpty(selectedPrestIds))
+      return;
+
+    var vars = Map.of(
+        "nrMissao", String.valueOf(missao.getNrMissao()),
+        "destino", missao.getDescricaoDestino() != null ? missao.getDescricaoDestino() : "",
+        "dataInicio", missao.getDataInicio() != null ? missao.getDataInicio().toString() : "",
+        "dataFim", missao.getDataFim() != null ? missao.getDataFim().toString() : "",
+        "nrDias", String.valueOf(missao.getNrDias())
+    );
+
+    for (var prestId : selectedPrestIds) {
+      var prest = missaoPrestadorRepository.findById(prestId).orElse(null);
+      if (prest == null || !StringUtils.hasText(prest.getEmail()))
+        continue;
+
+      notificacaoDispatchService.enviar(
+          TIPO_NOTIF_EMISSAO_REQUISICAO,
+          prest.getEmail(),
+          prest.getNome(),
+          prest.getId(),
+          TableName.RH_T_MISSAO_PRESTADOR.name(),
+          prest.getUuid(),
+          null,
+          vars
+      );
     }
+  }
+
+  private void enviarNotificacoesLogisticaColaborador(
+      MissaoServicoEntity missao,
+      MissaoNotificacaoRequestDTO notifReq) {
+    var colaboradores = missaoColaboradorRepository.findAllByMissaoServId_Uuid(missao.getUuid());
+    if (CollectionUtils.isEmpty(colaboradores))
+      return;
+
+    String assuntoOverride = notifReq != null ? notifReq.getAssunto() : null;
+    String corpoOverride   = notifReq != null ? notifReq.getCorpoEmail() : null;
+
+    String assunto = StringUtils.hasText(assuntoOverride)
+        ? assuntoOverride
+        : "Detalhes da sua Missão Nº " + missao.getNrMissao();
+    String corpo = StringUtils.hasText(corpoOverride)
+        ? corpoOverride
+        : buildCorpoLogistica(missao);
+
+    for (var colab : colaboradores) {
+      if (colab == null || !ESTADO_ATIVO.equals(colab.getEstado()) || colab.getFunId() == null)
+        continue;
+
+      var n = new NotificacaoEntity();
+      n.setUuid(UuidCreator.getTimeOrderedEpoch());
+      n.setTipoNotificacao(TIPO_NOTIF_LOGISTICA_COLAB);
+      n.setReferenciaId(missao.getId());
+      n.setReferenciaName(TableName.RH_T_MISSAO_COLABORADOR.name());
+      n.setReferenciaUuid(colab.getUuid());
+      n.setAssunto(assunto);
+      n.setMessage(corpo);
+      n.setNomeReceptor(colab.getFunId().getNome());
+      n.setFunId(colab.getFunId());
+      n.setDataEnvio(LocalDate.now());
+      n.setEstado("Pendente");
+      notificacaoRepository.save(n);
+    }
+  }
+
+  private String buildCorpoSimulacao(MissaoServicoEntity missao, Map<String, String> vars) {
+    return "Exmo(a) Sr(a),\n\n" +
+        "Solicita-se envio de proposta (fatura proforma) para missão de serviço com os seguintes dados:\n" +
+        "- Nº Missão: " + vars.get("nrMissao") + "\n" +
+        "- Destino: " + vars.get("destino") + "\n" +
+        "- Data Início: " + vars.get("dataInicio") + "\n" +
+        "- Data Fim: " + vars.get("dataFim") + "\n" +
+        "- Duração: " + vars.get("nrDias") + " dia(s)\n\n" +
+        "Aguardamos a vossa proposta.\n\nCom os melhores cumprimentos,\nINPS - Recursos Humanos";
+  }
+
+  private String buildCorpoLogistica(MissaoServicoEntity missao) {
+    return "Exmo(a) Colaborador(a),\n\n" +
+        "Informamos que os arranjos logísticos para a sua Missão Nº " + missao.getNrMissao() +
+        " estão confirmados.\n" +
+        "- Destino: " + (missao.getDescricaoDestino() != null ? missao.getDescricaoDestino() : "") + "\n" +
+        "- Data Início: " + (missao.getDataInicio() != null ? missao.getDataInicio().toString() : "") + "\n" +
+        "- Data Fim: " + (missao.getDataFim() != null ? missao.getDataFim().toString() : "") + "\n\n" +
+        "Para detalhes sobre bilhete, alojamento, seguro e ajuda de custo, consulte o portal RH.\n\n" +
+        "Com os melhores cumprimentos,\nINPS - Recursos Humanos";
   }
 
   private Long nextNrMissao() {
@@ -1254,12 +1389,16 @@ public class MissaoServicoServiceWrite {
   }
 
   private void persistirNotificacaoCancelamento(MissaoServicoEntity missao, MissaoCancelarRequestDTO dto) {
+    // Recolher todos os destinatários que já receberam notificação relativa a esta missão.
+    // As notificações de análise ficam com referencia = RH_T_MISSAO_PRESTADOR (por prestador UUID),
+    // por isso buscamos directamente nos prestadores activos da missão em vez do histórico.
+    var prestadores = missaoPrestadorRepository.findAllByMissaoServId_Uuid(missao.getUuid());
+
+    // Complementar com emails do histórico de notificações gravadas com referencia da missão
+    // (compatibilidade com notificações criadas noutros pontos do fluxo).
     var anteriores = notificacaoRepository.findAllByReferenciaNameAndReferenciaUuid(
         TableName.RH_T_MISSAO_SERVICO.name(),
         missao.getUuid());
-
-    if (CollectionUtils.isEmpty(anteriores))
-      return;
 
     var seen = new HashSet<String>();
     var toSave = new ArrayList<NotificacaoEntity>();
@@ -1267,24 +1406,70 @@ public class MissaoServicoServiceWrite {
     String assunto = "Cancelamento de Missão Nº " + missao.getNrMissao();
     String message = buildMensagemCancelamento(missao, dto);
 
-    for (var n0 : anteriores) {
-      var email = n0 != null ? n0.getEmail() : null;
-      if (!StringUtils.hasText(email))
-        continue;
-      if (!seen.add(email.trim().toLowerCase()))
-        continue;
+    // 1. Prestadores activos da missão
+    if (!CollectionUtils.isEmpty(prestadores)) {
+      for (var prest : prestadores) {
+        if (prest == null || !StringUtils.hasText(prest.getEmail()))
+          continue;
+        var email = prest.getEmail().trim().toLowerCase();
+        if (!seen.add(email))
+          continue;
 
-      var n = new NotificacaoEntity();
-      n.setUuid(UuidCreator.getTimeOrderedEpoch());
-      n.setReferenciaId(missao.getId());
-      n.setReferenciaName(TableName.RH_T_MISSAO_SERVICO.name());
-      n.setReferenciaUuid(missao.getUuid());
-      n.setAssunto(assunto);
-      n.setMessage(message);
-      n.setEmail(email);
-      n.setNomeReceptor(n0.getNomeReceptor());
-      n.setEstado(ESTADO_ATIVO);
-      toSave.add(n);
+        String estado = "Enviado";
+        try {
+          emailService.sendEmail(prest.getEmail(), assunto, message);
+        } catch (Exception e) {
+          LOGGER.warn("Erro ao enviar email de cancelamento para {}: {}", prest.getEmail(), e.getMessage());
+          estado = "Erro";
+        }
+
+        var n = new NotificacaoEntity();
+        n.setUuid(UuidCreator.getTimeOrderedEpoch());
+        n.setTipoNotificacao(TIPO_NOTIF_CANCELAMENTO);
+        n.setReferenciaId(missao.getId());
+        n.setReferenciaName(TableName.RH_T_MISSAO_SERVICO.name());
+        n.setReferenciaUuid(missao.getUuid());
+        n.setAssunto(assunto);
+        n.setMessage(message);
+        n.setEmail(prest.getEmail());
+        n.setNomeReceptor(prest.getNome());
+        n.setDataEnvio(LocalDate.now());
+        n.setEstado(estado);
+        toSave.add(n);
+      }
+    }
+
+    // 2. Outros destinatários do histórico (emails não cobertos pelos prestadores)
+    if (!CollectionUtils.isEmpty(anteriores)) {
+      for (var n0 : anteriores) {
+        var email = n0 != null ? n0.getEmail() : null;
+        if (!StringUtils.hasText(email))
+          continue;
+        if (!seen.add(email.trim().toLowerCase()))
+          continue;
+
+        String estado = "Enviado";
+        try {
+          emailService.sendEmail(email, assunto, message);
+        } catch (Exception e) {
+          LOGGER.warn("Erro ao enviar email de cancelamento para {}: {}", email, e.getMessage());
+          estado = "Erro";
+        }
+
+        var n = new NotificacaoEntity();
+        n.setUuid(UuidCreator.getTimeOrderedEpoch());
+        n.setTipoNotificacao(TIPO_NOTIF_CANCELAMENTO);
+        n.setReferenciaId(missao.getId());
+        n.setReferenciaName(TableName.RH_T_MISSAO_SERVICO.name());
+        n.setReferenciaUuid(missao.getUuid());
+        n.setAssunto(assunto);
+        n.setMessage(message);
+        n.setEmail(email);
+        n.setNomeReceptor(n0.getNomeReceptor());
+        n.setDataEnvio(LocalDate.now());
+        n.setEstado(estado);
+        toSave.add(n);
+      }
     }
 
     if (!toSave.isEmpty()) {

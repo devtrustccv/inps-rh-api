@@ -62,7 +62,7 @@ public class MissaoServicoServiceReadLogisticaTest {
     var missao = new MissaoServicoEntity();
     missao.setId(1L);
     missao.setUuid(missaoUuid);
-    missao.setEtapa("ETAPA_4_PROCESSAMENTO_LOGISTICO");
+    missao.setEtapa("LOGISTICA");
     when(missaoServicoRepository.findByUuidOrThrow(missaoUuid)).thenReturn(missao);
 
     var log = new MissaoLogisticaEntity();
