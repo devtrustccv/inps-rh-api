@@ -28,21 +28,26 @@ public class NotificacaoDispatchService {
   public void enviar(String tipoNotificacao, String emailDestino, String nomeReceptor,
                      Long referenciaId, String referenciaName, UUID referenciaUuid,
                      FuncionarioEntity funId, Map<String, String> vars) {
+
     var paramOpt = paramNotificacaoRepository.findByTipoNotificacao(tipoNotificacao);
     if (paramOpt.isEmpty()) {
-      LOGGER.warn("Template de notificação não encontrado para tipo: {}", tipoNotificacao);
-      return;
+      // Template não configurado: a notificação é sempre gravada (auditoria obrigatória),
+      // mas sem assunto/corpo definidos — RH deve configurar o template no backoffice.
+      LOGGER.warn("Template de notificação não encontrado para tipo '{}' — registo gravado sem conteúdo", tipoNotificacao);
     }
-    var param = paramOpt.get();
-    String assunto = substituir(param.getAssunto(), vars);
-    String corpo = substituir(param.getCorpo(), vars);
 
-    String estado = "Enviado";
-    try {
-      emailService.sendEmail(emailDestino, assunto, corpo);
-    } catch (Exception e) {
-      LOGGER.error("Erro ao enviar email notificação {} para {}: {}", tipoNotificacao, emailDestino, e.getMessage());
-      estado = "Erro";
+    String assunto = paramOpt.map(p -> substituir(p.getAssunto(), vars)).orElse(null);
+    String corpo   = paramOpt.map(p -> substituir(p.getCorpo(),   vars)).orElse(null);
+
+    String estado = "Pendente";
+    if (org.springframework.util.StringUtils.hasText(emailDestino)) {
+      try {
+        emailService.sendEmail(emailDestino, assunto != null ? assunto : "", corpo != null ? corpo : "");
+        estado = "Enviado";
+      } catch (Exception e) {
+        LOGGER.error("Erro ao enviar email notificação {} para {}: {}", tipoNotificacao, emailDestino, e.getMessage());
+        estado = "Erro";
+      }
     }
 
     var notificacao = new NotificacaoEntity();
