@@ -25,5 +25,8 @@ public class GetListaAvaliacaoQuery implements Query {
   private Long cargo;
   @NotBlank(message = "The field <colaborador> is required")
   private String colaborador;
+  private Long seccaoId;
+  private Long carreiraId;
+  private String semestre;
 
 }

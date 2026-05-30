@@ -93,11 +93,12 @@ public class AvaliacaoController {
     @RequestParam(value = "estado", required = false) String estado,
     @RequestParam(value = "institId", required = false) Long institId,
     @RequestParam(value = "cargoId", required = false) Long cargoId,
+    @RequestParam(value = "carreiraId", required = false) Long carreiraId,
     @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", required = false, defaultValue = "20") String pageSize)
   {
 
-      final var query = new GetListaDefinicaoObjectivosQuery(ano, semestre, estado, institId, cargoId, pageNumber, pageSize);
+      final var query = new GetListaDefinicaoObjectivosQuery(ano, semestre, estado, institId, cargoId, carreiraId, pageNumber, pageSize);
 
       return queryBus.handle(query);
 
@@ -128,10 +129,13 @@ public class AvaliacaoController {
     @RequestParam(value = "ano", required = false) Integer ano,
     @RequestParam(value = "direcao", required = false) Long direcao,
     @RequestParam(value = "cargo", required = false) Long cargo,
-    @RequestParam(value = "colaborador", required = false) String colaborador)
+    @RequestParam(value = "colaborador", required = false) String colaborador,
+    @RequestParam(value = "seccaoId", required = false) Long seccaoId,
+    @RequestParam(value = "carreiraId", required = false) Long carreiraId,
+    @RequestParam(value = "semestre", required = false) String semestre)
   {
 
-      final var query = new GetListaAvaliacaoQuery(pageNumber, pageSize, ano, direcao, cargo, colaborador);
+      final var query = new GetListaAvaliacaoQuery(pageNumber, pageSize, ano, direcao, cargo, colaborador, seccaoId, carreiraId, semestre);
 
       return queryBus.handle(query);
 

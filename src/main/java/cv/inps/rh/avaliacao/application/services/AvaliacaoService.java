@@ -141,8 +141,7 @@ public class AvaliacaoService {
       criarLinhasAvaliacao(
           avaliacao,
           det.getObjetivos(),
-          /*dto.getInstitId(), dto.getSeccaoId(), dto.getCargoId(), dto.getCarrPccsId(),*/
-          mapParamObjectives, dto
+          mapParamObjectives, dto, det
       );
 
       created.add(avaliacao.getUuid().toString());
@@ -186,6 +185,9 @@ public class AvaliacaoService {
       if (query.getCargoId() != null) {
         predicates.add(cb.equal(root.get("cargo").get("id"), query.getCargoId()));
       }
+      if (query.getCarreiraId() != null) {
+        predicates.add(cb.equal(root.get("carreira").get("id"), query.getCarreiraId()));
+      }
 
       return cb.and(predicates.toArray(new Predicate[0]));
     };
@@ -225,6 +227,15 @@ public class AvaliacaoService {
       }
       if (query.getCargo() != null) {
         predicates.add(cb.equal(root.get("cargo").get("id"), query.getCargo()));
+      }
+      if (query.getSeccaoId() != null) {
+        predicates.add(cb.equal(root.get("seccaoId").get("id"), query.getSeccaoId()));
+      }
+      if (query.getCarreiraId() != null) {
+        predicates.add(cb.equal(root.get("carreira").get("id"), query.getCarreiraId()));
+      }
+      if (StringUtils.hasText(query.getSemestre())) {
+        predicates.add(cb.equal(root.get("semestre"), query.getSemestre()));
       }
       if (StringUtils.hasText(query.getColaborador())) {
         var raw = query.getColaborador().trim();
@@ -296,12 +307,9 @@ public class AvaliacaoService {
   private void criarLinhasAvaliacao(
       AvaliacaoEntity avaliacao,
       List<ParamObjetivoEntity> params,
-      /*Long institId,
-      Long seccaoId,
-      Long cargoId,
-      Long carrPccsId, */
       Map<Long, ParamObjetivoEntity> mapParamObjectives,
-      DefinicaoObjectivoDTO dto) {
+      DefinicaoObjectivoDTO dto,
+      ParamObjetivoDetEntity det) {
     if (params == null)
       return;
 
@@ -335,6 +343,7 @@ public class AvaliacaoService {
       e.setDescricao(obj.getCompetencia());
       e.setPonderacao(p.getPonderacao());
       e.setComponente(p.getComponente());
+      e.setPeso(det.getPesoComportamentais());
       competenciaRepository.save(e);
     });
 
@@ -350,6 +359,7 @@ public class AvaliacaoService {
       e.setDescricao(obj.getCompetencia());
       e.setPonderacao(p.getPonderacao());
       e.setComponente(p.getComponente());
+      e.setPeso(det.getPesoTecnica());
       competenciaRepository.save(e);
     });
 
@@ -360,7 +370,9 @@ public class AvaliacaoService {
       e.setEstado(ESTADO_ATIVO);
       e.setAvaliacao(avaliacao);
       e.setParamObjetivo(p);
+      e.setNumeroOrdem(p.getNumeroOrdem());
       e.setAbrangencia(p.getAbrangencia());
+      e.setDescricao(p.getDescricao());
       e.setPonderacao(p.getPonderacao());
       atitudeRepository.save(e);
     });

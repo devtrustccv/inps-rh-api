@@ -72,8 +72,10 @@ public class AvaliacaoReadService {
     dto.setAtitudesPessoais(
         atitudeRepository.findAllByAvaliacao_Uuid(id).stream()
             .sorted(
-                Comparator.comparing(a -> a.getParamObjetivo() != null ? a.getParamObjetivo().getNumeroOrdem() : null,
-                    Comparator.nullsLast(Comparator.naturalOrder())))
+                Comparator.comparing(a -> a.getNumeroOrdem() != null
+                    ? a.getNumeroOrdem()
+                    : (a.getParamObjetivo() != null ? a.getParamObjetivo().getNumeroOrdem() : null),
+                Comparator.nullsLast(Comparator.naturalOrder())))
             .map(this::toAtitudePessoalAvaliacaoDTO)
             .toList());
 
@@ -119,8 +121,10 @@ public class AvaliacaoReadService {
     dto.setAtitudesPessoais(
         atitudeRepository.findAllByAvaliacao_Uuid(id).stream()
             .sorted(
-                Comparator.comparing(a -> a.getParamObjetivo() != null ? a.getParamObjetivo().getNumeroOrdem() : null,
-                    Comparator.nullsLast(Comparator.naturalOrder())))
+                Comparator.comparing(a -> a.getNumeroOrdem() != null
+                    ? a.getNumeroOrdem()
+                    : (a.getParamObjetivo() != null ? a.getParamObjetivo().getNumeroOrdem() : null),
+                Comparator.nullsLast(Comparator.naturalOrder())))
             .map(this::toAtitudePessoalAvaliacaoDTO)
             .toList());
 
@@ -227,9 +231,14 @@ public class AvaliacaoReadService {
 
   private AtitudePessoalAvaliacaoDTO toAtitudePessoalAvaliacaoDTO(AvaliacaoAtitudePessoalEntity e) {
     var dto = new AtitudePessoalAvaliacaoDTO();
-    dto.setNumeroOrdem(e.getParamObjetivo() != null ? e.getParamObjetivo().getNumeroOrdem() : null);
+    // Ler do próprio registo; fallback ao paramObjetivo para dados migrados antes do V3
+    dto.setNumeroOrdem(e.getNumeroOrdem() != null
+        ? e.getNumeroOrdem()
+        : (e.getParamObjetivo() != null ? e.getParamObjetivo().getNumeroOrdem() : null));
     dto.setAbrangencia(e.getAbrangencia());
-    dto.setAtitudePessoal(e.getParamObjetivo() != null ? e.getParamObjetivo().getDescricao() : null);
+    dto.setAtitudePessoal(e.getDescricao() != null
+        ? e.getDescricao()
+        : (e.getParamObjetivo() != null ? e.getParamObjetivo().getDescricao() : null));
     dto.setPonderacao(e.getPonderacao());
     dto.setAvaliacao(e.getAvaliacaoProcessual() != null ? e.getAvaliacaoProcessual().intValue() : null);
     dto.setAutoAvaliacao(e.getAutoAvaliacao() != null ? e.getAutoAvaliacao().intValue() : null);
