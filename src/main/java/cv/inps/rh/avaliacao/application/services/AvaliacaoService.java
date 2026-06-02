@@ -141,8 +141,7 @@ public class AvaliacaoService {
       criarLinhasAvaliacao(
           avaliacao,
           det.getObjetivos(),
-          /*dto.getInstitId(), dto.getSeccaoId(), dto.getCargoId(), dto.getCarrPccsId(),*/
-          mapParamObjectives, dto
+          mapParamObjectives, dto, det
       );
 
       created.add(avaliacao.getUuid().toString());
@@ -186,6 +185,9 @@ public class AvaliacaoService {
       if (query.getCargoId() != null) {
         predicates.add(cb.equal(root.get("cargo").get("id"), query.getCargoId()));
       }
+      if (query.getCarreiraId() != null) {
+        predicates.add(cb.equal(root.get("carreira").get("id"), query.getCarreiraId()));
+      }
 
       return cb.and(predicates.toArray(new Predicate[0]));
     };
@@ -225,6 +227,15 @@ public class AvaliacaoService {
       }
       if (query.getCargo() != null) {
         predicates.add(cb.equal(root.get("cargo").get("id"), query.getCargo()));
+      }
+      if (query.getSeccaoId() != null) {
+        predicates.add(cb.equal(root.get("seccaoId").get("id"), query.getSeccaoId()));
+      }
+      if (query.getCarreiraId() != null) {
+        predicates.add(cb.equal(root.get("carreira").get("id"), query.getCarreiraId()));
+      }
+      if (StringUtils.hasText(query.getSemestre())) {
+        predicates.add(cb.equal(root.get("semestre"), query.getSemestre()));
       }
       if (StringUtils.hasText(query.getColaborador())) {
         var raw = query.getColaborador().trim();
@@ -296,12 +307,9 @@ public class AvaliacaoService {
   private void criarLinhasAvaliacao(
       AvaliacaoEntity avaliacao,
       List<ParamObjetivoEntity> params,
-      /*Long institId,
-      Long seccaoId,
-      Long cargoId,
-      Long carrPccsId, */
       Map<Long, ParamObjetivoEntity> mapParamObjectives,
-      DefinicaoObjectivoDTO dto) {
+      DefinicaoObjectivoDTO dto,
+      ParamObjetivoDetEntity det) {
     if (params == null)
       return;
 
@@ -309,6 +317,8 @@ public class AvaliacaoService {
 
     dto.getObjectivos().forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
+      if (p == null) throw IgrpResponseStatusException.badRequest(
+          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
       var e = new AvaliacaoObjectivoEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
@@ -325,6 +335,8 @@ public class AvaliacaoService {
 
     dto.getCompetenciasComportamentais().forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
+      if (p == null) throw IgrpResponseStatusException.badRequest(
+          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
       var e = new AvaliacaoCompetenciaEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
@@ -335,11 +347,14 @@ public class AvaliacaoService {
       e.setDescricao(obj.getCompetencia());
       e.setPonderacao(p.getPonderacao());
       e.setComponente(p.getComponente());
+      e.setPeso(det.getPesoComportamentais());
       competenciaRepository.save(e);
     });
 
     dto.getCompetenciasTecnicas().forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
+      if (p == null) throw IgrpResponseStatusException.badRequest(
+          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
       var e = new AvaliacaoCompetenciaEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
@@ -350,17 +365,22 @@ public class AvaliacaoService {
       e.setDescricao(obj.getCompetencia());
       e.setPonderacao(p.getPonderacao());
       e.setComponente(p.getComponente());
+      e.setPeso(det.getPesoTecnica());
       competenciaRepository.save(e);
     });
 
     dto.getAtitudesPessoais().forEach(obj -> {
       var p = mapParamObjectives.get(obj.getParamId());
+      if (p == null) throw IgrpResponseStatusException.badRequest(
+          "ParamObjetivo não encontrado: id=" + obj.getParamId() + " para o ano " + det.getAno());
       var e = new AvaliacaoAtitudePessoalEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
       e.setAvaliacao(avaliacao);
       e.setParamObjetivo(p);
+      e.setNumeroOrdem(p.getNumeroOrdem());
       e.setAbrangencia(p.getAbrangencia());
+      e.setDescricao(p.getDescricao());
       e.setPonderacao(p.getPonderacao());
       atitudeRepository.save(e);
     });
@@ -474,15 +494,16 @@ public class AvaliacaoService {
   }
 
   private String resolveEstadoGrupo(List<AvaliacaoEntity> list) {
+    // Ano completo: 2º semestre concluído (C) — independente do estado do 1º
+    boolean sem2Concluido = list.stream()
+        .anyMatch(a -> "2".equals(a.getSemestre()) && "C".equalsIgnoreCase(a.getEstado()));
+    if (sem2Concluido)
+      return "C";
+
+    // Parcial: 1º semestre avaliado mas sem 2º semestre concluído
     boolean anyP = list.stream().anyMatch(a -> "P".equalsIgnoreCase(a.getEstado()));
     if (anyP)
       return "P";
-
-    boolean has1 = list.stream().anyMatch(a -> "1".equals(a.getSemestre()));
-    boolean has2 = list.stream().anyMatch(a -> "2".equals(a.getSemestre()));
-    boolean allC = list.stream().allMatch(a -> "C".equalsIgnoreCase(a.getEstado()));
-    if (has1 && has2 && allC)
-      return "C";
 
     return "A";
   }

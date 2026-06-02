@@ -7,6 +7,7 @@ import cv.inps.rh.assiduidade.application.dto.FaltaReqDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper;
+import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
@@ -43,6 +44,8 @@ public class FaltaServiceWrite {
   private final ParamSituacaoEntityRepository paramSituacaoRepository;
   private final DefPagamentoEntityRepository defPagamentoRepository;
   private final DefPagamentoMapper defPagamentoMapper;
+  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoRepository;
+  private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DocumentoEntityRepository documentoEntityRepository;
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
   private final FeriasGozadasEntityRepository feriasGozadasRepository;
@@ -81,7 +84,7 @@ public class FaltaServiceWrite {
       pedido.setTipoPedido("JUSTIFICACAO_FALTA");
       pedido.setEtapa("DESPACHO_RH");
       pedido.setEstado(Estado.P.name());
-      pedido.setOrigem("MANUAL");
+      pedido.setOrigem("RH");
       pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
       pedido = pedidoRepository.save(pedido);
 
@@ -177,9 +180,9 @@ public class FaltaServiceWrite {
         f.setParamSitId(ps);
       }
 
-      //desconto salário
+      // desconto salário — spec: RH_T_DEF_REMUNERACOES + actualizar RH_T_FALTA.DEF_REM_ID
       if (Objects.equals(novoEstado, Estado.A) && f.getParamSitId() != null &&
-          Objects.equals( f.getParamSitId().getFlgFaltaDecontoSal(), 1)) {
+          Objects.equals(f.getParamSitId().getFlgFaltaDecontoSal(), 1)) {
 
         var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid());
         var vinculoId = tipoRel.getContrVinculoId().getVinculoId().getId();
@@ -188,15 +191,18 @@ public class FaltaServiceWrite {
             .findByVinculoId_IdAndTipo(vinculoId, "PAG_FALTA")
             .getFirst();
 
-        var dp = defPagamentoMapper.createPagamento(
-            f.getValor(),
+        var valor = f.getValor() != null ? f.getValor() : java.math.BigDecimal.ZERO;
+        var dr = definicaoRemuneracaoMapper.createRenumeracao(
+            valor,
             mov.getTmId(),
             f.getDataInicio().toLocalDate(),
             f.getDataFim().toLocalDate(),
-            pedido.getFunId());
+            pedido.getFunId(),
+            "CVE");
 
-        defPagamentoRepository.save(dp);
+        definicaoRemuneracaoRepository.save(dr);
         f.setFlgDescontoSal(1);
+        f.setDefRemId(dr);
       }
 
       // desconto férias

@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -40,10 +41,10 @@ public class HoraExtraDTO  {
   private Long horasDiaria ;
 
 
-  private Integer percentagemHora ;
+  private String percentagemReferente ;
 
 
-  private Integer valorDiario ;
+  private BigDecimal valorDiario ;
 
   @Valid
   private AnexoReqDTO documento ;

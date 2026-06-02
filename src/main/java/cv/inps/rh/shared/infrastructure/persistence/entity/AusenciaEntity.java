@@ -72,4 +72,9 @@ public class AusenciaEntity extends AuditEntity {
     private Estado estado;
 
 
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fun_id", referencedColumnName = "id")
+    private FuncionarioEntity funId;
+
+
 }

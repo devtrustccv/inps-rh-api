@@ -75,7 +75,7 @@ public class MissaoServicoServiceReadDetalheTest {
     missao.setNrDias(3);
     missao.setAutorizadoPor("User");
     missao.setDataAutorizacao(LocalDate.of(2026, 2, 28));
-    missao.setEtapa("ETAPA_1_SUBMISSAO");
+    missao.setEtapa("SUBMISSAO");
     missao.setEstado("A");
     missao.setMotivoCancelamento("X");
     missao.setCreatedDate(LocalDateTime.of(2026, 2, 28, 10, 0));
@@ -95,7 +95,7 @@ public class MissaoServicoServiceReadDetalheTest {
     assertEquals(99L, resp.getBody().getNrMissao());
     assertEquals("Cabo Verde", resp.getBody().getPaisDestinoNome());
     assertEquals("NACIONAL", resp.getBody().getAmbitoMissao());
-    assertEquals("ETAPA_1_SUBMISSAO", resp.getBody().getEtapa());
+    assertEquals("SUBMISSAO", resp.getBody().getEtapa());
     assertEquals("A", resp.getBody().getEstado());
     assertEquals("X", resp.getBody().getMotivoCancelamento());
     assertNotNull(resp.getBody().getDataRegisto());

@@ -18,7 +18,7 @@
       "primaryKey": false
     },
     {
-      "name": "numero",
+      "name": "funId",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -30,7 +30,7 @@
       "primaryKey": false
     },
     {
-      "name": "dataInicio",
+      "name": "anoReferente",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -42,7 +42,7 @@
       "primaryKey": false
     },
     {
-      "name": "dataFim",
+      "name": "estado",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -54,7 +54,7 @@
       "primaryKey": false
     },
     {
-      "name": "escalao",
+      "name": "valorSubsidio",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -66,7 +66,7 @@
       "primaryKey": false
     },
     {
-      "name": "valorEscalao",
+      "name": "diasTotal",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -78,79 +78,7 @@
       "primaryKey": false
     },
     {
-      "name": "meses",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "dias",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "mesesValor",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "diasValor",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "total",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "id",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "totalRemun",
+      "name": "mesTotal",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -198,7 +126,7 @@
       "primaryKey": false
     },
     {
-      "name": "valorSubsidio",
+      "name": "totalRemun",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -210,7 +138,7 @@
       "primaryKey": false
     },
     {
-      "name": "mesTotal",
+      "name": "diasFeria",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -222,7 +150,7 @@
       "primaryKey": false
     },
     {
-      "name": "diasTotal",
+      "name": "id",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -232,6 +160,20 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "detalhes",
+      "objectType": "dto",
+      "type": "SubsidioFeriasDetalhe",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "processamento",
+      "collectionType": "list"
     }
   ],
   "id": "subsidio-feria-response-01-vf"

@@ -73,8 +73,18 @@ public class FeriaWriteService {
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
 
+    boolean temSubstituicao = req.getSubstituidoPor() != null;
+
+    // Regra: substituição só permitida para férias >= 15 dias
+    if (temSubstituicao && req.getNumDias() != null && req.getNumDias() < 15)
+      throw IgrpResponseStatusException.badRequest("Substituição só aplicável a férias com duração igual ou superior a 15 dias");
+
+    // Regra: substituição só permitida se colaborador ocupa um cargo (cargoId != null)
+    if (temSubstituicao && tipoRelAtual.getCargoId() == null)
+      throw IgrpResponseStatusException.badRequest("Substituição não aplicável: colaborador não ocupa nenhum cargo");
+
     TiposRelacionamentoEntity tipoRelAtualFuncSubstituto = null;
-    if(req.getSubstituidoPor()!=null) {
+    if (temSubstituicao) {
       var funcionarioSubstituto = funcionarioRepository.findByUuidOrThrow(req.getSubstituidoPor());
       tipoRelAtualFuncSubstituto = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid());
       var s = new SubstituicaoEntity();
@@ -91,8 +101,9 @@ public class FeriaWriteService {
     pedido.setFunId(funcionario);
     pedido.setTipoPedido("FERIA");
     pedido.setOrigem("ASSIDUIDADE");
-    pedido.setEtapa("DESPACHO_RH");
-    pedido.setEstado(Estado.P.name());
+    // Regra: só vai para validação (DESPACHO_RH) se tiver substituição
+    pedido.setEtapa(temSubstituicao ? "DESPACHO_RH" : "FINALIZADO");
+    pedido.setEstado(temSubstituicao ? Estado.P.name() : Estado.A.name());
     pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
     pedido = pedidoRepository.save(pedido);
 
@@ -119,26 +130,26 @@ public class FeriaWriteService {
       ferias.setResponsavelId(responsavel.getId());
     }
 
+    // Férias sem substituição ficam directamente activas
+    ferias.setEstado(temSubstituicao ? Estado.P : Estado.A);
     ferias = feriasGozadasRepository.save(ferias);
 
-
-    var validacao = buildValidacao(funcionario, tipoRelAtual, TipoAcao.INSERT.name(), Referencia.FERIA.name(),
-        Estado.P);
-    funcionario.getValidacoes().add(validacao);
-    funcionarioRepository.saveAndFlush(funcionario);
-
-    var finalPedido = pedido;
-    validacaoEntityRepository.findById(validacao.getId()).ifPresent(v -> {
-      v.setReferenciaId(finalPedido.getId());
-      v.setReferenciaUuid(finalPedido.getUuid());
-      validacaoEntityRepository.save(v);
-    });
+    // Regra: validação RH só necessária quando há substituição (implica salário)
+    if (temSubstituicao) {
+      var validacao = buildValidacao(funcionario, tipoRelAtual, TipoAcao.INSERT.name(), Referencia.FERIA.name(), Estado.P);
+      validacao.setReferenciaId(pedido.getId());
+      validacao.setReferenciaUuid(pedido.getUuid());
+      validacaoEntityRepository.save(validacao);
+    } else {
+      // Sem substituição: criar ausência directamente (já aprovado)
+      criarAusenciaNaValidacao(ferias);
+    }
 
     saveDocuments(req.getDocumentos(), funcionario, pedido);
 
     Map<String, Object> resp = new HashMap<>();
-    resp.put("id", ferias.getId());
-    resp.put("uuid", ferias.getUuid());
+    resp.put("id", pedido.getId());
+    resp.put("uuid", pedido.getUuid());
     return resp;
   }
 
@@ -150,16 +161,16 @@ public class FeriaWriteService {
     if (!StringUtils.hasText(command.getPedidoId()))
       throw IgrpResponseStatusException.badRequest("Identificador de pedido ferias é obrigatório");
 
-    var saldoFeria = saldoFeriaService.getSaldo(req.getColaborador());
-
-    if (req.getNumDias() > saldoFeria)
-      throw IgrpResponseStatusException.badRequest("Funcionario não tem saldo de ferias suficiente");
-
     var ferias = feriasGozadasRepository.findByPedidoId_Uuid(UuidCreator.fromString(command.getPedidoId()))
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
             "Ferias Gozadas not found for id: " + command.getPedidoId()));
 
     var funcionario = ferias.getFunId();
+
+    // Verificar saldo usando funcionario das ferias (colaborador pode não vir no request de validação)
+    var saldoFeria = saldoFeriaService.getSaldo(funcionario.getUuid());
+    if (req.getNumDias() != null && req.getNumDias() > saldoFeria)
+      throw IgrpResponseStatusException.badRequest("Funcionario não tem saldo de ferias suficiente");
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
@@ -195,11 +206,13 @@ public class FeriaWriteService {
       enviarNotificacaoValidacaoFerias(ferias, funcionario);
     }
 
-    funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.FERIA)
-        .ifPresent(v -> {
-          v.setEstado(estado);
-          validacaoEntityRepository.save(v);
-        });
+    if (pedido != null) {
+      funcionarioRules.getValidacaoPendenteByReferenciaUuid(pedido.getUuid(), TipoAcao.INSERT, Referencia.FERIA)
+          .ifPresent(v -> {
+            v.setEstado(estado);
+            validacaoEntityRepository.save(v);
+          });
+    }
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", ferias.getId());
@@ -224,7 +237,6 @@ public class FeriaWriteService {
         .orElseThrow(() -> IgrpResponseStatusException.notFound(
             "Pedido de férias não encontrado"));
 
-    var pedido = ferias.getPedidoId();
     var funcionario = ferias.getFunId();
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
@@ -243,50 +255,65 @@ public class FeriaWriteService {
     if (dataInicio == null || dataFim == null)
       throw IgrpResponseStatusException.badRequest("Data início e fim são obrigatórias");
 
-    // 2. UPDATE das férias
-    ferias.setDataInicio(dataInicio);
-    ferias.setDataFim(dataFim);
-    ferias.setNumDia(diffDays(dataInicio, dataFim));
-    ferias.setObsInfoConveniencia(base.getObsConvinienciaServico());
-    ferias.setObsResponsavel(base.getObsParecer());
-    ferias.setMotivoAlteracao(req.getMotivo());
-    ferias.setEstado(Estado.P); // volta a pendente
+    // 2. Inactivar registo antigo (spec: inativa e cria novo)
+    ferias.setEstado(Estado.I);
+    feriasGozadasRepository.save(ferias);
+
+    // F4: Inactivar ausência anterior ligada às férias antigas
+    var ausenciasAnteriores = ausenciaRepository
+        .findAllByReferenciaNameAndReferenciaId("RH_T_FERIAS_GOZADAS", ferias.getId());
+    if (!ausenciasAnteriores.isEmpty()) {
+      ausenciasAnteriores.forEach(a -> a.setEstado(Estado.I));
+      ausenciaRepository.saveAll(ausenciasAnteriores);
+    }
+
+    // 3. Criar novo pedido
+    var novoPedido = new PedidoEntity();
+    novoPedido.setFunId(funcionario);
+    novoPedido.setTipoPedido("FERIA");
+    novoPedido.setOrigem("ASSIDUIDADE");
+    novoPedido.setEtapa("DESPACHO_RH");
+    novoPedido.setEstado(Estado.P.name());
+    novoPedido.setUuid(UuidCreator.getTimeOrderedEpoch());
+    novoPedido = pedidoRepository.save(novoPedido);
+
+    // 4. Criar novo registo de férias (com referência ao antigo via feriasGozadasId)
+    var novasFerias = new FeriasGozadasEntity();
+    novasFerias.setPedidoId(novoPedido);
+    novasFerias.setFunId(funcionario);
+    novasFerias.setAnoId(ferias.getAnoId());
+    novasFerias.setDataInicio(dataInicio);
+    novasFerias.setDataFim(dataFim);
+    novasFerias.setNumDia(diffDays(dataInicio, dataFim));
+    novasFerias.setFeriasGozadasId(ferias.getId());
+    novasFerias.setMotivoAlteracao(req.getMotivo());
+    novasFerias.setObsInfoConveniencia(base.getObsConvinienciaServico());
+    novasFerias.setObsResponsavel(base.getObsParecer());
+    novasFerias.setEstado(Estado.P);
+    novasFerias.setUuid(UuidCreator.getTimeOrderedEpoch());
 
     if (base.getResponsavel() != null) {
       var responsavel = responsavelEntityRepository
           .findByFunId_Uuid(base.getResponsavel())
-          .orElseThrow(() ->
-              IgrpResponseStatusException.notFound("Responsável não encontrado"));
-      ferias.setResponsavelId(responsavel.getId());
+          .orElseThrow(() -> IgrpResponseStatusException.notFound("Responsável não encontrado"));
+      novasFerias.setResponsavelId(responsavel.getId());
     }
 
-    feriasGozadasRepository.save(ferias);
+    novasFerias = feriasGozadasRepository.save(novasFerias);
 
-    // 3. Pedido também volta a pendente
-    pedido.setEstado(Estado.P.name());
-    pedido.setEtapa("DESPACHO_RH");
-    pedidoRepository.save(pedido);
-
-    // 4. Validação de UPDATE
-    var validacao = buildValidacao(
-        funcionario,
-        tipoRelAtual,
-        TipoAcao.UPDATE.name(),
-        Referencia.FERIA.name(),
-        Estado.P
-    );
-
-    validacao.setReferenciaId(pedido.getId());
-    validacao.setReferenciaUuid(pedido.getUuid());
+    // 5. Validação de UPDATE no novo pedido
+    var validacao = buildValidacao(funcionario, tipoRelAtual, TipoAcao.UPDATE.name(), Referencia.FERIA.name(), Estado.P);
+    validacao.setReferenciaId(novoPedido.getId());
+    validacao.setReferenciaUuid(novoPedido.getUuid());
     validacaoEntityRepository.save(validacao);
 
-    // 5. Documentos (se houver)
-    saveDocuments(base.getDocumentos(), funcionario, pedido);
+    // 6. Documentos (se houver)
+    saveDocuments(base.getDocumentos(), funcionario, novoPedido);
 
     Map<String, Object> resp = new HashMap<>();
-    resp.put("id", ferias.getId());
-    resp.put("uuid", ferias.getUuid());
-    resp.put("estado", ferias.getEstado().name());
+    resp.put("id", novoPedido.getId());
+    resp.put("uuid", novoPedido.getUuid());
+    resp.put("estado", novasFerias.getEstado().name());
     return resp;
   }
 
@@ -359,17 +386,19 @@ public class FeriaWriteService {
 
   private void validatePedido(PedidoFeriaReqDTO req) {
 
-    var saldoFeria = saldoFeriaService.getSaldo(req.getColaborador());
-
-    if (req.getNumDias() > saldoFeria)
-      throw IgrpResponseStatusException.badRequest("Funcionario não tem saldo de ferias suficiente");
-
     if (req.getColaborador() == null)
       throw IgrpResponseStatusException.badRequest("Colaborador obrigatório");
     if (req.getDataInicio() == null)
       throw IgrpResponseStatusException.badRequest("Data de início obrigatória");
     if (req.getDataFim() == null)
       throw IgrpResponseStatusException.badRequest("Data de fim obrigatória");
+    if (req.getNumDias() == null)
+      throw IgrpResponseStatusException.badRequest("Número de dias obrigatório");
+
+    var saldoFeria = saldoFeriaService.getSaldo(req.getColaborador());
+
+    if (req.getNumDias() > saldoFeria)
+      throw IgrpResponseStatusException.badRequest("Funcionario não tem saldo de ferias suficiente");
   }
 
   private AnoEntity resolveAno(LocalDate data) {
@@ -418,6 +447,7 @@ public class FeriaWriteService {
       var param = params.getFirst();
       var ausencia = new AusenciaEntity();
       ausencia.setParamSitId(param);
+      ausencia.setFunId(ferias.getFunId());
       ausencia.setReferenciaName("RH_T_FERIAS_GOZADAS");
       ausencia.setReferenciaId(ferias.getId());
       ausencia.setObs(ferias.getFeriasGozadasId() != null ? "ALTERACAO DE FERIAS" : null);

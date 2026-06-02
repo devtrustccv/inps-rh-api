@@ -34,8 +34,14 @@ public class AvaliacaoAtitudePessoalEntity extends AuditEntity {
   @JoinColumn(name = "PARAM_OBJECTIVO_ID", nullable = false)
   private ParamObjetivoEntity paramObjetivo;
 
+  @Column(name = "NUMERO_ORDEM")
+  private Integer numeroOrdem;
+
   @Column(name = "ABRAGENCIA", length = 100, nullable = false)
   private String abrangencia;
+
+  @Column(name = "DESCRICAO", length = 300)
+  private String descricao;
 
   @Column(name = "PONDERACAO", nullable = false, precision = 5, scale = 2)
   private BigDecimal ponderacao;

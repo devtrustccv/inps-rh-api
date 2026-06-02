@@ -411,6 +411,39 @@ public class AssiduidadeController {
   }
 
    @GetMapping(
+   value = "hora-extra/calculo-valor"
+  )
+  @Operation(
+    summary = "Calcular valor hora extra",
+    description = "Calcula o valor diário de hora extra sem gravar. Usa o procedimento RH_PROCESSAMENTO_SALARIAL_DB.CALCULO_HORA_EXTRA.",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = CalcValorHoraExtraDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<CalcValorHoraExtraDTO> getCalculoValorHoraExtra(
+    @RequestParam(value = "funcionarioUuid") String funcionarioUuid,
+    @RequestParam(value = "dataInicio") String dataInicio,
+    @RequestParam(value = "dataFim") String dataFim,
+    @RequestParam(value = "percentagemReferente") String percentagemReferente,
+    @RequestParam(value = "horasDiaria") Long horasDiaria)
+  {
+
+      final var query = new GetCalcValorHoraExtraQuery(funcionarioUuid, dataInicio, dataFim, percentagemReferente, horasDiaria);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
    value = "feria"
   )
   @Operation(
@@ -1017,6 +1050,52 @@ public class AssiduidadeController {
       @PathVariable(value = "pedidoId") String pedidoId) {
     final var command = new EnviarDireitoFeriasCommand(pedidoId);
     return commandBus.send(command);
+  }
+
+  @GetMapping(value = "feria/exportar-direito", produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+  @Operation(
+    summary = "Exportar direito ferias",
+    description = "Gera ficheiro Excel com os direitos de férias por colaborador e direção. Colunas: CODIGO_DIRECAO, NOME_DIRECAO, ID_COLABORADOR, NOME_COLABORADOR, TOTAL_DIREITO, TOTAL_DIREITO_ANO.",
+    responses = {
+      @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+    }
+  )
+  public ResponseEntity<byte[]> exportarDireitoFerias(
+    @RequestParam(value = "anoReferente", required = false) Integer anoReferente,
+    @RequestParam(value = "direcaoId", required = false) Long direcaoId) {
+
+    return queryBus.handle(new GetExportDireitoFeriasQuery(anoReferente, direcaoId));
+  }
+
+  @GetMapping(value = "mapa-feria/exportar", produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+  @Operation(
+    summary = "Exportar mapa de férias",
+    description = "Gera ficheiro Excel com férias agendadas e por agendar por direcao e ano. Duas folhas: 'Ferias Agendadas' e 'Ferias por Agendar'.",
+    responses = {
+      @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+    }
+  )
+  public ResponseEntity<byte[]> exportarMapaFeria(
+    @RequestParam(value = "ano") Integer ano,
+    @RequestParam(value = "direcao") Long direcao) {
+
+    return queryBus.handle(new GetExportarMapaFeriaQuery(ano, direcao));
+  }
+
+  @PostMapping(value = "picagens/importar")
+  @Operation(
+    summary = "Importar dados de picagem",
+    description = "Importa dados do relógio de ponto para RH_MOVIMENTOS via INPSRH.IMPORT_DADOS_CONTR_ACESSO. Só importa se não houver dados já processados no período.",
+    responses = {
+      @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+          schema = @Schema(implementation = String.class)))
+    }
+  )
+  public ResponseEntity<java.util.Map<String, Object>> importarDadosPicagem(
+    @RequestParam(value = "dataInicio") String dataInicio,
+    @RequestParam(value = "dataFim") String dataFim) {
+
+    return queryBus.handle(new ImportarDadosPicagemQuery(dataInicio, dataFim));
   }
 
 }

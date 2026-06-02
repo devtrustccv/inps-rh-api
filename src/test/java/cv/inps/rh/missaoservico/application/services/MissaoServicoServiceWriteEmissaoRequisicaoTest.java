@@ -85,7 +85,7 @@ public class MissaoServicoServiceWriteEmissaoRequisicaoTest {
     missao.setId(1L);
     missao.setUuid(missaoUuid);
     missao.setNrMissao(1L);
-    missao.setEtapa("ETAPA_2_ANALISE_RH");
+    missao.setEtapa("ANALISE");
     missao.setEstado("A");
 
     when(missaoServicoRepository.findByUuidOrThrow(missaoUuid)).thenReturn(missao);

@@ -47,7 +47,7 @@ public class MissaoServicoServiceReadPagamentoTest {
     var missao = new MissaoServicoEntity();
     missao.setId(1L);
     missao.setUuid(missaoUuid);
-    missao.setEtapa("ETAPA_7_PAGAMENTO_FINANCEIRO");
+    missao.setEtapa("PAGAMENTO");
     missao.setEstado("A");
     missao.setReferenciaPagamento("REF-999");
     missao.setDataPagamento(LocalDate.of(2026, 3, 20));
@@ -58,7 +58,7 @@ public class MissaoServicoServiceReadPagamentoTest {
 
     assertNotNull(resp.getBody());
     assertEquals(1L, resp.getBody().getMissaoId());
-    assertEquals("ETAPA_7_PAGAMENTO_FINANCEIRO", resp.getBody().getEtapaAtual());
+    assertEquals("PAGAMENTO", resp.getBody().getEtapaAtual());
     assertEquals("A", resp.getBody().getEstado());
     assertEquals("REF-999", resp.getBody().getReferenciaPagamento());
     assertEquals(LocalDate.of(2026, 3, 20), resp.getBody().getDataPagamento());

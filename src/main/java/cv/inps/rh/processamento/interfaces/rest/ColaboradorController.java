@@ -6,14 +6,22 @@ package cv.inps.rh.processamento.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.processamento.application.commands.CriarBaixaMedicaCommand;
 import cv.inps.rh.processamento.application.commands.ImportarMovimentosCommand;
+import cv.inps.rh.processamento.application.commands.ValidarBaixaMedicaCommand;
 import cv.inps.rh.processamento.application.commands.ValidarMovimentoImportadoCommand;
+import cv.inps.rh.processamento.application.dto.BaixaMedicaCalculoDTO;
+import cv.inps.rh.processamento.application.dto.BaixaMedicaDetalheDTO;
+import cv.inps.rh.processamento.application.dto.BaixaMedicaReqDTO;
 import cv.inps.rh.processamento.application.dto.MovimentosImportadosDTO;
 import cv.inps.rh.processamento.application.dto.ValidacaoMovimentoImportadoDTO;
 import cv.inps.rh.processamento.application.dto.WrapperListaColaboradorDTO;
+import cv.inps.rh.processamento.application.queries.GetBaixaMedicaQuery;
+import cv.inps.rh.processamento.application.queries.GetCalculoBaixaMedicaQuery;
 import cv.inps.rh.processamento.application.queries.GetListaBaixamedicaQuery;
 import cv.inps.rh.processamento.application.queries.GetListaLicensaSemVencimentoQuery;
 import cv.inps.rh.processamento.application.queries.GetMovimentosImportadosQuery;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -198,6 +206,76 @@ public class ColaboradorController {
 
     return commandBus.send(command);
 
+  }
+
+  // ---------------------------------------------------------------
+  // Baixa Médica — Novo / Editar / Validar
+  // ---------------------------------------------------------------
+
+  @GetMapping(value = "baixa-medica/calculo")
+  @Operation(
+      summary = "Calcular baixa médica",
+      description = "Preview do cálculo (CALCULO_FALTA_LICENCA) sem gravar. Retorna os dados mensais e escalares do regulamento.",
+      responses = {
+        @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = BaixaMedicaCalculoDTO.class)))
+      }
+  )
+  public ResponseEntity<BaixaMedicaCalculoDTO> calcularBaixaMedica(
+      @RequestParam(value = "colaborador") java.util.UUID colaborador,
+      @RequestParam(value = "dataInicio") String dataInicio,
+      @RequestParam(value = "dataFim") String dataFim,
+      @RequestParam(value = "tipoLicenca") Long tipoLicenca,
+      @RequestParam(value = "dataInicioFalta", required = false) String dataInicioFalta) {
+
+    return queryBus.handle(new GetCalculoBaixaMedicaQuery(colaborador, dataInicio, dataFim, tipoLicenca, dataInicioFalta));
+  }
+
+  @GetMapping(value = "baixa-medica/{pedidoId}")
+  @Operation(
+      summary = "Detalhe baixa médica",
+      description = "Retorna os dados de uma baixa médica para preencher o formulário de edição/validação.",
+      responses = {
+        @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = BaixaMedicaDetalheDTO.class)))
+      }
+  )
+  public ResponseEntity<BaixaMedicaDetalheDTO> getBaixaMedica(
+      @PathVariable(value = "pedidoId") String pedidoId) {
+
+    return queryBus.handle(new GetBaixaMedicaQuery(pedidoId));
+  }
+
+  @PostMapping(value = "baixa-medica")
+  @Operation(
+      summary = "Criar baixa médica",
+      description = "Grava a baixa médica: RH_T_ABONOS_BENEFICIOS, RH_T_AUSENCIA (se aplicável), RH_T_FALTA (por mês), RH_T_PEDIDO, RH_T_VALIDACAO.",
+      responses = {
+        @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = String.class)))
+      }
+  )
+  public ResponseEntity<java.util.Map<String, ?>> criarBaixaMedica(
+      @Valid @RequestBody BaixaMedicaReqDTO req) {
+
+    return commandBus.send(new CriarBaixaMedicaCommand(req));
+  }
+
+  @PostMapping(value = "baixa-medica/{pedidoId}")
+  @Operation(
+      summary = "Validar baixa médica",
+      description = "Valida (SIM) ou desvalida (NAO) um pedido de baixa médica. Actualiza estado em todas as tabelas associadas.",
+      responses = {
+        @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = String.class)))
+      }
+  )
+  public ResponseEntity<java.util.Map<String, ?>> validarBaixaMedica(
+      @RequestParam(value = "validar") EstadoValidacao validar,
+      @PathVariable(value = "pedidoId") String pedidoId,
+      @RequestBody(required = false) BaixaMedicaReqDTO ajuste) {
+
+    return commandBus.send(new ValidarBaixaMedicaCommand(pedidoId, validar, ajuste));
   }
 
 }

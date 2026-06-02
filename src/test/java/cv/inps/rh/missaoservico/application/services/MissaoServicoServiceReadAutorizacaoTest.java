@@ -56,7 +56,7 @@ public class MissaoServicoServiceReadAutorizacaoTest {
     var missao = new MissaoServicoEntity();
     missao.setId(1L);
     missao.setUuid(missaoUuid);
-    missao.setEtapa("ETAPA_6_AUTORIZACAO_RH");
+    missao.setEtapa("CABIMENTO");
     when(missaoServicoRepository.findByUuidOrThrow(missaoUuid)).thenReturn(missao);
 
     var prest = new MissaoPrestadorEntity();
@@ -91,7 +91,7 @@ public class MissaoServicoServiceReadAutorizacaoTest {
 
     assertNotNull(resp.getBody());
     assertEquals(1L, resp.getBody().getMissaoId());
-    assertEquals("ETAPA_6_AUTORIZACAO_RH", resp.getBody().getEtapaAtual());
+    assertEquals("CABIMENTO", resp.getBody().getEtapaAtual());
     assertEquals(1, resp.getBody().getItens().size());
     assertEquals("Colaborador 1", resp.getBody().getItens().get(0).getNome());
   }

@@ -50,6 +50,16 @@
       "objectType": "java"
     },
     {
+      "name": "uuid_pedido",
+      "type": "uuid",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
+    },
+    {
       "name": "nome_colaborador",
       "type": "string",
       "length": 255,
@@ -57,6 +67,16 @@
       "unique": false,
       "primaryKey": false,
       "skipFieldRevision": false
+    },
+    {
+      "name": "id_colaborador",
+      "type": "string",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
     },
     {
       "name": "direcao_id",
@@ -76,6 +96,16 @@
       "unique": false,
       "primaryKey": false,
       "skipFieldRevision": false
+    },
+    {
+      "name": "codigo_direcao",
+      "type": "string",
+      "length": 255,
+      "nullable": true,
+      "unique": false,
+      "primaryKey": false,
+      "skipFieldRevision": false,
+      "objectType": "java"
     },
     {
       "name": "secao_id",

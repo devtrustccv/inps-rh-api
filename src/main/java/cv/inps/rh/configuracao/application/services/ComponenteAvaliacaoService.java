@@ -182,6 +182,7 @@ public class ComponenteAvaliacaoService {
     det.setPonderacaoObjetivo(dto.getPonderacaoObjetivo());
     det.setPonderacaoCompetencia(dto.getPonderacaoCompetencia());
     det.setPonderacaoAtitudePess(dto.getPonderacaoAtitudePessoal());
+    det.setVersao(det.getVersao() != null ? det.getVersao() + 1 : 1);
 
     var linhas = new ArrayList<ParamObjetivoEntity>(dto.getObjectivosInps().size()
         + dto.getCompetenciasComportamentais().size()

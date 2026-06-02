@@ -1008,6 +1008,54 @@
       ]
     },
     {
+      "actionName": "getCalculoValorHoraExtra",
+      "path": "hora-extra/calculo-valor",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "CalcValorHoraExtra",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "funcionarioUuid",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "percentagemReferente",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "horasDiaria",
+          "isRequired": true
+        }
+      ]
+    },
+    {
       "actionName": "getPedidoFeria",
       "path": "feria/{pedidoId}",
       "method": "GET",
@@ -1301,6 +1349,67 @@
           "type": "string",
           "isRequired": true
         }
+      ]
+    },
+    {
+      "actionName": "exportarDireitoFerias",
+      "path": "feria/exportar-direito",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {}
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "anoReferente",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "direcaoId",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "exportarMapaFeria",
+      "path": "mapa-feria/exportar",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {}
+          }
+        }
+      },
+      "requestParams": [
+        { "type": "string", "name": "ano", "isRequired": true },
+        { "type": "string", "name": "direcao", "isRequired": true }
+      ]
+    },
+    {
+      "actionName": "importarDadosPicagem",
+      "path": "picagens/importar",
+      "method": "POST",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": { "type": "string", "objectType": "java" }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        { "type": "string", "name": "dataInicio", "isRequired": true },
+        { "type": "string", "name": "dataFim", "isRequired": true }
       ]
     }
   ],

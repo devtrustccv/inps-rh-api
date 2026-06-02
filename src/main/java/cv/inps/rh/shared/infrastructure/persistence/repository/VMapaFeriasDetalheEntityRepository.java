@@ -27,7 +27,7 @@ public interface VMapaFeriasDetalheEntityRepository extends
   @Query("""
         SELECT f
         FROM VMapaFeriasDetalheEntity f
-        WHERE f.anoId = :ano
+        WHERE f.anoReferente = :ano
           AND f.direcaoId = :direcao
           AND f.dataInicioMapa IS NOT NULL
     """)
@@ -37,7 +37,7 @@ public interface VMapaFeriasDetalheEntityRepository extends
   @Query("""
         SELECT f
         FROM VMapaFeriasDetalheEntity f
-        WHERE f.anoId = :ano
+        WHERE f.anoReferente = :ano
           AND f.direcaoId = :direcao
           AND f.dataInicioMapa IS NULL
     """)

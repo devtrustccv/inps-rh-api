@@ -25,7 +25,7 @@ public class AssiduidadeListDTO  {
   private UUID uuid ;
 
 
-  private UUID uuidFuncionairio ;
+  private UUID uuidFuncionario ;
 
 
   private String nomeColaborador ;

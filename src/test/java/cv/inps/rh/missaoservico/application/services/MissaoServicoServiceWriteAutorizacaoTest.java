@@ -79,7 +79,7 @@ public class MissaoServicoServiceWriteAutorizacaoTest {
     missao.setId(1L);
     missao.setUuid(missaoUuid);
     missao.setEstado("A");
-    missao.setEtapa("ETAPA_5_CABIMENTACAO_SGAL");
+    missao.setEtapa("CABIMENTO");
     when(missaoServicoRepository.findByUuidOrThrow(missaoUuid)).thenReturn(missao);
     when(missaoServicoRepository.save(any(MissaoServicoEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -102,7 +102,7 @@ public class MissaoServicoServiceWriteAutorizacaoTest {
     assertNotNull(resp.getBody());
     assertEquals(missaoUuid.toString(), resp.getBody().get("id"));
     assertEquals("AUTORIZADO", log.getEstadoCabimento());
-    assertEquals("ETAPA_7_PAGAMENTO_FINANCEIRO", missao.getEtapa());
+    assertEquals("PAGAMENTO", missao.getEtapa());
   }
 }
 

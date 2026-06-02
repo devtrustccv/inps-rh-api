@@ -89,4 +89,12 @@ public class DispensaEntity extends AuditEntity {
     private UUID uuid;
 
 
+  @Column(name="decisao_rh")
+    private String decisaoRh;
+
+
+  @Column(name="total_hora")
+    private Integer totalHora;
+
+
 }

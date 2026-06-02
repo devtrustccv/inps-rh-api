@@ -753,13 +753,13 @@ public class MissaoServicoServiceRead {
     if (missao == null || !StringUtils.hasText(missao.getEtapa()))
       return null;
     var etapa = missao.getEtapa();
-    if ("ETAPA_7_PAGAMENTO_FINANCEIRO".equals(etapa)) {
+    if ("PAGAMENTO".equals(etapa)) {
       return (missao.getReferenciaPagamento() != null || missao.getDataPagamento() != null) ? "PAGO" : "POR_PAGAR";
     }
-    if ("ETAPA_6_AUTORIZACAO_RH".equals(etapa) || "ETAPA_5_CABIMENTACAO_SGAL".equals(etapa)) {
+    if ("CABIMENTO".equals(etapa)) {
       return "POR_PAGAR";
     }
-    if ("ETAPA_4_PROCESSAMENTO_LOGISTICO".equals(etapa)) {
+    if ("LOGISTICA".equals(etapa)) {
       return "PENDENTE_FATURA";
     }
     return "PENDENTE_REQUISICAO";

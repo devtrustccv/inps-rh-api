@@ -81,7 +81,7 @@ public class MissaoServicoServiceWriteCancelarTest {
     missao.setId(1L);
     missao.setUuid(uuid);
     missao.setNrMissao(99L);
-    missao.setEtapa("ETAPA_3_EMISSAO_REQUISICAO");
+    missao.setEtapa("EMISSAO_REQUISICAO");
     missao.setEstado("A");
 
     when(missaoServicoRepository.findByUuidOrThrow(uuid)).thenReturn(missao);

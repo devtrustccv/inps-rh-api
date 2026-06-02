@@ -185,7 +185,7 @@ public class HoraExtraReadService {
       item.setDataInicio(e.getDataInicio());
       item.setDataFim(e.getDataFim());
       item.setHorasDiaria(e.getHorasDiarias());
-      item.setPercentagemHora(e.getPercentagem());
+      item.setPercentagemReferente(e.getPercentagemReferente());
       item.setValorDiario(e.getValorDiario());
       var docsHe = documentoEntityRepository
           .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_HORA_EXTRA.name(), e.getUuid());

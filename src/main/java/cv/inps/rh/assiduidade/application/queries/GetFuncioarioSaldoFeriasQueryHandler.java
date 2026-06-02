@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -34,10 +35,10 @@ public class GetFuncioarioSaldoFeriasQueryHandler
 
    var saldo = saldoFeriaService.getSaldo(uuidFunc, query.getAno());
 
-    final Map<String, Object> response = Map.of(
-        "funcionarioUuid", query.getFuncionarioId(),
-        "anoReferencia", query.getAno(),
-        "saldo", saldo);
+    final Map<String, Object> response = new HashMap<>();
+    response.put("funcionarioUuid", query.getFuncionarioId());
+    response.put("anoReferencia", query.getAno());
+    response.put("saldo", saldo);
 
     return ResponseEntity.ok(response);
   }

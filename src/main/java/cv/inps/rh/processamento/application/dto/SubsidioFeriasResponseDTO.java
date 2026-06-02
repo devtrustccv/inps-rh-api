@@ -5,35 +5,24 @@ package cv.inps.rh.processamento.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
 
+import java.util.List;
 
 @IgrpDTO
 public record SubsidioFeriasResponseDTO(
 
     String nome,
 
-    String numero,
+    String funId,
 
-    String dataInicio,
+    String anoReferente,
 
-    String dataFim,
+    String estado,
 
-    String escalao,
+    String valorSubsidio,
 
-    String valorEscalao,
+    String diasTotal,
 
-    String meses,
-
-    String dias,
-
-    String mesesValor,
-
-    String diasValor,
-
-    String total,
-
-    String id,
-
-    String totalRemun,
+    String mesTotal,
 
     String descSalBase,
 
@@ -41,10 +30,12 @@ public record SubsidioFeriasResponseDTO(
 
     String descSubsidio,
 
-    String valorSubsidio,
+    String totalRemun,
 
-    String mesTotal,
+    String diasFeria,
 
-    String diasTotal
+    String id,
+
+    List<SubsidioFeriasDetalheDTO> detalhes
 ) {
 }

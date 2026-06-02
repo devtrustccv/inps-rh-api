@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(dir \"c:\\\\Users\\\\ivanick.santos\\\\Nick-personal\\\\personal-workspace\\\\projects\\\\RH_INPS_SERVICE\\\\src\\\\main\\\\java\\\\cv\\\\inps\\\\rh\\\\shared\\\\infrastructure\\\\persistence\\\\repository\")",
-      "Bash(findstr /i \"contrato\")",
-      "Bash(mvn -version)"
-    ]
-  }
-}

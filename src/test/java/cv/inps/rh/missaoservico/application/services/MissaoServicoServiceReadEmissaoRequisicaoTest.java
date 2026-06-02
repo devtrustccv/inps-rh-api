@@ -72,7 +72,7 @@ public class MissaoServicoServiceReadEmissaoRequisicaoTest {
     var missao = new MissaoServicoEntity();
     missao.setId(1L);
     missao.setUuid(missaoUuid);
-    missao.setEtapa("ETAPA_3_EMISSAO_REQUISICAO");
+    missao.setEtapa("EMISSAO_REQUISICAO");
     when(missaoServicoRepository.findByUuidOrThrow(missaoUuid)).thenReturn(missao);
 
     var prest = new MissaoPrestadorEntity();
@@ -129,7 +129,7 @@ public class MissaoServicoServiceReadEmissaoRequisicaoTest {
 
     assertNotNull(resp.getBody());
     assertEquals(1L, resp.getBody().getMissaoId());
-    assertEquals("ETAPA_3_EMISSAO_REQUISICAO", resp.getBody().getEtapaAtual());
+    assertEquals("EMISSAO_REQUISICAO", resp.getBody().getEtapaAtual());
     assertEquals(1, resp.getBody().getRequisicoes().size());
     assertEquals(10L, resp.getBody().getRequisicoes().get(0).getMissaoPrestId());
     assertEquals(2, resp.getBody().getRequisicoes().get(0).getColaboradores().size());
@@ -143,7 +143,7 @@ public class MissaoServicoServiceReadEmissaoRequisicaoTest {
     var missao = new MissaoServicoEntity();
     missao.setId(1L);
     missao.setUuid(missaoUuid);
-    missao.setEtapa("ETAPA_3_EMISSAO_REQUISICAO");
+    missao.setEtapa("EMISSAO_REQUISICAO");
     when(missaoServicoRepository.findByUuidOrThrow(missaoUuid)).thenReturn(missao);
 
     var prest = new MissaoPrestadorEntity();

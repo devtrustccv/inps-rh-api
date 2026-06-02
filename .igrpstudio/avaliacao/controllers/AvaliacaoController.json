@@ -84,6 +84,11 @@
           "isRequired": false
         },
         {
+          "type": "long",
+          "name": "carreiraId",
+          "isRequired": false
+        },
+        {
           "type": "string",
           "name": "pageNumber",
           "value": "0",
@@ -147,6 +152,21 @@
         {
           "type": "string",
           "name": "colaborador",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "seccaoId",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "carreiraId",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "semestre",
           "isRequired": false
         }
       ]

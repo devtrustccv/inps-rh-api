@@ -59,7 +59,7 @@ public class MissaoServicoServiceReadAnaliseTest {
     var missao = new MissaoServicoEntity();
     missao.setId(1L);
     missao.setUuid(missaoUuid);
-    missao.setEtapa("ETAPA_2_ANALISE_RH");
+    missao.setEtapa("ANALISE");
     when(missaoServicoRepository.findByUuidOrThrow(missaoUuid)).thenReturn(missao);
 
     var p1 = new MissaoPrestadorEntity();
@@ -96,7 +96,7 @@ public class MissaoServicoServiceReadAnaliseTest {
 
     assertNotNull(resp.getBody());
     assertEquals(1L, resp.getBody().getMissaoId());
-    assertEquals("ETAPA_2_ANALISE_RH", resp.getBody().getEtapaAtual());
+    assertEquals("ANALISE", resp.getBody().getEtapaAtual());
     assertEquals(1, resp.getBody().getPrestadores().size());
     assertEquals("P1", resp.getBody().getPrestadores().get(0).getNome());
     assertNotNull(resp.getBody().getNotificacao());

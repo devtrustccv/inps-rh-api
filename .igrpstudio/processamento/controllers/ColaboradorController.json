@@ -227,6 +227,130 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "calcularBaixaMedica",
+      "path": "baixa-medica/calculo",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "BaixaMedicaCalculo",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        { "type": "string", "name": "colaborador", "isRequired": true },
+        { "type": "string", "name": "dataInicio", "isRequired": true },
+        { "type": "string", "name": "dataFim", "isRequired": true },
+        { "type": "string", "name": "tipoLicenca", "isRequired": true },
+        { "type": "string", "name": "dataInicioFalta", "isRequired": false }
+      ]
+    },
+    {
+      "actionName": "getBaixaMedica",
+      "path": "baixa-medica/{pedidoId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "BaixaMedicaDetalhe",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "processamento"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        { "name": "pedidoId", "type": "string", "isRequired": true }
+      ]
+    },
+    {
+      "actionName": "criarBaixaMedica",
+      "path": "baixa-medica",
+      "method": "POST",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "objectType": "java"
+              }
+            }
+          }
+        }
+      },
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "BaixaMedicaReq",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "validarBaixaMedica",
+      "path": "baixa-medica/{pedidoId}",
+      "method": "POST",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "objectType": "java"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "validar",
+          "isRequired": true
+        }
+      ],
+      "pathVariables": [
+        {
+          "name": "pedidoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ],
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "BaixaMedicaReq",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      }
     }
   ],
   "id": "f2v97ka4pz-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica-getListaBaixamedicaCopy"

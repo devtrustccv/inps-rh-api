@@ -44,8 +44,12 @@ public class GetSubsidioFeriasQueryHandler implements QueryHandler<GetSubsidioFe
 
   private Date getDate(String dataProcessamento) {
 
-    if (StringUtils.hasText(dataProcessamento))
-      return Date.valueOf(LocalDate.parse(dataProcessamento));
+    try {
+      if (StringUtils.hasText(dataProcessamento))
+        return Date.valueOf(LocalDate.parse(dataProcessamento));
+    } catch (Exception e) {
+      LOGGER.error(e.getMessage(), e);
+    }
 
     return Date.valueOf(LocalDate.now());
   }

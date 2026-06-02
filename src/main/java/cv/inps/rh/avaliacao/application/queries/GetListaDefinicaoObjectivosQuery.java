@@ -23,6 +23,7 @@ public class GetListaDefinicaoObjectivosQuery implements Query {
   private Long institId;
   @NotNull(message = "The field <cargoId> is required")
   private Long cargoId;
+  private Long carreiraId;
   @NotBlank(message = "The field <pageNumber> is required")
   private String pageNumber;
   @NotBlank(message = "The field <pageSize> is required")

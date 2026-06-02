@@ -93,14 +93,24 @@ public class TimeUtils {
       return 0;
     }
     try {
-      var t1 = java.time.LocalTime.parse(inicio);
-      var t2 = java.time.LocalTime.parse(fim);
-      long minutes = java.time.Duration.between(t1, t2).toMinutes();
-      return (int) Math.max(minutes, 0);
+      return (int) Math.max(toMinutes(fim) - toMinutes(inicio), 0);
     } catch (Exception e) {
       return 0;
     }
+  }
 
+  private static long toMinutes(String time) {
+    // suporta "+0 HH:MM:SS" (Oracle interval) e "HH:MM"
+    String t = time.trim();
+    if (t.startsWith("+")) {
+      // "+0 HH:MM:SS" → extrair HH:MM
+      int spaceIdx = t.indexOf(' ');
+      t = spaceIdx >= 0 ? t.substring(spaceIdx + 1) : t.substring(1);
+    }
+    String[] parts = t.split(":");
+    long hours = Long.parseLong(parts[0]);
+    long minutes = parts.length > 1 ? Long.parseLong(parts[1]) : 0;
+    return hours * 60 + minutes;
   }
 
 
