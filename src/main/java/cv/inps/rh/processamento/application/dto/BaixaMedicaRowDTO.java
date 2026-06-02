@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -48,5 +49,8 @@ public class BaixaMedicaRowDTO {
 
 
   private LocalDate dataFim;
+
+
+  private UUID id;
 
 }

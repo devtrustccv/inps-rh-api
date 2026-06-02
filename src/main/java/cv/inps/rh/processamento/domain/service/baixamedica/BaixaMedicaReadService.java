@@ -90,9 +90,9 @@ public class BaixaMedicaReadService {
     var startDate = StringUtils.hasText(dataInicio) ? DateFormatter.stringToLocalDate(dataInicio) : null;
     var endDate = StringUtils.hasText(dataFim) ? DateFormatter.stringToLocalDate(dataFim) : null;
     var directionId = StringUtils.hasText(query.getDireccaoId()) ? Long.valueOf(query.getDireccaoId()) : null;
-    var funcionarioId = StringUtils.hasText(query.getFuncionarioId()) ? query.getFuncionarioId() : null;
+    var nomefuncionario = StringUtils.hasText(query.getFuncionarioId()) ? query.getFuncionarioId() : null;
 
-    var pageData = abonosRepository.getListaColaboradores(funcionarioId, startDate, endDate, pageRequest);
+    var pageData = abonosRepository.getListaColaboradores(nomefuncionario, startDate, endDate, pageRequest);
 
     var response = new BaixaMedicaListDTO();
     PageMapper.fillPagination(pageData, response);

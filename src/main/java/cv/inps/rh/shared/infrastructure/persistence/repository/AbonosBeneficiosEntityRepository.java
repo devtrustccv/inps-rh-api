@@ -40,19 +40,20 @@ public interface AbonosBeneficiosEntityRepository extends
           ps.nome,
           psd.motivo,
           t.dataInicio,
-          t.dataFim
+          t.dataFim,
+          t.uuid
       )
       FROM AbonosBeneficiosEntity t, TiposRelacionamentoEntity tr
       LEFT JOIN t.funId f
       LEFT JOIN t.paramSitId ps
       LEFT JOIN t.paramSitDetId psd
       WHERE tr.funId.id = f.id AND tr.estActAdm = 1
-          AND (:funcionario IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :funcionario, '%')))
+          AND (:nomefuncionario IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nomefuncionario, '%')))
           AND (:startDate IS NULL OR t.dataInicio = :startDate)
           AND (:endDate IS NULL OR t.dataFim = :endDate)
       """)
   Page<BaixaMedicaRowDTO> getListaColaboradores(
-      @Param("funcionario") String funcionario,
+      @Param("nomefuncionario") String nomefuncionario,
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,
       Pageable pageable
