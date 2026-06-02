@@ -7,6 +7,18 @@
   "readOnly": false,
   "attributes": [
     {
+      "name": "estadodesc",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "estado",
       "objectType": "enum",
       "type": "Estado",

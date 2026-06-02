@@ -21,6 +21,9 @@ import java.util.UUID;
 public class BaixaMedicaRowDTO {
 
 
+  private String estadodesc;
+
+
   private Estado estado;
 
 

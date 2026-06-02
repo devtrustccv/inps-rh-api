@@ -42,7 +42,7 @@
           "isRequired": false
         },
         {
-          "type": "string",
+          "type": "long",
           "name": "direccaoId",
           "isRequired": false
         },
@@ -59,7 +59,7 @@
           "isRequired": false
         },
         {
-          "type": "string",
+          "type": "long",
           "name": "tipoAbonoBeneficioId",
           "isRequired": false
         }
@@ -382,5 +382,5 @@
       }
     }
   ],
-  "id": "f2v97ka4pz-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica-getListaBaixamedicaCopy-getListaBaixamedica"
+  "id": "f2v97ka4pz-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica-getListaBaixamedicaCopy-getListaBaixamedica-getListaBaixamedica"
 }

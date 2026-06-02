@@ -64,10 +64,10 @@ public class ColaboradorController {
       @RequestParam(value = "dataInicio", required = false) String dataInicio,
       @RequestParam(value = "dataFim", required = false) String dataFim,
       @RequestParam(value = "funcionarioId", required = false) String funcionarioId,
-      @RequestParam(value = "direccaoId", required = false) String direccaoId,
+      @RequestParam(value = "direccaoId", required = false) Long direccaoId,
       @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
       @RequestParam(value = "size", required = false, defaultValue = "20") Integer size,
-      @RequestParam(value = "tipoAbonoBeneficioId", required = false) String tipoAbonoBeneficioId) {
+      @RequestParam(value = "tipoAbonoBeneficioId", required = false) Long tipoAbonoBeneficioId) {
 
     final var query = new GetListaBaixamedicaQuery(dataInicio, dataFim, funcionarioId, direccaoId, page, size, tipoAbonoBeneficioId);
 

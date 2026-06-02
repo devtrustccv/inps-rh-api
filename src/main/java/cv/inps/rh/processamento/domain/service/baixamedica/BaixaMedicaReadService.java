@@ -4,6 +4,7 @@ import cv.inps.rh.processamento.application.dto.BaixaMedicaDetalheDTO;
 import cv.inps.rh.processamento.application.dto.BaixaMedicaListDTO;
 import cv.inps.rh.processamento.application.queries.GetBaixaMedicaQuery;
 import cv.inps.rh.processamento.application.queries.GetListaBaixamedicaQuery;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AbonosBeneficiosEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FaltaEntityRepository;
@@ -17,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.UUID;
+
+import static java.util.Optional.ofNullable;
 
 @Service
 @RequiredArgsConstructor
@@ -83,20 +86,30 @@ public class BaixaMedicaReadService {
   public BaixaMedicaListDTO getListaBaixaMedica(GetListaBaixamedicaQuery query) {
 
     var pageRequest = PageRequest.of(query.getPage(), query.getSize());
-
-    var dataInicio = query.getDataInicio();
-    var dataFim = query.getDataFim();
-
-    var startDate = StringUtils.hasText(dataInicio) ? DateFormatter.stringToLocalDate(dataInicio) : null;
-    var endDate = StringUtils.hasText(dataFim) ? DateFormatter.stringToLocalDate(dataFim) : null;
-    var directionId = StringUtils.hasText(query.getDireccaoId()) ? Long.valueOf(query.getDireccaoId()) : null;
+    var startDate = StringUtils.hasText(query.getDataInicio()) ? DateFormatter.stringToLocalDate(query.getDataInicio()) : null;
+    var endDate = StringUtils.hasText(query.getDataFim()) ? DateFormatter.stringToLocalDate(query.getDataFim()) : null;
     var nomefuncionario = StringUtils.hasText(query.getFuncionarioId()) ? query.getFuncionarioId() : null;
 
-    var pageData = abonosRepository.getListaColaboradores(nomefuncionario, startDate, endDate, pageRequest);
+    var pageData = abonosRepository.getListaColaboradores(
+        nomefuncionario,
+        query.getDireccaoId(),
+        startDate,
+        endDate,
+        query.getTipoAbonoBeneficioId(),
+        pageRequest
+    );
+
+    var content = pageData.getContent()
+        .stream()
+        .map(obj -> {
+          obj.setEstadodesc(ofNullable(obj.getEstado()).map(Estado::getDescription).orElse(null));
+          return obj;
+        })
+        .toList();
 
     var response = new BaixaMedicaListDTO();
     PageMapper.fillPagination(pageData, response);
-    response.setContent(pageData.getContent());
+    response.setContent(content);
     return response;
   }
 }

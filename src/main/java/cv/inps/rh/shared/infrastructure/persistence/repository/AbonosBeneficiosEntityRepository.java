@@ -31,9 +31,10 @@ public interface AbonosBeneficiosEntityRepository extends
 
   @Query("""
       SELECT new cv.inps.rh.processamento.application.dto.BaixaMedicaRowDTO(
+          null,
           t.estado,
-          null,
-          null,
+          tr.mobId.instidId.nome,
+          tr.mobId.secaoId.nome,
           f.nome,
           tr.contrVinculoId.vinculoId.nome,
           tr.cargoId.nome,
@@ -51,11 +52,15 @@ public interface AbonosBeneficiosEntityRepository extends
           AND (:nomefuncionario IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nomefuncionario, '%')))
           AND (:startDate IS NULL OR t.dataInicio = :startDate)
           AND (:endDate IS NULL OR t.dataFim = :endDate)
+          AND (:direcaoId IS NULL OR tr.mobId.instidId.id = :direcaoId)
+          AND (:tipoAbonoId IS NULL OR t.paramSitId.id = :tipoAbonoId)
       """)
   Page<BaixaMedicaRowDTO> getListaColaboradores(
       @Param("nomefuncionario") String nomefuncionario,
+      @Param("direcaoId") Long direcaoId,
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,
+      @Param("tipoAbonoId") Long tipoAbonoId,
       Pageable pageable
   );
 

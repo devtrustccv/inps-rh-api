@@ -19,13 +19,13 @@ public class GetListaBaixamedicaQuery implements Query {
   private String dataFim;
   @NotBlank(message = "The field <funcionarioId> is required")
   private String funcionarioId;
-  @NotBlank(message = "The field <direccaoId> is required")
-  private String direccaoId;
+  @NotNull(message = "The field <direccaoId> is required")
+  private Long direccaoId;
   @NotNull(message = "The field <page> is required")
   private Integer page;
   @NotNull(message = "The field <size> is required")
   private Integer size;
-  @NotBlank(message = "The field <tipoAbonoBeneficioId> is required")
-  private String tipoAbonoBeneficioId;
+  @NotNull(message = "The field <tipoAbonoBeneficioId> is required")
+  private Long tipoAbonoBeneficioId;
 
 }
