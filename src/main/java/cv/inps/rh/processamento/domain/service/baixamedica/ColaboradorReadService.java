@@ -1,7 +1,6 @@
 package cv.inps.rh.processamento.domain.service.baixamedica;
 
 import cv.inps.rh.processamento.application.dto.WrapperListaColaboradorDTO;
-import cv.inps.rh.processamento.application.queries.GetListaBaixamedicaQuery;
 import cv.inps.rh.processamento.application.queries.GetListaLicensaSemVencimentoQuery;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
@@ -16,10 +15,6 @@ import org.springframework.util.StringUtils;
 public class ColaboradorReadService {
 
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
-
-  public WrapperListaColaboradorDTO getListaBaixaMedica(GetListaBaixamedicaQuery query) {
-    return getListas(query.getPage(), query.getSize(), query.getDataInicio(), query.getDataFim(), query.getDireccao(), query.getColaborador());
-  }
 
   public WrapperListaColaboradorDTO getListaLicensaSemvencimento(GetListaLicensaSemVencimentoQuery query) {
     return getListas(query.getPage(), query.getSize(), query.getDataInicio(), query.getDataFim(), query.getDireccao(), query.getColaborador());
@@ -40,7 +35,7 @@ public class ColaboradorReadService {
     var pageData = tiposRelacionamentoEntityRepository.getListaColaboradores(directionId, funcionario, startDate, endDate, pageRequest);
     pageData.forEach(obj -> obj.setEstadoSituacaoLaboralDesc(obj.getEstadoSituacaoLaboral().getDescription()));
 
-    // TODO 06/12/2025 18:19 falta defenir condicao pa saber k o registo é uma LICENSA SEM VENCIMENTO / BAIXA MEDICA ???
+    // TODO 06/12/2025 18:19 falta defenir condicao pa saber k o registo é uma LICENSA SEM VENCIMENTO
     // TODO 06/12/2025 18:19 ESTADO P, A ???
 
     var response = new WrapperListaColaboradorDTO();

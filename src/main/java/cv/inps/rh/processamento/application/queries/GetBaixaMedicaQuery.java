@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GetBaixaMedicaQuery implements Query {
 
-  @NotBlank(message = "The field pedidoId is required")
+  @NotBlank(message = "The field <pedidoId> is required")
   private String pedidoId;
 
 }
