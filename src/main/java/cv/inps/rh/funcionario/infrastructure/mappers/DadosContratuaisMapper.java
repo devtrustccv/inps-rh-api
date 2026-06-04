@@ -27,7 +27,7 @@ public class DadosContratuaisMapper {
   public TiposRelacionamentoEntity toRelacionamento(DadosContratuaisReqDTO dc, Estado estado) {
     if (dc == null) return null;
     var tr = new TiposRelacionamentoEntity();
-    tr.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
+    tr.setCargoId(dc.getCargoPosicaoId() != null ? em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()) : null);
     tr.setSalario(dc.getSalario());
     tr.setMoeda(dc.getMoeda());
     tr.setTipoSituacao("NOVO_CONTRATO");
@@ -43,7 +43,7 @@ public class DadosContratuaisMapper {
 
   public void toUpdateRelacionamento(TiposRelacionamentoEntity tr, DadosContratuaisReqDTO dc) {
     if (dc == null) return ;
-    tr.setCargoId(em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
+    tr.setCargoId(dc.getCargoPosicaoId() != null ? em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()) : null);
     tr.setSalario(dc.getSalario());
     tr.setMoeda(dc.getMoeda());
     tr.setTipoSituacao("NOVO_CONTRATO");

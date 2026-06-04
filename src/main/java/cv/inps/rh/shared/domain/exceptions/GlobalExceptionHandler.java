@@ -123,15 +123,63 @@ public class GlobalExceptionHandler {
     Throwable rootCause = getRootCause(ex);
 
     ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-    problem.setTitle("Data Integrity Violation");
+    problem.setTitle("Erro de dados");
 
     if (rootCause instanceof SQLException sqlEx) {
-      problem.setDetail(sqlEx.getMessage()); // retorna a mensagem completa do Oracle
+      String msg = sqlEx.getMessage();
+      if (msg != null) {
+        if (msg.contains("ORA-01400")) {
+          // ORA-01400: cannot insert NULL into ("SCHEMA"."TABLE"."COLUMN")
+          String column = extractOraColumn(msg);
+          problem.setDetail(column != null
+              ? "Campo obrigatório em falta: '" + column.toLowerCase() + "'"
+              : "Campo obrigatório em falta.");
+        } else if (msg.contains("ORA-02291")) {
+          // ORA-02291: integrity constraint (SCHEMA.FK_NAME) violated - parent key not found
+          String constraint = extractOraConstraint(msg);
+          problem.setDetail(constraint != null
+              ? "Referência inválida (constraint: " + constraint + "): o valor indicado não existe."
+              : "Referência inválida: o valor indicado não existe na tabela relacionada.");
+        } else if (msg.contains("ORA-00001")) {
+          // ORA-00001: unique constraint (SCHEMA.UK_NAME) violated
+          String constraint = extractOraConstraint(msg);
+          problem.setDetail(constraint != null
+              ? "Valor duplicado (constraint: " + constraint + "): já existe um registo com este valor."
+              : "Já existe um registo com este valor.");
+        } else {
+          problem.setDetail(msg);
+        }
+      } else {
+        problem.setDetail("Erro interno de base de dados.");
+      }
     } else {
       problem.setDetail(ex.getMostSpecificCause().getMessage());
     }
 
+    LOGGER.error("DataIntegrityViolationException: {}", ex.getMostSpecificCause().getMessage());
     return problem;
+  }
+
+  /** Extrai o nome da coluna de mensagens ORA-01400: ...("SCHEMA"."TABLE"."COLUMN") */
+  private String extractOraColumn(String message) {
+    int start = message.lastIndexOf(".\"");
+    int end = message.lastIndexOf("\")");
+    if (start != -1 && end > start + 2) {
+      return message.substring(start + 2, end);
+    }
+    return null;
+  }
+
+  /** Extrai o nome da constraint de mensagens ORA-02291/ORA-00001: ...(SCHEMA.CONSTRAINT)... */
+  private String extractOraConstraint(String message) {
+    int start = message.indexOf('(');
+    int end = message.indexOf(')');
+    if (start != -1 && end > start + 1) {
+      String full = message.substring(start + 1, end); // e.g. "INPSRH.FK_FUN_LOCAL_NASC"
+      int dot = full.indexOf('.');
+      return dot != -1 ? full.substring(dot + 1) : full;
+    }
+    return null;
   }
 
   @ExceptionHandler(JpaObjectRetrievalFailureException.class)
