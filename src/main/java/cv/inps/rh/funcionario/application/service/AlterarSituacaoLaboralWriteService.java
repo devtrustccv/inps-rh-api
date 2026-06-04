@@ -92,7 +92,7 @@ public class AlterarSituacaoLaboralWriteService {
         var carreira = tiposRelacionamentoAtual.getCarreiraId();
         if (carreira != null) carreira.setDataFim(dataFimValidacao);
 
-        var contrato = tiposRelacionamentoAtual.getContrVinculoId().getContratoId();
+        var contrato = tiposRelacionamentoAtual.getContrVinculoId();
         if (contrato != null) contrato.setDataFim(dataFimValidacao);
 
         funcionario.getDefinicoesRenumeracoes().forEach(r -> r.setDataFim(dataFimValidacao));
