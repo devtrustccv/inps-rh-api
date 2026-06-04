@@ -62,8 +62,9 @@ public class FuncionarioReadService {
       if (query.getCarreira() != null)
         predicates.add(cb.equal(root.get(RhVDossieEntity_.carreiraId), query.getCarreira()));
 
-      if (StringUtils.hasText(query.getEstado()))
-        predicates.add(cb.equal(root.get(RhVDossieEntity_.estadoColaborador), query.getEstado()));
+      // Por defeito lista apenas colaboradores com estado = 'A' (spec 3.3)
+      var estadoFiltro = StringUtils.hasText(query.getEstado()) ? query.getEstado() : Estado.A.name();
+      predicates.add(cb.equal(root.get(RhVDossieEntity_.estadoColaborador), estadoFiltro));
 
       if (StringUtils.hasText(query.getDataInicio())) {
         var di = DateFormatter.stringToLocalDate(query.getDataInicio());
@@ -92,7 +93,7 @@ public class FuncionarioReadService {
           dto.setId(d.getFunId());
           dto.setUuid(d.getFunUuid() != null ? d.getFunUuid().toString() : null);
           dto.setNome(d.getNome());
-          dto.setNumColaborador(d.getIdColaborador() + "");
+          dto.setNumColaborador(d.getIdColaborador() != null ? d.getIdColaborador().toString() : null);
           dto.setCargo(d.getCargoDesc());
           dto.setDireccao(d.getDirecaoDesc());
           dto.setSeccao(d.getSeccaoDesc());
