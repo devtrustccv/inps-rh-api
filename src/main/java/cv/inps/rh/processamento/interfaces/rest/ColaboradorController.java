@@ -10,18 +10,8 @@ import cv.inps.rh.processamento.application.commands.CriarBaixaMedicaCommand;
 import cv.inps.rh.processamento.application.commands.ImportarMovimentosCommand;
 import cv.inps.rh.processamento.application.commands.ValidarBaixaMedicaCommand;
 import cv.inps.rh.processamento.application.commands.ValidarMovimentoImportadoCommand;
-import cv.inps.rh.processamento.application.dto.BaixaMedicaCalculoDTO;
-import cv.inps.rh.processamento.application.dto.BaixaMedicaDetalheDTO;
-import cv.inps.rh.processamento.application.dto.BaixaMedicaReqDTO;
-import cv.inps.rh.processamento.application.dto.MovimentosImportadosDTO;
-import cv.inps.rh.processamento.application.dto.ValidacaoMovimentoImportadoDTO;
-import cv.inps.rh.processamento.application.dto.WrapperListaColaboradorDTO;
-import cv.inps.rh.processamento.application.queries.GetBaixaMedicaQuery;
-import cv.inps.rh.processamento.application.queries.GetCalculoBaixaMedicaQuery;
-import cv.inps.rh.processamento.application.queries.GetListaBaixamedicaQuery;
-import cv.inps.rh.processamento.application.queries.GetListaLicensaSemVencimentoQuery;
-import cv.inps.rh.processamento.application.queries.GetMovimentosImportadosQuery;
-import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import cv.inps.rh.processamento.application.dto.*;
+import cv.inps.rh.processamento.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -63,22 +53,23 @@ public class ColaboradorController {
               content = @Content(
                   mediaType = "application/json",
                   schema = @Schema(
-                      implementation = WrapperListaColaboradorDTO.class,
+                      implementation = BaixaMedicaListDTO.class,
                       type = "object")
               )
           )
       }
   )
 
-  public ResponseEntity<WrapperListaColaboradorDTO> getListaBaixamedica(
+  public ResponseEntity<BaixaMedicaListDTO> getListaBaixamedica(
       @RequestParam(value = "dataInicio", required = false) String dataInicio,
       @RequestParam(value = "dataFim", required = false) String dataFim,
-      @RequestParam(value = "colaborador", required = false) String colaborador,
-      @RequestParam(value = "direccao", required = false) String direccao,
-      @RequestParam(value = "page", required = false, defaultValue = "0") String page,
-      @RequestParam(value = "size", required = false, defaultValue = "20") String size) {
+      @RequestParam(value = "funcionarioId", required = false) String funcionarioId,
+      @RequestParam(value = "direccaoId", required = false) Long direccaoId,
+      @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") Integer size,
+      @RequestParam(value = "tipoAbonoBeneficioId", required = false) Long tipoAbonoBeneficioId) {
 
-    final var query = new GetListaBaixamedicaQuery(dataInicio, dataFim, colaborador, direccao, page, size);
+    final var query = new GetListaBaixamedicaQuery(dataInicio, dataFim, funcionarioId, direccaoId, page, size, tipoAbonoBeneficioId);
 
     return queryBus.handle(query);
 
@@ -208,74 +199,124 @@ public class ColaboradorController {
 
   }
 
-  // ---------------------------------------------------------------
-  // Baixa Médica — Novo / Editar / Validar
-  // ---------------------------------------------------------------
-
-  @GetMapping(value = "baixa-medica/calculo")
+  @GetMapping(
+      value = "baixa-medica/calculo"
+  )
   @Operation(
-      summary = "Calcular baixa médica",
-      description = "Preview do cálculo (CALCULO_FALTA_LICENCA) sem gravar. Retorna os dados mensais e escalares do regulamento.",
+      summary = "Calcular baixa medica",
+      description = "Calcular baixa medica",
       responses = {
-        @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = BaixaMedicaCalculoDTO.class)))
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = BaixaMedicaCalculoDTO.class,
+                      type = "object")
+              )
+          )
       }
   )
+
   public ResponseEntity<BaixaMedicaCalculoDTO> calcularBaixaMedica(
-      @RequestParam(value = "colaborador") java.util.UUID colaborador,
+      @RequestParam(value = "colaborador") String colaborador,
       @RequestParam(value = "dataInicio") String dataInicio,
       @RequestParam(value = "dataFim") String dataFim,
-      @RequestParam(value = "tipoLicenca") Long tipoLicenca,
+      @RequestParam(value = "tipoLicenca") String tipoLicenca,
       @RequestParam(value = "dataInicioFalta", required = false) String dataInicioFalta) {
 
-    return queryBus.handle(new GetCalculoBaixaMedicaQuery(colaborador, dataInicio, dataFim, tipoLicenca, dataInicioFalta));
+    final var query = new CalcularBaixaMedicaQuery(colaborador, dataInicio, dataFim, tipoLicenca, dataInicioFalta);
+
+    return queryBus.handle(query);
+
   }
 
-  @GetMapping(value = "baixa-medica/{pedidoId}")
+  @GetMapping(
+      value = "baixa-medica/{pedidoId}"
+  )
   @Operation(
-      summary = "Detalhe baixa médica",
-      description = "Retorna os dados de uma baixa médica para preencher o formulário de edição/validação.",
+      summary = "Get baixa medica",
+      description = "Get baixa medica",
       responses = {
-        @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = BaixaMedicaDetalheDTO.class)))
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = BaixaMedicaDetalheDTO.class,
+                      type = "object")
+              )
+          )
       }
   )
+
   public ResponseEntity<BaixaMedicaDetalheDTO> getBaixaMedica(
       @PathVariable(value = "pedidoId") String pedidoId) {
 
-    return queryBus.handle(new GetBaixaMedicaQuery(pedidoId));
+    final var query = new GetBaixaMedicaQuery(pedidoId);
+
+    return queryBus.handle(query);
+
   }
 
-  @PostMapping(value = "baixa-medica")
+  @PostMapping(
+      value = "baixa-medica"
+  )
   @Operation(
-      summary = "Criar baixa médica",
-      description = "Grava a baixa médica: RH_T_ABONOS_BENEFICIOS, RH_T_AUSENCIA (se aplicável), RH_T_FALTA (por mês), RH_T_PEDIDO, RH_T_VALIDACAO.",
+      summary = "Criar baixa medica",
+      description = "Criar baixa medica",
       responses = {
-        @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = String.class)))
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
       }
   )
-  public ResponseEntity<java.util.Map<String, ?>> criarBaixaMedica(
-      @Valid @RequestBody BaixaMedicaReqDTO req) {
 
-    return commandBus.send(new CriarBaixaMedicaCommand(req));
+  public ResponseEntity<String> criarBaixaMedica(@Valid @RequestBody BaixaMedicaReqDTO criarBaixaMedicaRequest
+  ) {
+
+    final var command = new CriarBaixaMedicaCommand(criarBaixaMedicaRequest);
+
+    return commandBus.send(command);
+
   }
 
-  @PostMapping(value = "baixa-medica/{pedidoId}")
+  @PostMapping(
+      value = "baixa-medica/{pedidoId}"
+  )
   @Operation(
-      summary = "Validar baixa médica",
-      description = "Valida (SIM) ou desvalida (NAO) um pedido de baixa médica. Actualiza estado em todas as tabelas associadas.",
+      summary = "Validar baixa medica",
+      description = "Validar baixa medica",
       responses = {
-        @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = String.class)))
+          @ApiResponse(
+              responseCode = "200",
+
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = String.class,
+                      type = "String")
+              )
+          )
       }
   )
-  public ResponseEntity<java.util.Map<String, ?>> validarBaixaMedica(
-      @RequestParam(value = "validar") EstadoValidacao validar,
-      @PathVariable(value = "pedidoId") String pedidoId,
-      @RequestBody(required = false) BaixaMedicaReqDTO ajuste) {
 
-    return commandBus.send(new ValidarBaixaMedicaCommand(pedidoId, validar, ajuste));
+  public ResponseEntity<String> validarBaixaMedica(@Valid @RequestBody BaixaMedicaReqDTO validarBaixaMedicaRequest
+      , @RequestParam(value = "validar") String validar, @PathVariable(value = "pedidoId") String pedidoId) {
+
+    final var command = new ValidarBaixaMedicaCommand(validarBaixaMedicaRequest, validar, pedidoId);
+
+    return commandBus.send(command);
+
   }
 
 }

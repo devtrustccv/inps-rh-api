@@ -25,27 +25,27 @@ import java.util.UUID;
 @Table(name = "RH_T_ABONOS_BENEFICIOS")
 public class AbonosBeneficiosEntity extends AuditEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_abonos_beneficios")
-    @SequenceGenerator(name = "seq_abonos_beneficios", sequenceName = "SEQ_ABONOS_BENEFICIOS", allocationSize = 1)
-    @Column(name = "id", unique = true, nullable = false)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_abonos_beneficios")
+  @SequenceGenerator(name = "seq_abonos_beneficios", sequenceName = "SEQ_ABONOS_BENEFICIOS", allocationSize = 1)
+  @Column(name = "id", unique = true, nullable = false)
+  private Long id;
 
 
-    @Column(name="uuid")
-    private UUID uuid;
+  @Column(name = "uuid")
+  private UUID uuid;
 
 
-    @Column(name="data_inicio")
-    private LocalDate dataInicio;
+  @Column(name = "data_inicio")
+  private LocalDate dataInicio;
 
 
-    @Column(name="data_fim")
-    private LocalDate dataFim;
+  @Column(name = "data_fim")
+  private LocalDate dataFim;
 
 
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fun_id", referencedColumnName = "id")
+  @JoinColumn(name = "fun_id", referencedColumnName = "id")
     private FuncionarioEntity funId;
 
 

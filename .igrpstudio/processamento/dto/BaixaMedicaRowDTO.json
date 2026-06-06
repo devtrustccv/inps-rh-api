@@ -1,10 +1,60 @@
 {
   "type": "dto",
   "module": "processamento",
-  "name": "SubsidioFeriasResponse",
-  "template": "record",
+  "name": "BaixaMedicaRow",
+  "template": "classic",
   "enableCustonValidation": false,
+  "readOnly": false,
   "attributes": [
+    {
+      "name": "estadodesc",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "estado",
+      "objectType": "enum",
+      "type": "Estado",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "shared"
+    },
+    {
+      "name": "direcao",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "seccao",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
     {
       "name": "nome",
       "objectType": "java",
@@ -18,7 +68,7 @@
       "primaryKey": false
     },
     {
-      "name": "funId",
+      "name": "vinculo",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -30,7 +80,7 @@
       "primaryKey": false
     },
     {
-      "name": "anoReferente",
+      "name": "categoria",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -42,7 +92,7 @@
       "primaryKey": false
     },
     {
-      "name": "estado",
+      "name": "tipoLicensa",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -54,7 +104,7 @@
       "primaryKey": false
     },
     {
-      "name": "valorSubsidio",
+      "name": "motivo",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -66,9 +116,9 @@
       "primaryKey": false
     },
     {
-      "name": "diasTotal",
+      "name": "dataInicio",
       "objectType": "java",
-      "type": "string",
+      "type": "date",
       "required": false,
       "before": false,
       "after": false,
@@ -78,69 +128,9 @@
       "primaryKey": false
     },
     {
-      "name": "mesTotal",
+      "name": "dataFim",
       "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "descSalBase",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "valorSalBase",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "descSubsidio",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "totalRemun",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "diasFeria",
-      "objectType": "java",
-      "type": "string",
+      "type": "date",
       "required": false,
       "before": false,
       "after": false,
@@ -152,7 +142,7 @@
     {
       "name": "id",
       "objectType": "java",
-      "type": "string",
+      "type": "uuid",
       "required": false,
       "before": false,
       "after": false,
@@ -160,21 +150,7 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
-    },
-    {
-      "name": "detalhes",
-      "objectType": "dto",
-      "type": "SubsidioFeriasDetalhe",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false,
-      "module": "processamento",
-      "collectionType": "list"
     }
   ],
-  "id": "subsidio-feria-response-01-vf"
+  "id": "vb7fnwq1ct"
 }
