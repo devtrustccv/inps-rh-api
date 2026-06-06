@@ -103,6 +103,17 @@ public class FuncionarioRules {
 
   }
 
+  public List<DefinicaoRemuneracaoEntity> getRemuneracoesAssociadosPendentes(Long tipoRelacionamentoId) {
+
+    return tipoRelRemPagEntityRepository
+        .findByTiprelIdAndEstado(tipoRelacionamentoId, Estado.P)
+        .stream()
+        .map(TipoRelRemPagEntity::getRemId)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+
+  }
+
   public List<DefPagamentoEntity> getPagamentosDescontosAssociadosAtivos(Long tipoRelacionamentoId) {
 
     return tipoRelRemPagEntityRepository
@@ -111,6 +122,17 @@ public class FuncionarioRules {
         .map(TipoRelRemPagEntity::getPagId)
         .filter(Objects::nonNull)
         //.distinct()
+        .collect(Collectors.toList());
+
+  }
+
+  public List<DefPagamentoEntity> getPagamentosDescontosAssociadosPendentes(Long tipoRelacionamentoId) {
+
+    return tipoRelRemPagEntityRepository
+        .findByTiprelIdAndEstado(tipoRelacionamentoId, Estado.P)
+        .stream()
+        .map(TipoRelRemPagEntity::getPagId)
+        .filter(Objects::nonNull)
         .collect(Collectors.toList());
 
   }
