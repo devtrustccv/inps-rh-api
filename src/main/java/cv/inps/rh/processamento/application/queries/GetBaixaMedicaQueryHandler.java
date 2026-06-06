@@ -2,7 +2,7 @@ package cv.inps.rh.processamento.application.queries;
 
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import cv.inps.rh.processamento.application.dto.BaixaMedicaDetalheDTO;
+import cv.inps.rh.processamento.application.dto.BaixaMedicaRowDTO;
 import cv.inps.rh.processamento.domain.service.baixamedica.BaixaMedicaReadService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GetBaixaMedicaQueryHandler
-    implements QueryHandler<GetBaixaMedicaQuery, ResponseEntity<BaixaMedicaDetalheDTO>> {
+    implements QueryHandler<GetBaixaMedicaQuery, ResponseEntity<BaixaMedicaRowDTO>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetBaixaMedicaQueryHandler.class);
 
@@ -23,7 +23,7 @@ public class GetBaixaMedicaQueryHandler
   }
 
   @IgrpQueryHandler
-  public ResponseEntity<BaixaMedicaDetalheDTO> handle(GetBaixaMedicaQuery query) {
+  public ResponseEntity<BaixaMedicaRowDTO> handle(GetBaixaMedicaQuery query) {
 
     LOGGER.debug("GetBaixaMedicaQuery: {}", query);
 

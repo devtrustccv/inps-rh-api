@@ -6,26 +6,19 @@ package cv.inps.rh.processamento.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import cv.inps.rh.processamento.application.commands.*;
-import cv.inps.rh.processamento.application.dto.BaixaMedicaCalculoDTO;
-import cv.inps.rh.processamento.application.dto.BaixaMedicaDetalheDTO;
-import cv.inps.rh.processamento.application.dto.BaixaMedicaListDTO;
-import cv.inps.rh.processamento.application.dto.BaixaMedicaReqDTO;
-import cv.inps.rh.processamento.application.dto.MovimentosImportadosDTO;
-import cv.inps.rh.processamento.application.dto.ValidacaoMovimentoImportadoDTO;
-import cv.inps.rh.processamento.application.dto.WrapperListaColaboradorDTO;
+import cv.inps.rh.processamento.application.commands.CriarBaixaMedicaCommand;
+import cv.inps.rh.processamento.application.commands.ImportarMovimentosCommand;
+import cv.inps.rh.processamento.application.commands.ValidarBaixaMedicaCommand;
+import cv.inps.rh.processamento.application.commands.ValidarMovimentoImportadoCommand;
+import cv.inps.rh.processamento.application.dto.*;
 import cv.inps.rh.processamento.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -193,7 +186,7 @@ public class ColaboradorController {
         return queryBus.handle(query);
     }
 
-    @GetMapping(value = "baixa-medica/{pedidoId}")
+  @GetMapping(value = "baixa-medica/{baixaMedicaId}")
     @Operation(
         summary = "Get baixa medica",
         description = "Get baixa medica",
@@ -202,13 +195,15 @@ public class ColaboradorController {
                 responseCode = "200",
                 content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = BaixaMedicaDetalheDTO.class)
+                    schema = @Schema(implementation = BaixaMedicaRowDTO.class)
                 )
             ),
         }
     )
-    public ResponseEntity<BaixaMedicaDetalheDTO> getBaixaMedica(@PathVariable(value = "pedidoId") String pedidoId) {
-        final var query = new GetBaixaMedicaQuery(pedidoId);
+  public ResponseEntity<BaixaMedicaRowDTO> getBaixaMedica(
+      @PathVariable(value = "baixaMedicaId") String baixaMedicaId
+  ) {
+    final var query = new GetBaixaMedicaQuery(baixaMedicaId);
 
         return queryBus.handle(query);
     }
