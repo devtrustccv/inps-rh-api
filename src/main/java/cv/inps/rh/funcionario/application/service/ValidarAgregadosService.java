@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.application.dto.ValidarAgregadosDependentesDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.FamiliarMapper;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
@@ -42,7 +43,7 @@ public class ValidarAgregadosService {
     }*/
 
     var familiares = familiarMapper
-        .syncFamiliares(funcionario.getFamiliares(), agregadoDependenteReqDTO, funcionario);
+        .syncFamiliares(funcionario.getFamiliares(), agregadoDependenteReqDTO, funcionario, Estado.A);
     funcionario.setFamiliares(familiares);
 
     /*if (temPendentes) {
@@ -66,7 +67,7 @@ public class ValidarAgregadosService {
 
     funcionario.getValidacoes().add(validacao);*/
 
-    var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+    funcionarioEntityRepository.saveAndFlush(funcionario);
 
     /*validacaoEntityRepository
         .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(

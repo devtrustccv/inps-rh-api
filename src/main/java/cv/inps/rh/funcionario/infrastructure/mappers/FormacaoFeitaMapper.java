@@ -44,7 +44,7 @@ public class FormacaoFeitaMapper {
   }
 
   public java.util.List<FormacaoFeitaEntity> syncFormacoes(java.util.List<FormacaoFeitaEntity> existingList,
-                            java.util.List<FormacaoProfissionalReqDTO> newList, FuncionarioEntity fun) {
+                            java.util.List<FormacaoProfissionalReqDTO> newList, FuncionarioEntity fun, Estado estadoParaNovos) {
     if (newList == null) return existingList;
     for (FormacaoProfissionalReqDTO dto : newList) {
       FormacaoFeitaEntity found = null;
@@ -62,7 +62,7 @@ public class FormacaoFeitaMapper {
         found.setCurso(dto.getDesignacao());
         found.setNivel(dto.getNivel());
       } else {
-        FormacaoFeitaEntity novo = toEntity(dto, Estado.P, fun);
+        FormacaoFeitaEntity novo = toEntity(dto, estadoParaNovos, fun);
         existingList.add(novo);
       }
     }
@@ -70,7 +70,7 @@ public class FormacaoFeitaMapper {
     for (FormacaoFeitaEntity existing : existingList) {
       boolean stillExists = newList.stream()
           .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
-      if (!stillExists) {
+      if (!stillExists && existing.getEstado() != Estado.E && existing.getEstado() != Estado.I) {
         existing.setEstado(Estado.E);
       }
     }

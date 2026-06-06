@@ -7,6 +7,7 @@ import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.ExperienciaProfissionalMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.FormacaoFeitaMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.HabilitacaoLiterariaMapper;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
@@ -49,15 +50,15 @@ public class ValidarDadosAcademicosService {
 
     var habilitacoesLiterarias = habilitacaoLiterariaMapper
         .syncHabilitacoes(funcionario.getHabilitacoesLiterarias(),
-        dadosAcademicosProfReqDTO.getHabilitacoesLiterarias(), funcionario);
+        dadosAcademicosProfReqDTO.getHabilitacoesLiterarias(), funcionario, Estado.A);
 
     var formacoesFeitas = formacaoFeitaMapper
         .syncFormacoes(funcionario.getFormacoesFeitas(),
-        dadosAcademicosProfReqDTO.getFormacoesFeitas(), funcionario);
+        dadosAcademicosProfReqDTO.getFormacoesFeitas(), funcionario, Estado.A);
 
     var experienciasProfissionais = experienciaProfissionalMapper
         .syncExperiencias(funcionario.getExperienciasProfissionais(),
-        dadosAcademicosProfReqDTO.getExperienciasProfssionais(), funcionario);
+        dadosAcademicosProfReqDTO.getExperienciasProfssionais(), funcionario, Estado.A);
 
     funcionario.setHabilitacoesLiterarias(habilitacoesLiterarias);
     funcionario.setFormacoesFeitas(formacoesFeitas);
@@ -85,7 +86,7 @@ public class ValidarDadosAcademicosService {
 
     funcionario.getValidacoes().add(validacao);*/
 
-    var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+    funcionarioEntityRepository.saveAndFlush(funcionario);
 
     /*validacaoEntityRepository
         .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(

@@ -50,7 +50,7 @@ public class HabilitacaoLiterariaMapper {
   }
 
   public java.util.List<HabilitacaoLiterariaEntity> syncHabilitacoes(List<HabilitacaoLiterariaEntity> existingList,
-                               java.util.List<HabilitacaoLiterariaReqDTO> newList, FuncionarioEntity fun) {
+                               java.util.List<HabilitacaoLiterariaReqDTO> newList, FuncionarioEntity fun, Estado estadoParaNovos) {
     if (newList == null) return existingList;
     for (HabilitacaoLiterariaReqDTO dto : newList) {
       HabilitacaoLiterariaEntity found = null;
@@ -71,7 +71,7 @@ public class HabilitacaoLiterariaMapper {
         found.setDataFim(dto.getDataTermino());
         found.setConcluido(dto.getConcluido());
       } else {
-        HabilitacaoLiterariaEntity novo = toEntity(dto, Estado.P, fun);
+        HabilitacaoLiterariaEntity novo = toEntity(dto, estadoParaNovos, fun);
         existingList.add(novo);
       }
     }
@@ -80,7 +80,7 @@ public class HabilitacaoLiterariaMapper {
       boolean stillExists = newList.stream()
           .anyMatch(dto ->
               java.util.Objects.equals(dto.getId(), existing.getId()));
-      if (!stillExists) {
+      if (!stillExists && existing.getEstado() != Estado.E && existing.getEstado() != Estado.I) {
         existing.setEstado(Estado.E);
       }
     }
