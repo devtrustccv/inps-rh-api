@@ -38,7 +38,7 @@
         },
         {
           "type": "string",
-          "name": "funcionarioId",
+          "name": "nomeFuncionario",
           "isRequired": false
         },
         {
@@ -382,5 +382,5 @@
       }
     }
   ],
-  "id": "f2v97ka4pz-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica-getListaBaixamedicaCopy-getListaBaixamedica-getListaBaixamedica"
+  "id": "f2v97ka4pz-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica-getListaBaixamedicaCopy-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica"
 }

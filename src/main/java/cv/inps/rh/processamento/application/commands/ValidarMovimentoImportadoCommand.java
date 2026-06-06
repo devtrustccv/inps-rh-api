@@ -2,7 +2,7 @@ package cv.inps.rh.processamento.application.commands;
 
 import cv.igrp.framework.core.domain.Command;
 import cv.inps.rh.processamento.application.dto.ValidacaoMovimentoImportadoDTO;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,9 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ValidarMovimentoImportadoCommand implements Command {
 
+    private ValidacaoMovimentoImportadoDTO validacaomovimentoimportado;
 
-  private ValidacaoMovimentoImportadoDTO validacaomovimentoimportado;
-  @NotBlank(message = "The field <movimentoId> is required")
-  private String movimentoId;
-
+    @NotBlank(message = "The field <movimentoId> is required")
+    private String movimentoId;
 }
