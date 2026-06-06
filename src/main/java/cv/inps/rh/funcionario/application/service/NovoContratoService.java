@@ -279,16 +279,14 @@ public class NovoContratoService {
     if (CollectionUtils.isEmpty(vinculoTipoMovimentoREM))
       return true;
 
-    var renumeracao = definicaoRemuneracaoEntityRepository
-        .findByFunIdAndTmIdAndEstado(funcionario, vinculoTipoMovimentoREM.getFirst().getTmId(), Estado.A).getFirst();
-
-    if (renumeracao != null) {
-      if (!Objects.equals(renumeracao.getValor(), dc.getSalario())) {
-        return true;
-      }
+    var renumeracaoList = definicaoRemuneracaoEntityRepository
+        .findByFunIdAndTmIdAndEstado(funcionario, vinculoTipoMovimentoREM.getFirst().getTmId(), Estado.A);
+    if (renumeracaoList.isEmpty()) {
+      return true;
     }
 
-    return false;
+    var renumeracao = renumeracaoList.getFirst();
+    return !Objects.equals(renumeracao.getValor(), dc.getSalario());
   }
 
   private boolean houveMudancaFuncionalCarreira(CarreiraEntity atual, DadosContratuaisReqDTO dc) {
