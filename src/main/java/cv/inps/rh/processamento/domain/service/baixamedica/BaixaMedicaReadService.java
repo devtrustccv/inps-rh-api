@@ -47,7 +47,7 @@ public class BaixaMedicaReadService {
     var endDate = StringUtils.hasText(query.getDataFim()) ? DateFormatter.stringToLocalDate(query.getDataFim()) : null;
     var nomefuncionario = StringUtils.hasText(query.getNomeFuncionario()) ? query.getNomeFuncionario() : null;
 
-    var pageData = abonosRepository.getListaColaboradores(
+    var pageData = abonosRepository.getListaBaixamedica(
         nomefuncionario,
         query.getDireccaoId(),
         startDate,

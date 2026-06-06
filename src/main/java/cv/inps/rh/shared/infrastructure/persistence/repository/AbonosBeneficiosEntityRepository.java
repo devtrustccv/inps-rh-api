@@ -56,7 +56,7 @@ public interface AbonosBeneficiosEntityRepository extends
           AND (:tipoAbonoId IS NULL OR t.paramSitId.id = :tipoAbonoId)
           AND (:abonoUuid IS NULL OR t.uuid = :abonoUuid)
       """)
-  Page<BaixaMedicaRowDTO> getListaColaboradores(
+  Page<BaixaMedicaRowDTO> getListaBaixamedica(
       @Param("nomefuncionario") String nomefuncionario,
       @Param("direcaoId") Long direcaoId,
       @Param("startDate") LocalDate startDate,
