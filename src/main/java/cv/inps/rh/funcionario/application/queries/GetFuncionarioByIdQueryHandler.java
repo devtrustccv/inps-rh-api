@@ -51,7 +51,7 @@ public class GetFuncionarioByIdQueryHandler
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getId()).valor());
 
-    var funcionarioResponseDTO = funcionarioMapper.toResponseDTO(funcionario);
+    var funcionarioResponseDTO = funcionarioMapper.toResponseDTO(funcionario, query.isValidacao());
 
     var documentos = documentoEntityRepository.findAllByReferenciaNameAndReferenciaUuid(
         TableName.RH_T_FUNCIONARIOS.name(), funcionario.getUuid());

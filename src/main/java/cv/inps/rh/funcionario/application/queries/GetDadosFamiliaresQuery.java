@@ -15,4 +15,6 @@ public class GetDadosFamiliaresQuery implements Query {
   @NotBlank(message = "The field <idFuncionario> is required")
   private String idFuncionario;
 
+  private boolean validacao;
+
 }

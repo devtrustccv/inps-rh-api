@@ -25,7 +25,7 @@ public class FamiliaresReadService {
   public List<AgregadoDependenteRespDTO> getFamiliares(GetDadosFamiliaresQuery query) {
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getIdFuncionario()).valor());
 
-    var estados = List.of(Estado.A, Estado.I);
+    var estados = query.isValidacao() ? List.of(Estado.P) : List.of(Estado.A, Estado.I);
 
     var familiares = familiarEntityRepository
         .findByFuncionarioIdAndEstados(funcionario.getUuid(), estados);

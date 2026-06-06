@@ -88,10 +88,11 @@ public class FuncionarioController {
   )
 
    public ResponseEntity<FuncionarioResponseDTO> getFuncionarioById(
-    @PathVariable(value = "id") String id)
+    @PathVariable(value = "id") String id,
+    @RequestParam(value = "validacao", defaultValue = "false") boolean validacao)
   {
 
-      final var query = new GetFuncionarioByIdQuery(id);
+      final var query = new GetFuncionarioByIdQuery(id, validacao);
 
       return queryBus.handle(query);
 
@@ -375,10 +376,11 @@ public class FuncionarioController {
   )
 
    public ResponseEntity<DadosAcademicosProfResponseDTO> getDadosAcademicos(
-    @PathVariable(value = "idFuncionario") String idFuncionario)
+    @PathVariable(value = "idFuncionario") String idFuncionario,
+    @RequestParam(value = "validacao", defaultValue = "false") boolean validacao)
   {
 
-      final var query = new GetDadosAcademicosQuery(idFuncionario);
+      final var query = new GetDadosAcademicosQuery(idFuncionario, validacao);
 
       return queryBus.handle(query);
 
@@ -405,10 +407,11 @@ public class FuncionarioController {
   )
 
    public ResponseEntity<List<AgregadoDependenteRespDTO>> getDadosFamiliares(
-    @PathVariable(value = "idFuncionario") String idFuncionario)
+    @PathVariable(value = "idFuncionario") String idFuncionario,
+    @RequestParam(value = "validacao", defaultValue = "false") boolean validacao)
   {
 
-      final var query = new GetDadosFamiliaresQuery(idFuncionario);
+      final var query = new GetDadosFamiliaresQuery(idFuncionario, validacao);
 
       return queryBus.handle(query);
 
@@ -435,10 +438,11 @@ public class FuncionarioController {
   )
 
    public ResponseEntity<List<DadosBancariosRespDTO>> getDadosBancarios(
-    @PathVariable(value = "idFuncionario") String idFuncionario)
+    @PathVariable(value = "idFuncionario") String idFuncionario,
+    @RequestParam(value = "validacao", defaultValue = "false") boolean validacao)
   {
 
-      final var query = new GetDadosBancariosQuery(idFuncionario);
+      final var query = new GetDadosBancariosQuery(idFuncionario, validacao);
 
       return queryBus.handle(query);
 
