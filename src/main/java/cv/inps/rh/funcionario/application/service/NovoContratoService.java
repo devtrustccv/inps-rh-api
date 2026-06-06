@@ -297,19 +297,23 @@ public class NovoContratoService {
       return true;
     }
 
-    if (!Objects.equals(atual.getCargoId().getId(), dc.getCargoPosicaoId())) {
+    Long atualCargoId = atual.getCargoId() != null ? atual.getCargoId().getId() : null;
+    if (!Objects.equals(atualCargoId, dc.getCargoPosicaoId())) {
       return true;
     }
 
-    if (!Objects.equals(atual.getEscalaoId().getId(), dc.getEscalaoReferenciaId())) {
+    Long atualEscalaoId = atual.getEscalaoId() != null ? atual.getEscalaoId().getId() : null;
+    if (!Objects.equals(atualEscalaoId, dc.getEscalaoReferenciaId())) {
       return true;
     }
 
-    if (!Objects.equals(atual.getCategoriaId().getId(), dc.getCategoriaId())) {
+    Long atualCategoriaId = atual.getCategoriaId() != null ? atual.getCategoriaId().getId() : null;
+    if (!Objects.equals(atualCategoriaId, dc.getCategoriaId())) {
       return true;
     }
 
-    return !Objects.equals(atual.getCarrPccsId().getId(), dc.getCarreiraId());
+    Long atualCarreiraId = atual.getCarrPccsId() != null ? atual.getCarrPccsId().getId() : null;
+    return !Objects.equals(atualCarreiraId, dc.getCarreiraId());
 
   }
 

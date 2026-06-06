@@ -49,7 +49,7 @@ public class DadosContratuaisMapper {
     tr.setTipoSituacao("NOVO_CONTRATO");
     tr.setObs("NOVO_CONTRATO");
     tr.setDataInicio(dc.getDataInicio());
-    tr.setDataFim(dc.getDataInicio());
+    tr.setDataFim(dc.getDataFim());
     tr.setReferente("REGISTO_COLABORADOR");
 
   }
