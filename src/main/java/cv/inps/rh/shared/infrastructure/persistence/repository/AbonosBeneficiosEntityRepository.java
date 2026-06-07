@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.processamento.application.dto.BaixaMedicaDetailDTO;
 import cv.inps.rh.processamento.application.dto.BaixaMedicaRowDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AbonosBeneficiosEntity;
@@ -67,7 +68,7 @@ public interface AbonosBeneficiosEntityRepository extends
   );
 
   @Query("""
-      SELECT new cv.inps.rh.processamento.application.dto.BaixaMedicaRowDTO(
+      SELECT new cv.inps.rh.processamento.application.dto.BaixaMedicaDetailDTO(
           null,
           t.estado,
           tr.mobId.instidId.nome,
@@ -79,7 +80,10 @@ public interface AbonosBeneficiosEntityRepository extends
           psd.motivo,
           t.dataInicio,
           t.dataFim,
-          t.uuid
+          t.uuid,
+          null,
+          tr.id,
+          ps.id
       )
       FROM AbonosBeneficiosEntity t, TiposRelacionamentoEntity tr
       LEFT JOIN t.funId f
@@ -87,7 +91,7 @@ public interface AbonosBeneficiosEntityRepository extends
       LEFT JOIN t.paramSitDetId psd
       WHERE tr.funId.id = f.id AND tr.estActAdm = 1 AND t.uuid = :abonoUuid
       """)
-  Optional<BaixaMedicaRowDTO> getBaixaMedica(@Param("abonoUuid") UUID abonoUuid);
+  Optional<BaixaMedicaDetailDTO> getBaixaMedica(@Param("abonoUuid") UUID abonoUuid);
 
   default AbonosBeneficiosEntity findByUuidOrThrow(UUID uuid) {
     return findByUuid(uuid)

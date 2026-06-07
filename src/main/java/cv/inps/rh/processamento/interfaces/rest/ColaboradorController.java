@@ -195,12 +195,12 @@ public class ColaboradorController {
                 responseCode = "200",
                 content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = BaixaMedicaRowDTO.class)
+                    schema = @Schema(implementation = BaixaMedicaDetailDTO.class)
                 )
             ),
         }
     )
-  public ResponseEntity<BaixaMedicaRowDTO> getBaixaMedica(
+  public ResponseEntity<BaixaMedicaDetailDTO> getBaixaMedica(
       @PathVariable(value = "baixaMedicaId") String baixaMedicaId
   ) {
     final var query = new GetBaixaMedicaQuery(baixaMedicaId);

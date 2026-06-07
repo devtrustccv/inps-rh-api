@@ -1,14 +1,12 @@
 package cv.inps.rh.processamento.domain.service.baixamedica;
 
+import cv.inps.rh.processamento.application.dto.BaixaMedicaDetailDTO;
 import cv.inps.rh.processamento.application.dto.BaixaMedicaListDTO;
-import cv.inps.rh.processamento.application.dto.BaixaMedicaRowDTO;
 import cv.inps.rh.processamento.application.queries.GetBaixaMedicaQuery;
 import cv.inps.rh.processamento.application.queries.GetListaBaixamedicaQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AbonosBeneficiosEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FaltaEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
 import lombok.RequiredArgsConstructor;
@@ -25,16 +23,21 @@ import static java.util.Optional.ofNullable;
 @RequiredArgsConstructor
 public class BaixaMedicaReadService {
 
-  private final PedidoEntityRepository pedidoRepository;
   private final AbonosBeneficiosEntityRepository abonosRepository;
-  private final FaltaEntityRepository faltaRepository;
   private final BaixaMedicaServiceWrite baixaMedicaServiceWrite;
 
   @Transactional(readOnly = true)
-  public BaixaMedicaRowDTO getBaixaMedica(GetBaixaMedicaQuery query) {
+  public BaixaMedicaDetailDTO getBaixaMedica(GetBaixaMedicaQuery query) {
     return abonosRepository.getBaixaMedica(UUID.fromString(query.getBaixaMedicaId()))
         .map(obj -> {
           obj.setEstadodesc(ofNullable(obj.getEstado()).map(Estado::getDescription).orElse(null));
+          var calculation = baixaMedicaServiceWrite.chamarProcedure(
+              obj.getRelacionamentoId(),
+              obj.getDataInicio(),
+              obj.getDataFim(),
+              obj.getParamSitId(),
+              null);
+          obj.setCalculo(calculation);
           return obj;
         })
         .orElseThrow(() -> IgrpResponseStatusException.notFound("AbonosBeneficiosEntity not found for uuid: " + query.getBaixaMedicaId()));
