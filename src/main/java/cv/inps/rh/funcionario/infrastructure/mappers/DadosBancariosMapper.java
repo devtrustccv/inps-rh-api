@@ -50,6 +50,11 @@ public class DadosBancariosMapper {
         }
       }
       if (found != null) {
+        Long bancoAtualId = found.getRhbId() != null ? found.getRhbId().getId() : null;
+        boolean mudou = !Objects.equals(dto.getEntidadeBancariaId(), bancoAtualId)
+            || !Objects.equals(dto.getNib(), found.getNib())
+            || !Objects.equals(dto.getNumConta(), found.getNumConta());
+
         if (dto.getEntidadeBancariaId() != null) {
           found.setRhbId(entityManager.getReference(BancoEntity.class, dto.getEntidadeBancariaId()));
         }
@@ -57,6 +62,8 @@ public class DadosBancariosMapper {
         found.setNib(dto.getNib());
         found.setDataInicio(dto.getDataInicio());
         found.setDataFim(dto.getDataFim());
+
+        if (mudou) found.setEstado(Estado.P);
       } else {
         DadosBancariosEntity novo = toEntity(dto, Estado.P, funcionario);
         existingList.add(novo);
