@@ -37,6 +37,7 @@ public class MobilidadeWriteService {
   private final EntityManager entityManager;
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final OrdemServicoWriteService ordemServicoWriteService;
+  private final cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper tipoRelRemPagHelper;
 
   @Transactional
   public MobilidadeDTO save(SaveMobilidadeCommand command) {
@@ -51,7 +52,7 @@ public class MobilidadeWriteService {
       throw IgrpResponseStatusException.badRequest("Funcionário tem uma mobilidade pendente por validar");
     }
 
-    var novaMobilidade = createMobilidade(mobilidadeDto);
+    var novaMobilidade = createMobilidade(mobilidadeDto, funcionario);
 
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     var novoTipoRelacionamento = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
@@ -65,32 +66,27 @@ public class MobilidadeWriteService {
     novoTipoRelacionamento.setEstado(Estado.P);
     novoTipoRelacionamento.setTipoSituacao(mobilidadeDto.getTipoMobilidade());
 
-    funcionario.getTiposrelacionamentos().add(novoTipoRelacionamento);
-    funcionario.getMobilidades().add(novaMobilidade);
+    // Persist new entities directly so their IDs are assigned on the same references.
+    // saveAndFlush(funcionario) uses em.merge(), which for transient children creates
+    // a managed copy — the original reference keeps getId() == null.
+    entityManager.persist(novaMobilidade);
+    entityManager.persist(novoTipoRelacionamento);
+    entityManager.flush();
 
-
-    // Cria validação agora que os IDs existem
     var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.MOBILIDADE.name(), Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
-    funcionario.getValidacoes().add(valid);
+    valid.setReferenciaId(novaMobilidade.getId());
+    entityManager.persist(valid);
 
-    // Salva validação
-    funcionarioEntityRepository.saveAndFlush(funcionario);
-
-    validacaoEntityRepository.findById(valid.getId())
-        .ifPresent(e -> {
-          e.setReferenciaId(novaMobilidade.getId());
-          validacaoEntityRepository.save(e);
-        });
-
+    tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tipoRelacionamentoAtual, novoTipoRelacionamento, java.util.List.of(), java.util.List.of());
 
     return mobilidadeDto;
 
   }
 
 
-  private MobilidadeEntity createMobilidade(MobilidadeDTO mobilidadeDTO){
+  private MobilidadeEntity createMobilidade(MobilidadeDTO mobilidadeDTO, cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity funcionario){
      if (mobilidadeDTO == null) return null;
 
      if(mobilidadeDTO.getLocalTrabalhoDepois() == null && mobilidadeDTO.getSeccaoDepois() == null && mobilidadeDTO.getDirecaoDepois() == null){
@@ -101,6 +97,7 @@ public class MobilidadeWriteService {
     me.setTipoSituacao(mobilidadeDTO.getTipoMobilidade());
     me.setObs("MOBILIDADE");
     me.setUuid(UuidCreator.getTimeOrderedEpoch());
+    me.setFunId(funcionario);
     if(Objects.nonNull(mobilidadeDTO.getLocalTrabalhoDepois()))
       me.setLocalTrabId(entityManager.getReference(ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDepois()));
     if(Objects.nonNull(mobilidadeDTO.getSeccaoDepois()))
