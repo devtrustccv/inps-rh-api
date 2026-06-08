@@ -33,9 +33,13 @@ public class BaixaMedicaDetailDTO {
 
   private String categoria;
 
-  private String tipoLicensa;
+  private Long tipoLicensaId;
 
-  private String motivo;
+  private String tipoLicensaNome;
+
+  private Long motivoId;
+
+  private String motivoNome;
 
   private LocalDate dataInicio;
 

@@ -88,7 +88,19 @@
       "primaryKey": false
     },
     {
-      "name": "tipoLicensa",
+      "name": "tipoLicensaId",
+      "type": "long",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "tipoLicensaNome",
       "type": "string",
       "objectType": "java",
       "required": false,
@@ -100,7 +112,19 @@
       "primaryKey": false
     },
     {
-      "name": "motivo",
+      "name": "motivoId",
+      "type": "long",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "motivoNome",
       "type": "string",
       "objectType": "java",
       "required": false,
