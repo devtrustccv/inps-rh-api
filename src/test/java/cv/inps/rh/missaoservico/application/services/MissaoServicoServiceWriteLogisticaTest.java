@@ -1,26 +1,15 @@
 package cv.inps.rh.missaoservico.application.services;
 
-import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.commands.SaveMissaoServicoLogisticaCommand;
 import cv.inps.rh.missaoservico.application.dto.AjudaCustoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.AlojamentoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.BilhetePassagemRequestDTO;
-import cv.inps.rh.missaoservico.application.dto.MissaoLogisticaRequestDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoColaboradorEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoPrestadorEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoRequisicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoServicoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.GeografiaEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoColaboradorEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoLogisticaDetEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoLogisticaEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoPrestadorEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoRequisicaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoServicoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.NotificacaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -121,8 +110,8 @@ public class MissaoServicoServiceWriteLogisticaTest {
     when(missaoLogisticaDetRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
     var bilhete = new BilhetePassagemRequestDTO(List.of(colabUuid), BigDecimal.valueOf(100), null);
-    var dto = new MissaoLogisticaRequestDTO(List.of(bilhete), null, null, null, ProcessStepAction.SAVE);
-    var cmd = new SaveMissaoServicoLogisticaCommand(dto, missaoUuid.toString());
+    //var dto = new MissaoLogisticaRequestDTO(List.of(bilhete), null, null, null, ProcessStepAction.SAVE);
+    var cmd = new SaveMissaoServicoLogisticaCommand(null, missaoUuid.toString());
 
     var response = service.salvarLogistica(cmd);
 
@@ -183,8 +172,8 @@ public class MissaoServicoServiceWriteLogisticaTest {
 
     var ajuda = new AjudaCustoRequestDTO(colabUuid, true, 3, BigDecimal.valueOf(300), null);
 
-    var dto = new MissaoLogisticaRequestDTO(null, null, List.of(aloj), List.of(ajuda), ProcessStepAction.SAVE);
-    var cmd = new SaveMissaoServicoLogisticaCommand(dto, missaoUuid.toString());
+    //var dto = new MissaoLogisticaRequestDTO(null, null, List.of(aloj), List.of(ajuda), ProcessStepAction.SAVE);
+    var cmd = new SaveMissaoServicoLogisticaCommand(null, missaoUuid.toString());
 
     var response = service.salvarLogistica(cmd);
 

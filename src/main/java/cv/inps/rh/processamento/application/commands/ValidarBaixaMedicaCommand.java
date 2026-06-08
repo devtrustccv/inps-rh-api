@@ -12,11 +12,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ValidarBaixaMedicaCommand implements Command {
 
+    private BaixaMedicaReqDTO baixamedicareq;
 
-  private BaixaMedicaReqDTO baixamedicareq;
-  @NotBlank(message = "The field <validar> is required")
-  private String validar;
-  @NotBlank(message = "The field <pedidoId> is required")
-  private String pedidoId;
+    @NotBlank(message = "The field <validar> is required")
+    private String validar;
 
+    @NotBlank(message = "The field <pedidoId> is required")
+    private String pedidoId;
 }

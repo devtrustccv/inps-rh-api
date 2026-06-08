@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.processamento.application.dto.BaixaMedicaDetailDTO;
 import cv.inps.rh.processamento.application.dto.BaixaMedicaRowDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AbonosBeneficiosEntity;
@@ -54,15 +55,45 @@ public interface AbonosBeneficiosEntityRepository extends
           AND (:endDate IS NULL OR t.dataFim = :endDate)
           AND (:direcaoId IS NULL OR tr.mobId.instidId.id = :direcaoId)
           AND (:tipoAbonoId IS NULL OR t.paramSitId.id = :tipoAbonoId)
+          AND (:abonoUuid IS NULL OR t.uuid = :abonoUuid)
       """)
-  Page<BaixaMedicaRowDTO> getListaColaboradores(
+  Page<BaixaMedicaRowDTO> getListaBaixamedica(
       @Param("nomefuncionario") String nomefuncionario,
       @Param("direcaoId") Long direcaoId,
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate,
       @Param("tipoAbonoId") Long tipoAbonoId,
+      @Param("abonoUuid") UUID abonoUuid,
       Pageable pageable
   );
+
+  @Query("""
+      SELECT new cv.inps.rh.processamento.application.dto.BaixaMedicaDetailDTO(
+          null,
+          t.estado,
+          tr.mobId.instidId.nome,
+          tr.mobId.secaoId.nome,
+          f.nome,
+          tr.contrVinculoId.vinculoId.nome,
+          tr.cargoId.nome,
+          ps.id,
+          ps.nome,
+          psd.id,
+          psd.motivo,
+          t.dataInicio,
+          t.dataFim,
+          t.uuid,
+          null,
+          tr.id,
+          ps.id
+      )
+      FROM AbonosBeneficiosEntity t, TiposRelacionamentoEntity tr
+      LEFT JOIN t.funId f
+      LEFT JOIN t.paramSitId ps
+      LEFT JOIN t.paramSitDetId psd
+      WHERE tr.funId.id = f.id AND tr.estActAdm = 1 AND t.uuid = :abonoUuid
+      """)
+  Optional<BaixaMedicaDetailDTO> getBaixaMedica(@Param("abonoUuid") UUID abonoUuid);
 
   default AbonosBeneficiosEntity findByUuidOrThrow(UUID uuid) {
     return findByUuid(uuid)

@@ -38,7 +38,7 @@
         },
         {
           "type": "string",
-          "name": "funcionarioId",
+          "name": "nomeFuncionario",
           "isRequired": false
         },
         {
@@ -283,7 +283,7 @@
     },
     {
       "actionName": "getBaixaMedica",
-      "path": "baixa-medica/{pedidoId}",
+      "path": "baixa-medica/{baixaMedicaId}",
       "method": "GET",
       "responses": {
         "200": {
@@ -291,7 +291,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "BaixaMedicaDetalhe",
+                "type": "BaixaMedicaDetail",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -303,7 +303,7 @@
       },
       "pathVariables": [
         {
-          "name": "pedidoId",
+          "name": "baixaMedicaId",
           "type": "string",
           "isRequired": true
         }
@@ -382,5 +382,5 @@
       }
     }
   ],
-  "id": "f2v97ka4pz-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica-getListaBaixamedicaCopy-getListaBaixamedica-getListaBaixamedica"
+  "id": "f2v97ka4pz-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica-getListaBaixamedicaCopy-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica-getBaixaMedica-getBaixaMedica"
 }

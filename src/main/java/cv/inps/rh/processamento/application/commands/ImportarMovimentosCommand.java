@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public class ImportarMovimentosCommand implements Command {
 
-  @NotNull(message = "The field <ficheiro> is required")
-  private MultipartFile ficheiro;
-
+    @NotNull(message = "The field <ficheiro> is required")
+    private MultipartFile ficheiro;
 }

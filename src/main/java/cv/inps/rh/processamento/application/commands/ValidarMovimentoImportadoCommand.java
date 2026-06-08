@@ -12,9 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ValidarMovimentoImportadoCommand implements Command {
 
+    private ValidacaoMovimentoImportadoDTO validacaomovimentoimportado;
 
-  private ValidacaoMovimentoImportadoDTO validacaomovimentoimportado;
-  @NotBlank(message = "The field <movimentoId> is required")
-  private String movimentoId;
-
+    @NotBlank(message = "The field <movimentoId> is required")
+    private String movimentoId;
 }
