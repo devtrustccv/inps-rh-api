@@ -25,7 +25,8 @@ import java.util.UUID;
 public class ProcessoDisciplinarEntity extends AuditEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_processo_discip")
+  @SequenceGenerator(name = "seq_processo_discip", sequenceName = "SEQ_PROCESSO_DISCIP", allocationSize = 1)
   @Column(name = "id", unique = true, nullable = false)
   private Long id;
 
@@ -38,7 +39,7 @@ public class ProcessoDisciplinarEntity extends AuditEntity {
   @JoinColumn(name = "fun_id", referencedColumnName = "id")
   private FuncionarioEntity funId;
 
-  @Column(name = "num_proceso")
+  @Column(name = "num_processo")
   private String numProceso;
 
   @Column(name = "entidade")
@@ -85,6 +86,15 @@ public class ProcessoDisciplinarEntity extends AuditEntity {
 
   @Column(name = "obs", length = 4000)
   private String obs;
+
+  @Column(name = "flg_condenacao", length = 20, nullable = false)
+  private String flgCondenacao;
+
+  @Column(name = "data_inicio_condenacao")
+  private LocalDate dataInicioCondenacao;
+
+  @Column(name = "data_fim_condenacao", length = 20)
+  private String dataFimCondenacao;
 
   @Column(name = "uuid")
   private UUID uuid;

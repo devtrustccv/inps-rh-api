@@ -15,4 +15,6 @@ public class GetProcessosFuncionarioQuery implements Query {
   @NotBlank(message = "The field <funcionarioId> is required")
   private String funcionarioId;
 
+  private boolean validacao;
+
 }

@@ -25,7 +25,7 @@ public class GetProcessosFuncionarioQueryHandler implements QueryHandler<GetProc
   @IgrpQueryHandler
   public ResponseEntity<List<ProcessoDisciplinarResponseDTO>> handle(GetProcessosFuncionarioQuery query) {
 
-    var data = processoDisciplinarReadService.getProcessosDisciplinares(query.getFuncionarioId());
+    var data = processoDisciplinarReadService.getProcessosDisciplinares(query.getFuncionarioId(), query.isValidacao());
 
     return ResponseEntity.ok(data);
   }

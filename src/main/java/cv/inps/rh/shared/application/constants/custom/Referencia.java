@@ -27,7 +27,8 @@ public enum Referencia {
   FERIA("Féria"),
   JUSTIFICAR_FALTA("Justificar Falta"),
   ORDEM_SERVICO("Ordem de Serviço"),
-  BAIXA_MEDICA("Baixa Médica");
+  BAIXA_MEDICA("Baixa Médica"),
+  PROCESSO_DISCIPLINAR("Processo Disciplinar");
 
   private final String descricao;
 

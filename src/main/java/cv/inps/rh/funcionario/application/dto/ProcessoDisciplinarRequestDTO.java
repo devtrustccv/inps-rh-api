@@ -1,5 +1,5 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
 
 package cv.inps.rh.funcionario.application.dto;
 
@@ -9,49 +9,50 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 
 
 @IgrpDTO
-public class ProcessoDisciplinarRequestDTO {
+public class ProcessoDisciplinarRequestDTO  {
 
   @NotBlank(message = "The field <vinculoReferente> is required")
 
-  private String vinculoReferente;
+  private String vinculoReferente ;
+  private String numeroProcesso ;
 
-  private String numeroProcesso;
   @NotBlank(message = "The field <entidade> is required")
 
-  private String entidade;
+  private String entidade ;
+
   @NotBlank(message = "The field <tipoProcesso> is required")
 
-  private String tipoProcesso;
+  private String tipoProcesso ;
+  private String estadoProcesso ;
 
 
-  private String estadoProcesso;
+  private String penaDisciplinar ;
 
 
-  private String penaDisciplinar;
+  private String dataInicioPd ;
 
 
-  private String dataInicioPd;
+  private String dataFimPd ;
 
 
-  private String dataFimPd;
+  private String dataInicioPena ;
 
 
-  private String dataInicioPena;
+  private String dataFimPena ;
 
 
-  private String dataFimPena;
+  private String numeroOrdemServico ;
 
 
-  private String numeroOrdemServico;
+  private String dataOrdemServico ;
 
 
-  private String dataOrdemServico;
+  private String validar ;
 
 }
