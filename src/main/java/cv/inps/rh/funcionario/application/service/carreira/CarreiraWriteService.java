@@ -61,6 +61,11 @@ public class CarreiraWriteService {
     var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
 
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+
+    // Capturar ativos ANTES de fechar — o helper filtra por Estado.A
+    var remuneracoesAtivas = funcionarioRules.getRemuneracoesAssociadosAtivos(relacionamentoAtual.getId());
+    var pagamentosAtivos = funcionarioRules.getPagamentosDescontosAssociadosAtivos(relacionamentoAtual.getId());
+
     // DATA_FIM = data inicio da nova carreira - 1, conforme especificação funcional
     var dataFimAnterior = dto.getDataInicio().minusDays(1);
     relacionamentoAtual.setDataFim(dataFimAnterior);
@@ -104,65 +109,73 @@ public class CarreiraWriteService {
 
     var novasRemuneracoes = new ArrayList<DefinicaoRemuneracaoEntity>();
     var novosPagamentos = new ArrayList<DefPagamentoEntity>();
-    if (dto.getSubsidios() != null && !dto.getSubsidios().isEmpty()) {
-      var remList = dto.getSubsidios().stream()
-          .map(s -> {
-            var obj = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
-            obj.setObs("MOBILIDADE- || TIPO_CARREIRA");
-            return obj;
-          })
-          .toList();
-      novasRemuneracoes.addAll(remList);
-      funcionario.setDefinicoesRenumeracoes(remList);
-    }
 
     var vinculoAtualId = contratoAtual.getVinculoId() != null ? contratoAtual.getVinculoId().getId() : null;
     var escalaoAtualId = relacionamentoAtual.getCarreiraId() != null ? relacionamentoAtual.getCarreiraId().getEscalaoId().getId() : null;
 
+    // Salário: criar novo se houve mudança, guardando o tm_id para não duplicar na cópia
+    Long salarioTmId = null;
     var criarNovoSalario = houveMudancaSalario(vinculoAtualId, escalaoAtualId, dto, funcionario);
     if (criarNovoSalario) {
-      var vinculoTipoMovimentoREMList = paramVinculoMovimentoEntityRepository
-          .findByVinculoId_IdAndTipo(dto.getTipoVinculoLaboralId(), "REM");
-      var vinculoTipoMovimentoREM = vinculoTipoMovimentoREMList.stream().findFirst().orElse(null);
-      if (vinculoTipoMovimentoREM != null) {
+      var movREM = paramVinculoMovimentoEntityRepository
+          .findByVinculoId_IdAndTipo(dto.getTipoVinculoLaboralId(), "REM")
+          .stream().findFirst().orElse(null);
+      if (movREM != null) {
+        salarioTmId = movREM.getTmId() != null ? movREM.getTmId().getId() : null;
         var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario);
-        salario.setTmId(vinculoTipoMovimentoREM.getTmId());
+        salario.setTmId(movREM.getTmId());
+        definicaoRemuneracaoEntityRepository.save(salario);
         novasRemuneracoes.add(salario);
-        funcionario.getDefinicoesRenumeracoes().add(salario);
       }
     }
 
+    // Subsídios: usar DTO se fornecido, senão copiar os ativos anteriores
+    if (dto.getSubsidios() != null && !dto.getSubsidios().isEmpty()) {
+      for (var s : dto.getSubsidios()) {
+        var obj = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
+        obj.setObs("MOBILIDADE- || TIPO_CARREIRA");
+        definicaoRemuneracaoEntityRepository.save(obj);
+        novasRemuneracoes.add(obj);
+      }
+    } else {
+      // Copiar rems ativos, excluindo o de salário se foi criado novo acima
+      final Long finalSalarioTmId = salarioTmId;
+      for (var rem : remuneracoesAtivas) {
+        if (finalSalarioTmId != null && rem.getTmId() != null
+            && Objects.equals(rem.getTmId().getId(), finalSalarioTmId)) continue;
+        var copia = copiarRemuneracao(rem, funcionario, dto.getDataInicio());
+        definicaoRemuneracaoEntityRepository.save(copia);
+        novasRemuneracoes.add(copia);
+      }
+    }
+
+    // Encargos: usar DTO se fornecido; se vínculo mudou criar do novo vínculo; senão copiar ativos
     if (dto.getEncargosDescontos() != null && !dto.getEncargosDescontos().isEmpty()) {
-      var pagList = dto.getEncargosDescontos().stream()
-          .map(e -> {
-            var def = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
-            def.setObs("MOBILIDADE- || TIPO_CARREIRA");
-            return def;
-          })
-          .toList();
-      novosPagamentos.addAll(pagList);
-      funcionario.setDefinicoesPagamentos(pagList);
-    }
-
-    if (!Objects.equals(vinculoAtualId, dto.getTipoVinculoLaboralId())) {
-      var listAssociacaoVinculoTipoMovimentoPag =
-          paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(
-              dto.getTipoVinculoLaboralId(), "PAG");
-      if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
-        listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
+      for (var e : dto.getEncargosDescontos()) {
+        var def = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
+        def.setObs("MOBILIDADE- || TIPO_CARREIRA");
+        defPagamentoEntityRepository.save(def);
+        novosPagamentos.add(def);
+      }
+    } else if (!Objects.equals(vinculoAtualId, dto.getTipoVinculoLaboralId())) {
+      var listAssoc = paramVinculoMovimentoEntityRepository
+          .findByVinculoId_IdAndTipo(dto.getTipoVinculoLaboralId(), "PAG");
+      if (!CollectionUtils.isEmpty(listAssoc)) {
+        for (var mov : listAssoc) {
           var pagamento = defPagamentoMapper.createPagamento(
-              BigDecimal.ZERO,
-              movimento.getTmId(),
-              dto.getDataInicio(),
-              dto.getDataFim(),
-              funcionario);
+              BigDecimal.ZERO, mov.getTmId(), dto.getDataInicio(), dto.getDataFim(), funcionario);
+          defPagamentoEntityRepository.save(pagamento);
           novosPagamentos.add(pagamento);
-          funcionario.getDefinicoesPagamentos().add(pagamento);
-        });
+        }
+      }
+    } else {
+      // Copiar pags ativos
+      for (var pag : pagamentosAtivos) {
+        var copia = copiarPagamento(pag, funcionario, dto.getDataInicio());
+        defPagamentoEntityRepository.save(copia);
+        novosPagamentos.add(copia);
       }
     }
-
-    var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
     tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(relacionamentoAtual, novoRelacionamento, novasRemuneracoes, novosPagamentos);
 
@@ -175,6 +188,40 @@ public class CarreiraWriteService {
     validation.setUuid(UuidCreator.getTimeOrderedEpoch());
     validation.setFunId(funcionario);
     validacaoEntityRepository.save(validation);
+  }
+
+  private DefinicaoRemuneracaoEntity copiarRemuneracao(DefinicaoRemuneracaoEntity original, FuncionarioEntity funcionario, java.time.LocalDate dataInicio) {
+    var copia = new DefinicaoRemuneracaoEntity();
+    copia.setTmId(original.getTmId());
+    copia.setValor(original.getValor());
+    copia.setPercentagem(original.getPercentagem());
+    copia.setMoeda(original.getMoeda());
+    copia.setEstado(Estado.P);
+    copia.setObs("MOBILIDADE- || TIPO_CARREIRA");
+    copia.setDataInicio(dataInicio);
+    copia.setDataFim(null);
+    copia.setFunId(funcionario);
+    copia.setUuid(UuidCreator.getTimeOrderedEpoch());
+    return copia;
+  }
+
+  private DefPagamentoEntity copiarPagamento(DefPagamentoEntity original, FuncionarioEntity funcionario, java.time.LocalDate dataInicio) {
+    var copia = new DefPagamentoEntity();
+    copia.setTmId(original.getTmId());
+    copia.setValor(original.getValor());
+    copia.setPercentagem(original.getPercentagem());
+    copia.setNib(original.getNib());
+    copia.setNif(original.getNif());
+    copia.setNmEntidade(original.getNmEntidade());
+    copia.setRhbId(original.getRhbId());
+    copia.setEntId(original.getEntId());
+    copia.setEstado(Estado.P);
+    copia.setObs("MOBILIDADE- || TIPO_CARREIRA");
+    copia.setDataInicio(dataInicio);
+    copia.setDataFim(null);
+    copia.setFunId(funcionario);
+    copia.setUuid(UuidCreator.getTimeOrderedEpoch());
+    return copia;
   }
 
   @NotNull
