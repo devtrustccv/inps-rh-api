@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
@@ -39,7 +38,6 @@ public class CarreiraWriteService {
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
   private final ValidacaoEntityRepository validacaoEntityRepository;
-  private final MobilidadeEntityRepository mobilidadeEntityRepository;
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
   private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
@@ -60,42 +58,46 @@ public class CarreiraWriteService {
     if (!contratoEntityRepository.existsByFunIdAndEstado(funcionario, Estado.A))
       throw IgrpResponseStatusException.conflict("Este funcionário não possui um contrato ativo");
 
-    var currentDate = LocalDate.now();
-    var currentDateMinusOneDay = currentDate.minusDays(1);
-
     var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
 
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-    relacionamentoAtual.setDataFim(currentDateMinusOneDay);
+    // DATA_FIM = data inicio da nova carreira - 1, conforme especificação funcional
+    var dataFimAnterior = dto.getDataInicio().minusDays(1);
+    relacionamentoAtual.setDataFim(dataFimAnterior);
     relacionamentoAtual.setEstActAdm(0);
     tiposRelacionamentoEntityRepository.save(relacionamentoAtual);
 
     var defRemuneracao = definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
     defRemuneracao.forEach(obj -> {
-      obj.setDataFim(currentDateMinusOneDay);
+      obj.setDataFim(dataFimAnterior);
+      obj.setEstado(Estado.I);
       definicaoRemuneracaoEntityRepository.save(obj);
     });
 
     var defPagamento = defPagamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
     defPagamento.forEach(obj -> {
-      obj.setDataFim(currentDateMinusOneDay);
+      obj.setDataFim(dataFimAnterior);
+      obj.setEstado(Estado.I);
       defPagamentoEntityRepository.save(obj);
     });
 
     var carreiraAtual = relacionamentoAtual.getCarreiraId();
-    carreiraAtual.setDataFim(currentDate);
+    carreiraAtual.setDataFim(dataFimAnterior);
     carreiraEntityRepository.save(carreiraAtual);
 
     var novaCarreira = Objects.requireNonNull(carreiraMapper.toCarreira(dto, Estado.P));
     novaCarreira.setObs("CARREIRA");
+    novaCarreira.setContrVinculoId(contratoAtual);
     carreiraEntityRepository.save(novaCarreira);
 
     var novoRelacionamento = contratuaisEntityMapper.toRelacionamento(dto, Estado.P);
     novoRelacionamento.setObs("MOBILIDADE- || TIPO_CARREIRA");
-    novoRelacionamento.setDataInicio(currentDate);
+    novoRelacionamento.setDataInicio(dto.getDataInicio());
     novoRelacionamento.setContrVinculoId(contratoAtual);
     novoRelacionamento.setCarreiraId(novaCarreira);
     novoRelacionamento.setFunId(funcionario);
+    novoRelacionamento.setMobId(relacionamentoAtual.getMobId());
+    novoRelacionamento.setRegimeId(relacionamentoAtual.getRegimeId());
     novoRelacionamento.setEstActAdm(1);
     novoRelacionamento.setReferente("CARREIRA");
     tiposRelacionamentoEntityRepository.save(novoRelacionamento);
@@ -164,12 +166,10 @@ public class CarreiraWriteService {
 
     tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(relacionamentoAtual, novoRelacionamento, novasRemuneracoes, novosPagamentos);
 
-    var mobilidade = mobilidadeEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
-
     var validation = new ValidacaoEntity();
     validation.setTipoAccao("INSERT");
     validation.setReferenciaName("CARREIRA");
-    validation.setReferenciaId(mobilidade.getId());
+    validation.setReferenciaId(novaCarreira.getId());
     validation.setTiprelId(novoRelacionamento);
     validation.setEstado(Estado.P);
     validation.setUuid(UuidCreator.getTimeOrderedEpoch());
