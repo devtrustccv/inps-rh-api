@@ -57,7 +57,7 @@ public class PagamentosDescontoReadService {
         predicates.add(cb.equal(root.get("estActAdm"), 1));
       }
 
-      var estadosPermitidos = EnumSet.of(Estado.A, Estado.I);
+      var estadosPermitidos = query.isValidacao() ? EnumSet.of(Estado.P) : EnumSet.of(Estado.A, Estado.I);
 
       if (StringUtils.hasText(query.getEstado())) {
         try {

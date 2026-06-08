@@ -175,15 +175,15 @@ public class RegimeWriteService {
     if (dto.getValidar() != null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
-      tipoRelacionamentoAtual.setEstado(estado);
       regime.setEstado(estado);
-
 
       funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGIME)
           .ifPresent(v -> v.setEstado(estado));
 
       if (estado == Estado.A) {
-        ordemServicoWriteService.criar(funcionario, tipoRelacionamentoAtual, dto.getTipoOrdemServico());
+        var referente = org.springframework.util.StringUtils.hasText(dto.getTipoOrdemServico())
+            ? dto.getTipoOrdemServico() : "REGIME";
+        ordemServicoWriteService.criar(funcionario, tipoRelacionamentoAtual, referente);
       }
     }
 

@@ -35,11 +35,11 @@ public class NovoRemuneracaoRequestDTO  {
   @NotBlank(message = "The field <dataInicio> is required")
 
   private String dataInicio ;
-  @NotBlank(message = "The field <dataFim> is required")
-
   private String dataFim ;
 
 
   private String observacao ;
+
+  private String estado ;
 
 }

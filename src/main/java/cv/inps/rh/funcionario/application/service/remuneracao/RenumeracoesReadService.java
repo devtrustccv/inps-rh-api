@@ -67,7 +67,7 @@ public class RenumeracoesReadService {
         predicates.add(cb.equal(root.get("estActAdm"), 1));
       }
 
-      var estadosPermitidos = EnumSet.of(Estado.A, Estado.I);
+      var estadosPermitidos = query.isValidacao() ? EnumSet.of(Estado.P) : EnumSet.of(Estado.A, Estado.I);
 
       if (StringUtils.hasText(query.getEstado())) {
         try {
@@ -133,6 +133,7 @@ public class RenumeracoesReadService {
     response.setDataInicio(renumeracao.getDataInicio()!=null ? DateFormatter.localDateToString(renumeracao.getDataInicio()) : null);
     response.setDataFim(renumeracao.getDataFim()!=null ? DateFormatter.localDateToString(renumeracao.getDataFim()) : null);
     response.setObservacao(renumeracao.getObs());
+    response.setEstado(renumeracao.getEstado() != null ? renumeracao.getEstado().name() : null);
 
     return response;
 
@@ -162,6 +163,7 @@ public class RenumeracoesReadService {
     response.setNif(pagamento.getNif() != null ? pagamento.getNif() : null);
     response.setEntidade(pagamento.getEntId()!= null ? pagamento.getEntId().getId(): null);
     response.setBanco(pagamento.getRhbId()!=null ? pagamento.getRhbId().getId(): null);
+    response.setEstado(pagamento.getEstado() != null ? pagamento.getEstado().name() : null);
 
     return response;
 

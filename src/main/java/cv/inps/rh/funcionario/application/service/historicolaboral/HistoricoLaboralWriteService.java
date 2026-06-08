@@ -12,6 +12,7 @@ import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
+import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -20,9 +21,13 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -47,6 +52,7 @@ public class HistoricoLaboralWriteService {
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
   private final OrdemServicoWriteService ordemServicoWriteService;
+  private final TipoRelRemPagHelper tipoRelRemPagHelper;
 
   @Transactional
   public RelacaoLaboralDTO validar(NovaRelacaoLaboralCommand command) {
@@ -64,6 +70,14 @@ public class HistoricoLaboralWriteService {
       if (dto.getTipoMobilidade() != null || dto.getDirecao() != null || dto.getSecao() != null
           || dto.getLocalTrabalho() != null || dto.getDataInicioMobilidade() != null
           || dto.getDataFimMobilidade() != null) {
+        if (mob == null) {
+          mob = new MobilidadeEntity();
+          mob.setEstado(Estado.P);
+          mob.setObs("HISTORICO_LABORAL");
+          mob.setUuid(IdentificadorUnico.create().valor());
+          mob.setFunId(funcionario);
+          atual.setMobId(mob);
+        }
         populateMobilidade(mob, dto);
         mob.setEstado(Estado.P);
         mobilidadeEntityRepository.save(mob);
@@ -77,6 +91,15 @@ public class HistoricoLaboralWriteService {
       if (dto.getTipoAlteracaoCarreira() != null || dto.getCarreira() != null || dto.getCategoria() != null
           || dto.getEscalao() != null || dto.getSalario() != null || dto.getDataInicioCarreira() != null
           || dto.getDataFimCarreira() != null || dto.getCargo() != null) {
+        if (car == null) {
+          car = new CarreiraEntity();
+          car.setFlgProcessa(1);
+          car.setEstado(Estado.P);
+          car.setObs("HISTORICO_LABORAL");
+          car.setUuid(IdentificadorUnico.create().valor());
+          car.setContrVinculoId(atual.getContrVinculoId());
+          atual.setCarreiraId(car);
+        }
         populateCarreiraCommon(car, dto);
         car.setEstado(Estado.P);
         carreiraEntityRepository.save(car);
@@ -90,6 +113,13 @@ public class HistoricoLaboralWriteService {
       var sitLab = atual.getSituacLaboralId();
       if (dto.getSituacaoLaboral() != null || dto.getMotivo() != null || dto.getDataInicioSituacao() != null
           || dto.getDataFimSituacao() != null || dto.getObservacao() != null) {
+        if (sitLab == null) {
+          sitLab = new SituacaoLaboralEntity();
+          sitLab.setEstado(Estado.P);
+          sitLab.setUuid(IdentificadorUnico.create().valor());
+          sitLab.setContrVinculoId(atual.getContrVinculoId());
+          atual.setSituacLaboralId(sitLab);
+        }
         populateSituacao(sitLab, dto);
         sitLab.setEstado(Estado.P);
         situacaoLaboralEntityRepository.save(sitLab);
@@ -104,7 +134,8 @@ public class HistoricoLaboralWriteService {
         updateEstadoOnRelAndChildren(atual, novoEstado);
         updateValidacaoPendentes(funcionario.getUuid(), novoEstado);
         if (novoEstado == Estado.A) {
-          ordemServicoWriteService.criar(funcionario, atual, dto.getTipoOrdemServico());
+          var referente = StringUtils.hasText(dto.getTipoOrdemServico()) ? dto.getTipoOrdemServico() : "SITUACAO_LABORAL";
+          ordemServicoWriteService.criar(funcionario, atual, referente);
         }
       }
 
@@ -122,6 +153,8 @@ public class HistoricoLaboralWriteService {
     novoRelacionamento.setFunId(funcionario);
     novoRelacionamento.setTiprelId(atual);
     novoRelacionamento.setReferente("HISTORICO_LABORAL");
+
+    List<DefinicaoRemuneracaoEntity> novasRemuneracoes = new ArrayList<>();
     novoRelacionamento.setUltProc(hoje);
 
     boolean criouAlgum = false;
@@ -151,9 +184,16 @@ public class HistoricoLaboralWriteService {
     if (dto.getTipoAlteracaoCarreira() != null || dto.getCarreira() != null || dto.getCategoria() != null
         || dto.getEscalao() != null || dto.getSalario() != null || dto.getDataInicioCarreira() != null
         || dto.getDataFimCarreira() != null || dto.getCargo() != null) {
+      var carAtual = atual.getCarreiraId();
+      if (carAtual != null) {
+        carAtual.setEstActAdm(0);
+        carreiraEntityRepository.save(carAtual);
+      }
+
       var novaCar = new CarreiraEntity();
       populateCarreiraCommon(novaCar, dto);
       novaCar.setFlgProcessa(1);
+      novaCar.setEstActAdm(1);
       novaCar.setEstado(Estado.P);
       novaCar.setObs("HISTORICO_LABORAL");
       novaCar.setUuid(IdentificadorUnico.create().valor());
@@ -171,7 +211,8 @@ public class HistoricoLaboralWriteService {
       funcionario.getValidacoes().add(validCar);
 
       if (dto.getSalario() != null) {
-        closeExistingSalaryAndCreateNew(funcionario, novoRelacionamento, dto);
+        var novaRem = closeExistingSalaryAndCreateNew(funcionario, novoRelacionamento, dto);
+        novasRemuneracoes.add(novaRem);
       }
     }
 
@@ -198,6 +239,8 @@ public class HistoricoLaboralWriteService {
 
     var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
+    tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(atual, novoRelacionamento, novasRemuneracoes, Collections.emptyList());
+
     saved.getValidacoes().stream()
         .filter(v -> v.getEstado() == Estado.P && v.getTiprelId() != null
             && v.getTiprelId().getId().equals(novoRelacionamento.getId()))
@@ -222,7 +265,8 @@ public class HistoricoLaboralWriteService {
       updateEstadoOnRelAndChildren(novoRelacionamento, novoEstado);
       updateValidacaoPendentes(funcionario.getUuid(), novoEstado);
       if (novoEstado == Estado.A) {
-        ordemServicoWriteService.criar(funcionario, novoRelacionamento, dto.getTipoOrdemServico());
+        var referente = StringUtils.hasText(dto.getTipoOrdemServico()) ? dto.getTipoOrdemServico() : "SITUACAO_LABORAL";
+        ordemServicoWriteService.criar(funcionario, novoRelacionamento, referente);
       }
     }
 
@@ -310,7 +354,8 @@ public class HistoricoLaboralWriteService {
       updateEstadoOnRelAndChildren(relacionamento, novoEstado);
       updateValidacaoPendentes(funcionario.getUuid(), novoEstado);
       if (novoEstado == Estado.A) {
-        ordemServicoWriteService.criar(funcionario, relacionamento, dto.getTipoOrdemServico());
+        var referente = StringUtils.hasText(dto.getTipoOrdemServico()) ? dto.getTipoOrdemServico() : "SITUACAO_LABORAL";
+        ordemServicoWriteService.criar(funcionario, relacionamento, referente);
       }
     }
 
@@ -372,7 +417,7 @@ public class HistoricoLaboralWriteService {
                                                TiposRelacionamentoEntity tiposRelacionamento) {
 
     //atraves de vinculo sabemos o tm_id sall, associação feita na tabela paramVinculoMovimento
-    var vinculoId = tiposRelacionamento.getContrVinculoId().getId();
+    var vinculoId = tiposRelacionamento.getContrVinculoId().getVinculoId().getId();
     var paramVinculoMovimentoEntity =
         paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoId,"REM").getFirst();
 
@@ -391,10 +436,10 @@ public class HistoricoLaboralWriteService {
     }
   }
 
-  private void closeExistingSalaryAndCreateNew(FuncionarioEntity funcionario, TiposRelacionamentoEntity rel,
+  private DefinicaoRemuneracaoEntity closeExistingSalaryAndCreateNew(FuncionarioEntity funcionario, TiposRelacionamentoEntity rel,
                                                RelacaoLaboralDTO dto) {
 
-    var vinculoId = rel.getContrVinculoId().getId();
+    var vinculoId = rel.getContrVinculoId().getVinculoId().getId();
     var paramVinculoMovimentoEntity =
         paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoId,"REM").getFirst();
 
@@ -417,6 +462,7 @@ public class HistoricoLaboralWriteService {
     remun.setRemId(renumSal);
     remun.setTiprelId(rel);
     remuneracaoTiprelEntityRepository.save(remun);
+    return renumSal;
   }
 
   private void updateEstadoOnRelAndChildren(TiposRelacionamentoEntity rel, Estado estado) {
