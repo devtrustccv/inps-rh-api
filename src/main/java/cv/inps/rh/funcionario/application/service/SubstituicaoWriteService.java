@@ -50,6 +50,7 @@ public class SubstituicaoWriteService {
     substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid()));
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());
+    substituicao.setMotivo(dto.getMotivoSubstituicao());
     substituicao.setObs(dto.getObs());
     substituicao.setUuid(IdentificadorUnico.create().valor());
     substituicao.setEstado(Estado.P);
@@ -69,6 +70,7 @@ public class SubstituicaoWriteService {
 
   }
 
+  @Transactional
   public SubstituicaoDTO validar(ValidarSubstituicaoCommand command) {
     var dto = command.getSubstituicao();
 
