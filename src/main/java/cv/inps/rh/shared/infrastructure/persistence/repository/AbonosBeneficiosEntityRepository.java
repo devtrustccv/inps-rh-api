@@ -74,6 +74,7 @@ public interface AbonosBeneficiosEntityRepository extends
           tr.mobId.instidId.nome,
           tr.mobId.secaoId.nome,
           f.nome,
+          f.uuid,
           tr.contrVinculoId.vinculoId.nome,
           tr.cargoId.nome,
           ps.id,
