@@ -28,7 +28,10 @@ public class GlobalExceptionHandler {
 
     LOGGER.error(ex.getMessage(), ex);
 
-    return ex.getBody();
+    var body = ex.getBody();
+    body.setProperty("igrpType", "validation");
+
+    return body;
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
