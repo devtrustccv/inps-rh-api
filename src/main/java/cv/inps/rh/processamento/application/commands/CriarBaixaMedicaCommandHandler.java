@@ -27,7 +27,7 @@ public class CriarBaixaMedicaCommandHandler implements CommandHandler<CriarBaixa
 
     LOGGER.debug("CriarBaixaMedicaCommand: {}", command);
 
-    return ResponseEntity.ok(baixaMedicaServiceWrite.criar(command.getReq()));
+    return ResponseEntity.ok(baixaMedicaServiceWrite.criar(command.getBaixamedicareq()));
   }
 
 }

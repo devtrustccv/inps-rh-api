@@ -58,10 +58,11 @@ public class PagamentoDescontoController {
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
     @RequestParam(value = "dataFim", required = false) String dataFim,
     @RequestParam(value = "estado", required = false) String estado,
-    @RequestParam(value = "tiprelUuid", required = false) String tiprelUuid)
+    @RequestParam(value = "tiprelUuid", required = false) String tiprelUuid,
+    @RequestParam(value = "validacao", defaultValue = "false") boolean validacao)
   {
 
-      final var query = new GetListPagamentosDescontoQuery(idFuncionario, pageNumber, pageSize, dataInicio, dataFim, estado, tiprelUuid);
+      final var query = new GetListPagamentosDescontoQuery(idFuncionario, pageNumber, pageSize, dataInicio, dataFim, estado, tiprelUuid, validacao);
 
       ResponseEntity<WrapperListPagamentosDescontoDTO> response = queryBus.handle(query);
 

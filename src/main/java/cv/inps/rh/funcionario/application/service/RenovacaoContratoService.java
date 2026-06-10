@@ -11,7 +11,6 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +25,6 @@ public class RenovacaoContratoService {
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final FuncionarioRules funcionarioRules;
-  private final ValidacaoEntityRepository validacaoEntityRepository;
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
 
   @Transactional
@@ -71,15 +69,10 @@ public class RenovacaoContratoService {
         TipoAcao.INSERT.name(), Referencia.RENOVACAO_CONTRATO.name(), Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
+    valid.setReferenciaId(contratoAtual.getId());
     funcionario.getValidacoes().add(valid);
 
     funcionarioEntityRepository.saveAndFlush(funcionario);
-
-    validacaoEntityRepository.findById(valid.getId())
-        .ifPresent(e -> {
-          e.setReferenciaId(contratoAtual.getId());
-          validacaoEntityRepository.save(e);
-        });
 
     var renovacaoContratoDTO = new RenovacaoContratoDTO();
     renovacaoContratoDTO.setDadosRenovacao(contratoMapper.toRenovacaoContratoReqDTO(contratoAtual));

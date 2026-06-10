@@ -2,19 +2,21 @@ package cv.inps.rh.processamento.application.commands;
 
 import cv.igrp.framework.core.domain.Command;
 import cv.inps.rh.processamento.application.dto.BaixaMedicaReqDTO;
-import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ValidarBaixaMedicaCommand implements Command {
 
-  private String pedidoId;
-  private EstadoValidacao validar;
-  private BaixaMedicaReqDTO ajuste;
+    private BaixaMedicaReqDTO baixamedicareq;
 
+    @NotBlank(message = "The field <validar> is required")
+    private String validar;
+
+    @NotBlank(message = "The field <pedidoId> is required")
+    private String pedidoId;
 }

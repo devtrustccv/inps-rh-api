@@ -35,7 +35,7 @@ public class DadosAcademicosReadService {
   public DadosAcademicosProfResponseDTO getDadosAcademicos(GetDadosAcademicosQuery query) {
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getIdFuncionario()).valor());
 
-    var estados = List.of(Estado.A, Estado.I);
+    var estados = query.isValidacao() ? List.of(Estado.P) : List.of(Estado.A, Estado.I);
 
     var habilitacaoesLiterarias = habilitacaoLiterariaEntityRepository
         .findByFuncionarioIdAndEstados(funcionario.getUuid(), estados);

@@ -15,7 +15,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "WrapperListaColaborador",
+                "type": "BaixaMedicaList",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -38,24 +38,29 @@
         },
         {
           "type": "string",
-          "name": "colaborador",
+          "name": "nomeFuncionario",
           "isRequired": false
         },
         {
-          "type": "string",
-          "name": "direccao",
+          "type": "long",
+          "name": "direccaoId",
           "isRequired": false
         },
         {
-          "type": "string",
+          "type": "integer",
           "name": "page",
           "value": "0",
           "isRequired": false
         },
         {
-          "type": "string",
+          "type": "integer",
           "name": "size",
           "value": "20",
+          "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "tipoAbonoBeneficioId",
           "isRequired": false
         }
       ]
@@ -249,16 +254,36 @@
         }
       },
       "requestParams": [
-        { "type": "string", "name": "colaborador", "isRequired": true },
-        { "type": "string", "name": "dataInicio", "isRequired": true },
-        { "type": "string", "name": "dataFim", "isRequired": true },
-        { "type": "string", "name": "tipoLicenca", "isRequired": true },
-        { "type": "string", "name": "dataInicioFalta", "isRequired": false }
+        {
+          "type": "string",
+          "name": "colaborador",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "tipoLicenca",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "dataInicioFalta",
+          "isRequired": false
+        }
       ]
     },
     {
       "actionName": "getBaixaMedica",
-      "path": "baixa-medica/{pedidoId}",
+      "path": "baixa-medica/{baixaMedicaId}",
       "method": "GET",
       "responses": {
         "200": {
@@ -266,7 +291,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "BaixaMedicaDetalhe",
+                "type": "BaixaMedicaDetail",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
@@ -277,7 +302,11 @@
         }
       },
       "pathVariables": [
-        { "name": "pedidoId", "type": "string", "isRequired": true }
+        {
+          "name": "baixaMedicaId",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -353,5 +382,5 @@
       }
     }
   ],
-  "id": "f2v97ka4pz-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica-getListaBaixamedicaCopy"
+  "id": "f2v97ka4pz-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica-getListaBaixamedicaCopy-getListaBaixamedica-getListaBaixamedica-getListaBaixamedica-getBaixaMedica-getBaixaMedica"
 }

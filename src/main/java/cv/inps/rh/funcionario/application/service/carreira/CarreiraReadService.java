@@ -54,7 +54,7 @@ public class CarreiraReadService {
       Join<TiposRelacionamentoEntity, FuncionarioEntity> fun = root.join("funId");
       predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
 
-      var estados = List.of(Estado.A, Estado.I);
+      var estados = List.of(Estado.A, Estado.P, Estado.I);
       predicates.add(
           root.get("estado").in(estados)
       );

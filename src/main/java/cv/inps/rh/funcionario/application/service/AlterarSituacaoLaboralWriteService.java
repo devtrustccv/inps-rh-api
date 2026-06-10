@@ -92,7 +92,7 @@ public class AlterarSituacaoLaboralWriteService {
         var carreira = tiposRelacionamentoAtual.getCarreiraId();
         if (carreira != null) carreira.setDataFim(dataFimValidacao);
 
-        var contrato = tiposRelacionamentoAtual.getContrVinculoId().getContratoId();
+        var contrato = tiposRelacionamentoAtual.getContrVinculoId();
         if (contrato != null) contrato.setDataFim(dataFimValidacao);
 
         funcionario.getDefinicoesRenumeracoes().forEach(r -> r.setDataFim(dataFimValidacao));
@@ -132,6 +132,7 @@ public class AlterarSituacaoLaboralWriteService {
     tipoRelacionamentoNovo.setObs(dto.getObservacao());
     tipoRelacionamentoNovo.setSituacLaboralId(situacaoLaboral);
     tipoRelacionamentoNovo.setReferente("SITUACAO_LABORAL");
+    tipoRelacionamentoNovo.setEstado(Estado.P);
     var tiprelPersistido = tiposRelacionamentoEntityRepository.saveAndFlush(tipoRelacionamentoNovo);
 
     var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.ESTADO_COLABORADOR.name(), Estado.P);

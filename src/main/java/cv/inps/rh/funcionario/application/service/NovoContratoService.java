@@ -279,16 +279,14 @@ public class NovoContratoService {
     if (CollectionUtils.isEmpty(vinculoTipoMovimentoREM))
       return true;
 
-    var renumeracao = definicaoRemuneracaoEntityRepository
-        .findByFunIdAndTmIdAndEstado(funcionario, vinculoTipoMovimentoREM.getFirst().getTmId(), Estado.A).getFirst();
-
-    if (renumeracao != null) {
-      if (!Objects.equals(renumeracao.getValor(), dc.getSalario())) {
-        return true;
-      }
+    var renumeracaoList = definicaoRemuneracaoEntityRepository
+        .findByFunIdAndTmIdAndEstado(funcionario, vinculoTipoMovimentoREM.getFirst().getTmId(), Estado.A);
+    if (renumeracaoList.isEmpty()) {
+      return true;
     }
 
-    return false;
+    var renumeracao = renumeracaoList.getFirst();
+    return !Objects.equals(renumeracao.getValor(), dc.getSalario());
   }
 
   private boolean houveMudancaFuncionalCarreira(CarreiraEntity atual, DadosContratuaisReqDTO dc) {
@@ -297,19 +295,23 @@ public class NovoContratoService {
       return true;
     }
 
-    if (!Objects.equals(atual.getCargoId().getId(), dc.getCargoPosicaoId())) {
+    Long atualCargoId = atual.getCargoId() != null ? atual.getCargoId().getId() : null;
+    if (!Objects.equals(atualCargoId, dc.getCargoPosicaoId())) {
       return true;
     }
 
-    if (!Objects.equals(atual.getEscalaoId().getId(), dc.getEscalaoReferenciaId())) {
+    Long atualEscalaoId = atual.getEscalaoId() != null ? atual.getEscalaoId().getId() : null;
+    if (!Objects.equals(atualEscalaoId, dc.getEscalaoReferenciaId())) {
       return true;
     }
 
-    if (!Objects.equals(atual.getCategoriaId().getId(), dc.getCategoriaId())) {
+    Long atualCategoriaId = atual.getCategoriaId() != null ? atual.getCategoriaId().getId() : null;
+    if (!Objects.equals(atualCategoriaId, dc.getCategoriaId())) {
       return true;
     }
 
-    return !Objects.equals(atual.getCarrPccsId().getId(), dc.getCarreiraId());
+    Long atualCarreiraId = atual.getCarrPccsId() != null ? atual.getCarrPccsId().getId() : null;
+    return !Objects.equals(atualCarreiraId, dc.getCarreiraId());
 
   }
 

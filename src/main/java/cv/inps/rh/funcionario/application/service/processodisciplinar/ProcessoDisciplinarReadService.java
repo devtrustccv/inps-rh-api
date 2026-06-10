@@ -25,9 +25,12 @@ public class ProcessoDisciplinarReadService {
   private final ProcessoDisciplinarEntityRepository processoDisciplinarEntityRepository;
   private final DomainEntityRepository domainEntityRepository;
 
-  public List<ProcessoDisciplinarResponseDTO> getProcessosDisciplinares(String funcionarioId) {
+  public List<ProcessoDisciplinarResponseDTO> getProcessosDisciplinares(String funcionarioId, boolean validacao) {
 
-    var processes = processoDisciplinarEntityRepository.findByFunId_UuidAndEstadoNot(UUID.fromString(funcionarioId), Estado.E.name());
+    var estados = validacao
+        ? List.of(Estado.P.name())
+        : List.of(Estado.A.name(), Estado.I.name());
+    var processes = processoDisciplinarEntityRepository.findByFunId_UuidAndEstadoIn(UUID.fromString(funcionarioId), estados);
     if (processes.isEmpty())
       return List.of();
 

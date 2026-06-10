@@ -13,6 +13,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.RhVHistLaboralEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
@@ -35,6 +36,7 @@ public class HistoricoLaboralReadService {
 
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
+  private final RhVHistLaboralEntityRepository rhVHistLaboralEntityRepository;
   private final FuncionarioRules funcionarioRules;
 
   public WrapperHistLaboralResponseDTO getHistoricoLaboral2(GetHistoricoLaboralQuery query) {
@@ -46,8 +48,9 @@ public class HistoricoLaboralReadService {
         : null;
     var df = StringUtils.isNotBlank(query.getDataFim()) ? DateFormatter.stringToLocalDate(query.getDataFim()) : null;
 
-    var page = tiposRelacionamentoEntityRepository.historicoLaboralViewByFuncionario(
+    var page = rhVHistLaboralEntityRepository.findByFunUuidWithFilters(
         query.getFuncionarioId(),
+        Estado.A.name(),
         query.getReferencia(),
         query.getTipoSituacao(),
         query.getSituacaoLaboral(),
@@ -68,8 +71,8 @@ public class HistoricoLaboralReadService {
       dto.setCargo(r.getCargoDesc());
       dto.setSituacaoLaboral(r.getSituacaoLaboralDesc());
       dto.setId(r.getTiprelId());
-      dto.setUuid(r.getFuncionarioUuid());
-      dto.setUuidFuncionario(r.getFuncionarioUuid());
+      dto.setUuid(r.getFunUuid() != null ? r.getFunUuid().toString() : null);
+      dto.setUuidFuncionario(r.getFunUuid() != null ? r.getFunUuid().toString() : null);
 
       var dataInicio = r.getDataInicio() != null ? DateFormatter.localDateToString(r.getDataInicio())
           : StringUtils.EMPTY;
@@ -102,20 +105,21 @@ public class HistoricoLaboralReadService {
           response.setUltimoMovimento(Objects.equals(obj.getEstActAdm(), 1));
 
           ofNullable(obj.getTipoSituacao()).ifPresent(response::setTipoSituacao);
-          ofNullable(obj.getContrVinculoId().getTpContratoId().getNome())
+          ofNullable(obj.getContrVinculoId()).map(ContratoEntity::getTpContratoId)
+              .map(ParamContratoEntity::getNome)
               .ifPresent(response::setTipoContrato);
-          ofNullable(obj.getContrVinculoId().getVinculoId())
+          ofNullable(obj.getContrVinculoId()).map(ContratoEntity::getVinculoId)
               .map(ParamVinculoEntity::getNome)
               .ifPresent(response::setVinculo);
-          ofNullable(obj.getMobId().getSecaoId()).map(SecaoEntity::getInstId)
+          ofNullable(obj.getMobId()).map(MobilidadeEntity::getSecaoId).map(SecaoEntity::getInstId)
               .map(InstituicaoEntity::getNome)
               .ifPresent(response::setDirecao);
-          ofNullable(obj.getMobId().getSecaoId()).map(SecaoEntity::getNome)
+          ofNullable(obj.getMobId()).map(MobilidadeEntity::getSecaoId).map(SecaoEntity::getNome)
               .ifPresent(response::setSeccao);
           ofNullable(obj.getCarreiraId()).map(CarreiraEntity::getCarrPccsId)
               .map(ParamCarreiraEntity::getNome)
               .ifPresent(response::setCarreira);
-          ofNullable(obj.getCarreiraId().getEscalaoId()).map(ParamEscalaoEntity::getEscalao)
+          ofNullable(obj.getCarreiraId()).map(CarreiraEntity::getEscalaoId).map(ParamEscalaoEntity::getEscalao)
               .ifPresent(response::setReferenciaEscalao);
           ofNullable(obj.getCargoId()).map(ParamCargoEntity::getNome)
               .ifPresent(response::setCargo);

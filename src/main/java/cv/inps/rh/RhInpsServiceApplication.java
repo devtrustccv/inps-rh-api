@@ -3,11 +3,11 @@ package cv.inps.rh;
 import cv.inps.rh.shared.config.ApplicationAuditorAware;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.auditing.DateTimeProvider;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -15,7 +15,7 @@ import java.util.Optional;
 @SpringBootApplication
 @EnableJpaAuditing(auditorAwareRef = "auditAware", dateTimeProviderRef = "auditDateTimeProvider")
 @EnableScheduling
-public class RHINPSSERVICEApplication {
+public class RhInpsServiceApplication {
 
   @Bean
   public AuditorAware<String> auditAware() {
@@ -28,8 +28,7 @@ public class RHINPSSERVICEApplication {
   }
 
   public static void main(String[] args) {
-    SpringApplication.run(RHINPSSERVICEApplication.class, args);
-
+    SpringApplication.run(RhInpsServiceApplication.class, args);
   }
 
 }

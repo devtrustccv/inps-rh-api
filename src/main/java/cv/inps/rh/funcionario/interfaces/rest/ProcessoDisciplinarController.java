@@ -1,5 +1,5 @@
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
 
 package cv.inps.rh.funcionario.interfaces.rest;
 
@@ -89,10 +89,11 @@ public class ProcessoDisciplinarController {
   )
 
   public ResponseEntity<List<ProcessoDisciplinarResponseDTO>> getProcessosFuncionario(
-    @PathVariable(value = "funcionarioId") String funcionarioId)
+    @PathVariable(value = "funcionarioId") String funcionarioId,
+    @RequestParam(value = "validacao", defaultValue = "false") boolean validacao)
   {
 
-      final var query = new GetProcessosFuncionarioQuery(funcionarioId);
+      final var query = new GetProcessosFuncionarioQuery(funcionarioId, validacao);
 
       return queryBus.handle(query);
 

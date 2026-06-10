@@ -39,8 +39,7 @@ public class ContactoMapper {
     for (ContactoEntity existing : existingList) {
       boolean stillExists = newList.stream()
           .anyMatch(dto -> Objects.equals(dto.getId(), existing.getId()));
-      if (!stillExists) {
-        // Se tiver campo de soft delete:
+      if (!stillExists && existing.getEstado() != Estado.E && existing.getEstado() != Estado.I) {
         existing.setEstado(Estado.E);
       }
     }

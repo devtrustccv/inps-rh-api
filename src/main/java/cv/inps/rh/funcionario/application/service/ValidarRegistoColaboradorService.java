@@ -81,22 +81,22 @@ public class ValidarRegistoColaboradorService {
 
     var familiares = familiarMapper
         .syncFamiliares(funcionario.getFamiliares(),
-            registroColaborador.getFamiliares(),funcionario);
+            registroColaborador.getFamiliares(), funcionario, Estado.P);
 
     var dadosAcademicosProf = registroColaborador.getDadosAcademicosProf();
 
     var habilitacoesLiterarias = habilitacaoLiterariaMapper
         .syncHabilitacoes(funcionario.getHabilitacoesLiterarias(),
-        dadosAcademicosProf.getHabilitacoesLiterarias(), funcionario);
+        dadosAcademicosProf.getHabilitacoesLiterarias(), funcionario, Estado.P);
 
     var formacoesFeitas = formacaoFeitaMapper
         .syncFormacoes(funcionario.getFormacoesFeitas(),
-        dadosAcademicosProf.getFormacoesFeitas(), funcionario);
+        dadosAcademicosProf.getFormacoesFeitas(), funcionario, Estado.P);
 
     var experienciasProfissionais = experienciaProfissionalMapper
         .syncExperiencias(
         funcionario.getExperienciasProfissionais(),
-        dadosAcademicosProf.getExperienciasProfssionais(), funcionario);
+        dadosAcademicosProf.getExperienciasProfssionais(), funcionario, Estado.P);
 
     var dadosBancarios = dadosBancariosMapper
         .syncBancarios(funcionario.getDadosBancarios(),
@@ -151,10 +151,13 @@ public class ValidarRegistoColaboradorService {
     if (registroColaborador.getValidar() != null) {
       var estado = registroColaborador.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       if (estado.equals(Estado.A)) {
-        ordemServicoWriteService.criar(funcionario, tiposRelacionamento, registroColaborador.getTipoOrdemServico());
+        if (!org.springframework.util.StringUtils.hasText(registroColaborador.getTipoOrdemServico()))
+          throw IgrpResponseStatusException.badRequest("Tipo de ordem de serviço é obrigatório para validar o registo.");
+        var validacao = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR).orElse(null);
+        var descricao = "Registo de colaborador - " + funcionario.getNome();
+        ordemServicoWriteService.criar(funcionario, tiposRelacionamento, registroColaborador.getTipoOrdemServico(), validacao, descricao);
       }
       mudaEstado(funcionario, estado);
-
     }
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
@@ -186,63 +189,63 @@ public class ValidarRegistoColaboradorService {
     var contactos = funcionarioEntity.getContactos();
     if (contactos != null)
       contactos.forEach(c -> {
-        if (c != null)
+        if (c != null && c.getEstado() != Estado.E)
           c.setEstado(estado);
       });
 
     var familiares = funcionarioEntity.getFamiliares();
     if (familiares != null)
       familiares.forEach(f -> {
-        if (f != null)
+        if (f != null && f.getEstado() != Estado.E)
           f.setEstado(estado);
       });
 
     var documentos = funcionarioEntity.getDocumentos();
     if (documentos != null)
       documentos.forEach(d -> {
-        if (d != null)
+        if (d != null && d.getEstado() != Estado.E)
           d.setEstado(estado);
       });
 
     var bancarios = funcionarioEntity.getDadosBancarios();
     if (bancarios != null)
       bancarios.forEach(b -> {
-        if (b != null)
+        if (b != null && b.getEstado() != Estado.E)
           b.setEstado(estado);
       });
 
     var habilitacoes = funcionarioEntity.getHabilitacoesLiterarias();
     if (habilitacoes != null)
       habilitacoes.forEach(h -> {
-        if (h != null)
+        if (h != null && h.getEstado() != Estado.E)
           h.setEstado(estado);
       });
 
     var formacoes = funcionarioEntity.getFormacoesFeitas();
     if (formacoes != null)
       formacoes.forEach(f -> {
-        if (f != null)
+        if (f != null && f.getEstado() != Estado.E)
           f.setEstado(estado);
       });
 
     var experiencias = funcionarioEntity.getExperienciasProfissionais();
     if (experiencias != null)
       experiencias.forEach(e -> {
-        if (e != null)
+        if (e != null && e.getEstado() != Estado.E)
           e.setEstado(estado);
       });
 
     var remuneracoes = funcionarioEntity.getDefinicoesRenumeracoes();
     if (remuneracoes != null)
       remuneracoes.forEach(r -> {
-        if (r != null)
+        if (r != null && r.getEstado() != Estado.E)
           r.setEstado(estado);
       });
 
     var pagamentos = funcionarioEntity.getDefinicoesPagamentos();
     if (pagamentos != null)
       pagamentos.forEach(p -> {
-        if (p != null)
+        if (p != null && p.getEstado() != Estado.E)
           p.setEstado(estado);
       });
 

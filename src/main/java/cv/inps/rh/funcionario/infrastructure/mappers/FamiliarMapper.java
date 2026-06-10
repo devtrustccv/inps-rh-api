@@ -39,7 +39,7 @@ public class FamiliarMapper {
   }
 
   public java.util.List<FamiliarEntity> syncFamiliares(java.util.List<FamiliarEntity> existingList,
-                             java.util.List<AgregadoDependenteReqDTO> newList, FuncionarioEntity fun) {
+                             java.util.List<AgregadoDependenteReqDTO> newList, FuncionarioEntity fun, Estado estadoParaNovos) {
     if (newList == null) return existingList;
     for (AgregadoDependenteReqDTO dto : newList) {
       FamiliarEntity found = null;
@@ -61,7 +61,7 @@ public class FamiliarMapper {
         found.setMembroAgr(dto.getAgregada());
         found.setResponsavel(dto.getResponsavel());
       } else {
-        FamiliarEntity novo = toEntity(dto, Estado.P, fun);
+        FamiliarEntity novo = toEntity(dto, estadoParaNovos, fun);
         existingList.add(novo);
       }
     }
@@ -69,7 +69,7 @@ public class FamiliarMapper {
     for (FamiliarEntity existing : existingList) {
       boolean stillExists = newList.stream()
           .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
-      if (!stillExists) {
+      if (!stillExists && existing.getEstado() != Estado.E && existing.getEstado() != Estado.I) {
         existing.setEstado(Estado.E);
       }
     }

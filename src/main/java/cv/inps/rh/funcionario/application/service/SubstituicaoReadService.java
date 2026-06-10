@@ -32,7 +32,7 @@ public class SubstituicaoReadService {
 
     var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
 
-    var estados = List.of(Estado.A, Estado.I);
+    var estados = List.of(Estado.A, Estado.P, Estado.I);
 
     return substituicaoEntityRepository
         .findBySubstituidoTiprelId_FunId_Uuid_AndEstadoIn(idFuncionario,estados, pageable)

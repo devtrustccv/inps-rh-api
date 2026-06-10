@@ -49,7 +49,7 @@ public class DefPagamentoMapper {
   public List<DefPagamentoEntity> syncPagamentos(
       java.util.List<DefPagamentoEntity> existingList,
       java.util.List<cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO> newList) {
-    if (newList == null) return existingList;
+    if (org.springframework.util.CollectionUtils.isEmpty(newList)) return existingList;
     for (cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO dto : newList) {
       DefPagamentoEntity found = null;
       if (dto.getId() != null) {
@@ -81,7 +81,7 @@ public class DefPagamentoMapper {
     for (DefPagamentoEntity existing : existingList) {
       boolean stillExists = newList.stream()
           .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
-      if (!stillExists) {
+      if (!stillExists && existing.getEstado() != Estado.E && existing.getEstado() != Estado.I) {
         existing.setEstado(Estado.E);
       }
     }

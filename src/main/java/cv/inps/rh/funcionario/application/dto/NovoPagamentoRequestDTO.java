@@ -4,8 +4,6 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,16 +16,11 @@ import lombok.NoArgsConstructor;
 @IgrpDTO
 public class NovoPagamentoRequestDTO extends NovoRemuneracaoRequestDTO {
 
-  @NotBlank(message = "The field <entidade> is required")
-
   private Long entidade ;
-  @NotNull(message = "The field <nif> is required")
 
   private Integer nif ;
-  @NotBlank(message = "The field <banco> is required")
 
   private Long banco ;
-  @NotBlank(message = "The field <nib> is required")
 
   private String nib ;
 

@@ -63,6 +63,14 @@ public class ValidarDadosBancariosService {
       return dto;
     }
 
+    boolean temPendentesParaValidar = funcionario.getDadosBancarios().stream()
+        .anyMatch(b -> b != null && b.getEstado() == Estado.P);
+
+    if (!temPendentesParaValidar) {
+      funcionarioEntityRepository.save(funcionario);
+      return dto;
+    }
+
     var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var validacao = contratuaisEntityMapper

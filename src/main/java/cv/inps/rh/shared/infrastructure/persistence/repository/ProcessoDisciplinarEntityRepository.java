@@ -27,6 +27,8 @@ public interface ProcessoDisciplinarEntityRepository extends
 
   List<ProcessoDisciplinarEntity> findByFunId_UuidAndEstadoNot(UUID uuid, String estado);
 
+  List<ProcessoDisciplinarEntity> findByFunId_UuidAndEstadoIn(UUID uuid, List<String> estados);
+
   Optional<ProcessoDisciplinarEntity> findByUuid(UUID uuid);
 
   default ProcessoDisciplinarEntity findByUuidOrThrow(UUID uuid) {

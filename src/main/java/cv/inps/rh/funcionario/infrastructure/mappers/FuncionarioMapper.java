@@ -63,7 +63,7 @@ public class FuncionarioMapper {
   }
 
 
-  public FuncionarioResponseDTO toResponseDTO(FuncionarioEntity entity) {
+  public FuncionarioResponseDTO toResponseDTO(FuncionarioEntity entity, boolean validacao) {
     if (entity == null) return null;
 
     FuncionarioResponseDTO dto = new FuncionarioResponseDTO();
@@ -71,36 +71,41 @@ public class FuncionarioMapper {
     DadosPessoaisRespDTO dadosPessoais = toDadosPessoaisRespDTO(entity);
     dto.setDadosPessoais(dadosPessoais);
 
+    var permitidos = validacao
+        ? List.of(Estado.P)
+        : List.of(Estado.A, Estado.I);
 
     if (entity.getFamiliares() != null) {
-      List<AgregadoDependenteRespDTO> familiares = familiarMapper.toAgregadoDependenteRespDTOList(entity.getFamiliares());
-      dto.setFamiliares(familiares);
+      var familiaresFiltrados = entity.getFamiliares().stream()
+          .filter(f -> permitidos.contains(f.getEstado())).toList();
+      dto.setFamiliares(familiarMapper.toAgregadoDependenteRespDTOList(familiaresFiltrados));
     }
 
     DadosAcademicosProfResponseDTO dap = new DadosAcademicosProfResponseDTO();
     if (entity.getHabilitacoesLiterarias() != null) {
-      var habilitacaoLiterariaRespDTOS = habilitacaoLiterariaMapper.toHabilitacaoLiterariaRespDTOList(entity.getHabilitacoesLiterarias());
-      dap.setHabilitacoesLiterarias(habilitacaoLiterariaRespDTOS);
+      var habFiltradas = entity.getHabilitacoesLiterarias().stream()
+          .filter(h -> permitidos.contains(h.getEstado())).toList();
+      dap.setHabilitacoesLiterarias(habilitacaoLiterariaMapper.toHabilitacaoLiterariaRespDTOList(habFiltradas));
     }
 
     if (entity.getFormacoesFeitas() != null) {
-      var formacaoFeitaRespDTOS = formacaoFeitaMapper.toFormacaoFeitaRespDTOList(entity.getFormacoesFeitas());
-      dap.setFormacoesFeitas(formacaoFeitaRespDTOS);
+      var formFiltradas = entity.getFormacoesFeitas().stream()
+          .filter(f -> permitidos.contains(f.getEstado())).toList();
+      dap.setFormacoesFeitas(formacaoFeitaMapper.toFormacaoFeitaRespDTOList(formFiltradas));
     }
 
     if (entity.getExperienciasProfissionais() != null) {
-      var experienciaProfissionalRespDTOS = experienciaProfissionalMapper.toExperienciaProfissionalRespDTOList(entity.getExperienciasProfissionais());
-      dap.setExperienciasProfssionais(experienciaProfissionalRespDTOS);
+      var expFiltradas = entity.getExperienciasProfissionais().stream()
+          .filter(e -> permitidos.contains(e.getEstado())).toList();
+      dap.setExperienciasProfssionais(experienciaProfissionalMapper.toExperienciaProfissionalRespDTOList(expFiltradas));
     }
     dto.setDadosAcademicosProf(dap);
 
-
     if (entity.getDadosBancarios() != null) {
-      var dadosBancariosRespDTOS = dadosBancariosMapper.toDadosBancariosRespDTOList(entity.getDadosBancarios());
-      dto.setDadosBancarios(dadosBancariosRespDTOS);
+      var bancFiltrados = entity.getDadosBancarios().stream()
+          .filter(b -> permitidos.contains(b.getEstado())).toList();
+      dto.setDadosBancarios(dadosBancariosMapper.toDadosBancariosRespDTOList(bancFiltrados));
     }
-
-
 
     return dto;
   }

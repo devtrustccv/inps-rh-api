@@ -318,6 +318,11 @@
         },
         {
           "type": "string",
+          "name": "flgAbonoBeneficio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
           "name": "flgAusencia",
           "isRequired": false
         },
@@ -398,5 +403,5 @@
       }
     }
   ],
-  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos-getParamSituacaoDetalheAtivo-getParamSituacaoLaboralAtivo-getTiposDocumentoAtivos-getVinculosAtivos-getParamSituacoesLaboraisByVinculo-getEscaloesAtivos-getParamSituacoesLaboraisByVinculo-getParamSituacoesLaboraisByVinculo-getParamSituacoesAtivo-getParamSituacoesAtivo-getParamSituacoesAtivo-getTiposDocumentoAtivos-getLocalTrabalhoAtivos-getCarreirasAtivos-getParamSituacoesLaboraisByVinculo"
+  "id": "3le3xt6arj-getCargos-getSituacaoLaboralAtivo-getDominios-getParamContratosAtivos-getVinculosAtivos-getLocalTrabalhoAtivos-getSeccoesAtivos-getParamSituacaoDetalheAtivo-getParamSituacaoLaboralAtivo-getTiposDocumentoAtivos-getVinculosAtivos-getParamSituacoesLaboraisByVinculo-getEscaloesAtivos-getParamSituacoesLaboraisByVinculo-getParamSituacoesLaboraisByVinculo-getParamSituacoesAtivo-getParamSituacoesAtivo-getParamSituacoesAtivo-getTiposDocumentoAtivos-getLocalTrabalhoAtivos-getCarreirasAtivos-getParamSituacoesLaboraisByVinculo-getParamSituacoesAtivo"
 }

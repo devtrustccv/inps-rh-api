@@ -14,6 +14,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeModalidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.RegimeModalidadeEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class RegimeWriteService {
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final EntityManager entityManager;
   private final ValidacaoEntityRepository validacaoEntityRepository;
+  private final RegimeModalidadeEntityRepository regimeModalidadeEntityRepository;
   private final OrdemServicoWriteService ordemServicoWriteService;
 
 
@@ -61,20 +63,21 @@ public class RegimeWriteService {
     regimeTrabalho.setDataInicio(dto.getDataInicio());
     regimeTrabalho.setDataFim(dto.getDataFim());
     regimeTrabalho.setEstado(Estado.P);
-    regimeTrabalho.setUuid(IdentificadorUnico.create().valor());
 
 
     // Criar modalidades
     if (dto.getRegimeModalidade() != null) {
-      for (var mod : dto.getRegimeModalidade()) {
+      var novasModalidades = dto.getRegimeModalidade().stream().map(mod -> {
         var modalidade = new RegimeModalidadeEntity();
         modalidade.setModalidade(mod.getModalidade());
         modalidade.setDiasSemana(mod.getDiasSemana());
         modalidade.setNumHoras(mod.getNumeroHoras());
         modalidade.setUuid(IdentificadorUnico.create().valor());
+        modalidade.setEstado(Estado.P);
         modalidade.setRegimeId(regimeTrabalho);
-        regimeTrabalho.getModalidades().add(modalidade);
-      }
+        return modalidade;
+      }).toList();
+      regimeModalidadeEntityRepository.saveAll(novasModalidades);
     }
 
 
@@ -88,7 +91,9 @@ public class RegimeWriteService {
     funcionarioEntityRepository.saveAndFlush(funcionario);
 
 
-    validacaoEntityRepository.findById(validacao.getId())
+    validacaoEntityRepository
+        .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(
+            funcionario.getUuid(), Estado.P, TipoAcao.INSERT.name(), Referencia.REGIME.name())
         .ifPresent(e -> {
           e.setReferenciaId(regimeTrabalho.getId());
           validacaoEntityRepository.save(e);
@@ -154,6 +159,7 @@ public class RegimeWriteService {
           novo.setRegimeId(regime);
           novo.setEstado(Estado.A);
 
+          regimeModalidadeEntityRepository.save(novo);
           existentes.add(novo);
         }
       }
@@ -169,15 +175,15 @@ public class RegimeWriteService {
     if (dto.getValidar() != null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
-      tipoRelacionamentoAtual.setEstado(estado);
       regime.setEstado(estado);
-
 
       funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGIME)
           .ifPresent(v -> v.setEstado(estado));
 
       if (estado == Estado.A) {
-        ordemServicoWriteService.criar(funcionario, tipoRelacionamentoAtual, dto.getTipoOrdemServico());
+        var referente = org.springframework.util.StringUtils.hasText(dto.getTipoOrdemServico())
+            ? dto.getTipoOrdemServico() : "REGIME";
+        ordemServicoWriteService.criar(funcionario, tipoRelacionamentoAtual, referente);
       }
     }
 

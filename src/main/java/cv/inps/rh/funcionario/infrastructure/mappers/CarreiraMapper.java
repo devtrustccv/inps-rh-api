@@ -91,6 +91,7 @@ public class CarreiraMapper {
     ce.setFlgProcessa(1);
     ce.setTipoSituacao("NOVO_CONTRATO");
     ce.setObs("NOVO_CONTRATO");
+    ce.setDataInicio(dc.getDataInicio());
     ce.setUuid(UuidCreator.getTimeOrderedEpoch());
     ce.setEstado(estado);
     return ce;
@@ -99,7 +100,7 @@ public class CarreiraMapper {
 
   public void toUpdateEntity(CarreiraEntity carreira, DadosContratuaisReqDTO dc) {
     if (dc == null) return;
-    carreira.setCargoId(entityManager.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()));
+    carreira.setCargoId(dc.getCargoPosicaoId() != null ? entityManager.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()) : null);
     carreira.setEscalaoId(entityManager.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
     //carreira.setCategoriaId(entityManager.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
     carreira.setCarrPccsId(entityManager.getReference(ParamCarreiraEntity.class, dc.getCarreiraId()));

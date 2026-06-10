@@ -51,6 +51,14 @@ public class GetParamSituacoesAtivoQueryHandler implements QueryHandler<GetParam
         }
       }
 
+      if (StringUtils.hasText(query.getFlgAbonoBeneficio())) {
+        try {
+          predicates.add(cb.equal(root.get("flgAbonoBeneficio"), Integer.valueOf(query.getFlgAbonoBeneficio())));
+        } catch (NumberFormatException e) {
+          LOGGER.warn("Invalid integer format for flgAusencia: {}", query.getFlgAbonoBeneficio());
+        }
+      }
+
       if (StringUtils.hasText(query.getTipoAusencia())) {
         predicates.add(cb.equal(root.get("tipoAusencia"), query.getTipoAusencia()));
       }

@@ -1,0 +1,29 @@
+{
+  "type": "dto",
+  "module": "processamento",
+  "name": "BaixaMedicaList",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": false,
+  "extends": {
+    "name": "Page",
+    "module": "shared"
+  },
+  "attributes": [
+    {
+      "name": "content",
+      "objectType": "dto",
+      "type": "BaixaMedicaRow",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "processamento"
+    }
+  ],
+  "id": "r7xroyelr4"
+}

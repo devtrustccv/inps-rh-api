@@ -12,6 +12,7 @@ import cv.inps.rh.shared.util.DateFormatter;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -45,7 +46,7 @@ public class DefinicaoRemuneracaoMapper {
 
   public java.util.List<DefinicaoRemuneracaoEntity> syncRemuneracoes(List<DefinicaoRemuneracaoEntity> existingList,
                                                                       List<SubsidioReqDTO> newList) {
-    if (newList == null) return existingList;
+    if (CollectionUtils.isEmpty(newList)) return existingList;
     for (SubsidioReqDTO dto : newList) {
       DefinicaoRemuneracaoEntity found = null;
       if (dto.getId() != null) {
@@ -75,7 +76,7 @@ public class DefinicaoRemuneracaoMapper {
     for (DefinicaoRemuneracaoEntity existing : existingList) {
       boolean stillExists = newList.stream()
           .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
-      if (!stillExists) {
+      if (!stillExists && existing.getEstado() != Estado.E && existing.getEstado() != Estado.I) {
         existing.setEstado(Estado.E);
       }
     }

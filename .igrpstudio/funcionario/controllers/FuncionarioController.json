@@ -62,6 +62,14 @@
           "type": "string",
           "isRequired": true
         }
+      ],
+      "requestParams": [
+        {
+          "type": "boolean",
+          "name": "validacao",
+          "value": "false",
+          "isRequired": false
+        }
       ]
     },
     {
@@ -465,6 +473,14 @@
           "type": "string",
           "isRequired": true
         }
+      ],
+      "requestParams": [
+        {
+          "type": "boolean",
+          "name": "validacao",
+          "value": "false",
+          "isRequired": false
+        }
       ]
     },
     {
@@ -493,6 +509,14 @@
           "type": "string",
           "isRequired": true
         }
+      ],
+      "requestParams": [
+        {
+          "type": "boolean",
+          "name": "validacao",
+          "value": "false",
+          "isRequired": false
+        }
       ]
     },
     {
@@ -520,6 +544,14 @@
           "name": "idFuncionario",
           "type": "string",
           "isRequired": true
+        }
+      ],
+      "requestParams": [
+        {
+          "type": "boolean",
+          "name": "validacao",
+          "value": "false",
+          "isRequired": false
         }
       ]
     },

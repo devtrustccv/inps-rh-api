@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.service;
 import cv.inps.rh.funcionario.application.commands.ValidarRenovacaoContratoCommand;
 import cv.inps.rh.funcionario.application.dto.RenovacaoContratoDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContratoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
@@ -25,6 +26,7 @@ public class ValidacaoRenovacaoContratoService {
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
+  private final TipoRelRemPagHelper tipoRelRemPagHelper;
 
   @Transactional
   public RenovacaoContratoDTO validar(ValidarRenovacaoContratoCommand command) {
@@ -49,7 +51,9 @@ public class ValidacaoRenovacaoContratoService {
       mudarEstado(funcionario, estado);
     }
 
-    funcionarioEntityRepository.save(funcionario);
+    FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+
+    tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
 
     var renovacaoContratoDTO = new RenovacaoContratoDTO();
     renovacaoContratoDTO.setDadosRenovacao(contratoMapper.toRenovacaoContratoReqDTO(contrato));

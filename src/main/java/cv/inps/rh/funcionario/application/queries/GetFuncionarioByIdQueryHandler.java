@@ -51,7 +51,7 @@ public class GetFuncionarioByIdQueryHandler
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getId()).valor());
 
-    var funcionarioResponseDTO = funcionarioMapper.toResponseDTO(funcionario);
+    var funcionarioResponseDTO = funcionarioMapper.toResponseDTO(funcionario, query.isValidacao());
 
     var documentos = documentoEntityRepository.findAllByReferenciaNameAndReferenciaUuid(
         TableName.RH_T_FUNCIONARIOS.name(), funcionario.getUuid());
@@ -63,10 +63,12 @@ public class GetFuncionarioByIdQueryHandler
 
     var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
-    var remuneracoes = funcionarioRules
-        .getRemuneracoesAssociados(tiposRelacionamento.getId());
-    var pagamentos = funcionarioRules
-        .getPagamentosDescontosAssociados(tiposRelacionamento.getId());
+    var remuneracoes = query.isValidacao()
+        ? funcionarioRules.getRemuneracoesAssociadosPendentes(tiposRelacionamento.getId())
+        : funcionarioRules.getRemuneracoesAssociadosAtivos(tiposRelacionamento.getId());
+    var pagamentos = query.isValidacao()
+        ? funcionarioRules.getPagamentosDescontosAssociadosPendentes(tiposRelacionamento.getId())
+        : funcionarioRules.getPagamentosDescontosAssociadosAtivos(tiposRelacionamento.getId());
 
     var dcr = dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento, pagamentos,
         remuneracoes);

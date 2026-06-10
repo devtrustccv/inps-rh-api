@@ -45,7 +45,7 @@ public class ExperienciaProfissionalMapper {
   }
 
   public java.util.List<ExperienciaProfEntity> syncExperiencias(java.util.List<ExperienciaProfEntity> existingList,
-                               java.util.List<ExperienciaProfissionalReqDTO> newList, FuncionarioEntity fun) {
+                               java.util.List<ExperienciaProfissionalReqDTO> newList, FuncionarioEntity fun, Estado estadoParaNovos) {
     if (newList == null) return existingList;
     for (ExperienciaProfissionalReqDTO dto : newList) {
       ExperienciaProfEntity found = null;
@@ -64,7 +64,7 @@ public class ExperienciaProfissionalMapper {
         found.setDataFim(dto.getDataSaida());
         found.setObservacao(dto.getObservacoes());
       } else {
-        ExperienciaProfEntity novo = toEntity(dto, Estado.P, fun);
+        ExperienciaProfEntity novo = toEntity(dto, estadoParaNovos, fun);
         existingList.add(novo);
       }
     }
@@ -73,7 +73,7 @@ public class ExperienciaProfissionalMapper {
     for (ExperienciaProfEntity existing : existingList) {
       boolean stillExists = newList.stream()
           .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
-      if (!stillExists) {
+      if (!stillExists && existing.getEstado() != Estado.E && existing.getEstado() != Estado.I) {
         existing.setEstado(Estado.E);
       }
     }

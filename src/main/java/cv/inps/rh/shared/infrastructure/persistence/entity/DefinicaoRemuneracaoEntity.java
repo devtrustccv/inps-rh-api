@@ -27,8 +27,8 @@ import java.util.UUID;
 public class DefinicaoRemuneracaoEntity extends AuditEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_def_pag")
-    @SequenceGenerator(name = "seq_def_pag", sequenceName = "SEQ_DEF_PAG", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_def_rem")
+    @SequenceGenerator(name = "seq_def_rem", sequenceName = "SEQ_DEF_REM", allocationSize = 1)
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 

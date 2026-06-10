@@ -62,6 +62,12 @@
           "type": "string",
           "name": "tiprelUuid",
           "isRequired": false
+        },
+        {
+          "type": "boolean",
+          "name": "validacao",
+          "value": "false",
+          "isRequired": false
         }
       ]
     }
