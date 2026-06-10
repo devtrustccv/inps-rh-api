@@ -30,8 +30,8 @@ public class ValidarDadosContratuaisService {
     if (dc.getDirecaoId() == null)
       throw IgrpResponseStatusException.badRequest("Direção é obrigatória.");
 
-    if (dc.getSeccaoId() == null)
-      throw IgrpResponseStatusException.badRequest("Seção é obrigatória.");
+    /*if (dc.getSeccaoId() == null)
+      throw IgrpResponseStatusException.badRequest("Seção é obrigatória.");*/
 
     if (dc.getLocalTrabalhoId() == null)
       throw IgrpResponseStatusException.badRequest("Local de trabalho é obrigatório.");
