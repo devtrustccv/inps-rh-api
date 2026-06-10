@@ -26,7 +26,7 @@ public class GetListRenumeracoesQueryHandlerTest {
   @Test
   void testHandleGetListRenumeracoesQuery_delegatesToServiceAndReturnsOk() {
     GetListRenumeracoesQuery query = new GetListRenumeracoesQuery(
-        "11111111-1111-1111-1111-111111111111", "20", "0", null, null, null, null);
+        "11111111-1111-1111-1111-111111111111", "20", "0", null, null, null, null, false);
     WrapperListRenumeracaoDTO expected = new WrapperListRenumeracaoDTO();
     when(renumeracoesReadService.getListRenumeracoes(any(GetListRenumeracoesQuery.class)))
         .thenReturn(expected);
