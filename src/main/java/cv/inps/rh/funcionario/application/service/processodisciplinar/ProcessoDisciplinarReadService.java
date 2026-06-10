@@ -49,9 +49,13 @@ public class ProcessoDisciplinarReadService {
     response.setDataInicio(DateFormatter.localDateToString(obj.getDateInicPd()));
     response.setDataFim(DateFormatter.localDateToString(obj.getDateFimPd()));
     ofNullable(obj.getTiprelId()).ifPresent(r -> {
-      ofNullable(r.getMobId().getInstidId()).ifPresent(i -> response.setDirecao(i.getNome()));
-      ofNullable(r.getMobId().getSecaoId()).ifPresent(s -> response.setSeccao(s.getNome()));
-      ofNullable(r.getContrVinculoId().getVinculoId()).ifPresent(v -> response.setVinculo(v.getNome()));
+      ofNullable(r.getMobId()).ifPresent(mob -> {
+        ofNullable(mob.getInstidId()).ifPresent(i -> response.setDirecao(i.getNome()));
+        ofNullable(mob.getSecaoId()).ifPresent(s -> response.setSeccao(s.getNome()));
+      });
+      ofNullable(r.getContrVinculoId()).ifPresent(c ->
+        ofNullable(c.getVinculoId()).ifPresent(v -> response.setVinculo(v.getNome()))
+      );
     });
     return response;
   }

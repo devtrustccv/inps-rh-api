@@ -67,9 +67,11 @@ public class ResponsavelService {
       obj.setIdResponsavel(e.getId());
 
       var section = e.getSecaoId();
-      obj.setNomeSeccao(section.getNome());
-      obj.setIdSeccao(section.getId().toString());
-      sectionIdsAlreadySaved.add(section.getId());
+      if (section != null) {
+        obj.setNomeSeccao(section.getNome());
+        obj.setIdSeccao(section.getId().toString());
+        sectionIdsAlreadySaved.add(section.getId());
+      }
 
       var direction = e.getInstitId();
       obj.setIdDirecao(direction.getId());
