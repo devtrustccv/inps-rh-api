@@ -21,7 +21,6 @@ public class GetListAlertaQuery implements Query {
   private String nomeColaborador;
   @NotNull(message = "The field <direcaoId> is required")
   private Long direcaoId;
-  @NotNull(message = "The field <seccaoId> is required")
   private Long seccaoId;
   @NotBlank(message = "The field <estado> is required")
   private String estado;

@@ -336,7 +336,7 @@ public class NovoContratoService {
       return true;
     }
 
-    if (!Objects.equals(atual.getSecaoId().getId(), dc.getSeccaoId())) {
+    if (!Objects.equals(atual.getSecaoId() != null ? atual.getSecaoId().getId() : null, dc.getSeccaoId())) {
       return true;
     }
 
