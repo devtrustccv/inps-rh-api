@@ -15,7 +15,6 @@ public class RelatorioAssiduidadeQuery implements Query {
 
   @NotNull(message = "The field <direccaoId> is required")
   private Long direccaoId;
-  @NotNull(message = "The field <seccaoId> is required")
   private Long seccaoId;
   @NotBlank(message = "The field <colaborador> is required")
   private String colaborador;

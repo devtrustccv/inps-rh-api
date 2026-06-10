@@ -48,7 +48,7 @@ public class MobilidadeMapper {
     me.setObs("NOVO_CONTRATO");
     me.setUuid(UuidCreator.getTimeOrderedEpoch());
     me.setLocalTrabId(entityManager.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));
-    me.setSecaoId(entityManager.getReference(SecaoEntity.class, dc.getSeccaoId()));
+    me.setSecaoId(dc.getSeccaoId() != null ? entityManager.getReference(SecaoEntity.class, dc.getSeccaoId()) : null);
     me.setInstidId(entityManager.getReference(InstituicaoEntity.class, dc.getDirecaoId()));
     me.setDataInicio(dc.getDataInicio());
     me.setDataFim(dc.getDataFim());
@@ -61,7 +61,7 @@ public class MobilidadeMapper {
     mobilidade.setTipoSituacao("NOVO_CONTRATO");
     mobilidade.setObs("NOVO_CONTRATO");
     mobilidade.setLocalTrabId(entityManager.getReference(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()));
-    mobilidade.setSecaoId(entityManager.getReference(SecaoEntity.class, dc.getSeccaoId()));
+    mobilidade.setSecaoId(dc.getSeccaoId() != null ? entityManager.getReference(SecaoEntity.class, dc.getSeccaoId()) : null);
     mobilidade.setInstidId(entityManager.getReference(InstituicaoEntity.class, dc.getDirecaoId()));
     mobilidade.setDataInicio(dc.getDataInicio());
     mobilidade.setDataFim(dc.getDataFim());
