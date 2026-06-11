@@ -13,6 +13,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +83,7 @@ public class AdiantamentoEmprestimoService {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
     loan.setBanco(request.getBancoId() != null ? bancoEntityRepository.findById(request.getBancoId()).orElseThrow() : null);
-    loan.setNib(request.getNib());
+    loan.setNib(ValidationUtil.sanitizeNib(request.getNib()));
     loan.setSwift(request.getSwift());
 
     var order = loan.getPedido();

@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -114,25 +115,25 @@ public class FuncionarioMapper {
     if (dadosPessoais == null) return null;
     FuncionarioEntity fun = new FuncionarioEntity();
 
-    var tipoDocumento = entityManager.getReference(TipoDocumentoEntity.class, dadosPessoais.getTipoDocumentoId());
+    var tipoDocumento = ValidationUtil.ref(entityManager, TipoDocumentoEntity.class, dadosPessoais.getTipoDocumentoId());
 
     fun.setIdColaborador(dadosPessoais.getIdColaborador());
     fun.setUuid(UuidCreator.getTimeOrderedEpoch());
     fun.setEstado(estado != null ? estado : Estado.P);
     fun.setEstadoValidacao(estado != null ? estado.name() : "P");
     fun.setTipoDocumentoId(tipoDocumento);
-    fun.setNumDocumento(dadosPessoais.getNumDocumento());
-    fun.setNome(dadosPessoais.getNome());
-    fun.setFotografia(dadosPessoais.getUrlFoto());
+    fun.setNumDocumento(ValidationUtil.trimToNull(dadosPessoais.getNumDocumento()));
+    fun.setNome(ValidationUtil.trimToNull(dadosPessoais.getNome()));
+    fun.setFotografia(ValidationUtil.trimToNull(dadosPessoais.getUrlFoto()));
     fun.setDataNascimento(dadosPessoais.getDataNascimento());
-    fun.setSexo(dadosPessoais.getGenero());
-    fun.setNmMae(dadosPessoais.getNomeMae());
-    fun.setNmPai(dadosPessoais.getNomePai());
-    fun.setEstadoCivil(dadosPessoais.getEstadoCivil());
-    fun.setNacionalidade(dadosPessoais.getNacionalidade());
-    fun.setLocNascId(entityManager.getReference(GeografiaEntity.class, dadosPessoais.getNaturalidadeId()));
+    fun.setSexo(ValidationUtil.trimToNull(dadosPessoais.getGenero()));
+    fun.setNmMae(ValidationUtil.trimToNull(dadosPessoais.getNomeMae()));
+    fun.setNmPai(ValidationUtil.trimToNull(dadosPessoais.getNomePai()));
+    fun.setEstadoCivil(ValidationUtil.trimToNull(dadosPessoais.getEstadoCivil()));
+    fun.setNacionalidade(ValidationUtil.trimToNull(dadosPessoais.getNacionalidade()));
+    fun.setLocNascId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dadosPessoais.getNaturalidadeId()));
     fun.setNif(dadosPessoais.getNif());
-    fun.setNuSegInps(dadosPessoais.getNumSegurado());
+    fun.setNuSegInps(ValidationUtil.trimToNull(dadosPessoais.getNumSegurado()));
 
     DocumentoPessoalEntity docPessoal = new DocumentoPessoalEntity();
     docPessoal.setEstado(estado != null ? estado : Estado.P);
@@ -164,22 +165,22 @@ public class FuncionarioMapper {
     if (dadosPessoais == null) return null;
     if (funParam == null) return null;
 
-    var tipoDocumento = entityManager.getReference(TipoDocumentoEntity.class, dadosPessoais.getTipoDocumentoId());
+    var tipoDocumento = ValidationUtil.ref(entityManager, TipoDocumentoEntity.class, dadosPessoais.getTipoDocumentoId());
 
     funParam.setIdColaborador(dadosPessoais.getIdColaborador());
     funParam.setTipoDocumentoId(tipoDocumento);
-    funParam.setNumDocumento(dadosPessoais.getNumDocumento());
-    funParam.setNome(dadosPessoais.getNome());
-    funParam.setFotografia(dadosPessoais.getUrlFoto());
+    funParam.setNumDocumento(ValidationUtil.trimToNull(dadosPessoais.getNumDocumento()));
+    funParam.setNome(ValidationUtil.trimToNull(dadosPessoais.getNome()));
+    funParam.setFotografia(ValidationUtil.trimToNull(dadosPessoais.getUrlFoto()));
     funParam.setDataNascimento(dadosPessoais.getDataNascimento());
-    funParam.setSexo(dadosPessoais.getGenero());
-    funParam.setNmMae(dadosPessoais.getNomeMae());
-    funParam.setNmPai(dadosPessoais.getNomePai());
-    funParam.setEstadoCivil(dadosPessoais.getEstadoCivil());
-    funParam.setNacionalidade(dadosPessoais.getNacionalidade());
-    funParam.setLocNascId(entityManager.getReference(GeografiaEntity.class, dadosPessoais.getNaturalidadeId()));
+    funParam.setSexo(ValidationUtil.trimToNull(dadosPessoais.getGenero()));
+    funParam.setNmMae(ValidationUtil.trimToNull(dadosPessoais.getNomeMae()));
+    funParam.setNmPai(ValidationUtil.trimToNull(dadosPessoais.getNomePai()));
+    funParam.setEstadoCivil(ValidationUtil.trimToNull(dadosPessoais.getEstadoCivil()));
+    funParam.setNacionalidade(ValidationUtil.trimToNull(dadosPessoais.getNacionalidade()));
+    funParam.setLocNascId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dadosPessoais.getNaturalidadeId()));
     funParam.setNif(dadosPessoais.getNif());
-    funParam.setNuSegInps(dadosPessoais.getNumSegurado());
+    funParam.setNuSegInps(ValidationUtil.trimToNull(dadosPessoais.getNumSegurado()));
 
     DocumentoPessoalEntity docPessoal = funParam.getDocumentoPessoal() != null ? funParam.getDocumentoPessoal() : new DocumentoPessoalEntity();
     docPessoal.setFunId(funParam);

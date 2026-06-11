@@ -17,6 +17,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.OrdemServicoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.OrdemServicoEntityRepository;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -132,18 +133,19 @@ public class OrdemServicoReadService {
           .findFirst()
           .orElse(null);
       if (found != null) {
-        found.setDescricao(item.getDescricao());
-        found.setReferente(item.getReferente());
-        found.setNuOrdem(item.getNuOrdem());
+        found.setDescricao(ValidationUtil.trimToNull(item.getDescricao()));
+        found.setReferente(ValidationUtil.trimToNull(item.getReferente()));
+        found.setNuOrdem(ValidationUtil.trimToNull(item.getNuOrdem()));
         return found;
       }
     }
 
     var novo = new OrdemServicoEntity();
     novo.setFunId(funcionario);
-    novo.setDescricao(item.getDescricao());
-    novo.setReferente(item.getReferente());
-    novo.setNuOrdem(item.getNuOrdem() != null ? item.getNuOrdem() : "1");
+    novo.setDescricao(ValidationUtil.trimToNull(item.getDescricao()));
+    novo.setReferente(ValidationUtil.trimToNull(item.getReferente()));
+    var nuOrdem = ValidationUtil.trimToNull(item.getNuOrdem());
+    novo.setNuOrdem(nuOrdem != null ? nuOrdem : "1");
     novo.setEstado(Estado.A);
     novo.setUuid(UuidCreator.getTimeOrderedEpoch());
     return novo;

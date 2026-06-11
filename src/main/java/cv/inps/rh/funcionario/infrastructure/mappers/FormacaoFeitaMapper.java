@@ -6,6 +6,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FormacaoFeitaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -28,15 +29,12 @@ public class FormacaoFeitaMapper {
     if(dto.getId() !=null && dto.getId()>0)
      e.setId(dto.getId());
 
-    // Referência ao país
-    if (dto.getPaisId() != null) {
-      e.setPaisId(entityManager.getReference(GeografiaEntity.class, dto.getPaisId()));
-    }
+    e.setPaisId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dto.getPaisId()));
 
-    e.setEstabelecimento(dto.getEstabelecimento());
-    e.setRhtpfor(dto.getTipoFormacao());
-    e.setCurso(dto.getDesignacao());
-    e.setNivel(dto.getNivel());
+    e.setEstabelecimento(ValidationUtil.trimToNull(dto.getEstabelecimento()));
+    e.setRhtpfor(ValidationUtil.trimToNull(dto.getTipoFormacao()));
+    e.setCurso(ValidationUtil.trimToNull(dto.getDesignacao()));
+    e.setNivel(ValidationUtil.trimToNull(dto.getNivel()));
     e.setFunId(fun);
     e.setEstado(estado);
 
@@ -54,13 +52,11 @@ public class FormacaoFeitaMapper {
         }
       }
       if (found != null) {
-        if (dto.getPaisId() != null) {
-          found.setPaisId(entityManager.getReference(GeografiaEntity.class, dto.getPaisId()));
-        }
-        found.setEstabelecimento(dto.getEstabelecimento());
-        found.setRhtpfor(dto.getTipoFormacao());
-        found.setCurso(dto.getDesignacao());
-        found.setNivel(dto.getNivel());
+        found.setPaisId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dto.getPaisId()));
+        found.setEstabelecimento(ValidationUtil.trimToNull(dto.getEstabelecimento()));
+        found.setRhtpfor(ValidationUtil.trimToNull(dto.getTipoFormacao()));
+        found.setCurso(ValidationUtil.trimToNull(dto.getDesignacao()));
+        found.setNivel(ValidationUtil.trimToNull(dto.getNivel()));
       } else {
         FormacaoFeitaEntity novo = toEntity(dto, estadoParaNovos, fun);
         existingList.add(novo);

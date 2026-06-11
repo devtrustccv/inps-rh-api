@@ -7,6 +7,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.HabilitacaoLiterariaEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -30,14 +31,11 @@ public class HabilitacaoLiterariaMapper {
     if (dto.getId() != null && dto.getId() > 0)
       e.setId(dto.getId());
 
-    // Referência para país
-    if (dto.getPaisId() != null) {
-      e.setPaisId(entityManager.getReference(GeografiaEntity.class, dto.getPaisId()));
-    }
-    e.setEstabelecimento(dto.getEstabelecimento());
-    e.setArea(dto.getArea());
-    e.setNomeCurso(dto.getCurso());
-    e.setNivel(dto.getGrauAcademico());
+    e.setPaisId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dto.getPaisId()));
+    e.setEstabelecimento(ValidationUtil.trimToNull(dto.getEstabelecimento()));
+    e.setArea(ValidationUtil.trimToNull(dto.getArea()));
+    e.setNomeCurso(ValidationUtil.trimToNull(dto.getCurso()));
+    e.setNivel(ValidationUtil.trimToNull(dto.getGrauAcademico()));
     e.setDataInicio(dto.getDataInicio());
     e.setDataFim(dto.getDataTermino());
     e.setConcluido(dto.getConcluido());
@@ -60,13 +58,11 @@ public class HabilitacaoLiterariaMapper {
         }
       }
       if (found != null) {
-        if (dto.getPaisId() != null) {
-          found.setPaisId(entityManager.getReference(GeografiaEntity.class, dto.getPaisId()));
-        }
-        found.setEstabelecimento(dto.getEstabelecimento());
-        found.setArea(dto.getArea());
-        found.setNomeCurso(dto.getCurso());
-        found.setNivel(dto.getGrauAcademico());
+        found.setPaisId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dto.getPaisId()));
+        found.setEstabelecimento(ValidationUtil.trimToNull(dto.getEstabelecimento()));
+        found.setArea(ValidationUtil.trimToNull(dto.getArea()));
+        found.setNomeCurso(ValidationUtil.trimToNull(dto.getCurso()));
+        found.setNivel(ValidationUtil.trimToNull(dto.getGrauAcademico()));
         found.setDataInicio(dto.getDataInicio());
         found.setDataFim(dto.getDataTermino());
         found.setConcluido(dto.getConcluido());

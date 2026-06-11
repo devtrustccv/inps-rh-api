@@ -3,6 +3,7 @@ package cv.inps.rh.parametrizacao.infrastructure.mappers;
 import cv.inps.rh.parametrizacao.application.dto.DominioDTO;
 import cv.inps.rh.parametrizacao.domain.models.Dominio;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DomainEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -30,10 +31,10 @@ public class DomainsMapper {
     if (dominio.getId() != null) {
       entity.setId(dominio.getId());
     }
-    entity.setDominio(dominio.getDominio());
-    entity.setValor(dominio.getValor());
-    entity.setDescricao(dominio.getDescricao());
-    entity.setReferencia(dominio.getReferencia());
+    entity.setDominio(ValidationUtil.trimToNull(dominio.getDominio()));
+    entity.setValor(ValidationUtil.trimToNull(dominio.getValor()));
+    entity.setDescricao(ValidationUtil.trimToNull(dominio.getDescricao()));
+    entity.setReferencia(ValidationUtil.trimToNull(dominio.getReferencia()));
     entity.setEstado(dominio.getEstado());
 
     return entity;

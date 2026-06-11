@@ -13,6 +13,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoHistoricoEnti
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import cv.inps.rh.shared.util.DateFormatter;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -82,8 +83,8 @@ public class ContratoMapper {
     c.setTipoSituacao("INICIO");
     c.setObs("NOVO_CONTRATO");
     c.setUuid(IdentificadorUnico.create().valor());
-    c.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
-    c.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
+    c.setTpContratoId(ValidationUtil.ref(entityManager, ParamContratoEntity.class, dc.getTipoContratoId()));
+    c.setVinculoId(ValidationUtil.ref(entityManager, ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
     return c;
   }
   public ContratoEntity toRenovarContrato(RenovarContratoReqDTO dc, Estado estado) {
@@ -96,8 +97,8 @@ public class ContratoMapper {
     c.setTipoSituacao("RENOVACAO_CONTRATO");
     c.setObs("RENOVACAO_CONTRATO");
     c.setUuid(IdentificadorUnico.create().valor());
-    c.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
-    c.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoId()));
+    c.setTpContratoId(ValidationUtil.ref(entityManager, ParamContratoEntity.class, dc.getTipoContratoId()));
+    c.setVinculoId(ValidationUtil.ref(entityManager, ParamVinculoEntity.class, dc.getTipoVinculoId()));
     return c;
   }
 
@@ -116,8 +117,8 @@ public class ContratoMapper {
     entity.setDataInicio(dc.getDataInicio());
     entity.setDataFim(dc.getDataFim());
     entity.setDuracao(dc.getDuracaoMeses());
-    entity.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
-    entity.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
+    entity.setTpContratoId(ValidationUtil.ref(entityManager, ParamContratoEntity.class, dc.getTipoContratoId()));
+    entity.setVinculoId(ValidationUtil.ref(entityManager, ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
     return entity;
   }
 
@@ -126,8 +127,8 @@ public class ContratoMapper {
     entity.setDataInicio(dc.getDataInicio());
     entity.setDataFim(dc.getDataFim());
     entity.setDuracao(dc.getDuracaoMeses());
-    entity.setTpContratoId(entityManager.getReference(ParamContratoEntity.class, dc.getTipoContratoId()));
-    entity.setVinculoId(entityManager.getReference(ParamVinculoEntity.class, dc.getTipoVinculoId()));
+    entity.setTpContratoId(ValidationUtil.ref(entityManager, ParamContratoEntity.class, dc.getTipoContratoId()));
+    entity.setVinculoId(ValidationUtil.ref(entityManager, ParamVinculoEntity.class, dc.getTipoVinculoId()));
     return entity;
   }
 

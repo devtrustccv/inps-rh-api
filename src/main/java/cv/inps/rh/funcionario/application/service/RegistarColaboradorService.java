@@ -15,6 +15,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -221,7 +222,7 @@ public class RegistarColaboradorService {
     }
     /******************** FIM PAGAMENTOS DESCONTOS ********************************/
 
-    var paramSituacaoLaboral = entityManager.getReference(ParamSituacaoEntity.class,
+    var paramSituacaoLaboral = ValidationUtil.ref(entityManager, ParamSituacaoEntity.class,
         dadosContratuais.getSituacaoLaboralId());
 
     var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P,

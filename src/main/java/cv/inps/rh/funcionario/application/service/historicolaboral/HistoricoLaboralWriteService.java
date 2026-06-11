@@ -16,6 +16,7 @@ import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -83,7 +84,7 @@ public class HistoricoLaboralWriteService {
         mobilidadeEntityRepository.save(mob);
 
         if (dto.getTipoMobilidade() != null)
-          atual.setTipoSituacao(dto.getTipoMobilidade());
+          atual.setTipoSituacao(ValidationUtil.trimToNull(dto.getTipoMobilidade()));
 
       }
 
@@ -104,8 +105,8 @@ public class HistoricoLaboralWriteService {
         car.setEstado(Estado.P);
         carreiraEntityRepository.save(car);
 
-        if (dto.getCargo() != null)
-          atual.setCargoId(entityManager.getReference(ParamCargoEntity.class, dto.getCargo()));
+        var cargoRef = ValidationUtil.ref(entityManager, ParamCargoEntity.class, dto.getCargo());
+        if (cargoRef != null) atual.setCargoId(cargoRef);
         if (dto.getSalario() != null)
           atual.setSalario(dto.getSalario());
       }
@@ -171,7 +172,7 @@ public class HistoricoLaboralWriteService {
       funcionario.getMobilidades().add(novaMob);
 
       novoRelacionamento.setMobId(novaMob);
-      novoRelacionamento.setTipoSituacao(dto.getTipoMobilidade());
+      novoRelacionamento.setTipoSituacao(ValidationUtil.trimToNull(dto.getTipoMobilidade()));
       criouAlgum = true;
 
       var validMob = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.MOBILIDADE.name(),
@@ -305,7 +306,7 @@ public class HistoricoLaboralWriteService {
 
       relacionamento.setMobId(mob);
       if (dto.getTipoMobilidade() != null)
-        relacionamento.setTipoSituacao(dto.getTipoMobilidade());
+        relacionamento.setTipoSituacao(ValidationUtil.trimToNull(dto.getTipoMobilidade()));
 
     }
 
@@ -325,8 +326,8 @@ public class HistoricoLaboralWriteService {
       carreiraEntityRepository.save(car);
 
       relacionamento.setCarreiraId(car);
-      if (dto.getCargo() != null)
-        relacionamento.setCargoId(entityManager.getReference(ParamCargoEntity.class, dto.getCargo()));
+      var cargoRef2 = ValidationUtil.ref(entityManager, ParamCargoEntity.class, dto.getCargo());
+      if (cargoRef2 != null) relacionamento.setCargoId(cargoRef2);
       if (dto.getSalario() != null)
         relacionamento.setSalario(dto.getSalario());
     }
@@ -367,12 +368,12 @@ public class HistoricoLaboralWriteService {
   private void populateMobilidade(MobilidadeEntity mob, RelacaoLaboralDTO dto) {
     if (dto.getTipoMobilidade() != null)
       mob.setTipoSituacao(dto.getTipoMobilidade());
-    if (dto.getDirecao() != null)
-      mob.setInstidId(entityManager.getReference(InstituicaoEntity.class, dto.getDirecao()));
-    if (dto.getSecao() != null)
-      mob.setSecaoId(entityManager.getReference(SecaoEntity.class, dto.getSecao()));
-    if (dto.getLocalTrabalho() != null)
-      mob.setLocalTrabId(entityManager.getReference(ParamLocalTrabEntity.class, dto.getLocalTrabalho()));
+    var instRef = ValidationUtil.ref(entityManager, InstituicaoEntity.class, dto.getDirecao());
+    if (instRef != null) mob.setInstidId(instRef);
+    var secRef = ValidationUtil.ref(entityManager, SecaoEntity.class, dto.getSecao());
+    if (secRef != null) mob.setSecaoId(secRef);
+    var ltRef = ValidationUtil.ref(entityManager, ParamLocalTrabEntity.class, dto.getLocalTrabalho());
+    if (ltRef != null) mob.setLocalTrabId(ltRef);
     if (dto.getDataInicioMobilidade() != null)
       mob.setDataInicio(dto.getDataInicioMobilidade());
     if (dto.getDataFimMobilidade() != null)
@@ -380,37 +381,38 @@ public class HistoricoLaboralWriteService {
   }
 
   private void populateCarreiraCommon(CarreiraEntity car, RelacaoLaboralDTO dto) {
-    if (dto.getCargo() != null)
-      car.setCargoId(entityManager.getReference(ParamCargoEntity.class, dto.getCargo()));
-    if (dto.getEscalao() != null)
-      car.setEscalaoId(entityManager.getReference(ParamEscalaoEntity.class, dto.getEscalao()));
-    if (dto.getCategoria() != null)
-      car.setCategoriaId(entityManager.getReference(ParamCategoriaEntity.class, dto.getCategoria()));
-    if (dto.getCarreira() != null)
-      car.setCarrPccsId(entityManager.getReference(ParamCarreiraEntity.class, dto.getCarreira()));
+    var cargoRef = ValidationUtil.ref(entityManager, ParamCargoEntity.class, dto.getCargo());
+    if (cargoRef != null) car.setCargoId(cargoRef);
+    var escalaoRef = ValidationUtil.ref(entityManager, ParamEscalaoEntity.class, dto.getEscalao());
+    if (escalaoRef != null) car.setEscalaoId(escalaoRef);
+    var catRef = ValidationUtil.ref(entityManager, ParamCategoriaEntity.class, dto.getCategoria());
+    if (catRef != null) car.setCategoriaId(catRef);
+    var carrRef = ValidationUtil.ref(entityManager, ParamCarreiraEntity.class, dto.getCarreira());
+    if (carrRef != null) car.setCarrPccsId(carrRef);
     if (dto.getSalario() != null)
       car.setSalario(dto.getSalario());
     else if (car.getSalario() == null)
       car.setSalario(BigDecimal.ZERO);
-    car.setTipoSituacao(dto.getTipoAlteracaoCarreira());
+    car.setTipoSituacao(ValidationUtil.trimToNull(dto.getTipoAlteracaoCarreira()));
     car.setDataInicio(dto.getDataInicioCarreira());
     car.setDataFim(dto.getDataFimCarreira());
   }
 
   private void populateSituacao(SituacaoLaboralEntity sit, RelacaoLaboralDTO dto) {
-    if (dto.getSituacaoLaboral() != null)
-      sit.setSituacaoLaboralId(entityManager.getReference(ParamSituacaoEntity.class, dto.getSituacaoLaboral()));
+    var sitRef = ValidationUtil.ref(entityManager, ParamSituacaoEntity.class, dto.getSituacaoLaboral());
+    if (sitRef != null) sit.setSituacaoLaboralId(sitRef);
     if (dto.getMotivo() != null) {
       try {
         var mid = Long.parseLong(dto.getMotivo());
-        sit.setMotivoSitLabId(entityManager.getReference(ParamSituacaoDetalheEntity.class, mid));
+        var motRef = ValidationUtil.ref(entityManager, ParamSituacaoDetalheEntity.class, mid);
+        if (motRef != null) sit.setMotivoSitLabId(motRef);
       } catch (NumberFormatException ignored) {
       }
-      sit.setTipoSituacao(dto.getMotivo());
+      sit.setTipoSituacao(ValidationUtil.trimToNull(dto.getMotivo()));
     }
     sit.setDataInicio(dto.getDataInicioSituacao());
     sit.setDataFim(dto.getDataFimSituacao());
-    sit.setObs(dto.getObservacao());
+    sit.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
   }
 
   private void updateExistingSalaryRemuneracao(FuncionarioEntity funcionario, RelacaoLaboralDTO dto,

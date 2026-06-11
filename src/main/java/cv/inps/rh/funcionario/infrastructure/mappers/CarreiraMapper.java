@@ -9,6 +9,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -74,18 +75,9 @@ public class CarreiraMapper {
     if (dc == null) return null;
     var ce = new CarreiraEntity();
 
-    ce.setCargoId(dc.getCargoPosicaoId() != null
-            ? entityManager.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId())
-            : null);
-    ce.setEscalaoId(dc.getEscalaoReferenciaId() != null
-            ? entityManager.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId())
-            : null);
-    /*ce.setCategoriaId(dc.getCategoriaId() != null
-            ? entityManager.getReference(ParamCategoriaEntity.class, dc.getCategoriaId())
-            : null);*/
-    ce.setCarrPccsId(dc.getCarreiraId() != null
-            ? entityManager.getReference(ParamCarreiraEntity.class, dc.getCarreiraId())
-            : null);
+    ce.setCargoId(ValidationUtil.ref(entityManager, ParamCargoEntity.class, dc.getCargoPosicaoId()));
+    ce.setEscalaoId(ValidationUtil.ref(entityManager, ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
+    ce.setCarrPccsId(ValidationUtil.ref(entityManager, ParamCarreiraEntity.class, dc.getCarreiraId()));
 
     ce.setSalario(dc.getSalario());
     ce.setFlgProcessa(1);
@@ -100,10 +92,9 @@ public class CarreiraMapper {
 
   public void toUpdateEntity(CarreiraEntity carreira, DadosContratuaisReqDTO dc) {
     if (dc == null) return;
-    carreira.setCargoId(dc.getCargoPosicaoId() != null ? entityManager.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()) : null);
-    carreira.setEscalaoId(entityManager.getReference(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
-    //carreira.setCategoriaId(entityManager.getReference(ParamCategoriaEntity.class, dc.getCategoriaId()));
-    carreira.setCarrPccsId(entityManager.getReference(ParamCarreiraEntity.class, dc.getCarreiraId()));
+    carreira.setCargoId(ValidationUtil.ref(entityManager, ParamCargoEntity.class, dc.getCargoPosicaoId()));
+    carreira.setEscalaoId(ValidationUtil.ref(entityManager, ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
+    carreira.setCarrPccsId(ValidationUtil.ref(entityManager, ParamCarreiraEntity.class, dc.getCarreiraId()));
     carreira.setSalario(dc.getSalario());
     carreira.setFlgProcessa(1);
     carreira.setTipoSituacao("NOVO_CONTRATO");

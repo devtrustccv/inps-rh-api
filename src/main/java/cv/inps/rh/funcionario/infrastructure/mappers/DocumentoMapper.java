@@ -7,6 +7,7 @@ import cv.inps.rh.shared.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -30,9 +31,9 @@ public class DocumentoMapper {
     if (dto == null)
       return null;
     DocumentoEntity entity = new DocumentoEntity();
-    entity.setTpDocumentoId(entityManager.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
+    entity.setTpDocumentoId(ValidationUtil.ref(entityManager, TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
     entity.setEstado(estado);
-    entity.setUrl(dto.getDocumento());
+    entity.setUrl(ValidationUtil.trimToNull(dto.getDocumento()));
     entity.setReferenciaName(referenciaName);
     entity.setReferenciaId(referenciaId != null ? referenciaId.toString() : null);
     entity.setReferenciaUuid(referenciaUuid);
@@ -61,10 +62,8 @@ public class DocumentoMapper {
         }
       }
       if (found != null) {
-        if (dto.getTipoDocumentoId() != null) {
-          found.setTpDocumentoId(entityManager.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
-        }
-        found.setUrl(dto.getDocumento());
+        found.setTpDocumentoId(ValidationUtil.ref(entityManager, TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
+        found.setUrl(ValidationUtil.trimToNull(dto.getDocumento()));
         found.setReferenciaName(referenciaName);
         found.setReferenciaId(referenciaId != null ? referenciaId.toString() : null);
         found.setReferenciaUuid(referenciaUuid);

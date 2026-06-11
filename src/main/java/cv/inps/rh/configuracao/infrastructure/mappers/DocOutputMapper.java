@@ -4,6 +4,7 @@ import cv.inps.rh.configuracao.application.dto.DocOutputRequestDTO;
 import cv.inps.rh.configuracao.application.dto.DocOutputResponseDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperDocOutputListDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamDocOutputEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -45,10 +46,10 @@ public class DocOutputMapper {
         }
 
         ParamDocOutputEntity entity = new ParamDocOutputEntity();
-        entity.setTipoDocumento(dto.getTipoDocumento());
-        entity.setTitulo(dto.getTitulo());
-        entity.setCorpo(dto.getCorpo());
-        entity.setAssinadoPor(dto.getAssinadoPor());
+        entity.setTipoDocumento(ValidationUtil.trimToNull(dto.getTipoDocumento()));
+        entity.setTitulo(ValidationUtil.trimToNull(dto.getTitulo()));
+        entity.setCorpo(ValidationUtil.trimToNull(dto.getCorpo()));
+        entity.setAssinadoPor(ValidationUtil.trimToNull(dto.getAssinadoPor()));
 
         return entity;
     }

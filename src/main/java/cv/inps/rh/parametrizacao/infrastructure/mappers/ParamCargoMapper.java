@@ -4,6 +4,7 @@ import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamCargo;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -40,13 +41,12 @@ public class ParamCargoMapper {
     ParamCargoEntity entity = new ParamCargoEntity();
     entity.setId(domain.getId());
     entity.setUuid(domain.getUuid().valor());
-    entity.setNome(domain.getNome());
-    entity.setDirigente(domain.getDirigente());
+    entity.setNome(ValidationUtil.trimToNull(domain.getNome()));
+    entity.setDirigente(ValidationUtil.trimToNull(domain.getDirigente()));
     entity.setEstado(domain.getEstado());
 
-    if (domain.getCarreira() != null && domain.getCarreira().getId() != null) {
-      entity.setParamCarrId(entityManager.getReference(ParamCarreiraEntity.class, domain.getCarreira().getId()));
-    }
+    entity.setParamCarrId(ValidationUtil.ref(entityManager, ParamCarreiraEntity.class,
+        domain.getCarreira() != null ? domain.getCarreira().getId() : null));
 
     return entity;
   }

@@ -12,6 +12,7 @@ import cv.inps.rh.shared.application.services.EmailService;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,18 +64,18 @@ public class PedidoDeclaracaoWriteService {
         declaracao.setFunId(funcionario);
         declaracao.setTiprelId(tiposRelacionamento);
 
-        declaracao.setTipoDeclaracao(command.getPedidodeclaracao().getTipoDeclaracao());
-        declaracao.setFinalidade(command.getPedidodeclaracao().getFinalidade());
-        declaracao.setEntidadeDestinado(command.getPedidodeclaracao().getEntidadeDestinado());
+        declaracao.setTipoDeclaracao(ValidationUtil.trimToNull(command.getPedidodeclaracao().getTipoDeclaracao()));
+        declaracao.setFinalidade(ValidationUtil.trimToNull(command.getPedidodeclaracao().getFinalidade()));
+        declaracao.setEntidadeDestinado(ValidationUtil.trimToNull(command.getPedidodeclaracao().getEntidadeDestinado()));
         declaracao.setDataPedido(command.getPedidodeclaracao().getDataPedido());
-        declaracao.setObs(command.getPedidodeclaracao().getObs());
+        declaracao.setObs(ValidationUtil.trimToNull(command.getPedidodeclaracao().getObs()));
         declaracao.setEstado(Estado.P.name());
         declaracao.setUuid(UUID.randomUUID());
 
 
         if (command.getPedidodeclaracao().getDecisaoAnalise() != null) {
-            declaracao.setDecisaoAnalise(command.getPedidodeclaracao().getDecisaoAnalise());
-            declaracao.setObsAnalise(command.getPedidodeclaracao().getObsAnalise());
+            declaracao.setDecisaoAnalise(ValidationUtil.trimToNull(command.getPedidodeclaracao().getDecisaoAnalise()));
+            declaracao.setObsAnalise(ValidationUtil.trimToNull(command.getPedidodeclaracao().getObsAnalise()));
             savedPedido.setEtapa("ANALISE");
         }
 
@@ -105,8 +106,8 @@ public class PedidoDeclaracaoWriteService {
     public Map<String, ?> submeterAnalise(SubmeterAnalisePedidoDeclaracaoCommand command) {
         DeclaracaoEntity declaracao = declaracaoRepository.findByIdOrThrow(Long.parseLong(command.getId()));
 
-        declaracao.setDecisaoAnalise(command.getPedidodeclaracaoanalise().getDecisaoAnalise());
-        declaracao.setObsAnalise(command.getPedidodeclaracaoanalise().getObsAnalise());
+        declaracao.setDecisaoAnalise(ValidationUtil.trimToNull(command.getPedidodeclaracaoanalise().getDecisaoAnalise()));
+        declaracao.setObsAnalise(ValidationUtil.trimToNull(command.getPedidodeclaracaoanalise().getObsAnalise()));
 
         PedidoEntity pedido = declaracao.getPedidoId();
         if (pedido != null) {
@@ -124,7 +125,7 @@ public class PedidoDeclaracaoWriteService {
         DeclaracaoEntity declaracao = declaracaoRepository.findByIdOrThrow(Long.parseLong(command.getId()));
         PedidoEntity pedido = declaracao.getPedidoId();
 
-        declaracao.setDecisaoRh(command.getPedidodeclaracaovalidacao().getValidar());
+        declaracao.setDecisaoRh(ValidationUtil.trimToNull(command.getPedidodeclaracaovalidacao().getValidar()));
         declaracao.setEntrega(command.getPedidodeclaracaovalidacao().getEntregaPorEmail());
 
         if ("SIM".equalsIgnoreCase(declaracao.getDecisaoRh())) {

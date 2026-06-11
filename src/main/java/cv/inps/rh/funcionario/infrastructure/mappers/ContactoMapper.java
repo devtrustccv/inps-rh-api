@@ -6,6 +6,7 @@ import cv.inps.rh.funcionario.application.dto.ContactoRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContactoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,8 +19,8 @@ public class ContactoMapper {
   public ContactoEntity toEntity(ContactoReqDTO dto, Estado estado, FuncionarioEntity fun) {
     if (dto == null) return null;
     ContactoEntity entity = new ContactoEntity();
-    entity.setTipoContacto(dto.getTipoContacto());
-    entity.setContacto(dto.getContacto());
+    entity.setTipoContacto(ValidationUtil.trimToNull(dto.getTipoContacto()));
+    entity.setContacto(ValidationUtil.trimToNull(dto.getContacto()));
     entity.setUuid(UuidCreator.getTimeOrderedEpoch());
     entity.setFunId(fun);
     entity.setEstado(estado);
@@ -54,8 +55,8 @@ public class ContactoMapper {
 
     if (found != null) {
       // atualizar
-      found.setTipoContacto(dto.getTipoContacto());
-      found.setContacto(dto.getContacto());
+      found.setTipoContacto(ValidationUtil.trimToNull(dto.getTipoContacto()));
+      found.setContacto(ValidationUtil.trimToNull(dto.getContacto()));
     } else {
       // adicionar
       ContactoEntity novo = this.toEntity(dto, Estado.P, fun);

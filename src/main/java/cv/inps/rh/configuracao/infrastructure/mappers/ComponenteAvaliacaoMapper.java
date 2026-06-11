@@ -6,6 +6,7 @@ import cv.inps.rh.configuracao.application.dto.CompetenciaTecnicaLinhaRequestDTO
 import cv.inps.rh.configuracao.application.dto.ObjectivoInpsLinhaRequestDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamObjetivoDetEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamObjetivoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.InstituicaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCargoEntityRepository;
@@ -39,9 +40,9 @@ public class ComponenteAvaliacaoMapper {
     var entity = baseEntity(det, dto.getAplicarATodos(), dto.getCargoId(), dto.getCarrPccsId(), dto.getPonderacao(),
         componente);
     entity.setNumeroOrdem(dto.getNumeroOrdem());
-    entity.setAbrangencia(dto.getAbrangencia());
-    entity.setDescricao(dto.getDescricao());
-    entity.setKpi(dto.getKpi());
+    entity.setAbrangencia(ValidationUtil.trimToNull(dto.getAbrangencia()));
+    entity.setDescricao(ValidationUtil.trimToNull(dto.getDescricao()));
+    entity.setKpi(ValidationUtil.trimToNull(dto.getKpi()));
 
     if (StringUtils.hasText(dto.getAbrangencia()) && "DIRECAO".equalsIgnoreCase(dto.getAbrangencia())) {
       if (dto.getInstitId() == null) {
@@ -81,7 +82,7 @@ public class ComponenteAvaliacaoMapper {
       return null;
     var entity = baseEntity(det, dto.getAplicarATodos(), dto.getCargoId(), dto.getCarrPccsId(), dto.getPonderacao(),
         componente);
-    entity.setDescricao(dto.getDescricao());
+    entity.setDescricao(ValidationUtil.trimToNull(dto.getDescricao()));
     entity.setNumeroOrdem(numeroOrdem);
     entity.setAbrangencia(abrangencia);
     return entity;

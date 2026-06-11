@@ -7,6 +7,7 @@ import cv.inps.rh.shared.infrastructure.mappers.GeografiaMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.UpsEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -39,18 +40,15 @@ public class ParamLocalTrabMapper {
     ParamLocalTrabEntity entity = new ParamLocalTrabEntity();
     entity.setId(domain.getId());
     entity.setUuid(domain.getUuid() != null ? domain.getUuid().valor() : null);
-    entity.setNome(domain.getNome());
+    entity.setNome(ValidationUtil.trimToNull(domain.getNome()));
 
-    // Lazy referência — só obtém se existir ID
-    if (domain.getPais() != null && domain.getPais().id() != null) {
-      entity.setPaisId(entityManager.getReference(GeografiaEntity.class, domain.getPais().id()));
-    }
+    entity.setPaisId(ValidationUtil.ref(entityManager, GeografiaEntity.class,
+        domain.getPais() != null ? domain.getPais().id() : null));
 
-    if (domain.getIlha() != null && domain.getIlha().id() != null) {
-      entity.setIlhaId(entityManager.getReference(GeografiaEntity.class, domain.getIlha().id()));
-    }
+    entity.setIlhaId(ValidationUtil.ref(entityManager, GeografiaEntity.class,
+        domain.getIlha() != null ? domain.getIlha().id() : null));
 
-    entity.setUpsId(entityManager.getReference(UpsEntity.class,domain.getUps()));
+    entity.setUpsId(ValidationUtil.ref(entityManager, UpsEntity.class, domain.getUps()));
     entity.setEstado(domain.getEstado());
 
     return entity;

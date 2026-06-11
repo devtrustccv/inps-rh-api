@@ -7,6 +7,7 @@ import cv.inps.rh.funcionario.application.rules.RegimeRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeTrabalhoEntity;
 import cv.inps.rh.shared.util.DateFormatter;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +47,7 @@ public class RegimeTrabalhoMapper {
   public RegimeTrabalhoEntity toRegime(DadosContratuaisReqDTO dc, Estado estado) {
     if (dc == null) return null;
     var re = new RegimeTrabalhoEntity();
-    re.setTipoRegime(dc.getRegimeTrabalho());
+    re.setTipoRegime(ValidationUtil.trimToNull(dc.getRegimeTrabalho()));
     re.setTipoSituacao("NOVO_CONTRATO");
     re.setDataInicio(dc.getDataInicio());
     re.setDataFim(dc.getDataFim());

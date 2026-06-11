@@ -4,6 +4,7 @@ import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamCategoria;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCategoriaEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -40,13 +41,12 @@ public class ParamCategoriaMapper {
     ParamCategoriaEntity entity = new ParamCategoriaEntity();
     entity.setId(domain.getId());
     entity.setUuid(domain.getUuid().valor());
-    entity.setNome(domain.getNome());
-    entity.setCodigo(domain.getCodigo());
+    entity.setNome(ValidationUtil.trimToNull(domain.getNome()));
+    entity.setCodigo(ValidationUtil.trimToNull(domain.getCodigo()));
     entity.setEstado(domain.getEstado());
 
-    if (domain.getParamCarreira() != null && domain.getParamCarreira().getId() != null) {
-      entity.setParamCarrId(entityManager.getReference(ParamCarreiraEntity.class, domain.getParamCarreira().getId()));
-    }
+    entity.setParamCarrId(ValidationUtil.ref(entityManager, ParamCarreiraEntity.class,
+        domain.getParamCarreira() != null ? domain.getParamCarreira().getId() : null));
 
     return entity;
   }

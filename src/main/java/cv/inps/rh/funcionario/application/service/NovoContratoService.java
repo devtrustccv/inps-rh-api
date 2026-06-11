@@ -14,6 +14,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -125,7 +126,7 @@ public class NovoContratoService {
       funcionario.getRegimesTrabalhos().add(regime);
     }
 
-    var paramSituacaoLaboral = entityManager.getReference(ParamSituacaoEntity.class, dadosContratuais.getSituacaoLaboralId());
+    var paramSituacaoLaboral = ValidationUtil.ref(entityManager, ParamSituacaoEntity.class, dadosContratuais.getSituacaoLaboralId());
 
 
     var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P,
@@ -380,7 +381,7 @@ public class NovoContratoService {
       }
     }
 
-    var paramSituacaoLaboral = entityManager.getReference(ParamSituacaoEntity.class, dadosContratuais.getSituacaoLaboralId());
+    var paramSituacaoLaboral = ValidationUtil.ref(entityManager, ParamSituacaoEntity.class, dadosContratuais.getSituacaoLaboralId());
 
 
     var situacaoLaboral = dadosContratuaisMapper.toSituacaoLaboral(dadosContratuais, paramSituacaoLaboral, Estado.P,

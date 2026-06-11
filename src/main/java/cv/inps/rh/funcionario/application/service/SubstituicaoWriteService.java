@@ -14,6 +14,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SubstituicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -50,8 +51,8 @@ public class SubstituicaoWriteService {
     substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid()));
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());
-    substituicao.setMotivo(dto.getMotivoSubstituicao());
-    substituicao.setObs(dto.getObs());
+    substituicao.setMotivo(ValidationUtil.trimToNull(dto.getMotivoSubstituicao()));
+    substituicao.setObs(ValidationUtil.trimToNull(dto.getObs()));
     substituicao.setUuid(IdentificadorUnico.create().valor());
     substituicao.setEstado(Estado.P);
     substituicaoEntityRepository.save(substituicao);
@@ -86,7 +87,7 @@ public class SubstituicaoWriteService {
     );
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());
-    substituicao.setObs(dto.getObs());
+    substituicao.setObs(ValidationUtil.trimToNull(dto.getObs()));
     substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid()));
 
 

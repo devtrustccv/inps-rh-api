@@ -24,6 +24,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.SituacaoLaboralEn
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoRelRemPagEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,7 +72,7 @@ public class AlterarSituacaoLaboralWriteService {
       situacaoLaboral.setEstado(estado);
       situacaoLaboral.setMotivoSitLabId(paramSituacaoLaboralDetalhe);
       situacaoLaboral.setSituacaoLaboralId(paramSituacaoLaboral);
-      situacaoLaboral.setObs(dto.getObservacao());
+      situacaoLaboral.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
       situacaoLaboralEntityRepository.save(situacaoLaboral);
 
       funcionario.getValidacoes().stream()
@@ -119,7 +120,7 @@ public class AlterarSituacaoLaboralWriteService {
     situacaoLaboral.setSituacaoLaboralId(paramSituacaoLaboral);
     situacaoLaboral.setMotivoSitLabId(paramSituacaoLaboralDetalhe);
     situacaoLaboral.setContrVinculoId(tiposRelacionamentoAtual.getContrVinculoId());
-    situacaoLaboral.setObs(dto.getObservacao());
+    situacaoLaboral.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
     situacaoLaboral.setDataInicio(dataInicio);
     situacaoLaboral.setDataFim(dataFim);
     situacaoLaboral.setEstado(Estado.P);
@@ -129,7 +130,7 @@ public class AlterarSituacaoLaboralWriteService {
     tipoRelacionamentoNovo.setDataInicio(dataInicio);
     tipoRelacionamentoNovo.setEstActAdm(1);
     tipoRelacionamentoNovo.setTipoSituacao("MUDANCA_SITUACAO_LABORAL");
-    tipoRelacionamentoNovo.setObs(dto.getObservacao());
+    tipoRelacionamentoNovo.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
     tipoRelacionamentoNovo.setSituacLaboralId(situacaoLaboral);
     tipoRelacionamentoNovo.setReferente("SITUACAO_LABORAL");
     tipoRelacionamentoNovo.setEstado(Estado.P);

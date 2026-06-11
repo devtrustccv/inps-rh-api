@@ -6,6 +6,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ExperienciaProfEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -29,15 +30,13 @@ public class ExperienciaProfissionalMapper {
     if(dto.getId() !=null && dto.getId()>0)
       e.setId(dto.getId());
 
-    if (dto.getPaisId() != null) {
-      e.setPaisId(entityManager.getReference(GeografiaEntity.class, dto.getPaisId()));
-    }
+    e.setPaisId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dto.getPaisId()));
 
-    e.setEmpresa(dto.getEmpresa());
-    e.setCargo(dto.getCargo());
+    e.setEmpresa(ValidationUtil.trimToNull(dto.getEmpresa()));
+    e.setCargo(ValidationUtil.trimToNull(dto.getCargo()));
     e.setDataInicio(dto.getDataEntrada());
     e.setDataFim(dto.getDataSaida());
-    e.setObservacao(dto.getObservacoes());
+    e.setObservacao(ValidationUtil.trimToNull(dto.getObservacoes()));
     e.setFunId(fun);
     e.setEstado(estado);
 
@@ -55,14 +54,12 @@ public class ExperienciaProfissionalMapper {
         }
       }
       if (found != null) {
-        if (dto.getPaisId() != null) {
-          found.setPaisId(entityManager.getReference(GeografiaEntity.class, dto.getPaisId()));
-        }
-        found.setEmpresa(dto.getEmpresa());
-        found.setCargo(dto.getCargo());
+        found.setPaisId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dto.getPaisId()));
+        found.setEmpresa(ValidationUtil.trimToNull(dto.getEmpresa()));
+        found.setCargo(ValidationUtil.trimToNull(dto.getCargo()));
         found.setDataInicio(dto.getDataEntrada());
         found.setDataFim(dto.getDataSaida());
-        found.setObservacao(dto.getObservacoes());
+        found.setObservacao(ValidationUtil.trimToNull(dto.getObservacoes()));
       } else {
         ExperienciaProfEntity novo = toEntity(dto, estadoParaNovos, fun);
         existingList.add(novo);

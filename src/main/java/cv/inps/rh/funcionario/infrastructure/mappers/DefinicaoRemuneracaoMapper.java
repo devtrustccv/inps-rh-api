@@ -9,6 +9,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoE
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
 import cv.inps.rh.shared.util.DateFormatter;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -55,17 +56,13 @@ public class DefinicaoRemuneracaoMapper {
         }
       }
       if (found != null) {
-        if (dto.getTipoSubsidioId() != null) {
-          found.setTmId(entityManager.getReference(TipoMovimentoEntity.class, dto.getTipoSubsidioId()));
-        }
+        found.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoSubsidioId()));
         found.setPercentagem(dto.getPercentagem());
         found.setValor(dto.getValor());
         found.setObs(dto.getObservacoes());
       } else {
         DefinicaoRemuneracaoEntity novo = new DefinicaoRemuneracaoEntity();
-        if (dto.getTipoSubsidioId() != null) {
-          novo.setTmId(entityManager.getReference(TipoMovimentoEntity.class, dto.getTipoSubsidioId()));
-        }
+        novo.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoSubsidioId()));
         novo.setPercentagem(dto.getPercentagem());
         novo.setValor(dto.getValor());
         novo.setObs(dto.getObservacoes());
@@ -93,9 +90,7 @@ public class DefinicaoRemuneracaoMapper {
     de.setObs(s.getObservacoes());
     de.setDataInicio(LocalDate.now());
     de.setDataFim(LocalDate.now());
-    if (s.getTipoSubsidioId() != null) {
-      de.setTmId(entityManager.getReference(TipoMovimentoEntity.class, s.getTipoSubsidioId()));
-    }
+    de.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, s.getTipoSubsidioId()));
     de.setFunId(fun);
     de.setUuid(UuidCreator.getTimeOrderedEpoch());
     return de;
@@ -112,7 +107,7 @@ public class DefinicaoRemuneracaoMapper {
     de.setDataFim(dataFim);
     de.setTmId(tmId);
     de.setFunId(fun);
-    de.setMoeda(moeda);
+    de.setMoeda(ValidationUtil.trimToNull(moeda));
     de.setUuid(UuidCreator.getTimeOrderedEpoch());
     return de;
   }

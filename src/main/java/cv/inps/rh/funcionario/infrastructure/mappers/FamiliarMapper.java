@@ -6,6 +6,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FamiliarEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -22,13 +23,11 @@ public class FamiliarMapper {
   public FamiliarEntity toEntity(AgregadoDependenteReqDTO dto, Estado estado, FuncionarioEntity fun) {
     if (dto == null) return null;
     FamiliarEntity entity = new FamiliarEntity();
-    if (dto.getTipoDocumentoId() != null) {
-      entity.setTpDocumentoId(em.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
-    }
-    entity.setNumDocumento(dto.getNumDocumento());
-    entity.setNome(dto.getNome());
+    entity.setTpDocumentoId(ValidationUtil.ref(em, TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
+    entity.setNumDocumento(ValidationUtil.trimToNull(dto.getNumDocumento()));
+    entity.setNome(ValidationUtil.trimToNull(dto.getNome()));
     entity.setDataNascimento(dto.getDataNascimento());
-    entity.setSexo(dto.getGenero());
+    entity.setSexo(ValidationUtil.trimToNull(dto.getGenero()));
     entity.setGdpId(dto.getGrauParentesco());
     entity.setDependencia(dto.getDependente());
     entity.setMembroAgr(dto.getAgregada());
@@ -49,13 +48,11 @@ public class FamiliarMapper {
         }
       }
       if (found != null) {
-        if (dto.getTipoDocumentoId() != null) {
-          found.setTpDocumentoId(em.getReference(TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
-        }
-        found.setNumDocumento(dto.getNumDocumento());
-        found.setNome(dto.getNome());
+        found.setTpDocumentoId(ValidationUtil.ref(em, TipoDocumentoEntity.class, dto.getTipoDocumentoId()));
+        found.setNumDocumento(ValidationUtil.trimToNull(dto.getNumDocumento()));
+        found.setNome(ValidationUtil.trimToNull(dto.getNome()));
         found.setDataNascimento(dto.getDataNascimento());
-        found.setSexo(dto.getGenero());
+        found.setSexo(ValidationUtil.trimToNull(dto.getGenero()));
         found.setGdpId(dto.getGrauParentesco());
         found.setDependencia(dto.getDependente());
         found.setMembroAgr(dto.getAgregada());

@@ -4,6 +4,7 @@ import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,10 +38,9 @@ public class ValidarDadosContratuaisService {
       throw IgrpResponseStatusException.badRequest("Local de trabalho é obrigatório.");
 
 
-    if (dc.getMoeda() == null || dc.getMoeda().isBlank())
+    dc.setMoeda(ValidationUtil.trimToNull(dc.getMoeda()));
+    if (dc.getMoeda() == null)
       throw IgrpResponseStatusException.badRequest("Moeda é obrigatória.");
-    else
-      dc.setMoeda(dc.getMoeda().trim());
 
     if (dc.getDataInicio() == null)
       throw IgrpResponseStatusException.badRequest("Data de início é obrigatória.");
