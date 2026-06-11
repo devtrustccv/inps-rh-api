@@ -6,6 +6,7 @@ import cv.inps.rh.funcionario.application.dto.EnderecoRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EnderecoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -26,7 +27,7 @@ public class EnderecoMapper {
     e.setConcelhoId(ref(GeografiaEntity.class, dto.getConcelhoId()));
     e.setFreguesiaId(ref(GeografiaEntity.class, dto.getFreguesiaId()));
     e.setZonaId(ref(GeografiaEntity.class, dto.getZonaId()));
-    e.setMorada(dto.getMorada());
+    e.setMorada(ValidationUtil.trimToNull(dto.getMorada()));
     e.setUuid(UuidCreator.getTimeOrderedEpoch());
     e.setEstado(estado);
     return e;
@@ -41,7 +42,7 @@ public class EnderecoMapper {
     e.setConcelhoId(ref(GeografiaEntity.class, dto.getConcelhoId()));
     e.setFreguesiaId(ref(GeografiaEntity.class, dto.getFreguesiaId()));
     e.setZonaId(ref(GeografiaEntity.class, dto.getZonaId()));
-    e.setMorada(dto.getMorada());
+    e.setMorada(ValidationUtil.trimToNull(dto.getMorada()));
     return e;
   }
 
@@ -78,7 +79,7 @@ public class EnderecoMapper {
 
 
   private <T> T ref(Class<T> type, Long id) {
-    return id == null ? null : em.getReference(type, id);
+    return ValidationUtil.ref(em, type, id);
   }
 
 }

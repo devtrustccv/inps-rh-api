@@ -5,6 +5,7 @@ import cv.inps.rh.parametrizacao.domain.models.Secao;
 import cv.inps.rh.shared.infrastructure.mappers.InstituicaoMapper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.InstituicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -34,13 +35,11 @@ public class SecaoMapper {
     SecaoEntity entity = new SecaoEntity();
     entity.setId(domain.getId());
     entity.setUuid(domain.getUuid().valor());
-    entity.setNome(domain.getNome());
+    entity.setNome(ValidationUtil.trimToNull(domain.getNome()));
     entity.setEstado(domain.getEstado());
 
-    if (domain.getInstId() != null && domain.getInstId().id() != null) {
-      entity.setInstId(entityManager.getReference(InstituicaoEntity.class,
-          domain.getInstId().id()));
-    }
+    entity.setInstId(ValidationUtil.ref(entityManager, InstituicaoEntity.class,
+        domain.getInstId() != null ? domain.getInstId().id() : null));
 
     return entity;
   }

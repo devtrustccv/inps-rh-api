@@ -6,6 +6,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamNotificacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.NotificacaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamNotificacaoEntityRepository;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,10 +43,10 @@ public class NotificacaoWriteService {
         }
 
         // 3. Atualizar a entidade Notificacao com os dados finais
-        notificacao.setAssunto(assunto);
-        notificacao.setMessage(corpo); // O corpo da mensagem vai para o campo 'message'
-        notificacao.setEmail(command.getNotificacaoenviarrequest().getEmail());
-        notificacao.setNomeReceptor(command.getNotificacaoenviarrequest().getNomeReceptor());
+        notificacao.setAssunto(ValidationUtil.trimToNull(assunto));
+        notificacao.setMessage(ValidationUtil.trimToNull(corpo));
+        notificacao.setEmail(ValidationUtil.trimToNull(command.getNotificacaoenviarrequest().getEmail()));
+        notificacao.setNomeReceptor(ValidationUtil.trimToNull(command.getNotificacaoenviarrequest().getNomeReceptor()));
 
         // 4. Enviar o email
         emailService.sendEmail(notificacao.getEmail(), notificacao.getAssunto(), notificacao.getMessage());

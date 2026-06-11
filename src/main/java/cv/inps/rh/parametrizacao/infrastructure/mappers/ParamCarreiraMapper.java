@@ -3,6 +3,7 @@ package cv.inps.rh.parametrizacao.infrastructure.mappers;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamCarreira;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -30,8 +31,8 @@ public class ParamCarreiraMapper {
     ParamCarreiraEntity entity = new ParamCarreiraEntity();
     entity.setId(domain.getId());
     entity.setUuid(domain.getUuid().valor());
-    entity.setNome(domain.getNome());
-    entity.setCodigo(domain.getCodigo());
+    entity.setNome(ValidationUtil.trimToNull(domain.getNome()));
+    entity.setCodigo(ValidationUtil.trimToNull(domain.getCodigo()));
     entity.setEstado(domain.getEstado());
     return entity;
   }

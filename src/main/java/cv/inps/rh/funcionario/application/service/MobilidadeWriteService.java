@@ -14,6 +14,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.InstituicaoEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MobilidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
@@ -25,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +64,7 @@ public class MobilidadeWriteService {
     novoTipoRelacionamento.setEstActAdm(1);
     novoTipoRelacionamento.setMobId(novaMobilidade);
     novoTipoRelacionamento.setEstado(Estado.P);
-    novoTipoRelacionamento.setTipoSituacao(mobilidadeDto.getTipoMobilidade());
+    novoTipoRelacionamento.setTipoSituacao(ValidationUtil.trimToNull(mobilidadeDto.getTipoMobilidade()));
 
     // Persist new entities directly so their IDs are assigned on the same references.
     // saveAndFlush(funcionario) uses em.merge(), which for transient children creates
@@ -94,16 +94,13 @@ public class MobilidadeWriteService {
      }
 
     var me = new MobilidadeEntity();
-    me.setTipoSituacao(mobilidadeDTO.getTipoMobilidade());
+    me.setTipoSituacao(ValidationUtil.trimToNull(mobilidadeDTO.getTipoMobilidade()));
     me.setObs("MOBILIDADE");
     me.setUuid(UuidCreator.getTimeOrderedEpoch());
     me.setFunId(funcionario);
-    if(Objects.nonNull(mobilidadeDTO.getLocalTrabalhoDepois()))
-      me.setLocalTrabId(entityManager.getReference(ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDepois()));
-    if(Objects.nonNull(mobilidadeDTO.getSeccaoDepois()))
-      me.setSecaoId(entityManager.getReference(SecaoEntity.class, mobilidadeDTO.getSeccaoDepois()));
-    if(Objects.nonNull(mobilidadeDTO.getDirecaoDepois()))
-      me.setInstidId(entityManager.getReference(InstituicaoEntity.class, mobilidadeDTO.getDirecaoDepois()));
+    me.setLocalTrabId(ValidationUtil.ref(entityManager, ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDepois()));
+    me.setSecaoId(ValidationUtil.ref(entityManager, SecaoEntity.class, mobilidadeDTO.getSeccaoDepois()));
+    me.setInstidId(ValidationUtil.ref(entityManager, InstituicaoEntity.class, mobilidadeDTO.getDirecaoDepois()));
     me.setDataInicio(mobilidadeDTO.getDataInicio());
     me.setDataFim(mobilidadeDTO.getDataFim());
     me.setEstado(Estado.P);
@@ -112,17 +109,17 @@ public class MobilidadeWriteService {
 
   private MobilidadeEntity updateMobilidade(MobilidadeEntity me ,MobilidadeDTO mobilidadeDTO){
     if (mobilidadeDTO == null) return null;
-    me.setTipoSituacao(mobilidadeDTO.getTipoMobilidade());
+    me.setTipoSituacao(ValidationUtil.trimToNull(mobilidadeDTO.getTipoMobilidade()));
     me.setObs(me.getObs());
     me.setUuid(me.getUuid());
-    me.setLocalTrabId(mobilidadeDTO.getLocalTrabalhoDepois()!=null ?
-        entityManager.getReference(ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDepois()): me.getLocalTrabId());
+    var localTrabRef = ValidationUtil.ref(entityManager, ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDepois());
+    if (localTrabRef != null) me.setLocalTrabId(localTrabRef);
 
-    me.setSecaoId(mobilidadeDTO.getSeccaoDepois()!=null ?
-        entityManager.getReference(SecaoEntity.class, mobilidadeDTO.getSeccaoDepois()): me.getSecaoId());
+    var secaoRef = ValidationUtil.ref(entityManager, SecaoEntity.class, mobilidadeDTO.getSeccaoDepois());
+    if (secaoRef != null) me.setSecaoId(secaoRef);
 
-    me.setInstidId(mobilidadeDTO.getDirecaoDepois()!=null ?
-        entityManager.getReference(InstituicaoEntity.class, mobilidadeDTO.getDirecaoDepois()): me.getInstidId());
+    var instidRef = ValidationUtil.ref(entityManager, InstituicaoEntity.class, mobilidadeDTO.getDirecaoDepois());
+    if (instidRef != null) me.setInstidId(instidRef);
 
     me.setDataInicio(mobilidadeDTO.getDataInicio());
     me.setDataFim(mobilidadeDTO.getDataFim()!=null ? mobilidadeDTO.getDataFim() : me.getDataFim());

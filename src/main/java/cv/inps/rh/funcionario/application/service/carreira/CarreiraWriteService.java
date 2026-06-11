@@ -332,9 +332,9 @@ public class CarreiraWriteService {
               obj = definicaoRemuneracaoEntityRepository.findByIdOrThrow(s.getId());
               obj.setPercentagem(s.getPercentagem());
               obj.setValor(s.getValor());
-              obj.setObs(s.getObservacoes());
-              if (s.getTipoSubsidioId() != null)
-                obj.setTmId(entityManager.getReference(TipoMovimentoEntity.class, s.getTipoSubsidioId()));
+              obj.setObs(ValidationUtil.trimToNull(s.getObservacoes()));
+              var tmRef = ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, s.getTipoSubsidioId());
+              if (tmRef != null) obj.setTmId(tmRef);
             }
             return obj;
           })
@@ -354,9 +354,9 @@ public class CarreiraWriteService {
           } else {
             obj = defPagamentoEntityRepository.findByIdOrThrow(e.getId());
             obj.setValor(e.getValor());
-            obj.setObs(e.getObservacoes());
-            if (e.getTipoEncargoId() != null)
-              obj.setTmId(entityManager.getReference(TipoMovimentoEntity.class, e.getTipoEncargoId()));
+            obj.setObs(ValidationUtil.trimToNull(e.getObservacoes()));
+            var tmRef2 = ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, e.getTipoEncargoId());
+            if (tmRef2 != null) obj.setTmId(tmRef2);
           }
           return obj;
         })

@@ -3,6 +3,7 @@ package cv.inps.rh.configuracao.infrastructure.mappers;
 import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoResponseDTO;
 import cv.inps.rh.configuracao.application.dto.EscalaAvaliacaoRowDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaAvaliacaoEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,8 +16,8 @@ public class EscalaAvaliacaoMapper {
 
     var entity = new ParamEscalaAvaliacaoEntity();
     entity.setNivel(dto.getNivel());
-    entity.setQualitativa(dto.getQualitativa());
-    entity.setDescricao(dto.getDescricao());
+    entity.setQualitativa(ValidationUtil.trimToNull(dto.getQualitativa()));
+    entity.setDescricao(ValidationUtil.trimToNull(dto.getDescricao()));
     entity.setQuantitativaDe(dto.getQuantitativaDe());
     entity.setQuantitativaAte(dto.getQuantitativaAte());
     return entity;

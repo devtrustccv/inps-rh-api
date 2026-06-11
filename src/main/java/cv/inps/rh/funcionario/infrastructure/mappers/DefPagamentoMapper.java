@@ -9,6 +9,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.DefPagamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
 import cv.inps.rh.shared.util.DateFormatter;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -58,18 +59,14 @@ public class DefPagamentoMapper {
         }
       }
       if (found != null) {
-        if (dto.getTipoEncargoId() != null) {
-          found.setTmId(entityManager.getReference(TipoMovimentoEntity.class, dto.getTipoEncargoId()));
-        }
+        found.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoEncargoId()));
         found.setValor(dto.getValor());
         found.setDataInicio(dto.getDataInicio());
         found.setDataFim(dto.getDataFim());
         found.setObs(dto.getObservacoes());
       } else {
         DefPagamentoEntity novo = new DefPagamentoEntity();
-        if (dto.getTipoEncargoId() != null) {
-          novo.setTmId(entityManager.getReference(TipoMovimentoEntity.class, dto.getTipoEncargoId()));
-        }
+        novo.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoEncargoId()));
         novo.setValor(dto.getValor());
         novo.setDataInicio(dto.getDataInicio());
         novo.setDataFim(dto.getDataFim());
@@ -92,9 +89,7 @@ public class DefPagamentoMapper {
   public DefPagamentoEntity toDefPagamento(EncargosDescontosReqDTO e, FuncionarioEntity fun, Estado estado) {
     if (e == null) return null;
     var dp = new DefPagamentoEntity();
-    if (e.getTipoEncargoId() != null) {
-      dp.setTmId(entityManager.getReference(TipoMovimentoEntity.class, e.getTipoEncargoId()));
-    }
+    dp.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, e.getTipoEncargoId()));
     dp.setValor(e.getValor());
     dp.setDataInicio(e.getDataInicio());
     dp.setDataFim(e.getDataFim());

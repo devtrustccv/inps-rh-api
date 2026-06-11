@@ -16,6 +16,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeModalidadeEntit
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.RegimeModalidadeEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -58,8 +59,8 @@ public class RegimeWriteService {
     //update
     var regimeTrabalho = tipoRelacionamentoAtual.getRegimeId();
     regimeTrabalho.setFunId(funcionario);
-    regimeTrabalho.setTipoRegime(dto.getTipoRegime());
-    regimeTrabalho.setTipoSituacao(dto.getTipoRegime());
+    regimeTrabalho.setTipoRegime(ValidationUtil.trimToNull(dto.getTipoRegime()));
+    regimeTrabalho.setTipoSituacao(ValidationUtil.trimToNull(dto.getTipoRegime()));
     regimeTrabalho.setDataInicio(dto.getDataInicio());
     regimeTrabalho.setDataFim(dto.getDataFim());
     regimeTrabalho.setEstado(Estado.P);
@@ -123,7 +124,7 @@ public class RegimeWriteService {
     }
 
     // Atualização simples do regime
-    regime.setTipoRegime(dto.getTipoRegime());
+    regime.setTipoRegime(ValidationUtil.trimToNull(dto.getTipoRegime()));
     regime.setDataInicio(dto.getDataInicio());
     regime.setDataFim(dto.getDataFim());
 

@@ -3,6 +3,7 @@ package cv.inps.rh.shared.infrastructure.mappers;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.shared.domain.models.Banco;
 import cv.inps.rh.shared.infrastructure.persistence.entity.BancoEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,7 @@ public class BancoMapper {
     entity.setNmBanco(banco.getNomeBanco());
     entity.setNuConta(banco.getNumeroConta());
     entity.setEntId(banco.getEntId());
-    entity.setNib(banco.getNib());
+    entity.setNib(ValidationUtil.sanitizeNib(banco.getNib()));
     entity.setTmId(banco.getTmId());
     return entity;
   }

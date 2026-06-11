@@ -6,6 +6,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.BancoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DadosBancariosEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -23,11 +24,9 @@ public class DadosBancariosMapper {
                                        FuncionarioEntity funcionario) {
     if (dto == null) return null;
     DadosBancariosEntity entity = new DadosBancariosEntity();
-    if (dto.getEntidadeBancariaId() != null) {
-      entity.setRhbId(entityManager.getReference(BancoEntity.class, dto.getEntidadeBancariaId()));
-    }
+    entity.setRhbId(ValidationUtil.ref(entityManager, BancoEntity.class, dto.getEntidadeBancariaId()));
     entity.setNumConta(dto.getNumConta());
-    entity.setNib(dto.getNib());
+    entity.setNib(ValidationUtil.sanitizeNib(dto.getNib()));
     entity.setDataInicio(dto.getDataInicio());
     entity.setDataFim(dto.getDataFim());
     entity.setFunId(funcionario);
@@ -55,11 +54,9 @@ public class DadosBancariosMapper {
             || !Objects.equals(dto.getNib(), found.getNib())
             || !Objects.equals(dto.getNumConta(), found.getNumConta());
 
-        if (dto.getEntidadeBancariaId() != null) {
-          found.setRhbId(entityManager.getReference(BancoEntity.class, dto.getEntidadeBancariaId()));
-        }
+        found.setRhbId(ValidationUtil.ref(entityManager, BancoEntity.class, dto.getEntidadeBancariaId()));
         found.setNumConta(dto.getNumConta());
-        found.setNib(dto.getNib());
+        found.setNib(ValidationUtil.sanitizeNib(dto.getNib()));
         found.setDataInicio(dto.getDataInicio());
         found.setDataFim(dto.getDataFim());
 

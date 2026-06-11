@@ -43,7 +43,7 @@ public class RenumeracoesWriteService {
     var remuneracao = new DefinicaoRemuneracaoEntity();
     remuneracao.setPercentagem(request.getPercentagem());
     remuneracao.setValor(request.getValor());
-    remuneracao.setObs(request.getObservacao());
+    remuneracao.setObs(ValidationUtil.trimToNull(request.getObservacao()));
     remuneracao.setEstado(Estado.P);
     remuneracao.setUuid(UuidCreator.getTimeOrderedEpoch());
     remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
@@ -77,21 +77,19 @@ public class RenumeracoesWriteService {
     pagamento.setPercentagem(request.getPercentagem());
     pagamento.setValor(request.getValor());
     pagamento.setEstado(Estado.P);
-    pagamento.setObs(request.getObservacao());
+    pagamento.setObs(ValidationUtil.trimToNull(request.getObservacao()));
     pagamento.setUuid(UuidCreator.getTimeOrderedEpoch());
     pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     pagamento.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
     pagamento.setFunId(funcionario);
-    pagamento.setNib(request.getNib());
-    if (request.getBanco() != null) {
-      pagamento.setRhbId(entityManager.getReference(BancoEntity.class, request.getBanco()));
-    }
+    pagamento.setNib(ValidationUtil.sanitizeNib(request.getNib()));
+    pagamento.setRhbId(ValidationUtil.ref(entityManager, BancoEntity.class, request.getBanco()));
     pagamento.setNif(request.getNif());
-    if (request.getEntidade() != null) {
-      var entidade = entityManager.getReference(EntidadeEntity.class, request.getEntidade());
-      pagamento.setNmEntidade(entidade.getNome());
-      pagamento.setEntId(entidade);
+    var entRef = ValidationUtil.ref(entityManager, EntidadeEntity.class, request.getEntidade());
+    if (entRef != null) {
+      pagamento.setNmEntidade(entRef.getNome());
+      pagamento.setEntId(entRef);
     }
     pagamento = defPagamentoEntityRepository.save(pagamento);
 
@@ -119,7 +117,7 @@ public class RenumeracoesWriteService {
     var remuneracao = definicaoRemuneracaoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getRemuneracaoId()));
     remuneracao.setValor(request.getValor());
     remuneracao.setPercentagem(request.getPercentagem());
-    remuneracao.setObs(request.getObservacao());
+    remuneracao.setObs(ValidationUtil.trimToNull(request.getObservacao()));
     remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     remuneracao.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     remuneracao.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
@@ -154,19 +152,17 @@ public class RenumeracoesWriteService {
 
     pagamento.setPercentagem(request.getPercentagem());
     pagamento.setValor(request.getValor());
-    pagamento.setObs(request.getObservacao());
+    pagamento.setObs(ValidationUtil.trimToNull(request.getObservacao()));
     pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     pagamento.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
-    pagamento.setNib(request.getNib());
-    if (request.getBanco() != null) {
-      pagamento.setRhbId(entityManager.getReference(BancoEntity.class, request.getBanco()));
-    }
+    pagamento.setNib(ValidationUtil.sanitizeNib(request.getNib()));
+    pagamento.setRhbId(ValidationUtil.ref(entityManager, BancoEntity.class, request.getBanco()));
     pagamento.setNif(request.getNif());
-    if (request.getEntidade() != null) {
-      var entidade = entityManager.getReference(EntidadeEntity.class, request.getEntidade());
-      pagamento.setNmEntidade(entidade.getNome());
-      pagamento.setEntId(entidade);
+    var entRef2 = ValidationUtil.ref(entityManager, EntidadeEntity.class, request.getEntidade());
+    if (entRef2 != null) {
+      pagamento.setNmEntidade(entRef2.getNome());
+      pagamento.setEntId(entRef2);
     }
 
     if (data.getValidacao() != null) {

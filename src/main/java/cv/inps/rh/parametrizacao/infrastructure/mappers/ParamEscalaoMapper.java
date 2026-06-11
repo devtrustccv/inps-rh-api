@@ -7,6 +7,7 @@ import cv.inps.rh.parametrizacao.domain.models.ParamEscalao;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCategoriaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -59,21 +60,19 @@ public class ParamEscalaoMapper {
     ParamEscalaoEntity entity = new ParamEscalaoEntity();
     entity.setId(domain.getId());
     entity.setUuid(domain.getUuid() != null ? domain.getUuid().valor() : null);
-    entity.setCodigo(domain.getCodigo());
+    entity.setCodigo(ValidationUtil.trimToNull(domain.getCodigo()));
     entity.setNivelReferencia(domain.getNivelReferencia());
-    entity.setEscalao(domain.getEscalao());
+    entity.setEscalao(ValidationUtil.trimToNull(domain.getEscalao()));
     entity.setValor(domain.getValor());
     entity.setDataInicio(domain.getDataInicio());
     entity.setDataFim(domain.getDataFim());
     entity.setEstado(domain.getEstado());
 
-    if (domain.getParamCarreira() != null && domain.getParamCarreira().getId() != null) {
-      entity.setParamCarrId(entityManager.getReference(ParamCarreiraEntity.class, domain.getParamCarreira().getId()));
-    }
+    entity.setParamCarrId(ValidationUtil.ref(entityManager, ParamCarreiraEntity.class,
+        domain.getParamCarreira() != null ? domain.getParamCarreira().getId() : null));
 
-    if (domain.getParamCategoria() != null && domain.getParamCategoria().getId() != null) {
-      entity.setParamCategoriaId(entityManager.getReference(ParamCategoriaEntity.class, domain.getParamCategoria().getId()));
-    }
+    entity.setParamCategoriaId(ValidationUtil.ref(entityManager, ParamCategoriaEntity.class,
+        domain.getParamCategoria() != null ? domain.getParamCategoria().getId() : null));
 
     return entity;
   }

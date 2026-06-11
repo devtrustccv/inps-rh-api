@@ -13,6 +13,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessoDisciplin
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,16 +80,16 @@ public class ProcessoDisciplinarWriteService {
   }
 
   private void populateEntity(ProcessoDisciplinarRequestDTO request, ProcessoDisciplinarEntity process) {
-    process.setNumProceso(request.getNumeroProcesso());
-    process.setEntidade(request.getEntidade());
-    process.setTpProcesso(request.getTipoProcesso());
-    process.setPenaDiscp(request.getPenaDisciplinar());
+    process.setNumProceso(ValidationUtil.trimToNull(request.getNumeroProcesso()));
+    process.setEntidade(ValidationUtil.trimToNull(request.getEntidade()));
+    process.setTpProcesso(ValidationUtil.trimToNull(request.getTipoProcesso()));
+    process.setPenaDiscp(ValidationUtil.trimToNull(request.getPenaDisciplinar()));
     process.setDateInicPd(DateFormatter.stringToLocalDate(request.getDataInicioPd()));
     process.setDateFimPd(DateFormatter.stringToLocalDate(request.getDataFimPd()));
     process.setDateInicPena(DateFormatter.stringToLocalDate(request.getDataInicioPena()));
     process.setDateFimPena(DateFormatter.stringToLocalDate(request.getDataFimPena()));
     process.setDataOrdemServ(DateFormatter.stringToLocalDate(request.getDataOrdemServico()));
-    process.setNumOrdemServ(request.getNumeroOrdemServico());
+    process.setNumOrdemServ(ValidationUtil.trimToNull(request.getNumeroOrdemServico()));
   }
 
   public void deleteProcessoDisciplinar(String processoDisciplinarId) {

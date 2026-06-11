@@ -8,6 +8,7 @@ import cv.inps.rh.funcionario.application.dto.SubsidioRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class DadosContratuaisMapper {
   public TiposRelacionamentoEntity toRelacionamento(DadosContratuaisReqDTO dc, Estado estado) {
     if (dc == null) return null;
     var tr = new TiposRelacionamentoEntity();
-    tr.setCargoId(dc.getCargoPosicaoId() != null ? em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()) : null);
+    tr.setCargoId(ValidationUtil.ref(em, ParamCargoEntity.class, dc.getCargoPosicaoId()));
     tr.setSalario(dc.getSalario());
     tr.setMoeda(dc.getMoeda());
     tr.setTipoSituacao("NOVO_CONTRATO");
@@ -43,7 +44,7 @@ public class DadosContratuaisMapper {
 
   public void toUpdateRelacionamento(TiposRelacionamentoEntity tr, DadosContratuaisReqDTO dc) {
     if (dc == null) return ;
-    tr.setCargoId(dc.getCargoPosicaoId() != null ? em.getReference(ParamCargoEntity.class, dc.getCargoPosicaoId()) : null);
+    tr.setCargoId(ValidationUtil.ref(em, ParamCargoEntity.class, dc.getCargoPosicaoId()));
     tr.setSalario(dc.getSalario());
     tr.setMoeda(dc.getMoeda());
     tr.setTipoSituacao("NOVO_CONTRATO");
@@ -81,7 +82,7 @@ public class DadosContratuaisMapper {
     if (dc == null) return;
     entity.setDataInicio(dc.getDataInicio());
     entity.setDataFim(dc.getDataFim());
-    entity.setSituacaoLaboralId(em.getReference(ParamSituacaoEntity.class,dc.getSituacaoLaboralId()));
+    entity.setSituacaoLaboralId(ValidationUtil.ref(em, ParamSituacaoEntity.class, dc.getSituacaoLaboralId()));
 
   }
 
