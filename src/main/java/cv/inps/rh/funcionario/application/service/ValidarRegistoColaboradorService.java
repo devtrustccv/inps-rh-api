@@ -1,6 +1,7 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidarRegistoColaboradorCommand;
+import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
@@ -47,6 +48,7 @@ public class ValidarRegistoColaboradorService {
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
+  private final ColaboradorValidationRules colaboradorValidationRules;
 
   @Transactional
   public Map<String, ?> validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -61,11 +63,7 @@ public class ValidarRegistoColaboradorService {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
-    if (funcionarioEntityRepository
-        .existsByTipoDocumentoId_IdAndNumDocumentoAndUuidNot(dadosPessoaisReqDTO.getTipoDocumentoId(),
-            dadosPessoaisReqDTO.getNumDocumento(), funcionario.getUuid())) {
-      throw IgrpResponseStatusException.conflict("Funcionario já registrado com esse documento");
-    }
+    colaboradorValidationRules.validarDadosPessoais(dadosPessoaisReqDTO, funcionario.getUuid());
 
     if (registroColaborador.getValidar() != null
         && !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT,
@@ -79,11 +77,16 @@ public class ValidarRegistoColaboradorService {
     var contactos = contactoMapper.syncContactos(funcionario.getContactos(),
         dadosPessoaisReqDTO.getContactos(), funcionario);
 
+    colaboradorValidationRules.verificarDuplicidadeFamiliares(
+        registroColaborador.getFamiliares(), funcionario.getFamiliares());
+
     var familiares = familiarMapper
         .syncFamiliares(funcionario.getFamiliares(),
             registroColaborador.getFamiliares(), funcionario, Estado.P);
 
     var dadosAcademicosProf = registroColaborador.getDadosAcademicosProf();
+
+    colaboradorValidationRules.validarHabilitacoesLiterarias(dadosAcademicosProf.getHabilitacoesLiterarias());
 
     var habilitacoesLiterarias = habilitacaoLiterariaMapper
         .syncHabilitacoes(funcionario.getHabilitacoesLiterarias(),

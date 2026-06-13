@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.CreateFuncionarioCommand;
 import cv.inps.rh.funcionario.application.dto.FuncionarioRequestDTO;
+import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
@@ -67,6 +68,8 @@ public class RegistarColaboradorService {
 
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
 
+  private final ColaboradorValidationRules colaboradorValidationRules;
+
   @Transactional
   public Map<String, ?> saveDossierColaborador(CreateFuncionarioCommand command) {
     FuncionarioRequestDTO dto = command.getFuncionariorequest();
@@ -74,10 +77,7 @@ public class RegistarColaboradorService {
     var dadosPessoais = dto.getDadosPessoais();
     var dadosContratuais = dto.getDadosContratuais();
 
-    if (funcionarioEntityRepository.existsByTipoDocumentoId_idAndNumDocumento(dadosPessoais.getTipoDocumentoId(),
-        dadosPessoais.getNumDocumento())) {
-      throw IgrpResponseStatusException.conflict("Funcionario já registrado com esse documento");
-    }
+    colaboradorValidationRules.validarDadosPessoais(dadosPessoais, null);
 
     validarDadosContratuaisService.validar(dadosContratuais);
 
@@ -97,6 +97,7 @@ public class RegistarColaboradorService {
     if (dto.getDadosAcademicosProf() != null) {
       var da = dto.getDadosAcademicosProf();
       if (da.getHabilitacoesLiterarias() != null) {
+        colaboradorValidationRules.validarHabilitacoesLiterarias(da.getHabilitacoesLiterarias());
         var list = da.getHabilitacoesLiterarias().stream().map(h -> {
           var he = habilitationLiterariaMapper.toEntity(h, Estado.P, fun);
           return he;

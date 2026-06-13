@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidarDadosAcademicosCommand;
 import cv.inps.rh.funcionario.application.dto.ValidarDadosAcademicosDTO;
+import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.ExperienciaProfissionalMapper;
@@ -27,6 +28,7 @@ public class ValidarDadosAcademicosService {
   private final HabilitacaoLiterariaMapper habilitacaoLiterariaMapper;
   private final FormacaoFeitaMapper formacaoFeitaMapper;
   private final ExperienciaProfissionalMapper experienciaProfissionalMapper;
+  private final ColaboradorValidationRules colaboradorValidationRules;
 
   @Transactional
   public ValidarDadosAcademicosDTO executar(ValidarDadosAcademicosCommand command) {
@@ -47,6 +49,8 @@ public class ValidarDadosAcademicosService {
       );
     }*/
 
+
+    colaboradorValidationRules.validarHabilitacoesLiterarias(dadosAcademicosProfReqDTO.getHabilitacoesLiterarias());
 
     var habilitacoesLiterarias = habilitacaoLiterariaMapper
         .syncHabilitacoes(funcionario.getHabilitacoesLiterarias(),

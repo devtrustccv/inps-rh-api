@@ -1,6 +1,7 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidaDadosPessoaisCommand;
+import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContactoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
@@ -27,6 +28,7 @@ public class ValidarDadosPessoaisService {
   private final DadosContratuaisMapper contratuaisEntityMapper;
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final ContactoMapper contactoMapper;
+  private final ColaboradorValidationRules colaboradorValidationRules;
 
   @Transactional
   public Map<String, ?> executar(ValidaDadosPessoaisCommand command) {
@@ -38,17 +40,8 @@ public class ValidarDadosPessoaisService {
     var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
 
-    //boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_PESSOAIS);
+    colaboradorValidationRules.validarDadosPessoais(dadosPessoaisReqDTO, funcionario.getUuid());
 
-
-    // 1) Se tem pendentes mas não enviou validar → erro
-    /*if (temPendentes && estadoValidacao == null) {
-      throw IgrpResponseStatusException.badRequest(
-          "Funcionario possui validação pendente de dados pessoais, por favor validar"
-      );
-    }*/
-
-    // 2) Fazer UPDATE dos dados (sempre permitido)
     var alertas = funcionarioRules.validarContactosDuplicados(
         dadosPessoaisReqDTO != null ? dadosPessoaisReqDTO.getContactos() : null,
         funcionario.getUuid()
