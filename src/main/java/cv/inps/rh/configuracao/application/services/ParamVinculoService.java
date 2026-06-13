@@ -62,6 +62,25 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     situacaoLaboralEntityRepository.save(obj);
   }
 
+  public void editarVinculoSituacao(Long id, String vinculoId, String situacaoId) {
+
+    var entity = situacaoLaboralEntityRepository.findByIdOrThrow(id);
+
+    var vinculo = repository.findByUuidOrThrow(UUID.fromString(vinculoId));
+    var situacao = paramSituacaoEntityRepository.findByUuidOrThrow(UUID.fromString(situacaoId));
+
+    entity.setVinculo(vinculo);
+    entity.setParamSit(situacao);
+    situacaoLaboralEntityRepository.save(entity);
+  }
+
+  public void eliminarVinculoSituacao(Long id) {
+
+    var entity = situacaoLaboralEntityRepository.findByIdOrThrow(id);
+    entity.setEstado(Estado.I.name());
+    situacaoLaboralEntityRepository.save(entity);
+  }
+
   @Override
   public Object create(VinculoLaboralRequestDTO dto) {
     var e = new ParamVinculoEntity();

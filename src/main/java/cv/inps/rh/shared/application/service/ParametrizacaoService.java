@@ -1,7 +1,10 @@
 package cv.inps.rh.shared.application.service;
 
+import cv.inps.rh.configuracao.application.dto.VinculoMovimentoResponseDTO;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoMovimentoEntity;
 import cv.inps.rh.shared.infrastructure.mappers.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +70,16 @@ public class ParametrizacaoService {
   }
 
   @Transactional(readOnly = true)
-  public List<ParametrizacaoDTO> getTiposMovimentoByVinculo(Long vinculoId, String vinculoUuid) {
+  public List<VinculoMovimentoResponseDTO> getRemuneracoesByVinculo(Long vinculoId, String vinculoUuid) {
+    return getTiposMovimentoByVinculoAndTipo(vinculoId, vinculoUuid, "REM");
+  }
+
+  @Transactional(readOnly = true)
+  public List<VinculoMovimentoResponseDTO> getEncargosDescontosByVinculo(Long vinculoId, String vinculoUuid) {
+    return getTiposMovimentoByVinculoAndTipo(vinculoId, vinculoUuid, "PAG");
+  }
+
+  private List<VinculoMovimentoResponseDTO> getTiposMovimentoByVinculoAndTipo(Long vinculoId, String vinculoUuid, String tipo) {
     boolean hasId = vinculoId != null;
     boolean hasUuid = vinculoUuid != null && !vinculoUuid.isBlank();
 
@@ -77,12 +89,25 @@ public class ParametrizacaoService {
     }
 
     var movimentos = hasId
-        ? paramVinculoMovimentoEntityRepository.findByVinculoId_Id(vinculoId)
-        : paramVinculoMovimentoEntityRepository.findByVinculoId_Uuid(UUID.fromString(vinculoUuid));
+        ? paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(vinculoId, tipo, Estado.A)
+        : paramVinculoMovimentoEntityRepository.findByVinculoId_UuidAndTipoAndEstado(UUID.fromString(vinculoUuid), tipo, Estado.A);
 
     return movimentos.stream()
         .filter(m -> m.getTmId() != null)
-        .map(m -> tipoMovimentoMapper.toParametrizacaoDto(m.getTmId()))
+        .map(this::toVinculoMovimentoResponse)
         .toList();
+  }
+
+  private VinculoMovimentoResponseDTO toVinculoMovimentoResponse(ParamVinculoMovimentoEntity entity) {
+    var resp = new VinculoMovimentoResponseDTO();
+    resp.setId(entity.getId());
+    resp.setUuid(entity.getUuid());
+    resp.setTipoMovimentoId(entity.getTmId().getId());
+    resp.setTipoMovimentoDescricao(entity.getTmId().getDescricao());
+    resp.setTipo(entity.getTipo());
+    resp.setPercentagem(entity.getPercentagem());
+    resp.setValor(entity.getValor());
+    resp.setEstado(entity.getEstado() != null ? entity.getEstado().getCode() : null);
+    return resp;
   }
 }

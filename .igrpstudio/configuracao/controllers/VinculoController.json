@@ -35,6 +35,137 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getMovimentosByVinculo",
+      "path": "vinculo/{vinculoId}/movimentos",
+      "method": "GET",
+      "pathVariables": [
+        {
+          "type": "long",
+          "name": "vinculoId",
+          "isRequired": true
+        }
+      ],
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "VinculoMovimentoResponse",
+                "objectType": "dto",
+                "module": "configuracao",
+                "collectionType": "list"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "criarVinculoMovimento",
+      "path": "vinculo/{vinculoId}/movimentos",
+      "method": "POST",
+      "pathVariables": [
+        {
+          "type": "long",
+          "name": "vinculoId",
+          "isRequired": true
+        }
+      ],
+      "requestBody": {
+        "name": "dto",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "VinculoMovimentoRequest",
+              "objectType": "dto",
+              "module": "configuracao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "name": "Created",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "VinculoMovimentoResponse",
+                "objectType": "dto",
+                "module": "configuracao"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "editarVinculoMovimento",
+      "path": "vinculo/{vinculoId}/movimentos/{id}",
+      "method": "PUT",
+      "pathVariables": [
+        {
+          "type": "long",
+          "name": "vinculoId",
+          "isRequired": true
+        },
+        {
+          "type": "long",
+          "name": "id",
+          "isRequired": true
+        }
+      ],
+      "requestBody": {
+        "name": "dto",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "VinculoMovimentoRequest",
+              "objectType": "dto",
+              "module": "configuracao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "VinculoMovimentoResponse",
+                "objectType": "dto",
+                "module": "configuracao"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "eliminarVinculoMovimento",
+      "path": "vinculo/{vinculoId}/movimentos/{id}",
+      "method": "DELETE",
+      "pathVariables": [
+        {
+          "type": "long",
+          "name": "vinculoId",
+          "isRequired": true
+        },
+        {
+          "type": "long",
+          "name": "id",
+          "isRequired": true
+        }
+      ],
+      "responses": {
+        "204": {
+          "name": "No Content",
+          "content": {}
+        }
+      }
     }
   ],
   "id": "3j65o2piu8"
