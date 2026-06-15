@@ -246,6 +246,7 @@ public class RegistarColaboradorService {
         Estado.P);
     valid.setFunId(fun);
     valid.setTiprelId(tr);
+    valid.setReferenciaUuid(fun.getUuid());
     fun.setValidacoes(new ArrayList<>(List.of(valid)));
 
     var alertas = funcionarioRules.validarContactosDuplicados(dadosPessoais.getContactos(), null);

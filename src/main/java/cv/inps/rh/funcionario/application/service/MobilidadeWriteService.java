@@ -77,6 +77,7 @@ public class MobilidadeWriteService {
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
     valid.setReferenciaId(novaMobilidade.getId());
+    valid.setReferenciaUuid(novaMobilidade.getUuid());
     entityManager.persist(valid);
 
     tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tipoRelacionamentoAtual, novoTipoRelacionamento, java.util.List.of(), java.util.List.of());

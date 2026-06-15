@@ -139,6 +139,7 @@ public class AlterarSituacaoLaboralWriteService {
     var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.ESTADO_COLABORADOR.name(), Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(tiprelPersistido);
+    valid.setReferenciaUuid(situacaoLaboral.getUuid());
     funcionario.getValidacoes().add(valid);
 
     funcionario.setEstado(paramSituacaoLaboral.getCodigo().equals(SituacaoLaboral.CESSADO.name()) ? Estado.I :
