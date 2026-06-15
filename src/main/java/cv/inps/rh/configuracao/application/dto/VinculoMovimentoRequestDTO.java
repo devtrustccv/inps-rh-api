@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 @IgrpDTO
 public class VinculoMovimentoRequestDTO  {
 
+  private Long id;
+
   @NotNull(message = "The field <tipoMovimentoId> is required")
 
   private Long tipoMovimentoId ;

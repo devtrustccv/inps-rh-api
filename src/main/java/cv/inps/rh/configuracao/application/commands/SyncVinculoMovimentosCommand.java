@@ -8,17 +8,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CriarVinculoMovimentoCommand implements Command {
+public class SyncVinculoMovimentosCommand implements Command {
 
   @NotNull(message = "The field <vinculoId> is required")
   private Long vinculoId;
 
   @Valid
-  @NotNull(message = "The field <dto> is required")
-  private VinculoMovimentoRequestDTO dto;
+  @NotNull(message = "The field <movimentos> is required")
+  private List<VinculoMovimentoRequestDTO> movimentos;
 
 }

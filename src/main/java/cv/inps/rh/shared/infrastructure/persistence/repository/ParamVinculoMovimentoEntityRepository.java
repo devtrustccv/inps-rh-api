@@ -27,6 +27,8 @@ public interface ParamVinculoMovimentoEntityRepository extends
 
       List<ParamVinculoMovimentoEntity> findByVinculoId_Id(Long vinculoId);
 
+      List<ParamVinculoMovimentoEntity> findByVinculoId_IdAndEstadoNot(Long vinculoId, Estado estado);
+
       List<ParamVinculoMovimentoEntity> findByVinculoId_Uuid(UUID vinculoUuid);
 
       List<ParamVinculoMovimentoEntity> findByVinculoId_IdAndTipoAndEstado(Long vinculoId, String tipo, Estado estado);

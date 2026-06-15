@@ -3,7 +3,6 @@ package cv.inps.rh.configuracao.application.service;
 import cv.inps.rh.configuracao.application.dto.VinculoMovimentoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoMovimentoResponseDTO;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoMovimentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -26,57 +26,56 @@ public class VinculoMovimentoService {
 
   @Transactional(readOnly = true)
   public List<VinculoMovimentoResponseDTO> listarPorVinculo(Long vinculoId) {
-    return repository.findByVinculoId_Id(vinculoId).stream()
-        .filter(m -> m.getEstado() != Estado.E)
+    return repository.findByVinculoId_IdAndEstadoNot(vinculoId, Estado.E).stream()
         .map(this::toResponse)
         .toList();
   }
 
   @Transactional
-  public VinculoMovimentoResponseDTO criar(Long vinculoId, VinculoMovimentoRequestDTO dto) {
+  public List<VinculoMovimentoResponseDTO> syncMovimentos(Long vinculoId, List<VinculoMovimentoRequestDTO> items) {
     var vinculo = ValidationUtil.ref(entityManager, ParamVinculoEntity.class, vinculoId);
-    var tipoMovimento = ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoMovimentoId());
+    var existingList = repository.findByVinculoId_IdAndEstadoNot(vinculoId, Estado.E);
 
-    var entity = new ParamVinculoMovimentoEntity();
-    entity.setVinculoId(vinculo);
-    entity.setTmId(tipoMovimento);
-    entity.setTipo(dto.getTipo());
-    entity.setPercentagem(dto.getPercentagem());
-    entity.setValor(dto.getValor());
-    entity.setEstado(Estado.A);
-    entity.setUuid(UUID.randomUUID());
+    if (items == null) items = List.of();
 
-    return toResponse(repository.save(entity));
-  }
-
-  @Transactional
-  public VinculoMovimentoResponseDTO editar(Long vinculoId, Long id, VinculoMovimentoRequestDTO dto) {
-    var entity = repository.findByIdOrThrow(id);
-
-    if (!entity.getVinculoId().getId().equals(vinculoId)) {
-      throw IgrpResponseStatusException.badRequest("O movimento não pertence ao vínculo informado");
+    for (var dto : items) {
+      ParamVinculoMovimentoEntity found = null;
+      if (dto.getId() != null) {
+        for (var e : existingList) {
+          if (Objects.equals(e.getId(), dto.getId())) { found = e; break; }
+        }
+      }
+      if (found != null) {
+        found.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoMovimentoId()));
+        found.setTipo(dto.getTipo());
+        found.setPercentagem(dto.getPercentagem());
+        found.setValor(dto.getValor());
+      } else {
+        var entity = new ParamVinculoMovimentoEntity();
+        entity.setVinculoId(vinculo);
+        entity.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoMovimentoId()));
+        entity.setTipo(dto.getTipo());
+        entity.setPercentagem(dto.getPercentagem());
+        entity.setValor(dto.getValor());
+        entity.setEstado(Estado.A);
+        entity.setUuid(UUID.randomUUID());
+        existingList.add(entity);
+      }
     }
 
-    var tipoMovimento = ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoMovimentoId());
-
-    entity.setTmId(tipoMovimento);
-    entity.setTipo(dto.getTipo());
-    entity.setPercentagem(dto.getPercentagem());
-    entity.setValor(dto.getValor());
-
-    return toResponse(repository.save(entity));
-  }
-
-  @Transactional
-  public void eliminar(Long vinculoId, Long id) {
-    var entity = repository.findByIdOrThrow(id);
-
-    if (!entity.getVinculoId().getId().equals(vinculoId)) {
-      throw IgrpResponseStatusException.badRequest("O movimento não pertence ao vínculo informado");
+    for (var existing : existingList) {
+      boolean stillExists = items.stream()
+          .anyMatch(dto -> Objects.equals(dto.getId(), existing.getId()));
+      if (!stillExists && existing.getEstado() != Estado.I) {
+        existing.setEstado(Estado.E);
+      }
     }
 
-    entity.setEstado(Estado.I);
-    repository.save(entity);
+    repository.saveAll(existingList);
+
+    return repository.findByVinculoId_IdAndEstadoNot(vinculoId, Estado.E).stream()
+        .map(this::toResponse)
+        .toList();
   }
 
   private VinculoMovimentoResponseDTO toResponse(ParamVinculoMovimentoEntity entity) {

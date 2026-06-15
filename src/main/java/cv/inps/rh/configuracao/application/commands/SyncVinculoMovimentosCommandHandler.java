@@ -9,24 +9,26 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 
 @Component
-public class EditarVinculoMovimentoCommandHandler implements CommandHandler<EditarVinculoMovimentoCommand, ResponseEntity<VinculoMovimentoResponseDTO>> {
+public class SyncVinculoMovimentosCommandHandler implements CommandHandler<SyncVinculoMovimentosCommand, ResponseEntity<List<VinculoMovimentoResponseDTO>>> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(EditarVinculoMovimentoCommandHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SyncVinculoMovimentosCommandHandler.class);
 
   private final VinculoMovimentoService vinculoMovimentoService;
 
-  public EditarVinculoMovimentoCommandHandler(VinculoMovimentoService vinculoMovimentoService) {
+  public SyncVinculoMovimentosCommandHandler(VinculoMovimentoService vinculoMovimentoService) {
     this.vinculoMovimentoService = vinculoMovimentoService;
   }
 
   @IgrpCommandHandler
-  public ResponseEntity<VinculoMovimentoResponseDTO> handle(EditarVinculoMovimentoCommand command) {
+  public ResponseEntity<List<VinculoMovimentoResponseDTO>> handle(SyncVinculoMovimentosCommand command) {
 
-    LOGGER.debug("EditarVinculoMovimentoCommand: {}", command);
+    LOGGER.debug("SyncVinculoMovimentosCommand: {}", command);
 
-    var data = vinculoMovimentoService.editar(command.getVinculoId(), command.getId(), command.getDto());
+    var data = vinculoMovimentoService.syncMovimentos(command.getVinculoId(), command.getMovimentos());
 
     return ResponseEntity.ok(data);
   }

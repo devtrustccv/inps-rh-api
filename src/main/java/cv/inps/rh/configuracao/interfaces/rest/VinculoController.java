@@ -6,19 +6,15 @@ package cv.inps.rh.configuracao.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import cv.inps.rh.configuracao.application.commands.AssociarVinculoSituacaoCommand;
-import cv.inps.rh.configuracao.application.commands.CriarVinculoMovimentoCommand;
-import cv.inps.rh.configuracao.application.commands.EditarVinculoMovimentoCommand;
-import cv.inps.rh.configuracao.application.commands.EditarVinculoSituacaoCommand;
-import cv.inps.rh.configuracao.application.commands.EliminarVinculoMovimentoCommand;
-import cv.inps.rh.configuracao.application.commands.EliminarVinculoSituacaoCommand;
+import cv.inps.rh.configuracao.application.commands.SyncVinculoMovimentosCommand;
+import cv.inps.rh.configuracao.application.commands.SyncVinculoSituacoesCommand;
 import cv.inps.rh.configuracao.application.dto.VinculoMovimentoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoMovimentoResponseDTO;
+import cv.inps.rh.configuracao.application.dto.VinculoSituacaoLaboralRequestDTO;
+import cv.inps.rh.configuracao.application.dto.VinculoSituacaoLaboralResponseDTO;
 import cv.inps.rh.configuracao.application.queries.GetMovimentosByVinculoQuery;
+import cv.inps.rh.configuracao.application.queries.GetSituacoesByVinculoQuery;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -46,57 +42,30 @@ public class VinculoController {
     this.commandBus = commandBus;
   }
 
-  @PostMapping(
-      value = "vinculo/associar-situacao"
-  )
-  @Operation(
-      summary = "Associar vinculo situacao",
-      description = "Associar vinculo situacao",
-      responses = {
-          @ApiResponse(
-              responseCode = "200",
+  // ── Vínculo ↔ Situação Laboral ──
 
-              content = @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(
-                      implementation = String.class,
-                      type = "String")
-              )
-          )
-      }
-  )
+  @GetMapping("vinculo/{vinculoUuid}/situacoes-laborais")
+  @Operation(summary = "Listar situações laborais associadas a um vínculo")
+  public ResponseEntity<List<VinculoSituacaoLaboralResponseDTO>> getSituacoesByVinculo(
+      @PathVariable String vinculoUuid) {
 
-  public ResponseEntity<String> associarVinculoSituacao(
-      @RequestParam(value = "vinculoId") String vinculoId,
-      @RequestParam(value = "situacaoId") String situacaoId) {
+    final var query = new GetSituacoesByVinculoQuery(vinculoUuid);
 
-    final var command = new AssociarVinculoSituacaoCommand(vinculoId, situacaoId);
-
-    return commandBus.send(command);
-
+    return queryBus.handle(query);
   }
 
-  @PutMapping("vinculo/associar-situacao/{id}")
-  @Operation(summary = "Editar associação vinculo situação laboral")
-  public ResponseEntity<String> editarVinculoSituacao(
-      @PathVariable Long id,
-      @RequestParam(value = "vinculoId") String vinculoId,
-      @RequestParam(value = "situacaoId") String situacaoId) {
+  @PutMapping("vinculo/{vinculoUuid}/situacoes-laborais")
+  @Operation(summary = "Sincronizar situações laborais de um vínculo (add/update/delete)")
+  public ResponseEntity<List<VinculoSituacaoLaboralResponseDTO>> syncVinculoSituacoes(
+      @PathVariable String vinculoUuid,
+      @Valid @RequestBody List<VinculoSituacaoLaboralRequestDTO> situacoes) {
 
-    final var command = new EditarVinculoSituacaoCommand(id, vinculoId, situacaoId);
+    final var command = new SyncVinculoSituacoesCommand(vinculoUuid, situacoes);
 
     return commandBus.send(command);
   }
 
-  @DeleteMapping("vinculo/associar-situacao/{id}")
-  @Operation(summary = "Eliminar associação vinculo situação laboral (soft delete)")
-  public ResponseEntity<Void> eliminarVinculoSituacao(
-      @PathVariable Long id) {
-
-    final var command = new EliminarVinculoSituacaoCommand(id);
-
-    return commandBus.send(command);
-  }
+  // ── Vínculo ↔ Tipo Movimento ──
 
   @GetMapping("vinculo/{vinculoId}/movimentos")
   @Operation(summary = "Listar tipos de movimento associados a um vínculo")
@@ -108,36 +77,13 @@ public class VinculoController {
     return queryBus.handle(query);
   }
 
-  @PostMapping("vinculo/{vinculoId}/movimentos")
-  @Operation(summary = "Associar tipo de movimento a um vínculo")
-  public ResponseEntity<VinculoMovimentoResponseDTO> criarVinculoMovimento(
+  @PutMapping("vinculo/{vinculoId}/movimentos")
+  @Operation(summary = "Sincronizar tipos de movimento de um vínculo (add/update/delete)")
+  public ResponseEntity<List<VinculoMovimentoResponseDTO>> syncVinculoMovimentos(
       @PathVariable Long vinculoId,
-      @Valid @RequestBody VinculoMovimentoRequestDTO dto) {
+      @Valid @RequestBody List<VinculoMovimentoRequestDTO> movimentos) {
 
-    final var command = new CriarVinculoMovimentoCommand(vinculoId, dto);
-
-    return commandBus.send(command);
-  }
-
-  @PutMapping("vinculo/{vinculoId}/movimentos/{id}")
-  @Operation(summary = "Editar associação tipo de movimento a um vínculo")
-  public ResponseEntity<VinculoMovimentoResponseDTO> editarVinculoMovimento(
-      @PathVariable Long vinculoId,
-      @PathVariable Long id,
-      @Valid @RequestBody VinculoMovimentoRequestDTO dto) {
-
-    final var command = new EditarVinculoMovimentoCommand(vinculoId, id, dto);
-
-    return commandBus.send(command);
-  }
-
-  @DeleteMapping("vinculo/{vinculoId}/movimentos/{id}")
-  @Operation(summary = "Eliminar associação tipo de movimento de um vínculo (soft delete)")
-  public ResponseEntity<Void> eliminarVinculoMovimento(
-      @PathVariable Long vinculoId,
-      @PathVariable Long id) {
-
-    final var command = new EliminarVinculoMovimentoCommand(vinculoId, id);
+    final var command = new SyncVinculoMovimentosCommand(vinculoId, movimentos);
 
     return commandBus.send(command);
   }
