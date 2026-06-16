@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GetSituacoesByVinculoQuery implements Query {
 
-  @NotBlank(message = "The field <vinculoUuid> is required")
-  private String vinculoUuid;
+  @NotBlank(message = "The field <vinculoId> is required")
+  private String vinculoId;
 
 }

@@ -3,9 +3,9 @@ package cv.inps.rh.configuracao.application.service;
 import cv.inps.rh.configuracao.application.dto.VinculoMovimentoRequestDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoMovimentoResponseDTO;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoMovimentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoMovimentoEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
@@ -22,19 +22,21 @@ import java.util.UUID;
 public class VinculoMovimentoService {
 
   private final ParamVinculoMovimentoEntityRepository repository;
+  private final ParamVinculoEntityRepository vinculoRepository;
   private final EntityManager entityManager;
 
   @Transactional(readOnly = true)
-  public List<VinculoMovimentoResponseDTO> listarPorVinculo(Long vinculoId) {
-    return repository.findByVinculoId_IdAndEstadoNot(vinculoId, Estado.E).stream()
+  public List<VinculoMovimentoResponseDTO> listarPorVinculo(String vinculoId) {
+    var vinculo = vinculoRepository.findByUuidOrThrow(UUID.fromString(vinculoId));
+    return repository.findByVinculoId_IdAndEstadoNot(vinculo.getId(), Estado.E).stream()
         .map(this::toResponse)
         .toList();
   }
 
   @Transactional
-  public List<VinculoMovimentoResponseDTO> syncMovimentos(Long vinculoId, List<VinculoMovimentoRequestDTO> items) {
-    var vinculo = ValidationUtil.ref(entityManager, ParamVinculoEntity.class, vinculoId);
-    var existingList = repository.findByVinculoId_IdAndEstadoNot(vinculoId, Estado.E);
+  public List<VinculoMovimentoResponseDTO> syncMovimentos(String vinculoId, List<VinculoMovimentoRequestDTO> items) {
+    var vinculo = vinculoRepository.findByUuidOrThrow(UUID.fromString(vinculoId));
+    var existingList = repository.findByVinculoId_IdAndEstadoNot(vinculo.getId(), Estado.E);
 
     if (items == null) items = List.of();
 
@@ -73,7 +75,7 @@ public class VinculoMovimentoService {
 
     repository.saveAll(existingList);
 
-    return repository.findByVinculoId_IdAndEstadoNot(vinculoId, Estado.E).stream()
+    return repository.findByVinculoId_IdAndEstadoNot(vinculo.getId(), Estado.E).stream()
         .map(this::toResponse)
         .toList();
   }

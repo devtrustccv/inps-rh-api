@@ -3,6 +3,7 @@ package cv.inps.rh.configuracao.application.commands;
 import cv.igrp.framework.core.domain.Command;
 import cv.inps.rh.configuracao.application.dto.VinculoMovimentoRequestDTO;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,8 +17,8 @@ import java.util.List;
 @AllArgsConstructor
 public class SyncVinculoMovimentosCommand implements Command {
 
-  @NotNull(message = "The field <vinculoId> is required")
-  private Long vinculoId;
+  @NotBlank(message = "The field <vinculoId> is required")
+  private String vinculoId;
 
   @Valid
   @NotNull(message = "The field <movimentos> is required")

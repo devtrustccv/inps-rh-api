@@ -1,7 +1,7 @@
 {
   "type": "dto",
   "module": "configuracao",
-  "name": "VinculoMovimentoRequest",
+  "name": "VinculoSituacaoLaboralResponse",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
@@ -18,33 +18,9 @@
       "primaryKey": false
     },
     {
-      "name": "tipoMovimentoId",
+      "name": "situacaoId",
       "objectType": "java",
       "type": "long",
-      "required": true,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "tipo",
-      "objectType": "java",
-      "type": "string",
-      "required": true,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "percentagem",
-      "objectType": "java",
-      "type": "integer",
       "required": false,
       "before": false,
       "after": false,
@@ -54,9 +30,21 @@
       "primaryKey": false
     },
     {
-      "name": "valor",
+      "name": "situacaoDescricao",
       "objectType": "java",
-      "type": "bigDecimal",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "estado",
+      "objectType": "java",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,

@@ -17,8 +17,8 @@ import java.util.List;
 @AllArgsConstructor
 public class SyncVinculoSituacoesCommand implements Command {
 
-  @NotBlank(message = "The field <vinculoUuid> is required")
-  private String vinculoUuid;
+  @NotBlank(message = "The field <vinculoId> is required")
+  private String vinculoId;
 
   @Valid
   @NotNull(message = "The field <situacoes> is required")

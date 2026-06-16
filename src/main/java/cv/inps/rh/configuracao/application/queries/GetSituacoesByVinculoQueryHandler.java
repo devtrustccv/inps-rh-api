@@ -27,7 +27,7 @@ public class GetSituacoesByVinculoQueryHandler implements QueryHandler<GetSituac
 
     LOGGER.debug("GetSituacoesByVinculoQuery: {}", query);
 
-    var data = paramVinculoService.listarSituacoesLaborais(query.getVinculoUuid());
+    var data = paramVinculoService.listarSituacoesLaborais(query.getVinculoId());
 
     return ResponseEntity.ok(data);
   }

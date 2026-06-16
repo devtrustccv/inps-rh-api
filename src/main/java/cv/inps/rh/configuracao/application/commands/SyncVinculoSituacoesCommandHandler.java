@@ -28,7 +28,7 @@ public class SyncVinculoSituacoesCommandHandler implements CommandHandler<SyncVi
 
     LOGGER.debug("SyncVinculoSituacoesCommand: {}", command);
 
-    var data = paramVinculoService.syncSituacoesLaborais(command.getVinculoUuid(), command.getSituacoes());
+    var data = paramVinculoService.syncSituacoesLaborais(command.getVinculoId(), command.getSituacoes());
 
     return ResponseEntity.ok(data);
   }

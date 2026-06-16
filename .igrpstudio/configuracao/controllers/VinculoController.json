@@ -6,32 +6,70 @@
   "basePath": "configuracao",
   "actions": [
     {
-      "actionName": "associarVinculoSituacao",
-      "path": "vinculo/associar-situacao",
-      "method": "POST",
+      "actionName": "getSituacoesByVinculo",
+      "path": "vinculo/{vinculoId}/situacoes-laborais",
+      "method": "GET",
       "responses": {
         "200": {
           "name": "OK",
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "VinculoSituacaoLaboralResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "none"
+                "collectionType": "list",
+                "module": "configuracao"
               }
             }
           }
         }
       },
-      "requestParams": [
+      "pathVariables": [
         {
-          "type": "string",
           "name": "vinculoId",
-          "isRequired": true
-        },
-        {
           "type": "string",
-          "name": "situacaoId",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "syncVinculoSituacoes",
+      "path": "vinculo/{vinculoId}/situacoes-laborais",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "VinculoSituacaoLaboralRequest",
+              "collectionType": "list",
+              "name": "data",
+              "objectType": "dto",
+              "module": "configuracao"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "VinculoSituacaoLaboralResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "configuracao"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "vinculoId",
+          "type": "string",
           "isRequired": true
         }
       ]
@@ -40,13 +78,6 @@
       "actionName": "getMovimentosByVinculo",
       "path": "vinculo/{vinculoId}/movimentos",
       "method": "GET",
-      "pathVariables": [
-        {
-          "type": "long",
-          "name": "vinculoId",
-          "isRequired": true
-        }
-      ],
       "responses": {
         "200": {
           "name": "OK",
@@ -55,74 +86,33 @@
               "schema": {
                 "type": "VinculoMovimentoResponse",
                 "objectType": "dto",
-                "module": "configuracao",
-                "collectionType": "list"
+                "name": "data",
+                "collectionType": "list",
+                "module": "configuracao"
               }
             }
           }
         }
-      }
+      },
+      "pathVariables": [
+        {
+          "name": "vinculoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     },
     {
-      "actionName": "criarVinculoMovimento",
+      "actionName": "syncVinculoMovimentos",
       "path": "vinculo/{vinculoId}/movimentos",
-      "method": "POST",
-      "pathVariables": [
-        {
-          "type": "long",
-          "name": "vinculoId",
-          "isRequired": true
-        }
-      ],
-      "requestBody": {
-        "name": "dto",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "VinculoMovimentoRequest",
-              "objectType": "dto",
-              "module": "configuracao"
-            }
-          }
-        }
-      },
-      "responses": {
-        "201": {
-          "name": "Created",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "VinculoMovimentoResponse",
-                "objectType": "dto",
-                "module": "configuracao"
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "actionName": "editarVinculoMovimento",
-      "path": "vinculo/{vinculoId}/movimentos/{id}",
       "method": "PUT",
-      "pathVariables": [
-        {
-          "type": "long",
-          "name": "vinculoId",
-          "isRequired": true
-        },
-        {
-          "type": "long",
-          "name": "id",
-          "isRequired": true
-        }
-      ],
       "requestBody": {
-        "name": "dto",
         "content": {
           "application/json": {
             "schema": {
               "type": "VinculoMovimentoRequest",
+              "collectionType": "list",
+              "name": "data",
               "objectType": "dto",
               "module": "configuracao"
             }
@@ -137,35 +127,21 @@
               "schema": {
                 "type": "VinculoMovimentoResponse",
                 "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
                 "module": "configuracao"
               }
             }
           }
         }
-      }
-    },
-    {
-      "actionName": "eliminarVinculoMovimento",
-      "path": "vinculo/{vinculoId}/movimentos/{id}",
-      "method": "DELETE",
+      },
       "pathVariables": [
         {
-          "type": "long",
           "name": "vinculoId",
-          "isRequired": true
-        },
-        {
-          "type": "long",
-          "name": "id",
+          "type": "string",
           "isRequired": true
         }
-      ],
-      "responses": {
-        "204": {
-          "name": "No Content",
-          "content": {}
-        }
-      }
+      ]
     }
   ],
   "id": "3j65o2piu8"

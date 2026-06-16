@@ -44,23 +44,23 @@ public class VinculoController {
 
   // ── Vínculo ↔ Situação Laboral ──
 
-  @GetMapping("vinculo/{vinculoUuid}/situacoes-laborais")
+  @GetMapping("vinculo/{vinculoId}/situacoes-laborais")
   @Operation(summary = "Listar situações laborais associadas a um vínculo")
   public ResponseEntity<List<VinculoSituacaoLaboralResponseDTO>> getSituacoesByVinculo(
-      @PathVariable String vinculoUuid) {
+      @PathVariable String vinculoId) {
 
-    final var query = new GetSituacoesByVinculoQuery(vinculoUuid);
+    final var query = new GetSituacoesByVinculoQuery(vinculoId);
 
     return queryBus.handle(query);
   }
 
-  @PutMapping("vinculo/{vinculoUuid}/situacoes-laborais")
+  @PutMapping("vinculo/{vinculoId}/situacoes-laborais")
   @Operation(summary = "Sincronizar situações laborais de um vínculo (add/update/delete)")
   public ResponseEntity<List<VinculoSituacaoLaboralResponseDTO>> syncVinculoSituacoes(
-      @PathVariable String vinculoUuid,
+      @PathVariable String vinculoId,
       @Valid @RequestBody List<VinculoSituacaoLaboralRequestDTO> situacoes) {
 
-    final var command = new SyncVinculoSituacoesCommand(vinculoUuid, situacoes);
+    final var command = new SyncVinculoSituacoesCommand(vinculoId, situacoes);
 
     return commandBus.send(command);
   }
@@ -70,7 +70,7 @@ public class VinculoController {
   @GetMapping("vinculo/{vinculoId}/movimentos")
   @Operation(summary = "Listar tipos de movimento associados a um vínculo")
   public ResponseEntity<List<VinculoMovimentoResponseDTO>> getMovimentosByVinculo(
-      @PathVariable Long vinculoId) {
+      @PathVariable String vinculoId) {
 
     final var query = new GetMovimentosByVinculoQuery(vinculoId);
 
@@ -80,7 +80,7 @@ public class VinculoController {
   @PutMapping("vinculo/{vinculoId}/movimentos")
   @Operation(summary = "Sincronizar tipos de movimento de um vínculo (add/update/delete)")
   public ResponseEntity<List<VinculoMovimentoResponseDTO>> syncVinculoMovimentos(
-      @PathVariable Long vinculoId,
+      @PathVariable String vinculoId,
       @Valid @RequestBody List<VinculoMovimentoRequestDTO> movimentos) {
 
     final var command = new SyncVinculoMovimentosCommand(vinculoId, movimentos);
