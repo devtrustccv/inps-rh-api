@@ -75,10 +75,10 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
         }
       }
       if (found != null) {
-        var situacao = paramSituacaoEntityRepository.findByUuidOrThrow(UUID.fromString(dto.getSituacaoId()));
+        var situacao = paramSituacaoEntityRepository.getReferenceById(dto.getSituacaoId());
         found.setParamSit(situacao);
       } else {
-        var situacao = paramSituacaoEntityRepository.findByUuidOrThrow(UUID.fromString(dto.getSituacaoId()));
+        var situacao = paramSituacaoEntityRepository.getReferenceById(dto.getSituacaoId());
         var obj = new ParamSitLaboralEntity();
         obj.setParamSit(situacao);
         obj.setVinculo(vinculo);
@@ -106,6 +106,7 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     var resp = new VinculoSituacaoLaboralResponseDTO();
     resp.setId(entity.getId());
     resp.setSituacaoId(entity.getParamSit() != null ? entity.getParamSit().getId() : null);
+    resp.setSituacaoUuid(entity.getParamSit() != null && entity.getParamSit().getUuid() != null ? entity.getParamSit().getUuid().toString() : null);
     resp.setSituacaoDescricao(entity.getParamSit() != null ? entity.getParamSit().getNome() : null);
     resp.setEstado(entity.getEstado());
     return resp;

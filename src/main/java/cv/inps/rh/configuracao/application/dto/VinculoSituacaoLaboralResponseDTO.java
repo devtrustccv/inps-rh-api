@@ -13,6 +13,7 @@ public class VinculoSituacaoLaboralResponseDTO {
 
   private Long id;
   private Long situacaoId;
+  private String situacaoUuid;
   private String situacaoDescricao;
   private String estado;
 

@@ -66,6 +66,9 @@ public class VinculoMovimentoService {
     }
 
     for (var existing : existingList) {
+      if (existing.getUuid() == null) {
+        existing.setUuid(UUID.randomUUID());
+      }
       boolean stillExists = items.stream()
           .anyMatch(dto -> Objects.equals(dto.getId(), existing.getId()));
       if (!stillExists && existing.getEstado() != Estado.I) {

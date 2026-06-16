@@ -15,6 +15,6 @@ public class VinculoSituacaoLaboralRequestDTO {
   private Long id;
 
   @NotNull(message = "The field <situacaoId> is required")
-  private String situacaoId;
+  private Long situacaoId;
 
 }
