@@ -1,5 +1,5 @@
 <figure>
-<img src="media/image1.jpeg" style="width:14.65694in;height:9.77083in"
+<img src="media/image1.jpeg" style="width:14.65706in;height:9.77083in"
 alt="C:\Users\joelm\Desktop\Imagens\sergey-zolkin-_UeY8aTI6d0-unsplash (2).jpg" />
 <figcaption><p>SIPS-RH</p></figcaption>
 </figure>
@@ -160,365 +160,11 @@ simples).</p>
 
 # Especificação 
 
-## Tipo Situação / Ocorrência
-
-### Registo 
-
-<img src="media/image4.png" style="width:9.69236in;height:4.96111in" />
-
-<table>
-<colgroup>
-<col style="width: 18%" />
-<col style="width: 6%" />
-<col style="width: 35%" />
-<col style="width: 39%" />
-</colgroup>
-<thead>
-<tr>
-<th style="text-align: center;"><strong>Formulario</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Gravação</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">Codigo</td>
-<td>TEXT</td>
-<td></td>
-<td><em>RH_T_PARAM_SITUACAO.CODIGO</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Descrição</td>
-<td>TEXT</td>
-<td></td>
-<td><em>RH_T_PARAM_SITUACAO.NOME</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Classificação/ Área</td>
-<td></td>
-<td>DOMAIN = CLASSIFICACAO_SITUACAO</td>
-<td><em>RH_T_PARAM_SITUACAO.CLASSIFICACAO_AREA</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Estado do contrato</td>
-<td>SELECT</td>
-<td><strong>DOMAIN = ESTADO_CONTRATO</strong></td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_ESTADO_CONTRATO</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Afeta Situação Laboral?</td>
-<td>radioList</td>
-<td>DOMAIN = SIM_NAO_NUMBER</td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_SITUACAO_LABORAL</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Abono e Beneficio?</td>
-<td>radioList</td>
-<td>DOMAIN = SIM_NAO_NUMBER</td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_ABONO_BENEFICIO</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Ausenta do local de Trabalho?</td>
-<td>RadioList</td>
-<td>DOMAIN = SIM_NAO_NUMBER</td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_AUSENCIA</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Estado</td>
-<td>Select</td>
-<td>DOMAIN = STATUS</td>
-<td><em>RH_T_PARAM_SITUACAO.ESTADO</em></td>
-</tr>
-<tr>
-<td colspan="4" style="text-align: left;">Detalhe Ausência (<em>Este
-separador só aparece caso</em> <strong>Ausenta do local =
-‘SIM’</strong>)</td>
-</tr>
-<tr>
-<td style="text-align: left;">Tipo Ausencia</td>
-<td>RadioList</td>
-<td>DOMAIN = TIPO_AUSENCIA</td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_FALTA</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Tipo Falta / Ausência</td>
-<td></td>
-<td><p>Este campo aparece caso o Ausenta do Local = ‘SIM’</p>
-<p>DOMAIN = JUSTIFICADA_INJUSTIFICADA</p></td>
-<td><em>RH_T_PARAM_SITUACAO.TIPO_FALTA</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Desconto Salário</td>
-<td></td>
-<td></td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL</em></td>
-</tr>
-<tr>
-<td colspan="4" style="text-align: left;"><strong>Detalhe Abono e
-Beneficio</strong> (<em>Este separador só aparece caso</em>
-<strong>Abono e Benefício = ‘SIM’</strong>)</td>
-</tr>
-<tr>
-<td style="text-align: left;">Tempo Contagem dias</td>
-<td></td>
-<td><ul>
-<li><p>Dias úteis</p></li>
-<li><p>Dias Corrido</p></li>
-</ul>
-<p>DOMAIN =TIPO_CONTAGEM_DIAS</p></td>
-<td><em>RH_T_PARAM_SITUACAO.TIPO_CONTAGEM_DIAS</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Nº Días</td>
-<td>NUMBER</td>
-<td>Número de dias do abono</td>
-<td><em>RH_T_PARAM_SITUACAO.NUM_DIAS_ABONOS</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Nº dias Descontado</td>
-<td>NUMBER</td>
-<td></td>
-<td><em>RH_T_PARAM_SITUACAO.NUM_DIAS_ABONOS_DESCONTO</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Nº dias não descontado</td>
-<td>NUMBER</td>
-<td></td>
-<td><em>RH_T_PARAM_SITUACAO.NUM_DIAS_ABONOS_NDESCONTO</em></td>
-</tr>
-<tr>
-<td colspan="4" style="text-align: left;"><em><strong>Detalhe Situação
-Laboral (</strong>Este separador só aparece caso</em> <strong>Situação
-Laboral = ‘SIM’<em>)</em></strong></td>
-</tr>
-<tr>
-<td style="text-align: left;">Tipo Situação Laboral</td>
-<td>Select</td>
-<td>DOMAIN = SITUACAO_LABORAL</td>
-<td><em>RH_T_PARAM_SITUACAO.TIPO_SITUACAO</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Remuneração</td>
-<td>radioList</td>
-<td>DOMAIN = SIM_NAO_NUMBER</td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_REMUNERACAO</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Tem Carreira?</td>
-<td>radioList</td>
-<td>DOMAIN = SIM_NAO_NUMBER</td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_AFETA_CARREIRA</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Regressa a Carreira Origem?</td>
-<td>radioList</td>
-<td>DOMAIN = SIM_NAO_NUMBER</td>
-<td><em>RH_T_PARAM_SITUACAO.REGRESSA_CARREIRA</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Conta Tempo serviço?</td>
-<td>radioList</td>
-<td>DOMAIN = SIM_NAO_NUMBER</td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_CONTA_TEMP_SERVICO</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Cessa vínculo?</td>
-<td>radioList</td>
-<td>DOMAIN = SIM_NAO_NUMBER</td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_CESSA_VINCULO</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Suspende Progressao / Promocao?</td>
-<td>radioList</td>
-<td>DOMAIN = SIM_NAO_NUMBER</td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_CESSA_PROGRESSAO</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Motivo Situação</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td style="text-align: left;">Motivo</td>
-<td>TEXT</td>
-<td><strong>TABELA</strong>: RH_T_PARAM_VINCULO</td>
-<td><em>RH_T_PARAM_SITUACAO.MOTIVO</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">---------------------------------</td>
-<td>HIDDEN</td>
-<td><strong>--------------------------------------------------------</strong></td>
-<td><em>RH_T_PARAM_SITUACAO.PARAM_SIT_ID</em></td>
-</tr>
-<tr>
-<td colspan="4"
-style="text-align: left;"><em><strong>REGRAS</strong></em></td>
-</tr>
-<tr>
-<td colspan="4" style="text-align: left;"><ul>
-<li><p><em>Qualquer alterção nessa tabela deve estar registado no
-Log</em></p></li>
-</ul></td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Acções</strong></td>
-<td colspan="3"></td>
-</tr>
-<tr>
-<td style="text-align: left;">Gravar</td>
-<td colspan="3"><ol type="1">
-<li><p><strong>Registar</strong></p>
-<ol type="1">
-<li><p>O sistema deve registar os dados introduzidos no formulário para
-a tabelas <em><strong>RH_T_PARAM_SITUACAO</strong></em>, bem como os
-campos adicionais especificados a seguir</p></li>
-</ol></li>
-</ol>
-<ul>
-<li><p><em>ESTADO <strong>= ‘A’</strong></em></p></li>
-<li><p><em>DATA_REGISTO= ‘<strong>SYSDATE’</strong></em></p></li>
-<li><p><em>USER_REGISTO_ID = id de utilizador Logado</em></p></li>
-<li><p><em>USER_REGISTO_NAME =nome de utilizador Logado</em></p></li>
-<li><p><em>USER_ALTERACAO _ID = <strong>NULL</strong></em></p></li>
-<li><p><em>DATA_ALTERACAO = <strong>NULL</strong></em></p></li>
-<li><p><em>DATA_ALTERACAO_NAME = <strong>NULL</strong></em></p>
-<ol type="1">
-<li><p>O sistema deve registar os dados introduzidos no formulário para
-a tabelas <em><strong>RH_T_PARAM_SITUACAO_DET</strong></em></p></li>
-</ol></li>
-</ul>
-<ul>
-<li><p><em>ESTADO = ‘A’</em></p></li>
-<li><p><em><strong>PARAM_SITUACAO_ID = id de
-RH_T_PARAM_SITUACAO</strong></em></p></li>
-<li><p><em><strong>DATA_REGISTO= ‘SYSDATE’</strong></em></p></li>
-<li><p><em><strong>USER_REGISTO_ID = id de utilizador
-Logado</strong></em></p></li>
-<li><p><em><strong>USER_REGISTO_NAME =nome de utilizador
-Logado</strong></em></p></li>
-<li><p><em><strong>USER_ALTERACAO _ID = NULL</strong></em></p></li>
-<li><p><em><strong>DATA_ALTERACAO = NULL</strong></em></p></li>
-<li><p><em><strong>DATA_ALTERACAO_NAME = NULL</strong></em></p></li>
-</ul>
-<ol start="2" type="1">
-<li><p><strong>Editar ou eliminar</strong></p></li>
-</ol>
-<ul>
-<li><p><em>USER_ALTERACAO _ID = id de utilizador Logado</em></p></li>
-<li><p><em>DATA_ALTERACAO = <strong>SYSDATE’</strong></em></p></li>
-<li><p><em>DATA_ALTERACAO_NAME = nome de utilizador Logado</em></p></li>
-</ul>
-<p><em>3.Eliminar</em></p>
-<ul>
-<li><p><em>ESTADO = ‘I’</em></p></li>
-</ul></td>
-</tr>
-</tbody>
-</table>
-
-### Lista Situação
-
-<img src="media/image5.png" style="width:9.69306in;height:4.15417in"
-alt="Uma imagem com texto, número, Tipo de letra, software Os conteúdos gerados por IA podem estar incorretos." />
-
-<table>
-<colgroup>
-<col style="width: 18%" />
-<col style="width: 8%" />
-<col style="width: 36%" />
-<col style="width: 37%" />
-</colgroup>
-<thead>
-<tr>
-<th style="text-align: center;"><strong>Filtro</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Fonte dados</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Classificação / Área</td>
-<td><em>SELECT</em></td>
-<td></td>
-<td><em>RH_T_PARAM_SITUACAO.CLASSIFICACAO_AREA</em></td>
-</tr>
-<tr>
-<td>Afeta Situação Laboral?</td>
-<td><em>CHECK</em></td>
-<td></td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_SITUACAO_LABORAL</em></td>
-</tr>
-<tr>
-<td>Abono e Beneficio</td>
-<td><em>CHECK</em></td>
-<td></td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_ABONO_BENEFICIO</em></td>
-</tr>
-<tr>
-<td>Ausência do Local Trabalho</td>
-<td><em>CHECK</em></td>
-<td></td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_AUSENCIA</em></td>
-</tr>
-<tr>
-<td style="text-align: center;"><strong>Lista</strong></td>
-<td style="text-align: center;"><strong>Tipo</strong></td>
-<td style="text-align: center;"><strong>Descrição</strong></td>
-<td style="text-align: center;"><strong>Fonte dados</strong></td>
-</tr>
-<tr>
-<td>Nome</td>
-<td><em>TEXT</em></td>
-<td></td>
-<td><em>RH_T_PARAM_SITUACAO.NOME</em></td>
-</tr>
-<tr>
-<td>Classificação / Área</td>
-<td><em>TEXT</em></td>
-<td></td>
-<td><em>RH_T_PARAM_SITUACAO.CLASSIFICACAO_AREA</em></td>
-</tr>
-<tr>
-<td>Afeta Situação Laboral?</td>
-<td><em>TEXT</em></td>
-<td></td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_SITUACAO_LABORAL</em></td>
-</tr>
-<tr>
-<td>Abono e Benefício</td>
-<td><em>TEXT</em></td>
-<td></td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_ABONO_BENEFICIO</em></td>
-</tr>
-<tr>
-<td>Ausência do Local Trabalho</td>
-<td><em>TEXT</em></td>
-<td></td>
-<td><em>RH_T_PARAM_SITUACAO.FLG_AUSENCIA</em></td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Ações</strong></td>
-<td colspan="3" style="text-align: center;"></td>
-</tr>
-<tr>
-<td>Novo</td>
-<td colspan="3"></td>
-</tr>
-<tr>
-<td>Editar</td>
-<td colspan="3"></td>
-</tr>
-</tbody>
-</table>
-
 ## Vinculo Laboral
 
-### Registo Vinculo Laboral
+### Registo vinculo Laboral
 
-<img src="media/image6.png" style="width:9.69306in;height:2.7625in"
+<img src="media/image4.png" style="width:9.69306in;height:2.7625in"
 alt="Uma imagem com captura de ecrã, texto Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -576,7 +222,7 @@ alt="Uma imagem com captura de ecrã, texto Os conteúdos gerados por IA podem e
 <tr>
 <td style="text-align: left;">Estado</td>
 <td></td>
-<td><p>Visivel so no modo editar</p>
+<td><p>Visivel so no modo Editar</p>
 <p>DOMINIO = STATUS</p></td>
 <td><em>RH_T_PARAM_VINCULO.ESTADO</em></td>
 </tr>
@@ -584,10 +230,10 @@ alt="Uma imagem com captura de ecrã, texto Os conteúdos gerados por IA podem e
 <td colspan="4" style="text-align: left;"><strong>Ações</strong></td>
 </tr>
 <tr>
-<td style="text-align: left;"><img src="media/image7.png"
-style="width:0.6375in;height:0.26944in"
+<td style="text-align: left;"><img src="media/image5.png"
+style="width:0.6375in;height:0.26984in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
-<td colspan="3"><ol start="3" type="1">
+<td colspan="3"><ol type="1">
 <li><p><strong>Registar</strong></p>
 <ol type="1">
 <li><p>O sistema deve registar os dados introduzidos no formulário para
@@ -604,7 +250,7 @@ campos adicionais especificados a seguir</p></li>
 <li><p><em>DATA_ALTERACAO = <strong>NULL</strong></em></p></li>
 <li><p><em>DATA_ALTERACAO_NAME = <strong>NULL</strong></em></p></li>
 </ul>
-<ol start="4" type="1">
+<ol start="2" type="1">
 <li><p><strong>Editar</strong></p></li>
 </ol>
 <ul>
@@ -618,8 +264,8 @@ campos adicionais especificados a seguir</p></li>
 
 ### Lista vinculo Laboral 
 
-<img src="media/image8.png" style="width:9.69306in;height:4.26667in"
-alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos gerados por IA podem estar incorretos." />
+<img src="media/image6.png" style="width:9.69306in;height:4.33333in"
+alt="Uma imagem com texto, número, software, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
 <colgroup>
@@ -712,185 +358,6 @@ alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos ger
 <p>Ao Eliminar atualiza o estado
 <strong><em>RH_T_PARAM_VINCULO</em>.estado = ‘E’</strong></p></td>
 </tr>
-<tr>
-<td>Associar Situação Laboral</td>
-<td colspan="3">Permite associar varios situação laboral a um
-Vínculo</td>
-</tr>
-<tr>
-<td>Associar tipo Movimento</td>
-<td colspan="3">Permite associar varios tipo de movimento a um
-vinculo</td>
-</tr>
-</tbody>
-</table>
-
-#### Associar Vinculo a situação Laboral
-
-<table>
-<colgroup>
-<col style="width: 17%" />
-<col style="width: 9%" />
-<col style="width: 22%" />
-<col style="width: 11%" />
-<col style="width: 38%" />
-</colgroup>
-<thead>
-<tr>
-<th style="text-align: center;"><strong>Formulario</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th colspan="2"
-style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Gravação</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">(*) Vínculo</td>
-<td>DESABLED</td>
-<td colspan="2"><em>RH_T_PARAM_VINCULO.ID,
-RH_T_PARAM_VINCULO.NOME</em></td>
-<td><em>RH_T_PARAM_SIT_LABORAL.VíNCULO_ID</em></td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Associar Situação
-laboral</strong></td>
-<td>SeparadorList</td>
-<td colspan="2"></td>
-<td></td>
-</tr>
-<tr>
-<td style="text-align: left;">(*) Situação Laboral</td>
-<td>Select</td>
-<td colspan="2"><p>Pela ID e nome na tabela RH_T_PARAM_SITUACAO,
-onde</p>
-<p>FLG_SITUACAO_LABORAL = 1 (sim)</p></td>
-<td><em>RH_T_PARAM_SIT_LABORAL.PARAM_SIT_ID</em></td>
-</tr>
-<tr>
-<td colspan="5"
-style="text-align: left;"><em><strong>Acoes</strong></em></td>
-</tr>
-<tr>
-<td colspan="3"
-style="text-align: left;"><p><em><strong>Gravar</strong></em></p>
-<ul>
-<li><p><em>ESTADO = ‘A’</em></p></li>
-<li><p><em>DATA_REGISTO = SYSDATE</em></p></li>
-<li><p><em>USER_REGISTO_ID = id de utilizador logado</em></p></li>
-<li><p><em>USER_REGISTO_NAME = nome de user logado</em></p></li>
-</ul>
-<p><em><strong>Editar</strong></em></p>
-<ul>
-<li><p><em>USER_ALTERACAO_ID = id de utilizador logado</em></p></li>
-<li><p><em>USER_ALTERACAO_NAME = nome de user logado</em></p></li>
-<li><p><em>DATA_ALTERACAO = SYSDATE</em></p></li>
-</ul></td>
-<td colspan="2"><p><em><strong>Eliminar</strong></em></p>
-<ul>
-<li><p><em>USER_ALTERACAO_ID = id de utilizador logado</em></p></li>
-<li><p><em>USER_ALTERACAO_NAME = nome de user logado</em></p></li>
-</ul>
-<ul>
-<li><p><em>DATA_ALTERACAO = SYSDATE</em></p></li>
-</ul>
-<ul>
-<li><p><em>ESTADO = ‘I’</em></p></li>
-</ul></td>
-</tr>
-</tbody>
-</table>
-
-#### Associar Vinculo a Movimento
-
-<table>
-<colgroup>
-<col style="width: 17%" />
-<col style="width: 9%" />
-<col style="width: 22%" />
-<col style="width: 11%" />
-<col style="width: 38%" />
-</colgroup>
-<thead>
-<tr>
-<th style="text-align: center;"><strong>Formulario</strong></th>
-<th style="text-align: center;"><strong>Tipo</strong></th>
-<th colspan="2"
-style="text-align: center;"><strong>Descrição</strong></th>
-<th style="text-align: center;"><strong>Gravação</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">(*) Vínculo</td>
-<td>DESABLED</td>
-<td colspan="2"><em>RH_T_PARAM_VINCULO.ID,
-RH_T_PARAM_VINCULO.NOME</em></td>
-<td><em>RH_T_PARAM_VINCULO_MOV.VINCULO_ID</em></td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Assossiar tipo
-Movimento</strong></td>
-<td>SeparadorList</td>
-<td colspan="2"></td>
-<td></td>
-</tr>
-<tr>
-<td style="text-align: left;">(*) Tipo Movimento</td>
-<td>Select</td>
-<td colspan="2"><em><strong>INPSSIGOF.RH_TIPO_MOVIMENTOS</strong>, cujo
-estado = <strong>ACTIVO</strong></em></td>
-<td><em>RH_T_PARAM_VINCULO_MOV.TM_ID</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">(*) Referencia</td>
-<td>Select</td>
-<td colspan="2"><em><strong>DOMAIN =</strong> TIPO_VINCULO_MOV</em></td>
-<td><em>RH_T_PARAM_VINCULO_MOV. TIPO</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Desconto Percentagem</td>
-<td>Number</td>
-<td colspan="2"></td>
-<td><em>RH_T_PARAM_VINCULO_MOV. PERCENTAGEM</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Desconto Valor</td>
-<td>Number</td>
-<td colspan="2"></td>
-<td><em>RH_T_PARAM_VINCULO_MOV.VALOR</em></td>
-</tr>
-<tr>
-<td colspan="5"
-style="text-align: left;"><em><strong>Acoes</strong></em></td>
-</tr>
-<tr>
-<td colspan="3"
-style="text-align: left;"><p><em><strong>Gravar</strong></em></p>
-<ul>
-<li><p><em>ESTADO = ‘A’</em></p></li>
-<li><p><em>DATA_REGISTO = SYSDATE</em></p></li>
-<li><p><em>USER_REGISTO_ID = id de utilizador logado</em></p></li>
-<li><p><em>USER_REGISTO_NAME = nome de user logado</em></p></li>
-</ul>
-<p><em><strong>Editar</strong></em></p>
-<ul>
-<li><p><em>USER_ALTERACAO_ID = id de utilizador logado</em></p></li>
-<li><p><em>USER_ALTERACAO_NAME = nome de user logado</em></p></li>
-<li><p><em>DATA_ALTERACAO = SYSDATE</em></p></li>
-</ul></td>
-<td colspan="2"><p><em><strong>Eliminar</strong></em></p>
-<ul>
-<li><p><em>USER_ALTERACAO_ID = id de utilizador logado</em></p></li>
-<li><p><em>USER_ALTERACAO_NAME = nome de user logado</em></p></li>
-</ul>
-<ul>
-<li><p><em>DATA_ALTERACAO = SYSDATE</em></p></li>
-</ul>
-<ul>
-<li><p><em>ESTADO = ‘I’</em></p></li>
-</ul></td>
-</tr>
 </tbody>
 </table>
 
@@ -900,7 +367,7 @@ style="text-align: left;"><p><em><strong>Gravar</strong></em></p>
 
 ### Registar tipo contrato
 
-<img src="media/image9.png" style="width:9.69306in;height:3.71389in"
+<img src="media/image7.png" style="width:9.69306in;height:3.71389in"
 alt="Uma imagem com texto, file, número, captura de ecrã Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -934,7 +401,7 @@ alt="Uma imagem com texto, file, número, captura de ecrã Os conteúdos gerados
 <tr>
 <td style="text-align: left;">Natureza</td>
 <td></td>
-<td><p>Indicar se o vínculo é de tempo determinado ou indeterminado</p>
+<td><p>Indicar se o vinculo é de tempo determinado ou indeterminado</p>
 <p>DOMINIO = NATUREZA_VINCULO</p></td>
 <td><em>RH_T_PARAM_CONTRATO.NATUREZA</em></td>
 </tr>
@@ -973,7 +440,7 @@ alt="Uma imagem com texto, file, número, captura de ecrã Os conteúdos gerados
 <td style="text-align: left;">Estado</td>
 <td>SELECT</td>
 <td>O campo deve estar oculto no registo inicial e apenas se tornar
-visível quando o formulário estiver em modo de edição. DOMINIO =
+visível quando o formulário estiver em modo de edição . DOMINIO =
 STATUS</td>
 <td><em>RH_T_PARAM_CONTRATO. ESTADO</em></td>
 </tr>
@@ -999,10 +466,10 @@ STATUS</td>
 <td colspan="4" style="text-align: left;"><strong>Ações</strong></td>
 </tr>
 <tr>
-<td style="text-align: left;"><img src="media/image7.png"
-style="width:0.6375in;height:0.26944in"
+<td style="text-align: left;"><img src="media/image5.png"
+style="width:0.6375in;height:0.26984in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
-<td colspan="3"><ol start="5" type="1">
+<td colspan="3"><ol start="3" type="1">
 <li><p><strong>Registar</strong></p>
 <ol type="1">
 <li><p>O sistema deve registar os dados introduzidos no formulário para
@@ -1019,7 +486,7 @@ campos adicionais especificados a seguir</p></li>
 <li><p><em>DATA_ALTERACAO = <strong>NULL</strong></em></p></li>
 <li><p><em>DATA_ALTERACAO_NAME = <strong>NULL</strong></em></p></li>
 </ul>
-<ol start="6" type="1">
+<ol start="4" type="1">
 <li><p><strong>Editar</strong></p></li>
 </ol>
 <ul>
@@ -1033,7 +500,7 @@ campos adicionais especificados a seguir</p></li>
 
 ### Lista Tipo contrato
 
-<img src="media/image10.png" style="width:9.69306in;height:4.38958in"
+<img src="media/image8.png" style="width:9.69306in;height:4.38958in"
 alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -1118,18 +585,19 @@ alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos ger
 </tbody>
 </table>
 
-## PCCS 
+## Situacao Laboral 
 
-### Registar PCCS 
+### Registo situacao Laboral
 
-<img src="media/image11.png" style="width:9.69306in;height:2.07153in" />
+<img src="media/image9.png" style="width:6.96875in;height:3.72901in"
+alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
 <colgroup>
-<col style="width: 16%" />
-<col style="width: 4%" />
-<col style="width: 38%" />
-<col style="width: 40%" />
+<col style="width: 18%" />
+<col style="width: 6%" />
+<col style="width: 35%" />
+<col style="width: 39%" />
 </colgroup>
 <thead>
 <tr>
@@ -1141,206 +609,257 @@ alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos ger
 </thead>
 <tbody>
 <tr>
-<td colspan="4"></td>
-</tr>
-<tr>
-<td style="text-align: left;">Data Inicio</td>
-<td><em>Date</em></td>
+<td style="text-align: left;">codigo</td>
+<td>TEXT</td>
 <td></td>
-<td><em>RH_T_PARAM_PCCS.</em> <em>DATA_INICIO</em></td>
-</tr>
-<tr>
-<td style="text-align: left;">Data Fim</td>
-<td><em>Date</em></td>
-<td></td>
-<td><p><em>RH_T_PARAM_PCCS.</em> <em>DATA_FIM</em></p>
-<p><em>RH_T_PARAM_ESCALAO.DATA_FIM</em></p></td>
+<td><em>RH_T_PARAM_SIT_LABORAL.CODIGO</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Descrição</td>
-<td><em>text</em></td>
+<td>TEXT</td>
 <td></td>
-<td><em>RH_T_PARAM_PCCS.DESCRICAO</em></td>
+<td><em>RH_T_PARAM_SIT_LABORAL.NOME</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">Fazer copia do Anterior?</td>
+<td style="text-align: left;">Tipo Situacao</td>
 <td></td>
-<td><p>Ao selecionar sim, o sistema deve pegar o registo ativo e criar o
-registo (fazer uma copia) nas seguintes tabelas:</p>
-<ul>
-<li><p><strong>RH_T_PARAM_CARREIRA</strong></p>
-<ul>
-<li><p>DATA REGISTO = sysdate</p></li>
-<li><p>USER_REGISTO = user logado</p></li>
-<li><p>USER_REGISTO_NAME</p></li>
-<li><p>PCCS_ID = novo id</p></li>
-<li><p>ID = Novo ID</p></li>
-</ul></li>
-<li><p><strong>RH_T_PARAM_CARGO</strong></p>
-<ul>
-<li><p>ID = novo id</p></li>
-<li><p>PARAM_CARR_ID = ID DE NOVO REGISTO</p></li>
-<li><p>DATA REGISTO = sysdate</p></li>
-<li><p>USER_REGISTO = user logado</p></li>
-<li><p>USER_REGISTO_NAME</p></li>
-</ul></li>
-<li><p><strong>RH_T_PARAM_ESCALAO</strong></p>
-<ul>
-<li><p>ID = novo id</p></li>
-<li><p>PARAM_CARR_ID = ID DE NOVO REGISTO</p></li>
-<li><p>DATA REGISTO = sysdate</p></li>
-<li><p>USER_REGISTO = user logado</p></li>
-<li><p>USER_REGISTO_NAME</p></li>
-</ul></li>
-</ul></td>
-<td><em>RH_T_PARAM_PCCS.FLG_COPIA_ANTERIOR</em></td>
+<td>DOMAIN = SITUACAO_LABORAL</td>
+<td><em>RH_T_PARAM_SIT_LABORAL.TIPO_SITUACAO</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">Fechar o Anterior?</td>
+<td style="text-align: left;">Remuneração</td>
+<td>radioList</td>
+<td>DOMAIN = SIM_NAO_NUMBER</td>
+<td><em>RH_T_PARAM_SIT_LABORAL.FLG_REMUNERACAO</em></td>
+</tr>
+<tr>
+<td style="text-align: left;">Afeta Carreira?</td>
+<td>radioList</td>
+<td>DOMAIN = SIM_NAO_NUMBER</td>
+<td><em>RH_T_PARAM_SIT_LABORAL .FLG_AFETA_CARREIRA</em></td>
+</tr>
+<tr>
+<td style="text-align: left;">Conta Tempo serviço?</td>
+<td>radioList</td>
+<td>DOMAIN = SIM_NAO_NUMBER</td>
+<td><em>RH_T_PARAM_SIT_LABORAL .FLG_CONTA_TEMP_SERVICO</em></td>
+</tr>
+<tr>
+<td style="text-align: left;">Cessa vinculo?</td>
+<td>radioList</td>
+<td>DOMAIN = SIM_NAO_NUMBER</td>
+<td><em>RH_T_PARAM_SIT_LABORAL .FLG_CESSA_VINCULO</em></td>
+</tr>
+<tr>
+<td style="text-align: left;">Suspende Progressao / Promocao?</td>
+<td>radioList</td>
+<td>DOMAIN = SIM_NAO_NUMBER</td>
+<td><em>RH_T_PARAM_SIT_LABORAL .FLG_CESSA_PROGRESSAO</em></td>
+</tr>
+<tr>
+<td style="text-align: left;">Estado do contrato</td>
+<td>SELECT</td>
+<td>DOMAIN = ESTADO_CONTRATO</td>
+<td><em>RH_T_PARAM_SIT_LABORAL .FLG_ESTADO_CONTRATO</em></td>
+</tr>
+<tr>
+<td style="text-align: left;">Estado</td>
+<td>Select</td>
+<td>DOMAIN = STATUS</td>
+<td><em>RH_T_PARAM_SIT_LABORAL .ESTADO</em></td>
+</tr>
+<tr>
+<td style="text-align: left;">Associar</td>
 <td></td>
-<td><p>Ao selcionar Sim, o sistema deve, fazer o seguinte</p>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">Vinculo</td>
+<td></td>
+<td><strong>TABELA</strong>: RH_T_PARAM_VINCULO</td>
+<td><em>RH_T_PARAM_SIT_LABORAL_DET.VINCULO_ID</em></td>
+</tr>
+<tr>
+<td style="text-align: left;">Motivo</td>
+<td></td>
+<td><strong>DOMAIN</strong> = MOTIVO_SIT_LABORAL</td>
+<td><em>RH_T_PARAM_SIT_LABORAL_DET.MOTIVO</em></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Acções</strong></td>
+<td colspan="3"></td>
+</tr>
+<tr>
+<td style="text-align: left;">Gravar</td>
+<td colspan="3"><ol start="5" type="1">
+<li><p><strong>Registar</strong></p>
+<ol type="1">
+<li><p>O sistema deve registar os dados introduzidos no formulário para
+a tabelas <em><strong>RH_T_PARAM_SIT_LABORAL</strong></em>, bem como os
+campos adicionais especificados a seguir</p></li>
+</ol></li>
+</ol>
 <ul>
-<li><p><strong>RH_T_PARAM_CARREIRA</strong>.ESTADO = “I”</p></li>
-<li><p><strong>RH_T_PARAM_CARGO</strong>.ESTADO = “I”</p></li>
-<li><p><strong>RH_T_PARAM_ESCALAO</strong>.DATA_FIM = Data Inicio e
-<strong>RH_T_PARAM_ESCALAO</strong>.ESTADO = “I”</p></li>
-</ul></td>
-<td><em>RH_T_PARAM_PCCS.FLG_FECHAR_ANTERIOR</em></td>
-</tr>
-<tr>
-<td colspan="4"><strong>Ações</strong></td>
-</tr>
-<tr>
-<td><img src="media/image7.png" style="width:0.6375in;height:0.26944in"
-alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
-<td colspan="3"><p><strong>1.Registar</strong></p>
-<p>1.1- O sistema deve registar os dados introduzidos no formulário para
-a tabelas <em><strong>RH_T_PARAM_PCCS</strong></em>, bem como os campos
-adicionais especificados a seguir</p>
+<li><p><em>ESTADO <strong>= ‘A’</strong></em></p></li>
+<li><p><em>DATA_REGISTO= ‘<strong>SYSDATE’</strong></em></p></li>
+<li><p><em>USER_REGISTO_ID = id de utilizador Logado</em></p></li>
+<li><p><em>USER_REGISTO_NAME =nome de utilizador Logado</em></p></li>
+<li><p><em>USER_ALTERACAO _ID = <strong>NULL</strong></em></p></li>
+<li><p><em>DATA_ALTERACAO = <strong>NULL</strong></em></p></li>
+<li><p><em>DATA_ALTERACAO_NAME = <strong>NULL</strong></em></p>
+<ol type="1">
+<li><p>O sistema deve registar os dados introduzidos no formulário para
+a tabelas <em><strong>RH_T_PARAM_SIT_LABORAL_DET</strong></em></p></li>
+</ol></li>
+</ul>
 <ul>
-<li><p>DATA REGISTO = sysdate</p></li>
-<li><p>USER_REGISTO = user logado</p></li>
-<li><p>USER_REGISTO_NAME</p></li>
+<li><p><em>ESTADO = ‘A’</em></p></li>
+<li><p><em>SITUACAO_LABORAL_ID <strong>= id de
+RH_T_PARAM_SIT_LABORAL</strong></em></p></li>
+<li><p><em><strong>DATA_REGISTO= ‘SYSDATE’</strong></em></p></li>
+<li><p><em><strong>USER_REGISTO_ID = id de utilizador
+Logado</strong></em></p></li>
+<li><p><em><strong>USER_REGISTO_NAME =nome de utilizador
+Logado</strong></em></p></li>
+<li><p><em><strong>USER_ALTERACAO _ID = NULL</strong></em></p></li>
+<li><p><em><strong>DATA_ALTERACAO = NULL</strong></em></p></li>
+<li><p><em><strong>DATA_ALTERACAO_NAME = NULL</strong></em></p></li>
+</ul>
+<ol start="6" type="1">
+<li><p><strong>Editar ou eliminar</strong></p></li>
+</ol>
+<ul>
+<li><p><em>USER_ALTERACAO _ID = id de utilizador Logado</em></p></li>
+<li><p><em>DATA_ALTERACAO = <strong>SYSDATE’</strong></em></p></li>
+<li><p><em>DATA_ALTERACAO_NAME = nome de utilizador Logado</em></p></li>
+</ul>
+<blockquote>
+<p><em>Eliminar</em></p>
+</blockquote>
+<ul>
+<li><p><em>ESTADO = ‘I’</em></p></li>
 </ul></td>
-</tr>
-<tr>
-<td><img src="media/image12.png"
-style="width:1.208in;height:0.23996in" /></td>
-<td colspan="3"><strong>Este menu apenas fica visível após a gravação e
-deverá ser automaticamente preenchido com uma cópia dos dados
-anteriores, caso o utilizador selecione a opção de copiar os dados
-anteriores (Sim).</strong></td>
 </tr>
 </tbody>
 </table>
 
-### Lista PCCS 
+### Lista situacao Laboral 
 
-<img src="media/image13.png" style="width:9.69306in;height:2.49653in" />
+<img src="media/image10.png" style="width:9.69306in;height:4.32014in"
+alt="Uma imagem com texto, software, número, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
-<table style="width:100%;">
+<table>
 <colgroup>
 <col style="width: 18%" />
 <col style="width: 8%" />
-<col style="width: 12%" />
-<col style="width: 20%" />
-<col style="width: 3%" />
-<col style="width: 16%" />
-<col style="width: 20%" />
+<col style="width: 36%" />
+<col style="width: 37%" />
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: center;"><strong>Lista</strong></th>
+<th style="text-align: center;"><strong>Filtro</strong></th>
 <th style="text-align: center;"><strong>Tipo</strong></th>
-<th colspan="3"
-style="text-align: center;"><strong>Descrição</strong></th>
-<th colspan="2" style="text-align: center;"><strong>Fonte
-dados</strong></th>
+<th style="text-align: center;"><strong>Descrição</strong></th>
+<th style="text-align: center;"><strong>Fonte dados</strong></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Data Inicio</td>
+<td>Nome</td>
 <td><em>TEXT</em></td>
-<td colspan="3"></td>
-<td colspan="2"><em>RH_T_PARAM_CARREIRA.DATA_INICIO</em></td>
+<td></td>
+<td><em>RH_T_PARAM_SIT_LABORAL. NOME</em></td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;"><strong>Lista</strong></td>
+<td style="text-align: center;"><strong>Tipo</strong></td>
+<td style="text-align: center;"><strong>Descrição</strong></td>
+<td style="text-align: center;"><strong>Fonte dados</strong></td>
+</tr>
+<tr>
+<td>codigo</td>
 <td><em>TEXT</em></td>
-<td colspan="3"></td>
-<td colspan="2"><em>RH_T_PARAM_CARREIRA.DATA_FIM</em></td>
+<td></td>
+<td><em>RH_T_PARAM_SIT_LABORAL.CODIGO</em></td>
 </tr>
 <tr>
-<td>Descricao</td>
+<td>Nome</td>
 <td><em>TEXT</em></td>
-<td colspan="3"></td>
-<td colspan="2"><em>RH_T_PARAM_CARREIRA.DESCRICAO</em></td>
+<td></td>
+<td><em>RH_T_PARAM_SIT_LABORAL.NOME</em></td>
 </tr>
 <tr>
-<td style="text-align: center;"><strong>Acções</strong></td>
-<td colspan="6" style="text-align: center;"></td>
+<td style="text-align: left;">Tipo Situacao</td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_T_PARAM_SIT_LABORAL.TIPO_SITUACAO</em></td>
 </tr>
 <tr>
-<td>Novo / NOVO</td>
-<td colspan="6">Permite abrir formulário para registar novo PCCS</td>
+<td>Remuneração</td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_T_PARAM_SIT_LABORAL.FLG_REMUNERACAO</em></td>
 </tr>
 <tr>
-<td rowspan="2">Inativar</td>
-<td colspan="6">Permite inativar um PCCS</td>
+<td>Afeta Carreira?</td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_T_PARAM_SIT_LABORAL .FLG_AFETA_CARREIRA</em></td>
 </tr>
 <tr>
-<td colspan="2"><p><strong>RH_T_PARAM_PCCS</strong></p>
-<ul>
-<li><p>USER_ALTERACAO_ID</p></li>
-<li><p>USER_ALTERACAO_NAME</p></li>
-<li><p>DATA_ALTERACAO</p></li>
-<li><p>ESTADO = ‘I’</p></li>
-</ul></td>
-<td><p><strong>RH_T_PARAM_CARREIRA</strong></p>
-<ul>
-<li><p>USER_ALTERACAO_ID</p></li>
-<li><p>USER_ALTERACAO_NAME</p></li>
-<li><p>DATA_ALTERACAO</p></li>
-<li><p>ESTADO = ‘I’</p></li>
-</ul></td>
-<td colspan="2"><p><strong>RH_T_PARAM_CARGO</strong></p>
-<ul>
-<li><p>USER_ALTERACAO_ID</p></li>
-<li><p>USER_ALTERACAO_NAME</p></li>
-<li><p>DATA_ALTERACAO</p></li>
-<li><p>ESTADO = ‘I’</p></li>
-</ul></td>
-<td><p><strong>RH_T_PARAM_ESCALAO</strong></p>
-<ul>
-<li><p>USER_ALTERACAO_ID</p></li>
-<li><p>USER_ALTERACAO_NAME</p></li>
-<li><p>DATA_ALTERACAO</p></li>
-<li><p>ESTADO = ‘I’</p></li>
-</ul></td>
+<td>Conta Tempo serviço?</td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_T_PARAM_SIT_LABORAL .FLG_CONTA_TEMP_SERVICO</em></td>
 </tr>
 <tr>
-<td><img src="media/image14.png"
-style="width:1.36119in;height:0.34742in" /></td>
-<td colspan="6"><p><mark>Abre o formulário Para Aumento
-Salarial</mark></p>
-<p><em><mark><strong>Nota:</strong> especifica no documento
-Processamento Salarial ( 3.8.1 regista critérios
-aumento)</mark></em></p></td>
+<td>Cessa vinculo?</td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_T_PARAM_SIT_LABORAL .FLG_CESSA_VINCULO</em></td>
 </tr>
 <tr>
-<td><img src="media/image15.png"
-style="width:0.272in;height:0.255in" /></td>
-<td colspan="6"><p><mark>Lista histórico aumento</mark></p>
-<p><em><mark><strong>Nota:</strong> especifica no documento
-Processamento Salarial (( 3.8.3 lista aumento)</mark></em></p></td>
+<td>Suspende Progressao / Promocao?</td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_T_PARAM_SIT_LABORAL .FLG_CESSA_PROGRESSAO</em></td>
+</tr>
+<tr>
+<td>Estado do contrato</td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_T_PARAM_SIT_LABORAL .FLG_ESTADO_CONTRATO</em></td>
+</tr>
+<tr>
+<td>Estado</td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_T_PARAM_SIT_LABORAL.ESTADO</em></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Acções</strong></td>
+<td colspan="3" style="text-align: center;"></td>
+</tr>
+<tr>
+<td>Editar</td>
+<td colspan="3">Invoca o mesmo formulario de registo</td>
+</tr>
+<tr>
+<td>Eliminar</td>
+<td colspan="3"><p>Somente deve eliminar caso não existe registo em
+<strong>RH_T_TIPOS_RELACIONAMENTO.</strong>SITUACAO_LABORAL</p>
+<p>Ao Eliminar atualiza o estado
+<strong><em>RH_T_PARAM_SIT_LABORAL</em>.estado = ‘E’</strong></p></td>
 </tr>
 </tbody>
 </table>
 
+## PCCS 
+
 ### Registo Carreira
 
-<img src="media/image16.png" style="width:9.69306in;height:3.77708in"
+<img src="media/image11.png" style="width:9.69306in;height:3.77708in"
 alt="Uma imagem com texto, software, número, captura de ecrã Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -1396,7 +915,7 @@ STATUS</td>
 <td colspan="4"><strong>Ações</strong></td>
 </tr>
 <tr>
-<td><img src="media/image7.png" style="width:0.6375in;height:0.26944in"
+<td><img src="media/image5.png" style="width:0.6375in;height:0.26984in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><p><strong>1.Registar</strong></p>
 <p>1.1- O sistema deve registar os dados introduzidos no formulário para
@@ -1409,8 +928,7 @@ campos adicionais especificados a seguir</p>
 <li><p><em>USER_REGISTO_NAME =nome de utilizador Logado</em></p></li>
 <li><p><em>USER_ALTERACAO _ID = <strong>NULL</strong></em></p></li>
 <li><p><em>DATA_ALTERACAO = <strong>NULL</strong></em></p></li>
-<li><p><em>DATA_ALTERACAO_NAME = <strong>NULL</strong></em></p></li>
-<li><p><em><mark>PCCS_ID = ID DE RH_T_PARAM_PCCS</mark></em></p>
+<li><p><em>DATA_ALTERACAO_NAME = <strong>NULL</strong></em></p>
 <ol start="2" type="1">
 <li><p><em>Registo na Tabela de
 <strong>RH_T_PARAM_CATEGORIA</strong></em></p></li>
@@ -1445,7 +963,7 @@ campos adicionais especificados a seguir</p>
 
 ### Lista Carreira
 
-<img src="media/image17.png" style="width:9.69306in;height:4.65625in"
+<img src="media/image12.png" style="width:9.69306in;height:4.65625in"
 alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -1514,7 +1032,7 @@ alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos ger
 
 ### Registar Cargo
 
-<img src="media/image18.png" style="width:9.69306in;height:1.91181in"
+<img src="media/image13.png" style="width:9.69306in;height:1.91181in"
 alt="Uma imagem com texto, file, captura de ecrã Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -1566,7 +1084,7 @@ STATUS</td>
 <td colspan="4"><strong>Ações</strong></td>
 </tr>
 <tr>
-<td><img src="media/image7.png" style="width:0.6375in;height:0.26944in"
+<td><img src="media/image5.png" style="width:0.6375in;height:0.26984in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><ol start="7" type="1">
 <li><p><strong>Registar</strong></p>
@@ -1599,7 +1117,7 @@ adicionais especificados a seguir</p></li>
 
 ### Lista Cargo 
 
-<img src="media/image19.png" style="width:9.69306in;height:4.81667in"
+<img src="media/image14.png" style="width:9.69306in;height:4.81667in"
 alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -1673,7 +1191,7 @@ alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos ger
 
 ### Escalao
 
-<img src="media/image20.png" style="width:9.69306in;height:2.375in"
+<img src="media/image15.png" style="width:9.69306in;height:2.375in"
 alt="Uma imagem com texto, captura de ecrã, file, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -1747,7 +1265,7 @@ alt="Uma imagem com texto, captura de ecrã, file, Tipo de letra Os conteúdos g
 <td colspan="4"><strong>Ações</strong></td>
 </tr>
 <tr>
-<td><img src="media/image7.png" style="width:0.6375in;height:0.26944in"
+<td><img src="media/image5.png" style="width:0.6375in;height:0.26984in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><ol start="9" type="1">
 <li><p><strong>Registar</strong></p>
@@ -1781,7 +1299,7 @@ adicionais especificados a seguir</p></li>
 
 ### Lista Escalao 
 
-<img src="media/image21.png" style="width:9.69306in;height:4.84792in"
+<img src="media/image16.png" style="width:9.69306in;height:4.84792in"
 alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -1891,7 +1409,7 @@ contrario faz update em</p>
 </tbody>
 </table>
 
-### 
+###  
 
 ## Local de Trabalho
 
@@ -1899,7 +1417,7 @@ contrario faz update em</p>
 
 *~~RH_T_PARAM_LOCAL_BALCAO =~~ RH_T_PARAM_LOCAL_TRAB*
 
-<img src="media/image22.png" style="width:9.69306in;height:2.00069in"
+<img src="media/image17.png" style="width:9.69306in;height:2.00069in"
 alt="Uma imagem com texto, file, captura de ecrã Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -1957,7 +1475,7 @@ STATUS</td>
 <td colspan="4"><strong>Ações</strong></td>
 </tr>
 <tr>
-<td><img src="media/image7.png" style="width:0.6375in;height:0.26944in"
+<td><img src="media/image5.png" style="width:0.6375in;height:0.26984in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3">Invoca o mesmo formulario de Registo</td>
 </tr>
@@ -1966,7 +1484,7 @@ alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteú
 
 ### Lista Local Trabalho
 
-<img src="media/image23.png" style="width:9.69306in;height:4.475in"
+<img src="media/image18.png" style="width:9.69306in;height:4.475in"
 alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2071,10 +1589,10 @@ trabalho</td>
 
 #### Equipamentos 
 
-Este formulário é aberto partir de local trabalho, especificado no
+Este formulário é aberto apartir de local trabalho, especificado no
 documento de parametrização
 
-<img src="media/image24.png" style="width:9.69306in;height:3.66597in"
+<img src="media/image19.png" style="width:9.69306in;height:3.66597in"
 alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 <table style="width:100%;">
@@ -2166,8 +1684,8 @@ alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdo
 <td></td>
 </tr>
 <tr>
-<td style="text-align: left;"><img src="media/image7.png"
-style="width:0.6375in;height:0.26944in"
+<td style="text-align: left;"><img src="media/image5.png"
+style="width:0.6375in;height:0.26984in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><ol type="1">
 <li><p>Outras GRavaçoes na tabela
@@ -2185,7 +1703,7 @@ alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteú
 
 ### Registar Seccão
 
-<img src="media/image25.png" style="width:9.69306in;height:1.86042in"
+<img src="media/image20.png" style="width:9.69306in;height:1.86042in"
 alt="Uma imagem com texto, captura de ecrã, file Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2234,8 +1752,8 @@ STATUS</td>
 <td colspan="4" style="text-align: left;"><strong>Ações</strong></td>
 </tr>
 <tr>
-<td style="text-align: left;"><img src="media/image7.png"
-style="width:0.6375in;height:0.26944in"
+<td style="text-align: left;"><img src="media/image5.png"
+style="width:0.6375in;height:0.26984in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><ol start="11" type="1">
 <li><p><strong>Registar</strong></p>
@@ -2268,7 +1786,7 @@ adicionais especificados a seguir</p></li>
 
 ### Lista Sessão
 
-<img src="media/image26.png" style="width:7.77778in;height:3.57778in" />
+<img src="media/image21.png" style="width:7.77778in;height:3.57796in" />
 
 <table>
 <colgroup>
@@ -2352,7 +1870,7 @@ adicionais especificados a seguir</p></li>
 
 #### Responsaveis
 
-<img src="media/image27.png" style="width:9.69306in;height:5.03958in"
+<img src="media/image22.png" style="width:9.69306in;height:5.03958in"
 alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2432,8 +1950,8 @@ alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdo
 <td></td>
 </tr>
 <tr>
-<td style="text-align: left;"><img src="media/image7.png"
-style="width:0.6375in;height:0.26944in"
+<td style="text-align: left;"><img src="media/image5.png"
+style="width:0.6375in;height:0.26984in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><p>Registo outros dados na tabela
 <strong>RH_T_RESPONSAVEL</strong></p>
@@ -2452,7 +1970,7 @@ logado</strong></em></p></li>
 
 ### Registo tipo documento
 
-<img src="media/image28.png" style="width:9.69306in;height:2.00764in" />
+<img src="media/image23.png" style="width:9.69306in;height:2.00764in" />
 
 <table>
 <colgroup>
@@ -2498,8 +2016,8 @@ logado</strong></em></p></li>
 <td colspan="4" style="text-align: left;"><strong>Ações</strong></td>
 </tr>
 <tr>
-<td style="text-align: left;"><img src="media/image7.png"
-style="width:0.6375in;height:0.26944in"
+<td style="text-align: left;"><img src="media/image5.png"
+style="width:0.6375in;height:0.26984in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><ol start="13" type="1">
 <li><p><strong>Registar</strong></p>
@@ -2532,7 +2050,7 @@ campos adicionais especificados a seguir</p></li>
 
 ### Listas Tipo documento
 
-<img src="media/image29.png" style="width:9.69306in;height:4.29167in"
+<img src="media/image24.png" style="width:9.69306in;height:4.29167in"
 alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2609,7 +2127,7 @@ alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos ger
 
 ### Registo de notificação
 
-<img src="media/image30.png" style="width:8.05833in;height:3.59028in"
+<img src="media/image25.png" style="width:8.05882in;height:3.59062in"
 alt="Uma imagem com texto, número, Tipo de letra, file Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2650,8 +2168,8 @@ alt="Uma imagem com texto, número, Tipo de letra, file Os conteúdos gerados po
 <td colspan="4" style="text-align: left;"><strong>Ações</strong></td>
 </tr>
 <tr>
-<td style="text-align: left;"><img src="media/image7.png"
-style="width:0.6375in;height:0.26944in"
+<td style="text-align: left;"><img src="media/image5.png"
+style="width:0.6375in;height:0.26984in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><ol start="15" type="1">
 <li><p><strong>Registar</strong></p>
@@ -2684,7 +2202,7 @@ campos adicionais especificados a seguir</p></li>
 
 ### Lista Notificação
 
-<img src="media/image31.png" style="width:9.69306in;height:4.28125in"
+<img src="media/image26.png" style="width:9.69306in;height:4.28125in"
 alt="Uma imagem com texto, software, número, Ícone de computador Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2751,7 +2269,7 @@ alt="Uma imagem com texto, software, número, Ícone de computador Os conteúdos
 
 # Assiduidade
 
-<img src="media/image32.png" style="width:5.64097in;height:1.02014in" />
+<img src="media/image27.png" style="width:5.64156in;height:1.02081in" />
 
 ## Configuração de Geral
 
@@ -2760,7 +2278,7 @@ alt="Uma imagem com texto, software, número, Ícone de computador Os conteúdos
 Cada vez que se faz uma gravação na parametrizaçã se inactiva o registo
 anterir e faz nova gravação
 
-<img src="media/image33.png" style="width:8.40556in;height:5.12292in"
+<img src="media/image28.png" style="width:8.40618in;height:5.12333in"
 alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2960,7 +2478,7 @@ fraçoes de segundos definos no movimento irregular</td>
 <td>RH_ASSIDUIDADE_PARAMETRO.<em>FALTA_MES_MAXIMO_ANO_1</em></td>
 </tr>
 <tr>
-<td><strong>Fuso de Horário do UPS</strong></td>
+<td><strong>Fuso de Horario do UPS</strong></td>
 <td></td>
 <td></td>
 <td></td>
@@ -2994,7 +2512,7 @@ anterior</em></p></li>
 <td colspan="4"><strong>AÇÕES</strong></td>
 </tr>
 <tr>
-<td><img src="media/image7.png" style="width:0.6375in;height:0.26944in"
+<td><img src="media/image5.png" style="width:0.6375in;height:0.26984in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><ol type="1">
 <li><p>NOVO- Outras Gravaçoes na tabela
@@ -3035,7 +2553,7 @@ alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteú
 
 ### Lista
 
-<img src="media/image34.png" style="width:8.02292in;height:4.54028in"
+<img src="media/image29.png" style="width:8.02328in;height:4.54047in"
 alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -3120,7 +2638,7 @@ alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos ger
 
 ###  Novo 
 
-<img src="media/image35.png" style="width:9.69306in;height:2.70486in"
+<img src="media/image30.png" style="width:9.69306in;height:2.70486in"
 alt="Uma imagem com captura de ecrã, texto, file, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -3178,8 +2696,8 @@ nulo</td>
 <td></td>
 </tr>
 <tr>
-<td style="text-align: left;"><img src="media/image7.png"
-style="width:0.6375in;height:0.26944in"
+<td style="text-align: left;"><img src="media/image5.png"
+style="width:0.6375in;height:0.26984in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><ol type="1">
 <li><p><strong>RH_TIPO_FALTAS</strong></p></li>
@@ -3202,7 +2720,7 @@ logado</strong></em></p></li>
 
 Parametrizar os dias feriados que não serão contabelizados nas ferias
 
-<img src="media/image36.png" style="width:9.69306in;height:2.86528in"
+<img src="media/image31.png" style="width:9.69306in;height:2.86528in"
 alt="Uma imagem com texto, file, captura de ecrã Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -3246,8 +2764,8 @@ alt="Uma imagem com texto, file, captura de ecrã Os conteúdos gerados por IA p
 <td></td>
 </tr>
 <tr>
-<td style="text-align: left;"><img src="media/image7.png"
-style="width:0.6375in;height:0.26944in"
+<td style="text-align: left;"><img src="media/image5.png"
+style="width:0.6375in;height:0.26984in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><ol type="1">
 <li><p>Registo na tabela <strong>RH_T_PARAM_FERIADO</strong></p></li>

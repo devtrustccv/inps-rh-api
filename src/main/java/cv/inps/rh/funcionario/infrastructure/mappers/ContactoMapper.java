@@ -18,9 +18,12 @@ public class ContactoMapper {
 
   public ContactoEntity toEntity(ContactoReqDTO dto, Estado estado, FuncionarioEntity fun) {
     if (dto == null) return null;
+    String tipoContacto = ValidationUtil.trimToNull(dto.getTipoContacto());
+    String contacto = ValidationUtil.trimToNull(dto.getContacto());
+    ValidationUtil.validateContacto(tipoContacto, contacto);
     ContactoEntity entity = new ContactoEntity();
-    entity.setTipoContacto(ValidationUtil.trimToNull(dto.getTipoContacto()));
-    entity.setContacto(ValidationUtil.trimToNull(dto.getContacto()));
+    entity.setTipoContacto(tipoContacto);
+    entity.setContacto(contacto);
     entity.setUuid(UuidCreator.getTimeOrderedEpoch());
     entity.setFunId(fun);
     entity.setEstado(estado);
@@ -54,9 +57,11 @@ public class ContactoMapper {
     ContactoEntity found = findById(existingList, dto.getId());
 
     if (found != null) {
-      // atualizar
-      found.setTipoContacto(ValidationUtil.trimToNull(dto.getTipoContacto()));
-      found.setContacto(ValidationUtil.trimToNull(dto.getContacto()));
+      String tipoContacto = ValidationUtil.trimToNull(dto.getTipoContacto());
+      String contacto = ValidationUtil.trimToNull(dto.getContacto());
+      ValidationUtil.validateContacto(tipoContacto, contacto);
+      found.setTipoContacto(tipoContacto);
+      found.setContacto(contacto);
     } else {
       // adicionar
       ContactoEntity novo = this.toEntity(dto, Estado.P, fun);

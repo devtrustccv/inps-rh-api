@@ -62,6 +62,7 @@ public class SubstituicaoWriteService {
     validacao.setTiprelId(substituicao.getSubstitutoTiprelId());
     validacao.setFunId(funcionarioSubstituido);
     validacao.setReferenciaId(substituicao.getId());
+    validacao.setReferenciaUuid(substituicao.getUuid());
 
     funcionarioSubstituido.getValidacoes().add(validacao);
 

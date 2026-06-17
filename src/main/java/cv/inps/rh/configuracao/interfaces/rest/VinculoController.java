@@ -4,18 +4,23 @@
 package cv.inps.rh.configuracao.interfaces.rest;
 
 import cv.igrp.framework.core.domain.CommandBus;
+import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import cv.inps.rh.configuracao.application.commands.AssociarVinculoSituacaoCommand;
+import cv.inps.rh.configuracao.application.commands.SyncVinculoMovimentosCommand;
+import cv.inps.rh.configuracao.application.commands.SyncVinculoSituacoesCommand;
+import cv.inps.rh.configuracao.application.dto.VinculoMovimentoRequestDTO;
+import cv.inps.rh.configuracao.application.dto.VinculoMovimentoResponseDTO;
+import cv.inps.rh.configuracao.application.dto.VinculoSituacaoLaboralRequestDTO;
+import cv.inps.rh.configuracao.application.dto.VinculoSituacaoLaboralResponseDTO;
+import cv.inps.rh.configuracao.application.queries.GetMovimentosByVinculoQuery;
+import cv.inps.rh.configuracao.application.queries.GetSituacoesByVinculoQuery;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @IgrpController
@@ -28,41 +33,59 @@ import org.springframework.web.bind.annotation.RestController;
 public class VinculoController {
 
 
+  private final QueryBus queryBus;
   private final CommandBus commandBus;
 
-  public VinculoController(CommandBus commandBus) {
+  public VinculoController(QueryBus queryBus, CommandBus commandBus) {
 
+    this.queryBus = queryBus;
     this.commandBus = commandBus;
   }
 
-  @PostMapping(
-      value = "vinculo/associar-situacao"
-  )
-  @Operation(
-      summary = "Associar vinculo situacao",
-      description = "Associar vinculo situacao",
-      responses = {
-          @ApiResponse(
-              responseCode = "200",
+  // ── Vínculo ↔ Situação Laboral ──
 
-              content = @Content(
-                  mediaType = "application/json",
-                  schema = @Schema(
-                      implementation = String.class,
-                      type = "String")
-              )
-          )
-      }
-  )
+  @GetMapping("vinculo/{vinculoId}/situacoes-laborais")
+  @Operation(summary = "Listar situações laborais associadas a um vínculo")
+  public ResponseEntity<List<VinculoSituacaoLaboralResponseDTO>> getSituacoesByVinculo(
+      @PathVariable String vinculoId) {
 
-  public ResponseEntity<String> associarVinculoSituacao(
-      @RequestParam(value = "vinculoId") String vinculoId,
-      @RequestParam(value = "situacaoId") String situacaoId) {
+    final var query = new GetSituacoesByVinculoQuery(vinculoId);
 
-    final var command = new AssociarVinculoSituacaoCommand(vinculoId, situacaoId);
+    return queryBus.handle(query);
+  }
+
+  @PutMapping("vinculo/{vinculoId}/situacoes-laborais")
+  @Operation(summary = "Sincronizar situações laborais de um vínculo (add/update/delete)")
+  public ResponseEntity<List<VinculoSituacaoLaboralResponseDTO>> syncVinculoSituacoes(
+      @PathVariable String vinculoId,
+      @Valid @RequestBody List<VinculoSituacaoLaboralRequestDTO> situacoes) {
+
+    final var command = new SyncVinculoSituacoesCommand(vinculoId, situacoes);
 
     return commandBus.send(command);
+  }
 
+  // ── Vínculo ↔ Tipo Movimento ──
+
+  @GetMapping("vinculo/{vinculoId}/movimentos")
+  @Operation(summary = "Listar tipos de movimento associados a um vínculo")
+  public ResponseEntity<List<VinculoMovimentoResponseDTO>> getMovimentosByVinculo(
+      @PathVariable String vinculoId) {
+
+    final var query = new GetMovimentosByVinculoQuery(vinculoId);
+
+    return queryBus.handle(query);
+  }
+
+  @PutMapping("vinculo/{vinculoId}/movimentos")
+  @Operation(summary = "Sincronizar tipos de movimento de um vínculo (add/update/delete)")
+  public ResponseEntity<List<VinculoMovimentoResponseDTO>> syncVinculoMovimentos(
+      @PathVariable String vinculoId,
+      @Valid @RequestBody List<VinculoMovimentoRequestDTO> movimentos) {
+
+    final var command = new SyncVinculoMovimentosCommand(vinculoId, movimentos);
+
+    return commandBus.send(command);
   }
 
 }

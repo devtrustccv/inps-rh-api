@@ -78,6 +78,7 @@ public class ValidarDadosBancariosService {
 
     validacao.setFunId(funcionario);
     validacao.setTiprelId(tipoRel);
+    validacao.setReferenciaUuid(funcionario.getUuid());
 
     funcionario.getValidacoes().add(validacao);
 

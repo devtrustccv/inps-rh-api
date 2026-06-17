@@ -179,6 +179,7 @@ public class HistoricoLaboralWriteService {
           Estado.P);
       validMob.setFunId(funcionario);
       validMob.setTiprelId(novoRelacionamento);
+      validMob.setReferenciaUuid(novaMob.getUuid());
       funcionario.getValidacoes().add(validMob);
     }
 
@@ -209,6 +210,7 @@ public class HistoricoLaboralWriteService {
           Estado.P);
       validCar.setFunId(funcionario);
       validCar.setTiprelId(novoRelacionamento);
+      validCar.setReferenciaUuid(novaCar.getUuid());
       funcionario.getValidacoes().add(validCar);
 
       if (dto.getSalario() != null) {
@@ -233,6 +235,7 @@ public class HistoricoLaboralWriteService {
           Referencia.SITUACAO_LABORAL.name(), Estado.P);
       validSit.setFunId(funcionario);
       validSit.setTiprelId(novoRelacionamento);
+      validSit.setReferenciaUuid(novaSit.getUuid());
       funcionario.getValidacoes().add(validSit);
     }
 

@@ -1,0 +1,33 @@
+{
+  "type": "dto",
+  "module": "configuracao",
+  "name": "VinculoSituacaoLaboralRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "id",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "situacaoId",
+      "objectType": "java",
+      "type": "long",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ]
+}

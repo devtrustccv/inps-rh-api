@@ -72,6 +72,10 @@ public interface FuncionarioEntityRepository extends
       String numDocumento,
       UUID funIdUuid);
 
+  boolean existsByNifAndEstadoNot(Long nif, Estado estado);
+
+  boolean existsByNifAndUuidNotAndEstadoNot(Long nif, UUID uuid, Estado estado);
+
   @Query("""
     select f from FuncionarioEntity f
     left join fetch f.dadosBancarios db

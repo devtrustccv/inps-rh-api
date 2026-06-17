@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoMovimentoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,7 +27,13 @@ public interface ParamVinculoMovimentoEntityRepository extends
 
       List<ParamVinculoMovimentoEntity> findByVinculoId_Id(Long vinculoId);
 
+      List<ParamVinculoMovimentoEntity> findByVinculoId_IdAndEstadoNot(Long vinculoId, Estado estado);
+
       List<ParamVinculoMovimentoEntity> findByVinculoId_Uuid(UUID vinculoUuid);
+
+      List<ParamVinculoMovimentoEntity> findByVinculoId_IdAndTipoAndEstado(Long vinculoId, String tipo, Estado estado);
+
+      List<ParamVinculoMovimentoEntity> findByVinculoId_UuidAndTipoAndEstado(UUID vinculoUuid, String tipo, Estado estado);
 
   //Optional<ParamVinculoMovimentoEntity> findByVinculoId_IdAndTipo(Long vinculoId, String tipo);
 

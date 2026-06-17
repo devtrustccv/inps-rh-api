@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidarDadosFamiliaresCommand;
 import cv.inps.rh.funcionario.application.dto.ValidarAgregadosDependentesDTO;
+import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.FamiliarMapper;
@@ -22,6 +23,7 @@ public class ValidarAgregadosService {
   private final DadosContratuaisMapper contratuaisEntityMapper;
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final FamiliarMapper familiarMapper;
+  private final ColaboradorValidationRules colaboradorValidationRules;
 
   @Transactional
   public ValidarAgregadosDependentesDTO executar(ValidarDadosFamiliaresCommand command) {
@@ -41,6 +43,8 @@ public class ValidarAgregadosService {
           "Funcionario possui validação pendente de dados de agregados, por favor validar"
       );
     }*/
+
+    colaboradorValidationRules.verificarDuplicidadeFamiliares(agregadoDependenteReqDTO, funcionario.getFamiliares());
 
     var familiares = familiarMapper
         .syncFamiliares(funcionario.getFamiliares(), agregadoDependenteReqDTO, funcionario, Estado.A);

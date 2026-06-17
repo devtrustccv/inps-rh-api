@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import cv.inps.rh.funcionario.application.dto.DadosBancariosReqDTO;
 import cv.inps.rh.funcionario.application.dto.DadosBancariosRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.BancoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DadosBancariosEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
@@ -23,6 +24,7 @@ public class DadosBancariosMapper {
   public DadosBancariosEntity toEntity(DadosBancariosReqDTO dto, Estado estado,
                                        FuncionarioEntity funcionario) {
     if (dto == null) return null;
+    validarDadosBancarios(dto);
     DadosBancariosEntity entity = new DadosBancariosEntity();
     entity.setRhbId(ValidationUtil.ref(entityManager, BancoEntity.class, dto.getEntidadeBancariaId()));
     entity.setNumConta(dto.getNumConta());
@@ -32,6 +34,17 @@ public class DadosBancariosMapper {
     entity.setFunId(funcionario);
     entity.setEstado(estado);
     return entity;
+  }
+
+  private void validarDadosBancarios(DadosBancariosReqDTO dto) {
+    if (dto.getEntidadeBancariaId() == null) {
+      throw IgrpResponseStatusException.badRequest("Entidade Bancária é obrigatória.");
+    }
+    if (dto.getDataInicio() != null && dto.getDataFim() != null
+        && dto.getDataInicio().isAfter(dto.getDataFim())) {
+      throw IgrpResponseStatusException.badRequest(
+          "A Data de Início não pode ser posterior à Data de Fim.");
+    }
   }
 
   public List<DadosBancariosEntity> syncBancarios(List<DadosBancariosEntity> existingList,
@@ -49,6 +62,7 @@ public class DadosBancariosMapper {
         }
       }
       if (found != null) {
+        validarDadosBancarios(dto);
         Long bancoAtualId = found.getRhbId() != null ? found.getRhbId().getId() : null;
         boolean mudou = !Objects.equals(dto.getEntidadeBancariaId(), bancoAtualId)
             || !Objects.equals(dto.getNib(), found.getNib())

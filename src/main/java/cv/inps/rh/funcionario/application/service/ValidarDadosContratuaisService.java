@@ -54,10 +54,10 @@ public class ValidarDadosContratuaisService {
     var hoje = LocalDate.now(ZoneId.systemDefault());
 
     if (dc.getDataInicio().isAfter(hoje))
-      throw IgrpResponseStatusException.badRequest("Data início não pode ser maior que a data atual.");
+      throw IgrpResponseStatusException.badRequest("A data de início não pode ser uma data futura.");
 
     if (dc.getDataFim() != null && dc.getDataInicio().isAfter(dc.getDataFim()))
-      throw IgrpResponseStatusException.badRequest("Data início não pode ser superior à data fim.");
+      throw IgrpResponseStatusException.badRequest("A Data de Início não pode ser posterior à Data de Fim.");
 
     // -----------------------------
     // OBRIGATÓRIOS POR TIPO DE VÍNCULO
@@ -89,6 +89,22 @@ public class ValidarDadosContratuaisService {
     if (vinculo.getFlgSalario() != null && vinculo.getFlgSalario() == 1) {
       if (dc.getSalario() == null)
         throw IgrpResponseStatusException.badRequest("valor do salário é obrigatório para este tipo de vínculo.");
+    }
+
+    // -----------------------------
+    // SUBSÍDIOS E ENCARGOS/DESCONTOS
+    // -----------------------------
+    if (dc.getEncargosDescontos() != null) {
+      for (var encargo : dc.getEncargosDescontos()) {
+        if (encargo.getDataInicio() == null) {
+          throw IgrpResponseStatusException.badRequest(
+              "A Data de Início é obrigatória para cada encargo/desconto.");
+        }
+        if (encargo.getDataFim() != null && encargo.getDataInicio().isAfter(encargo.getDataFim())) {
+          throw IgrpResponseStatusException.badRequest(
+              "A Data de Início não pode ser posterior à Data de Fim no encargo/desconto.");
+        }
+      }
     }
   }
 

@@ -36,6 +36,7 @@ public class RenumeracoesWriteService {
   private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
 
   public void novoRemuneracao(String funcionarioId, NovoRemuneracaoRequestDTO request) {
+    validarRemuneracaoOuPagamento(request);
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
     var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -69,6 +70,7 @@ public class RenumeracoesWriteService {
   }
 
   public void novoPagamento(String funcionarioId, NovoPagamentoRequestDTO request) {
+    validarRemuneracaoOuPagamento(request);
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
     var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -113,6 +115,7 @@ public class RenumeracoesWriteService {
 
     var data = command.getValidarremuneracaorequest();
     var request = data.getDados();
+    validarRemuneracaoOuPagamento(request);
 
     var remuneracao = definicaoRemuneracaoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getRemuneracaoId()));
     remuneracao.setValor(request.getValor());
@@ -147,6 +150,7 @@ public class RenumeracoesWriteService {
 
     var data = command.getValidarpagamentorequest();
     var request = data.getDados();
+    validarRemuneracaoOuPagamento(request);
 
     var pagamento = defPagamentoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getPagamentoId()));
 
@@ -185,5 +189,13 @@ public class RenumeracoesWriteService {
     }
 
     defPagamentoEntityRepository.save(pagamento);
+  }
+
+  private void validarRemuneracaoOuPagamento(NovoRemuneracaoRequestDTO request) {
+    ValidationUtil.validateValorNaoNegativo(request.getValor());
+    ValidationUtil.validatePercentagem(request.getPercentagem());
+    ValidationUtil.validateIntervaloData(
+        DateFormatter.stringToLocalDate(request.getDataInicio()),
+        DateFormatter.stringToLocalDate(request.getDataFim()));
   }
 }

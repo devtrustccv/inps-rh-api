@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 
@@ -58,6 +59,10 @@ public class ParamVinculoMovimentoEntity extends AuditEntity {
 
   @Column(name="percentagem")
     private Integer percentagem;
+
+
+  @Column(name="valor")
+    private BigDecimal valor;
 
 
 }

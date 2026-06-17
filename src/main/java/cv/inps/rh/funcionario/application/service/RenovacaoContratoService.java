@@ -70,6 +70,7 @@ public class RenovacaoContratoService {
     valid.setFunId(funcionario);
     valid.setTiprelId(novoTipoRelacionamento);
     valid.setReferenciaId(contratoAtual.getId());
+    valid.setReferenciaUuid(contratoAtual.getUuid());
     funcionario.getValidacoes().add(valid);
 
     funcionarioEntityRepository.saveAndFlush(funcionario);

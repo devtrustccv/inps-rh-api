@@ -56,6 +56,8 @@ public class DefinicaoRemuneracaoMapper {
         }
       }
       if (found != null) {
+        ValidationUtil.validateValorNaoNegativo(dto.getValor());
+        ValidationUtil.validatePercentagem(dto.getPercentagem());
         found.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoSubsidioId()));
         found.setPercentagem(dto.getPercentagem());
         found.setValor(dto.getValor());
@@ -83,6 +85,8 @@ public class DefinicaoRemuneracaoMapper {
 
   public DefinicaoRemuneracaoEntity toDefinicaoRemuneracao(SubsidioReqDTO s, FuncionarioEntity fun, Estado estado) {
     if (s == null) return null;
+    ValidationUtil.validateValorNaoNegativo(s.getValor());
+    ValidationUtil.validatePercentagem(s.getPercentagem());
     var de = new DefinicaoRemuneracaoEntity();
     de.setPercentagem(s.getPercentagem());
     de.setValor(s.getValor());

@@ -148,6 +148,7 @@ public class NovoContratoService {
     var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.CONTRATO.name(), Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(tiposRelacionamentoNovo);
+    valid.setReferenciaUuid(contratoNovo.getUuid());
     funcionario.getValidacoes().add(valid);
 
     // verifica se vinculo tem salario
@@ -403,6 +404,7 @@ public class NovoContratoService {
     var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.CONTRATO.name(), Estado.P);
     valid.setFunId(funcionario);
     valid.setTiprelId(tiposRelacionamento);
+    valid.setReferenciaUuid(contrato.getUuid());
     funcionario.getValidacoes().add(valid);
 
 

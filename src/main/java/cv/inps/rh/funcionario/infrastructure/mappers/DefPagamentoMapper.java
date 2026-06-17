@@ -59,6 +59,8 @@ public class DefPagamentoMapper {
         }
       }
       if (found != null) {
+        ValidationUtil.validateValorNaoNegativo(dto.getValor());
+        ValidationUtil.validateIntervaloData(dto.getDataInicio(), dto.getDataFim());
         found.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoEncargoId()));
         found.setValor(dto.getValor());
         found.setDataInicio(dto.getDataInicio());
@@ -88,6 +90,8 @@ public class DefPagamentoMapper {
 
   public DefPagamentoEntity toDefPagamento(EncargosDescontosReqDTO e, FuncionarioEntity fun, Estado estado) {
     if (e == null) return null;
+    ValidationUtil.validateValorNaoNegativo(e.getValor());
+    ValidationUtil.validateIntervaloData(e.getDataInicio(), e.getDataFim());
     var dp = new DefPagamentoEntity();
     dp.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, e.getTipoEncargoId()));
     dp.setValor(e.getValor());

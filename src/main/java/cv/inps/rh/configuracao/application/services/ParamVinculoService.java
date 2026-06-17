@@ -5,6 +5,8 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoLaboralRequestDTO;
 import cv.inps.rh.configuracao.application.dto.VinculoLaboralResponseDTO;
+import cv.inps.rh.configuracao.application.dto.VinculoSituacaoLaboralRequestDTO;
+import cv.inps.rh.configuracao.application.dto.VinculoSituacaoLaboralResponseDTO;
 import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
 import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
@@ -25,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Transactional
@@ -49,17 +53,63 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     this.paramContratoEntityRepository = paramContratoEntityRepository;
   }
 
-  public void associarVinculoSituacao(String vinculoId, String situacaoId) {
+  public List<VinculoSituacaoLaboralResponseDTO> listarSituacoesLaborais(String vinculoUuid) {
+    var vinculo = repository.findByUuidOrThrow(UUID.fromString(vinculoUuid));
+    return situacaoLaboralEntityRepository.findAllByVinculoIdAndEstadoNot(vinculo.getId(), Estado.E.name()).stream()
+        .map(this::toSituacaoResponse)
+        .toList();
+  }
 
-    var vinculo = repository.findByUuidOrThrow(UUID.fromString(vinculoId));
+  public List<VinculoSituacaoLaboralResponseDTO> syncSituacoesLaborais(String vinculoUuid,
+                                                                        List<VinculoSituacaoLaboralRequestDTO> items) {
+    var vinculo = repository.findByUuidOrThrow(UUID.fromString(vinculoUuid));
+    var existingList = situacaoLaboralEntityRepository.findAllByVinculoIdAndEstadoNot(vinculo.getId(), Estado.E.name());
 
-    var situacao = paramSituacaoEntityRepository.findByUuidOrThrow(UUID.fromString(situacaoId));
+    if (items == null) items = List.of();
 
-    var obj = new ParamSitLaboralEntity();
-    obj.setParamSit(situacao);
-    obj.setVinculo(vinculo);
-    obj.setEstado(Estado.A.name());
-    situacaoLaboralEntityRepository.save(obj);
+    for (var dto : items) {
+      ParamSitLaboralEntity found = null;
+      if (dto.getId() != null) {
+        for (var e : existingList) {
+          if (Objects.equals(e.getId(), dto.getId())) { found = e; break; }
+        }
+      }
+      if (found != null) {
+        var situacao = paramSituacaoEntityRepository.getReferenceById(dto.getSituacaoId());
+        found.setParamSit(situacao);
+      } else {
+        var situacao = paramSituacaoEntityRepository.getReferenceById(dto.getSituacaoId());
+        var obj = new ParamSitLaboralEntity();
+        obj.setParamSit(situacao);
+        obj.setVinculo(vinculo);
+        obj.setEstado(Estado.A.name());
+        existingList.add(obj);
+      }
+    }
+
+    for (var existing : existingList) {
+      boolean stillExists = items.stream()
+          .anyMatch(dto -> Objects.equals(dto.getId(), existing.getId()));
+      if (!stillExists && !"I".equals(existing.getEstado())) {
+        existing.setEstado(Estado.E.name());
+      }
+    }
+
+    situacaoLaboralEntityRepository.saveAll(existingList);
+
+    return situacaoLaboralEntityRepository.findAllByVinculoIdAndEstadoNot(vinculo.getId(), Estado.E.name()).stream()
+        .map(this::toSituacaoResponse)
+        .toList();
+  }
+
+  private VinculoSituacaoLaboralResponseDTO toSituacaoResponse(ParamSitLaboralEntity entity) {
+    var resp = new VinculoSituacaoLaboralResponseDTO();
+    resp.setId(entity.getId());
+    resp.setSituacaoId(entity.getParamSit() != null ? entity.getParamSit().getId() : null);
+    resp.setSituacaoUuid(entity.getParamSit() != null && entity.getParamSit().getUuid() != null ? entity.getParamSit().getUuid().toString() : null);
+    resp.setSituacaoDescricao(entity.getParamSit() != null ? entity.getParamSit().getNome() : null);
+    resp.setEstado(entity.getEstado());
+    return resp;
   }
 
   @Override
