@@ -37,11 +37,11 @@ public class ParametrizacaoService {
 
 
   public List<ParametrizacaoDTO> getTiposMovimentosRenumeracao(){
-    return tipoMovimentoEntityRepository.findAllByTipo("REM").stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
+    return tipoMovimentoEntityRepository.findAllByTipoIn(List.of("REM")).stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
 
   public List<ParametrizacaoDTO> getTiposMovimentosPagamentosDesconto(){
-    return tipoMovimentoEntityRepository.findAllByTipo("PAG").stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
+    return tipoMovimentoEntityRepository.findAllByTipoIn(List.of("PAG", "IMP")).stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
 
   public List<ParametrizacaoDTO> getInstituicoes() {
