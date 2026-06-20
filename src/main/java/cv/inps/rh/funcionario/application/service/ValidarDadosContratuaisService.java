@@ -2,8 +2,7 @@ package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +46,27 @@ public class ValidarDadosContratuaisService {
 
     if (dc.getTipoVinculoLaboralId() == null)
       throw IgrpResponseStatusException.badRequest("Tipo de vínculo laboral é obrigatório.");
+
+    // -----------------------------
+    // EXISTÊNCIA DAS REFERÊNCIAS (FK)
+    // -----------------------------
+    if (entityManager.find(ParamContratoEntity.class, dc.getTipoContratoId()) == null)
+      throw IgrpResponseStatusException.badRequest("Tipo de contrato inválido: o valor indicado não existe.");
+
+    if (entityManager.find(InstituicaoEntity.class, dc.getDirecaoId()) == null)
+      throw IgrpResponseStatusException.badRequest("Direção inválida: o valor indicado não existe.");
+
+    if (entityManager.find(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()) == null)
+      throw IgrpResponseStatusException.badRequest("Local de trabalho inválido: o valor indicado não existe.");
+
+    if (dc.getSeccaoId() != null && entityManager.find(SecaoEntity.class, dc.getSeccaoId()) == null)
+      throw IgrpResponseStatusException.badRequest("Seção inválida: o valor indicado não existe.");
+
+    if (dc.getCargoPosicaoId() != null && entityManager.find(ParamCargoEntity.class, dc.getCargoPosicaoId()) == null)
+      throw IgrpResponseStatusException.badRequest("Cargo/posição inválido: o valor indicado não existe.");
+
+    if (dc.getSituacaoLaboralId() != null && entityManager.find(ParamSituacaoEntity.class, dc.getSituacaoLaboralId()) == null)
+      throw IgrpResponseStatusException.badRequest("Situação laboral inválida: o valor indicado não existe.");
 
     // -----------------------------
     // REGRAS DE DATAS

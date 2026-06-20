@@ -7,12 +7,10 @@ import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaReqDTO;
 import cv.inps.rh.funcionario.application.dto.SubsidioReqDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.DefPagamentoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FamiliarEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoMovimentoEntityRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -30,6 +28,7 @@ public class ColaboradorValidationRules {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
+  private final EntityManager entityManager;
 
   public void validarDadosPessoais(DadosPessoaisReqDTO dp, UUID uuidExistente) {
     validarDocumentoUnico(dp, uuidExistente);
@@ -72,6 +71,14 @@ public class ColaboradorValidationRules {
     }
     if (dp.getNaturalidadeId() == null) {
       throw IgrpResponseStatusException.badRequest("Naturalidade é obrigatória.");
+    }
+
+    if (dp.getTipoDocumentoId() != null
+        && entityManager.find(TipoDocumentoEntity.class, dp.getTipoDocumentoId()) == null) {
+      throw IgrpResponseStatusException.badRequest("Tipo de documento inválido: o valor indicado não existe.");
+    }
+    if (entityManager.find(GeografiaEntity.class, dp.getNaturalidadeId()) == null) {
+      throw IgrpResponseStatusException.badRequest("Naturalidade inválida: o valor indicado não existe.");
     }
   }
 
