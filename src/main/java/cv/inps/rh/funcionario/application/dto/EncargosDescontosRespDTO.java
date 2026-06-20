@@ -33,9 +33,15 @@ public class EncargosDescontosRespDTO  {
   private BigDecimal valor ;
 
 
+  private BigDecimal percentagem ;
+
+
   private LocalDate dataInicio ;
 
 
   private LocalDate dataFim ;
+
+
+  private String observacoes ;
 
 }
