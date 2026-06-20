@@ -38,6 +38,8 @@ public class DefinicaoRemuneracaoMapper {
     dto.setEstadoDesc(entity.getEstado() != null ? entity.getEstado().getDescription() : null);
     dto.setMovimento(entity.getTmId() != null ? entity.getTmId().getDescricao() : null);
     dto.setValor(entity.getValor() != null ? entity.getValor().toPlainString() : null);
+    dto.setPercentagem(entity.getPercentagem() != null ? entity.getPercentagem().toPlainString() : null);
+    dto.setObs(entity.getObs());
     dto.setUltimoPRoc(entity.getDataUltimoProc() != null ? DateFormatter.localDateToString(entity.getDataUltimoProc()) : null);
     dto.setDataInicio(entity.getDataInicio() != null ? DateFormatter.localDateToString(entity.getDataInicio()) : null);
     dto.setDataFim(entity.getDataFim() != null ? DateFormatter.localDateToString(entity.getDataFim()) : null);

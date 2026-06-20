@@ -36,6 +36,8 @@ public class DefPagamentoMapper {
     dto.setUuid(defPagamentoEntity.getUuid() != null ? defPagamentoEntity.getUuid().toString() : null);
     dto.setMovimento(defPagamentoEntity.getTmId() != null ? defPagamentoEntity.getTmId().getDescricao() : null);
     dto.setValor(defPagamentoEntity.getValor() != null ? defPagamentoEntity.getValor().toPlainString() : null);
+    dto.setPercentagem(defPagamentoEntity.getPercentagem() != null ? defPagamentoEntity.getPercentagem().toPlainString() : null);
+    dto.setObs(defPagamentoEntity.getObs());
     dto.setEstado(defPagamentoEntity.getEstado() != null ? defPagamentoEntity.getEstado().name() : null);
     dto.setEstadoDesc(defPagamentoEntity.getEstado() != null ? defPagamentoEntity.getEstado().getDescription() : null);
     dto.setDataInicio(defPagamentoEntity.getDataInicio() != null ? DateFormatter.localDateToString(defPagamentoEntity.getDataInicio()) : null);
