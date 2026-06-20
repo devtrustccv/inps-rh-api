@@ -37,8 +37,8 @@ public class DefinicaoRemuneracaoMapper {
     dto.setEstado(entity.getEstado() != null ? entity.getEstado().name() : null);
     dto.setEstadoDesc(entity.getEstado() != null ? entity.getEstado().getDescription() : null);
     dto.setMovimento(entity.getTmId() != null ? entity.getTmId().getDescricao() : null);
-    dto.setValor(entity.getValor() != null ? entity.getValor().toPlainString() : null);
-    dto.setPercentagem(entity.getPercentagem() != null ? entity.getPercentagem().toPlainString() : null);
+    dto.setValor((entity.getValor() != null ? entity.getValor() : BigDecimal.ZERO).toPlainString());
+    dto.setPercentagem((entity.getPercentagem() != null ? entity.getPercentagem() : BigDecimal.ZERO).toPlainString());
     dto.setObs(entity.getObs());
     dto.setUltimoPRoc(entity.getDataUltimoProc() != null ? DateFormatter.localDateToString(entity.getDataUltimoProc()) : null);
     dto.setDataInicio(entity.getDataInicio() != null ? DateFormatter.localDateToString(entity.getDataInicio()) : null);
@@ -61,14 +61,14 @@ public class DefinicaoRemuneracaoMapper {
         ValidationUtil.validateValorNaoNegativo(dto.getValor());
         ValidationUtil.validatePercentagem(dto.getPercentagem());
         found.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoSubsidioId()));
-        found.setPercentagem(dto.getPercentagem());
-        found.setValor(dto.getValor());
+        found.setPercentagem(dto.getPercentagem() != null ? dto.getPercentagem() : BigDecimal.ZERO);
+        found.setValor(dto.getValor() != null ? dto.getValor() : BigDecimal.ZERO);
         found.setObs(dto.getObservacoes());
       } else {
         DefinicaoRemuneracaoEntity novo = new DefinicaoRemuneracaoEntity();
         novo.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoSubsidioId()));
-        novo.setPercentagem(dto.getPercentagem());
-        novo.setValor(dto.getValor());
+        novo.setPercentagem(dto.getPercentagem() != null ? dto.getPercentagem() : BigDecimal.ZERO);
+        novo.setValor(dto.getValor() != null ? dto.getValor() : BigDecimal.ZERO);
         novo.setObs(dto.getObservacoes());
         novo.setEstado(Estado.P);
         existingList.add(novo);
@@ -90,8 +90,8 @@ public class DefinicaoRemuneracaoMapper {
     ValidationUtil.validateValorNaoNegativo(s.getValor());
     ValidationUtil.validatePercentagem(s.getPercentagem());
     var de = new DefinicaoRemuneracaoEntity();
-    de.setPercentagem(s.getPercentagem());
-    de.setValor(s.getValor());
+    de.setPercentagem(s.getPercentagem() != null ? s.getPercentagem() : BigDecimal.ZERO);
+    de.setValor(s.getValor() != null ? s.getValor() : BigDecimal.ZERO);
     de.setEstado(estado);
     de.setObs(s.getObservacoes());
     de.setDataInicio(LocalDate.now());
@@ -105,8 +105,8 @@ public class DefinicaoRemuneracaoMapper {
   public DefinicaoRemuneracaoEntity createRenumeracao(BigDecimal valor, TipoMovimentoEntity tmId,
                                                       LocalDate dataInicio, LocalDate dataFim, FuncionarioEntity fun,String moeda) {
     var de = new DefinicaoRemuneracaoEntity();
-    de.setPercentagem(null);
-    de.setValor(valor);
+    de.setPercentagem(BigDecimal.ZERO);
+    de.setValor(valor != null ? valor : BigDecimal.ZERO);
     de.setEstado(Estado.P);
     de.setObs(null);
     de.setDataInicio(dataInicio);

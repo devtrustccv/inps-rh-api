@@ -35,8 +35,8 @@ public class DefPagamentoMapper {
     dto.setId(defPagamentoEntity.getId() != null ? defPagamentoEntity.getId().toString() : null);
     dto.setUuid(defPagamentoEntity.getUuid() != null ? defPagamentoEntity.getUuid().toString() : null);
     dto.setMovimento(defPagamentoEntity.getTmId() != null ? defPagamentoEntity.getTmId().getDescricao() : null);
-    dto.setValor(defPagamentoEntity.getValor() != null ? defPagamentoEntity.getValor().toPlainString() : null);
-    dto.setPercentagem(defPagamentoEntity.getPercentagem() != null ? defPagamentoEntity.getPercentagem().toPlainString() : null);
+    dto.setValor((defPagamentoEntity.getValor() != null ? defPagamentoEntity.getValor() : BigDecimal.ZERO).toPlainString());
+    dto.setPercentagem((defPagamentoEntity.getPercentagem() != null ? defPagamentoEntity.getPercentagem() : BigDecimal.ZERO).toPlainString());
     dto.setObs(defPagamentoEntity.getObs());
     dto.setEstado(defPagamentoEntity.getEstado() != null ? defPagamentoEntity.getEstado().name() : null);
     dto.setEstadoDesc(defPagamentoEntity.getEstado() != null ? defPagamentoEntity.getEstado().getDescription() : null);
@@ -64,14 +64,14 @@ public class DefPagamentoMapper {
         ValidationUtil.validateValorNaoNegativo(dto.getValor());
         ValidationUtil.validateIntervaloData(dto.getDataInicio(), dto.getDataFim());
         found.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoEncargoId()));
-        found.setValor(dto.getValor());
+        found.setValor(dto.getValor() != null ? dto.getValor() : BigDecimal.ZERO);
         found.setDataInicio(dto.getDataInicio());
         found.setDataFim(dto.getDataFim());
         found.setObs(dto.getObservacoes());
       } else {
         DefPagamentoEntity novo = new DefPagamentoEntity();
         novo.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoEncargoId()));
-        novo.setValor(dto.getValor());
+        novo.setValor(dto.getValor() != null ? dto.getValor() : BigDecimal.ZERO);
         novo.setDataInicio(dto.getDataInicio());
         novo.setDataFim(dto.getDataFim());
         novo.setObs(dto.getObservacoes());
@@ -96,7 +96,7 @@ public class DefPagamentoMapper {
     ValidationUtil.validateIntervaloData(e.getDataInicio(), e.getDataFim());
     var dp = new DefPagamentoEntity();
     dp.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, e.getTipoEncargoId()));
-    dp.setValor(e.getValor());
+    dp.setValor(e.getValor() != null ? e.getValor() : BigDecimal.ZERO);
     dp.setDataInicio(e.getDataInicio());
     dp.setDataFim(e.getDataFim());
     dp.setObs(e.getObservacoes());

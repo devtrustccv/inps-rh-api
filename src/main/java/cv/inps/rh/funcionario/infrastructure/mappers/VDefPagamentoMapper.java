@@ -17,8 +17,8 @@ public class VDefPagamentoMapper {
     dto.setMovimento(entity.getDescricao());
     dto.setEstado(entity.getEstado() != null ? entity.getEstado().name() : null);
     dto.setEstadoDesc(entity.getEstado() != null ? entity.getEstado().getDescription() : null);
-    dto.setValor(entity.getValor() != null ? entity.getValor().toPlainString() : null);
-    dto.setPercentagem(entity.getPercentagem() != null ? entity.getPercentagem().toPlainString() : null);
+    dto.setValor((entity.getValor() != null ? entity.getValor() : java.math.BigDecimal.ZERO).toPlainString());
+    dto.setPercentagem((entity.getPercentagem() != null ? entity.getPercentagem() : java.math.BigDecimal.ZERO).toPlainString());
     dto.setObs(entity.getObs());
     dto.setDataInicio(entity.getDataInicio() != null ? DateFormatter.localDateToString(entity.getDataInicio()) : null);
     dto.setDataFim(entity.getDataFim() != null ? DateFormatter.localDateToString(entity.getDataFim()) : null);
