@@ -36,12 +36,19 @@ public class ParametrizacaoService {
   private final ParamSituacaoEntityRepository paramSitLaboralEntityRepository;
 
 
+  private static final String ESTADO_ACTIVO = "ACTIVO";
+  private static final Long AMB_APL_ID = 30L;
+
   public List<ParametrizacaoDTO> getTiposMovimentosRenumeracao(){
-    return tipoMovimentoEntityRepository.findAllByTipoIn(List.of("REM")).stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
+    return tipoMovimentoEntityRepository
+        .findAllByTipoInAndEstadoAndAmbAplIdAndShortDescNot(List.of("REM", "ABA"), ESTADO_ACTIVO, AMB_APL_ID, "SALL")
+        .stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
 
   public List<ParametrizacaoDTO> getTiposMovimentosPagamentosDesconto(){
-    return tipoMovimentoEntityRepository.findAllByTipoIn(List.of("PAG", "IMP")).stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
+    return tipoMovimentoEntityRepository
+        .findAllByTipoInAndEstadoAndAmbAplId(List.of("PAG", "IMP"), ESTADO_ACTIVO, AMB_APL_ID)
+        .stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
 
   public List<ParametrizacaoDTO> getInstituicoes() {
