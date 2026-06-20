@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.application.dto.RenumeracaoListDTO;
 import cv.inps.rh.funcionario.application.dto.SubsidioReqDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.mappers.TipoMovimentoMapper;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
@@ -17,6 +18,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 
 @Component
@@ -81,7 +83,20 @@ public class DefinicaoRemuneracaoMapper {
         existing.setEstado(Estado.E);
       }
     }
+    verificarTipoMovimentoDuplicado(existingList);
     return existingList;
+  }
+
+  private void verificarTipoMovimentoDuplicado(List<DefinicaoRemuneracaoEntity> list) {
+    var seen = new HashSet<Long>();
+    for (var e : list) {
+      if (e.getEstado() != Estado.A && e.getEstado() != Estado.P) continue;
+      if (e.getTmId() != null && !seen.add(e.getTmId().getId())) {
+        var estadoDesc = e.getEstado() == Estado.P ? "pendente de validação" : "activo";
+        throw IgrpResponseStatusException.conflict(
+            "O tipo de movimento '" + e.getTmId().getDescricao() + "' já se encontra " + estadoDesc + " nas remunerações.");
+      }
+    }
   }
 
 

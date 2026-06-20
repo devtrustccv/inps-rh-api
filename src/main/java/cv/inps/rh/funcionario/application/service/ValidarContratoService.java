@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidarContratoCommand;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
+import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
@@ -42,6 +43,7 @@ public class ValidarContratoService {
   private final TipoMovimentoHelper tipoMovimentoHelper;
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
   private final EntityManager entityManager;
+  private final ColaboradorValidationRules colaboradorValidationRules;
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
 
@@ -88,6 +90,9 @@ public class ValidarContratoService {
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
 
     if (Objects.equals(1, paramVinculo.getFlgSalario())) {
+      colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
+      colaboradorValidationRules.validarEncargosDescontosDuplicados(dadosContratuais.getEncargosDescontos());
+
       var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(),
           dadosContratuais.getSubsidios());
       var definicoesPagamentos = defPagamentoMapper.syncPagamentos(funcionario.getDefinicoesPagamentos(),

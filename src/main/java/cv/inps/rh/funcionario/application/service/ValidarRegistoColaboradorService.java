@@ -133,6 +133,9 @@ public class ValidarRegistoColaboradorService {
     var regime = tiposRelacionamento.getRegimeId();
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
 
+    colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
+    colaboradorValidationRules.validarEncargosDescontosDuplicados(dadosContratuais.getEncargosDescontos());
+
     var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(),
         dadosContratuais.getSubsidios());
 
