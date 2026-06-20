@@ -22,7 +22,7 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -135,8 +135,7 @@ public class HistoricoLaboralWriteService {
         updateEstadoOnRelAndChildren(atual, novoEstado);
         updateValidacaoPendentes(funcionario.getUuid(), novoEstado);
         if (novoEstado == Estado.A) {
-          var referente = StringUtils.hasText(dto.getTipoOrdemServico()) ? dto.getTipoOrdemServico() : "SITUACAO_LABORAL";
-          ordemServicoWriteService.criar(funcionario, atual, referente);
+          ordemServicoWriteService.criar(funcionario, atual, dto.getTipoOrdemServico());
         }
       }
 
@@ -269,8 +268,7 @@ public class HistoricoLaboralWriteService {
       updateEstadoOnRelAndChildren(novoRelacionamento, novoEstado);
       updateValidacaoPendentes(funcionario.getUuid(), novoEstado);
       if (novoEstado == Estado.A) {
-        var referente = StringUtils.hasText(dto.getTipoOrdemServico()) ? dto.getTipoOrdemServico() : "SITUACAO_LABORAL";
-        ordemServicoWriteService.criar(funcionario, novoRelacionamento, referente);
+        ordemServicoWriteService.criar(funcionario, novoRelacionamento, dto.getTipoOrdemServico());
       }
     }
 
@@ -358,8 +356,7 @@ public class HistoricoLaboralWriteService {
       updateEstadoOnRelAndChildren(relacionamento, novoEstado);
       updateValidacaoPendentes(funcionario.getUuid(), novoEstado);
       if (novoEstado == Estado.A) {
-        var referente = StringUtils.hasText(dto.getTipoOrdemServico()) ? dto.getTipoOrdemServico() : "SITUACAO_LABORAL";
-        ordemServicoWriteService.criar(funcionario, relacionamento, referente);
+        ordemServicoWriteService.criar(funcionario, relacionamento, dto.getTipoOrdemServico());
       }
     }
 

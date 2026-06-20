@@ -157,8 +157,6 @@ public class ValidarRegistoColaboradorService {
     if (registroColaborador.getValidar() != null) {
       var estado = registroColaborador.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       if (estado.equals(Estado.A)) {
-        if (!org.springframework.util.StringUtils.hasText(registroColaborador.getTipoOrdemServico()))
-          throw IgrpResponseStatusException.badRequest("Tipo de ordem de serviço é obrigatório para validar o registo.");
         var validacao = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR).orElse(null);
         var descricao = "Registo de colaborador - " + funcionario.getNome();
         ordemServicoWriteService.criar(funcionario, tiposRelacionamento, registroColaborador.getTipoOrdemServico(), validacao, descricao);
