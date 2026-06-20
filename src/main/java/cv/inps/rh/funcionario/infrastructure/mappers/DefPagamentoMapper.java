@@ -104,9 +104,10 @@ public class DefPagamentoMapper {
     return dp;
   }
 
-  public DefPagamentoEntity createPagamento(BigDecimal valor, TipoMovimentoEntity tmId, LocalDate dataInicio, LocalDate dataFim, FuncionarioEntity fun) {
+  public DefPagamentoEntity createPagamento(BigDecimal valor, BigDecimal percentagem, TipoMovimentoEntity tmId, LocalDate dataInicio, LocalDate dataFim, FuncionarioEntity fun) {
     var dp = new DefPagamentoEntity();
-    dp.setValor(valor);
+    dp.setValor(valor != null ? valor : BigDecimal.ZERO);
+    dp.setPercentagem(percentagem != null ? percentagem : BigDecimal.ZERO);
     dp.setDataInicio(dataInicio);
     dp.setDataFim(dataFim);
     dp.setEstado(Estado.P);

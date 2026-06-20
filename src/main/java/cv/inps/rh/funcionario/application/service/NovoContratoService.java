@@ -216,7 +216,8 @@ public class NovoContratoService {
         if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
           listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
             var pagamento = defPagamentoMapper.createPagamento(
-                BigDecimal.ZERO,
+                movimento.getValor(),
+                movimento.getPercentagem() != null ? BigDecimal.valueOf(movimento.getPercentagem()) : null,
                 movimento.getTmId(),
                 dadosContratuais.getDataInicio(),
                 dadosContratuais.getDataFim(),
@@ -449,7 +450,8 @@ public class NovoContratoService {
       if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
         listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
           var pagamento = defPagamentoMapper.createPagamento(
-              BigDecimal.ZERO,
+              movimento.getValor(),
+              movimento.getPercentagem() != null ? BigDecimal.valueOf(movimento.getPercentagem()) : null,
               movimento.getTmId(),
               dadosContratuais.getDataInicio(),
               dadosContratuais.getDataFim(),
