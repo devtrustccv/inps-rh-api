@@ -73,6 +73,10 @@ public class DadosContratuaisReqDTO  {
 
   private Long localTrabalhoId ;
 
+  private String tipoCarreira ;
+
+  private Integer flgProcessa ;
+
   @Valid
   private List<SubsidioReqDTO> subsidios = new ArrayList<>();
 
