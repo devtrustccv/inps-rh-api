@@ -34,4 +34,7 @@ public class SubsidioRespDTO  {
 
   private BigDecimal valor ;
 
+
+  private String observacoes ;
+
 }

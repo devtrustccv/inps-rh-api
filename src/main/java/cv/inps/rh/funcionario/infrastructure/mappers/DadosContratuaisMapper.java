@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -160,8 +161,10 @@ public class DadosContratuaisMapper {
         SubsidioRespDTO sr = new SubsidioRespDTO();
         sr.setId(s.getId());
         sr.setTipoSubsidioId(s.getTmId() != null ? s.getTmId().getId() : null);
-        sr.setPercentagem(s.getPercentagem());
-        sr.setValor(s.getValor());
+        sr.setTipoSubsidioDesc(s.getTmId() != null ? s.getTmId().getDescricao() : null);
+        sr.setPercentagem(s.getPercentagem() != null ? s.getPercentagem() : BigDecimal.ZERO);
+        sr.setValor(s.getValor() != null ? s.getValor() : BigDecimal.ZERO);
+        sr.setObservacoes(s.getObs());
         return sr;
       }).toList();
 
@@ -174,9 +177,12 @@ public class DadosContratuaisMapper {
         EncargosDescontosRespDTO er = new EncargosDescontosRespDTO();
         er.setId(e.getId());
         er.setTipoEncargoId(e.getTmId() != null ? e.getTmId().getId() : null);
-        er.setValor(e.getValor());
+        er.setTipoEncargoDesc(e.getTmId() != null ? e.getTmId().getDescricao() : null);
+        er.setValor(e.getValor() != null ? e.getValor() : BigDecimal.ZERO);
+        er.setPercentagem(e.getPercentagem() != null ? e.getPercentagem() : BigDecimal.ZERO);
         er.setDataInicio(e.getDataInicio());
         er.setDataFim(e.getDataFim());
+        er.setObservacoes(e.getObs());
         return er;
       }).toList();
 

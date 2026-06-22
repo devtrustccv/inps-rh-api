@@ -43,6 +43,10 @@ public interface TipoMovimentoEntityRepository extends
 
   List<TipoMovimentoEntity> findAllByTipoIn(List<String> tipos);
 
+  List<TipoMovimentoEntity> findAllByTipoInAndEstadoAndAmbAplId(List<String> tipos, String estado, Long ambAplId);
+
+  List<TipoMovimentoEntity> findAllByTipoInAndEstadoAndAmbAplIdAndShortDescNot(List<String> tipos, String estado, Long ambAplId, String shortDesc);
+
   Optional<TipoMovimentoEntity> findByShortDescAndAmbAplId(String shortDesc, Long ambApplId);
 
 }

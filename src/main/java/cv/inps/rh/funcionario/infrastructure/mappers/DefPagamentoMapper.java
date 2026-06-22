@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO;
 import cv.inps.rh.funcionario.application.dto.PagamentosDescontoListDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.mappers.TipoMovimentoMapper;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefPagamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 
 @Component
@@ -35,7 +37,9 @@ public class DefPagamentoMapper {
     dto.setId(defPagamentoEntity.getId() != null ? defPagamentoEntity.getId().toString() : null);
     dto.setUuid(defPagamentoEntity.getUuid() != null ? defPagamentoEntity.getUuid().toString() : null);
     dto.setMovimento(defPagamentoEntity.getTmId() != null ? defPagamentoEntity.getTmId().getDescricao() : null);
-    dto.setValor(defPagamentoEntity.getValor() != null ? defPagamentoEntity.getValor().toPlainString() : null);
+    dto.setValor((defPagamentoEntity.getValor() != null ? defPagamentoEntity.getValor() : BigDecimal.ZERO).toPlainString());
+    dto.setPercentagem((defPagamentoEntity.getPercentagem() != null ? defPagamentoEntity.getPercentagem() : BigDecimal.ZERO).toPlainString());
+    dto.setObs(defPagamentoEntity.getObs());
     dto.setEstado(defPagamentoEntity.getEstado() != null ? defPagamentoEntity.getEstado().name() : null);
     dto.setEstadoDesc(defPagamentoEntity.getEstado() != null ? defPagamentoEntity.getEstado().getDescription() : null);
     dto.setDataInicio(defPagamentoEntity.getDataInicio() != null ? DateFormatter.localDateToString(defPagamentoEntity.getDataInicio()) : null);
@@ -62,14 +66,14 @@ public class DefPagamentoMapper {
         ValidationUtil.validateValorNaoNegativo(dto.getValor());
         ValidationUtil.validateIntervaloData(dto.getDataInicio(), dto.getDataFim());
         found.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoEncargoId()));
-        found.setValor(dto.getValor());
+        found.setValor(dto.getValor() != null ? dto.getValor() : BigDecimal.ZERO);
         found.setDataInicio(dto.getDataInicio());
         found.setDataFim(dto.getDataFim());
         found.setObs(dto.getObservacoes());
       } else {
         DefPagamentoEntity novo = new DefPagamentoEntity();
         novo.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoEncargoId()));
-        novo.setValor(dto.getValor());
+        novo.setValor(dto.getValor() != null ? dto.getValor() : BigDecimal.ZERO);
         novo.setDataInicio(dto.getDataInicio());
         novo.setDataFim(dto.getDataFim());
         novo.setObs(dto.getObservacoes());
@@ -84,7 +88,20 @@ public class DefPagamentoMapper {
         existing.setEstado(Estado.E);
       }
     }
+    verificarTipoMovimentoDuplicado(existingList);
     return existingList;
+  }
+
+  private void verificarTipoMovimentoDuplicado(List<DefPagamentoEntity> list) {
+    var seen = new HashSet<Long>();
+    for (var e : list) {
+      if (e.getEstado() != Estado.A && e.getEstado() != Estado.P) continue;
+      if (e.getTmId() != null && !seen.add(e.getTmId().getId())) {
+        var estadoDesc = e.getEstado() == Estado.P ? "pendente de validação" : "activo";
+        throw IgrpResponseStatusException.conflict(
+            "O tipo de movimento '" + e.getTmId().getDescricao() + "' já se encontra " + estadoDesc + " nos encargos/descontos.");
+      }
+    }
   }
 
 
@@ -94,7 +111,7 @@ public class DefPagamentoMapper {
     ValidationUtil.validateIntervaloData(e.getDataInicio(), e.getDataFim());
     var dp = new DefPagamentoEntity();
     dp.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, e.getTipoEncargoId()));
-    dp.setValor(e.getValor());
+    dp.setValor(e.getValor() != null ? e.getValor() : BigDecimal.ZERO);
     dp.setDataInicio(e.getDataInicio());
     dp.setDataFim(e.getDataFim());
     dp.setObs(e.getObservacoes());
@@ -104,9 +121,10 @@ public class DefPagamentoMapper {
     return dp;
   }
 
-  public DefPagamentoEntity createPagamento(BigDecimal valor, TipoMovimentoEntity tmId, LocalDate dataInicio, LocalDate dataFim, FuncionarioEntity fun) {
+  public DefPagamentoEntity createPagamento(BigDecimal valor, BigDecimal percentagem, TipoMovimentoEntity tmId, LocalDate dataInicio, LocalDate dataFim, FuncionarioEntity fun) {
     var dp = new DefPagamentoEntity();
-    dp.setValor(valor);
+    dp.setValor(valor != null ? valor : BigDecimal.ZERO);
+    dp.setPercentagem(percentagem != null ? percentagem : BigDecimal.ZERO);
     dp.setDataInicio(dataInicio);
     dp.setDataFim(dataFim);
     dp.setEstado(Estado.P);

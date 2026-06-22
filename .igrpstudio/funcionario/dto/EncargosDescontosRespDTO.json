@@ -54,6 +54,18 @@
       "primaryKey": false
     },
     {
+      "name": "percentagem",
+      "objectType": "java",
+      "type": "decimal",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "dataInicio",
       "objectType": "java",
       "type": "date",
@@ -69,6 +81,18 @@
       "name": "dataFim",
       "objectType": "java",
       "type": "date",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "observacoes",
+      "objectType": "java",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,

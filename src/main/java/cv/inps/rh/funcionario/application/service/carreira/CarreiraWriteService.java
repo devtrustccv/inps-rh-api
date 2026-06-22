@@ -163,7 +163,7 @@ public class CarreiraWriteService {
       if (!CollectionUtils.isEmpty(listAssoc)) {
         for (var mov : listAssoc) {
           var pagamento = defPagamentoMapper.createPagamento(
-              BigDecimal.ZERO, mov.getTmId(), dto.getDataInicio(), dto.getDataFim(), funcionario);
+              mov.getValor(), mov.getPercentagem() != null ? BigDecimal.valueOf(mov.getPercentagem()) : BigDecimal.ZERO, mov.getTmId(), dto.getDataInicio(), dto.getDataFim(), funcionario);
           defPagamentoEntityRepository.save(pagamento);
           novosPagamentos.add(pagamento);
         }

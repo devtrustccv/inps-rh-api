@@ -17,8 +17,8 @@ public class VDefRemuneracaoMapper {
     dto.setEstado(entity.getEstado() != null ? entity.getEstado().name() : null);
     dto.setEstadoDesc(entity.getEstado() != null ? entity.getEstado().getDescription() : null);
     dto.setMovimento(entity.getDescricao());
-    dto.setValor(entity.getValor() != null ? entity.getValor().toPlainString() : null);
-    dto.setPercentagem(entity.getPercentagem() != null ? entity.getPercentagem().toPlainString() : null);
+    dto.setValor((entity.getValor() != null ? entity.getValor() : java.math.BigDecimal.ZERO).toPlainString());
+    dto.setPercentagem((entity.getPercentagem() != null ? entity.getPercentagem() : java.math.BigDecimal.ZERO).toPlainString());
     dto.setObs(entity.getObs());
     dto.setUltimoPRoc(entity.getDataUltimoProc() != null ? DateFormatter.localDateToString(entity.getDataUltimoProc()) : null);
     dto.setDataInicio(entity.getDataInicio() != null ? DateFormatter.localDateToString(entity.getDataInicio()) : null);

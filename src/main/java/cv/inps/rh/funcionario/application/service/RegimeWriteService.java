@@ -183,9 +183,7 @@ public class RegimeWriteService {
           .ifPresent(v -> v.setEstado(estado));
 
       if (estado == Estado.A) {
-        var referente = org.springframework.util.StringUtils.hasText(dto.getTipoOrdemServico())
-            ? dto.getTipoOrdemServico() : "REGIME";
-        ordemServicoWriteService.criar(funcionario, tipoRelacionamentoAtual, referente);
+        ordemServicoWriteService.criar(funcionario, tipoRelacionamentoAtual, dto.getTipoOrdemServico());
       }
     }
 

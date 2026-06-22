@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.service;
 import cv.inps.rh.funcionario.application.commands.NovoContratoCommand;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
+import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
@@ -55,6 +56,7 @@ public class NovoContratoService {
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
 
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
+  private final ColaboradorValidationRules colaboradorValidationRules;
 
 
   @Transactional
@@ -154,8 +156,9 @@ public class NovoContratoService {
     // verifica se vinculo tem salario
     if (Objects.equals(1, paramVinculo.getFlgSalario())) {
       /******************** INI RENUMERACOES ********************************/
+      colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
+
       if (!CollectionUtils.isEmpty(dadosContratuais.getSubsidios())) {
-        System.out.println("RENUMERACOES");
         var remList = dadosContratuais.getSubsidios().stream()
             .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P))
             .collect(Collectors.toList());
@@ -179,23 +182,27 @@ public class NovoContratoService {
 
         var vinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
             .findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
-                "REM").getFirst(); // so é associado um tipo REM SALL ao vinculo
+                "REM").getFirst();
 
-        var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
-            dadosContratuais.getSalario(),
-            vinculoTipoMovimentoREM.getTmId(),
-            dadosContratuais.getDataInicio(),
-            dadosContratuais.getDataFim(),
-            funcionario,
-            dadosContratuais.getMoeda());
-        funcionario.getDefinicoesRenumeracoes().add(renumeracao);
+        var remTmIds = colaboradorValidationRules.getTipoMovimentoIdsDeRemuneracoes(funcionario.getDefinicoesRenumeracoes());
+        if (!remTmIds.contains(vinculoTipoMovimentoREM.getTmId().getId())) {
+          var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
+              dadosContratuais.getSalario(),
+              vinculoTipoMovimentoREM.getTmId(),
+              dadosContratuais.getDataInicio(),
+              dadosContratuais.getDataFim(),
+              funcionario,
+              dadosContratuais.getMoeda());
+          funcionario.getDefinicoesRenumeracoes().add(renumeracao);
+        }
       }
 
       /******************** FIM RENUMERACOES ********************************/
 
       /******************** INI PAGAMENTOS DESCONTOS ********************************/
+      colaboradorValidationRules.validarEncargosDescontosDuplicados(dadosContratuais.getEncargosDescontos());
+
       if (!CollectionUtils.isEmpty(dadosContratuais.getEncargosDescontos())) {
-        System.out.println("PAGAMENTOS DESCONTOS");
         var pagList = dadosContratuais.getEncargosDescontos().stream()
             .map(e -> defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P))
             .collect(Collectors.toList());
@@ -214,14 +221,18 @@ public class NovoContratoService {
                 "PAG");
 
         if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
+          var pagTmIds = colaboradorValidationRules.getTipoMovimentoIdsDePagamentos(funcionario.getDefinicoesPagamentos());
           listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
-            var pagamento = defPagamentoMapper.createPagamento(
-                BigDecimal.ZERO,
-                movimento.getTmId(),
-                dadosContratuais.getDataInicio(),
-                dadosContratuais.getDataFim(),
-                funcionario);
-            funcionario.getDefinicoesPagamentos().add(pagamento);
+            if (!pagTmIds.contains(movimento.getTmId().getId())) {
+              var pagamento = defPagamentoMapper.createPagamento(
+                  movimento.getValor(),
+                  movimento.getPercentagem() != null ? BigDecimal.valueOf(movimento.getPercentagem()) : null,
+                  movimento.getTmId(),
+                  dadosContratuais.getDataInicio(),
+                  dadosContratuais.getDataFim(),
+                  funcionario);
+              funcionario.getDefinicoesPagamentos().add(pagamento);
+            }
           });
         }
       }
@@ -411,6 +422,8 @@ public class NovoContratoService {
     // verifica se vinculo tem salario
     if (Objects.equals(1, paramVinculo.getFlgSalario())) {
       /******************** INI RENUMERACOES ********************************/
+      colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
+
       if (dadosContratuais.getSubsidios() != null && !dadosContratuais.getSubsidios().isEmpty()) {
         var remList = dadosContratuais.getSubsidios().stream()
             .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P))
@@ -420,21 +433,29 @@ public class NovoContratoService {
 
       var vinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
           .findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
-              "REM").getFirst(); // so é associado um tipo REM SALL ao vinculo
+              "REM").getFirst();
 
       if (!Objects.isNull(vinculoTipoMovimentoREM)) {
-        var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
-            dadosContratuais.getSalario(),
-            vinculoTipoMovimentoREM.getTmId(),
-            dadosContratuais.getDataInicio(),
-            dadosContratuais.getDataFim(),
-            funcionario,
-            dadosContratuais.getMoeda());
-        funcionario.getDefinicoesRenumeracoes().add(renumeracao);
+        if (funcionario.getDefinicoesRenumeracoes() == null) {
+          funcionario.setDefinicoesRenumeracoes(new ArrayList<>());
+        }
+        var remTmIds = colaboradorValidationRules.getTipoMovimentoIdsDeRemuneracoes(funcionario.getDefinicoesRenumeracoes());
+        if (!remTmIds.contains(vinculoTipoMovimentoREM.getTmId().getId())) {
+          var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
+              dadosContratuais.getSalario(),
+              vinculoTipoMovimentoREM.getTmId(),
+              dadosContratuais.getDataInicio(),
+              dadosContratuais.getDataFim(),
+              funcionario,
+              dadosContratuais.getMoeda());
+          funcionario.getDefinicoesRenumeracoes().add(renumeracao);
+        }
       }
       /******************** FIM RENUMERACOES ********************************/
 
       /******************** INI PAGAMENTOS DESCONTOS ********************************/
+      colaboradorValidationRules.validarEncargosDescontosDuplicados(dadosContratuais.getEncargosDescontos());
+
       if (dadosContratuais.getEncargosDescontos() != null && !dadosContratuais.getEncargosDescontos().isEmpty()) {
         var pagList = dadosContratuais.getEncargosDescontos().stream()
             .map(e -> defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P))
@@ -447,14 +468,21 @@ public class NovoContratoService {
           "PAG");
 
       if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
+        if (funcionario.getDefinicoesPagamentos() == null) {
+          funcionario.setDefinicoesPagamentos(new ArrayList<>());
+        }
+        var pagTmIds = colaboradorValidationRules.getTipoMovimentoIdsDePagamentos(funcionario.getDefinicoesPagamentos());
         listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
-          var pagamento = defPagamentoMapper.createPagamento(
-              BigDecimal.ZERO,
-              movimento.getTmId(),
-              dadosContratuais.getDataInicio(),
-              dadosContratuais.getDataFim(),
-              funcionario);
-          funcionario.getDefinicoesPagamentos().add(pagamento);
+          if (!pagTmIds.contains(movimento.getTmId().getId())) {
+            var pagamento = defPagamentoMapper.createPagamento(
+                movimento.getValor(),
+                movimento.getPercentagem() != null ? BigDecimal.valueOf(movimento.getPercentagem()) : null,
+                movimento.getTmId(),
+                dadosContratuais.getDataInicio(),
+                dadosContratuais.getDataFim(),
+                funcionario);
+            funcionario.getDefinicoesPagamentos().add(pagamento);
+          }
         });
       }
     }
