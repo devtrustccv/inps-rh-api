@@ -173,6 +173,7 @@ public interface TiposRelacionamentoEntityRepository extends
       from TiposRelacionamentoEntity tr
       where tr.funId.uuid = :funUuid
         and tr.contrVinculoId.uuid = :contratoUuid
+        and tr.estActAdm = 1
       """)
   TiposRelacionamentoEntity findByFunUuidAndContratoUuid(
       @Param("funUuid") UUID funUuid,
