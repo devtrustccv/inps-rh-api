@@ -58,6 +58,10 @@ public class CarreiraWriteService {
     if (!contratoEntityRepository.existsByFunIdAndEstado(funcionario, Estado.A))
       throw IgrpResponseStatusException.conflict("Este funcionário não possui um contrato ativo");
 
+    if (Integer.valueOf(1).equals(dto.getFlgProcessa())
+        && tiposRelacionamentoEntityRepository.existsByFunIdAndEstadoAndFlgProcessa(funcionario, Estado.A, 1))
+      throw IgrpResponseStatusException.conflict("Já existe um vínculo ativo com processamento salarial para este funcionário");
+
     var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
 
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
