@@ -10,6 +10,8 @@ import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -190,8 +192,8 @@ public class CarreiraWriteService {
     tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(relacionamentoAtual, novoRelacionamento, novasRemuneracoes, novosPagamentos);
 
     var validation = new ValidacaoEntity();
-    validation.setTipoAccao("INSERT");
-    validation.setReferenciaName("CARREIRA");
+    validation.setTipoAccao(TipoAcao.INSERT.name());
+    validation.setReferenciaName(Referencia.CARREIRA.name());
     validation.setReferenciaId(novaCarreira.getId());
     validation.setTiprelId(novoRelacionamento);
     validation.setEstado(Estado.P);
@@ -327,13 +329,18 @@ public class CarreiraWriteService {
     if (!carreira.getContrVinculoId().getFunId().getId().equals(funcionario.getId()))
       throw IgrpResponseStatusException.badRequest("Carreira não pertence a este funcionário");
 
-    if (!carreira.getEstado().equals(Estado.P))
-      throw IgrpResponseStatusException.badRequest("Carreira só pode ser atualizada no estado pendente");
+    var relacionamento = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(carreira.getUuid());
+
+    // Spec 3.5.2.3.1: "só permite editar caso ainda não tenha processamento associado (RH_V_CARREIRA.PROCESSAMENTO = NÃO)"
+    if (relacionamento != null && relacionamento.getUltProc() != null)
+      throw IgrpResponseStatusException.badRequest("Carreira já possui processamento associado e não pode ser editada");
+
+    boolean revalidar = !Estado.P.equals(carreira.getEstado());
 
     carreiraMapper.toUpdateEntity(carreira, dto);
+    if (revalidar) carreira.setEstado(Estado.P);
     carreiraEntityRepository.save(carreira);
 
-    var relacionamento = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(carreira.getUuid());
     if (relacionamento != null) {
       if (dto.getCargoPosicaoId() != null)
         relacionamento.setCargoId(ValidationUtil.ref(entityManager, ParamCargoEntity.class, dto.getCargoPosicaoId()));
@@ -341,6 +348,7 @@ public class CarreiraWriteService {
       relacionamento.setMoeda(dto.getMoeda());
       if (dto.getTipoCarreira() != null) relacionamento.setTipoSituacao(dto.getTipoCarreira());
       if (dto.getFlgProcessa() != null) relacionamento.setFlgProcessa(dto.getFlgProcessa());
+      if (revalidar) relacionamento.setEstado(Estado.P);
       tiposRelacionamentoEntityRepository.save(relacionamento);
     }
 
@@ -367,26 +375,50 @@ public class CarreiraWriteService {
       definicaoRemuneracaoEntityRepository.saveAll(remList);
     }
 
-    if (CollectionUtils.isEmpty(dto.getEncargosDescontos()))
-      return;
+    if (!CollectionUtils.isEmpty(dto.getEncargosDescontos())) {
+      var pagList = dto.getEncargosDescontos().stream()
+          .map(e -> {
+            DefPagamentoEntity obj;
+            if (e.getId() == null) {
+              obj = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
+              obj.setObs(obsAtualizar);
+            } else {
+              obj = defPagamentoEntityRepository.findByIdOrThrow(e.getId());
+              obj.setValor(e.getValor());
+              obj.setObs(ValidationUtil.trimToNull(e.getObservacoes()));
+              var tmRef2 = ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, e.getTipoEncargoId());
+              if (tmRef2 != null) obj.setTmId(tmRef2);
+            }
+            return obj;
+          })
+          .toList();
+      defPagamentoEntityRepository.saveAll(pagList);
+    }
 
-    var pagList = dto.getEncargosDescontos().stream()
-        .map(e -> {
-          DefPagamentoEntity obj;
-          if (e.getId() == null) {
-            obj = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
-            obj.setObs(obsAtualizar);
-          } else {
-            obj = defPagamentoEntityRepository.findByIdOrThrow(e.getId());
-            obj.setValor(e.getValor());
-            obj.setObs(ValidationUtil.trimToNull(e.getObservacoes()));
-            var tmRef2 = ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, e.getTipoEncargoId());
-            if (tmRef2 != null) obj.setTmId(tmRef2);
-          }
-          return obj;
-        })
-        .toList();
-    defPagamentoEntityRepository.saveAll(pagList);
+    // Spec: "Caso for editado, deve passar novamente para validação"
+    if (revalidar && relacionamento != null) {
+      var remuneracoes = definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
+      remuneracoes.forEach(obj -> {
+        obj.setEstado(Estado.P);
+        definicaoRemuneracaoEntityRepository.save(obj);
+      });
+
+      var pagamentos = defPagamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
+      pagamentos.forEach(obj -> {
+        obj.setEstado(Estado.P);
+        defPagamentoEntityRepository.save(obj);
+      });
+
+      var validation = new ValidacaoEntity();
+      validation.setTipoAccao(TipoAcao.UPDATE.name());
+      validation.setReferenciaName(Referencia.CARREIRA.name());
+      validation.setReferenciaId(carreira.getId());
+      validation.setTiprelId(relacionamento);
+      validation.setEstado(Estado.P);
+      validation.setUuid(UuidCreator.getTimeOrderedEpoch());
+      validation.setFunId(funcionario);
+      validacaoEntityRepository.save(validation);
+    }
   }
 
   private boolean houveMudancaSalario(Long vinculoId, Long escalaoId, DadosContratuaisReqDTO dc, FuncionarioEntity funcionario) {
