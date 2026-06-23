@@ -233,6 +233,11 @@
           "name": "size",
           "value": "20",
           "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "colaboradorId",
+          "isRequired": false
         }
       ]
     },
@@ -359,5 +364,5 @@
       ]
     }
   ],
-  "id": "w6juessy9r-getListaValidacaoProgressaPromocao-getListaValidacaoProgressaPromocaoCopy-getListaProgressaPromocao-simularProgressaoPromocaoCopy-enviarHistoricoProgressaoPromocao-extrairOrdemServico"
+  "id": "w6juessy9r-getListaValidacaoProgressaPromocao-getListaValidacaoProgressaPromocaoCopy-getListaProgressaPromocao-simularProgressaoPromocaoCopy-enviarHistoricoProgressaoPromocao-extrairOrdemServico-getListaSimulacaoProgressaPromocao"
 }

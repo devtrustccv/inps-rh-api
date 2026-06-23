@@ -11,7 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ExtrairOrdemServicoCommand implements Command {
 
-
   private HistoricoIdsDTO historicoids;
-
 }
