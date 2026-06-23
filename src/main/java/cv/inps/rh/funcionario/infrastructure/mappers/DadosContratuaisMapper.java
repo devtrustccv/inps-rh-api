@@ -32,8 +32,8 @@ public class DadosContratuaisMapper {
     tr.setCargoId(ValidationUtil.ref(em, ParamCargoEntity.class, dc.getCargoPosicaoId()));
     tr.setSalario(dc.getSalario());
     tr.setMoeda(dc.getMoeda());
-    tr.setTipoSituacao("NOVO_CONTRATO");
-    tr.setFlgProcessa(1);
+    tr.setTipoSituacao(dc.getTipoCarreira() != null ? dc.getTipoCarreira() : "NOVO_CONTRATO");
+    tr.setFlgProcessa(dc.getFlgProcessa() != null ? dc.getFlgProcessa() : 1);
     tr.setObs("NOVO_CONTRATO");
     tr.setDataInicio(dc.getDataInicio());
     tr.setDataFim(dc.getDataFim());

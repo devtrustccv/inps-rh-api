@@ -10,6 +10,8 @@ import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -58,6 +60,10 @@ public class CarreiraWriteService {
     if (!contratoEntityRepository.existsByFunIdAndEstado(funcionario, Estado.A))
       throw IgrpResponseStatusException.conflict("Este funcionário não possui um contrato ativo");
 
+    if (Integer.valueOf(1).equals(dto.getFlgProcessa())
+        && tiposRelacionamentoEntityRepository.existsByFunIdAndEstadoAndFlgProcessa(funcionario, Estado.A, 1))
+      throw IgrpResponseStatusException.conflict("Já existe um vínculo ativo com processamento salarial para este funcionário");
+
     var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
 
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -88,21 +94,27 @@ public class CarreiraWriteService {
 
     var carreiraAtual = relacionamentoAtual.getCarreiraId();
     carreiraAtual.setDataFim(dataFimAnterior);
+    carreiraAtual.setEstActAdm(0);
     carreiraEntityRepository.save(carreiraAtual);
+
+    var tipoCarreira = dto.getTipoCarreira() != null ? dto.getTipoCarreira() : "NOVO_CONTRATO";
+    var obsMovimento = "MOBILIDADE-" + tipoCarreira;
 
     var novaCarreira = Objects.requireNonNull(carreiraMapper.toCarreira(dto, Estado.P));
     novaCarreira.setObs("CARREIRA");
     novaCarreira.setContrVinculoId(contratoAtual);
+    novaCarreira.setEstActAdm(1);
     carreiraEntityRepository.save(novaCarreira);
 
     var novoRelacionamento = contratuaisEntityMapper.toRelacionamento(dto, Estado.P);
-    novoRelacionamento.setObs("MOBILIDADE- || TIPO_CARREIRA");
+    novoRelacionamento.setObs(obsMovimento);
     novoRelacionamento.setDataInicio(dto.getDataInicio());
     novoRelacionamento.setContrVinculoId(contratoAtual);
     novoRelacionamento.setCarreiraId(novaCarreira);
     novoRelacionamento.setFunId(funcionario);
     novoRelacionamento.setMobId(relacionamentoAtual.getMobId());
     novoRelacionamento.setRegimeId(relacionamentoAtual.getRegimeId());
+    novoRelacionamento.setSituacLaboralId(relacionamentoAtual.getSituacLaboralId());
     novoRelacionamento.setEstActAdm(1);
     novoRelacionamento.setReferente("CARREIRA");
     tiposRelacionamentoEntityRepository.save(novoRelacionamento);
@@ -122,7 +134,7 @@ public class CarreiraWriteService {
           .stream().findFirst().orElse(null);
       if (movREM != null) {
         salarioTmId = movREM.getTmId() != null ? movREM.getTmId().getId() : null;
-        var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario);
+        var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario, obsMovimento);
         salario.setTmId(movREM.getTmId());
         definicaoRemuneracaoEntityRepository.save(salario);
         novasRemuneracoes.add(salario);
@@ -133,7 +145,7 @@ public class CarreiraWriteService {
     if (dto.getSubsidios() != null && !dto.getSubsidios().isEmpty()) {
       for (var s : dto.getSubsidios()) {
         var obj = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
-        obj.setObs("MOBILIDADE- || TIPO_CARREIRA");
+        obj.setObs(obsMovimento);
         definicaoRemuneracaoEntityRepository.save(obj);
         novasRemuneracoes.add(obj);
       }
@@ -143,7 +155,7 @@ public class CarreiraWriteService {
       for (var rem : remuneracoesAtivas) {
         if (finalSalarioTmId != null && rem.getTmId() != null
             && Objects.equals(rem.getTmId().getId(), finalSalarioTmId)) continue;
-        var copia = copiarRemuneracao(rem, funcionario, dto.getDataInicio());
+        var copia = copiarRemuneracao(rem, funcionario, dto.getDataInicio(), obsMovimento);
         definicaoRemuneracaoEntityRepository.save(copia);
         novasRemuneracoes.add(copia);
       }
@@ -153,7 +165,7 @@ public class CarreiraWriteService {
     if (dto.getEncargosDescontos() != null && !dto.getEncargosDescontos().isEmpty()) {
       for (var e : dto.getEncargosDescontos()) {
         var def = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
-        def.setObs("MOBILIDADE- || TIPO_CARREIRA");
+        def.setObs(obsMovimento);
         defPagamentoEntityRepository.save(def);
         novosPagamentos.add(def);
       }
@@ -171,7 +183,7 @@ public class CarreiraWriteService {
     } else {
       // Copiar pags ativos
       for (var pag : pagamentosAtivos) {
-        var copia = copiarPagamento(pag, funcionario, dto.getDataInicio());
+        var copia = copiarPagamento(pag, funcionario, dto.getDataInicio(), obsMovimento);
         defPagamentoEntityRepository.save(copia);
         novosPagamentos.add(copia);
       }
@@ -180,8 +192,8 @@ public class CarreiraWriteService {
     tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(relacionamentoAtual, novoRelacionamento, novasRemuneracoes, novosPagamentos);
 
     var validation = new ValidacaoEntity();
-    validation.setTipoAccao("INSERT");
-    validation.setReferenciaName("CARREIRA");
+    validation.setTipoAccao(TipoAcao.INSERT.name());
+    validation.setReferenciaName(Referencia.CARREIRA.name());
     validation.setReferenciaId(novaCarreira.getId());
     validation.setTiprelId(novoRelacionamento);
     validation.setEstado(Estado.P);
@@ -190,14 +202,14 @@ public class CarreiraWriteService {
     validacaoEntityRepository.save(validation);
   }
 
-  private DefinicaoRemuneracaoEntity copiarRemuneracao(DefinicaoRemuneracaoEntity original, FuncionarioEntity funcionario, java.time.LocalDate dataInicio) {
+  private DefinicaoRemuneracaoEntity copiarRemuneracao(DefinicaoRemuneracaoEntity original, FuncionarioEntity funcionario, java.time.LocalDate dataInicio, String obs) {
     var copia = new DefinicaoRemuneracaoEntity();
     copia.setTmId(original.getTmId());
     copia.setValor(original.getValor());
     copia.setPercentagem(original.getPercentagem());
     copia.setMoeda(original.getMoeda());
     copia.setEstado(Estado.P);
-    copia.setObs("MOBILIDADE- || TIPO_CARREIRA");
+    copia.setObs(obs);
     copia.setDataInicio(dataInicio);
     copia.setDataFim(null);
     copia.setFunId(funcionario);
@@ -205,7 +217,7 @@ public class CarreiraWriteService {
     return copia;
   }
 
-  private DefPagamentoEntity copiarPagamento(DefPagamentoEntity original, FuncionarioEntity funcionario, java.time.LocalDate dataInicio) {
+  private DefPagamentoEntity copiarPagamento(DefPagamentoEntity original, FuncionarioEntity funcionario, java.time.LocalDate dataInicio, String obs) {
     var copia = new DefPagamentoEntity();
     copia.setTmId(original.getTmId());
     copia.setValor(original.getValor());
@@ -216,7 +228,7 @@ public class CarreiraWriteService {
     copia.setRhbId(original.getRhbId());
     copia.setEntId(original.getEntId());
     copia.setEstado(Estado.P);
-    copia.setObs("MOBILIDADE- || TIPO_CARREIRA");
+    copia.setObs(obs);
     copia.setDataInicio(dataInicio);
     copia.setDataFim(null);
     copia.setFunId(funcionario);
@@ -225,11 +237,11 @@ public class CarreiraWriteService {
   }
 
   @NotNull
-  private DefinicaoRemuneracaoEntity getSalarioDefinicaoRemuneracaoEntity(DadosContratuaisReqDTO dto, FuncionarioEntity funcionario) {
+  private DefinicaoRemuneracaoEntity getSalarioDefinicaoRemuneracaoEntity(DadosContratuaisReqDTO dto, FuncionarioEntity funcionario, String obs) {
     var salario = new DefinicaoRemuneracaoEntity();
     salario.setValor(dto.getSalario());
     salario.setEstado(Estado.P);
-    salario.setObs("MOBILIDADE- || TIPO_CARREIRA");
+    salario.setObs(obs);
     salario.setDataInicio(dto.getDataInicio());
     salario.setDataFim(dto.getDataFim());
     salario.setFunId(funcionario);
@@ -241,35 +253,39 @@ public class CarreiraWriteService {
 
     ValidationUtil.validateDecision(dto.getValidacao());
 
-    // TODO 30/11/2025 11:04 check this
     var dados = dto.getDados();
-
-    var estado = dto.getValidacao().equals("S") ? Estado.A : Estado.I;
+    var aprovado = dto.getValidacao().equals("S");
+    var estado = aprovado ? Estado.A : Estado.I;
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
 
     var carreira = carreiraEntityRepository.findByContrVinculoIdFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
     carreira.setEstado(estado);
+    if (!aprovado) carreira.setObs("Não Validado");
     carreiraEntityRepository.save(carreira);
 
     var relacionamento = tiposRelacionamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
     relacionamento.setEstado(estado);
+    if (!aprovado) relacionamento.setObs("Não Validado");
     tiposRelacionamentoEntityRepository.save(relacionamento);
 
     var definicoesRemuneracao = definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
     definicoesRemuneracao.forEach(obj -> {
       obj.setEstado(estado);
+      if (!aprovado) obj.setObs("Não Validado");
       definicaoRemuneracaoEntityRepository.save(obj);
     });
 
     var definicoesPagamento = defPagamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
     definicoesPagamento.forEach(obj -> {
       obj.setEstado(estado);
+      if (!aprovado) obj.setObs("Não Validado");
       defPagamentoEntityRepository.save(obj);
     });
 
     var validation = validacaoEntityRepository.findByTiprelIdAndEstadoAndReferenciaName(relacionamento, Estado.P, "CARREIRA");
     validation.setEstado(estado);
+    if (!aprovado) validation.setObs("Não Validado");
     validacaoEntityRepository.save(validation);
   }
 
@@ -285,6 +301,7 @@ public class CarreiraWriteService {
     carreiraEntityRepository.save(carreira);
 
     var relacionamentoAtual = tiposRelacionamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
+    relacionamentoAtual.setEstado(Estado.E);
     tiposRelacionamentoEntityRepository.save(relacionamentoAtual);
 
     var defRemuneracao = definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
@@ -299,12 +316,6 @@ public class CarreiraWriteService {
       defPagamentoEntityRepository.save(obj);
     });
 
-    definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P).
-        forEach(obj -> {
-          obj.setEstado(Estado.E);
-          definicaoRemuneracaoEntityRepository.save(obj);
-        });
-
     var validation = validacaoEntityRepository.findByTiprelIdAndEstadoAndReferenciaName(relacionamentoAtual, Estado.P, "CARREIRA");
     validation.setEstado(Estado.E);
     validacaoEntityRepository.save(validation);
@@ -315,11 +326,33 @@ public class CarreiraWriteService {
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
     var carreira = carreiraEntityRepository.findByUuidOrThrow(UUID.fromString(carreiraId));
 
-    if (carreira.getContrVinculoId().getFunId().getId().equals(funcionario.getId()))
+    if (!carreira.getContrVinculoId().getFunId().getId().equals(funcionario.getId()))
       throw IgrpResponseStatusException.badRequest("Carreira não pertence a este funcionário");
 
-    if (!carreira.getEstado().equals(Estado.P))
-      throw IgrpResponseStatusException.badRequest("Carreira só pode ser atualiza no estado pendente");
+    var relacionamento = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(carreira.getUuid());
+
+    // Spec 3.5.2.3.1: "só permite editar caso ainda não tenha processamento associado (RH_V_CARREIRA.PROCESSAMENTO = NÃO)"
+    if (relacionamento != null && relacionamento.getUltProc() != null)
+      throw IgrpResponseStatusException.badRequest("Carreira já possui processamento associado e não pode ser editada");
+
+    boolean revalidar = !Estado.P.equals(carreira.getEstado());
+
+    carreiraMapper.toUpdateEntity(carreira, dto);
+    if (revalidar) carreira.setEstado(Estado.P);
+    carreiraEntityRepository.save(carreira);
+
+    if (relacionamento != null) {
+      if (dto.getCargoPosicaoId() != null)
+        relacionamento.setCargoId(ValidationUtil.ref(entityManager, ParamCargoEntity.class, dto.getCargoPosicaoId()));
+      relacionamento.setSalario(dto.getSalario());
+      relacionamento.setMoeda(dto.getMoeda());
+      if (dto.getTipoCarreira() != null) relacionamento.setTipoSituacao(dto.getTipoCarreira());
+      if (dto.getFlgProcessa() != null) relacionamento.setFlgProcessa(dto.getFlgProcessa());
+      if (revalidar) relacionamento.setEstado(Estado.P);
+      tiposRelacionamentoEntityRepository.save(relacionamento);
+    }
+
+    var obsAtualizar = "MOBILIDADE-" + carreira.getTipoSituacao();
 
     if (!CollectionUtils.isEmpty(dto.getSubsidios())) {
       var remList = dto.getSubsidios().stream()
@@ -327,7 +360,7 @@ public class CarreiraWriteService {
             DefinicaoRemuneracaoEntity obj;
             if (s.getId() == null) {
               obj = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
-              obj.setObs("MOBILIDADE- || TIPO_CARREIRA");
+              obj.setObs(obsAtualizar);
             } else {
               obj = definicaoRemuneracaoEntityRepository.findByIdOrThrow(s.getId());
               obj.setPercentagem(s.getPercentagem());
@@ -342,26 +375,50 @@ public class CarreiraWriteService {
       definicaoRemuneracaoEntityRepository.saveAll(remList);
     }
 
-    if (CollectionUtils.isEmpty(dto.getEncargosDescontos()))
-      return;
+    if (!CollectionUtils.isEmpty(dto.getEncargosDescontos())) {
+      var pagList = dto.getEncargosDescontos().stream()
+          .map(e -> {
+            DefPagamentoEntity obj;
+            if (e.getId() == null) {
+              obj = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
+              obj.setObs(obsAtualizar);
+            } else {
+              obj = defPagamentoEntityRepository.findByIdOrThrow(e.getId());
+              obj.setValor(e.getValor());
+              obj.setObs(ValidationUtil.trimToNull(e.getObservacoes()));
+              var tmRef2 = ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, e.getTipoEncargoId());
+              if (tmRef2 != null) obj.setTmId(tmRef2);
+            }
+            return obj;
+          })
+          .toList();
+      defPagamentoEntityRepository.saveAll(pagList);
+    }
 
-    var pagList = dto.getEncargosDescontos().stream()
-        .map(e -> {
-          DefPagamentoEntity obj;
-          if (e.getId() == null) {
-            obj = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
-            obj.setObs("MOBILIDADE- || TIPO_CARREIRA");
-          } else {
-            obj = defPagamentoEntityRepository.findByIdOrThrow(e.getId());
-            obj.setValor(e.getValor());
-            obj.setObs(ValidationUtil.trimToNull(e.getObservacoes()));
-            var tmRef2 = ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, e.getTipoEncargoId());
-            if (tmRef2 != null) obj.setTmId(tmRef2);
-          }
-          return obj;
-        })
-        .toList();
-    defPagamentoEntityRepository.saveAll(pagList);
+    // Spec: "Caso for editado, deve passar novamente para validação"
+    if (revalidar && relacionamento != null) {
+      var remuneracoes = definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
+      remuneracoes.forEach(obj -> {
+        obj.setEstado(Estado.P);
+        definicaoRemuneracaoEntityRepository.save(obj);
+      });
+
+      var pagamentos = defPagamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
+      pagamentos.forEach(obj -> {
+        obj.setEstado(Estado.P);
+        defPagamentoEntityRepository.save(obj);
+      });
+
+      var validation = new ValidacaoEntity();
+      validation.setTipoAccao(TipoAcao.UPDATE.name());
+      validation.setReferenciaName(Referencia.CARREIRA.name());
+      validation.setReferenciaId(carreira.getId());
+      validation.setTiprelId(relacionamento);
+      validation.setEstado(Estado.P);
+      validation.setUuid(UuidCreator.getTimeOrderedEpoch());
+      validation.setFunId(funcionario);
+      validacaoEntityRepository.save(validation);
+    }
   }
 
   private boolean houveMudancaSalario(Long vinculoId, Long escalaoId, DadosContratuaisReqDTO dc, FuncionarioEntity funcionario) {

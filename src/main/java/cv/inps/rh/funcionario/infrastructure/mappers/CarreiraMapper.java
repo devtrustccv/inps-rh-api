@@ -8,6 +8,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCategoriaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
 import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
@@ -80,9 +81,9 @@ public class CarreiraMapper {
     ce.setCarrPccsId(ValidationUtil.ref(entityManager, ParamCarreiraEntity.class, dc.getCarreiraId()));
 
     ce.setSalario(dc.getSalario());
-    ce.setFlgProcessa(1);
-    ce.setTipoSituacao("NOVO_CONTRATO");
-    ce.setObs("NOVO_CONTRATO");
+    ce.setFlgProcessa(dc.getFlgProcessa() != null ? dc.getFlgProcessa() : 1);
+    ce.setTipoSituacao(dc.getTipoCarreira() != null ? dc.getTipoCarreira() : "NOVO_CONTRATO");
+    ce.setObs("CARREIRA");
     ce.setDataInicio(dc.getDataInicio());
     ce.setUuid(UuidCreator.getTimeOrderedEpoch());
     ce.setEstado(estado);
@@ -95,9 +96,9 @@ public class CarreiraMapper {
     carreira.setCargoId(ValidationUtil.ref(entityManager, ParamCargoEntity.class, dc.getCargoPosicaoId()));
     carreira.setEscalaoId(ValidationUtil.ref(entityManager, ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
     carreira.setCarrPccsId(ValidationUtil.ref(entityManager, ParamCarreiraEntity.class, dc.getCarreiraId()));
+    carreira.setCategoriaId(ValidationUtil.ref(entityManager, ParamCategoriaEntity.class, dc.getCategoriaId()));
     carreira.setSalario(dc.getSalario());
-    carreira.setFlgProcessa(1);
-    carreira.setTipoSituacao("NOVO_CONTRATO");
-    carreira.setObs("NOVO_CONTRATO");
+    carreira.setFlgProcessa(dc.getFlgProcessa() != null ? dc.getFlgProcessa() : carreira.getFlgProcessa());
+    if (dc.getTipoCarreira() != null) carreira.setTipoSituacao(dc.getTipoCarreira());
   }
 }

@@ -44,6 +44,7 @@ public class ProgressaoPromocaoReadService {
         DateFormatter.stringToLocalDate(query.getDataDe()),
         DateFormatter.stringToLocalDate(query.getDataAte()),
         ofNullable(query.getColaborador()).map(String::trim).orElse(null),
+        StringUtils.hasText(query.getColaboradorId()) ? UUID.fromString(query.getColaboradorId()) : null,
         StringUtils.hasText(query.getCarreiraId()) ? UUID.fromString(query.getCarreiraId()) : null,
         buildPageable(query.getPage(), query.getSize())
     );

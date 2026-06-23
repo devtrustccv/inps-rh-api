@@ -47,6 +47,10 @@ public class CarreiraEntity extends AuditEntity {
     private String tipoSituacao;
 
 
+  @Column(name="tipo_carreira", length=30)
+    private String tipoCarreira;
+
+
   @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;

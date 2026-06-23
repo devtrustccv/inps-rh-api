@@ -42,6 +42,8 @@ public interface TiposRelacionamentoEntityRepository extends
 
   boolean existsByMobId_SecaoId(SecaoEntity section);
 
+  boolean existsByFunIdAndEstadoAndFlgProcessa(FuncionarioEntity funId, Estado estado, Integer flgProcessa);
+
   Optional<TiposRelacionamentoEntity> findByUuid(UUID uuid);
 
   default TiposRelacionamentoEntity findByUuidOrThrow(UUID uuid) {
@@ -173,6 +175,7 @@ public interface TiposRelacionamentoEntityRepository extends
       from TiposRelacionamentoEntity tr
       where tr.funId.uuid = :funUuid
         and tr.contrVinculoId.uuid = :contratoUuid
+        and tr.estActAdm = 1
       """)
   TiposRelacionamentoEntity findByFunUuidAndContratoUuid(
       @Param("funUuid") UUID funUuid,

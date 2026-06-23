@@ -32,7 +32,7 @@ public class ColaboradorValidationRules {
 
   public void validarDadosPessoais(DadosPessoaisReqDTO dp, UUID uuidExistente) {
     validarDocumentoUnico(dp, uuidExistente);
-    validarNifUnico(dp.getNif(), uuidExistente);
+    validarNif(dp.getNif(), uuidExistente);
     validarCamposObrigatorios(dp);
   }
 
@@ -49,8 +49,15 @@ public class ColaboradorValidationRules {
     }
   }
 
-  private void validarNifUnico(Long nif, UUID uuidExistente) {
-    if (nif == null) return;
+  private static final int NIF_LENGTH = 9;
+
+  private void validarNif(Long nif, UUID uuidExistente) {
+    if (nif == null || nif <= 0) {
+      throw IgrpResponseStatusException.badRequest("O NIF é obrigatório e deve ser um número positivo.");
+    }
+    if (String.valueOf(nif).length() != NIF_LENGTH) {
+      throw IgrpResponseStatusException.badRequest("O NIF deve ter exactamente " + NIF_LENGTH + " dígitos.");
+    }
 
     boolean duplicado = (uuidExistente == null)
         ? funcionarioEntityRepository.existsByNifAndEstadoNot(nif, Estado.E)
