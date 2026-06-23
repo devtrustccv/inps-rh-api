@@ -6,6 +6,24 @@ networks:
     external: false
 
 services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: unless-stopped
+
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web Console
+
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin12345678
+
+    volumes:
+      - minio_data:/data
+
+    command: server /data --console-address ":9001"
+
   oracle-rhinpsservice-api-service:
     image: gvenzl/oracle-xe:21-slim
     container_name: oracle-rhinpsservice-api-service
@@ -43,4 +61,6 @@ services:
 
 volumes:
   oracle-data-21-rhinpsservice-api-service:
+    driver: local
+  minio_data:
     driver: local
