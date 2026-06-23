@@ -32,6 +32,12 @@ public class ParametrizacaoController {
     return ResponseEntity.ok(parametrizacaoService.getTiposMovimentosPagamentosDesconto());
   }
 
+  @GetMapping("/estabelecimento/ativos")
+  @Operation(summary = "Lista estabelecimentos ativos")
+  public ResponseEntity<List<ParametrizacaoDTO>> getEstabelecimentosAtivos() {
+    return ResponseEntity.ok(parametrizacaoService.getEstabelecimentosAtivos());
+  }
+
   @GetMapping("/tipo-movimento-renumeracao/ativos")
   @Operation(summary = "Lista tipos de movimento de remuneração ativos")
   public ResponseEntity<List<ParametrizacaoDTO>> getTiposMovimentoRemuneracaoAtivos() {

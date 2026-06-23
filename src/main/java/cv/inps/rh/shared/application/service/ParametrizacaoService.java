@@ -4,8 +4,8 @@ import cv.inps.rh.configuracao.application.dto.VinculoMovimentoResponseDTO;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoMovimentoEntity;
 import cv.inps.rh.shared.infrastructure.mappers.*;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoMovimentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +25,7 @@ public class ParametrizacaoService {
   private final BancoEntityRepository bancoEntityRepository;
   private final EntidadeEntityRepository entidadeEntityRepository;
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
+  private final EstabelecimentoEntityRepository estabelecimentoEntityRepository;
 
   private final TipoMovimentoMapper tipoMovimentoMapper;
   private final InstituicaoMapper instituicaoMapper;
@@ -39,16 +40,23 @@ public class ParametrizacaoService {
   private static final String ESTADO_ACTIVO = "ACTIVO";
   private static final Long AMB_APL_ID = 30L;
 
-  public List<ParametrizacaoDTO> getTiposMovimentosRenumeracao(){
+  public List<ParametrizacaoDTO> getTiposMovimentosRenumeracao() {
     return tipoMovimentoEntityRepository
         .findAllByTipoInAndEstadoAndAmbAplIdAndShortDescNot(List.of("REM", "ABA"), ESTADO_ACTIVO, AMB_APL_ID, "SALL")
         .stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
 
-  public List<ParametrizacaoDTO> getTiposMovimentosPagamentosDesconto(){
+  public List<ParametrizacaoDTO> getTiposMovimentosPagamentosDesconto() {
     return tipoMovimentoEntityRepository
         .findAllByTipoInAndEstadoAndAmbAplId(List.of("PAG", "IMP"), ESTADO_ACTIVO, AMB_APL_ID)
         .stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
+  }
+
+  public List<ParametrizacaoDTO> getEstabelecimentosAtivos() {
+    return estabelecimentoEntityRepository.findAll()
+        .stream()
+        .map(obj -> new ParametrizacaoDTO(obj.getNome(), obj.getId()))
+        .toList();
   }
 
   public List<ParametrizacaoDTO> getInstituicoes() {
@@ -57,6 +65,7 @@ public class ParametrizacaoService {
         .map(p -> new ParametrizacaoDTO(p.getNome(), p.getId()))
         .toList();
   }
+
   public List<ParametrizacaoDTO> getGeografias(Long nivelDetalhe, Long geogrId) {
     return geografiaEntityRepository.findByNivelDetalheAndGeogrId(nivelDetalhe, geogrId)
         .stream()
@@ -64,11 +73,11 @@ public class ParametrizacaoService {
         .toList();
   }
 
-  public List<ParametrizacaoDTO> getEntidades(){
-   return entidadeEntityRepository.findAll().stream().map(entidadeMapper::toParametrizacaoDto).toList();
+  public List<ParametrizacaoDTO> getEntidades() {
+    return entidadeEntityRepository.findAll().stream().map(entidadeMapper::toParametrizacaoDto).toList();
   }
 
-  public List<ParametrizacaoDTO> getBancos(){
+  public List<ParametrizacaoDTO> getBancos() {
     return bancoEntityRepository.findAll().stream().map(bancoMapper::toParametrizacaoDto).toList();
   }
 
