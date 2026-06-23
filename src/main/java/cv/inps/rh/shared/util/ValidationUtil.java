@@ -43,11 +43,10 @@ public final class ValidationUtil {
     return StringUtils.hasText(value) ? value.trim() : null;
   }
 
-  private static final int NIB_MAX_LENGTH = 21;
+  private static final int NIB_LENGTH = 21;
   private static final java.util.regex.Pattern DIGITS_ONLY = java.util.regex.Pattern.compile("^\\d+$");
   private static final java.util.regex.Pattern PHONE_PATTERN = java.util.regex.Pattern.compile("^\\+?\\d{7,15}$");
   private static final java.util.regex.Pattern EMAIL_PATTERN = java.util.regex.Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-
   public static String sanitizeNib(String nib) {
     String trimmed = trimToNull(nib);
     if (trimmed != null) {
@@ -55,9 +54,9 @@ public final class ValidationUtil {
         throw IgrpResponseStatusException.badRequest(
             "O NIB introduzido é inválido. O NIB deve conter apenas dígitos.");
       }
-      if (trimmed.length() > NIB_MAX_LENGTH) {
+      if (trimmed.length() != NIB_LENGTH) {
         throw IgrpResponseStatusException.badRequest(
-            "O NIB introduzido é inválido. O NIB não pode ter mais de " + NIB_MAX_LENGTH + " dígitos.");
+            "O NIB introduzido é inválido. O NIB deve ter exactamente " + NIB_LENGTH + " dígitos.");
       }
     }
     return trimmed;
