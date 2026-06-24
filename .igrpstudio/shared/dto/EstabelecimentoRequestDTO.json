@@ -1,0 +1,35 @@
+{
+  "name": "EstabelecimentoRequest",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "nome",
+      "type": "string",
+      "objectType": "java",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "paisId",
+      "type": "long",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "type": "dto",
+  "module": "shared",
+  "enableCustonValidation": false,
+  "readOnly": false,
+  "id": "new-action-Contract"
+}

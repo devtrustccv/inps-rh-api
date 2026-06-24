@@ -11,7 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EnviarHistoricoProgressaoPromocaoCommand implements Command {
 
-
   private HistoricoIdsDTO historicoids;
-
 }

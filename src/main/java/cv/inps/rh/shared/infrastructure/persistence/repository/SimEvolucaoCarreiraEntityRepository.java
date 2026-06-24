@@ -50,12 +50,14 @@ public interface SimEvolucaoCarreiraEntityRepository extends
         AND (:dataAte IS NULL OR e.dataReferente <= :dataAte)
         AND (:carreiraId IS NULL OR cd.id = :carreiraId)
         AND (:nome IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
+        AND (:funcionarioId IS NULL OR f.uuid = : funcionarioId)
       """)
   Page<ProgressaoPromocaoRowDTO> findProgressaoPromocaoWithFilters(
       @Param("tipo") String tipo,
       @Param("dataDe") LocalDate dataDe,
       @Param("dataAte") LocalDate dataAte,
       @Param("nome") String nome,
+      @Param("funcionarioId") UUID funcionarioId,
       @Param("carreiraId") UUID carreiraId,
       Pageable pageable
   );

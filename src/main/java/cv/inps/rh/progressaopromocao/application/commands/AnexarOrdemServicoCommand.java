@@ -11,7 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AnexarOrdemServicoCommand implements Command {
 
-
   private AnexarOrdemServicoRequestDTO anexarordemservicorequest;
-
 }
