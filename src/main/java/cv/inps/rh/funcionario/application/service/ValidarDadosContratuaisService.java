@@ -53,7 +53,7 @@ public class ValidarDadosContratuaisService {
     if (entityManager.find(ParamContratoEntity.class, dc.getTipoContratoId()) == null)
       throw IgrpResponseStatusException.badRequest("Tipo de contrato inválido: o valor indicado não existe.");
 
-    if (entityManager.find(InstituicaoEntity.class, dc.getDirecaoId()) == null)
+    if (entityManager.find(DirecaoEntity.class, dc.getDirecaoId()) == null)
       throw IgrpResponseStatusException.badRequest("Direção inválida: o valor indicado não existe.");
 
     if (entityManager.find(ParamLocalTrabEntity.class, dc.getLocalTrabalhoId()) == null)

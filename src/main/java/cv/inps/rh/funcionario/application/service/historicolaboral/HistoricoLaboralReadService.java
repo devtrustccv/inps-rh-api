@@ -112,7 +112,7 @@ public class HistoricoLaboralReadService {
               .map(ParamVinculoEntity::getNome)
               .ifPresent(response::setVinculo);
           ofNullable(obj.getMobId()).map(MobilidadeEntity::getSecaoId).map(SecaoEntity::getInstId)
-              .map(InstituicaoEntity::getNome)
+              .map(DirecaoEntity::getNome)
               .ifPresent(response::setDirecao);
           ofNullable(obj.getMobId()).map(MobilidadeEntity::getSecaoId).map(SecaoEntity::getNome)
               .ifPresent(response::setSeccao);

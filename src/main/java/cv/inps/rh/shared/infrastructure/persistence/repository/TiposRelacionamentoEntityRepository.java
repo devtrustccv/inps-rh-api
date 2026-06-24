@@ -163,7 +163,7 @@ public interface TiposRelacionamentoEntityRepository extends
             t.id,
             t.nome
            )
-      FROM InstituicaoEntity t
+      FROM DirecaoEntity t
       WHERE :nome IS NULL OR LOWER(t.nome) LIKE LOWER(CONCAT('%', :nome, '%'))
       """)
   Page<PesquisaCentroCustoResponseDTO> pesquisaCentroCusto(

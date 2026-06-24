@@ -30,7 +30,7 @@ public class ResponsavelEntity extends AuditEntity {
   @NotNull(message = "institId is mandatory")
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "instit_id", referencedColumnName = "id")
-  private InstituicaoEntity institId;
+  private DirecaoEntity institId;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "fun_id", referencedColumnName = "id")

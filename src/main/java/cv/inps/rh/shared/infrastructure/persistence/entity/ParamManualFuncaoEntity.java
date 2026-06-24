@@ -35,7 +35,7 @@ public class ParamManualFuncaoEntity extends AuditEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "INSTIT_ID")
-  private InstituicaoEntity institId;
+  private DirecaoEntity institId;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "SECCAO_ID")

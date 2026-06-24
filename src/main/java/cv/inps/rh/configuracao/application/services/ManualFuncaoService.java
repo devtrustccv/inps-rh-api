@@ -11,6 +11,7 @@ import cv.inps.rh.configuracao.infrastructure.mappers.ManualFuncaoMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamManualFuncaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DirecaoEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +31,7 @@ public class ManualFuncaoService {
   private static final String ESTADO_ATIVO = "A";
 
   private final ParamManualFuncaoEntityRepository manualRepository;
-  private final InstituicaoEntityRepository instituicaoRepository;
+  private final DirecaoEntityRepository instituicaoRepository;
   private final SecaoEntityRepository secaoRepository;
   private final ParamCargoEntityRepository cargoRepository;
   private final ParamCarreiraEntityRepository carreiraRepository;
@@ -38,7 +39,7 @@ public class ManualFuncaoService {
 
   public ManualFuncaoService(
       ParamManualFuncaoEntityRepository manualRepository,
-      InstituicaoEntityRepository instituicaoRepository,
+      DirecaoEntityRepository instituicaoRepository,
       SecaoEntityRepository secaoRepository,
       ParamCargoEntityRepository cargoRepository,
       ParamCarreiraEntityRepository carreiraRepository,

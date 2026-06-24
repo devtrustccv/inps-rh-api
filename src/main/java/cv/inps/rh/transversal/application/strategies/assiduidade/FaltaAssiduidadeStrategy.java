@@ -68,7 +68,7 @@ public class FaltaAssiduidadeStrategy implements AssiduidadeStrategy {
 
         // Joins de Estrutura
         Join<TiposRelacionamentoEntity, MobilidadeEntity> mobJoin = relJoin.join("mobId", JoinType.LEFT);
-        Join<MobilidadeEntity, InstituicaoEntity> instJoin = mobJoin.join("instidId", JoinType.LEFT);
+        Join<MobilidadeEntity, DirecaoEntity> instJoin = mobJoin.join("instidId", JoinType.LEFT);
         Join<MobilidadeEntity, SecaoEntity> secaoJoin = mobJoin.join("secaoId", JoinType.LEFT);
 
         // Predicates para Main

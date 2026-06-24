@@ -107,7 +107,7 @@
       "objectType": "java",
       "relation": {
         "type": "ManyToOne",
-        "entity": "InstituicaoEntity",
+        "entity": "DirecaoEntity",
         "referencedColumnName": "id",
         "cardinality": "oneWay",
         "fetchType": "lazy",

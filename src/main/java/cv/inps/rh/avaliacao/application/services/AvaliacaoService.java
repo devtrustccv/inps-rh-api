@@ -12,6 +12,7 @@ import cv.inps.rh.avaliacao.infrastructure.mappers.AvaliacaoMapper;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DirecaoEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -40,7 +41,7 @@ public class AvaliacaoService {
   private final AvaliacaoCompetenciaEntityRepository competenciaRepository;
   private final AvaliacaoAtitudePessoalEntityRepository atitudeRepository;
   private final FuncionarioEntityRepository funcionarioRepository;
-  private final InstituicaoEntityRepository instituicaoRepository;
+  private final DirecaoEntityRepository instituicaoRepository;
   private final SecaoEntityRepository secaoRepository;
   private final ParamCargoEntityRepository cargoRepository;
   private final ParamCarreiraEntityRepository carreiraRepository;
@@ -56,7 +57,7 @@ public class AvaliacaoService {
       AvaliacaoCompetenciaEntityRepository competenciaRepository,
       AvaliacaoAtitudePessoalEntityRepository atitudeRepository,
       FuncionarioEntityRepository funcionarioRepository,
-      InstituicaoEntityRepository instituicaoRepository,
+      DirecaoEntityRepository instituicaoRepository,
       SecaoEntityRepository secaoRepository,
       ParamCargoEntityRepository cargoRepository,
       ParamCarreiraEntityRepository carreiraRepository,
