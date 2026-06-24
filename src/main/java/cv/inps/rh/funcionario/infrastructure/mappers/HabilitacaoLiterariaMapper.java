@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaReqDTO;
 import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.infrastructure.persistence.entity.EstabelecimentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.HabilitacaoLiterariaEntity;
@@ -32,7 +33,7 @@ public class HabilitacaoLiterariaMapper {
       e.setId(dto.getId());
 
     e.setPaisId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dto.getPaisId()));
-    e.setEstabelecimento(ValidationUtil.trimToNull(dto.getEstabelecimento()));
+    e.setEstabelecimento(ValidationUtil.ref(entityManager, EstabelecimentoEntity.class, dto.getEstabelecimentoId()));
     e.setArea(ValidationUtil.trimToNull(dto.getArea()));
     e.setNomeCurso(ValidationUtil.trimToNull(dto.getCurso()));
     e.setNivel(ValidationUtil.trimToNull(dto.getGrauAcademico()));
@@ -59,7 +60,7 @@ public class HabilitacaoLiterariaMapper {
       }
       if (found != null) {
         found.setPaisId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dto.getPaisId()));
-        found.setEstabelecimento(ValidationUtil.trimToNull(dto.getEstabelecimento()));
+        found.setEstabelecimento(ValidationUtil.ref(entityManager, EstabelecimentoEntity.class, dto.getEstabelecimentoId()));
         found.setArea(ValidationUtil.trimToNull(dto.getArea()));
         found.setNomeCurso(ValidationUtil.trimToNull(dto.getCurso()));
         found.setNivel(ValidationUtil.trimToNull(dto.getGrauAcademico()));
@@ -90,7 +91,8 @@ public class HabilitacaoLiterariaMapper {
         hr.setId(h.getId());
         hr.setPaisId(h.getPaisId() != null ? h.getPaisId().getId() != null ? h.getPaisId().getId().intValue() : null : null);
         hr.setPaisDesc(h.getPaisId() != null ? h.getPaisId().getNome() : null);
-        hr.setEstabelecimento(h.getEstabelecimento());
+        hr.setEstabelecimentoId(h.getEstabelecimento() != null ? h.getEstabelecimento().getId() : null);
+        hr.setEstabelecimentoDesc(h.getEstabelecimento() != null ? h.getEstabelecimento().getNome() : null);
         hr.setArea(h.getArea());
         hr.setCurso(h.getNomeCurso());
         hr.setGrauAcademico(h.getNivel());
