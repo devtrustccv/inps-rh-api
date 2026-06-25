@@ -6,7 +6,6 @@ package cv.inps.rh.funcionario.application.dto;
 import cv.igrp.framework.stereotype.IgrpDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,12 +32,10 @@ public class CalcularRemuneracaoRequestDTO {
 
   @Valid
   @NotNull(message = "The field <subsidios> is required")
-  @NotEmpty(message = "The field <subsidios> must not be empty")
   private List<SubsidioItemDTO> subsidios = new ArrayList<>();
 
   @Valid
   @NotNull(message = "The field <descontos> is required")
-  @NotEmpty(message = "The field <descontos> must not be empty")
   private List<DescontoItemDTO> descontos = new ArrayList<>();
 
 }

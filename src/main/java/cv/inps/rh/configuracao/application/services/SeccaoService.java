@@ -10,10 +10,10 @@ import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.InstituicaoEntity_;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity_;
-import cv.inps.rh.shared.infrastructure.persistence.repository.InstituicaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DirecaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SecaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
@@ -35,13 +35,13 @@ import java.util.stream.Collectors;
 public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
 
   private final SecaoEntityRepository secaoRepository;
-  private final InstituicaoEntityRepository instituicaoRepository;
+  private final DirecaoEntityRepository instituicaoRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
 
   protected SeccaoService(
       Validator validator, ObjectMapper jsonMapper,
       SecaoEntityRepository secaoRepository,
-      InstituicaoEntityRepository instituicaoRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository
+      DirecaoEntityRepository instituicaoRepository, TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository
   ) {
     super(validator, jsonMapper, SeccaoRequestDTO.class);
     this.secaoRepository = secaoRepository;
@@ -104,7 +104,7 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
       }
 
       if (StringUtils.hasText(direcaoId))
-        predicates.add(cb.equal(root.get(SecaoEntity_.instId).get(InstituicaoEntity_.id), Long.valueOf(direcaoId)));
+        predicates.add(cb.equal(root.get(SecaoEntity_.instId).get(DirecaoEntity_.id), Long.valueOf(direcaoId)));
 
       return cb.and(predicates.toArray(new Predicate[0]));
     };

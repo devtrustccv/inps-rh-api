@@ -13,16 +13,21 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
+import java.security.Principal;
 import java.sql.Types;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
+import static java.util.Optional.ofNullable;
 
 @Transactional
 @Service
@@ -163,13 +168,13 @@ public class ProcessamentoSalarialWriteService {
     });
   }
 
-  public void processarSalario(ProcessamentoSalarioRequestDTO request) {
+  public String processarSalario(ProcessamentoSalarioRequestDTO request) {
 
     var formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     var startDate = Objects.nonNull(request.getDataInicio()) ? request.getDataInicio().format(formatter) : null;
-    var endDate = Objects.nonNull(request.getDataInicio()) ? request.getDataInicio().format(formatter) : null;
+    var endDate = Objects.nonNull(request.getDataFim()) ? request.getDataInicio().format(formatter) : null;
 
-    callProcedure(Processamento.PROCEDURE_PROCESSAR.getName())
+    var result = callProcedure(Processamento.PROCEDURE_PROCESSAR.getName())
         .declareParameters(
             new SqlParameter("p_dt_inicio", Types.VARCHAR),
             new SqlParameter("p_dt_fim", Types.VARCHAR),
@@ -177,7 +182,8 @@ public class ProcessamentoSalarialWriteService {
             new SqlParameter("p_tiprel_id", Types.NUMERIC),
             new SqlParameter("p_tipo", Types.VARCHAR),
             new SqlParameter("P_user_name", Types.VARCHAR),
-            new SqlParameter("p_user_id", Types.NUMERIC)
+            new SqlParameter("p_user_id", Types.NUMERIC),
+            new SqlOutParameter("p_msg", Types.VARCHAR)
         )
         .execute(
             new MapSqlParameterSource()
@@ -186,9 +192,13 @@ public class ProcessamentoSalarialWriteService {
                 .addValue("p_cc_id", request.getDireccaoId())
                 .addValue("p_tiprel_id", request.getRelacionamentoId())
                 .addValue("p_tipo", request.getTipo())
-                .addValue("P_user_name", "demo@demo.com") // TODO 07/12/2025 17:48 validate this
+                .addValue("P_user_name", ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                    .map(Principal::getName)
+                    .orElse("System"))
                 .addValue("p_user_id", 0) // TODO 07/12/2025 17:48 validate this
         );
+
+    return (String) result.get("p_msg");
   }
 
   private SimpleJdbcCall callProcedure(String procedureName) {

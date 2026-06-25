@@ -30,9 +30,9 @@
       "primaryKey": false
     },
     {
-      "name": "estabelecimento",
+      "name": "estabelecimentoId",
       "objectType": "java",
-      "type": "string",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,

@@ -8,7 +8,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamObjetivoDetEntity;
 import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamObjetivoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.InstituicaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DirecaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCargoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamCarreiraEntityRepository;
 import org.springframework.http.HttpStatus;
@@ -22,12 +22,12 @@ public class ComponenteAvaliacaoMapper {
 
   private final ParamCargoEntityRepository cargoRepository;
   private final ParamCarreiraEntityRepository carreiraRepository;
-  private final InstituicaoEntityRepository instituicaoRepository;
+  private final DirecaoEntityRepository instituicaoRepository;
 
   public ComponenteAvaliacaoMapper(
       ParamCargoEntityRepository cargoRepository,
       ParamCarreiraEntityRepository carreiraRepository,
-      InstituicaoEntityRepository instituicaoRepository) {
+      DirecaoEntityRepository instituicaoRepository) {
     this.cargoRepository = cargoRepository;
     this.carreiraRepository = carreiraRepository;
     this.instituicaoRepository = instituicaoRepository;

@@ -66,7 +66,7 @@ public class HoraExtraAssiduidadeStrategy implements AssiduidadeStrategy {
 
         // Joins de Estrutura
         Join<TiposRelacionamentoEntity, MobilidadeEntity> mobJoin = relJoin.join("mobId", JoinType.LEFT);
-        Join<MobilidadeEntity, InstituicaoEntity> instJoin = mobJoin.join("instidId", JoinType.LEFT);
+        Join<MobilidadeEntity, DirecaoEntity> instJoin = mobJoin.join("instidId", JoinType.LEFT);
         Join<MobilidadeEntity, SecaoEntity> secaoJoin = mobJoin.join("secaoId", JoinType.LEFT);
 
         List<Predicate> mainPredicates = buildPredicates(query, cb, rootMain, relJoin, funcJoin);

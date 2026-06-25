@@ -26,7 +26,7 @@ public class HabilitacaoLiterariaReqDTO  {
   private Long paisId ;
 
 
-  private String estabelecimento ;
+  private Long estabelecimentoId ;
 
 
   private String area ;

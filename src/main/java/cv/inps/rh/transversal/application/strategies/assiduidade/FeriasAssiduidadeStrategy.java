@@ -65,7 +65,7 @@ public class FeriasAssiduidadeStrategy implements AssiduidadeStrategy {
         Join<FuncionarioEntity, TiposRelacionamentoEntity> relJoin = funcJoin.join("tiposrelacionamentos",
                 JoinType.LEFT);
         Join<TiposRelacionamentoEntity, MobilidadeEntity> mobJoin = relJoin.join("mobId", JoinType.LEFT);
-        Join<MobilidadeEntity, InstituicaoEntity> instJoin = mobJoin.join("instidId", JoinType.LEFT);
+        Join<MobilidadeEntity, DirecaoEntity> instJoin = mobJoin.join("instidId", JoinType.LEFT);
         Join<MobilidadeEntity, SecaoEntity> secaoJoin = mobJoin.join("secaoId", JoinType.LEFT);
 
         // Predicates para Main (Reutiliza lógica, mas precisa dos joins específicos

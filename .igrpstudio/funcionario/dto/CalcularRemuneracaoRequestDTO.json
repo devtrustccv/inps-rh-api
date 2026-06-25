@@ -26,7 +26,7 @@
       "name": "subsidios",
       "type": "SubsidioItem",
       "objectType": "dto",
-      "required": true,
+      "required": false,
       "collectionType": "list",
       "module": "funcionario"
     },
@@ -34,7 +34,7 @@
       "name": "descontos",
       "type": "DescontoItem",
       "objectType": "dto",
-      "required": true,
+      "required": false,
       "collectionType": "list",
       "module": "funcionario"
     }

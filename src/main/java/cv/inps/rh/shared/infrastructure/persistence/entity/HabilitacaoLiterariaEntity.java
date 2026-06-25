@@ -39,8 +39,9 @@ public class HabilitacaoLiterariaEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pais_id", referencedColumnName = "id")
     private GeografiaEntity paisId;
-    @Column(name="estabelecimento")
-    private String estabelecimento;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "estabelecimento_id", referencedColumnName = "id")
+    private EstabelecimentoEntity estabelecimento;
 
 
     @Column(name="area")

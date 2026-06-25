@@ -29,7 +29,10 @@ public class HabilitacaoLiterariaRespDTO  {
   private String paisDesc ;
 
 
-  private String estabelecimento ;
+  private Long estabelecimentoId ;
+
+
+  private String estabelecimentoDesc ;
 
 
   private String area ;

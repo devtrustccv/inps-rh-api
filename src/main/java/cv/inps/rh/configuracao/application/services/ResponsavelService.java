@@ -7,8 +7,9 @@ import cv.inps.rh.configuracao.application.dto.WrapperListResponsaveisDTO;
 import cv.inps.rh.configuracao.application.queries.GetResponsaveisQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.InstituicaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DirecaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ResponsavelEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SecaoEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
@@ -33,9 +34,9 @@ public class ResponsavelService {
   private final ResponsavelEntityRepository responsavelEntityRepository;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final SecaoEntityRepository secaoEntityRepository;
-  private final InstituicaoEntityRepository instituicaoEntityRepository;
+  private final DirecaoEntityRepository instituicaoEntityRepository;
 
-  public ResponsavelService(ResponsavelEntityRepository responsavelEntityRepository, FuncionarioEntityRepository funcionarioEntityRepository, SecaoEntityRepository secaoEntityRepository, InstituicaoEntityRepository instituicaoEntityRepository) {
+  public ResponsavelService(ResponsavelEntityRepository responsavelEntityRepository, FuncionarioEntityRepository funcionarioEntityRepository, SecaoEntityRepository secaoEntityRepository, DirecaoEntityRepository instituicaoEntityRepository) {
     this.responsavelEntityRepository = responsavelEntityRepository;
     this.funcionarioEntityRepository = funcionarioEntityRepository;
     this.secaoEntityRepository = secaoEntityRepository;
@@ -113,11 +114,11 @@ public class ResponsavelService {
 
       if (StringUtils.hasText(query.getNomeInstituicao())) {
         var value = "%" + query.getNomeInstituicao().toLowerCase() + "%";
-        predicates.add(cb.like(cb.lower(root.get(ResponsavelEntity_.institId).get(InstituicaoEntity_.NOME)), value));
+        predicates.add(cb.like(cb.lower(root.get(ResponsavelEntity_.institId).get(DirecaoEntity_.NOME)), value));
       }
 
       if (query.getIdInstituicao() != null) {
-        predicates.add(cb.equal(root.get(ResponsavelEntity_.institId).get(InstituicaoEntity_.ID), query.getIdInstituicao()));
+        predicates.add(cb.equal(root.get(ResponsavelEntity_.institId).get(DirecaoEntity_.ID), query.getIdInstituicao()));
       }
 
       if (StringUtils.hasText(query.getNomeSecccao())) {

@@ -18,7 +18,7 @@ import lombok.Setter;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "GLB_T_GEOGRAFIA", schema = "INPSRH")
+@Table(name = "GLB_T_GEOGRAFIA", schema = "SIPSGLOBAL")
 public class GeografiaEntity  {
 
     @Id

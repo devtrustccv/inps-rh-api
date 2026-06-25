@@ -368,7 +368,7 @@ public class HistoricoLaboralWriteService {
   private void populateMobilidade(MobilidadeEntity mob, RelacaoLaboralDTO dto) {
     if (dto.getTipoMobilidade() != null)
       mob.setTipoSituacao(dto.getTipoMobilidade());
-    var instRef = ValidationUtil.ref(entityManager, InstituicaoEntity.class, dto.getDirecao());
+    var instRef = ValidationUtil.ref(entityManager, DirecaoEntity.class, dto.getDirecao());
     if (instRef != null) mob.setInstidId(instRef);
     var secRef = ValidationUtil.ref(entityManager, SecaoEntity.class, dto.getSecao());
     if (secRef != null) mob.setSecaoId(secRef);

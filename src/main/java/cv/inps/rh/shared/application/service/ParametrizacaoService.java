@@ -21,14 +21,14 @@ public class ParametrizacaoService {
 
   private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
   private final GeografiaEntityRepository geografiaEntityRepository;
-  private final InstituicaoEntityRepository instituicaoEntityRepository;
+  private final DirecaoEntityRepository instituicaoEntityRepository;
   private final BancoEntityRepository bancoEntityRepository;
   private final EntidadeEntityRepository entidadeEntityRepository;
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
   private final EstabelecimentoEntityRepository estabelecimentoEntityRepository;
 
   private final TipoMovimentoMapper tipoMovimentoMapper;
-  private final InstituicaoMapper instituicaoMapper;
+  private final DirecaoMapper direcaoMapper;
   private final GeografiaMapper geografiaMapper;
   private final EntidadeMapper entidadeMapper;
   private final BancoMapper bancoMapper;
@@ -60,7 +60,7 @@ public class ParametrizacaoService {
   }
 
   public List<ParametrizacaoDTO> getInstituicoes() {
-    return instituicaoEntityRepository.findInstituicoesList()
+    return instituicaoEntityRepository.findDirecoesList()
         .stream()
         .map(p -> new ParametrizacaoDTO(p.getNome(), p.getId()))
         .toList();

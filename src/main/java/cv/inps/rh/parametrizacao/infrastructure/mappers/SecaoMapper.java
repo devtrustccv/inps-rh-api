@@ -2,8 +2,8 @@ package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.Secao;
-import cv.inps.rh.shared.infrastructure.mappers.InstituicaoMapper;
-import cv.inps.rh.shared.infrastructure.persistence.entity.InstituicaoEntity;
+import cv.inps.rh.shared.infrastructure.mappers.DirecaoMapper;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
 import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class SecaoMapper {
 
   private final EntityManager entityManager;
-  private final InstituicaoMapper instituicaoMapper;
+  private final DirecaoMapper direcaoMapper;
 
   public Secao toDomain(SecaoEntity entity) {
     if (entity == null) return null;
@@ -24,7 +24,7 @@ public class SecaoMapper {
         entity.getId(),
         entity.getUuid(),
         entity.getNome(),
-        instituicaoMapper.toDomain(entity.getInstId()),
+        direcaoMapper.toDomain(entity.getInstId()),
         entity.getEstado()
     );
   }
@@ -38,7 +38,7 @@ public class SecaoMapper {
     entity.setNome(ValidationUtil.trimToNull(domain.getNome()));
     entity.setEstado(domain.getEstado());
 
-    entity.setInstId(ValidationUtil.ref(entityManager, InstituicaoEntity.class,
+    entity.setInstId(ValidationUtil.ref(entityManager, DirecaoEntity.class,
         domain.getInstId() != null ? domain.getInstId().id() : null));
 
     return entity;

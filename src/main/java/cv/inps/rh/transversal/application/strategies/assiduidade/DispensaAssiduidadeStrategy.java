@@ -82,7 +82,7 @@ public class DispensaAssiduidadeStrategy implements AssiduidadeStrategy {
         Join<TiposRelacionamentoEntity, FuncionarioEntity> funcJoinData = relJoinData.join("funId", JoinType.INNER);
 
         Join<TiposRelacionamentoEntity, MobilidadeEntity> mobJoinData = relJoinData.join("mobId", JoinType.LEFT);
-        Join<MobilidadeEntity, InstituicaoEntity> instJoinData = mobJoinData.join("instidId", JoinType.LEFT);
+        Join<MobilidadeEntity, DirecaoEntity> instJoinData = mobJoinData.join("instidId", JoinType.LEFT);
         Join<MobilidadeEntity, SecaoEntity> secaoJoinData = mobJoinData.join("secaoId", JoinType.LEFT);
 
         List<Predicate> dataPredicates = buildPredicates(query, cb, rootData, relJoinData, funcJoinData);

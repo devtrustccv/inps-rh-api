@@ -13,7 +13,7 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
-import cv.inps.rh.shared.infrastructure.persistence.entity.InstituicaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity;
 import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MobilidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity;
@@ -101,7 +101,7 @@ public class MobilidadeWriteService {
     me.setFunId(funcionario);
     me.setLocalTrabId(ValidationUtil.ref(entityManager, ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDepois()));
     me.setSecaoId(ValidationUtil.ref(entityManager, SecaoEntity.class, mobilidadeDTO.getSeccaoDepois()));
-    me.setInstidId(ValidationUtil.ref(entityManager, InstituicaoEntity.class, mobilidadeDTO.getDirecaoDepois()));
+    me.setInstidId(ValidationUtil.ref(entityManager, DirecaoEntity.class, mobilidadeDTO.getDirecaoDepois()));
     me.setDataInicio(mobilidadeDTO.getDataInicio());
     me.setDataFim(mobilidadeDTO.getDataFim());
     me.setEstado(Estado.P);
@@ -119,7 +119,7 @@ public class MobilidadeWriteService {
     var secaoRef = ValidationUtil.ref(entityManager, SecaoEntity.class, mobilidadeDTO.getSeccaoDepois());
     if (secaoRef != null) me.setSecaoId(secaoRef);
 
-    var instidRef = ValidationUtil.ref(entityManager, InstituicaoEntity.class, mobilidadeDTO.getDirecaoDepois());
+    var instidRef = ValidationUtil.ref(entityManager, DirecaoEntity.class, mobilidadeDTO.getDirecaoDepois());
     if (instidRef != null) me.setInstidId(instidRef);
 
     me.setDataInicio(mobilidadeDTO.getDataInicio());
