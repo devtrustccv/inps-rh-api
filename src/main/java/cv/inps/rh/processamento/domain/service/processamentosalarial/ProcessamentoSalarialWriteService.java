@@ -17,13 +17,17 @@ import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
+import java.security.Principal;
 import java.sql.Types;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
+import static java.util.Optional.ofNullable;
 
 @Transactional
 @Service
@@ -188,7 +192,9 @@ public class ProcessamentoSalarialWriteService {
                 .addValue("p_cc_id", request.getDireccaoId())
                 .addValue("p_tiprel_id", request.getRelacionamentoId())
                 .addValue("p_tipo", request.getTipo())
-                .addValue("P_user_name", "demo@demo.com") // TODO 07/12/2025 17:48 validate this
+                .addValue("P_user_name", ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                    .map(Principal::getName)
+                    .orElse("System"))
                 .addValue("p_user_id", 0) // TODO 07/12/2025 17:48 validate this
         );
 
