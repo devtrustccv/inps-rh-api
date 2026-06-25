@@ -4,6 +4,7 @@
 package cv.inps.rh.shared.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,7 @@ public class AnexoReqDTO  {
 
   private Long id ;
 
-
+  @NotNull(message = "O campo Tipo de Documento do anexo é obrigatório")
   private Long tipoDocumentoId ;
 
 

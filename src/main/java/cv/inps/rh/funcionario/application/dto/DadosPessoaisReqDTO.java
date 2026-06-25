@@ -5,6 +5,7 @@ package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,7 @@ public class DadosPessoaisReqDTO  {
 
   private Long idColaborador;
 
+  @NotNull(message = "O campo Tipo de Documento é obrigatório")
   private Long tipoDocumentoId ;
 
 
