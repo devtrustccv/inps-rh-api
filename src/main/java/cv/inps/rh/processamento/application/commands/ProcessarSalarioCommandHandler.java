@@ -25,9 +25,9 @@ public class ProcessarSalarioCommandHandler implements CommandHandler<ProcessarS
 
     LOGGER.debug("ProcessarSalarioCommand : {}", command);
 
-    processamentoSalarialService.processarSalario(command.getProcessamentosalariorequest());
+    var msg = processamentoSalarialService.processarSalario(command.getProcessamentosalariorequest());
 
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(msg);
   }
 
 }

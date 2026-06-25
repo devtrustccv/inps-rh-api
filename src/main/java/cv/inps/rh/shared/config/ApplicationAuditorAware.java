@@ -16,30 +16,30 @@ public class ApplicationAuditorAware implements AuditorAware<String> {
   @Override
   public Optional<String> getCurrentAuditor() {
     var preferredUsername = getPreferredUsername();
-    return Optional.of(preferredUsername);
-    }
+    return Optional.ofNullable(preferredUsername);
+  }
 
-    /**
-    * Retrieves the preferred username from the JWT token in the security context.
-    *
-    * @return preferred username
-    * @throws IllegalStateException if the JWT token is not found in the security context
-    */
-    public String getPreferredUsername() {
+  /**
+   * Retrieves the preferred username from the JWT token in the security context.
+   *
+   * @return preferred username
+   * @throws IllegalStateException if the JWT token is not found in the security context
+   */
+  public String getPreferredUsername() {
 
     if ("development".equals(activeProfile) || "staging".equals(activeProfile)) {
-    return "local";
+      return "local";
     }
 
     var authentication = SecurityContextHolder.getContext().getAuthentication();
 
     if (authentication == null || !authentication.isAuthenticated()
-    || "anonymousUser".equals(authentication.getPrincipal())) {
-    // Fallback when no user is authenticated (e.g., server-generated records)
-    return "system";
+        || "anonymousUser".equals(authentication.getPrincipal())) {
+      // Fallback when no user is authenticated (e.g., server-generated records)
+      return "system";
     }
 
     return authentication.getName();
-    }
+  }
 
-    }
+}
