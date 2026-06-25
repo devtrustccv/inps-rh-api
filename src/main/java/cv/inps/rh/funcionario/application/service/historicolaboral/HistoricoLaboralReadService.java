@@ -214,11 +214,13 @@ public class HistoricoLaboralReadService {
     var mob = entity.getMobId();
     if (mob != null) {
       dto.setTipoMobilidade(mob.getTipoSituacao());
+      dto.setDirecao(mob.getInstidId() != null ? mob.getInstidId().getId() : null);
+      dto.setSecao(mob.getSecaoId() != null ? mob.getSecaoId().getId() : null);
       dto.setDataInicioMobilidade(mob.getDataInicio());
       dto.setDataFimMobilidade(mob.getDataFim());
-      dto.setLocalTrabalho(mob.getLocalTrabId().getId());
-      dto.setPais(mob.getLocalTrabId().getPaisId() != null ? mob.getLocalTrabId().getPaisId().getNome() : null);
-      dto.setIlha(mob.getLocalTrabId().getIlhaId() != null ? mob.getLocalTrabId().getIlhaId().getNome() : null);
+      dto.setLocalTrabalho(mob.getLocalTrabId() != null ? mob.getLocalTrabId().getId() : null);
+      dto.setPais(mob.getLocalTrabId() != null && mob.getLocalTrabId().getPaisId() != null ? mob.getLocalTrabId().getPaisId().getNome() : null);
+      dto.setIlha(mob.getLocalTrabId() != null && mob.getLocalTrabId().getIlhaId() != null ? mob.getLocalTrabId().getIlhaId().getNome() : null);
     }
 
 
@@ -282,11 +284,13 @@ public class HistoricoLaboralReadService {
     var mob = atual.getMobId();
     if (mob != null) {
       dto.setTipoMobilidade(mob.getTipoSituacao());
+      dto.setDirecao(mob.getInstidId() != null ? mob.getInstidId().getId() : null);
+      dto.setSecao(mob.getSecaoId() != null ? mob.getSecaoId().getId() : null);
       dto.setDataInicioMobilidade(mob.getDataInicio());
       dto.setDataFimMobilidade(mob.getDataFim());
-      dto.setLocalTrabalho(mob.getLocalTrabId().getId());
-      dto.setPais(mob.getLocalTrabId().getPaisId() != null ? mob.getLocalTrabId().getPaisId().getNome() : null);
-      dto.setIlha(mob.getLocalTrabId().getIlhaId() != null ? mob.getLocalTrabId().getIlhaId().getNome() : null);
+      dto.setLocalTrabalho(mob.getLocalTrabId() != null ? mob.getLocalTrabId().getId() : null);
+      dto.setPais(mob.getLocalTrabId() != null && mob.getLocalTrabId().getPaisId() != null ? mob.getLocalTrabId().getPaisId().getNome() : null);
+      dto.setIlha(mob.getLocalTrabId() != null && mob.getLocalTrabId().getIlhaId() != null ? mob.getLocalTrabId().getIlhaId().getNome() : null);
     }
 
 
