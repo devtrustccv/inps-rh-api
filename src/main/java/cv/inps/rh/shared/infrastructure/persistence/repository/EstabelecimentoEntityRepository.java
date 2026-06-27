@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -25,5 +26,7 @@ public interface EstabelecimentoEntityRepository extends
     return findByUuid(uuid)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("EstabelecimentoEntity not found for uuid: " + uuid));
   }
+
+  List<EstabelecimentoEntity> findByPais_Id(Long id);
 
 }

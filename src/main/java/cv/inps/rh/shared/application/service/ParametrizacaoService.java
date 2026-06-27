@@ -53,9 +53,13 @@ public class ParametrizacaoService {
         .stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
 
-  public List<EstabelecimentoComboDTO> getEstabelecimentosAtivos() {
-    return estabelecimentoEntityRepository.findAll()
-        .stream()
+  public List<EstabelecimentoComboDTO> getEstabelecimentosAtivos(Long paisId) {
+
+    var data = paisId != null ?
+        estabelecimentoEntityRepository.findByPais_Id(paisId) :
+        estabelecimentoEntityRepository.findAll();
+
+    return data.stream()
         .map(obj -> {
           var pais = obj.getPais();
           var result = new EstabelecimentoComboDTO();

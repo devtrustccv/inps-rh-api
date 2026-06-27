@@ -35,8 +35,8 @@ public class ParametrizacaoController {
 
   @GetMapping("/estabelecimento/ativos")
   @Operation(summary = "Lista estabelecimentos ativos")
-  public ResponseEntity<List<EstabelecimentoComboDTO>> getEstabelecimentosAtivos() {
-    return ResponseEntity.ok(parametrizacaoService.getEstabelecimentosAtivos());
+  public ResponseEntity<List<EstabelecimentoComboDTO>> getEstabelecimentosAtivos(@RequestParam(required = false) Long paisId) {
+    return ResponseEntity.ok(parametrizacaoService.getEstabelecimentosAtivos(paisId));
   }
 
   @GetMapping("/tipo-movimento-renumeracao/ativos")
