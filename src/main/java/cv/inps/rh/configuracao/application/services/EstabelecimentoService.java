@@ -2,7 +2,6 @@ package cv.inps.rh.configuracao.application.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
-import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
 import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
 import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
@@ -55,9 +54,9 @@ public class EstabelecimentoService extends ConfigurationProcess<Estabelecimento
       estabelecimento.setPais(pais);
     }
 
-    estabelecimentoRepository.save(estabelecimento);
+    estabelecimento = estabelecimentoRepository.save(estabelecimento);
 
-    return new ConfigurationResponseIdDTO(estabelecimento.getUuid());
+    return buildResponse(estabelecimento);
   }
 
   @Override
@@ -72,9 +71,9 @@ public class EstabelecimentoService extends ConfigurationProcess<Estabelecimento
     } else
       estabelecimento.setPais(null);
 
-    estabelecimentoRepository.save(estabelecimento);
+    estabelecimento = estabelecimentoRepository.save(estabelecimento);
 
-    return "";
+    return buildResponse(estabelecimento);
   }
 
   @Override
@@ -134,9 +133,10 @@ public class EstabelecimentoService extends ConfigurationProcess<Estabelecimento
     response.setUuid(estabelecimento.getUuid());
     response.setNome(estabelecimento.getNome());
 
-    if (estabelecimento.getPais() != null) {
-      response.setPaisId(estabelecimento.getPais().getId());
-      response.setPais(estabelecimento.getPais().getNome());
+    var pais = estabelecimento.getPais();
+    if (pais != null) {
+      response.setPaisId(pais.getId());
+      response.setPais(pais.getNome());
     }
 
     return response;
