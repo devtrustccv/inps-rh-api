@@ -10,7 +10,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.thymeleaf.context.Context;
 
 @RestController
 @RequestMapping("/api/relatorios/pdf")
@@ -33,9 +32,13 @@ public class RelatoriosPdfController {
   }
 
   @GetMapping("/processamento-salarios")
-  public ResponseEntity<byte[]> processamentoSalariosPdf(@RequestParam Long processamentoId, @RequestParam String tipo) {
+  public ResponseEntity<byte[]> processamentoSalariosPdf(
+      @RequestParam Long processamentoId,
+      @RequestParam String tipo,
+      @RequestParam(required = false) String funId
+  ) {
     return pdfResponse(
-        pdfGenerator.generate("processamento-salarios", service.processamentoSalarios(processamentoId, tipo)),
+        pdfGenerator.generate("processamento-salarios", service.processamentoSalarios(processamentoId, tipo, funId)),
         "processamento-salarios.pdf"
     );
   }
