@@ -26,6 +26,8 @@ public class ResumoProcPagamentoDTO {
 
   private String shortDesc;
 
+  private String tipo;
+
 
   private Long valor;
 
