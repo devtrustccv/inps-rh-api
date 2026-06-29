@@ -42,9 +42,21 @@
       "primaryKey": false
     },
     {
-      "name": "tipo",
+      "name": "tipoMovimento",
       "objectType": "java",
       "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "procId",
+      "objectType": "java",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,

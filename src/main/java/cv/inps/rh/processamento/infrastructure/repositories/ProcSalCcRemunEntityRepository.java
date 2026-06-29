@@ -20,6 +20,7 @@ public interface ProcSalCcRemunEntityRepository extends
   @Query("""
           SELECT new cv.inps.rh.processamento.application.dto.ResumoProcessamentoRowDTO(
               e.itemActo,
+              e.descricao,
               e.tipo,
               e.shortDesc,
               e.procSalId,
@@ -28,6 +29,7 @@ public interface ProcSalCcRemunEntityRepository extends
           FROM ProcSalCcRemunEntity e
           WHERE e.ccId = :procId
           GROUP BY e.itemActo,
+                e.descricao,
                    e.tipo,
                    e.shortDesc,
                    e.procSalId

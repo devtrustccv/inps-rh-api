@@ -23,11 +23,12 @@ public interface ProcSalCcPagEntityRepository extends
               e.descricao,
               e.shortDesc,
               e.tipo,
+              e.procSalId,
               sum(e.valor)
           )
           FROM ProcSalCcPagEntity e
           WHERE e.ccId = :procId
-          GROUP BY e.itemActo,e.descricao, e.shortDesc, e.tipo
+          GROUP BY e.itemActo,e.descricao, e.shortDesc, e.tipo, e.procSalId
       """)
   List<ResumoProcPagamentoDTO> getPagamentos(@Param("procId") Long procId);
 
