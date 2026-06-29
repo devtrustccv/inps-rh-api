@@ -36,12 +36,12 @@ public class RelatoriosService {
         funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funId)).getId() : null;
 
     var remunRows = id != null ?
-        procSalCcRemunEntityRepository.findByProcFuncIdAndFunId(procFuncionarioId, id) :
-        procSalCcRemunEntityRepository.findByProcFuncId(procFuncionarioId);
+        procSalCcRemunEntityRepository.findByCcIdAndFunId(procFuncionarioId, id) :
+        procSalCcRemunEntityRepository.findByCcId(procFuncionarioId);
 
     var pagRows = id != null ?
-        procSalCcPagEntityRepository.findByProcFuncIdAndFunId(procFuncionarioId, id) :
-        procSalCcPagEntityRepository.findByProcFuncId(procFuncionarioId);
+        procSalCcPagEntityRepository.findByProcCcIdAndFunId(procFuncionarioId, id) :
+        procSalCcPagEntityRepository.findByProcCcId(procFuncionarioId);
 
     if (remunRows.isEmpty() && pagRows.isEmpty())
       return Map.of("recibos", List.of());
