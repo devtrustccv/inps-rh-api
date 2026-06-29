@@ -9,6 +9,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.ProcSalCcEntityEn
 import cv.inps.rh.shared.util.DateFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.thymeleaf.context.Context;
 
 import java.time.LocalDateTime;
@@ -29,10 +30,18 @@ public class RelatoriosService {
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ProcSalCcEntityEntityRepository procSalCcEntityEntityRepository;
 
-  public Map<String, Object> recibosSalario(Long procFuncionarioId) {
+  public Map<String, Object> recibosSalario(Long procFuncionarioId, String funId) {
 
-    var remunRows = procSalCcRemunEntityRepository.findByProcFuncId(procFuncionarioId);
-    var pagRows = procSalCcPagEntityRepository.findByProcFuncId(procFuncionarioId);
+    var id = StringUtils.hasText(funId) ?
+        funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funId)).getId() : null;
+
+    var remunRows = id != null ?
+        procSalCcRemunEntityRepository.findByProcFuncIdAndFunId(procFuncionarioId, id) :
+        procSalCcRemunEntityRepository.findByProcFuncId(procFuncionarioId);
+
+    var pagRows = id != null ?
+        procSalCcPagEntityRepository.findByProcFuncIdAndFunId(procFuncionarioId, id) :
+        procSalCcPagEntityRepository.findByProcFuncId(procFuncionarioId);
 
     if (remunRows.isEmpty() && pagRows.isEmpty())
       return Map.of("recibos", List.of());
@@ -42,6 +51,7 @@ public class RelatoriosService {
     var entidade = header != null ? ("Processar Remunerações " + header.getCentroDeCusto()) : "";
     var dataProcessamento = header != null ? header.getDataProcessamento().format(MONTH_YEAR) : "";
     var dataEmissao = LocalDateTime.now().format(DateFormatter.DATE_TIME);
+
     String nome = header != null ? header.getNome() : "";
     String vinculo = header != null ? header.getRelacao() : "";
     String nif = header != null ? String.valueOf(header.getNif()) : "";
@@ -72,7 +82,7 @@ public class RelatoriosService {
 
   public Context processamentoSalarios(Long processamentoId, String tipo, String funId) {
 
-    var id = funId != null && !funId.isBlank() ?
+    var id = StringUtils.hasText(funId) ?
         funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funId)).getId() : null;
 
     var data = procSalCcEntityEntityRepository.findAllByFilters(processamentoId, tipo, id);

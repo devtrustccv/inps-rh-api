@@ -27,8 +27,11 @@ public class RelatoriosPdfController {
   }
 
   @GetMapping("/recibos-salario")
-  public ResponseEntity<byte[]> recibosSalarioPdf(@RequestParam Long procFuncionarioId) {
-    return pdfResponse(pdfGenerator.generate("recibo-salario", service.recibosSalario(procFuncionarioId)), "recibos-salario.pdf");
+  public ResponseEntity<byte[]> recibosSalarioPdf(
+      @RequestParam Long procFuncionarioId,
+      @RequestParam(required = false) String funId
+  ) {
+    return pdfResponse(pdfGenerator.generate("recibo-salario", service.recibosSalario(procFuncionarioId, funId)), "recibos-salario.pdf");
   }
 
   @GetMapping("/processamento-salarios")

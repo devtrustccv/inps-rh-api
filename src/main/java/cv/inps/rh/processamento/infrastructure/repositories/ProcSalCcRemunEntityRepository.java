@@ -52,4 +52,6 @@ public interface ProcSalCcRemunEntityRepository extends
 
   List<ProcSalCcRemunEntity> findByProcFuncId(Long procFuncId);
 
+  List<ProcSalCcRemunEntity> findByProcFuncIdAndFunId(Long procFuncId, Long funId);
+
 }
