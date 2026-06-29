@@ -85,7 +85,11 @@ public class RelatoriosService {
     var id = StringUtils.hasText(funId) ?
         funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funId)).getId() : null;
 
-    var data = procSalCcEntityEntityRepository.findAllByFilters(processamentoId, tipo, id);
+    var data = procSalCcEntityEntityRepository.findAllByFilters(
+        processamentoId,
+        StringUtils.hasText(tipo) ? tipo : null,
+        id
+    );
     if (data.isEmpty())
       return new Context();
 
