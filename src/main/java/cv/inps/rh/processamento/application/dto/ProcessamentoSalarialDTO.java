@@ -43,4 +43,6 @@ public class ProcessamentoSalarialDTO {
 
   private Long total;
 
+  private String tipo;
+
 }

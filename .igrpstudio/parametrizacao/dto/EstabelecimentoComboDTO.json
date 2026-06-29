@@ -1,0 +1,39 @@
+{
+  "name": "EstabelecimentoCombo",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "paisId",
+      "type": "long",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "paisDescription",
+      "type": "string",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "type": "dto",
+  "module": "parametrizacao",
+  "enableCustonValidation": false,
+  "readOnly": false,
+  "extends": {
+    "name": "Parametrizacao",
+    "module": "parametrizacao"
+  },
+  "id": "new-action-Contract"
+}

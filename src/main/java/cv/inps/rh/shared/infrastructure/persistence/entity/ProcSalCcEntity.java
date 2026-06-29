@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Getter
 @Entity
 @Immutable
-@Table(name = "PROC_SAL_CC")
+@Table(name = "RH_V_PROC_SAL_CC")
 public class ProcSalCcEntity {
 
   @Id

@@ -1,6 +1,7 @@
 package cv.inps.rh.shared.application.service;
 
 import cv.inps.rh.configuracao.application.dto.VinculoMovimentoResponseDTO;
+import cv.inps.rh.parametrizacao.application.dto.EstabelecimentoComboDTO;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -52,10 +53,22 @@ public class ParametrizacaoService {
         .stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
 
-  public List<ParametrizacaoDTO> getEstabelecimentosAtivos() {
-    return estabelecimentoEntityRepository.findAll()
-        .stream()
-        .map(obj -> new ParametrizacaoDTO(obj.getNome(), obj.getId()))
+  public List<EstabelecimentoComboDTO> getEstabelecimentosAtivos(Long paisId) {
+
+    var data = paisId != null ?
+        estabelecimentoEntityRepository.findByPais_Id(paisId) :
+        estabelecimentoEntityRepository.findAll();
+
+    return data.stream()
+        .map(obj -> {
+          var pais = obj.getPais();
+          var result = new EstabelecimentoComboDTO();
+          result.setPaisId(pais != null ? pais.getId() : null);
+          result.setPaisDescription(pais != null ? pais.getNome() : null);
+          result.setLabel(obj.getNome());
+          result.setValue(obj.getId());
+          return result;
+        })
         .toList();
   }
 

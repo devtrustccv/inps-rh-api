@@ -25,7 +25,8 @@ public interface RhVListaProcessamentoEntityRepository extends JpaRepository<RhV
          p.obs,
          p.quantidade,
          p.cabimento,
-         p.total
+         p.total,
+         p.tipoProcessamento
       )
       FROM RhVListaProcessamentoEntity p
       WHERE ((:estado IS NULL AND p.estado <> 'E') OR (:estado IS NOT NULL AND p.estado = :estado))

@@ -4,6 +4,7 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,7 @@ public class AgregadoDependenteReqDTO  {
 
   private Long id ;
 
-
+  @NotNull(message = "O campo Tipo de Documento do familiar é obrigatório")
   private Long tipoDocumentoId ;
 
 

@@ -25,7 +25,7 @@ public interface ProcSalCcPagEntityRepository extends
               sum(e.valor)
           )
           FROM ProcSalCcPagEntity e
-          WHERE e.procSalId = :procId
+          WHERE e.ccId = :procId
           GROUP BY e.itemActo,e.descricao, e.shortDesc
       """)
   List<ResumoProcPagamentoDTO> getPagamentos(@Param("procId") Long procId);
@@ -47,5 +47,7 @@ public interface ProcSalCcPagEntityRepository extends
   );
 
   List<ProcSalCcPagEntity> findByProcFuncId(Long procFuncId);
+
+  List<ProcSalCcPagEntity> findByProcFuncIdAndFunId(Long procFuncId, Long funId);
 
 }

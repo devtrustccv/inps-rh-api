@@ -26,7 +26,7 @@ public interface ProcSalCcRemunEntityRepository extends
               SUM(e.valor)
           )
           FROM ProcSalCcRemunEntity e
-          WHERE e.procSalId = :procId
+          WHERE e.ccId = :procId
           GROUP BY e.itemActo,
                    e.tipo,
                    e.shortDesc,
@@ -51,5 +51,7 @@ public interface ProcSalCcRemunEntityRepository extends
   );
 
   List<ProcSalCcRemunEntity> findByProcFuncId(Long procFuncId);
+
+  List<ProcSalCcRemunEntity> findByProcFuncIdAndFunId(Long procFuncId, Long funId);
 
 }

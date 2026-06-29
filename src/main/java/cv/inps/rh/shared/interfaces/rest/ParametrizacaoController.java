@@ -3,6 +3,7 @@ package cv.inps.rh.shared.interfaces.rest;
 import cv.igrp.framework.core.data.EnumItem;
 import cv.igrp.framework.core.utils.object.EnumUtils;
 import cv.inps.rh.configuracao.application.dto.VinculoMovimentoResponseDTO;
+import cv.inps.rh.parametrizacao.application.dto.EstabelecimentoComboDTO;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.service.ParametrizacaoService;
@@ -34,8 +35,8 @@ public class ParametrizacaoController {
 
   @GetMapping("/estabelecimento/ativos")
   @Operation(summary = "Lista estabelecimentos ativos")
-  public ResponseEntity<List<ParametrizacaoDTO>> getEstabelecimentosAtivos() {
-    return ResponseEntity.ok(parametrizacaoService.getEstabelecimentosAtivos());
+  public ResponseEntity<List<EstabelecimentoComboDTO>> getEstabelecimentosAtivos(@RequestParam(required = false) Long paisId) {
+    return ResponseEntity.ok(parametrizacaoService.getEstabelecimentosAtivos(paisId));
   }
 
   @GetMapping("/tipo-movimento-renumeracao/ativos")

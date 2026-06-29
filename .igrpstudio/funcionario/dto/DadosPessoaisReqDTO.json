@@ -21,7 +21,7 @@
       "name": "tipoDocumentoId",
       "objectType": "java",
       "type": "long",
-      "required": false,
+      "required": true,
       "before": false,
       "after": false,
       "positive": false,
