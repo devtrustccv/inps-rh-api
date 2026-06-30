@@ -11,7 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ExecutarAcaoNoProcessamentoCommand implements Command {
 
-
   private ProcessamentoActionRequestDTO processamentoactionrequest;
-
 }

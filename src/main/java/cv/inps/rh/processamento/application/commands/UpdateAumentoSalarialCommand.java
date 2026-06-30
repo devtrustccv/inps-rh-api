@@ -12,9 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateAumentoSalarialCommand implements Command {
 
-
   private AumentoSalarialRequestDTO aumentosalarialrequest;
+
   @NotBlank(message = "The field <aumentoSalarialId> is required")
   private String aumentoSalarialId;
-
 }

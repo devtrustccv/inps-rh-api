@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,5 +13,4 @@ public class GetResumoProcessamentoQuery implements Query {
 
   @NotNull(message = "The field <processamentoId> is required")
   private Long processamentoId;
-
 }

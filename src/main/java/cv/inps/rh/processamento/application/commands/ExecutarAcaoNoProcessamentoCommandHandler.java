@@ -4,13 +4,14 @@ import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.processamento.application.constants.ProcessamentoSalarialAction;
 import cv.inps.rh.processamento.domain.service.processamentosalarial.ProcessamentoSalarialWriteService;
+import cv.inps.rh.shared.application.dto.ProcedureMsgDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ExecutarAcaoNoProcessamentoCommandHandler implements CommandHandler<ExecutarAcaoNoProcessamentoCommand, ResponseEntity<String>> {
+public class ExecutarAcaoNoProcessamentoCommandHandler implements CommandHandler<ExecutarAcaoNoProcessamentoCommand, ResponseEntity<ProcedureMsgDTO>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ExecutarAcaoNoProcessamentoCommandHandler.class);
 
@@ -21,7 +22,7 @@ public class ExecutarAcaoNoProcessamentoCommandHandler implements CommandHandler
   }
 
   @IgrpCommandHandler
-  public ResponseEntity<String> handle(ExecutarAcaoNoProcessamentoCommand command) {
+  public ResponseEntity<ProcedureMsgDTO> handle(ExecutarAcaoNoProcessamentoCommand command) {
 
     LOGGER.debug("ExecutarAcaoNoProcessamentoCommand : {}", command);
 
@@ -29,8 +30,12 @@ public class ExecutarAcaoNoProcessamentoCommandHandler implements CommandHandler
 
     var action = command.getProcessamentoactionrequest().action();
 
-    if (action.equals(ProcessamentoSalarialAction.ELIMINAR_PROCESSAMENTO))
-      return ResponseEntity.ok(service.eliminarProcessamento(ids));
+    var pms = new ProcedureMsgDTO();
+
+    if (action.equals(ProcessamentoSalarialAction.ELIMINAR_PROCESSAMENTO)) {
+      pms.setMessage(service.eliminarProcessamento(ids));
+      return ResponseEntity.ok(pms);
+    }
 
     switch (action) {
       case VALIDAR -> service.validar(ids);
@@ -40,7 +45,7 @@ public class ExecutarAcaoNoProcessamentoCommandHandler implements CommandHandler
       default -> throw new IllegalArgumentException("Invalid option");
     }
 
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(pms);
   }
 
 }

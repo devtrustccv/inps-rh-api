@@ -11,7 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SaveAumentoSalarialCommand implements Command {
 
-
   private AumentoSalarialRequestDTO aumentosalarialrequest;
-
 }

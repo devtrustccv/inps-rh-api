@@ -11,7 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProcessarSalarioCommand implements Command {
 
-
   private ProcessamentoSalarioRequestDTO processamentosalariorequest;
-
 }
