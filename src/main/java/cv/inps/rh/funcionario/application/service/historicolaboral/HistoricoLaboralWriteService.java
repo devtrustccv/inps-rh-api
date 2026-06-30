@@ -393,9 +393,12 @@ public class HistoricoLaboralWriteService {
       car.setSalario(dto.getSalario());
     else if (car.getSalario() == null)
       car.setSalario(BigDecimal.ZERO);
-    car.setTipoSituacao(ValidationUtil.trimToNull(dto.getTipoAlteracaoCarreira()));
-    car.setDataInicio(dto.getDataInicioCarreira());
-    car.setDataFim(dto.getDataFimCarreira());
+    if (dto.getTipoAlteracaoCarreira() != null)
+      car.setTipoSituacao(ValidationUtil.trimToNull(dto.getTipoAlteracaoCarreira()));
+    if (dto.getDataInicioCarreira() != null)
+      car.setDataInicio(dto.getDataInicioCarreira());
+    if (dto.getDataFimCarreira() != null)
+      car.setDataFim(dto.getDataFimCarreira());
   }
 
   private void populateSituacao(SituacaoLaboralEntity sit, RelacaoLaboralDTO dto) {
@@ -410,9 +413,12 @@ public class HistoricoLaboralWriteService {
       }
       sit.setTipoSituacao(ValidationUtil.trimToNull(dto.getMotivo()));
     }
-    sit.setDataInicio(dto.getDataInicioSituacao());
-    sit.setDataFim(dto.getDataFimSituacao());
-    sit.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
+    if (dto.getDataInicioSituacao() != null)
+      sit.setDataInicio(dto.getDataInicioSituacao());
+    if (dto.getDataFimSituacao() != null)
+      sit.setDataFim(dto.getDataFimSituacao());
+    if (dto.getObservacao() != null)
+      sit.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
   }
 
   private void updateExistingSalaryRemuneracao(FuncionarioEntity funcionario, RelacaoLaboralDTO dto,
