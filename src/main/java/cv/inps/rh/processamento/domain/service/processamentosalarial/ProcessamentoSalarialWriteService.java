@@ -1,12 +1,9 @@
 package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
-import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.processamento.application.constants.ProcessamentoSalarialAction;
 import cv.inps.rh.processamento.application.dto.ProcessamentoSalarioRequestDTO;
 import cv.inps.rh.processamento.domain.service.processamentosalarial.api.ProcessarSalarioApi;
-import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import lombok.Getter;
@@ -44,10 +41,8 @@ public class ProcessamentoSalarialWriteService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProcessamentoSalarialWriteService.class);
 
-  private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final ProcessamentoSalarialEntityRepository processamentoSalarialEntityRepository;
-  private final FuncionarioRules funcionarioRules;
   private final ProcessarSalarioApi processarSalarioApi;
   private final DataSource dataSource;
   private final JdbcTemplate jdbcTemplate;
@@ -56,27 +51,17 @@ public class ProcessamentoSalarialWriteService {
 
     var ids = funcionariosIds.stream().map(UUID::fromString).toList();
 
-    var funcionarios = funcionarioEntityRepository.findAllByUuidIn(ids);
-    if (funcionarios.size() != funcionariosIds.size())
-      throw IgrpResponseStatusException.badRequest("Funcionários não encontrados");
+    var relations = tiposRelacionamentoEntityRepository.findRelacionamentosAtuaisByFuncionarioUuids(ids);
+    if (relations.isEmpty())
+      return;
 
-    for (var funcionario : funcionarios) {
-
-      if (!funcionario.getEstado().equals(Estado.A))
-        throw IgrpResponseStatusException.badRequest("Funcionário <%s> não está ativo".formatted(funcionario.getNome()));
-
-      var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-      if (!tipoRelacionamentoAtual.getEstActAdm().equals(1))
-        throw IgrpResponseStatusException.badRequest("O vínculo do colaborador <%s> não está activo!".formatted(funcionario.getNome()));
-
-      tipoRelacionamentoAtual.setFlgProcessa(0);
-      tiposRelacionamentoEntityRepository.save(tipoRelacionamentoAtual);
-    }
+    relations.forEach(r -> r.setFlgProcessa(0));
+    tiposRelacionamentoEntityRepository.saveAll(relations);
   }
 
-  public String eliminarProcessamento(List<Long> processamentoIds) {
+  public String eliminarProcessamento(List<Long> ids) {
 
-    var ids = processamentoIds.stream()
+    var processingIds = ids.stream()
         .map(String::valueOf)
         .toArray(String[]::new);
 
@@ -89,8 +74,8 @@ public class ProcessamentoSalarialWriteService {
       stmt.setPlsqlIndexTable(
           1,                  // parameter index
           ids,                // array
-          ids.length,         // max length
-          ids.length,         // current length
+          processingIds.length,         // max length
+          processingIds.length,         // current length
           OracleTypes.VARCHAR,
           4000                // max VARCHAR2 length
       );
@@ -103,11 +88,12 @@ public class ProcessamentoSalarialWriteService {
     });
   }
 
-  public void validar(List<Long> processamentoIds) {
+  public void validar(List<Long> ids) {
 
     var processesThatCanNotBeValidated = new ArrayList<Long>();
 
-    var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
+    var processes = processamentoSalarialEntityRepository.findAllById(ids);
+
     processes.forEach(process -> {
       if (!ProcessamentoSalarialAction.VALIDAR.getCode().equals(process.getEstado()))
         processesThatCanNotBeValidated.add(process.getId());
@@ -121,11 +107,11 @@ public class ProcessamentoSalarialWriteService {
     processamentoSalarialEntityRepository.saveAll(processes);
   }
 
-  public void cabimentar(List<Long> processamentoIds) {
+  public void cabimentar(List<Long> ids) {
 
     var illegalProcesses = new ArrayList<Long>();
 
-    var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
+    var processes = processamentoSalarialEntityRepository.findAllById(ids);
     processes.forEach(process -> {
       if (!process.getEstado().equals(ProcessamentoSalarialAction.CABIMENTAR.getCode()))
         illegalProcesses.add(process.getId());
@@ -145,11 +131,11 @@ public class ProcessamentoSalarialWriteService {
     });
   }
 
-  public void autorizar(List<Long> processamentoIds) {
+  public void autorizar(List<Long> ids) {
 
     var illegalProcesses = new ArrayList<Long>();
 
-    var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
+    var processes = processamentoSalarialEntityRepository.findAllById(ids);
     processes.forEach(process -> {
       if (!process.getEstado().equals(ProcessamentoSalarialAction.AUTORIZAR.getCode()))
         illegalProcesses.add(process.getId());
@@ -166,11 +152,11 @@ public class ProcessamentoSalarialWriteService {
     });
   }
 
-  public void extornarCabimento(List<Long> processamentoIds) {
+  public void extornarCabimento(List<Long> ids) {
 
     var illegalProcesses = new ArrayList<Long>();
 
-    var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
+    var processes = processamentoSalarialEntityRepository.findAllById(ids);
     processes.forEach(process -> {
       if (!process.getEstado().equals(ProcessamentoSalarialAction.ELIMINAR_CABIMENTO.getCode()))
         illegalProcesses.add(process.getId());
