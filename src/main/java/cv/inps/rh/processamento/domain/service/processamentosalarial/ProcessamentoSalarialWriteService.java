@@ -69,7 +69,7 @@ public class ProcessamentoSalarialWriteService {
 
     var illegalProcesses = new ArrayList<Long>();
 
-    var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
+    var processes = processamentoSalarialEntityRepository.findAllByCcIdIn(processamentoIds);
     processes.forEach(process -> {
       if (!process.getEstado().equals(ProcessamentoSalarialAction.ELIMINAR_PROCESSAMENTO.getCode()))
         illegalProcesses.add(process.getId());

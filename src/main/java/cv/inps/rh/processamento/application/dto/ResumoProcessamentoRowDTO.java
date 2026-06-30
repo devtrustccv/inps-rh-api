@@ -17,18 +17,15 @@ import lombok.NoArgsConstructor;
 @IgrpDTO
 public class ResumoProcessamentoRowDTO {
 
-
   private Long itemActo;
 
+  private String descricao;
 
   private String tipoMovimento;
 
-
   private String shortDesc;
 
-
   private Long procId;
-
 
   private Long total;
 

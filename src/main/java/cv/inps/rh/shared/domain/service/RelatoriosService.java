@@ -25,6 +25,7 @@ public class RelatoriosService {
   private static final String SEPARATOR = " - ";
   private static final String SEM_CARGO = "__SEM_CARGO__";
   private static final DateTimeFormatter MONTH_YEAR = DateTimeFormatter.ofPattern("MM/yyyy");
+
   private final ProcSalCcRemunEntityRepository procSalCcRemunEntityRepository;
   private final ProcSalCcPagEntityRepository procSalCcPagEntityRepository;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
@@ -36,28 +37,29 @@ public class RelatoriosService {
         funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funId)).getId() : null;
 
     var remunRows = id != null ?
-        procSalCcRemunEntityRepository.findByProcFuncIdAndFunId(procFuncionarioId, id) :
-        procSalCcRemunEntityRepository.findByProcFuncId(procFuncionarioId);
+        procSalCcRemunEntityRepository.findByCcIdAndFunId(procFuncionarioId, id) :
+        procSalCcRemunEntityRepository.findByCcId(procFuncionarioId);
 
     var pagRows = id != null ?
-        procSalCcPagEntityRepository.findByProcFuncIdAndFunId(procFuncionarioId, id) :
-        procSalCcPagEntityRepository.findByProcFuncId(procFuncionarioId);
+        procSalCcPagEntityRepository.findByProcCcIdAndFunId(procFuncionarioId, id) :
+        procSalCcPagEntityRepository.findByProcCcId(procFuncionarioId);
 
     if (remunRows.isEmpty() && pagRows.isEmpty())
       return Map.of("recibos", List.of());
 
     ProcSalCcRemunEntity header = remunRows.isEmpty() ? null : remunRows.getFirst();
 
-    var entidade = header != null ? ("Processar Remunerações " + header.getCentroDeCusto()) : "";
-    var dataProcessamento = header != null ? header.getDataProcessamento().format(MONTH_YEAR) : "";
+    var hasHeader = header != null;
+    var entidade = hasHeader ? ("Processar Remunerações " + header.getCentroDeCusto()) : "";
+    var dataProcessamento = hasHeader ? header.getDataProcessamento().format(MONTH_YEAR) : "";
     var dataEmissao = LocalDateTime.now().format(DateFormatter.DATE_TIME);
 
-    String nome = header != null ? header.getNome() : "";
-    String vinculo = header != null ? header.getRelacao() : "";
-    String nif = header != null ? String.valueOf(header.getNif()) : "";
-    Long totRemun = header != null ? header.getTotalRemuneracoes() : 0L;
-    Long totDes = header != null ? header.getTotalDescontos() : 0L;
-    Long totLiq = header != null ? header.getTotalLiquido() : 0L;
+    var nome = hasHeader ? header.getNome() : "";
+    var vinculo = hasHeader ? header.getRelacao() : "";
+    var nif = hasHeader && header.getNif() != null ? String.valueOf(header.getNif()) : "";
+    var totRemun = hasHeader ? header.getTotalRemuneracoes() : 0L;
+    var totDes = hasHeader ? header.getTotalDescontos() : 0L;
+    var totLiq = hasHeader ? header.getTotalLiquido() : 0L;
 
     var remuneracoes = remunRows.stream()
         .map(r -> Map.of("descricao", r.getDescricao(), "valor", (Object) r.getValor()))
@@ -71,10 +73,22 @@ public class RelatoriosService {
         Map.entry("entidade", entidade),
         Map.entry("dataProcessamento", dataProcessamento),
         Map.entry("dataEmissao", dataEmissao),
-        Map.entry("funcionario", Map.of("numero", nif, "nome", nome, "vinculo", vinculo)),
-        Map.entry("totais", Map.of("remuneracoes", totRemun, "descontos", totDes, "liquido", totLiq)),
         Map.entry("remuneracoes", remuneracoes),
-        Map.entry("descontos", descontos)
+        Map.entry("descontos", descontos),
+        Map.entry(
+            "funcionario", Map.of(
+                "numero", nif,
+                "nome", nome,
+                "vinculo", vinculo
+            )
+        ),
+        Map.entry(
+            "totais", Map.of(
+                "remuneracoes", totRemun,
+                "descontos", totDes,
+                "liquido", totLiq
+            )
+        )
     );
 
     return Map.of("recibos", List.of(recibo));
@@ -85,7 +99,11 @@ public class RelatoriosService {
     var id = StringUtils.hasText(funId) ?
         funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funId)).getId() : null;
 
-    var data = procSalCcEntityEntityRepository.findAllByFilters(processamentoId, tipo, id);
+    var data = procSalCcEntityEntityRepository.findAllByFilters(
+        processamentoId,
+        StringUtils.hasText(tipo) ? tipo : null,
+        id
+    );
     if (data.isEmpty())
       return new Context();
 

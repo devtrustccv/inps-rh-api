@@ -37,7 +37,7 @@ public class RelatoriosPdfController {
   @GetMapping("/processamento-salarios")
   public ResponseEntity<byte[]> processamentoSalariosPdf(
       @RequestParam Long processamentoId,
-      @RequestParam String tipo,
+      @RequestParam(required = false) String tipo,
       @RequestParam(required = false) String funId
   ) {
     return pdfResponse(

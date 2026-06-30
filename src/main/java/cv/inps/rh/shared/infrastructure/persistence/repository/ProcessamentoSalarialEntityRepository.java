@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ProcessamentoSalarialEntityRepository extends
     JpaRepository<ProcessamentoSalarialEntity, Long>,
@@ -15,5 +17,7 @@ public interface ProcessamentoSalarialEntityRepository extends
     return this.findById(id)
         .orElseThrow(() -> IgrpResponseStatusException.badRequest("ProcessamentoSalarialEntity not found for id: " + id));
   }
+
+  List<ProcessamentoSalarialEntity> findAllByCcIdIn(List<Long> ccId);
 }
 
