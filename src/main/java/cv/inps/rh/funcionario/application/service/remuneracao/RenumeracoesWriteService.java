@@ -88,11 +88,7 @@ public class RenumeracoesWriteService {
     pagamento.setNib(ValidationUtil.sanitizeNib(request.getNib()));
     pagamento.setRhbId(ValidationUtil.ref(entityManager, BancoEntity.class, request.getBanco()));
     pagamento.setNif(request.getNif());
-    var entRef = ValidationUtil.ref(entityManager, EntidadeEntity.class, request.getEntidade());
-    if (entRef != null) {
-      pagamento.setNmEntidade(entRef.getNome());
-      pagamento.setEntId(entRef);
-    }
+    pagamento.setEntId(request.getEntidade());
     pagamento = defPagamentoEntityRepository.save(pagamento);
 
     var assocPag = new TipoRelRemPagEntity();
@@ -163,11 +159,7 @@ public class RenumeracoesWriteService {
     pagamento.setNib(ValidationUtil.sanitizeNib(request.getNib()));
     pagamento.setRhbId(ValidationUtil.ref(entityManager, BancoEntity.class, request.getBanco()));
     pagamento.setNif(request.getNif());
-    var entRef2 = ValidationUtil.ref(entityManager, EntidadeEntity.class, request.getEntidade());
-    if (entRef2 != null) {
-      pagamento.setNmEntidade(entRef2.getNome());
-      pagamento.setEntId(entRef2);
-    }
+    pagamento.setEntId(request.getEntidade());
 
     if (data.getValidacao() != null) {
 

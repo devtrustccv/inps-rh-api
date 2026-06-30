@@ -161,7 +161,7 @@ public class RenumeracoesReadService {
     response.setObservacao(pagamento.getObs());
     response.setNib(pagamento.getNib() != null ? pagamento.getNib() : null);
     response.setNif(pagamento.getNif() != null ? pagamento.getNif() : null);
-    response.setEntidade(pagamento.getEntId()!= null ? pagamento.getEntId().getId(): null);
+    response.setEntidade(pagamento.getEntId());
     response.setBanco(pagamento.getRhbId()!=null ? pagamento.getRhbId().getId(): null);
     response.setEstado(pagamento.getEstado() != null ? pagamento.getEstado().name() : null);
 
