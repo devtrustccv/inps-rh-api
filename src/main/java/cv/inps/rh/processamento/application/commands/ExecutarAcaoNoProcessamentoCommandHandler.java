@@ -2,6 +2,7 @@ package cv.inps.rh.processamento.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.processamento.application.constants.ProcessamentoSalarialAction;
 import cv.inps.rh.processamento.domain.service.processamentosalarial.ProcessamentoSalarialWriteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +28,16 @@ public class ExecutarAcaoNoProcessamentoCommandHandler implements CommandHandler
     var ids = command.getProcessamentoactionrequest().idsProcessamento();
 
     var action = command.getProcessamentoactionrequest().action();
+
+    if (action.equals(ProcessamentoSalarialAction.ELIMINAR_PROCESSAMENTO))
+      return ResponseEntity.ok(service.eliminarProcessamento(ids));
+
     switch (action) {
-      case ELIMINAR_PROCESSAMENTO -> service.eliminarProcessamento(ids);
       case VALIDAR -> service.validar(ids);
       case CABIMENTAR -> service.cabimentar(ids);
       case ELIMINAR_CABIMENTO -> service.extornarCabimento(ids);
       case AUTORIZAR -> service.autorizar(ids);
+      default -> throw new IllegalArgumentException("Invalid option");
     }
 
     return ResponseEntity.ok().build();
