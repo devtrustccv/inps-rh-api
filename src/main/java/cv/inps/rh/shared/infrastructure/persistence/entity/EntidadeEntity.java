@@ -18,7 +18,7 @@ import lombok.Setter;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "ENTIDADE")
+@Table(name = "ENTIDADES", schema = "INPSSIGOF")
 public class EntidadeEntity  {
 
     @Id
