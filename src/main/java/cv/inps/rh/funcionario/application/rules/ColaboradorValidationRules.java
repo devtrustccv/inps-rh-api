@@ -144,8 +144,7 @@ public class ColaboradorValidationRules {
           .anyMatch(f -> isResponsavel(f.getResponsavel()));
       if (outroResponsavel) {
         throw IgrpResponseStatusException.conflict(
-            "A pessoa com documento '" + dto.getNumDocumento()
-                + "' já tem outro colaborador responsável pelo seu agregado familiar.");
+            "O referido familiar já possui outro colaborador associado como seu responsável.");
       }
     }
   }

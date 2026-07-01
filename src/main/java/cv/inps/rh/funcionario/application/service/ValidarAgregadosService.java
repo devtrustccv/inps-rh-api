@@ -45,7 +45,10 @@ public class ValidarAgregadosService {
     }*/
 
     colaboradorValidationRules.verificarDuplicidadeFamiliares(agregadoDependenteReqDTO, funcionario.getFamiliares());
-    colaboradorValidationRules.verificarResponsavelUnicoAgregado(agregadoDependenteReqDTO, funcionario.getUuid());
+    // TODO: R1 (DOSSIÊ 438-442) — validação de responsável único do agregado desativada por enquanto.
+    // Depende de decidir a normalização do campo `responsavel` na escrita (dados atuais inconsistentes:
+    // SIM/S/NAO/N/0/vazio). Reativar após normalizar. Ver ColaboradorValidationRules.verificarResponsavelUnicoAgregado.
+    // colaboradorValidationRules.verificarResponsavelUnicoAgregado(agregadoDependenteReqDTO, funcionario.getUuid());
 
     var familiares = familiarMapper
         .syncFamiliares(funcionario.getFamiliares(), agregadoDependenteReqDTO, funcionario, Estado.A);
