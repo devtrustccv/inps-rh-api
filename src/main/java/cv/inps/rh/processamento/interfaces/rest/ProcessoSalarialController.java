@@ -113,11 +113,14 @@ public class ProcessoSalarialController {
       responses = {
           @ApiResponse(
               responseCode = "200",
-              content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ProcedureMsgDTO.class)
+              )
           ),
       }
   )
-  public ResponseEntity<String> processarSalario(
+  public ResponseEntity<ProcedureMsgDTO> processarSalario(
       @Valid @RequestBody ProcessamentoSalarioRequestDTO processarSalarioRequest
   ) {
     final var command = new ProcessarSalarioCommand(processarSalarioRequest);
