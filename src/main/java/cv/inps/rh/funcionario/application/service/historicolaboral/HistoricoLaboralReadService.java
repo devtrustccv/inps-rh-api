@@ -7,6 +7,7 @@ import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByFunIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralComboQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralQuery;
 import cv.inps.rh.shared.application.dto.ComboItemDTO;
+import cv.inps.rh.shared.application.service.DominioService;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -38,6 +39,7 @@ public class HistoricoLaboralReadService {
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final RhVHistLaboralEntityRepository rhVHistLaboralEntityRepository;
   private final FuncionarioRules funcionarioRules;
+  private final DominioService dominioService;
 
   public WrapperHistLaboralResponseDTO getHistoricoLaboral2(GetHistoricoLaboralQuery query) {
     var pageRequest = PageRequest.of(
@@ -58,10 +60,12 @@ public class HistoricoLaboralReadService {
         df,
         pageRequest);
 
+    var tipoMovLaboralDominio = dominioService.getDominioMap("TIPO_MOV_LABORAL");
+
     var data = page.getContent().stream().map(r -> {
       var dto = new HistoricoLaboralResponseDTO();
       dto.setUltimoMovimento(Objects.equals(r.getUltimoVinculo(), 1));
-      dto.setTipoSituacao(r.getTipoSituacaoDesc());
+      dto.setTipoSituacao(dominioService.traduzir(tipoMovLaboralDominio, r.getTipoSituacaoDesc()));
       dto.setTipoContrato(r.getTipoContratoDesc());
       dto.setVinculo(r.getVinculoDesc());
       dto.setDirecao(r.getDirecaoDesc());

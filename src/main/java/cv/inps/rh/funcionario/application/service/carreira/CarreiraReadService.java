@@ -80,7 +80,7 @@ public class CarreiraReadService {
     var pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
     var page = tiposRelacionamentoEntityRepository.findAll(spec, pageable);
 
-    var tipoMovimentoLaboralDomain = dominioService.getTipoMovimentoLaboralDomain();
+    var tipoMovimentoLaboralDomain = dominioService.getDominioMap("TIPO_MOV_LABORAL");
 
     List<CarreiraListDTO> content = page.getContent().stream().map(tr -> {
       var dto = new CarreiraListDTO();
@@ -110,7 +110,7 @@ public class CarreiraReadService {
 
       if (car != null) {
         dto.setTipoCarreira(car.getTipoSituacao());
-        dto.setTipoCarreiraDesc(tipoMovimentoLaboralDomain.getOrDefault(car.getTipoSituacao(), car.getTipoSituacao()));
+        dto.setTipoCarreiraDesc(dominioService.traduzir(tipoMovimentoLaboralDomain, car.getTipoSituacao()));
       }
 
       return dto;
