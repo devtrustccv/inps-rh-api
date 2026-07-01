@@ -63,6 +63,8 @@ public class ContratoListDTO  {
 
   private boolean atual ;
 
+  private boolean renovavel ;
+
   private List<ContratoHistoricoDTO> historicos ;
 
 }
