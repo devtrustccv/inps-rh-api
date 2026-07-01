@@ -170,7 +170,7 @@ public class RegistarColaboradorService {
       }
 
       var listVinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
-          .findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(), "REM");
+          .findByVinculoId_IdAndTipoAndEstado(dadosContratuais.getTipoVinculoLaboralId(), "REM", Estado.A);
 
       if (CollectionUtils.isEmpty(listVinculoTipoMovimentoREM)) {
         throw IgrpResponseStatusException.badRequest(
@@ -205,9 +205,10 @@ public class RegistarColaboradorService {
         fun.setDefinicoesPagamentos(pagList);
       }
 
-      var listAssociacaoVinculoTipoMovimentoPag = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(
+      var listAssociacaoVinculoTipoMovimentoPag = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(
           dadosContratuais.getTipoVinculoLaboralId(),
-          "PAG");
+          "PAG",
+          Estado.A);
 
       if (CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
         throw IgrpResponseStatusException.badRequest(

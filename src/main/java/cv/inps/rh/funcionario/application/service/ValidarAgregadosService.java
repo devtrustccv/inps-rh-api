@@ -45,6 +45,7 @@ public class ValidarAgregadosService {
     }*/
 
     colaboradorValidationRules.verificarDuplicidadeFamiliares(agregadoDependenteReqDTO, funcionario.getFamiliares());
+    colaboradorValidationRules.verificarResponsavelUnicoAgregado(agregadoDependenteReqDTO, funcionario.getUuid());
 
     var familiares = familiarMapper
         .syncFamiliares(funcionario.getFamiliares(), agregadoDependenteReqDTO, funcionario, Estado.A);

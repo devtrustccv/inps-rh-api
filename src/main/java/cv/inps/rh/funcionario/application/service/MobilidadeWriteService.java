@@ -64,6 +64,8 @@ public class MobilidadeWriteService {
     novoTipoRelacionamento.setEstActAdm(1);
     novoTipoRelacionamento.setMobId(novaMobilidade);
     novoTipoRelacionamento.setEstado(Estado.P);
+    // Spec: DATA_INICIO do novo vínculo = data do registo (não herdar a do vínculo anterior via clone)
+    novoTipoRelacionamento.setDataInicio(mobilidadeDto.getDataInicio() != null ? mobilidadeDto.getDataInicio() : LocalDate.now());
     novoTipoRelacionamento.setTipoSituacao(ValidationUtil.trimToNull(mobilidadeDto.getTipoMobilidade()));
 
     // Persist new entities directly so their IDs are assigned on the same references.

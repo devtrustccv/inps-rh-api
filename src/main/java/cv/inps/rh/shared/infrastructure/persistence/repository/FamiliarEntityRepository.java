@@ -36,4 +36,6 @@ public interface FamiliarEntityRepository extends
       List<Estado> estados
   );
 
+  List<FamiliarEntity> findByNumDocumentoAndEstadoIn(String numDocumento, List<Estado> estados);
+
 }

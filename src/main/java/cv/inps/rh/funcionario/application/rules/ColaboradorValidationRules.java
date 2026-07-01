@@ -8,6 +8,7 @@ import cv.inps.rh.funcionario.application.dto.SubsidioReqDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import cv.inps.rh.shared.infrastructure.persistence.repository.FamiliarEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoMovimentoEntityRepository;
 import jakarta.persistence.EntityManager;
@@ -28,6 +29,7 @@ public class ColaboradorValidationRules {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
+  private final FamiliarEntityRepository familiarEntityRepository;
   private final EntityManager entityManager;
 
   public void validarDadosPessoais(DadosPessoaisReqDTO dp, UUID uuidExistente) {
@@ -122,6 +124,36 @@ public class ColaboradorValidationRules {
             "O familiar com documento '" + dto.getNumDocumento() + "' já se encontra registado no agregado deste colaborador.");
       }
     }
+  }
+
+  /**
+   * Regra de negócio: um dependente/familiar só pode ter UM colaborador responsável pelo seu agregado.
+   * Uma pessoa pode pertencer a agregados de colaboradores diferentes, mas apenas 1 é responsável.
+   * Verifica, para cada familiar em que o colaborador atual é responsável, se já existe outro
+   * colaborador registado como responsável pelo mesmo documento.
+   */
+  public void verificarResponsavelUnicoAgregado(List<AgregadoDependenteReqDTO> novos, UUID funcionarioUuid) {
+    if (CollectionUtils.isEmpty(novos)) return;
+    for (var dto : novos) {
+      if (!isResponsavel(dto.getResponsavel()) || !StringUtils.hasText(dto.getNumDocumento())) continue;
+      var doc = dto.getNumDocumento().trim();
+      boolean outroResponsavel = familiarEntityRepository
+          .findByNumDocumentoAndEstadoIn(doc, List.of(Estado.A, Estado.P)).stream()
+          .filter(f -> f.getFunId() == null || funcionarioUuid == null
+              || !funcionarioUuid.equals(f.getFunId().getUuid()))
+          .anyMatch(f -> isResponsavel(f.getResponsavel()));
+      if (outroResponsavel) {
+        throw IgrpResponseStatusException.conflict(
+            "A pessoa com documento '" + dto.getNumDocumento()
+                + "' já tem outro colaborador responsável pelo seu agregado familiar.");
+      }
+    }
+  }
+
+  private boolean isResponsavel(String valor) {
+    if (valor == null) return false;
+    var v = valor.trim().toUpperCase();
+    return v.equals("SIM") || v.equals("S") || v.equals("1") || v.equals("TRUE") || v.equals("Y");
   }
 
   public void validarEncargosDescontosDuplicados(List<EncargosDescontosReqDTO> encargos) {
