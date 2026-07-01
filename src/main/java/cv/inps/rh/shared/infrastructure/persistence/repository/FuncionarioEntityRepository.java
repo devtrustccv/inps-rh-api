@@ -30,11 +30,6 @@ public interface FuncionarioEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "FuncionarioEntity not found for id: " + id));
   }
 
-
-
-
-  List<FuncionarioEntity> findAllByUuidIn(List<UUID> uuid);
-
   Optional<FuncionarioEntity> findByUuid(UUID uuid);
 
   default FuncionarioEntity findByUuidOrThrow(UUID uuid) {

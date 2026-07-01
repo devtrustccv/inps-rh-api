@@ -11,7 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AtivarInactivarSubsidioNatalCommand implements Command {
 
-
   private AtivarInativarSubsidioNatalDTO ativarinativarsubsidionatal;
-
 }

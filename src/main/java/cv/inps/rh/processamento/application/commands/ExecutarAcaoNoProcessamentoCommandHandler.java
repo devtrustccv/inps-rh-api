@@ -2,14 +2,16 @@ package cv.inps.rh.processamento.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
+import cv.inps.rh.processamento.application.constants.ProcessamentoSalarialAction;
 import cv.inps.rh.processamento.domain.service.processamentosalarial.ProcessamentoSalarialWriteService;
+import cv.inps.rh.shared.application.dto.ProcedureMsgDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ExecutarAcaoNoProcessamentoCommandHandler implements CommandHandler<ExecutarAcaoNoProcessamentoCommand, ResponseEntity<String>> {
+public class ExecutarAcaoNoProcessamentoCommandHandler implements CommandHandler<ExecutarAcaoNoProcessamentoCommand, ResponseEntity<ProcedureMsgDTO>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ExecutarAcaoNoProcessamentoCommandHandler.class);
 
@@ -20,22 +22,30 @@ public class ExecutarAcaoNoProcessamentoCommandHandler implements CommandHandler
   }
 
   @IgrpCommandHandler
-  public ResponseEntity<String> handle(ExecutarAcaoNoProcessamentoCommand command) {
+  public ResponseEntity<ProcedureMsgDTO> handle(ExecutarAcaoNoProcessamentoCommand command) {
 
     LOGGER.debug("ExecutarAcaoNoProcessamentoCommand : {}", command);
 
     var ids = command.getProcessamentoactionrequest().idsProcessamento();
 
     var action = command.getProcessamentoactionrequest().action();
+
+    var pms = new ProcedureMsgDTO();
+
+    if (action.equals(ProcessamentoSalarialAction.ELIMINAR_PROCESSAMENTO)) {
+      pms.setMessage(service.eliminarProcessamento(ids));
+      return ResponseEntity.ok(pms);
+    }
+
     switch (action) {
-      case ELIMINAR_PROCESSAMENTO -> service.eliminarProcessamento(ids);
       case VALIDAR -> service.validar(ids);
       case CABIMENTAR -> service.cabimentar(ids);
       case ELIMINAR_CABIMENTO -> service.extornarCabimento(ids);
       case AUTORIZAR -> service.autorizar(ids);
+      default -> throw new IllegalArgumentException("Invalid option");
     }
 
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(pms);
   }
 
 }
