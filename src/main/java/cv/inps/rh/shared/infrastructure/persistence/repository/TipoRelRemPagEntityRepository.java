@@ -30,7 +30,16 @@ public interface TipoRelRemPagEntityRepository extends
 
     boolean existsByTiprelIdAndPagId(TiposRelacionamentoEntity tipRelId, DefPagamentoEntity pagId);
 
-    List<TipoRelRemPagEntity> findByTiprelId_Id(Long tiprelId);
+    @Query("""
+        select trrp
+        from TipoRelRemPagEntity trrp
+          left join fetch trrp.remId rem
+          left join fetch rem.tmId
+          left join fetch trrp.pagId pag
+          left join fetch pag.tmId
+        where trrp.tiprelId.id = :tiprelId
+        """)
+    List<TipoRelRemPagEntity> findByTiprelId_Id(@Param("tiprelId") Long tiprelId);
 
   @Query("""
     SELECT trrp
@@ -41,15 +50,8 @@ public interface TipoRelRemPagEntityRepository extends
       LEFT JOIN FETCH pag.tmId
     WHERE trrp.tiprelId.id = :tiprelId
       AND (
-           (rem IS NOT NULL
-             AND rem.estado = :estado
-             /*AND (rem.dataFim IS NULL OR rem.dataFim >= CURRENT_DATE)*/
-           )
-        OR
-           (pag IS NOT NULL
-             AND pag.estado = :estado
-             /*AND (pag.dataFim IS NULL OR pag.dataFim >= CURRENT_DATE)*/
-           )
+           (rem IS NOT NULL AND rem.estado = :estado)
+        OR (pag IS NOT NULL AND pag.estado = :estado)
       )
 """)
   List<TipoRelRemPagEntity> findByTiprelIdAndEstado(
