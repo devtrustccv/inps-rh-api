@@ -195,6 +195,7 @@ public class CarreiraWriteService {
     validation.setTipoAccao(TipoAcao.INSERT.name());
     validation.setReferenciaName(Referencia.CARREIRA.name());
     validation.setReferenciaId(novaCarreira.getId());
+    validation.setReferenciaUuid(novaCarreira.getUuid());
     validation.setTiprelId(novoRelacionamento);
     validation.setEstado(Estado.P);
     validation.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -413,6 +414,7 @@ public class CarreiraWriteService {
       validation.setTipoAccao(TipoAcao.UPDATE.name());
       validation.setReferenciaName(Referencia.CARREIRA.name());
       validation.setReferenciaId(carreira.getId());
+      validation.setReferenciaUuid(carreira.getUuid());
       validation.setTiprelId(relacionamento);
       validation.setEstado(Estado.P);
       validation.setUuid(UuidCreator.getTimeOrderedEpoch());
