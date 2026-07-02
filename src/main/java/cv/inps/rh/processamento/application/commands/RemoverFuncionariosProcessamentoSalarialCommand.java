@@ -11,7 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RemoverFuncionariosProcessamentoSalarialCommand implements Command {
 
-
   private MarcarNaoProcessadoRequestDTO marcarnaoprocessadorequest;
-
 }

@@ -17,7 +17,7 @@ public interface ProcSalCcEntityEntityRepository extends
   @Query("""
       SELECT p
       FROM ProcSalCcEntity p
-      WHERE (:procSalId IS NULL OR p.ccId = :procSalId)
+      WHERE (:procSalId IS NULL OR p.procSalId = :procSalId)
         AND (:tipo IS NULL OR p.tipo = :tipo)
         AND (:funId IS NULL OR p.funId = :funId)
       """)

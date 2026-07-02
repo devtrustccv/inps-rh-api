@@ -1,30 +1,26 @@
 package cv.inps.rh.processamento.application.queries;
 
 import cv.igrp.framework.core.domain.Query;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetProcessamentoSalarialQuery implements Query {
 
-  @NotBlank(message = "The field <dataInicio> is required")
   private String dataInicio;
-  @NotBlank(message = "The field <dataFim> is required")
-  private String dataFim;
-  @NotBlank(message = "The field <direcaoId> is required")
-  private String direcaoId;
-  @NotBlank(message = "The field <tipo> is required")
-  private String tipo;
-  @NotBlank(message = "The field <estado> is required")
-  private String estado;
-  @NotBlank(message = "The field <page> is required")
-  private String page;
-  @NotBlank(message = "The field <size> is required")
-  private String size;
 
+  private String dataFim;
+
+  private String direcaoId;
+
+  private String tipo;
+
+  private String estado;
+
+  private String page;
+
+  private String size;
 }

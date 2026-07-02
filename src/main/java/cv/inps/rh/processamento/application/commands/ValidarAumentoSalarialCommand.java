@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,5 +13,4 @@ public class ValidarAumentoSalarialCommand implements Command {
 
   @NotBlank(message = "The field <aumentoSalarialId> is required")
   private String aumentoSalarialId;
-
 }

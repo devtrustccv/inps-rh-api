@@ -47,8 +47,8 @@ public class SubstituicaoWriteService {
 
 
     var substituicao = new SubstituicaoEntity();
-    substituicao.setSubstitutoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid()));
-    substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid()));
+    substituicao.setSubstitutoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid()));
+    substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid()));
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());
     substituicao.setMotivo(ValidationUtil.trimToNull(dto.getMotivoSubstituicao()));
@@ -83,19 +83,19 @@ public class SubstituicaoWriteService {
         () -> IgrpResponseStatusException.badRequest("Funcionário não encontrado:: "+idFuncionarioSubstituto)
     );
 
+    var idFuncionarioSubstituido = IdentificadorUnico.from(command.getIdFuncionario()).valor();
+    var funcionarioSubstituido = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituido).orElseThrow(
+        () -> IgrpResponseStatusException.badRequest("Funcionário não encontrado:: "+idFuncionarioSubstituido)
+    );
+
     var substituicao = substituicaoEntityRepository.findByUuid(idSusbtituicao).orElseThrow(
         () -> IgrpResponseStatusException.badRequest("Substituição não encontrada:: "+idSusbtituicao)
     );
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());
     substituicao.setObs(ValidationUtil.trimToNull(dto.getObs()));
-    substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid()));
-
-
-    var idFuncionarioSubstituido = IdentificadorUnico.from(command.getIdFuncionario()).valor();
-    var funcionarioSubstituido = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituido).orElseThrow(
-        () -> IgrpResponseStatusException.badRequest("Funcionário não encontrado:: "+idFuncionarioSubstituido)
-    );
+    substituicao.setSubstitutoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid()));
+    substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid()));
 
     if(dto.getValidar()!=null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;

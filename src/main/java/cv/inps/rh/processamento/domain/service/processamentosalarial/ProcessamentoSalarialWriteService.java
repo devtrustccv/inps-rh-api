@@ -1,18 +1,19 @@
 package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
-import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.processamento.application.constants.ProcessamentoSalarialAction;
 import cv.inps.rh.processamento.application.dto.ProcessamentoSalarioRequestDTO;
 import cv.inps.rh.processamento.domain.service.processamentosalarial.api.ProcessarSalarioApi;
-import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import oracle.jdbc.OracleCallableStatement;
+import oracle.jdbc.OracleConnection;
+import oracle.jdbc.OracleTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -23,9 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.security.Principal;
+import java.sql.Connection;
 import java.sql.Types;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 
@@ -36,59 +41,59 @@ public class ProcessamentoSalarialWriteService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProcessamentoSalarialWriteService.class);
 
-  private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final ProcessamentoSalarialEntityRepository processamentoSalarialEntityRepository;
-  private final FuncionarioRules funcionarioRules;
   private final ProcessarSalarioApi processarSalarioApi;
   private final DataSource dataSource;
+  private final JdbcTemplate jdbcTemplate;
 
   public void removerFuncionariosProcessados(List<String> funcionariosIds) {
 
     var ids = funcionariosIds.stream().map(UUID::fromString).toList();
 
-    var funcionarios = funcionarioEntityRepository.findAllByUuidIn(ids);
-    if (funcionarios.size() != funcionariosIds.size())
-      throw IgrpResponseStatusException.badRequest("Funcionários não encontrados");
+    var relations = tiposRelacionamentoEntityRepository.findRelacionamentosAtuaisByFuncionarioUuids(ids);
+    if (relations.isEmpty())
+      return;
 
-    for (var funcionario : funcionarios) {
-
-      if (!funcionario.getEstado().equals(Estado.A))
-        throw IgrpResponseStatusException.badRequest("Funcionário <%s> não está ativo".formatted(funcionario.getNome()));
-
-      var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-      if (!tipoRelacionamentoAtual.getEstActAdm().equals(1))
-        throw IgrpResponseStatusException.badRequest("O vínculo do colaborador <%s> não está activo!".formatted(funcionario.getNome()));
-
-      tipoRelacionamentoAtual.setFlgProcessa(0);
-      tiposRelacionamentoEntityRepository.save(tipoRelacionamentoAtual);
-    }
+    relations.forEach(r -> r.setFlgProcessa(0));
+    tiposRelacionamentoEntityRepository.saveAll(relations);
   }
 
-  public void eliminarProcessamento(List<Long> processamentoIds) {
+  public String eliminarProcessamento(List<Long> ids) {
 
-    var illegalProcesses = new ArrayList<Long>();
+    var processingIds = ids.stream()
+        .map(String::valueOf)
+        .toArray(String[]::new);
 
-    var processes = processamentoSalarialEntityRepository.findAllByCcIdIn(processamentoIds);
-    processes.forEach(process -> {
-      if (!process.getEstado().equals(ProcessamentoSalarialAction.ELIMINAR_PROCESSAMENTO.getCode()))
-        illegalProcesses.add(process.getId());
-    });
+    return jdbcTemplate.execute((Connection con) -> {
 
-    if (!illegalProcesses.isEmpty())
-      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'PROV'", illegalProcesses);
+      var oracleCon = con.unwrap(OracleConnection.class);
 
-    processes.forEach(p -> {
-      var call = callProcedure(Processamento.PROCEDURE_ELIMINAR_PROC.getName());
-      call.execute(Map.of("p_proc_id", p.getId()));
+      var stmt = (OracleCallableStatement) oracleCon.prepareCall("{ call RH_PROCESSAMENTO_SALARIAL_DB.ELIMINAR_PROCESSAMENTO(?, ?) }");
+
+      stmt.setPlsqlIndexTable(
+          1,                  // parameter index
+          ids,                // array
+          processingIds.length,         // max length
+          processingIds.length,         // current length
+          OracleTypes.VARCHAR,
+          4000                // max VARCHAR2 length
+      );
+
+      stmt.registerOutParameter(2, Types.VARCHAR);
+
+      stmt.execute();
+
+      return stmt.getString(2);
     });
   }
 
-  public void validar(List<Long> processamentoIds) {
+  public void validar(List<Long> ids) {
 
     var processesThatCanNotBeValidated = new ArrayList<Long>();
 
-    var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
+    var processes = processamentoSalarialEntityRepository.findAllById(ids);
+
     processes.forEach(process -> {
       if (!ProcessamentoSalarialAction.VALIDAR.getCode().equals(process.getEstado()))
         processesThatCanNotBeValidated.add(process.getId());
@@ -102,11 +107,11 @@ public class ProcessamentoSalarialWriteService {
     processamentoSalarialEntityRepository.saveAll(processes);
   }
 
-  public void cabimentar(List<Long> processamentoIds) {
+  public void cabimentar(List<Long> ids) {
 
     var illegalProcesses = new ArrayList<Long>();
 
-    var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
+    var processes = processamentoSalarialEntityRepository.findAllById(ids);
     processes.forEach(process -> {
       if (!process.getEstado().equals(ProcessamentoSalarialAction.CABIMENTAR.getCode()))
         illegalProcesses.add(process.getId());
@@ -126,11 +131,11 @@ public class ProcessamentoSalarialWriteService {
     });
   }
 
-  public void autorizar(List<Long> processamentoIds) {
+  public void autorizar(List<Long> ids) {
 
     var illegalProcesses = new ArrayList<Long>();
 
-    var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
+    var processes = processamentoSalarialEntityRepository.findAllById(ids);
     processes.forEach(process -> {
       if (!process.getEstado().equals(ProcessamentoSalarialAction.AUTORIZAR.getCode()))
         illegalProcesses.add(process.getId());
@@ -147,11 +152,11 @@ public class ProcessamentoSalarialWriteService {
     });
   }
 
-  public void extornarCabimento(List<Long> processamentoIds) {
+  public void extornarCabimento(List<Long> ids) {
 
     var illegalProcesses = new ArrayList<Long>();
 
-    var processes = processamentoSalarialEntityRepository.findAllById(processamentoIds);
+    var processes = processamentoSalarialEntityRepository.findAllById(ids);
     processes.forEach(process -> {
       if (!process.getEstado().equals(ProcessamentoSalarialAction.ELIMINAR_CABIMENTO.getCode()))
         illegalProcesses.add(process.getId());
@@ -213,7 +218,7 @@ public class ProcessamentoSalarialWriteService {
 
     PACKAGE("RH_PROCESSAMENTO_SALARIAL_DB"),
     PROCEDURE_ELIMINAR_CAB("EliminarCab"),
-    PROCEDURE_ELIMINAR_PROC("EliminarProc"),
+    ELIMINAR_PROCESSAMENTO("ELIMINAR_PROCESSAMENTO"),
     PROCEDURE_PROCESSAR("PROCESSAR");
 
     private final String name;

@@ -48,6 +48,8 @@ public class ContratoMapper {
     dto.setVersao(contrato.getVersao());
     dto.setInicial(contrato.getVersao() == 1);
     dto.setAtual(contrato.getEstado() == Estado.A);
+    dto.setRenovavel(contrato.getTpContratoId() != null
+        && Integer.valueOf(1).equals(contrato.getTpContratoId().getFlgRenovavel()));
 
     return dto;
   }

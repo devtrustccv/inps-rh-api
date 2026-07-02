@@ -15,11 +15,32 @@ public class DominioService {
 
   private final DomainEntityRepository domainEntityRepository;
 
-  public Map<String, String> getTipoMovimentoLaboralDomain() {
-    return domainEntityRepository.findByDominioAndEstado("TIPO_MOV_LABORAL", Estado.A)
+  /**
+   * Devolve o mapa {@code valor -> descricao} de um domínio ativo em RH_T_DOMAINS.
+   * As chaves são {@code trim}adas para evitar falhas de correspondência causadas
+   * por espaços acidentais no valor gravado (ex.: "MUDANCA_CARREIRA ").
+   */
+  public Map<String, String> getDominioMap(String dominio) {
+    return domainEntityRepository.findByDominioAndEstado(dominio, Estado.A)
         .stream()
-        .collect(Collectors.toMap(DomainEntity::getValor, DomainEntity::getDescricao));
+        .filter(d -> d.getValor() != null)
+        .collect(Collectors.toMap(
+            d -> d.getValor().trim(),
+            DomainEntity::getDescricao,
+            (a, b) -> a));
   }
 
+  /**
+   * Traduz um código para a descrição correspondente no mapa de domínio.
+   * Se não houver correspondência, devolve o próprio código ({@code trim}ado)
+   * como fallback.
+   */
+  public String traduzir(Map<String, String> dominio, String codigo) {
+    if (codigo == null) {
+      return null;
+    }
+    var chave = codigo.trim();
+    return dominio.getOrDefault(chave, chave);
+  }
 
 }

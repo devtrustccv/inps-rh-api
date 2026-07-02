@@ -78,6 +78,16 @@ public interface TiposRelacionamentoEntityRepository extends
   Optional<TiposRelacionamentoEntity> findAtualByFuncionarioUuid(@Param("funcionarioUuid") UUID funcionarioUuid);
 
   @Query("""
+      SELECT t
+      FROM TiposRelacionamentoEntity t
+      WHERE t.funId.uuid IN (:funcionarioUuids)
+        AND t.estActAdm = 1
+        AND t.funId.estado = 'A'
+      ORDER BY t.id, t.dataInicio DESC
+      """)
+  List<TiposRelacionamentoEntity> findRelacionamentosAtuaisByFuncionarioUuids(@Param("funcionarioUuids") List<UUID> uuids);
+
+  @Query("""
       select t
       from TiposRelacionamentoEntity t
       left join fetch t.contrVinculoId c
