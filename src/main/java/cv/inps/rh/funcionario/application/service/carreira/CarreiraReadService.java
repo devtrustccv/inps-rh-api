@@ -129,6 +129,10 @@ public class CarreiraReadService {
 
   public CarreiraResponseDTO getCarreiraById(String carreiraId) {
     var tr = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(UUID.fromString(carreiraId));
+    if (tr == null) {
+      throw IgrpResponseStatusException.notFound(
+          "Não existe relação laboral ativa para a carreira: " + carreiraId);
+    }
     return getCarreiraResponseDTO(tr);
   }
 

@@ -8,6 +8,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -66,11 +67,44 @@ public interface TiposRelacionamentoEntityRepository extends
 
   Page<TiposRelacionamentoEntity> findByFunId_UuidAndEstado(UUID funcionarioId, Estado estado, Pageable pageable);
 
-  TiposRelacionamentoEntity findByCarreiraId_uuid(UUID carreiraId);
+  @Query("""
+      select t
+      from TiposRelacionamentoEntity t
+      where t.carreiraId.uuid = :carreiraUuid
+        and t.estActAdm = 1
+      order by t.dataInicio desc
+      """)
+  List<TiposRelacionamentoEntity> findAtivaByCarreiraUuid(@Param("carreiraUuid") UUID carreiraUuid,
+      Pageable pageable);
+
+  /**
+   * Devolve a relação laboral ativa (estActAdm = 1) associada à carreira. Uma carreira pode ter
+   * várias relações associadas; devolve-se apenas a ativa e, em empate, a de dataInicio mais
+   * recente. Retorna {@code null} quando não existe relação ativa para a carreira.
+   */
+  default TiposRelacionamentoEntity findByCarreiraId_uuid(UUID carreiraId) {
+    var resultados = findAtivaByCarreiraUuid(carreiraId, PageRequest.of(0, 1));
+    return resultados.isEmpty() ? null : resultados.get(0);
+  }
 
   @Query("""
       select t
       from TiposRelacionamentoEntity t
+      left join fetch t.contrVinculoId c
+      left join fetch c.tpContratoId
+      left join fetch c.vinculoId
+      left join fetch t.situacLaboralId sl
+      left join fetch sl.situacaoLaboralId
+      left join fetch t.cargoId
+      left join fetch t.mobId m
+      left join fetch m.instidId
+      left join fetch m.secaoId
+      left join fetch m.localTrabId
+      left join fetch t.carreiraId car
+      left join fetch car.carrPccsId
+      left join fetch car.categoriaId
+      left join fetch car.escalaoId
+      left join fetch t.regimeId
       where t.funId.uuid = :funcionarioUuid
         and t.estActAdm = 1
       order by t.id, t.dataInicio desc
