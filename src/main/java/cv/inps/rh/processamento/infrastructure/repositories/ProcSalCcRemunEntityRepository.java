@@ -27,7 +27,7 @@ public interface ProcSalCcRemunEntityRepository extends
               SUM(e.valor)
           )
           FROM ProcSalCcRemunEntity e
-          WHERE e.ccId = :procId
+          WHERE e.procSalId = :procId
           GROUP BY e.itemActo,
                 e.descricao,
                    e.tipo,
