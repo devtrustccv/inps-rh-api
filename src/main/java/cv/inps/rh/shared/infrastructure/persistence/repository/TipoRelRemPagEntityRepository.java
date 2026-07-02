@@ -35,8 +35,10 @@ public interface TipoRelRemPagEntityRepository extends
   @Query("""
     SELECT trrp
     FROM TipoRelRemPagEntity trrp
-      LEFT JOIN trrp.remId rem
-      LEFT JOIN trrp.pagId pag
+      LEFT JOIN FETCH trrp.remId rem
+      LEFT JOIN FETCH rem.tmId
+      LEFT JOIN FETCH trrp.pagId pag
+      LEFT JOIN FETCH pag.tmId
     WHERE trrp.tiprelId.id = :tiprelId
       AND (
            (rem IS NOT NULL
