@@ -70,7 +70,22 @@ public interface TiposRelacionamentoEntityRepository extends
   @Query("""
       select t
       from TiposRelacionamentoEntity t
-      where t.carreiraId.uuid = :carreiraUuid
+      left join fetch t.contrVinculoId c
+      left join fetch c.tpContratoId
+      left join fetch c.vinculoId
+      left join fetch t.situacLaboralId sl
+      left join fetch sl.situacaoLaboralId
+      left join fetch t.cargoId
+      left join fetch t.mobId m
+      left join fetch m.instidId
+      left join fetch m.secaoId
+      left join fetch m.localTrabId
+      left join fetch t.carreiraId car
+      left join fetch car.carrPccsId
+      left join fetch car.categoriaId
+      left join fetch car.escalaoId
+      left join fetch t.regimeId
+      where car.uuid = :carreiraUuid
         and t.estActAdm = 1
       order by t.dataInicio desc
       """)
