@@ -65,7 +65,8 @@ public class ContratoHistoricoEntity extends AuditEntity {
     private UUID uuid;
 
 
-
+     @Column(name="est_act_adm")
+    private Integer estActAdm;
 
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contrato_id", referencedColumnName = "id")

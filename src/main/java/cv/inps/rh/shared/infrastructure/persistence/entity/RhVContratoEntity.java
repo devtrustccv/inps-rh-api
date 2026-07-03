@@ -8,6 +8,7 @@ import lombok.Getter;
 import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 /**
  * Vista RH_V_CONTRATO — 1 linha por situacao do contrato (registo de
@@ -29,7 +30,7 @@ public class RhVContratoEntity {
   private Long contratoId;
 
   @Column(name = "CONTRATO_UUID")
-  private String contratoUuid;
+  private UUID contratoUuid;
 
   @Column(name = "TIPO_CONTRATO")
   private String tipoContrato;
@@ -50,7 +51,7 @@ public class RhVContratoEntity {
   private Long funId;
 
   @Column(name = "FUN_UUID")
-  private String funUuid;
+  private UUID funUuid;
 
   @Column(name = "ESTADO")
   private String estado;
@@ -60,6 +61,9 @@ public class RhVContratoEntity {
 
   @Column(name = "VERSAO")
   private Integer versao;
+
+  @Column(name = "EST_ACT_ADM")
+  private Integer estActAdm;
 
   @Column(name = "FLG_RENOVAVEL")
   private Integer flgRenovavel;

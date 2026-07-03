@@ -62,12 +62,34 @@ public class ContratoHistoricoWriteService {
   }
 
   public void aplicarEstado(ContratoEntity contrato, Estado estado) {
-    contratoHistoricoEntityRepository
-        .findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.P)
-        .ifPresent(h -> {
-          h.setEstado(estado);
-          contratoHistoricoEntityRepository.save(h);
-        });
+    var pendenteOpt = contratoHistoricoEntityRepository
+        .findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.P);
+    if (pendenteOpt.isEmpty()) {
+      return;
+    }
+    var pendente = pendenteOpt.get();
+
+    // Numa validacao positiva, este historico passa a ser o ACTUAL do funcionario:
+    // desactiva-se (est_act_adm=0) todos os historicos activos do funcionario
+    // (do contrato actual e de contratos anteriores) e activa-se (1) apenas o
+    // historico validado. Garante um unico historico activo por funcionario,
+    // cobrindo renovacao (novo=1, antigo=0) e mudanca de vinculo/novo contrato.
+    if (estado == Estado.A) {
+      var funId = contrato.getFunId() != null ? contrato.getFunId().getId() : null;
+      if (funId != null) {
+        contratoHistoricoEntityRepository
+            .findByContratoId_FunId_IdAndEstActAdm(funId, 1)
+            .forEach(h -> {
+              h.setEstActAdm(0);
+              h.setEstado(Estado.I);
+              contratoHistoricoEntityRepository.save(h);
+            });
+      }
+      pendente.setEstActAdm(1);
+    }
+
+    pendente.setEstado(estado);
+    contratoHistoricoEntityRepository.save(pendente);
   }
 
   private ContratoHistoricoEntity buildBase(ContratoEntity contrato) {
@@ -76,6 +98,7 @@ public class ContratoHistoricoWriteService {
     h.setDataInicio(contrato.getDataInicio());
     h.setDataFim(contrato.getDataFim());
     h.setDuracao(contrato.getDuracao());
+    h.setEstActAdm(0);
     h.setUuid(IdentificadorUnico.create().valor());
     return h;
   }
