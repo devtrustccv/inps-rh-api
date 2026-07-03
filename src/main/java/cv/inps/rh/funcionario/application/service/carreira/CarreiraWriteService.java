@@ -252,10 +252,9 @@ public class CarreiraWriteService {
 
   public void validarCarreira(String funcionarioId, ValidacaoCarreiraDTO dto) {
 
-    ValidationUtil.validateDecision(dto.getValidacao());
+    var aprovado = ValidationUtil.isAprovado(dto.getValidacao());
 
     var dados = dto.getDados();
-    var aprovado = dto.getValidacao().equals("S");
     var estado = aprovado ? Estado.A : Estado.I;
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
