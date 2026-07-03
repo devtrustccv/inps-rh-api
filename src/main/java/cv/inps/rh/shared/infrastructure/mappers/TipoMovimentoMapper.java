@@ -1,6 +1,7 @@
 package cv.inps.rh.shared.infrastructure.mappers;
 
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.parametrizacao.application.dto.TipoMovimentoDTO;
 import cv.inps.rh.shared.domain.models.TipoMovimento;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +24,15 @@ public class TipoMovimentoMapper {
         .rebuild(idTipoMovimento, null, null, null, null);
   }
 
-  public ParametrizacaoDTO toParametrizacaoDto(TipoMovimentoEntity tipoMovimento) {
+  public TipoMovimentoDTO toParametrizacaoDto(TipoMovimentoEntity tipoMovimento) {
     if (tipoMovimento == null) return null;
 
-    ParametrizacaoDTO dto = new ParametrizacaoDTO();
+    TipoMovimentoDTO dto = new TipoMovimentoDTO();
     dto.setLabel(tipoMovimento.getDescricao());
     dto.setValue(tipoMovimento.getId());
+    dto.setValor(tipoMovimento.getValor());
+    dto.setPercentagem(tipoMovimento.getPercentagem());
+
     return dto;
   }
 }

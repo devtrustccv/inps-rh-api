@@ -1,5 +1,6 @@
 package cv.inps.rh.parametrizacao.infrastructure.mappers;
 
+import cv.inps.rh.parametrizacao.application.dto.ContratoDTO;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.models.ParamContrato;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamContratoEntity;
@@ -65,12 +66,14 @@ public class ParamContratoMapper {
     return ParamContrato.rebuild(idContrato);
   }
 
-  public ParametrizacaoDTO toParametrizacaoDto(ParamContrato domain) {
+  public ContratoDTO toParametrizacaoDto(ParamContrato domain) {
     if (domain == null) return null;
 
-    ParametrizacaoDTO dto = new ParametrizacaoDTO();
+    var dto = new ContratoDTO();
     dto.setLabel(domain.getNome());
     dto.setValue(domain.getId());
+    dto.setPrazoObrigatorio(domain.getPrazoObrigatorio()+"");
+
     return dto;
   }
 
