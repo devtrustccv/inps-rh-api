@@ -18,6 +18,9 @@ import java.time.LocalDate;
 public class ProcSalCcEntity {
 
   @Id
+  @Column(name = "REGISTO_ID")
+  private Long registoId;
+
   @Size(max = 4)
   @Column(name = "TIPO", length = 4)
   private String tipo;
@@ -102,9 +105,6 @@ public class ProcSalCcEntity {
 
   @Column(name = "PROC_FUNC_ID")
   private Long procFuncId;
-
-  @Column(name = "REGISTO_ID")
-  private Long registoId;
 
   @Size(max = 3)
   @Column(name = "FAVOR_ESTADO", length = 3)
