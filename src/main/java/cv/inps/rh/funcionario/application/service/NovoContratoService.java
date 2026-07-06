@@ -165,38 +165,9 @@ public class NovoContratoService {
         funcionario.setDefinicoesRenumeracoes(remList);
       }
 
-      var escalaoId = tipoRelacionamentoAtual.getCarreiraId() != null ?
-          tipoRelacionamentoAtual.getCarreiraId().getEscalaoId().getId() : null;
-
-      var vinculoId = tipoRelacionamentoAtual.getContrVinculoId() != null ?
-          tipoRelacionamentoAtual.getContrVinculoId().getVinculoId().getId() : null;
-
-      var houveMudancaSalario = houveMudancaSalario(vinculoId, escalaoId, dadosContratuais, funcionario);
-
-      if (houveMudancaSalario) {
-        if (funcionario.getDefinicoesRenumeracoes() != null) {
-          funcionario.getDefinicoesRenumeracoes().stream()
-              .filter(r -> r.getEstado() == Estado.A)
-              .forEach(r -> r.setEstado(Estado.I));
-        }
-
-        var vinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
-            .findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
-                "REM").getFirst();
-
-        var remTmIds = colaboradorValidationRules.getTipoMovimentoIdsDeRemuneracoes(funcionario.getDefinicoesRenumeracoes());
-        if (!remTmIds.contains(vinculoTipoMovimentoREM.getTmId().getId())) {
-          var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
-              dadosContratuais.getSalario(),
-              vinculoTipoMovimentoREM.getTmId(),
-              dadosContratuais.getDataInicio(),
-              dadosContratuais.getDataFim(),
-              funcionario,
-              dadosContratuais.getMoeda());
-          funcionario.getDefinicoesRenumeracoes().add(renumeracao);
-        }
-      }
-
+      // NOTA: inactivacao do salario antigo + derivacao do novo (REM do vinculo) foram movidas
+      // para a validacao positiva (ValidarContratoService.reconciliarMovimentosDoVinculo).
+      // Aqui persistem-se apenas os EXTRAS do utilizador (subsidios do DTO).
       /******************** FIM RENUMERACOES ********************************/
 
       /******************** INI PAGAMENTOS DESCONTOS ********************************/
@@ -209,47 +180,29 @@ public class NovoContratoService {
         funcionario.setDefinicoesPagamentos(pagList);
       }
 
-      if (!Objects.equals(vinculoId, dadosContratuais.getTipoVinculoLaboralId())) {
-        if (funcionario.getDefinicoesPagamentos() != null) {
-          funcionario.getDefinicoesPagamentos().stream()
-              .filter(r -> r.getEstado() == Estado.A)
-              .forEach(r -> r.setEstado(Estado.I));
-        }
-        var listAssociacaoVinculoTipoMovimentoPag =
-            paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(
-                dadosContratuais.getTipoVinculoLaboralId(),
-                "PAG");
-
-        if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
-          var pagTmIds = colaboradorValidationRules.getTipoMovimentoIdsDePagamentos(funcionario.getDefinicoesPagamentos());
-          listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
-            if (!pagTmIds.contains(movimento.getTmId().getId())) {
-              var pagamento = defPagamentoMapper.createPagamento(
-                  movimento.getValor(),
-                  movimento.getPercentagem() != null ? BigDecimal.valueOf(movimento.getPercentagem()) : null,
-                  movimento.getTmId(),
-                  dadosContratuais.getDataInicio(),
-                  dadosContratuais.getDataFim(),
-                  funcionario);
-              funcionario.getDefinicoesPagamentos().add(pagamento);
-            }
-          });
-        }
-      }
+      // NOTA: inactivacao dos PAG do vinculo antigo + derivacao dos do novo foram movidas
+      // para a validacao positiva (ValidarContratoService.reconciliarMovimentosDoVinculo).
     }
     /******************** FIM PAGAMENTOS DESCONTOS ********************************/
 
-    FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+    // funcionario esta MANAGED (findByUuidOrThrow na mesma tx) e NAO e novo, logo
+    // repository.saveAndFlush faria merge() — criaria COPIAS dos filhos novos
+    // (contratoNovo/tiposRelacionamentoNovo) e deixaria os originais transient (id null),
+    // rebentando depois em transferir/registrarNovo. entityManager.flush() persiste os
+    // filhos novos IN-PLACE via cascade PERSIST, atribuindo ids aos proprios objetos.
+    entityManager.flush();
+
+    List<DefinicaoRemuneracaoEntity> novasRems = funcionario.getDefinicoesRenumeracoes() != null
+        ? funcionario.getDefinicoesRenumeracoes().stream().filter(r -> r.getEstado() == Estado.P).collect(Collectors.toList())
+        : List.of();
+    List<DefPagamentoEntity> novosPags = funcionario.getDefinicoesPagamentos() != null
+        ? funcionario.getDefinicoesPagamentos().stream().filter(p -> p.getEstado() == Estado.P).collect(Collectors.toList())
+        : List.of();
+    // transferir corre queries (getRemuneracoesAssociadosAtivos/...) que forcam auto-flush;
+    // faze-lo logo apos o saveAndFlush limpo, ANTES de registrarNovo deixar historico pendente na sessao.
+    tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tipoRelacionamentoAtual, tiposRelacionamentoNovo, novasRems, novosPags);
 
     contratoHistoricoWriteService.registrarNovo(contratoNovo);
-
-    List<DefinicaoRemuneracaoEntity> novasRems = saved.getDefinicoesRenumeracoes() != null
-        ? saved.getDefinicoesRenumeracoes().stream().filter(r -> r.getEstado() == Estado.P).collect(Collectors.toList())
-        : List.of();
-    List<DefPagamentoEntity> novosPags = saved.getDefinicoesPagamentos() != null
-        ? saved.getDefinicoesPagamentos().stream().filter(p -> p.getEstado() == Estado.P).collect(Collectors.toList())
-        : List.of();
-    tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tipoRelacionamentoAtual, tiposRelacionamentoNovo, novasRems, novosPags);
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {
@@ -431,26 +384,9 @@ public class NovoContratoService {
         funcionario.setDefinicoesRenumeracoes(remList);
       }
 
-      var vinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
-          .findByVinculoId_IdAndTipo(dadosContratuais.getTipoVinculoLaboralId(),
-              "REM").getFirst();
-
-      if (!Objects.isNull(vinculoTipoMovimentoREM)) {
-        if (funcionario.getDefinicoesRenumeracoes() == null) {
-          funcionario.setDefinicoesRenumeracoes(new ArrayList<>());
-        }
-        var remTmIds = colaboradorValidationRules.getTipoMovimentoIdsDeRemuneracoes(funcionario.getDefinicoesRenumeracoes());
-        if (!remTmIds.contains(vinculoTipoMovimentoREM.getTmId().getId())) {
-          var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
-              dadosContratuais.getSalario(),
-              vinculoTipoMovimentoREM.getTmId(),
-              dadosContratuais.getDataInicio(),
-              dadosContratuais.getDataFim(),
-              funcionario,
-              dadosContratuais.getMoeda());
-          funcionario.getDefinicoesRenumeracoes().add(renumeracao);
-        }
-      }
+      // NOTA: a derivacao dos movimentos FIXOS do vinculo (REM salario + PAG) foi movida
+      // para a validacao positiva (ValidarContratoService.derivarMovimentosDoVinculo).
+      // Aqui persistem-se apenas os EXTRAS do utilizador (subsidios/encargos do DTO).
       /******************** FIM RENUMERACOES ********************************/
 
       /******************** INI PAGAMENTOS DESCONTOS ********************************/
@@ -462,37 +398,16 @@ public class NovoContratoService {
             .collect(Collectors.toList());
         funcionario.setDefinicoesPagamentos(pagList);
       }
-
-      var listAssociacaoVinculoTipoMovimentoPag = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(
-          dadosContratuais.getTipoVinculoLaboralId(),
-          "PAG");
-
-      if (!CollectionUtils.isEmpty(listAssociacaoVinculoTipoMovimentoPag)) {
-        if (funcionario.getDefinicoesPagamentos() == null) {
-          funcionario.setDefinicoesPagamentos(new ArrayList<>());
-        }
-        var pagTmIds = colaboradorValidationRules.getTipoMovimentoIdsDePagamentos(funcionario.getDefinicoesPagamentos());
-        listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
-          if (!pagTmIds.contains(movimento.getTmId().getId())) {
-            var pagamento = defPagamentoMapper.createPagamento(
-                movimento.getValor(),
-                movimento.getPercentagem() != null ? BigDecimal.valueOf(movimento.getPercentagem()) : null,
-                movimento.getTmId(),
-                dadosContratuais.getDataInicio(),
-                dadosContratuais.getDataFim(),
-                funcionario);
-            funcionario.getDefinicoesPagamentos().add(pagamento);
-          }
-        });
-      }
     }
 
 
-    FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+    // ver nota em registrar(): saveAndFlush faria merge() (funcionario nao e novo) e deixaria
+    // os filhos novos (contrato/tiposRelacionamento) transient. flush() persiste-os in-place.
+    entityManager.flush();
 
     contratoHistoricoWriteService.registrarNovo(contrato);
 
-    tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
+    tipoRelRemPagHelper.associarNovos(tiposRelacionamento, funcionario);
 
     validacaoEntityRepository.findById(valid.getId())
         .ifPresent(e -> {

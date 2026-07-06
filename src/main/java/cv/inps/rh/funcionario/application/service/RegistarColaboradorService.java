@@ -178,21 +178,9 @@ public class RegistarColaboradorService {
             "Parametrize o vínculo antes de registar o colaborador.");
       }
 
-      var vinculoTipoMovimentoREM = listVinculoTipoMovimentoREM.getFirst();
-      if (fun.getDefinicoesRenumeracoes() == null) {
-        fun.setDefinicoesRenumeracoes(new ArrayList<>());
-      }
-      var remTmIds = colaboradorValidationRules.getTipoMovimentoIdsDeRemuneracoes(fun.getDefinicoesRenumeracoes());
-      if (!remTmIds.contains(vinculoTipoMovimentoREM.getTmId().getId())) {
-        var renumeracao = definicaoRemuneracaoMapper.createRenumeracao(
-            dadosContratuais.getSalario(),
-            vinculoTipoMovimentoREM.getTmId(),
-            dadosContratuais.getDataInicio(),
-            dadosContratuais.getDataFim(),
-            fun,
-            dadosContratuais.getMoeda());
-        fun.getDefinicoesRenumeracoes().add(renumeracao);
-      }
+      // NOTA: derivacao do salario (REM) do vinculo movida para a validacao positiva
+      // (ReconciliacaoMovimentoVinculoService, via ValidarRegistoColaboradorService).
+      // Mantem-se acima o fail-fast (vinculo tem de ter REM parametrizado) e os extras do utilizador.
       /******************** FIM RENUMERACOES ********************************/
 
       /******************** INI PAGAMENTOS DESCONTOS ********************************/
@@ -216,22 +204,9 @@ public class RegistarColaboradorService {
             "Parametrize o vínculo antes de registar o colaborador.");
       }
 
-      if (fun.getDefinicoesPagamentos() == null) {
-        fun.setDefinicoesPagamentos(new ArrayList<>());
-      }
-      var pagTmIds = colaboradorValidationRules.getTipoMovimentoIdsDePagamentos(fun.getDefinicoesPagamentos());
-      listAssociacaoVinculoTipoMovimentoPag.forEach(movimento -> {
-        if (!pagTmIds.contains(movimento.getTmId().getId())) {
-          var pagamento = defPagamentoMapper.createPagamento(
-              movimento.getValor(),
-              movimento.getPercentagem() != null ? BigDecimal.valueOf(movimento.getPercentagem()) : null,
-              movimento.getTmId(),
-              dadosContratuais.getDataInicio(),
-              dadosContratuais.getDataFim(),
-              fun);
-          fun.getDefinicoesPagamentos().add(pagamento);
-        }
-      });
+      // NOTA: derivacao dos PAG do vinculo movida para a validacao positiva
+      // (ReconciliacaoMovimentoVinculoService, via ValidarRegistoColaboradorService).
+      // Mantem-se acima o fail-fast (vinculo tem de ter PAG parametrizado) e os extras do utilizador.
     }
     /******************** FIM PAGAMENTOS DESCONTOS ********************************/
 

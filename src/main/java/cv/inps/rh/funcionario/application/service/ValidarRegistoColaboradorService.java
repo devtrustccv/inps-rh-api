@@ -49,6 +49,7 @@ public class ValidarRegistoColaboradorService {
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
   private final ColaboradorValidationRules colaboradorValidationRules;
+  private final ReconciliacaoMovimentoVinculoService reconciliacaoMovimentoVinculoService;
 
   @Transactional
   public Map<String, ?> validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -157,6 +158,10 @@ public class ValidarRegistoColaboradorService {
     if (registroColaborador.getValidar() != null) {
       var estado = registroColaborador.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       if (estado.equals(Estado.A)) {
+        // derivar os movimentos fixos do vinculo — SO na validacao positiva (antes de activar)
+        reconciliacaoMovimentoVinculoService.reconciliar(funcionario, tiposRelacionamento.getContrVinculoId(),
+            dadosContratuais.getSalario(), dadosContratuais.getMoeda(),
+            dadosContratuais.getDataInicio(), dadosContratuais.getDataFim());
         var validacao = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR).orElse(null);
         var descricao = "Registo de colaborador - " + funcionario.getNome();
         ordemServicoWriteService.criar(funcionario, tiposRelacionamento, registroColaborador.getTipoOrdemServico(), validacao, descricao);
