@@ -46,6 +46,7 @@ public class ContratoMapper {
     dto.setInicial(Integer.valueOf(1).equals(v.getVersao()));
     dto.setAtual(Integer.valueOf(1).equals(v.getEstActAdm()));
     dto.setRenovavel(Integer.valueOf(1).equals(v.getFlgRenovavel()));
+    dto.setProcessamento(v.getProcessamento() != null && v.getProcessamento() > 0);
 
     return dto;
   }

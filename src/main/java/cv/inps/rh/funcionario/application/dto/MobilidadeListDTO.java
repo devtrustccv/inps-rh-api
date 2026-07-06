@@ -45,7 +45,8 @@ public class MobilidadeListDTO  {
   private String dataFim ;
 
 
-  private String processamento ;
+  // true se a mobilidade (o seu tiprel) já tem processamento salarial (RH_T_PROC_FUNCIONARIOS)
+  private boolean processamento ;
 
 
   private String estado ;

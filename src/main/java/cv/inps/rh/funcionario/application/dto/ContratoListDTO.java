@@ -63,4 +63,7 @@ public class ContratoListDTO  {
 
   private boolean renovavel ;
 
+  // true se o contrato já tem processamento salarial (algum tiprel em RH_T_PROC_FUNCIONARIOS)
+  private boolean processamento ;
+
 }

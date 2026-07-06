@@ -34,6 +34,7 @@ public class MobilidadeReadService {
 
   private final MobilidadeEntityRepository mobilidadeEntityRepository;
   private final MobilidadeMapper mobilidadeMapper;
+  private final cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
 
   @Transactional(readOnly = true)
   public WrapperListMobilidadeDTO getListMobilidade(GetListMobilidadesQuery query) {
@@ -72,6 +73,14 @@ public class MobilidadeReadService {
 
     Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
     Page<MobilidadeEntity> page = mobilidadeEntityRepository.findAll(spec, pageable);
+
+    // Processamento em BATCH: uma única query para saber quais mobilidades da página já
+    // têm processamento salarial (o seu tiprel tem registo em RH_T_PROC_FUNCIONARIOS).
+    var mobIds = page.getContent().stream().map(MobilidadeEntity::getId).toList();
+    var processados = mobIds.isEmpty()
+        ? java.util.Set.<Long>of()
+        : new java.util.HashSet<>(processamentoFuncionarioRepository.findMobIdsComProcessamento(mobIds));
+
     List<MobilidadeListDTO> content = page.getContent().stream().map(m -> {
       MobilidadeListDTO dto = new MobilidadeListDTO();
       dto.setId(m.getId());
@@ -83,7 +92,7 @@ public class MobilidadeReadService {
       dto.setLocalTrabalho(m.getLocalTrabId() != null ? m.getLocalTrabId().getNome() : null);
       dto.setDataInicio(DateFormatter.localDateToString(m.getDataInicio()));
       dto.setDataFim(DateFormatter.localDateToString(m.getDataFim()));
-      dto.setProcessamento(null);
+      dto.setProcessamento(processados.contains(m.getId()));
       dto.setEstado(m.getEstado() != null ? m.getEstado().getCode() : null);
       dto.setEstadoDesc(m.getEstado() != null ? m.getEstado().getDescription() : null);
       dto.setTipoMobilidade(m.getTipoSituacao());

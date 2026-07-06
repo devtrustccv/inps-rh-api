@@ -116,7 +116,7 @@
     {
       "name": "processamento",
       "objectType": "java",
-      "type": "string",
+      "type": "boolean",
       "required": false,
       "before": false,
       "after": false,
