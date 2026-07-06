@@ -198,6 +198,18 @@
       "primaryKey": false
     },
     {
+      "name": "processamento",
+      "objectType": "java",
+      "type": "boolean",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "historicos",
       "objectType": "dto",
       "type": "ContratoHistorico",

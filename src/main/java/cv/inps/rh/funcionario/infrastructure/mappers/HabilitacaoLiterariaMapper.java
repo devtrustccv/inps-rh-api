@@ -39,7 +39,8 @@ public class HabilitacaoLiterariaMapper {
     e.setNivel(ValidationUtil.trimToNull(dto.getGrauAcademico()));
     e.setDataInicio(dto.getDataInicio());
     e.setDataFim(dto.getDataTermino());
-    e.setConcluido(dto.getConcluido());
+    // concluido é NOT NULL na BD e o frontend nem sempre o envia — default 1 (concluído)
+    e.setConcluido(dto.getConcluido() != null ? dto.getConcluido() : 1);
     e.setUuid(UuidCreator.getTimeOrderedEpoch());
     e.setFunId(fun);
     e.setEstado(estado);
@@ -66,7 +67,7 @@ public class HabilitacaoLiterariaMapper {
         found.setNivel(ValidationUtil.trimToNull(dto.getGrauAcademico()));
         found.setDataInicio(dto.getDataInicio());
         found.setDataFim(dto.getDataTermino());
-        found.setConcluido(dto.getConcluido());
+        found.setConcluido(dto.getConcluido() != null ? dto.getConcluido() : 1);
       } else {
         HabilitacaoLiterariaEntity novo = toEntity(dto, estadoParaNovos, fun);
         existingList.add(novo);

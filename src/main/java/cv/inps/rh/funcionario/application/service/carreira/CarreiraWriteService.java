@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
@@ -60,13 +59,32 @@ public class CarreiraWriteService {
     if (!contratoEntityRepository.existsByFunIdAndEstado(funcionario, Estado.A))
       throw IgrpResponseStatusException.conflict("Este funcionário não possui um contrato ativo");
 
-    if (Integer.valueOf(1).equals(dto.getFlgProcessa())
-        && tiposRelacionamentoEntityRepository.existsByFunIdAndEstadoAndFlgProcessa(funcionario, Estado.A, 1))
-      throw IgrpResponseStatusException.conflict("Já existe um vínculo ativo com processamento salarial para este funcionário");
+    // Doc (Regra Geral): "O campo processar salário deve ser obrigatório"
+    if (dto.getFlgProcessa() == null)
+      throw IgrpResponseStatusException.badRequest("O campo 'processar salário' é obrigatório");
 
     var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
 
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+
+    // Doc: "somente uma carreira pode processar ao mesmo tempo". Exclui o vínculo actual, que é
+    // fechado/substituído nesta operação (permite progredir uma carreira que já processa).
+    if (Integer.valueOf(1).equals(dto.getFlgProcessa())
+        && tiposRelacionamentoEntityRepository.existsByFunIdAndEstadoAndFlgProcessaAndIdNot(
+            funcionario, Estado.A, 1, relacionamentoAtual.getId()))
+      throw IgrpResponseStatusException.conflict("Já existe um vínculo ativo com processamento salarial para este funcionário");
+
+    // Doc "Regra Geral": máx 2 carreiras activas; e não 2 do mesmo tipo (cargo nulo vs não-nulo).
+    // Conta as activas em vigor, excluindo a carreira actual que será fechada nesta operação.
+    var carreiraAtualIdGuard = relacionamentoAtual.getCarreiraId() != null ? relacionamentoAtual.getCarreiraId().getId() : null;
+    var carreirasAtivas = carreiraEntityRepository
+        .findAllByContrVinculoIdFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A)
+        .stream().filter(c -> !Objects.equals(c.getId(), carreiraAtualIdGuard)).toList();
+    if (carreirasAtivas.size() >= 2)
+      throw IgrpResponseStatusException.conflict("O colaborador não pode ter mais de duas carreiras activas");
+    boolean novoCargoNulo = dto.getCargoPosicaoId() == null;
+    if (carreirasAtivas.stream().anyMatch(c -> (c.getCargoId() == null) == novoCargoNulo))
+      throw IgrpResponseStatusException.conflict("O colaborador não pode ter duas carreiras activas do mesmo tipo (cargo)");
 
     // Capturar ativos ANTES de fechar — o helper filtra por Estado.A
     var remuneracoesAtivas = funcionarioRules.getRemuneracoesAssociadosAtivos(relacionamentoAtual.getId());
@@ -129,8 +147,10 @@ public class CarreiraWriteService {
     Long salarioTmId = null;
     var criarNovoSalario = houveMudancaSalario(vinculoAtualId, escalaoAtualId, dto, funcionario);
     if (criarNovoSalario) {
+      // A carreira NÃO muda de vínculo (campo Vínculo é read-only na ficha) — usar o vínculo
+      // actual, ignorando dto.getTipoVinculoLaboralId().
       var movREM = paramVinculoMovimentoEntityRepository
-          .findByVinculoId_IdAndTipo(dto.getTipoVinculoLaboralId(), "REM")
+          .findByVinculoId_IdAndTipo(vinculoAtualId, "REM")
           .stream().findFirst().orElse(null);
       if (movREM != null) {
         salarioTmId = movREM.getTmId() != null ? movREM.getTmId().getId() : null;
@@ -161,7 +181,8 @@ public class CarreiraWriteService {
       }
     }
 
-    // Encargos: usar DTO se fornecido; se vínculo mudou criar do novo vínculo; senão copiar ativos
+    // Encargos: usar DTO se fornecido; senão copiar os PAG activos. A carreira NÃO muda de vínculo,
+    // por isso não se derivam PAG de outro vínculo (o campo Vínculo é read-only na ficha).
     if (dto.getEncargosDescontos() != null && !dto.getEncargosDescontos().isEmpty()) {
       for (var e : dto.getEncargosDescontos()) {
         var def = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
@@ -169,19 +190,7 @@ public class CarreiraWriteService {
         defPagamentoEntityRepository.save(def);
         novosPagamentos.add(def);
       }
-    } else if (!Objects.equals(vinculoAtualId, dto.getTipoVinculoLaboralId())) {
-      var listAssoc = paramVinculoMovimentoEntityRepository
-          .findByVinculoId_IdAndTipo(dto.getTipoVinculoLaboralId(), "PAG");
-      if (!CollectionUtils.isEmpty(listAssoc)) {
-        for (var mov : listAssoc) {
-          var pagamento = defPagamentoMapper.createPagamento(
-              mov.getValor(), mov.getPercentagem() != null ? BigDecimal.valueOf(mov.getPercentagem()) : BigDecimal.ZERO, mov.getTmId(), dto.getDataInicio(), dto.getDataFim(), funcionario);
-          defPagamentoEntityRepository.save(pagamento);
-          novosPagamentos.add(pagamento);
-        }
-      }
     } else {
-      // Copiar pags ativos
       for (var pag : pagamentosAtivos) {
         var copia = copiarPagamento(pag, funcionario, dto.getDataInicio(), obsMovimento);
         defPagamentoEntityRepository.save(copia);
@@ -331,9 +340,20 @@ public class CarreiraWriteService {
 
     var relacionamento = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(carreira.getUuid());
 
-    // Spec 3.5.2.3.1: "só permite editar caso ainda não tenha processamento associado (RH_V_CARREIRA.PROCESSAMENTO = NÃO)"
-    if (relacionamento != null && relacionamento.getUltProc() != null)
-      throw IgrpResponseStatusException.badRequest("Carreira já possui processamento associado e não pode ser editada");
+    // Spec 3.5.2.3.1 (Novo/Editar, PROCESSAMENTO > 0): com processamento associado, os campos
+    // carreira/cargo/data início ficam fechados; a alteração de ESCALÃO implica um novo registo
+    // (INSERT) em CARREIRA + TIPOS_RELACIONAMENTO + TIPREL_REM_PAG — é a progressão/promoção,
+    // que o fluxo novaCarreira já cobre (fecha o registo anterior e cria o novo pendente).
+    if (relacionamento != null && relacionamento.getUltProc() != null) {
+      Long escalaoAtual = carreira.getEscalaoId() != null ? carreira.getEscalaoId().getId() : null;
+      boolean mudouEscalao = !Objects.equals(escalaoAtual, dto.getEscalaoReferenciaId());
+      if (mudouEscalao) {
+        novaCarreira(funcionarioId, dto);
+        return;
+      }
+      throw IgrpResponseStatusException.badRequest(
+          "Carreira já processada: apenas a alteração de escalão é permitida (gera um novo registo)");
+    }
 
     boolean revalidar = !Estado.P.equals(carreira.getEstado());
 

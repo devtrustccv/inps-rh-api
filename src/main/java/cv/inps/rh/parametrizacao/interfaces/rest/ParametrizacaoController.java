@@ -151,8 +151,10 @@ public class ParametrizacaoController {
             ),
         }
     )
-    public ResponseEntity<List<EscalaoDTO>> getEscaloesAtivos() {
-        final var query = new GetEscaloesAtivosQuery();
+    public ResponseEntity<List<EscalaoDTO>> getEscaloesAtivos(
+        @RequestParam(value = "carreiraId", required = false) Long carreiraId
+    ) {
+        final var query = new GetEscaloesAtivosQuery(carreiraId);
 
         return queryBus.handle(query);
     }

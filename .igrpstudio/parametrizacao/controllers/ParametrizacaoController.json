@@ -148,7 +148,14 @@
             }
           }
         }
-      }
+      },
+      "requestParams": [
+        {
+          "type": "long",
+          "name": "carreiraId",
+          "isRequired": false
+        }
+      ]
     },
     {
       "actionName": "getLocalTrabalhoAtivos",

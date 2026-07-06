@@ -45,6 +45,9 @@ public interface TiposRelacionamentoEntityRepository extends
 
   boolean existsByFunIdAndEstadoAndFlgProcessa(FuncionarioEntity funId, Estado estado, Integer flgProcessa);
 
+  // Igual ao anterior mas exclui um registo (o vínculo que está a ser fechado/substituído numa progressão).
+  boolean existsByFunIdAndEstadoAndFlgProcessaAndIdNot(FuncionarioEntity funId, Estado estado, Integer flgProcessa, Long id);
+
   Optional<TiposRelacionamentoEntity> findByUuid(UUID uuid);
 
   default TiposRelacionamentoEntity findByUuidOrThrow(UUID uuid) {

@@ -3939,7 +3939,7 @@ style="text-align: center;"><strong>Descrição</strong></th>
 </tr>
 <tr>
 <td colspan="5" style="text-align: left;"><ul>
-<li><p><em>O sistema deve aletar quando o prazo de contrato esta quase a
+<li><p><em>O sistema deve aletar quando o prazo de contrato está quase a
 atingir o prazo. Deve ser criado um job que notifica o utilizador sempre
 que o contrato esta proximo a atingir o Prozo. (VER ESPECIFICAÇÃO
 )</em></p></li>
@@ -4171,16 +4171,27 @@ mobilidade em questão já tenho um processamento.</em></p></li>
 </tr>
 <tr>
 <td style="text-align: left;">Editar</td>
-<td colspan="3" style="text-align: center;"><em>Somente deiza editar
+<td colspan="3" style="text-align: center;"><p><em>Somente deixa editar
 caso o registo ainda não for processado (RH_V_MOBILIDADE.PROCESSAMENTO =
-NÃO)</em></td>
+0)</em></p>
+<p><em><strong>Nota: Ao editar não faz um novo registo, mas sim
+atualiza</strong></em></p></td>
+</tr>
+<tr>
+<td style="text-align: left;">Mobilidade</td>
+<td colspan="3" style="text-align: center;"><p><em>Aparece somente a
+mobilidade tenha um processamento (RH_V_MOBILIDADE.PROCESSAMENTO &gt;
+0)</em></p>
+<p><em><strong>Nota: Ao editar faz um novo registo, mas sim
+atualiza</strong></em></p></td>
 </tr>
 <tr>
 <td style="text-align: left;">Eliminar</td>
 <td colspan="3" style="text-align: center;"><p><em>Somente deixa
 cancelar caso o registo ainda não for validade. (RH_V_MOBILIDADE.ESTADO
-= ‘P’) .</em></p>
-<p><em>Ao eliminar o RH_V_MOBILIDADE.ESTADO = ‘E’</em></p></td>
+= ‘P’).</em></p>
+<p><em>Ao eliminar o <strong>RH_</strong>V_MOBILIDADE.ESTADO =
+‘E’</em></p></td>
 </tr>
 </tbody>
 </table>
@@ -4387,14 +4398,13 @@ RH_T_TIPOS_RELACIONAMENTO</strong></em></p></li>
 <li><p><em>USER_REGISTO_ID = id de utilizador Logado</em></p></li>
 <li><p><em>ESTADO <strong>= ‘P’</strong></em></p></li>
 </ul>
-<p><em><mark>2.Cria uma nova associacao na tabela de Assossiacao
-gravação na tabela <strong>RH_T_TIPREL_REM_PAGPega os dados do tiprel_id
-fechado e cria um novo registo com novo Tiprel_id
-</strong></mark></em></p>
+<p><em>2.Cria uma nova associacao na tabela de Assossiacao gravação na
+tabela <strong>RH_T_TIPREL_REM_PAGPega os dados do tiprel_id fechado e
+cria um novo registo com novo Tiprel_id </strong></em></p>
 <ul>
-<li><p><em><mark>TIPREL_ID = novo Tiprel_id</mark></em></p></li>
-<li><p><em><mark>REM_ID = pega o mesmo anteriro</mark></em></p></li>
-<li><p><em><mark>PAG_ID = pega o mesmo anterior</mark></em></p></li>
+<li><p><em>TIPREL_ID = novo Tiprel_id</em></p></li>
+<li><p><em>REM_ID = pega o mesmo anteriro</em></p></li>
+<li><p><em>PAG_ID = pega o mesmo anterior</em></p></li>
 </ul>
 <p><em>3.1- Registo Detalhe de LOG na tabela
 <strong>RH_T_VALIDACAO_DETALHE</strong></em></p>
@@ -4479,8 +4489,7 @@ especificado em Editar Mobilidade.</em></p>
 
 ##### Lista Carreira
 
-<img src="media/image27.png" style="width:9.69306in;height:4.47083in"
-alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos gerados por IA podem estar incorretos." />
+<img src="media/image27.png" style="width:9.69306in;height:3.95069in" />
 
 <table style="width:100%;">
 <colgroup>
@@ -4532,6 +4541,12 @@ TIPO_MOV_LABORAL, REFERENTE = ‘CARREIRA’</td>
 style="text-align: left;"><em>RH_V_CARREIRA.TIPO_SITUACAO_DESC</em></td>
 </tr>
 <tr>
+<td style="text-align: left;">Estado</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;"><em>RH_V_CARREIRA.ESTADO</em></td>
+</tr>
+<tr>
 <td style="text-align: left;">Vinculo</td>
 <td style="text-align: center;"><em>TEXT</em></td>
 <td style="text-align: center;"></td>
@@ -4556,7 +4571,7 @@ style="text-align: left;"><em>RH_V_CARREIRA.TIPO_SITUACAO_DESC</em></td>
 <td style="text-align: left;"><em>RH_V_CARREIRA.ESCALAO_DESC</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">Salario</td>
+<td style="text-align: left;">Salário</td>
 <td style="text-align: center;"><em>TEXT</em></td>
 <td style="text-align: center;"></td>
 <td style="text-align: left;"><em>RH_V_CARREIRA.SALARIO</em></td>
@@ -4581,23 +4596,57 @@ style="text-align: left;"><em>RH_V_CARREIRA.SITUACAO_LABORAL_DESC</em></td>
 <td style="text-align: left;"><em>RH_V_CARREIRA.DATA_FIM</em></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>AÇÕES</strong></td>
+<td style="text-align: left;">Processa Salário?</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"></td>
-<td style="text-align: left;"></td>
+<td style="text-align: left;"><em>RH_V_CARREIRA.FLG_PROCESSA</em></td>
+</tr>
+<tr>
+<td colspan="4"><strong>REGRAS</strong></td>
+</tr>
+<tr>
+<td colspan="4"><ul>
+<li><p><em>A lista deve estar organizadas por data início de
+carreira</em></p></li>
+<li><p><em>Caso a carreira esteja validada ou processada o botão
+Eliminar deve ficar invisivel</em></p></li>
+</ul></td>
+</tr>
+<tr>
+<td colspan="4"><strong>AÇÕES</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">Novo</td>
+<td colspan="3" style="text-align: center;"><em>Campo Tipo Carreira de
+preenche com o seguinte: DOMINIO =<strong>TIPO_MOV_LABORAL</strong>,
+VALOR = <strong>CARREIRA_NOVO</strong></em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Editar</td>
-<td colspan="3" style="text-align: center;"><em>Abre o mesmo formulario
-de eliminar, so pemite editar caso ainda não tenha tenho processamento
-associado <strong>(RH_V_CARREIRA. PROCESSAMENTO = NÃO), …</strong> Caso
-for editado, deve passar novamente para validação.</em></td>
+<td colspan="3" style="text-align: center;"><p><em>so pemite editar
+todos campos caso ainda não tenha processamento associado
+(<strong>RH_V_CARREIRA. PROCESSAMENTO = 0), …</strong> Caso for editado,
+deve passar novamente para validação.</em></p>
+<p><em>Campo Tipo Carreira de preenche com o seguinte: DOMINIO
+=<strong>TIPO_MOV_LABORAL</strong>, VALOR =
+<strong>CARREIRA_EDITAR</strong></em></p></td>
+</tr>
+<tr>
+<td style="text-align: left;">Progressão / Promoção</td>
+<td colspan="3" style="text-align: center;"><p><em>Este botão invoca a
+mesma página de editar, mas no campo tipo carreira deve aparecer o
+seguinte:</em></p>
+<ul>
+<li><p><em>Campo Tipo Carreira de preenche com o seguinte: DOMINIO
+=<strong>TIPO_MOV_LABORAL</strong>, VALOR =
+<strong>CARREIRA_PROG_PROMO</strong></em></p></li>
+</ul></td>
 </tr>
 <tr>
 <td style="text-align: left;">Eliminar</td>
 <td colspan="3" style="text-align: center;"><p><em>Só pemite eliminar
-caso ainda não for validdo ou seja caso
-<strong>RH_T_CARREIRA.</strong>ESTADO <strong>= ‘P’</strong></em></p>
+caso ainda não for validdo, ou seja, caso
+RH<strong>_T_CARREIRA.</strong>ESTADO <strong>= ‘P’</strong></em></p>
 <p><em>Ao eliminar o RH_V_MOBILIDADE.ESTADO = ‘E’</em></p></td>
 </tr>
 </tbody>
@@ -4639,7 +4688,7 @@ validação desse Registo. No modo validação esse campo é obrigatorio</p>
 <td colspan="3"><em>RH_T_CARREIRA.ESTADO</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">Vinculo</td>
+<td style="text-align: left;">Vínculo</td>
 <td><em>ENABLE</em></td>
 <td colspan="3"></td>
 <td
@@ -4680,8 +4729,8 @@ colspan="3"><em>-------------------------------------------</em></td>
 <tr>
 <td style="text-align: left;">*Escalão</td>
 <td><em>SELECT</em></td>
-<td colspan="3"><em><strong>FUNÇÃO:</strong> GET_ESCALAO
-(P_CARREIRA,P_CATEGORIA)</em></td>
+<td colspan="3"><em><strong>FUNÇÃO:</strong> GET_ESCALAO (P_CARREIRA,
+P_CATEGORIA)</em></td>
 <td colspan="3"><p><em>RH_T_CARREIRA.ESCALAO_ID</em></p>
 <p><em>RH_T_TIPOS_RELACIONAMENTO. ESCALAO_ID</em></p></td>
 </tr>
@@ -4689,8 +4738,8 @@ colspan="3"><em>-------------------------------------------</em></td>
 <td style="text-align: left;">*Salário</td>
 <td><em>NUMBER</em></td>
 <td colspan="3"><strong>FUNÇÃO</strong> : GET_SALARIO (P_ESCALAO)</td>
-<td colspan="3"><p><em>RH_T_CARREIRA.SALARIO</em></p>
-<p><em>RH_T_TIPOS_RELACIONAMENTO. SALARIO</em></p></td>
+<td colspan="3"><p><em>RH_T_CARREIRA.SALÁRIO</em></p>
+<p><em>RH_T_TIPOS_RELACIONAMENTO. SALÁRIO</em></p></td>
 </tr>
 <tr>
 <td style="text-align: left;">Moeda</td>
@@ -4773,13 +4822,94 @@ aplicável).</td>
 <td colspan="8" style="text-align: left;"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="8" style="text-align: left;"><p><em><strong>Ao Clicar no
-botão gravar, deve ser feito as seguintes ações</strong></em></p>
+<td colspan="8" style="text-align: left;"><p><em><strong>Regra
+Geral:</strong></em></p>
+<ul>
+<li><p><em>O campo processar salário deve ser obrigatório. Deve ser
+validado que nunca um utilizador tenha duas carreiras marcadas para
+processar ao mesmo tempo</em></p></li>
+<li><p><em>O colaborador não pode ter mais de duas carreiras
+ativas.</em></p></li>
+<li><p><em>o colaborador não pode ter duas carreiras ativas do mesmo
+tipo (duas carreiras ativas cujo cargo é nulo ou duas carreiras ativas
+cujo cargo não é nulo)</em></p></li>
+</ul>
+<p><em><strong>1.Caso a carreira ainda não tenha um
+processamento</strong> (RH_V_CARREIRA.</em> <em>PROCESSAMENTO
+<strong>=</strong> 0).</em></p>
+<ul>
+<li><p><em>A alteração de dados não implica um novo registo nas tabelas
+<strong>RH_T_CARREIRA</strong> e
+<strong>RH_T_TIPOS_RELACIONAMENTO,</strong> mas sim deve fazer
+atualização</em></p></li>
+<li><p><em>A atualizacao de dados de <strong>escalão / salário</strong>
+deve passar para validação novamente</em></p></li>
+</ul>
+<p><em><strong>2.Caso a carreira tenha um processamento
+associado</strong> (RH_V_CARREIRA.</em> <em>PROCESSAMENTO
+<strong>&gt;</strong> 0).</em></p>
+<ul>
+<li><p><em>Ao editar, deve ficar fechado os campos de
+<strong>carreira</strong>, <strong>Cargo, Data
+início</strong></em></p></li>
+</ul>
+<ul>
+<li><p><em>A alteração dos campos de <strong>Escalão,</strong> implica
+um novo (<strong>INSERT</strong>) registo em <strong>RH_T_CARREIRA,
+RH_T_TIPOS_RELACIONAMENTO</strong> e
+<strong>RH_T_TIPLRE_REM_PAG</strong></em></p></li>
+<li><p><em>Ao fechar (Data Fim) uma carreiso somente faz
+<strong>actualização</strong> na tabela
+<strong>RH_T_CARREIRA,</strong></em></p></li>
+<li><p><em>Quando uma carreira esta fechada não se pode fazer alteração
+nela, ou seja o botão gravar deve estar desativo</em></p></li>
+<li><p><em>Duas carreras não podem estar marcados para processar ao
+mesmo tempo (<strong>RH_T_CARREIRA.FLG_CARREIRA = 1</strong>), ou seja
+somente um qui pode ser processado.</em></p></li>
+<li><p><em>Sempre que uma carreira for alterada para processar
+(<strong>RH_T_CARREIRA.FLG_CARREIRA = 1</strong>), ou seja, era 0 e
+passa para 1</em></p>
+<ul>
+<li><p><em>logo faz o novo registo na tabela,
+<strong>RH_T_TIPOS_RELACIONAMENTO.</strong> Pega todos os registos do
+último vínculo, excepto a CARREIRA_ID <strong>, pq este fica com
+</strong></em></p></li>
+</ul></li>
+</ul>
+<blockquote>
+<p><em>Id de carreira que será último vinculo
+atual<strong>).</strong></em></p>
+</blockquote>
+<ul>
+<li><p><em>Faz um novo registo na tabela
+<strong>RH_T_TIPREL_REM_PAG</strong> (pega todos os registos ativos
+dessa mesma carreira que se pretende processar, e faz um novo registo
+associando o novo TIPREL_ID (id de RH_T_TIPOS_RELACIONAMENTO
+registado<strong>) Nota: ter atenção aqui, o registo que vai pegar em
+rh_t_def_remuneraqcoes e rh_t_def_pagamentos deve ser dessa carreira
+atual que se vair mudar para processar e não de outroa
+carrerao</strong></em></p></li>
+</ul>
+<ul>
+<li><p><em>Sempre que uma carreira for marcada para não processar
+(<strong>RH_T_CARREIRA.FLG_CARREIRA = 0</strong>), ou seja, era 1 e
+passa para 0, somente faz atualização nas tabelas:</em></p>
+<ul>
+<li><p><em>RH_T_CARREIRA.FLG_PROCESSAR</em></p></li>
+<li><p><em>O sistema deve obrigar, colocar data fim nessa carreira
+RH_T_CARREIRA.DATA_FIM</em></p></li>
+<li><p><em>RH_T_TIPOS_RELACIONAMENTO.EST_ACT_AM = 0</em></p></li>
+<li><p><em>RH_T_TIPOS_RELACIONAMENTO.DATA_FIM = data fim de
+carreira</em></p></li>
+</ul></li>
+</ul>
+<p><em><strong>3.Ao clicar no botão gravar, deve ser feito as seguintes
+ações</strong></em></p>
 <ul>
 <li><p><em>Deve quardar na tabela Log</em></p></li>
-<li><p><em>O colaborador pode ter mais de um vinculo ativo, mais somente
+<li><p><em>O colaborador pode ter mais de um vínculo ativo, mais somente
 recebe salarios em um deles (sempre rece salarios no vinculo cujo
-salario é mais alto), logo o sistema deve validar se já existe uma
+salario é mais alto), logo o sistema deve validar se já existe um
 marcado como sim, caso sim não deixar registar outra como
 sim</em></p></li>
 <li><p><em>Deve quardar na tabela de Validação</em></p></li>
@@ -4796,7 +4926,7 @@ esta deve ser automaticamente <strong>submetida a validação</strong>. O
 respetivo registo deve ser inserido na tabela de <strong>Validação
 (RH_T_VALIDACAO)</strong>.</em></p></li>
 <li><p><em>Ao Criar uma nova carreira, o sistema deve fechar o registo
-de salario anteiror (RH_T_DEF_REMUNERAÇÃO anteriror ativos
+de salário anteiror (RH_T_DEF_REMUNERAÇÃO anteriror ativos
 )</em></p></li>
 </ul>
 <p><em><strong>Subsidio</strong></em></p>

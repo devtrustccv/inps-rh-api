@@ -28,7 +28,7 @@ public class GetEscaloesAtivosQueryHandler implements QueryHandler<GetEscaloesAt
 
    @IgrpQueryHandler
   public ResponseEntity<List<EscalaoDTO>> handle(GetEscaloesAtivosQuery query) {
-     var paramEscaloes =  paramEscalaoRepository.findAllActive();
+     var paramEscaloes =  paramEscalaoRepository.findAllActive(query.getCarreiraId());
      List<EscalaoDTO> parametrizacoes = paramEscaloes.stream()
          .map(paramEscalaoMapper::toParametrizacaoDto)
          .toList();

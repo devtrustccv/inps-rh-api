@@ -46,6 +46,7 @@ public class ValidarContratoService {
   private final ColaboradorValidationRules colaboradorValidationRules;
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
+  private final ReconciliacaoMovimentoVinculoService reconciliacaoMovimentoVinculoService;
 
   @Transactional
   public ResponseEntity<DadosContratuaisRespDTO> validar(ValidarContratoCommand command) {
@@ -104,6 +105,10 @@ public class ValidarContratoService {
         var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
         mudarEstado(funcionario, estado);
         if (estado == Estado.A) {
+          // reconciliar os movimentos fixos do vinculo — SO na validacao positiva
+          reconciliacaoMovimentoVinculoService.reconciliar(funcionario, contrato,
+              dadosContratuais.getSalario(), dadosContratuais.getMoeda(),
+              dadosContratuais.getDataInicio(), dadosContratuais.getDataFim());
           ordemServicoWriteService.criar(funcionario, tiposRelacionamento, dto.getTipoOrdemServico());
         }
       }
@@ -156,4 +161,5 @@ public class ValidarContratoService {
         .ifPresent(v -> v.setEstado(estado));
 
   }
+
 }
