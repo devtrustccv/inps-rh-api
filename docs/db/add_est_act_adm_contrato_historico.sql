@@ -1,0 +1,14 @@
+-- =====================================================================
+-- RH_T_CONTRATO_HISTORICO: coluna EST_ACT_ADM
+-- =====================================================================
+-- Marca qual o historico ACTUAL do contrato (situacao corrente):
+--   EST_ACT_ADM = 1  -> historico actual (apenas um por contrato/funcionario)
+--   EST_ACT_ADM = 0  -> historicos anteriores/desactivados
+--
+-- Mantido pelo fluxo de escrita:
+--  - Novo contrato: historico inicial com EST_ACT_ADM = 1.
+--  - Renovacao validada positivamente: novo historico = 1, anterior = 0.
+--  - Mudanca de vinculo (novo contrato): desactiva tudo do contrato anterior
+--    (historicos -> 0) e o novo contrato passa a ter o historico com 1.
+-- =====================================================================
+ALTER TABLE rh_t_contrato_historico ADD (est_act_adm NUMBER DEFAULT 0);

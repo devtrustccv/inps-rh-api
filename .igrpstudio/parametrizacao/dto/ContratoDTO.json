@@ -1,0 +1,27 @@
+{
+  "name": "Contrato",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "prazoObrigatorio",
+      "type": "string",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "type": "dto",
+  "module": "parametrizacao",
+  "enableCustonValidation": false,
+  "readOnly": false,
+  "extends": {
+    "name": "Parametrizacao",
+    "module": "parametrizacao"
+  },
+  "id": "new-action-Contract"
+}

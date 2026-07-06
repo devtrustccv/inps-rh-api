@@ -14,9 +14,37 @@ public final class ValidationUtil {
   private ValidationUtil() {
   }
 
+  private static final List<String> DECISOES_APROVACAO = List.of("S", "SIM");
+  private static final List<String> DECISOES_REJEICAO = List.of("N", "NAO", "NÃO");
+
+  /**
+   * Valida a decisão de validação/aprovação. Aceita, sem distinção de maiúsculas,
+   * tanto a convenção curta ({@code "S"}/{@code "N"}) como a convenção do frontend
+   * ({@code "SIM"}/{@code "NAO"}).
+   */
   public static void validateDecision(String decision) {
-    if (!List.of("S", "N").contains(decision))
+    if (!isDecisaoValida(decision))
       throw IgrpResponseStatusException.badRequest("Decisão inválida: " + decision);
+  }
+
+  /**
+   * Valida a decisão e devolve {@code true} se for uma aprovação ({@code "S"}/{@code "SIM"}),
+   * {@code false} se for uma rejeição ({@code "N"}/{@code "NAO"}).
+   *
+   * @throws IgrpResponseStatusException se a decisão não for reconhecida
+   */
+  public static boolean isAprovado(String decision) {
+    validateDecision(decision);
+    return DECISOES_APROVACAO.contains(normalizeDecision(decision));
+  }
+
+  private static boolean isDecisaoValida(String decision) {
+    String normalized = normalizeDecision(decision);
+    return DECISOES_APROVACAO.contains(normalized) || DECISOES_REJEICAO.contains(normalized);
+  }
+
+  private static String normalizeDecision(String decision) {
+    return decision == null ? null : decision.trim().toUpperCase();
   }
 
   public static <E extends Enum<E>> Optional<E> getEnum(Class<E> enumClass, String value) {

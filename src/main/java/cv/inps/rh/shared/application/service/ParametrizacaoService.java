@@ -3,6 +3,7 @@ package cv.inps.rh.shared.application.service;
 import cv.inps.rh.configuracao.application.dto.VinculoMovimentoResponseDTO;
 import cv.inps.rh.parametrizacao.application.dto.EstabelecimentoComboDTO;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.parametrizacao.application.dto.TipoMovimentoDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.mappers.*;
@@ -41,13 +42,13 @@ public class ParametrizacaoService {
   private static final String ESTADO_ACTIVO = "ACTIVO";
   private static final Long AMB_APL_ID = 30L;
 
-  public List<ParametrizacaoDTO> getTiposMovimentosRenumeracao() {
+  public List<TipoMovimentoDTO> getTiposMovimentosRenumeracao() {
     return tipoMovimentoEntityRepository
         .findAllByTipoInAndEstadoAndAmbAplIdAndShortDescNot(List.of("REM", "ABA"), ESTADO_ACTIVO, AMB_APL_ID, "SALL")
         .stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
 
-  public List<ParametrizacaoDTO> getTiposMovimentosPagamentosDesconto() {
+  public List<TipoMovimentoDTO> getTiposMovimentosPagamentosDesconto() {
     return tipoMovimentoEntityRepository
         .findAllByTipoInAndEstadoAndAmbAplId(List.of("PAG", "IMP"), ESTADO_ACTIVO, AMB_APL_ID)
         .stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();

@@ -1,6 +1,5 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
-import cv.inps.rh.funcionario.application.dto.ContratoHistoricoDTO;
 import cv.inps.rh.funcionario.application.dto.ContratoListDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.RenovarContratoReqDTO;
@@ -9,16 +8,14 @@ import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamVinculoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoHistoricoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.RhVContratoEntity;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -29,49 +26,27 @@ public class ContratoMapper {
   private final EntityManager entityManager;
 
 
-  public ContratoListDTO toDTO(ContratoEntity contrato) {
-    if (contrato == null) return null;
+  public ContratoListDTO toDTO(RhVContratoEntity v) {
+    if (v == null) return null;
 
     var dto = new ContratoListDTO();
-    dto.setId(contrato.getId());
-    dto.setUuid(contrato.getUuid() != null ? contrato.getUuid().toString() : null);
-    dto.setFuncionarioId(contrato.getFunId().getId());
-    dto.setTipoContrato(contrato.getTpContratoId() != null ? contrato.getTpContratoId().getNome() : null);
-    dto.setUuidFuncionario(contrato.getFunId() != null ? contrato.getFunId().getUuid().toString() : null);
-    dto.setSituacao(contrato.getTipoSituacao());
-    dto.setTipoVinculo(contrato.getVinculoId() != null ? contrato.getVinculoId().getNome() : null);
-    dto.setDataInicio(contrato.getDataInicio() != null ? DateFormatter.localDateToString(contrato.getDataInicio()) : null);
-    dto.setDataFim(contrato.getDataFim() != null ? DateFormatter.localDateToString(contrato.getDataFim()) : null);
-    dto.setDuracao(contrato.getDuracao() != null ? contrato.getDuracao().toString() : null);
-    dto.setEstado(contrato.getEstado() != null ? contrato.getEstado().name() : null);
-    dto.setEstadoDesc(contrato.getEstado() != null ? contrato.getEstado().getDescription() : null);
-    dto.setVersao(contrato.getVersao());
-    dto.setInicial(contrato.getVersao() == 1);
-    dto.setAtual(contrato.getEstado() == Estado.A);
-    dto.setRenovavel(contrato.getTpContratoId() != null
-        && Integer.valueOf(1).equals(contrato.getTpContratoId().getFlgRenovavel()));
+    dto.setId(v.getContratoId());
+    dto.setUuid(v.getContratoUuid() != null ? v.getContratoUuid().toString() : null);
+    dto.setFuncionarioId(v.getFunId());
+    dto.setUuidFuncionario(v.getFunUuid() != null ? v.getFunUuid().toString() : null);
+    dto.setSituacao(v.getTipoSituacao());
+    dto.setTipoContrato(v.getTipoContrato());
+    dto.setTipoVinculo(v.getVinculo());
+    dto.setDataInicio(v.getDataInicio() != null ? DateFormatter.localDateToString(v.getDataInicio()) : null);
+    dto.setDataFim(v.getDataFim() != null ? DateFormatter.localDateToString(v.getDataFim()) : null);
+    dto.setDuracao(v.getDuracao() != null ? v.getDuracao().toString() : null);
+    dto.setEstado(v.getEstado());
+    dto.setEstadoDesc(Estado.fromCode(v.getEstado()).map(Estado::getDescription).orElse(null));
+    dto.setVersao(v.getVersao());
+    dto.setInicial(Integer.valueOf(1).equals(v.getVersao()));
+    dto.setAtual(Integer.valueOf(1).equals(v.getEstActAdm()));
+    dto.setRenovavel(Integer.valueOf(1).equals(v.getFlgRenovavel()));
 
-    return dto;
-  }
-
-  public ContratoListDTO toDTO(ContratoEntity contrato, List<ContratoHistoricoEntity> historicos) {
-    var dto = toDTO(contrato);
-    dto.setHistoricos(historicos.stream().map(this::toHistoricoDTO).toList());
-    return dto;
-  }
-
-  public ContratoHistoricoDTO toHistoricoDTO(ContratoHistoricoEntity h) {
-    if (h == null) return null;
-    var dto = new ContratoHistoricoDTO();
-    dto.setId(h.getId());
-    dto.setUuid(h.getUuid() != null ? h.getUuid().toString() : null);
-    dto.setVersao(h.getVersao());
-    dto.setEstado(h.getEstado() != null ? h.getEstado().name() : null);
-    dto.setEstadoDesc(h.getEstado() != null ? h.getEstado().getDescription() : null);
-    dto.setDataInicio(h.getDataInicio() != null ? DateFormatter.localDateToString(h.getDataInicio()) : null);
-    dto.setDataFim(h.getDataFim() != null ? DateFormatter.localDateToString(h.getDataFim()) : null);
-    dto.setDuracao(h.getDuracao());
-    dto.setObs(h.getObs());
     return dto;
   }
 

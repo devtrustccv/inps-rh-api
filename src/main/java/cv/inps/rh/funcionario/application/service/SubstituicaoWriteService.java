@@ -35,14 +35,17 @@ public class SubstituicaoWriteService {
 
     var dto = command.getSubstituicao();
 
+    if (dto.getColaboradorSubstituto() == null)
+      throw IgrpResponseStatusException.badRequest("É obrigatório indicar o colaborador substituto.");
+
     var idFuncionarioSubstituto = IdentificadorUnico.from(dto.getColaboradorSubstituto()).valor();
     var funcionarioSubstituto = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituto).orElseThrow(
-        () -> IgrpResponseStatusException.badRequest("Funcionário não encontrado:: "+idFuncionarioSubstituto)
+        () -> IgrpResponseStatusException.badRequest("Funcionário substituto não encontrado.")
     );
 
     var idFuncionarioSubstituido = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionarioSubstituido = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituido).orElseThrow(
-        () -> IgrpResponseStatusException.badRequest("Funcionário não encontrado:: "+idFuncionarioSubstituido)
+        () -> IgrpResponseStatusException.badRequest("Funcionário substituído não encontrado.")
     );
 
 
@@ -78,18 +81,21 @@ public class SubstituicaoWriteService {
 
     var idSusbtituicao = IdentificadorUnico.from(command.getSubstituicaoId()).valor();
 
+    if (dto.getColaboradorSubstituto() == null)
+      throw IgrpResponseStatusException.badRequest("É obrigatório indicar o colaborador substituto.");
+
     var idFuncionarioSubstituto = IdentificadorUnico.from(dto.getColaboradorSubstituto()).valor();
     var funcionarioSubstituto = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituto).orElseThrow(
-        () -> IgrpResponseStatusException.badRequest("Funcionário não encontrado:: "+idFuncionarioSubstituto)
+        () -> IgrpResponseStatusException.badRequest("Funcionário substituto não encontrado.")
     );
 
     var idFuncionarioSubstituido = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionarioSubstituido = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituido).orElseThrow(
-        () -> IgrpResponseStatusException.badRequest("Funcionário não encontrado:: "+idFuncionarioSubstituido)
+        () -> IgrpResponseStatusException.badRequest("Funcionário substituído não encontrado.")
     );
 
     var substituicao = substituicaoEntityRepository.findByUuid(idSusbtituicao).orElseThrow(
-        () -> IgrpResponseStatusException.badRequest("Substituição não encontrada:: "+idSusbtituicao)
+        () -> IgrpResponseStatusException.badRequest("Substituição não encontrada.")
     );
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());

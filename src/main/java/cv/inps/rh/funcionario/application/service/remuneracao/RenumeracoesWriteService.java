@@ -123,9 +123,7 @@ public class RenumeracoesWriteService {
 
     if (data.getValidacao() != null) {
       if (remuneracao.getEstado() == Estado.P) {
-        ValidationUtil.validateDecision(data.getValidacao());
-
-        var novoEstado = data.getValidacao().equals("S") ? Estado.A : Estado.I;
+        var novoEstado = ValidationUtil.isAprovado(data.getValidacao()) ? Estado.A : Estado.I;
         remuneracao.setEstado(novoEstado);
 
         var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
@@ -164,9 +162,7 @@ public class RenumeracoesWriteService {
     if (data.getValidacao() != null) {
 
       if (pagamento.getEstado() == Estado.P) {
-        ValidationUtil.validateDecision(data.getValidacao());
-
-        var novoEstado = data.getValidacao().equals("S") ? Estado.A : Estado.I;
+        var novoEstado = ValidationUtil.isAprovado(data.getValidacao()) ? Estado.A : Estado.I;
         pagamento.setEstado(novoEstado);
 
         var idFunc = IdentificadorUnico.from(command.getIdFuncionario());

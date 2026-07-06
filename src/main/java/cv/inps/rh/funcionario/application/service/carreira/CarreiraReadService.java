@@ -4,17 +4,16 @@ import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.application.service.DominioService;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.RhVCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.RhVCarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
-import jakarta.persistence.criteria.Join;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -37,7 +36,7 @@ public class CarreiraReadService {
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
-  private final DominioService dominioService;
+  private final RhVCarreiraEntityRepository rhVCarreiraEntityRepository;
   private final FuncionarioRules funcionarioRules;
 
   @Transactional(readOnly = true)
@@ -48,21 +47,16 @@ public class CarreiraReadService {
 
     var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
 
-    Specification<TiposRelacionamentoEntity> spec = (root, cq, cb) -> {
-      List<Predicate> predicates = new java.util.ArrayList<>();
+    Specification<RhVCarreiraEntity> spec = (root, cq, cb) -> {
+      List<Predicate> predicates = new ArrayList<>();
 
-      Join<TiposRelacionamentoEntity, FuncionarioEntity> fun = root.join("funId");
-      predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
+      predicates.add(cb.equal(root.get("funUuid"), idFuncionario));
 
-      var estados = List.of(Estado.A, Estado.P, Estado.I);
-      predicates.add(
-          root.get("estado").in(estados)
-      );
-
-      Join<TiposRelacionamentoEntity, CarreiraEntity> carreira = root.join("carreiraId");
+      var estados = List.of(Estado.A.getCode(), Estado.P.getCode(), Estado.I.getCode());
+      predicates.add(root.get("estadoCarreira").in(estados));
 
       if (StringUtils.hasText(query.getTipoCarreira())) {
-        predicates.add(cb.equal(carreira.get("tipoSituacao"), query.getTipoCarreira()));
+        predicates.add(cb.equal(root.get("tipoSituacao"), query.getTipoCarreira()));
       }
 
       if (StringUtils.hasText(query.getDataInicio())) {
@@ -78,53 +72,37 @@ public class CarreiraReadService {
     };
 
     var pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
-    var page = tiposRelacionamentoEntityRepository.findAll(spec, pageable);
+    var page = rhVCarreiraEntityRepository.findAll(spec, pageable);
 
-    var tipoMovimentoLaboralDomain = dominioService.getDominioMap("TIPO_MOV_LABORAL");
-
-    List<CarreiraListDTO> content = page.getContent().stream().map(tr -> {
-      var dto = new CarreiraListDTO();
-      var car = tr.getCarreiraId();
-      var fun = tr.getFunId();
-      var vinc = tr.getContrVinculoId().getVinculoId();
-      var carrPcc = tr.getCarreiraId()!=null ? tr.getCarreiraId().getCarrPccsId() : null;
-      var cargo = tr.getCargoId();
-      var esc = tr.getCarreiraId()!=null ? tr.getCarreiraId().getEscalaoId(): null;
-      var sitLab = tr.getSituacLaboralId();
-
-      dto.setId(car != null ? car.getId() : null);
-      dto.setUuid(car != null && car.getUuid() != null ? car.getUuid().toString() : null);
-      dto.setIdFuncionario(fun != null ? fun.getId() : null);
-      dto.setUuidFuncionario(fun != null && fun.getUuid() != null ? fun.getUuid().toString() : null);
-      dto.setVinculo(vinc != null ? vinc.getNome() : null);
-      dto.setCarreira(carrPcc != null ? carrPcc.getNome() : null);
-      dto.setCargo(cargo != null ? cargo.getNome() : null);
-      dto.setEscalao(esc != null ? esc.getEscalao() : null);
-      dto.setSalario(car != null && car.getSalario() != null ? car.getSalario().toString() : null);
-      dto.setSituacaoLaboral(sitLab != null ? sitLab.getSituacaoLaboralId().getNome() : null);
-      dto.setDataInicio(tr.getDataInicio());
-      dto.setDataFim(tr.getDataFim());
-      dto.setProcessamento(tr.getFlgProcessa()== 1 ? "SIM" : "NAO");
-      dto.setEstado(car != null && car.getEstado() != null ? car.getEstado().getCode() : null);
-      dto.setEstadoDesc(car != null && car.getEstado() != null ? car.getEstado().getDescription() : null);
-
-      if (car != null) {
-        dto.setTipoCarreira(car.getTipoSituacao());
-        dto.setTipoCarreiraDesc(dominioService.traduzir(tipoMovimentoLaboralDomain, car.getTipoSituacao()));
-      }
-
-      return dto;
-    }).toList();
+    List<CarreiraListDTO> content = page.getContent().stream().map(this::toDTO).toList();
 
     var wrapper = new WrapperCarreiraListDTO();
     wrapper.setContent(content);
-    wrapper.setPageNumber(page.getNumber());
-    wrapper.setPageSize(page.getSize());
-    wrapper.setTotalElements(page.getTotalElements());
-    wrapper.setTotalPages(page.getTotalPages());
-    wrapper.setFirst(page.isFirst());
-    wrapper.setLast(page.isLast());
+    PageMapper.fillPagination(page, wrapper);
     return wrapper;
+  }
+
+  private CarreiraListDTO toDTO(RhVCarreiraEntity v) {
+    var dto = new CarreiraListDTO();
+    dto.setId(v.getCarreiraId());
+    dto.setUuid(v.getCarreiraUuid() != null ? v.getCarreiraUuid().toString() : null);
+    dto.setIdFuncionario(v.getFunId());
+    dto.setUuidFuncionario(v.getFunUuid() != null ? v.getFunUuid().toString() : null);
+    dto.setTipoCarreira(v.getTipoSituacao());
+    dto.setTipoCarreiraDesc(v.getTipoSituacaoDesc());
+    dto.setVinculo(v.getVinculoDesc());
+    dto.setCarreira(v.getCarreiraDesc());
+    dto.setCargo(v.getCargoDesc());
+    dto.setEscalao(v.getEscalaoDesc());
+    dto.setSalario(v.getSalario() != null ? v.getSalario().toString() : null);
+    // situacaoLaboral: ainda nao existe na vista (vem do tiprel). Fica null ate a
+    // BD o expor em RH_V_CARREIRA; nessa altura mapeia-se v.getSituacaoLaboral().
+    dto.setDataInicio(v.getDataInicio());
+    dto.setDataFim(v.getDataFim());
+    dto.setProcessamento(Integer.valueOf(1).equals(v.getFlgProcessa()) ? "SIM" : "NAO");
+    dto.setEstado(v.getEstadoCarreira());
+    dto.setEstadoDesc(Estado.fromCode(v.getEstadoCarreira()).map(Estado::getDescription).orElse(null));
+    return dto;
   }
 
   public CarreiraResponseDTO getCarreiraById(String carreiraId) {

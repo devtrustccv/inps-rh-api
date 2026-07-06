@@ -2,6 +2,7 @@ package cv.inps.rh.parametrizacao.application.queries;
 
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
+import cv.inps.rh.parametrizacao.application.dto.ContratoDTO;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
 import cv.inps.rh.parametrizacao.domain.repository.ParamContratoRepository;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamContratoMapper;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class GetParamContratosAtivosQueryHandler implements QueryHandler<GetParamContratosAtivosQuery, ResponseEntity<List<ParametrizacaoDTO>>>{
+public class GetParamContratosAtivosQueryHandler implements QueryHandler<GetParamContratosAtivosQuery, ResponseEntity<List<ContratoDTO>>>{
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetParamContratosAtivosQueryHandler.class);
 
@@ -27,9 +28,9 @@ public class GetParamContratosAtivosQueryHandler implements QueryHandler<GetPara
   }
 
   @IgrpQueryHandler
-  public ResponseEntity<List<ParametrizacaoDTO>> handle(GetParamContratosAtivosQuery query) {
+  public ResponseEntity<List<ContratoDTO>> handle(GetParamContratosAtivosQuery query) {
      var paramContratos =  paramContratoRepository.findAllActive();
-     List<ParametrizacaoDTO> parametrizacoes = paramContratos.stream()
+     List<ContratoDTO> parametrizacoes = paramContratos.stream()
          .map(paramContratoMapper::toParametrizacaoDto)
          .toList();
      return ResponseEntity.ok(parametrizacoes);

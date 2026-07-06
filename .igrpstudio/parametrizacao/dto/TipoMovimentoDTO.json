@@ -1,0 +1,39 @@
+{
+  "name": "TipoMovimento",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "valor",
+      "type": "decimal",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "percentagem",
+      "type": "decimal",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "type": "dto",
+  "module": "parametrizacao",
+  "enableCustonValidation": false,
+  "readOnly": false,
+  "extends": {
+    "name": "Parametrizacao",
+    "module": "parametrizacao"
+  },
+  "id": "new-action-Contract"
+}
