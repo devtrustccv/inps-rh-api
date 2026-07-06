@@ -24,4 +24,14 @@ public class ParamCargoRepositoryImpl implements ParamCargoRepository {
         .toList();
   }
 
+  @Override
+  public List<ParamCargo> findAllActive(Long carreiraId) {
+    if (carreiraId == null) {
+      return findAllActive();
+    }
+    return paramCargoEntityRepository.findAllByEstadoAndParamCarrId_Id(Estado.A, carreiraId).stream()
+        .map(paramCargoMapper::toDomain)
+        .toList();
+  }
+
 }

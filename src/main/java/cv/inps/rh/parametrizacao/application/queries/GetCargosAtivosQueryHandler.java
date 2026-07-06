@@ -29,7 +29,7 @@ public class GetCargosAtivosQueryHandler implements QueryHandler<GetCargosAtivos
    @IgrpQueryHandler
   public ResponseEntity<List<ParametrizacaoDTO>> handle(GetCargosAtivosQuery query) {
     LOGGER.info("Handling query {}", query);
-    var paramCargos =  paramCargoRepository.findAllActive();
+    var paramCargos =  paramCargoRepository.findAllActive(query.getCarreiraId());
 
     List<ParametrizacaoDTO> parametrizacoes = paramCargos.stream()
         .map(paramCargoMapper::toParametrizacaoDto)

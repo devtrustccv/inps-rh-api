@@ -72,8 +72,10 @@ public class ParametrizacaoController {
             ),
         }
     )
-    public ResponseEntity<List<ParametrizacaoDTO>> getCargosAtivos() {
-        final var query = new GetCargosAtivosQuery();
+    public ResponseEntity<List<ParametrizacaoDTO>> getCargosAtivos(
+        @RequestParam(value = "carreiraId", required = false) Long carreiraId
+    ) {
+        final var query = new GetCargosAtivosQuery(carreiraId);
 
         return queryBus.handle(query);
     }
