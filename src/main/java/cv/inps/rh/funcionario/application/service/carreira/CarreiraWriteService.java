@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
@@ -148,8 +147,10 @@ public class CarreiraWriteService {
     Long salarioTmId = null;
     var criarNovoSalario = houveMudancaSalario(vinculoAtualId, escalaoAtualId, dto, funcionario);
     if (criarNovoSalario) {
+      // A carreira NÃO muda de vínculo (campo Vínculo é read-only na ficha) — usar o vínculo
+      // actual, ignorando dto.getTipoVinculoLaboralId().
       var movREM = paramVinculoMovimentoEntityRepository
-          .findByVinculoId_IdAndTipo(dto.getTipoVinculoLaboralId(), "REM")
+          .findByVinculoId_IdAndTipo(vinculoAtualId, "REM")
           .stream().findFirst().orElse(null);
       if (movREM != null) {
         salarioTmId = movREM.getTmId() != null ? movREM.getTmId().getId() : null;
@@ -180,7 +181,8 @@ public class CarreiraWriteService {
       }
     }
 
-    // Encargos: usar DTO se fornecido; se vínculo mudou criar do novo vínculo; senão copiar ativos
+    // Encargos: usar DTO se fornecido; senão copiar os PAG activos. A carreira NÃO muda de vínculo,
+    // por isso não se derivam PAG de outro vínculo (o campo Vínculo é read-only na ficha).
     if (dto.getEncargosDescontos() != null && !dto.getEncargosDescontos().isEmpty()) {
       for (var e : dto.getEncargosDescontos()) {
         var def = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
@@ -188,19 +190,7 @@ public class CarreiraWriteService {
         defPagamentoEntityRepository.save(def);
         novosPagamentos.add(def);
       }
-    } else if (!Objects.equals(vinculoAtualId, dto.getTipoVinculoLaboralId())) {
-      var listAssoc = paramVinculoMovimentoEntityRepository
-          .findByVinculoId_IdAndTipo(dto.getTipoVinculoLaboralId(), "PAG");
-      if (!CollectionUtils.isEmpty(listAssoc)) {
-        for (var mov : listAssoc) {
-          var pagamento = defPagamentoMapper.createPagamento(
-              mov.getValor(), mov.getPercentagem() != null ? BigDecimal.valueOf(mov.getPercentagem()) : BigDecimal.ZERO, mov.getTmId(), dto.getDataInicio(), dto.getDataFim(), funcionario);
-          defPagamentoEntityRepository.save(pagamento);
-          novosPagamentos.add(pagamento);
-        }
-      }
     } else {
-      // Copiar pags ativos
       for (var pag : pagamentosAtivos) {
         var copia = copiarPagamento(pag, funcionario, dto.getDataInicio(), obsMovimento);
         defPagamentoEntityRepository.save(copia);
