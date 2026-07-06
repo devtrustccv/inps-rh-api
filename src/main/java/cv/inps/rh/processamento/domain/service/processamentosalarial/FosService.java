@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
@@ -73,7 +74,7 @@ public class FosService {
     );
   }
 
-  public void novoSegurado(Integer ano, Integer mes) {
+  public String novoSegurado(Integer ano, Integer mes) {
 
     var referenceDate = FosUtil.getReferenceDate(ano, mes);
 
@@ -85,15 +86,16 @@ public class FosService {
     var referenceMonth = FosUtil.buildReferenceMonth(referenceDate);
     LOGGER.debug("Novo segurado reference date: {}", referenceMonth);
 
-    configXml(referenceMonth, "PRIME");
+    return configXml(referenceMonth, "PRIME");
   }
 
-  private void configXml(String referenceMonth, String tipo) {
-    buildSimpleJdbcCall("configXML")
+  private String configXml(String referenceMonth, String tipo) {
+    var result = buildSimpleJdbcCall("configXML")
         .declareParameters(
             new SqlParameter("p_mes_referencia", Types.VARCHAR),
             new SqlParameter("p_tipo", Types.VARCHAR),
-            new SqlParameter("p_user_id", Types.NUMERIC)
+            new SqlParameter("p_user_id", Types.NUMERIC),
+            new SqlOutParameter("p_msg", Types.VARCHAR)
         )
         .execute(
             new MapSqlParameterSource()
@@ -101,9 +103,11 @@ public class FosService {
                 .addValue("p_tipo", tipo)
                 .addValue("p_user_id", 1) // TODO 18/04/2026 21:34 check this later
         );
+
+    return (String) result.get("P_MSG");
   }
 
-  public void restaurarXml(Long fosId) {
+  public String restaurarXml(Long fosId) {
 
     var fosXml = fosEntityRepository.findByIdOrThrow(fosId);
     FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
@@ -114,7 +118,7 @@ public class FosService {
     detalheXmlFosEntityRepository.deleteAllByIdXmlFos(fosXml);
     fosEntityRepository.delete(fosXml);
 
-    configXml(referenceMonth, type);
+    return configXml(referenceMonth, type);
   }
 
   public void removerFos(Long fosId) {
@@ -216,13 +220,13 @@ public class FosService {
     // TODO 18/04/2026 23:21 api INPS
   }
 
-  public void substituirXml(Long id) {
+  public String substituirXml(Long id) {
 
     var fosXml = fosEntityRepository.findByIdOrThrow(id);
 
     FosUtil.validateDeliveryDate(fosXml.getDtEntrega());
 
-    configXml(fosXml.getAno() + fosXml.getMes(), "SUBST");
+    return configXml(fosXml.getAno() + fosXml.getMes(), "SUBST");
   }
 
   private SimpleJdbcCall buildSimpleJdbcCall(String procedureName) {
