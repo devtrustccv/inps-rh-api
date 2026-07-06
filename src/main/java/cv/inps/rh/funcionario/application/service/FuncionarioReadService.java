@@ -62,9 +62,13 @@ public class FuncionarioReadService {
       if (query.getCarreira() != null)
         predicates.add(cb.equal(root.get(RhVDossieEntity_.carreiraId), query.getCarreira()));
 
-      // Por defeito lista apenas colaboradores com estado = 'A' (spec 3.3)
-      var estadoFiltro = StringUtils.hasText(query.getEstado()) ? query.getEstado() : Estado.A.name();
-      predicates.add(cb.equal(root.get(RhVDossieEntity_.estadoColaborador), estadoFiltro));
+      // Por defeito lista activos e pendentes (A, P); não mostra inactivos (I).
+      // Se for enviado um estado específico, filtra por esse.
+      if (StringUtils.hasText(query.getEstado())) {
+        predicates.add(cb.equal(root.get(RhVDossieEntity_.estadoColaborador), query.getEstado()));
+      } else {
+        predicates.add(root.get(RhVDossieEntity_.estadoColaborador).in(Estado.A.name(), Estado.P.name()));
+      }
 
       if (StringUtils.hasText(query.getDataInicio())) {
         var di = DateFormatter.stringToLocalDate(query.getDataInicio());
