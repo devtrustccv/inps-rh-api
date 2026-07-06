@@ -5,6 +5,7 @@ import cv.igrp.framework.core.utils.object.EnumUtils;
 import cv.inps.rh.configuracao.application.dto.VinculoMovimentoResponseDTO;
 import cv.inps.rh.parametrizacao.application.dto.EstabelecimentoComboDTO;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.parametrizacao.application.dto.TipoMovimentoDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.service.ParametrizacaoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +30,7 @@ public class ParametrizacaoController {
 
   @GetMapping("/tipo-movimento-desconto/ativos")
   @Operation(summary = "Lista tipos de movimento de desconto ativos")
-  public ResponseEntity<List<ParametrizacaoDTO>> getTiposMovimentoPagamentosDescontoAtivos() {
+  public ResponseEntity<List<TipoMovimentoDTO>> getTiposMovimentoPagamentosDescontoAtivos() {
     return ResponseEntity.ok(parametrizacaoService.getTiposMovimentosPagamentosDesconto());
   }
 
@@ -41,7 +42,7 @@ public class ParametrizacaoController {
 
   @GetMapping("/tipo-movimento-renumeracao/ativos")
   @Operation(summary = "Lista tipos de movimento de remuneração ativos")
-  public ResponseEntity<List<ParametrizacaoDTO>> getTiposMovimentoRemuneracaoAtivos() {
+  public ResponseEntity<List<TipoMovimentoDTO>> getTiposMovimentoRemuneracaoAtivos() {
     return ResponseEntity.ok(parametrizacaoService.getTiposMovimentosRenumeracao());
   }
 
