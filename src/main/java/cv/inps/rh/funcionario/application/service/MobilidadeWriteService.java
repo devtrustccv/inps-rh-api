@@ -57,9 +57,11 @@ public class MobilidadeWriteService {
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     var novoTipoRelacionamento = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
 
+    // Spec: DATA_FIM do vínculo fechado = data início da nova mobilidade - 1
+    var dataFimAnterior = mobilidadeDto.getDataInicio() != null ? mobilidadeDto.getDataInicio().minusDays(1) : LocalDate.now();
     tipoRelacionamentoAtual.setEstActAdm(0);
-    tipoRelacionamentoAtual.setDataFim(LocalDate.now());
-    tipoRelacionamentoAtual.getMobId().setDataFim(mobilidadeDto.getDataInicio().minusDays(1));
+    tipoRelacionamentoAtual.setDataFim(dataFimAnterior);
+    tipoRelacionamentoAtual.getMobId().setDataFim(dataFimAnterior);
 
     novoTipoRelacionamento.setEstActAdm(1);
     novoTipoRelacionamento.setMobId(novaMobilidade);
@@ -67,6 +69,9 @@ public class MobilidadeWriteService {
     // Spec: DATA_INICIO do novo vínculo = data do registo (não herdar a do vínculo anterior via clone)
     novoTipoRelacionamento.setDataInicio(mobilidadeDto.getDataInicio() != null ? mobilidadeDto.getDataInicio() : LocalDate.now());
     novoTipoRelacionamento.setTipoSituacao(ValidationUtil.trimToNull(mobilidadeDto.getTipoMobilidade()));
+    // Spec: REFERENTE = 'MOBILIDADE', OBS = 'MOBILIDADE-'||tipo (não herdar do vínculo clonado)
+    novoTipoRelacionamento.setReferente(Referencia.MOBILIDADE.name());
+    novoTipoRelacionamento.setObs("MOBILIDADE-" + ValidationUtil.trimToNull(mobilidadeDto.getTipoMobilidade()));
 
     // Persist new entities directly so their IDs are assigned on the same references.
     // saveAndFlush(funcionario) uses em.merge(), which for transient children creates
@@ -149,20 +154,22 @@ public class MobilidadeWriteService {
        mobilidade.setEstado(estado);
        tipoRelacionamentoAtual.setEstado(estado);
 
-       funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.MOBILIDADE)
-          .ifPresent(v -> v.setEstado(estado));
+      var validacao = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.MOBILIDADE)
+          .orElse(null);
+      if (validacao != null) validacao.setEstado(estado);
 
-
-      if(estado.equals(Estado.I)){
-        var remuneracoes = funcionario.getDefinicoesRenumeracoes();
-        if (remuneracoes != null) remuneracoes.forEach(r -> { if (r != null) r.setEstado(estado); });
-
-        var descontos = funcionario.getDefinicoesPagamentos();
-        if (descontos != null) descontos.forEach(d -> { if (d != null) d.setEstado(estado); });
-      }
+      // Propagar o estado APENAS às remunerações/descontos associados a ESTE vínculo
+      // (não a todas as definições do funcionário).
+      var remuneracoes = funcionarioRules.getRemuneracoesAssociadosAtivos(tipoRelacionamentoAtual.getId());
+      if (remuneracoes != null) remuneracoes.forEach(r -> { if (r != null) r.setEstado(estado); });
+      var descontos = funcionarioRules.getPagamentosDescontosAssociadosAtivos(tipoRelacionamentoAtual.getId());
+      if (descontos != null) descontos.forEach(d -> { if (d != null) d.setEstado(estado); });
 
       if(estado.equals(Estado.A)){
-        ordemServicoWriteService.criar(funcionario, tipoRelacionamentoAtual, mobilidadeDto.getTipoOrdemServico());
+        // Spec: REFERENTE='MOBILIDADE', DESCRICAO='Mobilidade do colaborador - '||nome, VALIDACAO_ID preenchido
+        var nome = funcionario.getNome() != null ? funcionario.getNome() : "";
+        ordemServicoWriteService.criar(funcionario, tipoRelacionamentoAtual, Referencia.MOBILIDADE.name(),
+            validacao, "Mobilidade do colaborador - " + nome);
       }
 
     }

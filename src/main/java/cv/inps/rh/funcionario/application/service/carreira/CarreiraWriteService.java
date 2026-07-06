@@ -60,6 +60,10 @@ public class CarreiraWriteService {
     if (!contratoEntityRepository.existsByFunIdAndEstado(funcionario, Estado.A))
       throw IgrpResponseStatusException.conflict("Este funcionário não possui um contrato ativo");
 
+    // Doc (Regra Geral): "O campo processar salário deve ser obrigatório"
+    if (dto.getFlgProcessa() == null)
+      throw IgrpResponseStatusException.badRequest("O campo 'processar salário' é obrigatório");
+
     if (Integer.valueOf(1).equals(dto.getFlgProcessa())
         && tiposRelacionamentoEntityRepository.existsByFunIdAndEstadoAndFlgProcessa(funcionario, Estado.A, 1))
       throw IgrpResponseStatusException.conflict("Já existe um vínculo ativo com processamento salarial para este funcionário");
@@ -331,9 +335,20 @@ public class CarreiraWriteService {
 
     var relacionamento = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(carreira.getUuid());
 
-    // Spec 3.5.2.3.1: "só permite editar caso ainda não tenha processamento associado (RH_V_CARREIRA.PROCESSAMENTO = NÃO)"
-    if (relacionamento != null && relacionamento.getUltProc() != null)
-      throw IgrpResponseStatusException.badRequest("Carreira já possui processamento associado e não pode ser editada");
+    // Spec 3.5.2.3.1 (Novo/Editar, PROCESSAMENTO > 0): com processamento associado, os campos
+    // carreira/cargo/data início ficam fechados; a alteração de ESCALÃO implica um novo registo
+    // (INSERT) em CARREIRA + TIPOS_RELACIONAMENTO + TIPREL_REM_PAG — é a progressão/promoção,
+    // que o fluxo novaCarreira já cobre (fecha o registo anterior e cria o novo pendente).
+    if (relacionamento != null && relacionamento.getUltProc() != null) {
+      Long escalaoAtual = carreira.getEscalaoId() != null ? carreira.getEscalaoId().getId() : null;
+      boolean mudouEscalao = !Objects.equals(escalaoAtual, dto.getEscalaoReferenciaId());
+      if (mudouEscalao) {
+        novaCarreira(funcionarioId, dto);
+        return;
+      }
+      throw IgrpResponseStatusException.badRequest(
+          "Carreira já processada: apenas a alteração de escalão é permitida (gera um novo registo)");
+    }
 
     boolean revalidar = !Estado.P.equals(carreira.getEstado());
 

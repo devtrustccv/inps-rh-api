@@ -49,10 +49,10 @@ public class MobilidadeReadService {
       Join<MobilidadeEntity, FuncionarioEntity> fun = root.join("funId");
       predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
 
-      var estados = List.of(Estado.A, Estado.P, Estado.I);
-      predicates.add(
-          root.get("estado").in(estados)
-      );
+      // Mostra activos e pendentes (não inactivos); o bloqueio de edição de
+      // pendentes é garantido no frontend (só edita depois de validar).
+      var estados = List.of(Estado.A, Estado.P);
+      predicates.add(root.get("estado").in(estados));
 
       if (StringUtils.hasText(query.getTipoMobilidade())) {
         predicates.add(cb.equal(root.get("tipoSituacao"), query.getTipoMobilidade()));
