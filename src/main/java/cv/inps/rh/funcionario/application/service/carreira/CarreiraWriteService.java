@@ -64,13 +64,28 @@ public class CarreiraWriteService {
     if (dto.getFlgProcessa() == null)
       throw IgrpResponseStatusException.badRequest("O campo 'processar salário' é obrigatório");
 
-    if (Integer.valueOf(1).equals(dto.getFlgProcessa())
-        && tiposRelacionamentoEntityRepository.existsByFunIdAndEstadoAndFlgProcessa(funcionario, Estado.A, 1))
-      throw IgrpResponseStatusException.conflict("Já existe um vínculo ativo com processamento salarial para este funcionário");
-
     var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
 
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+
+    // Doc: "somente uma carreira pode processar ao mesmo tempo". Exclui o vínculo actual, que é
+    // fechado/substituído nesta operação (permite progredir uma carreira que já processa).
+    if (Integer.valueOf(1).equals(dto.getFlgProcessa())
+        && tiposRelacionamentoEntityRepository.existsByFunIdAndEstadoAndFlgProcessaAndIdNot(
+            funcionario, Estado.A, 1, relacionamentoAtual.getId()))
+      throw IgrpResponseStatusException.conflict("Já existe um vínculo ativo com processamento salarial para este funcionário");
+
+    // Doc "Regra Geral": máx 2 carreiras activas; e não 2 do mesmo tipo (cargo nulo vs não-nulo).
+    // Conta as activas em vigor, excluindo a carreira actual que será fechada nesta operação.
+    var carreiraAtualIdGuard = relacionamentoAtual.getCarreiraId() != null ? relacionamentoAtual.getCarreiraId().getId() : null;
+    var carreirasAtivas = carreiraEntityRepository
+        .findAllByContrVinculoIdFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A)
+        .stream().filter(c -> !Objects.equals(c.getId(), carreiraAtualIdGuard)).toList();
+    if (carreirasAtivas.size() >= 2)
+      throw IgrpResponseStatusException.conflict("O colaborador não pode ter mais de duas carreiras activas");
+    boolean novoCargoNulo = dto.getCargoPosicaoId() == null;
+    if (carreirasAtivas.stream().anyMatch(c -> (c.getCargoId() == null) == novoCargoNulo))
+      throw IgrpResponseStatusException.conflict("O colaborador não pode ter duas carreiras activas do mesmo tipo (cargo)");
 
     // Capturar ativos ANTES de fechar — o helper filtra por Estado.A
     var remuneracoesAtivas = funcionarioRules.getRemuneracoesAssociadosAtivos(relacionamentoAtual.getId());

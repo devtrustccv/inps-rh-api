@@ -29,6 +29,9 @@ public interface CarreiraEntityRepository extends
 
   boolean existsByContrVinculoIdFunIdAndEstado(FuncionarioEntity fun, Estado estado);
 
+  // Carreiras actualmente activas do funcionário (estado A e ainda em vigor: data fim nula).
+  List<CarreiraEntity> findAllByContrVinculoIdFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity fun, Estado estado);
+
   Optional<CarreiraEntity> findByUuid(UUID uuid);
 
   default CarreiraEntity findByUuidOrThrow(UUID uuid) {
