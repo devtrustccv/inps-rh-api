@@ -21,4 +21,14 @@ public class ParamEscalaoRepositoryImpl implements ParamEscalaoRepository {
   public List<ParamEscalao> findAllActive() {
     return paramEscalaoEntityRepository.findAllByEstado(Estado.A).stream().map(paramEscalaoMapper::toDomain).toList();
   }
+
+  @Override
+  public List<ParamEscalao> findAllActive(Long carreiraId) {
+    if (carreiraId == null) {
+      return findAllActive();
+    }
+    return paramEscalaoEntityRepository.findAllByEstadoAndParamCarrId_Id(Estado.A, carreiraId).stream()
+        .map(paramEscalaoMapper::toDomain)
+        .toList();
+  }
 }

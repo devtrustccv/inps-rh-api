@@ -7,4 +7,6 @@ import java.util.List;
 public interface ParamEscalaoRepository {
 
   List<ParamEscalao> findAllActive();
+
+  List<ParamEscalao> findAllActive(Long carreiraId);
 }

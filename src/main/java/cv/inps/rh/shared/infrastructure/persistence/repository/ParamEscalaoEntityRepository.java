@@ -25,6 +25,8 @@ public interface ParamEscalaoEntityRepository extends
 
   List<ParamEscalaoEntity> findAllByEstado(Estado estado);
 
+  List<ParamEscalaoEntity> findAllByEstadoAndParamCarrId_Id(Estado estado, Long carreiraId);
+
   List<ParamEscalaoEntity> findAllByParamCarrId(cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity paramCarrId);
 
   Optional<ParamEscalaoEntity> findByUuid(UUID uuid);
