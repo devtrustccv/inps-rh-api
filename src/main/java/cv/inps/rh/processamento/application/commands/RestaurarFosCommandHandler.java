@@ -24,9 +24,9 @@ public class RestaurarFosCommandHandler implements CommandHandler<RestaurarFosCo
 
     LOGGER.debug("RestaurarFosCommand : {}", command);
 
-    fosService.restaurarXml(command.getFosId());
+    var msg = fosService.restaurarXml(command.getFosId());
 
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(msg);
   }
 
 }
