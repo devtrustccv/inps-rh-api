@@ -176,7 +176,7 @@
     {
       "name": "encargosDescontos",
       "objectType": "dto",
-      "type": "EncargosDescontosReq",
+      "type": "EncargosDescontosResp",
       "required": false,
       "before": false,
       "after": false,
@@ -226,7 +226,7 @@
     {
       "name": "subsidios",
       "objectType": "dto",
-      "type": "SubsidioReq",
+      "type": "SubsidioResp",
       "required": false,
       "before": false,
       "after": false,

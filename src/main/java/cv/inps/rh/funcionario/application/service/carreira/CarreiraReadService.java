@@ -151,7 +151,7 @@ public class CarreiraReadService {
       dto.setEstadoDesc(car.getEstado().getDescription());
     }
 
-    var encargos = new ArrayList<EncargosDescontosReqDTO>();
+    var encargos = new ArrayList<EncargosDescontosRespDTO>();
     var paymentsNotNeedInDetails = List.of("INPS", "IUR");
 
     var data = defPagamentoEntityRepository.findByFunIdAndEstado(fun, tr.getEstado())
@@ -160,10 +160,12 @@ public class CarreiraReadService {
         .toList();
 
     data.forEach(obj -> {
-      var row = new EncargosDescontosReqDTO();
+      var row = new EncargosDescontosRespDTO();
       row.setId(obj.getId());
       row.setTipoEncargoId(obj.getTmId() != null ? obj.getTmId().getId() : null);
+      row.setTipoEncargoDesc(obj.getTmId() != null ? obj.getTmId().getDescricao() : null);
       row.setValor(obj.getValor());
+      row.setPercentagem(obj.getPercentagem());
       row.setDataInicio(obj.getDataInicio());
       row.setDataFim(obj.getDataFim());
       row.setObservacoes(obj.getObs());
@@ -171,12 +173,13 @@ public class CarreiraReadService {
     });
     dto.setEncargosDescontos(encargos);
 
-    var subsidios = new ArrayList<SubsidioReqDTO>();
+    var subsidios = new ArrayList<SubsidioRespDTO>();
     var subsidioDBData = definicaoRemuneracaoEntityRepository.findByFunIdAndEstado(fun, tr.getEstado());
     subsidioDBData.forEach(obj -> {
-      var row = new SubsidioReqDTO();
+      var row = new SubsidioRespDTO();
       row.setId(obj.getId());
       row.setTipoSubsidioId(obj.getTmId() != null ? obj.getTmId().getId() : null);
+      row.setTipoSubsidioDesc(obj.getTmId() != null ? obj.getTmId().getDescricao() : null);
       row.setValor(obj.getValor());
       row.setPercentagem(obj.getPercentagem());
       row.setObservacoes(obj.getObs());

@@ -63,7 +63,7 @@ public class CarreiraResponseDTO  {
   private String processaSalarioNestaCarreira ;
 
   @Valid
-  private List<EncargosDescontosReqDTO> encargosDescontos = new ArrayList<>();
+  private List<EncargosDescontosRespDTO> encargosDescontos = new ArrayList<>();
 
 
   private String estado ;
@@ -75,6 +75,6 @@ public class CarreiraResponseDTO  {
   private String funcionarioId ;
 
   @Valid
-  private List<SubsidioReqDTO> subsidios = new ArrayList<>();
+  private List<SubsidioRespDTO> subsidios = new ArrayList<>();
 
 }
