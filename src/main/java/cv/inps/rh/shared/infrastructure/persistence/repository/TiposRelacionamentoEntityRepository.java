@@ -70,6 +70,8 @@ public interface TiposRelacionamentoEntityRepository extends
 
   Page<TiposRelacionamentoEntity> findByFunId_UuidAndEstado(UUID funcionarioId, Estado estado, Pageable pageable);
 
+  Page<TiposRelacionamentoEntity> findByFunId_UuidAndEstadoIn(UUID funcionarioId, java.util.Collection<Estado> estados, Pageable pageable);
+
   @Query("""
       select t
       from TiposRelacionamentoEntity t

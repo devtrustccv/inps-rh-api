@@ -25,9 +25,9 @@ public class NovoSeguradoCommandHandler implements CommandHandler<NovoSeguradoCo
 
     LOGGER.debug("NovoSeguradoCommand : {}", command);
 
-    fosService.novoSegurado(command.getAno(), command.getMes());
+    var result = fosService.novoSegurado(command.getAno(), command.getMes());
 
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(result);
   }
 
 }

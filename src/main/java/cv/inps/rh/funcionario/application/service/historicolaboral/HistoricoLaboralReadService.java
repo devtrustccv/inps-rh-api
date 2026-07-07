@@ -98,9 +98,10 @@ public class HistoricoLaboralReadService {
         Integer.parseInt(query.getPagina()),
         Integer.parseInt(query.getTamanho()));
 
-    var page = tiposRelacionamentoEntityRepository.findByFunId_UuidAndEstado(
+    // Mostra activos e pendentes; não mostra inactivos (I)
+    var page = tiposRelacionamentoEntityRepository.findByFunId_UuidAndEstadoIn(
         UUID.fromString(query.getFuncionarioId()),
-        Estado.A,
+        java.util.List.of(Estado.A, Estado.P),
         pageRequest);
 
     var data = page.stream()

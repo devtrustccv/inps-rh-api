@@ -7,4 +7,6 @@ import java.util.List;
 public interface ParamCargoRepository {
 
   List<ParamCargo> findAllActive();
+
+  List<ParamCargo> findAllActive(Long carreiraId);
 }
