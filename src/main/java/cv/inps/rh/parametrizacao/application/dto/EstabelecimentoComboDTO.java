@@ -6,17 +6,19 @@ package cv.inps.rh.parametrizacao.application.dto;
 import cv.igrp.framework.stereotype.IgrpDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 @IgrpDTO
-public class EstabelecimentoComboDTO extends ParametrizacaoDTO {
+public class EstabelecimentoComboDTO {
 
   private Long paisId;
 
   private String paisDescription;
+
+  private String label;
+
+  private Long value;
 }
