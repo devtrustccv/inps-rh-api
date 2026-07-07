@@ -19,12 +19,12 @@ public class DetalhesProcessamentoRowDTO {
 
   private String nomeColaborador;
 
-
   private String cargo;
-
 
   private String vinculo;
 
   private Long valor;
+
+  private String descricao;
 
 }
