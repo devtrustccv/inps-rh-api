@@ -102,6 +102,10 @@ public class ValidarRegistoColaboradorService {
         funcionario.getExperienciasProfissionais(),
         dadosAcademicosProf.getExperienciasProfssionais(), funcionario, Estado.P);
 
+    // NIB é obrigatório em cada registo bancário quando o vínculo tem salário (flgSalario=1)
+    colaboradorValidationRules.validarNibObrigatorioSeSalario(
+        dadosContratuais.getTipoVinculoLaboralId(), registroColaborador.getDadosBancarios());
+
     var dadosBancarios = dadosBancariosMapper
         .syncBancarios(funcionario.getDadosBancarios(),
         registroColaborador.getDadosBancarios(), funcionario);
