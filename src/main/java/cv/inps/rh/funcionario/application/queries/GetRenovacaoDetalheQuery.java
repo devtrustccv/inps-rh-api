@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GetRenovacaoDetalheQuery implements Query {
 
+  @NotBlank(message = "The field <idFuncionario> is required")
+  private String idFuncionario;
   @NotBlank(message = "The field <contratoId> is required")
   private String contratoId;
 

@@ -264,7 +264,7 @@
     },
     {
       "actionName": "getRenovacaoDetalhe",
-      "path": "renovacao-contrato/{contratoId}",
+      "path": "{idFuncionario}/renovacao-contrato/{contratoId}",
       "method": "GET",
       "responses": {
         "200": {
@@ -283,6 +283,11 @@
         }
       },
       "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        },
         {
           "name": "contratoId",
           "type": "string",

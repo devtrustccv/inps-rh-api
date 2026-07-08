@@ -231,7 +231,7 @@ public class ContratoController {
   }
 
    @GetMapping(
-   value = "renovacao-contrato/{contratoId}"
+   value = "{idFuncionario}/renovacao-contrato/{contratoId}"
   )
   @Operation(
     summary = "Get detalhe renovacao (atual + pendente)",
@@ -251,10 +251,10 @@ public class ContratoController {
   )
 
   public ResponseEntity<RenovacaoDetalheDTO> getRenovacaoDetalhe(
-    @PathVariable(value = "contratoId") String contratoId)
+    @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "contratoId") String contratoId)
   {
 
-      final var query = new GetRenovacaoDetalheQuery(contratoId);
+      final var query = new GetRenovacaoDetalheQuery(idFuncionario, contratoId);
 
       return queryBus.handle(query);
 
