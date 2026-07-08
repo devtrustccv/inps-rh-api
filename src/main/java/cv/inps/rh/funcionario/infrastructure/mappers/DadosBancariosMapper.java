@@ -64,13 +64,14 @@ public class DadosBancariosMapper {
       if (found != null) {
         validarDadosBancarios(dto);
         Long bancoAtualId = found.getRhbId() != null ? found.getRhbId().getId() : null;
+        String nibSanitizado = ValidationUtil.sanitizeNib(dto.getNib());
         boolean mudou = !Objects.equals(dto.getEntidadeBancariaId(), bancoAtualId)
-            || !Objects.equals(dto.getNib(), found.getNib())
+            || !Objects.equals(nibSanitizado, found.getNib())
             || !Objects.equals(dto.getNumConta(), found.getNumConta());
 
         found.setRhbId(ValidationUtil.ref(entityManager, BancoEntity.class, dto.getEntidadeBancariaId()));
         found.setNumConta(dto.getNumConta());
-        found.setNib(ValidationUtil.sanitizeNib(dto.getNib()));
+        found.setNib(nibSanitizado);
         found.setDataInicio(dto.getDataInicio());
         found.setDataFim(dto.getDataFim());
 

@@ -1,6 +1,7 @@
 package cv.inps.rh.funcionario.application.rules;
 
 import cv.inps.rh.funcionario.application.dto.AgregadoDependenteReqDTO;
+import cv.inps.rh.funcionario.application.dto.DadosBancariosReqDTO;
 import cv.inps.rh.funcionario.application.dto.DadosPessoaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO;
 import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaReqDTO;
@@ -19,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -195,5 +197,58 @@ public class ColaboradorValidationRules {
         .filter(r -> r.getTmId() != null)
         .map(r -> r.getTmId().getId())
         .collect(Collectors.toSet());
+  }
+
+  /** true se o tipo de vínculo tem salário (RH_T_PARAM_VINCULO.FLG_SALARIO = 1). */
+  public boolean vinculoTemSalario(Long tipoVinculoId) {
+    if (tipoVinculoId == null) return false;
+    var vinculo = entityManager.find(ParamVinculoEntity.class, tipoVinculoId);
+    return vinculo != null && Objects.equals(1, vinculo.getFlgSalario());
+  }
+
+  /**
+   * Regra (spec DOSSIÊ, formulário "Dados Bancários"): se o vínculo do colaborador tem salário
+   * (flgSalario = 1), o NIB é obrigatório — tem de existir pelo menos um registo bancário e cada
+   * registo enviado tem de ter NIB preenchido. Sem salário, o NIB é opcional.
+   * Usar nos fluxos onde o request traz o estado completo dos bancários (registo / validar registo).
+   *
+   * @param tipoVinculoId id do tipo de vínculo (RH_T_PARAM_VINCULO); se null, não valida.
+   * @param bancarios registos bancários enviados no request.
+   */
+  public void validarNibObrigatorioSeSalario(Long tipoVinculoId, List<DadosBancariosReqDTO> bancarios) {
+    if (!vinculoTemSalario(tipoVinculoId)) return;
+
+    if (CollectionUtils.isEmpty(bancarios)) {
+      throw IgrpResponseStatusException.badRequest("Erro: O Nib é Obrigatório");
+    }
+    for (var banco : bancarios) {
+      if (banco == null || !StringUtils.hasText(banco.getNib())) {
+        throw IgrpResponseStatusException.badRequest("Erro: O Nib é Obrigatório");
+      }
+    }
+  }
+
+  /**
+   * Variante para o fluxo standalone: valida o estado EFETIVO dos dados bancários (existentes +
+   * enviados, após o sync), considerando apenas registos activos/pendentes (ignora E e I). Assim
+   * não falha ao aprovar/rejeitar uma validação em que o request não reenvia os registos.
+   * Se o vínculo tem salário: tem de existir pelo menos um registo A/P e cada um com NIB.
+   */
+  public void validarNibObrigatorioSeSalarioEfetivo(Long tipoVinculoId, List<DadosBancariosEntity> bancariosEfetivos) {
+    if (!vinculoTemSalario(tipoVinculoId)) return;
+
+    var ativos = bancariosEfetivos == null ? List.<DadosBancariosEntity>of()
+        : bancariosEfetivos.stream()
+            .filter(b -> b != null && b.getEstado() != Estado.E && b.getEstado() != Estado.I)
+            .collect(Collectors.toList());
+
+    if (ativos.isEmpty()) {
+      throw IgrpResponseStatusException.badRequest("Erro: O Nib é Obrigatório");
+    }
+    for (var banco : ativos) {
+      if (!StringUtils.hasText(banco.getNib())) {
+        throw IgrpResponseStatusException.badRequest("Erro: O Nib é Obrigatório");
+      }
+    }
   }
 }

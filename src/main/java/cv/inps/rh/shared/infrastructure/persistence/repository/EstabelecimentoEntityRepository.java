@@ -1,9 +1,12 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.parametrizacao.application.dto.EstabelecimentoComboDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EstabelecimentoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
@@ -27,6 +30,16 @@ public interface EstabelecimentoEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.notFound("EstabelecimentoEntity not found for uuid: " + uuid));
   }
 
-  List<EstabelecimentoEntity> findByPais_Id(Long id);
+  @Query("""
+      SELECT new cv.inps.rh.parametrizacao.application.dto.EstabelecimentoComboDTO(
+            e.pais.id,
+            e.pais.nome,
+            e.nome,
+            e.id
+      )
+      FROM EstabelecimentoEntity e
+      WHERE :countryId IS NULL OR e.pais.id =: countryId
+      """)
+  List<EstabelecimentoComboDTO> findByPaisId(@Param("countryId") Long paisId);
 
 }

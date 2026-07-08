@@ -261,7 +261,40 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getRenovacaoDetalhe",
+      "path": "{idFuncionario}/renovacao-contrato/{contratoId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "RenovacaoDetalhe",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "contratoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
-  "id": "zt8ilwt31b-getListContratos-getListContratos-validarContrato-validarContrato-getContratoById-getContratoById-novoContrato-validarContrato-novoContrato-renovarContrato-renovarContrato-novoContrato-validarContrato-renovarContrato-validarRenovacaoContrato-renovarContrato-renovarContrato-validarContrato-validarRenovacaoContrato"
+  "id": "zt8ilwt31b-getListContratos-getListContratos-validarContrato-validarContrato-getContratoById-getContratoById-novoContrato-validarContrato-novoContrato-renovarContrato-renovarContrato-novoContrato-validarContrato-renovarContrato-validarRenovacaoContrato-renovarContrato-renovarContrato-validarContrato-validarRenovacaoContrato-getRenovacaoDetalhe"
 }

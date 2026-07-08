@@ -54,23 +54,9 @@ public class ParametrizacaoService {
         .stream().map(tipoMovimentoMapper::toParametrizacaoDto).toList();
   }
 
+  @Transactional
   public List<EstabelecimentoComboDTO> getEstabelecimentosAtivos(Long paisId) {
-
-    var data = paisId != null ?
-        estabelecimentoEntityRepository.findByPais_Id(paisId) :
-        estabelecimentoEntityRepository.findAll();
-
-    return data.stream()
-        .map(obj -> {
-          var pais = obj.getPais();
-          var result = new EstabelecimentoComboDTO();
-          result.setPaisId(pais != null ? pais.getId() : null);
-          result.setPaisDescription(pais != null ? pais.getNome() : null);
-          result.setLabel(obj.getNome());
-          result.setValue(obj.getId());
-          return result;
-        })
-        .toList();
+    return estabelecimentoEntityRepository.findByPaisId(paisId);
   }
 
   public List<ParametrizacaoDTO> getInstituicoes() {

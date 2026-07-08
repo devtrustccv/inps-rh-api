@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidarDadosBancariosCommand;
 import cv.inps.rh.funcionario.application.dto.ValidarDadosBancariosDTO;
+import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosBancariosMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
@@ -27,6 +28,7 @@ public class ValidarDadosBancariosService {
   private final DadosContratuaisMapper contratuaisEntityMapper;
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final DadosBancariosMapper dadosBancariosMapper;
+  private final ColaboradorValidationRules colaboradorValidationRules;
 
   @Transactional
   public ValidarDadosBancariosDTO executar(ValidarDadosBancariosCommand command) {
@@ -37,6 +39,14 @@ public class ValidarDadosBancariosService {
 
     var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
+
+    // Vínculo ativo do colaborador (para saber se tem salário → NIB obrigatório)
+    var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    Long tipoVinculoId = (tipoRelAtual != null
+        && tipoRelAtual.getContrVinculoId() != null
+        && tipoRelAtual.getContrVinculoId().getVinculoId() != null)
+        ? tipoRelAtual.getContrVinculoId().getVinculoId().getId()
+        : null;
 
     boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE,
         Referencia.DADOS_BANCARIOS);
@@ -50,6 +60,9 @@ public class ValidarDadosBancariosService {
     var dadosBancarios = dadosBancariosMapper
     .syncBancarios(funcionario.getDadosBancarios(), dadosBancariosReqDTO, funcionario);
     funcionario.setDadosBancarios(dadosBancarios);
+
+    // NIB obrigatório quando o vínculo tem salário — valida o estado efetivo (existentes + enviados)
+    colaboradorValidationRules.validarNibObrigatorioSeSalarioEfetivo(tipoVinculoId, dadosBancarios);
 
     if (temPendentes) {
 

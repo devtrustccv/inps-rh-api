@@ -7,25 +7,22 @@ import cv.inps.rh.funcionario.application.queries.GetListMobilidadesQuery;
 import cv.inps.rh.funcionario.application.queries.GetMobilidadeByIdQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.MobilidadeMapper;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.application.constants.custom.TipoMobilidade;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.MobilidadeEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.RhVMobilidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MobilidadeEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.RhVMobilidadeEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -33,8 +30,9 @@ import java.util.List;
 public class MobilidadeReadService {
 
   private final MobilidadeEntityRepository mobilidadeEntityRepository;
+  private final RhVMobilidadeEntityRepository rhVMobilidadeEntityRepository;
   private final MobilidadeMapper mobilidadeMapper;
-  private final cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
+  private final ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
 
   @Transactional(readOnly = true)
   public WrapperListMobilidadeDTO getListMobilidade(GetListMobilidadesQuery query) {
@@ -42,61 +40,46 @@ public class MobilidadeReadService {
     int pageNumber = query.getPageNumber() != null ? Integer.parseInt(query.getPageNumber()) : 0;
     int pageSize = query.getPageSize() != null ? Integer.parseInt(query.getPageSize()) : 20;
 
-    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
+    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor().toString();
 
-    Specification<MobilidadeEntity> spec = (root, cq, cb) -> {
-      List<Predicate> predicates = new java.util.ArrayList<>();
+    // Mostra activos e pendentes (não inactivos); o bloqueio de edição de
+    // pendentes é garantido no frontend (só edita depois de validar).
+    var estados = List.of(Estado.A.getCode(), Estado.P.getCode());
 
-      Join<MobilidadeEntity, FuncionarioEntity> fun = root.join("funId");
-      predicates.add(cb.equal(fun.get("uuid"), idFuncionario));
+    String tipoSituacao = StringUtils.hasText(query.getTipoMobilidade()) ? query.getTipoMobilidade() : null;
+    LocalDate dataInicio = StringUtils.hasText(query.getDataInicio())
+        ? DateFormatter.stringToLocalDate(query.getDataInicio()) : null;
+    LocalDate dataFim = StringUtils.hasText(query.getDataFim())
+        ? DateFormatter.stringToLocalDate(query.getDataFim()) : null;
 
-      // Mostra activos e pendentes (não inactivos); o bloqueio de edição de
-      // pendentes é garantido no frontend (só edita depois de validar).
-      var estados = List.of(Estado.A, Estado.P);
-      predicates.add(root.get("estado").in(estados));
-
-      if (StringUtils.hasText(query.getTipoMobilidade())) {
-        predicates.add(cb.equal(root.get("tipoSituacao"), query.getTipoMobilidade()));
-      }
-
-      if (StringUtils.hasText(query.getDataInicio())) {
-        var di = DateFormatter.stringToLocalDate(query.getDataInicio());
-        predicates.add(cb.greaterThanOrEqualTo(root.get("dataInicio"), di));
-      }
-      if (StringUtils.hasText(query.getDataFim())) {
-        var df = DateFormatter.stringToLocalDate(query.getDataFim());
-        predicates.add(cb.lessThanOrEqualTo(root.get("dataFim"), df));
-      }
-
-      return cb.and(predicates.toArray(new Predicate[0]));
-    };
-
-    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
-    Page<MobilidadeEntity> page = mobilidadeEntityRepository.findAll(spec, pageable);
+    // A ordenação (DATA_INICIO DESC) já vem no ORDER BY da native query da vista.
+    Pageable pageable = PageRequest.of(pageNumber, pageSize);
+    Page<RhVMobilidadeEntity> page = rhVMobilidadeEntityRepository.findByFunUuidWithFilters(
+        idFuncionario, estados, tipoSituacao, dataInicio, dataFim, pageable);
 
     // Processamento em BATCH: uma única query para saber quais mobilidades da página já
     // têm processamento salarial (o seu tiprel tem registo em RH_T_PROC_FUNCIONARIOS).
-    var mobIds = page.getContent().stream().map(MobilidadeEntity::getId).toList();
+    var mobIds = page.getContent().stream().map(RhVMobilidadeEntity::getMobId).toList();
     var processados = mobIds.isEmpty()
         ? java.util.Set.<Long>of()
         : new java.util.HashSet<>(processamentoFuncionarioRepository.findMobIdsComProcessamento(mobIds));
 
     List<MobilidadeListDTO> content = page.getContent().stream().map(m -> {
       MobilidadeListDTO dto = new MobilidadeListDTO();
-      dto.setId(m.getId());
-      dto.setIdFuncionario(m.getFunId() != null ? m.getFunId().getId() : null);
-      dto.setUuid(m.getUuid() != null ? m.getUuid().toString() : null);
-      dto.setUuidFuncionario(m.getFunId() != null && m.getFunId().getUuid() != null ? m.getFunId().getUuid().toString() : null);
-      dto.setDireccao(m.getInstidId() != null ? m.getInstidId().getNome() : null);
-      dto.setSeccao(m.getSecaoId() != null ? m.getSecaoId().getNome() : null);
-      dto.setLocalTrabalho(m.getLocalTrabId() != null ? m.getLocalTrabId().getNome() : null);
+      dto.setId(m.getMobId());
+      dto.setIdFuncionario(m.getFunId());
+      dto.setUuid(m.getMobUuid());
+      dto.setUuidFuncionario(m.getFunUuid());
+      dto.setDireccao(m.getDirecaoNome());
+      dto.setSeccao(m.getUnidadeDesc());
+      dto.setLocalTrabalho(m.getLocalTrabNome());
       dto.setDataInicio(DateFormatter.localDateToString(m.getDataInicio()));
       dto.setDataFim(DateFormatter.localDateToString(m.getDataFim()));
-      dto.setProcessamento(processados.contains(m.getId()));
-      dto.setEstado(m.getEstado() != null ? m.getEstado().getCode() : null);
-      dto.setEstadoDesc(m.getEstado() != null ? m.getEstado().getDescription() : null);
+      dto.setProcessamento(processados.contains(m.getMobId()));
+      dto.setEstado(m.getEstado());
+      dto.setEstadoDesc(Estado.fromCode(m.getEstado()).map(Estado::getDescription).orElse(null));
       dto.setTipoMobilidade(m.getTipoSituacao());
-      dto.setTipoMobilidadeDesc(TipoMobilidade.traduzir(m.getTipoSituacao()));
+      dto.setTipoMobilidadeDesc(m.getTipoSituacaoDesc());
 
       return dto;
     }).toList();
@@ -121,10 +104,6 @@ public class MobilidadeReadService {
         () -> IgrpResponseStatusException.notFound("mobilidade nao encontrada com id"+query.getId())
     );
 
-    var mobilidadteDto = mobilidadeMapper.mobilidadeDTO(mobilidade);
-
-
-
-    return mobilidadteDto;
+    return mobilidadeMapper.mobilidadeDTO(mobilidade);
   }
 }
