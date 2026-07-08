@@ -35,6 +35,8 @@ public interface ContratoHistoricoEntityRepository extends
 
   List<ContratoHistoricoEntity> findByContratoId_FunId_IdAndEstActAdm(Long funId, Integer estActAdm);
 
+  Optional<ContratoHistoricoEntity> findFirstByContratoId_IdAndEstActAdmOrderByVersaoDesc(Long contratoId, Integer estActAdm);
+
   List<ContratoHistoricoEntity> findByContratoId_IdInOrderByContratoId_IdAscVersaoDesc(Collection<Long> contratoIds);
 
 }
