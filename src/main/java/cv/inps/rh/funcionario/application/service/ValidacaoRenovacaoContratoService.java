@@ -72,8 +72,8 @@ public class ValidacaoRenovacaoContratoService {
       }
     }
 
-    // Corrigido: TipoAcao.INSERT (criado com INSERT em RenovacaoContratoService)
-    funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.INSERT, Referencia.RENOVACAO_CONTRATO)
+    // Renovação regista validação com TIPO_ACCAO='UPDATE' (conforme especificação)
+    funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.UPDATE, Referencia.RENOVACAO_CONTRATO)
         .ifPresent(v -> v.setEstado(estado));
   }
 }
