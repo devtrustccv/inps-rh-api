@@ -1,7 +1,7 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.dto.RenovacaoDetalheDTO;
-import cv.inps.rh.funcionario.application.dto.RenovarContratoReqDTO;
+import cv.inps.rh.funcionario.application.dto.RenovarContratoRespDTO;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContratoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -31,7 +31,7 @@ public class RenovacaoContratoReadService {
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Contrato não encontrado: " + contratoId));
 
     var dto = new RenovacaoDetalheDTO();
-    dto.setAtual(contratoMapper.toRenovacaoContratoReqDTO(contrato));
+    dto.setAtual(contratoMapper.toRenovacaoContratoRespDTO(contrato));
     dto.setTemRenovacaoPendente(false);
 
     // A renovação pendente é o histórico em estado P com versão > 1 (a versão 1 é o contrato inicial,
@@ -40,9 +40,15 @@ public class RenovacaoContratoReadService {
         .findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.P)
         .filter(h -> h.getVersao() != null && h.getVersao() > 1)
         .ifPresent(h -> {
-          var renovacao = new RenovarContratoReqDTO();
-          renovacao.setTipoContratoId(contrato.getTpContratoId() != null ? contrato.getTpContratoId().getId() : null);
-          renovacao.setTipoVinculoId(contrato.getVinculoId() != null ? contrato.getVinculoId().getId() : null);
+          var renovacao = new RenovarContratoRespDTO();
+          if (contrato.getTpContratoId() != null) {
+            renovacao.setTipoContratoId(contrato.getTpContratoId().getId());
+            renovacao.setTipoContratoDesc(contrato.getTpContratoId().getNome());
+          }
+          if (contrato.getVinculoId() != null) {
+            renovacao.setTipoVinculoId(contrato.getVinculoId().getId());
+            renovacao.setTipoVinculoDesc(contrato.getVinculoId().getNome());
+          }
           renovacao.setDataInicio(h.getDataInicio());
           renovacao.setDataFim(h.getDataFim());
           renovacao.setDuracaoMeses(h.getDuracao());

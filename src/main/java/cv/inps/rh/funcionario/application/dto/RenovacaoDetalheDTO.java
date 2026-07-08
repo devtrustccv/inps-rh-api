@@ -19,11 +19,11 @@ public class RenovacaoDetalheDTO  {
 
 
   @Valid
-  private RenovarContratoReqDTO atual ;
+  private RenovarContratoRespDTO atual ;
 
 
   @Valid
-  private RenovarContratoReqDTO renovacao ;
+  private RenovarContratoRespDTO renovacao ;
 
 
   private boolean temRenovacaoPendente ;
