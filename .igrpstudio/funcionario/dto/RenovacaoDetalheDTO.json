@@ -1,0 +1,48 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "RenovacaoDetalhe",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "atual",
+      "objectType": "dto",
+      "type": "RenovarContratoReq",
+      "module": "funcionario",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "renovacao",
+      "objectType": "dto",
+      "type": "RenovarContratoReq",
+      "module": "funcionario",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "temRenovacaoPendente",
+      "objectType": "java",
+      "type": "boolean",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "id": "renovdetalhe01"
+}

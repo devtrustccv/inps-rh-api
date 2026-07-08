@@ -13,9 +13,11 @@ import cv.inps.rh.funcionario.application.commands.ValidarRenovacaoContratoComma
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.application.dto.NovoContratoDTO;
 import cv.inps.rh.funcionario.application.dto.RenovacaoContratoDTO;
+import cv.inps.rh.funcionario.application.dto.RenovacaoDetalheDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListContratoDTO;
 import cv.inps.rh.funcionario.application.queries.GetContratoByIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetListContratosQuery;
+import cv.inps.rh.funcionario.application.queries.GetRenovacaoDetalheQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -226,6 +228,36 @@ public class ContratoController {
        ResponseEntity<RenovacaoContratoDTO> response = commandBus.send(command);
 
        return response;
+  }
+
+   @GetMapping(
+   value = "renovacao-contrato/{contratoId}"
+  )
+  @Operation(
+    summary = "Get detalhe renovacao (atual + pendente)",
+    description = "Get detalhe renovacao (atual + pendente)",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = RenovacaoDetalheDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<RenovacaoDetalheDTO> getRenovacaoDetalhe(
+    @PathVariable(value = "contratoId") String contratoId)
+  {
+
+      final var query = new GetRenovacaoDetalheQuery(contratoId);
+
+      return queryBus.handle(query);
+
   }
 
 }
