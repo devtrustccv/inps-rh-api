@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 
 @Repository
 public interface RhVHistLaboralEntityRepository extends
@@ -20,7 +21,7 @@ public interface RhVHistLaboralEntityRepository extends
   @Query(value = """
       SELECT * FROM RH_V_HIST_LABORAL
       WHERE FUN_UUID = :funUuid
-        AND TIPREL_ESTADO = :tiprelEstado
+        AND TIPREL_ESTADO IN (:tiprelEstados)
         AND (:referencia IS NULL OR REFERENCIA = :referencia)
         AND (:tipoSituacao IS NULL OR LOWER(TIPO_SITUACAO_DESC) LIKE LOWER('%' || :tipoSituacao || '%'))
         AND (:situacaoLaboral IS NULL OR LOWER(SITUACAO_LABORAL_DESC) LIKE LOWER('%' || :situacaoLaboral || '%'))
@@ -30,7 +31,7 @@ public interface RhVHistLaboralEntityRepository extends
       """, countQuery = """
       SELECT COUNT(*) FROM RH_V_HIST_LABORAL
       WHERE FUN_UUID = :funUuid
-        AND TIPREL_ESTADO = :tiprelEstado
+        AND TIPREL_ESTADO IN (:tiprelEstados)
         AND (:referencia IS NULL OR REFERENCIA = :referencia)
         AND (:tipoSituacao IS NULL OR LOWER(TIPO_SITUACAO_DESC) LIKE LOWER('%' || :tipoSituacao || '%'))
         AND (:situacaoLaboral IS NULL OR LOWER(SITUACAO_LABORAL_DESC) LIKE LOWER('%' || :situacaoLaboral || '%'))
@@ -39,7 +40,7 @@ public interface RhVHistLaboralEntityRepository extends
       """, nativeQuery = true)
   Page<RhVHistLaboralEntity> findByFunUuidWithFilters(
       @Param("funUuid") String funUuid,
-      @Param("tiprelEstado") String tiprelEstado,
+      @Param("tiprelEstados") Collection<String> tiprelEstados,
       @Param("referencia") String referencia,
       @Param("tipoSituacao") String tipoSituacao,
       @Param("situacaoLaboral") String situacaoLaboral,

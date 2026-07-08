@@ -41,7 +41,7 @@ public class HistoricoLaboralReadService {
   private final FuncionarioRules funcionarioRules;
   private final DominioService dominioService;
 
-  public WrapperHistLaboralResponseDTO getHistoricoLaboral2(GetHistoricoLaboralQuery query) {
+  public WrapperHistLaboralResponseDTO getHistoricoLaboral(GetHistoricoLaboralQuery query) {
     var pageRequest = PageRequest.of(
         Integer.parseInt(query.getPagina()),
         Integer.parseInt(query.getTamanho()));
@@ -50,9 +50,10 @@ public class HistoricoLaboralReadService {
         : null;
     var df = StringUtils.isNotBlank(query.getDataFim()) ? DateFormatter.stringToLocalDate(query.getDataFim()) : null;
 
+    // Mostra activos e pendentes; não mostra inactivos (I)
     var page = rhVHistLaboralEntityRepository.findByFunUuidWithFilters(
         query.getFuncionarioId(),
-        Estado.A.name(),
+        java.util.List.of(Estado.A.name(), Estado.P.name()),
         query.getReferencia(),
         query.getTipoSituacao(),
         query.getSituacaoLaboral(),
@@ -89,78 +90,6 @@ public class HistoricoLaboralReadService {
     var wrapper = new WrapperHistLaboralResponseDTO();
     wrapper.setHistorico(data);
     PageMapper.fillPagination(page, wrapper);
-    return wrapper;
-  }
-
-  public WrapperHistLaboralResponseDTO getHistoricoLaboral(GetHistoricoLaboralQuery query) {
-
-    var pageRequest = PageRequest.of(
-        Integer.parseInt(query.getPagina()),
-        Integer.parseInt(query.getTamanho()));
-
-    // Mostra activos e pendentes; não mostra inactivos (I)
-    var page = tiposRelacionamentoEntityRepository.findByFunId_UuidAndEstadoIn(
-        UUID.fromString(query.getFuncionarioId()),
-        java.util.List.of(Estado.A, Estado.P),
-        pageRequest);
-
-    var data = page.stream()
-        .map(obj -> {
-          var response = new HistoricoLaboralResponseDTO();
-          response.setUltimoMovimento(Objects.equals(obj.getEstActAdm(), 1));
-
-          ofNullable(obj.getTipoSituacao()).ifPresent(response::setTipoSituacao);
-          ofNullable(obj.getContrVinculoId()).map(ContratoEntity::getTpContratoId)
-              .map(ParamContratoEntity::getNome)
-              .ifPresent(response::setTipoContrato);
-          ofNullable(obj.getContrVinculoId()).map(ContratoEntity::getVinculoId)
-              .map(ParamVinculoEntity::getNome)
-              .ifPresent(response::setVinculo);
-          ofNullable(obj.getMobId()).map(MobilidadeEntity::getSecaoId).map(SecaoEntity::getInstId)
-              .map(DirecaoEntity::getNome)
-              .ifPresent(response::setDirecao);
-          ofNullable(obj.getMobId()).map(MobilidadeEntity::getSecaoId).map(SecaoEntity::getNome)
-              .ifPresent(response::setSeccao);
-          ofNullable(obj.getCarreiraId()).map(CarreiraEntity::getCarrPccsId)
-              .map(ParamCarreiraEntity::getNome)
-              .ifPresent(response::setCarreira);
-          ofNullable(obj.getCarreiraId()).map(CarreiraEntity::getEscalaoId).map(ParamEscalaoEntity::getEscalao)
-              .ifPresent(response::setReferenciaEscalao);
-          ofNullable(obj.getCargoId()).map(ParamCargoEntity::getNome)
-              .ifPresent(response::setCargo);
-          ofNullable(obj.getSituacLaboralId())
-              .map(SituacaoLaboralEntity::getSituacaoLaboralId)
-              .map(ParamSituacaoEntity::getNome)
-              .ifPresent(response::setSituacaoLaboral);
-
-          response.setId(obj.getId());
-          response.setUuid(obj.getFunId().getUuid().toString());
-
-          var dataInicio = obj.getDataInicio() != null
-              ? DateFormatter.localDateToString(
-                  obj.getDataInicio())
-              : StringUtils.EMPTY;
-
-          var dataFim = obj.getDataFim() != null
-              ? DateFormatter.localDateToString(
-                  obj.getDataFim())
-              : StringUtils.EMPTY;
-
-          response.setDataInicioFim(
-              dataInicio.concat(" / ").concat(dataFim));
-
-          return response;
-        }).toList();
-
-    var wrapper = new WrapperHistLaboralResponseDTO();
-    wrapper.setHistorico(data);
-    wrapper.setPageNumber(page.getTotalPages());
-    wrapper.setPageSize(page.getSize());
-    wrapper.setTotalElements(page.getTotalElements());
-    wrapper.setTotalPages(page.getTotalPages());
-    wrapper.setLast(page.isLast());
-    wrapper.setFirst(page.isFirst());
-
     return wrapper;
   }
 
