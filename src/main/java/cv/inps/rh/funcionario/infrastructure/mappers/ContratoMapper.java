@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 import cv.inps.rh.funcionario.application.dto.ContratoListDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.RenovarContratoReqDTO;
+import cv.inps.rh.funcionario.application.dto.RenovarContratoRespDTO;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamContratoMapper;
 import cv.inps.rh.parametrizacao.infrastructure.mappers.ParamVinculoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -88,6 +89,23 @@ public class ContratoMapper {
     renovacaoContrato.setTipoContratoId(contratoEntity.getTpContratoId().getId());
     renovacaoContrato.setTipoVinculoId(contratoEntity.getVinculoId().getId());
     return renovacaoContrato;
+  }
+
+  public RenovarContratoRespDTO toRenovacaoContratoRespDTO(ContratoEntity contratoEntity) {
+    if (contratoEntity == null) return null;
+    var resp = new RenovarContratoRespDTO();
+    resp.setDataInicio(contratoEntity.getDataInicio());
+    resp.setDataFim(contratoEntity.getDataFim());
+    resp.setDuracaoMeses(contratoEntity.getDuracao());
+    if (contratoEntity.getTpContratoId() != null) {
+      resp.setTipoContratoId(contratoEntity.getTpContratoId().getId());
+      resp.setTipoContratoDesc(contratoEntity.getTpContratoId().getNome());
+    }
+    if (contratoEntity.getVinculoId() != null) {
+      resp.setTipoVinculoId(contratoEntity.getVinculoId().getId());
+      resp.setTipoVinculoDesc(contratoEntity.getVinculoId().getNome());
+    }
+    return resp;
   }
 
   public ContratoEntity toUpdateEntity(ContratoEntity entity, DadosContratuaisReqDTO dc) {

@@ -8,7 +8,7 @@
     {
       "name": "atual",
       "objectType": "dto",
-      "type": "RenovarContratoReq",
+      "type": "RenovarContratoResp",
       "module": "funcionario",
       "required": false,
       "before": false,
@@ -21,7 +21,7 @@
     {
       "name": "renovacao",
       "objectType": "dto",
-      "type": "RenovarContratoReq",
+      "type": "RenovarContratoResp",
       "module": "funcionario",
       "required": false,
       "before": false,

@@ -1,11 +1,12 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.dto.RenovacaoDetalheDTO;
-import cv.inps.rh.funcionario.application.dto.RenovarContratoReqDTO;
+import cv.inps.rh.funcionario.application.dto.RenovarContratoRespDTO;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContratoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoHistoricoEntityRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,21 @@ public class RenovacaoContratoReadService {
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Contrato não encontrado: " + contratoId));
 
     var dto = new RenovacaoDetalheDTO();
-    dto.setAtual(contratoMapper.toRenovacaoContratoReqDTO(contrato));
+
+    // O "atual" deve refletir o registo de histórico atualmente ativo (EST_ACT_ADM = 1), não as colunas
+    // da entidade base RH_T_CONTRATO_VINCULO — essas só são gravadas na criação do contrato e nunca são
+    // atualizadas quando uma renovação é validada.
+    dto.setAtual(contratoHistoricoEntityRepository
+        .findFirstByContratoId_IdAndEstActAdmOrderByVersaoDesc(contrato.getId(), 1)
+        .map(h -> {
+          var atual = new RenovarContratoRespDTO();
+          preencherTipoEVinculo(atual, contrato);
+          atual.setDataInicio(h.getDataInicio());
+          atual.setDataFim(h.getDataFim());
+          atual.setDuracaoMeses(h.getDuracao());
+          return atual;
+        })
+        .orElseGet(() -> contratoMapper.toRenovacaoContratoRespDTO(contrato)));
     dto.setTemRenovacaoPendente(false);
 
     // A renovação pendente é o histórico em estado P com versão > 1 (a versão 1 é o contrato inicial,
@@ -40,9 +55,8 @@ public class RenovacaoContratoReadService {
         .findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.P)
         .filter(h -> h.getVersao() != null && h.getVersao() > 1)
         .ifPresent(h -> {
-          var renovacao = new RenovarContratoReqDTO();
-          renovacao.setTipoContratoId(contrato.getTpContratoId() != null ? contrato.getTpContratoId().getId() : null);
-          renovacao.setTipoVinculoId(contrato.getVinculoId() != null ? contrato.getVinculoId().getId() : null);
+          var renovacao = new RenovarContratoRespDTO();
+          preencherTipoEVinculo(renovacao, contrato);
           renovacao.setDataInicio(h.getDataInicio());
           renovacao.setDataFim(h.getDataFim());
           renovacao.setDuracaoMeses(h.getDuracao());
@@ -51,5 +65,16 @@ public class RenovacaoContratoReadService {
         });
 
     return dto;
+  }
+
+  private void preencherTipoEVinculo(RenovarContratoRespDTO resp, ContratoEntity contrato) {
+    if (contrato.getTpContratoId() != null) {
+      resp.setTipoContratoId(contrato.getTpContratoId().getId());
+      resp.setTipoContratoDesc(contrato.getTpContratoId().getNome());
+    }
+    if (contrato.getVinculoId() != null) {
+      resp.setTipoVinculoId(contrato.getVinculoId().getId());
+      resp.setTipoVinculoDesc(contrato.getVinculoId().getNome());
+    }
   }
 }
