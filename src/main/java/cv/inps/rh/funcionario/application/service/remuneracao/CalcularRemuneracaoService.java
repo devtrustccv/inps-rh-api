@@ -18,18 +18,17 @@ public class CalcularRemuneracaoService {
   @Transactional(readOnly = true)
   public CalcularRemuneracaoResponseDTO calcular(CalcularRemuneracaoRequestDTO request) {
 
-    // Remuneração Bruta = salario + Σ(subsidios) — calculado em Java conforme especificação
-    BigDecimal totalSubsidios = request.getSubsidios().stream()
-        .map(s -> s.getValor() != null ? s.getValor() : BigDecimal.ZERO)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-    BigDecimal remuneracaoBruta = request.getSalario().add(totalSubsidios);
-
-    // Chama processamento_salarial_db.CalcularDesAtual via bloco PL/SQL anónimo
+    // Chama processamento_salarial_db.CalcularDesAtual via bloco PL/SQL anónimo.
+    // A procedure devolve OUT: [0]=p_total_remun (total bruto de remunerações,
+    // base + subsídios recalculados a partir de RH_TIPO_MOVIMENTOS) e
+    // [1]=P_total_pagamentos (total de descontos: IUR + INPS + outros).
     BigDecimal[] resultado = calcularRemuneracaoRepository.calcularDesAtual(request);
 
-    BigDecimal remuneracaoLiquida = resultado[0];
+    BigDecimal remuneracaoBruta = resultado[0];
     BigDecimal totalDesconto = resultado[1];
+
+    // Remuneração Líquida = bruta - descontos (ambas na mesma base, vinda da procedure)
+    BigDecimal remuneracaoLiquida = remuneracaoBruta.subtract(totalDesconto);
 
     var response = new CalcularRemuneracaoResponseDTO();
     response.setRemuneracaoBruta(remuneracaoBruta);
