@@ -55,8 +55,9 @@ public class MobilidadeWriteService {
     var novaMobilidade = createMobilidade(mobilidadeDto, funcionario);
 
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-    if (tipoRelacionamentoAtual.getMobId() != null)
-      funcionarioRules.garantirEditavel(tipoRelacionamentoAtual.getMobId().getEstado());
+    // TODO(guard I/E temporariamente desativado):
+    // if (tipoRelacionamentoAtual.getMobId() != null)
+    //   funcionarioRules.garantirEditavel(tipoRelacionamentoAtual.getMobId().getEstado());
     var novoTipoRelacionamento = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
 
     // Spec: DATA_FIM do vínculo fechado = data início da nova mobilidade - 1
@@ -148,8 +149,9 @@ public class MobilidadeWriteService {
 
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
-    if (tipoRelacionamentoAtual.getMobId() != null)
-      funcionarioRules.garantirEditavel(tipoRelacionamentoAtual.getMobId().getEstado());
+    // TODO(guard I/E temporariamente desativado):
+    // if (tipoRelacionamentoAtual.getMobId() != null)
+    //   funcionarioRules.garantirEditavel(tipoRelacionamentoAtual.getMobId().getEstado());
 
     var mobilidade = updateMobilidade(tipoRelacionamentoAtual.getMobId(),mobilidadeDto);
 

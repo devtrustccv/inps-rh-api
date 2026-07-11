@@ -112,7 +112,7 @@ public class AlterarSituacaoLaboralWriteService {
     var dataFim = DateFormatter.stringToLocalDate(dto.getDataFim());
 
     var tiposRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-    funcionarioRules.garantirEditavel(tiposRelacionamentoAtual.getEstado());
+    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(tiposRelacionamentoAtual.getEstado());
     tiposRelacionamentoAtual.setDataFim(dataInicio);
     tiposRelacionamentoAtual.setEstActAdm(0);
 

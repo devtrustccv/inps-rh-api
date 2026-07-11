@@ -97,7 +97,7 @@ public class SubstituicaoWriteService {
     var substituicao = substituicaoEntityRepository.findByUuid(idSusbtituicao).orElseThrow(
         () -> IgrpResponseStatusException.badRequest("Substituição não encontrada.")
     );
-    funcionarioRules.garantirEditavel(substituicao.getEstado());
+    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(substituicao.getEstado());
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());
     substituicao.setObs(ValidationUtil.trimToNull(dto.getObs()));
