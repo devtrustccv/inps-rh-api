@@ -10,6 +10,7 @@
     {"name": "funcionarioId", "objectType": "java", "type": "long", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
     {"name": "funcionarioUuid", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
     {"name": "tipoRegime", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "tipoRegimeDesc", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
     {"name": "dataInicio", "objectType": "java", "type": "date", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
     {"name": "dataFim", "objectType": "java", "type": "date", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
     {"name": "estado", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},

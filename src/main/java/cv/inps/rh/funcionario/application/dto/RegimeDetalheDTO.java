@@ -36,6 +36,9 @@ public class RegimeDetalheDTO  {
   private String tipoRegime ;
 
 
+  private String tipoRegimeDesc ;
+
+
   private LocalDate dataInicio ;
 
 

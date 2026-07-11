@@ -32,7 +32,7 @@ public class RegimeTrabalhoMapper {
     dto.setTipoRegime(regime.getTipoRegime());
     dto.setDataInicio(DateFormatter.localDateToString(regime.getDataInicio()));
     dto.setDataFim(regime.getDataFim() != null ? regime.getDataFim().toString() : null);
-    dto.setModalidade(regimeRules.getDiasSemanaAgrupados(regime));
+    dto.setModalidade(regimeRules.getModalidadesAgrupadas(regime));
     dto.setNumHoras(String.valueOf(regimeRules.getTotalHoras(regime)));
 
     if (regime.getEstado() != null) {

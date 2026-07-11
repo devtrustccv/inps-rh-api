@@ -34,6 +34,9 @@ public class RegimeListDTO  {
   private String tipoRegime ;
 
 
+  private String tipoRegimeDesc ;
+
+
   private String dataInicio ;
 
 

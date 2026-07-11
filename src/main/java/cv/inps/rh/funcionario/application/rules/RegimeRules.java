@@ -22,6 +22,17 @@ public class RegimeRules {
         .collect(Collectors.joining(", "));
   }
 
+  public String getModalidadesAgrupadas(RegimeTrabalhoEntity regimeTrabalhoEntity) {
+    if (regimeTrabalhoEntity == null || regimeTrabalhoEntity.getModalidades() == null)
+      return null;
+
+    return regimeTrabalhoEntity.getModalidades().stream()
+        .map(m -> m.getModalidade() == null ? "" : m.getModalidade().trim())
+        .filter(d -> !d.isEmpty())
+        .distinct()
+        .collect(Collectors.joining(", "));
+  }
+
   public Integer getTotalHoras(RegimeTrabalhoEntity regimeTrabalhoEntity) {
     if (regimeTrabalhoEntity == null || regimeTrabalhoEntity.getModalidades() == null)
       return 0;

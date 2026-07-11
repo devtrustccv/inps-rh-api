@@ -4,22 +4,16 @@ import cv.inps.rh.funcionario.application.commands.AdicionarRegimeTrabalhoComman
 import cv.inps.rh.funcionario.application.commands.ValidarRegimeTrabalhoCommand;
 import cv.inps.rh.funcionario.application.dto.RegimeTrabalhoDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
-import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
-import cv.inps.rh.shared.application.constants.custom.Referencia;
-import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeModalidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeTrabalhoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.RegimeModalidadeEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.RegimeTrabalhoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,12 +27,8 @@ public class RegimeWriteService {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final FuncionarioRules funcionarioRules;
-  private final DadosContratuaisMapper dadosContratuaisMapper;
-  private final EntityManager entityManager;
-  private final ValidacaoEntityRepository validacaoEntityRepository;
   private final RegimeModalidadeEntityRepository regimeModalidadeEntityRepository;
   private final RegimeTrabalhoEntityRepository regimeTrabalhoEntityRepository;
-  private final OrdemServicoWriteService ordemServicoWriteService;
 
 
   @Transactional

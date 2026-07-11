@@ -25,6 +25,9 @@ public class RegimeModalidadeDTO  {
   private String modalidade ;
 
 
+  private String modalidadeDesc ;
+
+
   private String diasSemana ;
 
 
