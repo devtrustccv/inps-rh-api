@@ -63,6 +63,7 @@ public class HistoricoLaboralWriteService {
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc);
 
     var atual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    funcionarioRules.garantirEditavel(atual.getEstado());
 
     var flgProc = atual.getFlgProcessa();
 
@@ -289,6 +290,8 @@ public class HistoricoLaboralWriteService {
 
     if (relacionamento.getFunId() == null || !relacionamento.getFunId().getId().equals(funcionario.getId()))
       throw IgrpResponseStatusException.badRequest("Histórico laboral não pertence ao funcionário");
+
+    funcionarioRules.garantirEditavel(relacionamento.getEstado());
 
     if (dto.getTipoMobilidade() != null || dto.getDirecao() != null || dto.getSecao() != null
         || dto.getLocalTrabalho() != null || dto.getDataInicioMobilidade() != null
