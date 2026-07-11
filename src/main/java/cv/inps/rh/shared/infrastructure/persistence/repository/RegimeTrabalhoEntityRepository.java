@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 
 @Repository
@@ -22,6 +24,8 @@ public interface RegimeTrabalhoEntityRepository extends
           return this.findById(id)
           .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,"RegimeTrabalhoEntity not found for id: " + id));
       }
+
+  Optional<RegimeTrabalhoEntity> findByUuid(UUID uuid);
 
   @Query(value = """
         SELECT * FROM (

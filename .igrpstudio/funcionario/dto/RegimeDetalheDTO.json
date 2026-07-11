@@ -1,0 +1,34 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "RegimeDetalhe",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {"name": "id", "objectType": "java", "type": "long", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "uuid", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "funcionarioId", "objectType": "java", "type": "long", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "funcionarioUuid", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "tipoRegime", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "dataInicio", "objectType": "java", "type": "date", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "dataFim", "objectType": "java", "type": "date", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "estado", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "estadoDesc", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "obs", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {
+      "name": "regimeModalidade",
+      "objectType": "dto",
+      "type": "RegimeModalidade",
+      "module": "funcionario",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list"
+    }
+  ],
+  "id": "regimedetalhe01"
+}

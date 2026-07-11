@@ -1,9 +1,12 @@
 package cv.inps.rh.funcionario.application.service;
 
+import cv.inps.rh.funcionario.application.dto.RegimeDetalheDTO;
+import cv.inps.rh.funcionario.application.dto.RegimeModalidadeDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperRegimeListDTO;
 import cv.inps.rh.funcionario.application.queries.GetListRegimesQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.RegimeTrabalhoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeTrabalhoEntity;
@@ -79,5 +82,42 @@ public class RegimeReadService {
     wrapper.setLast(page.isLast());
 
     return wrapper;
+  }
+
+  @Transactional(readOnly = true)
+  public RegimeDetalheDTO getById(String regimeId) {
+    var uuid = IdentificadorUnico.from(regimeId).valor();
+    var regime = regimeTrabalhoEntityRepository.findByUuid(uuid)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Regime não encontrado: " + regimeId));
+
+    var dto = new RegimeDetalheDTO();
+    dto.setId(regime.getId());
+    dto.setUuid(regime.getUuid() != null ? regime.getUuid().toString() : null);
+    if (regime.getFunId() != null) {
+      dto.setFuncionarioId(regime.getFunId().getId());
+      dto.setFuncionarioUuid(regime.getFunId().getUuid() != null ? regime.getFunId().getUuid().toString() : null);
+    }
+    dto.setTipoRegime(regime.getTipoRegime());
+    dto.setDataInicio(regime.getDataInicio());
+    dto.setDataFim(regime.getDataFim());
+    dto.setEstado(regime.getEstado() != null ? regime.getEstado().getCode() : null);
+    dto.setEstadoDesc(regime.getEstado() != null ? regime.getEstado().getDescription() : null);
+    dto.setObs(regime.getObs());
+
+    if (regime.getModalidades() != null) {
+      var mods = regime.getModalidades().stream()
+          .filter(m -> m != null && m.getEstado() != Estado.I && m.getEstado() != Estado.E)
+          .map(m -> {
+            var md = new RegimeModalidadeDTO();
+            md.setId(m.getId());
+            md.setModalidade(m.getModalidade());
+            md.setDiasSemana(m.getDiasSemana());
+            md.setNumeroHoras(m.getNumHoras());
+            return md;
+          }).toList();
+      dto.setRegimeModalidade(mods);
+    }
+
+    return dto;
   }
 }

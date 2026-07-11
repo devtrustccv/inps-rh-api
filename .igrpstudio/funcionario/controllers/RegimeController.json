@@ -141,6 +141,39 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "getRegimeById",
+      "path": "{idFuncionario}/regimes/{regimeId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "RegimeDetalhe",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "regimeId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "exldkjz2ka-getListRegimes"
