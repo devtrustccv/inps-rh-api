@@ -11,7 +11,6 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RhVMobilidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MobilidadeEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.RhVMobilidadeEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,6 @@ public class MobilidadeReadService {
   private final MobilidadeEntityRepository mobilidadeEntityRepository;
   private final RhVMobilidadeEntityRepository rhVMobilidadeEntityRepository;
   private final MobilidadeMapper mobilidadeMapper;
-  private final ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
 
   @Transactional(readOnly = true)
   public WrapperListMobilidadeDTO getListMobilidade(GetListMobilidadesQuery query) {
@@ -57,13 +55,6 @@ public class MobilidadeReadService {
     Page<RhVMobilidadeEntity> page = rhVMobilidadeEntityRepository.findByFunUuidWithFilters(
         idFuncionario, estados, tipoSituacao, dataInicio, dataFim, pageable);
 
-    // Processamento em BATCH: uma única query para saber quais mobilidades da página já
-    // têm processamento salarial (o seu tiprel tem registo em RH_T_PROC_FUNCIONARIOS).
-    var mobIds = page.getContent().stream().map(RhVMobilidadeEntity::getMobId).toList();
-    var processados = mobIds.isEmpty()
-        ? java.util.Set.<Long>of()
-        : new java.util.HashSet<>(processamentoFuncionarioRepository.findMobIdsComProcessamento(mobIds));
-
     List<MobilidadeListDTO> content = page.getContent().stream().map(m -> {
       MobilidadeListDTO dto = new MobilidadeListDTO();
       dto.setId(m.getMobId());
@@ -75,7 +66,7 @@ public class MobilidadeReadService {
       dto.setLocalTrabalho(m.getLocalTrabNome());
       dto.setDataInicio(DateFormatter.localDateToString(m.getDataInicio()));
       dto.setDataFim(DateFormatter.localDateToString(m.getDataFim()));
-      dto.setProcessamento(processados.contains(m.getMobId()));
+      dto.setProcessamento(m.getProcessamento() != null && m.getProcessamento() > 0);
       dto.setEstado(m.getEstado());
       dto.setEstadoDesc(Estado.fromCode(m.getEstado()).map(Estado::getDescription).orElse(null));
       dto.setTipoMobilidade(m.getTipoSituacao());

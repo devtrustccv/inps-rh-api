@@ -100,4 +100,8 @@ public class RhVMobilidadeEntity {
   private String tipoSituacaoDesc;
 
 
+  @Column(name = "processamento")
+  private Integer processamento;
+
+
 }

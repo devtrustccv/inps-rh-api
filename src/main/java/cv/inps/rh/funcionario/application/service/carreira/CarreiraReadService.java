@@ -96,8 +96,8 @@ public class CarreiraReadService {
     dto.setCargo(v.getCargoDesc());
     dto.setEscalao(v.getEscalaoDesc());
     dto.setSalario(v.getSalario() != null ? v.getSalario().toString() : null);
-    // situacaoLaboral: ainda nao existe na vista (vem do tiprel). Fica null ate a
-    // BD o expor em RH_V_CARREIRA; nessa altura mapeia-se v.getSituacaoLaboral().
+    dto.setSituacaoLaboralId(v.getSituacaoLaboralId());
+    dto.setSituacaoLaboral(v.getSituacaoLaboralDesc());
     dto.setDataInicio(v.getDataInicio());
     dto.setDataFim(v.getDataFim());
     dto.setProcessamento(Integer.valueOf(1).equals(v.getFlgProcessa()) ? "SIM" : "NAO");

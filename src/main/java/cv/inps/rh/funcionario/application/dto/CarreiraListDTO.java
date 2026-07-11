@@ -51,6 +51,9 @@ public class CarreiraListDTO  {
   private String salario ;
 
 
+  private Long situacaoLaboralId ;
+
+
   private String situacaoLaboral ;
 
 
