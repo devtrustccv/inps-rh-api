@@ -86,6 +86,7 @@ public class NovoContratoService {
     }
 
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    funcionarioRules.garantirEditavel(tipoRelacionamentoAtual.getEstado());
     tipoRelacionamentoAtual.setEstActAdm(0);
 
     var contratoAtual = tipoRelacionamentoAtual.getContrVinculoId();

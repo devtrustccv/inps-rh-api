@@ -37,6 +37,18 @@ public class FuncionarioRules {
         referenciaName.name());
   }
 
+  /**
+   * Guard de escrita: impede alterar/validar um registo que esteja Inactivo (I) ou Eliminado (E).
+   * Lança 400 com mensagem clara para o cliente. Chamar depois de carregar o registo alvo, antes de mutar.
+   */
+  public void garantirEditavel(Estado estado) {
+    if (estado == Estado.I || estado == Estado.E) {
+      throw IgrpResponseStatusException.badRequest(
+          "Este registo está %s e não pode ser alterado."
+              .formatted(estado == Estado.E ? "eliminado" : "inactivo"));
+    }
+  }
+
   public TiposRelacionamentoEntity getTipoRelacionamentoAtual(UUID funUuid) {
     return tiposRelacionamentoEntityRepository.findAtualByFuncionarioUuid(funUuid)
         .orElseThrow(()-> IgrpResponseStatusException.badRequest("Funcionario sem tipo de relacionamento atual"));

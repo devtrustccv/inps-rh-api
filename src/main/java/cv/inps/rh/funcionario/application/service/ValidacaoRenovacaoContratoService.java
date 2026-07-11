@@ -43,6 +43,8 @@ public class ValidacaoRenovacaoContratoService {
       throw IgrpResponseStatusException.badRequest(
           "Funcionario com id '%s' não possui contrato ativo".formatted(idFunc));
 
+    funcionarioRules.garantirEditavel(contrato.getEstado());
+
     // Aplica as novas datas do DTO ao contrato existente
     contratoMapper.toUpdateEntity(contrato, dto.getDadosRenovacao());
 

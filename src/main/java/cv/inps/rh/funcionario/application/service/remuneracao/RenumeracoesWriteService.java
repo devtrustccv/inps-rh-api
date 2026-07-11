@@ -114,6 +114,7 @@ public class RenumeracoesWriteService {
     validarRemuneracaoOuPagamento(request);
 
     var remuneracao = definicaoRemuneracaoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getRemuneracaoId()));
+    funcionarioRules.garantirEditavel(remuneracao.getEstado());
     remuneracao.setValor(request.getValor());
     remuneracao.setPercentagem(request.getPercentagem());
     remuneracao.setObs(ValidationUtil.trimToNull(request.getObservacao()));
@@ -147,6 +148,7 @@ public class RenumeracoesWriteService {
     validarRemuneracaoOuPagamento(request);
 
     var pagamento = defPagamentoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getPagamentoId()));
+    funcionarioRules.garantirEditavel(pagamento.getEstado());
 
     pagamento.setPercentagem(request.getPercentagem());
     pagamento.setValor(request.getValor());

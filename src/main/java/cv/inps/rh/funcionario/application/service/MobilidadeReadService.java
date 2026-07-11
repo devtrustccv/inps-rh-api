@@ -42,9 +42,9 @@ public class MobilidadeReadService {
 
     var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor().toString();
 
-    // Mostra activos e pendentes (não inactivos); o bloqueio de edição de
-    // pendentes é garantido no frontend (só edita depois de validar).
-    var estados = List.of(Estado.A.getCode(), Estado.P.getCode());
+    // Mostra activos, pendentes e inactivos (histórico completo). A edição/validação
+    // de registos inactivos (I) ou eliminados (E) é bloqueada na camada de escrita.
+    var estados = List.of(Estado.A.getCode(), Estado.P.getCode(), Estado.I.getCode());
 
     String tipoSituacao = StringUtils.hasText(query.getTipoMobilidade()) ? query.getTipoMobilidade() : null;
     LocalDate dataInicio = StringUtils.hasText(query.getDataInicio())

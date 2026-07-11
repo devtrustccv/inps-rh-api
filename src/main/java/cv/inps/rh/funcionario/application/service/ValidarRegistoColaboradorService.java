@@ -63,6 +63,7 @@ public class ValidarRegistoColaboradorService {
     var funcionarioPublicId = IdentificadorUnico.from(command.getId()).valor();
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
+    funcionarioRules.garantirEditavel(funcionario.getEstado());
 
     colaboradorValidationRules.validarDadosPessoais(dadosPessoaisReqDTO, funcionario.getUuid());
 
