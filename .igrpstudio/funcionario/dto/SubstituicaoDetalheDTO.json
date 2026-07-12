@@ -1,0 +1,25 @@
+{
+  "type": "dto",
+  "module": "funcionario",
+  "name": "SubstituicaoDetalhe",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {"name": "id", "objectType": "java", "type": "long", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "uuidSubstituicao", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "estado", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "estadoDesc", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "colaboradorSubstitutoId", "objectType": "java", "type": "long", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "colaboradorSubstitutoUuid", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "colaboradorSubstitutoNome", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "colaboradorSubstituidoId", "objectType": "java", "type": "long", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "colaboradorSubstituidoUuid", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "colaboradorSubstituidoNome", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "cargo", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "motivoSubstituicao", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "dataInicio", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "dataFim", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false},
+    {"name": "obs", "objectType": "java", "type": "string", "required": false, "before": false, "after": false, "positive": false, "isEmail": false, "isUrl": false, "primaryKey": false}
+  ],
+  "id": "substdetalhe01"
+}

@@ -44,6 +44,8 @@ public class RenovacaoContratoService {
       throw IgrpResponseStatusException.notFound(
           "Funcionario com id '%s' não possui contrato ativo".formatted(idFunc));
 
+    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(contratoAtual.getEstado());
+
     if (funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.RENOVACAO_CONTRATO))
       throw IgrpResponseStatusException.conflict(
           "Funcionario com id '%s' possui uma validação pendente de renovação de contrato".formatted(idFunc));

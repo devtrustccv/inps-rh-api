@@ -42,7 +42,7 @@ public class ContratoReadService {
       predicates.add(cb.equal(root.get("funUuid"), idFuncionario));
 
       // Mostra activos e pendentes; não mostra inactivos (I)
-      var estados = List.of(Estado.A.getCode(), Estado.P.getCode());
+      var estados = List.of(Estado.A.getCode(), Estado.P.getCode(), Estado.I.getCode());
       predicates.add(root.get("estado").in(estados));
 
       if (query.getVinculo() != null) {

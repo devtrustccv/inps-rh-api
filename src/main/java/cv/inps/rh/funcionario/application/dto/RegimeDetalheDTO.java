@@ -8,6 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -15,8 +18,7 @@ import lombok.NoArgsConstructor;
 
 
 @IgrpDTO
-public class RegimeListDTO  {
-
+public class RegimeDetalheDTO  {
 
 
   private Long id ;
@@ -25,10 +27,10 @@ public class RegimeListDTO  {
   private String uuid ;
 
 
-  private Long idFuncionario ;
+  private Long funcionarioId ;
 
 
-  private String uuidFuncionario ;
+  private String funcionarioUuid ;
 
 
   private String tipoRegime ;
@@ -37,21 +39,21 @@ public class RegimeListDTO  {
   private String tipoRegimeDesc ;
 
 
-  private String dataInicio ;
+  private LocalDate dataInicio ;
 
 
-  private String dataFim ;
-
-
-  private String modalidade ;
-
-
-  private String numHoras ;
+  private LocalDate dataFim ;
 
 
   private String estado ;
 
 
   private String estadoDesc ;
+
+
+  private String obs ;
+
+
+  private List<RegimeModalidadeDTO> regimeModalidade = new ArrayList<>();
 
 }

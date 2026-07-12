@@ -43,12 +43,16 @@ public class ValidacaoRenovacaoContratoService {
       throw IgrpResponseStatusException.badRequest(
           "Funcionario com id '%s' não possui contrato ativo".formatted(idFunc));
 
-    // Aplica as novas datas do DTO ao contrato existente
-    contratoMapper.toUpdateEntity(contrato, dto.getDadosRenovacao());
+    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(contrato.getEstado());
 
     if (dto.getValidacao() != null) {
-      var estado = dto.getValidacao().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-      mudarEstado(funcionario, estado);
+      var aprovado = dto.getValidacao().equals(EstadoValidacao.SIM);
+      // As novas datas da renovacao so devem ser gravadas no contrato quando a
+      // renovacao e APROVADA. Numa rejeicao o contrato mantem as datas actuais.
+      if (aprovado) {
+        contratoMapper.toUpdateEntity(contrato, dto.getDadosRenovacao());
+      }
+      mudarEstado(funcionario, aprovado ? Estado.A : Estado.I);
     }
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);

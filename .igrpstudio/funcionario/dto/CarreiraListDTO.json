@@ -138,6 +138,18 @@
       "primaryKey": false
     },
     {
+      "name": "situacaoLaboralId",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "situacaoLaboral",
       "objectType": "java",
       "type": "string",

@@ -10,8 +10,10 @@ import cv.inps.rh.funcionario.application.commands.RegistarSubstituicaoCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarSubstituicaoCommand;
 import cv.inps.rh.funcionario.application.dto.CalcularSubstituicaoResponseDTO;
 import cv.inps.rh.funcionario.application.dto.SubstituicaoDTO;
+import cv.inps.rh.funcionario.application.dto.SubstituicaoDetalheDTO;
 import cv.inps.rh.funcionario.application.dto.SubstituicaoSumaryDTO;
 import cv.inps.rh.funcionario.application.queries.CalcularSubstituicaoQuery;
+import cv.inps.rh.funcionario.application.queries.GetSubstituicaoByIdQuery;
 import cv.inps.rh.funcionario.application.queries.ListaSubstituicaoQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -98,6 +100,37 @@ public class SubstituicaoController {
        ResponseEntity<SubstituicaoDTO> response = commandBus.send(command);
 
        return response;
+  }
+
+   @GetMapping(
+   value = "{idFuncionario}/substituicoes/{substituicaoId}"
+  )
+  @Operation(
+    summary = "Get substituicao by id",
+    description = "Get substituicao by id",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = SubstituicaoDetalheDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<SubstituicaoDetalheDTO> getSubstituicaoById(
+    @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "substituicaoId") String substituicaoId)
+  {
+
+      final var query = new GetSubstituicaoByIdQuery(idFuncionario, substituicaoId);
+
+      ResponseEntity<SubstituicaoDetalheDTO> response = queryBus.handle(query);
+
+      return response;
   }
 
    @GetMapping(

@@ -86,6 +86,7 @@ public class NovoContratoService {
     }
 
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(tipoRelacionamentoAtual.getEstado());
     tipoRelacionamentoAtual.setEstActAdm(0);
 
     var contratoAtual = tipoRelacionamentoAtual.getContrVinculoId();

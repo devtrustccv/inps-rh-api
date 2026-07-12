@@ -1,9 +1,13 @@
 package cv.inps.rh.funcionario.application.service;
 
+import cv.inps.rh.funcionario.application.dto.RegimeDetalheDTO;
+import cv.inps.rh.funcionario.application.dto.RegimeModalidadeDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperRegimeListDTO;
 import cv.inps.rh.funcionario.application.queries.GetListRegimesQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.RegimeTrabalhoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.service.DominioService;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeTrabalhoEntity;
@@ -20,7 +24,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +35,18 @@ public class RegimeReadService {
 
   private final RegimeTrabalhoEntityRepository regimeTrabalhoEntityRepository;
   private final RegimeTrabalhoMapper regimeTrabalhoMapper;
+  private final DominioService dominioService;
+
+  /** Traduz códigos (possivelmente multiselect, separados por vírgula) para descrições do domínio,
+   *  com fallback para o próprio código quando não há correspondência. */
+  private String traduzirMulti(Map<String, String> dominio, String codigos) {
+    if (codigos == null || codigos.isBlank()) return null;
+    return Arrays.stream(codigos.split(","))
+        .map(String::trim)
+        .filter(c -> !c.isEmpty())
+        .map(c -> dominioService.traduzir(dominio, c))
+        .collect(Collectors.joining(", "));
+  }
 
   @Transactional(readOnly = true)
   public WrapperRegimeListDTO listRegime(GetListRegimesQuery query) {
@@ -65,9 +84,11 @@ public class RegimeReadService {
     Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, "id"));
     Page<RegimeTrabalhoEntity> page = regimeTrabalhoEntityRepository.findAll(spec, pageable);
 
+    var regimeDom = dominioService.getDominioMap("REGIME_TRABALHO");
     var content = page.getContent().stream()
         .map(regimeTrabalhoMapper::toDTO)
         .toList();
+    content.forEach(d -> d.setTipoRegimeDesc(traduzirMulti(regimeDom, d.getTipoRegime())));
 
     var wrapper = new WrapperRegimeListDTO();
     wrapper.setContent(content);
@@ -79,5 +100,46 @@ public class RegimeReadService {
     wrapper.setLast(page.isLast());
 
     return wrapper;
+  }
+
+  @Transactional(readOnly = true)
+  public RegimeDetalheDTO getById(String regimeId) {
+    var uuid = IdentificadorUnico.from(regimeId).valor();
+    var regime = regimeTrabalhoEntityRepository.findByUuid(uuid)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Regime não encontrado: " + regimeId));
+
+    var dto = new RegimeDetalheDTO();
+    dto.setId(regime.getId());
+    dto.setUuid(regime.getUuid() != null ? regime.getUuid().toString() : null);
+    if (regime.getFunId() != null) {
+      dto.setFuncionarioId(regime.getFunId().getId());
+      dto.setFuncionarioUuid(regime.getFunId().getUuid() != null ? regime.getFunId().getUuid().toString() : null);
+    }
+    var regimeDom = dominioService.getDominioMap("REGIME_TRABALHO");
+    dto.setTipoRegime(regime.getTipoRegime());
+    dto.setTipoRegimeDesc(traduzirMulti(regimeDom, regime.getTipoRegime()));
+    dto.setDataInicio(regime.getDataInicio());
+    dto.setDataFim(regime.getDataFim());
+    dto.setEstado(regime.getEstado() != null ? regime.getEstado().getCode() : null);
+    dto.setEstadoDesc(regime.getEstado() != null ? regime.getEstado().getDescription() : null);
+    dto.setObs(regime.getObs());
+
+    if (regime.getModalidades() != null) {
+      var modalidadeDom = dominioService.getDominioMap("MODALIDADE_REGIME");
+      var mods = regime.getModalidades().stream()
+          .filter(m -> m != null && m.getEstado() != Estado.I && m.getEstado() != Estado.E)
+          .map(m -> {
+            var md = new RegimeModalidadeDTO();
+            md.setId(m.getId());
+            md.setModalidade(m.getModalidade());
+            md.setModalidadeDesc(dominioService.traduzir(modalidadeDom, m.getModalidade()));
+            md.setDiasSemana(m.getDiasSemana());
+            md.setNumeroHoras(m.getNumHoras());
+            return md;
+          }).toList();
+      dto.setRegimeModalidade(mods);
+    }
+
+    return dto;
   }
 }

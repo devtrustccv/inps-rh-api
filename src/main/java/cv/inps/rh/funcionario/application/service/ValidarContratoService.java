@@ -74,6 +74,7 @@ public class ValidarContratoService {
     dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, dadosContratuais);
 
     var contrato = tiposRelacionamento.getContrVinculoId();
+    // TODO(guard I/E temporariamente desativado): if (contrato != null) funcionarioRules.garantirEditavel(contrato.getEstado());
     contratoMapper.toUpdateEntity(contrato, dadosContratuais);
 
     var mobilidade = tiposRelacionamento.getMobId();
@@ -90,6 +91,7 @@ public class ValidarContratoService {
     var regime = tiposRelacionamento.getRegimeId();
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
 
+    // Sincronizacao de subsidios/encargos so faz sentido para vinculos COM salario.
     if (Objects.equals(1, paramVinculo.getFlgSalario())) {
       colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
       colaboradorValidationRules.validarEncargosDescontosDuplicados(dadosContratuais.getEncargosDescontos());
@@ -100,17 +102,23 @@ public class ValidarContratoService {
           dadosContratuais.getEncargosDescontos());
       funcionario.getDefinicoesRenumeracoes().addAll(definicoesRemuneracoes);
       funcionario.getDefinicoesPagamentos().addAll(definicoesPagamentos);
+    }
 
-      if (dto.getValidar() != null) {
-        var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-        mudarEstado(funcionario, estado);
-        if (estado == Estado.A) {
-          // reconciliar os movimentos fixos do vinculo — SO na validacao positiva
+    // Transicao de estado (A/I) deve acontecer SEMPRE que ha decisao de validacao,
+    // independentemente de o vinculo ter salario — conforme a especificacao ("ao
+    // validar, actualizar todas as tabelas associadas para estado='A'"). Antes estava
+    // dentro do bloco flgSalario==1, pelo que estagios (flg_salario=0) nunca transitavam.
+    if (dto.getValidar() != null) {
+      var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
+      mudarEstado(funcionario, estado);
+      if (estado == Estado.A) {
+        // reconciliar os movimentos fixos do vinculo — SO na validacao positiva e SO com salario
+        if (Objects.equals(1, paramVinculo.getFlgSalario())) {
           reconciliacaoMovimentoVinculoService.reconciliar(funcionario, contrato,
               dadosContratuais.getSalario(), dadosContratuais.getMoeda(),
               dadosContratuais.getDataInicio(), dadosContratuais.getDataFim());
-          ordemServicoWriteService.criar(funcionario, tiposRelacionamento, dto.getTipoOrdemServico());
         }
+        ordemServicoWriteService.criar(funcionario, tiposRelacionamento, dto.getTipoOrdemServico());
       }
     }
 

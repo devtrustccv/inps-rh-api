@@ -1,8 +1,11 @@
 package cv.inps.rh.funcionario.application.service;
 
+import cv.inps.rh.funcionario.application.dto.SubstituicaoDetalheDTO;
 import cv.inps.rh.funcionario.application.dto.SubstituicaoSumaryDTO;
+import cv.inps.rh.funcionario.application.queries.GetSubstituicaoByIdQuery;
 import cv.inps.rh.funcionario.application.queries.ListaSubstituicaoQuery;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SubstituicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoEntityRepository;
@@ -41,6 +44,51 @@ public class SubstituicaoReadService {
   }
 
 
+  @Transactional(readOnly = true)
+  public SubstituicaoDetalheDTO getById(GetSubstituicaoByIdQuery query) {
+
+    var uuid = IdentificadorUnico.from(query.getSubstituicaoId()).valor();
+    var e = substituicaoEntityRepository.findByUuid(uuid)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound(
+            "Substituição não encontrada: " + query.getSubstituicaoId()));
+
+    var dto = new SubstituicaoDetalheDTO();
+    dto.setId(e.getId());
+    dto.setUuidSubstituicao(e.getUuid() != null ? e.getUuid().toString() : null);
+    dto.setEstado(e.getEstado() != null ? e.getEstado().name() : null);
+    dto.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);
+
+    // substitutoTiprelId = o substituto (o colaborador escolhido para substituir)
+    var substituto = e.getSubstitutoTiprelId();
+    if (substituto != null && substituto.getFunId() != null) {
+      var f = substituto.getFunId();
+      dto.setColaboradorSubstitutoId(f.getId());
+      dto.setColaboradorSubstitutoUuid(f.getUuid() != null ? f.getUuid().toString() : null);
+      dto.setColaboradorSubstitutoNome(f.getNome());
+    }
+
+    // substituidoTiprelId = o colaborador substituído (o que está a ser substituído)
+    var substituido = e.getSubstituidoTiprelId();
+    if (substituido != null && substituido.getFunId() != null) {
+      var f = substituido.getFunId();
+      dto.setColaboradorSubstituidoId(f.getId());
+      dto.setColaboradorSubstituidoUuid(f.getUuid() != null ? f.getUuid().toString() : null);
+      dto.setColaboradorSubstituidoNome(f.getNome());
+    }
+    // Cargo da posição substituída
+    if (substituido != null && substituido.getCargoId() != null) {
+      dto.setCargo(substituido.getCargoId().getNome());
+    }
+
+    dto.setMotivoSubstituicao(e.getMotivo());
+    dto.setDataInicio(e.getDataInicio() != null ? DateFormatter.localDateToString(e.getDataInicio()) : null);
+    dto.setDataFim(e.getDataFim() != null ? DateFormatter.localDateToString(e.getDataFim()) : null);
+    dto.setObs(e.getObs());
+
+    return dto;
+  }
+
+
   private SubstituicaoSumaryDTO toDto(SubstituicaoEntity e) {
 
     var dto = new SubstituicaoSumaryDTO();
@@ -51,15 +99,16 @@ public class SubstituicaoReadService {
     dto.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);
 
     dto.setColaboradorSustituido(
-        e.getSubstitutoTiprelId() != null ? e.getSubstitutoTiprelId().getFunId().getNome() : null
+        e.getSubstituidoTiprelId() != null ? e.getSubstituidoTiprelId().getFunId().getNome() : null
     );
 
     dto.setColaboradorSustituto(
-        e.getSubstituidoTiprelId() != null ? e.getSubstituidoTiprelId().getFunId().getNome(): null
+        e.getSubstitutoTiprelId() != null ? e.getSubstitutoTiprelId().getFunId().getNome() : null
     );
 
     dto.setCargo(
-        e.getSubstitutoTiprelId() != null ? e.getSubstitutoTiprelId().getCargoId().getNome() : null
+        e.getSubstituidoTiprelId() != null && e.getSubstituidoTiprelId().getCargoId() != null
+            ? e.getSubstituidoTiprelId().getCargoId().getNome() : null
     );
 
     dto.setDataInicio(

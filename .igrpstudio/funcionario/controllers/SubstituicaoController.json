@@ -93,6 +93,39 @@
       ]
     },
     {
+      "actionName": "getSubstituicaoById",
+      "path": "{idFuncionario}/substituicoes/{substituicaoId}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "SubstituicaoDetalhe",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "substituicaoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
       "actionName": "listaSubstituicao",
       "path": "substituicoes",
       "method": "GET",

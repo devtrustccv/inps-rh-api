@@ -8,9 +8,11 @@ import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.funcionario.application.commands.AdicionarRegimeTrabalhoCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarRegimeTrabalhoCommand;
+import cv.inps.rh.funcionario.application.dto.RegimeDetalheDTO;
 import cv.inps.rh.funcionario.application.dto.RegimeTrabalhoDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperRegimeListDTO;
 import cv.inps.rh.funcionario.application.queries.GetListRegimesQuery;
+import cv.inps.rh.funcionario.application.queries.GetRegimeByIdQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -129,6 +131,37 @@ public class RegimeController {
        ResponseEntity<RegimeTrabalhoDTO> response = commandBus.send(command);
 
        return response;
+  }
+
+   @GetMapping(
+   value = "{idFuncionario}/regimes/{regimeId}"
+  )
+  @Operation(
+    summary = "Get regime by id",
+    description = "Get regime by id",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = RegimeDetalheDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<RegimeDetalheDTO> getRegimeById(
+    @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "regimeId") String regimeId)
+  {
+
+      final var query = new GetRegimeByIdQuery(idFuncionario, regimeId);
+
+      ResponseEntity<RegimeDetalheDTO> response = queryBus.handle(query);
+
+      return response;
   }
 
 }

@@ -13,8 +13,8 @@ import java.util.UUID;
 
 /**
  * Vista RH_V_CARREIRA — 1 linha por carreira (RH_T_CARREIRA). CARREIRA_ID e a
- * chave unica da linha (@Id). Nota: {@code situacaoLaboral} nao existe na vista
- * (vem do tiprel); sera adicionado ao entity quando a BD o expuser na vista.
+ * chave unica da linha (@Id). A situacao laboral vem exposta na vista como par
+ * SITUACAO_LABORAL_ID / SITUACAO_LABORAL_DESC.
  */
 @Getter
 @Entity
@@ -76,6 +76,12 @@ public class RhVCarreiraEntity {
 
   @Column(name = "TIPO_SITUACAO_DESC")
   private String tipoSituacaoDesc;
+
+  @Column(name = "SITUACAO_LABORAL_ID")
+  private Long situacaoLaboralId;
+
+  @Column(name = "SITUACAO_LABORAL_DESC")
+  private String situacaoLaboralDesc;
 
   @Column(name = "PROCESSAMENTO")
   private Integer processamento;

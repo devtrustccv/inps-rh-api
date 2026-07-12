@@ -66,6 +66,9 @@ public class CarreiraWriteService {
     var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
 
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    // TODO(guard I/E temporariamente desativado):
+    // if (relacionamentoAtual.getCarreiraId() != null)
+    //   funcionarioRules.garantirEditavel(relacionamentoAtual.getCarreiraId().getEstado());
 
     // Doc: "somente uma carreira pode processar ao mesmo tempo". Exclui o vínculo actual, que é
     // fechado/substituído nesta operação (permite progredir uma carreira que já processa).
@@ -337,6 +340,8 @@ public class CarreiraWriteService {
 
     if (!carreira.getContrVinculoId().getFunId().getId().equals(funcionario.getId()))
       throw IgrpResponseStatusException.badRequest("Carreira não pertence a este funcionário");
+
+    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(carreira.getEstado());
 
     var relacionamento = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(carreira.getUuid());
 

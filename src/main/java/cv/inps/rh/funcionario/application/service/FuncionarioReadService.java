@@ -67,7 +67,7 @@ public class FuncionarioReadService {
       if (StringUtils.hasText(query.getEstado())) {
         predicates.add(cb.equal(root.get(RhVDossieEntity_.estadoColaborador), query.getEstado()));
       } else {
-        predicates.add(root.get(RhVDossieEntity_.estadoColaborador).in(Estado.A.name(), Estado.P.name()));
+        predicates.add(root.get(RhVDossieEntity_.estadoColaborador).in(Estado.A.name(), Estado.P.name(), Estado.I.name()));
       }
 
       if (StringUtils.hasText(query.getDataInicio())) {

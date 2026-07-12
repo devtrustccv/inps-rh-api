@@ -53,7 +53,7 @@ public class HistoricoLaboralReadService {
     // Mostra activos e pendentes; não mostra inactivos (I)
     var page = rhVHistLaboralEntityRepository.findByFunUuidWithFilters(
         query.getFuncionarioId(),
-        java.util.List.of(Estado.A.name(), Estado.P.name()),
+        java.util.List.of(Estado.A.name(), Estado.P.name(), Estado.I.name()),
         query.getReferencia(),
         query.getTipoSituacao(),
         query.getSituacaoLaboral(),

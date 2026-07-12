@@ -4,24 +4,21 @@ import cv.inps.rh.funcionario.application.commands.AdicionarRegimeTrabalhoComman
 import cv.inps.rh.funcionario.application.commands.ValidarRegimeTrabalhoCommand;
 import cv.inps.rh.funcionario.application.dto.RegimeTrabalhoDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
-import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
-import cv.inps.rh.shared.application.constants.custom.Referencia;
-import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
-import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeModalidadeEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeTrabalhoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.RegimeModalidadeEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.RegimeTrabalhoEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,76 +27,45 @@ public class RegimeWriteService {
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final FuncionarioRules funcionarioRules;
-  private final DadosContratuaisMapper dadosContratuaisMapper;
-  private final EntityManager entityManager;
-  private final ValidacaoEntityRepository validacaoEntityRepository;
   private final RegimeModalidadeEntityRepository regimeModalidadeEntityRepository;
-  private final OrdemServicoWriteService ordemServicoWriteService;
+  private final RegimeTrabalhoEntityRepository regimeTrabalhoEntityRepository;
 
 
   @Transactional
   public RegimeTrabalhoDTO alterarRegimeTrabalho(AdicionarRegimeTrabalhoCommand command) {
 
-    // Carregar dados do comando
     var dto = command.getRegimetrabalho();
     var idFuncionario = IdentificadorUnico.from(command.getIdFuncionario()).valor();
 
-    // Buscar funcionário
     var funcionario = funcionarioEntityRepository.findByUuid(idFuncionario)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Funcionário não encontrado"));
 
+    // Spec (Dossiê "Alterar regime trabalho" + BASE DADOS): o regime é registado directamente
+    // como Ativo (A), associado ao FUN_ID, sem validação e sem movimento no tipos_relacionamento.
+    // Um colaborador pode ter mais do que um regime.
+    var regime = new RegimeTrabalhoEntity();
+    regime.setUuid(IdentificadorUnico.create().valor());
+    regime.setFunId(funcionario);
+    regime.setTipoRegime(ValidationUtil.trimToNull(dto.getTipoRegime()));
+    regime.setTipoSituacao(ValidationUtil.trimToNull(dto.getTipoRegime()));
+    regime.setDataInicio(dto.getDataInicio());
+    regime.setDataFim(dto.getDataFim());
+    regime.setEstado(Estado.A);
+    regimeTrabalhoEntityRepository.save(regime);
 
-    if(funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGIME)){
-      throw IgrpResponseStatusException.conflict("Existe uma validação pendente regime trabalho para este funcionário");
-    }
-
-    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-
-
-    //update
-    var regimeTrabalho = tipoRelacionamentoAtual.getRegimeId();
-    regimeTrabalho.setFunId(funcionario);
-    regimeTrabalho.setTipoRegime(ValidationUtil.trimToNull(dto.getTipoRegime()));
-    regimeTrabalho.setTipoSituacao(ValidationUtil.trimToNull(dto.getTipoRegime()));
-    regimeTrabalho.setDataInicio(dto.getDataInicio());
-    regimeTrabalho.setDataFim(dto.getDataFim());
-    regimeTrabalho.setEstado(Estado.P);
-
-
-    // Criar modalidades
     if (dto.getRegimeModalidade() != null) {
       var novasModalidades = dto.getRegimeModalidade().stream().map(mod -> {
         var modalidade = new RegimeModalidadeEntity();
+        modalidade.setUuid(IdentificadorUnico.create().valor());
         modalidade.setModalidade(mod.getModalidade());
         modalidade.setDiasSemana(mod.getDiasSemana());
         modalidade.setNumHoras(mod.getNumeroHoras());
-        modalidade.setUuid(IdentificadorUnico.create().valor());
-        modalidade.setEstado(Estado.P);
-        modalidade.setRegimeId(regimeTrabalho);
+        modalidade.setEstado(Estado.A);
+        modalidade.setRegimeId(regime);
         return modalidade;
       }).toList();
       regimeModalidadeEntityRepository.saveAll(novasModalidades);
     }
-
-
-    // Criar validação
-    var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.REGIME.name(), Estado.P);
-    validacao.setFunId(funcionario);
-    validacao.setTiprelId(tipoRelacionamentoAtual);
-    validacao.setReferenciaUuid(regimeTrabalho.getUuid());
-    funcionario.getValidacoes().add(validacao);
-
-    // Salvar tudo (cascade)
-    funcionarioEntityRepository.saveAndFlush(funcionario);
-
-
-    validacaoEntityRepository
-        .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(
-            funcionario.getUuid(), Estado.P, TipoAcao.INSERT.name(), Referencia.REGIME.name())
-        .ifPresent(e -> {
-          e.setReferenciaId(regimeTrabalho.getId());
-          validacaoEntityRepository.save(e);
-        });
 
     return dto;
   }
@@ -113,19 +79,17 @@ public class RegimeWriteService {
     var funcionario = funcionarioEntityRepository.findByUuid(idFuncionario)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Funcionário não encontrado"));
 
-    if(!funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGIME)){
-      throw IgrpResponseStatusException.conflict("Nenhuma validação pendente de regime trabalho para este funcionário");
-    }
+    var regime = regimeTrabalhoEntityRepository.findByUuid(UUID.fromString(command.getRegimeId()))
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Regime não encontrado"));
 
-    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-    var regime = tipoRelacionamentoAtual.getRegimeId();
+    if (regime.getFunId() == null || !regime.getFunId().getId().equals(funcionario.getId()))
+      throw IgrpResponseStatusException.badRequest("Regime não pertence a este funcionário");
 
-    if (regime == null) {
-      throw IgrpResponseStatusException.badRequest("Funcionário não possui regime associado");
-    }
+    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(regime.getEstado());
 
-    // Atualização simples do regime
+    // Atualização do regime
     regime.setTipoRegime(ValidationUtil.trimToNull(dto.getTipoRegime()));
+    regime.setTipoSituacao(ValidationUtil.trimToNull(dto.getTipoRegime()));
     regime.setDataInicio(dto.getDataInicio());
     regime.setDataFim(dto.getDataFim());
 
@@ -174,20 +138,13 @@ public class RegimeWriteService {
 
     /********************* VALIDAÇÃO ************************/
 
+    // Validação opcional: o mesmo PUT edita e, se vier o campo "validar", transiciona o estado.
     if (dto.getValidar() != null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-
       regime.setEstado(estado);
-
-      funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGIME)
-          .ifPresent(v -> v.setEstado(estado));
-
-      if (estado == Estado.A) {
-        ordemServicoWriteService.criar(funcionario, tipoRelacionamentoAtual, dto.getTipoOrdemServico());
-      }
     }
 
-    funcionarioEntityRepository.save(funcionario);
+    regimeTrabalhoEntityRepository.save(regime);
 
     return dto;
   }
