@@ -29,6 +29,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class AlterarSituacaoLaboralWriteService {
@@ -113,6 +115,46 @@ public class AlterarSituacaoLaboralWriteService {
 
     var tiposRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(tiposRelacionamentoAtual.getEstado());
+
+    // Caso de teste (Situação Laboral): só há registo novo quando muda Situação/Motivo E o registo
+    // atual já foi processado. Se mudou mas ainda não processado → apenas UPDATE. Sem alteração → nada.
+    var situacaoAtual = tiposRelacionamentoAtual.getSituacLaboralId();
+    Long sitAtualId = (situacaoAtual != null && situacaoAtual.getSituacaoLaboralId() != null)
+        ? situacaoAtual.getSituacaoLaboralId().getId() : null;
+    Long motAtualId = (situacaoAtual != null && situacaoAtual.getMotivoSitLabId() != null)
+        ? situacaoAtual.getMotivoSitLabId().getId() : null;
+    boolean mudouSituacaoOuMotivo = !Objects.equals(sitAtualId, dto.getSituacaoLaboralId())
+        || !Objects.equals(motAtualId, dto.getMotivoId());
+
+    if (!mudouSituacaoOuMotivo) {
+      return dto;
+    }
+
+    boolean processado = tiposRelacionamentoAtual.getUltProc() != null;
+    if (!processado) {
+      // Ainda não processado → UPDATE do registo existente, sem criar novo tipos_relacionamento
+      if (situacaoAtual != null) {
+        situacaoAtual.setSituacaoLaboralId(paramSituacaoLaboral);
+        situacaoAtual.setMotivoSitLabId(paramSituacaoLaboralDetalhe);
+        situacaoAtual.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
+        situacaoAtual.setDataInicio(dataInicio);
+        situacaoAtual.setDataFim(dataFim);
+        situacaoAtual.setEstado(Estado.P);
+        situacaoLaboralEntityRepository.save(situacaoAtual);
+      }
+      // garante uma validação pendente para esta alteração
+      if (funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.ESTADO_COLABORADOR).isEmpty()) {
+        var validUpd = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.ESTADO_COLABORADOR.name(), Estado.P);
+        validUpd.setFunId(funcionario);
+        validUpd.setTiprelId(tiposRelacionamentoAtual);
+        validUpd.setReferenciaUuid(situacaoAtual != null ? situacaoAtual.getUuid() : null);
+        funcionario.getValidacoes().add(validUpd);
+      }
+      funcionarioEntityRepository.save(funcionario);
+      return dto;
+    }
+
+    // Mudou E já processado → fecha o atual e cria novo registo (situação + tipos_relacionamento)
     tiposRelacionamentoAtual.setDataFim(dataInicio);
     tiposRelacionamentoAtual.setEstActAdm(0);
 
@@ -135,6 +177,8 @@ public class AlterarSituacaoLaboralWriteService {
     tipoRelacionamentoNovo.setSituacLaboralId(situacaoLaboral);
     tipoRelacionamentoNovo.setReferente("SITUACAO_LABORAL");
     tipoRelacionamentoNovo.setEstado(Estado.P);
+    // FLG_PROCESSA depende de a situação ter remuneração (RH_T_PARAM_SITUACAO.FLG_REMUNERACAO)
+    tipoRelacionamentoNovo.setFlgProcessa(Integer.valueOf(1).equals(paramSituacaoLaboral.getFlgRemuneracao()) ? 1 : 0);
     var tiprelPersistido = tiposRelacionamentoEntityRepository.saveAndFlush(tipoRelacionamentoNovo);
 
     var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.ESTADO_COLABORADOR.name(), Estado.P);
