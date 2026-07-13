@@ -67,7 +67,9 @@ public class ValidacoesReadService {
       return cb.and(predicates.toArray(new Predicate[0]));
     };
 
-    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, "id"));
+    // Mais recente primeiro: ordena pela data de criação (desc), com o id como desempate.
+    Pageable pageable = PageRequest.of(pageNumber, pageSize,
+        Sort.by(Sort.Order.desc("createdDate"), Sort.Order.desc("id")));
     Page<ValidacaoEntity> page = validacaoEntityRepository.findAll(spec, pageable);
 
     var content = page.getContent().stream()
