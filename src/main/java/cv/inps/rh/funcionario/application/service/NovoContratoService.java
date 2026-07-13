@@ -94,10 +94,6 @@ public class NovoContratoService {
     var fim = contratoAtual.getDataFim();
     tipoRelacionamentoAtual.setDataFim(fim);
 
-    if (tipoRelacionamentoAtual.getRegimeId() != null && tipoRelacionamentoAtual.getRegimeId().getDataFim() == null) {
-      tipoRelacionamentoAtual.getRegimeId().setDataFim(fim);
-    }
-
     var contratoNovo = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contratoNovo.setFunId(funcionario);
     contratoNovo.setTipoSituacao("CONTINUIDADE");
@@ -123,11 +119,8 @@ public class NovoContratoService {
     var mobilidade = mudaMobilidadeOuManter(tipoRelacionamentoAtual.getMobId(), dadosContratuais,
         funcionario);
 
-    var regime = regimeTrabalhoMapper.toRegime(dadosContratuais, Estado.P);
-    if (regime != null) {
-      regime.setFunId(funcionario);
-      funcionario.getRegimesTrabalhos().add(regime);
-    }
+    // Regime: só cria novo se houver alteração ou não existir regime activo; senão reutiliza (caso de teste).
+    var regime = mudaRegimeOuManter(tipoRelacionamentoAtual.getRegimeId(), dadosContratuais, funcionario);
 
     var paramSituacaoLaboral = ValidationUtil.ref(entityManager, ParamSituacaoEntity.class, dadosContratuais.getSituacaoLaboralId());
 
@@ -312,6 +305,35 @@ public class NovoContratoService {
     }
 
     return false;
+  }
+
+  private RegimeTrabalhoEntity mudaRegimeOuManter(RegimeTrabalhoEntity regimeAtual, DadosContratuaisReqDTO dc,
+                                                  FuncionarioEntity funcionario) {
+    // Sem regime activo → cria novo
+    if (regimeAtual == null) {
+      var nova = regimeTrabalhoMapper.toRegime(dc, Estado.P);
+      if (nova != null) {
+        nova.setFunId(funcionario);
+        funcionario.getRegimesTrabalhos().add(nova);
+      }
+      return nova;
+    }
+    // Sem alteração de regime → reutiliza o activo (mantém-se em vigor)
+    if (!houveMudancaRegime(regimeAtual, dc)) {
+      return regimeAtual;
+    }
+    // Alteração → fecha o actual e cria novo
+    regimeAtual.setDataFim(LocalDate.now());
+    var nova = regimeTrabalhoMapper.toRegime(dc, Estado.P);
+    nova.setFunId(funcionario);
+    funcionario.getRegimesTrabalhos().add(nova);
+    return nova;
+  }
+
+  private boolean houveMudancaRegime(RegimeTrabalhoEntity atual, DadosContratuaisReqDTO dc) {
+    var atualTipo = atual.getTipoRegime() != null ? atual.getTipoRegime().trim() : null;
+    var novoTipo = dc.getRegimeTrabalho() != null ? dc.getRegimeTrabalho().trim() : null;
+    return !Objects.equals(atualTipo, novoTipo);
   }
 
 
