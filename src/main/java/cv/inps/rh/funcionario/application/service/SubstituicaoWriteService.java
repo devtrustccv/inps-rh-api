@@ -166,6 +166,13 @@ public class SubstituicaoWriteService {
 
       substituicao.setEstado(estado);
 
+      // Diferença salarial: o DEF_REMUNERACOES criado no registo (OBS="Substituição", estado P)
+      // acompanha a decisão — passa a A quando aprovado, I quando rejeitado. Sem isto a diferença
+      // ficaria pendente e nunca seria processada.
+      definicaoRemuneracaoEntityRepository.findByFunIdAndEstado(funcionarioSubstituto, Estado.P).stream()
+          .filter(r -> "Substituição".equals(r.getObs()))
+          .forEach(r -> r.setEstado(estado));
+
       funcionarioRules.getValidacaoPendente(funcionarioSubstituido.getUuid(), TipoAcao.INSERT, Referencia.SUBSTITUICAO)
           .ifPresent(v -> v.setEstado(estado));
 
