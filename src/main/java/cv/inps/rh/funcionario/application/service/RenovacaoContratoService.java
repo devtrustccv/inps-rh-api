@@ -46,6 +46,16 @@ public class RenovacaoContratoService {
       throw IgrpResponseStatusException.notFound(
           "Funcionario com id '%s' não possui contrato ativo".formatted(idFunc));
 
+    // Guard (datas da renovação): a data de início é obrigatória e não pode ser no passado; a data
+    // de fim, se indicada, não pode ser anterior à de início.
+    var dadosRenovacao = dto.getDadosRenovacao();
+    if (dadosRenovacao == null || dadosRenovacao.getDataInicio() == null)
+      throw IgrpResponseStatusException.badRequest("A data de início da renovação é obrigatória.");
+    if (dadosRenovacao.getDataInicio().isBefore(LocalDate.now()))
+      throw IgrpResponseStatusException.badRequest("A data de início da renovação não pode ser uma data no passado.");
+    if (dadosRenovacao.getDataFim() != null && dadosRenovacao.getDataFim().isBefore(dadosRenovacao.getDataInicio()))
+      throw IgrpResponseStatusException.badRequest("A data de fim não pode ser anterior à data de início.");
+
     // Guard (parametrização do tipo de contrato): tem de ser renovável e respeitar o nº máximo de
     // renovações. Nº de renovações já validadas = validações UPDATE/RENOVACAO_CONTRATO em estado A
     // deste contrato — o estado da validação regista a decisão e não é sobrescrito por renovações
