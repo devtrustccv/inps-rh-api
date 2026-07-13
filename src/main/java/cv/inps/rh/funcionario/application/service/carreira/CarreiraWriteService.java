@@ -93,8 +93,8 @@ public class CarreiraWriteService {
     var remuneracoesAtivas = funcionarioRules.getRemuneracoesAssociadosAtivos(relacionamentoAtual.getId());
     var pagamentosAtivos = funcionarioRules.getPagamentosDescontosAssociadosAtivos(relacionamentoAtual.getId());
 
-    // DATA_FIM = data inicio da nova carreira - 1, conforme especificação funcional
-    var dataFimAnterior = dto.getDataInicio().minusDays(1);
+    // Caso de uso 1.5: anterior fecha com DATA_FIM = data do registo.
+    var dataFimAnterior = java.time.LocalDate.now();
     relacionamentoAtual.setDataFim(dataFimAnterior);
     relacionamentoAtual.setEstActAdm(0);
     tiposRelacionamentoEntityRepository.save(relacionamentoAtual);
@@ -118,8 +118,9 @@ public class CarreiraWriteService {
     carreiraAtual.setEstActAdm(0);
     carreiraEntityRepository.save(carreiraAtual);
 
-    var tipoCarreira = dto.getTipoCarreira() != null ? dto.getTipoCarreira() : "NOVO_CONTRATO";
-    var obsMovimento = "MOBILIDADE-" + tipoCarreira;
+    // Caso de uso 1.5: tipo situação de carreira (default CARREIRA_NOVO); OBS = tipo situação.
+    var tipoCarreira = dto.getTipoCarreira() != null ? dto.getTipoCarreira() : "CARREIRA_NOVO";
+    var obsMovimento = tipoCarreira;
 
     var novaCarreira = Objects.requireNonNull(carreiraMapper.toCarreira(dto, Estado.P));
     novaCarreira.setObs("CARREIRA");
@@ -129,7 +130,10 @@ public class CarreiraWriteService {
 
     var novoRelacionamento = contratuaisEntityMapper.toRelacionamento(dto, Estado.P);
     novoRelacionamento.setObs(obsMovimento);
-    novoRelacionamento.setDataInicio(dto.getDataInicio());
+    // Caso de uso 1.5: novo tiprel DATA_INICIO = data do registo, DATA_FIM = null, TIPREL_ID = anterior.
+    novoRelacionamento.setDataInicio(java.time.LocalDate.now());
+    novoRelacionamento.setDataFim(null);
+    novoRelacionamento.setTiprelId(relacionamentoAtual);
     novoRelacionamento.setContrVinculoId(contratoAtual);
     novoRelacionamento.setCarreiraId(novaCarreira);
     novoRelacionamento.setFunId(funcionario);

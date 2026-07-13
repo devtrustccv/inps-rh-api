@@ -44,7 +44,8 @@ public class RenumeracoesWriteService {
     var remuneracao = new DefinicaoRemuneracaoEntity();
     remuneracao.setPercentagem(request.getPercentagem());
     remuneracao.setValor(request.getValor());
-    remuneracao.setObs(ValidationUtil.trimToNull(request.getObservacao()));
+    // Caso de uso 1.8: OBS = "Novo Registo".
+    remuneracao.setObs("Novo Registo");
     remuneracao.setEstado(Estado.P);
     remuneracao.setUuid(UuidCreator.getTimeOrderedEpoch());
     remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
@@ -79,7 +80,8 @@ public class RenumeracoesWriteService {
     pagamento.setPercentagem(request.getPercentagem());
     pagamento.setValor(request.getValor());
     pagamento.setEstado(Estado.P);
-    pagamento.setObs(ValidationUtil.trimToNull(request.getObservacao()));
+    // Caso de uso 1.8: OBS = "Novo Registo".
+    pagamento.setObs("Novo Registo");
     pagamento.setUuid(UuidCreator.getTimeOrderedEpoch());
     pagamento.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     pagamento.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));

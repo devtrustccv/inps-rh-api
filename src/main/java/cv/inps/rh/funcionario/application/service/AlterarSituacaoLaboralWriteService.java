@@ -155,7 +155,8 @@ public class AlterarSituacaoLaboralWriteService {
     }
 
     // Mudou E já processado → fecha o atual e cria novo registo (situação + tipos_relacionamento)
-    tiposRelacionamentoAtual.setDataFim(dataInicio);
+    // Caso de uso 1.6.3: anterior DATA_FIM = data do registo.
+    tiposRelacionamentoAtual.setDataFim(java.time.LocalDate.now());
     tiposRelacionamentoAtual.setEstActAdm(0);
 
     var situacaoLaboral = new SituacaoLaboralEntity();
@@ -170,7 +171,9 @@ public class AlterarSituacaoLaboralWriteService {
     situacaoLaboralEntityRepository.save(situacaoLaboral);
 
     var tipoRelacionamentoNovo = dadosContratuaisMapper.clone(tiposRelacionamentoAtual);
-    tipoRelacionamentoNovo.setDataInicio(dataInicio);
+    // Caso de uso 1.6.3: novo tiprel DATA_INICIO = data do registo, DATA_FIM = null.
+    tipoRelacionamentoNovo.setDataInicio(java.time.LocalDate.now());
+    tipoRelacionamentoNovo.setDataFim(null);
     tipoRelacionamentoNovo.setEstActAdm(1);
     tipoRelacionamentoNovo.setTipoSituacao("MUDANCA_SITUACAO_LABORAL");
     tipoRelacionamentoNovo.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
