@@ -4,6 +4,7 @@ import cv.inps.rh.funcionario.application.commands.RegistarSubstituicaoCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarSubstituicaoCommand;
 import cv.inps.rh.funcionario.application.dto.SubstituicaoDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
+import cv.inps.rh.funcionario.domain.repository.ICalcularSubstituicaoRepository;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -13,6 +14,7 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoMovimentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SubstituicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
@@ -25,6 +27,9 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.TipoRelRemPagEnti
 import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoEntityRepository;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +50,7 @@ public class SubstituicaoWriteService {
   private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
+  private final ICalcularSubstituicaoRepository calcularSubstituicaoRepository;
 
   @Transactional
   public SubstituicaoDTO registrar(RegistarSubstituicaoCommand command) {
@@ -81,30 +87,17 @@ public class SubstituicaoWriteService {
 
     // Caso de teste / item 50-51: a substituição só segue para VALIDAÇÃO quando existe diferença
     // salarial a favor do substituto (salário do substituto < salário do substituído). Nesse caso
-    // regista-se a diferença em RH_T_DEF_REMUNERACOES (Tipo Movimento parametrizado no vínculo com
-    // TIPO='REM_SUBSTITUICAO', OBS='Substituição') + RH_T_TIPREL_REM_PAG.
+    // regista-se a diferença em RH_T_DEF_REMUNERACOES (Tipo Movimento com TIPO='REM_SUBSTITUICAO'
+    // parametrizado no vínculo, OBS='Substituição') + RH_T_TIPREL_REM_PAG, UM registo por mês, com o
+    // valor proporcional aos dias — reutilizando a regra oficial (proc CALCULAR_SUBSTITUICAO).
     var salarioSubstituto = substitutoTiprel.getSalario();
     var salarioSubstituido = substituidoTiprel.getSalario();
     boolean temDiferencaSalarial = salarioSubstituto != null && salarioSubstituido != null
         && salarioSubstituto.compareTo(salarioSubstituido) < 0;
 
     if (temDiferencaSalarial) {
-      var diferenca = salarioSubstituido.subtract(salarioSubstituto);
-
-      var tm = tipoMovimentoSubstituicao(substitutoTiprel);
-      if (tm != null) {
-        var defRem = definicaoRemuneracaoMapper.createRenumeracao(
-            diferenca, tm, substituicao.getDataInicio(), substituicao.getDataFim(),
-            funcionarioSubstituto, substitutoTiprel.getMoeda());
-        defRem.setObs("Substituição");
-        defRem.setEstado(Estado.P);
-        definicaoRemuneracaoEntityRepository.save(defRem);
-
-        var link = new TipoRelRemPagEntity();
-        link.setTiprelId(substitutoTiprel);
-        link.setRemId(defRem);
-        tipoRelRemPagEntityRepository.save(link);
-      }
+      registarDiferencaMensal(substituicao, substitutoTiprel, funcionarioSubstituto,
+          salarioSubstituto, salarioSubstituido);
 
       // Existe diferença → segue para validação
       var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.SUBSTITUICAO.name(), Estado.P);
@@ -182,6 +175,59 @@ public class SubstituicaoWriteService {
     funcionarioEntityRepository.save(funcionarioSubstituido);
 
     return dto;
+  }
+
+  /**
+   * Regista a diferença salarial da substituição em RH_T_DEF_REMUNERACOES — UM registo por mês do
+   * período, com o valor proporcional aos dias, calculado pela regra oficial (proc
+   * CALCULAR_SUBSTITUICAO via {@link ICalcularSubstituicaoRepository}), o mesmo cálculo do endpoint
+   * de "calcular substituição". Cada registo fica ligado ao tiprel do substituto (RH_T_TIPREL_REM_PAG),
+   * OBS='Substituição', estado P (passa a A/I na validação). Não faz nada se o vínculo não tiver o
+   * Tipo de Movimento REM_SUBSTITUICAO parametrizado (já registado em WARN) ou se faltarem as datas.
+   */
+  private void registarDiferencaMensal(SubstituicaoEntity substituicao,
+                                       TiposRelacionamentoEntity substitutoTiprel,
+                                       FuncionarioEntity funcionarioSubstituto,
+                                       BigDecimal salarioSubstituto, BigDecimal salarioSubstituido) {
+
+    var tm = tipoMovimentoSubstituicao(substitutoTiprel);
+    if (tm == null) return; // WARN já emitido no helper
+
+    LocalDate dataInicio = substituicao.getDataInicio();
+    LocalDate dataFim = substituicao.getDataFim();
+    if (dataInicio == null || dataFim == null || dataFim.isBefore(dataInicio)) {
+      log.warn("Substituição {}: datas inválidas (inicio={}, fim={}); diferença salarial não registada.",
+          substituicao.getId(), dataInicio, dataFim);
+      return;
+    }
+
+    YearMonth mesAtual = YearMonth.from(dataInicio);
+    YearMonth mesFim = YearMonth.from(dataFim);
+
+    while (!mesAtual.isAfter(mesFim)) {
+      LocalDate diaInicio = dataInicio.isAfter(mesAtual.atDay(1)) ? dataInicio : mesAtual.atDay(1);
+      LocalDate diaFim = dataFim.isBefore(mesAtual.atEndOfMonth()) ? dataFim : mesAtual.atEndOfMonth();
+      int nrDias = (int) (diaFim.toEpochDay() - diaInicio.toEpochDay() + 1);
+
+      // proc: P_VALOR_TIPREL_DE = substituto, P_VALOR_TIPREL_PARA = substituído
+      BigDecimal valorReceber = calcularSubstituicaoRepository
+          .calcularValorReceber(nrDias, salarioSubstituto, salarioSubstituido);
+
+      if (valorReceber != null && valorReceber.signum() > 0) {
+        var defRem = definicaoRemuneracaoMapper.createRenumeracao(
+            valorReceber, tm, diaInicio, diaFim, funcionarioSubstituto, substitutoTiprel.getMoeda());
+        defRem.setObs("Substituição");
+        defRem.setEstado(Estado.P);
+        definicaoRemuneracaoEntityRepository.save(defRem);
+
+        var link = new TipoRelRemPagEntity();
+        link.setTiprelId(substitutoTiprel);
+        link.setRemId(defRem);
+        tipoRelRemPagEntityRepository.save(link);
+      }
+
+      mesAtual = mesAtual.plusMonths(1);
+    }
   }
 
   /**
