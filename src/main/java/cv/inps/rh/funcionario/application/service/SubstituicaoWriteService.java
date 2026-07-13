@@ -15,7 +15,9 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoMovimentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SubstituicaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoRelRemPagEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoMovimentoEntityRepository;
@@ -23,7 +25,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.TipoRelRemPagEnti
 import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoEntityRepository;
 
-import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,16 +89,8 @@ public class SubstituicaoWriteService {
     if (temDiferencaSalarial) {
       var diferenca = salarioSubstituido.subtract(salarioSubstituto);
 
-      Long vinculoSubstitutoId = (substitutoTiprel.getContrVinculoId() != null
-          && substitutoTiprel.getContrVinculoId().getVinculoId() != null)
-          ? substitutoTiprel.getContrVinculoId().getVinculoId().getId() : null;
-
-      List<ParamVinculoMovimentoEntity> movs = vinculoSubstitutoId == null ? List.of()
-          : paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(
-              vinculoSubstitutoId, "REM_SUBSTITUICAO", Estado.A);
-
-      if (!movs.isEmpty() && movs.getFirst().getTmId() != null) {
-        var tm = movs.getFirst().getTmId();
+      var tm = tipoMovimentoSubstituicao(substitutoTiprel);
+      if (tm != null) {
         var defRem = definicaoRemuneracaoMapper.createRenumeracao(
             diferenca, tm, substituicao.getDataInicio(), substituicao.getDataFim(),
             funcionarioSubstituto, substitutoTiprel.getMoeda());
@@ -166,12 +160,15 @@ public class SubstituicaoWriteService {
 
       substituicao.setEstado(estado);
 
-      // Diferença salarial: o DEF_REMUNERACOES criado no registo (OBS="Substituição", estado P)
-      // acompanha a decisão — passa a A quando aprovado, I quando rejeitado. Sem isto a diferença
-      // ficaria pendente e nunca seria processada.
-      definicaoRemuneracaoEntityRepository.findByFunIdAndEstado(funcionarioSubstituto, Estado.P).stream()
-          .filter(r -> "Substituição".equals(r.getObs()))
-          .forEach(r -> r.setEstado(estado));
+      // Diferença salarial: o DEF_REMUNERACOES da diferença acompanha a decisão — P->A na aprovação,
+      // P->I na rejeição. Identifica-se pelo Tipo de Movimento REM_SUBSTITUICAO do vínculo do
+      // substituto (determinístico), não por texto de OBS. Sem isto a diferença ficaria pendente.
+      var tmSubstituicao = tipoMovimentoSubstituicao(substituicao.getSubstitutoTiprelId());
+      if (tmSubstituicao != null) {
+        definicaoRemuneracaoEntityRepository
+            .findByFunIdAndTmIdAndEstado(funcionarioSubstituto, tmSubstituicao, Estado.P)
+            .forEach(r -> r.setEstado(estado));
+      }
 
       funcionarioRules.getValidacaoPendente(funcionarioSubstituido.getUuid(), TipoAcao.INSERT, Referencia.SUBSTITUICAO)
           .ifPresent(v -> v.setEstado(estado));
@@ -183,5 +180,25 @@ public class SubstituicaoWriteService {
     funcionarioEntityRepository.save(funcionarioSubstituido);
 
     return dto;
+  }
+
+  /**
+   * Tipo de Movimento parametrizado no vínculo do substituto para a diferença salarial de
+   * substituição (RH_T_PARAM_VINCULO_MOV, TIPO='REM_SUBSTITUICAO', estado A). Devolve null se o
+   * tiprel/vínculo não estiver resolvido ou o vínculo não tiver esse movimento parametrizado.
+   */
+  private TipoMovimentoEntity tipoMovimentoSubstituicao(TiposRelacionamentoEntity substitutoTiprel) {
+    Long vinculoId = (substitutoTiprel != null && substitutoTiprel.getContrVinculoId() != null
+        && substitutoTiprel.getContrVinculoId().getVinculoId() != null)
+        ? substitutoTiprel.getContrVinculoId().getVinculoId().getId() : null;
+    if (vinculoId == null) return null;
+
+    return paramVinculoMovimentoEntityRepository
+        .findByVinculoId_IdAndTipoAndEstado(vinculoId, "REM_SUBSTITUICAO", Estado.A)
+        .stream()
+        .map(ParamVinculoMovimentoEntity::getTmId)
+        .filter(Objects::nonNull)
+        .findFirst()
+        .orElse(null);
   }
 }
