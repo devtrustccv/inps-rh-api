@@ -149,6 +149,16 @@ public class GlobalExceptionHandler {
           problem.setDetail(constraint != null
               ? "Valor duplicado (constraint: " + constraint + "): já existe um registo com este valor."
               : "Já existe um registo com este valor.");
+        } else if (msg.contains("ORA-02290")) {
+          // ORA-02290: check constraint (SCHEMA.CK_NAME) violated
+          String constraint = extractOraConstraint(msg);
+          if (constraint != null && constraint.toUpperCase().contains("CK_TIPREL_PERIODO")) {
+            problem.setDetail("Datas inválidas: a data de fim não pode ser anterior à data de início.");
+          } else {
+            problem.setDetail(constraint != null
+                ? "Dados inválidos (constraint: " + constraint + ")."
+                : "Dados inválidos: uma regra de validação da base de dados foi violada.");
+          }
         } else {
           problem.setDetail(msg);
         }
