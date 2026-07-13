@@ -4,7 +4,9 @@ import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
 import cv.inps.rh.funcionario.application.dto.MobilidadeListDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListMobilidadeDTO;
 import cv.inps.rh.funcionario.application.queries.GetListMobilidadesQuery;
+import cv.inps.rh.funcionario.application.queries.GetMobilidadeAtualQuery;
 import cv.inps.rh.funcionario.application.queries.GetMobilidadeByIdQuery;
+import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.MobilidadeMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -31,6 +33,7 @@ public class MobilidadeReadService {
   private final MobilidadeEntityRepository mobilidadeEntityRepository;
   private final RhVMobilidadeEntityRepository rhVMobilidadeEntityRepository;
   private final MobilidadeMapper mobilidadeMapper;
+  private final FuncionarioRules funcionarioRules;
 
   @Transactional(readOnly = true)
   public WrapperListMobilidadeDTO getListMobilidade(GetListMobilidadesQuery query) {
@@ -96,5 +99,18 @@ public class MobilidadeReadService {
     );
 
     return mobilidadeMapper.mobilidadeDTO(mobilidade);
+  }
+
+  @Transactional(readOnly = true)
+  public MobilidadeDTO getMobilidadeAtual(GetMobilidadeAtualQuery query) {
+
+    var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
+
+    var tiprel = funcionarioRules.getTipoRelacionamentoAtual(idFuncionario);
+    if (tiprel == null || tiprel.getMobId() == null)
+      throw IgrpResponseStatusException.notFound(
+          "Funcionário não tem mobilidade atual: " + query.getIdFuncionario());
+
+    return mobilidadeMapper.mobilidadeDTO(tiprel.getMobId());
   }
 }

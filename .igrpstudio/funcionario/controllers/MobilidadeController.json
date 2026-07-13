@@ -89,6 +89,34 @@
       ]
     },
     {
+      "actionName": "getMobilidadeAtual",
+      "path": "mobilidades/{idFuncionario}/atual",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Mobilidade",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
       "actionName": "saveMobilidade",
       "path": "{idFuncionario}/mobilidades",
       "method": "POST",
