@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.application.commands.ValidarSubstituicaoCommand;
 import cv.inps.rh.funcionario.application.dto.SubstituicaoDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
+import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
@@ -12,10 +13,17 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoMovimentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SubstituicaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TipoRelRemPagEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoMovimentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.TipoRelRemPagEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoEntityRepository;
+
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +37,10 @@ public class SubstituicaoWriteService {
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final FuncionarioRules funcionarioRules;
   private final OrdemServicoWriteService ordemServicoWriteService;
+  private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
+  private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
+  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
+  private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
 
   @Transactional
   public SubstituicaoDTO registrar(RegistarSubstituicaoCommand command) {
@@ -63,17 +75,42 @@ public class SubstituicaoWriteService {
     substituicao.setEstado(Estado.P);
     substituicaoEntityRepository.save(substituicao);
 
-    // Caso de teste: a substituição só segue para VALIDAÇÃO quando existe diferença salarial
-    // a favor do substituto (salário do substituto < salário do substituído).
-    // TODO: registar a diferença em RH_T_DEF_REMUNERACOES (Tipo Movimento "Diferença Salarial"
-    // parametrizado no vínculo, OBS='Substituição') + RH_T_TIPREL_REM_PAG — pendente de definir
-    // qual o tipo de movimento de diferença no vínculo.
+    // Caso de teste / item 50-51: a substituição só segue para VALIDAÇÃO quando existe diferença
+    // salarial a favor do substituto (salário do substituto < salário do substituído). Nesse caso
+    // regista-se a diferença em RH_T_DEF_REMUNERACOES (Tipo Movimento parametrizado no vínculo com
+    // TIPO='REM_SUBSTITUICAO', OBS='Substituição') + RH_T_TIPREL_REM_PAG.
     var salarioSubstituto = substitutoTiprel.getSalario();
     var salarioSubstituido = substituidoTiprel.getSalario();
     boolean temDiferencaSalarial = salarioSubstituto != null && salarioSubstituido != null
         && salarioSubstituto.compareTo(salarioSubstituido) < 0;
 
     if (temDiferencaSalarial) {
+      var diferenca = salarioSubstituido.subtract(salarioSubstituto);
+
+      Long vinculoSubstitutoId = (substitutoTiprel.getContrVinculoId() != null
+          && substitutoTiprel.getContrVinculoId().getVinculoId() != null)
+          ? substitutoTiprel.getContrVinculoId().getVinculoId().getId() : null;
+
+      List<ParamVinculoMovimentoEntity> movs = vinculoSubstitutoId == null ? List.of()
+          : paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(
+              vinculoSubstitutoId, "REM_SUBSTITUICAO", Estado.A);
+
+      if (!movs.isEmpty() && movs.getFirst().getTmId() != null) {
+        var tm = movs.getFirst().getTmId();
+        var defRem = definicaoRemuneracaoMapper.createRenumeracao(
+            diferenca, tm, substituicao.getDataInicio(), substituicao.getDataFim(),
+            funcionarioSubstituto, substitutoTiprel.getMoeda());
+        defRem.setObs("Substituição");
+        defRem.setEstado(Estado.P);
+        definicaoRemuneracaoEntityRepository.save(defRem);
+
+        var link = new TipoRelRemPagEntity();
+        link.setTiprelId(substitutoTiprel);
+        link.setRemId(defRem);
+        tipoRelRemPagEntityRepository.save(link);
+      }
+
+      // Existe diferença → segue para validação
       var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.SUBSTITUICAO.name(), Estado.P);
       validacao.setFunId(funcionarioSubstituido);
       validacao.setTiprelId(substituicao.getSubstitutoTiprelId());
