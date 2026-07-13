@@ -27,9 +27,11 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoEntit
 
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubstituicaoWriteService {
@@ -191,14 +193,26 @@ public class SubstituicaoWriteService {
     Long vinculoId = (substitutoTiprel != null && substitutoTiprel.getContrVinculoId() != null
         && substitutoTiprel.getContrVinculoId().getVinculoId() != null)
         ? substitutoTiprel.getContrVinculoId().getVinculoId().getId() : null;
-    if (vinculoId == null) return null;
+    if (vinculoId == null) {
+      log.warn("Substituição: não foi possível resolver o vínculo do substituto (tiprelId={}); "
+          + "diferença salarial NÃO será registada/processada.",
+          substitutoTiprel != null ? substitutoTiprel.getId() : null);
+      return null;
+    }
 
-    return paramVinculoMovimentoEntityRepository
+    var tm = paramVinculoMovimentoEntityRepository
         .findByVinculoId_IdAndTipoAndEstado(vinculoId, "REM_SUBSTITUICAO", Estado.A)
         .stream()
         .map(ParamVinculoMovimentoEntity::getTmId)
         .filter(Objects::nonNull)
         .findFirst()
         .orElse(null);
+
+    if (tm == null) {
+      log.warn("Substituição: vínculo {} não tem Tipo de Movimento REM_SUBSTITUICAO (estado A) "
+          + "parametrizado em RH_T_PARAM_VINCULO_MOV; diferença salarial NÃO será registada/processada.",
+          vinculoId);
+    }
+    return tm;
   }
 }
