@@ -143,10 +143,10 @@ public class ValidarRegistoColaboradorService {
     colaboradorValidationRules.validarEncargosDescontosDuplicados(dadosContratuais.getEncargosDescontos());
 
     var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(),
-        dadosContratuais.getSubsidios());
+        dadosContratuais.getSubsidios(), funcionario);
 
     var definicoesPagamentos = defPagamentoMapper.syncPagamentos(funcionario.getDefinicoesPagamentos(),
-        dadosContratuais.getEncargosDescontos());
+        dadosContratuais.getEncargosDescontos(), funcionario);
 
     var alertas = funcionarioRules.validarContactosDuplicados(dadosPessoaisReqDTO.getContactos(), funcionario.getUuid());
 

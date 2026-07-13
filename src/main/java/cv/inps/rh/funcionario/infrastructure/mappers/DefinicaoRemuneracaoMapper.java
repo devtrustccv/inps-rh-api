@@ -50,7 +50,8 @@ public class DefinicaoRemuneracaoMapper {
   }
 
   public java.util.List<DefinicaoRemuneracaoEntity> syncRemuneracoes(List<DefinicaoRemuneracaoEntity> existingList,
-                                                                      List<SubsidioReqDTO> newList) {
+                                                                      List<SubsidioReqDTO> newList,
+                                                                      FuncionarioEntity fun) {
     if (CollectionUtils.isEmpty(newList)) return existingList;
     for (SubsidioReqDTO dto : newList) {
       DefinicaoRemuneracaoEntity found = null;
@@ -67,13 +68,9 @@ public class DefinicaoRemuneracaoMapper {
         found.setValor(dto.getValor() != null ? dto.getValor() : BigDecimal.ZERO);
         found.setObs(dto.getObservacoes());
       } else {
-        DefinicaoRemuneracaoEntity novo = new DefinicaoRemuneracaoEntity();
-        novo.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoSubsidioId()));
-        novo.setPercentagem(dto.getPercentagem() != null ? dto.getPercentagem() : BigDecimal.ZERO);
-        novo.setValor(dto.getValor() != null ? dto.getValor() : BigDecimal.ZERO);
-        novo.setObs(dto.getObservacoes());
-        novo.setEstado(Estado.P);
-        existingList.add(novo);
+        // Novo subsídio: usar toDefinicaoRemuneracao para garantir funId + uuid + datas (evita
+        // ORA-01400 por FUN_ID null na inserção).
+        existingList.add(toDefinicaoRemuneracao(dto, fun, Estado.P));
       }
     }
     for (DefinicaoRemuneracaoEntity existing : existingList) {
