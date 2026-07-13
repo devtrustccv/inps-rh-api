@@ -66,7 +66,8 @@ public class HistoricoLaboralReadService {
     var data = page.getContent().stream().map(r -> {
       var dto = new HistoricoLaboralResponseDTO();
       dto.setUltimoMovimento(Objects.equals(r.getUltimoVinculo(), 1));
-      dto.setTipoSituacao(dominioService.traduzir(tipoMovLaboralDominio, r.getTipoSituacaoDesc()));
+      dto.setTipoSituacao(r.getTipoSituacaoDesc());
+      dto.setTipoSituacaoDesc(dominioService.traduzir(tipoMovLaboralDominio, r.getTipoSituacaoDesc()));
       dto.setTipoContrato(r.getTipoContratoDesc());
       dto.setVinculo(r.getVinculoDesc());
       dto.setDirecao(r.getDirecaoDesc());
