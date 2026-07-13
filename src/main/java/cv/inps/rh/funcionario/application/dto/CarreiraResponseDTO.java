@@ -62,6 +62,9 @@ public class CarreiraResponseDTO  {
 
   private String processaSalarioNestaCarreira ;
 
+
+  private Boolean processamento ;
+
   @Valid
   private List<EncargosDescontosRespDTO> encargosDescontos = new ArrayList<>();
 
