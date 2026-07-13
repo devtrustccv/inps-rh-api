@@ -70,6 +70,14 @@ public class SubstituicaoWriteService {
         () -> IgrpResponseStatusException.badRequest("Funcionário substituído não encontrado.")
     );
 
+    // Guard: não permitir registar nova substituição enquanto o substituído tiver uma pendente de
+    // validação. Evita o estado de múltiplas substituições pendentes (que quebra a validação) e
+    // obriga a resolver a anterior primeiro.
+    if (funcionarioRules.temValidacaoPendente(funcionarioSubstituido.getUuid(), TipoAcao.INSERT, Referencia.SUBSTITUICAO)) {
+      throw IgrpResponseStatusException.badRequest(
+          "O colaborador substituído já tem uma substituição pendente de validação. "
+              + "Valide ou rejeite essa substituição antes de registar uma nova.");
+    }
 
     var substitutoTiprel = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid());
     var substituidoTiprel = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid());
