@@ -10,6 +10,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.RhVCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.RhVCarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
@@ -37,6 +38,7 @@ public class CarreiraReadService {
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final RhVCarreiraEntityRepository rhVCarreiraEntityRepository;
+  private final ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
   private final FuncionarioRules funcionarioRules;
 
   @Transactional(readOnly = true)
@@ -145,6 +147,8 @@ public class CarreiraReadService {
     dto.setDataInicio(DateFormatter.localDateToString(tr.getDataInicio()));
     dto.setDataFim(DateFormatter.localDateToString(tr.getDataFim()));
     dto.setProcessaSalarioNestaCarreira(tr.getFlgProcessa()== 1 ? "SIM" : "NAO");
+    // PROCESSAMENTO (vista RH_V_CARREIRA): true se a carreira ja foi processada em folha
+    dto.setProcessamento(car != null && processamentoFuncionarioRepository.existsByTiprel_CarreiraId_Id(car.getId()));
     dto.setCategoriaId(categoria != null ? categoria.getId() : null);
 
     if (car != null) {

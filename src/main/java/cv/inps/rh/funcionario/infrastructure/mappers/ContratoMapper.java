@@ -73,8 +73,8 @@ public class ContratoMapper {
     c.setDataInicio(dc.getDataInicio());
     c.setDataFim(dc.getDataFim());
     c.setDuracao(dc.getDuracaoMeses());
-    c.setTipoSituacao("RENOVACAO_CONTRATO");
-    c.setObs("RENOVACAO_CONTRATO");
+    c.setTipoSituacao("RENOVACAO");
+    c.setObs("RENOVACAO");
     c.setUuid(IdentificadorUnico.create().valor());
     c.setTpContratoId(ValidationUtil.ref(entityManager, ParamContratoEntity.class, dc.getTipoContratoId()));
     c.setVinculoId(ValidationUtil.ref(entityManager, ParamVinculoEntity.class, dc.getTipoVinculoId()));

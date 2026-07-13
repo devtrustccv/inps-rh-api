@@ -70,6 +70,9 @@ public class DadosPessoaisRespDTO  {
   private String naturalidadeDesc ;
 
 
+  private String localidade ;
+
+
   private Long nif ;
 
 

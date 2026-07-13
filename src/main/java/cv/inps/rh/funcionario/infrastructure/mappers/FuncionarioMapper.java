@@ -41,6 +41,7 @@ public class FuncionarioMapper {
     dadosPessoais.setNomePai(entity.getNmPai());
     dadosPessoais.setEstadoCivil(entity.getEstadoCivil());
     dadosPessoais.setNacionalidade(entity.getNacionalidade());
+    dadosPessoais.setLocalidade(entity.getLocalidade());
     dadosPessoais.setTipoDocumentoId(entity.getTipoDocumentoId() != null ? entity.getTipoDocumentoId().getId() : null);
     dadosPessoais.setNumDocumento(entity.getNumDocumento());
     dadosPessoais.setNif(entity.getNif() != null ? entity.getNif() : null);
@@ -131,6 +132,7 @@ public class FuncionarioMapper {
     fun.setNmPai(ValidationUtil.trimToNull(dadosPessoais.getNomePai()));
     fun.setEstadoCivil(ValidationUtil.trimToNull(dadosPessoais.getEstadoCivil()));
     fun.setNacionalidade(ValidationUtil.trimToNull(dadosPessoais.getNacionalidade()));
+    fun.setLocalidade(ValidationUtil.trimToNull(dadosPessoais.getLocalidade()));
     fun.setLocNascId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dadosPessoais.getNaturalidadeId()));
     fun.setNif(dadosPessoais.getNif());
     fun.setNuSegInps(ValidationUtil.trimToNull(dadosPessoais.getNumSegurado()));
@@ -178,6 +180,7 @@ public class FuncionarioMapper {
     funParam.setNmPai(ValidationUtil.trimToNull(dadosPessoais.getNomePai()));
     funParam.setEstadoCivil(ValidationUtil.trimToNull(dadosPessoais.getEstadoCivil()));
     funParam.setNacionalidade(ValidationUtil.trimToNull(dadosPessoais.getNacionalidade()));
+    funParam.setLocalidade(ValidationUtil.trimToNull(dadosPessoais.getLocalidade()));
     funParam.setLocNascId(ValidationUtil.ref(entityManager, GeografiaEntity.class, dadosPessoais.getNaturalidadeId()));
     funParam.setNif(dadosPessoais.getNif());
     funParam.setNuSegInps(ValidationUtil.trimToNull(dadosPessoais.getNumSegurado()));

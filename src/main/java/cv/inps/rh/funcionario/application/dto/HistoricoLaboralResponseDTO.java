@@ -33,6 +33,9 @@ public class HistoricoLaboralResponseDTO  {
   private String tipoSituacao ;
 
 
+  private String tipoSituacaoDesc ;
+
+
   private String tipoContrato ;
 
 

@@ -13,10 +13,13 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +54,8 @@ public class ValidacaoRenovacaoContratoService {
       // renovacao e APROVADA. Numa rejeicao o contrato mantem as datas actuais.
       if (aprovado) {
         contratoMapper.toUpdateEntity(contrato, dto.getDadosRenovacao());
+        // Caso de teste: a renovação estende a DATA_FIM das tabelas associadas.
+        atualizarDataFimAssociadas(tiposRelacionamento, funcionario, contrato.getDataFim());
       }
       mudarEstado(funcionario, aprovado ? Estado.A : Estado.I);
     }
@@ -62,6 +67,22 @@ public class ValidacaoRenovacaoContratoService {
     var renovacaoContratoDTO = new RenovacaoContratoDTO();
     renovacaoContratoDTO.setDadosRenovacao(contratoMapper.toRenovacaoContratoReqDTO(contrato));
     return renovacaoContratoDTO;
+  }
+
+  /** Renovação (caso de teste): estende a DATA_FIM das tabelas associadas ao tiprel + rem/pag activos. */
+  private void atualizarDataFimAssociadas(TiposRelacionamentoEntity tr, FuncionarioEntity funcionario, LocalDate novaDataFim) {
+    if (tr.getCarreiraId() != null) tr.getCarreiraId().setDataFim(novaDataFim);
+    if (tr.getMobId() != null) tr.getMobId().setDataFim(novaDataFim);
+    if (tr.getRegimeId() != null) tr.getRegimeId().setDataFim(novaDataFim);
+    if (tr.getSituacLaboralId() != null) tr.getSituacLaboralId().setDataFim(novaDataFim);
+    if (funcionario.getDefinicoesRenumeracoes() != null)
+      funcionario.getDefinicoesRenumeracoes().stream()
+          .filter(r -> r != null && r.getEstado() == Estado.A)
+          .forEach(r -> r.setDataFim(novaDataFim));
+    if (funcionario.getDefinicoesPagamentos() != null)
+      funcionario.getDefinicoesPagamentos().stream()
+          .filter(p -> p != null && p.getEstado() == Estado.A)
+          .forEach(p -> p.setDataFim(novaDataFim));
   }
 
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {

@@ -85,6 +85,8 @@ public class CarreiraMapper {
     ce.setTipoSituacao(dc.getTipoCarreira() != null ? dc.getTipoCarreira() : "NOVO_CONTRATO");
     ce.setObs("CARREIRA");
     ce.setDataInicio(dc.getDataInicio());
+    // Item 71: Data_Fim da carreira preenchida com a data fim do contrato
+    ce.setDataFim(dc.getDataFim());
     ce.setUuid(UuidCreator.getTimeOrderedEpoch());
     ce.setEstado(estado);
     return ce;

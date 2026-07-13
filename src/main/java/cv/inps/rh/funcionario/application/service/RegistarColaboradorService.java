@@ -232,6 +232,13 @@ public class RegistarColaboradorService {
     tr.setFlgProcessa(1);
     tr.setEstActAdm(1);
     tr.setSituacLaboralId(situacaoLaboral);
+
+    // Registo do colaborador: TIPO_SITUACAO = "INICIO" em todas as tabelas (caso de teste).
+    tr.setTipoSituacao("INICIO");
+    if (carreira != null) carreira.setTipoSituacao("INICIO");
+    if (regime != null) regime.setTipoSituacao("INICIO");
+    if (mobilidade != null) mobilidade.setTipoSituacao("INICIO");
+
     fun.setTiposrelacionamentos(new ArrayList<>(List.of(tr)));
     var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.REGISTO_COLABORADOR.name(),
         Estado.P);
