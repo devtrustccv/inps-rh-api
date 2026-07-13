@@ -49,9 +49,12 @@ public class SubstituicaoWriteService {
     );
 
 
+    var substitutoTiprel = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid());
+    var substituidoTiprel = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid());
+
     var substituicao = new SubstituicaoEntity();
-    substituicao.setSubstitutoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid()));
-    substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid()));
+    substituicao.setSubstitutoTiprelId(substitutoTiprel);
+    substituicao.setSubstituidoTiprelId(substituidoTiprel);
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());
     substituicao.setMotivo(ValidationUtil.trimToNull(dto.getMotivoSubstituicao()));
@@ -60,14 +63,24 @@ public class SubstituicaoWriteService {
     substituicao.setEstado(Estado.P);
     substituicaoEntityRepository.save(substituicao);
 
-    var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.SUBSTITUICAO.name(), Estado.P);
-    validacao.setFunId(funcionarioSubstituido);
-    validacao.setTiprelId(substituicao.getSubstitutoTiprelId());
-    validacao.setFunId(funcionarioSubstituido);
-    validacao.setReferenciaId(substituicao.getId());
-    validacao.setReferenciaUuid(substituicao.getUuid());
+    // Caso de teste: a substituição só segue para VALIDAÇÃO quando existe diferença salarial
+    // a favor do substituto (salário do substituto < salário do substituído).
+    // TODO: registar a diferença em RH_T_DEF_REMUNERACOES (Tipo Movimento "Diferença Salarial"
+    // parametrizado no vínculo, OBS='Substituição') + RH_T_TIPREL_REM_PAG — pendente de definir
+    // qual o tipo de movimento de diferença no vínculo.
+    var salarioSubstituto = substitutoTiprel.getSalario();
+    var salarioSubstituido = substituidoTiprel.getSalario();
+    boolean temDiferencaSalarial = salarioSubstituto != null && salarioSubstituido != null
+        && salarioSubstituto.compareTo(salarioSubstituido) < 0;
 
-    funcionarioSubstituido.getValidacoes().add(validacao);
+    if (temDiferencaSalarial) {
+      var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.SUBSTITUICAO.name(), Estado.P);
+      validacao.setFunId(funcionarioSubstituido);
+      validacao.setTiprelId(substituicao.getSubstitutoTiprelId());
+      validacao.setReferenciaId(substituicao.getId());
+      validacao.setReferenciaUuid(substituicao.getUuid());
+      funcionarioSubstituido.getValidacoes().add(validacao);
+    }
 
     funcionarioEntityRepository.save(funcionarioSubstituido);
 
