@@ -59,6 +59,9 @@ public class DadosPessoaisReqDTO  {
   private Long naturalidadeId ;
 
 
+  private String localidade ;
+
+
   private Long nif ;
 
 

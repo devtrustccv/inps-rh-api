@@ -81,6 +81,10 @@ public class FuncionarioEntity extends AuditEntity {
     private String nacionalidade;
 
 
+    @Column(name="localidade", length=200)
+    private String localidade;
+
+
 
 
   @ManyToOne(fetch = FetchType.LAZY)
