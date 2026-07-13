@@ -66,7 +66,9 @@ public class MobilidadeWriteService {
     var dataRegisto = LocalDate.now();
     tipoRelacionamentoAtual.setEstActAdm(0);
     tipoRelacionamentoAtual.setDataFim(dataRegisto);
+    // Caso de uso (RH_T_MOBILIDADE): "Atualiza o que estava do anterior, ativo para inativo".
     tipoRelacionamentoAtual.getMobId().setDataFim(dataRegisto);
+    tipoRelacionamentoAtual.getMobId().setEstado(Estado.I);
 
     novoTipoRelacionamento.setEstActAdm(1);
     novoTipoRelacionamento.setMobId(novaMobilidade);
