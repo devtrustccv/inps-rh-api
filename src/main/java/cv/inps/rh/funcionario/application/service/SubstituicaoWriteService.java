@@ -16,6 +16,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoMovimentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.SubstituicaoDetalheEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SubstituicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoRelRemPagEntity;
@@ -23,6 +24,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEn
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoMovimentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoDetalheEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoRelRemPagEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoEntityRepository;
@@ -30,6 +32,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoEntit
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +54,7 @@ public class SubstituicaoWriteService {
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
   private final ICalcularSubstituicaoRepository calcularSubstituicaoRepository;
+  private final SubstituicaoDetalheEntityRepository substituicaoDetalheEntityRepository;
 
   @Transactional
   public SubstituicaoDTO registrar(RegistarSubstituicaoCommand command) {
@@ -198,16 +202,17 @@ public class SubstituicaoWriteService {
                                        FuncionarioEntity funcionarioSubstituto,
                                        BigDecimal salarioSubstituto, BigDecimal salarioSubstituido) {
 
-    var tm = tipoMovimentoSubstituicao(substitutoTiprel);
-    if (tm == null) return; // WARN já emitido no helper
-
     LocalDate dataInicio = substituicao.getDataInicio();
     LocalDate dataFim = substituicao.getDataFim();
     if (dataInicio == null || dataFim == null || dataFim.isBefore(dataInicio)) {
-      log.warn("Substituição {}: datas inválidas (inicio={}, fim={}); diferença salarial não registada.",
+      log.warn("Substituição {}: datas inválidas (inicio={}, fim={}); detalhe/diferença não registados.",
           substituicao.getId(), dataInicio, dataFim);
       return;
     }
+
+    // Tipo de Movimento da diferença (REM_SUBSTITUICAO); se não existir, o WARN é emitido e não se
+    // grava DEF_REMUNERACOES, mas o RH_T_SUBSTITUICAO_DETALHE (detalhe mensal) é sempre criado.
+    var tm = tipoMovimentoSubstituicao(substitutoTiprel);
 
     YearMonth mesAtual = YearMonth.from(dataInicio);
     YearMonth mesFim = YearMonth.from(dataFim);
@@ -221,7 +226,19 @@ public class SubstituicaoWriteService {
       BigDecimal valorReceber = calcularSubstituicaoRepository
           .calcularValorReceber(nrDias, salarioSubstituto, salarioSubstituido);
 
-      if (valorReceber != null && valorReceber.signum() > 0) {
+      // Caso de uso: RH_T_SUBSTITUICAO_DETALHE — um registo por mês do período.
+      var detalhe = new SubstituicaoDetalheEntity();
+      detalhe.setSubstituicaoId(substituicao);
+      detalhe.setMesAno(mesAtual.format(DateTimeFormatter.ofPattern("yyyyMM")));
+      detalhe.setNrDias(nrDias);
+      detalhe.setValorDoSubstituto(salarioSubstituto);
+      detalhe.setValorDoSubstituido(salarioSubstituido);
+      detalhe.setEstado(Estado.P);
+      substituicaoDetalheEntityRepository.save(detalhe);
+
+      // Diferença salarial em DEF_REMUNERACOES (+ TIPREL_REM_PAG), OBS='Substituição' — só quando o
+      // vínculo tem REM_SUBSTITUICAO parametrizado e há valor a favor do substituto.
+      if (tm != null && valorReceber != null && valorReceber.signum() > 0) {
         var defRem = definicaoRemuneracaoMapper.createRenumeracao(
             valorReceber, tm, diaInicio, diaFim, funcionarioSubstituto, substitutoTiprel.getMoeda());
         defRem.setObs("Substituição");
