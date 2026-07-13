@@ -39,4 +39,7 @@ public interface ValidacaoEntityRepository extends
   findByTiprelIdAndEstadoAndTipoAccaoAndReferenciaName(TiposRelacionamentoEntity tiposRelacionamento, Estado estado, String tipoAccao, String referenciaName);
 
     Optional<ValidacaoEntity> findByReferenciaUuidAndEstadoAndTipoAccaoAndReferenciaName(UUID referenciaUuid, Estado estado, String tipoAccao, String referenciaName);
+
+  /** Nº de validações de uma referência (ex.: renovações de um contrato) num dado estado/ação. */
+  long countByReferenciaIdAndReferenciaNameAndTipoAccaoAndEstado(Long referenciaId, String referenciaName, String tipoAccao, Estado estado);
 }
