@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.ExperienciaProfissionalReqDTO;
 import cv.inps.rh.funcionario.application.dto.ExperienciaProfissionalRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -37,6 +38,7 @@ public class ExperienciaProfissionalMapper {
     e.setDataInicio(dto.getDataEntrada());
     e.setDataFim(dto.getDataSaida());
     e.setObservacao(ValidationUtil.trimToNull(dto.getObservacoes()));
+    e.setUuid(UuidCreator.getTimeOrderedEpoch());
     e.setFunId(fun);
     e.setEstado(estado);
 
