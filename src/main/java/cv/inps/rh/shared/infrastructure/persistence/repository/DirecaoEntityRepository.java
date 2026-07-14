@@ -23,7 +23,7 @@ public interface DirecaoEntityRepository extends
   }
 
   @Query(value = """
-    SELECT T.ID AS id, '(' || T.SIGA || ') ' || T.NOME AS nome
+    SELECT T.ID AS id, T.NOME AS nome
     FROM RH_T_DIRECAO T
     WHERE T.ESTADO = 'A'
     ORDER BY T.NOME

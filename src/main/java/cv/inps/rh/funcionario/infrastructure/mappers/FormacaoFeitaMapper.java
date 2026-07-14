@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.FormacaoProfissionalReqDTO;
 import cv.inps.rh.funcionario.application.dto.FormacaoProfissionalRespDTO;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -35,6 +36,7 @@ public class FormacaoFeitaMapper {
     e.setRhtpfor(ValidationUtil.trimToNull(dto.getTipoFormacao()));
     e.setCurso(ValidationUtil.trimToNull(dto.getDesignacao()));
     e.setNivel(ValidationUtil.trimToNull(dto.getNivel()));
+    e.setUuid(UuidCreator.getTimeOrderedEpoch());
     e.setFunId(fun);
     e.setEstado(estado);
 
