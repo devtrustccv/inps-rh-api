@@ -32,6 +32,9 @@ public class ContratoListDTO  {
   private String situacao ;
 
 
+  private String situacaoDesc ;
+
+
   private String tipoContrato ;
 
 

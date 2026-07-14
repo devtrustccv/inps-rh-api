@@ -96,7 +96,7 @@ public class NovoContratoService {
 
     var contratoNovo = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contratoNovo.setFunId(funcionario);
-    contratoNovo.setTipoSituacao("CONTINUIDADE");
+    contratoNovo.setTipoSituacao("NOVO_CONTRATO");
     contratoNovo.setVersao(contratoAtual.getVersao() + 1);
     contratoNovo.setContratoId(contratoAtual); // contrato pai
     funcionario.getContratos().add(contratoNovo);
@@ -132,6 +132,8 @@ public class NovoContratoService {
 
     var tiposRelacionamentoNovo = dadosContratuaisMapper.toRelacionamento(dadosContratuais, Estado.P);
     tiposRelacionamentoNovo.setFunId(funcionario);
+    // Caso de uso 1.2: TIPREL_ID = id do tipo de relacionamento anterior.
+    tiposRelacionamentoNovo.setTiprelId(tipoRelacionamentoAtual);
     tiposRelacionamentoNovo.setContrVinculoId(contratoNovo);
     tiposRelacionamentoNovo.setCarreiraId(carreira);
     tiposRelacionamentoNovo.setRegimeId(regime);
@@ -154,7 +156,14 @@ public class NovoContratoService {
 
       if (!CollectionUtils.isEmpty(dadosContratuais.getSubsidios())) {
         var remList = dadosContratuais.getSubsidios().stream()
-            .map(s -> definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P))
+            .map(s -> {
+              // Caso de uso 1.2: DATA_INICIO/FIM = do novo contrato; OBS = "Novo Contrato".
+              var r = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
+              r.setDataInicio(contratoNovo.getDataInicio());
+              r.setDataFim(contratoNovo.getDataFim());
+              r.setObs("Novo Contrato");
+              return r;
+            })
             .collect(Collectors.toList());
         funcionario.setDefinicoesRenumeracoes(remList);
       }
@@ -169,7 +178,12 @@ public class NovoContratoService {
 
       if (!CollectionUtils.isEmpty(dadosContratuais.getEncargosDescontos())) {
         var pagList = dadosContratuais.getEncargosDescontos().stream()
-            .map(e -> defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P))
+            .map(e -> {
+              // Caso de uso 1.2: OBS = "Novo Contrato".
+              var p = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
+              p.setObs("Novo Contrato");
+              return p;
+            })
             .collect(Collectors.toList());
         funcionario.setDefinicoesPagamentos(pagList);
       }
@@ -417,7 +431,12 @@ public class NovoContratoService {
 
       if (dadosContratuais.getEncargosDescontos() != null && !dadosContratuais.getEncargosDescontos().isEmpty()) {
         var pagList = dadosContratuais.getEncargosDescontos().stream()
-            .map(e -> defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P))
+            .map(e -> {
+              // Caso de uso 1.2: OBS = "Novo Contrato".
+              var p = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
+              p.setObs("Novo Contrato");
+              return p;
+            })
             .collect(Collectors.toList());
         funcionario.setDefinicoesPagamentos(pagList);
       }

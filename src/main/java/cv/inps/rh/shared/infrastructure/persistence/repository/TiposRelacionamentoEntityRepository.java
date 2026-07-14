@@ -48,6 +48,9 @@ public interface TiposRelacionamentoEntityRepository extends
   // Igual ao anterior mas exclui um registo (o vínculo que está a ser fechado/substituído numa progressão).
   boolean existsByFunIdAndEstadoAndFlgProcessaAndIdNot(FuncionarioEntity funId, Estado estado, Integer flgProcessa, Long id);
 
+  /** Existe OUTRO vínculo EM VIGOR (data_fim null) validado e a processar salário? (regra: só 1 processa). */
+  boolean existsByFunIdAndEstadoAndFlgProcessaAndDataFimIsNullAndIdNot(FuncionarioEntity funId, Estado estado, Integer flgProcessa, Long id);
+
   Optional<TiposRelacionamentoEntity> findByUuid(UUID uuid);
 
   default TiposRelacionamentoEntity findByUuidOrThrow(UUID uuid) {

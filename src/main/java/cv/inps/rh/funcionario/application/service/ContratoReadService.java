@@ -4,6 +4,7 @@ import cv.inps.rh.funcionario.application.dto.WrapperListContratoDTO;
 import cv.inps.rh.funcionario.application.queries.GetListContratosQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContratoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.service.DominioService;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RhVContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.RhVContratoEntityRepository;
@@ -27,6 +28,7 @@ public class ContratoReadService {
 
   private final ContratoMapper contratoMapper;
   private final RhVContratoEntityRepository rhVContratoEntityRepository;
+  private final DominioService dominioService;
 
   @Transactional(readOnly = true)
   public WrapperListContratoDTO listaContratos(GetListContratosQuery query) {
@@ -55,8 +57,14 @@ public class ContratoReadService {
     Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
     Page<RhVContratoEntity> page = rhVContratoEntityRepository.findAll(spec, pageable);
 
+    // situacaoDesc: traduz o tipo de situação do contrato (domínio TIPO_MOV_LABORAL, com fallback ao código)
+    var dominioMovLaboral = dominioService.getDominioMap("TIPO_MOV_LABORAL");
     var content = page.getContent().stream()
-        .map(contratoMapper::toDTO)
+        .map(v -> {
+          var dto = contratoMapper.toDTO(v);
+          dto.setSituacaoDesc(dominioService.traduzir(dominioMovLaboral, v.getTipoSituacao()));
+          return dto;
+        })
         .toList();
 
     var wrapper = new WrapperListContratoDTO();
