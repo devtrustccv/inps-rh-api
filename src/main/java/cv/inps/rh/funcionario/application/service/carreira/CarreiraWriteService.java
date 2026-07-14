@@ -278,7 +278,9 @@ public class CarreiraWriteService {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
 
-    var carreira = carreiraEntityRepository.findByContrVinculoIdFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
+    // A carreira pendente pode ter DATA_FIM (data fim do contrato); não filtrar por DataFimIsNull
+    // (senão vinha null e dava NPE ao validar).
+    var carreira = carreiraEntityRepository.findByContrVinculoIdFunIdAndEstado(funcionario, Estado.P);
     carreira.setEstado(estado);
     if (!aprovado) carreira.setObs("Não Validado");
     carreiraEntityRepository.save(carreira);

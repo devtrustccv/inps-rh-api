@@ -85,6 +85,8 @@ public class AlterarSituacaoLaboralWriteService {
           .ifPresent(v -> v.setEstado(estado));
 
       if (paramSituacaoLaboral.getCodigo().equals(SituacaoLaboral.CESSADO.name())) {
+        // Cessação APROVADA → o colaborador fica efetivamente inativo (RH_T_FUNCIONARIOS.ESTADO=I).
+        if (estado == Estado.A) funcionario.setEstado(Estado.I);
         var dataFimValidacao = DateFormatter.stringToLocalDate(dto.getDataFim());
         tiposRelacionamentoAtual.setDataFim(dataFimValidacao);
         tiposRelacionamentoAtual.setEstActAdm(0);
