@@ -36,16 +36,28 @@ public class CarreiraResponseDTO  {
   private Long carreiraId ;
 
 
+  private String carreiraDesc ;
+
+
   private String tipoCarreira ;
 
 
   private Long cargoId ;
 
 
+  private String cargoDesc ;
+
+
   private Long categoriaId ;
 
 
+  private String categoriaDesc ;
+
+
   private Long escalaoId ;
+
+
+  private String escalaoDesc ;
 
 
   private String salario ;
