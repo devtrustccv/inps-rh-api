@@ -60,17 +60,22 @@ public class MobilidadeWriteService {
     //   funcionarioRules.garantirEditavel(tipoRelacionamentoAtual.getMobId().getEstado());
     var novoTipoRelacionamento = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
 
-    // Spec: DATA_FIM do vínculo fechado = data início da nova mobilidade - 1
-    var dataFimAnterior = mobilidadeDto.getDataInicio() != null ? mobilidadeDto.getDataInicio().minusDays(1) : LocalDate.now();
+    // Caso de uso: no update do vínculo anterior, DATA_FIM = Data do registo (não dataInicio-1, que
+    // fecharia o vínculo antes de começar e viola CK_TIPREL_PERIODO quando registo e mobilidade são
+    // no mesmo dia).
+    var dataRegisto = LocalDate.now();
     tipoRelacionamentoAtual.setEstActAdm(0);
-    tipoRelacionamentoAtual.setDataFim(dataFimAnterior);
-    tipoRelacionamentoAtual.getMobId().setDataFim(dataFimAnterior);
+    tipoRelacionamentoAtual.setDataFim(dataRegisto);
+    // Caso de uso (RH_T_MOBILIDADE): "Atualiza o que estava do anterior, ativo para inativo".
+    tipoRelacionamentoAtual.getMobId().setDataFim(dataRegisto);
+    tipoRelacionamentoAtual.getMobId().setEstado(Estado.I);
 
     novoTipoRelacionamento.setEstActAdm(1);
     novoTipoRelacionamento.setMobId(novaMobilidade);
     novoTipoRelacionamento.setEstado(Estado.P);
-    // Spec: DATA_INICIO do novo vínculo = data do registo (não herdar a do vínculo anterior via clone)
-    novoTipoRelacionamento.setDataInicio(mobilidadeDto.getDataInicio() != null ? mobilidadeDto.getDataInicio() : LocalDate.now());
+    // Caso de uso: novo vínculo DATA_INICIO = Data do registo, DATA_FIM = nulo.
+    novoTipoRelacionamento.setDataInicio(dataRegisto);
+    novoTipoRelacionamento.setDataFim(null);
     novoTipoRelacionamento.setTipoSituacao(ValidationUtil.trimToNull(mobilidadeDto.getTipoMobilidade()));
     // Spec: REFERENTE = 'MOBILIDADE', OBS = 'MOBILIDADE-'||tipo (não herdar do vínculo clonado)
     novoTipoRelacionamento.setReferente(Referencia.MOBILIDADE.name());

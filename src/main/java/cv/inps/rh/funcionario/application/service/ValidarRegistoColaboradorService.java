@@ -139,14 +139,22 @@ public class ValidarRegistoColaboradorService {
     var regime = tiposRelacionamento.getRegimeId();
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
 
+    // Registo do colaborador: TIPO_SITUACAO = "INICIO" em todas as tabelas afetadas (caso de teste).
+    // Reforça aqui porque os toUpdate* repõem "NOVO_CONTRATO"; a validação não deve alterar o
+    // tipo de situação definido no registo.
+    tiposRelacionamento.setTipoSituacao("INICIO");
+    if (carreira != null) carreira.setTipoSituacao("INICIO");
+    if (regime != null) regime.setTipoSituacao("INICIO");
+    if (mobilidade != null) mobilidade.setTipoSituacao("INICIO");
+
     colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
     colaboradorValidationRules.validarEncargosDescontosDuplicados(dadosContratuais.getEncargosDescontos());
 
     var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(),
-        dadosContratuais.getSubsidios());
+        dadosContratuais.getSubsidios(), funcionario);
 
     var definicoesPagamentos = defPagamentoMapper.syncPagamentos(funcionario.getDefinicoesPagamentos(),
-        dadosContratuais.getEncargosDescontos());
+        dadosContratuais.getEncargosDescontos(), funcionario);
 
     var alertas = funcionarioRules.validarContactosDuplicados(dadosPessoaisReqDTO.getContactos(), funcionario.getUuid());
 

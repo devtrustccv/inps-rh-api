@@ -11,6 +11,7 @@ import cv.inps.rh.funcionario.application.commands.ValidarMobilidadeCommand;
 import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListMobilidadeDTO;
 import cv.inps.rh.funcionario.application.queries.GetListMobilidadesQuery;
+import cv.inps.rh.funcionario.application.queries.GetMobilidadeAtualQuery;
 import cv.inps.rh.funcionario.application.queries.GetMobilidadeByIdQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -96,6 +97,37 @@ public class MobilidadeController {
   {
 
       final var query = new GetMobilidadeByIdQuery(id);
+
+      ResponseEntity<MobilidadeDTO> response = queryBus.handle(query);
+
+      return response;
+  }
+
+   @GetMapping(
+   value = "mobilidades/{idFuncionario}/atual"
+  )
+  @Operation(
+    summary = "Get mobilidade atual do funcionario",
+    description = "Get mobilidade atual do funcionario",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = MobilidadeDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<MobilidadeDTO> getMobilidadeAtual(
+    @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var query = new GetMobilidadeAtualQuery(idFuncionario);
 
       ResponseEntity<MobilidadeDTO> response = queryBus.handle(query);
 

@@ -53,7 +53,8 @@ public class DefPagamentoMapper {
 
   public List<DefPagamentoEntity> syncPagamentos(
       java.util.List<DefPagamentoEntity> existingList,
-      java.util.List<cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO> newList) {
+      java.util.List<cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO> newList,
+      FuncionarioEntity fun) {
     if (org.springframework.util.CollectionUtils.isEmpty(newList)) return existingList;
     for (cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO dto : newList) {
       DefPagamentoEntity found = null;
@@ -71,14 +72,9 @@ public class DefPagamentoMapper {
         found.setDataFim(dto.getDataFim());
         found.setObs(dto.getObservacoes());
       } else {
-        DefPagamentoEntity novo = new DefPagamentoEntity();
-        novo.setTmId(ValidationUtil.ref(entityManager, TipoMovimentoEntity.class, dto.getTipoEncargoId()));
-        novo.setValor(dto.getValor() != null ? dto.getValor() : BigDecimal.ZERO);
-        novo.setDataInicio(dto.getDataInicio());
-        novo.setDataFim(dto.getDataFim());
-        novo.setObs(dto.getObservacoes());
-        novo.setEstado(Estado.P);
-        existingList.add(novo);
+        // Novo encargo/desconto: usar toDefPagamento para garantir funId + uuid (evita ORA-01400
+        // por FUN_ID null na inserção).
+        existingList.add(toDefPagamento(dto, fun, Estado.P));
       }
     }
     for (DefPagamentoEntity existing : existingList) {
