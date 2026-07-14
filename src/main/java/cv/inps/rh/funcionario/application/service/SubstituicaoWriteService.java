@@ -167,6 +167,12 @@ public class SubstituicaoWriteService {
 
       substituicao.setEstado(estado);
 
+      // RH_T_SUBSTITUICAO_DETALHE (detalhe mensal) acompanha a decisão: P->A na aprovação, P->I na rejeição.
+      substituicaoDetalheEntityRepository.findBySubstituicaoId_Id(substituicao.getId())
+          .stream()
+          .filter(d -> d.getEstado() == Estado.P)
+          .forEach(d -> d.setEstado(estado));
+
       // Diferença salarial: o DEF_REMUNERACOES da diferença acompanha a decisão — P->A na aprovação,
       // P->I na rejeição. Identifica-se pelo Tipo de Movimento REM_SUBSTITUICAO do vínculo do
       // substituto (determinístico), não por texto de OBS. Sem isto a diferença ficaria pendente.
