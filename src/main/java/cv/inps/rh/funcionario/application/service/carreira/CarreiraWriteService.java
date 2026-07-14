@@ -73,7 +73,7 @@ public class CarreiraWriteService {
     // Doc: "somente uma carreira pode processar ao mesmo tempo". Exclui o vínculo actual, que é
     // fechado/substituído nesta operação (permite progredir uma carreira que já processa).
     if (Integer.valueOf(1).equals(dto.getFlgProcessa())
-        && tiposRelacionamentoEntityRepository.existsByFunIdAndEstadoAndFlgProcessaAndIdNot(
+        && tiposRelacionamentoEntityRepository.existsByFunIdAndEstadoAndFlgProcessaAndDataFimIsNullAndIdNot(
             funcionario, Estado.A, 1, relacionamentoAtual.getId()))
       throw IgrpResponseStatusException.conflict("Já existe um vínculo ativo com processamento salarial para este funcionário");
 
