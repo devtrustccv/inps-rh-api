@@ -120,11 +120,15 @@ public class ContratoMapper {
 
   public ContratoEntity toUpdateEntity(ContratoEntity entity, RenovarContratoReqDTO dc) {
     if (dc == null) return null;
-    entity.setDataInicio(dc.getDataInicio());
-    entity.setDataFim(dc.getDataFim());
-    entity.setDuracao(dc.getDuracaoMeses());
-    entity.setTpContratoId(ValidationUtil.ref(entityManager, ParamContratoEntity.class, dc.getTipoContratoId()));
-    entity.setVinculoId(ValidationUtil.ref(entityManager, ParamVinculoEntity.class, dc.getTipoVinculoId()));
+    // Ponto 9: só sobrescrever campos enviados; a renovação não deve apagar tipo/vínculo (nem
+    // datas) quando o payload da validação os omite (senão o contrato ficava com dados null).
+    if (dc.getDataInicio() != null) entity.setDataInicio(dc.getDataInicio());
+    if (dc.getDataFim() != null) entity.setDataFim(dc.getDataFim());
+    if (dc.getDuracaoMeses() != null) entity.setDuracao(dc.getDuracaoMeses());
+    if (dc.getTipoContratoId() != null)
+      entity.setTpContratoId(ValidationUtil.ref(entityManager, ParamContratoEntity.class, dc.getTipoContratoId()));
+    if (dc.getTipoVinculoId() != null)
+      entity.setVinculoId(ValidationUtil.ref(entityManager, ParamVinculoEntity.class, dc.getTipoVinculoId()));
     return entity;
   }
 

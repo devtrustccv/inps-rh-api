@@ -127,18 +127,23 @@ public class CarreiraReadService {
     var contrato = tr.getContrVinculoId();
     var fun = tr.getFunId();
     var vinc = contrato.getVinculoId();
-    var carrPcc = tr.getCarreiraId() !=null ? tr.getCarreiraId().getCarrPccsId() : null;
-    var esc = tr.getCarreiraId() !=null ? tr.getCarreiraId().getEscalaoId() : null;
-    var categoria = tr.getCarreiraId()!=null ? tr.getCarreiraId().getEscalaoId(): null;
+    var carrPcc = car != null ? car.getCarrPccsId() : null;
+    var esc = car != null ? car.getEscalaoId() : null;
+    // Ponto 20: a categoria vem de car.getCategoriaId() (antes usava o escalão -> categoriaId==escalaoId).
+    var categoria = car != null ? car.getCategoriaId() : null;
+    var cargo = car != null ? car.getCargoId() : null;
 
     var dto = new CarreiraResponseDTO();
     dto.setMoeda(tr.getMoeda());
     dto.setFuncionarioId(fun != null && fun.getUuid() != null ? fun.getUuid().toString() : null);
     dto.setTipoCarreira(car!=null ? car.getTipoSituacao() : null);
     dto.setTipoContratoId(contrato.getTpContratoId().getId());
-    dto.setCargoId(tr.getCargoId() != null ? tr.getCargoId().getId() : null);
+    dto.setCargoId(cargo != null ? cargo.getId() : null);
+    dto.setCargoDesc(cargo != null ? cargo.getNome() : null);
     dto.setCarreiraId(carrPcc != null ? carrPcc.getId() : null);
+    dto.setCarreiraDesc(carrPcc != null ? carrPcc.getNome() : null);
     dto.setEscalaoId(esc != null ? esc.getId() : null);
+    dto.setEscalaoDesc(esc != null ? (esc.getNivelReferencia() != null ? esc.getNivelReferencia() : "") + esc.getEscalao() : null);
     dto.setSalario(car!=null ? car.getSalario().toString() : null);
     dto.setTipoVinculoLaboral(vinc != null ? vinc.getNome() : null);
     dto.setTipoVinculoLaboralId(vinc != null ? vinc.getId() : null);
@@ -150,6 +155,7 @@ public class CarreiraReadService {
     // PROCESSAMENTO (vista RH_V_CARREIRA): true se a carreira ja foi processada em folha
     dto.setProcessamento(car != null && processamentoFuncionarioRepository.existsByTiprel_CarreiraId_Id(car.getId()));
     dto.setCategoriaId(categoria != null ? categoria.getId() : null);
+    dto.setCategoriaDesc(categoria != null ? categoria.getNome() : null);
 
     if (car != null) {
       dto.setEstado(car.getEstado().getCode());

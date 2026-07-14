@@ -79,6 +79,9 @@ public class CarreiraMapper {
     ce.setCargoId(ValidationUtil.ref(entityManager, ParamCargoEntity.class, dc.getCargoPosicaoId()));
     ce.setEscalaoId(ValidationUtil.ref(entityManager, ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
     ce.setCarrPccsId(ValidationUtil.ref(entityManager, ParamCarreiraEntity.class, dc.getCarreiraId()));
+    // Categoria: gravar na criação (spec DOSSIÊ: Categoria = RH_T_CARREIRA.CATEGORIA_ID).
+    // Antes só o toUpdateEntity gravava -> carreira nova ficava com CATEGORIA_ID null.
+    ce.setCategoriaId(ValidationUtil.ref(entityManager, ParamCategoriaEntity.class, dc.getCategoriaId()));
 
     ce.setSalario(dc.getSalario());
     ce.setFlgProcessa(dc.getFlgProcessa() != null ? dc.getFlgProcessa() : 1);

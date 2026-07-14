@@ -27,6 +27,9 @@ public interface CarreiraEntityRepository extends
 
   CarreiraEntity findByContrVinculoIdFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity fun, Estado estado);
 
+  /** Carreira pendente do funcionário independentemente de DATA_FIM (a pendente pode ter data fim do contrato). */
+  CarreiraEntity findByContrVinculoIdFunIdAndEstado(FuncionarioEntity fun, Estado estado);
+
   boolean existsByContrVinculoIdFunIdAndEstado(FuncionarioEntity fun, Estado estado);
 
   // Carreiras actualmente activas do funcionário (estado A e ainda em vigor: data fim nula).
