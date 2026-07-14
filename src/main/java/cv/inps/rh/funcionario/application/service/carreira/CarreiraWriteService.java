@@ -124,12 +124,15 @@ public class CarreiraWriteService {
 
     var novaCarreira = Objects.requireNonNull(carreiraMapper.toCarreira(dto, Estado.P));
     novaCarreira.setObs("CARREIRA");
+    // Caso de uso 1.5: TIPO_SITUACAO = tipo situação de carreira (default CARREIRA_NOVO).
+    novaCarreira.setTipoSituacao(tipoCarreira);
     novaCarreira.setContrVinculoId(contratoAtual);
     novaCarreira.setEstActAdm(1);
     carreiraEntityRepository.save(novaCarreira);
 
     var novoRelacionamento = contratuaisEntityMapper.toRelacionamento(dto, Estado.P);
     novoRelacionamento.setObs(obsMovimento);
+    novoRelacionamento.setTipoSituacao(tipoCarreira);
     // Caso de uso 1.5: novo tiprel DATA_INICIO = data do registo, DATA_FIM = null, TIPREL_ID = anterior.
     novoRelacionamento.setDataInicio(java.time.LocalDate.now());
     novoRelacionamento.setDataFim(null);
