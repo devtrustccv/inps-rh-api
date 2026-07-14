@@ -22,8 +22,8 @@ public class ValidacaoCarreiraDTO  {
   @NotBlank(message = "The field <validacao> is required")
 
   private String validacao ;
-  @NotNull(message = "The field <dados> is required")
-  @Valid
+  // Opcional: a validação (aprovar/rejeitar) não precisa dos dados contratuais; exigi-los fazia o
+  // endpoint devolver 400 quando o frontend enviava só {validacao}. Mantido opcional.
   private DadosContratuaisReqDTO dados ;
 
 }
