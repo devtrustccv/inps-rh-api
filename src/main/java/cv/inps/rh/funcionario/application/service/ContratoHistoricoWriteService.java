@@ -21,7 +21,10 @@ public class ContratoHistoricoWriteService {
    */
   public ContratoHistoricoEntity registrarNovo(ContratoEntity contrato) {
     var h = buildBase(contrato);
-    h.setVersao(1);
+    // A versão do histórico deve acompanhar a versão do contrato (1 no registo inicial,
+    // 2+ num novo contrato). Antes estava fixo em 1 -> a listagem mostrava sempre
+    // versao=1/inicial=true, mesmo para o 2.º contrato.
+    h.setVersao(contrato.getVersao() != null ? contrato.getVersao() : 1);
     h.setEstado(Estado.P);
     h.setObs("NOVO_CONTRATO");
     return contratoHistoricoEntityRepository.save(h);
