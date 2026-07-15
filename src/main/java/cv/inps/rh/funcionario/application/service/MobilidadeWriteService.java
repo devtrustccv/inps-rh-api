@@ -166,7 +166,10 @@ public class MobilidadeWriteService {
        mobilidade.setEstado(estado);
        tipoRelacionamentoAtual.setEstado(estado);
 
+      // A validação pendente pode ser INSERT (nova mobilidade) ou UPDATE (edição). Trata ambos,
+      // senão a validação de uma edição ficava presa em P mesmo depois de aprovada.
       var validacao = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.MOBILIDADE)
+          .or(() -> funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.MOBILIDADE))
           .orElse(null);
       if (validacao != null) validacao.setEstado(estado);
 
