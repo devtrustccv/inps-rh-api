@@ -11,9 +11,12 @@ import cv.inps.rh.funcionario.infrastructure.mappers.MobilidadeMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
+import cv.inps.rh.shared.infrastructure.persistence.entity.MobilidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RhVMobilidadeEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MobilidadeEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.RhVMobilidadeEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,6 +37,7 @@ public class MobilidadeReadService {
   private final RhVMobilidadeEntityRepository rhVMobilidadeEntityRepository;
   private final MobilidadeMapper mobilidadeMapper;
   private final FuncionarioRules funcionarioRules;
+  private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
 
   @Transactional(readOnly = true)
   public WrapperListMobilidadeDTO getListMobilidade(GetListMobilidadesQuery query) {
@@ -98,7 +102,15 @@ public class MobilidadeReadService {
         () -> IgrpResponseStatusException.notFound("mobilidade nao encontrada com id"+query.getId())
     );
 
-    return mobilidadeMapper.mobilidadeDTO(mobilidade);
+    // "Antes" = direção do vínculo anterior. O tiprel que introduziu esta mobilidade tem
+    // TIPREL_ID a apontar para o vínculo anterior, cujo MOB_ID dá a direção "antes".
+    MobilidadeEntity anterior = tiposRelacionamentoEntityRepository
+        .findFirstByMobId_IdOrderByIdAsc(mobilidade.getId())
+        .map(TiposRelacionamentoEntity::getTiprelId)
+        .map(TiposRelacionamentoEntity::getMobId)
+        .orElse(null);
+
+    return mobilidadeMapper.mobilidadeDetalheDTO(mobilidade, anterior);
   }
 
   @Transactional(readOnly = true)

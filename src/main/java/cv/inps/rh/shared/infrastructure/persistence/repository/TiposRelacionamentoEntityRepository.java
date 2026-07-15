@@ -43,6 +43,10 @@ public interface TiposRelacionamentoEntityRepository extends
 
   boolean existsByMobId_SecaoId(SecaoEntity section);
 
+  // Tiprel que introduziu esta mobilidade (o mais antigo que a referencia). O seu TIPREL_ID (pai)
+  // aponta para o vínculo anterior, cujo MOB_ID é a mobilidade "antes". Usado no detalhe/editar.
+  Optional<TiposRelacionamentoEntity> findFirstByMobId_IdOrderByIdAsc(Long mobId);
+
   boolean existsByFunIdAndEstadoAndFlgProcessa(FuncionarioEntity funId, Estado estado, Integer flgProcessa);
 
   // Igual ao anterior mas exclui um registo (o vínculo que está a ser fechado/substituído numa progressão).
