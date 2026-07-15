@@ -41,6 +41,11 @@ public class SubstituicaoDetalheEntity {
   @Column(name = "valor_do_substituido", nullable = false)
   private BigDecimal valorDoSubstituido;
 
+  // Diferença salarial proporcional aos dias do mês (proc CALCULAR_SUBSTITUICAO) — o valor a
+  // favor do substituto. Coluna acrescentada à RH_T_SUBSTITUICAO_DETALHE.
+  @Column(name = "valor_diferenca")
+  private BigDecimal valorDiferenca;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "substituicao_id", referencedColumnName = "id", nullable = false)
   private SubstituicaoEntity substituicaoId;

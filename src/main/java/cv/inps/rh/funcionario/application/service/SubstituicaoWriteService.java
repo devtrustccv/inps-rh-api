@@ -239,6 +239,8 @@ public class SubstituicaoWriteService {
       detalhe.setNrDias(nrDias);
       detalhe.setValorDoSubstituto(salarioSubstituto);
       detalhe.setValorDoSubstituido(salarioSubstituido);
+      // Diferença salarial do mês (proporcional aos dias) = valor a favor do substituto (proc).
+      detalhe.setValorDiferenca(valorReceber);
       detalhe.setEstado(Estado.P);
       substituicaoDetalheEntityRepository.save(detalhe);
 

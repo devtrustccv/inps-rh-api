@@ -63,6 +63,16 @@ public class CarreiraWriteService {
     if (dto.getFlgProcessa() == null)
       throw IgrpResponseStatusException.badRequest("O campo 'processar salário' é obrigatório");
 
+    // Salário automático: numa carreira o salário vem do ESCALÃO (spec DOSSIÊ: "o campo salário é
+    // preenchido automaticamente caso FLG_CARREIRA=1" + função GET_SALARIO(P_ESCALAO)). Não se usa
+    // o valor enviado. Derivar aqui garante que a carreira, a def_remuneração e houveMudancaSalario
+    // usam o valor correto do escalão.
+    if (dto.getEscalaoReferenciaId() != null) {
+      var escalaoSel = entityManager.find(ParamEscalaoEntity.class, dto.getEscalaoReferenciaId());
+      if (escalaoSel != null && escalaoSel.getValor() != null)
+        dto.setSalario(escalaoSel.getValor());
+    }
+
     var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
 
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -99,15 +109,19 @@ public class CarreiraWriteService {
     relacionamentoAtual.setEstActAdm(0);
     tiposRelacionamentoEntityRepository.save(relacionamentoAtual);
 
-    var defRemuneracao = definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
-    defRemuneracao.forEach(obj -> {
+    // Fechar as remunerações/descontos ASSOCIADOS AO TIPREL ATUAL (os que estão a ser
+    // substituídos), usando as listas já capturadas acima — e não o filtro DataFimIsNull.
+    // Uma renovação anterior pode ter preenchido a DATA_FIM destes registos; com o filtro
+    // DataFimIsNull escapavam ao fecho, ficavam Estado.A e o transferir re-associava-os ao novo
+    // tiprel além das cópias novas (duplicação). Use case: nova carreira "faz 3 registos de
+    // desconto" e o anterior fecha -> o novo tiprel deve ficar só com os novos.
+    remuneracoesAtivas.forEach(obj -> {
       obj.setDataFim(dataFimAnterior);
       obj.setEstado(Estado.I);
       definicaoRemuneracaoEntityRepository.save(obj);
     });
 
-    var defPagamento = defPagamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
-    defPagamento.forEach(obj -> {
+    pagamentosAtivos.forEach(obj -> {
       obj.setDataFim(dataFimAnterior);
       obj.setEstado(Estado.I);
       defPagamentoEntityRepository.save(obj);
@@ -349,6 +363,13 @@ public class CarreiraWriteService {
 
     if (!carreira.getContrVinculoId().getFunId().getId().equals(funcionario.getId()))
       throw IgrpResponseStatusException.badRequest("Carreira não pertence a este funcionário");
+
+    // Salário automático do escalão (spec DOSSIÊ: FLG_CARREIRA=1 -> salário preenchido do escalão).
+    if (dto.getEscalaoReferenciaId() != null) {
+      var escalaoSel = entityManager.find(ParamEscalaoEntity.class, dto.getEscalaoReferenciaId());
+      if (escalaoSel != null && escalaoSel.getValor() != null)
+        dto.setSalario(escalaoSel.getValor());
+    }
 
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(carreira.getEstado());
 

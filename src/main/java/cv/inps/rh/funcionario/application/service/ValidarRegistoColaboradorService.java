@@ -86,22 +86,22 @@ public class ValidarRegistoColaboradorService {
         .syncFamiliares(funcionario.getFamiliares(),
             registroColaborador.getFamiliares(), funcionario, Estado.P);
 
+    // dadosAcademicosProf pode vir null (secção não enviada no payload). Nesse caso não se mexe
+    // nas coleções académicas: evita o NPE e evita o soft-delete indevido das existentes (sync
+    // com lista vazia apagaria; aqui mantemos as atuais).
     var dadosAcademicosProf = registroColaborador.getDadosAcademicosProf();
-
-    colaboradorValidationRules.validarHabilitacoesLiterarias(dadosAcademicosProf.getHabilitacoesLiterarias());
-
-    var habilitacoesLiterarias = habilitacaoLiterariaMapper
-        .syncHabilitacoes(funcionario.getHabilitacoesLiterarias(),
-        dadosAcademicosProf.getHabilitacoesLiterarias(), funcionario, Estado.P);
-
-    var formacoesFeitas = formacaoFeitaMapper
-        .syncFormacoes(funcionario.getFormacoesFeitas(),
-        dadosAcademicosProf.getFormacoesFeitas(), funcionario, Estado.P);
-
-    var experienciasProfissionais = experienciaProfissionalMapper
-        .syncExperiencias(
-        funcionario.getExperienciasProfissionais(),
-        dadosAcademicosProf.getExperienciasProfssionais(), funcionario, Estado.P);
+    var habilitacoesLiterarias = funcionario.getHabilitacoesLiterarias();
+    var formacoesFeitas = funcionario.getFormacoesFeitas();
+    var experienciasProfissionais = funcionario.getExperienciasProfissionais();
+    if (dadosAcademicosProf != null) {
+      colaboradorValidationRules.validarHabilitacoesLiterarias(dadosAcademicosProf.getHabilitacoesLiterarias());
+      habilitacoesLiterarias = habilitacaoLiterariaMapper.syncHabilitacoes(
+          funcionario.getHabilitacoesLiterarias(), dadosAcademicosProf.getHabilitacoesLiterarias(), funcionario, Estado.P);
+      formacoesFeitas = formacaoFeitaMapper.syncFormacoes(
+          funcionario.getFormacoesFeitas(), dadosAcademicosProf.getFormacoesFeitas(), funcionario, Estado.P);
+      experienciasProfissionais = experienciaProfissionalMapper.syncExperiencias(
+          funcionario.getExperienciasProfissionais(), dadosAcademicosProf.getExperienciasProfssionais(), funcionario, Estado.P);
+    }
 
     // NIB é obrigatório em cada registo bancário quando o vínculo tem salário (flgSalario=1)
     colaboradorValidationRules.validarNibObrigatorioSeSalario(

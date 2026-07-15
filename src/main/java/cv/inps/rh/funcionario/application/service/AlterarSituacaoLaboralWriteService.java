@@ -144,6 +144,11 @@ public class AlterarSituacaoLaboralWriteService {
         situacaoAtual.setEstado(Estado.P);
         situacaoLaboralEntityRepository.save(situacaoAtual);
       }
+      // FLG_PROCESSA depende de a situação ter remuneração (RH_T_PARAM_SITUACAO.FLG_REMUNERACAO),
+      // tal como no ramo processado (novo tiprel). Sem isto, mudar p/ situação sem remuneração
+      // (ex.: Licença S/Vencimento) deixava o colaborador ainda marcado para processar salário.
+      tiposRelacionamentoAtual.setFlgProcessa(
+          Integer.valueOf(1).equals(paramSituacaoLaboral.getFlgRemuneracao()) ? 1 : 0);
       // garante uma validação pendente para esta alteração
       if (funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.ESTADO_COLABORADOR).isEmpty()) {
         var validUpd = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.ESTADO_COLABORADOR.name(), Estado.P);
