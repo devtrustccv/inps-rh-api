@@ -59,6 +59,27 @@ public class HistoricoLaboralWriteService {
   public RelacaoLaboralDTO validar(NovaRelacaoLaboralCommand command) {
 
     var dto = command.getRelacaolaboral();
+
+    // Caso de uso "Registo de Relação Laboral" (confirmado pelo analista): Mobilidade e Carreira
+    // são SOMENTE LEITURA e NÃO vão para validação — a relação laboral só altera a SITUAÇÃO.
+    // Neutralizam-se os campos de mobilidade/carreira/salário para os blocos respetivos serem
+    // saltados (não atualizam nem criam validações MOBILIDADE/CARREIRA). As alterações de
+    // mobilidade/carreira têm os seus ecrãs próprios (.../mobilidades, .../carreiras).
+    dto.setTipoMobilidade(null);
+    dto.setDirecao(null);
+    dto.setSecao(null);
+    dto.setLocalTrabalho(null);
+    dto.setDataInicioMobilidade(null);
+    dto.setDataFimMobilidade(null);
+    dto.setTipoAlteracaoCarreira(null);
+    dto.setCarreira(null);
+    dto.setCategoria(null);
+    dto.setEscalao(null);
+    dto.setCargo(null);
+    dto.setSalario(null);
+    dto.setDataInicioCarreira(null);
+    dto.setDataFimCarreira(null);
+
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc);
 
@@ -307,6 +328,31 @@ public class HistoricoLaboralWriteService {
       throw IgrpResponseStatusException.badRequest("Histórico laboral não pertence ao funcionário");
 
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(relacionamento.getEstado());
+
+    // A edição da relação laboral só é permitida se ainda NÃO houver processamento salarial
+    // (o registo ainda não foi à folha). Se já processado, bloquear — alterar exigiria novo
+    // registo/validação, não uma simples edição in-place. (ultProc = data do último
+    // processamento; mesma noção usada em bf420c35 / AlterarSituacaoLaboralWriteService.)
+    if (relacionamento.getUltProc() != null)
+      throw IgrpResponseStatusException.badRequest(
+          "Não é possível editar a relação laboral: já tem processamento salarial.");
+
+    // Mobilidade e Carreira são SOMENTE LEITURA na relação laboral (só se altera a situação).
+    // Neutralizar os campos para os blocos respetivos serem saltados.
+    dto.setTipoMobilidade(null);
+    dto.setDirecao(null);
+    dto.setSecao(null);
+    dto.setLocalTrabalho(null);
+    dto.setDataInicioMobilidade(null);
+    dto.setDataFimMobilidade(null);
+    dto.setTipoAlteracaoCarreira(null);
+    dto.setCarreira(null);
+    dto.setCategoria(null);
+    dto.setEscalao(null);
+    dto.setCargo(null);
+    dto.setSalario(null);
+    dto.setDataInicioCarreira(null);
+    dto.setDataFimCarreira(null);
 
     if (dto.getTipoMobilidade() != null || dto.getDirecao() != null || dto.getSecao() != null
         || dto.getLocalTrabalho() != null || dto.getDataInicioMobilidade() != null
