@@ -83,6 +83,7 @@ public class HistoricoLaboralWriteService {
         populateMobilidade(mob, dto);
         mob.setEstado(Estado.P);
         mobilidadeEntityRepository.save(mob);
+        criarValidacaoRelacaoLaboralSeAusente(funcionario, atual, Referencia.MOBILIDADE, mob.getUuid(), mob.getId());
 
         if (dto.getTipoMobilidade() != null)
           atual.setTipoSituacao(ValidationUtil.trimToNull(dto.getTipoMobilidade()));
@@ -105,6 +106,7 @@ public class HistoricoLaboralWriteService {
         populateCarreiraCommon(car, dto);
         car.setEstado(Estado.P);
         carreiraEntityRepository.save(car);
+        criarValidacaoRelacaoLaboralSeAusente(funcionario, atual, Referencia.CARREIRA, car.getUuid(), car.getId());
 
         var cargoRef = ValidationUtil.ref(entityManager, ParamCargoEntity.class, dto.getCargo());
         if (cargoRef != null) atual.setCargoId(cargoRef);
@@ -125,6 +127,12 @@ public class HistoricoLaboralWriteService {
         populateSituacao(sitLab, dto);
         sitLab.setEstado(Estado.P);
         situacaoLaboralEntityRepository.save(sitLab);
+        // FLG_PROCESSA deriva de RH_T_PARAM_SITUACAO.FLG_REMUNERACAO (use case linha 632-635):
+        // ex. Licença S/Vencimento (sem remuneração) -> 0.
+        var paramSit = sitLab.getSituacaoLaboralId();
+        if (paramSit != null)
+          atual.setFlgProcessa(Integer.valueOf(1).equals(paramSit.getFlgRemuneracao()) ? 1 : 0);
+        criarValidacaoRelacaoLaboralSeAusente(funcionario, atual, Referencia.SITUACAO_LABORAL, sitLab.getUuid(), sitLab.getId());
       }
 
       if (dto.getSalario() != null) {
@@ -132,6 +140,9 @@ public class HistoricoLaboralWriteService {
       }
 
       if (dto.getValidar() != null) {
+        // Regra geral (caso de uso linha 5): a alteração passa por validação. Persistir as
+        // validações pendentes criadas acima ANTES de as fechar em updateValidacaoPendentes.
+        funcionarioEntityRepository.saveAndFlush(funcionario);
         var novoEstado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
         updateEstadoOnRelAndChildren(atual, novoEstado);
         updateValidacaoPendentes(funcionario.getUuid(), novoEstado);
@@ -366,6 +377,22 @@ public class HistoricoLaboralWriteService {
     tiposRelacionamentoEntityRepository.save(relacionamento);
     funcionarioEntityRepository.save(funcionario);
     return dto;
+  }
+
+  /**
+   * Regra geral (caso de uso linha 5): toda alteração vai para validação. Cria uma validação
+   * pendente INSERT para a sub-entidade alterada no fluxo relação laboral (update in-place),
+   * sem duplicar se já houver uma pendente para a mesma referência.
+   */
+  private void criarValidacaoRelacaoLaboralSeAusente(FuncionarioEntity funcionario, TiposRelacionamentoEntity tiprel,
+      Referencia referencia, java.util.UUID referenciaUuid, Long referenciaId) {
+    if (funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, referencia)) return;
+    var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), referencia.name(), Estado.P);
+    valid.setFunId(funcionario);
+    valid.setTiprelId(tiprel);
+    valid.setReferenciaUuid(referenciaUuid);
+    valid.setReferenciaId(referenciaId);
+    funcionario.getValidacoes().add(valid);
   }
 
   private void populateMobilidade(MobilidadeEntity mob, RelacaoLaboralDTO dto) {
