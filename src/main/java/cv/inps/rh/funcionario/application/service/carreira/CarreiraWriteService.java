@@ -109,15 +109,19 @@ public class CarreiraWriteService {
     relacionamentoAtual.setEstActAdm(0);
     tiposRelacionamentoEntityRepository.save(relacionamentoAtual);
 
-    var defRemuneracao = definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
-    defRemuneracao.forEach(obj -> {
+    // Fechar as remunerações/descontos ASSOCIADOS AO TIPREL ATUAL (os que estão a ser
+    // substituídos), usando as listas já capturadas acima — e não o filtro DataFimIsNull.
+    // Uma renovação anterior pode ter preenchido a DATA_FIM destes registos; com o filtro
+    // DataFimIsNull escapavam ao fecho, ficavam Estado.A e o transferir re-associava-os ao novo
+    // tiprel além das cópias novas (duplicação). Use case: nova carreira "faz 3 registos de
+    // desconto" e o anterior fecha -> o novo tiprel deve ficar só com os novos.
+    remuneracoesAtivas.forEach(obj -> {
       obj.setDataFim(dataFimAnterior);
       obj.setEstado(Estado.I);
       definicaoRemuneracaoEntityRepository.save(obj);
     });
 
-    var defPagamento = defPagamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
-    defPagamento.forEach(obj -> {
+    pagamentosAtivos.forEach(obj -> {
       obj.setDataFim(dataFimAnterior);
       obj.setEstado(Estado.I);
       defPagamentoEntityRepository.save(obj);
