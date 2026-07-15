@@ -42,6 +42,40 @@ public class MobilidadeMapper {
 
   }
 
+  /**
+   * Detalhe/editar de uma mobilidade específica. Spec DOSSIÊ: o INSTIT_ID gravado é a
+   * "Direção (Depois)"; o "Antes" é a direção do vínculo anterior (só display).
+   *
+   * @param atual    a mobilidade que está a ser vista/editada (fornece o "Depois")
+   * @param anterior a mobilidade do vínculo anterior (fornece o "Antes"); pode ser null
+   */
+  public MobilidadeDTO mobilidadeDetalheDTO(MobilidadeEntity atual, MobilidadeEntity anterior) {
+    var dto = new MobilidadeDTO();
+
+    // Depois = valores gravados nesta mobilidade
+    if (Objects.nonNull(atual.getInstidId()))
+      dto.setDirecaoDepois(atual.getInstidId().getId());
+    if (Objects.nonNull(atual.getSecaoId()))
+      dto.setSeccaoDepois(atual.getSecaoId().getId());
+    if (Objects.nonNull(atual.getLocalTrabId()))
+      dto.setLocalTrabalhoDepois(atual.getLocalTrabId().getId());
+
+    // Antes = direção/secção/local do vínculo anterior (display)
+    if (anterior != null) {
+      if (Objects.nonNull(anterior.getInstidId()))
+        dto.setDirrecaoAntes(anterior.getInstidId().getNome());
+      if (Objects.nonNull(anterior.getSecaoId()))
+        dto.setSeccaoAntes(anterior.getSecaoId().getNome());
+      if (Objects.nonNull(anterior.getLocalTrabId()))
+        dto.setLocalTrabalhoAntes(anterior.getLocalTrabId().getNome());
+    }
+
+    dto.setTipoMobilidade(atual.getTipoSituacao());
+    dto.setDataInicio(atual.getDataInicio());
+    dto.setDataFim(atual.getDataFim());
+    return dto;
+  }
+
   public MobilidadeEntity toMobilidade(DadosContratuaisReqDTO dc, Estado estado) {
     if (dc == null) return null;
     var me = new MobilidadeEntity();
