@@ -63,6 +63,16 @@ public class CarreiraWriteService {
     if (dto.getFlgProcessa() == null)
       throw IgrpResponseStatusException.badRequest("O campo 'processar salário' é obrigatório");
 
+    // Salário automático: numa carreira o salário vem do ESCALÃO (spec DOSSIÊ: "o campo salário é
+    // preenchido automaticamente caso FLG_CARREIRA=1" + função GET_SALARIO(P_ESCALAO)). Não se usa
+    // o valor enviado. Derivar aqui garante que a carreira, a def_remuneração e houveMudancaSalario
+    // usam o valor correto do escalão.
+    if (dto.getEscalaoReferenciaId() != null) {
+      var escalaoSel = entityManager.find(ParamEscalaoEntity.class, dto.getEscalaoReferenciaId());
+      if (escalaoSel != null && escalaoSel.getValor() != null)
+        dto.setSalario(escalaoSel.getValor());
+    }
+
     var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
 
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -349,6 +359,13 @@ public class CarreiraWriteService {
 
     if (!carreira.getContrVinculoId().getFunId().getId().equals(funcionario.getId()))
       throw IgrpResponseStatusException.badRequest("Carreira não pertence a este funcionário");
+
+    // Salário automático do escalão (spec DOSSIÊ: FLG_CARREIRA=1 -> salário preenchido do escalão).
+    if (dto.getEscalaoReferenciaId() != null) {
+      var escalaoSel = entityManager.find(ParamEscalaoEntity.class, dto.getEscalaoReferenciaId());
+      if (escalaoSel != null && escalaoSel.getValor() != null)
+        dto.setSalario(escalaoSel.getValor());
+    }
 
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(carreira.getEstado());
 
