@@ -59,26 +59,6 @@ public class HistoricoLaboralWriteService {
   public RelacaoLaboralDTO validar(NovaRelacaoLaboralCommand command) {
 
     var dto = command.getRelacaolaboral();
-
-    // Caso de uso "Registo de Relação Laboral": Mobilidade e Carreira são SOMENTE LEITURA neste
-    // fluxo — a relação laboral só altera a SITUAÇÃO LABORAL. Ignoram-se quaisquer campos de
-    // mobilidade/carreira/salário enviados (essas alterações têm os seus ecrãs próprios:
-    // .../mobilidades e .../carreiras).
-    dto.setTipoMobilidade(null);
-    dto.setDirecao(null);
-    dto.setSecao(null);
-    dto.setLocalTrabalho(null);
-    dto.setDataInicioMobilidade(null);
-    dto.setDataFimMobilidade(null);
-    dto.setTipoAlteracaoCarreira(null);
-    dto.setCarreira(null);
-    dto.setCategoria(null);
-    dto.setEscalao(null);
-    dto.setCargo(null);
-    dto.setSalario(null);
-    dto.setDataInicioCarreira(null);
-    dto.setDataFimCarreira(null);
-
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc);
 
