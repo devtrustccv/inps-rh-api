@@ -54,20 +54,49 @@ public class HistoricoLaboralWriteService {
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
+  private final cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
 
   @Transactional
   public RelacaoLaboralDTO validar(NovaRelacaoLaboralCommand command) {
 
     var dto = command.getRelacaolaboral();
+
+    // Caso de uso "Registo de Relação Laboral" (confirmado pelo analista): Mobilidade e Carreira
+    // são SOMENTE LEITURA e NÃO vão para validação — a relação laboral só altera a SITUAÇÃO.
+    // Neutralizam-se os campos de mobilidade/carreira/salário para os blocos respetivos serem
+    // saltados (não atualizam nem criam validações MOBILIDADE/CARREIRA). As alterações de
+    // mobilidade/carreira têm os seus ecrãs próprios (.../mobilidades, .../carreiras).
+    dto.setTipoMobilidade(null);
+    dto.setDirecao(null);
+    dto.setSecao(null);
+    dto.setLocalTrabalho(null);
+    dto.setDataInicioMobilidade(null);
+    dto.setDataFimMobilidade(null);
+    dto.setTipoAlteracaoCarreira(null);
+    dto.setCarreira(null);
+    dto.setCategoria(null);
+    dto.setEscalao(null);
+    dto.setCargo(null);
+    dto.setSalario(null);
+    dto.setDataInicioCarreira(null);
+    dto.setDataFimCarreira(null);
+
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc);
 
     var atual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(atual.getEstado());
 
-    var flgProc = atual.getFlgProcessa();
+    // Caso de uso: só se cria NOVO registo/tiprel quando o registo atual JÁ FOI PROCESSADO
+    // (para preservar o histórico salarial). Se ainda não processado -> UPDATE in-place. A
+    // condição correta é ultProc (data do último processamento), não flgProcessa (que é 0/1 e
+    // está quase sempre preenchido). Alinha com AlterarSituacaoLaboralWriteService.
+    // "Processado" detetado como na vista e na edição: EXISTS em RH_T_PROC_FUNCIONARIOS por
+    // TIPREL_ID (fonte única de verdade). Processado -> novo registo/tiprel (preserva histórico);
+    // não processado -> UPDATE in-place.
+    boolean processado = processamentoFuncionarioRepository.existsByTiprel_Id(atual.getId());
 
-    if (flgProc != null) {
+    if (!processado) {
       var mob = atual.getMobId();
       if (dto.getTipoMobilidade() != null || dto.getDirecao() != null || dto.getSecao() != null
           || dto.getLocalTrabalho() != null || dto.getDataInicioMobilidade() != null
@@ -115,40 +144,36 @@ public class HistoricoLaboralWriteService {
       }
 
       var sitLab = atual.getSituacLaboralId();
+      boolean alterouSituacao = false;
       if (dto.getSituacaoLaboral() != null || dto.getMotivo() != null || dto.getDataInicioSituacao() != null
           || dto.getDataFimSituacao() != null || dto.getObservacao() != null) {
         if (sitLab == null) {
           sitLab = new SituacaoLaboralEntity();
-          sitLab.setEstado(Estado.P);
           sitLab.setUuid(IdentificadorUnico.create().valor());
           sitLab.setContrVinculoId(atual.getContrVinculoId());
           atual.setSituacLaboralId(sitLab);
         }
         populateSituacao(sitLab, dto);
-        sitLab.setEstado(Estado.P);
+        // Registo de Relação Laboral aplica-se DIRETAMENTE — o use case NÃO prevê validação
+        // para este fluxo (ao contrário de contrato/carreira/substituição). Fica logo ativo.
+        sitLab.setEstado(Estado.A);
         situacaoLaboralEntityRepository.save(sitLab);
         // FLG_PROCESSA deriva de RH_T_PARAM_SITUACAO.FLG_REMUNERACAO (use case linha 632-635):
         // ex. Licença S/Vencimento (sem remuneração) -> 0.
         var paramSit = sitLab.getSituacaoLaboralId();
         if (paramSit != null)
           atual.setFlgProcessa(Integer.valueOf(1).equals(paramSit.getFlgRemuneracao()) ? 1 : 0);
-        criarValidacaoRelacaoLaboralSeAusente(funcionario, atual, Referencia.SITUACAO_LABORAL, sitLab.getUuid(), sitLab.getId());
+        alterouSituacao = true;
       }
 
       if (dto.getSalario() != null) {
         updateExistingSalaryRemuneracao(funcionario, dto, atual);
       }
 
-      if (dto.getValidar() != null) {
-        // Regra geral (caso de uso linha 5): a alteração passa por validação. Persistir as
-        // validações pendentes criadas acima ANTES de as fechar em updateValidacaoPendentes.
+      // Sem passo de validação: aplica-se de imediato e gera-se a Ordem de Serviço no apply.
+      if (alterouSituacao) {
         funcionarioEntityRepository.saveAndFlush(funcionario);
-        var novoEstado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-        updateEstadoOnRelAndChildren(atual, novoEstado);
-        updateValidacaoPendentes(funcionario.getUuid(), novoEstado);
-        if (novoEstado == Estado.A) {
-          ordemServicoWriteService.criar(funcionario, atual, dto.getTipoOrdemServico());
-        }
+        ordemServicoWriteService.criar(funcionario, atual, dto.getTipoOrdemServico());
       }
 
       funcionarioEntityRepository.save(funcionario);
@@ -160,11 +185,16 @@ public class HistoricoLaboralWriteService {
     atual.setDataFim(hoje);
 
     var novoRelacionamento = dadosContratuaisMapper.clone(atual);
-    novoRelacionamento.setEstado(Estado.P);
+    // Registo de Relação Laboral aplica-se DIRETAMENTE (use case não prevê validação).
+    novoRelacionamento.setEstado(Estado.A);
     novoRelacionamento.setEstActAdm(1);
     novoRelacionamento.setFunId(funcionario);
     novoRelacionamento.setTiprelId(atual);
     novoRelacionamento.setReferente("HISTORICO_LABORAL");
+    // Use case (RH_T_TIPOS_RELACIONAMENTO): novo registo DATA_INICIO = data do registo, DATA_FIM = nulo.
+    // O clone copia as datas do anterior; repõe-se aqui.
+    novoRelacionamento.setDataInicio(hoje);
+    novoRelacionamento.setDataFim(null);
 
     List<DefinicaoRemuneracaoEntity> novasRemuneracoes = new ArrayList<>();
     novoRelacionamento.setUltProc(hoje);
@@ -234,54 +264,29 @@ public class HistoricoLaboralWriteService {
         || dto.getDataFimSituacao() != null || dto.getObservacao() != null) {
       var novaSit = new SituacaoLaboralEntity();
       populateSituacao(novaSit, dto);
-      novaSit.setEstado(Estado.P);
+      novaSit.setEstado(Estado.A);
       novaSit.setUuid(IdentificadorUnico.create().valor());
       novaSit.setContrVinculoId(atual.getContrVinculoId());
       situacaoLaboralEntityRepository.save(novaSit);
 
       novoRelacionamento.setSituacLaboralId(novaSit);
+      // FLG_PROCESSA do novo tiprel deriva de RH_T_PARAM_SITUACAO.FLG_REMUNERACAO (use case 632-635).
+      var paramSitNova = novaSit.getSituacaoLaboralId();
+      if (paramSitNova != null)
+        novoRelacionamento.setFlgProcessa(Integer.valueOf(1).equals(paramSitNova.getFlgRemuneracao()) ? 1 : 0);
       criouAlgum = true;
-
-      var validSit = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(),
-          Referencia.SITUACAO_LABORAL.name(), Estado.P);
-      validSit.setFunId(funcionario);
-      validSit.setTiprelId(novoRelacionamento);
-      validSit.setReferenciaUuid(novaSit.getUuid());
-      funcionario.getValidacoes().add(validSit);
     }
 
     funcionario.getTiposrelacionamentos().add(novoRelacionamento);
 
-    var saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+    funcionarioEntityRepository.saveAndFlush(funcionario);
 
     tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(atual, novoRelacionamento, novasRemuneracoes, Collections.emptyList());
 
-    saved.getValidacoes().stream()
-        .filter(v -> v.getEstado() == Estado.P && v.getTiprelId() != null
-            && v.getTiprelId().getId().equals(novoRelacionamento.getId()))
-        .forEach(v -> {
-          if (Referencia.MOBILIDADE.name().equals(v.getReferenciaName()) && novoRelacionamento.getMobId() != null) {
-            v.setReferenciaId(novoRelacionamento.getMobId().getId());
-            validacaoEntityRepository.save(v);
-          }
-          if (Referencia.CARREIRA.name().equals(v.getReferenciaName()) && novoRelacionamento.getCarreiraId() != null) {
-            v.setReferenciaId(novoRelacionamento.getCarreiraId().getId());
-            validacaoEntityRepository.save(v);
-          }
-          if (Referencia.SITUACAO_LABORAL.name().equals(v.getReferenciaName())
-              && novoRelacionamento.getSituacLaboralId() != null) {
-            v.setReferenciaId(novoRelacionamento.getSituacLaboralId().getId());
-            validacaoEntityRepository.save(v);
-          }
-        });
-
-    if (dto.getValidar() != null) {
-      var novoEstado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-      updateEstadoOnRelAndChildren(novoRelacionamento, novoEstado);
-      updateValidacaoPendentes(funcionario.getUuid(), novoEstado);
-      if (novoEstado == Estado.A) {
-        ordemServicoWriteService.criar(funcionario, novoRelacionamento, dto.getTipoOrdemServico());
-      }
+    // Sem passo de validação (use case): o novo tipo de relacionamento fica ativo de imediato.
+    // Gera-se a Ordem de Serviço no apply (opcional — só se o tipo vier preenchido pelo frontend).
+    if (criouAlgum) {
+      ordemServicoWriteService.criar(funcionario, novoRelacionamento, dto.getTipoOrdemServico());
     }
 
     funcionarioEntityRepository.save(funcionario);
@@ -294,7 +299,12 @@ public class HistoricoLaboralWriteService {
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc);
 
-    var relacionamento = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(UUID.fromString(command.getCarreiraId()));
+    // A relação laboral é identificada pelo UUID do TIPO DE RELACIONAMENTO (tiprel),
+    // exposto na lista como `tiprelUuid` — e não pelo UUID da carreira (a carreira é
+    // somente leitura). O path {carreiraId} transporta agora o tiprelUuid.
+    var relacionamento = tiposRelacionamentoEntityRepository
+        .findByUuid(UUID.fromString(command.getCarreiraId()))
+        .orElse(null);
     if (relacionamento == null) {
       throw IgrpResponseStatusException.notFound("Histórico Laboral não encontrado");
     }
@@ -303,6 +313,31 @@ public class HistoricoLaboralWriteService {
       throw IgrpResponseStatusException.badRequest("Histórico laboral não pertence ao funcionário");
 
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(relacionamento.getEstado());
+
+    // A edição da relação laboral só é permitida se ainda NÃO houver processamento salarial.
+    // Deteção feita como na vista (RH_V_CONTRATO/RH_V_RELACAO_LABORAL): EXISTS em
+    // RH_T_PROC_FUNCIONARIOS por TIPREL_ID. Se já processado, bloquear — alterar exigiria
+    // novo registo/validação, não uma simples edição in-place.
+    if (processamentoFuncionarioRepository.existsByTiprel_Id(relacionamento.getId()))
+      throw IgrpResponseStatusException.badRequest(
+          "Não é possível editar a relação laboral: já tem processamento salarial.");
+
+    // Mobilidade e Carreira são SOMENTE LEITURA na relação laboral (só se altera a situação).
+    // Neutralizar os campos para os blocos respetivos serem saltados.
+    dto.setTipoMobilidade(null);
+    dto.setDirecao(null);
+    dto.setSecao(null);
+    dto.setLocalTrabalho(null);
+    dto.setDataInicioMobilidade(null);
+    dto.setDataFimMobilidade(null);
+    dto.setTipoAlteracaoCarreira(null);
+    dto.setCarreira(null);
+    dto.setCategoria(null);
+    dto.setEscalao(null);
+    dto.setCargo(null);
+    dto.setSalario(null);
+    dto.setDataInicioCarreira(null);
+    dto.setDataFimCarreira(null);
 
     if (dto.getTipoMobilidade() != null || dto.getDirecao() != null || dto.getSecao() != null
         || dto.getLocalTrabalho() != null || dto.getDataInicioMobilidade() != null
@@ -352,10 +387,12 @@ public class HistoricoLaboralWriteService {
       var sitLab = relacionamento.getSituacLaboralId();
       if (sitLab == null) {
         sitLab = new SituacaoLaboralEntity();
-        sitLab.setEstado(Estado.P);
+        sitLab.setEstado(Estado.A);
         sitLab.setUuid(IdentificadorUnico.create().valor());
         sitLab.setContrVinculoId(relacionamento.getContrVinculoId());
       }
+      // Atualização in-place: apenas se atualizam os campos da situação. NÃO se altera o ESTADO
+      // do registo — a relação laboral não passa por validação (use case). Sem OS neste fluxo.
       populateSituacao(sitLab, dto);
       situacaoLaboralEntityRepository.save(sitLab);
       relacionamento.setSituacLaboralId(sitLab);
@@ -363,15 +400,6 @@ public class HistoricoLaboralWriteService {
 
     if (dto.getSalario() != null) {
       updateExistingSalaryRemuneracao(funcionario, dto,relacionamento);
-    }
-
-    if (dto.getValidar() != null) {
-      var novoEstado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-      updateEstadoOnRelAndChildren(relacionamento, novoEstado);
-      updateValidacaoPendentes(funcionario.getUuid(), novoEstado);
-      if (novoEstado == Estado.A) {
-        ordemServicoWriteService.criar(funcionario, relacionamento, dto.getTipoOrdemServico());
-      }
     }
 
     tiposRelacionamentoEntityRepository.save(relacionamento);

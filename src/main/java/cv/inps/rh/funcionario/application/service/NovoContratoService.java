@@ -97,7 +97,9 @@ public class NovoContratoService {
     var contratoNovo = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contratoNovo.setFunId(funcionario);
     contratoNovo.setTipoSituacao("NOVO_CONTRATO");
-    contratoNovo.setVersao(contratoAtual.getVersao() + 1);
+    // Versao e POR CONTRATO (DOSSIÊ): novo contrato comeca sempre em 1; so a
+    // renovacao incrementa (dentro do mesmo CONTRATO_VINCULO).
+    contratoNovo.setVersao(1);
     contratoNovo.setContratoId(contratoAtual); // contrato pai
     funcionario.getContratos().add(contratoNovo);
 
@@ -292,6 +294,14 @@ public class NovoContratoService {
   private MobilidadeEntity mudaMobilidadeOuManter(MobilidadeEntity mobilidadeAtual, DadosContratuaisReqDTO dc,
                                                   FuncionarioEntity funcionario) {
 
+    // Sem mobilidade activa → cria nova (não há o que fechar)
+    if (mobilidadeAtual == null) {
+      MobilidadeEntity nova = mobilidadeMapper.toMobilidade(dc, Estado.P);
+      nova.setFunId(funcionario);
+      funcionario.getMobilidades().add(nova);
+      return nova;
+    }
+
     if (!houveMudancaFuncionalMobilidade(mobilidadeAtual, dc)) {
       return mobilidadeAtual;
     }
@@ -306,7 +316,12 @@ public class NovoContratoService {
 
   private boolean houveMudancaFuncionalMobilidade(MobilidadeEntity atual, DadosContratuaisReqDTO dc) {
 
-    if (!Objects.equals(atual.getLocalTrabId().getId(), dc.getLocalTrabalhoId())) {
+    if (atual == null) {
+      return true;
+    }
+
+    Long atualLocalTrabId = atual.getLocalTrabId() != null ? atual.getLocalTrabId().getId() : null;
+    if (!Objects.equals(atualLocalTrabId, dc.getLocalTrabalhoId())) {
       return true;
     }
 

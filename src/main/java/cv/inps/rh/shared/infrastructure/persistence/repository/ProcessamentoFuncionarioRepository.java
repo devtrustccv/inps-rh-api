@@ -16,4 +16,10 @@ public interface ProcessamentoFuncionarioRepository extends
    * registo em RH_T_PROC_FUNCIONARIOS.
    */
   boolean existsByTiprel_CarreiraId_Id(Long carreiraId);
+
+  /**
+   * Indica se um tipo de relacionamento já foi processado em folha — mesma lógica da vista
+   * (RH_V_CONTRATO/RH_V_RELACAO_LABORAL): EXISTS em RH_T_PROC_FUNCIONARIOS por TIPREL_ID.
+   */
+  boolean existsByTiprel_Id(Long tiprelId);
 }

@@ -310,7 +310,10 @@ public interface TiposRelacionamentoEntityRepository extends
         CARGO_DESC AS cargoDesc,
         CARGO_ID AS cargoId,
         SITUACAO_LABORAL_DESC AS situacaoLaboralDesc,
-        SITUACAO_LABORAL_ID AS situacaoLaboralId
+        SITUACAO_LABORAL_ID AS situacaoLaboralId,
+        TIPREL_ID AS tiprelId,
+        TIPREL_UUID AS tiprelUuid,
+        PROCESSAMENTO AS processamento
       FROM RH_V_RELACAO_LABORAL
       WHERE FUNCIONARIO_UUID = :funcionarioUuid
       """, nativeQuery = true)
