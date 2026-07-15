@@ -184,6 +184,26 @@ public class MobilidadeWriteService {
             validacao, "Mobilidade do colaborador - " + nome);
       }
 
+    } else {
+      // Caso de uso (Mobilidade): "registo e alteração passa por validação". Na edição
+      // (validar==null) o updateMobilidade acima atualiza o mesmo registo, mas a alteração
+      // não pode ficar live: volta a pendente (P) e garante uma validação UPDATE/MOBILIDADE
+      // para ser aprovada. Se já existir validação pendente (ex.: registo acabado de criar),
+      // não duplica.
+      mobilidade.setEstado(Estado.P);
+      tipoRelacionamentoAtual.setEstado(Estado.P);
+      boolean jaPendente =
+          funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.MOBILIDADE)
+              || funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.MOBILIDADE);
+      if (!jaPendente) {
+        var valid = dadosContratuaisMapper.toValidacaoInsert(
+            TipoAcao.UPDATE.name(), Referencia.MOBILIDADE.name(), Estado.P);
+        valid.setFunId(funcionario);
+        valid.setTiprelId(tipoRelacionamentoAtual);
+        valid.setReferenciaId(mobilidade.getId());
+        valid.setReferenciaUuid(mobilidade.getUuid());
+        funcionario.getValidacoes().add(valid);
+      }
     }
 
     funcionarioEntityRepository.save(funcionario);
