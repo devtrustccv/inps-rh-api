@@ -65,9 +65,13 @@ public class HistoricoLaboralWriteService {
     var atual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(atual.getEstado());
 
-    var flgProc = atual.getFlgProcessa();
+    // Caso de uso: só se cria NOVO registo/tiprel quando o registo atual JÁ FOI PROCESSADO
+    // (para preservar o histórico salarial). Se ainda não processado -> UPDATE in-place. A
+    // condição correta é ultProc (data do último processamento), não flgProcessa (que é 0/1 e
+    // está quase sempre preenchido). Alinha com AlterarSituacaoLaboralWriteService.
+    boolean processado = atual.getUltProc() != null;
 
-    if (flgProc != null) {
+    if (!processado) {
       var mob = atual.getMobId();
       if (dto.getTipoMobilidade() != null || dto.getDirecao() != null || dto.getSecao() != null
           || dto.getLocalTrabalho() != null || dto.getDataInicioMobilidade() != null
