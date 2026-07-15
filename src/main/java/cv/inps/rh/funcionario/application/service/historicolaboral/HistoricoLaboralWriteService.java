@@ -54,6 +54,7 @@ public class HistoricoLaboralWriteService {
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
+  private final cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
 
   @Transactional
   public RelacaoLaboralDTO validar(NovaRelacaoLaboralCommand command) {
@@ -329,11 +330,11 @@ public class HistoricoLaboralWriteService {
 
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(relacionamento.getEstado());
 
-    // A edição da relação laboral só é permitida se ainda NÃO houver processamento salarial
-    // (o registo ainda não foi à folha). Se já processado, bloquear — alterar exigiria novo
-    // registo/validação, não uma simples edição in-place. (ultProc = data do último
-    // processamento; mesma noção usada em bf420c35 / AlterarSituacaoLaboralWriteService.)
-    if (relacionamento.getUltProc() != null)
+    // A edição da relação laboral só é permitida se ainda NÃO houver processamento salarial.
+    // Deteção feita como na vista (RH_V_CONTRATO/RH_V_RELACAO_LABORAL): EXISTS em
+    // RH_T_PROC_FUNCIONARIOS por TIPREL_ID. Se já processado, bloquear — alterar exigiria
+    // novo registo/validação, não uma simples edição in-place.
+    if (processamentoFuncionarioRepository.existsByTiprel_Id(relacionamento.getId()))
       throw IgrpResponseStatusException.badRequest(
           "Não é possível editar a relação laboral: já tem processamento salarial.");
 
