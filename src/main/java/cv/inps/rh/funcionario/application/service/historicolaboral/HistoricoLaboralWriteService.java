@@ -91,7 +91,10 @@ public class HistoricoLaboralWriteService {
     // (para preservar o histórico salarial). Se ainda não processado -> UPDATE in-place. A
     // condição correta é ultProc (data do último processamento), não flgProcessa (que é 0/1 e
     // está quase sempre preenchido). Alinha com AlterarSituacaoLaboralWriteService.
-    boolean processado = atual.getUltProc() != null;
+    // "Processado" detetado como na vista e na edição: EXISTS em RH_T_PROC_FUNCIONARIOS por
+    // TIPREL_ID (fonte única de verdade). Processado -> novo registo/tiprel (preserva histórico);
+    // não processado -> UPDATE in-place.
+    boolean processado = processamentoFuncionarioRepository.existsByTiprel_Id(atual.getId());
 
     if (!processado) {
       var mob = atual.getMobId();
