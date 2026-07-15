@@ -194,6 +194,10 @@ public class HistoricoLaboralWriteService {
     novoRelacionamento.setFunId(funcionario);
     novoRelacionamento.setTiprelId(atual);
     novoRelacionamento.setReferente("HISTORICO_LABORAL");
+    // Use case (RH_T_TIPOS_RELACIONAMENTO): novo registo DATA_INICIO = data do registo, DATA_FIM = nulo.
+    // O clone copia as datas do anterior; repõe-se aqui.
+    novoRelacionamento.setDataInicio(hoje);
+    novoRelacionamento.setDataFim(null);
 
     List<DefinicaoRemuneracaoEntity> novasRemuneracoes = new ArrayList<>();
     novoRelacionamento.setUltProc(hoje);
@@ -269,6 +273,10 @@ public class HistoricoLaboralWriteService {
       situacaoLaboralEntityRepository.save(novaSit);
 
       novoRelacionamento.setSituacLaboralId(novaSit);
+      // FLG_PROCESSA do novo tiprel deriva de RH_T_PARAM_SITUACAO.FLG_REMUNERACAO (use case 632-635).
+      var paramSitNova = novaSit.getSituacaoLaboralId();
+      if (paramSitNova != null)
+        novoRelacionamento.setFlgProcessa(Integer.valueOf(1).equals(paramSitNova.getFlgRemuneracao()) ? 1 : 0);
       criouAlgum = true;
 
       var validSit = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(),
