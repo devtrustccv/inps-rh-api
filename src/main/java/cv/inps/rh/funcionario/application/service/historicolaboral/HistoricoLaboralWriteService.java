@@ -331,7 +331,12 @@ public class HistoricoLaboralWriteService {
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc);
 
-    var relacionamento = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(UUID.fromString(command.getCarreiraId()));
+    // A relação laboral é identificada pelo UUID do TIPO DE RELACIONAMENTO (tiprel),
+    // exposto na lista como `tiprelUuid` — e não pelo UUID da carreira (a carreira é
+    // somente leitura). O path {carreiraId} transporta agora o tiprelUuid.
+    var relacionamento = tiposRelacionamentoEntityRepository
+        .findByUuid(UUID.fromString(command.getCarreiraId()))
+        .orElse(null);
     if (relacionamento == null) {
       throw IgrpResponseStatusException.notFound("Histórico Laboral não encontrado");
     }

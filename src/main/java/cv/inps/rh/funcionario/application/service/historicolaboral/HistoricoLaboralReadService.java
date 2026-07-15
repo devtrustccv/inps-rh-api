@@ -111,6 +111,10 @@ public class HistoricoLaboralReadService {
       dto.setDataInicioFimContrato(r.getDataContrato());
       dto.setCargo(r.getCargoDesc());
       dto.setSituacaoLaboral(r.getSituacaoLaboralDesc());
+      dto.setTiprelId(r.getTiprelId());
+      dto.setTiprelUuid(r.getTiprelUuid());
+      // PROCESSAMENTO da vista: >0 => já processado em folha (edição bloqueada no frontend)
+      dto.setProcessamento(r.getProcessamento() != null && r.getProcessamento() > 0);
       return dto;
     }).toList();
 

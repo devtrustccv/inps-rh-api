@@ -53,4 +53,13 @@ public class RelacaoLaboralSumaryDTO  {
 
   private String situacaoLaboral ;
 
+
+  private Long tiprelId ;
+
+
+  private String tiprelUuid ;
+
+
+  private boolean processamento ;
+
 }

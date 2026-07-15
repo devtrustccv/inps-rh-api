@@ -42,4 +42,10 @@ public interface RelacaoLaboralView {
   String getSituacaoLaboralDesc();
 
   Long getSituacaoLaboralId();
+
+  Long getTiprelId();
+
+  String getTiprelUuid();
+
+  Integer getProcessamento();
 }
