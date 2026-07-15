@@ -97,7 +97,9 @@ public class NovoContratoService {
     var contratoNovo = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contratoNovo.setFunId(funcionario);
     contratoNovo.setTipoSituacao("NOVO_CONTRATO");
-    contratoNovo.setVersao(contratoAtual.getVersao() + 1);
+    // Versao e POR CONTRATO (DOSSIÊ): novo contrato comeca sempre em 1; so a
+    // renovacao incrementa (dentro do mesmo CONTRATO_VINCULO).
+    contratoNovo.setVersao(1);
     contratoNovo.setContratoId(contratoAtual); // contrato pai
     funcionario.getContratos().add(contratoNovo);
 
