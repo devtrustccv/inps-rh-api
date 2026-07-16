@@ -217,7 +217,7 @@
     },
     {
       "actionName": "getRelacaoLaboralByFunId",
-      "path": "relacao-laboral/{idFuncionario}/novo",
+      "path": "relacao-laboral/{idFuncionario}/atual",
       "method": "GET",
       "responses": {
         "200": {
