@@ -105,5 +105,9 @@ public class CarreiraMapper {
     carreira.setSalario(dc.getSalario());
     carreira.setFlgProcessa(dc.getFlgProcessa() != null ? dc.getFlgProcessa() : carreira.getFlgProcessa());
     if (dc.getTipoCarreira() != null) carreira.setTipoSituacao(dc.getTipoCarreira());
+    // DOSSIÊ (campo Data Inicio/Fim): a carreira acompanha o periodo do contrato. O create
+    // (toCarreira, "Item 71") ja fazia; o update deixava as datas antigas -> propagar aqui.
+    if (dc.getDataInicio() != null) carreira.setDataInicio(dc.getDataInicio());
+    if (dc.getDataFim() != null) carreira.setDataFim(dc.getDataFim());
   }
 }
