@@ -125,6 +125,11 @@ public class ValidarContratoService {
     if (dto.getValidar() != null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       mudarEstado(funcionario, estado);
+      // Subsidios/encargos MANUAIS nascem pendentes (P) e devem seguir a decisao de validacao
+      // (SIM -> A, NAO -> I), tal como as restantes tabelas em mudarEstado. Sem isto ficavam em P
+      // apos validar e nao seriam processados. Os movimentos FIXOS do vinculo sao tratados pelo
+      // reconciliar (que os cria ja como A); aqui so se tocam os que estao pendentes.
+      transicionarManuaisPendentes(funcionario, estado);
       if (estado == Estado.A) {
         // reconciliar os movimentos fixos do vinculo — SO na validacao positiva e SO com salario
         if (Objects.equals(1, paramVinculo.getFlgSalario())) {
@@ -150,6 +155,18 @@ public class ValidarContratoService {
 
   }
 
+
+  /** Subsidios (def_remuneracoes) e encargos (def_pagamentos) manuais pendentes seguem a validacao. */
+  private void transicionarManuaisPendentes(FuncionarioEntity funcionario, Estado estado) {
+    if (funcionario.getDefinicoesRenumeracoes() != null)
+      funcionario.getDefinicoesRenumeracoes().stream()
+          .filter(r -> r != null && r.getEstado() == Estado.P)
+          .forEach(r -> r.setEstado(estado));
+    if (funcionario.getDefinicoesPagamentos() != null)
+      funcionario.getDefinicoesPagamentos().stream()
+          .filter(p -> p != null && p.getEstado() == Estado.P)
+          .forEach(p -> p.setEstado(estado));
+  }
 
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {
 

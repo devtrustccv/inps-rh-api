@@ -211,9 +211,13 @@ public class NovoContratoService {
     List<DefPagamentoEntity> novosPags = funcionario.getDefinicoesPagamentos() != null
         ? funcionario.getDefinicoesPagamentos().stream().filter(p -> p.getEstado() == Estado.P).collect(Collectors.toList())
         : List.of();
-    // transferir corre queries (getRemuneracoesAssociadosAtivos/...) que forcam auto-flush;
-    // faze-lo logo apos o saveAndFlush limpo, ANTES de registrarNovo deixar historico pendente na sessao.
-    tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tipoRelacionamentoAtual, tiposRelacionamentoNovo, novasRems, novosPags);
+    // So associamos ao tiprel novo os NOVOS pendentes (subsidios/encargos do DTO) — NAO se copiam
+    // as ativas do tiprel anterior. O novo contrato defere a inactivacao/derivacao do salario para
+    // o validar (ver NOTA acima): copiar o salario antigo aqui deixaria associacao orfa quando o
+    // reconciliar o inactivasse. O salario certo (do novo vinculo) e ligado no validar via
+    // reconciliar + associarNovos. Assim o ecra de validacao (GetContratoById) ja mostra os
+    // subsidios/encargos que o utilizador meteu, sem o salario antigo obsoleto.
+    tipoRelRemPagHelper.associarLista(tiposRelacionamentoNovo, novasRems, novosPags);
 
     contratoHistoricoWriteService.registrarNovo(contratoNovo);
 

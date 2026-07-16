@@ -62,6 +62,54 @@ public class TipoRelRemPagHelper {
   }
 
   /**
+   * Associa ao novo tipo relacionamento APENAS a lista de remunerações/pagamentos indicada,
+   * SEM copiar as associações do tiprel anterior.
+   *
+   * <p>Usar quando a inactivação/derivação dos movimentos antigos é DEFERIDA para a validação
+   * (ex.: novo contrato): copiar as ativas do tiprel anterior traria o salário antigo (ainda
+   * activo na criação), que o {@code reconciliar} inactiva no validar — deixando uma associação
+   * órfã em RH_T_TIPREL_REM_PAG. Aqui associam-se só os novos pendentes (subsídios/encargos do
+   * DTO); o salário certo é ligado no validar via reconciliar + associarNovos.</p>
+   */
+  public void associarLista(
+      TiposRelacionamentoEntity novoTipoRel,
+      List<DefinicaoRemuneracaoEntity> remuneracoes,
+      List<DefPagamentoEntity> pagamentos) {
+
+    List<TipoRelRemPagEntity> lista = new ArrayList<>();
+    Set<Long> remIds = new HashSet<>();
+    Set<Long> pagIds = new HashSet<>();
+
+    if (!CollectionUtils.isEmpty(remuneracoes)) {
+      for (var rem : remuneracoes) {
+        if (rem == null || rem.getId() == null) continue;
+        if (!remIds.add(rem.getId())) continue;
+        var assoc = new TipoRelRemPagEntity();
+        assoc.setTiprelId(novoTipoRel);
+        assoc.setRemId(rem);
+        assoc.setPagId(null);
+        lista.add(assoc);
+      }
+    }
+
+    if (!CollectionUtils.isEmpty(pagamentos)) {
+      for (var pag : pagamentos) {
+        if (pag == null || pag.getId() == null) continue;
+        if (!pagIds.add(pag.getId())) continue;
+        var assoc = new TipoRelRemPagEntity();
+        assoc.setTiprelId(novoTipoRel);
+        assoc.setPagId(pag);
+        assoc.setRemId(null);
+        lista.add(assoc);
+      }
+    }
+
+    if (!lista.isEmpty()) {
+      tipoRelRemPagEntityRepository.saveAll(lista);
+    }
+  }
+
+  /**
    * Ao trocar de tipo relacionamento (est_adm anterior = 0, novo = 1), copia as
    * remunerações e pagamentos ativos associados ao tipo anterior para o novo e
    * também associa os itens novos criados na mesma operação (estado P).
