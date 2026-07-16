@@ -76,8 +76,8 @@ public class ValidarDadosContratuaisService {
     // -----------------------------
     var hoje = LocalDate.now(ZoneId.systemDefault());
 
-    if (dc.getDataInicio().isAfter(hoje))
-      throw IgrpResponseStatusException.badRequest("A data de início não pode ser uma data futura.");
+    if (dc.getDataInicio().isBefore(hoje))
+      throw IgrpResponseStatusException.badRequest("A data de início não pode ser uma data no passado.");
 
     if (dc.getDataFim() != null && dc.getDataInicio().isAfter(dc.getDataFim()))
       throw IgrpResponseStatusException.badRequest("A Data de Início não pode ser posterior à Data de Fim.");
