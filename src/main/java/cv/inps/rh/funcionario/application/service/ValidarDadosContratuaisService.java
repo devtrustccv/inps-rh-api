@@ -81,12 +81,12 @@ public class ValidarDadosContratuaisService {
       throw IgrpResponseStatusException.badRequest("A Data de Início não pode ser posterior à Data de Fim.");
 
     // Contrato a termo (RH_T_PARAM_CONTRATO.PRAZO_OBRIGATORIO = 1, ex.: Contrato
-    // Determinado/Projeto/Estágio) exige prazo: tem de vir Data de Fim ou Duração.
-    // Indeterminado / sem prazo obrigatório (=0) aceita ambos nulos.
+    // Determinado/Projeto/Estágio) exige Data de Fim. Indeterminado / sem prazo
+    // obrigatório (=0) aceita Data de Fim nula.
     if (Integer.valueOf(1).equals(paramContrato.getPrazoObrigatorio())
-        && dc.getDataFim() == null && dc.getDuracaoMeses() == null)
+        && dc.getDataFim() == null)
       throw IgrpResponseStatusException.badRequest(
-          "Este tipo de contrato é a termo: indique a Data de Fim ou a Duração (meses).");
+          "Este tipo de contrato é a termo: a Data de Fim é obrigatória.");
 
     // -----------------------------
     // OBRIGATÓRIOS POR TIPO DE VÍNCULO
