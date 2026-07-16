@@ -98,13 +98,9 @@ public class NovoContratoService {
     contratoNovo.setFunId(funcionario);
     contratoNovo.setTipoSituacao("NOVO_CONTRATO");
     // Versao e POR CONTRATO (DOSSIÊ): novo contrato comeca sempre em 1; so a
-    // renovacao incrementa (dentro do mesmo CONTRATO_VINCULO). A constraint
-    // CK_CONTRATO_VERSAO_CONTRATO exige: (VERSAO=1 AND CONTRATO_ID IS NULL) OR
-    // (VERSAO>1 AND CONTRATO_ID IS NOT NULL). Logo, um novo contrato (v1) NAO
-    // pode referenciar contrato pai — inicia uma nova cadeia (contrato_id nulo).
-    // A ligacao ao vinculo anterior fica no encadeamento do tiprel, nao aqui.
+    // renovacao incrementa (dentro do mesmo CONTRATO_VINCULO).
     contratoNovo.setVersao(1);
-    contratoNovo.setContratoId(null);
+    contratoNovo.setContratoId(contratoAtual); // contrato pai
     funcionario.getContratos().add(contratoNovo);
 
     //**************** INI verifica se mudou carreira e tambem se foi escolhido carreira***********/
