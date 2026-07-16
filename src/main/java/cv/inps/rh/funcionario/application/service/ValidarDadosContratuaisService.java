@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -87,6 +88,11 @@ public class ValidarDadosContratuaisService {
         && dc.getDataFim() == null)
       throw IgrpResponseStatusException.badRequest(
           "Este tipo de contrato é a termo: a Data de Fim é obrigatória.");
+
+    // Deriva a duração (meses) a partir das datas quando o frontend não a envia.
+    // A Data de Fim é a fonte de verdade do prazo; a duração fica coerente com ela.
+    if (dc.getDataFim() != null && dc.getDuracaoMeses() == null)
+      dc.setDuracaoMeses((int) ChronoUnit.MONTHS.between(dc.getDataInicio(), dc.getDataFim()));
 
     // -----------------------------
     // OBRIGATÓRIOS POR TIPO DE VÍNCULO
