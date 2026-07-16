@@ -97,10 +97,13 @@ public class NovoContratoService {
     var contratoNovo = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contratoNovo.setFunId(funcionario);
     contratoNovo.setTipoSituacao("NOVO_CONTRATO");
-    // Versao e POR CONTRATO (DOSSIÊ): novo contrato comeca sempre em 1; so a
-    // renovacao incrementa (dentro do mesmo CONTRATO_VINCULO).
+    // Regra (analista): a VERSAO do CONTRATO_VINCULO e SEMPRE 1 num novo contrato.
+    // A renovacao NAO incrementa aqui — o incremento de versao vive no HISTORICO
+    // (RH_T_CONTRATO_HISTORICO). Como versao=1, a constraint CK_CONTRATO_VERSAO_CONTRATO
+    // (VERSAO=1 AND CONTRATO_ID IS NULL) exige CONTRATO_ID nulo: o novo contrato inicia
+    // uma nova cadeia, sem contrato pai. A ligacao ao vinculo anterior fica no tiprel.
     contratoNovo.setVersao(1);
-    contratoNovo.setContratoId(contratoAtual); // contrato pai
+    contratoNovo.setContratoId(null);
     funcionario.getContratos().add(contratoNovo);
 
     //**************** INI verifica se mudou carreira e tambem se foi escolhido carreira***********/
