@@ -77,7 +77,8 @@ public class HistoricoLaboralReadService {
       dto.setCargo(r.getCargoDesc());
       dto.setSituacaoLaboral(r.getSituacaoLaboralDesc());
       dto.setId(r.getTiprelId());
-      dto.setUuid(r.getFunUuid() != null ? r.getFunUuid().toString() : null);
+      // uuid da LINHA = uuid do tipo de relacionamento (tiprel), nao do funcionario.
+      dto.setUuid(r.getTiprelUuid() != null ? r.getTiprelUuid().toString() : null);
       dto.setUuidFuncionario(r.getFunUuid() != null ? r.getFunUuid().toString() : null);
 
       var dataInicio = r.getDataInicio() != null ? DateFormatter.localDateToString(r.getDataInicio())

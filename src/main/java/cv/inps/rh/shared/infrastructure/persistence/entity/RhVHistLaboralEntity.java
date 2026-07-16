@@ -34,6 +34,10 @@ public class RhVHistLaboralEntity  {
   private Long tiprelId;
 
 
+  @Column(name="tiprel_uuid")
+  private UUID tiprelUuid;
+
+
   @Column(name="fun_id")
   private Long funId;
 
