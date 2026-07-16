@@ -12,7 +12,7 @@ import cv.inps.rh.funcionario.application.dto.RelacaoLaboralDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperRelacaoLaboralSumaryDTO;
 import cv.inps.rh.funcionario.application.queries.GetHistoricoLaboralQuery;
-import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByCarreiraIdQuery;
+import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByTiprelUuidQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByFunIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralComboQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralQuery;
@@ -112,7 +112,7 @@ public class HistoricoLaboralController {
   }
 
    @PutMapping(
-   value = "{idFuncionario}/relacao-laboral/{carreiraId}"
+   value = "{idFuncionario}/relacao-laboral/{tiprelUuid}"
   )
   @Operation(
     summary = "Atualizar relacao laboral",
@@ -132,21 +132,21 @@ public class HistoricoLaboralController {
   )
 
    public ResponseEntity<RelacaoLaboralDTO> atualizarRelacaoLaboral(@Valid @RequestBody RelacaoLaboralDTO atualizarRelacaoLaboralRequest
-    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "carreiraId") String carreiraId)
+    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "tiprelUuid") String tiprelUuid)
   {
 
-      final var command = new AtualizarRelacaoLaboralCommand(atualizarRelacaoLaboralRequest, idFuncionario, carreiraId);
+      final var command = new AtualizarRelacaoLaboralCommand(atualizarRelacaoLaboralRequest, idFuncionario, tiprelUuid);
 
       return commandBus.send(command);
 
   }
 
    @GetMapping(
-   value = "relacao-laboral/{carreiraId}"
+   value = "relacao-laboral/{tiprelUuid}"
   )
   @Operation(
-    summary = "Get relacao laboral by carreira id",
-    description = "Get relacao laboral by carreira id",
+    summary = "Get relacao laboral by tiprel uuid",
+    description = "Get relacao laboral by tiprel uuid",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -161,11 +161,11 @@ public class HistoricoLaboralController {
     }
   )
 
-   public ResponseEntity<RelacaoLaboralDTO> getRelacaoLaboralByCarreiraId(
-    @PathVariable(value = "carreiraId") String carreiraId)
+   public ResponseEntity<RelacaoLaboralDTO> getRelacaoLaboralByTiprelUuid(
+    @PathVariable(value = "tiprelUuid") String tiprelUuid)
   {
 
-      final var query = new GetRelacaoLaboralByCarreiraIdQuery(carreiraId);
+      final var query = new GetRelacaoLaboralByTiprelUuidQuery(tiprelUuid);
 
       return queryBus.handle(query);
 
@@ -202,7 +202,7 @@ public class HistoricoLaboralController {
   }
 
    @GetMapping(
-   value = "relacao-laboral/{idFuncionario}/novo"
+   value = "relacao-laboral/{idFuncionario}/atual"
   )
   @Operation(
     summary = "Get relacao laboral by fun id",

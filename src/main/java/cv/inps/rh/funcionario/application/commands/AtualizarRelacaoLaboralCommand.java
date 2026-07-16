@@ -16,7 +16,7 @@ public class AtualizarRelacaoLaboralCommand implements Command {
   private RelacaoLaboralDTO relacaolaboral;
   @NotBlank(message = "The field <idFuncionario> is required")
   private String idFuncionario;
-  @NotBlank(message = "The field <carreiraId> is required")
-  private String carreiraId;
+  @NotBlank(message = "The field <tiprelUuid> is required")
+  private String tiprelUuid;
 
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +51,8 @@ public class ValidarDadosContratuaisService {
     // -----------------------------
     // EXISTÊNCIA DAS REFERÊNCIAS (FK)
     // -----------------------------
-    if (entityManager.find(ParamContratoEntity.class, dc.getTipoContratoId()) == null)
+    var paramContrato = entityManager.find(ParamContratoEntity.class, dc.getTipoContratoId());
+    if (paramContrato == null)
       throw IgrpResponseStatusException.badRequest("Tipo de contrato inválido: o valor indicado não existe.");
 
     if (entityManager.find(DirecaoEntity.class, dc.getDirecaoId()) == null)
@@ -78,6 +80,19 @@ public class ValidarDadosContratuaisService {
 
     if (dc.getDataFim() != null && dc.getDataInicio().isAfter(dc.getDataFim()))
       throw IgrpResponseStatusException.badRequest("A Data de Início não pode ser posterior à Data de Fim.");
+
+    // Contrato a termo (RH_T_PARAM_CONTRATO.PRAZO_OBRIGATORIO = 1, ex.: Contrato
+    // Determinado/Projeto/Estágio) exige Data de Fim. Indeterminado / sem prazo
+    // obrigatório (=0) aceita Data de Fim nula.
+    if (Integer.valueOf(1).equals(paramContrato.getPrazoObrigatorio())
+        && dc.getDataFim() == null)
+      throw IgrpResponseStatusException.badRequest(
+          "Este tipo de contrato é a termo: a Data de Fim é obrigatória.");
+
+    // Deriva a duração (meses) a partir das datas quando o frontend não a envia.
+    // A Data de Fim é a fonte de verdade do prazo; a duração fica coerente com ela.
+    if (dc.getDataFim() != null && dc.getDuracaoMeses() == null)
+      dc.setDuracaoMeses((int) ChronoUnit.MONTHS.between(dc.getDataInicio(), dc.getDataFim()));
 
     // -----------------------------
     // OBRIGATÓRIOS POR TIPO DE VÍNCULO

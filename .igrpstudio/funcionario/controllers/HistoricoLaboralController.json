@@ -115,7 +115,7 @@
     },
     {
       "actionName": "atualizarRelacaoLaboral",
-      "path": "{idFuncionario}/relacao-laboral/{carreiraId}",
+      "path": "{idFuncionario}/relacao-laboral/{tiprelUuid}",
       "method": "PUT",
       "requestBody": {
         "content": {
@@ -153,15 +153,15 @@
           "isRequired": true
         },
         {
-          "name": "carreiraId",
+          "name": "tiprelUuid",
           "type": "string",
           "isRequired": true
         }
       ]
     },
     {
-      "actionName": "getRelacaoLaboralByCarreiraId",
-      "path": "relacao-laboral/{carreiraId}",
+      "actionName": "getRelacaoLaboralByTiprelUuid",
+      "path": "relacao-laboral/{tiprelUuid}",
       "method": "GET",
       "responses": {
         "200": {
@@ -181,7 +181,7 @@
       },
       "pathVariables": [
         {
-          "name": "carreiraId",
+          "name": "tiprelUuid",
           "type": "string",
           "isRequired": true
         }
@@ -217,7 +217,7 @@
     },
     {
       "actionName": "getRelacaoLaboralByFunId",
-      "path": "relacao-laboral/{idFuncionario}/novo",
+      "path": "relacao-laboral/{idFuncionario}/atual",
       "method": "GET",
       "responses": {
         "200": {
