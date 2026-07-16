@@ -50,7 +50,8 @@ public class ValidarDadosContratuaisService {
     // -----------------------------
     // EXISTÊNCIA DAS REFERÊNCIAS (FK)
     // -----------------------------
-    if (entityManager.find(ParamContratoEntity.class, dc.getTipoContratoId()) == null)
+    var paramContrato = entityManager.find(ParamContratoEntity.class, dc.getTipoContratoId());
+    if (paramContrato == null)
       throw IgrpResponseStatusException.badRequest("Tipo de contrato inválido: o valor indicado não existe.");
 
     if (entityManager.find(DirecaoEntity.class, dc.getDirecaoId()) == null)
@@ -78,6 +79,14 @@ public class ValidarDadosContratuaisService {
 
     if (dc.getDataFim() != null && dc.getDataInicio().isAfter(dc.getDataFim()))
       throw IgrpResponseStatusException.badRequest("A Data de Início não pode ser posterior à Data de Fim.");
+
+    // Contrato a termo (RH_T_PARAM_CONTRATO.PRAZO_OBRIGATORIO = 1, ex.: Contrato
+    // Determinado/Projeto/Estágio) exige prazo: tem de vir Data de Fim ou Duração.
+    // Indeterminado / sem prazo obrigatório (=0) aceita ambos nulos.
+    if (Integer.valueOf(1).equals(paramContrato.getPrazoObrigatorio())
+        && dc.getDataFim() == null && dc.getDuracaoMeses() == null)
+      throw IgrpResponseStatusException.badRequest(
+          "Este tipo de contrato é a termo: indique a Data de Fim ou a Duração (meses).");
 
     // -----------------------------
     // OBRIGATÓRIOS POR TIPO DE VÍNCULO
