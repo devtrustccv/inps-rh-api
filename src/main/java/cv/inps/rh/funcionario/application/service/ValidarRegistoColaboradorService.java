@@ -173,7 +173,11 @@ public class ValidarRegistoColaboradorService {
       var ci = contratoRl.getDataInicio();
       var cf = contratoRl.getDataFim();
       funcionario.getDefinicoesRenumeracoes().forEach(r -> {
-        if (r != null && r.getEstado() != Estado.E) { r.setDataInicio(ci); r.setDataFim(cf); }
+        if (r != null && r.getEstado() != Estado.E) {
+          r.setDataInicio(ci); r.setDataFim(cf);
+          // Subsidio (SubsidioReqDTO nao tem moeda) -> herda a moeda do contrato (ex.: CVE).
+          if (r.getMoeda() == null) r.setMoeda(dadosContratuais.getMoeda());
+        }
       });
     }
     funcionario.setHabilitacoesLiterarias(habilitacoesLiterarias);
