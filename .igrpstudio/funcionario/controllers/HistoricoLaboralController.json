@@ -80,7 +80,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "RelacaoLaboral",
+              "type": "RelacaoLaboralReq",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
@@ -121,7 +121,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "RelacaoLaboral",
+              "type": "RelacaoLaboralReq",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
