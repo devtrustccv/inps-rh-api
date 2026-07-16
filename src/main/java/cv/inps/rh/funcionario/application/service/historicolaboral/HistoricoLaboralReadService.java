@@ -2,7 +2,7 @@ package cv.inps.rh.funcionario.application.service.historicolaboral;
 
 import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.application.queries.GetHistoricoLaboralQuery;
-import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByCarreiraIdQuery;
+import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByTiprelUuidQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByFunIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralComboQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralQuery;
@@ -129,8 +129,11 @@ public class HistoricoLaboralReadService {
     return wrapper;
   }
 
-  public RelacaoLaboralDTO getRelacaoLaboralByCarreiraId(GetRelacaoLaboralByCarreiraIdQuery query) {
-    var entity = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(UUID.fromString(query.getCarreiraId()));
+  public RelacaoLaboralDTO getRelacaoLaboralByTiprelUuid(GetRelacaoLaboralByTiprelUuidQuery query) {
+    // Resolve o detalhe pelo UUID do tipo de relacionamento (tiprel), coerente com a lista e o
+    // PUT. Assim clicar em qualquer linha (atual ou histórica) traz exatamente aquele tiprel.
+    var entity = tiposRelacionamentoEntityRepository.findByUuid(UUID.fromString(query.getTiprelUuid()))
+        .orElse(null);
     if (entity == null) {
       throw IgrpResponseStatusException.notFound("Histórico Laboral não encontrado");
     }

@@ -160,8 +160,8 @@
       ]
     },
     {
-      "actionName": "getRelacaoLaboralByCarreiraId",
-      "path": "relacao-laboral/{carreiraId}",
+      "actionName": "getRelacaoLaboralByTiprelUuid",
+      "path": "relacao-laboral/{tiprelUuid}",
       "method": "GET",
       "responses": {
         "200": {
@@ -181,7 +181,7 @@
       },
       "pathVariables": [
         {
-          "name": "carreiraId",
+          "name": "tiprelUuid",
           "type": "string",
           "isRequired": true
         }

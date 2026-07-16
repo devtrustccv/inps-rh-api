@@ -10,22 +10,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GetRelacaoLaboralByCarreiraIdQueryHandler implements QueryHandler<GetRelacaoLaboralByCarreiraIdQuery, ResponseEntity<RelacaoLaboralDTO>>{
+public class GetRelacaoLaboralByTiprelUuidQueryHandler implements QueryHandler<GetRelacaoLaboralByTiprelUuidQuery, ResponseEntity<RelacaoLaboralDTO>>{
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(GetRelacaoLaboralByCarreiraIdQueryHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(GetRelacaoLaboralByTiprelUuidQueryHandler.class);
 
   private final HistoricoLaboralReadService historicoLaboralReadService;
 
-  public GetRelacaoLaboralByCarreiraIdQueryHandler(HistoricoLaboralReadService historicoLaboralReadService) {
+  public GetRelacaoLaboralByTiprelUuidQueryHandler(HistoricoLaboralReadService historicoLaboralReadService) {
     this.historicoLaboralReadService = historicoLaboralReadService;
   }
 
    @IgrpQueryHandler
-  public ResponseEntity<RelacaoLaboralDTO> handle(GetRelacaoLaboralByCarreiraIdQuery query) {
+  public ResponseEntity<RelacaoLaboralDTO> handle(GetRelacaoLaboralByTiprelUuidQuery query) {
 
     LOGGER.debug("GetHistoricoLaboralByIdQuery: {}", query);
 
-    var data = historicoLaboralReadService.getRelacaoLaboralByCarreiraId(query);
+    var data = historicoLaboralReadService.getRelacaoLaboralByTiprelUuid(query);
     return ResponseEntity.ok(data);
   }
 
