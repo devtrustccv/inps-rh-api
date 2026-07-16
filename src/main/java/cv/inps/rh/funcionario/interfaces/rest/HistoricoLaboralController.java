@@ -112,7 +112,7 @@ public class HistoricoLaboralController {
   }
 
    @PutMapping(
-   value = "{idFuncionario}/relacao-laboral/{carreiraId}"
+   value = "{idFuncionario}/relacao-laboral/{tiprelUuid}"
   )
   @Operation(
     summary = "Atualizar relacao laboral",
@@ -132,10 +132,10 @@ public class HistoricoLaboralController {
   )
 
    public ResponseEntity<RelacaoLaboralDTO> atualizarRelacaoLaboral(@Valid @RequestBody RelacaoLaboralDTO atualizarRelacaoLaboralRequest
-    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "carreiraId") String carreiraId)
+    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "tiprelUuid") String tiprelUuid)
   {
 
-      final var command = new AtualizarRelacaoLaboralCommand(atualizarRelacaoLaboralRequest, idFuncionario, carreiraId);
+      final var command = new AtualizarRelacaoLaboralCommand(atualizarRelacaoLaboralRequest, idFuncionario, tiprelUuid);
 
       return commandBus.send(command);
 

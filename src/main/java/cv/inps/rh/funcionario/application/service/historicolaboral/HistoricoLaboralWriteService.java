@@ -303,7 +303,7 @@ public class HistoricoLaboralWriteService {
     // exposto na lista como `tiprelUuid` — e não pelo UUID da carreira (a carreira é
     // somente leitura). O path {carreiraId} transporta agora o tiprelUuid.
     var relacionamento = tiposRelacionamentoEntityRepository
-        .findByUuid(UUID.fromString(command.getCarreiraId()))
+        .findByUuid(UUID.fromString(command.getTiprelUuid()))
         .orElse(null);
     if (relacionamento == null) {
       throw IgrpResponseStatusException.notFound("Histórico Laboral não encontrado");
