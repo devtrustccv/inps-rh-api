@@ -22,7 +22,7 @@ public class NovaRelacaoLaboralCommandHandler implements CommandHandler<NovaRela
    @IgrpCommandHandler
    public ResponseEntity<RelacaoLaboralDTO> handle(NovaRelacaoLaboralCommand command) {
       LOGGER.info("ValidarHistoricoLaboralCommandHandler.handle: {}", command);
-      return ResponseEntity.ok(historicoLaboralWriteService.validar(command));
+      return ResponseEntity.ok(historicoLaboralWriteService.novo(command));
    }
 
 }

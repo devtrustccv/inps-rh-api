@@ -102,6 +102,20 @@ public class ValidarContratoService {
           dadosContratuais.getEncargosDescontos(), funcionario);
       funcionario.getDefinicoesRenumeracoes().addAll(definicoesRemuneracoes);
       funcionario.getDefinicoesPagamentos().addAll(definicoesPagamentos);
+
+      // Subsidios (def_remuneracoes) seguem o periodo e a moeda do contrato (o SubsidioReqDTO
+      // nao tem datas nem moeda -> senao ficariam com NOW/moeda null). Encargos ja recebem o
+      // default do contrato no ValidarDadosContratuaisService.
+      if (contrato != null) {
+        var ci = contrato.getDataInicio();
+        var cf = contrato.getDataFim();
+        funcionario.getDefinicoesRenumeracoes().forEach(r -> {
+          if (r != null && r.getEstado() != Estado.E) {
+            r.setDataInicio(ci); r.setDataFim(cf);
+            if (r.getMoeda() == null) r.setMoeda(dadosContratuais.getMoeda());
+          }
+        });
+      }
     }
 
     // Transicao de estado (A/I) deve acontecer SEMPRE que ha decisao de validacao,

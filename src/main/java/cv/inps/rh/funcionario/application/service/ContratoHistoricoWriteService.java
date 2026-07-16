@@ -92,6 +92,15 @@ public class ContratoHistoricoWriteService {
       pendente.setEstActAdm(1);
     }
 
+    // O historico do contrato segue as datas do contrato. Propaga as datas atuais do contrato
+    // ao historico validado — EXCEPTO renovacao, que traz as suas proprias datas (as novas
+    // datas propostas na renovacao).
+    if (!"RENOVACAO".equals(pendente.getObs())) {
+      pendente.setDataInicio(contrato.getDataInicio());
+      pendente.setDataFim(contrato.getDataFim());
+      pendente.setDuracao(contrato.getDuracao());
+    }
+
     pendente.setEstado(estado);
     contratoHistoricoEntityRepository.save(pendente);
   }

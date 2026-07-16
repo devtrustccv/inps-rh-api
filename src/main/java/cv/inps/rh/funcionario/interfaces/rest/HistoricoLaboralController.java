@@ -9,6 +9,7 @@ import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.funcionario.application.commands.AtualizarRelacaoLaboralCommand;
 import cv.inps.rh.funcionario.application.commands.NovaRelacaoLaboralCommand;
 import cv.inps.rh.funcionario.application.dto.RelacaoLaboralDTO;
+import cv.inps.rh.funcionario.application.dto.RelacaoLaboralReqDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperRelacaoLaboralSumaryDTO;
 import cv.inps.rh.funcionario.application.queries.GetHistoricoLaboralQuery;
@@ -101,7 +102,7 @@ public class HistoricoLaboralController {
     }
   )
 
-   public ResponseEntity<RelacaoLaboralDTO> novaRelacaoLaboral(@Valid @RequestBody RelacaoLaboralDTO novaRelacaoLaboralRequest
+   public ResponseEntity<RelacaoLaboralDTO> novaRelacaoLaboral(@Valid @RequestBody RelacaoLaboralReqDTO novaRelacaoLaboralRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
@@ -131,7 +132,7 @@ public class HistoricoLaboralController {
     }
   )
 
-   public ResponseEntity<RelacaoLaboralDTO> atualizarRelacaoLaboral(@Valid @RequestBody RelacaoLaboralDTO atualizarRelacaoLaboralRequest
+   public ResponseEntity<RelacaoLaboralDTO> atualizarRelacaoLaboral(@Valid @RequestBody RelacaoLaboralReqDTO atualizarRelacaoLaboralRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "tiprelUuid") String tiprelUuid)
   {
 

@@ -164,6 +164,22 @@ public class ValidarRegistoColaboradorService {
     funcionario.setDadosBancarios(dadosBancarios);
     funcionario.getDefinicoesRenumeracoes().addAll(definicoesRemuneracoes);
     funcionario.getDefinicoesPagamentos().addAll(definicoesPagamentos);
+
+    // Subsidios (def_remuneracoes) nao tem datas proprias no formulario -> seguem o periodo do
+    // contrato (antes ficavam com NOW). Os encargos ja recebem o default do contrato no
+    // ValidarDadosContratuaisService quando o utilizador nao indica.
+    var contratoRl = tiposRelacionamento.getContrVinculoId();
+    if (contratoRl != null) {
+      var ci = contratoRl.getDataInicio();
+      var cf = contratoRl.getDataFim();
+      funcionario.getDefinicoesRenumeracoes().forEach(r -> {
+        if (r != null && r.getEstado() != Estado.E) {
+          r.setDataInicio(ci); r.setDataFim(cf);
+          // Subsidio (SubsidioReqDTO nao tem moeda) -> herda a moeda do contrato (ex.: CVE).
+          if (r.getMoeda() == null) r.setMoeda(dadosContratuais.getMoeda());
+        }
+      });
+    }
     funcionario.setHabilitacoesLiterarias(habilitacoesLiterarias);
     funcionario.setFormacoesFeitas(formacoesFeitas);
     funcionario.setExperienciasProfissionais(experienciasProfissionais);

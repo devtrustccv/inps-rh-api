@@ -20,7 +20,7 @@ segurança e conformidade com as normas aplicáveis.
 # Âmbito 
 
 | **Funcionalidade** | **Descrição** |
-|----|----|
+|----|:---|
 | Registo do Colaborador | A funcionalidade de **Registo de Colaboradores** permite criar e atualizar o dossiê digital de cada trabalhador no sistema de RH. Através de uma interface intuitiva, o utilizador insere dados pessoais, contactos, identificação (NIF/BI), vínculo e informações contratuais, enquadramento organizacional (direção, função, escalão), dados bancários e qualificações académicas ou profissionais, podendo ainda anexar documentos relevantes como contratos e certidões. |
 | Lista de Colaboradores | A **Lista de Colaboradores** apresenta de forma organizada todos os trabalhadores registados no sistema de RH, com dados essenciais como nome, cargo, direção, vínculo e estado. Permite pesquisar, aplicar filtros e aceder rapidamente ao perfil detalhado de cada colaborador para consulta ou atualização. |
 | Dossiê do colaborador | O **Dossiê do Colaborador** reúne todas as informações individuais do trabalhador num único registo digital. Contém dados pessoais, contratuais, organizacionais, bancários, académicos e profissionais, bem como documentos anexos, servindo de base para gestão, consulta e atualização no sistema de RH. |
