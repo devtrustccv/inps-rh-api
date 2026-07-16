@@ -38,9 +38,10 @@ public class ValidarDadosContratuaisService {
       throw IgrpResponseStatusException.badRequest("Local de trabalho é obrigatório.");
 
 
+    // Moeda: se o utilizador nao indicar, assume CVE (Cabo Verde) — valor do dominio MOEDA.
     dc.setMoeda(ValidationUtil.trimToNull(dc.getMoeda()));
     if (dc.getMoeda() == null)
-      throw IgrpResponseStatusException.badRequest("Moeda é obrigatória.");
+      dc.setMoeda("CVE");
 
     if (dc.getDataInicio() == null)
       throw IgrpResponseStatusException.badRequest("Data de início é obrigatória.");
@@ -131,11 +132,11 @@ public class ValidarDadosContratuaisService {
     // -----------------------------
     if (dc.getEncargosDescontos() != null) {
       for (var encargo : dc.getEncargosDescontos()) {
-        if (encargo.getDataInicio() == null) {
-          throw IgrpResponseStatusException.badRequest(
-              "A Data de Início é obrigatória para cada encargo/desconto.");
-        }
-        if (encargo.getDataFim() != null && encargo.getDataInicio().isAfter(encargo.getDataFim())) {
+        // Se o utilizador nao indicar datas no encargo, assume as datas do contrato.
+        if (encargo.getDataInicio() == null) encargo.setDataInicio(dc.getDataInicio());
+        if (encargo.getDataFim() == null) encargo.setDataFim(dc.getDataFim());
+        if (encargo.getDataFim() != null && encargo.getDataInicio() != null
+            && encargo.getDataInicio().isAfter(encargo.getDataFim())) {
           throw IgrpResponseStatusException.badRequest(
               "A Data de Início não pode ser posterior à Data de Fim no encargo/desconto.");
         }
