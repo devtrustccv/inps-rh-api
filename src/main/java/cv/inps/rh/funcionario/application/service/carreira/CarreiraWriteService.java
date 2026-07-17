@@ -304,14 +304,17 @@ public class CarreiraWriteService {
     if (!aprovado) relacionamento.setObs("Não Validado");
     tiposRelacionamentoEntityRepository.save(relacionamento);
 
-    var definicoesRemuneracao = definicaoRemuneracaoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
+    // NAO filtrar por DataFimIsNull: o salario e criado COM data fim (fim do contrato), pelo que
+    // com o filtro escapava a validacao e ficava P. Doc (DOSSIÊ l.5197-5199): ao validar a carreira,
+    // TODAS as tabelas associadas ao registo -> estado 'A'.
+    var definicoesRemuneracao = definicaoRemuneracaoEntityRepository.findByFunIdAndEstado(funcionario, Estado.P);
     definicoesRemuneracao.forEach(obj -> {
       obj.setEstado(estado);
       if (!aprovado) obj.setObs("Não Validado");
       definicaoRemuneracaoEntityRepository.save(obj);
     });
 
-    var definicoesPagamento = defPagamentoEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.P);
+    var definicoesPagamento = defPagamentoEntityRepository.findByFunIdAndEstado(funcionario, Estado.P);
     definicoesPagamento.forEach(obj -> {
       obj.setEstado(estado);
       if (!aprovado) obj.setObs("Não Validado");
