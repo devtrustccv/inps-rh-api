@@ -71,6 +71,9 @@ public class ValidacaoRenovacaoContratoService {
 
   /** Renovação (caso de teste): estende a DATA_FIM das tabelas associadas ao tiprel + rem/pag activos. */
   private void atualizarDataFimAssociadas(TiposRelacionamentoEntity tr, FuncionarioEntity funcionario, LocalDate novaDataFim) {
+    // O proprio tiprel: o GET do contrato le a data fim daqui (tiprel.getDataFim()); sem isto o
+    // contrato renovado aparecia com dataFim = null.
+    tr.setDataFim(novaDataFim);
     if (tr.getCarreiraId() != null) tr.getCarreiraId().setDataFim(novaDataFim);
     if (tr.getMobId() != null) tr.getMobId().setDataFim(novaDataFim);
     if (tr.getRegimeId() != null) tr.getRegimeId().setDataFim(novaDataFim);
