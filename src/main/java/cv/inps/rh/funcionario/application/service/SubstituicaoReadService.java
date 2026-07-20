@@ -2,6 +2,8 @@ package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.dto.SubstituicaoDetalheDTO;
 import cv.inps.rh.funcionario.application.dto.SubstituicaoSumaryDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperSubstituicaoSumaryDTO;
+import cv.inps.rh.shared.util.PageMapper;
 import cv.inps.rh.funcionario.application.queries.GetSubstituicaoByIdQuery;
 import cv.inps.rh.funcionario.application.queries.ListaSubstituicaoQuery;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -26,7 +28,7 @@ public class SubstituicaoReadService {
 
 
   @Transactional(readOnly = true)
-  public List<SubstituicaoSumaryDTO> listar(ListaSubstituicaoQuery query) {
+  public WrapperSubstituicaoSumaryDTO listar(ListaSubstituicaoQuery query) {
 
     int page = Integer.parseInt(query.getPageNumber());
     int size = Integer.parseInt(query.getPageSize());
@@ -39,10 +41,14 @@ public class SubstituicaoReadService {
     // substitui). Inclui pendentes (A/P/I).
     var estados = List.of(Estado.A, Estado.P, Estado.I);
 
-    return substituicaoEntityRepository
+    var pageResult = substituicaoEntityRepository
         .findBySubstitutoTiprelId_FunId_Uuid_AndEstadoIn(idFuncionario, estados, pageable)
-        .map(this::toDto)
-        .getContent();
+        .map(this::toDto);
+
+    var wrapper = new WrapperSubstituicaoSumaryDTO();
+    wrapper.setContent(pageResult.getContent());
+    PageMapper.fillPagination(pageResult, wrapper);
+    return wrapper;
   }
 
 

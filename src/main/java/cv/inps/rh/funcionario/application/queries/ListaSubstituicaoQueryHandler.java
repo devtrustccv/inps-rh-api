@@ -2,15 +2,13 @@ package cv.inps.rh.funcionario.application.queries;
 
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import cv.inps.rh.funcionario.application.dto.SubstituicaoSumaryDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperSubstituicaoSumaryDTO;
 import cv.inps.rh.funcionario.application.service.SubstituicaoReadService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
-public class ListaSubstituicaoQueryHandler implements QueryHandler<ListaSubstituicaoQuery, ResponseEntity<List<SubstituicaoSumaryDTO>>> {
+public class ListaSubstituicaoQueryHandler implements QueryHandler<ListaSubstituicaoQuery, ResponseEntity<WrapperSubstituicaoSumaryDTO>> {
 
   private final SubstituicaoReadService substituicaoReadService;
 
@@ -20,7 +18,7 @@ public class ListaSubstituicaoQueryHandler implements QueryHandler<ListaSubstitu
   }
 
   @IgrpQueryHandler
-  public ResponseEntity<List<SubstituicaoSumaryDTO>> handle(ListaSubstituicaoQuery query) {
+  public ResponseEntity<WrapperSubstituicaoSumaryDTO> handle(ListaSubstituicaoQuery query) {
     return ResponseEntity.ok(substituicaoReadService.listar(query));
   }
 

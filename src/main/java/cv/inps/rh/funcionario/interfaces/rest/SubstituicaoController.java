@@ -11,7 +11,7 @@ import cv.inps.rh.funcionario.application.commands.ValidarSubstituicaoCommand;
 import cv.inps.rh.funcionario.application.dto.CalcularSubstituicaoResponseDTO;
 import cv.inps.rh.funcionario.application.dto.SubstituicaoDTO;
 import cv.inps.rh.funcionario.application.dto.SubstituicaoDetalheDTO;
-import cv.inps.rh.funcionario.application.dto.SubstituicaoSumaryDTO;
+import cv.inps.rh.funcionario.application.dto.WrapperSubstituicaoSumaryDTO;
 import cv.inps.rh.funcionario.application.queries.CalcularSubstituicaoQuery;
 import cv.inps.rh.funcionario.application.queries.GetSubstituicaoByIdQuery;
 import cv.inps.rh.funcionario.application.queries.ListaSubstituicaoQuery;
@@ -23,8 +23,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @IgrpController
 @RestController
@@ -146,14 +144,14 @@ public class SubstituicaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = SubstituicaoSumaryDTO.class,
+                  implementation = WrapperSubstituicaoSumaryDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<List<SubstituicaoSumaryDTO>> listaSubstituicao(
+  public ResponseEntity<WrapperSubstituicaoSumaryDTO> listaSubstituicao(
     @RequestParam(value = "pageNumber", defaultValue = "0") String pageNumber,
     @RequestParam(value = "pageSize", defaultValue = "20") String pageSize,
     @RequestParam(value = "idFuncionario") String idFuncionario)
@@ -161,7 +159,7 @@ public class SubstituicaoController {
 
       final var query = new ListaSubstituicaoQuery(pageNumber, pageSize, idFuncionario);
 
-      ResponseEntity<List<SubstituicaoSumaryDTO>> response = queryBus.handle(query);
+      ResponseEntity<WrapperSubstituicaoSumaryDTO> response = queryBus.handle(query);
 
       return response;
   }
