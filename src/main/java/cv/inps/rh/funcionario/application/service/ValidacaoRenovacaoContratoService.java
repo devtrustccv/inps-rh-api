@@ -15,11 +15,14 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoMovimentoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class ValidacaoRenovacaoContratoService {
   private final FuncionarioRules funcionarioRules;
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
+  private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
 
   @Transactional
   public RenovacaoContratoDTO validar(ValidarRenovacaoContratoCommand command) {
@@ -54,8 +58,8 @@ public class ValidacaoRenovacaoContratoService {
       // renovacao e APROVADA. Numa rejeicao o contrato mantem as datas actuais.
       if (aprovado) {
         contratoMapper.toUpdateEntity(contrato, dto.getDadosRenovacao());
-        // Caso de teste: a renovação estende a DATA_FIM das tabelas associadas.
-        atualizarDataFimAssociadas(tiposRelacionamento, funcionario, contrato.getDataFim());
+        // Renovação estende as datas das tabelas associadas; nos MOVIMENTOS só os fixos (doc ponto 3).
+        atualizarDatasRenovacao(tiposRelacionamento, funcionario, contrato);
       }
       mudarEstado(funcionario, aprovado ? Estado.A : Estado.I);
     }
@@ -69,23 +73,39 @@ public class ValidacaoRenovacaoContratoService {
     return renovacaoContratoDTO;
   }
 
-  /** Renovação (caso de teste): estende a DATA_FIM das tabelas associadas ao tiprel + rem/pag activos. */
-  private void atualizarDataFimAssociadas(TiposRelacionamentoEntity tr, FuncionarioEntity funcionario, LocalDate novaDataFim) {
-    // O proprio tiprel: o GET do contrato le a data fim daqui (tiprel.getDataFim()); sem isto o
-    // contrato renovado aparecia com dataFim = null.
-    tr.setDataFim(novaDataFim);
-    if (tr.getCarreiraId() != null) tr.getCarreiraId().setDataFim(novaDataFim);
-    if (tr.getMobId() != null) tr.getMobId().setDataFim(novaDataFim);
-    if (tr.getRegimeId() != null) tr.getRegimeId().setDataFim(novaDataFim);
-    if (tr.getSituacLaboralId() != null) tr.getSituacLaboralId().setDataFim(novaDataFim);
+  /**
+   * Renovação: estende as datas das tabelas associadas ao tiprel. Doc (ponto 3): nos MOVIMENTOS,
+   * só os FIXOS do vínculo (salário/vencimento + INPS + IUR + valor líquido) atualizam datas
+   * (Data Início + Data Fim); os manuais (subsídios/encargos) NÃO são tocados.
+   */
+  private void atualizarDatasRenovacao(TiposRelacionamentoEntity tr, FuncionarioEntity funcionario, ContratoEntity contrato) {
+    var dataInicio = contrato.getDataInicio();
+    var dataFim = contrato.getDataFim();
+
+    // Tabelas associadas (não-movimentos): o próprio tiprel (o GET lê tiprel.getDataFim()) + carreira/
+    // mobilidade/regime/situação estendem a DATA_FIM para o novo período.
+    tr.setDataFim(dataFim);
+    if (tr.getCarreiraId() != null) tr.getCarreiraId().setDataFim(dataFim);
+    if (tr.getMobId() != null) tr.getMobId().setDataFim(dataFim);
+    if (tr.getRegimeId() != null) tr.getRegimeId().setDataFim(dataFim);
+    if (tr.getSituacLaboralId() != null) tr.getSituacLaboralId().setDataFim(dataFim);
+
+    // Movimentos: SÓ os fixos do vínculo atualizam datas (Início + Fim). Manuais não. (doc ponto 3)
+    var vinculoId = contrato.getVinculoId() != null ? contrato.getVinculoId().getId() : null;
+    if (vinculoId == null) return;
+    Set<Long> tmsRem = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoId, "REM").stream()
+        .filter(m -> m.getTmId() != null).map(m -> m.getTmId().getId()).collect(Collectors.toSet());
+    Set<Long> tmsPag = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoId, "PAG").stream()
+        .filter(m -> m.getTmId() != null).map(m -> m.getTmId().getId()).collect(Collectors.toSet());
+
     if (funcionario.getDefinicoesRenumeracoes() != null)
       funcionario.getDefinicoesRenumeracoes().stream()
-          .filter(r -> r != null && r.getEstado() == Estado.A)
-          .forEach(r -> r.setDataFim(novaDataFim));
+          .filter(r -> r != null && r.getEstado() == Estado.A && r.getTmId() != null && tmsRem.contains(r.getTmId().getId()))
+          .forEach(r -> { r.setDataInicio(dataInicio); r.setDataFim(dataFim); });
     if (funcionario.getDefinicoesPagamentos() != null)
       funcionario.getDefinicoesPagamentos().stream()
-          .filter(p -> p != null && p.getEstado() == Estado.A)
-          .forEach(p -> p.setDataFim(novaDataFim));
+          .filter(p -> p != null && p.getEstado() == Estado.A && p.getTmId() != null && tmsPag.contains(p.getTmId().getId()))
+          .forEach(p -> { p.setDataInicio(dataInicio); p.setDataFim(dataFim); });
   }
 
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {
