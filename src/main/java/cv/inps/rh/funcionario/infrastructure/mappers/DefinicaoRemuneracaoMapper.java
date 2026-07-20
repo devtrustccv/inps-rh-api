@@ -51,7 +51,8 @@ public class DefinicaoRemuneracaoMapper {
 
   public java.util.List<DefinicaoRemuneracaoEntity> syncRemuneracoes(List<DefinicaoRemuneracaoEntity> existingList,
                                                                       List<SubsidioReqDTO> newList,
-                                                                      FuncionarioEntity fun) {
+                                                                      FuncionarioEntity fun,
+                                                                      java.util.Set<Long> tmsFixos) {
     if (CollectionUtils.isEmpty(newList)) return existingList;
     for (SubsidioReqDTO dto : newList) {
       DefinicaoRemuneracaoEntity found = null;
@@ -74,9 +75,13 @@ public class DefinicaoRemuneracaoMapper {
       }
     }
     for (DefinicaoRemuneracaoEntity existing : existingList) {
+      // Os movimentos FIXOS do vinculo (salario) NAO sao geridos aqui — o sync so mexe nos
+      // subsidios MANUAIS. Sem esta guarda o salario-base (nunca vem no DTO) era eliminado.
+      boolean fixo = existing.getTmId() != null && tmsFixos != null
+          && tmsFixos.contains(existing.getTmId().getId());
       boolean stillExists = newList.stream()
           .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
-      if (!stillExists && existing.getEstado() != Estado.E && existing.getEstado() != Estado.I) {
+      if (!fixo && !stillExists && existing.getEstado() != Estado.E && existing.getEstado() != Estado.I) {
         existing.setEstado(Estado.E);
       }
     }

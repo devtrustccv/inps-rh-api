@@ -150,11 +150,15 @@ public class ValidarRegistoColaboradorService {
     colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
     colaboradorValidationRules.validarEncargosDescontosDuplicados(dadosContratuais.getEncargosDescontos());
 
+    // tms dos movimentos FIXOS do vinculo — o sync so mexe nos manuais, protege os fixos.
+    var vinculoId = dadosContratuais.getTipoVinculoLaboralId();
+    var tmsFixosRem = reconciliacaoMovimentoVinculoService.tmsFixosDoVinculo(vinculoId, "REM");
+    var tmsFixosPag = reconciliacaoMovimentoVinculoService.tmsFixosDoVinculo(vinculoId, "PAG");
     var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(),
-        dadosContratuais.getSubsidios(), funcionario);
+        dadosContratuais.getSubsidios(), funcionario, tmsFixosRem);
 
     var definicoesPagamentos = defPagamentoMapper.syncPagamentos(funcionario.getDefinicoesPagamentos(),
-        dadosContratuais.getEncargosDescontos(), funcionario);
+        dadosContratuais.getEncargosDescontos(), funcionario, tmsFixosPag);
 
     var alertas = funcionarioRules.validarContactosDuplicados(dadosPessoaisReqDTO.getContactos(), funcionario.getUuid());
 

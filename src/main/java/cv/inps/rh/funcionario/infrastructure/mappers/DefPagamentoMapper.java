@@ -54,7 +54,8 @@ public class DefPagamentoMapper {
   public List<DefPagamentoEntity> syncPagamentos(
       java.util.List<DefPagamentoEntity> existingList,
       java.util.List<cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO> newList,
-      FuncionarioEntity fun) {
+      FuncionarioEntity fun,
+      java.util.Set<Long> tmsFixos) {
     if (org.springframework.util.CollectionUtils.isEmpty(newList)) return existingList;
     for (cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO dto : newList) {
       DefPagamentoEntity found = null;
@@ -78,9 +79,13 @@ public class DefPagamentoMapper {
       }
     }
     for (DefPagamentoEntity existing : existingList) {
+      // Os movimentos FIXOS do vinculo (INPS/IUR/valor liquido) NAO sao geridos aqui — o sync so
+      // mexe nos encargos/descontos MANUAIS. Sem esta guarda os fixos (nunca vem no DTO) eram eliminados.
+      boolean fixo = existing.getTmId() != null && tmsFixos != null
+          && tmsFixos.contains(existing.getTmId().getId());
       boolean stillExists = newList.stream()
           .anyMatch(dto -> java.util.Objects.equals(dto.getId(), existing.getId()));
-      if (!stillExists && existing.getEstado() != Estado.E && existing.getEstado() != Estado.I) {
+      if (!fixo && !stillExists && existing.getEstado() != Estado.E && existing.getEstado() != Estado.I) {
         existing.setEstado(Estado.E);
       }
     }

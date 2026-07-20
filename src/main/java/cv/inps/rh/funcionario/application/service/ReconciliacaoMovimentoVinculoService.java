@@ -126,4 +126,17 @@ public class ReconciliacaoMovimentoVinculoService {
   private boolean ativoOuPendente(Estado estado) {
     return estado == Estado.A || estado == Estado.P;
   }
+
+  /**
+   * Tms dos movimentos FIXOS do vínculo (tipo "REM" = salário; "PAG" = INPS/IUR/valor líquido).
+   * Usado para PROTEGER estes movimentos nos syncs de subsídios/encargos (que só devem mexer
+   * nos manuais). Devolve conjunto vazio se o vínculo for nulo.
+   */
+  public Set<Long> tmsFixosDoVinculo(Long vinculoId, String tipo) {
+    if (vinculoId == null) return Set.of();
+    return paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoId, tipo).stream()
+        .filter(m -> m.getTmId() != null)
+        .map(m -> m.getTmId().getId())
+        .collect(Collectors.toSet());
+  }
 }
