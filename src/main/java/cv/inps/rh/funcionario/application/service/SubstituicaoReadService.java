@@ -35,10 +35,12 @@ public class SubstituicaoReadService {
 
     var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor();
 
+    // Inversão (UX): o dossiê mostra as substituições onde o funcionário é o SUBSTITUTO (quem
+    // substitui). Inclui pendentes (A/P/I).
     var estados = List.of(Estado.A, Estado.P, Estado.I);
 
     return substituicaoEntityRepository
-        .findBySubstituidoTiprelId_FunId_Uuid_AndEstadoIn(idFuncionario,estados, pageable)
+        .findBySubstitutoTiprelId_FunId_Uuid_AndEstadoIn(idFuncionario, estados, pageable)
         .map(this::toDto)
         .getContent();
   }

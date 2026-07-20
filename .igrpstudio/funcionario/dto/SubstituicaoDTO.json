@@ -19,7 +19,7 @@
       "module": "shared"
     },
     {
-      "name": "colaboradorSubstituto",
+      "name": "colaboradorSubstituido",
       "objectType": "java",
       "type": "uuid",
       "required": false,

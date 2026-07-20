@@ -36,5 +36,14 @@ public interface SubstituicaoEntityRepository extends
       Pageable pageable
   );
 
+  /**
+   * Substituições onde o funcionário é o SUBSTITUTO (quem substitui) — o dossiê mostra as
+   * substituições que o próprio registou. Inclui A/P/I (mostra também pendentes).
+   */
+  Page<SubstituicaoEntity> findBySubstitutoTiprelId_FunId_Uuid_AndEstadoIn(
+      UUID substitutoTiprelIdFunIdUuid,
+      List<Estado> estados,
+      Pageable pageable
+  );
 
 }

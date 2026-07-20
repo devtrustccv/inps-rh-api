@@ -61,25 +61,27 @@ public class SubstituicaoWriteService {
 
     var dto = command.getSubstituicao();
 
-    if (dto.getColaboradorSubstituto() == null)
-      throw IgrpResponseStatusException.badRequest("É obrigatório indicar o colaborador substituto.");
+    if (dto.getColaboradorSubstituido() == null)
+      throw IgrpResponseStatusException.badRequest("É obrigatório indicar o colaborador substituído.");
 
-    var idFuncionarioSubstituto = IdentificadorUnico.from(dto.getColaboradorSubstituto()).valor();
+    // Inversão (UX): o dono do dossiê (idFuncionario) é o SUBSTITUTO (quem substitui); o campo
+    // colaboradorSubstituido é o SUBSTITUÍDO (quem vai ser substituído).
+    var idFuncionarioSubstituto = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionarioSubstituto = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituto).orElseThrow(
         () -> IgrpResponseStatusException.badRequest("Funcionário substituto não encontrado.")
     );
 
-    var idFuncionarioSubstituido = IdentificadorUnico.from(command.getIdFuncionario()).valor();
+    var idFuncionarioSubstituido = IdentificadorUnico.from(dto.getColaboradorSubstituido()).valor();
     var funcionarioSubstituido = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituido).orElseThrow(
         () -> IgrpResponseStatusException.badRequest("Funcionário substituído não encontrado.")
     );
 
-    // Guard: não permitir registar nova substituição enquanto o substituído tiver uma pendente de
-    // validação. Evita o estado de múltiplas substituições pendentes (que quebra a validação) e
-    // obriga a resolver a anterior primeiro.
-    if (funcionarioRules.temValidacaoPendente(funcionarioSubstituido.getUuid(), TipoAcao.INSERT, Referencia.SUBSTITUICAO)) {
+    // Guard: não permitir registar nova substituição enquanto o SUBSTITUTO tiver uma pendente de
+    // validação (a validação vive no substituto). Evita múltiplas substituições pendentes e obriga
+    // a resolver a anterior primeiro.
+    if (funcionarioRules.temValidacaoPendente(funcionarioSubstituto.getUuid(), TipoAcao.INSERT, Referencia.SUBSTITUICAO)) {
       throw IgrpResponseStatusException.badRequest(
-          "O colaborador substituído já tem uma substituição pendente de validação. "
+          "O colaborador substituto já tem uma substituição pendente de validação. "
               + "Valide ou rejeite essa substituição antes de registar uma nova.");
     }
 
@@ -111,16 +113,17 @@ public class SubstituicaoWriteService {
       registarDiferencaMensal(substituicao, substitutoTiprel, funcionarioSubstituto,
           salarioSubstituto, salarioSubstituido);
 
-      // Existe diferença → segue para validação
+      // Existe diferença → segue para validação, associada ao SUBSTITUTO (quem regista e recebe a
+      // diferença). FUN_ID = substituto; a validação aparece no contexto do substituto.
       var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.SUBSTITUICAO.name(), Estado.P);
-      validacao.setFunId(funcionarioSubstituido);
+      validacao.setFunId(funcionarioSubstituto);
       validacao.setTiprelId(substituicao.getSubstitutoTiprelId());
       validacao.setReferenciaId(substituicao.getId());
       validacao.setReferenciaUuid(substituicao.getUuid());
-      funcionarioSubstituido.getValidacoes().add(validacao);
+      funcionarioSubstituto.getValidacoes().add(validacao);
     }
 
-    funcionarioEntityRepository.save(funcionarioSubstituido);
+    funcionarioEntityRepository.save(funcionarioSubstituto);
 
     return dto;
 
@@ -132,15 +135,17 @@ public class SubstituicaoWriteService {
 
     var idSusbtituicao = IdentificadorUnico.from(command.getSubstituicaoId()).valor();
 
-    if (dto.getColaboradorSubstituto() == null)
-      throw IgrpResponseStatusException.badRequest("É obrigatório indicar o colaborador substituto.");
+    if (dto.getColaboradorSubstituido() == null)
+      throw IgrpResponseStatusException.badRequest("É obrigatório indicar o colaborador substituído.");
 
-    var idFuncionarioSubstituto = IdentificadorUnico.from(dto.getColaboradorSubstituto()).valor();
+    // Inversão (UX): o dono do dossiê (idFuncionario) é o SUBSTITUTO (quem substitui); o campo
+    // colaboradorSubstituido é o SUBSTITUÍDO (quem vai ser substituído).
+    var idFuncionarioSubstituto = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionarioSubstituto = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituto).orElseThrow(
         () -> IgrpResponseStatusException.badRequest("Funcionário substituto não encontrado.")
     );
 
-    var idFuncionarioSubstituido = IdentificadorUnico.from(command.getIdFuncionario()).valor();
+    var idFuncionarioSubstituido = IdentificadorUnico.from(dto.getColaboradorSubstituido()).valor();
     var funcionarioSubstituido = funcionarioEntityRepository.findByUuid(idFuncionarioSubstituido).orElseThrow(
         () -> IgrpResponseStatusException.badRequest("Funcionário substituído não encontrado.")
     );
