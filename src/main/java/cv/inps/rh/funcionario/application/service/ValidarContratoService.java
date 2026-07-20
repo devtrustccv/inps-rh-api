@@ -143,7 +143,11 @@ public class ValidarContratoService {
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
+    // Numa REJEICAO (validar=NAO) nao se associam defs ao tiprel rejeitado — RH_T_TIPREL_REM_PAG
+    // nao tem estado, logo a unica forma de nao os ter e nao criar a associacao.
+    if (!EstadoValidacao.NAO.equals(dto.getValidar())) {
+      tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
+    }
 
     var remuneracoes = funcionarioRules
         .getRemuneracoesAssociados(tiposRelacionamento.getId());

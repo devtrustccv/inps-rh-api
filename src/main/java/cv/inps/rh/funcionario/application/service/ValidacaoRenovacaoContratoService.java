@@ -66,7 +66,11 @@ public class ValidacaoRenovacaoContratoService {
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
+    // Numa REJEICAO (validacao=NAO) nao se associam defs ao tiprel rejeitado — RH_T_TIPREL_REM_PAG
+    // nao tem estado, logo a unica forma de nao os ter e nao criar a associacao.
+    if (!EstadoValidacao.NAO.equals(dto.getValidacao())) {
+      tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
+    }
 
     var renovacaoContratoDTO = new RenovacaoContratoDTO();
     renovacaoContratoDTO.setDadosRenovacao(contratoMapper.toRenovacaoContratoReqDTO(contrato));
