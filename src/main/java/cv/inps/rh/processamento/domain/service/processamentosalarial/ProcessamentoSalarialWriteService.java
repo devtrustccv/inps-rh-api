@@ -135,12 +135,12 @@ public class ProcessamentoSalarialWriteService {
 
     var processes = processamentoSalarialEntityRepository.findAllById(ids);
     processes.forEach(process -> {
-      if (!process.getEstado().equals(StatusProcessamento.VALIDADO.name()))
+      if (!process.getEstado().equals(StatusProcessamento.VALIDADO_DEFINITIVO.name()))
         illegalProcesses.add(process.getId());
     });
 
     if (!illegalProcesses.isEmpty())
-      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'VALIDADO'", illegalProcesses);
+      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'VALIDADO_DEFINITIVO'", illegalProcesses);
 
     processes.forEach(p -> {
       var date = p.getDataProcDefinitivo().format(DateFormatter.DATE);
@@ -157,7 +157,7 @@ public class ProcessamentoSalarialWriteService {
 
     var processes = processamentoSalarialEntityRepository.findAllById(ids);
     processes.forEach(process -> {
-      if (!process.getEstado().equals(ProcessamentoSalarialAction.AUTORIZAR.getCode()))
+      if (!process.getEstado().equals(StatusProcessamento.CABIMENTADO.name()))
         illegalProcesses.add(process.getId());
     });
 
@@ -166,7 +166,7 @@ public class ProcessamentoSalarialWriteService {
 
     processes.forEach(p -> {
       var response = processarSalarioApi.autorizarSalario(p.getCab1Id().toString(), "SIM");
-      LOGGER.info("Autorizar Salario Response: {}", response);
+      LOGGER.debug("Autorizar Salario Response: {}", response);
       if (response.content().issue().code() != 200)
         throw IgrpResponseStatusException.badRequest("Erro ao autorizar salario", response.content().issue().diagnostics());
     });
@@ -249,6 +249,11 @@ public class ProcessamentoSalarialWriteService {
   }
 
   private enum StatusProcessamento {
-    VALIDADO, PROCESSADO, PROV, ERRO_PROCESSAMENTO, VALIDADO_PROVISORIO
+    VALIDADO,
+    PROCESSADO,
+    ERRO_PROCESSAMENTO,
+    VALIDADO_PROVISORIO,
+    VALIDADO_DEFINITIVO,
+    CABIMENTADO
   }
 }
