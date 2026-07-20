@@ -167,7 +167,20 @@
     {
       "actionName": "getResumoProcessamento",
       "path": "resumo",
-      "method": "GET",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ProcessamentoIds",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "processamento"
+            }
+          }
+        }
+      },
       "responses": {
         "200": {
           "name": "OK",
@@ -183,14 +196,7 @@
             }
           }
         }
-      },
-      "requestParams": [
-        {
-          "type": "long",
-          "name": "processamentoId",
-          "isRequired": true
-        }
-      ]
+      }
     },
     {
       "actionName": "getDetalhesProcessamento",
@@ -597,5 +603,5 @@
       ]
     }
   ],
-  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial-ativarInactivarSubsidioNatal-getColaboresAumentoSalarial-getColaboresAumentoSalarial-getSubsidioFerias-executarAcaoNoProcessamento-processarSalario"
+  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial-ativarInactivarSubsidioNatal-getColaboresAumentoSalarial-getColaboresAumentoSalarial-getSubsidioFerias-executarAcaoNoProcessamento-processarSalario-getResumoProcessamento-getResumoProcessamento"
 }

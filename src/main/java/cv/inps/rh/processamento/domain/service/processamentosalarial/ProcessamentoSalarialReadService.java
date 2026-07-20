@@ -63,10 +63,10 @@ public class ProcessamentoSalarialReadService {
     return response;
   }
 
-  public ResumoProcessamentoDTO getResumoProcessamentoSalarial(Long procId) {
+  public ResumoProcessamentoDTO getResumoProcessamentoSalarial(List<Long> procIds) {
     return new ResumoProcessamentoDTO(
-        procSalCcRemunEntityRepository.getRemuneracoes(procId),
-        procSalCcPagEntityRepository.getPagamentos(procId)
+        procSalCcRemunEntityRepository.getRemuneracoes(procIds),
+        procSalCcPagEntityRepository.getPagamentos(procIds)
     );
   }
 
