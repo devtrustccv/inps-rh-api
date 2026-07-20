@@ -249,6 +249,8 @@ public class SubstituicaoWriteService {
     }
     var estados = List.of(Estado.A, Estado.P);
 
+    // Lado do SUBSTITUÍDO: a pessoa que se quer substituir já está a ser substituída por outra
+    // pessoa num período que colide. Mensagem nomeia ambos, o período e o estado (activa/pendente).
     substituicaoEntityRepository
         .findBySubstituidoTiprelId_FunId_UuidAndEstadoInAndDataInicioLessThanEqualAndDataFimGreaterThanEqual(
             substituido.getUuid(), estados, fim, inicio)
@@ -257,11 +259,13 @@ public class SubstituicaoWriteService {
         .findFirst()
         .ifPresent(s -> {
           throw IgrpResponseStatusException.badRequest(String.format(
-              "O colaborador a substituir já tem uma substituição nesse período (%s a %s). "
-                  + "Ajuste as datas ou trate a substituição existente primeiro.",
-              s.getDataInicio(), s.getDataFim()));
+              "Conflito de substituição: %s já está a ser substituído(a) por %s no período de %s a %s "
+                  + "(substituição %s). Escolha outras datas ou resolva essa substituição primeiro.",
+              nomeDo(substituido), nomeDoTiprel(s.getSubstitutoTiprelId()),
+              s.getDataInicio(), s.getDataFim(), estadoFrase(s.getEstado())));
         });
 
+    // Lado do SUBSTITUTO: quem vai substituir já está a substituir outra pessoa num período que colide.
     substituicaoEntityRepository
         .findBySubstitutoTiprelId_FunId_UuidAndEstadoInAndDataInicioLessThanEqualAndDataFimGreaterThanEqual(
             substituto.getUuid(), estados, fim, inicio)
@@ -270,10 +274,30 @@ public class SubstituicaoWriteService {
         .findFirst()
         .ifPresent(s -> {
           throw IgrpResponseStatusException.badRequest(String.format(
-              "O substituto já está a substituir outro colaborador nesse período (%s a %s). "
-                  + "Ajuste as datas ou trate a substituição existente primeiro.",
-              s.getDataInicio(), s.getDataFim()));
+              "Conflito de substituição: %s já está a substituir %s no período de %s a %s "
+                  + "(substituição %s). Escolha outras datas ou resolva essa substituição primeiro.",
+              nomeDo(substituto), nomeDoTiprel(s.getSubstituidoTiprelId()),
+              s.getDataInicio(), s.getDataFim(), estadoFrase(s.getEstado())));
         });
+  }
+
+  private static String nomeDo(FuncionarioEntity f) {
+    return (f != null && f.getNome() != null && !f.getNome().isBlank()) ? f.getNome() : "o colaborador";
+  }
+
+  private static String nomeDoTiprel(TiposRelacionamentoEntity t) {
+    return (t != null) ? nomeDo(t.getFunId()) : "o colaborador";
+  }
+
+  /** Descrição amigável do estado do conflito para a mensagem ao utilizador. */
+  private static String estadoFrase(Estado e) {
+    if (e == Estado.A) {
+      return "já activa";
+    }
+    if (e == Estado.P) {
+      return "pendente de validação";
+    }
+    return e != null ? e.getDescription() : "";
   }
 
   private void registarDiferencaMensal(SubstituicaoEntity substituicao,
