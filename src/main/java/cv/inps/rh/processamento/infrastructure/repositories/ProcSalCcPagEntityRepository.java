@@ -27,10 +27,10 @@ public interface ProcSalCcPagEntityRepository extends
               sum(e.valor)
           )
           FROM ProcSalCcPagEntity e
-          WHERE e.procSalId = :procId
+          WHERE e.procSalId IN (:procId)
           GROUP BY e.itemActo,e.descricao, e.shortDesc, e.tipo, e.procSalId
       """)
-  List<ResumoProcPagamentoDTO> getPagamentos(@Param("procId") Long procId);
+  List<ResumoProcPagamentoDTO> getPagamentos(@Param("procId") List<Long> procId);
 
 
   @Query("""
