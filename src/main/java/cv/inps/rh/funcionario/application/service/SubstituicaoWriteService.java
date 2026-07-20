@@ -33,6 +33,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,6 +89,24 @@ public class SubstituicaoWriteService {
     var substitutoTiprel = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid());
     var substituidoTiprel = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid());
 
+    // Guard de sobreposição de datas (estados A/P — activas e pendentes de validação): não permitir
+    // registar uma substituição que colida no tempo com outra já existente, tanto do lado do
+    // SUBSTITUÍDO (a posição já está a ser coberta nesse período) como do SUBSTITUTO (o próprio já
+    // está a substituir alguém nesse período). Sobreposição: inicio_existente <= fimNovo AND
+    // fim_existente >= inicioNovo.
+    validarSobreposicao(funcionarioSubstituto, funcionarioSubstituido, dto.getDataInicio(), dto.getDataFim(), null);
+
+    // Caso de teste / item 50-51: a substituição só segue para VALIDAÇÃO quando existe diferença
+    // salarial a favor do substituto (salário do substituto < salário do substituído). Sem diferença
+    // não há nada a validar nem a compensar → a substituição fica logo ACTIVA (A). Com diferença fica
+    // P e segue para validação, onde a diferença é registada em RH_T_DEF_REMUNERACOES (DOSSIÊ 16/07:
+    // "ao validar o registo logo deve fazer um registo em RH_T_DEF_REMUNERACAO") — aqui só se cria a
+    // validação pendente.
+    var salarioSubstituto = substitutoTiprel.getSalario();
+    var salarioSubstituido = substituidoTiprel.getSalario();
+    boolean temDiferencaSalarial = salarioSubstituto != null && salarioSubstituido != null
+        && salarioSubstituto.compareTo(salarioSubstituido) < 0;
+
     var substituicao = new SubstituicaoEntity();
     substituicao.setSubstitutoTiprelId(substitutoTiprel);
     substituicao.setSubstituidoTiprelId(substituidoTiprel);
@@ -96,23 +115,10 @@ public class SubstituicaoWriteService {
     substituicao.setMotivo(ValidationUtil.trimToNull(dto.getMotivoSubstituicao()));
     substituicao.setObs(ValidationUtil.trimToNull(dto.getObs()));
     substituicao.setUuid(IdentificadorUnico.create().valor());
-    substituicao.setEstado(Estado.P);
+    substituicao.setEstado(temDiferencaSalarial ? Estado.P : Estado.A);
     substituicaoEntityRepository.save(substituicao);
 
-    // Caso de teste / item 50-51: a substituição só segue para VALIDAÇÃO quando existe diferença
-    // salarial a favor do substituto (salário do substituto < salário do substituído). Nesse caso
-    // regista-se a diferença em RH_T_DEF_REMUNERACOES (Tipo Movimento com TIPO='REM_SUBSTITUICAO'
-    // parametrizado no vínculo, OBS='Substituição') + RH_T_TIPREL_REM_PAG, UM registo por mês, com o
-    // valor proporcional aos dias — reutilizando a regra oficial (proc CALCULAR_SUBSTITUICAO).
-    var salarioSubstituto = substitutoTiprel.getSalario();
-    var salarioSubstituido = substituidoTiprel.getSalario();
-    boolean temDiferencaSalarial = salarioSubstituto != null && salarioSubstituido != null
-        && salarioSubstituto.compareTo(salarioSubstituido) < 0;
-
     if (temDiferencaSalarial) {
-      registarDiferencaMensal(substituicao, substitutoTiprel, funcionarioSubstituto,
-          salarioSubstituto, salarioSubstituido);
-
       // Existe diferença → segue para validação, associada ao SUBSTITUTO (quem regista e recebe a
       // diferença). FUN_ID = substituto; a validação aparece no contexto do substituto.
       var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.SUBSTITUICAO.name(), Estado.P);
@@ -164,31 +170,54 @@ public class SubstituicaoWriteService {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
       if(estado.equals(Estado.A)){
+        // Re-validar sobreposição na aprovação: as datas podem ter sido alteradas no formulário de
+        // validação, colidindo agora com outra substituição activa. Exclui o próprio registo.
+        validarSobreposicao(funcionarioSubstituto, funcionarioSubstituido,
+            substituicao.getDataInicio(), substituicao.getDataFim(), substituicao.getId());
+
         ordemServicoWriteService.criar(
             funcionarioSubstituido,
             funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid()),
             dto.getTipoOrdemServico());
+
+        // DOSSIÊ 16/07: a diferença salarial (RH_T_DEF_REMUNERACOES + RH_T_TIPREL_REM_PAG + detalhe
+        // mensal) é registada AO VALIDAR o registo, já em estado A — não no registo inicial. Só
+        // quando o substituto ganha menos que o substituído (valor a favor do substituto). Usa os
+        // tiprels atuais (re-lidos acima), portanto os salários refletem o estado corrente.
+        var substitutoTiprel = substituicao.getSubstitutoTiprelId();
+        var substituidoTiprel = substituicao.getSubstituidoTiprelId();
+        var salarioSubstituto = substitutoTiprel != null ? substitutoTiprel.getSalario() : null;
+        var salarioSubstituido = substituidoTiprel != null ? substituidoTiprel.getSalario() : null;
+        boolean temDiferencaSalarial = salarioSubstituto != null && salarioSubstituido != null
+            && salarioSubstituto.compareTo(salarioSubstituido) < 0;
+        if (temDiferencaSalarial) {
+          registarDiferencaMensal(substituicao, substitutoTiprel, funcionarioSubstituto,
+              salarioSubstituto, salarioSubstituido);
+        }
       }
 
       substituicao.setEstado(estado);
 
-      // RH_T_SUBSTITUICAO_DETALHE (detalhe mensal) acompanha a decisão: P->A na aprovação, P->I na rejeição.
-      substituicaoDetalheEntityRepository.findBySubstituicaoId_Id(substituicao.getId())
-          .stream()
-          .filter(d -> d.getEstado() == Estado.P)
-          .forEach(d -> d.setEstado(estado));
+      // Na rejeição (NAO), garantir que eventuais registos pendentes da diferença (detalhe mensal +
+      // DEF_REMUNERACOES) ficam I. Na aprovação já foram criados em A acima, logo não há P a mexer.
+      if (estado == Estado.I) {
+        substituicaoDetalheEntityRepository.findBySubstituicaoId_Id(substituicao.getId())
+            .stream()
+            .filter(d -> d.getEstado() == Estado.P)
+            .forEach(d -> d.setEstado(Estado.I));
 
-      // Diferença salarial: o DEF_REMUNERACOES da diferença acompanha a decisão — P->A na aprovação,
-      // P->I na rejeição. Identifica-se pelo Tipo de Movimento REM_SUBSTITUICAO do vínculo do
-      // substituto (determinístico), não por texto de OBS. Sem isto a diferença ficaria pendente.
-      var tmSubstituicao = tipoMovimentoSubstituicao(substituicao.getSubstitutoTiprelId());
-      if (tmSubstituicao != null) {
-        definicaoRemuneracaoEntityRepository
-            .findByFunIdAndTmIdAndEstado(funcionarioSubstituto, tmSubstituicao, Estado.P)
-            .forEach(r -> r.setEstado(estado));
+        var tmSubstituicao = tipoMovimentoSubstituicao(substituicao.getSubstitutoTiprelId());
+        if (tmSubstituicao != null) {
+          definicaoRemuneracaoEntityRepository
+              .findByFunIdAndTmIdAndEstado(funcionarioSubstituto, tmSubstituicao, Estado.P)
+              .forEach(r -> r.setEstado(Estado.I));
+        }
       }
 
-      funcionarioRules.getValidacaoPendente(funcionarioSubstituido.getUuid(), TipoAcao.INSERT, Referencia.SUBSTITUICAO)
+      // A validação vive no SUBSTITUTO (ver registrar(): setFunId(funcionarioSubstituto)). Procurar
+      // pelo substituto — antes procurava pelo substituído e a validação nunca era encontrada,
+      // ficando presa em P mesmo após aprovar.
+      funcionarioRules.getValidacaoPendente(funcionarioSubstituto.getUuid(), TipoAcao.INSERT, Referencia.SUBSTITUICAO)
           .ifPresent(v -> v.setEstado(estado));
 
     }
@@ -205,9 +234,48 @@ public class SubstituicaoWriteService {
    * período, com o valor proporcional aos dias, calculado pela regra oficial (proc
    * CALCULAR_SUBSTITUICAO via {@link ICalcularSubstituicaoRepository}), o mesmo cálculo do endpoint
    * de "calcular substituição". Cada registo fica ligado ao tiprel do substituto (RH_T_TIPREL_REM_PAG),
-   * OBS='Substituição', estado P (passa a A/I na validação). Não faz nada se o vínculo não tiver o
-   * Tipo de Movimento REM_SUBSTITUICAO parametrizado (já registado em WARN) ou se faltarem as datas.
+   * OBS='Substituição', estado A (é chamado no validar()/SIM, portanto nasce já ativo). Não faz nada
+   * se o vínculo não tiver o Tipo de Movimento REM_SUBSTITUICAO parametrizado (WARN) ou faltarem datas.
    */
+  /**
+   * Guard de sobreposição temporal. Bloqueia o registo se, no período [inicio, fim], já existir
+   * uma substituição (estado A ou P) em que este colaborador seja o SUBSTITUÍDO (a posição já
+   * coberta) ou o SUBSTITUTO (já a cobrir outra pessoa). Ignora se faltarem datas.
+   */
+  private void validarSobreposicao(FuncionarioEntity substituto, FuncionarioEntity substituido,
+                                   LocalDate inicio, LocalDate fim, Long excludeId) {
+    if (inicio == null || fim == null) {
+      return;
+    }
+    var estados = List.of(Estado.A, Estado.P);
+
+    substituicaoEntityRepository
+        .findBySubstituidoTiprelId_FunId_UuidAndEstadoInAndDataInicioLessThanEqualAndDataFimGreaterThanEqual(
+            substituido.getUuid(), estados, fim, inicio)
+        .stream()
+        .filter(s -> excludeId == null || !excludeId.equals(s.getId()))
+        .findFirst()
+        .ifPresent(s -> {
+          throw IgrpResponseStatusException.badRequest(String.format(
+              "O colaborador a substituir já tem uma substituição nesse período (%s a %s). "
+                  + "Ajuste as datas ou trate a substituição existente primeiro.",
+              s.getDataInicio(), s.getDataFim()));
+        });
+
+    substituicaoEntityRepository
+        .findBySubstitutoTiprelId_FunId_UuidAndEstadoInAndDataInicioLessThanEqualAndDataFimGreaterThanEqual(
+            substituto.getUuid(), estados, fim, inicio)
+        .stream()
+        .filter(s -> excludeId == null || !excludeId.equals(s.getId()))
+        .findFirst()
+        .ifPresent(s -> {
+          throw IgrpResponseStatusException.badRequest(String.format(
+              "O substituto já está a substituir outro colaborador nesse período (%s a %s). "
+                  + "Ajuste as datas ou trate a substituição existente primeiro.",
+              s.getDataInicio(), s.getDataFim()));
+        });
+  }
+
   private void registarDiferencaMensal(SubstituicaoEntity substituicao,
                                        TiposRelacionamentoEntity substitutoTiprel,
                                        FuncionarioEntity funcionarioSubstituto,
@@ -246,7 +314,7 @@ public class SubstituicaoWriteService {
       detalhe.setValorDoSubstituido(salarioSubstituido);
       // Diferença salarial do mês (proporcional aos dias) = valor a favor do substituto (proc).
       detalhe.setValorDiferenca(valorReceber);
-      detalhe.setEstado(Estado.P);
+      detalhe.setEstado(Estado.A);
       substituicaoDetalheEntityRepository.save(detalhe);
 
       // Diferença salarial em DEF_REMUNERACOES (+ TIPREL_REM_PAG), OBS='Substituição' — só quando o
@@ -255,7 +323,7 @@ public class SubstituicaoWriteService {
         var defRem = definicaoRemuneracaoMapper.createRenumeracao(
             valorReceber, tm, diaInicio, diaFim, funcionarioSubstituto, substitutoTiprel.getMoeda());
         defRem.setObs("Substituição");
-        defRem.setEstado(Estado.P);
+        defRem.setEstado(Estado.A);
         definicaoRemuneracaoEntityRepository.save(defRem);
 
         var link = new TipoRelRemPagEntity();

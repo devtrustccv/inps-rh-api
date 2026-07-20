@@ -46,4 +46,32 @@ public interface SubstituicaoEntityRepository extends
       Pageable pageable
   );
 
+  /**
+   * Substituições do SUBSTITUÍDO (o colaborador que está a ser substituído) que se sobrepõem no
+   * tempo ao período [novoInicio, novoFim]. Usado como guard: não se pode registar nova substituição
+   * de um colaborador que já tenha outra a cobrir o mesmo período. Sobreposição de intervalos:
+   * dataInicio_existente <= novoFim AND dataFim_existente >= novoInicio. Filtra pelos estados
+   * indicados (tipicamente A/P — as já activas e as pendentes de validação).
+   */
+  List<SubstituicaoEntity>
+  findBySubstituidoTiprelId_FunId_UuidAndEstadoInAndDataInicioLessThanEqualAndDataFimGreaterThanEqual(
+      UUID substituidoTiprelIdFunIdUuid,
+      List<Estado> estados,
+      java.time.LocalDate novoFim,
+      java.time.LocalDate novoInicio
+  );
+
+  /**
+   * Substituições do SUBSTITUTO (o colaborador que substitui) que se sobrepõem no tempo ao período
+   * [novoInicio, novoFim]. Guard: o mesmo substituto não pode estar a cobrir dois colaboradores em
+   * períodos sobrepostos. Mesma regra de sobreposição do método do substituído.
+   */
+  List<SubstituicaoEntity>
+  findBySubstitutoTiprelId_FunId_UuidAndEstadoInAndDataInicioLessThanEqualAndDataFimGreaterThanEqual(
+      UUID substitutoTiprelIdFunIdUuid,
+      List<Estado> estados,
+      java.time.LocalDate novoFim,
+      java.time.LocalDate novoInicio
+  );
+
 }
