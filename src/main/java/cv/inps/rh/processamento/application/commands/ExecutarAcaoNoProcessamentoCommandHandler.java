@@ -40,7 +40,7 @@ public class ExecutarAcaoNoProcessamentoCommandHandler implements CommandHandler
     switch (action) {
       case VALIDAR -> service.validar(ids, command.getProcessamentoactionrequest().tipoValidacao());
       case CABIMENTAR -> service.cabimentar(ids);
-      case ELIMINAR_CABIMENTO -> service.extornarCabimento(ids);
+      case ELIMINAR_CABIMENTO -> service.eliminarCabimento(ids);
       case AUTORIZAR -> service.autorizar(ids);
       default -> throw new IllegalArgumentException("Invalid option");
     }

@@ -1,6 +1,5 @@
 package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
-import cv.inps.rh.processamento.application.constants.ProcessamentoSalarialAction;
 import cv.inps.rh.processamento.application.constants.TipoValidacaoProcessamentoSalarial;
 import cv.inps.rh.processamento.application.dto.ProcessamentoSalarioRequestDTO;
 import cv.inps.rh.processamento.domain.service.processamentosalarial.api.ProcessarSalarioApi;
@@ -172,18 +171,18 @@ public class ProcessamentoSalarialWriteService {
     });
   }
 
-  public void extornarCabimento(List<Long> ids) {
+  public void eliminarCabimento(List<Long> ids) {
 
     var illegalProcesses = new ArrayList<Long>();
 
     var processes = processamentoSalarialEntityRepository.findAllById(ids);
     processes.forEach(process -> {
-      if (!process.getEstado().equals(ProcessamentoSalarialAction.ELIMINAR_CABIMENTO.getCode()))
+      if (!process.getEstado().equals(StatusProcessamento.CABIMENTADO.name()))
         illegalProcesses.add(process.getId());
     });
 
     if (!illegalProcesses.isEmpty())
-      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'DEV'", illegalProcesses);
+      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado CABIMENTADO", illegalProcesses);
 
     processes.forEach(p -> {
       var response = processarSalarioApi.extornarCabimento(p.getCab1Id().toString());
