@@ -27,7 +27,9 @@ public class ContratoHistoricoWriteService {
     // comportamento esperado — a lista distingue-os por CONTRATO_ID, nao pela versao.
     h.setVersao(contrato.getVersao() != null ? contrato.getVersao() : 1);
     h.setEstado(Estado.P);
-    h.setObs("NOVO_CONTRATO");
+    // OBS segue o tipo de situacao do contrato: "INICIO" no 1o contrato (registo colaborador),
+    // "NOVO_CONTRATO" num novo contrato. Fallback "NOVO_CONTRATO" se nao vier definido.
+    h.setObs(contrato.getTipoSituacao() != null ? contrato.getTipoSituacao() : "NOVO_CONTRATO");
     return contratoHistoricoEntityRepository.save(h);
   }
 

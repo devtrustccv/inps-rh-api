@@ -316,7 +316,9 @@ public interface TiposRelacionamentoEntityRepository extends
         PROCESSAMENTO AS processamento
       FROM RH_V_RELACAO_LABORAL
       WHERE FUNCIONARIO_UUID = :funcionarioUuid
+        AND (:situacaoAtual IS NULL OR EST_ACT_ADM = :situacaoAtual)
       """, nativeQuery = true)
-  List<RelacaoLaboralView> relacaoLaboralFromViewByFuncionario(@Param("funcionarioUuid") String funcionarioUuid);
+  List<RelacaoLaboralView> relacaoLaboralFromViewByFuncionario(@Param("funcionarioUuid") String funcionarioUuid,
+      @Param("situacaoAtual") Integer situacaoAtual);
 
 }

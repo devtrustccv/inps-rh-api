@@ -96,10 +96,14 @@ public class ValidarContratoService {
       colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
       colaboradorValidationRules.validarEncargosDescontosDuplicados(dadosContratuais.getEncargosDescontos());
 
+      // tms dos movimentos FIXOS do vinculo — o sync so mexe nos manuais, protege os fixos.
+      var vinculoId = dadosContratuais.getTipoVinculoLaboralId();
+      var tmsFixosRem = reconciliacaoMovimentoVinculoService.tmsFixosDoVinculo(vinculoId, "REM");
+      var tmsFixosPag = reconciliacaoMovimentoVinculoService.tmsFixosDoVinculo(vinculoId, "PAG");
       var definicoesRemuneracoes = definicaoRemuneracaoMapper.syncRemuneracoes(funcionario.getDefinicoesRenumeracoes(),
-          dadosContratuais.getSubsidios(), funcionario);
+          dadosContratuais.getSubsidios(), funcionario, tmsFixosRem);
       var definicoesPagamentos = defPagamentoMapper.syncPagamentos(funcionario.getDefinicoesPagamentos(),
-          dadosContratuais.getEncargosDescontos(), funcionario);
+          dadosContratuais.getEncargosDescontos(), funcionario, tmsFixosPag);
       funcionario.getDefinicoesRenumeracoes().addAll(definicoesRemuneracoes);
       funcionario.getDefinicoesPagamentos().addAll(definicoesPagamentos);
 
@@ -143,7 +147,11 @@ public class ValidarContratoService {
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
+    // Numa REJEICAO (validar=NAO) nao se associam defs ao tiprel rejeitado — RH_T_TIPREL_REM_PAG
+    // nao tem estado, logo a unica forma de nao os ter e nao criar a associacao.
+    if (!EstadoValidacao.NAO.equals(dto.getValidar())) {
+      tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
+    }
 
     var remuneracoes = funcionarioRules
         .getRemuneracoesAssociados(tiposRelacionamento.getId());

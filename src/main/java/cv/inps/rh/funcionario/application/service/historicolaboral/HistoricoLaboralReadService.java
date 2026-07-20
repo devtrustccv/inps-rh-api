@@ -96,7 +96,9 @@ public class HistoricoLaboralReadService {
   }
 
   public WrapperRelacaoLaboralSumaryDTO getRelacaoLaboral(GetRelacaoLaboralQuery query) {
-    var rows = tiposRelacionamentoEntityRepository.relacaoLaboralFromViewByFuncionario(query.getFuncionarioId());
+    // A lista "Relação Laboral" mostra só o ATUAL (EST_ACT_ADM=1); o histórico tem ecrã próprio.
+    // O filtro é opcional na query (passar null traria todos).
+    var rows = tiposRelacionamentoEntityRepository.relacaoLaboralFromViewByFuncionario(query.getFuncionarioId(), 1);
 
     var data = rows.stream().map(r -> {
       var dto = new RelacaoLaboralSumaryDTO();
