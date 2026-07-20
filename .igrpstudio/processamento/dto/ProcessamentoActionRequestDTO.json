@@ -1,14 +1,11 @@
 {
-  "type": "dto",
-  "module": "processamento",
   "name": "ProcessamentoActionRequest",
   "template": "record",
-  "enableCustonValidation": false,
   "attributes": [
     {
       "name": "action",
-      "objectType": "enum",
       "type": "ProcessamentoSalarialAction",
+      "objectType": "enum",
       "required": true,
       "before": false,
       "after": false,
@@ -20,8 +17,8 @@
     },
     {
       "name": "idsProcessamento",
-      "objectType": "java",
       "type": "long",
+      "objectType": "java",
       "required": true,
       "before": false,
       "after": false,
@@ -30,7 +27,24 @@
       "isUrl": false,
       "primaryKey": false,
       "collectionType": "list"
+    },
+    {
+      "name": "tipoValidacao",
+      "type": "TipoValidacaoProcessamentoSalarial",
+      "objectType": "enum",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "processamento"
     }
   ],
+  "type": "dto",
+  "module": "processamento",
+  "enableCustonValidation": false,
+  "readOnly": false,
   "id": "dgsuqb9qwi"
 }
