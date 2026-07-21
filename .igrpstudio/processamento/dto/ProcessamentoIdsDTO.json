@@ -1,0 +1,24 @@
+{
+  "name": "ProcessamentoIds",
+  "template": "record",
+  "attributes": [
+    {
+      "name": "id",
+      "type": "long",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list"
+    }
+  ],
+  "type": "dto",
+  "module": "processamento",
+  "enableCustonValidation": false,
+  "readOnly": false,
+  "id": "new-action-Contract"
+}

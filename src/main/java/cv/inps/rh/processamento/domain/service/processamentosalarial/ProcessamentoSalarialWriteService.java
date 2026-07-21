@@ -1,9 +1,10 @@
 package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
-import cv.inps.rh.processamento.application.constants.ProcessamentoSalarialAction;
+import cv.inps.rh.processamento.application.constants.TipoValidacaoProcessamentoSalarial;
 import cv.inps.rh.processamento.application.dto.ProcessamentoSalarioRequestDTO;
 import cv.inps.rh.processamento.domain.service.processamentosalarial.api.ProcessarSalarioApi;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ProcessamentoSalarialEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
@@ -62,11 +63,19 @@ public class ProcessamentoSalarialWriteService {
 
   public String eliminarProcessamento(List<Long> ids) {
 
-    var hasProcessesNotValidated = processamentoSalarialEntityRepository.findAllById(ids)
+    var invalidStatus = List.of(
+        StatusProcessamento.PROCESSADO.name(),
+        StatusProcessamento.ERRO_PROCESSAMENTO.name()
+    );
+
+    var invalidValuesToBeEliminated = processamentoSalarialEntityRepository.findAllById(ids)
         .stream()
-        .anyMatch(p -> !p.getEstado().equals(StatusProcessamento.PROV.name()));
-    if (hasProcessesNotValidated)
-      return "Só é possível eliminar processamentos que ainda não tenham sido validados(PROV)";
+        .map(ProcessamentoSalarialEntity::getEstado)
+        .filter(Objects::nonNull)
+        .filter(obj -> !invalidStatus.contains(obj))
+        .toList();
+    if (!invalidValuesToBeEliminated.isEmpty())
+      return "Existem registos que nao podem ser eliminados nestes estados: %s".formatted(invalidValuesToBeEliminated.toString());
 
     var processingIds = ids.stream()
         .map(String::valueOf)
@@ -95,21 +104,26 @@ public class ProcessamentoSalarialWriteService {
     });
   }
 
-  public void validar(List<Long> ids) {
+  public void validar(List<Long> ids, TipoValidacaoProcessamentoSalarial tipoValidacao) {
+
+    if (Objects.isNull(tipoValidacao))
+      throw IgrpResponseStatusException.badRequest("Para validar deve indicar o tipo de validacao: [DEFINITIVO, PROVISORIO]");
 
     var processesThatCanNotBeValidated = new ArrayList<Long>();
 
     var processes = processamentoSalarialEntityRepository.findAllById(ids);
 
+    var status = TipoValidacaoProcessamentoSalarial.DEFINITIVO.equals(tipoValidacao) ? StatusProcessamento.VALIDADO_PROVISORIO : StatusProcessamento.PROCESSADO;
+
     processes.forEach(process -> {
-      if (!StatusProcessamento.PROCESSADO.name().equals(process.getEstado()))
+      if (!status.name().equals(process.getEstado()))
         processesThatCanNotBeValidated.add(process.getId());
       else
         process.setEstado(StatusProcessamento.VALIDADO.name());
     });
 
     if (!processesThatCanNotBeValidated.isEmpty())
-      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado Processado", processesThatCanNotBeValidated);
+      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado %s".formatted(status.name()));
 
     processamentoSalarialEntityRepository.saveAll(processes);
   }
@@ -120,12 +134,12 @@ public class ProcessamentoSalarialWriteService {
 
     var processes = processamentoSalarialEntityRepository.findAllById(ids);
     processes.forEach(process -> {
-      if (!process.getEstado().equals(StatusProcessamento.VALIDADO.name()))
+      if (!process.getEstado().equals(StatusProcessamento.VALIDADO_DEFINITIVO.name()))
         illegalProcesses.add(process.getId());
     });
 
     if (!illegalProcesses.isEmpty())
-      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'VALIDADO'", illegalProcesses);
+      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'VALIDADO_DEFINITIVO'", illegalProcesses);
 
     processes.forEach(p -> {
       var date = p.getDataProcDefinitivo().format(DateFormatter.DATE);
@@ -142,7 +156,7 @@ public class ProcessamentoSalarialWriteService {
 
     var processes = processamentoSalarialEntityRepository.findAllById(ids);
     processes.forEach(process -> {
-      if (!process.getEstado().equals(ProcessamentoSalarialAction.AUTORIZAR.getCode()))
+      if (!process.getEstado().equals(StatusProcessamento.CABIMENTADO.name()))
         illegalProcesses.add(process.getId());
     });
 
@@ -151,24 +165,24 @@ public class ProcessamentoSalarialWriteService {
 
     processes.forEach(p -> {
       var response = processarSalarioApi.autorizarSalario(p.getCab1Id().toString(), "SIM");
-      LOGGER.info("Autorizar Salario Response: {}", response);
+      LOGGER.debug("Autorizar Salario Response: {}", response);
       if (response.content().issue().code() != 200)
         throw IgrpResponseStatusException.badRequest("Erro ao autorizar salario", response.content().issue().diagnostics());
     });
   }
 
-  public void extornarCabimento(List<Long> ids) {
+  public void eliminarCabimento(List<Long> ids) {
 
     var illegalProcesses = new ArrayList<Long>();
 
     var processes = processamentoSalarialEntityRepository.findAllById(ids);
     processes.forEach(process -> {
-      if (!process.getEstado().equals(ProcessamentoSalarialAction.ELIMINAR_CABIMENTO.getCode()))
+      if (!process.getEstado().equals(StatusProcessamento.CABIMENTADO.name()))
         illegalProcesses.add(process.getId());
     });
 
     if (!illegalProcesses.isEmpty())
-      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado 'DEV'", illegalProcesses);
+      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado CABIMENTADO", illegalProcesses);
 
     processes.forEach(p -> {
       var response = processarSalarioApi.extornarCabimento(p.getCab1Id().toString());
@@ -234,6 +248,11 @@ public class ProcessamentoSalarialWriteService {
   }
 
   private enum StatusProcessamento {
-    VALIDADO, PROCESSADO, PROV
+    VALIDADO,
+    PROCESSADO,
+    ERRO_PROCESSAMENTO,
+    VALIDADO_PROVISORIO,
+    VALIDADO_DEFINITIVO,
+    CABIMENTADO
   }
 }

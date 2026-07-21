@@ -128,7 +128,7 @@ public class ProcessoSalarialController {
     return commandBus.send(command);
   }
 
-  @GetMapping(value = "resumo")
+  @PostMapping(value = "resumo")
   @Operation(
       summary = "Get resumo processamento",
       description = "Get resumo processamento",
@@ -143,11 +143,11 @@ public class ProcessoSalarialController {
       }
   )
   public ResponseEntity<ResumoProcessamentoDTO> getResumoProcessamento(
-      @RequestParam(value = "processamentoId") Long processamentoId
+      @Valid @RequestBody ProcessamentoIdsDTO getResumoProcessamentoRequest
   ) {
-    final var query = new GetResumoProcessamentoQuery(processamentoId);
+    final var command = new GetResumoProcessamentoCommand(getResumoProcessamentoRequest);
 
-    return queryBus.handle(query);
+    return commandBus.send(command);
   }
 
   @GetMapping(value = "resumo/detalhes")

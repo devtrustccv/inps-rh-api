@@ -28,7 +28,7 @@ public class SubstituicaoDTO  {
   private EstadoValidacao validar ;
 
 
-  private UUID colaboradorSubstituto ;
+  private UUID colaboradorSubstituido ;
 
 
   private String motivoSubstituicao ;
