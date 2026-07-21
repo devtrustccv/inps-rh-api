@@ -25,7 +25,8 @@ public class DadosBancariosReadService {
   public List<DadosBancariosRespDTO> getDadosBancarios(GetDadosBancariosQuery query) {
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getIdFuncionario()).valor());
 
-    var estados = query.isValidacao() ? List.of(Estado.P) : List.of(Estado.A, Estado.I);
+    // Mostra A + P + I (tudo menos eliminados). O parametro validacao e ignorado por agora.
+    var estados = List.of(Estado.A, Estado.P, Estado.I);
 
     var dadosBancarios  = dadosBancariosEntityRepository.findByFuncionarioIdAndEstados(
         funcionario.getUuid(), estados

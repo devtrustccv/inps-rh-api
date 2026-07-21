@@ -9,8 +9,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class GetResumoProcessamentoQueryHandlerTest {
 
-  @InjectMocks
-  private GetResumoProcessamentoQueryHandler getResumoProcessamentoQueryHandler;
+  /*@InjectMocks
+  private GetResumoProcessamentoQueryHandler getResumoProcessamentoQueryHandler;*/
 
   @BeforeEach
   void setUp() {

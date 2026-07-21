@@ -44,6 +44,9 @@ public class RenumeracoesWriteService {
     var remuneracao = new DefinicaoRemuneracaoEntity();
     remuneracao.setPercentagem(request.getPercentagem());
     remuneracao.setValor(request.getValor());
+    // Moeda opcional: quando nao vem no pedido assume-se CVE por defeito.
+    remuneracao.setMoeda(
+        request.getMoeda() != null && !request.getMoeda().isBlank() ? request.getMoeda() : "CVE");
     // Caso de uso 1.8: OBS = "Novo Registo".
     remuneracao.setObs("Novo Registo");
     remuneracao.setEstado(Estado.P);
