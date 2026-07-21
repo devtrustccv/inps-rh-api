@@ -206,7 +206,10 @@ public class CarreiraWriteService {
     var remuneracoesAtivas = funcionarioRules.getRemuneracoesAssociadosAtivos(relacionamentoAtual.getId());
     var pagamentosAtivos = funcionarioRules.getPagamentosDescontosAssociadosAtivos(relacionamentoAtual.getId());
 
-    // Fechar vínculo/rem-pag/carreira anteriores.
+    // Fechar vínculo/rem-pag/carreira anteriores. O tiprel (e a carreira) antigos ficam com
+    // est_act_adm=0 + data_fim, mas o ESTADO mantém-se 'A' de propósito (convenção do sistema: o
+    // "atual" é definido por est_act_adm=1; um registo fechado é histórico e as vistas já o mostram
+    // como I quando data_fim < sysdate). Não passar a I aqui sem alinhar a convenção transversalmente.
     relacionamentoAtual.setDataFim(dataEfetiva);
     relacionamentoAtual.setEstActAdm(0);
     tiposRelacionamentoEntityRepository.save(relacionamentoAtual);

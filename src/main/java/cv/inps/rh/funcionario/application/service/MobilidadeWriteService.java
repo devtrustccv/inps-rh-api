@@ -157,6 +157,10 @@ public class MobilidadeWriteService {
         // impomos data_fim >= data_inicio aqui.)
         var dataEfetiva = mobilidade.getDataInicio();
 
+        // Fecho do vínculo antigo: est_act_adm=0 + data_fim. O ESTADO mantém-se 'A' de propósito
+        // (convenção do sistema: o "atual" é definido por est_act_adm=1; um vínculo fechado é
+        // histórico e as vistas já o mostram como I quando data_fim < sysdate). Não passar a I aqui
+        // sem alinhar a convenção de forma transversal (mobilidade, carreira, etc.).
         tipoRelacionamentoAtual.setEstActAdm(0);
         tipoRelacionamentoAtual.setDataFim(dataEfetiva);
         if (tipoRelacionamentoAtual.getMobId() != null) {
