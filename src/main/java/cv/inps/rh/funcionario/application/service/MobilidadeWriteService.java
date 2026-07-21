@@ -19,13 +19,12 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.MobilidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.MobilidadeEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +37,7 @@ public class MobilidadeWriteService {
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper tipoRelRemPagHelper;
+  private final MobilidadeEntityRepository mobilidadeEntityRepository;
 
   @Transactional
   public MobilidadeDTO save(SaveMobilidadeCommand command) {
@@ -55,47 +55,20 @@ public class MobilidadeWriteService {
     var novaMobilidade = createMobilidade(mobilidadeDto, funcionario);
 
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-    // TODO(guard I/E temporariamente desativado):
-    // if (tipoRelacionamentoAtual.getMobId() != null)
-    //   funcionarioRules.garantirEditavel(tipoRelacionamentoAtual.getMobId().getEstado());
-    var novoTipoRelacionamento = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
 
-    // Caso de uso: no update do vínculo anterior, DATA_FIM = Data do registo (não dataInicio-1, que
-    // fecharia o vínculo antes de começar e viola CK_TIPREL_PERIODO quando registo e mobilidade são
-    // no mesmo dia).
-    var dataRegisto = LocalDate.now();
-    tipoRelacionamentoAtual.setEstActAdm(0);
-    tipoRelacionamentoAtual.setDataFim(dataRegisto);
-    // Caso de uso (RH_T_MOBILIDADE): "Atualiza o que estava do anterior, ativo para inativo".
-    tipoRelacionamentoAtual.getMobId().setDataFim(dataRegisto);
-    tipoRelacionamentoAtual.getMobId().setEstado(Estado.I);
-
-    novoTipoRelacionamento.setEstActAdm(1);
-    novoTipoRelacionamento.setMobId(novaMobilidade);
-    novoTipoRelacionamento.setEstado(Estado.P);
-    // Caso de uso: novo vínculo DATA_INICIO = Data do registo, DATA_FIM = nulo.
-    novoTipoRelacionamento.setDataInicio(dataRegisto);
-    novoTipoRelacionamento.setDataFim(null);
-    novoTipoRelacionamento.setTipoSituacao(ValidationUtil.trimToNull(mobilidadeDto.getTipoMobilidade()));
-    // Spec: REFERENTE = 'MOBILIDADE', OBS = 'MOBILIDADE-'||tipo (não herdar do vínculo clonado)
-    novoTipoRelacionamento.setReferente(Referencia.MOBILIDADE.name());
-    novoTipoRelacionamento.setObs("MOBILIDADE-" + ValidationUtil.trimToNull(mobilidadeDto.getTipoMobilidade()));
-
-    // Persist new entities directly so their IDs are assigned on the same references.
-    // saveAndFlush(funcionario) uses em.merge(), which for transient children creates
-    // a managed copy — the original reference keeps getId() == null.
+    // Novo padrão: o REGISTO não cria nem altera tipo_relacionamento. O vínculo atual mantém-se
+    // intacto e continua a ser o atual até a mobilidade ser validada. Aqui só se grava a mobilidade
+    // (estado P) e a validação pendente; a criação/troca de tiprel acontece no validarMobilidade (SIM).
     entityManager.persist(novaMobilidade);
-    entityManager.persist(novoTipoRelacionamento);
     entityManager.flush();
 
     var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.MOBILIDADE.name(), Estado.P);
     valid.setFunId(funcionario);
-    valid.setTiprelId(novoTipoRelacionamento);
+    // tiprelId = vínculo atual, apenas para contexto/leitura — NÃO é alterado no registo.
+    valid.setTiprelId(tipoRelacionamentoAtual);
     valid.setReferenciaId(novaMobilidade.getId());
     valid.setReferenciaUuid(novaMobilidade.getUuid());
     entityManager.persist(valid);
-
-    tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tipoRelacionamentoAtual, novoTipoRelacionamento, java.util.List.of(), java.util.List.of());
 
     return mobilidadeDto;
 
@@ -152,19 +125,17 @@ public class MobilidadeWriteService {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
-    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    // A mobilidade a validar é identificada pelo uuid (path {mobilidadeId}) — já NÃO se descobre via
+    // tiprel.getMobId(), porque no registo não se cria/troca tiprel nenhum.
+    var mobilidade = mobilidadeEntityRepository.findByUuid(
+        IdentificadorUnico.from(command.getMobilidadeId()).valor())
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest("Mobilidade não encontrada."));
 
-    // TODO(guard I/E temporariamente desativado):
-    // if (tipoRelacionamentoAtual.getMobId() != null)
-    //   funcionarioRules.garantirEditavel(tipoRelacionamentoAtual.getMobId().getEstado());
+    // Aplica eventuais edições do formulário à mobilidade pendente.
+    updateMobilidade(mobilidade, mobilidadeDto);
 
-    var mobilidade = updateMobilidade(tipoRelacionamentoAtual.getMobId(),mobilidadeDto);
-
-    if(mobilidadeDto.getValidar()!=null) {
+    if (mobilidadeDto.getValidar() != null) {
       var estado = mobilidadeDto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-
-       mobilidade.setEstado(estado);
-       tipoRelacionamentoAtual.setEstado(estado);
 
       // A validação pendente pode ser INSERT (nova mobilidade) ou UPDATE (edição). Trata ambos,
       // senão a validação de uma edição ficava presa em P mesmo depois de aprovada.
@@ -172,33 +143,58 @@ public class MobilidadeWriteService {
           .or(() -> funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.MOBILIDADE))
           .orElse(null);
       if (validacao != null) validacao.setEstado(estado);
+      mobilidade.setEstado(estado);
 
-      // Propagar o estado APENAS às remunerações/descontos associados a ESTE vínculo
-      // (não a todas as definições do funcionário).
-      var remuneracoes = funcionarioRules.getRemuneracoesAssociadosAtivos(tipoRelacionamentoAtual.getId());
-      if (remuneracoes != null) remuneracoes.forEach(r -> { if (r != null) r.setEstado(estado); });
-      var descontos = funcionarioRules.getPagamentosDescontosAssociadosAtivos(tipoRelacionamentoAtual.getId());
-      if (descontos != null) descontos.forEach(d -> { if (d != null) d.setEstado(estado); });
+      if (estado.equals(Estado.A)) {
+        // Consolidação: é AQUI (e só aqui) que o tipo_relacionamento é criado/trocado — a mesma
+        // mecânica que antes estava no save(), agora executada apenas quando a mobilidade é aprovada.
+        var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+        var novoTipoRelacionamento = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
 
-      if(estado.equals(Estado.A)){
+        // Opção A: data efetiva = data do pedido (mobilidade.data_inicio), não a data da validação,
+        // para o processamento refletir quando a mobilidade realmente aconteceu. O vínculo antigo
+        // fecha com data_fim = mesma data. (A CK_TIPREL_PERIODO está DISABLED na BD, por isso não
+        // impomos data_fim >= data_inicio aqui.)
+        var dataEfetiva = mobilidade.getDataInicio();
+
+        tipoRelacionamentoAtual.setEstActAdm(0);
+        tipoRelacionamentoAtual.setDataFim(dataEfetiva);
+        if (tipoRelacionamentoAtual.getMobId() != null) {
+          tipoRelacionamentoAtual.getMobId().setDataFim(dataEfetiva);
+          tipoRelacionamentoAtual.getMobId().setEstado(Estado.I);
+        }
+
+        novoTipoRelacionamento.setEstActAdm(1);
+        novoTipoRelacionamento.setMobId(mobilidade);
+        novoTipoRelacionamento.setEstado(Estado.A);
+        novoTipoRelacionamento.setDataInicio(dataEfetiva);
+        novoTipoRelacionamento.setDataFim(null);
+        novoTipoRelacionamento.setTipoSituacao(ValidationUtil.trimToNull(mobilidadeDto.getTipoMobilidade()));
+        novoTipoRelacionamento.setReferente(Referencia.MOBILIDADE.name());
+        novoTipoRelacionamento.setObs("MOBILIDADE-" + ValidationUtil.trimToNull(mobilidadeDto.getTipoMobilidade()));
+        entityManager.persist(novoTipoRelacionamento);
+        entityManager.flush();
+
+        // rem/pag passam do vínculo antigo para o novo — só na aprovação.
+        tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tipoRelacionamentoAtual, novoTipoRelacionamento, java.util.List.of(), java.util.List.of());
+
         // Spec: REFERENTE='MOBILIDADE', DESCRICAO='Mobilidade do colaborador - '||nome, VALIDACAO_ID preenchido
         var nome = funcionario.getNome() != null ? funcionario.getNome() : "";
-        ordemServicoWriteService.criar(funcionario, tipoRelacionamentoAtual, Referencia.MOBILIDADE.name(),
+        ordemServicoWriteService.criar(funcionario, novoTipoRelacionamento, Referencia.MOBILIDADE.name(),
             validacao, "Mobilidade do colaborador - " + nome);
       }
+      // Rejeição (NAO): mobilidade e validação ficam I; o vínculo atual NÃO foi tocado no registo,
+      // logo continua atual — nada a reverter.
 
     } else {
-      // Caso de uso (Mobilidade): "registo e alteração passa por validação". Na edição
-      // (validar==null) o updateMobilidade acima atualiza o mesmo registo, mas a alteração
-      // não pode ficar live: volta a pendente (P) e garante uma validação UPDATE/MOBILIDADE
-      // para ser aprovada. Se já existir validação pendente (ex.: registo acabado de criar),
-      // não duplica.
+      // Edição sem decisão de validação: atualiza a mobilidade pendente, mantém-na P e garante uma
+      // validação UPDATE/MOBILIDADE pendente. NÃO toca no tipo_relacionamento (só o validar SIM o faz).
       mobilidade.setEstado(Estado.P);
-      tipoRelacionamentoAtual.setEstado(Estado.P);
       boolean jaPendente =
           funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.MOBILIDADE)
               || funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.MOBILIDADE);
       if (!jaPendente) {
+        var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
         var valid = dadosContratuaisMapper.toValidacaoInsert(
             TipoAcao.UPDATE.name(), Referencia.MOBILIDADE.name(), Estado.P);
         valid.setFunId(funcionario);
