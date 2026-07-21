@@ -67,7 +67,9 @@ public class RenumeracoesReadService {
         predicates.add(cb.equal(root.get("estActAdm"), 1));
       }
 
-      var estadosPermitidos = query.isValidacao() ? EnumSet.of(Estado.P) : EnumSet.of(Estado.A, Estado.I);
+      // Lista normal mostra A + P + I (tudo menos eliminados) — sem necessidade do parametro validacao.
+      // validacao=true (apenas P) so faz sentido no get de detalhes do funcionario (ecra de validacao).
+      var estadosPermitidos = query.isValidacao() ? EnumSet.of(Estado.P) : EnumSet.of(Estado.A, Estado.P, Estado.I);
 
       if (StringUtils.hasText(query.getEstado())) {
         try {
