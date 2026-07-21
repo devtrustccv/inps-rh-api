@@ -29,8 +29,6 @@ public class NovoRemuneracaoRequestDTO  {
   @NotNull(message = "The field <percentagem> is required")
 
   private BigDecimal percentagem ;
-  @NotBlank(message = "The field <moeda> is required")
-
   private String moeda ;
   @NotBlank(message = "The field <dataInicio> is required")
 
