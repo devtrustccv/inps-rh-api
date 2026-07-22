@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +35,19 @@ public interface CarreiraEntityRepository extends
 
   // Carreiras actualmente activas do funcionário (estado A e ainda em vigor: data fim nula).
   List<CarreiraEntity> findAllByContrVinculoIdFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity fun, Estado estado);
+
+  /**
+   * Carreiras "em vigor" do funcionário: estado A e ainda não terminadas (DATA_FIM nula OU futura).
+   * É o critério correto para "carreiras activas" — uma carreira activa pode ter DATA_FIM = fim do
+   * contrato (futuro); só está fechada quando DATA_FIM já passou. Usado no guard das 2 carreiras.
+   */
+  @Query("""
+          SELECT c FROM CarreiraEntity c
+          WHERE c.contrVinculoId.funId = :fun
+            AND c.estado = cv.inps.rh.shared.application.constants.Estado.A
+            AND (c.dataFim IS NULL OR c.dataFim >= :hoje)
+      """)
+  List<CarreiraEntity> findEmVigorByFuncionario(FuncionarioEntity fun, LocalDate hoje);
 
   Optional<CarreiraEntity> findByUuid(UUID uuid);
 
