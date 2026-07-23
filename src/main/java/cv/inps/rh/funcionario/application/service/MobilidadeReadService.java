@@ -102,12 +102,17 @@ public class MobilidadeReadService {
         () -> IgrpResponseStatusException.notFound("mobilidade nao encontrada com id"+query.getId())
     );
 
-    // "Antes" = direção do vínculo anterior. O tiprel que introduziu esta mobilidade tem
-    // TIPREL_ID a apontar para o vínculo anterior, cujo MOB_ID dá a direção "antes".
+    // "Antes" = direção do vínculo anterior. Com o padrão de contentores, vários tiprels podem
+    // partilhar o mesmo MOB (ex.: uma carreira que validou depois herdou-o). O que INTRODUZIU esta
+    // mobilidade é aquele cujo pai (TIPREL_ID) tem um MOB DIFERENTE; o MOB desse pai é o "antes".
     MobilidadeEntity anterior = tiposRelacionamentoEntityRepository
-        .findFirstByMobId_IdOrderByIdAsc(mobilidade.getId())
+        .findAllByMobId_Id(mobilidade.getId())
+        .stream()
         .map(TiposRelacionamentoEntity::getTiprelId)
+        .filter(java.util.Objects::nonNull)
         .map(TiposRelacionamentoEntity::getMobId)
+        .filter(m -> m != null && !java.util.Objects.equals(m.getId(), mobilidade.getId()))
+        .findFirst()
         .orElse(null);
 
     return mobilidadeMapper.mobilidadeDetalheDTO(mobilidade, anterior);

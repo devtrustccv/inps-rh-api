@@ -47,6 +47,12 @@ public interface TiposRelacionamentoEntityRepository extends
   // aponta para o vínculo anterior, cujo MOB_ID é a mobilidade "antes". Usado no detalhe/editar.
   Optional<TiposRelacionamentoEntity> findFirstByMobId_IdOrderByIdAsc(Long mobId);
 
+  // Todos os tiprels que referenciam esta mobilidade. Um mob pode aparecer em mais de um tiprel
+  // (ex.: a carreira faz snapshot do mob do atual ao criar o seu contentor e, ao validar depois,
+  // herda o mob novo). Usado no detalhe para achar o que INTRODUZIU a mobilidade — aquele cujo
+  // pai/tiprelId tem um mob DIFERENTE (o mob do pai é o "antes").
+  List<TiposRelacionamentoEntity> findAllByMobId_Id(Long mobId);
+
   boolean existsByFunIdAndEstadoAndFlgProcessa(FuncionarioEntity funId, Estado estado, Integer flgProcessa);
 
   // Igual ao anterior mas exclui um registo (o vínculo que está a ser fechado/substituído numa progressão).
