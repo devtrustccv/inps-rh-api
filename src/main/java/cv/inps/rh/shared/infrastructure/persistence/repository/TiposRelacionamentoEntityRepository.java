@@ -47,6 +47,12 @@ public interface TiposRelacionamentoEntityRepository extends
   // aponta para o vínculo anterior, cujo MOB_ID é a mobilidade "antes". Usado no detalhe/editar.
   Optional<TiposRelacionamentoEntity> findFirstByMobId_IdOrderByIdAsc(Long mobId);
 
+  // Todos os tiprels que referenciam esta mobilidade. Um mob pode aparecer em mais de um tiprel
+  // (ex.: a carreira faz snapshot do mob do atual ao criar o seu contentor e, ao validar depois,
+  // herda o mob novo). Usado no detalhe para achar o que INTRODUZIU a mobilidade — aquele cujo
+  // pai/tiprelId tem um mob DIFERENTE (o mob do pai é o "antes").
+  List<TiposRelacionamentoEntity> findAllByMobId_Id(Long mobId);
+
   boolean existsByFunIdAndEstadoAndFlgProcessa(FuncionarioEntity funId, Estado estado, Integer flgProcessa);
 
   // Igual ao anterior mas exclui um registo (o vínculo que está a ser fechado/substituído numa progressão).
@@ -109,6 +115,13 @@ public interface TiposRelacionamentoEntityRepository extends
     var resultados = findAtivaByCarreiraUuid(carreiraId, PageRequest.of(0, 1));
     return resultados.isEmpty() ? null : resultados.get(0);
   }
+
+  /**
+   * Tiprel associado a uma carreira INDEPENDENTEMENTE do est_act_adm (inclui pendentes/parqueados).
+   * Cada carreira tem o seu tiprel; em empate devolve o mais recente. Usado no fluxo em que o
+   * pendente já tem tiprel (est_act_adm=0) — o findByCarreiraId_uuid só devolve o ativo (est_act_adm=1).
+   */
+  Optional<TiposRelacionamentoEntity> findFirstByCarreiraId_UuidOrderByIdDesc(UUID carreiraUuid);
 
   @Query("""
       select t

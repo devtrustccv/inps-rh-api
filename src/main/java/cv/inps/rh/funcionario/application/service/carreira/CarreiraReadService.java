@@ -8,6 +8,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RhVCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository;
@@ -35,6 +36,7 @@ import java.util.UUID;
 public class CarreiraReadService {
 
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
+  private final CarreiraEntityRepository carreiraEntityRepository;
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final RhVCarreiraEntityRepository rhVCarreiraEntityRepository;
@@ -109,10 +111,15 @@ public class CarreiraReadService {
   }
 
   public CarreiraResponseDTO getCarreiraById(String carreiraId) {
-    var tr = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(UUID.fromString(carreiraId));
+    var uuid = UUID.fromString(carreiraId);
+    // Valida que a carreira existe (404 claro). O detalhe usa o tipos_relacionamento DA PRÓPRIA
+    // carreira — o que foi criado no registo com carreira_id = esta carreira (novoTiprel.setCarreiraId).
+    // Em qualquer estado, porque o pendente tem est_act_adm=0 (o findByCarreiraId_uuid só devolve o ativo).
+    carreiraEntityRepository.findByUuidOrThrow(uuid);
+    var tr = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(uuid).orElse(null);
     if (tr == null) {
       throw IgrpResponseStatusException.notFound(
-          "Não existe relação laboral ativa para a carreira: " + carreiraId);
+          "Não existe relação laboral para a carreira: " + carreiraId);
     }
     return getCarreiraResponseDTO(tr);
   }
@@ -165,8 +172,12 @@ public class CarreiraReadService {
     var encargos = new ArrayList<EncargosDescontosRespDTO>();
     var paymentsNotNeedInDetails = List.of("INPS", "IUR");
 
-    var data = defPagamentoEntityRepository.findByFunIdAndEstado(fun, tr.getEstado())
+    // Def SÓ desta carreira: pela associação do tiprel (TIPREL_REM_PAG), filtrada pelo estado do
+    // próprio tiprel. Não usar fun+estado — misturaria def de outros pendentes (o def não tem
+    // coluna de carreira; a associação é o único vínculo à carreira).
+    var data = funcionarioRules.getPagamentosDescontosAssociados(tr.getId())
         .stream()
+        .filter(obj -> obj.getEstado() == tr.getEstado())
         .filter(obj -> !paymentsNotNeedInDetails.contains(obj.getTmId().getTipo()))
         .toList();
 
@@ -185,7 +196,10 @@ public class CarreiraReadService {
     dto.setEncargosDescontos(encargos);
 
     var subsidios = new ArrayList<SubsidioRespDTO>();
-    var subsidioDBData = definicaoRemuneracaoEntityRepository.findByFunIdAndEstado(fun, tr.getEstado());
+    var subsidioDBData = funcionarioRules.getRemuneracoesAssociados(tr.getId())
+        .stream()
+        .filter(obj -> obj.getEstado() == tr.getEstado())
+        .toList();
     subsidioDBData.forEach(obj -> {
       var row = new SubsidioRespDTO();
       row.setId(obj.getId());
