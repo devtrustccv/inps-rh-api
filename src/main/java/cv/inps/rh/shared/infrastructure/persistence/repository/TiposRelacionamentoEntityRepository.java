@@ -110,6 +110,13 @@ public interface TiposRelacionamentoEntityRepository extends
     return resultados.isEmpty() ? null : resultados.get(0);
   }
 
+  /**
+   * Tiprel associado a uma carreira INDEPENDENTEMENTE do est_act_adm (inclui pendentes/parqueados).
+   * Cada carreira tem o seu tiprel; em empate devolve o mais recente. Usado no fluxo em que o
+   * pendente já tem tiprel (est_act_adm=0) — o findByCarreiraId_uuid só devolve o ativo (est_act_adm=1).
+   */
+  Optional<TiposRelacionamentoEntity> findFirstByCarreiraId_UuidOrderByIdDesc(UUID carreiraUuid);
+
   @Query("""
       select t
       from TiposRelacionamentoEntity t

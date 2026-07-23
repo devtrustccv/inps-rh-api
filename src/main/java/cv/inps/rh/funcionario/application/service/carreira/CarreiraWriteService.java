@@ -127,7 +127,7 @@ public class CarreiraWriteService {
     var vinculoAtualId = contratoAtual.getVinculoId() != null ? contratoAtual.getVinculoId().getId() : null;
     var carreiraMesmoTipo = emVigor.stream().filter(c -> (c.getCargoId() == null) == novoCargoNulo).findFirst().orElse(null);
     var tiprelMesmoTipo = carreiraMesmoTipo != null
-        ? tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(carreiraMesmoTipo.getUuid()) : null;
+        ? tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreiraMesmoTipo.getUuid()).orElse(null) : null;
     List<DefinicaoRemuneracaoEntity> remsMesmoTipo = tiprelMesmoTipo != null
         ? funcionarioRules.getRemuneracoesAssociadosAtivos(tiprelMesmoTipo.getId()) : List.of();
     List<DefPagamentoEntity> pagsMesmoTipo = tiprelMesmoTipo != null
@@ -250,7 +250,7 @@ public class CarreiraWriteService {
 
     // Carreira pendente + o seu tiprel pendente (ambos criados em P no registo, est_act_adm=0).
     var carreira = carreiraEntityRepository.findByContrVinculoIdFunIdAndEstado(funcionario, Estado.P);
-    var tiprelPendente = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(carreira.getUuid());
+    var tiprelPendente = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreira.getUuid()).orElse(null);
     var validation = funcionarioRules
         .getValidacaoPendenteByReferenciaUuid(carreira.getUuid(), TipoAcao.INSERT, Referencia.CARREIRA)
         .orElse(null);
@@ -294,7 +294,7 @@ public class CarreiraWriteService {
 
     // PROGRESSÃO (mesmo tipo em vigor): fecha o track substituído (tiprel + carreira + rem/pag).
     if (carreiraMesmoTipo != null) {
-      var tiprelSubstituido = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(carreiraMesmoTipo.getUuid());
+      var tiprelSubstituido = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreiraMesmoTipo.getUuid()).orElse(null);
       if (tiprelSubstituido != null) {
         funcionarioRules.getRemuneracoesAssociadosAtivos(tiprelSubstituido.getId())
             .forEach(o -> { o.setDataFim(dataEfetiva); o.setEstado(Estado.I); definicaoRemuneracaoEntityRepository.save(o); });
@@ -323,7 +323,7 @@ public class CarreiraWriteService {
       // leva DATA_FIM — fica activa/parqueada (para haver genuinamente 2 carreiras activas).
       for (var c : emVigor) {
         if (carreiraMesmoTipo != null && Objects.equals(c.getId(), carreiraMesmoTipo.getId())) continue; // já fechada
-        var t = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(c.getUuid());
+        var t = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(c.getUuid()).orElse(null);
         if (Integer.valueOf(1).equals(c.getFlgProcessa())) {
           c.setFlgProcessa(0);
           carreiraEntityRepository.save(c);
@@ -375,7 +375,7 @@ public class CarreiraWriteService {
     carreiraEntityRepository.save(carreira);
 
     // O pendente inclui tiprel + def (criados em P no registo) — também passam a E.
-    var tiprelPendente = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(carreira.getUuid());
+    var tiprelPendente = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreira.getUuid()).orElse(null);
     if (tiprelPendente != null) {
       tiprelPendente.setEstado(Estado.E);
       tiposRelacionamentoEntityRepository.save(tiprelPendente);
@@ -411,7 +411,7 @@ public class CarreiraWriteService {
 
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(carreira.getEstado());
 
-    var relacionamento = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(carreira.getUuid());
+    var relacionamento = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreira.getUuid()).orElse(null);
 
     // Spec 3.5.2.3.1 (Novo/Editar, PROCESSAMENTO > 0): com processamento associado, os campos
     // carreira/cargo/data início ficam fechados; a alteração de ESCALÃO implica um novo registo
