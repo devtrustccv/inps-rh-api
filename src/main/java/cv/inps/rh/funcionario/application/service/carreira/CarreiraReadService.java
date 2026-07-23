@@ -112,10 +112,10 @@ public class CarreiraReadService {
 
   public CarreiraResponseDTO getCarreiraById(String carreiraId) {
     var uuid = UUID.fromString(carreiraId);
-    // Garante que a carreira existe (404 claro se não). O pendente já tem tiprel (criado em P no
-    // registo), por isso o detalhe é sempre o rico (salário/subsídios/encargos), pendente ou validada.
+    // Valida que a carreira existe (404 claro). O detalhe usa o tipos_relacionamento DA PRÓPRIA
+    // carreira — o que foi criado no registo com carreira_id = esta carreira (novoTiprel.setCarreiraId).
+    // Em qualquer estado, porque o pendente tem est_act_adm=0 (o findByCarreiraId_uuid só devolve o ativo).
     carreiraEntityRepository.findByUuidOrThrow(uuid);
-    // Qualquer estado (o pendente tem tiprel est_act_adm=0; findByCarreiraId_uuid só devolve o ativo).
     var tr = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(uuid).orElse(null);
     if (tr == null) {
       throw IgrpResponseStatusException.notFound(
