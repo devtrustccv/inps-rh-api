@@ -8,6 +8,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RhVCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository;
@@ -35,6 +36,7 @@ import java.util.UUID;
 public class CarreiraReadService {
 
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
+  private final CarreiraEntityRepository carreiraEntityRepository;
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final RhVCarreiraEntityRepository rhVCarreiraEntityRepository;
@@ -109,10 +111,14 @@ public class CarreiraReadService {
   }
 
   public CarreiraResponseDTO getCarreiraById(String carreiraId) {
-    var tr = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(UUID.fromString(carreiraId));
+    var uuid = UUID.fromString(carreiraId);
+    // Garante que a carreira existe (404 claro se não). O pendente já tem tiprel (criado em P no
+    // registo), por isso o detalhe é sempre o rico (salário/subsídios/encargos), pendente ou validada.
+    carreiraEntityRepository.findByUuidOrThrow(uuid);
+    var tr = tiposRelacionamentoEntityRepository.findByCarreiraId_uuid(uuid);
     if (tr == null) {
       throw IgrpResponseStatusException.notFound(
-          "Não existe relação laboral ativa para a carreira: " + carreiraId);
+          "Não existe relação laboral para a carreira: " + carreiraId);
     }
     return getCarreiraResponseDTO(tr);
   }
