@@ -265,11 +265,12 @@ public class CarreiraWriteService {
         tiprelPendente.setEstado(Estado.I);
         tiprelPendente.setObs("Não Validado");
         tiposRelacionamentoEntityRepository.save(tiprelPendente);
+        // Rejeitar SÓ os def desta carreira (pela associação do tiprel), não todos os fun+P.
+        funcionarioRules.getRemuneracoesAssociadosPendentes(tiprelPendente.getId())
+            .forEach(o -> { o.setEstado(Estado.I); definicaoRemuneracaoEntityRepository.save(o); });
+        funcionarioRules.getPagamentosDescontosAssociadosPendentes(tiprelPendente.getId())
+            .forEach(o -> { o.setEstado(Estado.I); defPagamentoEntityRepository.save(o); });
       }
-      definicaoRemuneracaoEntityRepository.findByFunIdAndEstado(funcionario, Estado.P)
-          .forEach(o -> { o.setEstado(Estado.I); definicaoRemuneracaoEntityRepository.save(o); });
-      defPagamentoEntityRepository.findByFunIdAndEstado(funcionario, Estado.P)
-          .forEach(o -> { o.setEstado(Estado.I); defPagamentoEntityRepository.save(o); });
       if (validation != null) {
         validation.setEstado(Estado.I);
         validation.setObs("Não Validado");
@@ -285,6 +286,12 @@ public class CarreiraWriteService {
     boolean novoCargoNulo = carreira.getCargoId() == null;
     Integer novoFlgProcessa = carreira.getFlgProcessa() != null ? carreira.getFlgProcessa() : 0;
     boolean novaProcessa = Integer.valueOf(1).equals(novoFlgProcessa);
+
+    // COMPÕE sobre o ATUAL do momento: as dimensões PARTILHADAS (mob/regime/situação) e a lineage
+    // (tiprelId) vêm do tiprel atual de AGORA — não do snapshot fotografado no registo. Assim uma
+    // mobilidade/regime/situação que tenha validado ENTRE o registo e esta validação não se perde:
+    // só o carr_id (a dimensão desta carreira) fica o novo. Ler ANTES de a progressão fechar o atual.
+    var tiprelAtual = tiposRelacionamentoEntityRepository.findAtualByFuncionarioUuid(funcionario.getUuid()).orElse(null);
 
     // Carreiras em vigor (estado A, data_fim null ou futura), excluindo a pendente.
     var emVigor = carreiraEntityRepository.findEmVigorByFuncionario(funcionario, java.time.LocalDate.now())
@@ -342,19 +349,30 @@ public class CarreiraWriteService {
     carreira.setFlgProcessa(novoFlgProcessa);
     carreiraEntityRepository.save(carreira);
 
-    // ATIVAR o tiprel pendente (P->A) com o est_act_adm/flg finais.
+    // ATIVAR o tiprel pendente (P->A) com o est_act_adm/flg finais. As dimensões PARTILHADAS e a
+    // lineage vêm do atual do momento (composição — ver acima); só o carr_id fica o desta carreira.
     if (tiprelPendente != null) {
+      if (tiprelAtual != null && !Objects.equals(tiprelAtual.getId(), tiprelPendente.getId())) {
+        tiprelPendente.setMobId(tiprelAtual.getMobId());
+        tiprelPendente.setRegimeId(tiprelAtual.getRegimeId());
+        tiprelPendente.setSituacLaboralId(tiprelAtual.getSituacLaboralId());
+        tiprelPendente.setTiprelId(tiprelAtual);
+      }
       tiprelPendente.setEstActAdm(novoEst);
       tiprelPendente.setEstado(Estado.A);
       tiprelPendente.setFlgProcessa(novoFlgProcessa);
       tiposRelacionamentoEntityRepository.save(tiprelPendente);
     }
 
-    // ATIVAR os def pendentes (P->A) — os desta carreira (o guard garante 1 carreira pendente por vez).
-    definicaoRemuneracaoEntityRepository.findByFunIdAndEstado(funcionario, Estado.P)
-        .forEach(o -> { o.setEstado(Estado.A); definicaoRemuneracaoEntityRepository.save(o); });
-    defPagamentoEntityRepository.findByFunIdAndEstado(funcionario, Estado.P)
-        .forEach(o -> { o.setEstado(Estado.A); defPagamentoEntityRepository.save(o); });
+    // ATIVAR os def pendentes (P->A) — SÓ os desta carreira, pela ASSOCIAÇÃO do tiprel pendente
+    // (TIPREL_REM_PAG). Não usar fun+estado=P: misturaria def de outros pendentes (outra carreira,
+    // rendimento/desconto) que não têm coluna de carreira.
+    if (tiprelPendente != null) {
+      funcionarioRules.getRemuneracoesAssociadosPendentes(tiprelPendente.getId())
+          .forEach(o -> { o.setEstado(Estado.A); definicaoRemuneracaoEntityRepository.save(o); });
+      funcionarioRules.getPagamentosDescontosAssociadosPendentes(tiprelPendente.getId())
+          .forEach(o -> { o.setEstado(Estado.A); defPagamentoEntityRepository.save(o); });
+    }
 
     if (validation != null) {
       validation.setEstado(Estado.A);

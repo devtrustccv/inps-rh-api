@@ -172,8 +172,12 @@ public class CarreiraReadService {
     var encargos = new ArrayList<EncargosDescontosRespDTO>();
     var paymentsNotNeedInDetails = List.of("INPS", "IUR");
 
-    var data = defPagamentoEntityRepository.findByFunIdAndEstado(fun, tr.getEstado())
+    // Def SÓ desta carreira: pela associação do tiprel (TIPREL_REM_PAG), filtrada pelo estado do
+    // próprio tiprel. Não usar fun+estado — misturaria def de outros pendentes (o def não tem
+    // coluna de carreira; a associação é o único vínculo à carreira).
+    var data = funcionarioRules.getPagamentosDescontosAssociados(tr.getId())
         .stream()
+        .filter(obj -> obj.getEstado() == tr.getEstado())
         .filter(obj -> !paymentsNotNeedInDetails.contains(obj.getTmId().getTipo()))
         .toList();
 
@@ -192,7 +196,10 @@ public class CarreiraReadService {
     dto.setEncargosDescontos(encargos);
 
     var subsidios = new ArrayList<SubsidioRespDTO>();
-    var subsidioDBData = definicaoRemuneracaoEntityRepository.findByFunIdAndEstado(fun, tr.getEstado());
+    var subsidioDBData = funcionarioRules.getRemuneracoesAssociados(tr.getId())
+        .stream()
+        .filter(obj -> obj.getEstado() == tr.getEstado())
+        .toList();
     subsidioDBData.forEach(obj -> {
       var row = new SubsidioRespDTO();
       row.setId(obj.getId());
