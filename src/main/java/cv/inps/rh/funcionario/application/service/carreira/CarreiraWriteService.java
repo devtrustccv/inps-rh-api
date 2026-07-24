@@ -1,7 +1,7 @@
 package cv.inps.rh.funcionario.application.service.carreira;
 
 import com.github.f4b6a3.uuid.UuidCreator;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.funcionario.application.dto.CarreiraNovoDTO;
 import cv.inps.rh.funcionario.application.dto.ValidacaoCarreiraDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
@@ -49,8 +49,47 @@ public class CarreiraWriteService {
   private final DefPagamentoMapper defPagamentoMapper;
   private final FuncionarioRules funcionarioRules;
   private final EntityManager entityManager;
+  private final DomainEntityRepository domainEntityRepository;
+  private final ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
 
-  public void novaCarreira(String funcionarioId, DadosContratuaisReqDTO dto) {
+  /**
+   * "Carreira processada" = igual à vista RH_V_CARREIRA.PROCESSAMENTO: existe um tiprel desta
+   * carreira com registo em RH_T_PROC_FUNCIONARIOS (processada em folha). Substitui o proxy
+   * ULT_PROC, que não reflecte a definição de negócio.
+   */
+  private boolean carreiraProcessada(CarreiraEntity carreira) {
+    return carreira != null && carreira.getId() != null
+        && processamentoFuncionarioRepository.existsByTiprel_CarreiraId_Id(carreira.getId());
+  }
+
+  /** Contexto do fluxo de carreira, dado pela REFERENCIA do domínio TIPO_MOV_LABORAL. */
+  private enum ContextoCarreira { NOVO, EDITAR, PROG_PROMO }
+
+  private static final String DOMINIO_TIPO_MOV = "TIPO_MOV_LABORAL";
+  private static final String REF_NOVO = "CARREIRA_NOVO";
+  private static final String REF_EDITAR = "CARREIRA_EDITAR";
+  private static final String REF_PROG_PROMO = "CARREIRA_PROG_PROMO";
+
+  /**
+   * Resolve o contexto a partir do VALOR enviado em tipoCarreira (ex.: CARGO_NOVO, PROGRESSAO,
+   * NOVO_CONTRATO): lê a REFERENCIA no domínio TIPO_MOV_LABORAL. Só a REFERENCIA importa para a
+   * lógica; o VALOR guarda-se em tipo_situacao (registo do que foi feito).
+   */
+  private ContextoCarreira contexto(String tipoCarreira) {
+    // Match por (dominio, valor) + REFERENCIA comparada DIRETO com as 3 de carreira que conhecemos.
+    // O mesmo VALOR (ex.: NOVO_CONTRATO) existe noutros contextos (CONTRATO, MOBILIDADE) — por isso
+    // não basta o valor; filtramos a referência pelas 3 conhecidas.
+    var refs = domainEntityRepository
+        .findByDominioAndValorAndEstado(DOMINIO_TIPO_MOV, tipoCarreira, Estado.A)
+        .stream().map(DomainEntity::getReferencia).collect(java.util.stream.Collectors.toSet());
+    if (refs.contains(REF_NOVO)) return ContextoCarreira.NOVO;
+    if (refs.contains(REF_EDITAR)) return ContextoCarreira.EDITAR;
+    if (refs.contains(REF_PROG_PROMO)) return ContextoCarreira.PROG_PROMO;
+    throw IgrpResponseStatusException.badRequest(
+        "Tipo de carreira inválido (sem referência de carreira em " + DOMINIO_TIPO_MOV + "): " + tipoCarreira);
+  }
+
+  public void novaCarreira(String funcionarioId, CarreiraNovoDTO dto) {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
 
@@ -67,18 +106,37 @@ public class CarreiraWriteService {
     var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
-    // Doc "Regra Geral": máx 2 carreiras activas e não 2 do mesmo tipo (cargo nulo=CATEGORIA vs
-    // cargo não-nulo=CARGO). "Em vigor" = estado A e ainda não terminada (data_fim nula ou futura) —
-    // NÃO usar data_fim IS NULL só, pois uma carreira activa pode ter data_fim = fim do contrato.
-    // Se a nova é do MESMO tipo que uma em vigor → é progressão (substitui essa na validação) e é
-    // permitida; se é de tipo DIFERENTE → acumula uma 2ª carreira, só permitida se ainda não houver 2.
-    // A unicidade do "processa salário" (flg_processa) deixa de ser bloqueada aqui — é garantida na
-    // validação (ao aprovar uma que processa, o código tira o flag das outras).
+    // POST = contexto CARREIRA_NOVO. Se vier tipoCarreira, validar que a REFERENCIA é mesmo NOVO —
+    // progressão/promoção e editar entram pelo PUT (atualizarCarreira), não por aqui.
+    if (dto.getTipoCarreira() != null && contexto(dto.getTipoCarreira()) != ContextoCarreira.NOVO)
+      throw IgrpResponseStatusException.badRequest(
+          "Este endpoint regista uma carreira NOVA. Para Progressão/Promoção ou Editar use o PUT.");
+
+    // Doc "Regra Geral" (l.4831-4835): máx 2 carreiras activas e NÃO duas do mesmo tipo (cargo
+    // nulo=CATEGORIA vs cargo não-nulo=CARGO). "Em vigor" = estado A e não terminada (data_fim nula
+    // ou futura). NOVO só ACUMULA um tipo diferente; se já existe do mesmo tipo, é caso de
+    // Progressão/Promoção (PUT), não de carreira nova.
     boolean novoCargoNulo = dto.getCargoPosicaoId() == null;
     var emVigor = carreiraEntityRepository.findEmVigorByFuncionario(funcionario, java.time.LocalDate.now());
-    boolean existeMesmoTipo = emVigor.stream().anyMatch(c -> (c.getCargoId() == null) == novoCargoNulo);
-    if (!existeMesmoTipo && emVigor.size() >= 2)
+    if (emVigor.stream().anyMatch(c -> (c.getCargoId() == null) == novoCargoNulo))
+      throw IgrpResponseStatusException.conflict(
+          "Já existe uma carreira activa do mesmo tipo. Para alterá-la use Progressão/Promoção.");
+    if (emVigor.size() >= 2)
       throw IgrpResponseStatusException.conflict("O colaborador não pode ter mais de duas carreiras activas");
+
+    criarPendenteContentor(funcionario, dto, contratoAtual, relacionamentoAtual, null);
+  }
+
+  /**
+   * Cria o PENDENTE (contentor): carreira P + tiprel-contentor P (clona o vínculo atual) + def P
+   * (salário do escalão + subsídios/encargos do DTO) + validação P. NÃO toca no atual — a
+   * consolidação (fechar anterior, est_act_adm/flg, substituição) acontece no validarCarreira.
+   *
+   * <p>Se {@code fonte} != null (Progressão/Promoção), os subsídios/encargos não fornecidos no DTO
+   * são HERDADOS dos activos da carreira-fonte. Se {@code fonte} == null (Novo), não copia nada.</p>
+   */
+  private void criarPendenteContentor(FuncionarioEntity funcionario, CarreiraNovoDTO dto,
+      ContratoEntity contratoAtual, TiposRelacionamentoEntity relacionamentoAtual, CarreiraEntity fonte) {
 
     // Salário automático do escalão (spec DOSSIÊ: FLG_CARREIRA=1 -> salário preenchido do escalão).
     if (dto.getEscalaoReferenciaId() != null) {
@@ -90,10 +148,6 @@ public class CarreiraWriteService {
     var obsMovimento = tipoCarreira;
     var dataEfetiva = dto.getDataInicio() != null ? dto.getDataInicio() : java.time.LocalDate.now();
 
-    // Convenção: o REGISTO cria TUDO em P (carreira + tiprel [est_act_adm=0] + def), mas NÃO toca no
-    // vínculo/carreira/def atuais. Assim o pendente é completo e legível (o detalhe da validação mostra
-    // tudo), não é o atual (est_act_adm=0), e a consolidação (fechar anterior, est_act_adm=1/flg,
-    // despromoção) acontece só no validarCarreira (SIM). A rejeição é P->I, sem reverter nada.
     var novaCarreira = Objects.requireNonNull(carreiraMapper.toCarreira(dto, Estado.P));
     novaCarreira.setObs("CARREIRA");
     novaCarreira.setTipoSituacao(tipoCarreira);
@@ -120,33 +174,20 @@ public class CarreiraWriteService {
     novoTiprel.setReferente("CARREIRA");
     tiposRelacionamentoEntityRepository.save(novoTiprel);
 
-    // def (P): salário do escalão + subsídios/encargos do DTO. Numa progressão (mesmo tipo em vigor)
-    // sem subsídios/encargos no DTO, copiam-se os activos desse track (para o novo herdar).
     var novasRem = new ArrayList<DefinicaoRemuneracaoEntity>();
     var novosPag = new ArrayList<DefPagamentoEntity>();
     var vinculoAtualId = contratoAtual.getVinculoId() != null ? contratoAtual.getVinculoId().getId() : null;
-    var carreiraMesmoTipo = emVigor.stream().filter(c -> (c.getCargoId() == null) == novoCargoNulo).findFirst().orElse(null);
-    var tiprelMesmoTipo = carreiraMesmoTipo != null
-        ? tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreiraMesmoTipo.getUuid()).orElse(null) : null;
-    List<DefinicaoRemuneracaoEntity> remsMesmoTipo = tiprelMesmoTipo != null
-        ? funcionarioRules.getRemuneracoesAssociadosAtivos(tiprelMesmoTipo.getId()) : List.of();
-    List<DefPagamentoEntity> pagsMesmoTipo = tiprelMesmoTipo != null
-        ? funcionarioRules.getPagamentosDescontosAssociadosAtivos(tiprelMesmoTipo.getId()) : List.of();
-    var escalaoMesmoTipoId = carreiraMesmoTipo != null && carreiraMesmoTipo.getEscalaoId() != null
-        ? carreiraMesmoTipo.getEscalaoId().getId() : null;
+    var tiprelFonte = fonte != null
+        ? tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(fonte.getUuid()).orElse(null) : null;
 
-    Long salarioTmId = null;
-    boolean criarSalario = (carreiraMesmoTipo == null) || houveMudancaSalario(vinculoAtualId, escalaoMesmoTipoId, dto, funcionario);
-    if (criarSalario) {
-      var movREM = paramVinculoMovimentoEntityRepository
-          .findByVinculoId_IdAndTipo(vinculoAtualId, "REM").stream().findFirst().orElse(null);
-      if (movREM != null) {
-        salarioTmId = movREM.getTmId() != null ? movREM.getTmId().getId() : null;
-        var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario, obsMovimento);
-        salario.setTmId(movREM.getTmId());
-        definicaoRemuneracaoEntityRepository.save(salario);
-        novasRem.add(salario);
-      }
+    var movREM = paramVinculoMovimentoEntityRepository
+        .findByVinculoId_IdAndTipo(vinculoAtualId, "REM").stream().findFirst().orElse(null);
+    Long salarioTmId = movREM != null && movREM.getTmId() != null ? movREM.getTmId().getId() : null;
+    if (movREM != null) {
+      var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario, obsMovimento);
+      salario.setTmId(movREM.getTmId());
+      definicaoRemuneracaoEntityRepository.save(salario);
+      novasRem.add(salario);
     }
 
     if (dto.getSubsidios() != null && !dto.getSubsidios().isEmpty()) {
@@ -156,9 +197,9 @@ public class CarreiraWriteService {
         definicaoRemuneracaoEntityRepository.save(obj);
         novasRem.add(obj);
       }
-    } else if (carreiraMesmoTipo != null) {
+    } else if (tiprelFonte != null) {
       final Long finalSalarioTmId = salarioTmId;
-      for (var rem : remsMesmoTipo) {
+      for (var rem : funcionarioRules.getRemuneracoesAssociadosAtivos(tiprelFonte.getId())) {
         if (finalSalarioTmId != null && rem.getTmId() != null
             && Objects.equals(rem.getTmId().getId(), finalSalarioTmId)) continue;
         var copia = copiarRemuneracao(rem, funcionario, dataEfetiva, obsMovimento);
@@ -174,8 +215,8 @@ public class CarreiraWriteService {
         defPagamentoEntityRepository.save(def);
         novosPag.add(def);
       }
-    } else if (carreiraMesmoTipo != null) {
-      for (var pag : pagsMesmoTipo) {
+    } else if (tiprelFonte != null) {
+      for (var pag : funcionarioRules.getPagamentosDescontosAssociadosAtivos(tiprelFonte.getId())) {
         var copia = copiarPagamento(pag, funcionario, dataEfetiva, obsMovimento);
         defPagamentoEntityRepository.save(copia);
         novosPag.add(copia);
@@ -194,6 +235,98 @@ public class CarreiraWriteService {
     validation.setUuid(UuidCreator.getTimeOrderedEpoch());
     validation.setFunId(funcionario);
     validacaoEntityRepository.save(validation);
+  }
+
+  /**
+   * Progressão/Promoção (CARREIRA_PROG_PROMO, via PUT {carreiraId}): cria um pendente SOBRE a
+   * carreira-fonte, herdando os def activos dela; na validação, o {@code validarCarreira} fecha a
+   * fonte (mesma-tipo em vigor) e activa a nova.
+   */
+  private void progredirCarreira(FuncionarioEntity funcionario, CarreiraEntity fonte, CarreiraNovoDTO dto) {
+    if (carreiraEntityRepository.existsByContrVinculoIdFunIdAndEstado(funcionario, Estado.P))
+      throw IgrpResponseStatusException.conflict("Existe um registo de carreira por validar!");
+    if (dto.getFlgProcessa() == null)
+      throw IgrpResponseStatusException.badRequest("O campo 'processar salário' é obrigatório");
+    var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
+    var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    criarPendenteContentor(funcionario, dto, contratoAtual, relacionamentoAtual, fonte);
+  }
+
+  /**
+   * Editar carreira processada — FLG_PROCESSA 0→1 (doc l.4869-4891). IMEDIATO (não vai a validação):
+   * cria um NOVO tiprel clonando o último vínculo (mob/regime/situação), EXCEPTO carreira_id que fica
+   * ESTA carreira; EST_ACT_ADM=1, FLG=1. Copia os def activos DESTA carreira para o novo (via
+   * TIPREL_REM_PAG). Despromove o atual anterior (est=0, flg=0) — fica parqueado, sem data_fim.
+   */
+  private void marcarParaProcessar(FuncionarioEntity funcionario, CarreiraEntity carreira, CarreiraNovoDTO dto) {
+    var atual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    var dataEfetiva = dto.getDataInicio() != null ? dto.getDataInicio() : java.time.LocalDate.now();
+    var tiprelDestaCarreira = tiposRelacionamentoEntityRepository
+        .findFirstByCarreiraId_UuidOrderByIdDesc(carreira.getUuid()).orElse(null);
+
+    // Novo tiprel: clona o atual (partilhadas), mas carreira_id/cargo/salário = ESTA carreira.
+    var novoTiprel = contratuaisEntityMapper.clone(atual);
+    novoTiprel.setCarreiraId(carreira);
+    novoTiprel.setCargoId(carreira.getCargoId());
+    novoTiprel.setSalario(carreira.getSalario());
+    novoTiprel.setTipoSituacao(carreira.getTipoSituacao());
+    novoTiprel.setEstActAdm(1);
+    novoTiprel.setFlgProcessa(1);
+    novoTiprel.setEstado(Estado.A);
+    novoTiprel.setDataInicio(dataEfetiva);
+    novoTiprel.setDataFim(null);
+    novoTiprel.setTiprelId(atual);
+    novoTiprel.setReferente("CARREIRA");
+    tiposRelacionamentoEntityRepository.save(novoTiprel);
+
+    // TIPREL_REM_PAG: os def a copiar são os DESTA carreira (não de outra) — doc "Nota".
+    if (tiprelDestaCarreira != null)
+      tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tiprelDestaCarreira, novoTiprel, List.of(), List.of());
+
+    // Despromove o atual anterior (a que processava): est=0, flg=0, sem data_fim (fica parqueada,
+    // para continuar a haver 2 carreiras activas).
+    if (atual != null && !Objects.equals(atual.getId(), novoTiprel.getId())) {
+      atual.setEstActAdm(0);
+      atual.setFlgProcessa(0);
+      tiposRelacionamentoEntityRepository.save(atual);
+      var carreiraAtual = atual.getCarreiraId();
+      if (carreiraAtual != null && !Objects.equals(carreiraAtual.getId(), carreira.getId())) {
+        carreiraAtual.setFlgProcessa(0);
+        carreiraEntityRepository.save(carreiraAtual);
+      }
+    }
+
+    carreira.setFlgProcessa(1);
+    carreira.setEstActAdm(1);
+    carreira.setDataFim(null);
+    carreiraEntityRepository.save(carreira);
+  }
+
+  /**
+   * Editar carreira processada — FLG_PROCESSA 1→0 (doc l.4894-4903). IMEDIATO: a carreira deixa de
+   * processar — FLG=0, DATA_FIM obrigatória, e o tiprel fecha (EST_ACT_ADM=0 + DATA_FIM). Tem de
+   * existir OUTRA carreira em vigor a processar (invariante ≥1), senão erro.
+   */
+  private void desmarcarProcessar(FuncionarioEntity funcionario, CarreiraEntity carreira,
+      TiposRelacionamentoEntity relacionamento, CarreiraNovoDTO dto) {
+    if (dto.getDataFim() == null)
+      throw IgrpResponseStatusException.badRequest("Ao desmarcar 'processar salário', a Data Fim é obrigatória.");
+    boolean outraProcessa = carreiraEntityRepository
+        .findEmVigorByFuncionario(funcionario, java.time.LocalDate.now()).stream()
+        .anyMatch(c -> !Objects.equals(c.getId(), carreira.getId()) && Integer.valueOf(1).equals(c.getFlgProcessa()));
+    if (!outraProcessa)
+      throw IgrpResponseStatusException.badRequest(
+          "Pelo menos uma carreira activa tem de estar marcada para processar salário.");
+
+    carreira.setFlgProcessa(0);
+    carreira.setEstActAdm(0);
+    carreira.setDataFim(dto.getDataFim());
+    carreiraEntityRepository.save(carreira);
+
+    relacionamento.setFlgProcessa(0);
+    relacionamento.setEstActAdm(0);
+    relacionamento.setDataFim(dto.getDataFim());
+    tiposRelacionamentoEntityRepository.save(relacionamento);
   }
 
   private DefinicaoRemuneracaoEntity copiarRemuneracao(DefinicaoRemuneracaoEntity original, FuncionarioEntity funcionario, java.time.LocalDate dataInicio, String obs) {
@@ -231,7 +364,7 @@ public class CarreiraWriteService {
   }
 
   @NotNull
-  private DefinicaoRemuneracaoEntity getSalarioDefinicaoRemuneracaoEntity(DadosContratuaisReqDTO dto, FuncionarioEntity funcionario, String obs) {
+  private DefinicaoRemuneracaoEntity getSalarioDefinicaoRemuneracaoEntity(CarreiraNovoDTO dto, FuncionarioEntity funcionario, String obs) {
     var salario = new DefinicaoRemuneracaoEntity();
     salario.setValor(dto.getSalario());
     salario.setEstado(Estado.P);
@@ -324,6 +457,9 @@ public class CarreiraWriteService {
         .filter(c -> carreiraMesmoTipo == null || !Objects.equals(c.getId(), carreiraMesmoTipo.getId()))
         .anyMatch(c -> Integer.valueOf(1).equals(c.getFlgProcessa()));
     int novoEst = (novaProcessa || !outraProcessa) ? 1 : 0;
+    // Invariante (doc): o atual (est_act_adm=1) É a que processa. Acoplar flg ao est — evita o caso
+    // fallback em que a nova assumia o atual (est=1) mas ficava com flg=0 (ninguém a processar).
+    novoFlgProcessa = novoEst;
 
     if (novoEst == 1) {
       // O novo assume o atual: tirar est_act_adm e flg_processa às outras em vigor. A despromovida NÃO
@@ -412,7 +548,7 @@ public class CarreiraWriteService {
         });
   }
 
-  public void atualizarCarreira(String carreiraId, String funcionarioId, DadosContratuaisReqDTO dto) {
+  public void atualizarCarreira(String carreiraId, String funcionarioId, CarreiraNovoDTO dto) {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
     var carreira = carreiraEntityRepository.findByUuidOrThrow(UUID.fromString(carreiraId));
@@ -431,22 +567,49 @@ public class CarreiraWriteService {
 
     var relacionamento = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreira.getUuid()).orElse(null);
 
-    // Spec 3.5.2.3.1 (Novo/Editar, PROCESSAMENTO > 0): com processamento associado, os campos
-    // carreira/cargo/data início ficam fechados; a alteração de ESCALÃO implica um novo registo
-    // (INSERT) em CARREIRA + TIPOS_RELACIONAMENTO + TIPREL_REM_PAG — é a progressão/promoção,
-    // que o fluxo novaCarreira já cobre (fecha o registo anterior e cria o novo pendente).
-    if (relacionamento != null && relacionamento.getUltProc() != null) {
-      Long escalaoAtual = carreira.getEscalaoId() != null ? carreira.getEscalaoId().getId() : null;
-      boolean mudouEscalao = !Objects.equals(escalaoAtual, dto.getEscalaoReferenciaId());
-      if (mudouEscalao) {
-        novaCarreira(funcionarioId, dto);
-        return;
-      }
-      throw IgrpResponseStatusException.badRequest(
-          "Carreira já processada: apenas a alteração de escalão é permitida (gera um novo registo)");
+    // Roteamento (doc): Progressão/Promoção (CARREIRA_PROG_PROMO) cria um NOVO pendente SOBRE esta
+    // carreira (herda os def e substitui na validação). Editar (CARREIRA_EDITAR) altera in place e
+    // revalida só se mudar CARGO/CARR_PCCS/ESCALÃO. Sem tipoCarreira, mantém-se EDITAR.
+    if (dto.getTipoCarreira() != null && contexto(dto.getTipoCarreira()) == ContextoCarreira.PROG_PROMO) {
+      progredirCarreira(funcionario, carreira, dto);
+      return;
     }
 
-    boolean revalidar = !Estado.P.equals(carreira.getEstado());
+    // Editar de carreira JÁ processada (PROCESSAMENTO > 0, doc l.4851-4905): só Escalão, Data Fim e
+    // Processa Salário são editáveis. Escalão → progressão (novo INSERT). Os flips de flg e a Data
+    // Fim são IMEDIATOS (não vão a validação). "Processada" segue a vista RH_V_CARREIRA (existe
+    // registo em RH_T_PROC_FUNCIONARIOS para um tiprel desta carreira).
+    if (carreiraProcessada(carreira)) {
+      Long escalaoAtual = carreira.getEscalaoId() != null ? carreira.getEscalaoId().getId() : null;
+      if (!Objects.equals(escalaoAtual, dto.getEscalaoReferenciaId())) {
+        progredirCarreira(funcionario, carreira, dto);
+        return;
+      }
+      boolean eraProcessa = Integer.valueOf(1).equals(carreira.getFlgProcessa());
+      boolean passaProcessa = Integer.valueOf(1).equals(dto.getFlgProcessa());
+      if (!eraProcessa && passaProcessa) {
+        marcarParaProcessar(funcionario, carreira, dto);        // 0->1
+      } else if (eraProcessa && !passaProcessa) {
+        desmarcarProcessar(funcionario, carreira, relacionamento, dto);   // 1->0
+      } else if (dto.getDataFim() != null && !Objects.equals(carreira.getDataFim(), dto.getDataFim())) {
+        // Só Data Fim (fechar): actualização em RH_T_CARREIRA (doc l.4861-4863).
+        carreira.setDataFim(dto.getDataFim());
+        carreiraEntityRepository.save(carreira);
+      }
+      return;
+    }
+
+    // Doc (caso de uso l.462-474): editar só volta a validação se mudar CARGO_ID / CARR_PCCS_ID /
+    // ESCALAO_ID; e apenas se estiver validada (se já está P, mantém-se pendente). Outros campos
+    // (data fim, subsídios/encargos) fazem UPDATE in place sem nova validação. Calcular ANTES do
+    // toUpdateEntity, que sobrepõe os campos da carreira.
+    Long escAtual = carreira.getEscalaoId() != null ? carreira.getEscalaoId().getId() : null;
+    Long cargoAtual = carreira.getCargoId() != null ? carreira.getCargoId().getId() : null;
+    Long carrPccsAtual = carreira.getCarrPccsId() != null ? carreira.getCarrPccsId().getId() : null;
+    boolean mudouChave = !Objects.equals(escAtual, dto.getEscalaoReferenciaId())
+        || !Objects.equals(cargoAtual, dto.getCargoPosicaoId())
+        || !Objects.equals(carrPccsAtual, dto.getCarreiraId());
+    boolean revalidar = mudouChave && !Estado.P.equals(carreira.getEstado());
 
     carreiraMapper.toUpdateEntity(carreira, dto);
     if (revalidar) carreira.setEstado(Estado.P);
@@ -531,29 +694,5 @@ public class CarreiraWriteService {
       validation.setFunId(funcionario);
       validacaoEntityRepository.save(validation);
     }
-  }
-
-  private boolean houveMudancaSalario(Long vinculoId, Long escalaoId, DadosContratuaisReqDTO dc, FuncionarioEntity funcionario) {
-    if (escalaoId != null && escalaoId > 0) {
-      if (!Objects.equals(escalaoId, dc.getEscalaoReferenciaId())) {
-        return true;
-      }
-    }
-    var vinculoTipoMovimentoREMList = paramVinculoMovimentoEntityRepository
-        .findByVinculoId_IdAndTipo(vinculoId, "REM");
-    var tmRem = vinculoTipoMovimentoREMList.stream()
-        .findFirst()
-        .map(ParamVinculoMovimentoEntity::getTmId)
-        .orElse(null);
-    if (tmRem == null) return true;
-    var renumeracoes = definicaoRemuneracaoEntityRepository
-        .findByFunIdAndTmIdAndEstado(funcionario, tmRem, Estado.A);
-    var renumeracao = renumeracoes.stream().findFirst().orElse(null);
-    if (renumeracao != null) {
-      if (!Objects.equals(renumeracao.getValor(), dc.getSalario())) {
-        return true;
-      }
-    }
-    return false;
   }
 }

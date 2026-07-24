@@ -68,7 +68,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "type": "DadosContratuaisReq",
+              "type": "CarreiraNovo",
               "collectionType": "none",
               "name": "data",
               "objectType": "dto",
@@ -235,7 +235,7 @@
             "schema": {
               "collectionType": "none",
               "name": "data",
-              "type": "DadosContratuaisReq",
+              "type": "CarreiraNovo",
               "objectType": "dto",
               "module": "funcionario"
             }
