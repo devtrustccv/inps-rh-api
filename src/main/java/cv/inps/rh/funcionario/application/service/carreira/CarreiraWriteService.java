@@ -304,19 +304,14 @@ public class CarreiraWriteService {
 
   /**
    * Editar carreira processada — FLG_PROCESSA 1→0 (doc l.4894-4903). IMEDIATO: a carreira deixa de
-   * processar — FLG=0, DATA_FIM obrigatória, e o tiprel fecha (EST_ACT_ADM=0 + DATA_FIM). Tem de
-   * existir OUTRA carreira em vigor a processar (invariante ≥1), senão erro.
+   * processar — FLG=0, DATA_FIM obrigatória, e o tiprel fecha (EST_ACT_ADM=0 + DATA_FIM). O DOSSIÊ
+   * NÃO exige que outra carreira passe a processar (só "nunca duas a processar"); logo é permitido
+   * fechar a última que processa (ex.: colaborador a sair).
    */
-  private void desmarcarProcessar(FuncionarioEntity funcionario, CarreiraEntity carreira,
+  private void desmarcarProcessar(CarreiraEntity carreira,
       TiposRelacionamentoEntity relacionamento, CarreiraNovoDTO dto) {
     if (dto.getDataFim() == null)
       throw IgrpResponseStatusException.badRequest("Ao desmarcar 'processar salário', a Data Fim é obrigatória.");
-    boolean outraProcessa = carreiraEntityRepository
-        .findEmVigorByFuncionario(funcionario, java.time.LocalDate.now()).stream()
-        .anyMatch(c -> !Objects.equals(c.getId(), carreira.getId()) && Integer.valueOf(1).equals(c.getFlgProcessa()));
-    if (!outraProcessa)
-      throw IgrpResponseStatusException.badRequest(
-          "Pelo menos uma carreira activa tem de estar marcada para processar salário.");
 
     carreira.setFlgProcessa(0);
     carreira.setEstActAdm(0);
@@ -523,21 +518,18 @@ public class CarreiraWriteService {
     if (!Estado.P.equals(carreira.getEstado()))
       throw IgrpResponseStatusException.badRequest("Esta carreira não se encontra no estado pendente");
 
-    var funcionario = carreira.getContrVinculoId() != null ? carreira.getContrVinculoId().getFunId() : null;
-
     carreira.setEstado(Estado.E);
     carreiraEntityRepository.save(carreira);
 
-    // O pendente inclui tiprel + def (criados em P no registo) — também passam a E.
+    // O pendente inclui tiprel + def (criados em P no registo) — também passam a E. Os def SÓ desta
+    // carreira, pela ASSOCIAÇÃO do tiprel (não fun+estado, que misturaria outros pendentes).
     var tiprelPendente = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreira.getUuid()).orElse(null);
     if (tiprelPendente != null) {
       tiprelPendente.setEstado(Estado.E);
       tiposRelacionamentoEntityRepository.save(tiprelPendente);
-    }
-    if (funcionario != null) {
-      definicaoRemuneracaoEntityRepository.findByFunIdAndEstado(funcionario, Estado.P)
+      funcionarioRules.getRemuneracoesAssociadosPendentes(tiprelPendente.getId())
           .forEach(o -> { o.setEstado(Estado.E); definicaoRemuneracaoEntityRepository.save(o); });
-      defPagamentoEntityRepository.findByFunIdAndEstado(funcionario, Estado.P)
+      funcionarioRules.getPagamentosDescontosAssociadosPendentes(tiprelPendente.getId())
           .forEach(o -> { o.setEstado(Estado.E); defPagamentoEntityRepository.save(o); });
     }
 
@@ -590,7 +582,7 @@ public class CarreiraWriteService {
       if (!eraProcessa && passaProcessa) {
         marcarParaProcessar(funcionario, carreira, dto);        // 0->1
       } else if (eraProcessa && !passaProcessa) {
-        desmarcarProcessar(funcionario, carreira, relacionamento, dto);   // 1->0
+        desmarcarProcessar(carreira, relacionamento, dto);   // 1->0
       } else if (dto.getDataFim() != null && !Objects.equals(carreira.getDataFim(), dto.getDataFim())) {
         // Só Data Fim (fechar): actualização em RH_T_CARREIRA (doc l.4861-4863).
         carreira.setDataFim(dto.getDataFim());
