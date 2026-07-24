@@ -141,17 +141,18 @@ public class ValidarContratoService {
       // reconciliar (que os cria ja como A); aqui so se tocam os que estao pendentes.
       transicionarManuaisPendentes(funcionario, estado);
       if (estado == Estado.A) {
+        // #7 — Inativa (I) TODOS os def do contrato ANTERIOR (associados ao tiprel pai) ANTES do
+        // reconciliar. Sem isto: (a) o associarNovos herdava os manuais antigos; (b) o reconciliar
+        // REUTILIZAVA os fixos partilhados (mesmo tm) do contrato anterior, que ficavam ativos e
+        // associados aos DOIS contratos. Ao inativa-los primeiro, o contrato anterior fica encerrado
+        // e o reconciliar cria fixos FRESCOS para o novo contrato -> separacao limpa por contrato.
+        inativarDefContratoAnterior(tiposRelacionamento);
         // reconciliar os movimentos fixos do vinculo — SO na validacao positiva e SO com salario
         if (Objects.equals(1, paramVinculo.getFlgSalario())) {
           reconciliacaoMovimentoVinculoService.reconciliar(funcionario, contrato,
               dadosContratuais.getSalario(), dadosContratuais.getMoeda(),
               dadosContratuais.getDataInicio(), dadosContratuais.getDataFim());
         }
-        // #7: os subsidios/encargos MANUAIS do contrato ANTERIOR (associados ao tiprel pai) NAO
-        // transitam para o novo contrato — encerram-se (E). Sem isto, o associarNovos apanhava-os
-        // (estado A) e o novo contrato herdava os subsidios/descontos do anterior. Os movimentos
-        // FIXOS do vinculo ficam protegidos (sao tratados pelo reconciliar).
-        fecharDefManuaisContratoAnterior(tiposRelacionamento, dadosContratuais.getTipoVinculoLaboralId());
         ordemServicoWriteService.criar(funcionario, tiposRelacionamento, dto.getTipoOrdemServico());
       } else {
         // Revert (validacao NAO): repoe o estado anterior ao REGISTO do novo contrato — o
@@ -199,22 +200,19 @@ public class ValidarContratoService {
   }
 
   /**
-   * #7 — encerra (E) os subsidios/encargos MANUAIS associados ao tiprel do contrato ANTERIOR (o
-   * tiprel pai). Nao devem transitar para o novo contrato; ficam apenas os do DTO do novo contrato
-   * + os movimentos FIXOS do vinculo (tratados pelo reconciliar). Os fixos ficam protegidos via
-   * tmsFixos para nao serem encerrados por engano.
+   * Inativa (I) TODOS os def (subsidios/encargos manuais + fixos) associados ao tiprel do contrato
+   * ANTERIOR (o tiprel pai). Chamado ANTES do reconciliar na validacao positiva de um novo contrato:
+   * o contrato anterior fica totalmente encerrado, e o reconciliar cria fixos FRESCOS para o novo
+   * contrato em vez de reutilizar os do anterior (que de outra forma ficavam ativos e partilhados
+   * entre os dois contratos).
    */
-  private void fecharDefManuaisContratoAnterior(TiposRelacionamentoEntity novoTiprel, Long vinculoId) {
+  private void inativarDefContratoAnterior(TiposRelacionamentoEntity novoTiprel) {
     var antigo = novoTiprel.getTiprelId();
     if (antigo == null) return;
-    var tmsFixosRem = reconciliacaoMovimentoVinculoService.tmsFixosDoVinculo(vinculoId, "REM");
-    var tmsFixosPag = reconciliacaoMovimentoVinculoService.tmsFixosDoVinculo(vinculoId, "PAG");
-    funcionarioRules.getRemuneracoesAssociadosAtivos(antigo.getId()).stream()
-        .filter(r -> r.getTmId() == null || !tmsFixosRem.contains(r.getTmId().getId()))
-        .forEach(r -> r.setEstado(Estado.E));
-    funcionarioRules.getPagamentosDescontosAssociadosAtivos(antigo.getId()).stream()
-        .filter(p -> p.getTmId() == null || !tmsFixosPag.contains(p.getTmId().getId()))
-        .forEach(p -> p.setEstado(Estado.E));
+    funcionarioRules.getRemuneracoesAssociadosAtivos(antigo.getId())
+        .forEach(r -> r.setEstado(Estado.I));
+    funcionarioRules.getPagamentosDescontosAssociadosAtivos(antigo.getId())
+        .forEach(p -> p.setEstado(Estado.I));
   }
 
   /**
