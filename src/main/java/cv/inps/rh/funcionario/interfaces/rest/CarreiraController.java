@@ -10,8 +10,8 @@ import cv.inps.rh.funcionario.application.commands.AtualizarCarreiraCommand;
 import cv.inps.rh.funcionario.application.commands.EliminarCarreiraCommand;
 import cv.inps.rh.funcionario.application.commands.NovaCarreiraCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarCarreiraCommand;
+import cv.inps.rh.funcionario.application.dto.CarreiraNovoDTO;
 import cv.inps.rh.funcionario.application.dto.CarreiraResponseDTO;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.ValidacaoCarreiraDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraAtualQuery;
@@ -98,7 +98,7 @@ public class CarreiraController {
     }
   )
 
-   public ResponseEntity<String> novaCarreira(@Valid @RequestBody DadosContratuaisReqDTO novaCarreiraRequest
+   public ResponseEntity<String> novaCarreira(@Valid @RequestBody CarreiraNovoDTO novaCarreiraRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
@@ -248,7 +248,7 @@ public class CarreiraController {
     }
   )
 
-   public ResponseEntity<String> atualizarCarreira(@Valid @RequestBody DadosContratuaisReqDTO atualizarCarreiraRequest
+   public ResponseEntity<String> atualizarCarreira(@Valid @RequestBody CarreiraNovoDTO atualizarCarreiraRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId,@PathVariable(value = "carreiraId") String carreiraId)
   {
 

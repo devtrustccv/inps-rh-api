@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -36,5 +37,19 @@ public interface DomainEntityRepository extends
         .collect(Collectors.toMap(DomainEntity::getValor, DomainEntity::getDescricao));
   }
 
+  Optional<DomainEntity> findFirstByDominioAndValorAndEstado(String dominio, String valor, Estado estado);
+
+  /**
+   * REFERENCIA de um VALOR ativo dentro de um DOMINIO. Ex.: para TIPO_MOV_LABORAL, o VALOR
+   * enviado pelo frontend (PROGRESSAO, CARGO_NOVO, NOVO_CONTRATO, …) resolve para a REFERENCIA
+   * (CARREIRA_PROG_PROMO / CARREIRA_NOVO / CARREIRA_EDITAR) — o contexto do fluxo. Devolve null
+   * se o VALOR não existir/estiver inativo.
+   */
+  default String getReferencia(String dominio, String valor) {
+    if (valor == null) return null;
+    return findFirstByDominioAndValorAndEstado(dominio, valor, Estado.A)
+        .map(DomainEntity::getReferencia)
+        .orElse(null);
+  }
 
 }

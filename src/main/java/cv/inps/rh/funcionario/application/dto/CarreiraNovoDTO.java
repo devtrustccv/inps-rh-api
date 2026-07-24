@@ -39,6 +39,9 @@ public class CarreiraNovoDTO  {
   private Long categoriaId ;
 
 
+  private Long cargoPosicaoId ;
+
+
   private Long escalaoReferenciaId ;
 
 
@@ -54,7 +57,7 @@ public class CarreiraNovoDTO  {
   private LocalDate dataFim ;
 
 
-  private String processamentoSalarial ;
+  private Integer flgProcessa ;
 
   @Valid
   private List<SubsidioReqDTO> subsidios = new ArrayList<>();

@@ -2,6 +2,7 @@ package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.CarreiraListDTO;
+import cv.inps.rh.funcionario.application.dto.CarreiraNovoDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.domain.projections.CarreiraList;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -95,6 +96,30 @@ public class CarreiraMapper {
     return ce;
   }
 
+  /**
+   * Overload do ecrã de CARREIRA (CarreiraNovoDTO). Mesmo mapeamento do {@code toCarreira} acima —
+   * o CarreiraNovoDTO tem os campos idênticos (só os da carreira), sem os campos de contrato/vínculo.
+   */
+  public CarreiraEntity toCarreira(CarreiraNovoDTO dc, Estado estado) {
+    if (dc == null) return null;
+    var ce = new CarreiraEntity();
+
+    ce.setCargoId(ValidationUtil.ref(entityManager, ParamCargoEntity.class, dc.getCargoPosicaoId()));
+    ce.setEscalaoId(ValidationUtil.ref(entityManager, ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
+    ce.setCarrPccsId(ValidationUtil.ref(entityManager, ParamCarreiraEntity.class, dc.getCarreiraId()));
+    ce.setCategoriaId(ValidationUtil.ref(entityManager, ParamCategoriaEntity.class, dc.getCategoriaId()));
+
+    ce.setSalario(dc.getSalario());
+    ce.setFlgProcessa(dc.getFlgProcessa() != null ? dc.getFlgProcessa() : 1);
+    ce.setTipoSituacao(dc.getTipoCarreira() != null ? dc.getTipoCarreira() : "NOVO_CONTRATO");
+    ce.setObs("CARREIRA");
+    ce.setDataInicio(dc.getDataInicio());
+    ce.setDataFim(dc.getDataFim());
+    ce.setUuid(UuidCreator.getTimeOrderedEpoch());
+    ce.setEstado(estado);
+    return ce;
+  }
+
 
   public void toUpdateEntity(CarreiraEntity carreira, DadosContratuaisReqDTO dc) {
     if (dc == null) return;
@@ -107,6 +132,20 @@ public class CarreiraMapper {
     if (dc.getTipoCarreira() != null) carreira.setTipoSituacao(dc.getTipoCarreira());
     // DOSSIÊ (campo Data Inicio/Fim): a carreira acompanha o periodo do contrato. O create
     // (toCarreira, "Item 71") ja fazia; o update deixava as datas antigas -> propagar aqui.
+    if (dc.getDataInicio() != null) carreira.setDataInicio(dc.getDataInicio());
+    if (dc.getDataFim() != null) carreira.setDataFim(dc.getDataFim());
+  }
+
+  /** Overload do ecrã de CARREIRA (CarreiraNovoDTO) — mesmo update do {@code toUpdateEntity} acima. */
+  public void toUpdateEntity(CarreiraEntity carreira, CarreiraNovoDTO dc) {
+    if (dc == null) return;
+    carreira.setCargoId(ValidationUtil.ref(entityManager, ParamCargoEntity.class, dc.getCargoPosicaoId()));
+    carreira.setEscalaoId(ValidationUtil.ref(entityManager, ParamEscalaoEntity.class, dc.getEscalaoReferenciaId()));
+    carreira.setCarrPccsId(ValidationUtil.ref(entityManager, ParamCarreiraEntity.class, dc.getCarreiraId()));
+    carreira.setCategoriaId(ValidationUtil.ref(entityManager, ParamCategoriaEntity.class, dc.getCategoriaId()));
+    carreira.setSalario(dc.getSalario());
+    carreira.setFlgProcessa(dc.getFlgProcessa() != null ? dc.getFlgProcessa() : carreira.getFlgProcessa());
+    if (dc.getTipoCarreira() != null) carreira.setTipoSituacao(dc.getTipoCarreira());
     if (dc.getDataInicio() != null) carreira.setDataInicio(dc.getDataInicio());
     if (dc.getDataFim() != null) carreira.setDataFim(dc.getDataFim());
   }

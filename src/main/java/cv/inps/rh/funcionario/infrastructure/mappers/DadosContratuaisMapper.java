@@ -1,6 +1,7 @@
 package cv.inps.rh.funcionario.infrastructure.mappers;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.funcionario.application.dto.CarreiraNovoDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.application.dto.EncargosDescontosRespDTO;
@@ -27,6 +28,27 @@ public class DadosContratuaisMapper {
 
 
   public TiposRelacionamentoEntity toRelacionamento(DadosContratuaisReqDTO dc, Estado estado) {
+    if (dc == null) return null;
+    var tr = new TiposRelacionamentoEntity();
+    tr.setCargoId(ValidationUtil.ref(em, ParamCargoEntity.class, dc.getCargoPosicaoId()));
+    tr.setSalario(dc.getSalario());
+    tr.setMoeda(dc.getMoeda());
+    tr.setTipoSituacao(dc.getTipoCarreira() != null ? dc.getTipoCarreira() : "NOVO_CONTRATO");
+    tr.setFlgProcessa(dc.getFlgProcessa() != null ? dc.getFlgProcessa() : 1);
+    tr.setObs("NOVO_CONTRATO");
+    tr.setDataInicio(dc.getDataInicio());
+    tr.setDataFim(dc.getDataFim());
+    tr.setReferente("REGISTO_COLABORADOR");
+    tr.setUuid(UuidCreator.getTimeOrderedEpoch());
+    tr.setEstado(estado);
+    return tr;
+  }
+
+  /**
+   * Overload do ecrã de CARREIRA (CarreiraNovoDTO). Mesmo mapeamento base do {@code toRelacionamento}
+   * acima — o {@code novaCarreira} sobrepõe depois as dimensões partilhadas a partir do vínculo atual.
+   */
+  public TiposRelacionamentoEntity toRelacionamento(CarreiraNovoDTO dc, Estado estado) {
     if (dc == null) return null;
     var tr = new TiposRelacionamentoEntity();
     tr.setCargoId(ValidationUtil.ref(em, ParamCargoEntity.class, dc.getCargoPosicaoId()));
