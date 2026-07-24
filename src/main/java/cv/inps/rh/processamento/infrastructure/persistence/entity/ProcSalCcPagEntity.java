@@ -21,6 +21,10 @@ import java.time.LocalDate;
 public class ProcSalCcPagEntity {
 
   @Id
+  @NotNull
+  @Column(name = "REGISTO_ID", nullable = false)
+  private Long registoId;
+
   @Column(name = "CC_ID")
   private Long ccId;
 
@@ -124,10 +128,6 @@ public class ProcSalCcPagEntity {
   @NotNull
   @Column(name = "PROC_FUNC_ID", nullable = false)
   private Long procFuncId;
-
-  @NotNull
-  @Column(name = "REGISTO_ID", nullable = false)
-  private Long registoId;
 
   @Size(max = 3)
   @Column(name = "FAVOR_ESTADO", length = 3)
