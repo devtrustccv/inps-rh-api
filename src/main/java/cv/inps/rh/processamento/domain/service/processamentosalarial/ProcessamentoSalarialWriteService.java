@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -235,13 +236,18 @@ public class ProcessamentoSalarialWriteService {
             new MapSqlParameterSource()
                 .addValue("p_dt_inicio", startDate)
                 .addValue("p_dt_fim", endDate)
-                .addValue("p_cc_id", request.getDireccaoId())
+                .addValue("p_cc_id",
+                    request.getDireccaoId()
+                        .stream()
+                        .map(Objects::toString)
+                        .collect(Collectors.joining(","))
+                )
                 .addValue("p_tiprel_id", request.getRelacionamentoId())
                 .addValue("p_tipo", request.getTipo())
                 .addValue("P_user_name", ofNullable(SecurityContextHolder.getContext().getAuthentication())
                     .map(Principal::getName)
                     .orElse("System"))
-                .addValue("p_user_id", 0) // TODO 07/12/2025 17:48 validate this
+                .addValue("p_user_id", 0)
         );
 
     return (String) result.get("p_msg");
