@@ -76,12 +76,17 @@ public class CarreiraWriteService {
    * lógica; o VALOR guarda-se em tipo_situacao (registo do que foi feito).
    */
   private ContextoCarreira contexto(String tipoCarreira) {
-    var ref = domainEntityRepository.getReferencia(DOMINIO_TIPO_MOV, tipoCarreira);
-    if (REF_NOVO.equals(ref)) return ContextoCarreira.NOVO;
-    if (REF_EDITAR.equals(ref)) return ContextoCarreira.EDITAR;
-    if (REF_PROG_PROMO.equals(ref)) return ContextoCarreira.PROG_PROMO;
+    // Match por (dominio, valor) + REFERENCIA comparada DIRETO com as 3 de carreira que conhecemos.
+    // O mesmo VALOR (ex.: NOVO_CONTRATO) existe noutros contextos (CONTRATO, MOBILIDADE) — por isso
+    // não basta o valor; filtramos a referência pelas 3 conhecidas.
+    var refs = domainEntityRepository
+        .findByDominioAndValorAndEstado(DOMINIO_TIPO_MOV, tipoCarreira, Estado.A)
+        .stream().map(DomainEntity::getReferencia).collect(java.util.stream.Collectors.toSet());
+    if (refs.contains(REF_NOVO)) return ContextoCarreira.NOVO;
+    if (refs.contains(REF_EDITAR)) return ContextoCarreira.EDITAR;
+    if (refs.contains(REF_PROG_PROMO)) return ContextoCarreira.PROG_PROMO;
     throw IgrpResponseStatusException.badRequest(
-        "Tipo de carreira inválido (sem referência em " + DOMINIO_TIPO_MOV + "): " + tipoCarreira);
+        "Tipo de carreira inválido (sem referência de carreira em " + DOMINIO_TIPO_MOV + "): " + tipoCarreira);
   }
 
   public void novaCarreira(String funcionarioId, CarreiraNovoDTO dto) {
