@@ -16,6 +16,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -141,7 +142,18 @@ public class ValidarContratoService {
               dadosContratuais.getSalario(), dadosContratuais.getMoeda(),
               dadosContratuais.getDataInicio(), dadosContratuais.getDataFim());
         }
+        // #7: os subsidios/encargos MANUAIS do contrato ANTERIOR (associados ao tiprel pai) NAO
+        // transitam para o novo contrato — encerram-se (E). Sem isto, o associarNovos apanhava-os
+        // (estado A) e o novo contrato herdava os subsidios/descontos do anterior. Os movimentos
+        // FIXOS do vinculo ficam protegidos (sao tratados pelo reconciliar).
+        fecharDefManuaisContratoAnterior(tiposRelacionamento, dadosContratuais.getTipoVinculoLaboralId());
         ordemServicoWriteService.criar(funcionario, tiposRelacionamento, dto.getTipoOrdemServico());
+      } else {
+        // Revert (validacao NAO): repoe o estado anterior ao REGISTO do novo contrato — o
+        // contrato/tiprel/carreira/mob/regime ANTERIORES voltam a ativos e o novo fica inativo.
+        // Regra nossa por logica (o DOSSIE so descreve "desvalidar -> estado=I"): sem isto o
+        // colaborador ficaria sem contrato atual (o anterior foi fechado no registo).
+        reverterRegistoNovoContrato(tiposRelacionamento);
       }
     }
 
@@ -153,10 +165,15 @@ public class ValidarContratoService {
       tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
     }
 
+    // Só os def vigentes deste tiprel (estado coincide com o do tiprel) — exclui E/I que ficaram
+    // associados (ex.: manuais substituídos pelo sync), tal como no getById/CarreiraReadService.
+    var estadoTiprel = tiposRelacionamento.getEstado();
     var remuneracoes = funcionarioRules
-        .getRemuneracoesAssociados(tiposRelacionamento.getId());
+        .getRemuneracoesAssociados(tiposRelacionamento.getId())
+        .stream().filter(r -> r.getEstado() == estadoTiprel).toList();
     var pagamentos = funcionarioRules
-        .getPagamentosDescontosAssociados(tiposRelacionamento.getId());
+        .getPagamentosDescontosAssociados(tiposRelacionamento.getId())
+        .stream().filter(p -> p.getEstado() == estadoTiprel).toList();
 
 
     return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento, pagamentos, remuneracoes));
@@ -174,6 +191,42 @@ public class ValidarContratoService {
       funcionario.getDefinicoesPagamentos().stream()
           .filter(p -> p != null && p.getEstado() == Estado.P)
           .forEach(p -> p.setEstado(estado));
+  }
+
+  /**
+   * #7 — encerra (E) os subsidios/encargos MANUAIS associados ao tiprel do contrato ANTERIOR (o
+   * tiprel pai). Nao devem transitar para o novo contrato; ficam apenas os do DTO do novo contrato
+   * + os movimentos FIXOS do vinculo (tratados pelo reconciliar). Os fixos ficam protegidos via
+   * tmsFixos para nao serem encerrados por engano.
+   */
+  private void fecharDefManuaisContratoAnterior(TiposRelacionamentoEntity novoTiprel, Long vinculoId) {
+    var antigo = novoTiprel.getTiprelId();
+    if (antigo == null) return;
+    var tmsFixosRem = reconciliacaoMovimentoVinculoService.tmsFixosDoVinculo(vinculoId, "REM");
+    var tmsFixosPag = reconciliacaoMovimentoVinculoService.tmsFixosDoVinculo(vinculoId, "PAG");
+    funcionarioRules.getRemuneracoesAssociadosAtivos(antigo.getId()).stream()
+        .filter(r -> r.getTmId() == null || !tmsFixosRem.contains(r.getTmId().getId()))
+        .forEach(r -> r.setEstado(Estado.E));
+    funcionarioRules.getPagamentosDescontosAssociadosAtivos(antigo.getId()).stream()
+        .filter(p -> p.getTmId() == null || !tmsFixosPag.contains(p.getTmId().getId()))
+        .forEach(p -> p.setEstado(Estado.E));
+  }
+
+  /**
+   * Revert do registo de Novo Contrato numa validacao NEGATIVA: o novo tiprel deixa de ser o atual
+   * e o contrato/tiprel/carreira/mobilidade/regime ANTERIORES (fechados no registo) voltam a ativos.
+   * Os registos do NOVO contrato ja foram para 'I' via mudarEstado.
+   */
+  private void reverterRegistoNovoContrato(TiposRelacionamentoEntity novoTiprel) {
+    novoTiprel.setEstActAdm(0);
+    var antigo = novoTiprel.getTiprelId();
+    if (antigo == null) return;
+    antigo.setEstActAdm(1);
+    antigo.setDataFim(null);
+    if (antigo.getContrVinculoId() != null) antigo.getContrVinculoId().setEstado(Estado.A);
+    if (antigo.getCarreiraId() != null) antigo.getCarreiraId().setDataFim(null);
+    if (antigo.getMobId() != null) antigo.getMobId().setDataFim(null);
+    if (antigo.getRegimeId() != null) antigo.getRegimeId().setDataFim(null);
   }
 
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {

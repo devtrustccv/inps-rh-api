@@ -43,7 +43,9 @@ public class ContratoReadService {
 
       predicates.add(cb.equal(root.get("funUuid"), idFuncionario));
 
-      // Mostra activos e pendentes; não mostra inactivos (I)
+      // Gestão Contratual é uma vista de histórico (tem "Ver Informação Inicial/Atual"): mostra
+      // activos (A), pendentes de validação (P) e também os inactivos/encerrados (I) — o contrato
+      // anterior substituído por um novo fica I e deve continuar visível no histórico.
       var estados = List.of(Estado.A.getCode(), Estado.P.getCode(), Estado.I.getCode());
       predicates.add(root.get("estado").in(estados));
 

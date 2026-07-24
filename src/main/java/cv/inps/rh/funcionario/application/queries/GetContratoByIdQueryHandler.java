@@ -46,8 +46,15 @@ public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoById
     if (tiposRelacionamento == null)
       throw IgrpResponseStatusException.notFound("Contrato com id '%s' não encontrado".formatted(contratoId));
 
-    var remuneracoes = funcionarioRules.getRemuneracoesAssociados(tiposRelacionamento.getId());
-    var pagamentos = funcionarioRules.getPagamentosDescontosAssociados(tiposRelacionamento.getId());
+    // Def SÓ deste contrato e vigentes: pela associação do tiprel, filtradas pelo estado do próprio
+    // tiprel (mesmo padrão do CarreiraReadService). Sem isto, def eliminados/inactivos (E/I) que
+    // continuam associados ao tiprel — ex.: manuais substituídos pelo sync na validação — apareciam
+    // no detalhe. O def não tem coluna de contrato; a associação + estado do tiprel é o vínculo.
+    var estadoTiprel = tiposRelacionamento.getEstado();
+    var remuneracoes = funcionarioRules.getRemuneracoesAssociados(tiposRelacionamento.getId())
+        .stream().filter(r -> r.getEstado() == estadoTiprel).toList();
+    var pagamentos = funcionarioRules.getPagamentosDescontosAssociados(tiposRelacionamento.getId())
+        .stream().filter(p -> p.getEstado() == estadoTiprel).toList();
 
     var dadosContratuaisResp = dadosContratuaisMapper
         .dadosContratuaisRespDTO(tiposRelacionamento, pagamentos, remuneracoes);

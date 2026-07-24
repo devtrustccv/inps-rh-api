@@ -51,12 +51,10 @@ public class NovoContratoService {
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
   private final EntityManager entityManager;
-  private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
-
-  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
 
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
   private final ColaboradorValidationRules colaboradorValidationRules;
+  private final ContratoEntityRepository contratoEntityRepository;
 
 
   @Transactional
@@ -68,7 +66,8 @@ public class NovoContratoService {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
-    validarDadosContratuaisService.validar(dadosContratuais);
+    // D1 (DOSSIÊ, Novo Contrato): a data de início não pode ser futura ("não maior que sysdate").
+    validarDadosContratuaisService.validar(dadosContratuais, true);
 
     var paramVinculo = entityManager.find(ParamVinculoEntity.class,
         dadosContratuais.getTipoVinculoLaboralId());
@@ -79,6 +78,15 @@ public class NovoContratoService {
           "funcionario possui validacao de contrato pendente");
     }
 
+    // D2 (DOSSIÊ, Novo Contrato): "o botão Novo Contrato só deve ficar visível caso NÃO exista um
+    // contrato ativo". Enforçado no backend via query: um contrato em vigor (estado A e ainda dentro
+    // do prazo) bloqueia o novo — a alteração de um contrato em vigor faz-se pela Renovação.
+    var hoje = LocalDate.now();
+    if (contratoEntityRepository.existeContratoEmVigor(funcionario, Estado.A, hoje)) {
+      throw IgrpResponseStatusException.badRequest(
+          "O funcionário já possui um contrato ativo. Para alterar o contrato em vigor, use a Renovação de Contrato.");
+    }
+
     boolean isPrimeiroContrato = funcionario.getContratos().isEmpty();
 
     if (isPrimeiroContrato) {
@@ -87,16 +95,20 @@ public class NovoContratoService {
 
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(tipoRelacionamentoAtual.getEstado());
+    // Fecha o tiprel anterior (DOSSIÊ, Novo Contrato 2.5): est_act_adm=0 e DATA_FIM = data de início
+    // do NOVO registo. Antes usava contratoAtual.getDataFim(), que podia ser null (contrato sem termo)
+    // e deixava o tiprel anterior por fechar.
     tipoRelacionamentoAtual.setEstActAdm(0);
+    tipoRelacionamentoAtual.setDataFim(dadosContratuais.getDataInicio());
 
     var contratoAtual = tipoRelacionamentoAtual.getContrVinculoId();
     contratoAtual.setEstado(Estado.I);
-    var fim = contratoAtual.getDataFim();
-    tipoRelacionamentoAtual.setDataFim(fim);
 
     var contratoNovo = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contratoNovo.setFunId(funcionario);
-    contratoNovo.setTipoSituacao("NOVO_CONTRATO");
+    // D3 (DOSSIÊ): num contrato NÃO-primeiro, TIPO_SITUACAO = CONTINUIDADE. O 1º contrato usa
+    // INICIO e é tratado em primeiroContrato().
+    contratoNovo.setTipoSituacao("CONTINUIDADE");
     // Regra (analista): a VERSAO do CONTRATO_VINCULO e SEMPRE 1 num novo contrato.
     // A renovacao NAO incrementa aqui — o incremento de versao vive no HISTORICO
     // (RH_T_CONTRATO_HISTORICO). Como versao=1, a constraint CK_CONTRATO_VERSAO_CONTRATO
@@ -137,6 +149,8 @@ public class NovoContratoService {
 
     var tiposRelacionamentoNovo = dadosContratuaisMapper.toRelacionamento(dadosContratuais, Estado.P);
     tiposRelacionamentoNovo.setFunId(funcionario);
+    // D3 (DOSSIÊ, Novo Contrato 2.5): TIPO_SITUACAO = CONTINUIDADE (não-primeiro contrato).
+    tiposRelacionamentoNovo.setTipoSituacao("CONTINUIDADE");
     // Caso de uso 1.2: TIPREL_ID = id do tipo de relacionamento anterior.
     tiposRelacionamentoNovo.setTiprelId(tipoRelacionamentoAtual);
     tiposRelacionamentoNovo.setContrVinculoId(contratoNovo);
@@ -227,151 +241,65 @@ public class NovoContratoService {
           validacaoEntityRepository.save(e);
         });
 
+    // Só os def vigentes deste tiprel (estado coincide com o do tiprel) — coerente com getById.
+    var estadoTiprel = tiposRelacionamentoNovo.getEstado();
     var remuneracoes = funcionarioRules
-        .getRemuneracoesAssociados(tiposRelacionamentoNovo.getId());
+        .getRemuneracoesAssociados(tiposRelacionamentoNovo.getId())
+        .stream().filter(r -> r.getEstado() == estadoTiprel).toList();
     var pagamentos = funcionarioRules
-        .getPagamentosDescontosAssociados(tiposRelacionamentoNovo.getId());
+        .getPagamentosDescontosAssociados(tiposRelacionamentoNovo.getId())
+        .stream().filter(p -> p.getEstado() == estadoTiprel).toList();
 
     return dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamentoNovo, pagamentos, remuneracoes);
   }
 
+  // D4 (DOSSIÊ, Novo Contrato): num contrato NÃO-primeiro encerram-se SEMPRE os registos ativos
+  // (DATA_FIM IS NULL) de carreira/mobilidade/regime — pondo DATA_FIM = data de início do novo
+  // contrato — e cria-se um novo registo (CONTINUIDADE). Não se reutiliza o do contrato anterior:
+  // assim o novo tiprel aponta para entidades PRÓPRIAS, o que mantém a separação e permite a
+  // reversão limpa na validação NÃO (reabrir os antigos, inativar os novos).
   private CarreiraEntity mudaCarreiraOuManter(
       CarreiraEntity carreiraAtual,
       DadosContratuaisReqDTO dc) {
 
-    if (!houveMudancaFuncionalCarreira(carreiraAtual, dc)) {
-      return carreiraAtual;
+    if (carreiraAtual != null && carreiraAtual.getDataFim() == null) {
+      carreiraAtual.setDataFim(dc.getDataInicio());
     }
-
-    carreiraAtual.setDataFim(LocalDate.now());
-    return carreiraMapper.toCarreira(dc, Estado.P);
+    var nova = carreiraMapper.toCarreira(dc, Estado.P);
+    nova.setTipoSituacao("CONTINUIDADE");
+    return nova;
   }
 
-  private boolean houveMudancaSalario(Long vinculoId, Long escalaoId, DadosContratuaisReqDTO dc, FuncionarioEntity funcionario) {
-
-    if (escalaoId != null && escalaoId > 0) {
-      if (!Objects.equals(escalaoId, dc.getEscalaoReferenciaId())) {
-        return true;
-      }
-    }
-
-    // se nao tiver escalao procuramos pelo vinculo associado ao tipo movimento, e depois vamos procurar na remuneracao
-    var vinculoTipoMovimentoREM = paramVinculoMovimentoEntityRepository
-        .findByVinculoId_IdAndTipo(vinculoId,
-            "REM");
-    if (CollectionUtils.isEmpty(vinculoTipoMovimentoREM))
-      return true;
-
-    var renumeracaoList = definicaoRemuneracaoEntityRepository
-        .findByFunIdAndTmIdAndEstado(funcionario, vinculoTipoMovimentoREM.getFirst().getTmId(), Estado.A);
-    if (renumeracaoList.isEmpty()) {
-      return true;
-    }
-
-    var renumeracao = renumeracaoList.getFirst();
-    return !Objects.equals(renumeracao.getValor(), dc.getSalario());
-  }
-
-  private boolean houveMudancaFuncionalCarreira(CarreiraEntity atual, DadosContratuaisReqDTO dc) {
-
-    if (atual == null) {
-      return true;
-    }
-
-    Long atualCargoId = atual.getCargoId() != null ? atual.getCargoId().getId() : null;
-    if (!Objects.equals(atualCargoId, dc.getCargoPosicaoId())) {
-      return true;
-    }
-
-    Long atualEscalaoId = atual.getEscalaoId() != null ? atual.getEscalaoId().getId() : null;
-    if (!Objects.equals(atualEscalaoId, dc.getEscalaoReferenciaId())) {
-      return true;
-    }
-
-    Long atualCategoriaId = atual.getCategoriaId() != null ? atual.getCategoriaId().getId() : null;
-    if (!Objects.equals(atualCategoriaId, dc.getCategoriaId())) {
-      return true;
-    }
-
-    Long atualCarreiraId = atual.getCarrPccsId() != null ? atual.getCarrPccsId().getId() : null;
-    return !Objects.equals(atualCarreiraId, dc.getCarreiraId());
-
-  }
-
+  // D4: encerra SEMPRE a mobilidade ativa (DATA_FIM = início do novo) e cria uma nova (CONTINUIDADE).
   private MobilidadeEntity mudaMobilidadeOuManter(MobilidadeEntity mobilidadeAtual, DadosContratuaisReqDTO dc,
                                                   FuncionarioEntity funcionario) {
 
-    // Sem mobilidade activa → cria nova (não há o que fechar)
-    if (mobilidadeAtual == null) {
-      MobilidadeEntity nova = mobilidadeMapper.toMobilidade(dc, Estado.P);
-      nova.setFunId(funcionario);
-      funcionario.getMobilidades().add(nova);
-      return nova;
+    if (mobilidadeAtual != null && mobilidadeAtual.getDataFim() == null) {
+      mobilidadeAtual.setDataFim(dc.getDataInicio());
     }
-
-    if (!houveMudancaFuncionalMobilidade(mobilidadeAtual, dc)) {
-      return mobilidadeAtual;
-    }
-    mobilidadeAtual.setDataFim(LocalDate.now());
 
     MobilidadeEntity nova = mobilidadeMapper.toMobilidade(dc, Estado.P);
     nova.setFunId(funcionario);
+    nova.setTipoSituacao("CONTINUIDADE");
     funcionario.getMobilidades().add(nova);
     return nova;
   }
 
 
-  private boolean houveMudancaFuncionalMobilidade(MobilidadeEntity atual, DadosContratuaisReqDTO dc) {
-
-    if (atual == null) {
-      return true;
-    }
-
-    Long atualLocalTrabId = atual.getLocalTrabId() != null ? atual.getLocalTrabId().getId() : null;
-    if (!Objects.equals(atualLocalTrabId, dc.getLocalTrabalhoId())) {
-      return true;
-    }
-
-    if (!Objects.equals(atual.getSecaoId() != null ? atual.getSecaoId().getId() : null, dc.getSeccaoId())) {
-      return true;
-    }
-
-    if (!Objects.equals(atual.getInstidId() != null ? atual.getInstidId().getId() : null, dc.getDirecaoId())) {
-      return true;
-    }
-
-    return false;
-  }
-
+  // D4: encerra SEMPRE o regime ativo (DATA_FIM = início do novo) e cria um novo (CONTINUIDADE).
   private RegimeTrabalhoEntity mudaRegimeOuManter(RegimeTrabalhoEntity regimeAtual, DadosContratuaisReqDTO dc,
                                                   FuncionarioEntity funcionario) {
-    // Sem regime activo → cria novo
-    if (regimeAtual == null) {
-      var nova = regimeTrabalhoMapper.toRegime(dc, Estado.P);
-      if (nova != null) {
-        nova.setFunId(funcionario);
-        funcionario.getRegimesTrabalhos().add(nova);
-      }
-      return nova;
+    if (regimeAtual != null && regimeAtual.getDataFim() == null) {
+      regimeAtual.setDataFim(dc.getDataInicio());
     }
-    // Sem alteração de regime → reutiliza o activo (mantém-se em vigor)
-    if (!houveMudancaRegime(regimeAtual, dc)) {
-      return regimeAtual;
-    }
-    // Alteração → fecha o actual e cria novo
-    regimeAtual.setDataFim(LocalDate.now());
     var nova = regimeTrabalhoMapper.toRegime(dc, Estado.P);
-    nova.setFunId(funcionario);
-    funcionario.getRegimesTrabalhos().add(nova);
+    if (nova != null) {
+      nova.setFunId(funcionario);
+      nova.setTipoSituacao("CONTINUIDADE");
+      funcionario.getRegimesTrabalhos().add(nova);
+    }
     return nova;
   }
-
-  private boolean houveMudancaRegime(RegimeTrabalhoEntity atual, DadosContratuaisReqDTO dc) {
-    var atualTipo = atual.getTipoRegime() != null ? atual.getTipoRegime().trim() : null;
-    var novoTipo = dc.getRegimeTrabalho() != null ? dc.getRegimeTrabalho().trim() : null;
-    return !Objects.equals(atualTipo, novoTipo);
-  }
-
 
   private DadosContratuaisRespDTO primeiroContrato(FuncionarioEntity funcionario, DadosContratuaisReqDTO dadosContratuais) {
 
@@ -479,10 +407,14 @@ public class NovoContratoService {
           validacaoEntityRepository.save(e);
         });
 
+    // Só os def vigentes deste tiprel (estado coincide com o do tiprel) — coerente com getById.
+    var estadoTiprel = tiposRelacionamento.getEstado();
     var remuneracoes = funcionarioRules
-        .getRemuneracoesAssociados(tiposRelacionamento.getId());
+        .getRemuneracoesAssociados(tiposRelacionamento.getId())
+        .stream().filter(r -> r.getEstado() == estadoTiprel).toList();
     var pagamentos = funcionarioRules
-        .getPagamentosDescontosAssociados(tiposRelacionamento.getId());
+        .getPagamentosDescontosAssociados(tiposRelacionamento.getId())
+        .stream().filter(p -> p.getEstado() == estadoTiprel).toList();
 
     return dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento, pagamentos, remuneracoes);
 
