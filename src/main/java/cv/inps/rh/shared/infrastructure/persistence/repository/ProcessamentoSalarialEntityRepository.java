@@ -18,6 +18,6 @@ public interface ProcessamentoSalarialEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.badRequest("ProcessamentoSalarialEntity not found for id: " + id));
   }
 
-  List<ProcessamentoSalarialEntity> findAllByCcIdIn(List<Long> ccId);
+  List<ProcessamentoSalarialEntity> findAllByIdInAndEstadoIn(List<Long> ids, List<String> status);
 }
 

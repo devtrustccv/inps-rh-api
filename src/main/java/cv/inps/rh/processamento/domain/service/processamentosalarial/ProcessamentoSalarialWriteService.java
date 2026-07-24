@@ -128,6 +128,28 @@ public class ProcessamentoSalarialWriteService {
     processamentoSalarialEntityRepository.saveAll(processes);
   }
 
+  public void retroceder(List<Long> ids) {
+
+    var allowedStatusToBeRollback = List.of(
+        StatusProcessamento.VALIDADO_PROVISORIO.name(),
+        StatusProcessamento.VALIDADO_DEFINITIVO.name()
+    );
+
+    var processes = processamentoSalarialEntityRepository.findAllByIdInAndEstadoIn(ids, allowedStatusToBeRollback);
+    if (processes.size() != ids.size())
+      throw IgrpResponseStatusException.badRequest("Processos a serem retrocedidos devem estar nos estados de validaçao provisório ou definitivo");
+
+    processes.forEach(process -> {
+      var status = switch (StatusProcessamento.valueOf(process.getEstado())) {
+        case VALIDADO_PROVISORIO -> StatusProcessamento.PROCESSADO.name();
+        case VALIDADO_DEFINITIVO -> StatusProcessamento.VALIDADO_PROVISORIO.name();
+        default ->
+            throw new IllegalArgumentException("Invalid state for salary processing rollback!");
+      };
+      process.setEstado(status);
+    });
+  }
+
   public void cabimentar(List<Long> ids) {
 
     var illegalProcesses = new ArrayList<Long>();

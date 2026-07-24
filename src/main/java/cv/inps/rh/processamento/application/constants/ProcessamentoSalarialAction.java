@@ -12,7 +12,8 @@ public enum ProcessamentoSalarialAction implements IgrpEnum<String> {
   VALIDAR("PROV", "VALIDAR"),
   CABIMENTAR("VALIDADO", "CABIMENTAR"),
   ELIMINAR_CABIMENTO("DEV", "ELIMINAR_CABIMENTO"),
-  AUTORIZAR("CABIMENTADO", "AUTORIZAR");
+  AUTORIZAR("CABIMENTADO", "AUTORIZAR"),
+  RETROCEDER("RETROCEDER", "RETROCEDER");
 
   private final String code;
   private final String description;
