@@ -22,4 +22,12 @@ public interface ProcessamentoFuncionarioRepository extends
    * (RH_V_CONTRATO/RH_V_RELACAO_LABORAL): EXISTS em RH_T_PROC_FUNCIONARIOS por TIPREL_ID.
    */
   boolean existsByTiprel_Id(Long tiprelId);
+
+  /**
+   * Já existe processamento em folha do tiprel cujo período de referência começa dentro do intervalo
+   * (mês). Usado na substituição (caso de uso, Caso 4.1/4.2): se o 1º mês já foi processado, a
+   * diferença desse mês junta-se ao mês seguinte em vez de gerar um DEF_REMUNERACOES próprio.
+   */
+  boolean existsByTiprel_IdAndDataReferenciaDeBetween(
+      Long tiprelId, java.time.LocalDate de, java.time.LocalDate ate);
 }

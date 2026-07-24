@@ -24,6 +24,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEn
 import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoMovimentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoDetalheEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoRelRemPagEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
@@ -31,6 +32,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoEntit
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -56,6 +58,12 @@ public class SubstituicaoWriteService {
   private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
   private final ICalcularSubstituicaoRepository calcularSubstituicaoRepository;
   private final SubstituicaoDetalheEntityRepository substituicaoDetalheEntityRepository;
+  private final ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
+
+  /** Caso de uso: mês completo do período conta sempre como 30 dias (Fev 28 / Ago 31 → 30). */
+  private static final int DIAS_MES_COMPLETO = 30;
+  /** Caso de uso: só se cria DEF_REMUNERACOES se o total de dias da substituição for ≥ 15. */
+  private static final int LIMIAR_DIAS_DEF = 15;
 
   @Transactional
   public SubstituicaoDTO registrar(RegistarSubstituicaoCommand command) {
@@ -317,48 +325,77 @@ public class SubstituicaoWriteService {
     // grava DEF_REMUNERACOES, mas o RH_T_SUBSTITUICAO_DETALHE (detalhe mensal) é sempre criado.
     var tm = tipoMovimentoSubstituicao(substitutoTiprel);
 
+    // 1) Repartição por mês: DETALHE por mês (sempre) + normalização "mês completo = 30 dias" +
+    // total de dias. O valor de cada mês vem do proc CALCULAR_SUBSTITUICAO (escala linear em nrDias).
+    var meses = new ArrayList<MesSubstituicao>();
+    int totalDias = 0;
     YearMonth mesAtual = YearMonth.from(dataInicio);
     YearMonth mesFim = YearMonth.from(dataFim);
 
     while (!mesAtual.isAfter(mesFim)) {
       LocalDate diaInicio = dataInicio.isAfter(mesAtual.atDay(1)) ? dataInicio : mesAtual.atDay(1);
       LocalDate diaFim = dataFim.isBefore(mesAtual.atEndOfMonth()) ? dataFim : mesAtual.atEndOfMonth();
-      int nrDias = (int) (diaFim.toEpochDay() - diaInicio.toEpochDay() + 1);
+      // Mês INTEIRAMENTE dentro do período conta 30 dias (Fev 28 / Ago 31 → 30); parcial usa dias reais.
+      boolean mesCompleto = diaInicio.equals(mesAtual.atDay(1)) && diaFim.equals(mesAtual.atEndOfMonth());
+      int nrDias = mesCompleto ? DIAS_MES_COMPLETO : (int) (diaFim.toEpochDay() - diaInicio.toEpochDay() + 1);
 
-      // proc: P_VALOR_TIPREL_DE = substituto, P_VALOR_TIPREL_PARA = substituído
       BigDecimal valorReceber = calcularSubstituicaoRepository
           .calcularValorReceber(nrDias, salarioSubstituto, salarioSubstituido);
 
-      // Caso de uso: RH_T_SUBSTITUICAO_DETALHE — um registo por mês do período.
       var detalhe = new SubstituicaoDetalheEntity();
       detalhe.setSubstituicaoId(substituicao);
       detalhe.setMesAno(mesAtual.format(DateTimeFormatter.ofPattern("yyyyMM")));
       detalhe.setNrDias(nrDias);
       detalhe.setValorDoSubstituto(salarioSubstituto);
       detalhe.setValorDoSubstituido(salarioSubstituido);
-      // Diferença salarial do mês (proporcional aos dias) = valor a favor do substituto (proc).
       detalhe.setValorDiferenca(valorReceber);
       detalhe.setEstado(Estado.A);
       substituicaoDetalheEntityRepository.save(detalhe);
 
-      // Diferença salarial em DEF_REMUNERACOES (+ TIPREL_REM_PAG), OBS='Substituição' — só quando o
-      // vínculo tem REM_SUBSTITUICAO parametrizado e há valor a favor do substituto.
-      if (tm != null && valorReceber != null && valorReceber.signum() > 0) {
-        var defRem = definicaoRemuneracaoMapper.createRenumeracao(
-            valorReceber, tm, diaInicio, diaFim, funcionarioSubstituto, substitutoTiprel.getMoeda());
-        defRem.setObs("Substituição");
-        defRem.setEstado(Estado.A);
-        definicaoRemuneracaoEntityRepository.save(defRem);
-
-        var link = new TipoRelRemPagEntity();
-        link.setTiprelId(substitutoTiprel);
-        link.setRemId(defRem);
-        tipoRelRemPagEntityRepository.save(link);
-      }
-
+      meses.add(new MesSubstituicao(mesAtual, diaInicio, diaFim, valorReceber));
+      totalDias += nrDias;
       mesAtual = mesAtual.plusMonths(1);
     }
+
+    // 2) Limiar 15 dias (caso de uso, Caso 2): só se cria DEF_REMUNERACOES se o TOTAL de dias ≥ 15.
+    // Abaixo disso o registo só fica em SUBSTITUICAO + DETALHE + VALIDACAO, sem valor a processar.
+    if (totalDias < LIMIAR_DIAS_DEF) return;
+    if (tm == null) return; // vínculo sem REM_SUBSTITUICAO parametrizado
+
+    // 3) DEF_REMUNERACOES por mês (+ TIPREL_REM_PAG). Merge (Caso 4.1/4.2): um mês JÁ processado em
+    // folha não gera def próprio — a sua diferença arrasta para o mês seguinte (o def desse mês fica
+    // com o valor acumulado e as datas do mês seguinte).
+    BigDecimal arrastar = BigDecimal.ZERO;
+    for (var m : meses) {
+      BigDecimal valorMes = m.valor() != null ? m.valor() : BigDecimal.ZERO;
+
+      boolean mesJaProcessado = processamentoFuncionarioRepository
+          .existsByTiprel_IdAndDataReferenciaDeBetween(
+              substitutoTiprel.getId(), m.mes().atDay(1), m.mes().atEndOfMonth());
+      if (mesJaProcessado) {
+        arrastar = arrastar.add(valorMes); // junta ao mês seguinte
+        continue;
+      }
+
+      BigDecimal valorDef = valorMes.add(arrastar);
+      arrastar = BigDecimal.ZERO;
+      if (valorDef.signum() <= 0) continue;
+
+      var defRem = definicaoRemuneracaoMapper.createRenumeracao(
+          valorDef, tm, m.diaInicio(), m.diaFim(), funcionarioSubstituto, substitutoTiprel.getMoeda());
+      defRem.setObs("Substituição");
+      defRem.setEstado(Estado.A);
+      definicaoRemuneracaoEntityRepository.save(defRem);
+
+      var link = new TipoRelRemPagEntity();
+      link.setTiprelId(substitutoTiprel);
+      link.setRemId(defRem);
+      tipoRelRemPagEntityRepository.save(link);
+    }
   }
+
+  /** Uma fatia mensal da substituição: mês, datas efetivas no mês e o valor a favor do substituto. */
+  private record MesSubstituicao(YearMonth mes, LocalDate diaInicio, LocalDate diaFim, BigDecimal valor) {}
 
   /**
    * Tipo de Movimento parametrizado no vínculo do substituto para a diferença salarial de
