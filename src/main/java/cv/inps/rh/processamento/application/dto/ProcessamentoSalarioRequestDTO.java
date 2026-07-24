@@ -11,32 +11,27 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-
 @IgrpDTO
-public class ProcessamentoSalarioRequestDTO  {
+public class ProcessamentoSalarioRequestDTO {
 
   @NotNull(message = "The field <dataInicio> is required")
+  private LocalDate dataInicio;
 
-  private LocalDate dataInicio ;
   @NotNull(message = "The field <dataFim> is required")
+  private LocalDate dataFim;
 
-  private LocalDate dataFim ;
   @NotBlank(message = "The field <tipo> is required")
+  private String tipo;
 
-  private String tipo ;
+  private List<Long> direccaoId = new ArrayList<>();
 
+  private String observacao;
 
-  private Long direccaoId ;
-
-
-  private String observacao ;
-
-
-  private Long relacionamentoId ;
-
+  private Long relacionamentoId;
 }
