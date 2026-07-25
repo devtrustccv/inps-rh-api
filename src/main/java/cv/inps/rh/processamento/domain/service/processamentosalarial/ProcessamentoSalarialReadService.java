@@ -28,6 +28,7 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Clob;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -64,9 +65,14 @@ public class ProcessamentoSalarialReadService {
   }
 
   public ResumoProcessamentoDTO getResumoProcessamentoSalarial(List<Long> procIds) {
+
+    var processedIds = procIds.stream().filter(Objects::nonNull).distinct().toList();
+
+    var isOne = processedIds.size() == 1;
+
     return new ResumoProcessamentoDTO(
-        procSalCcRemunEntityRepository.getRemuneracoes(procIds),
-        procSalCcPagEntityRepository.getPagamentos(procIds)
+        isOne ? procSalCcRemunEntityRepository.getRemuneracoesForOne(processedIds.getFirst()) : procSalCcRemunEntityRepository.getRemuneracoes(processedIds),
+        isOne ? procSalCcPagEntityRepository.getPagamentosForOne(processedIds.getFirst()) : procSalCcPagEntityRepository.getPagamentos(processedIds)
     );
   }
 
