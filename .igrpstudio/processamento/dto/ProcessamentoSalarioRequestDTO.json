@@ -1,14 +1,11 @@
 {
-  "type": "dto",
-  "module": "processamento",
   "name": "ProcessamentoSalarioRequest",
   "template": "classic",
-  "enableCustonValidation": false,
   "attributes": [
     {
       "name": "dataInicio",
-      "objectType": "java",
       "type": "date",
+      "objectType": "java",
       "required": true,
       "before": false,
       "after": false,
@@ -19,8 +16,8 @@
     },
     {
       "name": "dataFim",
-      "objectType": "java",
       "type": "date",
+      "objectType": "java",
       "required": true,
       "before": false,
       "after": false,
@@ -31,8 +28,8 @@
     },
     {
       "name": "tipo",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": true,
       "before": false,
       "after": false,
@@ -43,20 +40,21 @@
     },
     {
       "name": "direccaoId",
-      "objectType": "java",
       "type": "long",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
       "positive": false,
       "isEmail": false,
       "isUrl": false,
-      "primaryKey": false
+      "primaryKey": false,
+      "collectionType": "list"
     },
     {
       "name": "observacao",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -67,8 +65,8 @@
     },
     {
       "name": "relacionamentoId",
-      "objectType": "java",
       "type": "long",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -78,5 +76,9 @@
       "primaryKey": false
     }
   ],
+  "type": "dto",
+  "module": "processamento",
+  "enableCustonValidation": false,
+  "readOnly": false,
   "id": "4zer1jwv7v"
 }

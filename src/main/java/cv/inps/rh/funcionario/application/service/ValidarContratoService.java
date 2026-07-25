@@ -16,6 +16,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Service
@@ -91,8 +93,12 @@ public class ValidarContratoService {
     var regime = tiposRelacionamento.getRegimeId();
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
 
-    // Sincronizacao de subsidios/encargos so faz sentido para vinculos COM salario.
-    if (Objects.equals(1, paramVinculo.getFlgSalario())) {
+    // Sincronizacao de subsidios/encargos so faz sentido para vinculos COM salario — e NUNCA numa
+    // REJEICAO (NAO): o sync elimina os def existentes que nao vem no DTO, o que numa rejeicao
+    // apagaria os def do contrato ANTERIOR (que o revert vai reativar). No NAO nao se mexe nos def:
+    // os do novo contrato (P) vao a I pelo transicionarManuaisPendentes.
+    if (Objects.equals(1, paramVinculo.getFlgSalario())
+        && !EstadoValidacao.NAO.equals(dto.getValidar())) {
       colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
       colaboradorValidationRules.validarEncargosDescontosDuplicados(dadosContratuais.getEncargosDescontos());
 
@@ -135,6 +141,12 @@ public class ValidarContratoService {
       // reconciliar (que os cria ja como A); aqui so se tocam os que estao pendentes.
       transicionarManuaisPendentes(funcionario, estado);
       if (estado == Estado.A) {
+        // #7 — Inativa (I) TODOS os def do contrato ANTERIOR (associados ao tiprel pai) ANTES do
+        // reconciliar. Sem isto: (a) o associarNovos herdava os manuais antigos; (b) o reconciliar
+        // REUTILIZAVA os fixos partilhados (mesmo tm) do contrato anterior, que ficavam ativos e
+        // associados aos DOIS contratos. Ao inativa-los primeiro, o contrato anterior fica encerrado
+        // e o reconciliar cria fixos FRESCOS para o novo contrato -> separacao limpa por contrato.
+        inativarDefContratoAnterior(tiposRelacionamento);
         // reconciliar os movimentos fixos do vinculo — SO na validacao positiva e SO com salario
         if (Objects.equals(1, paramVinculo.getFlgSalario())) {
           reconciliacaoMovimentoVinculoService.reconciliar(funcionario, contrato,
@@ -142,6 +154,12 @@ public class ValidarContratoService {
               dadosContratuais.getDataInicio(), dadosContratuais.getDataFim());
         }
         ordemServicoWriteService.criar(funcionario, tiposRelacionamento, dto.getTipoOrdemServico());
+      } else {
+        // Revert (validacao NAO): repoe o estado anterior ao REGISTO do novo contrato — o
+        // contrato/tiprel/carreira/mob/regime ANTERIORES voltam a ativos e o novo fica inativo.
+        // Regra nossa por logica (o DOSSIE so descreve "desvalidar -> estado=I"): sem isto o
+        // colaborador ficaria sem contrato atual (o anterior foi fechado no registo).
+        reverterRegistoNovoContrato(tiposRelacionamento);
       }
     }
 
@@ -153,10 +171,15 @@ public class ValidarContratoService {
       tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
     }
 
+    // Só os def vigentes deste tiprel (estado coincide com o do tiprel) — exclui E/I que ficaram
+    // associados (ex.: manuais substituídos pelo sync), tal como no getById/CarreiraReadService.
+    var estadoTiprel = tiposRelacionamento.getEstado();
     var remuneracoes = funcionarioRules
-        .getRemuneracoesAssociados(tiposRelacionamento.getId());
+        .getRemuneracoesAssociados(tiposRelacionamento.getId())
+        .stream().filter(r -> r.getEstado() == estadoTiprel).toList();
     var pagamentos = funcionarioRules
-        .getPagamentosDescontosAssociados(tiposRelacionamento.getId());
+        .getPagamentosDescontosAssociados(tiposRelacionamento.getId())
+        .stream().filter(p -> p.getEstado() == estadoTiprel).toList();
 
 
     return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento, pagamentos, remuneracoes));
@@ -174,6 +197,54 @@ public class ValidarContratoService {
       funcionario.getDefinicoesPagamentos().stream()
           .filter(p -> p != null && p.getEstado() == Estado.P)
           .forEach(p -> p.setEstado(estado));
+  }
+
+  /**
+   * Inativa (I) TODOS os def (subsidios/encargos manuais + fixos) associados ao tiprel do contrato
+   * ANTERIOR (o tiprel pai). Chamado ANTES do reconciliar na validacao positiva de um novo contrato:
+   * o contrato anterior fica totalmente encerrado, e o reconciliar cria fixos FRESCOS para o novo
+   * contrato em vez de reutilizar os do anterior (que de outra forma ficavam ativos e partilhados
+   * entre os dois contratos).
+   */
+  private void inativarDefContratoAnterior(TiposRelacionamentoEntity novoTiprel) {
+    var antigo = novoTiprel.getTiprelId();
+    if (antigo == null) return;
+    funcionarioRules.getRemuneracoesAssociadosAtivos(antigo.getId())
+        .forEach(r -> r.setEstado(Estado.I));
+    funcionarioRules.getPagamentosDescontosAssociadosAtivos(antigo.getId())
+        .forEach(p -> p.setEstado(Estado.I));
+  }
+
+  /**
+   * Revert do registo de Novo Contrato numa validacao NEGATIVA: o novo tiprel deixa de ser o atual
+   * e o contrato/tiprel/carreira/mobilidade/regime ANTERIORES (fechados no registo) voltam a ativos.
+   * Os registos do NOVO contrato ja foram para 'I' via mudarEstado.
+   *
+   * <p>So se REATIVA o contrato anterior se ele ainda estiver EM VIGOR (dentro do prazo) — mesma
+   * logica do guard D2 (existeContratoEmVigor). Se ja tinha terminado, a rejeicao do novo contrato
+   * NAO o ressuscita: o colaborador fica sem relacao ativa (correto, o anterior expirou).
+   */
+  private void reverterRegistoNovoContrato(TiposRelacionamentoEntity novoTiprel) {
+    novoTiprel.setEstActAdm(0);
+    var antigo = novoTiprel.getTiprelId();
+    if (antigo == null) return;
+    var contratoAntigo = antigo.getContrVinculoId();
+    if (contratoAntigo == null) return;
+
+    var hoje = LocalDate.now();
+    boolean emVigor = contratoAntigo.getDataFim() == null
+        || !contratoAntigo.getDataFim().isBefore(hoje);
+    if (!emVigor) return;
+
+    // data_fim reposto = data_fim do contrato anterior (o registo tinha-o sobrescrito com a data de
+    // inicio do novo); nunca null, para nao perder o termo do contrato.
+    var df = contratoAntigo.getDataFim();
+    antigo.setEstActAdm(1);
+    antigo.setDataFim(df);
+    contratoAntigo.setEstado(Estado.A);
+    if (antigo.getCarreiraId() != null) antigo.getCarreiraId().setDataFim(df);
+    if (antigo.getMobId() != null) antigo.getMobId().setDataFim(df);
+    if (antigo.getRegimeId() != null) antigo.getRegimeId().setDataFim(df);
   }
 
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {

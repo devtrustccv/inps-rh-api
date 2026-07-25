@@ -59,6 +59,21 @@ public interface ContratoEntityRepository extends
 
   boolean existsByFunIdAndEstado(FuncionarioEntity fun, Estado estado);
 
+  /**
+   * Existe um contrato "em vigor" do funcionário — estado A e ainda dentro do prazo (sem data de fim
+   * ou com data de fim ainda não ultrapassada). Usado no guard do Novo Contrato (DOSSIÊ: "o botão só
+   * fica visível caso NÃO exista um contrato ativo"): a alteração de um contrato em vigor é feita
+   * pela Renovação de Contrato, não por um novo contrato.
+   */
+  @Query("""
+      SELECT COUNT(c) > 0 FROM ContratoEntity c
+      WHERE c.funId = :fun AND c.estado = :estado
+        AND (c.dataFim IS NULL OR c.dataFim >= :hoje)
+      """)
+  boolean existeContratoEmVigor(@Param("fun") FuncionarioEntity fun,
+                                @Param("estado") Estado estado,
+                                @Param("hoje") LocalDate hoje);
+
 
   @Query("""
        select c

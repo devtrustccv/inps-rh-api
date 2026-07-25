@@ -19,7 +19,12 @@ import java.time.LocalDate;
 @Immutable
 @Table(name = "RH_V_PROC_SAL_CC_REMUN")
 public class ProcSalCcRemunEntity {
+
   @Id
+  @NotNull
+  @Column(name = "REGISTO_ID", nullable = false)
+  private Long registoId;
+
   @Column(name = "CC_ID")
   private Long ccId;
 
@@ -129,10 +134,6 @@ public class ProcSalCcRemunEntity {
   @NotNull
   @Column(name = "PROC_FUNC_ID", nullable = false)
   private Long procFuncId;
-
-  @NotNull
-  @Column(name = "REGISTO_ID", nullable = false)
-  private Long registoId;
 
   @Size(max = 3)
   @Column(name = "FAVOR_ESTADO", length = 3)

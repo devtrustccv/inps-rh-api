@@ -37,6 +37,13 @@
         "CABIMENTADO",
         "AUTORIZAR"
       ]
+    },
+    {
+      "name": "RETROCEDER",
+      "attributes": [
+        "RETROCEDER",
+        "RETROCEDER"
+      ]
     }
   ],
   "attributes": [

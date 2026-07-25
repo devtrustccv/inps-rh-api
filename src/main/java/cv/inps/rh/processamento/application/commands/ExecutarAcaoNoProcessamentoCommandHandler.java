@@ -42,6 +42,7 @@ public class ExecutarAcaoNoProcessamentoCommandHandler implements CommandHandler
       case CABIMENTAR -> service.cabimentar(ids);
       case ELIMINAR_CABIMENTO -> service.eliminarCabimento(ids);
       case AUTORIZAR -> service.autorizar(ids);
+      case RETROCEDER -> service.retroceder(ids);
       default -> throw new IllegalArgumentException("Invalid option");
     }
 
