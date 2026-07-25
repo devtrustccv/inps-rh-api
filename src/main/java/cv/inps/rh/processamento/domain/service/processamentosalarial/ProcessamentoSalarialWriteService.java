@@ -8,7 +8,6 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ProcessamentoSalarial
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import oracle.jdbc.OracleCallableStatement;
 import oracle.jdbc.OracleConnection;
@@ -16,10 +15,6 @@ import oracle.jdbc.OracleTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.SqlOutParameter;
-import org.springframework.jdbc.core.SqlParameter;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,14 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
 import java.security.Principal;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static java.util.Optional.ofNullable;
 
 @Service
 @RequiredArgsConstructor
@@ -209,60 +203,61 @@ public class ProcessamentoSalarialWriteService {
   public String processarSalario(ProcessamentoSalarioRequestDTO request) {
 
     var formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-    var startDate = Objects.nonNull(request.getDataInicio()) ? request.getDataInicio().format(formatter) : null;
-    var endDate = Objects.nonNull(request.getDataFim()) ? request.getDataInicio().format(formatter) : null;
 
-    var result = callProcedure(Processamento.PROCEDURE_PROCESSAR.getName())
-        .declareParameters(
-            new SqlParameter("p_dt_inicio", Types.VARCHAR),
-            new SqlParameter("p_dt_fim", Types.VARCHAR),
-            new SqlParameter("p_cc_id", Types.NUMERIC),
-            new SqlParameter("p_tiprel_id", Types.NUMERIC),
-            new SqlParameter("p_tipo", Types.VARCHAR),
-            new SqlParameter("P_user_name", Types.VARCHAR),
-            new SqlParameter("p_user_id", Types.NUMERIC),
-            new SqlOutParameter("p_msg", Types.VARCHAR)
-        )
-        .execute(
-            new MapSqlParameterSource()
-                .addValue("p_dt_inicio", startDate)
-                .addValue("p_dt_fim", endDate)
-                .addValue("p_cc_id",
-                    request.getDireccaoId()
-                        .stream()
-                        .map(Objects::toString)
-                        .collect(Collectors.joining(","))
-                )
-                .addValue("p_tiprel_id", request.getRelacionamentoId())
-                .addValue("p_tipo", request.getTipo())
-                .addValue("P_user_name", ofNullable(SecurityContextHolder.getContext().getAuthentication())
-                    .map(Principal::getName)
-                    .orElse("System"))
-                .addValue("p_user_id", 0)
-        );
+    var startDate = request.getDataInicio() != null
+        ? request.getDataInicio().format(formatter)
+        : null;
 
-    return (String) result.get("p_msg");
-  }
+    var endDate = request.getDataFim() != null
+        ? request.getDataFim().format(formatter)
+        : null;
 
-  private SimpleJdbcCall callProcedure(String procedureName) {
-    return new SimpleJdbcCall(dataSource)
-        .withoutProcedureColumnMetaDataAccess()
-        .withCatalogName(Processamento.PACKAGE.getName())
-        .withProcedureName(procedureName);
-  }
+    var ccIds = request.getDireccaoId()
+        .stream()
+        .map(String::valueOf)
+        .toArray(String[]::new);
 
-  @Getter
-  private enum Processamento {
+    var procedure = "{ call RH_PROCESSAMENTO_SALARIAL_DB.PROCESSAR(?, ?, ?, ?, ?, ?, ?, ?) }";
 
-    PACKAGE("RH_PROCESSAMENTO_SALARIAL_DB"),
-    PROCEDURE_ELIMINAR_CAB("EliminarCab"),
-    ELIMINAR_PROCESSAMENTO("ELIMINAR_PROCESSAMENTO"),
-    PROCEDURE_PROCESSAR("PROCESSAR");
+    try (var connection = dataSource.getConnection()) {
 
-    private final String name;
+      var stmt = connection.prepareCall(procedure).unwrap(OracleCallableStatement.class);
+      stmt.setString(1, startDate);
+      stmt.setString(2, endDate);
+      stmt.setPlsqlIndexTable(
+          3,
+          ccIds,
+          ccIds.length,
+          ccIds.length,
+          OracleTypes.VARCHAR,
+          32767
+      );
 
-    Processamento(String name) {
-      this.name = name;
+      if (request.getRelacionamentoId() == null) {
+        stmt.setNull(4, Types.NUMERIC);
+      } else {
+        stmt.setLong(4, request.getRelacionamentoId());
+      }
+
+      stmt.setString(5, request.getTipo());
+
+      stmt.setString(
+          6,
+          Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+              .map(Principal::getName)
+              .orElse("System")
+      );
+
+      stmt.setInt(7, 0);
+
+      stmt.registerOutParameter(8, Types.VARCHAR);
+
+      stmt.execute();
+
+      return stmt.getString(8);
+
+    } catch (SQLException ex) {
+      throw new RuntimeException("Error executing PROCESSAR", ex);
     }
   }
 
