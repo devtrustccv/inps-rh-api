@@ -109,13 +109,19 @@ public class FaltaServiceWrite {
     var datas = expandirDias(req.getDataInicio(), req.getDataFim());
     int totalRegistos = 0;
 
+    // RH_T_FALTA.HORAS_AUSENCIA e RH_ASSIDUIDADE_SINTESE_DIARIA.HORAS_AUSENCIA são
+    // INTERVAL DAY(0) TO SECOND(0) — só admitem 0-23h por registo (um por dia).
+    // O total informado no pedido cobre o período inteiro, por isso é dividido
+    // pelo nº de dias antes de gravar cada registo diário.
+    String horasAusenciaPorDia = dividirPorDias(req.getTotalDeHorasAusentes(), datas.size());
+
     for (var dia : datas) {
       var sintese = createSinteseDiaria(funcionario, dia,
-          req.getTotalDeHorasAusentes(), deveJustificar);
+          horasAusenciaPorDia, deveJustificar);
       sinteseRepository.save(sintese);
 
       if (deveJustificar) {
-        var falta = createFaltaDoDia(req, pedido, dia, tipoRelAtual, sintese);
+        var falta = createFaltaDoDia(req, pedido, dia, tipoRelAtual, sintese, horasAusenciaPorDia);
         faltaRepository.save(falta);
       }
 
@@ -283,13 +289,14 @@ public class FaltaServiceWrite {
       PedidoEntity pedido,
       LocalDate dia,
       TiposRelacionamentoEntity tipoRel,
-      AssiduidadeSinteseDiarioEntity sintese) {
+      AssiduidadeSinteseDiarioEntity sintese,
+      String horasAusenciaPorDia) {
 
     FaltaEntity falta = new FaltaEntity();
     falta.setPedidoId(pedido);
     falta.setTiprelId(tipoRel);
     falta.setDescricaoMotivo(req.getMotivoAusencia());
-    falta.setHorasAusencia(parseInterval(req.getTotalDeHorasAusentes()));
+    falta.setHorasAusencia(parseInterval(horasAusenciaPorDia));
 
     falta.setDataInicio(LocalDateTime.of(dia, LocalTime.MIN));
     falta.setDataFim(LocalDateTime.of(dia, LocalTime.of(23, 59, 59)));
@@ -328,7 +335,7 @@ public class FaltaServiceWrite {
         ? jornada.getFirst().getDiaria()
         : "08:00";
     int totalMinutosDia = parseMin(diaria);
-    int ausenciaMinutos = parseMin(req.getTotalDeHorasAusentes());
+    int ausenciaMinutos = parseMin(horasAusenciaPorDia);
     java.math.BigDecimal salarioDiario = tipoRel.getSalario() != null ? tipoRel.getSalario()
         : java.math.BigDecimal.ZERO;
     java.math.BigDecimal ratio = totalMinutosDia > 0
@@ -398,10 +405,24 @@ public class FaltaServiceWrite {
       String[] parts = hhmm.split(":");
       int hours = Integer.parseInt(parts[0]);
       int minutes = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+      // RH_T_FALTA/RH_ASSIDUIDADE_SINTESE_DIARIA.HORAS_AUSENCIA é
+      // INTERVAL DAY(0) TO SECOND(0): não há campo de dias, logo horas > 23
+      // não é representável (Oracle rejeitaria com ORA-01850).
+      if (hours < 0 || hours > 23) {
+        throw IgrpResponseStatusException.badRequest(
+            "Horas de ausência por dia inválidas (" + hhmm + "h) — não pode exceder 23h/dia");
+      }
       return String.format("+0 %02d:%02d:00", hours, minutes);
     } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
       throw new IllegalArgumentException("Horas inválidas: " + hhmm, e);
     }
+  }
+
+  private String dividirPorDias(String totalHoras, int totalDias) {
+    if (!StringUtils.hasText(totalHoras) || totalDias <= 0)
+      return totalHoras;
+    int minutosPorDia = parseMin(totalHoras) / totalDias;
+    return String.format("%02d:%02d", minutosPorDia / 60, minutosPorDia % 60);
   }
 
   private String intervalToHHmm(String interval) {
