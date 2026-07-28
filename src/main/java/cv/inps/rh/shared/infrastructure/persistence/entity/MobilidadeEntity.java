@@ -79,4 +79,15 @@ public class MobilidadeEntity extends AuditEntity {
    private FuncionarioEntity funId;
 
 
+  /**
+   * Mobilidade anterior (o "antes"): a mobilidade que estava em vigor no momento em que esta foi
+   * registada. Preenchida no registo, antes de existir qualquer tipo_relacionamento — é o que
+   * permite mostrar direção/secção/local "antes" enquanto a mobilidade ainda está pendente (P).
+   * Null na primeira mobilidade do funcionário e em registos anteriores a esta coluna.
+   */
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mob_id", referencedColumnName = "id")
+    private MobilidadeEntity mobId;
+
+
 }

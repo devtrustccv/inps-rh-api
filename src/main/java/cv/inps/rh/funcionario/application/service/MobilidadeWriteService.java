@@ -52,9 +52,12 @@ public class MobilidadeWriteService {
       throw IgrpResponseStatusException.badRequest("Funcionário tem uma mobilidade pendente por validar");
     }
 
-    var novaMobilidade = createMobilidade(mobilidadeDto, funcionario);
-
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+
+    // A mobilidade em vigor no momento do registo é o "antes" desta. Guardamo-la já aqui, em
+    // RH_T_MOBILIDADE.MOB_ID, porque no registo ainda não existe tipo_relacionamento novo — sem isto
+    // o ecrã de validação não teria como mostrar direção/secção/local "antes".
+    var novaMobilidade = createMobilidade(mobilidadeDto, funcionario, tipoRelacionamentoAtual.getMobId());
 
     // Novo padrão: o REGISTO não cria nem altera tipo_relacionamento. O vínculo atual mantém-se
     // intacto e continua a ser o atual até a mobilidade ser validada. Aqui só se grava a mobilidade
@@ -75,7 +78,9 @@ public class MobilidadeWriteService {
   }
 
 
-  private MobilidadeEntity createMobilidade(MobilidadeDTO mobilidadeDTO, cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity funcionario){
+  private MobilidadeEntity createMobilidade(MobilidadeDTO mobilidadeDTO,
+                                            cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity funcionario,
+                                            MobilidadeEntity mobilidadeAnterior){
      if (mobilidadeDTO == null) return null;
 
      if(mobilidadeDTO.getLocalTrabalhoDepois() == null && mobilidadeDTO.getSeccaoDepois() == null && mobilidadeDTO.getDirecaoDepois() == null){
@@ -93,6 +98,7 @@ public class MobilidadeWriteService {
     me.setDataInicio(mobilidadeDTO.getDataInicio());
     me.setDataFim(mobilidadeDTO.getDataFim());
     me.setEstado(Estado.P);
+    me.setMobId(mobilidadeAnterior);
     return me;
   }
 
@@ -150,6 +156,15 @@ public class MobilidadeWriteService {
         // mecânica que antes estava no save(), agora executada apenas quando a mobilidade é aprovada.
         var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
         var novoTipoRelacionamento = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
+
+        // Backfill para registos gravados antes de MOB_ID existir: o "antes" é a mobilidade do
+        // vínculo que ainda é o atual. A guarda evita auto-referência em registos do padrão antigo,
+        // onde o tiprel atual já apontava para esta própria mobilidade.
+        if (mobilidade.getMobId() == null
+            && tipoRelacionamentoAtual.getMobId() != null
+            && !java.util.Objects.equals(tipoRelacionamentoAtual.getMobId().getId(), mobilidade.getId())) {
+          mobilidade.setMobId(tipoRelacionamentoAtual.getMobId());
+        }
 
         // Opção A: data efetiva = data do pedido (mobilidade.data_inicio), não a data da validação,
         // para o processamento refletir quando a mobilidade realmente aconteceu. O vínculo antigo
