@@ -177,6 +177,12 @@ public class CarreiraWriteService {
     var novasRem = new ArrayList<DefinicaoRemuneracaoEntity>();
     var novosPag = new ArrayList<DefPagamentoEntity>();
     var vinculoAtualId = contratoAtual.getVinculoId() != null ? contratoAtual.getVinculoId().getId() : null;
+    // Fixos do vinculo (salario REM + INPS/IUR/Valor Liquido PAG): NAO se recriam a partir do DTO.
+    // O getById devolve-os na lista de subsidios/encargos (para o utilizador os ver) e o frontend
+    // reenvia-os; sem este skip, cada progressao/edicao duplicava o salario. O salario e derivado do
+    // escalao (acima) e os fixos PAG pelo reconciliar/associacao — nunca pelo DTO.
+    var tmsFixosRem = tmsFixosDoVinculo(vinculoAtualId, "REM");
+    var tmsFixosPag = tmsFixosDoVinculo(vinculoAtualId, "PAG");
     var tiprelFonte = fonte != null
         ? tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(fonte.getUuid()).orElse(null) : null;
 
@@ -192,6 +198,8 @@ public class CarreiraWriteService {
 
     if (dto.getSubsidios() != null && !dto.getSubsidios().isEmpty()) {
       for (var s : dto.getSubsidios()) {
+        // Skip do salario/fixo REM reenviado pelo frontend — evita duplicar o salario.
+        if (s.getTipoSubsidioId() != null && tmsFixosRem.contains(s.getTipoSubsidioId())) continue;
         var obj = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
         obj.setObs(obsMovimento);
         definicaoRemuneracaoEntityRepository.save(obj);
@@ -210,6 +218,8 @@ public class CarreiraWriteService {
 
     if (dto.getEncargosDescontos() != null && !dto.getEncargosDescontos().isEmpty()) {
       for (var e : dto.getEncargosDescontos()) {
+        // Skip dos fixos PAG (INPS/IUR/Valor Liquido) reenviados pelo frontend.
+        if (e.getTipoEncargoId() != null && tmsFixosPag.contains(e.getTipoEncargoId())) continue;
         var def = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
         def.setObs(obsMovimento);
         defPagamentoEntityRepository.save(def);
@@ -322,6 +332,17 @@ public class CarreiraWriteService {
     relacionamento.setEstActAdm(0);
     relacionamento.setDataFim(dto.getDataFim());
     tiposRelacionamentoEntityRepository.save(relacionamento);
+  }
+
+  /** Tms dos movimentos FIXOS do vinculo (REM=salario; PAG=INPS/IUR/Valor Liquido). Usado para
+   *  NAO recriar/duplicar fixos a partir da lista de subsidios/encargos do DTO (que o getById
+   *  devolve para visualizacao e o frontend reenvia). Conjunto vazio se o vinculo for nulo. */
+  private java.util.Set<Long> tmsFixosDoVinculo(Long vinculoId, String tipo) {
+    if (vinculoId == null) return java.util.Set.of();
+    return paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoId, tipo).stream()
+        .filter(m -> m.getTmId() != null)
+        .map(m -> m.getTmId().getId())
+        .collect(java.util.stream.Collectors.toSet());
   }
 
   private DefinicaoRemuneracaoEntity copiarRemuneracao(DefinicaoRemuneracaoEntity original, FuncionarioEntity funcionario, java.time.LocalDate dataInicio, String obs) {
@@ -438,11 +459,16 @@ public class CarreiraWriteService {
         tiprelSubstituido.setDataFim(dataEfetiva);
         tiprelSubstituido.setEstActAdm(0);
         tiprelSubstituido.setFlgProcessa(0);
+        // Substituída por progressão/promoção → inactiva (estado I), não fica só "fechada por data".
+        // Sinal limpo: o em-vigor (estado A) deixa de a contar já no dia da progressão, e o dossier
+        // não mostra carreiras substituídas como activas.
+        tiprelSubstituido.setEstado(Estado.I);
         tiposRelacionamentoEntityRepository.save(tiprelSubstituido);
       }
       carreiraMesmoTipo.setDataFim(dataEfetiva);
       carreiraMesmoTipo.setEstActAdm(0);
       carreiraMesmoTipo.setFlgProcessa(0);
+      carreiraMesmoTipo.setEstado(Estado.I);
       carreiraEntityRepository.save(carreiraMesmoTipo);
     }
 
@@ -620,8 +646,16 @@ public class CarreiraWriteService {
 
     var obsAtualizar = "MOBILIDADE-" + carreira.getTipoSituacao();
 
+    // Fixos do vinculo (salario/INPS/IUR/Valor Liquido): reenviados pelo getById, NAO se recriam nem
+    // editam pela lista de subsidios/encargos (geridos pelo escalao/reconciliar). Skip = evita duplicar.
+    var vinculoEditId = carreira.getContrVinculoId() != null && carreira.getContrVinculoId().getVinculoId() != null
+        ? carreira.getContrVinculoId().getVinculoId().getId() : null;
+    var tmsFixosRemEdit = tmsFixosDoVinculo(vinculoEditId, "REM");
+    var tmsFixosPagEdit = tmsFixosDoVinculo(vinculoEditId, "PAG");
+
     if (!CollectionUtils.isEmpty(dto.getSubsidios())) {
       var remList = dto.getSubsidios().stream()
+          .filter(s -> s.getTipoSubsidioId() == null || !tmsFixosRemEdit.contains(s.getTipoSubsidioId()))
           .map(s -> {
             DefinicaoRemuneracaoEntity obj;
             if (s.getId() == null) {
@@ -643,6 +677,7 @@ public class CarreiraWriteService {
 
     if (!CollectionUtils.isEmpty(dto.getEncargosDescontos())) {
       var pagList = dto.getEncargosDescontos().stream()
+          .filter(e -> e.getTipoEncargoId() == null || !tmsFixosPagEdit.contains(e.getTipoEncargoId()))
           .map(e -> {
             DefPagamentoEntity obj;
             if (e.getId() == null) {
