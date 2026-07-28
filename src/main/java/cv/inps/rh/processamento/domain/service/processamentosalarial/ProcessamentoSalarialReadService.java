@@ -97,12 +97,12 @@ public class ProcessamentoSalarialReadService {
 
       var sql = "{ ? = call RH_PK_VALIDACAO_SALARIAL_DB.RH_F_VALIDACAO2(?, ?) }";
 
-      try (var connection = dataSource.getConnection()) {
+      try (var connection = dataSource.getConnection();
+           var stmt = connection.prepareCall(sql).unwrap(OracleCallableStatement.class);) {
 
-        var stmt = connection.prepareCall(sql).unwrap(OracleCallableStatement.class);
         stmt.registerOutParameter(1, OracleTypes.CLOB);
 
-        var ids = List.of(query.getProcessamentoIds()).toArray(String[]::new);
+        var ids = query.getProcessamentoIds().toArray(String[]::new);
 
         stmt.setPlsqlIndexTable(
             2,
@@ -121,7 +121,6 @@ public class ProcessamentoSalarialReadService {
           return List.of();
 
         var json = clob.getSubString(1, (int) clob.length());
-
         if (!StringUtils.hasText(json))
           return List.of();
 

@@ -190,7 +190,7 @@ public class ProcessoSalarialController {
   )
   public ResponseEntity<List<DadosValidacaoDTO>> getDadosValidacao(
       @RequestParam(value = "tipoValidacao") String tipoValidacao,
-      @RequestParam(value = "processamentoIds") String processamentoIds
+      @RequestParam(value = "processamentoIds") List<String> processamentoIds
   ) {
     final var query = new GetDadosValidacaoQuery(tipoValidacao, processamentoIds);
 

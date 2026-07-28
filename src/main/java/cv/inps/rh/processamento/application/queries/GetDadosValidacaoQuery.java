@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,5 +17,5 @@ public class GetDadosValidacaoQuery implements Query {
   private String tipoValidacao;
 
   @NotBlank(message = "The field <processamentoIds> is required")
-  private String processamentoIds;
+  private List<String> processamentoIds;
 }
