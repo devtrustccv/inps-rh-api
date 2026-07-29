@@ -112,15 +112,11 @@ public class CarreiraWriteService {
       throw IgrpResponseStatusException.badRequest(
           "Este endpoint regista uma carreira NOVA. Para Progressão/Promoção ou Editar use o PUT.");
 
-    // Doc "Regra Geral" (l.4831-4835): máx 2 carreiras activas e NÃO duas do mesmo tipo (cargo
-    // nulo=CATEGORIA vs cargo não-nulo=CARGO). "Em vigor" = estado A e não terminada (data_fim nula
-    // ou futura). NOVO só ACUMULA um tipo diferente; se já existe do mesmo tipo, é caso de
-    // Progressão/Promoção (PUT), não de carreira nova.
-    boolean novoCargoNulo = dto.getCargoPosicaoId() == null;
+    // Doc "Regra Geral" (l.4831-4835): máx 2 carreiras activas. "Em vigor" = estado A e não terminada
+    // (data_fim nula ou futura). O guard "não duas do mesmo tipo" foi RELAXADO (decisão): permite-se
+    // uma 2ª carreira activa. A regra "só uma a processar salário" NÃO se bloqueia no registo — é
+    // garantida pelo FLIP na validação (a nova a processar despromove a anterior; ver validarCarreira).
     var emVigor = carreiraEntityRepository.findEmVigorByFuncionario(funcionario, java.time.LocalDate.now());
-    if (emVigor.stream().anyMatch(c -> (c.getCargoId() == null) == novoCargoNulo))
-      throw IgrpResponseStatusException.conflict(
-          "Já existe uma carreira activa do mesmo tipo. Para alterá-la use Progressão/Promoção.");
     if (emVigor.size() >= 2)
       throw IgrpResponseStatusException.conflict("O colaborador não pode ter mais de duas carreiras activas");
 
