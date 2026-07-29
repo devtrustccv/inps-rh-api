@@ -159,6 +159,7 @@ public class CarreiraReadService {
     dto.setDataInicio(DateFormatter.localDateToString(tr.getDataInicio()));
     dto.setDataFim(DateFormatter.localDateToString(tr.getDataFim()));
     dto.setProcessaSalarioNestaCarreira(tr.getFlgProcessa()== 1 ? "SIM" : "NAO");
+    dto.setFlgProcessa(tr.getFlgProcessa());
     // PROCESSAMENTO (vista RH_V_CARREIRA): true se a carreira ja foi processada em folha
     dto.setProcessamento(car != null && processamentoFuncionarioRepository.existsByTiprel_CarreiraId_Id(car.getId()));
     dto.setCategoriaId(categoria != null ? categoria.getId() : null);
