@@ -15,14 +15,11 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ParamVinculoMovimentoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +30,6 @@ public class ValidacaoRenovacaoContratoService {
   private final FuncionarioRules funcionarioRules;
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
-  private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
 
   @Transactional
   public RenovacaoContratoDTO validar(ValidarRenovacaoContratoCommand command) {
@@ -58,18 +54,29 @@ public class ValidacaoRenovacaoContratoService {
       // renovacao e APROVADA. Numa rejeicao o contrato mantem as datas actuais.
       if (aprovado) {
         contratoMapper.toUpdateEntity(contrato, dto.getDadosRenovacao());
-        // Renovação estende as datas das tabelas associadas; nos MOVIMENTOS só os fixos (doc ponto 3).
-        atualizarDatasRenovacao(tiposRelacionamento, funcionario, contrato);
+        // Estende as datas das DIMENSÕES (tiprel + carreira/mob/regime/situação). Os DEF são
+        // estendidos DEPOIS do transferir, para o filtro "não-terminado" avaliar a DATA_FIM ORIGINAL
+        // dos def (senão a extensão reviveria os expirados e o filtro não os excluiria).
+        estenderDatasDimensoes(tiposRelacionamento, contrato.getDataInicio(), contrato.getDataFim());
       }
       mudarEstado(funcionario, aprovado ? Estado.A : Estado.I);
     }
 
-    FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+    funcionarioEntityRepository.saveAndFlush(funcionario);
 
-    // Numa REJEICAO (validacao=NAO) nao se associam defs ao tiprel rejeitado — RH_T_TIPREL_REM_PAG
-    // nao tem estado, logo a unica forma de nao os ter e nao criar a associacao.
+    // Use case (RH_T_TIPREL_REM_PAG): "pega os registos do TIPREL_ID ANTERIOR e faz novo registo com
+    // novo tiprel_id" — copia do tiprel anterior os def A ainda EM VIGOR (o transferir filtra os
+    // terminados). NÃO usar associarNovos. Rejeição (NAO) não associa nada ao tiprel rejeitado.
     if (!EstadoValidacao.NAO.equals(dto.getValidacao())) {
-      tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
+      var antigo = tiposRelacionamento.getTiprelId();
+      if (antigo != null) {
+        tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(
+            antigo, tiposRelacionamento, java.util.List.of(), java.util.List.of());
+        // Use case (DEF_REMUNERACOES/PAGAMENTOS "atualizar data fim"): estende a DATA_FIM dos def que
+        // TRANSITARAM (os não-terminados). Depois do transferir → não revive os expirados.
+        if (EstadoValidacao.SIM.equals(dto.getValidacao()))
+          estenderDatasDefNaoTerminados(antigo, contrato.getDataFim());
+      }
     }
 
     var renovacaoContratoDTO = new RenovacaoContratoDTO();
@@ -78,38 +85,39 @@ public class ValidacaoRenovacaoContratoService {
   }
 
   /**
-   * Renovação: estende as datas das tabelas associadas ao tiprel. Doc (ponto 3): nos MOVIMENTOS,
-   * só os FIXOS do vínculo (salário/vencimento + INPS + IUR + valor líquido) atualizam datas
-   * (Data Início + Data Fim); os manuais (subsídios/encargos) NÃO são tocados.
+   * Renovação: ajusta as datas das DIMENSÕES na aprovação.
+   *
+   * <p>TIPREL — recebe DATA_INICIO + DATA_FIM. O tiprel novo é criado no registo com
+   * DATA_INICIO = sysdate; aqui corrigimo-lo para a DATA_INICIO real do contrato (a "Data inicio" do
+   * formulário, conforme a spec da Renovação: novo tiprel.DATA_INICIO = data início do formulário).
+   *
+   * <p>Carreira/mobilidade/regime/situação — só se estende a DATA_FIM. Estas dimensões já são
+   * gravadas com o DATA_INICIO correto no registo; NÃO se sobrescreve o DATA_INICIO delas para não
+   * estragar casos legítimos com início próprio (ex.: progressão de carreira a meio do contrato).
    */
-  private void atualizarDatasRenovacao(TiposRelacionamentoEntity tr, FuncionarioEntity funcionario, ContratoEntity contrato) {
-    var dataInicio = contrato.getDataInicio();
-    var dataFim = contrato.getDataFim();
-
-    // Tabelas associadas (não-movimentos): o próprio tiprel (o GET lê tiprel.getDataFim()) + carreira/
-    // mobilidade/regime/situação estendem a DATA_FIM para o novo período.
+  private void estenderDatasDimensoes(TiposRelacionamentoEntity tr, LocalDate dataInicio, LocalDate dataFim) {
+    tr.setDataInicio(dataInicio);
     tr.setDataFim(dataFim);
     if (tr.getCarreiraId() != null) tr.getCarreiraId().setDataFim(dataFim);
     if (tr.getMobId() != null) tr.getMobId().setDataFim(dataFim);
     if (tr.getRegimeId() != null) tr.getRegimeId().setDataFim(dataFim);
     if (tr.getSituacLaboralId() != null) tr.getSituacLaboralId().setDataFim(dataFim);
+  }
 
-    // Movimentos: SÓ os fixos do vínculo atualizam datas (Início + Fim). Manuais não. (doc ponto 3)
-    var vinculoId = contrato.getVinculoId() != null ? contrato.getVinculoId().getId() : null;
-    if (vinculoId == null) return;
-    Set<Long> tmsRem = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoId, "REM").stream()
-        .filter(m -> m.getTmId() != null).map(m -> m.getTmId().getId()).collect(Collectors.toSet());
-    Set<Long> tmsPag = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoId, "PAG").stream()
-        .filter(m -> m.getTmId() != null).map(m -> m.getTmId().getId()).collect(Collectors.toSet());
-
-    if (funcionario.getDefinicoesRenumeracoes() != null)
-      funcionario.getDefinicoesRenumeracoes().stream()
-          .filter(r -> r != null && r.getEstado() == Estado.A && r.getTmId() != null && tmsRem.contains(r.getTmId().getId()))
-          .forEach(r -> { r.setDataInicio(dataInicio); r.setDataFim(dataFim); });
-    if (funcionario.getDefinicoesPagamentos() != null)
-      funcionario.getDefinicoesPagamentos().stream()
-          .filter(p -> p != null && p.getEstado() == Estado.A && p.getTmId() != null && tmsPag.contains(p.getTmId().getId()))
-          .forEach(p -> { p.setDataInicio(dataInicio); p.setDataFim(dataFim); });
+  /**
+   * Renovação (use case, DEF_REMUNERACOES/PAGAMENTOS "atualizar data fim"): estende a DATA_FIM dos
+   * def do tiprel anterior que TRANSITARAM — os que estão A e ainda EM VIGOR (não terminados, mesmo
+   * predicado do transferir). Os expirados NÃO transitaram e não se lhes toca (ficam expirados no
+   * tiprel anterior). Chamado DEPOIS do transferir (que não altera DATA_FIM), sobre a data original.
+   */
+  private void estenderDatasDefNaoTerminados(TiposRelacionamentoEntity antigo, LocalDate dataFim) {
+    var hoje = LocalDate.now();
+    funcionarioRules.getRemuneracoesAssociadosAtivos(antigo.getId()).stream()
+        .filter(r -> r.getDataFim() == null || !r.getDataFim().isBefore(hoje))
+        .forEach(r -> r.setDataFim(dataFim));
+    funcionarioRules.getPagamentosDescontosAssociadosAtivos(antigo.getId()).stream()
+        .filter(p -> p.getDataFim() == null || !p.getDataFim().isBefore(hoje))
+        .forEach(p -> p.setDataFim(dataFim));
   }
 
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {

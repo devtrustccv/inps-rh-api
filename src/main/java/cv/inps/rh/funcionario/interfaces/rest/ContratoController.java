@@ -127,10 +127,11 @@ public class ContratoController {
   )
 
   public ResponseEntity<DadosContratuaisRespDTO> getContratoById(
-    @PathVariable(value = "contratoId") String contratoId,@PathVariable(value = "id") String id)
+    @PathVariable(value = "contratoId") String contratoId,@PathVariable(value = "id") String id,
+    @RequestParam(value = "versao", required = false) Integer versao)
   {
 
-      final var query = new GetContratoByIdQuery(contratoId, id);
+      final var query = new GetContratoByIdQuery(contratoId, id, versao);
 
       ResponseEntity<DadosContratuaisRespDTO> response = queryBus.handle(query);
 

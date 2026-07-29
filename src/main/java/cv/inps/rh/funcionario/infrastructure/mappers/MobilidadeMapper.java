@@ -52,13 +52,20 @@ public class MobilidadeMapper {
   public MobilidadeDTO mobilidadeDetalheDTO(MobilidadeEntity atual, MobilidadeEntity anterior) {
     var dto = new MobilidadeDTO();
 
-    // Depois = valores gravados nesta mobilidade
-    if (Objects.nonNull(atual.getInstidId()))
+    // Depois = valores gravados nesta mobilidade. O id alimenta os selects do formulário; a
+    // descrição existe para o ecrã de validação, que é só leitura e não carrega as listas.
+    if (Objects.nonNull(atual.getInstidId())) {
       dto.setDirecaoDepois(atual.getInstidId().getId());
-    if (Objects.nonNull(atual.getSecaoId()))
+      dto.setDirecaoDepoisDesc(atual.getInstidId().getNome());
+    }
+    if (Objects.nonNull(atual.getSecaoId())) {
       dto.setSeccaoDepois(atual.getSecaoId().getId());
-    if (Objects.nonNull(atual.getLocalTrabId()))
+      dto.setSeccaoDepoisDesc(atual.getSecaoId().getNome());
+    }
+    if (Objects.nonNull(atual.getLocalTrabId())) {
       dto.setLocalTrabalhoDepois(atual.getLocalTrabId().getId());
+      dto.setLocalTrabalhoDepoisDesc(atual.getLocalTrabId().getNome());
+    }
 
     // Antes = direção/secção/local do vínculo anterior (display)
     if (anterior != null) {

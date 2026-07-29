@@ -115,6 +115,14 @@ public class MobilidadeReadService {
         .findFirst()
         .orElse(null);
 
+    // Fallback: enquanto a mobilidade está pendente (P) ainda não existe tiprel a apontar-lhe, por
+    // isso a derivação acima não devolve nada. Nesse caso usa-se o "antes" gravado no registo
+    // (RH_T_MOBILIDADE.MOB_ID). Fica null em registos antigos e na primeira mobilidade do funcionário.
+    if (anterior == null && mobilidade.getMobId() != null
+        && !java.util.Objects.equals(mobilidade.getMobId().getId(), mobilidade.getId())) {
+      anterior = mobilidade.getMobId();
+    }
+
     return mobilidadeMapper.mobilidadeDetalheDTO(mobilidade, anterior);
   }
 

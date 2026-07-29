@@ -276,6 +276,36 @@ public interface TiposRelacionamentoEntityRepository extends
       @Param("funUuid") UUID funUuid,
       @Param("contratoUuid") UUID contratoUuid);
 
+  /** Tiprel do contrato por TIPO_SITUACAO (ex.: 'INICIO' para a vista "Ver Informação Inicial").
+   *  ORDER BY id para escolher o 1º de forma determinística caso exista mais que um. */
+  @Query("""
+      select tr
+      from TiposRelacionamentoEntity tr
+      left join fetch tr.contrVinculoId c
+      left join fetch c.tpContratoId
+      left join fetch c.vinculoId
+      left join fetch tr.situacLaboralId sl
+      left join fetch sl.situacaoLaboralId
+      left join fetch tr.cargoId
+      left join fetch tr.mobId m
+      left join fetch m.instidId
+      left join fetch m.secaoId
+      left join fetch m.localTrabId
+      left join fetch tr.carreiraId car
+      left join fetch car.carrPccsId
+      left join fetch car.categoriaId
+      left join fetch car.escalaoId
+      left join fetch tr.regimeId
+      where tr.funId.uuid = :funUuid
+        and c.uuid = :contratoUuid
+        and tr.tipoSituacao = :tipoSituacao
+      order by tr.id
+      """)
+  java.util.List<TiposRelacionamentoEntity> findByFunUuidAndContratoUuidAndTipoSituacao(
+      @Param("funUuid") UUID funUuid,
+      @Param("contratoUuid") UUID contratoUuid,
+      @Param("tipoSituacao") String tipoSituacao);
+
   @Query(value = """
       SELECT
         FUNCIONARIO_UUID AS funcionarioUuid,

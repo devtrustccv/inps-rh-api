@@ -79,6 +79,18 @@
       "primaryKey": false
     },
     {
+      "name": "direcaoDepoisDesc",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "seccaoAntes",
       "objectType": "java",
       "type": "string",
@@ -103,6 +115,18 @@
       "primaryKey": false
     },
     {
+      "name": "seccaoDepoisDesc",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "localTrabalhoAntes",
       "objectType": "java",
       "type": "string",
@@ -118,6 +142,18 @@
       "name": "localTrabalhoDepois",
       "objectType": "java",
       "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "localTrabalhoDepoisDesc",
+      "objectType": "java",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,

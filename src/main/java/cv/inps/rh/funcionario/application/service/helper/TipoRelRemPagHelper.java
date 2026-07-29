@@ -110,10 +110,14 @@ public class TipoRelRemPagHelper {
   }
 
   /**
-   * Ao trocar de tipo relacionamento (est_adm anterior = 0, novo = 1), copia as
-   * remunerações e pagamentos ativos associados ao tipo anterior para o novo e
-   * também associa os itens novos criados na mesma operação (estado P).
-   * A deduplicação por ID garante que itens transferidos e novos não se sobrepõem.
+   * Ao trocar de tipo relacionamento (est_adm anterior = 0, novo = 1), copia para o novo os
+   * movimentos do tipo anterior que estão em estado A e AINDA EM VIGOR (não terminados: DATA_FIM
+   * nula ou >= hoje) e também associa os itens novos criados na mesma operação (estado P). A
+   * dedup por ID garante que itens transferidos e novos não se sobrepõem.
+   *
+   * <p>Filtro "não-terminado" (todos os fluxos de cópia — mobilidade/carreira/histórico/renovação):
+   * um movimento já expirado (ex.: diferença de substituição de mês passado, subsídio manual cuja
+   * DATA_FIM já passou) NÃO transita para o novo relacionamento.</p>
    */
   public void transferirParaNovoTipoRelacionamento(
       TiposRelacionamentoEntity tipoRelAtual,
@@ -124,11 +128,13 @@ public class TipoRelRemPagHelper {
     List<TipoRelRemPagEntity> lista = new ArrayList<>();
     Set<Long> remIds = new HashSet<>();
     Set<Long> pagIds = new HashSet<>();
+    var hoje = java.time.LocalDate.now();
 
     var remuneracoesAtivas = funcionarioRules.getRemuneracoesAssociadosAtivos(tipoRelAtual.getId());
     if (!CollectionUtils.isEmpty(remuneracoesAtivas)) {
       for (var rem : remuneracoesAtivas) {
         if (rem == null || rem.getId() == null) continue;
+        if (rem.getDataFim() != null && rem.getDataFim().isBefore(hoje)) continue; // expirado → não transita
         if (!remIds.add(rem.getId())) continue;
         var assoc = new TipoRelRemPagEntity();
         assoc.setTiprelId(novoTipoRel);
@@ -142,6 +148,7 @@ public class TipoRelRemPagHelper {
     if (!CollectionUtils.isEmpty(pagamentosAtivos)) {
       for (var pag : pagamentosAtivos) {
         if (pag == null || pag.getId() == null) continue;
+        if (pag.getDataFim() != null && pag.getDataFim().isBefore(hoje)) continue; // expirado → não transita
         if (!pagIds.add(pag.getId())) continue;
         var assoc = new TipoRelRemPagEntity();
         assoc.setTiprelId(novoTipoRel);
