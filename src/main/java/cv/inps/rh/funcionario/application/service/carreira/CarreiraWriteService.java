@@ -183,12 +183,12 @@ public class CarreiraWriteService {
     // escalao (acima) e os fixos PAG pelo reconciliar/associacao — nunca pelo DTO.
     var tmsFixosRem = tmsFixosDoVinculo(vinculoAtualId, "REM");
     var tmsFixosPag = tmsFixosDoVinculo(vinculoAtualId, "PAG");
-    var tiprelFonte = fonte != null
-        ? tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(fonte.getUuid()).orElse(null) : null;
 
+    // Salario: SEMPRE registo novo (valor do escalao). Na progressao o salario antigo e fechado no
+    // validar; os subsidios/descontos existentes NAO se copiam — RE-ASSOCIAM-se ao novo tiprel no
+    // validar (doc 29/07: TIPREL_REM_PAG "pega todos os registos do tiprel anterior").
     var movREM = paramVinculoMovimentoEntityRepository
         .findByVinculoId_IdAndTipo(vinculoAtualId, "REM").stream().findFirst().orElse(null);
-    Long salarioTmId = movREM != null && movREM.getTmId() != null ? movREM.getTmId().getId() : null;
     if (movREM != null) {
       var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario, obsMovimento);
       salario.setTmId(movREM.getTmId());
@@ -196,40 +196,33 @@ public class CarreiraWriteService {
       novasRem.add(salario);
     }
 
-    if (dto.getSubsidios() != null && !dto.getSubsidios().isEmpty()) {
+    // Subsidios/encargos: cria SO os NOVOS (sem id) do DTO — os manuais acrescentados de raiz — com a
+    // DATA_INICIO efetiva. Na progressao, os ecoados do getById (com id) NAO se recriam aqui: sao
+    // re-associados no validar (mesmas linhas). Em carreira nova (fonte == null) nao ha o que
+    // re-associar, logo cria todos os do DTO.
+    if (dto.getSubsidios() != null) {
       for (var s : dto.getSubsidios()) {
-        // Skip do salario/fixo REM reenviado pelo frontend — evita duplicar o salario.
         if (s.getTipoSubsidioId() != null && tmsFixosRem.contains(s.getTipoSubsidioId())) continue;
+        if (fonte != null && s.getId() != null) continue; // existente → re-associa no validar
         var obj = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
         obj.setObs(obsMovimento);
+        obj.setDataInicio(dataEfetiva);
+        obj.setDataFim(null);
         definicaoRemuneracaoEntityRepository.save(obj);
         novasRem.add(obj);
       }
-    } else if (tiprelFonte != null) {
-      final Long finalSalarioTmId = salarioTmId;
-      for (var rem : funcionarioRules.getRemuneracoesAssociadosAtivos(tiprelFonte.getId())) {
-        if (finalSalarioTmId != null && rem.getTmId() != null
-            && Objects.equals(rem.getTmId().getId(), finalSalarioTmId)) continue;
-        var copia = copiarRemuneracao(rem, funcionario, dataEfetiva, obsMovimento);
-        definicaoRemuneracaoEntityRepository.save(copia);
-        novasRem.add(copia);
-      }
     }
 
-    if (dto.getEncargosDescontos() != null && !dto.getEncargosDescontos().isEmpty()) {
+    if (dto.getEncargosDescontos() != null) {
       for (var e : dto.getEncargosDescontos()) {
-        // Skip dos fixos PAG (INPS/IUR/Valor Liquido) reenviados pelo frontend.
         if (e.getTipoEncargoId() != null && tmsFixosPag.contains(e.getTipoEncargoId())) continue;
+        if (fonte != null && e.getId() != null) continue; // existente → re-associa no validar
         var def = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
         def.setObs(obsMovimento);
+        def.setDataInicio(dataEfetiva);
+        def.setDataFim(null);
         defPagamentoEntityRepository.save(def);
         novosPag.add(def);
-      }
-    } else if (tiprelFonte != null) {
-      for (var pag : funcionarioRules.getPagamentosDescontosAssociadosAtivos(tiprelFonte.getId())) {
-        var copia = copiarPagamento(pag, funcionario, dataEfetiva, obsMovimento);
-        defPagamentoEntityRepository.save(copia);
-        novosPag.add(copia);
       }
     }
 
@@ -345,38 +338,14 @@ public class CarreiraWriteService {
         .collect(java.util.stream.Collectors.toSet());
   }
 
-  private DefinicaoRemuneracaoEntity copiarRemuneracao(DefinicaoRemuneracaoEntity original, FuncionarioEntity funcionario, java.time.LocalDate dataInicio, String obs) {
-    var copia = new DefinicaoRemuneracaoEntity();
-    copia.setTmId(original.getTmId());
-    copia.setValor(original.getValor());
-    copia.setPercentagem(original.getPercentagem());
-    copia.setMoeda(original.getMoeda());
-    copia.setEstado(Estado.P);
-    copia.setObs(obs);
-    copia.setDataInicio(dataInicio);
-    copia.setDataFim(null);
-    copia.setFunId(funcionario);
-    copia.setUuid(UuidCreator.getTimeOrderedEpoch());
-    return copia;
-  }
-
-  private DefPagamentoEntity copiarPagamento(DefPagamentoEntity original, FuncionarioEntity funcionario, java.time.LocalDate dataInicio, String obs) {
-    var copia = new DefPagamentoEntity();
-    copia.setTmId(original.getTmId());
-    copia.setValor(original.getValor());
-    copia.setPercentagem(original.getPercentagem());
-    copia.setNib(original.getNib());
-    copia.setNif(original.getNif());
-    copia.setNmEntidade(original.getNmEntidade());
-    copia.setRhbId(original.getRhbId());
-    copia.setEntId(original.getEntId());
-    copia.setEstado(Estado.P);
-    copia.setObs(obs);
-    copia.setDataInicio(dataInicio);
-    copia.setDataFim(null);
-    copia.setFunId(funcionario);
-    copia.setUuid(UuidCreator.getTimeOrderedEpoch());
-    return copia;
+  /** Tm do movimento de SALÁRIO do vínculo do contrato (REM). Usado na progressão para identificar
+   *  o vencimento antigo a fechar (os subsídios/descontos re-associam-se; só o salário é substituído). */
+  private Long salarioTmIdDoContrato(ContratoEntity contrato) {
+    Long vinculoId = contrato != null && contrato.getVinculoId() != null ? contrato.getVinculoId().getId() : null;
+    if (vinculoId == null) return null;
+    var movREM = paramVinculoMovimentoEntityRepository
+        .findByVinculoId_IdAndTipo(vinculoId, "REM").stream().findFirst().orElse(null);
+    return movREM != null && movREM.getTmId() != null ? movREM.getTmId().getId() : null;
   }
 
   @NotNull
@@ -448,20 +417,26 @@ public class CarreiraWriteService {
     var carreiraMesmoTipo = emVigor.stream()
         .filter(c -> (c.getCargoId() == null) == novoCargoNulo).findFirst().orElse(null);
 
-    // PROGRESSÃO (mesmo tipo em vigor): fecha o track substituído (tiprel + carreira + rem/pag).
+    // PROGRESSÃO (mesmo tipo em vigor): substitui o track. Doc 29/07: SÓ o VENCIMENTO é substituído
+    // (novo salário do escalão) → fecha-se; os subsídios/descontos RE-ASSOCIAM ao novo tiprel
+    // (mesmas linhas, via transferir — como renovação/mobilidade: "pega todos os registos do tiprel
+    // anterior"). Não se fecham nem se copiam os subsídios. Fecha-se depois o tiprel/carreira antigos.
     if (carreiraMesmoTipo != null) {
       var tiprelSubstituido = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreiraMesmoTipo.getUuid()).orElse(null);
       if (tiprelSubstituido != null) {
-        funcionarioRules.getRemuneracoesAssociadosAtivos(tiprelSubstituido.getId())
+        // 1. Fecha SÓ o vencimento antigo (o def REM cujo tm é o salário do vínculo).
+        Long salarioTmId = salarioTmIdDoContrato(carreira.getContrVinculoId());
+        funcionarioRules.getRemuneracoesAssociadosAtivos(tiprelSubstituido.getId()).stream()
+            .filter(r -> salarioTmId != null && r.getTmId() != null && Objects.equals(r.getTmId().getId(), salarioTmId))
             .forEach(o -> { o.setDataFim(dataEfetiva); o.setEstado(Estado.I); definicaoRemuneracaoEntityRepository.save(o); });
-        funcionarioRules.getPagamentosDescontosAssociadosAtivos(tiprelSubstituido.getId())
-            .forEach(o -> { o.setDataFim(dataEfetiva); o.setEstado(Estado.I); defPagamentoEntityRepository.save(o); });
+        // 2. Re-associa os restantes ativos (subsídios + descontos) ao novo tiprel — mesmas linhas,
+        //    datas intactas (o vencimento já foi fechado acima, logo não transita).
+        if (tiprelPendente != null)
+          tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tiprelSubstituido, tiprelPendente, List.of(), List.of());
+        // 3. Fecha o tiprel antigo (est_act_adm=0, I). Os def re-associados ficam ativos.
         tiprelSubstituido.setDataFim(dataEfetiva);
         tiprelSubstituido.setEstActAdm(0);
         tiprelSubstituido.setFlgProcessa(0);
-        // Substituída por progressão/promoção → inactiva (estado I), não fica só "fechada por data".
-        // Sinal limpo: o em-vigor (estado A) deixa de a contar já no dia da progressão, e o dossier
-        // não mostra carreiras substituídas como activas.
         tiprelSubstituido.setEstado(Estado.I);
         tiposRelacionamentoEntityRepository.save(tiprelSubstituido);
       }
