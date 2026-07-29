@@ -621,6 +621,32 @@ public class CarreiraWriteService {
 
     var obsAtualizar = "MOBILIDADE-" + carreira.getTipoSituacao();
 
+    // Doc (RH_T_DEF_REMUNERACOES, "Atualização Carreira"): quando o ESCALÃO muda, "faz um novo registo
+    // de salário". O salário (REM fixo) é saltado no update de subsídios abaixo, por isso trata-se aqui:
+    // fecha o salário antigo (I) e cria um novo com o valor do novo escalão, associado ao tiprel (P,
+    // acompanha a revalidação). Carreira/tiprel continuam UPDATE in place (Caso 1). Só age quando há um
+    // salário ATIVO no tiprel (edição de carreira já validada); num pendente ainda por validar, não.
+    boolean mudouEscalao = !Objects.equals(escAtual, dto.getEscalaoReferenciaId());
+    if (mudouEscalao && relacionamento != null) {
+      Long salarioTmId = salarioTmIdDoContrato(carreira.getContrVinculoId());
+      var salarioAntigo = salarioTmId == null ? null :
+          funcionarioRules.getRemuneracoesAssociadosAtivos(relacionamento.getId()).stream()
+              .filter(r -> r.getTmId() != null && Objects.equals(r.getTmId().getId(), salarioTmId))
+              .findFirst().orElse(null);
+      if (salarioAntigo != null) {
+        var dataEfetiva = dto.getDataInicio() != null ? dto.getDataInicio() : java.time.LocalDate.now();
+        salarioAntigo.setDataFim(dataEfetiva);
+        salarioAntigo.setEstado(Estado.I);
+        definicaoRemuneracaoEntityRepository.save(salarioAntigo);
+        var salarioNovo = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario, obsAtualizar);
+        salarioNovo.setDataInicio(dataEfetiva);
+        salarioNovo.setDataFim(null);
+        salarioNovo.setTmId(salarioAntigo.getTmId());
+        definicaoRemuneracaoEntityRepository.save(salarioNovo);
+        tipoRelRemPagHelper.associarLista(relacionamento, List.of(salarioNovo), List.of());
+      }
+    }
+
     // Fixos do vinculo (salario/INPS/IUR/Valor Liquido): reenviados pelo getById, NAO se recriam nem
     // editam pela lista de subsidios/encargos (geridos pelo escalao/reconciliar). Skip = evita duplicar.
     var vinculoEditId = carreira.getContrVinculoId() != null && carreira.getContrVinculoId().getVinculoId() != null
