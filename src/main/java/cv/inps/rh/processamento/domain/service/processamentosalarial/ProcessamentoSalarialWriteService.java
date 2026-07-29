@@ -7,7 +7,6 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ProcessamentoSalarialEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
-import cv.inps.rh.shared.util.DateFormatter;
 import lombok.RequiredArgsConstructor;
 import oracle.jdbc.OracleCallableStatement;
 import oracle.jdbc.OracleConnection;
@@ -106,17 +105,18 @@ public class ProcessamentoSalarialWriteService {
     if (Objects.isNull(tipoValidacao))
       throw IgrpResponseStatusException.badRequest("Para validar deve indicar o tipo de validacao: [DEFINITIVO, PROVISORIO]");
 
-    var status = TipoValidacaoProcessamentoSalarial.DEFINITIVO.equals(tipoValidacao) ?
-        StatusProcessamento.VALIDADO_PROVISORIO : StatusProcessamento.PROCESSADO;
+    var isDefinitivo = TipoValidacaoProcessamentoSalarial.DEFINITIVO.equals(tipoValidacao);
+    var statusPesquisa = isDefinitivo ? StatusProcessamento.VALIDADO_PROVISORIO : StatusProcessamento.PROCESSADO;
+    var statusRegisto = isDefinitivo ? StatusProcessamento.VALIDADO_DEFINITIVO : StatusProcessamento.VALIDADO_PROVISORIO;
 
     var processes = processamentoSalarialEntityRepository.findAllByIdInAndEstadoIn(
         ids,
-        List.of(status.name())
+        List.of(statusPesquisa.name())
     );
     if (processes.size() != ids.size())
-      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado %s".formatted(status.name()));
+      throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado %s".formatted(statusPesquisa.name()));
 
-    processes.forEach(process -> process.setEstado(StatusProcessamento.VALIDADO.name()));
+    processes.forEach(process -> process.setEstado(statusRegisto.name()));
 
     processamentoSalarialEntityRepository.saveAll(processes);
   }
@@ -156,11 +156,11 @@ public class ProcessamentoSalarialWriteService {
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram Validados definitivamente");
 
     processes.forEach(p -> {
-      var date = p.getDataProcDefinitivo().format(DateFormatter.DATE);
+     /* var date = p.getDataProcDefinitivo().format(DateFormatter.DATE);
       var response = processarSalarioApi.processarCabimento(p.getId().toString(), date);
       LOGGER.debug("Cabimentar Response: {}", response);
       if (response.content().issue().code() != 200)
-        throw IgrpResponseStatusException.badRequest("Erro ao processar cabimento", response.content().issue().diagnostics());
+        throw IgrpResponseStatusException.badRequest("Erro ao processar cabimento", response.content().issue().diagnostics());*/
       processamentoSalarialHelper.atualizarEstado(p.getId(), StatusProcessamento.CABIMENTADO.name());
     });
   }
@@ -175,10 +175,11 @@ public class ProcessamentoSalarialWriteService {
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado Cabimentado");
 
     processes.forEach(p -> {
-      var response = processarSalarioApi.autorizarSalario(p.getCab1Id().toString(), "SIM");
+     /* var response = processarSalarioApi.autorizarSalario(p.getCab1Id().toString(), "SIM");
       LOGGER.debug("Autorizar Salario Response: {}", response);
       if (response.content().issue().code() != 200)
-        throw IgrpResponseStatusException.badRequest("Erro ao autorizar salario", response.content().issue().diagnostics());
+        throw IgrpResponseStatusException.badRequest("Erro ao autorizar salario", response.content().issue().diagnostics());*/
+      processamentoSalarialHelper.atualizarEstado(p.getId(), StatusProcessamento.AUTORIZADO.name());
     });
   }
 
@@ -192,10 +193,10 @@ public class ProcessamentoSalarialWriteService {
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado Cabimentado");
 
     processes.forEach(p -> {
-      var response = processarSalarioApi.extornarCabimento(p.getCab1Id().toString());
+     /* var response = processarSalarioApi.extornarCabimento(p.getCab1Id().toString());
       LOGGER.debug("Extornar Cabimento Response: {}", response);
       if (response.content().issue().code() != 200)
-        throw IgrpResponseStatusException.badRequest("Erro ao eliminar cabimento", response.content().issue().diagnostics());
+        throw IgrpResponseStatusException.badRequest("Erro ao eliminar cabimento", response.content().issue().diagnostics());*/
       processamentoSalarialHelper.atualizarEstado(p.getId(), StatusProcessamento.VALIDADO_DEFINITIVO.name());
     });
   }
@@ -263,6 +264,7 @@ public class ProcessamentoSalarialWriteService {
 
   private enum StatusProcessamento {
     VALIDADO,
+    AUTORIZADO,
     PROCESSADO,
     ERRO_PROCESSAMENTO,
     VALIDADO_PROVISORIO,

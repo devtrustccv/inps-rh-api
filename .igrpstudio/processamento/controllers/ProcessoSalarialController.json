@@ -260,22 +260,12 @@
         {
           "type": "string",
           "name": "tipoValidacao",
-          "isRequired": false
-        },
-        {
-          "type": "string",
-          "name": "mesAtual",
-          "isRequired": false
-        },
-        {
-          "type": "string",
-          "name": "mesAnterior",
-          "isRequired": false
+          "isRequired": true
         },
         {
           "type": "string",
           "name": "processamentoIds",
-          "isRequired": false
+          "isRequired": true
         }
       ]
     },
@@ -603,5 +593,5 @@
       ]
     }
   ],
-  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial-ativarInactivarSubsidioNatal-getColaboresAumentoSalarial-getColaboresAumentoSalarial-getSubsidioFerias-executarAcaoNoProcessamento-processarSalario-getResumoProcessamento-getResumoProcessamento"
+  "id": "dcry51pbek-validarProcessamentoSalarial-getResumoProcessamento-getResumoProcessamento-getResumoProcessamento-getDadosValidacao-getDadosValidacao-getResumoProcessamento-getSubsidioNatal-getDetalhesAumentoSalarial-ativarInactivarSubsidioNatal-getColaboresAumentoSalarial-getColaboresAumentoSalarial-getSubsidioFerias-executarAcaoNoProcessamento-processarSalario-getResumoProcessamento-getResumoProcessamento-getDadosValidacao"
 }
