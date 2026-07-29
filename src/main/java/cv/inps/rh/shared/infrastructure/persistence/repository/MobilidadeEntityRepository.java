@@ -75,6 +75,12 @@ public interface MobilidadeEntityRepository extends
 
   MobilidadeEntity findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity fun, Estado estado);
 
+  /**
+   * Doc (Mobilidade): "um colaborador deve ter um único registo de mobilidade ativo". Usado na
+   * validação para desactivar as restantes activas quando uma nova mobilidade é aprovada.
+   */
+  List<MobilidadeEntity> findAllByFunIdAndEstado(FuncionarioEntity fun, Estado estado);
+
 }
 
 

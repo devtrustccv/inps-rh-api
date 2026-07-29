@@ -112,15 +112,22 @@ public class CarreiraWriteService {
       throw IgrpResponseStatusException.badRequest(
           "Este endpoint regista uma carreira NOVA. Para Progressão/Promoção ou Editar use o PUT.");
 
-    // Doc "Regra Geral" (l.4831-4835): máx 2 carreiras activas e NÃO duas do mesmo tipo (cargo
-    // nulo=CATEGORIA vs cargo não-nulo=CARGO). "Em vigor" = estado A e não terminada (data_fim nula
-    // ou futura). NOVO só ACUMULA um tipo diferente; se já existe do mesmo tipo, é caso de
-    // Progressão/Promoção (PUT), não de carreira nova.
-    boolean novoCargoNulo = dto.getCargoPosicaoId() == null;
+    // Normaliza "sem cargo": o frontend envia cargoPosicaoId=0 para carreira tipo CATEGORIA (sem
+    // cargo). Tratamos 0 como null para a classificação de tipo (cargo null=CATEGORIA vs não-nulo=
+    // CARGO) ficar correta em TODO o fluxo (guard, validação, gravação) — senão 0 conta como CARGO.
+    if (dto.getCargoPosicaoId() != null && dto.getCargoPosicaoId() == 0L) dto.setCargoPosicaoId(null);
+
+    // Doc "Regra Geral" (l.4831-4835): máx 2 carreiras activas; NÃO duas do mesmo tipo (cargo
+    // nulo=CATEGORIA vs cargo não-nulo=CARGO). "Em vigor" = estado A e não terminada.
+    // NOTA: o guard "mesmo tipo → Progressão" está COMENTADO temporariamente — pendente de confirmação
+    // com o negócio se pode haver 2 carreiras activas do MESMO tipo. Enquanto comentado, permite-se
+    // registar 2ª carreira de qualquer tipo (o "só 1 a processar" é garantido pelo flip na validação).
+    // Reativar após decisão. (cargo=0 já foi normalizado para null acima → classificação de tipo correta.)
+    // boolean novoCargoNulo = dto.getCargoPosicaoId() == null;
     var emVigor = carreiraEntityRepository.findEmVigorByFuncionario(funcionario, java.time.LocalDate.now());
-    if (emVigor.stream().anyMatch(c -> (c.getCargoId() == null) == novoCargoNulo))
-      throw IgrpResponseStatusException.conflict(
-          "Já existe uma carreira activa do mesmo tipo. Para alterá-la use Progressão/Promoção.");
+    // if (emVigor.stream().anyMatch(c -> (c.getCargoId() == null) == novoCargoNulo))
+    //   throw IgrpResponseStatusException.conflict(
+    //       "Já existe uma carreira activa do mesmo tipo. Para alterá-la use Progressão/Promoção.");
     if (emVigor.size() >= 2)
       throw IgrpResponseStatusException.conflict("O colaborador não pode ter mais de duas carreiras activas");
 
@@ -548,6 +555,10 @@ public class CarreiraWriteService {
 
     if (!carreira.getContrVinculoId().getFunId().getId().equals(funcionario.getId()))
       throw IgrpResponseStatusException.badRequest("Carreira não pertence a este funcionário");
+
+    // "Sem cargo" (CATEGORIA): o frontend envia cargoPosicaoId=0. Tratar 0 como null para a
+    // classificação de tipo (mudouChave) e a gravação do cargo ficarem corretas.
+    if (dto.getCargoPosicaoId() != null && dto.getCargoPosicaoId() == 0L) dto.setCargoPosicaoId(null);
 
     // Salário automático do escalão (spec DOSSIÊ: FLG_CARREIRA=1 -> salário preenchido do escalão).
     if (dto.getEscalaoReferenciaId() != null) {

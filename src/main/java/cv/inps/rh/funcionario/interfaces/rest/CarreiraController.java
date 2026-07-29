@@ -17,6 +17,7 @@ import cv.inps.rh.funcionario.application.dto.WrapperCarreiraListDTO;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraAtualQuery;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraByIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
+import cv.inps.rh.funcionario.application.queries.GetCarreiraProcessandoAtivaQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -193,6 +194,36 @@ public class CarreiraController {
   {
 
       final var query = new GetCarreiraAtualQuery(uuidFuncionario);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "carreiras/{idFuncionario}/processamento-ativo"
+  )
+  @Operation(
+    summary = "Get carreira que processa salario (ativa)",
+    description = "Get carreira que processa salario (ativa)",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = CarreiraResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<CarreiraResponseDTO> getCarreiraProcessandoAtiva(
+    @PathVariable(value = "idFuncionario") String idFuncionario)
+  {
+
+      final var query = new GetCarreiraProcessandoAtivaQuery(idFuncionario);
 
       return queryBus.handle(query);
 

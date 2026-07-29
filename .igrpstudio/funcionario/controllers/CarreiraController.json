@@ -200,6 +200,34 @@
       ]
     },
     {
+      "actionName": "getCarreiraProcessandoAtiva",
+      "path": "carreiras/{idFuncionario}/processamento-ativo",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "CarreiraResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
       "actionName": "eliminarCarreira",
       "path": "carreiras/{carreiraId}",
       "method": "DELETE",

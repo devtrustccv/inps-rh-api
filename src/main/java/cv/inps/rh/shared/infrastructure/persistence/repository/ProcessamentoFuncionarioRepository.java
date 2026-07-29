@@ -24,6 +24,13 @@ public interface ProcessamentoFuncionarioRepository extends
   boolean existsByTiprel_Id(Long tiprelId);
 
   /**
+   * Reproduz a coluna PROCESSAMENTO da vista RH_V_MOBILIDADE: existe um tiprel desta mobilidade
+   * (RH_T_TIPOS_RELACIONAMENTO.MOB_ID) com registo em RH_T_PROC_FUNCIONARIOS. Usado para bloquear a
+   * edição de mobilidades já processadas em folha.
+   */
+  boolean existsByTiprel_MobId_Id(Long mobId);
+
+  /**
    * Já existe processamento em folha do tiprel cujo período de referência começa dentro do intervalo
    * (mês). Usado na substituição (caso de uso, Caso 4.1/4.2): se o 1º mês já foi processado, a
    * diferença desse mês junta-se ao mês seguinte em vez de gerar um DEF_REMUNERACOES próprio.

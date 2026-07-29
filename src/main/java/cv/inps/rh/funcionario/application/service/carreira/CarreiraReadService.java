@@ -129,6 +129,18 @@ public class CarreiraReadService {
     return getCarreiraResponseDTO(tr);
   }
 
+  /**
+   * Pré-check do frontend antes de registar nova carreira: a carreira ATIVA que processa salário
+   * (ou {@code null} se nenhuma). O invariante acopla FLG_PROCESSA ao EST_ACT_ADM=1 (ver
+   * validarCarreira), logo a única que pode processar é a do tiprel atual — devolve-se essa se
+   * flg=1. Com isto o frontend avisa "já existe X a processar; ao marcar esta, X deixa de processar".
+   */
+  public CarreiraResponseDTO carreiraProcessandoAtiva(String uuidFuncionario) {
+    var tr = funcionarioRules.getTipoRelacionamentoAtual(parseUuid(uuidFuncionario, "uuidFuncionario"));
+    if (tr == null || !Integer.valueOf(1).equals(tr.getFlgProcessa())) return null;
+    return getCarreiraResponseDTO(tr);
+  }
+
   private @NonNull CarreiraResponseDTO getCarreiraResponseDTO(TiposRelacionamentoEntity tr) {
     var car = tr.getCarreiraId();
     var contrato = tr.getContrVinculoId();
