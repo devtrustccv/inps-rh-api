@@ -72,7 +72,10 @@ public class CarreiraResponseDTO  {
   private String dataFim ;
 
 
-  private String processaSalarioNestaCarreira ;
+  private String processaSalarioNestaCarreira;
+
+
+  private Integer flgProcessa;
 
 
   private Boolean processamento ;
