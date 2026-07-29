@@ -122,6 +122,13 @@
           "type": "string",
           "isRequired": true
         }
+      ],
+      "requestParams": [
+        {
+          "type": "integer",
+          "name": "versao",
+          "isRequired": false
+        }
       ]
     },
     {
