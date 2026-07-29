@@ -5,6 +5,7 @@ package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,22 +34,40 @@ public class MobilidadeDTO  {
   private LocalDate dataFim ;
 
 
+  // Campos só de leitura: o servidor devolve-os, nunca os lê do corpo do pedido. O readOnly tira-os
+  // do schema de request no Swagger. Substituir por MobilidadeReqDTO/MobilidadeRespDTO quando o
+  // fluxo de mobilidade estabilizar — é a convenção do resto do módulo.
+  @Schema(accessMode = Schema.AccessMode.READ_ONLY)
   private String dirrecaoAntes ;
 
 
   private Long direcaoDepois ;
 
 
+  @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+  private String direcaoDepoisDesc ;
+
+
+  @Schema(accessMode = Schema.AccessMode.READ_ONLY)
   private String seccaoAntes ;
 
 
   private Long seccaoDepois ;
 
 
+  @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+  private String seccaoDepoisDesc ;
+
+
+  @Schema(accessMode = Schema.AccessMode.READ_ONLY)
   private String localTrabalhoAntes ;
 
 
   private Long localTrabalhoDepois ;
+
+
+  @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+  private String localTrabalhoDepoisDesc ;
 
   private String tipoOrdemServico ;
 
