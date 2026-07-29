@@ -54,10 +54,10 @@ public class ValidacaoRenovacaoContratoService {
       // renovacao e APROVADA. Numa rejeicao o contrato mantem as datas actuais.
       if (aprovado) {
         contratoMapper.toUpdateEntity(contrato, dto.getDadosRenovacao());
-        // Estende a DATA_FIM das DIMENSÕES (tiprel + carreira/mob/regime/situação). Os DEF são
+        // Estende as datas das DIMENSÕES (tiprel + carreira/mob/regime/situação). Os DEF são
         // estendidos DEPOIS do transferir, para o filtro "não-terminado" avaliar a DATA_FIM ORIGINAL
         // dos def (senão a extensão reviveria os expirados e o filtro não os excluiria).
-        estenderDatasDimensoes(tiposRelacionamento, contrato.getDataFim());
+        estenderDatasDimensoes(tiposRelacionamento, contrato.getDataInicio(), contrato.getDataFim());
       }
       mudarEstado(funcionario, aprovado ? Estado.A : Estado.I);
     }
@@ -84,8 +84,19 @@ public class ValidacaoRenovacaoContratoService {
     return renovacaoContratoDTO;
   }
 
-  /** Renovação: estende a DATA_FIM das DIMENSÕES (tiprel + carreira/mobilidade/regime/situação). */
-  private void estenderDatasDimensoes(TiposRelacionamentoEntity tr, LocalDate dataFim) {
+  /**
+   * Renovação: ajusta as datas das DIMENSÕES na aprovação.
+   *
+   * <p>TIPREL — recebe DATA_INICIO + DATA_FIM. O tiprel novo é criado no registo com
+   * DATA_INICIO = sysdate; aqui corrigimo-lo para a DATA_INICIO real do contrato (a "Data inicio" do
+   * formulário, conforme a spec da Renovação: novo tiprel.DATA_INICIO = data início do formulário).
+   *
+   * <p>Carreira/mobilidade/regime/situação — só se estende a DATA_FIM. Estas dimensões já são
+   * gravadas com o DATA_INICIO correto no registo; NÃO se sobrescreve o DATA_INICIO delas para não
+   * estragar casos legítimos com início próprio (ex.: progressão de carreira a meio do contrato).
+   */
+  private void estenderDatasDimensoes(TiposRelacionamentoEntity tr, LocalDate dataInicio, LocalDate dataFim) {
+    tr.setDataInicio(dataInicio);
     tr.setDataFim(dataFim);
     if (tr.getCarreiraId() != null) tr.getCarreiraId().setDataFim(dataFim);
     if (tr.getMobId() != null) tr.getMobId().setDataFim(dataFim);
