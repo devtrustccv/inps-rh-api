@@ -14,6 +14,8 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DefPagamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
@@ -93,6 +95,15 @@ public class ValidarContratoService {
     var regime = tiposRelacionamento.getRegimeId();
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
 
+    // Novo contrato = TUDO NOVO (não é renovação): os def do contrato ANTERIOR não pertencem a este
+    // fluxo. Numa validação POSITIVA, encerra-os por DATA_FIM mantendo 'A' (doc "Novo Contrato":
+    // encerrar por DATA_FIM; o 'I' é só rejeição) e retira-os da coleção de trabalho — para que o
+    // sync (eliminar/adicionar/atualizar), o reconciliar e o associarNovos, que iteram a coleção do
+    // funcionário, só vejam os def do NOVO contrato. Corre ANTES do sync.
+    if (EstadoValidacao.SIM.equals(dto.getValidar())) {
+      encerrarEExcluirDefsContratoAnterior(funcionario, tiposRelacionamento);
+    }
+
     // Sincronizacao de subsidios/encargos so faz sentido para vinculos COM salario — e NUNCA numa
     // REJEICAO (NAO): o sync elimina os def existentes que nao vem no DTO, o que numa rejeicao
     // apagaria os def do contrato ANTERIOR (que o revert vai reativar). No NAO nao se mexe nos def:
@@ -141,12 +152,11 @@ public class ValidarContratoService {
       // reconciliar (que os cria ja como A); aqui so se tocam os que estao pendentes.
       transicionarManuaisPendentes(funcionario, estado);
       if (estado == Estado.A) {
-        // #7 — Inativa (I) TODOS os def do contrato ANTERIOR (associados ao tiprel pai) ANTES do
-        // reconciliar. Sem isto: (a) o associarNovos herdava os manuais antigos; (b) o reconciliar
-        // REUTILIZAVA os fixos partilhados (mesmo tm) do contrato anterior, que ficavam ativos e
-        // associados aos DOIS contratos. Ao inativa-los primeiro, o contrato anterior fica encerrado
-        // e o reconciliar cria fixos FRESCOS para o novo contrato -> separacao limpa por contrato.
-        inativarDefContratoAnterior(tiposRelacionamento);
+        // Os def do contrato ANTERIOR já foram encerrados (DATA_FIM, mantendo 'A') e retirados da
+        // coleção de trabalho acima (encerrarEExcluirDefsContratoAnterior). Por isso o reconciliar
+        // cria fixos FRESCOS para o novo contrato (não vê os antigos) e o associarNovos só associa os
+        // novos — separação limpa por contrato, SEM inativar/apagar os antigos (ficam visíveis no
+        // getById do contrato anterior).
         // reconciliar os movimentos fixos do vinculo — SO na validacao positiva e SO com salario
         if (Objects.equals(1, paramVinculo.getFlgSalario())) {
           reconciliacaoMovimentoVinculoService.reconciliar(funcionario, contrato,
@@ -206,13 +216,32 @@ public class ValidarContratoService {
    * contrato em vez de reutilizar os do anterior (que de outra forma ficavam ativos e partilhados
    * entre os dois contratos).
    */
-  private void inativarDefContratoAnterior(TiposRelacionamentoEntity novoTiprel) {
+  private void encerrarEExcluirDefsContratoAnterior(FuncionarioEntity funcionario, TiposRelacionamentoEntity novoTiprel) {
     var antigo = novoTiprel.getTiprelId();
     if (antigo == null) return;
-    funcionarioRules.getRemuneracoesAssociadosAtivos(antigo.getId())
-        .forEach(r -> r.setEstado(Estado.I));
-    funcionarioRules.getPagamentosDescontosAssociadosAtivos(antigo.getId())
-        .forEach(p -> p.setEstado(Estado.I));
+    var remsAntigos = funcionarioRules.getRemuneracoesAssociadosAtivos(antigo.getId());
+    var pagsAntigos = funcionarioRules.getPagamentosDescontosAssociadosAtivos(antigo.getId());
+
+    // 1. ENCERRAR por DATA_FIM, mantendo 'A' (doc). Só fecha os que estão em aberto (DATA_FIM nula);
+    //    os que já têm DATA_FIM (fim do próprio contrato anterior) ficam como estão. Usa a DATA_FIM
+    //    do tiprel anterior (= início do novo contrato, definida no registo).
+    var fimAntigo = antigo.getDataFim();
+    if (fimAntigo != null) {
+      remsAntigos.forEach(r -> { if (r.getDataFim() == null) r.setDataFim(fimAntigo); });
+      pagsAntigos.forEach(p -> { if (p.getDataFim() == null) p.setDataFim(fimAntigo); });
+    }
+
+    // 2. EXCLUIR da coleção de trabalho do funcionário (scoping em memória). Seguro: @OneToMany
+    //    mappedBy (lado inverso) SEM orphanRemoval/REMOVE → não apaga da BD nem mexe no fun_id. Os
+    //    def continuam geridos (a DATA_FIM acima persiste) e associados ao tiprel anterior na
+    //    RH_T_TIPREL_REM_PAG. Com isto, o sync/reconciliar/associarNovos (que iteram esta coleção)
+    //    tratam o novo contrato como TUDO NOVO, sem tocar nos def do contrato anterior.
+    var remIds = remsAntigos.stream().map(DefinicaoRemuneracaoEntity::getId).collect(java.util.stream.Collectors.toSet());
+    var pagIds = pagsAntigos.stream().map(DefPagamentoEntity::getId).collect(java.util.stream.Collectors.toSet());
+    if (funcionario.getDefinicoesRenumeracoes() != null)
+      funcionario.getDefinicoesRenumeracoes().removeIf(r -> r != null && r.getId() != null && remIds.contains(r.getId()));
+    if (funcionario.getDefinicoesPagamentos() != null)
+      funcionario.getDefinicoesPagamentos().removeIf(p -> p != null && p.getId() != null && pagIds.contains(p.getId()));
   }
 
   /**

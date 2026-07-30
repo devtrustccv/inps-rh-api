@@ -54,7 +54,7 @@ public class ReconciliacaoMovimentoVinculoService {
 
   private void reconciliarRemuneracao(FuncionarioEntity funcionario, Long vinculoNovoId, Long vinculoAntigoId,
                                       BigDecimal salario, String moeda, LocalDate dataInicio, LocalDate dataFim) {
-    var remMovs = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoNovoId, "REM");
+    var remMovs = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(vinculoNovoId, "REM", Estado.A);
     if (CollectionUtils.isEmpty(remMovs) || remMovs.getFirst().getTmId() == null) {
       return;
     }
@@ -65,7 +65,7 @@ public class ReconciliacaoMovimentoVinculoService {
     // mudanca de vinculo: se a REM-base do vinculo ANTIGO usa um tm diferente, inactiva-la
     // (senao ficariam dois salarios-base activos)
     if (vinculoAntigoId != null && !Objects.equals(vinculoAntigoId, vinculoNovoId)) {
-      var antigoRemMovs = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoAntigoId, "REM");
+      var antigoRemMovs = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(vinculoAntigoId, "REM", Estado.A);
       if (!CollectionUtils.isEmpty(antigoRemMovs) && antigoRemMovs.getFirst().getTmId() != null) {
         Long antigoRemTmId = antigoRemMovs.getFirst().getTmId().getId();
         if (!Objects.equals(antigoRemTmId, remTm.getId())) {
@@ -91,12 +91,12 @@ public class ReconciliacaoMovimentoVinculoService {
 
   private void reconciliarPagamentos(FuncionarioEntity funcionario, Long vinculoNovoId, Long vinculoAntigoId,
                                      LocalDate dataInicio, LocalDate dataFim) {
-    var novosPagMovs = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoNovoId, "PAG");
+    var novosPagMovs = paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(vinculoNovoId, "PAG", Estado.A);
     Set<Long> novosPagTms = novosPagMovs.stream()
         .filter(m -> m.getTmId() != null).map(m -> m.getTmId().getId()).collect(Collectors.toSet());
 
     Set<Long> antigosPagTms = vinculoAntigoId == null ? Set.of()
-        : paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoAntigoId, "PAG").stream()
+        : paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(vinculoAntigoId, "PAG", Estado.A).stream()
             .filter(m -> m.getTmId() != null).map(m -> m.getTmId().getId()).collect(Collectors.toSet());
 
     if (funcionario.getDefinicoesPagamentos() == null) {
@@ -134,7 +134,7 @@ public class ReconciliacaoMovimentoVinculoService {
    */
   public Set<Long> tmsFixosDoVinculo(Long vinculoId, String tipo) {
     if (vinculoId == null) return Set.of();
-    return paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoId, tipo).stream()
+    return paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(vinculoId, tipo, Estado.A).stream()
         .filter(m -> m.getTmId() != null)
         .map(m -> m.getTmId().getId())
         .collect(Collectors.toSet());
