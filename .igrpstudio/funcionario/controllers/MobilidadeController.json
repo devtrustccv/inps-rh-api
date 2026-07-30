@@ -158,8 +158,54 @@
       ]
     },
     {
-      "actionName": "validarMobilidade",
+      "actionName": "editarMobilidade",
       "path": "{idFuncionario}/mobilidades/{mobilidadeId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "Mobilidade",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "Mobilidade",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idFuncionario",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "mobilidadeId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "validarMobilidade",
+      "path": "{idFuncionario}/mobilidades/{mobilidadeId}/validar",
       "method": "PUT",
       "requestBody": {
         "content": {
