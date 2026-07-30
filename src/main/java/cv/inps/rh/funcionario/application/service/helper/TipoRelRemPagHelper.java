@@ -116,24 +116,49 @@ public class TipoRelRemPagHelper {
    * dedup por ID garante que itens transferidos e novos não se sobrepõem.
    *
    * <p>Filtro "não-terminado" (todos os fluxos de cópia — mobilidade/carreira/histórico/renovação):
-   * um movimento já expirado (ex.: diferença de substituição de mês passado, subsídio manual cuja
-   * DATA_FIM já passou) NÃO transita para o novo relacionamento.</p>
+   * um movimento já expirado (DATA_FIM anterior a hoje) NÃO transita. Usa-se HOJE (não a data do
+   * novo relacionamento) porque na renovação os def do tiprel anterior ainda têm a DATA_FIM do
+   * contrato antigo (ex.: 2027-07-31) no momento do transfer — o novo tiprel começa no dia seguinte
+   * (2027-08-01) e só depois é que o {@code estenderDatas} lhes estende a data; por hoje ainda estão
+   * em vigor e devem transitar.</p>
    */
   public void transferirParaNovoTipoRelacionamento(
       TiposRelacionamentoEntity tipoRelAtual,
       TiposRelacionamentoEntity novoTipoRel,
       List<DefinicaoRemuneracaoEntity> novasRemuneracoes,
       List<DefPagamentoEntity> novosPagamentos) {
+    transferirParaNovoTipoRelacionamento(tipoRelAtual, novoTipoRel, novasRemuneracoes, novosPagamentos,
+        java.util.Collections.emptySet(), java.util.Collections.emptySet());
+  }
+
+  /**
+   * Variante com EXCLUSÃO explícita por id de def. Usada na progressão de carreira: o vencimento
+   * antigo é FECHADO por DATA_FIM mas MANTÉM estado 'A' (para não desaparecer da vista inicial),
+   * logo já não é o {@code estado='I'} que o exclui do transfer — a progressão passa aqui o id do
+   * salário fechado para ele não transitar para o novo tiprel (que já recebe o salário novo). A
+   * data não distingue este caso do def continuado da renovação (ambos ficam com DATA_FIM =
+   * início_novo − 1), por isso a exclusão é por id, não por data.
+   */
+  public void transferirParaNovoTipoRelacionamento(
+      TiposRelacionamentoEntity tipoRelAtual,
+      TiposRelacionamentoEntity novoTipoRel,
+      List<DefinicaoRemuneracaoEntity> novasRemuneracoes,
+      List<DefPagamentoEntity> novosPagamentos,
+      Set<Long> excluirRemIds,
+      Set<Long> excluirPagIds) {
 
     List<TipoRelRemPagEntity> lista = new ArrayList<>();
     Set<Long> remIds = new HashSet<>();
     Set<Long> pagIds = new HashSet<>();
     var hoje = java.time.LocalDate.now();
+    var excluirRem = excluirRemIds != null ? excluirRemIds : java.util.Collections.<Long>emptySet();
+    var excluirPag = excluirPagIds != null ? excluirPagIds : java.util.Collections.<Long>emptySet();
 
     var remuneracoesAtivas = funcionarioRules.getRemuneracoesAssociadosAtivos(tipoRelAtual.getId());
     if (!CollectionUtils.isEmpty(remuneracoesAtivas)) {
       for (var rem : remuneracoesAtivas) {
         if (rem == null || rem.getId() == null) continue;
+        if (excluirRem.contains(rem.getId())) continue; // fechado/substituído nesta operação → não transita
         if (rem.getDataFim() != null && rem.getDataFim().isBefore(hoje)) continue; // expirado → não transita
         if (!remIds.add(rem.getId())) continue;
         var assoc = new TipoRelRemPagEntity();
@@ -148,6 +173,7 @@ public class TipoRelRemPagHelper {
     if (!CollectionUtils.isEmpty(pagamentosAtivos)) {
       for (var pag : pagamentosAtivos) {
         if (pag == null || pag.getId() == null) continue;
+        if (excluirPag.contains(pag.getId())) continue; // fechado/substituído nesta operação → não transita
         if (pag.getDataFim() != null && pag.getDataFim().isBefore(hoje)) continue; // expirado → não transita
         if (!pagIds.add(pag.getId())) continue;
         var assoc = new TipoRelRemPagEntity();

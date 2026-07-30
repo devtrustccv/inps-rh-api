@@ -5,6 +5,7 @@ import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RhVContratoEntity;
@@ -82,11 +83,13 @@ public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoById
     if (tiposRelacionamento == null)
       throw IgrpResponseStatusException.notFound("Contrato com id '%s' não encontrado".formatted(contratoId));
 
-    // Def SÓ deste contrato e vigentes: pela associação do tiprel, filtradas pelo estado do próprio
-    // tiprel (mesmo padrão do CarreiraReadService). Sem isto, def eliminados/inactivos (E/I) que
-    // continuam associados ao tiprel — ex.: manuais substituídos pelo sync na validação — apareciam
-    // no detalhe. O def não tem coluna de contrato; a associação + estado do tiprel é o vínculo.
-    var estadoTiprel = tiposRelacionamento.getEstado();
+    // Def SÓ deste contrato: pela associação do tiprel. Regra do analista (progressão 4.2.2): os def
+    // relevantes são os que estão 'A' — o vencimento superseded fecha-se por DATA_FIM mas MANTÉM 'A'.
+    // Um tiprel superseded pela progressão fica 'I' enquanto os seus def ficam 'A', logo NÃO se pode
+    // filtrar por "def.estado == tiprel.estado" (daria vazio). Filtra-se por 'A', EXCETO quando o
+    // tiprel está PENDENTE (P): aí mostram-se os def P (preview). Isto também exclui os E/I
+    // (eliminados/inactivos — ex.: manuais substituídos pelo sync), que não são 'A'.
+    var estadoAlvo = tiposRelacionamento.getEstado() == Estado.P ? Estado.P : Estado.A;
     // Vista ATUAL (est_act_adm=1): mostra só os def EM VIGOR — o MESMO predicado "não-terminado" da
     // cópia da renovação: data_fim NULL ou >= hoje. Exclui os expirados (ex.: diferenças de meses já
     // passados) e mantém os futuros. A vista INICIAL não filtra período (mostra o estado inicial).
@@ -94,11 +97,11 @@ public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoById
     var hoje = LocalDate.now();
 
     var remuneracoes = funcionarioRules.getRemuneracoesAssociados(tiposRelacionamento.getId())
-        .stream().filter(r -> r.getEstado() == estadoTiprel)
+        .stream().filter(r -> r.getEstado() == estadoAlvo)
         .filter(r -> !atual || emVigor(r.getDataFim(), hoje))
         .toList();
     var pagamentos = funcionarioRules.getPagamentosDescontosAssociados(tiposRelacionamento.getId())
-        .stream().filter(p -> p.getEstado() == estadoTiprel)
+        .stream().filter(p -> p.getEstado() == estadoAlvo)
         .filter(p -> !atual || emVigor(p.getDataFim(), hoje))
         .toList();
 

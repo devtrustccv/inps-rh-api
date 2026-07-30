@@ -184,6 +184,7 @@ public class ValidarRegistoColaboradorService {
         }
       });
     }
+
     funcionario.setHabilitacoesLiterarias(habilitacoesLiterarias);
     funcionario.setFormacoesFeitas(formacoesFeitas);
     funcionario.setExperienciasProfissionais(experienciasProfissionais);
@@ -201,6 +202,17 @@ public class ValidarRegistoColaboradorService {
       }
       mudaEstado(funcionario, estado);
     }
+
+    // Registo do colaborador: marca TODOS os def (remuneracoes + pagamentos) com obs="INICIO",
+    // identificando-os como a versao INICIAL do contrato. Feito AQUI, depois do reconciliar (que
+    // acrescenta o salario-base + PAG fixos as colecoes), para apanhar tambem esses — nao so os
+    // subsidios manuais. Sobrescreve qualquer obs do formulario. Ignora os E (eliminados).
+    funcionario.getDefinicoesRenumeracoes().forEach(r -> {
+      if (r != null && r.getEstado() != Estado.E) r.setObs("INICIO");
+    });
+    funcionario.getDefinicoesPagamentos().forEach(p -> {
+      if (p != null && p.getEstado() != Estado.E) p.setObs("INICIO");
+    });
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 

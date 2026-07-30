@@ -431,15 +431,23 @@ public class CarreiraWriteService {
     if (carreiraMesmoTipo != null) {
       var tiprelSubstituido = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreiraMesmoTipo.getUuid()).orElse(null);
       if (tiprelSubstituido != null) {
-        // 1. Fecha SÓ o vencimento antigo (o def REM cujo tm é o salário do vínculo).
+        // 1. Fecha SÓ o vencimento antigo (o def REM cujo tm é o salário do vínculo). Doc: fechar por
+        //    DATA_FIM e MANTER estado 'A' (o 'I' é só para rejeição). Fecha em dataEfetiva-1 (o dia
+        //    antes do novo período) para dar fronteira de período limpa: o antigo cobre até ao dia
+        //    anterior; o novo começa em dataEfetiva. Assim as vistas por período separam-nos sem sobrepor.
         Long salarioTmId = salarioTmIdDoContrato(carreira.getContrVinculoId());
+        var fimAntigo = dataEfetiva.minusDays(1);
+        var salariosFechadosIds = new java.util.HashSet<Long>();
         funcionarioRules.getRemuneracoesAssociadosAtivos(tiprelSubstituido.getId()).stream()
             .filter(r -> salarioTmId != null && r.getTmId() != null && Objects.equals(r.getTmId().getId(), salarioTmId))
-            .forEach(o -> { o.setDataFim(dataEfetiva); o.setEstado(Estado.I); definicaoRemuneracaoEntityRepository.save(o); });
+            .forEach(o -> { o.setDataFim(fimAntigo); definicaoRemuneracaoEntityRepository.save(o); salariosFechadosIds.add(o.getId()); });
         // 2. Re-associa os restantes ativos (subsídios + descontos) ao novo tiprel — mesmas linhas,
-        //    datas intactas (o vencimento já foi fechado acima, logo não transita).
+        //    datas intactas. O vencimento antigo mantém-se 'A' (para não sumir da vista inicial), por
+        //    isso já não é o estado 'I' que o exclui do transfer: passa-se o seu id em excluirRemIds
+        //    para ele NÃO transitar (o novo tiprel já recebe o salário novo do escalão).
         if (tiprelPendente != null)
-          tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tiprelSubstituido, tiprelPendente, List.of(), List.of());
+          tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tiprelSubstituido, tiprelPendente,
+              List.of(), List.of(), salariosFechadosIds, java.util.Collections.emptySet());
         // 3. Fecha o tiprel antigo (est_act_adm=0, I). Os def re-associados ficam ativos.
         tiprelSubstituido.setDataFim(dataEfetiva);
         tiprelSubstituido.setEstActAdm(0);
@@ -646,7 +654,12 @@ public class CarreiraWriteService {
               .findFirst().orElse(null);
       if (salarioAntigo != null) {
         var dataEfetiva = dto.getDataInicio() != null ? dto.getDataInicio() : java.time.LocalDate.now();
-        salarioAntigo.setDataFim(dataEfetiva);
+        // Editar é uma correção IN-PLACE na MESMA versão (mesmo tiprel): o salário novo é associado
+        // a este mesmo relacionamento (linha abaixo). Ao contrário da progressão/renovação (transição
+        // de versão, tiprels distintos), aqui o valor antigo NÃO é uma versão à parte — é só histórico
+        // da correção. Por isso fecha-se por DATA_FIM E inactiva-se ('I'): senão o mesmo tiprel ficaria
+        // com dois salários 'A' e a vista (inicial e atual, ambas este tiprel) mostraria os dois.
+        salarioAntigo.setDataFim(dataEfetiva.minusDays(1));
         salarioAntigo.setEstado(Estado.I);
         definicaoRemuneracaoEntityRepository.save(salarioAntigo);
         var salarioNovo = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario, obsAtualizar);

@@ -185,12 +185,15 @@ public class CarreiraReadService {
     var encargos = new ArrayList<EncargosDescontosRespDTO>();
     var paymentsNotNeedInDetails = List.of("INPS", "IUR");
 
-    // Def SÓ desta carreira: pela associação do tiprel (TIPREL_REM_PAG), filtrada pelo estado do
-    // próprio tiprel. Não usar fun+estado — misturaria def de outros pendentes (o def não tem
-    // coluna de carreira; a associação é o único vínculo à carreira).
+    // Def SÓ desta carreira: pela associação do tiprel (TIPREL_REM_PAG). Regra do analista (progressão
+    // 4.2.2): os def relevantes são os que estão 'A' (o vencimento antigo fecha-se por DATA_FIM mas
+    // MANTÉM 'A'). Um tiprel superseded pela progressão fica 'I', mas os seus def continuam 'A' — logo
+    // NÃO se pode filtrar por "def.estado == tiprel.estado" (daria vazio no superseded). Filtra-se por
+    // 'A', EXCETO quando o tiprel está PENDENTE (P): aí mostram-se os def P (preview da validação).
+    var estadoAlvo = tr.getEstado() == Estado.P ? Estado.P : Estado.A;
     var data = funcionarioRules.getPagamentosDescontosAssociados(tr.getId())
         .stream()
-        .filter(obj -> obj.getEstado() == tr.getEstado())
+        .filter(obj -> obj.getEstado() == estadoAlvo)
         .filter(obj -> !paymentsNotNeedInDetails.contains(obj.getTmId().getTipo()))
         .toList();
 
@@ -211,7 +214,7 @@ public class CarreiraReadService {
     var subsidios = new ArrayList<SubsidioRespDTO>();
     var subsidioDBData = funcionarioRules.getRemuneracoesAssociados(tr.getId())
         .stream()
-        .filter(obj -> obj.getEstado() == tr.getEstado())
+        .filter(obj -> obj.getEstado() == estadoAlvo)
         .toList();
     subsidioDBData.forEach(obj -> {
       var row = new SubsidioRespDTO();
