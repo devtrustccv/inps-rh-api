@@ -84,7 +84,7 @@ public class ProcessamentoSalarialWriteService {
 
       stmt.setPlsqlIndexTable(
           1,
-          ids,
+          processingIds,
           processingIds.length,
           processingIds.length,
           OracleTypes.VARCHAR,
