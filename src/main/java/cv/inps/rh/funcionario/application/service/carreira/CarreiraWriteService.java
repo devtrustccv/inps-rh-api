@@ -103,7 +103,7 @@ public class CarreiraWriteService {
     if (dto.getFlgProcessa() == null)
       throw IgrpResponseStatusException.badRequest("O campo 'processar salário' é obrigatório");
 
-    var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
+    var contratoAtual = funcionarioRules.getContratoAtual(funcionario.getUuid());
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     // POST = contexto CARREIRA_NOVO. Se vier tipoCarreira, validar que a REFERENCIA é mesmo NOVO —
@@ -124,7 +124,10 @@ public class CarreiraWriteService {
     // registar 2ª carreira de qualquer tipo (o "só 1 a processar" é garantido pelo flip na validação).
     // Reativar após decisão. (cargo=0 já foi normalizado para null acima → classificação de tipo correta.)
     // boolean novoCargoNulo = dto.getCargoPosicaoId() == null;
-    var emVigor = carreiraEntityRepository.findEmVigorByFuncionario(funcionario, java.time.LocalDate.now());
+    // Escopadas ao contrato ATUAL — carreiras de contratos anteriores (encerrados) não contam para o
+    // limite de 2 activas, mesmo que o seu data_fim ainda seja futuro (ver validarCarreira).
+    var emVigor = carreiraEntityRepository.findEmVigorByFuncionario(funcionario, java.time.LocalDate.now())
+        .stream().filter(c -> mesmoContrato(c, contratoAtual)).toList();
     // if (emVigor.stream().anyMatch(c -> (c.getCargoId() == null) == novoCargoNulo))
     //   throw IgrpResponseStatusException.conflict(
     //       "Já existe uma carreira activa do mesmo tipo. Para alterá-la use Progressão/Promoção.");
@@ -195,7 +198,7 @@ public class CarreiraWriteService {
     // validar; os subsidios/descontos existentes NAO se copiam — RE-ASSOCIAM-se ao novo tiprel no
     // validar (doc 29/07: TIPREL_REM_PAG "pega todos os registos do tiprel anterior").
     var movREM = paramVinculoMovimentoEntityRepository
-        .findByVinculoId_IdAndTipo(vinculoAtualId, "REM").stream().findFirst().orElse(null);
+        .findByVinculoId_IdAndTipoAndEstado(vinculoAtualId, "REM", Estado.A).stream().findFirst().orElse(null);
     if (movREM != null) {
       var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario, obsMovimento);
       salario.setTmId(movREM.getTmId());
@@ -257,7 +260,7 @@ public class CarreiraWriteService {
       throw IgrpResponseStatusException.conflict("Existe um registo de carreira por validar!");
     if (dto.getFlgProcessa() == null)
       throw IgrpResponseStatusException.badRequest("O campo 'processar salário' é obrigatório");
-    var contratoAtual = funcionarioRules.getContratoComMaiorVersao(funcionario.getUuid());
+    var contratoAtual = funcionarioRules.getContratoAtual(funcionario.getUuid());
     var relacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     criarPendenteContentor(funcionario, dto, contratoAtual, relacionamentoAtual, fonte);
   }
@@ -339,10 +342,18 @@ public class CarreiraWriteService {
    *  devolve para visualizacao e o frontend reenvia). Conjunto vazio se o vinculo for nulo. */
   private java.util.Set<Long> tmsFixosDoVinculo(Long vinculoId, String tipo) {
     if (vinculoId == null) return java.util.Set.of();
-    return paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipo(vinculoId, tipo).stream()
+    return paramVinculoMovimentoEntityRepository.findByVinculoId_IdAndTipoAndEstado(vinculoId, tipo, Estado.A).stream()
         .filter(m -> m.getTmId() != null)
         .map(m -> m.getTmId().getId())
         .collect(java.util.stream.Collectors.toSet());
+  }
+
+  /** Uma carreira pertence ao mesmo contrato (contr_vinculo) dado. Usado para escopar as "carreiras
+   *  em vigor" ao contrato atual — evita que carreiras de contratos anteriores (encerrados, mas com
+   *  data_fim ainda futuro) sejam consideradas na progressão/limite. */
+  private boolean mesmoContrato(CarreiraEntity c, ContratoEntity contrato) {
+    return c != null && c.getContrVinculoId() != null && contrato != null
+        && Objects.equals(c.getContrVinculoId().getId(), contrato.getId());
   }
 
   /** Tm do movimento de SALÁRIO do vínculo do contrato (REM). Usado na progressão para identificar
@@ -351,7 +362,7 @@ public class CarreiraWriteService {
     Long vinculoId = contrato != null && contrato.getVinculoId() != null ? contrato.getVinculoId().getId() : null;
     if (vinculoId == null) return null;
     var movREM = paramVinculoMovimentoEntityRepository
-        .findByVinculoId_IdAndTipo(vinculoId, "REM").stream().findFirst().orElse(null);
+        .findByVinculoId_IdAndTipoAndEstado(vinculoId, "REM", Estado.A).stream().findFirst().orElse(null);
     return movREM != null && movREM.getTmId() != null ? movREM.getTmId().getId() : null;
   }
 
@@ -418,9 +429,15 @@ public class CarreiraWriteService {
     // só o carr_id (a dimensão desta carreira) fica o novo. Ler ANTES de a progressão fechar o atual.
     var tiprelAtual = tiposRelacionamentoEntityRepository.findAtualByFuncionarioUuid(funcionario.getUuid()).orElse(null);
 
-    // Carreiras em vigor (estado A, data_fim null ou futura), excluindo a pendente.
+    // Carreiras em vigor (estado A, data_fim null ou futura), excluindo a pendente. ESCOPADAS ao
+    // MESMO contrato da pendente: num funcionário multi-contrato (após um novo contrato), a carreira
+    // do contrato ANTERIOR ainda tem data_fim = fim desse contrato (futuro), pelo que o findEmVigor a
+    // devolveria — e a progressão substituiria a carreira ERRADA (do contrato antigo), transferindo os
+    // def do contrato antigo. A "carreira do mesmo tipo em vigor" só faz sentido dentro do contrato atual.
     var emVigor = carreiraEntityRepository.findEmVigorByFuncionario(funcionario, java.time.LocalDate.now())
-        .stream().filter(c -> !Objects.equals(c.getId(), carreira.getId())).toList();
+        .stream().filter(c -> !Objects.equals(c.getId(), carreira.getId()))
+        .filter(c -> mesmoContrato(c, carreira.getContrVinculoId()))
+        .toList();
     var carreiraMesmoTipo = emVigor.stream()
         .filter(c -> (c.getCargoId() == null) == novoCargoNulo).findFirst().orElse(null);
 
@@ -431,15 +448,23 @@ public class CarreiraWriteService {
     if (carreiraMesmoTipo != null) {
       var tiprelSubstituido = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreiraMesmoTipo.getUuid()).orElse(null);
       if (tiprelSubstituido != null) {
-        // 1. Fecha SÓ o vencimento antigo (o def REM cujo tm é o salário do vínculo).
+        // 1. Fecha SÓ o vencimento antigo (o def REM cujo tm é o salário do vínculo). Doc: fechar por
+        //    DATA_FIM e MANTER estado 'A' (o 'I' é só para rejeição). Fecha em dataEfetiva-1 (o dia
+        //    antes do novo período) para dar fronteira de período limpa: o antigo cobre até ao dia
+        //    anterior; o novo começa em dataEfetiva. Assim as vistas por período separam-nos sem sobrepor.
         Long salarioTmId = salarioTmIdDoContrato(carreira.getContrVinculoId());
+        var fimAntigo = dataEfetiva.minusDays(1);
+        var salariosFechadosIds = new java.util.HashSet<Long>();
         funcionarioRules.getRemuneracoesAssociadosAtivos(tiprelSubstituido.getId()).stream()
             .filter(r -> salarioTmId != null && r.getTmId() != null && Objects.equals(r.getTmId().getId(), salarioTmId))
-            .forEach(o -> { o.setDataFim(dataEfetiva); o.setEstado(Estado.I); definicaoRemuneracaoEntityRepository.save(o); });
+            .forEach(o -> { o.setDataFim(fimAntigo); definicaoRemuneracaoEntityRepository.save(o); salariosFechadosIds.add(o.getId()); });
         // 2. Re-associa os restantes ativos (subsídios + descontos) ao novo tiprel — mesmas linhas,
-        //    datas intactas (o vencimento já foi fechado acima, logo não transita).
+        //    datas intactas. O vencimento antigo mantém-se 'A' (para não sumir da vista inicial), por
+        //    isso já não é o estado 'I' que o exclui do transfer: passa-se o seu id em excluirRemIds
+        //    para ele NÃO transitar (o novo tiprel já recebe o salário novo do escalão).
         if (tiprelPendente != null)
-          tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tiprelSubstituido, tiprelPendente, List.of(), List.of());
+          tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tiprelSubstituido, tiprelPendente,
+              List.of(), List.of(), salariosFechadosIds, java.util.Collections.emptySet());
         // 3. Fecha o tiprel antigo (est_act_adm=0, I). Os def re-associados ficam ativos.
         tiprelSubstituido.setDataFim(dataEfetiva);
         tiprelSubstituido.setEstActAdm(0);
@@ -646,7 +671,12 @@ public class CarreiraWriteService {
               .findFirst().orElse(null);
       if (salarioAntigo != null) {
         var dataEfetiva = dto.getDataInicio() != null ? dto.getDataInicio() : java.time.LocalDate.now();
-        salarioAntigo.setDataFim(dataEfetiva);
+        // Editar é uma correção IN-PLACE na MESMA versão (mesmo tiprel): o salário novo é associado
+        // a este mesmo relacionamento (linha abaixo). Ao contrário da progressão/renovação (transição
+        // de versão, tiprels distintos), aqui o valor antigo NÃO é uma versão à parte — é só histórico
+        // da correção. Por isso fecha-se por DATA_FIM E inactiva-se ('I'): senão o mesmo tiprel ficaria
+        // com dois salários 'A' e a vista (inicial e atual, ambas este tiprel) mostraria os dois.
+        salarioAntigo.setDataFim(dataEfetiva.minusDays(1));
         salarioAntigo.setEstado(Estado.I);
         definicaoRemuneracaoEntityRepository.save(salarioAntigo);
         var salarioNovo = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario, obsAtualizar);

@@ -6,6 +6,7 @@ package cv.inps.rh.funcionario.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.funcionario.application.commands.EditarMobilidadeCommand;
 import cv.inps.rh.funcionario.application.commands.SaveMobilidadeCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarMobilidadeCommand;
 import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
@@ -167,6 +168,37 @@ public class MobilidadeController {
 
    @PutMapping(
    value = "{idFuncionario}/mobilidades/{mobilidadeId}"
+  )
+  @Operation(
+    summary = "Editar mobilidade",
+    description = "Editar mobilidade",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = MobilidadeDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<MobilidadeDTO> editarMobilidade(@Valid @RequestBody MobilidadeDTO editarMobilidadeRequest
+    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "mobilidadeId") String mobilidadeId)
+  {
+
+      final var command = new EditarMobilidadeCommand(editarMobilidadeRequest, idFuncionario, mobilidadeId);
+
+       ResponseEntity<MobilidadeDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
+   @PutMapping(
+   value = "{idFuncionario}/mobilidades/{mobilidadeId}/validar"
   )
   @Operation(
     summary = "Validar mobilidade",

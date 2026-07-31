@@ -1,6 +1,7 @@
 package cv.inps.rh.funcionario.application.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.funcionario.application.commands.EditarMobilidadeCommand;
 import cv.inps.rh.funcionario.application.commands.SaveMobilidadeCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarMobilidadeCommand;
 import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
@@ -148,20 +149,39 @@ public class MobilidadeWriteService {
         IdentificadorUnico.from(command.getMobilidadeId()).valor())
         .orElseThrow(() -> IgrpResponseStatusException.badRequest("Mobilidade não encontrada."));
 
+    // Endpoint de VALIDAÇÃO — a decisão (SIM/NAO) é obrigatória; a edição vive no endpoint editar().
+    if (mobilidadeDto.getValidar() == null)
+      throw IgrpResponseStatusException.badRequest("A decisão de validação (SIM ou NAO) é obrigatória.");
+
     if (mobilidadeDto.getValidar() != null) {
       // Aplica eventuais edições do formulário antes de decidir a validação.
       updateMobilidade(mobilidade, mobilidadeDto);
       var estado = mobilidadeDto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
-      // A validação pendente pode ser INSERT (nova mobilidade) ou UPDATE (edição). Trata ambos,
-      // senão a validação de uma edição ficava presa em P mesmo depois de aprovada.
-      var validacao = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.MOBILIDADE)
-          .or(() -> funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.MOBILIDADE))
+      // Distingue REGISTO (INSERT) de EDIÇÃO (UPDATE) pela validação DESTA mobilidade — filtra pelo
+      // referenciaUuid = uuid da mobilidade a validar, não por qualquer validação pendente do
+      // funcionário. Assim, só a validação de um REGISTO novo (INSERT desta mobilidade) cria tiprel,
+      // mesmo que coexistam outras validações pendentes do colaborador.
+      var mobUuid = mobilidade.getUuid();
+      var validacaoInsert = funcionarioRules.getValidacaoPendenteByReferenciaUuid(mobUuid, TipoAcao.INSERT, Referencia.MOBILIDADE);
+      var validacao = validacaoInsert
+          .or(() -> funcionarioRules.getValidacaoPendenteByReferenciaUuid(mobUuid, TipoAcao.UPDATE, Referencia.MOBILIDADE))
           .orElse(null);
       if (validacao != null) validacao.setEstado(estado);
-      mobilidade.setEstado(estado);
+      // Só o REGISTO (INSERT) muda o estado da mobilidade segundo a decisão e cria/troca
+      // tipos_relacionamento. A validação de uma EDIÇÃO (UPDATE) NÃO mexe no tiprel — a alteração já
+      // está in place e o tiprel atual referencia-a via MOB_ID.
+      if (validacaoInsert.isPresent()) {
+        // REGISTO: A (aprovado) ou I (rejeitado).
+        mobilidade.setEstado(estado);
+      } else if (validacao != null) {
+        // EDIÇÃO: a mobilidade estava PENDENTE (P) com os dados já editados in place; validar tira-a
+        // do pendente → volta a ACTIVA (A), quer aprovada quer rejeitada (o update foi feito "na
+        // mesma"; sem snapshot não se revertem valores).
+        mobilidade.setEstado(Estado.A);
+      }
 
-      if (estado.equals(Estado.A)) {
+      if (estado.equals(Estado.A) && validacaoInsert.isPresent()) {
         // Consolidação: é AQUI (e só aqui) que o tipo_relacionamento é criado/trocado — a mesma
         // mecânica que antes estava no save(), agora executada apenas quando a mobilidade é aprovada.
         var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -220,36 +240,60 @@ public class MobilidadeWriteService {
         ordemServicoWriteService.criar(funcionario, novoTipoRelacionamento, Referencia.MOBILIDADE.name(),
             validacao, "Mobilidade do colaborador - " + nome);
       }
-      // Rejeição (NAO): mobilidade e validação ficam I; o vínculo atual NÃO foi tocado no registo,
-      // logo continua atual — nada a reverter.
+      // Rejeição (NAO): a mobilidade e a validação seguem o estado definido acima; o vínculo atual
+      // não é tocado. (Numa validação de EDIÇÃO/UPDATE nunca se cria tiprel.)
 
-    } else {
-      // EDIÇÃO (sem decisão de validação). Doc: "Editar uma mobilidade — update registo. O BOTÃO:
-      // somente deve ficar visível caso a mobilidade não tenha um processamento." A edição é um
-      // simples update: NÃO cria validação pendente e NÃO toca no tipo_relacionamento (a direção/
-      // secção/local vivem em RH_T_MOBILIDADE, que o tiprel já referencia via MOB_ID — logo o
-      // vínculo atual passa a refletir os novos dados sem precisar de novo tiprel).
-
-      // Registos inactivos/eliminados são histórico — não se editam.
-      if (Estado.I.equals(mobilidade.getEstado()) || Estado.E.equals(mobilidade.getEstado())) {
-        throw IgrpResponseStatusException.badRequest(
-            "Não é possível editar uma mobilidade inactiva ou eliminada.");
-      }
-
-      // Guard de processamento: se já entrou em folha, editar alteraria dados já processados.
-      if (mobilidadeProcessada(mobilidade)) {
-        throw IgrpResponseStatusException.badRequest(
-            "Não é possível editar uma mobilidade que já tem processamento salarial.");
-      }
-
-      // O estado mantém-se: uma mobilidade activa (A) continua activa depois da edição; uma ainda
-      // pendente (P) continua pendente, à espera da validação do registo inicial.
-      updateMobilidade(mobilidade, mobilidadeDto);
     }
 
     funcionarioEntityRepository.save(funcionario);
+    return mobilidadeDto;
+  }
 
+  /**
+   * EDITAR mobilidade (endpoint dedicado PUT .../mobilidades/{id}). Doc: "Editar uma mobilidade —
+   * update registo (in place); o botão só fica visível se não tiver processamento" + "registo e
+   * alteração passa por validação". Faz UPDATE in place na RH_T_MOBILIDADE + cria validação pendente
+   * UPDATE + marca a mobilidade PENDENTE (P). NÃO toca no tipos_relacionamento — a alteração propaga
+   * via MOB_ID; a mobilidade volta a A quando validada.
+   */
+  @Transactional
+  public MobilidadeDTO editar(EditarMobilidadeCommand command) {
 
+    var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
+    var mobilidadeDto = command.getMobilidade();
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
+
+    var mobilidade = mobilidadeEntityRepository.findByUuid(
+        IdentificadorUnico.from(command.getMobilidadeId()).valor())
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest("Mobilidade não encontrada."));
+
+    // Registos inactivos/eliminados são histórico — não se editam.
+    if (Estado.I.equals(mobilidade.getEstado()) || Estado.E.equals(mobilidade.getEstado())) {
+      throw IgrpResponseStatusException.badRequest("Não é possível editar uma mobilidade inactiva ou eliminada.");
+    }
+    // Guard de processamento: se já entrou em folha, editar alteraria dados já processados.
+    if (mobilidadeProcessada(mobilidade)) {
+      throw IgrpResponseStatusException.badRequest("Não é possível editar uma mobilidade que já tem processamento salarial.");
+    }
+
+    // 1) UPDATE in place — direção/secção/local/datas na RH_T_MOBILIDADE.
+    updateMobilidade(mobilidade, mobilidadeDto);
+
+    // 2) Vai para validação — cria validação pendente UPDATE + marca a mobilidade P (aparece como
+    //    "por validar" na própria lista). Só para mobilidade já validada (A); se ainda P, a validação
+    //    inicial (INSERT) cobre-a. Não duplica se já houver UPDATE pendente. NÃO cria/troca tiprel.
+    if (Estado.A.equals(mobilidade.getEstado())
+        && !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.MOBILIDADE)) {
+      var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.MOBILIDADE.name(), Estado.P);
+      valid.setFunId(funcionario);
+      valid.setTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid()));
+      valid.setReferenciaId(mobilidade.getId());
+      valid.setReferenciaUuid(mobilidade.getUuid());
+      entityManager.persist(valid);
+      mobilidade.setEstado(Estado.P);
+    }
+
+    funcionarioEntityRepository.save(funcionario);
     return mobilidadeDto;
   }
 

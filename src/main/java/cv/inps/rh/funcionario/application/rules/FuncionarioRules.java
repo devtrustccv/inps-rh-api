@@ -59,6 +59,18 @@ public class FuncionarioRules {
     return contratoEntityRepository.findTopByFunId_UuidOrderByVersaoDesc(funUuid);
   }
 
+  /**
+   * Contrato ATUAL do funcionário — determinado de forma SEGURA pelo tiprel com est_act_adm=1, NÃO
+   * pela versão. Num funcionário com vários contratos (ex.: após um NOVO CONTRATO), todos os
+   * contrato_vinculo têm versao=1 (o versionamento vive no histórico), pelo que ordenar por versão
+   * empata e pode devolver o contrato errado. Devolve null se não houver relacionamento atual.
+   */
+  public ContratoEntity getContratoAtual(UUID funUuid) {
+    return tiposRelacionamentoEntityRepository.findAtualByFuncionarioUuid(funUuid)
+        .map(TiposRelacionamentoEntity::getContrVinculoId)
+        .orElse(null);
+  }
+
 
   public ContratoEntity getPrimeiroContrato(UUID funUuid) {
     return contratoEntityRepository.findPrimeiroContratoFuncionario(funUuid);
