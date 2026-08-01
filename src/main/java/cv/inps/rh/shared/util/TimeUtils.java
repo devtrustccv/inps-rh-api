@@ -31,31 +31,24 @@ public class TimeUtils {
   }
 
 
+  /**
+   * Normaliza um intervalo para {@code HH:MM}, seja qual for a forma em que chega.
+   *
+   * <p>Aceita {@code "+0 08:00:00"} (o que gravamos), {@code "0 5:20:0.0"} (o que Oracle
+   * devolve ao ler um INTERVAL DAY TO SECOND) e {@code "05:20"} (texto já normalizado).
+   * Devolve {@code "00:00"} para nulo ou vazio.
+   *
+   * <p>Antes exigia a componente de dias e rebentava com {@code IllegalArgumentException}
+   * perante um simples {@code "05:20"} — o que tornava arriscado usá-la para normalizar
+   * valores de origem mista.
+   */
   public static String intervalFormatToHHmm(String interval) {
     if (interval == null || interval.isBlank()) {
       return "00:00";
     }
 
     try {
-      // Divide pelo espaço para pegar a parte do tempo
-      String[] parts = interval.trim().split("\\s+");
-      if (parts.length < 2) {
-        throw new IllegalArgumentException("Formato inválido de interval: " + interval);
-      }
-
-      // Pega HH:MM:SS
-      String timePart = parts[1];
-      String[] hm = timePart.split(":");
-
-      if (hm.length < 2) {
-        throw new IllegalArgumentException("Formato inválido de tempo: " + timePart);
-      }
-
-      int hours = Integer.parseInt(hm[0]);
-      int minutes = Integer.parseInt(hm[1]);
-
-      return String.format("%02d:%02d", hours, minutes);
-
+      return formatMinutesToHHmm((int) toMinutes(interval));
     } catch (Exception e) {
       throw new IllegalArgumentException("Erro ao converter interval para HH:MM: " + interval, e);
     }

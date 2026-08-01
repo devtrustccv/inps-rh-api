@@ -9,6 +9,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.util.TimeUtils;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeSinteseDiarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
@@ -93,7 +94,9 @@ public class JustificarFaltaReadService {
       FaltaItemDTO item = new FaltaItemDTO();
       item.setId(s.getId());
       item.setData(s.getData().toString());
-      item.setHorasAusencia(s.getHorasAusencia());
+      // Normalizado para HH:MM — Oracle devolve o INTERVAL como "0 5:20:0.0" e o
+      // frontend não tem de conhecer esse formato.
+      item.setHorasAusencia(TimeUtils.intervalFormatToHHmm(s.getHorasAusencia()));
 
       var falta = faltaPorSintese.get(s.getId());
       if (falta != null) {
@@ -152,12 +155,13 @@ public class JustificarFaltaReadService {
       var item = new FaltaItemDTO();
       item.setId(f.getSinteseDiarioId().getId());
       item.setData(f.getSinteseDiarioId().getData().toString());
-      // item.setTipoFalta(f.getParamSitId() != null ? f.getParamSitId().getNome() :
-      // null);
-      item.setValorAusencia(null); // calculo futuro
-      item.setHorasAusencia(f.getHorasAusencia());
+      item.setTipoFalta(f.getParamSitId() != null ? f.getParamSitId().getNome() : null);
+      item.setValorAusencia(f.getValor() != null ? f.getValor().intValue() : null);
+      item.setHorasAusencia(TimeUtils.intervalFormatToHHmm(f.getHorasAusencia()));
       item.setMotivo(f.getDescricaoMotivo());
       item.setComJustificativo(f.getFlgJustificativo());
+      item.setEstado(f.getEstado() != null ? f.getEstado().getCode() : null);
+      item.setEstadoDesc(descreverEstadoFalta(f.getEstado()));
 
       List<DocumentoEntity> documentos = documentoEntityRepository
           .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_FALTA.name(), f.getUuid());
