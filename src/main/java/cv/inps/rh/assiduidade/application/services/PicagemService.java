@@ -111,8 +111,10 @@ public class PicagemService {
         }
 
         if (query.getUps() != null) {
+          // upsId é um @ManyToOne para UpsEntity — tem de navegar até ao id, tal como
+          // direcção e secção acima. Comparar a associação com um Long dava ORA/500.
           conds.add(cb.equal(
-              tr.get("mobId").get("localTrabId").get("upsId"),
+              tr.get("mobId").get("localTrabId").get("upsId").get("id"),
               query.getUps()));
         }
 
