@@ -1,0 +1,131 @@
+{
+  "name": "RegularizacaoContaRequest",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "mesReferencia",
+      "type": "string",
+      "objectType": "java",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "sdoRecebido",
+      "type": "decimal",
+      "objectType": "java",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "retroativoSalario",
+      "type": "decimal",
+      "objectType": "java",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "retroativoSdo",
+      "type": "decimal",
+      "objectType": "java",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "uuidRegularizacao",
+      "type": "string",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "valorLiquido",
+      "type": "long",
+      "objectType": "java",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "subsidiofiscalRecebido",
+      "type": "long",
+      "objectType": "java",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "processamentoFuncionarioId",
+      "type": "long",
+      "objectType": "java",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "abonoBeneficioId",
+      "type": "long",
+      "objectType": "java",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "estado",
+      "type": "string",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "type": "dto",
+  "module": "assiduidade",
+  "enableCustonValidation": false,
+  "readOnly": false,
+  "id": "new-action-Contracssssssssssssst"
+}
