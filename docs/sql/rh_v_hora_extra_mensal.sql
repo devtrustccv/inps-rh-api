@@ -53,7 +53,7 @@ he_mes AS (
         ON g.n <= MONTHS_BETWEEN(TRUNC(he.DATA_FIM, 'MM'), TRUNC(he.DATA_INICIO, 'MM')) + 1
 ),
 -- Expande dia a dia dentro de cada mes para classificar util / nao util
-dias AS (
+dias_base AS (
     SELECT m.hora_extra_id,
            m.mes_ini,
            m.data_inicio_mes,
@@ -66,6 +66,31 @@ dias AS (
       JOIN gerador g
         ON m.data_inicio_mes + g.n - 1 <= m.data_fim_mes
      GROUP BY m.hora_extra_id, m.mes_ini, m.data_inicio_mes, m.data_fim_mes
+),
+-- Peso de cada mes no total do periodo, para repartir o valor gravado.
+-- O peso e a soma dos dias ponderados pela percentagem que lhes cabe.
+dias AS (
+    SELECT db.hora_extra_id,
+           db.mes_ini,
+           db.data_inicio_mes,
+           db.data_fim_mes,
+           db.dias_uteis,
+           db.dias_nao_uteis,
+           CASE he2.PERCENTAGEM_REFERENTE
+               WHEN 'DIAS_UTEIS'     THEN db.dias_uteis     * par2.pct_util
+               WHEN 'DIAS_NAO_UTEIS' THEN db.dias_nao_uteis * par2.pct_nao_util
+               ELSE db.dias_uteis * par2.pct_util + db.dias_nao_uteis * par2.pct_nao_util
+           END AS peso_mes,
+           SUM(
+               CASE he2.PERCENTAGEM_REFERENTE
+                   WHEN 'DIAS_UTEIS'     THEN db.dias_uteis     * par2.pct_util
+                   WHEN 'DIAS_NAO_UTEIS' THEN db.dias_nao_uteis * par2.pct_nao_util
+                   ELSE db.dias_uteis * par2.pct_util + db.dias_nao_uteis * par2.pct_nao_util
+               END
+           ) OVER (PARTITION BY db.hora_extra_id) AS peso_total
+      FROM dias_base db
+      JOIN RH_T_HORA_EXTRA he2 ON he2.ID = db.hora_extra_id
+      CROSS JOIN parametro par2
 )
 SELECT
     -- Chave sintetica estavel: um registo de hora extra tem no maximo uma linha por mes
@@ -118,20 +143,16 @@ SELECT
     ROUND(NVL(t.SALARIO, 0) / 30 / NULLIF(par.jornada_horas, 0)
           * NVL(he.HORAS_DIARIAS, 0) * par.pct_nao_util / 100, 2)  AS VALOR_DIARIO_NAO_UTIL,
 
+    -- Reparte o valor GRAVADO (he.VALOR_DIARIO, que é o total do período devolvido por
+    -- CALCULO_HORA_EXTRA) pelos meses, proporcionalmente ao peso de cada mês.
+    --
+    -- Não recalcula: o que a lista mostra tem de ser o que o processamento vai pagar,
+    -- senão o RH valida um valor e o colaborador recebe outro. O peso respeita a
+    -- mistura de dias úteis/não úteis e a percentagem aplicável.
     ROUND(
-        CASE he.PERCENTAGEM_REFERENTE
-            WHEN 'DIAS_UTEIS' THEN
-                d.dias_uteis * NVL(t.SALARIO, 0) / 30 / NULLIF(par.jornada_horas, 0)
-                * NVL(he.HORAS_DIARIAS, 0) * par.pct_util / 100
-            WHEN 'DIAS_NAO_UTEIS' THEN
-                d.dias_nao_uteis * NVL(t.SALARIO, 0) / 30 / NULLIF(par.jornada_horas, 0)
-                * NVL(he.HORAS_DIARIAS, 0) * par.pct_nao_util / 100
-            ELSE
-                d.dias_uteis * NVL(t.SALARIO, 0) / 30 / NULLIF(par.jornada_horas, 0)
-                * NVL(he.HORAS_DIARIAS, 0) * par.pct_util / 100
-              + d.dias_nao_uteis * NVL(t.SALARIO, 0) / 30 / NULLIF(par.jornada_horas, 0)
-                * NVL(he.HORAS_DIARIAS, 0) * par.pct_nao_util / 100
-        END, 2)                                  AS VALOR_ACUMULADO_MES,
+        NVL(he.VALOR_DIARIO, 0)
+        * CASE WHEN NVL(d.peso_total, 0) = 0 THEN 0 ELSE d.peso_mes / d.peso_total END
+    , 2)                                         AS VALOR_ACUMULADO_MES,
 
     -- Total do periodo tal como gravado por CALCULO_HORA_EXTRA
     he.VALOR_DIARIO                              AS VALOR_PERIODO,
