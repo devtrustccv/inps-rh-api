@@ -44,7 +44,26 @@ public class HoraExtraDTO  {
   private String percentagemReferente ;
 
 
+  /** Total do período, tal como CALCULO_HORA_EXTRA o devolve. */
   private BigDecimal valorDiario ;
+
+  // --- Repartição mensal (só de resposta) -------------------------------
+  // Ao ler, uma hora extra que atravessa N meses devolve N entradas, com as
+  // datas recortadas a cada mês. Ao escrever, envia-se uma só entrada com o
+  // período integral.
+
+  /** Mês de referência, {@code YYYYMM}. */
+  private String mes ;
+
+  private Integer diasUteis ;
+
+  private Integer diasNaoUteis ;
+
+  private BigDecimal valorDiarioUtil ;
+
+  private BigDecimal valorDiarioNaoUtil ;
+
+  private BigDecimal valorAcumuladoMes ;
 
   @Valid
   private AnexoReqDTO documento ;

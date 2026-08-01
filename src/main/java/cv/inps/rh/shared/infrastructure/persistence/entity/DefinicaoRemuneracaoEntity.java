@@ -61,6 +61,15 @@ public class DefinicaoRemuneracaoEntity extends AuditEntity {
     private String moeda;
 
 
+  /**
+   * Natureza da remuneração (ex.: {@code HORA_EXTRA}). É por aqui que
+   * RH_PROCESSAMENTO_SALARIAL_DB.DELETE_ASSIDUIDADE identifica os registos a remover
+   * quando um processamento é eliminado — se ficar nulo, a remuneração fica órfã.
+   */
+  @Column(name="tipo")
+    private String tipo;
+
+
   @Column(name="data_inicio")
     private LocalDate dataInicio;
 

@@ -119,14 +119,9 @@ public class DispensaWriteService {
       documentoEntityRepository.saveAll(documentos);
     }
 
-    var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.DISPENSA.name(),
-        Estado.P);
-    validacao.setFunId(funcionario);
-    validacao.setTiprelId(tipoRelAtual);
-    validacao.setReferenciaId(pedido.getId());
-    validacao.setReferenciaUuid(pedido.getUuid());
-    validacaoEntityRepository.save(validacao);
-
+    // A especificação de 01/08/2026 riscou o registo em RH_T_VALIDACAO para dispensa
+    // (secção "Dispensa > Novo / Editar", ponto 3). O parecer do responsável e a
+    // decisão do RH ficam na própria RH_T_DISPENSA.
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("pedidoId", pedido.getId());
@@ -248,13 +243,6 @@ public class DispensaWriteService {
     pedido.setEstado(estado.name());
     pedidoRepository.save(pedido);
 
-    // Atualizar validação pendente
-    funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.DISPENSA)
-        .ifPresent(v -> {
-          v.setEstado(estado);
-          validacaoEntityRepository.save(v);
-        });
-
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", dispensa.getId());
     resp.put("estado", dispensa.getEstado().name()); // mantido .name() se Estado for enum
@@ -337,18 +325,6 @@ public class DispensaWriteService {
     // Atualizar pedido
     pedido.setEstado(Estado.P.name());
     pedidoRepository.save(pedido);
-
-    // Registo de UPDATE — editar cria UPDATE (não um novo INSERT) para não duplicar a validação pendente
-    var validacao = dadosContratuaisMapper.toValidacaoInsert(
-        TipoAcao.UPDATE.name(),
-        Referencia.DISPENSA.name(),
-        Estado.P
-    );
-    validacao.setFunId(funcionario);
-    validacao.setTiprelId(tipoRelAtual);
-    validacao.setReferenciaId(pedido.getId());
-    validacao.setReferenciaUuid(pedido.getUuid());
-    validacaoEntityRepository.save(validacao);
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", dispensa.getId());

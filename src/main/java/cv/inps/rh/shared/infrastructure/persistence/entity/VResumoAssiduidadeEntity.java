@@ -67,6 +67,14 @@ public class VResumoAssiduidadeEntity  {
     private String nomeIlha;
 
 
+    @Column(name="id_ups")
+    private Long idUps;
+
+
+    @Column(name="nome_ups")
+    private String nomeUps;
+
+
     @Column(name="ano")
     private Integer ano;
 
@@ -79,8 +87,19 @@ public class VResumoAssiduidadeEntity  {
     private Integer totalDias;
 
 
+    /** Dias com falta sem registo em RH_T_FALTA e sem ausência activa. */
     @Column(name="total_faltas")
     private Integer totalFaltas;
+
+
+    /** Faltas já registadas mas ainda por validar. */
+    @Column(name="total_faltas_pendentes")
+    private Integer totalFaltasPendentes;
+
+
+    /** Faltas registadas e validadas. */
+    @Column(name="total_faltas_justificadas")
+    private Integer totalFaltasJustificadas;
 
 
     @Column(name="horas_trabalhadas")

@@ -11,6 +11,7 @@ import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import cv.inps.rh.shared.application.constants.TipoDescontoFalta;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
@@ -27,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -51,16 +53,10 @@ public class JustificarFaltaWriteService {
   private final EntityManager entityManager;
   private final DocumentoMapper documentoMapper;
   private final DocumentoEntityRepository documentoEntityRepository;
-  private final DefPagamentoEntityRepository defPagamentoRepository;
-  private final DefPagamentoMapper defPagamentoMapper;
-  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
-  private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
-  private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoEntityRepository;
-  private final FeriasGozadasEntityRepository feriasGozadasRepository;
-  private final AnoEntityRepository anoRepository;
-  private final DispensaEntityRepository dispensaEntityRepository;
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final NotificacaoDispatchService notificacaoDispatchService;
+  private final FaltaDescontoService faltaDescontoService;
+  private final FaltaValorCalculator faltaValorCalculator;
 
   @Transactional
   public Map<String, ?> justificarFalta(JustificarFaltaCommand command) {
@@ -96,24 +92,33 @@ public class JustificarFaltaWriteService {
       throw IgrpResponseStatusException.badRequest("Tipo justificativo não permitido para falta");
     }
 
+    var selecionados = dto.getItensFalta().stream().filter(FaltaItemDTO::isSelecionar).toList();
+
+    // Regra: só vai a validação se forem mais de 3 dias E o tipo de justificação
+    // descontar no salário. Caso contrário fica logo activo.
+    boolean requerValidacao = faltaDescontoService.requerValidacao(selecionados.size(), paramSituacao);
+    var estadoInicial = requerValidacao ? Estado.P : Estado.A;
+
+    var deducao = StringUtils.hasText(dto.getDeduzirFaltaEm())
+        ? TipoDescontoFalta.fromCodeOrThrow(dto.getDeduzirFaltaEm()).getCode()
+        : null;
+
     // Criar pedido de justificação
     PedidoEntity pedido = new PedidoEntity();
     pedido.setFunId(funcionario);
     pedido.setTipoPedido("JUSTIFICACAO_FALTA");
     pedido.setOrigem("RH");
-    pedido.setEtapa("DESPACHO_RH");
-    pedido.setEstado(Estado.P.name());
+    pedido.setEtapa(requerValidacao ? "DESPACHO_RH" : "FINALIZADO");
+    pedido.setEstado(estadoInicial.name());
     pedido.setUuid(UuidCreator.getTimeOrderedEpoch());
     pedido = pedidoRepository.save(pedido);
 
     // Criar faltas a partir das sínteses diárias
     List<FaltaEntity> faltas = new ArrayList<>();
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionarioUuid);
+    BigDecimal valorTotal = BigDecimal.ZERO;
 
-    for (var item : dto.getItensFalta()) {
-
-      if (!item.isSelecionar())
-        continue;
+    for (var item : selecionados) {
 
       AssiduidadeSinteseDiarioEntity sintese;
       try {
@@ -135,29 +140,33 @@ public class JustificarFaltaWriteService {
       falta.setPedidoId(pedido);
       falta.setSinteseDiarioId(sintese);
       falta.setTiprelId(tipoRelAtual);
+      falta.setTipo(FaltaDescontoService.TIPO_FALTA);
 
-      falta.setDataInicio(LocalDateTime.of(
-          sintese.getData(),
-          LocalTime.MIN));
-      falta.setDataFim(LocalDateTime.of(
-          sintese.getData(),
-          LocalTime.of(23, 59, 59)));
+      var dia = sintese.getData();
+      falta.setDataInicio(LocalDateTime.of(dia, LocalTime.MIN));
+      falta.setDataFim(LocalDateTime.of(dia, LocalTime.of(23, 59, 59)));
 
       falta.setHorasAusencia(sintese.getHorasAusencia());
-      falta.setValor(
-          item.getValorAusencia() != null
-              ? BigDecimal.valueOf(item.getValorAusencia())
-              : null);
+
+      // Valor à hora x horas de ausência do dia — via CALCULO_FALTA_DIARIO com
+      // fallback em Java. O valor enviado pelo cliente é meramente indicativo.
+      var horasAusencia = TimeUtils.intervalFormatToHHmm(sintese.getHorasAusencia());
+      var valor = faltaValorCalculator.valorDia(tipoRelAtual.getId(), dia, horasAusencia);
+      falta.setValor(valor);
+      valorTotal = valorTotal.add(valor);
 
       falta.setDescricaoMotivo(item.getMotivo());
-      falta.setFlgJustificativo("SIM");
+      // "Com justificativo?" é escolha do RH por falta — antes assumia-se sempre SIM.
+      falta.setFlgJustificativo(
+          StringUtils.hasText(item.getComJustificativo()) ? item.getComJustificativo() : "SIM");
 
       falta.setDecisaoResponsavel(dto.getParecerResponsavel());
       falta.setObsResponsavel(dto.getObsResponsavel());
       falta.setDespachoRh(dto.getDespachoRh());
 
       falta.setParamSitId(paramSituacao);
-      falta.setEstado(Estado.P);
+      falta.setFlgDescontoFalta(deducao);
+      falta.setEstado(estadoInicial);
       falta.setUuid(UuidCreator.getTimeOrderedEpoch());
 
       faltas.add(falta);
@@ -171,9 +180,7 @@ public class JustificarFaltaWriteService {
         .collect(Collectors.toMap(f -> f.getSinteseDiarioId().getId(), Function.identity()));
 
     List<DocumentoEntity> documentos = new ArrayList<>();
-    for (var item : dto.getItensFalta()) {
-      if (!item.isSelecionar())
-        continue;
+    for (var item : selecionados) {
       if (item.getDocumento() == null)
         continue;
       FaltaEntity faltaRef = faltaPorSinteseId.get(item.getId());
@@ -182,7 +189,7 @@ public class JustificarFaltaWriteService {
 
       var doc = documentoMapper.toEntity(
           item.getDocumento(),
-          Estado.P,
+          estadoInicial,
           TableName.RH_T_FALTA.name(),
           faltaRef.getId(),
           faltaRef.getUuid(),
@@ -191,27 +198,56 @@ public class JustificarFaltaWriteService {
       doc.setUuid(UuidCreator.getTimeOrderedEpoch());
       documentos.add(doc);
     }
+    // Documentos do bloco "Justificar Faltas Selecionadas" — o formulário permite
+    // anexar vários e aplicam-se a todas as faltas seleccionadas. Ficam ligados à
+    // primeira falta do pedido, que é a âncora do conjunto.
+    if (dto.getDocumentos() != null && !dto.getDocumentos().isEmpty() && !faltas.isEmpty()) {
+      var ancora = faltas.getFirst();
+      for (var anexo : dto.getDocumentos()) {
+        var doc = documentoMapper.toEntity(
+            anexo,
+            estadoInicial,
+            TableName.RH_T_FALTA.name(),
+            ancora.getId(),
+            ancora.getUuid(),
+            1L,
+            funcionario);
+        doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+        documentos.add(doc);
+      }
+    }
+
     if (!documentos.isEmpty()) {
       documentoEntityRepository.saveAll(documentos);
     }
 
-    // Criar validação
-    var validacao = dadosContratuaisMapper.toValidacaoInsert(
-        TipoAcao.INSERT.name(),
-        Referencia.JUSTIFICAR_FALTA.name(),
-        Estado.P);
-    validacao.setFunId(funcionario);
-    validacao.setTiprelId(tipoRelAtual);
-    validacao.setReferenciaId(pedido.getId());
-    validacao.setReferenciaUuid(pedido.getUuid());
+    if (requerValidacao) {
+      var validacao = dadosContratuaisMapper.toValidacaoInsert(
+          TipoAcao.INSERT.name(),
+          Referencia.JUSTIFICAR_FALTA.name(),
+          Estado.P);
+      validacao.setFunId(funcionario);
+      validacao.setTiprelId(tipoRelAtual);
+      validacao.setReferenciaId(pedido.getId());
+      validacao.setReferenciaUuid(pedido.getUuid());
+      validacaoEntityRepository.save(validacao);
+    } else {
+      // Sem validação, os descontos são aplicados de imediato.
+      for (var falta : faltas)
+        faltaDescontoService.aplicar(falta, pedido, tipoRelAtual);
+      faltaRepository.saveAll(faltas);
+    }
 
-    validacaoEntityRepository.save(validacao);
-
-    // 8️ Retorno
-    return Map.of(
-        "pedidoId", pedido.getId(),
-        "pedidoUuid", pedido.getUuid(),
-        "estado", pedido.getEstado());
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("pedidoId", pedido.getId());
+    resp.put("pedidoUuid", pedido.getUuid());
+    resp.put("estado", pedido.getEstado());
+    resp.put("requerValidacao", requerValidacao);
+    resp.put("totalRegistos", faltas.size());
+    if (!faltas.isEmpty())
+      resp.put("valorDiario", faltas.getFirst().getValor());
+    resp.put("valorTotal", valorTotal);
+    return resp;
   }
 
   @Transactional
@@ -246,6 +282,7 @@ public class JustificarFaltaWriteService {
 
     // Estado final
     final Estado estadoFinal = dto.getValidar() == EstadoValidacao.SIM ? Estado.A : Estado.I;
+    var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     // Atualizar apenas as faltas correspondentes às sínteses selecionadas
     for (var item : dto.getItensFalta()) {
@@ -266,78 +303,17 @@ public class JustificarFaltaWriteService {
       falta.setParamSitId(paramSituacao);
       falta.setEstado(estadoFinal);
 
-      if (estadoFinal == Estado.A &&
-          falta.getParamSitId() != null &&
-          falta.getParamSitId().getFlgFaltaDecontoSal() != null &&
-          falta.getParamSitId().getFlgFaltaDecontoSal() == 1) {
+      if (StringUtils.hasText(dto.getDeduzirFaltaEm()))
+        falta.setFlgDescontoFalta(TipoDescontoFalta.fromCodeOrThrow(dto.getDeduzirFaltaEm()).getCode());
 
-        var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-        var vinculoId = tipoRel.getContrVinculoId().getVinculoId().getId();
-
-        var mov = paramVinculoMovimentoEntityRepository
-            .findByVinculoId_IdAndTipo(vinculoId, "PAG_FALTA")
-            .getFirst();
-
-        var valor = falta.getValor() != null ? falta.getValor() : BigDecimal.ZERO;
-        var dr = definicaoRemuneracaoMapper.createRenumeracao(
-            valor,
-            mov.getTmId(),
-            falta.getDataInicio().toLocalDate(),
-            falta.getDataFim().toLocalDate(),
-            funcionario,
-            "CVE");
-
-        definicaoRemuneracaoEntityRepository.save(dr);
-        falta.setFlgDescontoSal(1);
-        falta.setDefRemId(dr);
-      }
-
-      // REGRA: Desconto de Férias
-      if (Objects.equals(estadoFinal, Estado.A) &&  falta.getParamSitId() != null &&
-          Objects.equals(falta.getParamSitId().getFlgAusencia(), 1) &&
-          Objects.equals(falta.getParamSitId().getTipoAusencia(), "FERIAS"))  {
-
-        // TODO: Implementar validação de saldo de férias do funcionário
-
-        var ano = anoRepository.findByAno(String.valueOf(falta.getDataInicio().getYear()))
-            .orElseThrow(() -> IgrpResponseStatusException.badRequest("Ano de referência não encontrado"));
-
-        var feriasGozadas = new FeriasGozadasEntity();
-        feriasGozadas.setFunId(funcionario);
-        feriasGozadas.setPedidoId(pedido);
-        feriasGozadas.setAnoId(ano);
-        feriasGozadas.setDataInicio(falta.getDataInicio().toLocalDate());
-        feriasGozadas.setDataFim(falta.getDataFim().toLocalDate());
-        feriasGozadas.setNumDia(1); // Assumindo 1 dia de desconto por falta
-        feriasGozadas.setEstado(Estado.A);
-        feriasGozadas.setUuid(UuidCreator.getTimeOrderedEpoch());
-        feriasGozadasRepository.save(feriasGozadas);
-      }
-
-      // desconto dispensa — spec: "caso desconto nas horas de Dispensa → Regista na RH_T_DISPENSA"
-      if (Objects.equals(estadoFinal, Estado.A) && falta.getParamSitId() != null &&
-          Objects.equals(falta.getParamSitId().getFlgAusencia(), 1) &&
-          Objects.equals(falta.getParamSitId().getTipoAusencia(), "DISPENSA")) {
-
-        var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-        var disp = new DispensaEntity();
-        disp.setPedidoId(pedido);
-        disp.setTiprelId(tipoRel);
-        disp.setData(falta.getDataInicio().toLocalDate());
-        disp.setHoraInicio("+0 00:00:00");
-        disp.setHoraFim(falta.getHorasAusencia() != null ? falta.getHorasAusencia() : "+0 00:00:00");
-        disp.setEstado(Estado.A);
-        disp.setUuid(UuidCreator.getTimeOrderedEpoch());
-        dispensaEntityRepository.save(disp);
-      }
+      if (estadoFinal == Estado.A)
+        faltaDescontoService.aplicar(falta, pedido, tipoRelAtual);
     }
 
     faltaRepository.saveAll(faltas);
 
-    if (estadoFinal == Estado.A) {
-      var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    if (estadoFinal == Estado.A)
       ordemServicoWriteService.criar(funcionario, tipoRelAtual, dto.getTipoOrdemServico());
-    }
 
     // Atualizar pedido
     pedido.setEstado(estadoFinal.name());
@@ -361,52 +337,7 @@ public class JustificarFaltaWriteService {
         "pedidoUuid", pedido.getUuid(),
         "estado", pedido.getEstado());
 
-    /*
-     * ================= DÚVIDAS / PONTOS A CONFIRMAR COM ANALISTA =================
-     *
-     * 1️ Desconto de Salário (RH_T_DEF_PAGAMENTOS)
-     * - Qual entidade exata devemos usar para registrar o desconto de salário?
-     * - Quais campos são obrigatórios: funId, tiprelId, referenciaId, valor, data,
-     * estado?
-     * - O desconto é automático ao validar a falta ou apenas registro histórico?
-     *
-     * 2️ Desconto de Férias (RH_T_FERIAS_GOZADAS)
-     * - Existe entidade mapeada para registrar férias gozadas?
-     * - Como calcular os dias a descontar por falta?
-     * - Só desconta se houver saldo suficiente de férias?
-     * - As datas da falta (dataInicio/dataFim) devem ser replicadas no registro de
-     * férias?
-     *
-     * 3️ Desconto de Horas de Dispensa (RH_T_DISPENSA)
-     * - Existe entidade mapeada para horas de dispensa?
-     * - Como calcular a quantidade de horas a descontar por falta?
-     * - Aplica apenas a faltas injustificadas ou todas as faltas?
-     *
-     * 4️ Valor da Justificação de Falta
-     * - Para cada tipoJustificacao (ParamSituacaoEntity.tipoFalta), como calcular o
-     * valor?
-     * - Valor por hora ou por dia?
-     * - É apenas para descontos ou também para relatórios?
-     *
-     * 5️ Integração com Pedido e Validação
-     * - Ao validar a falta, devemos atualizar estados:
-     * FaltaEntity.estado = 'A'
-     * PedidoEntity.estado = 'A', PedidoEntity.etapa = 'FINALIZADO'
-     * ValidacaoEntity.estado = 'A'
-     * - Isso deve ocorrer somente se EstadoValidacao enviado for "SIM"?
-     *
-     * 6️ Observações Gerais
-     * - O campo tipoJustificacao já vem no DTO como Long (id de
-     * ParamSituacaoEntity), está correto?
-     * - Se uma falta já tiver desconto registrado, sobrescrever ou criar novo
-     * registro?
-     * - Como tratar múltiplas faltas do mesmo colaborador no mesmo mês: justificar
-     * todas juntas ou individualmente?
-     * - Confirmação do cálculo de horas trabalhadas e horas de ausência para
-     * atualização na FaltaEntity.
-     *
-     * =============================================================================
-     */
+
   }
 
   private void enviarNotificacaoJustificacaoFalta(PedidoEntity pedido, FuncionarioEntity funcionario) {

@@ -1,33 +1,44 @@
 package cv.inps.rh.assiduidade.application.queries;
 
 import cv.igrp.framework.core.domain.Query;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
+/**
+ * Filtros da lista de hora extra. Todos opcionais — sem filtros, devolve tudo
+ * ordenado por data de pedido descendente.
+ *
+ * <p>Os filtros de pessoa/estrutura ({@code funcionarioUuid}, {@code colaborador},
+ * {@code direcao}, {@code seccao}, {@code ilha}) seleccionam o pedido se <em>algum</em>
+ * dos seus itens corresponder, e restringem também os itens devolvidos.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetListaHoraExtraQuery implements Query {
 
-  @NotBlank(message = "The field <pageNumber> is required")
   private String pageNumber;
-  @NotBlank(message = "The field <pageSize> is required")
   private String pageSize;
-  @NotNull(message = "The field <ilha> is required")
   private Long ilha;
-  @NotNull(message = "The field <direcao> is required")
   private Long direcao;
-  @NotNull(message = "The field <seccao> is required")
   private Long seccao;
-  @NotBlank(message = "The field <dataInicio> is required")
+
+  /** Data inicial do intervalo, {@code YYYY-MM-DD}. Testa sobreposição, não contenção. */
   private String dataInicio;
-  @NotBlank(message = "The field <dataFim> is required")
+
+  /** Data final do intervalo, {@code YYYY-MM-DD}. */
   private String dataFim;
-  @NotBlank(message = "The field <funcionarioUuid> is required")
+
   private String funcionarioUuid;
+
+  /** Pesquisa parcial pelo nome do colaborador. */
+  private String colaborador;
+
+  /** Estado do pedido: {@code P} | {@code A} | {@code I}. */
+  private String estado;
+
+  /** Mês de referência, {@code YYYYMM}. */
+  private String mes;
 
 }

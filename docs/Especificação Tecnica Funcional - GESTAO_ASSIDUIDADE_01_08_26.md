@@ -15,7 +15,7 @@ alt="Uma imagem com texto, captura de ecrã, Tipo de letra, número Os conteúdo
 
 # Especificação 
 
-<img src="media/image5.png" style="width:8.10347in;height:0.85764in" />
+<img src="media/image5.png" style="width:9.69306in;height:1.45833in" />
 
 ## Movimento de Picagem (Entrada / saída)
 
@@ -114,7 +114,7 @@ alt="Uma imagem com texto, software, número, Ícone de computador Os conteúdos
 <tr>
 <td><img src="media/image7.png"
 style="width:1.18264in;height:0.30347in" /></td>
-<td colspan="3"><p>Caso algum dados não foi importado de forma
+<td colspan="3"><p>Caso alguns dados não foi importado de forma
 automático, o RH Tem a possibilidade de o fazer manualmente com esse
 botão-</p>
 <p>Esse botão invoca um serviço que importa dados do relógio.</p></td>
@@ -155,7 +155,7 @@ trunc(to_date(<strong>´P_data_fim</strong>´, 'dd-mm-yyyy'));</p>
 </tbody>
 </table>
 
-## Movimento Resumido
+## <span class="mark">Gestão Falta</span> ~~Movimento Resumido~~
 
 ### Lista
 
@@ -316,8 +316,7 @@ especifico</mark></strong></td>
 
 ### Marcar Falta / Ausência
 
-<img src="media/image12.png" style="width:9.69306in;height:4.97639in"
-alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
+<img src="media/image12.png" style="width:4.8099in;height:5.73048in" />
 
 <table>
 <colgroup>
@@ -336,6 +335,14 @@ alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdo
 </thead>
 <tbody>
 <tr>
+<td style="text-align: left;"><mark>Validar</mark></td>
+<td><mark>Select</mark></td>
+<td><p><mark>Deve aparecer somente em Validacao</mark></p>
+<p><strong>DOMAIN</strong> (VALIDAR_REGISTO)</p></td>
+<td><p><mark><strong>RH_ASSIDUIDADE_SINTESE_DIARIA.</strong>ESTADO</mark></p>
+<p>RH_T_FALTA.estado</p></td>
+</tr>
+<tr>
 <td style="text-align: left;">Colaborador</td>
 <td>SELECT</td>
 <td>RH_T_COLABORADORES.NOME</td>
@@ -353,7 +360,8 @@ alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdo
 <td style="text-align: left;">Data Fim</td>
 <td>Date</td>
 <td></td>
-<td>RH_T_FALTA.DATA_FIM</td>
+<td><hr />
+<p>RH_T_FALTA.DATA_FIM</p></td>
 </tr>
 <tr>
 <td style="text-align: left;">Horas <strong>Ausência</strong></td>
@@ -370,22 +378,14 @@ HORAS_AUSENCIA</p>
 <td></td>
 </tr>
 <tr>
-<td style="text-align: left;"></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td style="text-align: left;">Justificar</td>
+<td style="text-align: left;">Com Justificativo?</td>
 <td>RADIOLIST</td>
 <td><strong>DOMAINS = SIM_NAO</strong></td>
 <td><strong>---------------------</strong></td>
 </tr>
 <tr>
-<td style="text-align: left;"><del>Tipo Falta</del></td>
-<td></td>
-<td><del><strong>DOMAIN</strong> = JUSTIFICADA_INJUSTIFICADA</del></td>
-<td><del><strong>RH_T_FALTA</strong>.TIPO_FALTA</del></td>
+<td colspan="4" style="text-align: left;"><strong>Nota:</strong> os
+campos abaixo so aparecem caso Com Justificativo = SIM</td>
 </tr>
 <tr>
 <td style="text-align: left;">Motivo Ausência</td>
@@ -394,9 +394,44 @@ HORAS_AUSENCIA</p>
 <td><strong>RH_T_FALTA</strong>.DESCRICAO<strong>_</strong>MOTIVO</td>
 </tr>
 <tr>
+<td style="text-align: left;"><mark>Tipo Falta</mark></td>
+<td><mark>SELECT</mark></td>
+<td><mark>Deve buscar a descrição do tipo de falta escolhido … para
+buscar a justificativo, deve buscar da tabela de parametrização
+RH_T_PARAM_SITUACAO onde <em>FLG_ausencia = FALTA </em></mark></td>
+<td><mark>RH_T_FALTA<strong>.</strong>PARAM_SIT_ID</mark></td>
+</tr>
+<tr>
+<td style="text-align: left;"><mark>Desduzir Falta Em</mark></td>
+<td></td>
+<td><p><mark>Domains = TP_DESCONTO_FALTA</mark></p>
+<ul>
+<li><p><mark>Ferias</mark></p></li>
+<li><p><mark>Dispensa</mark></p></li>
+</ul></td>
+<td><mark>RH_T_FALTA.FLG_DESCONTO_FALTA</mark></td>
+</tr>
+<tr>
+<td style="text-align: left;"><mark>Valor diario Falta</mark></td>
+<td></td>
+<td><p><mark>Calcula o valor de falta por cada dia por cada horas de
+ausência</mark></p>
+<p><mark>RH_PROCESSAMENTO_SALARIAL_DB. CALCULO_FALTA_DIARIO (P_TIPREL_ID
+NUMBER, p_data_inicio DATE)</mark></p>
+<p><mark>Nota :essa funcao somente develvo o valor diario, que deve ser
+calculado por total de dias</mark></p></td>
+<td><mark>RH_T_FALTA.VALOR</mark></td>
+</tr>
+<tr>
+<td style="text-align: left;"><mark>Valor Total</mark></td>
+<td></td>
+<td><mark>Valor diário * totais dias</mark></td>
+<td><mark>-----------------------</mark></td>
+</tr>
+<tr>
 <td style="text-align: left;"><strong>Parecer Responsável</strong></td>
 <td colspan="3"><strong>Nota:</strong> este separador só aparece caso
-justificar = SIM</td>
+Com Justificativo = SIM</td>
 </tr>
 <tr>
 <td style="text-align: left;">Parecer Responsável</td>
@@ -419,23 +454,25 @@ PARECER_RESPONSAVEL</td>
 <td>RH_T_FALTA.OBS_RESPONSAVEL</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>Despacho RH</strong></td>
-<td colspan="3"><strong>Nota:</strong> Fica Visivel somente na
-Validação</td>
+<td colspan="4" style="text-align: left;"><strong>Anexar Documentos -
+Nota:</strong> este separador só aparece caso Com Justificativo =
+SIM</td>
 </tr>
 <tr>
-<td style="text-align: left;">Despacho RH</td>
-<td>SELECT</td>
-<td>DOMAIN = SIM_NAO</td>
-<td>RH_T_FALTA.DESPACHO_RH</td>
+<td style="text-align: left;">Tipo Documento</td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td style="text-align: left;">Tipo Justificação</td>
-<td>SELECT</td>
-<td>Deve buscar a descrição do tipo de falta escolhido … para buscar a
-justificativo, deve buscar da tabela de parametrização
-RH_T_PARAM_SITUACAO onde <em>FLG_ausencia = FALTA</em></td>
-<td>RH_T_FALTA<strong>.</strong>PARAM_SIT_ID</td>
+<td style="text-align: left;">Anexar Documento</td>
+<td></td>
+<td></td>
+<td><p>RH_T_DOCUMENTO.<em>DOC_ID</em></p>
+<p>RH_T_DOCUMENTO.TIPO_DOCUMETO = ID DE TABELA RH_T_TIPO_DOCUMENTO ONDE
+REFERENCIA = ‘JUSTIFICACAO_FALTA’</p>
+<p>REFERENCIA_NAME = ‘RH_T_FALTA’</p>
+<p>REFERENCIA_ID = id de RH_T_FALTA</p></td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>REGRA</strong></td>
@@ -447,13 +484,19 @@ RH_T_PARAM_SITUACAO onde <em>FLG_ausencia = FALTA</em></td>
 <td colspan="4" style="text-align: left;"><ul>
 <li><p>Caso campo justificar for <strong>SIM</strong>:</p>
 <ul>
-<li><p>Deve aparecer o separador de Parecer Respnsável e Despacho
-RH</p></li>
+<li><p>Deve aparecer o separador de <strong>Parecer Respnsável</strong>
+e <strong>Despacho RH</strong></p></li>
 <li><p>Regista na tabela RH_T_PEDIDO, e RH_T_FALTA</p></li>
-<li><p>Despacho RH , fica visível somente em Validação</p></li>
+<li><p><mark>Campo Validar, fica visível somente em
+Validação</mark></p></li>
 </ul></li>
-<li><p>O numero de registo na tabela RH_T_FALTA dependerá do numero de
+<li><p>O número de registo na tabela RH_T_FALTA dependerá do número de
 dias de falta (por cada dia de falta é um registo na tabela)</p></li>
+<li><p><mark>Somente deve ir para validação caso o número de falta for
+maior que 3 dias, e caso o tipo de justificação esta sujeito a desconto
+no salário
+(</mark><em><strong>RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL</strong></em><mark>)
+caso contrario o registo fica registado com estado ATIVO</mark></p></li>
 </ul>
 <p><strong>Pendente</strong>: calculo de valor na justificacao de
 Falta</p></td>
@@ -489,14 +532,15 @@ alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteú
 </ul>
 <p>2. Caso se pretende além de registar Falta Também Justificar a Falta.
 Logo deve registar o Pedido de justificação</p>
-<p>2.1 Grava na tabela <strong>RH_T_PEDIDO</strong></p>
+<p>2.1 Grava na tabela <strong>RH_T_PEDIDO (somente caso a falta for
+justificada “com justificação = Sim”)</strong></p>
 <ul>
 <li><p>TIPO_PEDIDO = ‘JUSTIFICACAO_FALTA’,</p></li>
 <li><p>ETAPA = DESPACHO_RH</p></li>
 </ul>
 <p><strong>2.2 R</strong>egisto na tabela de
 <strong>RH_T_FALTA</strong>, campo do formulário e outros seguintes
-campos</p>
+campos (regista aqui somente apos justificação de Falta)</p>
 <ul>
 <li><p>DATA_REGISTO</p></li>
 <li><p>USER_REGISTO_ID</p></li>
@@ -505,9 +549,11 @@ campos</p>
 <li><p>SINTESE_DIARIO_ID = id de
 <strong>RH_ASSIDUIDADE_SINTESE_DIARIO</strong></p></li>
 <li><p>TIPO = ‘FALTA’</p></li>
+<li><p>Estado = <mark>A</mark></p></li>
 </ul>
-<p><strong>2.3</strong> Regista na tabela
-<strong>RH_T_VALIDACAO</strong></p></td>
+<p><strong>2.3</strong> Regista na tabela <strong>RH_T_VALIDACAO
+<mark>(Somento o Tipo de Falta tem Salarios
+Associado)</mark></strong></p></td>
 </tr>
 </tbody>
 </table>
@@ -531,18 +577,22 @@ campos</p>
 <strong>RH_T_TIPOS_RELACIONAMENTO</strong>.ID onde
 <strong>EST_ACT_ADM</strong> = 1</p></li>
 </ul></li>
-<li><p><strong>caso o tipo de falta desconta salário , logo deve
-registar na Tabela</strong></p>
+<li><p><strong>caso o tipo de falta desconta salário, logo deve registar
+na Tabela</strong></p>
 <ul>
-<li><p><strong>RH_T_DEF_REMUNERACAO</strong></p></li>
+<li><p><strong>RH_T_DEF_PAGAMENTO</strong></p></li>
+<li><p>atualiza id RH_T_DEF_PAGAMENTO em <strong>RH_T_FALTA.
+<mark>DEF_PAG_ID</mark></strong></p></li>
+<li><p>Regista a associacao na tabela <strong><mark>RH_T_TIPREL_REM_PAG
+.PAG_ID</mark></strong></p></li>
 </ul></li>
-<li><p><strong>Caso o tipo de falta for desconto nas ferias</strong> ,
-logo deve registar na Tabela</p>
+<li><p><strong>Caso o tipo de falta for desconto nas ferias <mark>(campo
+DEDUZIR EM = FERIAS ),</mark></strong> logo deve registar na Tabela</p>
 <ul>
 <li><p>Regista na tabela <strong>RH_T_FERIAS_GOZADAS</strong></p></li>
 </ul></li>
 <li><p><strong>Caso o tipo de justificação for desconto nas horas de
-Dispensa</strong></p>
+Dispensa <mark>(campo DEDUZIR EM = DISPENSA ),</mark></strong></p>
 <ul>
 <li><p>Regista na <strong>RH_T_DISPENSA</strong></p></li>
 </ul></li>
@@ -555,8 +605,7 @@ Dispensa</strong></p>
 
 ### Justificar Falta 
 
-<img src="media/image14.png" style="width:9.42431in;height:5.28611in"
-alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
+<img src="media/image14.png" style="width:8.3096in;height:5.53973in" />
 
 <table>
 <colgroup>
@@ -575,7 +624,13 @@ alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdo
 </thead>
 <tbody>
 <tr>
-<td colspan="4"><strong>Informações colaborador</strong></td>
+<td colspan="4"><strong>RESUMO FALTAS</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">Selecionar</td>
+<td></td>
+<td></td>
+<td>RH_T_FALTA.<em>SINTESE_DIARIO_ID</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Data</td>
@@ -585,25 +640,32 @@ alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdo
 <p>RH_T_FALTA.DATA_FIM</p></td>
 </tr>
 <tr>
-<td style="text-align: left;">Tipo (Falta ou Ausência)</td>
+<td style="text-align: left;">Estado</td>
 <td></td>
 <td></td>
-<td>RH_T_FALTA.TIPO</td>
+<td>RH_T_FALTA.ESTADO</td>
 </tr>
 <tr>
-<td style="text-align: left;">Horas de Ausência</td>
+<td style="text-align: left;">Total de Horas</td>
 <td></td>
 <td></td>
-<td>RH_T_FALTA.HORAS_AUSENCIA</td>
+<td><strong>RH_ASSIDUIDADE_SINTESE_DIARIA</strong>.
+HORAS_AUSENCIA<strong>RH_T_T_FALTA.</strong>HORAS_AUSENCIA</td>
 </tr>
 <tr>
-<td style="text-align: left;">Valor de Ausência</td>
+<td colspan="4"><strong>JUSTIFICAR FALTAS SELECIONADAS</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;">Validar</td>
 <td></td>
-<td><p>Calcula o valor de falta por cada dia ..ou por cada horas de
-ausência</p>
-<p><mark>RH_PROCESSAMENTO_SALARIAL_DB. CALCULO_FALTA_DIARIO (P_TIPREL_ID
-NUMBER, p_data_inicio DATE)</mark></p></td>
-<td>RH_T_FALTA.VALOR</td>
+<td><strong>DOMAIN</strong> (VALIDAR_REGISTO)</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">Com Justificativo</td>
+<td>Seelct</td>
+<td><strong>DOMAIN</strong> = SIM_NAO</td>
+<td>RH_T_FALTA.FLG_JUSTIFICATIVO</td>
 </tr>
 <tr>
 <td style="text-align: left;">Motivo</td>
@@ -612,11 +674,37 @@ NUMBER, p_data_inicio DATE)</mark></p></td>
 <td>RH_T_FALTA.DESCRICAO<strong>_</strong>MOTIVO</td>
 </tr>
 <tr>
-<td style="text-align: left;"><del>Parecer (Justificar / não
-Justificar)</del></td>
+<td style="text-align: left;">Tipo Falta</td>
+<td>SELECT</td>
+<td>Desve buscar a descrição do tipo de falta escolhido … para buscar a
+justificativo, deve buscar da tabela de parametrização
+RH_T_PARAM_SITUACAO onde <em>FLG_AUSENCIA = FALTA</em></td>
+<td>RH_T_FALTA<strong>.PARAM_SIT_ID</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><mark>Desduzir Falta Em</mark></td>
 <td></td>
-<td><del>DOMAIN = JUSTIFICADA_INJUSTIFICADA</del></td>
-<td><del>RH_T_FALTA.TIPO_FALTA</del></td>
+<td><p><mark>Domains = TP_DESCONTO_FALTA</mark></p>
+<ul>
+<li><p><mark>Ferias</mark></p></li>
+</ul>
+<p><mark>Dispensa</mark></p></td>
+<td><mark>RH_T_FALTA.FLG_DESCONTO_FALTA</mark></td>
+</tr>
+<tr>
+<td style="text-align: left;">Valor Diário</td>
+<td></td>
+<td><p>Calcula o valor de falta por cada dia ..ou por cada horas de
+ausência</p>
+<p><mark>RH_PROCESSAMENTO_SALARIAL_DB. CALCULO_FALTA_DIARIO (P_TIPREL_ID
+NUMBER, p_data_inicio DATE)</mark></p></td>
+<td>RH_T_FALTA.VALOR</td>
+</tr>
+<tr>
+<td style="text-align: left;"><mark>Valor Total</mark></td>
+<td></td>
+<td><mark>Valor diário * totais dias</mark></td>
+<td><mark>-----------------------</mark></td>
 </tr>
 <tr>
 <td style="text-align: left;">-----------------------------</td>
@@ -626,10 +714,16 @@ Justificar)</del></td>
 <td>RH_T_FALTA.FLG_DESCONTO_SAL</td>
 </tr>
 <tr>
-<td style="text-align: left;">Com Justificativo</td>
-<td>Seelct</td>
-<td><strong>DOMAIN</strong> = SIM_NAO</td>
-<td>RH_T_FALTA.FLG_JUSTIFICATIVO</td>
+<td style="text-align: left;"></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: left;">Tipo Documento</td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 <tr>
 <td style="text-align: left;">Anexar Documento</td>
@@ -640,12 +734,6 @@ Justificar)</del></td>
 REFERENCIA = ‘JUSTIFICACAO_FALTA’</p>
 <p><mark>REFERENCIA_NAME = ‘RH_T_FALTA’</mark></p>
 <p><mark>REFERENCIA_ID = id de RH_T_FALTA</mark></p></td>
-</tr>
-<tr>
-<td style="text-align: left;">Selecionar</td>
-<td></td>
-<td></td>
-<td>RH_T_FALTA.<em>SINTESE_DIARIO_ID</em></td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Parecer Responsável</strong></td>
@@ -674,26 +762,6 @@ PARECER_RESPONSAVEL</td>
 <td>RH_T_FALTA.OBS_RESPONSAVEL</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>Despacho RH</strong></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td style="text-align: left;">Despacho RH</td>
-<td>SELECT</td>
-<td>DOMAIN = SIM_NAO</td>
-<td>RH_T_FALTA.DESPACHO_RH</td>
-</tr>
-<tr>
-<td style="text-align: left;">Tipo Justificação</td>
-<td>SELECT</td>
-<td>Desve buscar a descrição do tipo de falta escolhido … para buscar a
-justificativo, deve buscar da tabela de parametrização
-RH_T_PARAM_SITUACAO onde <em>FLG_AUSENCIA = FALTA</em></td>
-<td>RH_T_FALTA<strong>.PARAM_SIT_ID</strong></td>
-</tr>
-<tr>
 <td colspan="4"><strong>REGRA</strong></td>
 </tr>
 <tr>
@@ -708,6 +776,14 @@ Gozar)</em></p></li>
 <li><p><em>Ao validar é enviado uma notificação ao Colaborador. pegar o
 assunto e corpo na tabela <strong>RH_T_PARAM_NOTIFICACAO</strong> onde
 REFRENCIA = <strong>‘JUSTIFICACAO_FALTA’’</strong></em></p></li>
+<li><p><mark>Somente deve ir para validação caso o número de falta for
+maior que 3 dias , e caso o tipo de justificação esta sujeito a desconto
+no salário
+(</mark><em><strong>RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL</strong></em><mark>)
+caso contrario o registo fica registado com estado ATIVO</mark></p></li>
+<li><p><mark>Campo Validar , fica visível somente em
+Validação</mark></p></li>
+<li></li>
 </ul>
 <p><strong>Pendente</strong>: calculo de valor na justificacao de
 Falta</p></td>
@@ -720,7 +796,7 @@ Falta</p></td>
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><p>1-Registo na tabela <strong>RH_T_PEDIDO</strong></p>
 <ul>
-<li><p>TIPO_PEDIDO = <strong>DOMAIN</strong> = TIPO_PEDIDO ,
+<li><p>TIPO_PEDIDO = <strong>DOMAIN</strong> = TIPO_PEDIDO,
 <strong>VALOR</strong> = JUSTIFICACAO_FALTA</p></li>
 <li><p>ORIGEM = RH</p></li>
 <li><p>ESTADO = <strong>‘P’</strong></p></li>
@@ -730,7 +806,8 @@ alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteú
 <li><p>USER_REGISTO_ID = user_logado</p></li>
 <li><p>USER_ REGISTO_NAME = nome utilizador</p></li>
 </ul>
-<p>2- Registo na Tabela <strong>RH_T_VALIDACAO</strong></p>
+<p>2- Registo na Tabela <strong>RH_T_VALIDACAO (caso o tipo fr falta tem
+salario )</strong></p>
 <ul>
 <li><p><em>TIPO_ACCAO<strong>= ‘INSERT ’ (</strong>DOMAINS =
 TIPO_ACAO<strong>)</strong></em></p></li>
@@ -763,18 +840,26 @@ ACCAO_REFERENTE<strong>)</strong></em></p></li>
 <ul>
 <li><p>Atualiza os estado pendentes para ativo</p></li>
 <li><p>Caso a justificação é sujeita a desconto no salário, logo deve
-registar no <strong>RH_T_DEF_REMUNERACOES</strong> o registo de
+registar no <strong>RH_T_DEF_PAGAMENTOS</strong> o registo de
 falta</p></li>
-<li><p>Atualiza o id de remuneração na tabela
-<strong>RH_T_FALTA.</strong>DEF<strong>_</strong>REM_ID</p></li>
+<li><p>Regista a associacao na tabela <strong><mark>RH_T_TIPREL_REM_PAG
+.PAG_ID</mark></strong></p></li>
+<li><p>Atualiza o id de PAGAMENTO na tabela
+<mark><strong>RH_T_FALTA.</strong>
+<strong>DEF_PAG_ID</strong></mark></p></li>
+<li><p><strong>Caso o tipo de falta for desconto nas ferias <mark>(campo
+DEDUZIR EM = FERIAS ),</mark></strong> logo deve registar na
+Tabela</p></li>
+<li><p>Regista na tabela <strong>RH_T_FERIAS_GOZADAS</strong></p></li>
+<li><p><strong>Caso o tipo de justificação for desconto nas horas de
+Dispensa <mark>(campo DEDUZIR EM = DISPENSA ),</mark></strong></p></li>
+<li><p>Regista na <strong>RH_T_DISPENSA</strong></p></li>
 </ul></th>
 </tr>
 </thead>
 <tbody>
 </tbody>
 </table>
-
-### 
 
 ## Falta Justificada / injustificada
 
@@ -801,8 +886,8 @@ alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos ger
 | Valor a Descontar | *TEXT* |  | RH_T_FALTA.VALOR_DESCONTO |
 | Desconto na Remuneração? | *TEXT* |  | RH_T_FALTA. TF_ID, RH_TIPO_FALTAS. FLG_DESCONTO_SALARIO |
 | Estado Processamento | *TEXT* | Verifica se existe um registo em RH_REMUNERACOES | ----------------------------------------------------- |
-| Acoes |  |  |  |
-|  |  |  |  |
+| **Acoes** |  |  |  |
+| <span class="mark">Ver detalhe Falta</span> |  | <span class="mark">Abre o mesmo formulário de justificação de Falta</span> |  |
 
 ## Dispensa
 
@@ -1116,23 +1201,29 @@ alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteú
 <li><p><em>PEDIDO_ID = ID DE RH_T_PEDIDO</em></p></li>
 </ol>
 <blockquote>
-<p>3.Registo na Tabela <strong>RH_T_VALIDACAO</strong></p>
+<p><mark>3<del>.Registo na Tabela
+<strong>RH_T_VALIDACAO</strong></del></mark></p>
 </blockquote>
 <ul>
-<li><p><em>TIPO_ACCAO<strong>= ‘INSERT ’ (</strong>DOMAINS =
-TIPO_ACAO<strong>)</strong></em></p></li>
-<li><p><em>REFERENCIA_NAME <strong>=
+<li><p><em><mark><del>TIPO_ACCAO<strong>= ‘INSERT ’ (</strong>DOMAINS =
+TIPO_ACAO<strong>)</strong></del></mark></em></p></li>
+<li><p><mark><del><em>REFERENCIA_NAME <strong>=
 ‘</strong></em>DISPENSA<em><strong>’ (</strong>DOMAINS =
-ACCAO_REFERENTE<strong>)</strong></em></p></li>
-<li><p><em>REFERENCIA_ID <strong>= RH_T_PEDIDO.ID
-</strong></em></p></li>
-<li><p><em>FUN_ID <strong>= ID</strong> de tabela
-<strong>RH_T_FUNCIONARIOS </strong></em></p></li>
-<li><p><em>TIPREL_ID <strong>= NULL</strong></em></p></li>
-<li><p><em>DATA_REGISTO <strong>= SYSDATE </strong></em></p></li>
-<li><p><em>USER_REGISTO_NAME = nome de utilizador Logado</em></p></li>
-<li><p><em>USER_REGISTO_ID = id de utilizador Logado</em></p></li>
-<li><p><em>ESTADO <strong>= ‘P’</strong></em></p></li>
+ACCAO_REFERENTE<strong>)</strong></em></del></mark></p></li>
+<li><p><em><mark><del>REFERENCIA_ID <strong>= RH_T_PEDIDO.ID
+</strong></del></mark></em></p></li>
+<li><p><em><mark><del>FUN_ID <strong>= ID</strong> de tabela
+<strong>RH_T_FUNCIONARIOS </strong></del></mark></em></p></li>
+<li><p><em><mark><del>TIPREL_ID <strong>=
+NULL</strong></del></mark></em></p></li>
+<li><p><em><mark><del>DATA_REGISTO <strong>= SYSDATE
+</strong></del></mark></em></p></li>
+<li><p><em><mark><del>USER_REGISTO_NAME = nome de utilizador
+Logado</del></mark></em></p></li>
+<li><p><em><mark><del>USER_REGISTO_ID = id de utilizador
+Logado</del></mark></em></p></li>
+<li><p><em><mark><del>ESTADO <strong>=
+‘P’</strong></del></mark></em></p></li>
 </ul>
 <p><em><strong><mark>Caso a dispensa for valida, log deve registar na
 tabela Ausencia</mark></strong></em></p>
@@ -1158,11 +1249,604 @@ onde nome = DISPENSA</p></li>
 </tbody>
 </table>
 
+## Licença / Baixa Medica 
+
+- PARA BAIXA , DEVE ABRIR UMA TEBELA COM OS MESES PROCESSADOS, O RH
+  INTRODUZ OS VALORES DE SDO, E O SISEMA FAZ OS CALUCLOS, O RH VALIDA E
+  O VALOR é introduzido SALÁRIO (SABER QUAL SERºA O TIPO DE MOVIMENTO
+  PARA RETROATIVO DE BAIXA)
+
+### Licença / Lista baixa Médica 
+
+<img src="media/image18.png" style="width:9.69306in;height:4.26806in"
+alt="Uma imagem com texto, software, número, Ícone de computador Os conteúdos gerados por IA podem estar incorretos." />
+
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 7%" />
+<col style="width: 41%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;"><strong>Filtro</strong></th>
+<th style="text-align: center;"><strong>Tipo</strong></th>
+<th style="text-align: center;"><strong>Descrição</strong></th>
+<th style="text-align: center;"><strong>Fonte dados</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data Inicio</td>
+<td><em>DATE</em></td>
+<td></td>
+<td><em>RH_T_ABONOS_BENEFICIOS.DATA_INICIO</em></td>
+</tr>
+<tr>
+<td>Data Fim</td>
+<td><em>DATE</em></td>
+<td></td>
+<td><em>RH_T_ABONOS_BENEFICIOS.DATA_FIM</em></td>
+</tr>
+<tr>
+<td>Colaborador</td>
+<td></td>
+<td>RH_T_FUNCIONARIO.NOME</td>
+<td><em>RH_T_ABONOS_BENEFICIOS.FUN_ID</em></td>
+</tr>
+<tr>
+<td>Direcção</td>
+<td></td>
+<td>RH_T_TIPOS_RELACIONAMENT.INSTIT_ID, do ultimo Vinculo</td>
+<td><em>-----------------------------------------------------------</em></td>
+</tr>
+<tr>
+<td><p><del>Tipo Abono e Beneficio</del></p>
+<p><mark>Licença</mark></p></td>
+<td><em>SELECT</em></td>
+<td>RH_T_PARAM_SITUACAO.NOME</td>
+<td><em>RH_T_ABONOS_BENEFICIOS.PARAM_SIT_ID</em></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>Lista</strong></td>
+<td style="text-align: center;"><strong>Tipo</strong></td>
+<td style="text-align: center;"><strong>Descrição</strong></td>
+<td style="text-align: center;"><strong>Fonte dados</strong></td>
+</tr>
+<tr>
+<td>Estado</td>
+<td></td>
+<td></td>
+<td><em>RH_T_ABONOS_BENEFICIOS.ESTADO</em></td>
+</tr>
+<tr>
+<td>Direção</td>
+<td></td>
+<td></td>
+<td><p><em>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID</em></p>
+<p><em>INPSSIGOF.INSTITUICOES. NOME</em></p></td>
+</tr>
+<tr>
+<td>Seccão</td>
+<td></td>
+<td></td>
+<td><p><em>RH_T_TIPOS_RELACIONAMENTO.SECCAO_ID</em></p>
+<p><em>RH_T_SECCAO.NOME</em></p></td>
+</tr>
+<tr>
+<td>Nome</td>
+<td></td>
+<td></td>
+<td><em>RH_T_FUNCIONARIOS.NOME</em></td>
+</tr>
+<tr>
+<td>Vínculo</td>
+<td></td>
+<td></td>
+<td><p><em>RH_T_TIPOS_RELACIONAMENTO.CONTRATO_VíNCULO_ID</em></p>
+<p><em>RH_T_PARAM_VíNCULO.NOME</em></p></td>
+</tr>
+<tr>
+<td>Categoria</td>
+<td></td>
+<td></td>
+<td><p><em>RH_T_TIPOS_RELACIONAMENTO.CARGO_ID</em></p>
+<p><em>RH_T_PARAM_CARGO.NOME</em></p></td>
+</tr>
+<tr>
+<td><p><del>Tipo de Abono e Beneficio</del></p>
+<p><mark>Tipo Licença</mark></p></td>
+<td></td>
+<td>RH_T_PARAM_SITUACAO.NOME</td>
+<td><em>RH_T_ABONOS_BENEFICIOS.PARAM_SIT_ID</em></td>
+</tr>
+<tr>
+<td>Motivo</td>
+<td></td>
+<td></td>
+<td><em>RH_T_ABONOS_BENEFICIOS. PARAM_SIT_DET_ID</em></td>
+</tr>
+<tr>
+<td>Data início</td>
+<td></td>
+<td></td>
+<td><em>RH_T_ABONOS_BENEFICIOS.DATA_INICIO</em></td>
+</tr>
+<tr>
+<td>Data Fim</td>
+<td></td>
+<td></td>
+<td><em>RH_T_ABONOS_BENEFICIOS.DATA_FIM</em></td>
+</tr>
+<tr>
+<td colspan="4" style="text-align: left;"><strong>REGRAS</strong></td>
+</tr>
+<tr>
+<td colspan="4"></td>
+</tr>
+<tr>
+<td colspan="4" style="text-align: left;"><strong>ACÇÕES</strong></td>
+</tr>
+<tr>
+<td>Editar</td>
+<td colspan="3">Abre o mesmo formulário de registo</td>
+</tr>
+<tr>
+<td>Regularização de contas</td>
+<td colspan="3">Abre um formulario que pemite ajustar os valos pagos
+pelo RH e SDO referente baixa medica de um colaborador</td>
+</tr>
+</tbody>
+</table>
+
+### Novo / Editar
+
+RH_T_PARAM_SITUACAO
+
+RH_T_ABONOS_BENEFICIOS
+
+RH_T_FALTA
+
+RH_T_AUSENCIA
+
+<img src="media/image19.png" style="width:9.69306in;height:4.9875in" />
+
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 12%" />
+<col style="width: 23%" />
+<col style="width: 12%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;"><strong>Formulário</strong></th>
+<th style="text-align: center;"><strong>Tipo</strong></th>
+<th colspan="2"
+style="text-align: center;"><strong>Descrição</strong></th>
+<th style="text-align: center;"><strong>Gravação</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Validar</td>
+<td></td>
+<td colspan="2"><strong>Fica visivel somente na validacao</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><p><del>*Tipo Abono Benefício</del></p>
+<p><mark>*Tipo Licença</mark></p></td>
+<td><em>SELECT</em></td>
+<td colspan="2"><strong>RH_T_PARAM_SITUACAO</strong>.NOME</td>
+<td><p><em>RH_T_ABONOS_BENEFICIOS.PARAM_SIT_ID</em></p>
+<p><em>RH_T_FALTA. PARAM_SIT_ID</em></p>
+<p><em>RH_T_AUSENCIA. PARAM_SIT_ID</em></p></td>
+</tr>
+<tr>
+<td>Motivo</td>
+<td><em>SELECT</em></td>
+<td colspan="2"><p><strong>RH_T_PARAM_SITUACAO_DET.NOME</strong></p>
+<p>Motivo não é obrigatário</p></td>
+<td><em>RH_T_ABONOS_BENEFICIOS. PARAM_SIT_DET_ID</em></td>
+</tr>
+<tr>
+<td>*Data Inicio Licença</td>
+<td><em>DATE</em></td>
+<td colspan="2"></td>
+<td><p><em>RH_T_ABONOS_BENEFICIOS.DATA_INICIO</em></p>
+<p><em>RH_T_AUSENCIA.DATA_INICIO</em></p></td>
+</tr>
+<tr>
+<td>Data Fim Licença</td>
+<td><em>DATE</em></td>
+<td colspan="2"></td>
+<td><p><em>RH_T_ABONOS_BENEFICIOS.DATA_FIM</em></p>
+<p><em>RH_T_AUSENCIA. DATA_FIM</em></p></td>
+</tr>
+<tr>
+<td>Data Inicio Falta</td>
+<td><em>DATE</em></td>
+<td colspan="2">Caso essa informação não for nula, logo deva enviar essa
+informação como parâmetro no Procedimento</td>
+<td><em><del>-------------------------------</del></em></td>
+</tr>
+<tr>
+<td>Dias Total Licença</td>
+<td><em>NUMBER</em></td>
+<td colspan="2">Contar número de dias entre <strong>Data Inicio de
+Licença</strong> e <strong>Data Fim Licença</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>Observação</td>
+<td><em>TEXTAREA</em></td>
+<td colspan="2"></td>
+<td><p><em>RH_T_ABONOS_BENEFICIOS OBS</em></p>
+<p><em>RH_T_AUSENCIA.OBS</em></p></td>
+</tr>
+<tr>
+<td>----------------------------</td>
+<td><em>HIDDEN</em></td>
+<td
+colspan="2">-------------------------------------------------------</td>
+<td><p><em>RH_T_ABONOS_BENEFICIOS.FUN_ID</em></p>
+<p><em>RH_T_FALTA.TIPREL_ID</em></p>
+<p><em>RH_T_AUSENCIA.FUN_ID</em></p></td>
+</tr>
+<tr>
+<td colspan="5"><strong>Informações Definidas No
+Regulamento</strong></td>
+</tr>
+<tr>
+<td
+colspan="5"><p><strong>RH_PROCESSAMENTO_SALARIAL_DB.CALCULO_FALTA_LICENCA(P_TIPREL_ID</strong>
+=: ID de RH_T_TIPOS_RELACIONAMENTO onde EST_ACT_ADM = 1,</p>
+<p><strong>P_DATA_INICIO</strong> =: Data Inicio Licença,</p>
+<p><strong>P_DATA_FIM</strong> := Data Fim Licença,</p>
+<p><strong>P_TIPO_LICENCA</strong> := Tipo Licença ,</p></td>
+</tr>
+<tr>
+<td>Desconto Sobre</td>
+<td></td>
+<td colspan="2"><em>p_desc_sobre</em></td>
+<td><em><del>-----------------------------------------------</del></em></td>
+</tr>
+<tr>
+<td>Dias Direito Licença</td>
+<td></td>
+<td colspan="2"><em>p_dias_Direito</em></td>
+<td><em><del>------------------------------------------------</del></em></td>
+</tr>
+<tr>
+<td>Dias Descontado por RH</td>
+<td></td>
+<td colspan="2"><em>p_dias_desc_rh</em></td>
+<td><em><del>-----------------------------------------------</del></em></td>
+</tr>
+<tr>
+<td>Dias não descontado por RH</td>
+<td></td>
+<td colspan="2"><em>p_dias_ndesc_rh</em></td>
+<td><em><del>----------------------------------------------</del></em></td>
+</tr>
+<tr>
+<td><strong>Falta Mensal</strong></td>
+<td></td>
+<td colspan="2"></td>
+<td></td>
+</tr>
+<tr>
+<td>Mês</td>
+<td></td>
+<td colspan="2"><em>p_meses</em></td>
+<td><em>-----------------------------------------------------</em></td>
+</tr>
+<tr>
+<td>Data Inicio</td>
+<td></td>
+<td colspan="2"><em>p_data_ini_falta</em></td>
+<td><em>RH_T_FALTA.DATA_INICIO</em></td>
+</tr>
+<tr>
+<td>Data Fim</td>
+<td></td>
+<td colspan="2"><em>p_data_fim_falta</em></td>
+<td><em>RH_T_FALTA.DATA_FIM</em></td>
+</tr>
+<tr>
+<td>Dias Falta Mensal</td>
+<td></td>
+<td colspan="2"><em>p_dias_falta</em></td>
+<td><em>RH_T_FALTA.AUSENCIA</em></td>
+</tr>
+<tr>
+<td>Salário Base</td>
+<td></td>
+<td colspan="2"><em>p_valor_salario</em></td>
+<td><em>-----------------------------</em></td>
+</tr>
+<tr>
+<td>Valor Descontado</td>
+<td></td>
+<td colspan="2"><em>p_valor_desc</em></td>
+<td><em>RH_T_FALTA.VALOR</em></td>
+</tr>
+<tr>
+<td colspan="5"><strong>Anexar Documento Comprovativo</strong></td>
+</tr>
+<tr>
+<td>Tipo Documento</td>
+<td></td>
+<td colspan="2"></td>
+<td rowspan="2"><p>RH_T_DOCUMENTO.<em>DOC_ID</em></p>
+<p>RH_T_DOCUMENTO.TIPO_DOCUMETO = ID DE TABELA RH_T_TIPO_DOCUMENTO ONDE
+REFERENCIA = ‘JUSTIFICACAO_FALTA’</p>
+<p>REFERENCIA_NAME = ‘<em>RH_T_ABONOS_BENEFICIOS</em></p>
+<p>REFERENCIA_ID = id de <em>RH_T_ABONOS_BENEFICIOS</em></p></td>
+</tr>
+<tr>
+<td>Documento</td>
+<td></td>
+<td colspan="2"></td>
+</tr>
+<tr>
+<td colspan="5"><em><strong>OUTRAS GRAVAÇÕES</strong></em></td>
+</tr>
+<tr>
+<td colspan="3"><p><em>2-insert em
+<strong>RH_T_ABONOS_BENEFICIOS</strong></em></p>
+<ul>
+<li><p><em>DATA_REGISTO= ‘<strong>SYSDATE’</strong></em></p></li>
+<li><p><em>USER_REGISTO_ID = id de utilizador Logado</em></p></li>
+<li><p><em>USER_REGISTO_NAME = nome de utilizador Logado</em></p></li>
+<li><p><em>USER_ALTERACAO _ID = <strong>NULL</strong></em></p></li>
+<li><p><em>USER_ALTERACAO_NAME = <strong>NULL</strong></em></p></li>
+<li><p><em>DATA_ALTERACAO = <strong>NULL</strong></em></p></li>
+<li><p><em>ESTADO = “<strong>P</strong>”</em></p></li>
+<li><p><em>FUN_ID = id de RH_T_FUNCIONARIOS</em></p></li>
+</ul>
+<p><em>4-Registo em <strong>RH_T_AVALIACAO,
+RH_T_VALIDACAO_DETALHE</strong></em></p></td>
+<td colspan="2" style="text-align: left;"><p><em>2.1 Caso o tipo de
+ausência é considerado uma ausência. (ou seja verifica na tabela
+RH_T_PARAM_SITUACAO.FLG_AUSENCIA = 1). Logo regista na tabela
+<strong>RH_T_AUSENCIA</strong></em></p>
+<ul>
+<li><p><em>PARAM_SIT_ID = ID de RH_T_PARAM_SITUACAO</em></p></li>
+<li><p><em>DATA_INICIO = Data inicio</em></p></li>
+<li><p><em>DATA_FIM = Data Fim</em></p></li>
+<li><p><em>REFERENCIA_ID = id de
+<strong>RH_T_ABONOS_BENEFICIOS</strong></em></p></li>
+<li><p><em>REFERENCIA_NAME =
+‘<strong>RH_T_ABONOS_BENEFICIOS’</strong></em></p></li>
+<li><p><em>FUN_ID</em></p></li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+####  Validação 
+
+<table style="width:100%;">
+<colgroup>
+<col style="width: 99%" />
+</colgroup>
+<thead>
+<tr>
+<th><ul>
+<li><p>A validação invoca a mesma página de Registo</p></li>
+<li><p>O campo validar deve ficar visível</p></li>
+<li><p>Ao <strong>validar</strong>, devem ser atualizadas todas as
+tabelas associadas, definindo o campo <strong>estado =
+'A'</strong>.</p></li>
+<li><p>Ao <strong>desvalidar</strong>, devem ser atualizadas todas as
+tabelas associadas, definindo o campo <strong>estado =
+'I'</strong>.</p></li>
+<li><p>Caso o utilizador <strong>atualize algum campo no
+formulário</strong>, a alteração deve ser <strong>refletida na tabela
+correspondente</strong>.</p></li>
+</ul></th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+### Regularização de Contas 
+
+<img src="media/image20.png" style="width:9.69306in;height:3.62778in"
+alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
+
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 12%" />
+<col style="width: 23%" />
+<col style="width: 8%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: center;"><strong>Lista</strong></th>
+<th style="text-align: center;"><strong>Tipo</strong></th>
+<th colspan="2"
+style="text-align: center;"><strong>Descrição</strong></th>
+<th style="text-align: center;"><strong>Gravação</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Meses</td>
+<td><em>TEXT</em></td>
+<td colspan="2"></td>
+<td>RH_T_REGULARIZACAO_SDO.MES_REFERENTE</td>
+</tr>
+<tr>
+<td>Valor Liquido Recevido</td>
+<td><em>TEXT</em></td>
+<td colspan="2">RH_T_PROC_FUNCIONARIOS. TOT_LIQUIDO</td>
+<td>-------------------------------</td>
+</tr>
+<tr>
+<td>SDO Recebido</td>
+<td><em>NUMBER</em></td>
+<td colspan="2"></td>
+<td>RH_T_REGULARIZACAO_SDO.SDO_RECEBIDO</td>
+</tr>
+<tr>
+<td>Retroativo Salário</td>
+<td></td>
+<td colspan="2"></td>
+<td>RH_T_REGULARIZACAO_SDO.VALOR_RETROATIVO_SALARIO</td>
+</tr>
+<tr>
+<td>Retroativo SDO</td>
+<td></td>
+<td colspan="2"></td>
+<td>RH_T_REGULARIZACAO_SDO.VALOR_RETROATIVO_SDO</td>
+</tr>
+<tr>
+<td>Subsidio fiscal Recebido</td>
+<td></td>
+<td colspan="2">RH_T_PROC_FUNCIONARIOS. .TOT_REMUN_COLLECT</td>
+<td>-------------------------------------</td>
+</tr>
+<tr>
+<td>Salario Liquido + Subsidio Fiscal</td>
+<td></td>
+<td colspan="2">RH_T_PROC_FUNCIONARIOS.TOT_LIQUIDO +
+RH_T_PROC_FUNCIONARIOS. .TOT_REMUN_COLLECT</td>
+<td>----------------------------------------------</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td colspan="2"></td>
+<td></td>
+</tr>
+<tr>
+<td>TOTAL RECEBIDO</td>
+<td><em>TEXT</em></td>
+<td colspan="2">Somatoria entre o valor liquido recebido +SDO
+recebido</td>
+<td></td>
+</tr>
+<tr>
+<td>TOTAL DIREITO</td>
+<td><em>TEXT</em></td>
+<td colspan="2">Somatoria entre o valor liquido recebido + retroativo
+salario – retroativo SDO</td>
+<td></td>
+</tr>
+<tr>
+<td>DIFERENÇA POR EXPEDIENTE</td>
+<td><em>TEXT</em></td>
+<td colspan="2">retroativo salario + retroativo salario</td>
+<td>??</td>
+</tr>
+<tr>
+<td>Validar</td>
+<td><em>RADIOLIST</em></td>
+<td colspan="2">Só fica visivel ao validar salário</td>
+<td>RH_T_REGULARIZACAO_SDO.ESTADO</td>
+</tr>
+<tr>
+<td colspan="5"><em>OUTRAS GRAVAÇÕES</em></td>
+</tr>
+<tr>
+<td colspan="3"><p><em>1.2 Fazer uma nova gravação na tabela de</em>
+<strong>RH_T_REGULARIZACAO_SDO</strong></p>
+<ul>
+<li><p><em>DATA_REGISTO= ‘SYSDATE’</em></p></li>
+<li><p><em>USER_REGISTO_ID = id de utilizador Logado</em></p></li>
+<li><p><em>USER_REGISTO_NAME = nome de utilizador Logado</em></p></li>
+<li><p><em>USER_ALTERACAO _ID = NULL</em></p></li>
+</ul>
+<blockquote>
+<p><em>USER_ALTERACAO_NAME = NULL</em></p>
+</blockquote>
+<ul>
+<li><p><em>DATA_ALTERACAO = NULL</em></p></li>
+<li><p><em>ESTADO = ‘P’</em></p></li>
+<li><p><em>PROC_FUN_ID = ID DE
+<strong>RH_T_PROC_FUNCIONARIOS</strong></em></p></li>
+<li><p><em>SITUACAO_LABORAL_ID = ID DE
+<strong>RH_T_SITUACAO_LABORAL</strong></em></p></li>
+</ul></td>
+<td colspan="2"><p><em>1.Registo na tabela de validação
+<strong>RH_T_VALIDACAO</strong></em></p>
+<ul>
+<li><p><em>TIPO_ACCAO<strong>= ‘INSERT ’ (</strong>DOMAINS =
+TIPO_ACAO<strong>)</strong></em></p></li>
+<li><p><em>REFERENCIA_NAME <strong>= ‘REGULARIZAÇÃO’ (</strong>DOMAINS =
+ACCAO_REFERENTE<strong>)</strong></em></p></li>
+<li><p><em>REFERENCIA_ID <strong>= ID</strong> de tabela
+<strong>RH_T_REGULARIZACAO </strong></em></p></li>
+<li><p><em>FUN_ID <strong>= ID</strong> de tabela
+<strong>RH_T_FUNCIONARIOS </strong></em></p></li>
+<li><p><em>TIPREL_ID <strong>= ID de
+RH_T_TIPOS_RELACIONAMENTO</strong></em></p></li>
+<li><p><em>DATA_REGISTO <strong>= SYSDATE </strong></em></p></li>
+<li><p><em>USER_REGISTO_NAME = nome de utilizador Logado</em></p></li>
+<li><p><em>USER_REGISTO_ID = id de utilizador Logado</em></p></li>
+<li><p><em>ESTADO <strong>= ‘P’</strong></em></p></li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+
+#### Validação 
+
+<table style="width:100%;">
+<colgroup>
+<col style="width: 99%" />
+</colgroup>
+<thead>
+<tr>
+<th><ul>
+<li><p>A validação invoca a mesma página de Registo</p></li>
+<li><p>O campo validar deve ficar visível</p></li>
+<li><p>Ao <strong>validar</strong>, devem ser atualizadas todas as
+tabelas associadas, definindo o campo <strong>estado =
+'A'</strong>.</p></li>
+<li><p>Ao <strong>desvalidar</strong>, devem ser atualizadas todas as
+tabelas associadas, definindo o campo <strong>estado =
+'I'</strong>.</p></li>
+<li><p>Caso o utilizador <strong>atualize algum campo no
+formulário</strong>, a alteração deve ser <strong>refletida na tabela
+correspondente</strong>.</p></li>
+<li><p>Ao clicar no botão validar deve ser efetuado as seguintes
+ações,</p>
+<ul>
+<li><p>caso o colaborador tenha valor a receber por parte do RH</p>
+<ul>
+<li><p>Registo na tabela <strong>RH_T_DEF_REMUNERACOES</strong> (o valor
+do retroativo), para isso é necessário definir qual o TM_ID</p></li>
+<li><p>Registo na tabela de associação RH_T_REMUN_TIREPL</p></li>
+</ul></li>
+<li><p>Caso o colaborador tem a pagar</p>
+<ul>
+<li><p>Registo na tabela <strong>RH_T_DEF_REMUNERACOES</strong> (o valor
+do retroativo negativo), para isso é necessário definir qual o
+TM_ID</p></li>
+<li><p>Registo na tabela de associação RH_T_REMUN_TIREPL</p></li>
+</ul></li>
+</ul></li>
+</ul></th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
 ## Hora Extra
 
 ### Lista Hora Extra 
 
-<img src="media/image18.png" style="width:9.69306in;height:4.45347in"
+<img src="media/image21.png" style="width:9.69306in;height:4.45347in"
 alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -1310,7 +1994,7 @@ alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos ger
 
 ### Novo Hora Extra
 
-<img src="media/image19.png" style="width:9.16944in;height:2.91389in" />
+<img src="media/image22.png" style="width:9.16944in;height:2.91389in" />
 
 <table style="width:100%;">
 <colgroup>
@@ -1474,12 +2158,12 @@ DE HORA EXTRA</p></li>
 
 ## Ferias 
 
-<img src="media/image20.png" style="width:4.73333in;height:1.05625in"
+<img src="media/image23.png" style="width:4.73333in;height:1.05625in"
 alt="Uma imagem com texto, Tipo de letra, branco, captura de ecrã Os conteúdos gerados por IA podem estar incorretos." />
 
 ### Lista Ferias 
 
-<img src="media/image21.png" style="width:9.69306in;height:4.79375in"
+<img src="media/image24.png" style="width:9.69306in;height:4.79375in"
 alt="Uma imagem com texto, captura de ecrã, software, Ícone de computador Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -1595,24 +2279,24 @@ alt="Uma imagem com texto, captura de ecrã, software, Ícone de computador Os c
 <td colspan="3" style="text-align: center;"></td>
 </tr>
 <tr>
-<td><img src="media/image22.png"
+<td><img src="media/image25.png"
 style="width:1.17431in;height:0.28264in" /></td>
 <td colspan="3">Permite exportar dados de direitos a cada direção</td>
 </tr>
 <tr>
-<td><p><img src="media/image23.png"
+<td><p><img src="media/image26.png"
 style="width:0.93681in;height:0.32014in" /></p>
-<p><img src="media/image24.png"
+<p><img src="media/image27.png"
 style="width:1.14931in;height:0.23264in" /></p></td>
 <td colspan="3">Pemite Abrir formulario para solicitar Ferias</td>
 </tr>
 <tr>
-<td><img src="media/image25.png"
+<td><img src="media/image28.png"
 style="width:1.11181in;height:0.26181in" /></td>
 <td colspan="3">Permite ver ferias agendadas e por gozar</td>
 </tr>
 <tr>
-<td><img src="media/image26.png"
+<td><img src="media/image29.png"
 style="width:1.17014in;height:0.23264in" /></td>
 <td colspan="3">Permite enviar direito de ferias por email</td>
 </tr>
@@ -1637,7 +2321,7 @@ style="width:1.17014in;height:0.23264in" /></td>
 
 ### Pedido Ferias / Alteração de ferias 
 
-<img src="media/image27.png" style="width:9.69306in;height:5.44861in"
+<img src="media/image30.png" style="width:9.69306in;height:5.44861in"
 alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -1922,7 +2606,7 @@ gozar.</p>
 
 ### Ver Mapa
 
-<img src="media/image28.png" style="width:9.69306in;height:4.56181in"
+<img src="media/image31.png" style="width:9.69306in;height:4.56181in"
 alt="Uma imagem com texto, software, Ícone de computador, Página web Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -1973,7 +2657,7 @@ Responsável.</p>
 
 ### Mapa de Ferias 
 
-<img src="media/image29.png" style="width:9.69306in;height:5.04514in"
+<img src="media/image32.png" style="width:9.69306in;height:5.04514in"
 alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2065,7 +2749,7 @@ Agendadas;</td>
 <td></td>
 </tr>
 <tr>
-<td><img src="media/image30.png"
+<td><img src="media/image33.png"
 style="width:1.14514in;height:0.25347in" /></td>
 <td colspan="3" style="text-align: center;">Botão que permite importar
 mapa, caso se importar uma mapa que já existe, log se deve
@@ -2073,13 +2757,13 @@ mapa, caso se importar uma mapa que já existe, log se deve
 (<strong>RH_T_FERIAS_MAPA</strong>.ESTADO = “A”)</td>
 </tr>
 <tr>
-<td><img src="media/image31.png"
+<td><img src="media/image34.png"
 style="width:1.17014in;height:0.24514in" /></td>
 <td colspan="3" style="text-align: center;">Permite exportar mapa por
 direção com os direitos de cada colaborador</td>
 </tr>
 <tr>
-<td><img src="media/image32.png"
+<td><img src="media/image35.png"
 style="width:1.15556in;height:0.25417in" /></td>
 <td colspan="3" style="text-align: center;"></td>
 </tr>
@@ -2097,7 +2781,7 @@ acima (<a href="#_Ver Mapa"><u>VER MAPA</u></a>)</td>
 
 ####  Ver detalhe 
 
-<img src="media/image33.png" style="width:9.69306in;height:4.39722in"
+<img src="media/image36.png" style="width:9.69306in;height:4.39722in"
 alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2186,18 +2870,18 @@ mas que não estão nessa tabela (RH_T_FERIAS_MAPA.INSTIT_ID)</p></td>
 
 ## FALTA
 
-<img src="media/image34.png" style="width:5.55208in;height:4.59375in"
+<img src="media/image37.png" style="width:5.55208in;height:4.59375in"
 alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 ## HORA EXTRA
 
-<img src="media/image35.png" style="width:7.61458in;height:3.11458in"
+<img src="media/image38.png" style="width:7.61458in;height:3.11458in"
 alt="Uma imagem com texto, captura de ecrã, diagrama, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 ## DISPENSA
 
-<img src="media/image36.png" style="width:8.36458in;height:2.59375in" />
+<img src="media/image39.png" style="width:8.36458in;height:2.59375in" />
 
 ## FERIAS
 
-<img src="media/image37.png" style="width:9.69306in;height:4.47014in" />
+<img src="media/image40.png" style="width:9.69306in;height:4.47014in" />

@@ -147,6 +147,21 @@
           "type": "long",
           "name": "seccao",
           "isRequired": false
+        },
+        {
+          "type": "long",
+          "name": "ups",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": false
         }
       ]
     },
@@ -503,6 +518,21 @@
         {
           "type": "string",
           "name": "funcionarioUuid",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "colaborador",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "estado",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "mes",
           "isRequired": false
         }
       ]
@@ -1389,8 +1419,16 @@
         }
       },
       "requestParams": [
-        { "type": "string", "name": "ano", "isRequired": true },
-        { "type": "string", "name": "direcao", "isRequired": true }
+        {
+          "type": "string",
+          "name": "ano",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "direcao",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -1402,14 +1440,25 @@
           "name": "OK",
           "content": {
             "application/json": {
-              "schema": { "type": "string", "objectType": "java" }
+              "schema": {
+                "type": "string",
+                "objectType": "java"
+              }
             }
           }
         }
       },
       "requestParams": [
-        { "type": "string", "name": "dataInicio", "isRequired": true },
-        { "type": "string", "name": "dataFim", "isRequired": true }
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": true
+        }
       ]
     }
   ],

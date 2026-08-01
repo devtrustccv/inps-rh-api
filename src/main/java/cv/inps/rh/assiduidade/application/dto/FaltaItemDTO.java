@@ -42,6 +42,16 @@ public class FaltaItemDTO  {
 
   private String comJustificativo ;
 
+  /**
+   * Estado da falta: {@code P} (pendente), {@code A} (justificada) ou {@code I}
+   * (rejeitada). Só de resposta — alimenta a coluna "Estado" do resumo de faltas.
+   * Vem nulo quando o dia ainda não tem registo em RH_T_FALTA.
+   */
+  private String estado ;
+
+  /** Descrição legível de {@link #estado}: Pendente / Justificada / Rejeitada. */
+  private String estadoDesc ;
+
   @Valid
   private AnexoReqDTO documento ;
 
