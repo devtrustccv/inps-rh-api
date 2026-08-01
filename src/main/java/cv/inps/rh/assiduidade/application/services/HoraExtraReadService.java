@@ -256,7 +256,7 @@ public class HoraExtraReadService {
     dto.setDiasUteis(e.getDiasUteis());
     dto.setDiasNaoUteis(e.getDiasNaoUteis());
 
-    dto.setHorasContratadaDiaria(asText(e.getHorasContratadoDiario()));
+    dto.setHorasContratadaDiaria(e.getHorasContratadoDiario());
     dto.setHorasContratadaMensal(asText(e.getHorasContratadoMensal()));
     dto.setHorasExtraDiarias(asText(e.getHorasExtraDiarias()));
     dto.setHorasTrabalho(asText(e.getHorasTrabalho()));

@@ -160,8 +160,9 @@ public class VHoraExtraMensalEntity  {
     private LocalDate dataFim;
 
 
+    /** Jornada diária contratada, em {@code HH:MM} (ex.: "08:00") — é texto, não número. */
     @Column(name="horas_contratado_diario")
-    private BigDecimal horasContratadoDiario;
+    private String horasContratadoDiario;
 
 
     @Column(name="horas_contratado_mensal")
@@ -176,12 +177,9 @@ public class VHoraExtraMensalEntity  {
     private BigDecimal salarioMensal;
 
 
-    @Column(name="valor_horas_mensal")
-    private BigDecimal valorHorasMensal;
-
-
-    @Column(name="valor_horas_diario")
-    private BigDecimal valorHorasDiario;
+    // VALOR_HORAS_MENSAL e VALOR_HORAS_DIARIO existiam na versão anterior da vista,
+    // que multiplicava o valor por 12. Foram substituídos pela repartição mensal real:
+    // valorDiarioUtil / valorDiarioNaoUtil / valorAcumuladoMes / valorPeriodo.
 
 
     @Column(name="percentagem")
