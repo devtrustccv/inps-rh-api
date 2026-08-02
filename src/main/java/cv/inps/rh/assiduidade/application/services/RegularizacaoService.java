@@ -75,18 +75,7 @@ public class RegularizacaoService {
       validacaoEntityRepository.save(validation);
     }
 
-    return savedList
-        .stream()
-        .map(entity -> {
-          var dto = new RegularizacaoContaRequestDTO();
-          dto.setMesReferencia(entity.getMesReferente());
-          dto.setSdoRecebido(entity.getSdoRecebido());
-          dto.setRetroativoSalario(entity.getValorRetroativoSalario());
-          dto.setRetroativoSdo(entity.getValorRetroativoSdo());
-          dto.setUuidRegularizacao(entity.getUuid());
-          return dto;
-        })
-        .toList();
+    return mapToRegularizacaoContaRequestDTO(savedList);
   }
 
   @Transactional
@@ -138,7 +127,11 @@ public class RegularizacaoService {
         Estado.P
     );
 
-    // TODO 01/08/2026 18:26 update other tables here
+    if (validation.equals(EstadoValidacao.SIM.name())) {
+
+      // TODO 01/08/2026 18:26 update other tables here
+
+    }
 
     return mapToRegularizacaoContaRequestDTO(savedList);
   }
