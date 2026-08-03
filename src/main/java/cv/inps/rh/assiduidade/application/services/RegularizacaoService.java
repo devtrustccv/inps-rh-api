@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,10 +31,12 @@ public class RegularizacaoService {
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
 
   @Transactional(readOnly = true)
-  public List<RegularizacaoContaRequestDTO> getByFunId(String funUuid) {
+  public List<RegularizacaoContaRequestDTO> getByFunId(String funUuid, LocalDate start, LocalDate end) {
     return regularizacaoRepository.findRegularizacoesByFunId(
         UUID.fromString(funUuid),
-        Estado.P.name()
+        Estado.P.name(),
+        start,
+        end
     );
   }
 
@@ -129,11 +132,11 @@ public class RegularizacaoService {
 
     var data = regularizacaoRepository.saveAll(savedList);
 
-    /*if (validation.equals(EstadoValidacao.SIM.name())) {
+    if (validation.equals(EstadoValidacao.SIM.name())) {
 
       // TODO 01/08/2026 18:26 update other tables: DefinicaoRemuneracaoEntity and RH_T_REMUN_TIREPL
 
-      var remuneration = new DefinicaoRemuneracaoEntity();
+      /*var remuneration = new DefinicaoRemuneracaoEntity();
       remuneration.setUuid(UuidCreator.getTimeOrderedEpoch());
       remuneration.setEstado(Estado.P);
       remuneration.setFunId(data.getFirst().getProcFun().getTiprel().getFunId());
@@ -146,8 +149,8 @@ public class RegularizacaoService {
       remuneration.setDataInicio();
       remuneration.setDataFim();
       remuneration.setDataUltimoProc();
-      definicaoRemuneracaoEntityRepository.save(remuneration);
-    }*/
+      definicaoRemuneracaoEntityRepository.save(remuneration);*/
+    }
 
     return mapToRegularizacaoContaRequestDTO(data);
   }

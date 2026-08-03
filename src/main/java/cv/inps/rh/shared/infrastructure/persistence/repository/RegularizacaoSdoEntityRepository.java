@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,11 +40,13 @@ public interface RegularizacaoSdoEntityRepository extends JpaRepository<Regulari
       LEFT JOIN RegularizacaoSdoEntity r
           ON r.procFun.id = pf.id
           AND r.estado = :regularizacaoEstado
-      WHERE pf.tiprel.funId.uuid = :funId
+      WHERE pf.tiprel.funId.uuid = :funId AND pf.dataProcessamento BETWEEN :start AND :end
       """)
   List<RegularizacaoContaRequestDTO> findRegularizacoesByFunId(
       @Param("funId") UUID funUuid,
-      @Param("regularizacaoEstado") String regularizacaoEstado
+      @Param("regularizacaoEstado") String regularizacaoEstado,
+      @Param("start") LocalDate start,
+      @Param("end") LocalDate end
   );
 
   Optional<RegularizacaoSdoEntity> findByUuid(String uuid);
