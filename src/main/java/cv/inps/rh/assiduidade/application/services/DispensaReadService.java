@@ -6,6 +6,7 @@ import cv.inps.rh.assiduidade.application.dto.WrapperListaDispensaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetDispensaByPedidoIdQuery;
 import cv.inps.rh.assiduidade.application.queries.GetDispensaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaDispensaQuery;
+import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
@@ -158,7 +159,8 @@ public class DispensaReadService {
       return new DispensaReqDTO();
     }
 
-    var e = dispensaRepository.findByUuid(UUID.fromString(query.getDispensaId()))
+    var e = dispensaRepository.findByUuid(
+        ValidationUtil.parseUuid(query.getDispensaId(), "Identificador da dispensa"))
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Dispensa nao encontrada",
             query.getDispensaId()));
 
@@ -226,7 +228,8 @@ public class DispensaReadService {
       return new DispensaReqDTO();
     }
 
-    var e = dispensaRepository.findByPedidoId_Uuid(UUID.fromString(query.getPedidoId()))
+    var e = dispensaRepository.findByPedidoId_Uuid(
+        ValidationUtil.parseUuid(query.getPedidoId(), "Identificador do pedido"))
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Dispensa nao encontrada",
             query.getPedidoId()));
 

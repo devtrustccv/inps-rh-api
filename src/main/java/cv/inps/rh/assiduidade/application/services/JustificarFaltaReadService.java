@@ -153,8 +153,15 @@ public class JustificarFaltaReadService {
     // Mapear para FaltaItemDTO
     List<FaltaItemDTO> itensFalta = faltas.stream().map(f -> {
       var item = new FaltaItemDTO();
-      item.setId(f.getSinteseDiarioId().getId());
-      item.setData(f.getSinteseDiarioId().getData().toString());
+      // Nem toda a falta nasce de uma síntese diária: as que a baixa médica gera a
+      // partir de CALCULO_FALTA_LICENCA têm só datas, sem síntese associada. Sem esta
+      // guarda a leitura do pedido rebentava com NPE.
+      var sintese = f.getSinteseDiarioId();
+      item.setId(sintese != null ? sintese.getId() : null);
+      if (sintese != null && sintese.getData() != null)
+        item.setData(sintese.getData().toString());
+      else if (f.getDataInicio() != null)
+        item.setData(f.getDataInicio().toLocalDate().toString());
       item.setTipoFalta(f.getParamSitId() != null ? f.getParamSitId().getNome() : null);
       item.setValorAusencia(f.getValor() != null ? f.getValor().intValue() : null);
       item.setHorasAusencia(TimeUtils.intervalFormatToHHmm(f.getHorasAusencia()));
