@@ -9,10 +9,7 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegularizacaoSdoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.AbonosBeneficiosEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.RegularizacaoSdoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,8 +27,9 @@ public class RegularizacaoService {
   private final ProcessamentoFuncionarioRepository processamentoSalarialRepository;
   private final AbonosBeneficiosEntityRepository abonosBeneficiosRepository;
   private final ValidacaoEntityRepository validacaoEntityRepository;
+  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
 
-  @Transactional
+  @Transactional(readOnly = true)
   public List<RegularizacaoContaRequestDTO> getByFunId(String funUuid) {
     return regularizacaoRepository.findRegularizacoesByFunId(
         UUID.fromString(funUuid),
@@ -42,13 +40,14 @@ public class RegularizacaoService {
   @Transactional
   public List<RegularizacaoContaRequestDTO> create(List<RegularizacaoContaRequestDTO> request) {
 
-    var savedList = new ArrayList<RegularizacaoSdoEntity>();
+    var regularization = new ArrayList<RegularizacaoSdoEntity>();
+    var validations = new ArrayList<ValidacaoEntity>();
 
     for (var dto : request) {
 
       var procFun = processamentoSalarialRepository.findByIdOrThrow(dto.getProcessamentoFuncionarioId());
-      var tiprel = procFun.getTiprel();
-      var fun = tiprel.getFunId();
+      var relation = procFun.getTiprel();
+      var fun = relation.getFunId();
       var regularizacaoUUID = UuidCreator.getTimeOrderedEpoch();
 
       var entity = new RegularizacaoSdoEntity();
@@ -61,7 +60,7 @@ public class RegularizacaoService {
       entity.setEstado(Estado.P.name());
       entity.setUuid(regularizacaoUUID.toString());
       entity = regularizacaoRepository.save(entity);
-      savedList.add(entity);
+      regularization.add(entity);
 
       var validation = new ValidacaoEntity();
       validation.setTipoAccao(TipoAcao.INSERT.name());
@@ -69,19 +68,21 @@ public class RegularizacaoService {
       validation.setReferenciaId(entity.getId());
       validation.setReferenciaUuid(regularizacaoUUID);
       validation.setFunId(fun);
-      validation.setTiprelId(tiprel);
+      validation.setTiprelId(relation);
       validation.setEstado(Estado.P);
       validation.setUuid(UuidCreator.getTimeOrderedEpoch());
-      validacaoEntityRepository.save(validation);
+      validations.add(validation);
     }
 
-    return mapToRegularizacaoContaRequestDTO(savedList);
+    validacaoEntityRepository.saveAll(validations);
+
+    return mapToRegularizacaoContaRequestDTO(regularization);
   }
 
   @Transactional
   public List<RegularizacaoContaRequestDTO> update(List<RegularizacaoContaRequestDTO> request) {
 
-    var savedList = new ArrayList<RegularizacaoSdoEntity>();
+    var regularization = new ArrayList<RegularizacaoSdoEntity>();
 
     for (var dto : request) {
       var entity = regularizacaoRepository.findByUuid(dto.getUuidRegularizacao()).orElseThrow();
@@ -90,10 +91,10 @@ public class RegularizacaoService {
       entity.setValorRetroativoSalario(dto.getRetroativoSalario());
       entity.setValorRetroativoSdo(dto.getRetroativoSdo());
       entity.setAbonoBeneficio(abonosBeneficiosRepository.findByIdOrThrow(dto.getAbonoBeneficioId()));
-      savedList.add(regularizacaoRepository.save(entity));
+      regularization.add(entity);
     }
 
-    return mapToRegularizacaoContaRequestDTO(savedList);
+    return mapToRegularizacaoContaRequestDTO(regularizacaoRepository.saveAll(regularization));
   }
 
   @Transactional
@@ -103,7 +104,6 @@ public class RegularizacaoService {
       throw IgrpResponseStatusException.badRequest("Invalid validation flag: %s".formatted(validation));
 
     var status = validation.equals(EstadoValidacao.SIM.name()) ? Estado.A : Estado.I;
-
     var savedList = new ArrayList<RegularizacaoSdoEntity>();
     var regularizationUuids = new ArrayList<String>();
 
@@ -116,7 +116,7 @@ public class RegularizacaoService {
       entity.setValorRetroativoSalario(dto.getRetroativoSalario());
       entity.setAbonoBeneficio(abonosBeneficiosRepository.findByIdOrThrow(dto.getAbonoBeneficioId()));
       entity.setValorRetroativoSdo(dto.getRetroativoSdo());
-      savedList.add(regularizacaoRepository.save(entity));
+      savedList.add(entity);
     }
 
     validacaoEntityRepository.updateValidationsForRegularization(
@@ -127,22 +127,39 @@ public class RegularizacaoService {
         Estado.P
     );
 
-    if (validation.equals(EstadoValidacao.SIM.name())) {
+    var data = regularizacaoRepository.saveAll(savedList);
 
-      // TODO 01/08/2026 18:26 update other tables here
+    /*if (validation.equals(EstadoValidacao.SIM.name())) {
 
-    }
+      // TODO 01/08/2026 18:26 update other tables: DefinicaoRemuneracaoEntity and RH_T_REMUN_TIREPL
 
-    return mapToRegularizacaoContaRequestDTO(savedList);
+      var remuneration = new DefinicaoRemuneracaoEntity();
+      remuneration.setUuid(UuidCreator.getTimeOrderedEpoch());
+      remuneration.setEstado(Estado.P);
+      remuneration.setFunId(data.getFirst().getProcFun().getTiprel().getFunId());
+      remuneration.setPercentagem();
+      remuneration.setValor();
+      remuneration.setObs();
+      remuneration.setTmId();
+      remuneration.setMoeda();
+      remuneration.setTipo();
+      remuneration.setDataInicio();
+      remuneration.setDataFim();
+      remuneration.setDataUltimoProc();
+      definicaoRemuneracaoEntityRepository.save(remuneration);
+    }*/
+
+    return mapToRegularizacaoContaRequestDTO(data);
   }
 
   private List<RegularizacaoContaRequestDTO> mapToRegularizacaoContaRequestDTO(List<RegularizacaoSdoEntity> data) {
     return data.stream()
         .map(entity -> {
+          var procFun = entity.getProcFun();
           var dto = new RegularizacaoContaRequestDTO();
-          dto.setValorLiquido(entity.getProcFun().getTotLiquido());
-          dto.setSubsidiofiscalRecebido(entity.getProcFun().getTotRemunCollect());
-          dto.setProcessamentoFuncionarioId(entity.getProcFun().getId());
+          dto.setValorLiquido(procFun.getTotLiquido());
+          dto.setSubsidiofiscalRecebido(procFun.getTotRemunCollect());
+          dto.setProcessamentoFuncionarioId(procFun.getId());
           dto.setAbonoBeneficioId(entity.getAbonoBeneficio().getId());
           dto.setEstado(entity.getEstado());
           dto.setMesReferencia(entity.getMesReferente());

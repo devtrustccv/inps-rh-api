@@ -40,6 +40,7 @@ public class EmprestimoReadService {
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
   private final RhPagamentoEntityRepository rhPagamentoEntityRepository;
   private final EmprestimoDocumentService documentService;
+  private final EmprestimoWriteService emprestimoWriteService;
 
   public List<InformacaoEmprestimoRequestDTO> getAllConfiguracaoEmprestimo() {
     return paramEmprestimoEntityRepository.findAll()
@@ -237,6 +238,11 @@ public class EmprestimoReadService {
     plan.setJurosTotal(loan.getValorJuroTotal());
     plan.setCustoTotalEmprestimo(NumberUtils.sum(loan.getValorJuroTotal(), loan.getValorEmprestimo()));
     plan.setPagamentoMensal(loan.getValorPrestacao());
+
+    if (plan.getDataInicio() == null) {
+      plan.setRows(emprestimoWriteService.generateMockFinancialPlan(loan));
+      return plan;
+    }
 
     var rows = planoFinanceiroEntityRepository.findAllByEmprestimo(loan)
         .stream()
