@@ -131,8 +131,10 @@ public class JustificarFaltaWriteService {
             "Síntese diária inválida: " + item.getId());
       }
 
-      // Regra crítica: não permitir falta duplicada para a mesma síntese
-      if (faltaRepository.existsBySinteseDiarioId(sintese)) {
+      // Não permitir duas faltas vivas no mesmo dia. A verificação é pelo dia e não
+      // pela síntese: o mesmo dia pode ter uma síntese importada e outra manual, e
+      // verificar por síntese deixava passar uma falta em cada.
+      if (faltaRepository.existeFaltaVivaNoDia(funcionario.getId(), sintese.getData())) {
         throw IgrpResponseStatusException.badRequest(
             "Já existe uma falta associada à data " + sintese.getData());
       }

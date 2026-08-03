@@ -82,6 +82,16 @@ public class FaltaServiceWrite {
 
     var datas = expandirDias(req.getDataInicio(), req.getDataFim());
 
+    // A marcação não tinha guarda nenhuma: era possível marcar a mesma falta vezes sem
+    // conta, cada uma com o seu registo e o seu desconto. A justificação já verificava.
+    if (deveJustificar) {
+      for (var dia : datas) {
+        if (faltaRepository.existeFaltaVivaNoDia(funcionario.getId(), dia))
+          throw IgrpResponseStatusException.badRequest(
+              "Já existe uma falta associada à data " + dia);
+      }
+    }
+
     // Regra: só vai a validação se forem mais de 3 dias E o tipo de justificação
     // descontar no salário. Caso contrário fica logo activo.
     var paramSituacao = resolverParamSituacao(req.getTipoJustificacao());
@@ -113,8 +123,7 @@ public class FaltaServiceWrite {
     BigDecimal valorTotal = BigDecimal.ZERO;
 
     for (var dia : datas) {
-      var sintese = createSinteseDiaria(funcionario, dia,
-          horasAusenciaPorDia, deveJustificar);
+      var sintese = obterOuCriarSinteseDiaria(funcionario, dia, horasAusenciaPorDia);
       sinteseRepository.save(sintese);
 
       if (deveJustificar) {
@@ -316,15 +325,36 @@ public class FaltaServiceWrite {
     return falta;
   }
 
-  private AssiduidadeSinteseDiarioEntity createSinteseDiaria(
+  /**
+   * Síntese diária do dia, reaproveitando a que já exista.
+   *
+   * <p>Um dia tem uma síntese, venha ela do relógio de ponto ou da marcação manual.
+   * Antes criava-se sempre um registo novo, pelo que marcar uma falta num dia já
+   * importado deixava duas sínteses para o mesmo (colaborador, dia) — e a vista de
+   * assiduidade somava as horas das duas, inflacionando os totais do mês.
+   *
+   * <p>Quando já existe, as horas de ausência são substituídas pelas que o RH indicou:
+   * é ele que está a corrigir o que o relógio registou.
+   */
+  private AssiduidadeSinteseDiarioEntity obterOuCriarSinteseDiaria(
       FuncionarioEntity funcionario,
       LocalDate dia,
-      String horasAusencia,
-      boolean justificar) {
+      String horasAusencia) {
 
-    AssiduidadeSinteseDiarioEntity sintese = new AssiduidadeSinteseDiarioEntity();
-    sintese.setFuncionarioId(funcionario);
-    sintese.setData(dia);
+    var existentes = sinteseRepository.findAllByFuncionarioIdAndData(funcionario, dia);
+
+    AssiduidadeSinteseDiarioEntity sintese;
+    if (existentes != null && !existentes.isEmpty()) {
+      sintese = existentes.getFirst();
+    } else {
+      sintese = new AssiduidadeSinteseDiarioEntity();
+      sintese.setFuncionarioId(funcionario);
+      sintese.setData(dia);
+      sintese.setFlagRececao("1");
+      // Distingue este registo dos que vêm da importação do relógio de ponto.
+      sintese.setForma(FORMA_MANUAL);
+    }
+
     sintese.setMes(dia.getMonthValue());
     sintese.setAno(dia.getYear());
 
@@ -347,9 +377,6 @@ public class FaltaServiceWrite {
 
     sintese.setFalta(trabalhadosMinutos == 0 ? 1 : 0);
     sintese.setEstado(Estado.A.name());
-    sintese.setFlagRececao("1");
-    // Distingue este registo dos que vêm da importação do relógio de ponto.
-    sintese.setForma(FORMA_MANUAL);
 
     return sintese;
   }
