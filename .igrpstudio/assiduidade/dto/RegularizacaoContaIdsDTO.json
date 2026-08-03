@@ -1,0 +1,35 @@
+{
+  "name": "RegularizacaoContaIds",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "processamentoFunId",
+      "type": "long",
+      "objectType": "java",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "abonoBeneficioId",
+      "type": "long",
+      "objectType": "java",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "type": "dto",
+  "module": "assiduidade",
+  "enableCustonValidation": false,
+  "readOnly": false,
+  "id": "new-action-Contractsss"
+}

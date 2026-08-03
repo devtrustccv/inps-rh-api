@@ -28,7 +28,8 @@ public enum Referencia {
   JUSTIFICAR_FALTA("Justificar Falta"),
   ORDEM_SERVICO("Ordem de Serviço"),
   BAIXA_MEDICA("Baixa Médica"),
-  PROCESSO_DISCIPLINAR("Processo Disciplinar");
+  PROCESSO_DISCIPLINAR("Processo Disciplinar"),
+  REGULARIZACAO("Regularização");
 
   private final String descricao;
 
