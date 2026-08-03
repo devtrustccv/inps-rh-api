@@ -93,4 +93,12 @@ public class AssiduidadeSinteseDiarioEntity extends AuditEntity {
     private String flagRececao;
 
 
+  /**
+   * Origem do registo: {@code MANUAL} (marcado pelo RH) ou {@code AUTOMATICO}
+   * (importado do relógio de ponto via IMPORT_DADOS_CONTR_ACESSO).
+   */
+  @Column(name="forma")
+    private String forma;
+
+
 }

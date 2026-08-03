@@ -5,9 +5,11 @@ import cv.inps.rh.assiduidade.application.dto.JustificarFaltaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetJustificacaoFaltaByPedidoQuery;
 import cv.inps.rh.assiduidade.application.queries.GetJustificacaoFaltaQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.util.TimeUtils;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeSinteseDiarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
@@ -20,7 +22,10 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +38,22 @@ public class JustificarFaltaReadService {
   private final AssiduidadeSinteseDiarioEntityRepository assiduidadeSinteseDiarioEntityRepository;
   private final PedidoEntityRepository pedidoRepository;
   private final DocumentoMapper documentoMapper;
+
+  /**
+   * Rótulo do estado da falta para o resumo. {@code I} lê-se "Rejeitada" e não
+   * "Inactiva" — neste ecrã o estado inactivo resulta de o RH ter recusado a
+   * justificação.
+   */
+  private static String descreverEstadoFalta(Estado estado) {
+    if (estado == null)
+      return "Por justificar";
+    return switch (estado) {
+      case P -> "Pendente";
+      case A -> "Justificada";
+      case I -> "Rejeitada";
+      default -> estado.getDescription();
+    };
+  }
 
   @Transactional(readOnly = true)
   public JustificarFaltaDTO getFaltaJustificadaResumo(GetJustificacaoFaltaQuery query) {
@@ -57,18 +78,38 @@ public class JustificarFaltaReadService {
     List<AssiduidadeSinteseDiarioEntity> sinteses = assiduidadeSinteseDiarioEntityRepository
         .findAllByFuncionarioIdAndDataBetween(funcionario, inicioMes, fimMes);
 
-    // Mapear para FaltaItemDTO
+    // Faltas já registadas no período, indexadas pela síntese que as originou.
+    // Sem isto o resumo não conseguiria mostrar o estado de cada dia
+    // (Pendente / Justificada / Rejeitada).
+    Map<Long, FaltaEntity> faltaPorSintese = faltaRepository
+        .findAllByFuncionarioAndPeriodo(funcUuid, inicioMes, fimMes)
+        .stream()
+        .filter(f -> f.getSinteseDiarioId() != null)
+        .collect(Collectors.toMap(
+            f -> f.getSinteseDiarioId().getId(),
+            Function.identity(),
+            (a, b) -> a));
+
     List<FaltaItemDTO> itensFalta = sinteses.stream().map(s -> {
       FaltaItemDTO item = new FaltaItemDTO();
       item.setId(s.getId());
       item.setData(s.getData().toString());
-      // Se houver falta total (0 = falta total?), definir tipoFalta
-      // item.setTipoFalta(s.getFalta() != null && s.getFalta() > 0 ? "INJUSTIFICADA"
-      // : null);
-      item.setHorasAusencia(s.getHorasAusencia());
-      item.setValorAusencia(null); // cálculo futuro
-      item.setMotivo(null); // não há motivo na síntese
-      item.setComJustificativo(null); // será preenchido quando houver falta vinculada
+      // Normalizado para HH:MM — Oracle devolve o INTERVAL como "0 5:20:0.0" e o
+      // frontend não tem de conhecer esse formato.
+      item.setHorasAusencia(TimeUtils.intervalFormatToHHmm(s.getHorasAusencia()));
+
+      var falta = faltaPorSintese.get(s.getId());
+      if (falta != null) {
+        item.setEstado(falta.getEstado() != null ? falta.getEstado().getCode() : null);
+        item.setEstadoDesc(descreverEstadoFalta(falta.getEstado()));
+        item.setMotivo(falta.getDescricaoMotivo());
+        item.setComJustificativo(falta.getFlgJustificativo());
+        item.setTipoFalta(falta.getParamSitId() != null ? falta.getParamSitId().getNome() : null);
+        item.setValorAusencia(falta.getValor() != null ? falta.getValor().intValue() : null);
+      } else {
+        // Dia com ausência mas ainda sem pedido de justificação.
+        item.setEstadoDesc("Por justificar");
+      }
       return item;
     }).toList();
 
@@ -114,12 +155,13 @@ public class JustificarFaltaReadService {
       var item = new FaltaItemDTO();
       item.setId(f.getSinteseDiarioId().getId());
       item.setData(f.getSinteseDiarioId().getData().toString());
-      // item.setTipoFalta(f.getParamSitId() != null ? f.getParamSitId().getNome() :
-      // null);
-      item.setValorAusencia(null); // calculo futuro
-      item.setHorasAusencia(f.getHorasAusencia());
+      item.setTipoFalta(f.getParamSitId() != null ? f.getParamSitId().getNome() : null);
+      item.setValorAusencia(f.getValor() != null ? f.getValor().intValue() : null);
+      item.setHorasAusencia(TimeUtils.intervalFormatToHHmm(f.getHorasAusencia()));
       item.setMotivo(f.getDescricaoMotivo());
       item.setComJustificativo(f.getFlgJustificativo());
+      item.setEstado(f.getEstado() != null ? f.getEstado().getCode() : null);
+      item.setEstadoDesc(descreverEstadoFalta(f.getEstado()));
 
       List<DocumentoEntity> documentos = documentoEntityRepository
           .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_FALTA.name(), f.getUuid());

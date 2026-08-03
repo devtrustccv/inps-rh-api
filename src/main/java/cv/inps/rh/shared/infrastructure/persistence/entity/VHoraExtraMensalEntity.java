@@ -28,9 +28,78 @@ import java.util.UUID;
 @Table(name = "RH_V_HORA_EXTRA_MENSAL")
 public class VHoraExtraMensalEntity  {
 
+    /** Chave sintética: {@code hora_extra_id * 1000000 + YYYYMM}. */
     @Id
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
+
+
+    @Column(name="hora_extra_id")
+    private Long horaExtraId;
+
+
+    @Column(name="hora_extra_uuid")
+    private String horaExtraUuid;
+
+
+    /** Mês de referência, formato YYYYMM. */
+    @Column(name="mes")
+    private String mesReferencia;
+
+
+    @Column(name="mes_numero")
+    private Integer mesNumero;
+
+
+    /** Início do período integral do registo (não recortado ao mês). */
+    @Column(name="periodo_inicio")
+    private LocalDate periodoInicio;
+
+
+    @Column(name="periodo_fim")
+    private LocalDate periodoFim;
+
+
+    @Column(name="dias_uteis")
+    private Integer diasUteis;
+
+
+    @Column(name="dias_nao_uteis")
+    private Integer diasNaoUteis;
+
+
+    @Column(name="horas_extra_diarias")
+    private BigDecimal horasExtraDiarias;
+
+
+    @Column(name="percentagem_util")
+    private BigDecimal percentagemUtil;
+
+
+    @Column(name="percentagem_nao_util")
+    private BigDecimal percentagemNaoUtil;
+
+
+    @Column(name="valor_diario_util")
+    private BigDecimal valorDiarioUtil;
+
+
+    @Column(name="valor_diario_nao_util")
+    private BigDecimal valorDiarioNaoUtil;
+
+
+    /** Valor acumulado neste mês — já é o somatório. */
+    @Column(name="valor_acumulado_mes")
+    private BigDecimal valorAcumuladoMes;
+
+
+    /** Total do período tal como CALCULO_HORA_EXTRA o devolveu. */
+    @Column(name="valor_periodo")
+    private BigDecimal valorPeriodo;
+
+
+    @Column(name="data_pedido")
+    private LocalDate dataPedido;
 
 
     @NotBlank(message = "funcionarioId is mandatory")
@@ -82,10 +151,7 @@ public class VHoraExtraMensalEntity  {
     private Integer ano;
 
 
-    @Column(name="mes")
-    private Integer mes;
-
-
+    /** Início do período dentro deste mês (recortado às fronteiras). */
     @Column(name="data_inicio")
     private LocalDate dataInicio;
 
@@ -94,8 +160,9 @@ public class VHoraExtraMensalEntity  {
     private LocalDate dataFim;
 
 
+    /** Jornada diária contratada, em {@code HH:MM} (ex.: "08:00") — é texto, não número. */
     @Column(name="horas_contratado_diario")
-    private BigDecimal horasContratadoDiario;
+    private String horasContratadoDiario;
 
 
     @Column(name="horas_contratado_mensal")
@@ -110,12 +177,9 @@ public class VHoraExtraMensalEntity  {
     private BigDecimal salarioMensal;
 
 
-    @Column(name="valor_horas_mensal")
-    private BigDecimal valorHorasMensal;
-
-
-    @Column(name="valor_horas_diario")
-    private BigDecimal valorHorasDiario;
+    // VALOR_HORAS_MENSAL e VALOR_HORAS_DIARIO existiam na versão anterior da vista,
+    // que multiplicava o valor por 12. Foram substituídos pela repartição mensal real:
+    // valorDiarioUtil / valorDiarioNaoUtil / valorAcumuladoMes / valorPeriodo.
 
 
     @Column(name="percentagem")

@@ -31,31 +31,24 @@ public class TimeUtils {
   }
 
 
+  /**
+   * Normaliza um intervalo para {@code HH:MM}, seja qual for a forma em que chega.
+   *
+   * <p>Aceita {@code "+0 08:00:00"} (o que gravamos), {@code "0 5:20:0.0"} (o que Oracle
+   * devolve ao ler um INTERVAL DAY TO SECOND) e {@code "05:20"} (texto já normalizado).
+   * Devolve {@code "00:00"} para nulo ou vazio.
+   *
+   * <p>Antes exigia a componente de dias e rebentava com {@code IllegalArgumentException}
+   * perante um simples {@code "05:20"} — o que tornava arriscado usá-la para normalizar
+   * valores de origem mista.
+   */
   public static String intervalFormatToHHmm(String interval) {
     if (interval == null || interval.isBlank()) {
       return "00:00";
     }
 
     try {
-      // Divide pelo espaço para pegar a parte do tempo
-      String[] parts = interval.trim().split("\\s+");
-      if (parts.length < 2) {
-        throw new IllegalArgumentException("Formato inválido de interval: " + interval);
-      }
-
-      // Pega HH:MM:SS
-      String timePart = parts[1];
-      String[] hm = timePart.split(":");
-
-      if (hm.length < 2) {
-        throw new IllegalArgumentException("Formato inválido de tempo: " + timePart);
-      }
-
-      int hours = Integer.parseInt(hm[0]);
-      int minutes = Integer.parseInt(hm[1]);
-
-      return String.format("%02d:%02d", hours, minutes);
-
+      return formatMinutesToHHmm((int) toMinutes(interval));
     } catch (Exception e) {
       throw new IllegalArgumentException("Erro ao converter interval para HH:MM: " + interval, e);
     }
@@ -99,18 +92,56 @@ public class TimeUtils {
     }
   }
 
+  /**
+   * Converte um intervalo em minutos.
+   *
+   * <p>Aceita os três formatos que circulam no sistema:
+   * <ul>
+   *   <li>{@code "+0 HH:MM:SS"} — o que gravamos em Oracle;</li>
+   *   <li>{@code "0 14:0:0.0"} — o que Oracle <strong>devolve</strong> ao ler um
+   *       INTERVAL DAY TO SECOND: sem sinal, sem zeros à esquerda e com fracção de
+   *       segundo;</li>
+   *   <li>{@code "HH:MM"} — texto simples.</li>
+   * </ul>
+   *
+   * <p>A versão anterior só removia a componente de dias quando a string começava por
+   * {@code "+"}, pelo que a leitura de Oracle caía sempre em excepção e era contada
+   * como zero — as horas de dispensa já usadas apareciam sempre a 00:00.
+   *
+   * <p>A componente de dias é somada, não descartada: um intervalo de {@code "1 02:00:00"}
+   * são 26 horas.
+   */
   private static long toMinutes(String time) {
-    // suporta "+0 HH:MM:SS" (Oracle interval) e "HH:MM"
     String t = time.trim();
-    if (t.startsWith("+")) {
-      // "+0 HH:MM:SS" → extrair HH:MM
-      int spaceIdx = t.indexOf(' ');
-      t = spaceIdx >= 0 ? t.substring(spaceIdx + 1) : t.substring(1);
+
+    long dias = 0;
+
+    // Separa a componente de dias, com ou sem sinal: "+0 HH:MM:SS", "0 14:0:0.0"
+    int spaceIdx = t.indexOf(' ');
+    if (spaceIdx >= 0) {
+      String diasPart = t.substring(0, spaceIdx).trim();
+      if (diasPart.startsWith("+")) {
+        diasPart = diasPart.substring(1);
+      }
+      boolean negativo = diasPart.startsWith("-");
+      if (negativo) {
+        diasPart = diasPart.substring(1);
+      }
+      dias = diasPart.isEmpty() ? 0 : Long.parseLong(diasPart);
+      if (negativo) {
+        dias = -dias;
+      }
+      t = t.substring(spaceIdx + 1).trim();
+    } else if (t.startsWith("+")) {
+      t = t.substring(1);
     }
+
     String[] parts = t.split(":");
-    long hours = Long.parseLong(parts[0]);
-    long minutes = parts.length > 1 ? Long.parseLong(parts[1]) : 0;
-    return hours * 60 + minutes;
+    long hours = Long.parseLong(parts[0].trim());
+    // minutos podem vir como "0" ou "00"; segundos e fracção são ignorados
+    long minutes = parts.length > 1 ? Long.parseLong(parts[1].trim()) : 0;
+
+    return dias * 24 * 60 + hours * 60 + minutes;
   }
 
 

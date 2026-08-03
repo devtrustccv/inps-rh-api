@@ -277,6 +277,30 @@
       "primaryKey": false,
       "skipFieldRevision": false,
       "objectType": "java"
+    },
+    {
+      "name": "flgDescontoFalta",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "tipo",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
     }
   ],
   "id": "xrq1j8zin1",

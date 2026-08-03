@@ -106,10 +106,14 @@ public class AssiduidadeController {
     @RequestParam(value = "estado", required = false) String estado,
     @RequestParam(value = "ilha", required = false) Long ilha,
     @RequestParam(value = "direcao", required = false) Long direcao,
-    @RequestParam(value = "seccao", required = false) Long seccao)
+    @RequestParam(value = "seccao", required = false) Long seccao,
+    @RequestParam(value = "ups", required = false) Long ups,
+    @RequestParam(value = "dataInicio", required = false) String dataInicio,
+    @RequestParam(value = "dataFim", required = false) String dataFim)
   {
 
-      final var query = new GetListaMovimentosResumidosQuery(pageSize, pageNumber, colaborador, funcionarioUuid, mes, ano, estado, ilha, direcao, seccao);
+      final var query = new GetListaMovimentosResumidosQuery(pageSize, pageNumber, colaborador,
+          funcionarioUuid, mes, ano, estado, ilha, direcao, seccao, ups, dataInicio, dataFim);
 
       return queryBus.handle(query);
 
@@ -341,10 +345,14 @@ public class AssiduidadeController {
     @RequestParam(value = "seccao", required = false) Long seccao,
     @RequestParam(value = "dataInicio", required = false) String dataInicio,
     @RequestParam(value = "dataFim", required = false) String dataFim,
-    @RequestParam(value = "funcionarioUuid", required = false) String funcionarioUuid)
+    @RequestParam(value = "funcionarioUuid", required = false) String funcionarioUuid,
+    @RequestParam(value = "colaborador", required = false) String colaborador,
+    @RequestParam(value = "estado", required = false) String estado,
+    @RequestParam(value = "mes", required = false) String mes)
   {
 
-      final var query = new GetListaHoraExtraQuery(pageNumber, pageSize, ilha, direcao, seccao, dataInicio, dataFim, funcionarioUuid);
+      final var query = new GetListaHoraExtraQuery(pageNumber, pageSize, ilha, direcao, seccao,
+          dataInicio, dataFim, funcionarioUuid, colaborador, estado, mes);
 
       return queryBus.handle(query);
 

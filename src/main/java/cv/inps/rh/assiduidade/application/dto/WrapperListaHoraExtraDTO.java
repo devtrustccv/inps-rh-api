@@ -24,6 +24,6 @@ public class WrapperListaHoraExtraDTO extends PageDTO {
 
 
   @Valid
-  private List<HorExtraListDTO> content = new ArrayList<>();
+  private List<HoraExtraPedidoDTO> content = new ArrayList<>();
 
 }

@@ -72,15 +72,37 @@ public class MovimentoResumoService {
     return (root, cq, cb) -> {
       var predicates = cb.conjunction();
 
-      Integer mes = query.getMes() != null ? query.getMes() : LocalDate.now().getMonthValue();
-      Integer ano = query.getAno() != null ? query.getAno() : LocalDate.now().getYear();
+      // Período por intervalo de datas tem precedência sobre mes/ano. A vista é
+      // agregada por (ano, mês), por isso o intervalo é convertido para uma
+      // comparação sobre o par ano*100+mes.
+      boolean porDatas = StringUtils.hasText(query.getDataInicio())
+          || StringUtils.hasText(query.getDataFim());
 
-      if (query.getAno() != null) {
-        predicates = cb.and(predicates, cb.equal(root.get("ano"), ano));
+      if (porDatas) {
+        var anoMes = cb.sum(cb.prod(root.get("ano").as(Integer.class), 100),
+            root.get("mes").as(Integer.class));
+
+        if (StringUtils.hasText(query.getDataInicio())) {
+          var d = LocalDate.parse(query.getDataInicio());
+          predicates = cb.and(predicates,
+              cb.greaterThanOrEqualTo(anoMes, d.getYear() * 100 + d.getMonthValue()));
+        }
+        if (StringUtils.hasText(query.getDataFim())) {
+          var d = LocalDate.parse(query.getDataFim());
+          predicates = cb.and(predicates,
+              cb.lessThanOrEqualTo(anoMes, d.getYear() * 100 + d.getMonthValue()));
+        }
+      } else {
+        if (query.getAno() != null) {
+          predicates = cb.and(predicates, cb.equal(root.get("ano"), query.getAno()));
+        }
+        if (query.getMes() != null) {
+          predicates = cb.and(predicates, cb.equal(root.get("mes"), query.getMes()));
+        }
       }
 
-      if (query.getMes() != null) {
-        predicates = cb.and(predicates, cb.equal(root.get("mes"), mes));
+      if (query.getUps() != null) {
+        predicates = cb.and(predicates, cb.equal(root.get("idUps"), query.getUps()));
       }
 
       if (query.getColaborador() != null && !query.getColaborador().isBlank()) {

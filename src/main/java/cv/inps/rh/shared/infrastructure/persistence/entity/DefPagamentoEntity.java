@@ -97,4 +97,18 @@ public class DefPagamentoEntity extends AuditEntity {
    private FuncionarioEntity funId;
 
 
+  /**
+   * Natureza do pagamento (ex.: {@code FALTA}). É por aqui que
+   * RH_PROCESSAMENTO_SALARIAL_DB.DELETE_ASSIDUIDADE identifica os registos a
+   * remover quando um processamento é eliminado — se ficar nulo, o pagamento
+   * fica órfão.
+   */
+  @Column(name="tipo")
+   private String tipo;
+
+
+  @Column(name="moeda")
+   private String moeda;
+
+
 }

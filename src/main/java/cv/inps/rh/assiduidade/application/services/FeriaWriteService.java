@@ -43,6 +43,9 @@ public class FeriaWriteService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FeriaWriteService.class);
 
+  /** RH_T_FERIAS_GOZADAS.TIPO_ALTERACAO — alteração da data do gozo. */
+  private static final String TIPO_ALTERACAO_DATA = "ALTERACAO_DATA";
+
   private final FeriasGozadasEntityRepository feriasGozadasRepository;
   private final PedidoEntityRepository pedidoRepository;
   private final FuncionarioEntityRepository funcionarioRepository;
@@ -259,6 +262,15 @@ public class FeriaWriteService {
     ferias.setEstado(Estado.I);
     feriasGozadasRepository.save(ferias);
 
+    // Spec, "Alteração": ponto 1 — "Inativa RH_T_PEDIDO ANTERIOR". Sem isto o pedido
+    // antigo ficava activo em paralelo com o novo.
+    var pedidoAnterior = ferias.getPedidoId();
+    if (pedidoAnterior != null) {
+      pedidoAnterior.setEstado(Estado.I.name());
+      pedidoAnterior.setEtapa("FINALIZADO");
+      pedidoRepository.save(pedidoAnterior);
+    }
+
     // F4: Inactivar ausência anterior ligada às férias antigas
     var ausenciasAnteriores = ausenciaRepository
         .findAllByReferenciaNameAndReferenciaId("RH_T_FERIAS_GOZADAS", ferias.getId());
@@ -286,6 +298,7 @@ public class FeriaWriteService {
     novasFerias.setDataFim(dataFim);
     novasFerias.setNumDia(diffDays(dataInicio, dataFim));
     novasFerias.setFeriasGozadasId(ferias.getId());
+    novasFerias.setTipoAlteracao(TIPO_ALTERACAO_DATA);
     novasFerias.setMotivoAlteracao(req.getMotivo());
     novasFerias.setObsInfoConveniencia(base.getObsConvinienciaServico());
     novasFerias.setObsResponsavel(base.getObsParecer());
@@ -300,6 +313,29 @@ public class FeriaWriteService {
     }
 
     novasFerias = feriasGozadasRepository.save(novasFerias);
+
+    // Spec, "Alteração": ponto 3 — gravar RH_T_SUBSTITUICAO caso haja substituto.
+    // Faltava por completo no fluxo de alteração.
+    if (base.getSubstituidoPor() != null) {
+      if (tipoRelAtual.getCargoId() == null)
+        throw IgrpResponseStatusException.badRequest(
+            "Substituição não aplicável: colaborador não ocupa nenhum cargo");
+
+      var funcionarioSubstituto = funcionarioRepository.findByUuidOrThrow(base.getSubstituidoPor());
+      var tipoRelSubstituto = funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid());
+
+      var substituicao = new SubstituicaoEntity();
+      substituicao.setSubstituidoTiprelId(tipoRelAtual);
+      substituicao.setSubstitutoTiprelId(tipoRelSubstituto);
+      substituicao.setDataInicio(dataInicio);
+      substituicao.setDataFim(dataFim);
+      substituicao.setEstado(Estado.P);
+      substituicao.setUuid(UuidCreator.getTimeOrderedEpoch());
+      substituicaoRepository.save(substituicao);
+
+      novasFerias.setTiprelIdSubstituido(tipoRelSubstituto.getId());
+      novasFerias = feriasGozadasRepository.save(novasFerias);
+    }
 
     // 5. Validação de UPDATE no novo pedido
     var validacao = buildValidacao(funcionario, tipoRelAtual, TipoAcao.UPDATE.name(), Referencia.FERIA.name(), Estado.P);
@@ -439,25 +475,33 @@ public class FeriaWriteService {
     return validacaoEntityRepository.save(v);
   }
 
+  /**
+   * Regista a ausência correspondente às férias validadas.
+   *
+   * <p>Esta ausência não é acessória: é ela que faz o colaborador desaparecer da lista
+   * de faltas no período (regra da especificação — quem está de férias tem a falta
+   * justificada automaticamente). Uma falha aqui produziria faltas indevidas, por isso
+   * propaga em vez de ser silenciada.
+   */
   private void criarAusenciaNaValidacao(FeriasGozadasEntity ferias) {
-    try {
-      var params = paramSituacaoRepository.findByFlgAusenciaAndTipoAusencia(1,SituacaoFalta.FERIAS.name());
-      if (params == null || params.isEmpty())
-        return;
-      var param = params.getFirst();
-      var ausencia = new AusenciaEntity();
-      ausencia.setParamSitId(param);
-      ausencia.setFunId(ferias.getFunId());
-      ausencia.setReferenciaName("RH_T_FERIAS_GOZADAS");
-      ausencia.setReferenciaId(ferias.getId());
-      ausencia.setObs(ferias.getFeriasGozadasId() != null ? "ALTERACAO DE FERIAS" : null);
-      ausencia.setDataInicio(ferias.getDataInicio());
-      ausencia.setDataFim(ferias.getDataFim());
-      ausencia.setEstado(Estado.A);
-      ausencia.setUuid(UuidCreator.getTimeOrderedEpoch());
-      ausenciaRepository.save(ausencia);
-    } catch (Exception ignored) {
-    }
+    var params = paramSituacaoRepository.findByFlgAusenciaAndTipoAusencia(1, SituacaoFalta.FERIAS.name());
+    if (params == null || params.isEmpty())
+      throw IgrpResponseStatusException.badRequest(
+          "Não existe parametrização de situação para FERIAS em RH_T_PARAM_SITUACAO "
+              + "(FLG_AUSENCIA=1, TIPO_AUSENCIA='FERIAS') — sem ela o colaborador continuaria "
+              + "a aparecer na lista de faltas durante as férias.");
+
+    var ausencia = new AusenciaEntity();
+    ausencia.setParamSitId(params.getFirst());
+    ausencia.setFunId(ferias.getFunId());
+    ausencia.setReferenciaName(TableName.RH_T_FERIAS_GOZADAS.name());
+    ausencia.setReferenciaId(ferias.getId());
+    ausencia.setObs(ferias.getFeriasGozadasId() != null ? "ALTERACAO DE FERIAS" : null);
+    ausencia.setDataInicio(ferias.getDataInicio());
+    ausencia.setDataFim(ferias.getDataFim());
+    ausencia.setEstado(Estado.A);
+    ausencia.setUuid(UuidCreator.getTimeOrderedEpoch());
+    ausenciaRepository.save(ausencia);
   }
 
 

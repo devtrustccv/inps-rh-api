@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +69,15 @@ public class FaltaReqDTO  {
 
 
   private Long tipoJustificacao ;
+
+  /** "Deduzir Falta Em" — DOMAIN TP_DESCONTO_FALTA: FERIAS | DISPENSA. */
+  private String deduzirFaltaEm ;
+
+  /** Só de resposta: valor da falta por dia. */
+  private BigDecimal valorDiario ;
+
+  /** Só de resposta: valorDiario x totalDias. */
+  private BigDecimal valorTotal ;
 
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();

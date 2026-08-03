@@ -1,14 +1,21 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ProcessamentoFuncionarioEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProcessamentoFuncionarioRepository extends
     JpaRepository<ProcessamentoFuncionarioEntity, Long>,
     JpaSpecificationExecutor<ProcessamentoFuncionarioEntity> {
+
+  default ProcessamentoFuncionarioEntity findByIdOrThrow(Long id) {
+    return this.findById(id)
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "ProcessamentoFuncionarioEntity not found for id: " + id));
+  }
 
   /**
    * Reproduz a coluna PROCESSAMENTO da vista RH_V_CARREIRA: indica se a carreira

@@ -65,6 +65,14 @@ public class FeriasGozadasEntity extends AuditEntity {
     private String motivoAlteracao;
 
 
+  /**
+   * Natureza da alteração (ex.: {@code ALTERACAO_DATA}). Preenchido apenas nos registos
+   * de alteração, a par de {@link #feriasGozadasId}.
+   */
+  @Column(name="tipo_alteracao")
+    private String tipoAlteracao;
+
+
   @Column(name="obs_info_conveniencia")
     private String obsInfoConveniencia;
 

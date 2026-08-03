@@ -187,6 +187,42 @@
       "primaryKey": false
     },
     {
+      "name": "deduzirFaltaEm",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "valorDiario",
+      "objectType": "java",
+      "type": "bigdecimal",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "valorTotal",
+      "objectType": "java",
+      "type": "bigdecimal",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "documentos",
       "objectType": "dto",
       "type": "AnexoReq",

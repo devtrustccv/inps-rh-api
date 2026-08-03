@@ -18,7 +18,10 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.TimeUtils;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -36,7 +39,19 @@ import java.util.*;
 @RequiredArgsConstructor
 public class HoraExtraServiceWrite {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(HoraExtraServiceWrite.class);
+
+  /** Tipo de movimento parametrizado para a remuneração de hora extra. */
+  private static final String TIPO_MOV_REM_HORA = "REM_HORA";
+
+  private static final String MOEDA_PADRAO = "CVE";
+
+  /** Valor de RH_T_DEF_REMUNERACOES.TIPO — usado por DELETE_ASSIDUIDADE para limpar. */
+  private static final String TIPO_REMUNERACAO_HORA_EXTRA = "HORA_EXTRA";
+
   private final HoraExtraEntityRepository horaExtraRepository;
+  private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoRepository;
+  private final TipoRelRemPagEntityRepository tipoRelRemPagRepository;
   private final FuncionarioEntityRepository funcionarioRepository;
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final FuncionarioRules funcionarioRules;
@@ -146,24 +161,116 @@ public class HoraExtraServiceWrite {
     return resp;
   }
 
+  /**
+   * Valor total do período de hora extra.
+   *
+   * <p>Apesar do campo se chamar {@code VALOR_DIARIO}, {@code CALCULO_HORA_EXTRA}
+   * devolve o somatório do <strong>período inteiro</strong> (package body, linha 2197).
+   *
+   * <p>Em caso de falha do procedimento cai no cálculo equivalente em Java, com registo
+   * em log — antes, qualquer erro no lado Oracle derrubava o pedido do utilizador.
+   */
   public BigDecimal calcularValorHoraExtra(
       Long tiprelId, LocalDate dataInicio, LocalDate dataFim,
       String percentagemReferente, Long horasDiaria) {
 
-    return jdbcTemplate.execute((ConnectionCallback<BigDecimal>) conn -> {
-      try (CallableStatement cs = conn.prepareCall(
-          "{ ? = call INPSRH.RH_PROCESSAMENTO_SALARIAL_DB.CALCULO_HORA_EXTRA(?, ?, ?, ?, ?) }")) {
-        cs.registerOutParameter(1, Types.NUMERIC);
-        cs.setLong(2, tiprelId);
-        cs.setDate(3, java.sql.Date.valueOf(dataInicio));
-        cs.setDate(4, java.sql.Date.valueOf(dataFim));
-        cs.setString(5, percentagemReferente != null ? percentagemReferente : "DIAS_UTEIS");
-        cs.setLong(6, horasDiaria != null ? horasDiaria : 0);
-        cs.execute();
-        BigDecimal result = cs.getBigDecimal(1);
-        return result != null ? result.setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
-      }
-    });
+    try {
+      var valor = jdbcTemplate.execute((ConnectionCallback<BigDecimal>) conn -> {
+        try (CallableStatement cs = conn.prepareCall(
+            "{ ? = call INPSRH.RH_PROCESSAMENTO_SALARIAL_DB.CALCULO_HORA_EXTRA(?, ?, ?, ?, ?) }")) {
+          cs.registerOutParameter(1, Types.NUMERIC);
+          cs.setLong(2, tiprelId);
+          cs.setDate(3, java.sql.Date.valueOf(dataInicio));
+          cs.setDate(4, java.sql.Date.valueOf(dataFim));
+          cs.setString(5, percentagemReferente != null ? percentagemReferente : "DIAS_UTEIS");
+          cs.setLong(6, horasDiaria != null ? horasDiaria : 0);
+          cs.execute();
+          return cs.getBigDecimal(1);
+        }
+      });
+
+      if (valor != null && valor.signum() > 0)
+        return valor.setScale(2, RoundingMode.HALF_UP);
+
+      LOGGER.warn("CALCULO_HORA_EXTRA devolveu {} para tiprelId={} {} a {} ({}, {}h/dia)"
+              + " — a usar cálculo Java.",
+          valor, tiprelId, dataInicio, dataFim, percentagemReferente, horasDiaria);
+
+    } catch (Exception e) {
+      LOGGER.warn("CALCULO_HORA_EXTRA falhou para tiprelId={} {} a {} — a usar cálculo Java. Causa: {}",
+          tiprelId, dataInicio, dataFim, e.getMessage(), e);
+    }
+
+    return calcularValorHoraExtraEmJava(tiprelId, dataInicio, dataFim, percentagemReferente, horasDiaria);
+  }
+
+  /**
+   * Réplica em Java da fórmula de CALCULO_HORA_EXTRA (package body, linhas 2111-2196):
+   * percorre os dias do período e, conforme o dia seja útil ou não, aplica a
+   * percentagem respectiva sobre o valor à hora.
+   */
+  private BigDecimal calcularValorHoraExtraEmJava(
+      Long tiprelId, LocalDate dataInicio, LocalDate dataFim,
+      String percentagemReferente, Long horasDiaria) {
+
+    var parametros = assiduidadeParametroRepository.findAllByEstado(Estado.A.getCode());
+    if (parametros == null || parametros.isEmpty())
+      throw IgrpResponseStatusException.badRequest(
+          "Parametrização de assiduidade activa não encontrada — não é possível calcular a hora extra");
+
+    var parametro = parametros.getFirst();
+    int jornadaMinutos = TimeUtils.hhmmToMinutes(parametro.getDiaria());
+    if (jornadaMinutos <= 0)
+      throw IgrpResponseStatusException.badRequest("Jornada diária não parametrizada");
+
+    var salario = getSalarioMensal(tiprelId);
+    if (salario == null || salario.signum() <= 0) {
+      LOGGER.warn("Salário indisponível para tiprelId={} — valor de hora extra fica 0", tiprelId);
+      return BigDecimal.ZERO;
+    }
+
+    var jornadaHoras = BigDecimal.valueOf(jornadaMinutos)
+        .divide(BigDecimal.valueOf(60), 8, RoundingMode.HALF_UP);
+
+    // valor à hora = salário / 30 / jornada diária
+    var valorHora = salario
+        .divide(BigDecimal.valueOf(30), 8, RoundingMode.HALF_UP)
+        .divide(jornadaHoras, 8, RoundingMode.HALF_UP)
+        .multiply(BigDecimal.valueOf(horasDiaria != null ? horasDiaria : 0));
+
+    var pctUtil = parametro.getHeValorDutil() != null ? parametro.getHeValorDutil() : BigDecimal.ZERO;
+    var pctNaoUtil = parametro.getHeValorDnutil() != null ? parametro.getHeValorDnutil() : BigDecimal.ZERO;
+
+    String modo = percentagemReferente != null ? percentagemReferente : "DIAS_UTEIS";
+    var total = BigDecimal.ZERO;
+
+    for (var dia = dataInicio; !dia.isAfter(dataFim); dia = dia.plusDays(1)) {
+      // Aproximação: fim-de-semana conta como não útil. Ao contrário de IS_DIA_UTEL,
+      // não consulta RH_T_PARAM_FERIADO — um feriado em dia de semana é aqui contado
+      // como útil. É o custo de o procedimento estar indisponível; por isso o caminho
+      // Oracle é o preferido e a falha fica registada em log.
+      boolean util = dia.getDayOfWeek().getValue() <= 5;
+
+      BigDecimal pct = switch (modo) {
+        case "DIAS_UTEIS" -> util ? pctUtil : BigDecimal.ZERO;
+        case "DIAS_NAO_UTEIS" -> util ? BigDecimal.ZERO : pctNaoUtil;
+        default -> util ? pctUtil : pctNaoUtil;
+      };
+
+      total = total.add(valorHora.multiply(pct).divide(BigDecimal.valueOf(100), 8, RoundingMode.HALF_UP));
+    }
+
+    return total.setScale(2, RoundingMode.HALF_UP);
+  }
+
+  private BigDecimal getSalarioMensal(Long tiprelId) {
+    try {
+      return jdbcTemplate.queryForObject(
+          "SELECT salario FROM rh_t_tipos_relacionamento WHERE id = ?", BigDecimal.class, tiprelId);
+    } catch (Exception e) {
+      LOGGER.error("Não foi possível obter o salário do tiprelId={}: {}", tiprelId, e.getMessage());
+      return null;
+    }
   }
 
   @Transactional
@@ -204,6 +311,10 @@ public class HoraExtraServiceWrite {
     for (var he : horasExtra) {
       he.setEstado(estado);
       horaExtraRepository.save(he);
+
+      // Validado ⇒ entra no processamento salarial como remuneração.
+      if (estado == Estado.A)
+        registarRemuneracaoHoraExtra(he);
 
       var ajuste = ajustes.get(he.getDataInicio());
 
@@ -278,6 +389,64 @@ public class HoraExtraServiceWrite {
     resp.put("totalRegistos", horasExtra.size());
 
     return resp;
+  }
+
+  /**
+   * Regista a hora extra validada em {@code RH_T_DEF_REMUNERACOES} e associa em
+   * {@code RH_T_TIPREL_REM_PAG.REM_ID} — o equivalente a
+   * {@code GRAVA_REMUN_PAG(P_REM_PAG => 'REM')} do lado da BD, e o que
+   * {@code PROCESSA_HORA} espera encontrar.
+   *
+   * <p>O tipo de movimento vem da parametrização {@code REM_HORA} do vínculo, filtrada
+   * por estado activo — há linhas eliminadas ('E') em BD que não devem ser usadas.
+   */
+  private void registarRemuneracaoHoraExtra(HoraExtraEntity he) {
+
+    var tipoRel = he.getTiprelId();
+    if (tipoRel == null || tipoRel.getContrVinculoId() == null
+        || tipoRel.getContrVinculoId().getVinculoId() == null)
+      throw IgrpResponseStatusException.badRequest(
+          "Colaborador sem vínculo contratual associado — não é possível registar a hora extra");
+
+    var vinculoId = tipoRel.getContrVinculoId().getVinculoId().getId();
+
+    var movimentos = paramVinculoMovimentoRepository
+        .findByVinculoId_IdAndTipoAndEstado(vinculoId, TIPO_MOV_REM_HORA, Estado.A);
+
+    if (movimentos == null || movimentos.isEmpty())
+      throw IgrpResponseStatusException.badRequest(
+          "Não existe tipo de movimento '" + TIPO_MOV_REM_HORA + "' activo parametrizado para o vínculo "
+              + vinculoId + ". Configure-o em RH_T_PARAM_VINCULO_MOV antes de validar horas extra.");
+
+    var valor = he.getValorDiario() != null ? he.getValorDiario() : BigDecimal.ZERO;
+
+    var remuneracao = definicaoRemuneracaoMapper.createRenumeracao(
+        valor,
+        movimentos.getFirst().getTmId(),
+        he.getDataInicio(),
+        he.getDataFim(),
+        tipoRel.getFunId(),   // FUN_ID, tal como GRAVA_REMUN_PAG
+        MOEDA_PADRAO);
+
+    // O mapper cria em estado P (serve os fluxos que ainda vão a validação). Aqui a
+    // hora extra já foi validada, e GET_SALARIO_BASE / o processamento só olham para
+    // remunerações com ESTADO = 'A' — em P ficaria invisível ao salário.
+    remuneracao.setEstado(Estado.A);
+    // DELETE_ASSIDUIDADE filtra por TIPO = 'HORA_EXTRA' (package body, linha 2683).
+    remuneracao.setTipo(TIPO_REMUNERACAO_HORA_EXTRA);
+
+    remuneracao = definicaoRemuneracaoRepository.save(remuneracao);
+
+    var associacao = new TipoRelRemPagEntity();
+    associacao.setTiprelId(tipoRel);
+    associacao.setRemId(remuneracao);
+    tipoRelRemPagRepository.save(associacao);
+
+    // PROCESSA_HORA actualiza RH_T_HORA_EXTRA.DEF_REM_ID (package body, linha 2573) e
+    // DELETE_ASSIDUIDADE limpa-o por aí (linha 2686). Sem este elo o registo ficaria
+    // órfão do processamento.
+    he.setDefRemId(remuneracao);
+    horaExtraRepository.save(he);
   }
 
   private AssiduidadeSinteseDiarioEntity buildSinteseDia(FuncionarioEntity fun, LocalDate dia, Long horasExtra) {

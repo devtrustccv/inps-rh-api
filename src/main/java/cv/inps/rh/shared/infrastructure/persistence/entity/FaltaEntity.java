@@ -97,9 +97,34 @@ public class FaltaEntity extends AuditEntity {
 
 
 
+  /**
+   * Desconto de falta no salário.
+   *
+   * <p>A falta desconta via <em>pagamento</em>, não via remuneração: PROCESSA_FALTA usa
+   * o tipo de movimento PAG_FALTA, grava em RH_T_DEF_PAGAMENTOS e actualiza esta coluna
+   * (package body, linha 2496).
+   *
+   * <p>Existiu aqui um DEF_REM_ID que nunca chegou a ser usado — sem dados, sem PL/SQL
+   * e sem vistas a referi-lo — e foi removido da tabela. Não confundir com
+   * RH_T_HORA_EXTRA.DEF_REM_ID, esse sim alimentado por PROCESSA_HORA: a hora extra
+   * acresce como remuneração, a falta desconta como pagamento.
+   */
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "def_rem_id", referencedColumnName = "id")
-    private DefinicaoRemuneracaoEntity defRemId;
+    @JoinColumn(name = "def_pag_id", referencedColumnName = "id")
+    private DefPagamentoEntity defPagId;
+
+
+  /**
+   * Onde a falta é deduzida: {@code FERIAS} ou {@code DISPENSA} (domínio
+   * TP_DESCONTO_FALTA). Escolha explícita do RH no formulário "Deduzir Falta Em";
+   * antes era inferida do tipo de justificação.
+   */
+  @Column(name="flg_desconto_falta")
+    private String flgDescontoFalta;
+
+
+  @Column(name="tipo")
+    private String tipo;
 
 
   @ManyToOne(fetch = FetchType.LAZY)

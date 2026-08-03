@@ -56,16 +56,18 @@ public class DispensaWriteService {
     if (!StringUtils.hasText(req.getHoraSaida()) || !StringUtils.hasText(req.getHoraEntrada()))
       throw IgrpResponseStatusException.badRequest("Intervalo de horas obrigatório");
 
-    var dispensaStatus = dispensaHorasService.getHorasStatus(req.getColaborador(), req.getDataDispensa());
-    var horasDisponiveis = TimeUtils.hhmmToMinutes(dispensaStatus.getHorasDisponiveis());
-    var horasUsadas= TimeUtils.hhmmToMinutes(dispensaStatus.getHorasUsadas());
+    // Inclui as horas agora pedidas no cálculo — a verificação anterior só olhava
+    // para as já usadas, pelo que um pedido acima do direito passava sempre.
+    int minutosPedidos = TimeUtils.diffMinutes(
+        TimeUtils.hhmmToIntervalFormat(req.getHoraSaida()),
+        TimeUtils.hhmmToIntervalFormat(req.getHoraEntrada()));
 
-    if (horasUsadas > horasDisponiveis) {
+    if (minutosPedidos <= 0)
       throw IgrpResponseStatusException.badRequest(
-          "Funcionário não tem horas suficientes para dispensa"
-      );
-    }
+          "Hora de entrada tem de ser posterior à hora de saída");
 
+    dispensaHorasService.validarSaldo(
+        req.getColaborador(), req.getDataDispensa(), minutosPedidos, null);
 
     var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaborador());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -119,14 +121,9 @@ public class DispensaWriteService {
       documentoEntityRepository.saveAll(documentos);
     }
 
-    var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.DISPENSA.name(),
-        Estado.P);
-    validacao.setFunId(funcionario);
-    validacao.setTiprelId(tipoRelAtual);
-    validacao.setReferenciaId(pedido.getId());
-    validacao.setReferenciaUuid(pedido.getUuid());
-    validacaoEntityRepository.save(validacao);
-
+    // A especificação de 01/08/2026 riscou o registo em RH_T_VALIDACAO para dispensa
+    // (secção "Dispensa > Novo / Editar", ponto 3). O parecer do responsável e a
+    // decisão do RH ficam na própria RH_T_DISPENSA.
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("pedidoId", pedido.getId());
@@ -157,16 +154,11 @@ public class DispensaWriteService {
     if (funcionario == null)
       throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
 
-    // Usar funcionario do pedido (não do request — pode não vir preenchido na validação)
-    var dispensaStatus = dispensaHorasService.getHorasStatus(funcionario.getUuid(), dispensa.getData());
-    var horasDisponiveis = TimeUtils.hhmmToMinutes(dispensaStatus.getHorasDisponiveis());
-    var horasUsadas= TimeUtils.hhmmToMinutes(dispensaStatus.getHorasUsadas());
-
-    if (horasUsadas > horasDisponiveis) {
-      throw IgrpResponseStatusException.badRequest(
-          "Funcionário não tem horas suficientes para dispensa"
-      );
-    }
+    // Usar funcionario do pedido (não do request — pode não vir preenchido na validação).
+    // A própria dispensa é excluída da contagem: já está gravada, contá-la seria duplicar.
+    int minutosDesta = TimeUtils.diffMinutes(dispensa.getHoraInicio(), dispensa.getHoraFim());
+    dispensaHorasService.validarSaldo(
+        funcionario.getUuid(), dispensa.getData(), minutosDesta, dispensa.getId());
 
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
@@ -248,13 +240,6 @@ public class DispensaWriteService {
     pedido.setEstado(estado.name());
     pedidoRepository.save(pedido);
 
-    // Atualizar validação pendente
-    funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.DISPENSA)
-        .ifPresent(v -> {
-          v.setEstado(estado);
-          validacaoEntityRepository.save(v);
-        });
-
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", dispensa.getId());
     resp.put("estado", dispensa.getEstado().name()); // mantido .name() se Estado for enum
@@ -275,16 +260,6 @@ public class DispensaWriteService {
         .orElseThrow(() -> IgrpResponseStatusException.notFound("Dispensa nao encontrada",
             command.getDispensaId()));
 
-    var dispensaStatus = dispensaHorasService.getHorasStatus(req.getColaborador(), dispensa.getData());
-    var horasDisponiveis = TimeUtils.hhmmToMinutes(dispensaStatus.getHorasDisponiveis());
-    var horasUsadas= TimeUtils.hhmmToMinutes(dispensaStatus.getHorasUsadas());
-
-    if (horasUsadas > horasDisponiveis) {
-      throw IgrpResponseStatusException.badRequest(
-          "Funcionário não tem horas suficientes para dispensa"
-      );
-    }
-
     var pedido = dispensa.getPedidoId();
     if (pedido == null)
       throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
@@ -294,6 +269,21 @@ public class DispensaWriteService {
       throw IgrpResponseStatusException.badRequest("Pedido sem colaborador associado");
 
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+
+    // Valida o saldo com as horas novas, excluindo esta dispensa da contagem do mês.
+    var novaData = req.getDataDispensa() != null ? req.getDataDispensa() : dispensa.getData();
+    var novoInicio = StringUtils.hasText(req.getHoraSaida())
+        ? TimeUtils.hhmmToIntervalFormat(req.getHoraSaida()) : dispensa.getHoraInicio();
+    var novoFim = StringUtils.hasText(req.getHoraEntrada())
+        ? TimeUtils.hhmmToIntervalFormat(req.getHoraEntrada()) : dispensa.getHoraFim();
+
+    int minutosPedidos = TimeUtils.diffMinutes(novoInicio, novoFim);
+    if (minutosPedidos <= 0)
+      throw IgrpResponseStatusException.badRequest(
+          "Hora de entrada tem de ser posterior à hora de saída");
+
+    dispensaHorasService.validarSaldo(
+        funcionario.getUuid(), novaData, minutosPedidos, dispensa.getId());
 
     ResponsavelEntity responsavel = null;
     if (req.getResponsavel()!=null) {
@@ -337,18 +327,6 @@ public class DispensaWriteService {
     // Atualizar pedido
     pedido.setEstado(Estado.P.name());
     pedidoRepository.save(pedido);
-
-    // Registo de UPDATE — editar cria UPDATE (não um novo INSERT) para não duplicar a validação pendente
-    var validacao = dadosContratuaisMapper.toValidacaoInsert(
-        TipoAcao.UPDATE.name(),
-        Referencia.DISPENSA.name(),
-        Estado.P
-    );
-    validacao.setFunId(funcionario);
-    validacao.setTiprelId(tipoRelAtual);
-    validacao.setReferenciaId(pedido.getId());
-    validacao.setReferenciaUuid(pedido.getUuid());
-    validacaoEntityRepository.save(validacao);
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", dispensa.getId());
