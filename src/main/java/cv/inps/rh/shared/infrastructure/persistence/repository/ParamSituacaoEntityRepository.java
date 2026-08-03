@@ -18,7 +18,8 @@ public interface ParamSituacaoEntityRepository extends JpaRepository<ParamSituac
 
   default ParamSituacaoEntity findByIdOrThrow(Long id) {
     return this.findById(id)
-        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "ParamSitLaboralEntity not found for id: " + id));
+        .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
+            "Situação/parametrização não encontrada para o id: " + id));
   }
 
   List<ParamSituacaoEntity> findAllByEstado(Estado estado);

@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public final class ValidationUtil {
 
@@ -69,6 +70,43 @@ public final class ValidationUtil {
 
   public static String trimToNull(String value) {
     return StringUtils.hasText(value) ? value.trim() : null;
+  }
+
+  /**
+   * Converte um identificador de recurso em UUID, devolvendo 400 quando é inválido.
+   *
+   * <p>Um identificador malformado é erro de quem chama, não do servidor: sem isto
+   * {@code UUID.fromString} lança {@code IllegalArgumentException} e o pedido termina
+   * em 500, ou — pior — é apanhado por um {@code catch} que devolve 200 com corpo
+   * vazio, deixando o cliente sem saber o que correu mal.
+   *
+   * @param nomeCampo nome do campo tal como o cliente o conhece, para a mensagem de erro
+   */
+  public static UUID parseUuid(String valor, String nomeCampo) {
+    var v = trimToNull(valor);
+    if (v == null)
+      throw IgrpResponseStatusException.badRequest(nomeCampo + " é obrigatório");
+    try {
+      return UUID.fromString(v);
+    } catch (IllegalArgumentException e) {
+      throw IgrpResponseStatusException.badRequest(
+          nomeCampo + " inválido: '" + valor + "' não é um identificador válido");
+    }
+  }
+
+  /**
+   * Versão para filtros opcionais: devolve vazio quando o valor não vem ou está
+   * malformado, para o filtro ser simplesmente ignorado em vez de derrubar a listagem.
+   */
+  public static Optional<UUID> parseUuidOpcional(String valor) {
+    var v = trimToNull(valor);
+    if (v == null)
+      return Optional.empty();
+    try {
+      return Optional.of(UUID.fromString(v));
+    } catch (IllegalArgumentException e) {
+      return Optional.empty();
+    }
   }
 
   private static final int NIB_LENGTH = 21;

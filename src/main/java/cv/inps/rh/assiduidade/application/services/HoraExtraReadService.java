@@ -7,6 +7,8 @@ import cv.inps.rh.assiduidade.application.dto.HoraExtraReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaHoraExtraDTO;
 import cv.inps.rh.assiduidade.application.queries.GetHoraExtraQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaHoraExtraQuery;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.HoraExtraEntity;
@@ -299,19 +301,14 @@ public class HoraExtraReadService {
 
     HoraExtraReqDTO dto = new HoraExtraReqDTO();
 
-    if (query == null || !StringUtils.hasText(query.getPedidoId()))
-      return dto;
-
-    UUID pedidoUuid;
-    try {
-      pedidoUuid = UUID.fromString(query.getPedidoId());
-    } catch (IllegalArgumentException e) {
-      return dto;
-    }
+    // Antes um id em falta ou malformado devolvia 200 com corpo vazio — o cliente não
+    // distinguia "não existe" de "enviaste lixo". Passa a 400.
+    var pedidoUuid = ValidationUtil.parseUuid(query.getPedidoId(), "Identificador do pedido de hora extra");
 
     var horasExtra = horaExtraRepository.findAllByPedidoId_Uuid(pedidoUuid);
     if (horasExtra == null || horasExtra.isEmpty())
-      return dto;
+      throw IgrpResponseStatusException.notFound(
+          "Pedido de hora extra não encontrado: " + query.getPedidoId());
 
     // Repartição mensal a partir da vista, para o detalhe falar a mesma língua da lista.
     var linhasPorHoraExtra = vHoraExtraMensalRepository

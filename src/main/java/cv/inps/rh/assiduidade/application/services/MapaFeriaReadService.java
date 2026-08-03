@@ -4,6 +4,7 @@ import cv.inps.rh.assiduidade.application.dto.*;
 import cv.inps.rh.assiduidade.application.queries.GetDetalheMapaFeriaQuery;
 import cv.inps.rh.assiduidade.application.queries.ListaMapaFeriaQuery;
 import cv.inps.rh.assiduidade.application.queries.VerMapaQuery;
+import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.infrastructure.persistence.entity.VFeriasDetalheColaboradorEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.VMapaFeriaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.VFeriasDetalheColaboradorEntityRepository;
@@ -46,7 +47,10 @@ public class MapaFeriaReadService {
     }
 
     if (StringUtils.hasText(query.getFuncionarioUuid())) {
-      spec = spec.and((root, cq, cb) -> cb.equal(root.get("uuidFuncionario"), UUID.fromString(query.getFuncionarioUuid())));
+      // Filtro opcional: um UUID malformado é ignorado, não derruba a listagem.
+      var funcUuid = ValidationUtil.parseUuidOpcional(query.getFuncionarioUuid());
+      if (funcUuid.isPresent())
+        spec = spec.and((root, cq, cb) -> cb.equal(root.get("uuidFuncionario"), funcUuid.get()));
     }
 
     // Buscar registros da view

@@ -7,6 +7,7 @@ import cv.inps.rh.assiduidade.application.dto.PedidoFeriaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFeriaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetListaFeriaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetPedidoFeriaQuery;
+import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -123,13 +124,13 @@ public class FeriaReadService {
 
   @Transactional(readOnly = true)
   public PedidoFeriaAlterarReqDTO getPedidoFeria(GetPedidoFeriaQuery query) {
-    if (!StringUtils.hasText(query.getPedidoId()))
-      throw cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException
-          .badRequest("Identificador de pedido férias é obrigatório");
+    // UuidCreator.fromString lançava IllegalArgumentException num id malformado, o que
+    // saía como 500. Um identificador inválido é erro do cliente: 400.
+    var pedidoUuid = ValidationUtil.parseUuid(query.getPedidoId(), "Identificador do pedido de férias");
 
-    var entity = feriasGozadasEntityRepository.findByPedidoId_Uuid(UuidCreator.fromString(query.getPedidoId()))
+    var entity = feriasGozadasEntityRepository.findByPedidoId_Uuid(pedidoUuid)
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,
-            "Ferias Gozadas not found for id: " + query.getPedidoId()));
+            "Pedido de férias não encontrado: " + query.getPedidoId()));
 
     var req = new PedidoFeriaReqDTO();
     req.setColaborador(entity.getFunId() != null ? entity.getFunId().getUuid() : null);
@@ -156,8 +157,12 @@ public class FeriaReadService {
     req.setParecer(entity.getDecisaoResponsavel());
     req.setObsParecer(entity.getObsResponsavel());
 
-    var documentos = documentoEntityRepository.findAllByReferenciaNameAndReferenciaUuid(
-        TableName.RH_T_FERIAS_GOZADAS.name(), entity.getPedidoId().getUuid());
+    // Férias podem existir sem pedido associado (ex.: dedução de falta em férias cria
+    // o registo directamente). Sem esta guarda a leitura rebentava com NPE.
+    var documentos = entity.getPedidoId() != null
+        ? documentoEntityRepository.findAllByReferenciaNameAndReferenciaUuid(
+            TableName.RH_T_FERIAS_GOZADAS.name(), entity.getPedidoId().getUuid())
+        : null;
 
     if (documentos != null && !documentos.isEmpty()) {
       req.setDocumentos(documentos.stream().map(d -> {

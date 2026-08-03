@@ -85,14 +85,15 @@ public class JustificarFaltaWriteService {
       throw IgrpResponseStatusException.badRequest(
           "Nenhuma falta marcada para justificação");
 
-    // Buscar ParamSituação (obrigatório)
-    var paramSituacao = paramSituacaoEntityRepository.findByIdOrThrow(dto.getTipoJustificacao());
-    // tipoFalta não nulo indica que este paramSituacao é válido para justificação de falta
-    if (paramSituacao.getTipoFalta() == null) {
-      throw IgrpResponseStatusException.badRequest("Tipo justificativo não permitido para falta");
-    }
-
     var selecionados = dto.getItensFalta().stream().filter(FaltaItemDTO::isSelecionar).toList();
+
+    // O tipo de justificação só existe no formulário quando "Com Justificativo" = SIM
+    // (spec: "os campos abaixo só aparecem caso Com Justificativo = SIM"). Marcar a
+    // falta como não justificada é um acto legítimo e não precisa de tipo.
+    boolean algumComJustificativo = selecionados.stream()
+        .anyMatch(i -> "SIM".equalsIgnoreCase(i.getComJustificativo()));
+
+    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), algumComJustificativo);
 
     // Regra: só vai a validação se forem mais de 3 dias E o tipo de justificação
     // descontar no salário. Caso contrário fica logo activo.
@@ -264,8 +265,11 @@ public class JustificarFaltaWriteService {
     if (dto == null || dto.getItensFalta() == null || dto.getItensFalta().isEmpty()) {
       throw IgrpResponseStatusException.badRequest("Nenhuma falta selecionada para validação");
     }
-    // Parametrização da justificação
-    var paramSituacao = paramSituacaoEntityRepository.findByIdOrThrow(dto.getTipoJustificacao());
+    // Parametrização da justificação — mesma tolerância ao "0" do formulário.
+    boolean algumComJustificativo = dto.getItensFalta().stream()
+        .filter(FaltaItemDTO::isSelecionar)
+        .anyMatch(i -> "SIM".equalsIgnoreCase(i.getComJustificativo()));
+    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), algumComJustificativo);
 
     // Todas as faltas do pedido (já criadas na fase de justificar)
     List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
@@ -300,7 +304,10 @@ public class JustificarFaltaWriteService {
       falta.setDescricaoMotivo(item.getMotivo());
       falta.setObsResponsavel(dto.getObsResponsavel());
       falta.setDespachoRh(dto.getDespachoRh());
-      falta.setParamSitId(paramSituacao);
+      // Só sobrepõe se veio no payload — caso contrário mantém o que foi gravado na
+      // justificação, em vez de o apagar.
+      if (paramSituacao != null)
+        falta.setParamSitId(paramSituacao);
       falta.setEstado(estadoFinal);
 
       if (StringUtils.hasText(dto.getDeduzirFaltaEm()))
@@ -338,6 +345,38 @@ public class JustificarFaltaWriteService {
         "estado", pedido.getEstado());
 
 
+  }
+
+  /**
+   * Resolve o tipo de justificação enviado pelo formulário.
+   *
+   * <p>O frontend envia {@code 0} para "nada seleccionado" — é a sentinela dele para
+   * campos numéricos por preencher. Tratá-lo como um id real fazia a pesquisa rebentar
+   * com um 404 enganador; aqui é lido como ausência de valor.
+   *
+   * @param obrigatorio quando alguma falta seleccionada vem com justificativo, o tipo
+   *                    passa a ser exigido — sem ele não há como apurar desconto.
+   */
+  private ParamSituacaoEntity resolverTipoJustificacao(Long tipoJustificacao, boolean obrigatorio) {
+
+    boolean preenchido = tipoJustificacao != null && tipoJustificacao > 0;
+
+    if (!preenchido) {
+      if (obrigatorio)
+        throw IgrpResponseStatusException.badRequest(
+            "Tipo de justificação é obrigatório quando a falta é marcada com justificativo");
+      return null;
+    }
+
+    var paramSituacao = paramSituacaoEntityRepository.findById(tipoJustificacao)
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest(
+            "Tipo de justificação inválido: " + tipoJustificacao));
+
+    // tipoFalta não nulo indica que este paramSituacao serve para justificar faltas
+    if (paramSituacao.getTipoFalta() == null)
+      throw IgrpResponseStatusException.badRequest("Tipo justificativo não permitido para falta");
+
+    return paramSituacao;
   }
 
   private void enviarNotificacaoJustificacaoFalta(PedidoEntity pedido, FuncionarioEntity funcionario) {

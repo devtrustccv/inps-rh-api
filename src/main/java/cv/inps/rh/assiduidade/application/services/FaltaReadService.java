@@ -5,6 +5,7 @@ import cv.inps.rh.assiduidade.application.dto.FaltaReqDTO;
 import cv.inps.rh.assiduidade.application.dto.WrapperListaFaltaDTO;
 import cv.inps.rh.assiduidade.application.queries.GetFaltaQuery;
 import cv.inps.rh.assiduidade.application.queries.GetListaFaltaQuery;
+import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -141,7 +142,7 @@ public class FaltaReadService {
     if (query == null || !StringUtils.hasText(query.getPedidoId())) {
       return new FaltaReqDTO();
     }
-    UUID pedidoUuid = UUID.fromString(query.getPedidoId());
+    UUID pedidoUuid = ValidationUtil.parseUuid(query.getPedidoId(), "Identificador do pedido");
 
     // Buscar pedido
     var pedido = pedidoEntityRepository.findByUuid(pedidoUuid)
@@ -194,10 +195,13 @@ public class FaltaReadService {
     dto.setParecer(primeiraFalta.getDecisaoResponsavel());
     dto.setObservacao(primeiraFalta.getObsResponsavel());
     dto.setDespachoRh(primeiraFalta.getDespachoRh());
-    dto.setResponsavel(
-        primeiraFalta.getResponsavelId() != null ? primeiraFalta.getResponsavelId().getFunId().getUuid() : null);
-    dto.setResponsavelNome(
-        primeiraFalta.getResponsavelId() != null ? primeiraFalta.getResponsavelId().getFunId().getNome() : null);
+    // A guarda tem de cobrir também o funcionário do responsável: RH_T_RESPONSAVEL
+    // pode existir sem FUN_ID preenchido.
+    var funResponsavel = primeiraFalta.getResponsavelId() != null
+        ? primeiraFalta.getResponsavelId().getFunId()
+        : null;
+    dto.setResponsavel(funResponsavel != null ? funResponsavel.getUuid() : null);
+    dto.setResponsavelNome(funResponsavel != null ? funResponsavel.getNome() : null);
     dto.setTipoJustificacao(primeiraFalta.getParamSitId() != null ? primeiraFalta.getParamSitId().getId() : null);
 
     var documentos = documentoEntityRepository
