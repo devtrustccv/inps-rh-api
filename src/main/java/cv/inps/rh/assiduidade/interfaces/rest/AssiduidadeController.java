@@ -452,6 +452,40 @@ public class AssiduidadeController {
   }
 
    @GetMapping(
+   value = "falta/calculo-valor"
+  )
+  @Operation(
+    summary = "Calcular valor da falta",
+    description = "Calcula o valor diário e total da falta sem gravar, para os campos "
+        + "\"Valor Diário (calculado)\" e \"Valor Total (calculado)\" do formulário. "
+        + "Usa RH_PROCESSAMENTO_SALARIAL_DB.CALCULO_FALTA_DIARIO, com fallback em Java.",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = CalcValorFaltaDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<CalcValorFaltaDTO> getCalculoValorFalta(
+    @RequestParam(value = "funcionarioUuid") String funcionarioUuid,
+    @RequestParam(value = "dataInicio") String dataInicio,
+    @RequestParam(value = "dataFim") String dataFim,
+    @RequestParam(value = "totalDeHorasAusentes") String totalDeHorasAusentes)
+  {
+
+      final var query = new GetCalcValorFaltaQuery(funcionarioUuid, dataInicio, dataFim, totalDeHorasAusentes);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
    value = "feria"
   )
   @Operation(

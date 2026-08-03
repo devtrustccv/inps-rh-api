@@ -1086,6 +1086,49 @@
       ]
     },
     {
+      "actionName": "getCalculoValorFalta",
+      "path": "falta/calculo-valor",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "CalcValorFalta",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "string",
+          "name": "funcionarioUuid",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "dataInicio",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "dataFim",
+          "isRequired": true
+        },
+        {
+          "type": "string",
+          "name": "totalDeHorasAusentes",
+          "isRequired": true
+        }
+      ]
+    },
+    {
       "actionName": "getPedidoFeria",
       "path": "feria/{pedidoId}",
       "method": "GET",

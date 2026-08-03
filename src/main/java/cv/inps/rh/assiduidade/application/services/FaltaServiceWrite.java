@@ -19,6 +19,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +67,13 @@ public class FaltaServiceWrite {
       throw IgrpResponseStatusException.badRequest("Intervalo de datas obrigatório");
     if (req.getDataFim().isBefore(req.getDataInicio()))
       throw IgrpResponseStatusException.badRequest("Data fim não pode ser anterior à data início");
+
+    // Uma falta sem horas de ausência contradiz-se: a síntese diária ficaria com
+    // 8h trabalhadas e FALTA=0, ou seja, a dizer que não houve falta nenhuma.
+    // O formulário traz este campo a 0 por defeito, por isso é fácil escapar.
+    if (parseMin(req.getTotalDeHorasAusentes()) <= 0)
+      throw IgrpResponseStatusException.badRequest(
+          "Total de horas ausente tem de ser superior a zero");
 
     var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaboradorId());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -346,17 +354,13 @@ public class FaltaServiceWrite {
     return sintese;
   }
 
-  private int parseMin(String hhmm) {
-    if (!StringUtils.hasText(hhmm))
-      return 0;
-    var parts = hhmm.split(":");
-    try {
-      int h = Integer.parseInt(parts[0]);
-      int m = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
-      return h * 60 + m;
-    } catch (Exception ignored) {
-      return 0;
-    }
+  /**
+   * O formulário de falta usa um campo numérico ("8", "8.5"), mas o valor também chega
+   * em {@code HH:MM}. Delegado no utilitário partilhado para as duas formas serem lidas
+   * da mesma maneira aqui e na dispensa — antes "8.5" caía silenciosamente para zero.
+   */
+  private int parseMin(String horas) {
+    return TimeUtils.parseHorasFlexivel(horas);
   }
 
   private String parseInterval(String hhmm) {
