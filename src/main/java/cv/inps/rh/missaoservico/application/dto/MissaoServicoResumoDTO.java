@@ -28,7 +28,9 @@ public class MissaoServicoResumoDTO  {
   private String nacionalInternacional;   // "Nacional" | "Internacional" via flgDestino
   private LocalDate dataMissao;           // dataInicio
   private String estado;                  // badge: PENDENTE_FATURA | POR_PAGAR | PAGO | PENDENTE_REQUISICAO
+  private String estadoDesc;                  // badge: PENDENTE_FATURA | POR_PAGAR | PAGO | PENDENTE_REQUISICAO desc
   private String etapa;                   // etapa atual do processo
+  private String etapaDesc;                   // etapa atual do processo desc
   private BigDecimal valorAC;             // soma VALOR_TOTAL onde REFERENCIA='AJUDA_CUSTO'
   private BigDecimal valorBP;             // REFERENCIA='BILHETE_PASSAGEM'
   private BigDecimal valorAlojamento;     // REFERENCIA='ALOJAMENTO'
