@@ -52,7 +52,7 @@ public class DispensaHorasService {
         usadasMin += TimeUtils.diffMinutes(d.getHoraInicio(), d.getHoraFim());
       }
 
-      int disponiveisMin = parseHoras(
+      int disponiveisMin = TimeUtils.parseHorasFlexivel(
           assiduidadeParametroEntityRepository.findActiveTDispensa().orElse(null));
 
       int restantesMin = Math.max(0, disponiveisMin - usadasMin);
@@ -98,24 +98,4 @@ public class DispensaHorasService {
       return status;
     }
 
-    /**
-     * Aceita {@code "4"}, {@code "4.5"} e {@code "04:00"}.
-     *
-     * @return minutos; 0 se não for interpretável.
-     */
-    static int parseHoras(String valor) {
-      if (!StringUtils.hasText(valor))
-        return 0;
-
-      var v = valor.trim();
-
-      if (v.contains(":"))
-        return TimeUtils.hhmmToMinutes(v);
-
-      try {
-        return (int) Math.round(Double.parseDouble(v.replace(',', '.')) * 60);
-      } catch (NumberFormatException e) {
-        return 0;
-      }
-    }
 }

@@ -48,6 +48,28 @@ public interface FaltaEntityRepository extends
 
   boolean existsBySinteseDiarioId(AssiduidadeSinteseDiarioEntity sintese);
 
+  /**
+   * Já existe falta viva para este colaborador neste dia?
+   *
+   * <p>Verifica pelo <strong>dia</strong> e não pela síntese: um mesmo dia pode ter mais
+   * do que uma síntese (importada e manual), e a verificação por síntese deixava passar
+   * duas faltas para a mesma data — apesar de a mensagem prometer o contrário.
+   *
+   * <p>Faltas em {@code I} são ignoradas: uma justificação recusada não pode bloquear o
+   * dia para sempre.
+   */
+  @Query("""
+          SELECT COUNT(f) > 0
+          FROM FaltaEntity f
+          JOIN f.sinteseDiarioId s
+          WHERE s.funcionarioId.id = :funcionarioId
+            AND s.data = :data
+            AND f.estado <> cv.inps.rh.shared.application.constants.Estado.I
+      """)
+  boolean existeFaltaVivaNoDia(
+      @Param("funcionarioId") Long funcionarioId,
+      @Param("data") LocalDate data);
+
   @Query("""
           SELECT COUNT(f)
           FROM FaltaEntity f

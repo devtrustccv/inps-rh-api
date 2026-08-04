@@ -23,4 +23,14 @@ public interface AssiduidadeSinteseDiarioEntityRepository extends
   }
 
   List<AssiduidadeSinteseDiarioEntity> findAllByFuncionarioIdAndDataBetween(FuncionarioEntity funcionarioId, LocalDate dataAfter, LocalDate dataBefore);
+
+  /**
+   * Síntese de um colaborador num dia.
+   *
+   * <p>Devolve lista porque a tabela não tem constraint única em (FUNCIONARIO_ID, DATA)
+   * e existem dias com mais do que uma — marcar uma falta criava sempre um registo novo,
+   * mesmo que o relógio já tivesse importado esse dia.
+   */
+  List<AssiduidadeSinteseDiarioEntity> findAllByFuncionarioIdAndData(
+      FuncionarioEntity funcionarioId, LocalDate data);
 }

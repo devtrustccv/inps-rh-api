@@ -52,6 +52,8 @@ public class AdiantamentoEmprestimoService {
     newLoan.setTipoSituacao(tipoSituacao.name());
     newLoan.setVersao(loan.getVersao() + 1);
     newLoan.setValorPago(null);
+    newLoan.setValorDivida(obj.getValorAdiantamento());
+    newLoan.setValorEmprestimo(obj.getValorAdiantamento());
     newLoan.setEmprestimo(loan);
     newLoan.setNrPrestacao(obj.getNumeroPrestacao());
     var saved = emprestimoEntityRepository.save(loan);

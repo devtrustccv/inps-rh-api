@@ -8,6 +8,7 @@ import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.DateFormatter;
@@ -19,6 +20,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -131,6 +133,8 @@ public class EmprestimoWriteService {
   public List<PlanoFinanceiroRowDTO> generateFinancialPlan(String uuid) {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    if (entity.getDataInicio() == null)
+      throw IgrpResponseStatusException.badRequest("Para gerar o plano financeiro deve ter uma data de início de empréstimo");
 
     return generateFinancialPlan(entity);
   }
@@ -147,6 +151,15 @@ public class EmprestimoWriteService {
     savePlans(entity, plan);
 
     return plan;
+  }
+
+  public List<PlanoFinanceiroRowDTO> generateMockFinancialPlan(EmprestimoEntity entity) {
+    return FinancialPlanHelper.generateFinancialPlan(
+        entity.getValorEmprestimo(),
+        entity.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
+        entity.getNrPrestacao().intValue(),
+        LocalDate.now(ZoneId.systemDefault())
+    );
   }
 
   public void generateFinancialPlanForFundoSocial(EmprestimoEntity entity) {

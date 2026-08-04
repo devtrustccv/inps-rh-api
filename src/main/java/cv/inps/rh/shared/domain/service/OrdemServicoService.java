@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 public class OrdemServicoService {
 
   private final ParamDocOutputEntityRepository repository;
-
   private final Map<OrdemServico, OrdemServicoProvider> providers;
 
   public OrdemServicoService(ParamDocOutputEntityRepository repository, List<OrdemServicoProvider> providerList) {
@@ -77,21 +76,13 @@ public class OrdemServicoService {
   }
 
   private ParamDocOutputEntity getByDocType(String type) {
-
-    return repository
-        .findByTipoDocumentoAndEstado(
-            type,
-            Estado.A.name()
-        )
+    return repository.findByTipoDocumentoAndEstado(type, Estado.A.name())
         .orElseThrow(() ->
-            new IllegalArgumentException(
-                "Documento não encontrado para tipo: " + type
-            )
+            new IllegalArgumentException("Documento não encontrado para tipo: " + type)
         );
   }
 
   private String getResponsavel(ResponsavelEntity responsavel) {
-
     return Optional.ofNullable(responsavel)
         .map(ResponsavelEntity::getFunId)
         .map(FuncionarioEntity::getNome)

@@ -99,6 +99,24 @@ COMMENT ON COLUMN RH_ASSIDUIDADE_SINTESE_DIARIA.FORMA IS
 UPDATE RH_ASSIDUIDADE_SINTESE_DIARIA SET FORMA = 'AUTOMATICO' WHERE FORMA IS NULL;
 
 
+-- 3.1.1 PENDENTE: IMPORT_DADOS_CONTR_ACESSO nao preenche FORMA
+--
+--   A coluna foi criada depois da procedure de importacao, que por isso a ignora
+--   (verificado: zero referencias a FORMA em ALL_SOURCE).
+--
+--   Consequencia: as sinteses vindas do relogio ficam com FORMA a NULL, nao a
+--   'AUTOMATICO'. As 113 linhas retro-preenchidas acima sao uma suposicao — de
+--   fiavel, so o valor 'MANUAL', que e escrito pelo nosso codigo.
+--
+--   Enquanto nao for corrigido, ler NULL como automatico. Corrigir seria
+--   acrescentar a atribuicao no INSERT da procedure:
+--       FORMA = 'AUTOMATICO'
+--
+--   Hoje nao afecta nada: nem a reutilizacao da sintese do dia nem a verificacao
+--   de falta duplicada leem este campo. Mas afecta qualquer regra futura que
+--   precise de distinguir importado de marcado a mao.
+
+
 -- 3.2 RH_T_FERIAS_GOZADAS.TIPO_ALTERACAO
 --     Spec, "Pedido Ferias / Alteracao de ferias":
 --       RH_T_FERIAS_GOZADA.TIPO_ALTERACAO + FERIAS_GOZADA_ID

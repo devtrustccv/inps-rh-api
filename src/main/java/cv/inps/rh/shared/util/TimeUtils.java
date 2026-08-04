@@ -55,6 +55,40 @@ public class TimeUtils {
   }
 
   /**
+   * Lê uma quantidade de horas em minutos, aceitando as formas que circulam no sistema.
+   *
+   * <p>Os formulários usam ora um campo numérico ({@code "8"}, {@code "8.5"}), ora um
+   * campo de hora ({@code "08:30"}), e a parametrização em BD guarda números simples.
+   * Ler tudo como {@code HH:MM} fazia {@code "8.5"} cair silenciosamente para zero —
+   * o utilizador escrevia meia hora a mais e o valor ficava a nada.
+   *
+   * <table>
+   *   <tr><td>{@code "8"}</td><td>480 min</td></tr>
+   *   <tr><td>{@code "8.5"} ou {@code "8,5"}</td><td>510 min</td></tr>
+   *   <tr><td>{@code "08:30"}</td><td>510 min</td></tr>
+   * </table>
+   *
+   * @return minutos; 0 se o valor for vazio ou não interpretável
+   */
+  public static int parseHorasFlexivel(String valor) {
+    if (!StringUtils.hasText(valor)) {
+      return 0;
+    }
+
+    var v = valor.trim();
+
+    if (v.contains(":")) {
+      return (int) toMinutes(v);
+    }
+
+    try {
+      return (int) Math.round(Double.parseDouble(v.replace(',', '.')) * 60);
+    } catch (NumberFormatException e) {
+      return 0;
+    }
+  }
+
+  /**
    * Converte uma string "HH:MM" em formato aceito por Oracle INTERVAL DAY TO SECOND.
    * Retorna "+0 HH:MM:SS"
    */
