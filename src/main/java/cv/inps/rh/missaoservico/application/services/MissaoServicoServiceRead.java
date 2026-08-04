@@ -75,16 +75,16 @@ public class MissaoServicoServiceRead {
 
       var docs = l.getUuid() != null
           ? documentoRepository.findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_MISSAO_LOGISTICA.name(),
-              l.getUuid())
+          l.getUuid())
           : List.<cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity>of();
       var fatura = docs == null
           ? null
           : docs.stream()
-              .filter(d -> d != null && d.getEstado() != Estado.E)
-              .max(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
-                  Comparator.nullsLast(Comparator.naturalOrder())))
-              .map(documentoMapper::toRespDto)
-              .orElse(null);
+          .filter(d -> d != null && d.getEstado() != Estado.E)
+          .max(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
+              Comparator.nullsLast(Comparator.naturalOrder())))
+          .map(documentoMapper::toRespDto)
+          .orElse(null);
 
       var item = new MissaoCabimentoItemResponseDTO();
       item.setLogisticaId(l.getId());
@@ -194,16 +194,16 @@ public class MissaoServicoServiceRead {
 
       var docs = l.getUuid() != null
           ? documentoRepository.findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_MISSAO_LOGISTICA.name(),
-              l.getUuid())
+          l.getUuid())
           : List.<cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity>of();
       var documento = docs == null
           ? null
           : docs.stream()
-              .filter(d -> d != null && d.getEstado() != Estado.E)
-              .max(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
-                  Comparator.nullsLast(Comparator.naturalOrder())))
-              .map(documentoMapper::toRespDto)
-              .orElse(null);
+          .filter(d -> d != null && d.getEstado() != Estado.E)
+          .max(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
+              Comparator.nullsLast(Comparator.naturalOrder())))
+          .map(documentoMapper::toRespDto)
+          .orElse(null);
 
       if ("BILHETE_PASSAGEM".equalsIgnoreCase(referencia)) {
         var bp = new BilhetePassagemResponseDTO();
@@ -360,12 +360,12 @@ public class MissaoServicoServiceRead {
     var documentos = docs == null
         ? List.<AnexoRespDTO>of()
         : docs.stream()
-            .filter(d -> d != null && d.getEstado() != Estado.E)
-            .sorted(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
-                Comparator.nullsLast(Comparator.naturalOrder())))
-            .map(documentoMapper::toRespDto)
-            .filter(Objects::nonNull)
-            .toList();
+        .filter(d -> d != null && d.getEstado() != Estado.E)
+        .sorted(Comparator.comparing(cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity::getId,
+            Comparator.nullsLast(Comparator.naturalOrder())))
+        .map(documentoMapper::toRespDto)
+        .filter(Objects::nonNull)
+        .toList();
 
     var response = new MissaoSubmissaoResponseDTO();
     response.setId(missao.getId());
@@ -563,6 +563,7 @@ public class MissaoServicoServiceRead {
 
   @Transactional(readOnly = true)
   public ResponseEntity<WrapperListMissaoServicoDTO> getLista(GetListaMissaoServicoQuery query) {
+
     var nrMissao = parseLongSafe(query != null ? query.getNrMissao() : null);
     var periodoDe = parseDateSafe(query != null ? query.getPeriodoDe() : null);
     var periodoAte = parseDateSafe(query != null ? query.getPeriodoAte() : null);
@@ -586,8 +587,8 @@ public class MissaoServicoServiceRead {
     };
 
     var page = missaoServicoRepository.findAll(spec, pageable);
-    var missoes = page.getContent() != null ? page.getContent()
-        : List.<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoServicoEntity>of();
+    page.getContent();
+    var missoes = page.getContent();
 
     var missaoById = new HashMap<Long, cv.inps.rh.shared.infrastructure.persistence.entity.MissaoServicoEntity>();
     var missaoIds = new ArrayList<Long>();
@@ -626,6 +627,9 @@ public class MissaoServicoServiceRead {
     for (var m : missoes) {
       if (m == null)
         continue;
+
+      var estado = resolveEstadoLista(m);
+
       var sums = totalsByMissao.getOrDefault(m.getId(), java.util.Map.of());
       var dto = new MissaoServicoResumoDTO();
       dto.setId(m.getId());
@@ -635,7 +639,9 @@ public class MissaoServicoServiceRead {
       dto.setNacionalInternacional(resolveNacionalInternacional(m.getFlgDestino()));
       dto.setDataMissao(m.getDataInicio());
       dto.setEtapa(m.getEtapa());
-      dto.setEstado(resolveEstadoLista(m));
+      dto.setEtapaDesc(resolveEtapaLista(m.getEtapa()));
+      dto.setEstado(estado.estado());
+      dto.setEstadoDesc(estado.estadoDesc());
       dto.setValorAC(sums.get("AJUDA_CUSTO"));
       dto.setValorBP(sums.get("BILHETE_PASSAGEM"));
       dto.setValorAlojamento(sums.get("ALOJAMENTO"));
@@ -699,7 +705,7 @@ public class MissaoServicoServiceRead {
   }
 
   private MissaoLogisticaDetResponseDTO toDetDto(
-     MissaoLogisticaDetEntity d) {
+      MissaoLogisticaDetEntity d) {
     if (d == null)
       return null;
     var dto = new MissaoLogisticaDetResponseDTO();
@@ -749,20 +755,49 @@ public class MissaoServicoServiceRead {
     return null;
   }
 
-  private String resolveEstadoLista(MissaoServicoEntity missao) {
-    if (missao == null || !StringUtils.hasText(missao.getEtapa()))
-      return null;
+  private EstadoDesc resolveEstadoLista(MissaoServicoEntity missao) {
+    if (missao == null || !StringUtils.hasText(missao.getEtapa())) {
+      return new EstadoDesc("", "");
+    }
+
     var etapa = missao.getEtapa();
+
     if ("PAGAMENTO".equals(etapa)) {
-      return (missao.getReferenciaPagamento() != null || missao.getDataPagamento() != null) ? "PAGO" : "POR_PAGAR";
+      return missao.getReferenciaPagamento() != null || missao.getDataPagamento() != null
+          ? new EstadoDesc("PAGO", "Pago")
+          : new EstadoDesc("POR_PAGAR", "Por pagar");
     }
+
     if ("CABIMENTO".equals(etapa)) {
-      return "POR_PAGAR";
+      return new EstadoDesc("POR_PAGAR", "Por pagar");
     }
+
     if ("LOGISTICA".equals(etapa)) {
-      return "PENDENTE_FATURA";
+      return new EstadoDesc("PENDENTE_FATURA", "Pendente de Fatura");
     }
-    return "PENDENTE_REQUISICAO";
+
+    return new EstadoDesc("PENDENTE_REQUISICAO", "Pendente de Requisição");
+  }
+
+  private String resolveEtapaLista(String etapa) {
+
+    if (!StringUtils.hasText(etapa))
+      return "";
+
+    if ("PAGAMENTO".equals(etapa))
+      return "Pagamento";
+
+    if ("CABIMENTO".equals(etapa))
+      return "Cabimento";
+
+    if ("LOGISTICA".equals(etapa)) {
+      return "Logística";
+    }
+
+    return etapa;
+  }
+
+  private record EstadoDesc(String estado, String estadoDesc) {
   }
 
   private Long parseLongSafe(String raw) {

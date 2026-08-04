@@ -59,5 +59,6 @@ public class EmprestimoListRowDTO  {
 
 
   private String etapa ;
+  private String etapaDesc;
 
 }

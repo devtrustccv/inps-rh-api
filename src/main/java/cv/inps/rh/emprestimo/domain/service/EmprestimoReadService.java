@@ -195,6 +195,8 @@ public class EmprestimoReadService {
 
     var pageResult = emprestimoEntityRepository.findAll(specification, pageable);
 
+    var etapaMap = EtapaEmprestimo.descriptionMap();
+
     var response = new EmprestimoListDTO();
     PageMapper.fillPagination(pageResult, response);
     response.setContent(pageResult.getContent()
@@ -217,7 +219,10 @@ public class EmprestimoReadService {
           dto.setFuncionarioId(funId.getUuid().toString());
           dto.setNomeColaborador(funId.getNome());
           PedidoEntity order = e.getPedido();
-          ofNullable(order).ifPresent(o -> dto.setEtapa(o.getEtapa()));
+          ofNullable(order).ifPresent(o -> {
+            dto.setEtapa(o.getEtapa());
+            dto.setEtapaDesc(etapaMap.getOrDefault(o.getEtapa(), o.getEtapa()));
+          });
           return dto;
         })
         .toList());
