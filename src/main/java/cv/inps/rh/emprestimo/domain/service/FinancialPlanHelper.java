@@ -13,6 +13,9 @@ import java.util.List;
 
 public class FinancialPlanHelper {
 
+  private FinancialPlanHelper() {
+  }
+
   private static final Logger LOGGER = LoggerFactory.getLogger(FinancialPlanHelper.class);
 
   private static final int SCALE = 2;

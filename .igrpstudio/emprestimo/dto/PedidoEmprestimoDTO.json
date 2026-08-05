@@ -129,7 +129,7 @@
       "name": "juros",
       "objectType": "java",
       "type": "decimal",
-      "required": false,
+      "required": true,
       "before": false,
       "after": false,
       "positive": false,

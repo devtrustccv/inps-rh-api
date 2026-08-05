@@ -69,6 +69,7 @@ public class PedidoAquisicaoViaturaService {
     entity.setValorEmprestimo(request.getValorEmprestimo());
     entity.setValorDivida(request.getValorEmprestimo());
     entity.setNrPrestacao(request.getNumeroPrestacoes());
+    entity.setJuro(request.getJuros());
     var savedLoan = emprestimoEntityRepository.save(entity);
 
     var funId = currentRelation.getFunId();
