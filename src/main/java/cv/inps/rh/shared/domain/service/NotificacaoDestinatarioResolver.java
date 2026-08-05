@@ -66,9 +66,16 @@ public class NotificacaoDestinatarioResolver {
       switch (tipo) {
         case COLABORADOR -> resolverColaborador(colaborador).ifPresent(destinatarios::add);
         case RESPONSAVEL_COLABORADOR -> destinatarios.addAll(resolverResponsavelColaborador(colaborador));
+        // TODO RESPONSAVEL_REGISTO: enviar para o utilizador que fez login e criou o registo.
+        // Bloqueado — AuditEntityListener.getCurrentUserId() é um stub (devolve 1L/2L fixo) e
+        // ApplicationAuditorAware devolve "local" hardcoded em development/staging, portanto não
+        // há hoje forma de chegar à pessoa. A resolver replicando o padrão IAM do inss_core_service
+        // (perfil por claim `sub` do JWT + sync filter + AuthenticatedUserHelper); esse perfil já
+        // traz o email, logo bastará ir de createdBy (= sub) ao perfil. Ver o javadoc de
+        // NotificacaoDispatchService para o detalhe das peças a copiar.
         case RESPONSAVEL_REGISTO -> LOGGER.warn(
             "Destinatário RESPONSAVEL_REGISTO pedido mas ainda não implementado — "
-            + "requer identidade do utilizador autenticado (ver TODO em NotificacaoDispatchService)");
+            + "requer identidade do utilizador autenticado (ver TODO acima)");
       }
     }
 
