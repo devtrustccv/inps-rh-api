@@ -55,6 +55,8 @@ public class PedidoEmprestimoDTO {
 
   private BigDecimal juros;
 
+  private Long bancoId;
+
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();
 
