@@ -6,6 +6,7 @@ package cv.inps.rh.emprestimo.application.dto;
 import cv.igrp.framework.stereotype.IgrpDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -52,8 +53,13 @@ public class PedidoEmprestimoDTO {
 
   private Long numeroPrestacoes;
 
-
+  @NotNull
   private BigDecimal juros;
+
+  private Long bancoId;
+
+  private String nib;
+  private String nif;
 
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();

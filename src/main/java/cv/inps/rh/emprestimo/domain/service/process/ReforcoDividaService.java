@@ -50,6 +50,8 @@ public class ReforcoDividaService {
     newLoan.setValorPago(null);
     newLoan.setEmprestimo(loan);
     newLoan.setNrPrestacao(obj.getNumeroPrestacao());
+    newLoan.setValorEmprestimo(obj.getValorReforco());
+    newLoan.setValorDivida(obj.getValorReforco());
     newLoan.setMotivo(obj.getMotivoReforco());
     var saved = emprestimoEntityRepository.save(loan);
 

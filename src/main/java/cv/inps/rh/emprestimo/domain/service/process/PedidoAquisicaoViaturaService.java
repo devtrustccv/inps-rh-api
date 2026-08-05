@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.domain.service.EmprestimoDocumentService;
+import cv.inps.rh.emprestimo.domain.service.EmprestimoWriteService;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.ProcessType;
 import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
@@ -14,6 +15,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.BancoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
@@ -33,8 +35,10 @@ public class PedidoAquisicaoViaturaService {
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PedidoEntityRepository pedidoEntityRepository;
+  private final BancoEntityRepository bancoEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final EmprestimoDocumentService documentService;
+  private final EmprestimoWriteService emprestimoWriteService;
 
   public IdDTO saveUpdatePedidoEmprestimo(String uuid, PedidoEmprestimoRequestDTO request) {
 
@@ -54,6 +58,7 @@ public class PedidoAquisicaoViaturaService {
       entity.setVersao(1L);
     }
 
+    entity.setBanco(Objects.nonNull(request.getBancoId()) ? bancoEntityRepository.findById(request.getBancoId()).orElseThrow() : null);
     entity.setTiprel(currentRelation);
     entity.setMarca(request.getMarca());
     entity.setAnoFabrico(request.getAnoFabrico());
@@ -62,7 +67,11 @@ public class PedidoAquisicaoViaturaService {
     entity.setCombustivel(request.getCombustivel());
     entity.setEstadoViatura(request.getEstadoViatura());
     entity.setValorEmprestimo(request.getValorEmprestimo());
+    entity.setValorDivida(request.getValorEmprestimo());
     entity.setNrPrestacao(request.getNumeroPrestacoes());
+    entity.setJuro(request.getJuros());
+    entity.setNib(request.getNib());
+    entity.setNif(request.getNif());
     var savedLoan = emprestimoEntityRepository.save(entity);
 
     var funId = currentRelation.getFunId();
@@ -257,6 +266,7 @@ public class PedidoAquisicaoViaturaService {
         });
   }
 
+  @Transactional
   public void elaborarContrato(String uuid, ElaboracaoContratoRequestDTO request) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
@@ -264,6 +274,8 @@ public class PedidoAquisicaoViaturaService {
       loan.setDataInicio(request.getDataInicioEmprestimo());
       emprestimoEntityRepository.save(loan);
     }
+
+    emprestimoWriteService.generateFinancialPlan(loan);
 
     var step = request.getAction().equals(ProcessStepAction.NEXT) ?
         EtapaEmprestimo.PAGAMENTO :

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -23,9 +24,12 @@ public class RegularizacaoController {
    */
   @GetMapping("/funcionario/{funUuid}")
   public List<RegularizacaoContaRequestDTO> getByFunId(
-      @PathVariable String funUuid) {
+      @PathVariable String funUuid,
+      @RequestParam LocalDate dataInicio,
+      @RequestParam LocalDate dataFim
+  ) {
 
-    return regularizacaoService.getByFunId(funUuid);
+    return regularizacaoService.getByFunId(funUuid, dataInicio, dataFim);
   }
 
   /**

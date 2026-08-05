@@ -102,6 +102,30 @@
       "primaryKey": false
     },
     {
+      "name": "nib",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "nif",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "valorEmprestimo",
       "objectType": "java",
       "type": "decimal",
@@ -129,7 +153,7 @@
       "name": "juros",
       "objectType": "java",
       "type": "decimal",
-      "required": false,
+      "required": true,
       "before": false,
       "after": false,
       "positive": false,

@@ -32,7 +32,7 @@ public class AdiantamentoEmprestimoHelper {
     var allPlans = planoFinanceiroEntityRepository.findAllByEmprestimo(loan);
 
     var numberOfPaidPrestations = allPlans.stream()
-        .filter(obj -> obj.getFlgPago().equals("PAGO"))
+        .filter(obj -> "PAGO".equals(obj.getFlgPago()))
         .count();
 
     // adiantamento valor, valor em divida diminui , valor pago , valor adiantado

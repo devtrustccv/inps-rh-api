@@ -40,6 +40,7 @@ public class EmprestimoReadService {
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
   private final RhPagamentoEntityRepository rhPagamentoEntityRepository;
   private final EmprestimoDocumentService documentService;
+  private final EmprestimoWriteService emprestimoWriteService;
 
   public List<InformacaoEmprestimoRequestDTO> getAllConfiguracaoEmprestimo() {
     return paramEmprestimoEntityRepository.findAll()
@@ -79,9 +80,10 @@ public class EmprestimoReadService {
     dto.setAvaliacaoTaxaEsforco(entity.getDescTaxaEsforco());
     dto.setTipoSituacao(entity.getTipoSituacao());
     dto.setValorAdiantamento(entity.getValorAdiantado());
-    dto.setNib(entity.getNib());
     dto.setSwift(entity.getSwift());
     dto.setMotivo(entity.getMotivo());
+    dto.setNib(entity.getNib());
+    dto.setNif(entity.getNif());
     ofNullable(entity.getBanco()).ifPresent(o -> {
       dto.setBancoId(o.getId());
       dto.setNumeroContaBanco(o.getNuConta());
@@ -194,6 +196,8 @@ public class EmprestimoReadService {
 
     var pageResult = emprestimoEntityRepository.findAll(specification, pageable);
 
+    var etapaMap = EtapaEmprestimo.descriptionMap();
+
     var response = new EmprestimoListDTO();
     PageMapper.fillPagination(pageResult, response);
     response.setContent(pageResult.getContent()
@@ -216,7 +220,10 @@ public class EmprestimoReadService {
           dto.setFuncionarioId(funId.getUuid().toString());
           dto.setNomeColaborador(funId.getNome());
           PedidoEntity order = e.getPedido();
-          ofNullable(order).ifPresent(o -> dto.setEtapa(o.getEtapa()));
+          ofNullable(order).ifPresent(o -> {
+            dto.setEtapa(o.getEtapa());
+            dto.setEtapaDesc(etapaMap.getOrDefault(o.getEtapa(), o.getEtapa()));
+          });
           return dto;
         })
         .toList());
@@ -237,6 +244,11 @@ public class EmprestimoReadService {
     plan.setJurosTotal(loan.getValorJuroTotal());
     plan.setCustoTotalEmprestimo(NumberUtils.sum(loan.getValorJuroTotal(), loan.getValorEmprestimo()));
     plan.setPagamentoMensal(loan.getValorPrestacao());
+
+    if (plan.getDataInicio() == null) {
+      plan.setRows(emprestimoWriteService.generateMockFinancialPlan(loan));
+      return plan;
+    }
 
     var rows = planoFinanceiroEntityRepository.findAllByEmprestimo(loan)
         .stream()
