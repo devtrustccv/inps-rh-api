@@ -102,7 +102,43 @@ public class ColaboradorController {
     @PostMapping(value = "importar-movimento", consumes = "multipart/form-data")
     @Operation(
         summary = "Importar movimentos",
-        description = "Importar movimentos",
+        description = """
+            Importa movimentos a partir de um ficheiro Excel.
+
+            O ficheiro enviado deve conter os dados dos movimentos na primeira folha (sheet).
+            A primeira linha do ficheiro é considerada como cabeçalho e será ignorada durante o processamento.
+
+            Formato esperado das colunas do ficheiro Excel:
+
+            - Coluna A (índice 0): UUID do Funcionário
+              - Deve conter um UUID válido do funcionário.
+
+            - Coluna B (índice 1): Coluna reservada
+              - Não é utilizada no processamento, mas deve manter a posição no ficheiro.
+
+            - Coluna C (índice 2): Tipo de Movimento de Retenção
+              - Valor textual.
+
+            - Coluna D (índice 3): Tipo de Movimento de Remuneração
+              - Valor textual.
+
+            - Coluna E (índice 4): Percentagem
+              - Valor numérico decimal (ex: 10.5).
+
+            - Coluna F (índice 5): Valor
+              - Valor numérico decimal (ex: 2500.00).
+
+            - Coluna G (índice 6): Data de Início
+              - Data no formato aceite pelo sistema (ex: 01/01/2026).
+
+            - Coluna H (índice 7): Data de Fim
+              - Data no formato aceite pelo sistema (ex: 31/12/2026).
+
+            - Coluna I (índice 8): Situação
+              - Valor textual que representa o estado do movimento.
+
+            Cada linha válida do ficheiro Excel irá originar um novo registo de movimento associado ao funcionário indicado pelo UUID.
+            """,
         responses = {
             @ApiResponse(
                 responseCode = "200",
