@@ -2,14 +2,17 @@ package cv.inps.rh.configuracao.application.services;
 
 import cv.inps.rh.configuracao.application.dto.AssociarResponsaveisRequestDTO;
 import cv.inps.rh.configuracao.application.dto.ResponsaveisDirecaoResponseDTO;
+import cv.inps.rh.configuracao.application.dto.ResponsavelEmailDTO;
 import cv.inps.rh.configuracao.application.dto.ResponsavelResponseDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperListResponsaveisDTO;
+import cv.inps.rh.configuracao.application.queries.GetResponsaveisEmailsQuery;
 import cv.inps.rh.configuracao.application.queries.GetResponsaveisQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DirecaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.MobilidadeEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ResponsavelEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SecaoEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
@@ -25,6 +28,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 @Transactional
@@ -35,12 +39,14 @@ public class ResponsavelService {
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final SecaoEntityRepository secaoEntityRepository;
   private final DirecaoEntityRepository instituicaoEntityRepository;
+  private final MobilidadeEntityRepository mobilidadeEntityRepository;
 
-  public ResponsavelService(ResponsavelEntityRepository responsavelEntityRepository, FuncionarioEntityRepository funcionarioEntityRepository, SecaoEntityRepository secaoEntityRepository, DirecaoEntityRepository instituicaoEntityRepository) {
+  public ResponsavelService(ResponsavelEntityRepository responsavelEntityRepository, FuncionarioEntityRepository funcionarioEntityRepository, SecaoEntityRepository secaoEntityRepository, DirecaoEntityRepository instituicaoEntityRepository, MobilidadeEntityRepository mobilidadeEntityRepository) {
     this.responsavelEntityRepository = responsavelEntityRepository;
     this.funcionarioEntityRepository = funcionarioEntityRepository;
     this.secaoEntityRepository = secaoEntityRepository;
     this.instituicaoEntityRepository = instituicaoEntityRepository;
+    this.mobilidadeEntityRepository = mobilidadeEntityRepository;
   }
 
   public void saveResponsaveis(AssociarResponsaveisRequestDTO request) {
@@ -162,6 +168,73 @@ public class ResponsavelService {
     PageMapper.fillPagination(page, wrapper);
     wrapper.setContent(content);
     return wrapper;
+  }
+
+  /**
+   * Emails de RH_T_RESPONSAVEL para o multiselect "Email do Responsável" do ecrã de notificação.
+   *
+   * <p>Quando vem {@code funcionarioId}, a direção/secção é deduzida da mobilidade activa do
+   * colaborador — é o que o ecrã tem em mão. Sem filtro nenhum devolve todos os responsáveis
+   * com email, o que é aceitável porque a tabela é pequena (uma linha por direção/secção).</p>
+   *
+   * <p>Linhas sem email ficam de fora: no multiselect seriam opções impossíveis de escolher.</p>
+   */
+  @Transactional(readOnly = true)
+  public List<ResponsavelEmailDTO> getResponsaveisEmails(GetResponsaveisEmailsQuery query) {
+
+    Long idInstituicao = query.getIdInstituicao();
+    Long idSeccao = query.getIdSeccao();
+
+    if (StringUtils.hasText(query.getFuncionarioId())) {
+      var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(query.getFuncionarioId()));
+      var mobilidade = mobilidadeEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
+
+      if (mobilidade == null || mobilidade.getInstidId() == null) {
+        // Sem colocação conhecida não há como escolher responsáveis; devolver a lista toda seria
+        // pior do que devolver nada, porque sugeriria chefias de outras direções.
+        return List.of();
+      }
+
+      idInstituicao = mobilidade.getInstidId().getId();
+      idSeccao = mobilidade.getSecaoId() != null ? mobilidade.getSecaoId().getId() : null;
+    }
+
+    var filtroInstituicao = idInstituicao;
+    var filtroSeccao = idSeccao;
+
+    Specification<ResponsavelEntity> spec = (root, _, cb) -> {
+      var predicates = new ArrayList<Predicate>();
+      predicates.add(cb.isNotNull(root.get(ResponsavelEntity_.email)));
+
+      if (filtroInstituicao != null) {
+        predicates.add(cb.equal(root.get(ResponsavelEntity_.institId).get(DirecaoEntity_.ID), filtroInstituicao));
+      }
+      if (filtroSeccao != null) {
+        predicates.add(cb.equal(root.get(ResponsavelEntity_.secaoId).get(SecaoEntity_.ID), filtroSeccao));
+      }
+
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
+
+    return responsavelEntityRepository.findAll(spec).stream()
+        .filter(e -> StringUtils.hasText(e.getEmail()))
+        .map(e -> {
+          var dto = new ResponsavelEmailDTO();
+          dto.setIdResponsavel(e.getId());
+          dto.setEmail(e.getEmail().trim());
+
+          var fun = e.getFunId();
+          dto.setNome(fun != null && StringUtils.hasText(fun.getNome()) ? fun.getNome() : e.getEmail().trim());
+
+          var direcao = e.getInstitId();
+          if (direcao != null) dto.setDirecao(direcao.getNome());
+
+          var secao = e.getSecaoId();
+          if (secao != null) dto.setSeccao(secao.getNome());
+
+          return dto;
+        })
+        .toList();
   }
 
 }

@@ -7,6 +7,7 @@ import cv.inps.rh.processamento.application.dto.MovimentosImportadosDTO;
 import cv.inps.rh.processamento.application.dto.ValidacaoMovimentoImportadoDTO;
 import cv.inps.rh.processamento.application.queries.GetMovimentosImportadosQuery;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.UUID;
 
 @Transactional
@@ -140,64 +142,62 @@ public class MovimentoService {
 
     var fun = mov.getFuncionario();
     var currentRelation = funcionarioRules.getTipoRelacionamentoAtual(fun.getUuid());
-
-
     var validation = data.getValidacao();
 
-    if (validation.equals("DESVALIDAR")) {   // TODO 10/02/2026 validar este codigo
+    if (!Arrays.stream(EstadoValidacao.values()).map(EstadoValidacao::name).toList().contains(validation))
+      throw IgrpResponseStatusException.badRequest("Invalid validation flag: %s".formatted(validation));
+
+    if (validation.equals(EstadoValidacao.NAO.name())) {
       mov.setEstado(Estado.I.name());
       importacaoMovimentoEntityRepository.save(mov);
       return;
     }
 
-    if (validation.equals("VALIDAR")) {   // TODO 10/02/2026  validar este codigo
+    if (StringUtils.hasText(mov.getTpMovRem())) {
 
-      if (StringUtils.hasText(mov.getTpMovRem())) {
+      var remunerationDefinition = new DefinicaoRemuneracaoEntity();
+      remunerationDefinition.setPercentagem(mov.getPercentagem());
+      remunerationDefinition.setValor(mov.getValor());
+      remunerationDefinition.setEstado(Estado.A);
+      remunerationDefinition.setObs("Registo referente ao ficheiro:" + mov.getNomeFicheiro());
+      remunerationDefinition.setUuid(UuidCreator.getTimeOrderedEpoch());
+      remunerationDefinition.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(mov.getTpMovRem())));
+      remunerationDefinition.setMoeda("CVE");
+      remunerationDefinition.setDataInicio(mov.getDataInicio());
+      remunerationDefinition.setDataFim(mov.getDataFim());
+      remunerationDefinition.setFunId(fun);
+      var saved = definicaoRemuneracaoEntityRepository.save(remunerationDefinition);
 
-        var remunerationDefinition = new DefinicaoRemuneracaoEntity();
-        remunerationDefinition.setPercentagem(mov.getPercentagem());
-        remunerationDefinition.setValor(mov.getValor());
-        remunerationDefinition.setEstado(Estado.A);
-        remunerationDefinition.setObs("Registo referente ao ficheiro:" + mov.getNomeFicheiro());
-        remunerationDefinition.setUuid(UuidCreator.getTimeOrderedEpoch());
-        remunerationDefinition.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(mov.getTpMovRem())));
-        remunerationDefinition.setMoeda("CVE");
-        remunerationDefinition.setDataInicio(mov.getDataInicio());
-        remunerationDefinition.setDataFim(mov.getDataFim());
-        remunerationDefinition.setFunId(fun);
-        var saved = definicaoRemuneracaoEntityRepository.save(remunerationDefinition);
+      var remunerationRelType = new RemuneracaoTiprelEntity();
+      remunerationRelType.setEstado(Estado.A);
+      remunerationRelType.setObs(saved.getObs());
+      remunerationRelType.setUuid(UuidCreator.getTimeOrderedEpoch());
+      remunerationRelType.setRemId(saved);
+      remunerationRelType.setTiprelId(currentRelation);
+      remuneracaoTiprelEntityRepository.save(remunerationRelType);
+    }
 
-        var remunerationRelType = new RemuneracaoTiprelEntity();
-        remunerationRelType.setEstado(Estado.A);
-        remunerationRelType.setObs(saved.getObs());
-        remunerationRelType.setUuid(UuidCreator.getTimeOrderedEpoch());
-        remunerationRelType.setRemId(saved);
-        remunerationRelType.setTiprelId(currentRelation);
-        remuneracaoTiprelEntityRepository.save(remunerationRelType);
-      }
+    if (StringUtils.hasText(mov.getTpMovRetencao())) {
 
-      if (StringUtils.hasText(mov.getTpMovRetencao())) {
+      var paymentDefinition = new DefPagamentoEntity();
+      paymentDefinition.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(mov.getTpMovRetencao())));
+      paymentDefinition.setValor(mov.getValor());
+      paymentDefinition.setDataInicio(mov.getDataInicio());
+      paymentDefinition.setDataFim(mov.getDataFim());
+      paymentDefinition.setEstado(Estado.A);
+      paymentDefinition.setObs("Registo referente ao ficheiro:" + mov.getNomeFicheiro());
+      paymentDefinition.setUuid(UuidCreator.getTimeOrderedEpoch());
+      paymentDefinition.setPercentagem(mov.getPercentagem());
+      paymentDefinition.setFunId(fun);
+      var saved = defPagamentoEntityRepository.save(paymentDefinition);
 
-        var paymentDefinition = new DefPagamentoEntity();
-        paymentDefinition.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(Long.valueOf(mov.getTpMovRetencao())));
-        paymentDefinition.setValor(mov.getValor());
-        paymentDefinition.setDataInicio(mov.getDataInicio());
-        paymentDefinition.setDataFim(mov.getDataFim());
-        paymentDefinition.setEstado(Estado.A);
-        paymentDefinition.setObs("Registo referente ao ficheiro:" + mov.getNomeFicheiro());
-        paymentDefinition.setUuid(UuidCreator.getTimeOrderedEpoch());
-        paymentDefinition.setPercentagem(mov.getPercentagem());
-        paymentDefinition.setFunId(fun);
-        var saved = defPagamentoEntityRepository.save(paymentDefinition);
-
-        var relPaymentType = new PagTiprelEntity();
-        relPaymentType.setPagId(saved);
-        relPaymentType.setTiprelId(currentRelation);
-        relPaymentType.setEstado(Estado.A);
-        relPaymentType.setObs(saved.getObs());
-        relPaymentType.setUuid(UuidCreator.getTimeOrderedEpoch());
-        pagTiprelEntityRepository.save(relPaymentType);
-      }
+      var relPaymentType = new PagTiprelEntity();
+      relPaymentType.setPagId(saved);
+      relPaymentType.setTiprelId(currentRelation);
+      relPaymentType.setEstado(Estado.A);
+      relPaymentType.setObs(saved.getObs());
+      relPaymentType.setUuid(UuidCreator.getTimeOrderedEpoch());
+      pagTiprelEntityRepository.save(relPaymentType);
     }
   }
 

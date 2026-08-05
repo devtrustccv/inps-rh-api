@@ -89,4 +89,12 @@ public class NotificacaoEntity extends AuditEntity {
     private String tipoNotificacao;
 
 
+  /**
+   * Tipo de destinatário a quem esta notificação foi enviada (domínio DESTINATARIO_NOTIFICACAO).
+   * Nulo nos envios que não passam pelo multiselect do ecrã.
+   */
+  @Column(name="destinatario", length = 50)
+    private String destinatario;
+
+
 }

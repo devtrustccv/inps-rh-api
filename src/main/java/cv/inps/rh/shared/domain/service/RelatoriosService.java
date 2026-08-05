@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.thymeleaf.context.Context;
 
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -62,11 +63,17 @@ public class RelatoriosService {
     var totLiq = hasHeader ? header.getTotalLiquido() : 0L;
 
     var remuneracoes = remunRows.stream()
-        .map(r -> Map.of("descricao", r.getDescricao(), "valor", (Object) r.getValor()))
+        .map(r -> Map.of(
+            "descricao", r.getDescricao(),
+            "valor", (Object) formatNumber(r.getValor())
+        ))
         .toList();
 
     var descontos = pagRows.stream()
-        .map(r -> Map.of("descricao", r.getDescricao(), "valor", (Object) r.getValor()))
+        .map(r -> Map.of(
+            "descricao", r.getDescricao(),
+            "valor", (Object) formatNumber(r.getValor())
+        ))
         .toList();
 
     var recibo = Map.ofEntries(
@@ -126,7 +133,7 @@ public class RelatoriosService {
 
           var lancamentos = rows.stream()
               .sorted(Comparator.comparing(r -> !AREM.equals(r.getTipo())))
-              .map(r -> new Lancamentos(r.getDescricao(), r.getValor()))
+              .map(r -> new Lancamentos(r.getDescricao(), formatNumber(r.getValor())))
               .toList();
 
           var firstRow = rows.getFirst();
@@ -151,7 +158,10 @@ public class RelatoriosService {
     return context;
   }
 
-  public record Lancamentos(String descricao, Long valor) {
+  private String formatNumber(Long value) {
+    return value != null
+        ? NumberFormat.getIntegerInstance(Locale.of("pt", "PT")).format(value)
+        : "";
   }
 
   public record Funcionarios(
@@ -162,6 +172,9 @@ public class RelatoriosService {
       Long descontos,
       Long liquido
   ) {
+  }
+
+  public record Lancamentos(String descricao, String valor) {
   }
 
 }

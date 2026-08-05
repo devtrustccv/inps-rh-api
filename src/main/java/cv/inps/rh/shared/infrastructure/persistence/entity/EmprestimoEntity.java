@@ -145,6 +145,10 @@ public class EmprestimoEntity extends AuditEntity {
   @Column(name = "NIB", length = 21)
   private String nib;
 
+  @Size(max = 9)
+  @Column(name = "NIF", length = 9)
+  private String nif;
+
   @Size(max = 50)
   @Column(name = "SWIFT", length = 50)
   private String swift;
