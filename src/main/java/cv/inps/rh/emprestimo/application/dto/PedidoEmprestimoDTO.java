@@ -58,6 +58,9 @@ public class PedidoEmprestimoDTO {
 
   private Long bancoId;
 
+  private String nib;
+  private String nif;
+
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();
 
