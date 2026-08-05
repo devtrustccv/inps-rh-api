@@ -15,6 +15,7 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.BancoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
@@ -34,6 +35,7 @@ public class PedidoAquisicaoViaturaService {
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PedidoEntityRepository pedidoEntityRepository;
+  private final BancoEntityRepository bancoEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final EmprestimoDocumentService documentService;
   private final EmprestimoWriteService emprestimoWriteService;
@@ -56,6 +58,7 @@ public class PedidoAquisicaoViaturaService {
       entity.setVersao(1L);
     }
 
+    entity.setBanco(Objects.nonNull(request.getBancoId()) ? bancoEntityRepository.findById(request.getBancoId()).orElseThrow() : null);
     entity.setTiprel(currentRelation);
     entity.setMarca(request.getMarca());
     entity.setAnoFabrico(request.getAnoFabrico());

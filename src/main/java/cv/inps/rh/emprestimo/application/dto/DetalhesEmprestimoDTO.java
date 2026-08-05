@@ -44,18 +44,11 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
 
   private String tipoSituacao ;
 
-
   private String nib ;
-
-
-  private Long bancoId ;
-
 
   private Long numeroContaBanco ;
 
-
   private String swift ;
-
 
   private String motivo ;
 
