@@ -7,9 +7,11 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.funcionario.application.commands.EnviarNotificacaoCommand;
+import cv.inps.rh.funcionario.application.commands.NotificarDestinatariosCommand;
 import cv.inps.rh.funcionario.application.queries.DetalheNotificacaoQuery;
 import cv.inps.rh.funcionario.application.queries.ListaNotificacoesQuery;
 import cv.inps.rh.shared.application.dto.NotificacaoEnviarRequestDTO;
+import cv.inps.rh.shared.application.dto.NotificarEnvioRequestDTO;
 import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
 import cv.inps.rh.shared.application.dto.WrapperListaNotificacoesDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -130,6 +132,38 @@ public class NotificacaoController {
   {
 
       final var command = new EnviarNotificacaoCommand(enviarNotificacaoRequest, id);
+
+      return commandBus.send(command);
+
+  }
+
+   @PostMapping(
+   value = "notificacoes/notificar"
+  )
+  @Operation(
+    summary = "Notificar destinatarios",
+    description = "Envia a notificacao para os destinatarios escolhidos no ecra (dominio "
+        + "DESTINATARIO_NOTIFICACAO) mais os emails adicionais. Grava um registo em "
+        + "RH_T_NOTIFICACAO por cada destinatario.",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<Map<String, ?>> notificarDestinatarios(
+    @Valid @RequestBody NotificarEnvioRequestDTO notificarEnvioRequest)
+  {
+
+      final var command = new NotificarDestinatariosCommand(notificarEnvioRequest);
 
       return commandBus.send(command);
 

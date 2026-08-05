@@ -44,6 +44,34 @@
         "CLASSIFICACAO_SITUACAO",
         "CLASSIFICACAO_SITUACAO"
       ]
+    },
+    {
+      "name": "TIPO_ALERTA_NOTIFICACAO",
+      "attributes": [
+        "TIPO_ALERTA_NOTIFICACAO",
+        "TIPO_ALERTA_NOTIFICACAO"
+      ]
+    },
+    {
+      "name": "ACCAO_REFERENTE",
+      "attributes": [
+        "ACCAO_REFERENTE",
+        "ACCAO_REFERENTE"
+      ]
+    },
+    {
+      "name": "TIPO_MOV_LABORAL",
+      "attributes": [
+        "TIPO_MOV_LABORAL",
+        "TIPO_MOV_LABORAL"
+      ]
+    },
+    {
+      "name": "DESTINATARIO_NOTIFICACAO",
+      "attributes": [
+        "DESTINATARIO_NOTIFICACAO",
+        "DESTINATARIO_NOTIFICACAO"
+      ]
     }
   ],
   "attributes": [

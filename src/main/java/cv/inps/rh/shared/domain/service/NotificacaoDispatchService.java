@@ -10,11 +10,49 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * TODO: suportar o multiselect "Destinatários da notificação" (domínio DESTINATARIO_NOTIFICACAO,
+ * linhas já inseridas em RH_T_DOMAINS). A resolução de cada valor para um email:
+ *
+ * <ul>
+ *   <li>COLABORADOR — contacto do funcionário com tipoContacto = "EMAIL" (ver FeriaWriteService).</li>
+ *   <li>RESPONSAVEL_COLABORADOR — RH_T_RESPONSAVEL pela direção/secção do colaborador.</li>
+ *   <li>RESPONSAVEL_REGISTO — o utilizador autenticado que criou o registo, ou seja o createdBy
+ *       herdado de AuditEntity (decisão de negócio confirmada).</li>
+ * </ul>
+ *
+ * BLOQUEIO em RESPONSAVEL_REGISTO: hoje não há como chegar ao utilizador do login.
+ * AuditEntityListener.getCurrentUserId() é um stub — devolve sempre 1L (anónimo) ou 2L
+ * (autenticado), nunca o ID real — e ApplicationAuditorAware devolve "local" hardcoded nos
+ * perfis development/staging.
+ *
+ * A resolver replicando o padrão já em produção no projeto inss_core_service
+ * (C:\Users\ivanick.santos\Nosi-work\projects_nosi_workspace\projects\inss_core_service),
+ * em gw.inss.core.shared:
+ *
+ * <ol>
+ *   <li>Tabela local de perfis IAM, chaveada pelo claim {@code sub} do JWT, com username, email,
+ *       firstName/lastName/fullName.</li>
+ *   <li>{@code IAMUserProfileSyncFilter} (OncePerRequestFilter) sincroniza o perfil em cada
+ *       pedido autenticado, delegando em {@code IAMUserProfileService.syncFromJwt}, que faz
+ *       curto-circuito por cache Caffeine (hash dos claims + TTL) para não ir à BD em todos os
+ *       pedidos. Primeiro login reconcilia com linhas legacy por email.</li>
+ *   <li>{@code ApplicationAuditorAware} passa a gravar o {@code sub} do JWT, com fallback para
+ *       uma conta de sistema — em vez do "local" hardcoded.</li>
+ *   <li>{@code AuthenticatedUserHelper} expõe getSub()/getUsername()/getProfile() para o resto
+ *       da aplicação.</li>
+ * </ol>
+ *
+ * Com isso, RESPONSAVEL_REGISTO resolve-se sem sequer passar por RH_T_FUNCIONARIO: o perfil IAM
+ * já traz o email do claim, bastando ir de createdBy (= sub) ao perfil.
+ */
 @Service
 @RequiredArgsConstructor
 public class NotificacaoDispatchService {
@@ -29,6 +67,48 @@ public class NotificacaoDispatchService {
                      Long referenciaId, String referenciaName, UUID referenciaUuid,
                      FuncionarioEntity funId, Map<String, String> vars) {
 
+    var conteudo = conteudoDe(tipoNotificacao, vars, null);
+
+    gravarEEnviar(tipoNotificacao, emailDestino, nomeReceptor, null,
+        referenciaId, referenciaName, referenciaUuid, funId,
+        conteudo.assunto(), conteudo.corpo());
+  }
+
+  /**
+   * Envio a partir do ecrã de notificação: um email — e um registo em RH_T_NOTIFICACAO — por
+   * cada destinatário resolvido, como a spec exige.
+   *
+   * <p>A {@code mensagemCustom} é o campo "Mensagem da notificação" escrito pelo utilizador.
+   * Quando vem preenchida substitui o corpo do template; quando vem vazia usa-se o template de
+   * RH_T_PARAM_NOTIFICACAO. O assunto vem sempre do template — o ecrã não o expõe.</p>
+   *
+   * <p>Uma falha de envio a um destinatário não interrompe os restantes: cada um é gravado com o
+   * seu próprio estado (Enviado/Erro), que é o que permite ao RH ver depois quem ficou por
+   * notificar.</p>
+   */
+  public void enviarParaDestinatarios(String tipoNotificacao,
+                                      Collection<NotificacaoDestinatarioResolver.Destinatario> destinatarios,
+                                      String mensagemCustom,
+                                      Long referenciaId, String referenciaName, UUID referenciaUuid,
+                                      Map<String, String> vars) {
+
+    if (destinatarios == null || destinatarios.isEmpty()) {
+      LOGGER.warn("Notificação {} sem destinatários resolvidos — nada a enviar", tipoNotificacao);
+      return;
+    }
+
+    var conteudo = conteudoDe(tipoNotificacao, vars, mensagemCustom);
+
+    for (var destinatario : destinatarios) {
+      gravarEEnviar(tipoNotificacao, destinatario.email(), destinatario.nome(), destinatario.tipo(),
+          referenciaId, referenciaName, referenciaUuid, destinatario.funcionario(),
+          conteudo.assunto(), conteudo.corpo());
+    }
+  }
+
+  private record Conteudo(String assunto, String corpo) {}
+
+  private Conteudo conteudoDe(String tipoNotificacao, Map<String, String> vars, String mensagemCustom) {
     var paramOpt = paramNotificacaoRepository.findByTipoNotificacao(tipoNotificacao);
     if (paramOpt.isEmpty()) {
       // Template não configurado: a notificação é sempre gravada (auditoria obrigatória),
@@ -37,10 +117,20 @@ public class NotificacaoDispatchService {
     }
 
     String assunto = paramOpt.map(p -> substituir(p.getAssunto(), vars)).orElse(null);
-    String corpo   = paramOpt.map(p -> substituir(p.getCorpo(),   vars)).orElse(null);
+    String corpo = StringUtils.hasText(mensagemCustom)
+        ? substituir(mensagemCustom, vars)
+        : paramOpt.map(p -> substituir(p.getCorpo(), vars)).orElse(null);
+
+    return new Conteudo(assunto, corpo);
+  }
+
+  private void gravarEEnviar(String tipoNotificacao, String emailDestino, String nomeReceptor,
+                             String destinatario, Long referenciaId, String referenciaName,
+                             UUID referenciaUuid, FuncionarioEntity funId,
+                             String assunto, String corpo) {
 
     String estado = "Pendente";
-    if (org.springframework.util.StringUtils.hasText(emailDestino)) {
+    if (StringUtils.hasText(emailDestino)) {
       try {
         emailService.sendEmail(emailDestino, assunto != null ? assunto : "", corpo != null ? corpo : "");
         estado = "Enviado";
@@ -59,6 +149,7 @@ public class NotificacaoDispatchService {
     notificacao.setMessage(corpo);
     notificacao.setEmail(emailDestino);
     notificacao.setNomeReceptor(nomeReceptor);
+    notificacao.setDestinatario(destinatario);
     notificacao.setDataEnvio(LocalDate.now());
     notificacao.setEstado(estado);
     notificacao.setUuid(UuidCreator.getTimeOrderedEpoch());
