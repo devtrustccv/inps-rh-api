@@ -9,24 +9,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-
 @IgrpDTO
-public class HistoricoPagamentoDTO  {
+public class HistoricoPagamentoDTO {
 
-
-
-  private BigDecimal valorTotalPago ;
-
-
-  private BigDecimal saldoDivida ;
+  private String valorTotalPago;
+  private String saldoDivida;
 
   @Valid
   private List<HistoricoPagamentoRowDTO> pagamentos = new ArrayList<>();

@@ -270,17 +270,23 @@ public class EmprestimoReadService {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
-    var history = new HistoricoPagamentoDTO();
+    var usDecimalFormatter = NumberUtils.usDecimalFormat();
 
-    var rows = rhPagamentoEntityRepository.findByEstadoAndDefp_FunId(Estado.A.name(), loan.getTiprel().getFunId())
+    var rows = rhPagamentoEntityRepository.findByEstadoAndDefp_FunId(
+            Estado.A.name(),
+            loan.getTiprel().getFunId()
+        )
         .stream()
-        .map(p -> new HistoricoPagamentoRowDTO(p.getDataRef(), p.getValor()))
+        .map(p -> new HistoricoPagamentoRowDTO(
+            p.getDataRef(),
+            usDecimalFormatter.format(p.getValor())
+        ))
         .toList();
 
+    var history = new HistoricoPagamentoDTO();
     history.setPagamentos(rows);
-    history.setValorTotalPago(loan.getValorPago());
-    history.setSaldoDivida(loan.getValorDivida());
-
+    history.setValorTotalPago(usDecimalFormatter.format(loan.getValorPago()));
+    history.setSaldoDivida(usDecimalFormatter.format(loan.getValorDivida()));
     return history;
   }
 }
