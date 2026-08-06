@@ -933,6 +933,29 @@ public class MissaoServicoServiceWrite {
     });
   }
 
+  /**
+   * Aplica ao valor diário base a fração devida conforme o alojamento: 100% se o colaborador tem
+   * alojamento próprio, 2/3 se a empresa paga alojamento sem alimentação, 1/3 se paga alojamento
+   * com alimentação.
+   *
+   * <p>TODO: o valor diário <b>base</b> ainda vem do cliente ({@code AjudaCustoRequestDTO.valorDiario},
+   * validado como obrigatório) — o backend não o calcula nem o valida contra nenhuma referência.
+   * Segundo a Especificação Técnica Funcional da Missão de Serviço, este campo deve ser "preenchido
+   * automaticamente com base no cálculo definido na parametrização", variando com:
+   * <ul>
+   *   <li>a função do colaborador;</li>
+   *   <li>missão nacional vs internacional (internacional suporta valor superior);</li>
+   *   <li>a "tabela de preços de ajuda de custo" — referida na spec mas nunca especificada:
+   *       não há nome de tabela, colunas nem faixas, e não existe módulo de parametrização
+   *       correspondente no projeto.</li>
+   * </ul>
+   * Enquanto essa tabela não estiver identificada, o valor transferido ao colaborador é decidido
+   * por quem chama a API. Para implementar, obter do negócio a tabela de preços e passar a derivar
+   * a base aqui, deixando de a aceitar no request.
+   *
+   * <p>Nota: a spec prevê ainda 100% para quem fica em casa de família, caso que o DTO não
+   * distingue de "alojamento próprio" — o resultado coincide, mas a informação perde-se.
+   */
   private java.math.BigDecimal calcularValorDiarioAjudaCusto(
       java.math.BigDecimal baseValorDiario,
       boolean incluiAlojamento,
