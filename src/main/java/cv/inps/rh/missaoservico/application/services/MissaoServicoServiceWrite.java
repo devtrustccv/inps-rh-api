@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.commands.*;
 import cv.inps.rh.missaoservico.application.dto.*;
+import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.services.EmailService;
@@ -41,6 +42,14 @@ public class MissaoServicoServiceWrite {
   private static final String ETAPA_4 = "LOGISTICA";
   private static final String ETAPA_5 = "CABIMENTO";
   private static final String ETAPA_7 = "PAGAMENTO";
+
+  private static final String ACTION_NEXT = "NEXT";
+  private static final String ESTADO_CABIMENTO_CABIMENTADO = "CABIMENTADO";
+  private static final String ESTADO_CABIMENTO_AUTORIZADO = "AUTORIZADO";
+
+  /** Ordem das etapas do processo — usada para nunca retroceder a etapa (ver avancarEtapa). */
+  private static final List<String> ORDEM_ETAPAS = List.of(
+      ETAPA_1, ETAPA_2, ETAPA_3, ETAPA_4, ETAPA_5, ETAPA_7);
 
   private static final int MAX_PRESTADORES = 3;
 
@@ -112,6 +121,8 @@ public class MissaoServicoServiceWrite {
     }
 
     var missao = missaoServicoRepository.findByUuidOrThrow(uuid);
+    var avancar = isNext(dto.getProcessoEtapaAction());
+    exigirEtapaMinima(missao, ETAPA_2, avancar);
 
     validarAnalise(dto);
 
@@ -121,9 +132,8 @@ public class MissaoServicoServiceWrite {
       prestadoresSalvos = new ArrayList<>(missaoPrestadorRepository.saveAll(prestadoresPersistidos));
     }
 
-    missao.setEtapa(ETAPA_2);
-    if (dto.getProcessoEtapaAction() != null && dto.getProcessoEtapaAction().getCode().equals("NEXT")) {
-      missao.setEtapa(ETAPA_3);
+    if (avancar) {
+      avancarEtapa(missao, ETAPA_3);
       enviarNotificacoesPedidoSimulacao(missao, prestadoresSalvos, dto.getNotificacao());
     }
     missaoServicoRepository.save(missao);
@@ -157,10 +167,8 @@ public class MissaoServicoServiceWrite {
     if (StringUtils.hasText(dto.getEstado())) {
       missao.setEstado(dto.getEstado());
     }
-    missao.setEtapa(ETAPA_1);
-
-    if (dto.getProcessoEtapaAction() != null && dto.getProcessoEtapaAction().getCode().equals("NEXT")) {
-      missao.setEtapa(ETAPA_2);
+    if (isNext(dto.getProcessoEtapaAction())) {
+      avancarEtapa(missao, ETAPA_2);
     }
     missao = missaoServicoRepository.save(missao);
 
@@ -186,6 +194,8 @@ public class MissaoServicoServiceWrite {
     }
 
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+    var avancar = isNext(dto.getProcessoEtapaAction());
+    exigirEtapaMinima(missao, ETAPA_3, avancar);
 
     validarEmissaoRequisicao(dto.getRequisicoes());
 
@@ -299,9 +309,8 @@ public class MissaoServicoServiceWrite {
       }
     }
 
-    missao.setEtapa(ETAPA_3);
-    if (dto.getProcessoEtapaAction() != null && dto.getProcessoEtapaAction().getCode().equals("NEXT")) {
-      missao.setEtapa(ETAPA_4);
+    if (avancar) {
+      avancarEtapa(missao, ETAPA_4);
       enviarNotificacoesEmissaoRequisicao(missao, selectedPrestIds);
     }
     missaoServicoRepository.save(missao);
@@ -320,6 +329,8 @@ public class MissaoServicoServiceWrite {
     }
 
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+    var avancar = isNext(dto.getProcessoEtapaAction());
+    exigirEtapaMinima(missao, ETAPA_4, avancar);
 
     var requisicoes = missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid);
     var logisticasExistentes = missaoLogisticaRepository.findAllByMissaoServId_Uuid(missaoUuid);
@@ -346,9 +357,8 @@ public class MissaoServicoServiceWrite {
       }
       syncLogisticaAjudaCusto(missao, dto.getAjudasCusto(), alimentacaoByColabId, logisticasExistentes, requisicoes);
     }
-    missao.setEtapa(ETAPA_4);
-    if (dto.getProcessoEtapaAction() != null && "NEXT".equals(dto.getProcessoEtapaAction().getCode())) {
-      missao.setEtapa(ETAPA_5);
+    if (avancar) {
+      avancarEtapa(missao, ETAPA_5);
     }
     missaoServicoRepository.save(missao);
     if (ETAPA_5.equals(missao.getEtapa())) {
@@ -372,6 +382,11 @@ public class MissaoServicoServiceWrite {
 
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
 
+    // "Gravar" apenas persiste os anexos/seleção; "Cabimentar" (NEXT) é que gera o
+    // cabimento, marca ESTADO_CABIMENTO e avança a etapa.
+    var cabimentar = isNext(dto.getProcessoEtapaAction());
+    exigirEtapaMinima(missao, ETAPA_5, cabimentar);
+
     var toSave = new ArrayList<MissaoLogisticaEntity>();
 
     for (var item : dto.getItens()) {
@@ -382,10 +397,6 @@ public class MissaoServicoServiceWrite {
       if (item.getLogisticaId() == null)
         continue;
 
-      if (item.getCabId() == null) {
-        throw IgrpResponseStatusException.badRequest("cabId é obrigatório");
-      }
-
       var log = missaoLogisticaRepository.findById(item.getLogisticaId())
           .orElseThrow(() -> IgrpResponseStatusException.badRequest("logisticaId inválido: " + item.getLogisticaId()));
 
@@ -394,8 +405,21 @@ public class MissaoServicoServiceWrite {
         throw IgrpResponseStatusException.badRequest("logisticaId não pertence à missão: " + item.getLogisticaId());
       }
 
-      log.setCabId(item.getCabId());
-      log.setEstadoCabimento("CABIMENTADO");
+      // Cabimento manual/internacional: o financeiro pode enviar o nr de cabimento.
+      if (item.getCabId() != null) {
+        log.setCabId(item.getCabId());
+      }
+
+      if (cabimentar) {
+        if (log.getCabId() == null) {
+          var cabId = gerarCabimentoSgal(log);
+          if (cabId != null) {
+            log.setCabId(cabId);
+          }
+        }
+        log.setEstadoCabimento(ESTADO_CABIMENTO_CABIMENTADO);
+      }
+
       if (!ESTADO_ATIVO.equals(log.getEstado())) {
         log.setEstado(ESTADO_ATIVO);
       }
@@ -431,12 +455,44 @@ public class MissaoServicoServiceWrite {
       missaoLogisticaRepository.saveAll(toSave);
     }
 
-    missao.setEtapa(ETAPA_5);
-    missaoServicoRepository.save(missao);
+    if (cabimentar) {
+      avancarEtapa(missao, ETAPA_5);
+      missaoServicoRepository.save(missao);
+    }
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", missao.getUuid() != null ? missao.getUuid().toString() : null);
     return ResponseEntity.ok(resp);
+  }
+
+  /**
+   * Gera o cabimento no SGAL para uma linha de logística e devolve o nr de cabimento (CAB_ID).
+   *
+   * <p>TODO: integrar com o serviço financeiro do SGAL. A integração está bloqueada por falta de
+   * contrato — a Especificação Técnica Funcional da Missão de Serviço apenas menciona que "é gerado
+   * um cabimento para cada tipo de serviço" e que o SGAL pode cabimentar "diretamente na plataforma
+   * ou por exportação para o SIPS FUN", sem indicar endpoint, payload nem onde vem o número
+   * devolvido. Antes de implementar, obter do financeiro/SGAL:
+   * <ul>
+   *   <li>endpoint de cabimento aplicável a uma linha de RH_T_MISSAO_LOGISTICA;</li>
+   *   <li>contrato do payload — 1 cabimento por tipo de serviço e 1 individual por colaborador na
+   *       ajuda de custo;</li>
+   *   <li>em que campo da resposta vem o CAB_ID;</li>
+   *   <li>confirmar a direção: somos nós a chamar o SGAL ou é o SGAL a escrever o CAB_ID aqui.</li>
+   * </ul>
+   *
+   * <p>O único precedente no projeto é {@code ProcessarSalarioApi#processarCabimento}
+   * ({@code /processa_cabimento}), mas recebe {@code p_proc_sal_id} — não serve para logística de
+   * missão — devolve um {@code OperationOutcomeResponse} sem nr de cabimento, e a chamada está
+   * comentada em {@code ProcessamentoSalarialWriteService#cabimentar}.
+   *
+   * <p>Enquanto a integração não existir devolve null: a linha fica CABIMENTADO sem cabId, e por
+   * isso {@code salvarAutorizacao} valida ESTADO_CABIMENTO em vez de exigir cabId. Cabimentos
+   * manuais/internacionais continuam a poder enviar o cabId no payload.
+   */
+  private Long gerarCabimentoSgal(MissaoLogisticaEntity log) {
+    LOGGER.warn("Integração SGAL pendente: cabimento não gerado para logistica id={}", log.getId());
+    return null;
   }
 
   @Transactional
@@ -450,6 +506,11 @@ public class MissaoServicoServiceWrite {
     validarAutorizacao(dto);
 
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    // "Gravar" apenas valida/persiste a seleção; só "Autorizar" (NEXT) põe os cabimentos
+    // gerados em estado AUTORIZADO e avança para PAGAMENTO.
+    var autorizar = isNext(dto.getProcessoEtapaAction());
+    exigirEtapaMinima(missao, ETAPA_5, autorizar);
 
     var toSave = new ArrayList<MissaoLogisticaEntity>();
 
@@ -469,11 +530,16 @@ public class MissaoServicoServiceWrite {
         throw IgrpResponseStatusException.badRequest("logisticaId não pertence à missão: " + item.getLogisticaId());
       }
 
-      if (log.getCabId() == null) {
+      // Só se autoriza o que já foi cabimentado (o cabId pode ainda vir do SGAL).
+      // AUTORIZADO é aceite para a gravação ser idempotente.
+      if (!ESTADO_CABIMENTO_CABIMENTADO.equals(log.getEstadoCabimento())
+          && !ESTADO_CABIMENTO_AUTORIZADO.equals(log.getEstadoCabimento())) {
         throw IgrpResponseStatusException.badRequest("Item sem cabimento: " + item.getLogisticaId());
       }
 
-      log.setEstadoCabimento("AUTORIZADO");
+      if (autorizar) {
+        log.setEstadoCabimento(ESTADO_CABIMENTO_AUTORIZADO);
+      }
       if (!ESTADO_ATIVO.equals(log.getEstado())) {
         log.setEstado(ESTADO_ATIVO);
       }
@@ -484,11 +550,10 @@ public class MissaoServicoServiceWrite {
       missaoLogisticaRepository.saveAll(toSave);
     }
 
-    missao.setEtapa(ETAPA_5);
-    if (dto.getProcessoEtapaAction() != null && "NEXT".equals(dto.getProcessoEtapaAction().getCode())) {
-      missao.setEtapa(ETAPA_7);
+    if (autorizar) {
+      avancarEtapa(missao, ETAPA_7);
+      missaoServicoRepository.save(missao);
     }
-    missaoServicoRepository.save(missao);
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", missao.getUuid() != null ? missao.getUuid().toString() : null);
@@ -506,10 +571,12 @@ public class MissaoServicoServiceWrite {
     validarPagamento(dto);
 
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+    // O pagamento é registado pelo sistema financeiro — exige sempre a etapa atingida.
+    exigirEtapaMinima(missao, ETAPA_7, true);
 
     missao.setReferenciaPagamento(dto.getReferenciaPagamento());
     missao.setDataPagamento(dto.getDataPagamento());
-    missao.setEtapa(ETAPA_7);
+    avancarEtapa(missao, ETAPA_7);
     missaoServicoRepository.save(missao);
 
     Map<String, Object> resp = new HashMap<>();
@@ -618,9 +685,8 @@ public class MissaoServicoServiceWrite {
       if (item.getLogisticaId() == null) {
         throw IgrpResponseStatusException.badRequest("logisticaId é obrigatório");
       }
-      if (item.getCabId() == null) {
-        throw IgrpResponseStatusException.badRequest("cabId é obrigatório");
-      }
+      // cabId não é preenchido pelo utilizador: é gerado ao cabimentar (SGAL).
+      // Só vem no payload no caso dos cabimentos manuais/internacionais.
     }
 
     if (!anySelected) {
@@ -867,6 +933,29 @@ public class MissaoServicoServiceWrite {
     });
   }
 
+  /**
+   * Aplica ao valor diário base a fração devida conforme o alojamento: 100% se o colaborador tem
+   * alojamento próprio, 2/3 se a empresa paga alojamento sem alimentação, 1/3 se paga alojamento
+   * com alimentação.
+   *
+   * <p>TODO: o valor diário <b>base</b> ainda vem do cliente ({@code AjudaCustoRequestDTO.valorDiario},
+   * validado como obrigatório) — o backend não o calcula nem o valida contra nenhuma referência.
+   * Segundo a Especificação Técnica Funcional da Missão de Serviço, este campo deve ser "preenchido
+   * automaticamente com base no cálculo definido na parametrização", variando com:
+   * <ul>
+   *   <li>a função do colaborador;</li>
+   *   <li>missão nacional vs internacional (internacional suporta valor superior);</li>
+   *   <li>a "tabela de preços de ajuda de custo" — referida na spec mas nunca especificada:
+   *       não há nome de tabela, colunas nem faixas, e não existe módulo de parametrização
+   *       correspondente no projeto.</li>
+   * </ul>
+   * Enquanto essa tabela não estiver identificada, o valor transferido ao colaborador é decidido
+   * por quem chama a API. Para implementar, obter do negócio a tabela de preços e passar a derivar
+   * a base aqui, deixando de a aceitar no request.
+   *
+   * <p>Nota: a spec prevê ainda 100% para quem fica em casa de família, caso que o DTO não
+   * distingue de "alojamento próprio" — o resultado coincide, mas a informação perde-se.
+   */
   private java.math.BigDecimal calcularValorDiarioAjudaCusto(
       java.math.BigDecimal baseValorDiario,
       boolean incluiAlojamento,
@@ -1289,6 +1378,48 @@ public class MissaoServicoServiceWrite {
         "- Data Fim: " + (missao.getDataFim() != null ? missao.getDataFim().toString() : "") + "\n\n" +
         "Para detalhes sobre bilhete, alojamento, seguro e ajuda de custo, consulte o portal RH.\n\n" +
         "Com os melhores cumprimentos,\nINPS - Recursos Humanos";
+  }
+
+  /**
+   * Avança a etapa da missão para {@code etapaAlvo}, nunca retrocedendo: gravar num ecrã de uma
+   * etapa já ultrapassada não deve puxar o processo para trás. Também torna a gravação idempotente.
+   */
+  private boolean isNext(ProcessStepAction action) {
+    return action != null && ACTION_NEXT.equals(action.getCode());
+  }
+
+  /**
+   * Impede saltar etapas: o processo só avança (NEXT) se a missão já tiver atingido
+   * {@code etapaMinima}. Gravar (SAVE) fora de ordem é permitido — não altera o estado do processo,
+   * só escreve dados de formulário, e bloquear faria o utilizador perder o que preencheu; fica
+   * apenas registado em log. Gravar numa etapa já ultrapassada é sempre permitido (correções).
+   * Missões com etapa desconhecida/nula (dados legados) não são bloqueadas.
+   */
+  private void exigirEtapaMinima(MissaoServicoEntity missao, String etapaMinima, boolean avancando) {
+    var atual = ORDEM_ETAPAS.indexOf(missao.getEtapa());
+    if (atual < 0) {
+      LOGGER.warn("Missão {} com etapa desconhecida ({}) — guarda de etapa ignorada",
+          missao.getUuid(), missao.getEtapa());
+      return;
+    }
+    if (atual >= ORDEM_ETAPAS.indexOf(etapaMinima)) {
+      return;
+    }
+    if (avancando) {
+      throw IgrpResponseStatusException.badRequest(
+          "A missão encontra-se na etapa '" + missao.getEtapa()
+              + "' — esta operação exige que já tenha atingido a etapa '" + etapaMinima + "'");
+    }
+    LOGGER.warn("Gravação fora de ordem na missão {}: etapa atual '{}', etapa do ecrã '{}'",
+        missao.getUuid(), missao.getEtapa(), etapaMinima);
+  }
+
+  private void avancarEtapa(MissaoServicoEntity missao, String etapaAlvo) {
+    var atual = ORDEM_ETAPAS.indexOf(missao.getEtapa());
+    var alvo = ORDEM_ETAPAS.indexOf(etapaAlvo);
+    if (alvo > atual) {
+      missao.setEtapa(etapaAlvo);
+    }
   }
 
   private Long nextNrMissao() {
