@@ -7,12 +7,12 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ProcSalCcEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcSalCcEntityEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
+import cv.inps.rh.shared.util.NumberUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.thymeleaf.context.Context;
 
-import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -62,17 +62,19 @@ public class RelatoriosService {
     var totDes = hasHeader ? header.getTotalDescontos() : 0L;
     var totLiq = hasHeader ? header.getTotalLiquido() : 0L;
 
+    var usDecimalFormat = NumberUtils.usDecimalFormat();
+
     var remuneracoes = remunRows.stream()
         .map(r -> Map.of(
             "descricao", r.getDescricao(),
-            "valor", (Object) formatNumber(r.getValor())
+            "valor", (Object) usDecimalFormat.format(r.getValor())
         ))
         .toList();
 
     var descontos = pagRows.stream()
         .map(r -> Map.of(
             "descricao", r.getDescricao(),
-            "valor", (Object) formatNumber(r.getValor())
+            "valor", (Object) usDecimalFormat.format(r.getValor())
         ))
         .toList();
 
@@ -128,12 +130,14 @@ public class RelatoriosService {
             Collectors.groupingBy(ProcSalCcEntity::getFunId)
         ));
 
+    var usDecimalFormat = NumberUtils.usDecimalFormat();
+
     grouped.forEach((_, funMap) ->
         funMap.forEach((_, rows) -> {
 
           var lancamentos = rows.stream()
               .sorted(Comparator.comparing(r -> !AREM.equals(r.getTipo())))
-              .map(r -> new Lancamentos(r.getDescricao(), formatNumber(r.getValor())))
+              .map(r -> new Lancamentos(r.getDescricao(), usDecimalFormat.format(r.getValor())))
               .toList();
 
           var firstRow = rows.getFirst();
@@ -156,12 +160,6 @@ public class RelatoriosService {
     context.setVariable("entidade", "Processar Remunerações " + centroCusto);
     context.setVariable("funcionarios", funcionarios);
     return context;
-  }
-
-  private String formatNumber(Long value) {
-    return value != null
-        ? NumberFormat.getIntegerInstance(Locale.of("pt", "PT")).format(value)
-        : "";
   }
 
   public record Funcionarios(

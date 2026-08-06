@@ -13,13 +13,12 @@ import java.util.List;
 
 public class FinancialPlanHelper {
 
-  private FinancialPlanHelper() {
-  }
-
   private static final Logger LOGGER = LoggerFactory.getLogger(FinancialPlanHelper.class);
 
-  private static final int SCALE = 2;
   private static final MathContext MC = new MathContext(20, RoundingMode.HALF_UP);
+
+  private FinancialPlanHelper() {
+  }
 
   /**
    * Simula um plano financeiro usando o Sistema Francês (Price)
@@ -49,35 +48,27 @@ public class FinancialPlanHelper {
     var potencia = umMaisTaxa.pow(prazoMeses, MC);
     var prestacaoFixa = valorEmprestimo
         .multiply(taxaMensal, MC)
-        .divide(BigDecimal.ONE.subtract(BigDecimal.ONE.divide(potencia, MC), MC), MC)
-        .setScale(SCALE, RoundingMode.HALF_UP);
+        .divide(BigDecimal.ONE.subtract(BigDecimal.ONE.divide(potencia, MC), MC), MC);
 
     LOGGER.debug("PRESTACAO FIXA : {}", prestacaoFixa);
 
-    var saldoInicial = valorEmprestimo.setScale(SCALE, RoundingMode.HALF_UP);
+    var saldoInicial = valorEmprestimo;
 
     var plano = new ArrayList<PlanoFinanceiroRowDTO>();
 
     for (int i = 1; i <= prazoMeses; i++) {
 
       var dataPagamento = dataInicio.plusMonths(i);
-
-      var juros = saldoInicial.multiply(taxaMensal, MC)
-          .setScale(SCALE, RoundingMode.HALF_UP);
-
-      var principal = prestacaoFixa.subtract(juros)
-          .setScale(SCALE, RoundingMode.HALF_UP);
-
+      var juros = saldoInicial.multiply(taxaMensal, MC);
+      var principal = prestacaoFixa.subtract(juros);
       var pagamentoAtual = prestacaoFixa;
-
       // Ajuste no último mês para zerar saldo
       if (i == prazoMeses) {
         principal = saldoInicial;
-        pagamentoAtual = principal.add(juros).setScale(SCALE, RoundingMode.HALF_UP);
+        pagamentoAtual = principal.add(juros);
       }
 
-      var saldoFinal = saldoInicial.subtract(principal)
-          .setScale(SCALE, RoundingMode.HALF_UP);
+      var saldoFinal = saldoInicial.subtract(principal);
 
       LOGGER.debug("MÊS {} | DATA: {} | SALDO INICIAL: {} | JUROS: {} | PRINCIPAL: {} | PAGAMENTO ATUAL: {} | SALDO FINAL: {}",
           i, dataPagamento, saldoInicial, juros, principal, pagamentoAtual, saldoFinal);
@@ -86,11 +77,11 @@ public class FinancialPlanHelper {
           new PlanoFinanceiroRowDTO(
               (long) i,
               dataPagamento,
-              saldoInicial,
-              pagamentoAtual,
-              principal,
-              juros,
-              saldoFinal
+              saldoInicial.setScale(0, RoundingMode.HALF_UP),
+              pagamentoAtual.setScale(0, RoundingMode.HALF_UP),
+              principal.setScale(0, RoundingMode.HALF_UP),
+              juros.setScale(0, RoundingMode.HALF_UP),
+              saldoFinal.setScale(0, RoundingMode.HALF_UP)
           )
       );
 
@@ -119,31 +110,26 @@ public class FinancialPlanHelper {
     var potencia = umMaisTaxa.pow(prazoMeses, MC);
     var prestacaoFixa = valorEmprestimo
         .multiply(taxaMensal, MC)
-        .divide(BigDecimal.ONE.subtract(BigDecimal.ONE.divide(potencia, MC), MC), MC)
-        .setScale(SCALE, RoundingMode.HALF_UP);
+        .divide(BigDecimal.ONE.subtract(BigDecimal.ONE.divide(potencia, MC), MC), MC);
 
     LOGGER.debug("PRESTACAO FUNDO SOCIAL FIXA : {}", prestacaoFixa);
 
-    var saldoInicial = valorEmprestimo.setScale(SCALE, RoundingMode.HALF_UP);
+    var saldoInicial = valorEmprestimo;
 
     var plano = new ArrayList<PlanoFinanceiroRowDTO>();
 
     for (int i = 1; i <= prazoMeses; i++) {
 
       var dataPagamento = dataInicio.plusMonths(i);
-
-      var principal = prestacaoFixa.setScale(SCALE, RoundingMode.HALF_UP);
-
+      var principal = prestacaoFixa;
       var pagamentoAtual = prestacaoFixa;
-
       // Ajuste no último mês para zerar saldo
       if (i == prazoMeses) {
         principal = saldoInicial;
-        pagamentoAtual = principal.setScale(SCALE, RoundingMode.HALF_UP);
+        pagamentoAtual = principal;
       }
 
-      var saldoFinal = saldoInicial.subtract(principal)
-          .setScale(SCALE, RoundingMode.HALF_UP);
+      var saldoFinal = saldoInicial.subtract(principal);
 
       LOGGER.debug("MÊS {} | DATA: {} | SALDO INICIAL: {} | PRINCIPAL: {} | PAGAMENTO ATUAL: {} | SALDO FINAL: {}",
           i, dataPagamento, saldoInicial, principal, pagamentoAtual, saldoFinal);
@@ -152,11 +138,11 @@ public class FinancialPlanHelper {
           new PlanoFinanceiroRowDTO(
               (long) i,
               dataPagamento,
-              saldoInicial,
-              pagamentoAtual,
-              principal,
+              saldoInicial.setScale(0, RoundingMode.HALF_UP),
+              pagamentoAtual.setScale(0, RoundingMode.HALF_UP),
+              principal.setScale(0, RoundingMode.HALF_UP),
               null,
-              saldoFinal
+              saldoFinal.setScale(0, RoundingMode.HALF_UP)
           )
       );
 
