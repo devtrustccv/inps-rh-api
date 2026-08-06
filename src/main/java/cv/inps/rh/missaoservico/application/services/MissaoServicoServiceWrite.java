@@ -42,6 +42,10 @@ public class MissaoServicoServiceWrite {
   private static final String ETAPA_5 = "CABIMENTO";
   private static final String ETAPA_7 = "PAGAMENTO";
 
+  private static final String ACTION_NEXT = "NEXT";
+  private static final String ESTADO_CABIMENTO_CABIMENTADO = "CABIMENTADO";
+  private static final String ESTADO_CABIMENTO_AUTORIZADO = "AUTORIZADO";
+
   private static final int MAX_PRESTADORES = 3;
 
   private static final String TIPO_NOTIF_PEDIDO_PROPOSTA    = "MISSAO_PEDIDO_PROPOSTA";
@@ -372,6 +376,11 @@ public class MissaoServicoServiceWrite {
 
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
 
+    // "Gravar" apenas persiste os anexos/seleção; "Cabimentar" (NEXT) é que gera o
+    // cabimento, marca ESTADO_CABIMENTO e avança a etapa.
+    var cabimentar = dto.getProcessoEtapaAction() != null
+        && ACTION_NEXT.equals(dto.getProcessoEtapaAction().getCode());
+
     var toSave = new ArrayList<MissaoLogisticaEntity>();
 
     for (var item : dto.getItens()) {
@@ -382,10 +391,6 @@ public class MissaoServicoServiceWrite {
       if (item.getLogisticaId() == null)
         continue;
 
-      if (item.getCabId() == null) {
-        throw IgrpResponseStatusException.badRequest("cabId é obrigatório");
-      }
-
       var log = missaoLogisticaRepository.findById(item.getLogisticaId())
           .orElseThrow(() -> IgrpResponseStatusException.badRequest("logisticaId inválido: " + item.getLogisticaId()));
 
@@ -394,8 +399,21 @@ public class MissaoServicoServiceWrite {
         throw IgrpResponseStatusException.badRequest("logisticaId não pertence à missão: " + item.getLogisticaId());
       }
 
-      log.setCabId(item.getCabId());
-      log.setEstadoCabimento("CABIMENTADO");
+      // Cabimento manual/internacional: o financeiro pode enviar o nr de cabimento.
+      if (item.getCabId() != null) {
+        log.setCabId(item.getCabId());
+      }
+
+      if (cabimentar) {
+        if (log.getCabId() == null) {
+          var cabId = gerarCabimentoSgal(log);
+          if (cabId != null) {
+            log.setCabId(cabId);
+          }
+        }
+        log.setEstadoCabimento(ESTADO_CABIMENTO_CABIMENTADO);
+      }
+
       if (!ESTADO_ATIVO.equals(log.getEstado())) {
         log.setEstado(ESTADO_ATIVO);
       }
@@ -431,12 +449,44 @@ public class MissaoServicoServiceWrite {
       missaoLogisticaRepository.saveAll(toSave);
     }
 
-    missao.setEtapa(ETAPA_5);
-    missaoServicoRepository.save(missao);
+    if (cabimentar) {
+      missao.setEtapa(ETAPA_5);
+      missaoServicoRepository.save(missao);
+    }
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", missao.getUuid() != null ? missao.getUuid().toString() : null);
     return ResponseEntity.ok(resp);
+  }
+
+  /**
+   * Gera o cabimento no SGAL para uma linha de logística e devolve o nr de cabimento (CAB_ID).
+   *
+   * <p>TODO: integrar com o serviço financeiro do SGAL. A integração está bloqueada por falta de
+   * contrato — a Especificação Técnica Funcional da Missão de Serviço apenas menciona que "é gerado
+   * um cabimento para cada tipo de serviço" e que o SGAL pode cabimentar "diretamente na plataforma
+   * ou por exportação para o SIPS FUN", sem indicar endpoint, payload nem onde vem o número
+   * devolvido. Antes de implementar, obter do financeiro/SGAL:
+   * <ul>
+   *   <li>endpoint de cabimento aplicável a uma linha de RH_T_MISSAO_LOGISTICA;</li>
+   *   <li>contrato do payload — 1 cabimento por tipo de serviço e 1 individual por colaborador na
+   *       ajuda de custo;</li>
+   *   <li>em que campo da resposta vem o CAB_ID;</li>
+   *   <li>confirmar a direção: somos nós a chamar o SGAL ou é o SGAL a escrever o CAB_ID aqui.</li>
+   * </ul>
+   *
+   * <p>O único precedente no projeto é {@code ProcessarSalarioApi#processarCabimento}
+   * ({@code /processa_cabimento}), mas recebe {@code p_proc_sal_id} — não serve para logística de
+   * missão — devolve um {@code OperationOutcomeResponse} sem nr de cabimento, e a chamada está
+   * comentada em {@code ProcessamentoSalarialWriteService#cabimentar}.
+   *
+   * <p>Enquanto a integração não existir devolve null: a linha fica CABIMENTADO sem cabId, e por
+   * isso {@code salvarAutorizacao} valida ESTADO_CABIMENTO em vez de exigir cabId. Cabimentos
+   * manuais/internacionais continuam a poder enviar o cabId no payload.
+   */
+  private Long gerarCabimentoSgal(MissaoLogisticaEntity log) {
+    LOGGER.warn("Integração SGAL pendente: cabimento não gerado para logistica id={}", log.getId());
+    return null;
   }
 
   @Transactional
@@ -469,11 +519,14 @@ public class MissaoServicoServiceWrite {
         throw IgrpResponseStatusException.badRequest("logisticaId não pertence à missão: " + item.getLogisticaId());
       }
 
-      if (log.getCabId() == null) {
+      // Só se autoriza o que já foi cabimentado (o cabId pode ainda vir do SGAL).
+      // AUTORIZADO é aceite para a gravação ser idempotente.
+      if (!ESTADO_CABIMENTO_CABIMENTADO.equals(log.getEstadoCabimento())
+          && !ESTADO_CABIMENTO_AUTORIZADO.equals(log.getEstadoCabimento())) {
         throw IgrpResponseStatusException.badRequest("Item sem cabimento: " + item.getLogisticaId());
       }
 
-      log.setEstadoCabimento("AUTORIZADO");
+      log.setEstadoCabimento(ESTADO_CABIMENTO_AUTORIZADO);
       if (!ESTADO_ATIVO.equals(log.getEstado())) {
         log.setEstado(ESTADO_ATIVO);
       }
@@ -618,9 +671,8 @@ public class MissaoServicoServiceWrite {
       if (item.getLogisticaId() == null) {
         throw IgrpResponseStatusException.badRequest("logisticaId é obrigatório");
       }
-      if (item.getCabId() == null) {
-        throw IgrpResponseStatusException.badRequest("cabId é obrigatório");
-      }
+      // cabId não é preenchido pelo utilizador: é gerado ao cabimentar (SGAL).
+      // Só vem no payload no caso dos cabimentos manuais/internacionais.
     }
 
     if (!anySelected) {
