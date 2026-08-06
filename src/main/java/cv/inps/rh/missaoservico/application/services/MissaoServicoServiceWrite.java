@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.commands.*;
 import cv.inps.rh.missaoservico.application.dto.*;
+import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.services.EmailService;
@@ -45,6 +46,10 @@ public class MissaoServicoServiceWrite {
   private static final String ACTION_NEXT = "NEXT";
   private static final String ESTADO_CABIMENTO_CABIMENTADO = "CABIMENTADO";
   private static final String ESTADO_CABIMENTO_AUTORIZADO = "AUTORIZADO";
+
+  /** Ordem das etapas do processo — usada para nunca retroceder a etapa (ver avancarEtapa). */
+  private static final List<String> ORDEM_ETAPAS = List.of(
+      ETAPA_1, ETAPA_2, ETAPA_3, ETAPA_4, ETAPA_5, ETAPA_7);
 
   private static final int MAX_PRESTADORES = 3;
 
@@ -116,6 +121,8 @@ public class MissaoServicoServiceWrite {
     }
 
     var missao = missaoServicoRepository.findByUuidOrThrow(uuid);
+    var avancar = isNext(dto.getProcessoEtapaAction());
+    exigirEtapaMinima(missao, ETAPA_2, avancar);
 
     validarAnalise(dto);
 
@@ -125,9 +132,9 @@ public class MissaoServicoServiceWrite {
       prestadoresSalvos = new ArrayList<>(missaoPrestadorRepository.saveAll(prestadoresPersistidos));
     }
 
-    missao.setEtapa(ETAPA_2);
-    if (dto.getProcessoEtapaAction() != null && dto.getProcessoEtapaAction().getCode().equals("NEXT")) {
-      missao.setEtapa(ETAPA_3);
+    avancarEtapa(missao, ETAPA_2);
+    if (avancar) {
+      avancarEtapa(missao, ETAPA_3);
       enviarNotificacoesPedidoSimulacao(missao, prestadoresSalvos, dto.getNotificacao());
     }
     missaoServicoRepository.save(missao);
@@ -161,10 +168,10 @@ public class MissaoServicoServiceWrite {
     if (StringUtils.hasText(dto.getEstado())) {
       missao.setEstado(dto.getEstado());
     }
-    missao.setEtapa(ETAPA_1);
+    avancarEtapa(missao, ETAPA_1);
 
-    if (dto.getProcessoEtapaAction() != null && dto.getProcessoEtapaAction().getCode().equals("NEXT")) {
-      missao.setEtapa(ETAPA_2);
+    if (isNext(dto.getProcessoEtapaAction())) {
+      avancarEtapa(missao, ETAPA_2);
     }
     missao = missaoServicoRepository.save(missao);
 
@@ -190,6 +197,8 @@ public class MissaoServicoServiceWrite {
     }
 
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+    var avancar = isNext(dto.getProcessoEtapaAction());
+    exigirEtapaMinima(missao, ETAPA_3, avancar);
 
     validarEmissaoRequisicao(dto.getRequisicoes());
 
@@ -303,9 +312,9 @@ public class MissaoServicoServiceWrite {
       }
     }
 
-    missao.setEtapa(ETAPA_3);
-    if (dto.getProcessoEtapaAction() != null && dto.getProcessoEtapaAction().getCode().equals("NEXT")) {
-      missao.setEtapa(ETAPA_4);
+    avancarEtapa(missao, ETAPA_3);
+    if (avancar) {
+      avancarEtapa(missao, ETAPA_4);
       enviarNotificacoesEmissaoRequisicao(missao, selectedPrestIds);
     }
     missaoServicoRepository.save(missao);
@@ -324,6 +333,8 @@ public class MissaoServicoServiceWrite {
     }
 
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+    var avancar = isNext(dto.getProcessoEtapaAction());
+    exigirEtapaMinima(missao, ETAPA_4, avancar);
 
     var requisicoes = missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid);
     var logisticasExistentes = missaoLogisticaRepository.findAllByMissaoServId_Uuid(missaoUuid);
@@ -350,9 +361,9 @@ public class MissaoServicoServiceWrite {
       }
       syncLogisticaAjudaCusto(missao, dto.getAjudasCusto(), alimentacaoByColabId, logisticasExistentes, requisicoes);
     }
-    missao.setEtapa(ETAPA_4);
-    if (dto.getProcessoEtapaAction() != null && "NEXT".equals(dto.getProcessoEtapaAction().getCode())) {
-      missao.setEtapa(ETAPA_5);
+    avancarEtapa(missao, ETAPA_4);
+    if (avancar) {
+      avancarEtapa(missao, ETAPA_5);
     }
     missaoServicoRepository.save(missao);
     if (ETAPA_5.equals(missao.getEtapa())) {
@@ -378,8 +389,8 @@ public class MissaoServicoServiceWrite {
 
     // "Gravar" apenas persiste os anexos/seleção; "Cabimentar" (NEXT) é que gera o
     // cabimento, marca ESTADO_CABIMENTO e avança a etapa.
-    var cabimentar = dto.getProcessoEtapaAction() != null
-        && ACTION_NEXT.equals(dto.getProcessoEtapaAction().getCode());
+    var cabimentar = isNext(dto.getProcessoEtapaAction());
+    exigirEtapaMinima(missao, ETAPA_5, cabimentar);
 
     var toSave = new ArrayList<MissaoLogisticaEntity>();
 
@@ -450,7 +461,7 @@ public class MissaoServicoServiceWrite {
     }
 
     if (cabimentar) {
-      missao.setEtapa(ETAPA_5);
+      avancarEtapa(missao, ETAPA_5);
       missaoServicoRepository.save(missao);
     }
 
@@ -501,6 +512,11 @@ public class MissaoServicoServiceWrite {
 
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
 
+    // "Gravar" apenas valida/persiste a seleção; só "Autorizar" (NEXT) põe os cabimentos
+    // gerados em estado AUTORIZADO e avança para PAGAMENTO.
+    var autorizar = isNext(dto.getProcessoEtapaAction());
+    exigirEtapaMinima(missao, ETAPA_5, autorizar);
+
     var toSave = new ArrayList<MissaoLogisticaEntity>();
 
     for (var item : dto.getItens()) {
@@ -526,7 +542,9 @@ public class MissaoServicoServiceWrite {
         throw IgrpResponseStatusException.badRequest("Item sem cabimento: " + item.getLogisticaId());
       }
 
-      log.setEstadoCabimento(ESTADO_CABIMENTO_AUTORIZADO);
+      if (autorizar) {
+        log.setEstadoCabimento(ESTADO_CABIMENTO_AUTORIZADO);
+      }
       if (!ESTADO_ATIVO.equals(log.getEstado())) {
         log.setEstado(ESTADO_ATIVO);
       }
@@ -537,11 +555,10 @@ public class MissaoServicoServiceWrite {
       missaoLogisticaRepository.saveAll(toSave);
     }
 
-    missao.setEtapa(ETAPA_5);
-    if (dto.getProcessoEtapaAction() != null && "NEXT".equals(dto.getProcessoEtapaAction().getCode())) {
-      missao.setEtapa(ETAPA_7);
+    if (autorizar) {
+      avancarEtapa(missao, ETAPA_7);
+      missaoServicoRepository.save(missao);
     }
-    missaoServicoRepository.save(missao);
 
     Map<String, Object> resp = new HashMap<>();
     resp.put("id", missao.getUuid() != null ? missao.getUuid().toString() : null);
@@ -559,10 +576,12 @@ public class MissaoServicoServiceWrite {
     validarPagamento(dto);
 
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+    // O pagamento é registado pelo sistema financeiro — exige sempre a etapa atingida.
+    exigirEtapaMinima(missao, ETAPA_7, true);
 
     missao.setReferenciaPagamento(dto.getReferenciaPagamento());
     missao.setDataPagamento(dto.getDataPagamento());
-    missao.setEtapa(ETAPA_7);
+    avancarEtapa(missao, ETAPA_7);
     missaoServicoRepository.save(missao);
 
     Map<String, Object> resp = new HashMap<>();
@@ -1341,6 +1360,48 @@ public class MissaoServicoServiceWrite {
         "- Data Fim: " + (missao.getDataFim() != null ? missao.getDataFim().toString() : "") + "\n\n" +
         "Para detalhes sobre bilhete, alojamento, seguro e ajuda de custo, consulte o portal RH.\n\n" +
         "Com os melhores cumprimentos,\nINPS - Recursos Humanos";
+  }
+
+  /**
+   * Avança a etapa da missão para {@code etapaAlvo}, nunca retrocedendo: gravar num ecrã de uma
+   * etapa já ultrapassada não deve puxar o processo para trás. Também torna a gravação idempotente.
+   */
+  private boolean isNext(ProcessStepAction action) {
+    return action != null && ACTION_NEXT.equals(action.getCode());
+  }
+
+  /**
+   * Impede saltar etapas: o processo só avança (NEXT) se a missão já tiver atingido
+   * {@code etapaMinima}. Gravar (SAVE) fora de ordem é permitido — não altera o estado do processo,
+   * só escreve dados de formulário, e bloquear faria o utilizador perder o que preencheu; fica
+   * apenas registado em log. Gravar numa etapa já ultrapassada é sempre permitido (correções).
+   * Missões com etapa desconhecida/nula (dados legados) não são bloqueadas.
+   */
+  private void exigirEtapaMinima(MissaoServicoEntity missao, String etapaMinima, boolean avancando) {
+    var atual = ORDEM_ETAPAS.indexOf(missao.getEtapa());
+    if (atual < 0) {
+      LOGGER.warn("Missão {} com etapa desconhecida ({}) — guarda de etapa ignorada",
+          missao.getUuid(), missao.getEtapa());
+      return;
+    }
+    if (atual >= ORDEM_ETAPAS.indexOf(etapaMinima)) {
+      return;
+    }
+    if (avancando) {
+      throw IgrpResponseStatusException.badRequest(
+          "A missão encontra-se na etapa '" + missao.getEtapa()
+              + "' — esta operação exige que já tenha atingido a etapa '" + etapaMinima + "'");
+    }
+    LOGGER.warn("Gravação fora de ordem na missão {}: etapa atual '{}', etapa do ecrã '{}'",
+        missao.getUuid(), missao.getEtapa(), etapaMinima);
+  }
+
+  private void avancarEtapa(MissaoServicoEntity missao, String etapaAlvo) {
+    var atual = ORDEM_ETAPAS.indexOf(missao.getEtapa());
+    var alvo = ORDEM_ETAPAS.indexOf(etapaAlvo);
+    if (alvo > atual) {
+      missao.setEtapa(etapaAlvo);
+    }
   }
 
   private Long nextNrMissao() {
