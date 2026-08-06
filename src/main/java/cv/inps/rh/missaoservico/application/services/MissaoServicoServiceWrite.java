@@ -132,7 +132,6 @@ public class MissaoServicoServiceWrite {
       prestadoresSalvos = new ArrayList<>(missaoPrestadorRepository.saveAll(prestadoresPersistidos));
     }
 
-    avancarEtapa(missao, ETAPA_2);
     if (avancar) {
       avancarEtapa(missao, ETAPA_3);
       enviarNotificacoesPedidoSimulacao(missao, prestadoresSalvos, dto.getNotificacao());
@@ -168,8 +167,6 @@ public class MissaoServicoServiceWrite {
     if (StringUtils.hasText(dto.getEstado())) {
       missao.setEstado(dto.getEstado());
     }
-    avancarEtapa(missao, ETAPA_1);
-
     if (isNext(dto.getProcessoEtapaAction())) {
       avancarEtapa(missao, ETAPA_2);
     }
@@ -312,7 +309,6 @@ public class MissaoServicoServiceWrite {
       }
     }
 
-    avancarEtapa(missao, ETAPA_3);
     if (avancar) {
       avancarEtapa(missao, ETAPA_4);
       enviarNotificacoesEmissaoRequisicao(missao, selectedPrestIds);
@@ -361,7 +357,6 @@ public class MissaoServicoServiceWrite {
       }
       syncLogisticaAjudaCusto(missao, dto.getAjudasCusto(), alimentacaoByColabId, logisticasExistentes, requisicoes);
     }
-    avancarEtapa(missao, ETAPA_4);
     if (avancar) {
       avancarEtapa(missao, ETAPA_5);
     }
