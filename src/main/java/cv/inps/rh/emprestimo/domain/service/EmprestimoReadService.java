@@ -6,23 +6,18 @@ import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.NumberUtils;
 import cv.inps.rh.shared.util.PageMapper;
-import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -160,73 +155,29 @@ public class EmprestimoReadService {
 
     var page = Integer.parseInt(query.getPage());
     var size = Integer.parseInt(query.getSize());
-
     var pageable = PageRequest.of(page, size, Sort.by("dataInicio").descending());
 
-    Specification<EmprestimoEntity> specification = (root, _, cb) -> {
+    var pageData = emprestimoEntityRepository.listLoans(
+        StringUtils.hasText(query.getTipoEmprestimo()) ? query.getTipoEmprestimo() : null,
+        StringUtils.hasText(query.getEstado()) ? query.getEstado() : Estado.A.name(),
+        StringUtils.hasText(query.getDataInicio()) ? LocalDate.parse(query.getDataInicio()) : null,
+        StringUtils.hasText(query.getDataFim()) ? LocalDate.parse(query.getDataFim()) : null,
+        StringUtils.hasText(query.getDireccaoId()) ? Long.valueOf(query.getDireccaoId()) : null,
+        StringUtils.hasText(query.getFuncionarioId()) ? UUID.fromString(query.getFuncionarioId()) : null,
+        pageable
+    );
 
-      var predicates = new ArrayList<Predicate>();
-
-      if (StringUtils.hasText(query.getTipoEmprestimo()))
-        predicates.add(cb.equal(root.get("tipoEmprestimo"), query.getTipoEmprestimo()));
-
-      var status = StringUtils.hasText(query.getEstado()) ? query.getEstado() : Estado.A.name();
-      predicates.add(cb.equal(root.get("estado"), status));
-
-      if (StringUtils.hasText(query.getDataInicio()) && StringUtils.hasText(query.getDataFim()))
-        predicates.add(cb.between(root.get("dataInicio"), LocalDate.parse(query.getDataInicio()), LocalDate.parse(query.getDataFim()))
-        );
-
-      if (StringUtils.hasText(query.getDireccaoId())) {
-        var relacionamento = root.join("tiprel");
-        predicates.add(
-            cb.equal(relacionamento.get("mobId").get("instidId").get("id"), Long.valueOf(query.getDireccaoId()))
-        );
-      }
-
-      if (StringUtils.hasText(query.getFuncionarioId())) {
-        var relacionamento = root.join("tiprel");
-        predicates.add(
-            cb.equal(relacionamento.get("funId").get("uuid"), UUID.fromString(query.getFuncionarioId()))
-        );
-      }
-
-      return cb.and(predicates.toArray(new Predicate[0]));
-    };
-
-    var pageResult = emprestimoEntityRepository.findAll(specification, pageable);
-
+    var estadoMap = Estado.codeDescriptionMap();
     var etapaMap = EtapaEmprestimo.descriptionMap();
 
+    pageData.getContent().forEach(dto -> {
+      dto.setEstadoDesc(estadoMap.get(dto.getEstado()));
+      dto.setEtapaDesc(etapaMap.getOrDefault(dto.getEtapa(), dto.getEtapa()));
+    });
+
     var response = new EmprestimoListDTO();
-    PageMapper.fillPagination(pageResult, response);
-    response.setContent(pageResult.getContent()
-        .stream()
-        .map(e -> {
-          var dto = new EmprestimoListRowDTO();
-          dto.setEstado(e.getEstado());
-          dto.setEstadoDesc(Estado.codeDescriptionMap().get(e.getEstado()));
-          dto.setTipoEmprestimo(e.getTipoEmprestimo());
-          dto.setRenegociacaoDivida(e.getRenogociacao());
-          dto.setValorConcedido(e.getValorEmprestimo());
-          dto.setNumeroPrestacoesPagas(e.getNrPrestacao());
-          dto.setTipoSituacao(e.getTipoSituacao());
-          dto.setValorPago(e.getValorPago());
-          dto.setDataInicioEmprestimo(e.getDataInicio());
-          dto.setEmprestimoId(e.getUuid());
-          dto.setSaldoEmDivida(e.getValorDivida());
-          dto.setDataInicioEmprestimo(e.getDataInicio());
-          var funId = e.getTiprel().getFunId();
-          dto.setFuncionarioId(funId.getUuid().toString());
-          dto.setNomeColaborador(funId.getNome());
-          PedidoEntity order = e.getPedido();
-          ofNullable(order).ifPresent(o -> {
-            dto.setEtapa(o.getEtapa());
-            dto.setEtapaDesc(etapaMap.getOrDefault(o.getEtapa(), o.getEtapa()));
-          });
-          return dto;
-        })
-        .toList());
+    PageMapper.fillPagination(pageData, response);
+    response.setContent(pageData.getContent());
 
     return response;
   }

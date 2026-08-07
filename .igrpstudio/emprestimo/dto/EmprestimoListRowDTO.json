@@ -8,7 +8,7 @@
     {
       "name": "funcionarioId",
       "objectType": "java",
-      "type": "string",
+      "type": "uuid",
       "required": false,
       "before": false,
       "after": false,
@@ -105,6 +105,18 @@
       "name": "valorConcedido",
       "objectType": "java",
       "type": "decimal",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "numeroTotalPrestacoes",
+      "objectType": "java",
+      "type": "long",
       "required": false,
       "before": false,
       "after": false,
