@@ -25,13 +25,6 @@
           }
         }
       },
-      "requestParams": [
-        {
-          "type": "string",
-          "name": "seccaoId",
-          "isRequired": true
-        }
-      ],
       "pathVariables": [
         {
           "name": "institutoId",

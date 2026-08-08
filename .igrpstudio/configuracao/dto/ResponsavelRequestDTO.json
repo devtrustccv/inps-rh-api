@@ -30,19 +30,7 @@
       "primaryKey": false
     },
     {
-      "name": "IdFuncionario",
-      "objectType": "java",
-      "type": "string",
-      "required": true,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "email",
+      "name": "idFuncionario",
       "objectType": "java",
       "type": "string",
       "required": true,

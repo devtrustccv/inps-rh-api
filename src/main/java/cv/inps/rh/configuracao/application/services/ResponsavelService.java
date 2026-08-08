@@ -1,33 +1,22 @@
 package cv.inps.rh.configuracao.application.services;
 
-import cv.inps.rh.configuracao.application.dto.AssociarResponsaveisRequestDTO;
-import cv.inps.rh.configuracao.application.dto.ResponsaveisDirecaoResponseDTO;
-import cv.inps.rh.configuracao.application.dto.ResponsavelEmailDTO;
-import cv.inps.rh.configuracao.application.dto.ResponsavelResponseDTO;
-import cv.inps.rh.configuracao.application.dto.WrapperListResponsaveisDTO;
+import cv.inps.rh.configuracao.application.dto.*;
 import cv.inps.rh.configuracao.application.queries.GetResponsaveisEmailsQuery;
 import cv.inps.rh.configuracao.application.queries.GetResponsaveisQuery;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity_;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DirecaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MobilidadeEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ResponsavelEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.SecaoEntityRepository;
-import cv.inps.rh.shared.util.PageMapper;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity_;
+import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity_;
+import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.validation.constraints.NotBlank;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,59 +44,36 @@ public class ResponsavelService {
       responsavel.setInstitId(instituicaoEntityRepository.findByIdOrThrow(row.getIdDirecao()));
       responsavel.setFunId(funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(row.getIdFuncionario())));
       responsavel.setSecaoId(StringUtils.hasText(row.getIdSeccao()) ? secaoEntityRepository.findByUuidOrThrow(UUID.fromString(row.getIdSeccao())) : null);
-      responsavel.setEmail(row.getEmail());
       responsavelEntityRepository.save(responsavel);
     });
   }
 
-  public ResponsaveisDirecaoResponseDTO getResponsavelData(Long institutoId, @NotBlank(message = "The field <seccaoId> is required") String seccaoId) {
+  public ResponsaveisDirecaoResponseDTO getResponsavelData(Long institutoId) {
 
-    var savedData = responsavelEntityRepository.findAllByInstitId_idAndSecaoId_uuid(institutoId, UUID.fromString(seccaoId));
+    var savedResponsibles = responsavelEntityRepository.findAllSectionsByDirection(institutoId);
 
-    var arraySavedData = new ArrayList<ResponsavelResponseDTO>();
+    var rows = savedResponsibles.stream()
+        .filter(obj -> obj.secaoId() != null)
+        .map(obj -> {
+          var o = new ResponsavelResponseDTO();
+          o.setResponsavelId(obj.responsavelId());
+          o.setSeccao(obj.secaoNome());
+          o.setSeccaoId(obj.secaoId().toString());
+          o.setEmail(obj.email());
+          o.setFuncionarioId(obj.funcionarioId() != null ? obj.funcionarioId().toString() : null);
+          return o;
+        })
+        .toList();
 
-    var sectionIdsAlreadySaved = new HashSet<Long>();
-
-    savedData.forEach(e -> {
-      var obj = new ResponsavelResponseDTO();
-      obj.setEmail(e.getEmail());
-      obj.setIdResponsavel(e.getId());
-
-      var section = e.getSecaoId();
-      if (section != null) {
-        obj.setNomeSeccao(section.getNome());
-        obj.setIdSeccao(section.getId().toString());
-        sectionIdsAlreadySaved.add(section.getId());
-      }
-
-      var direction = e.getInstitId();
-      obj.setIdDirecao(direction.getId());
-      obj.setNomeDirecao(direction.getNome());
-
-      var funId = e.getFunId();
-      obj.setIdFuncionario(funId.getUuid().toString());
-      obj.setNomeFuncionario(funId.getNome());
-      arraySavedData.add(obj);
-    });
-
-    var allDirectionSections = secaoEntityRepository.findAllByEstadoAndInstId_Id(Estado.A, institutoId);
-    allDirectionSections.forEach(s -> {
-      if (!sectionIdsAlreadySaved.contains(s.getId())) {
-        sectionIdsAlreadySaved.add(s.getId());
-        var obj = new ResponsavelResponseDTO();
-        obj.setIdSeccao(s.getId().toString());
-        obj.setNomeSeccao(s.getNome());
-        arraySavedData.add(obj);
-      }
-    });
-
-    return new ResponsaveisDirecaoResponseDTO(arraySavedData);
+    var response = new ResponsaveisDirecaoResponseDTO();
+    response.setContent(rows);
+    return response;
   }
 
 
   public WrapperListResponsaveisDTO getResponsaveis(GetResponsaveisQuery query) {
 
-    int pageNumber = StringUtils.hasText(query.getPageNumber()) ? Integer.parseInt(query.getPageNumber()) : 0;
+   /* int pageNumber = StringUtils.hasText(query.getPageNumber()) ? Integer.parseInt(query.getPageNumber()) : 0;
     int pageSize = StringUtils.hasText(query.getPageSize()) ? Integer.parseInt(query.getPageSize()) : 20;
 
     Specification<ResponsavelEntity> spec = (root, _, cb) -> {
@@ -166,8 +132,8 @@ public class ResponsavelService {
 
     var wrapper = new WrapperListResponsaveisDTO();
     PageMapper.fillPagination(page, wrapper);
-    wrapper.setContent(content);
-    return wrapper;
+    wrapper.setContent(content);*/
+    return null;
   }
 
   /**

@@ -1,18 +1,11 @@
 {
-  "type": "dto",
-  "module": "configuracao",
   "name": "ResponsavelResponse",
   "template": "classic",
-  "enableCustonValidation": false,
-  "extends": {
-    "name": "ResponsavelRequest",
-    "module": "configuracao"
-  },
   "attributes": [
     {
-      "name": "nomeSeccao",
+      "name": "responsavelId",
+      "type": "long",
       "objectType": "java",
-      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -22,9 +15,21 @@
       "primaryKey": false
     },
     {
-      "name": "nomeFuncionario",
-      "objectType": "java",
+      "name": "seccao",
       "type": "string",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "seccaoId",
+      "type": "string",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -35,8 +40,8 @@
     },
     {
       "name": "email",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -46,9 +51,9 @@
       "primaryKey": false
     },
     {
-      "name": "nomeDirecao",
-      "objectType": "java",
+      "name": "funcionarioId",
       "type": "string",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -58,5 +63,9 @@
       "primaryKey": false
     }
   ],
+  "type": "dto",
+  "module": "configuracao",
+  "enableCustonValidation": false,
+  "readOnly": false,
   "id": "nnlywao0ll"
 }

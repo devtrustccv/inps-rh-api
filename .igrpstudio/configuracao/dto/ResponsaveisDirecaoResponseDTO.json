@@ -1,14 +1,11 @@
 {
-  "type": "dto",
-  "module": "configuracao",
   "name": "ResponsaveisDirecaoResponse",
   "template": "classic",
-  "enableCustonValidation": false,
   "attributes": [
     {
       "name": "content",
-      "objectType": "dto",
       "type": "ResponsavelResponse",
+      "objectType": "dto",
       "required": false,
       "before": false,
       "after": false,
@@ -20,5 +17,9 @@
       "module": "configuracao"
     }
   ],
+  "type": "dto",
+  "module": "configuracao",
+  "enableCustonValidation": false,
+  "readOnly": false,
   "id": "efb6tbobly"
 }

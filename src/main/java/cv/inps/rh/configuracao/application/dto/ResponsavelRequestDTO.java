@@ -10,28 +10,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-
 @IgrpDTO
 public class ResponsavelRequestDTO {
 
-
   private Long idResponsavel;
+
   @NotNull(message = "The field <idDirecao> is required")
-
   private Long idDirecao;
+
   @NotBlank(message = "The field <IdFuncionario> is required")
-
-  private String IdFuncionario;
-  @NotBlank(message = "The field <email> is required")
-
-  private String email;
-
+  private String idFuncionario;
 
   private String idSeccao;
-
 }
