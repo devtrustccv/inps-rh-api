@@ -139,7 +139,7 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
     var entity = repository.findByIdOrThrow(Long.valueOf(id));
     entity.setEstado(Estado.E.getCode());
     entity.setDtFim(LocalDate.now());
-    entity.setUsrFim(1L);
+    entity.setUsrFim(1L); // TODO 08/08/2026 13:29 fix this user for current user
     repository.save(entity);
   }
 
