@@ -5,6 +5,7 @@ import cv.inps.rh.emprestimo.application.dto.*;
 import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
+import cv.inps.rh.emprestimo.domain.service.constants.StatusEmprestimo;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -40,14 +41,17 @@ public class EmprestimoReadService {
   public List<InformacaoEmprestimoRequestDTO> getAllConfiguracaoEmprestimo() {
     return paramEmprestimoEntityRepository.findAll()
         .stream()
-        .map(entity -> new InformacaoEmprestimoRequestDTO(
-            entity.getCarrPccs().getId(),
-            entity.getValorLimite(),
-            entity.getNumeroLimite(),
-            entity.getEstado(),
-            entity.getUuid(),
-            entity.getCarrPccs().getUuid().toString()
-        ))
+        .map(entity -> {
+          var carrPccs = entity.getCarrPccs();
+          return new InformacaoEmprestimoRequestDTO(
+              carrPccs.getId(),
+              entity.getValorLimite(),
+              entity.getNumeroLimite(),
+              entity.getEstado(),
+              entity.getUuid(),
+              carrPccs.getUuid().toString()
+          );
+        })
         .toList();
   }
 
@@ -159,7 +163,7 @@ public class EmprestimoReadService {
 
     var pageData = emprestimoEntityRepository.listLoans(
         StringUtils.hasText(query.getTipoEmprestimo()) ? query.getTipoEmprestimo() : null,
-        StringUtils.hasText(query.getEstado()) ? query.getEstado() : Estado.A.name(),
+        StringUtils.hasText(query.getEstado()) ? query.getEstado() : null,
         StringUtils.hasText(query.getDataInicio()) ? LocalDate.parse(query.getDataInicio()) : null,
         StringUtils.hasText(query.getDataFim()) ? LocalDate.parse(query.getDataFim()) : null,
         StringUtils.hasText(query.getDireccaoId()) ? Long.valueOf(query.getDireccaoId()) : null,
@@ -167,18 +171,17 @@ public class EmprestimoReadService {
         pageable
     );
 
-    var estadoMap = Estado.codeDescriptionMap();
+    var estadoMap = StatusEmprestimo.codeDescriptionMap();
     var etapaMap = EtapaEmprestimo.descriptionMap();
 
     pageData.getContent().forEach(dto -> {
-      dto.setEstadoDesc(estadoMap.get(dto.getEstado()));
+      dto.setEstadoDesc(estadoMap.getOrDefault(dto.getEstado(), dto.getEstado()));
       dto.setEtapaDesc(etapaMap.getOrDefault(dto.getEtapa(), dto.getEtapa()));
     });
 
     var response = new EmprestimoListDTO();
     PageMapper.fillPagination(pageData, response);
     response.setContent(pageData.getContent());
-
     return response;
   }
 
