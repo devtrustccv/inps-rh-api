@@ -7,6 +7,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -46,8 +47,11 @@ public interface SecaoEntityRepository extends
             s.instId.estado
           )
           FROM SecaoEntity s
+          WHERE :direcaoId IS NULL OR s.instId.id = :direcaoId
           """
   )
-  List<SectionData> getAllData();
+  List<SectionData> getAllData(
+      @Param("direcaoId") Long direcaoId
+  );
 
 }

@@ -78,7 +78,9 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
   @Override
   public Object list(Map<String, String> filters) {
 
-    var rows = secaoRepository.getAllData()
+    Long direcaoId = filters.get("direcaoId") != null ? Long.valueOf(filters.get("direcaoId")) : null;
+
+    var rows = secaoRepository.getAllData(direcaoId)
         .stream()
         .collect(Collectors.groupingBy(
             SectionData::direcaoId,
@@ -87,9 +89,9 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
         ))
         .values()
         .stream()
-        .map(sectionDataList -> {
+        .map(sdList -> {
 
-          var first = sectionDataList.getFirst();
+          var first = sdList.getFirst();
 
           var dir = new DirecaoRowDTO();
           dir.setDirecaoId(first.direcaoId());
@@ -97,7 +99,7 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
           dir.setEstadoDirecao(first.estadoDirecao());
 
           dir.setSeccao(
-              sectionDataList.stream()
+              sdList.stream()
                   .map(sd -> {
                     var sec = new SeccaoRowDTO();
                     sec.setSeccaoId(sd.seccaoId().toString());
