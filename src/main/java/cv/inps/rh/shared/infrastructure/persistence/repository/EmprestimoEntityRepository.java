@@ -49,6 +49,7 @@ public interface EmprestimoEntityRepository extends
           '',
           f.nome,
           e.tipoEmprestimo,
+          "",
           e.renogociacao,
           e.uuid,
           e.valorEmprestimo,

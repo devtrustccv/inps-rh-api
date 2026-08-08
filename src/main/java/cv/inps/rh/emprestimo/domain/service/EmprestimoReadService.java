@@ -6,6 +6,7 @@ import cv.inps.rh.emprestimo.application.queries.ListarEmprestimosQuery;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.ReferenceName;
 import cv.inps.rh.emprestimo.domain.service.constants.StatusEmprestimo;
+import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -173,10 +174,12 @@ public class EmprestimoReadService {
 
     var estadoMap = StatusEmprestimo.codeDescriptionMap();
     var etapaMap = EtapaEmprestimo.descriptionMap();
+    var tipoEmprestimoMap = TipoPedido.descriptionMap();
 
     pageData.getContent().forEach(dto -> {
       dto.setEstadoDesc(estadoMap.getOrDefault(dto.getEstado(), dto.getEstado()));
       dto.setEtapaDesc(etapaMap.getOrDefault(dto.getEtapa(), dto.getEtapa()));
+      dto.setTipoEmprestimoDesc(tipoEmprestimoMap.getOrDefault(dto.getTipoEmprestimo(), dto.getTipoEmprestimo()));
     });
 
     var response = new EmprestimoListDTO();

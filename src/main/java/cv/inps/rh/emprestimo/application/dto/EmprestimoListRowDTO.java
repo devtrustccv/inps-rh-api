@@ -20,10 +20,9 @@ import java.util.UUID;
 @IgrpDTO
 public class EmprestimoListRowDTO  {
 
-
   private UUID funcionarioId;
-  private String tipoSituacao ;
 
+  private String tipoSituacao ;
 
   private String estado ;
 
@@ -35,6 +34,8 @@ public class EmprestimoListRowDTO  {
 
 
   private String tipoEmprestimo ;
+
+  private String tipoEmprestimoDesc;
 
 
   private String renegociacaoDivida ;
