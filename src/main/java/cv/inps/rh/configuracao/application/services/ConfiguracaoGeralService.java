@@ -14,6 +14,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.FusoHorarioUpsEnt
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -110,7 +111,9 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
 
   @Override
   public Object list(Map<String, String> filters) {
-    var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
+
+    var pageable = ConfigurationUtils.buildDefaultPageRequest(filters)
+        .withSort(Sort.by(Sort.Direction.DESC, "dtRegisto"));
     var data = repository.findAll(pageable);
 
     var response = new WrapperListDTO();
@@ -162,11 +165,7 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
     var fusos = new ArrayList<FusoHorarioDTO>();
 
     fusoHorarioUpsEntityRepository.findByIdParametrizacao(e.getId())
-        .forEach(obj -> {
-              var row = new FusoHorarioDTO(obj.getIdUps(), obj.getFuso());
-              fusos.add(row);
-            }
-        );
+        .forEach(obj -> fusos.add(new FusoHorarioDTO(obj.getIdUps(), obj.getFuso())));
 
     r.setFusoHorario(fusos);
 
