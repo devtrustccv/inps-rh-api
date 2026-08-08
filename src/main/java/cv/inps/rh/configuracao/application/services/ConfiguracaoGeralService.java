@@ -1,6 +1,7 @@
 package cv.inps.rh.configuracao.application.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cv.inps.rh.configuracao.application.dto.ConfiguracaoGeralBaseDTO;
 import cv.inps.rh.configuracao.application.dto.ConfiguracaoGeralDTO;
 import cv.inps.rh.configuracao.application.dto.FusoHorarioDTO;
 import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
@@ -118,7 +119,18 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
 
     var response = new WrapperListDTO();
     PageMapper.fillPagination(data, response);
-    response.setContent(data.getContent().stream().map(this::buildResponse).collect(Collectors.toList()));
+    response.setContent(
+        data.getContent().stream()
+            .map(e -> {
+              var r = new ConfiguracaoGeralBaseDTO();
+              r.setId(e.getId().toString());
+              r.setEstado(e.getEstado());
+              r.setDataRegisto(e.getDtRegisto());
+              r.setUtilizadoRegisto(e.getUsrRegisto() != null ? e.getUsrRegisto().toString() : null);
+              return r;
+            })
+            .collect(Collectors.toList())
+    );
     return response;
   }
 

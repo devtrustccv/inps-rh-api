@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -20,12 +21,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 
-
+@EqualsAndHashCode(callSuper = true)
 @IgrpDTO
-public class ConfiguracaoGeralDTO  {
+public class ConfiguracaoGeralDTO extends ConfiguracaoGeralBaseDTO {
 
-
-  private String id ;
   @NotBlank(message = "The field <jornadaDiaria> is required")
 
   private String jornadaDiaria ;
@@ -98,14 +97,5 @@ public class ConfiguracaoGeralDTO  {
 
   @Valid
   private List<FusoHorarioDTO> fusoHorario = new ArrayList<>();
-
-
-  private LocalDate dataRegisto ;
-
-
-  private String utilizadoRegisto ;
-
-
-  private String estado ;
 
 }
