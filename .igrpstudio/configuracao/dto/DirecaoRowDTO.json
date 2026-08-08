@@ -1,9 +1,21 @@
 {
-  "name": "ConfiguracaoGeralBase",
+  "name": "DirecaoRow",
   "template": "classic",
   "attributes": [
     {
-      "name": "id",
+      "name": "direcaoId",
+      "type": "long",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "nome",
       "type": "string",
       "objectType": "java",
       "required": false,
@@ -15,7 +27,7 @@
       "primaryKey": false
     },
     {
-      "name": "utilizadoRegisto",
+      "name": "estadoDirecao",
       "type": "string",
       "objectType": "java",
       "required": false,
@@ -27,33 +39,23 @@
       "primaryKey": false
     },
     {
-      "name": "dataRegisto",
-      "type": "date",
-      "objectType": "java",
+      "name": "seccao",
+      "type": "SeccaoRow",
+      "objectType": "dto",
       "required": false,
       "before": false,
       "after": false,
       "positive": false,
       "isEmail": false,
       "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "estado",
-      "type": "string",
-      "objectType": "java",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "configuracao"
     }
   ],
   "type": "dto",
   "module": "configuracao",
   "enableCustonValidation": false,
   "readOnly": false,
-  "id": "new-action-Contractxvxvsfdsfsdfdsfdsfsdfsfd"
+  "id": "new-action-configuracao-adsjhbcsjhbvfks"
 }

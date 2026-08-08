@@ -1,9 +1,9 @@
 {
-  "name": "ConfiguracaoGeralBase",
+  "name": "SeccaoRow",
   "template": "classic",
   "attributes": [
     {
-      "name": "id",
+      "name": "seccaoId",
       "type": "string",
       "objectType": "java",
       "required": false,
@@ -15,7 +15,7 @@
       "primaryKey": false
     },
     {
-      "name": "utilizadoRegisto",
+      "name": "nome",
       "type": "string",
       "objectType": "java",
       "required": false,
@@ -27,19 +27,7 @@
       "primaryKey": false
     },
     {
-      "name": "dataRegisto",
-      "type": "date",
-      "objectType": "java",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "estado",
+      "name": "estadoSeccao",
       "type": "string",
       "objectType": "java",
       "required": false,
@@ -55,5 +43,5 @@
   "module": "configuracao",
   "enableCustonValidation": false,
   "readOnly": false,
-  "id": "new-action-Contractxvxvsfdsfsdfdsfdsfsdfsfd"
+  "id": "new-action-Contract_secsecsec"
 }

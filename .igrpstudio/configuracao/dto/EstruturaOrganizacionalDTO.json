@@ -1,0 +1,25 @@
+{
+  "name": "EstruturaOrganizacional",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "direcao",
+      "type": "DirecaoRow",
+      "objectType": "dto",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "configuracao"
+    }
+  ],
+  "type": "dto",
+  "module": "configuracao",
+  "enableCustonValidation": false,
+  "readOnly": false,
+  "id": "new-action-Contrasaskjdsakjdhasjdkjsahdkjsakhdj"
+}
