@@ -68,7 +68,7 @@
     {
       "name": "carreiraUuid",
       "objectType": "java",
-      "type": "string",
+      "type": "uuid",
       "required": false,
       "before": false,
       "after": false,

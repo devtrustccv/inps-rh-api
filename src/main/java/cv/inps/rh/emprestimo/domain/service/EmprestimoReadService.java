@@ -40,20 +40,7 @@ public class EmprestimoReadService {
   private final EmprestimoWriteService emprestimoWriteService;
 
   public List<InformacaoEmprestimoRequestDTO> getAllConfiguracaoEmprestimo() {
-    return paramEmprestimoEntityRepository.findAll()
-        .stream()
-        .map(entity -> {
-          var carrPccs = entity.getCarrPccs();
-          return new InformacaoEmprestimoRequestDTO(
-              carrPccs.getId(),
-              entity.getValorLimite(),
-              entity.getNumeroLimite(),
-              entity.getEstado(),
-              entity.getUuid(),
-              carrPccs.getUuid().toString()
-          );
-        })
-        .toList();
+    return paramEmprestimoEntityRepository.listAll();
   }
 
   public DetalhesEmprestimoDTO getEmprestimoByUuid(String uuid) {
