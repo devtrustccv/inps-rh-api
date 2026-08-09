@@ -35,11 +35,19 @@ public interface EstabelecimentoEntityRepository extends
             e.pais.id,
             e.pais.nome,
             e.nome,
-            e.id
+            e.id,
+            e.uuid
       )
       FROM EstabelecimentoEntity e
-      WHERE :countryId IS NULL OR e.pais.id =: countryId
+      WHERE :countryIds IS NULL OR e.pais.id IN (:countryIds) AND e.estado = 'A'
       """)
-  List<EstabelecimentoComboDTO> findByPaisId(@Param("countryId") Long paisId);
+  List<EstabelecimentoComboDTO> findByPaisId(@Param("countryIds") List<Long> paisId);
+
+  @Query("""
+      SELECT e
+      FROM EstabelecimentoEntity e
+      WHERE :countryIds IS NULL OR e.pais.id IN (:countryIds) AND e.estado = 'A'
+      """)
+  List<EstabelecimentoEntity> findEntityByPaisId(@Param("countryIds") List<Long> paisId);
 
 }
