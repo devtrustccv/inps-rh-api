@@ -2,6 +2,7 @@ package cv.inps.rh.shared.infrastructure.persistence.repository;
 
 import cv.inps.rh.configuracao.application.services.model.ResponsavelSectionData;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -45,7 +46,16 @@ public interface ResponsavelEntityRepository extends
               AND r.estado = 'A'
           LEFT JOIN FuncionarioEntity f
                 ON r.funId.id = f.id
-          WHERE s.instId.id = :instId
+          WHERE s.instId.id = :instId AND s.estado = 'A'
       """)
   List<ResponsavelSectionData> findAllSectionsByDirection(Long instId);
+
+  Optional<ResponsavelEntity> findByInstitIdAndSecaoIdIsNull(
+      DirecaoEntity direcao
+  );
+
+  List<ResponsavelEntity> findByInstitIdAndSecaoIdIsNotNullAndEstado(
+      DirecaoEntity direcao,
+      String estado
+  );
 }

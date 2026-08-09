@@ -47,7 +47,7 @@ public interface SecaoEntityRepository extends
             s.instId.estado
           )
           FROM SecaoEntity s
-          WHERE :direcaoId IS NULL OR s.instId.id = :direcaoId
+          WHERE s.estado = 'A' AND (:direcaoId IS NULL OR s.instId.id = :direcaoId)
           """
   )
   List<SectionData> getAllData(

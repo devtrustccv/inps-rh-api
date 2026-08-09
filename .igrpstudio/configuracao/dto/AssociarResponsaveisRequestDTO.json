@@ -4,6 +4,7 @@
   "name": "AssociarResponsaveisRequest",
   "template": "classic",
   "enableCustonValidation": false,
+  "readOnly": true,
   "attributes": [
     {
       "name": "responsaveis",

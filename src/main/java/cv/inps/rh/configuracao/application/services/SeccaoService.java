@@ -95,7 +95,7 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
 
           var dir = new DirecaoRowDTO();
           dir.setDirecaoId(first.direcaoId());
-          dir.setNome(first.DirecaoNome());
+          dir.setNome(first.direcaoNome());
           dir.setEstadoDirecao(first.estadoDirecao());
 
           dir.setSeccao(

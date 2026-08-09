@@ -9,7 +9,7 @@ public record SectionData(
     String seccaoNome,
     Estado estadoSeccao,
     Long direcaoId,
-    String DirecaoNome,
+    String direcaoNome,
     String estadoDirecao
 ) {
 }
