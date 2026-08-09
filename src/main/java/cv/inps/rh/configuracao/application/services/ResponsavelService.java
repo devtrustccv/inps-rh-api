@@ -56,7 +56,7 @@ public class ResponsavelService {
      * There can only be one direction responsible.
      */
     var directionResponsible = responsavelEntityRepository
-        .findByInstitIdAndSecaoIdIsNull(direcao);
+        .findByInstitId_IdAndSecaoIdIsNull(direcao.getId());
 
     var funcionarioResponsavelId =
         request.getDirecaoData().funcionarioResponsavelId();
@@ -311,7 +311,16 @@ public class ResponsavelService {
 
   public ResponsaveisDirecaoResponseDTO getResponsavelData(Long institutoId) {
 
+    var response = new ResponsaveisDirecaoResponseDTO();
+
     var savedResponsibles = responsavelEntityRepository.findAllSectionsByDirection(institutoId);
+
+    responsavelEntityRepository.findByInstitId_IdAndSecaoIdIsNull(institutoId)
+        .map(ResponsavelEntity::getFunId)
+        .ifPresent(obj -> {
+          response.setResponsavelDirecaoId(obj.getUuid());
+          response.setResponsavelDirecaoNome(obj.getNome());
+        });
 
     var rows = savedResponsibles.stream()
         .filter(obj -> obj.secaoId() != null)
@@ -326,7 +335,6 @@ public class ResponsavelService {
         })
         .toList();
 
-    var response = new ResponsaveisDirecaoResponseDTO();
     response.setContent(rows);
     return response;
   }

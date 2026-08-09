@@ -50,8 +50,8 @@ public interface ResponsavelEntityRepository extends
       """)
   List<ResponsavelSectionData> findAllSectionsByDirection(Long instId);
 
-  Optional<ResponsavelEntity> findByInstitIdAndSecaoIdIsNull(
-      DirecaoEntity direcao
+  Optional<ResponsavelEntity> findByInstitId_IdAndSecaoIdIsNull(
+      Long direcao
   );
 
   List<ResponsavelEntity> findByInstitIdAndSecaoIdIsNotNullAndEstado(

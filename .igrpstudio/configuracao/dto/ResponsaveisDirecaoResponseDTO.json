@@ -1,6 +1,7 @@
 {
   "name": "ResponsaveisDirecaoResponse",
   "template": "classic",
+  "readOnly": true,
   "attributes": [
     {
       "name": "content",
@@ -20,6 +21,5 @@
   "type": "dto",
   "module": "configuracao",
   "enableCustonValidation": false,
-  "readOnly": false,
   "id": "efb6tbobly"
 }

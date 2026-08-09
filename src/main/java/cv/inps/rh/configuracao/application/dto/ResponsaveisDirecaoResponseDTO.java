@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -20,6 +21,8 @@ import java.util.List;
 @IgrpDTO
 public class ResponsaveisDirecaoResponseDTO {
 
+  private UUID responsavelDirecaoId;
+  private String responsavelDirecaoNome;
 
   @Valid
   private List<ResponsavelResponseDTO> content = new ArrayList<>();
