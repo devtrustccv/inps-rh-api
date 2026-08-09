@@ -42,6 +42,9 @@ public interface ResponsavelEntityRepository extends
           LEFT JOIN ResponsavelEntity r
               ON r.secaoId.id = s.id
               AND r.institId.id = :instId
+              AND r.estado = 'A'
+          LEFT JOIN FuncionarioEntity f
+                ON r.funId.id = f.id
           WHERE s.instId.id = :instId
       """)
   List<ResponsavelSectionData> findAllSectionsByDirection(Long instId);

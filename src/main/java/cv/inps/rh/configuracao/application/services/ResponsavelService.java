@@ -44,8 +44,15 @@ public class ResponsavelService {
       responsavel.setInstitId(instituicaoEntityRepository.findByIdOrThrow(row.getIdDirecao()));
       responsavel.setFunId(funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(row.getIdFuncionario())));
       responsavel.setSecaoId(StringUtils.hasText(row.getIdSeccao()) ? secaoEntityRepository.findByUuidOrThrow(UUID.fromString(row.getIdSeccao())) : null);
+      responsavel.setEstado(Estado.A.name());
       responsavelEntityRepository.save(responsavel);
     });
+  }
+
+  public void removerSecaoDirecaoAsociation(Long responsavelId) {
+    var responsavel = responsavelEntityRepository.findByIdOrThrow(responsavelId);
+    responsavel.setEstado(Estado.I.name());
+    responsavelEntityRepository.save(responsavel);
   }
 
   public ResponsaveisDirecaoResponseDTO getResponsavelData(Long institutoId) {

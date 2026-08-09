@@ -2,6 +2,7 @@ package cv.inps.rh.configuracao.interfaces.custom;
 
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.configuracao.application.constants.ConfigurationType;
+import cv.inps.rh.configuracao.application.services.ResponsavelService;
 import cv.inps.rh.configuracao.application.services.engine.Configuration;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,9 +24,11 @@ import java.util.Map;
 public class ConfiguracaoController {
 
   private final Configuration configuration;
+  private final ResponsavelService responsavelService;
 
-  public ConfiguracaoController(Configuration configuration) {
+  public ConfiguracaoController(Configuration configuration, ResponsavelService responsavelService) {
     this.configuration = configuration;
+    this.responsavelService = responsavelService;
   }
 
   @PostMapping
@@ -128,6 +131,19 @@ public class ConfiguracaoController {
       @Parameter(description = "Tipo de configuração") @RequestParam ConfigurationType configurationType
   ) {
     configuration.delete(id, configurationType.getCode());
+    return ResponseEntity.noContent().build();
+  }
+
+  @DeleteMapping("/direcao-seccao/{responsavelId}")
+  @Operation(
+      summary = "Remover associacao direcao e seccao",
+      description = "Remove uma configuracao pelo seu id"
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "204", description = "Associação removida")
+  })
+  public ResponseEntity<Void> delete(@Parameter @PathVariable Long responsavelId) {
+    responsavelService.removerSecaoDirecaoAsociation(responsavelId);
     return ResponseEntity.noContent().build();
   }
 }
