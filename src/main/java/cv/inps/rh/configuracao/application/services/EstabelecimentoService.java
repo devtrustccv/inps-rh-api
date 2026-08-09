@@ -9,7 +9,6 @@ import cv.inps.rh.parametrizacao.application.dto.EstabelecimentoComboDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.dto.EstabelecimentoGroupedDTO;
 import cv.inps.rh.shared.application.dto.EstabelecimentoResponseDTO;
-import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EstabelecimentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EstabelecimentoEntityRepository;
@@ -59,25 +58,17 @@ public class EstabelecimentoService extends ConfigurationProcess<Estabelecimento
     var existentes = estabelecimentoRepository.findEntityByPaisId(List.of(dto.getPaisId()));
     existentes.stream()
         .filter(e -> !idsRecebidos.contains(e.getUuid()))
-        .forEach(e -> e.setEstado(Estado.I.getCode()));
+        .forEach(e -> {
+          e.setEstado(Estado.I.getCode());
+          estabelecimentoRepository.save(e);
+        });
 
     for (var data : estabelecimentos) {
 
       EstabelecimentoEntity estabelecimento;
 
       if (StringUtils.hasText(data.id())) {
-
         estabelecimento = estabelecimentoRepository.findByUuidOrThrow(data.id());
-
-        if (estabelecimento.getPais() == null
-            || !estabelecimento.getPais().getId().equals(dto.getPaisId())) {
-
-          throw IgrpResponseStatusException.badRequest(
-              "O estabelecimento " + data.id()
-              + " não pertence ao país informado."
-          );
-        }
-
       } else {
         estabelecimento = new EstabelecimentoEntity();
         estabelecimento.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
@@ -86,11 +77,8 @@ public class EstabelecimentoService extends ConfigurationProcess<Estabelecimento
       }
 
       estabelecimento.setNome(data.nome());
-
       estabelecimentoRepository.save(estabelecimento);
     }
-
-    estabelecimentoRepository.saveAll(existentes);
 
     return list(Map.of("filter", dto.getPaisId().toString()));
   }
@@ -186,10 +174,6 @@ public class EstabelecimentoService extends ConfigurationProcess<Estabelecimento
   @Override
   public void delete(String uuid) {
 
-    var estabelecimento = estabelecimentoRepository.findByUuidOrThrow(uuid);
 
-    estabelecimento.setEstado(Estado.E.getCode());
-
-    estabelecimentoRepository.save(estabelecimento);
   }
 }
