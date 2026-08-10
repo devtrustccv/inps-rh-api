@@ -63,10 +63,10 @@ public class ResponsavelController {
   )
 
    public ResponseEntity<ResponsaveisDirecaoResponseDTO> getResponsaveisDirecao(
-       @RequestParam(value = "seccaoId") String seccaoId, @PathVariable String institutoId)
+       @PathVariable String institutoId)
   {
 
-      final var query = new GetResponsaveisDirecaoQuery(seccaoId, institutoId);
+    final var query = new GetResponsaveisDirecaoQuery(institutoId);
 
       return queryBus.handle(query);
 

@@ -1,14 +1,11 @@
 {
-  "type": "dto",
-  "module": "emprestimo",
   "name": "HistoricoPagamentoRow",
   "template": "record",
-  "enableCustonValidation": false,
   "attributes": [
     {
       "name": "dataProcessamento",
-      "objectType": "java",
       "type": "date",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -19,8 +16,8 @@
     },
     {
       "name": "valor",
+      "type": "string",
       "objectType": "java",
-      "type": "decimal",
       "required": false,
       "before": false,
       "after": false,
@@ -30,5 +27,9 @@
       "primaryKey": false
     }
   ],
+  "type": "dto",
+  "module": "emprestimo",
+  "enableCustonValidation": false,
+  "readOnly": false,
   "id": "6ex46h0xs3"
 }

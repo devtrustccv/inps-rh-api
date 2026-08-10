@@ -5,6 +5,7 @@ import cv.inps.rh.emprestimo.application.commands.SaveConfiguracaoInfoEmprestimo
 import cv.inps.rh.emprestimo.application.dto.FundoSocialRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
+import cv.inps.rh.emprestimo.domain.service.constants.StatusEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -49,9 +50,9 @@ public class EmprestimoWriteService {
 
       final ParamEmprestimoEntity entity;
 
-      if (StringUtils.hasText(row.getId())) {
+      if (StringUtils.hasText(row.getId()))
         entity = paramEmprestimoEntityRepository.findByUuidOrThrow(row.getId());
-      } else {
+      else {
         entity = new ParamEmprestimoEntity();
         entity.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
       }
@@ -77,9 +78,10 @@ public class EmprestimoWriteService {
       entity.setTmId(request.getTipoMovimentoId());
       entity.setDataInicio(request.getDataInicio());
       entity.setDataFim(request.getDataFim());
-      entity.setEstado(Estado.A.name());
+      entity.setEstado(StatusEmprestimo.POR_SUBMETER.name());
       entity.setValorPrestacao(request.getValorPrestacaoMensal());
       entity.setValorEmprestimo(request.getValorTotalEmprestimo());
+      entity.setValorDivida(request.getValorTotalEmprestimo());
       entity.setFinalidade(request.getFinalidade());
       entity.setTipoEmprestimo(TipoPedido.FUNDO_SOCIAL.name());
       entity.setTipoSituacao(TipoPedido.FUNDO_SOCIAL.name());
@@ -89,27 +91,24 @@ public class EmprestimoWriteService {
 
       var funId = currentRelation.getFunId();
 
-      var orderOP = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, TipoPedido.FUNDO_SOCIAL.name(), Estado.A.name());
-      if (orderOP.isEmpty()) {
-        var order = new PedidoEntity();
-        order.setFunId(funId);
-        order.setUuid(UuidCreator.getTimeOrderedEpoch());
-        order.setTipoPedido(TipoPedido.FUNDO_SOCIAL.name());
-        order.setOrigem("RH");
-        order.setEtapa(EtapaEmprestimo.PEDIDO.name());
-        order.setEstado(Estado.A.name());
-        var savedOrder = pedidoEntityRepository.save(order);
-        entity.setPedido(savedOrder);
-      }
+      var order = new PedidoEntity();
+      order.setFunId(funId);
+      order.setUuid(UuidCreator.getTimeOrderedEpoch());
+      order.setTipoPedido(TipoPedido.FUNDO_SOCIAL.name());
+      order.setOrigem("RH");
+      order.setEtapa(EtapaEmprestimo.PEDIDO.name());
+      order.setEstado(Estado.A.name());
+      order = pedidoEntityRepository.save(order);
+      entity.setPedido(order);
 
-      var savedEntity = emprestimoEntityRepository.save(entity);
+      entity = emprestimoEntityRepository.save(entity);
 
-      generateFinancialPlanForFundoSocial(savedEntity);
+      generateSaveFinancialPlanForFundoSocial(entity);
 
       documentService.saveDocuments(
           request.getDocumentos(),
           funId,
-          savedEntity.getUuid(),
+          entity.getUuid(),
           TipoPedido.FUNDO_SOCIAL.name()
       );
 
@@ -130,22 +129,20 @@ public class EmprestimoWriteService {
     }
   }
 
-  public List<PlanoFinanceiroRowDTO> generateFinancialPlan(String uuid) {
+  public List<PlanoFinanceiroRowDTO> generateSaveFinancialPlan(String uuid) {
 
     var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
     if (entity.getDataInicio() == null)
       throw IgrpResponseStatusException.badRequest("Para gerar o plano financeiro deve ter uma data de início de empréstimo");
 
-    return generateFinancialPlan(entity);
+    return generateSaveFinancialPlan(entity);
   }
 
-  public List<PlanoFinanceiroRowDTO> generateFinancialPlan(EmprestimoEntity entity) {
+  public List<PlanoFinanceiroRowDTO> generateSaveFinancialPlan(EmprestimoEntity entity) {
 
-    var plan = FinancialPlanHelper.generateFinancialPlan(
-        entity.getValorEmprestimo(),
-        entity.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
-        entity.getNrPrestacao().intValue(),
-        entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now()
+    var plan = generateFinancialPlan(
+        entity,
+        entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now(ZoneId.systemDefault())
     );
 
     savePlans(entity, plan);
@@ -153,41 +150,50 @@ public class EmprestimoWriteService {
     return plan;
   }
 
-  public List<PlanoFinanceiroRowDTO> generateMockFinancialPlan(EmprestimoEntity entity) {
+  public List<PlanoFinanceiroRowDTO> generateFinancialPlan(EmprestimoEntity entity, LocalDate startDate) {
     return FinancialPlanHelper.generateFinancialPlan(
         entity.getValorEmprestimo(),
         entity.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
         entity.getNrPrestacao().intValue(),
-        LocalDate.now(ZoneId.systemDefault())
+        startDate
     );
   }
 
-  public void generateFinancialPlanForFundoSocial(EmprestimoEntity entity) {
+  public void generateSaveFinancialPlanForFundoSocial(EmprestimoEntity entity) {
 
     var plan = FinancialPlanHelper.generateFinancialPlanForSocialFund(
         entity.getValorEmprestimo(),
         entity.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
         entity.getNrPrestacao().intValue(),
-        entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now()
+        entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now(ZoneId.systemDefault())
     );
 
     savePlans(entity, plan);
   }
 
   private void savePlans(EmprestimoEntity entity, List<PlanoFinanceiroRowDTO> plan) {
-    for (var obj : plan) {
-      var newPlan = new PlanoFinanceiroEntity();
-      newPlan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-      newPlan.setEstado(Estado.A.name());
-      newPlan.setEmprestimo(entity);
-      newPlan.setDataPagamento(obj.dataPagamento());
-      newPlan.setNrOrdemPrestacao(obj.numero());
-      newPlan.setValorPrincipal(obj.principal());
-      newPlan.setValorJuros(obj.juros());
-      newPlan.setSaldoInicial(obj.saldoInicial());
-      newPlan.setSaldoFinal(obj.saldoFinal());
-      planoFinanceiroEntityRepository.save(newPlan);
-    }
+    var plans = plan.stream()
+        .map(obj -> {
+          var newPlan = new PlanoFinanceiroEntity();
+          newPlan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+          newPlan.setEstado(Estado.A.name());
+          newPlan.setEmprestimo(entity);
+          newPlan.setDataPagamento(obj.dataPagamento());
+          newPlan.setNrOrdemPrestacao(obj.numero());
+          newPlan.setValorPrincipal(obj.principal());
+          newPlan.setValorJuros(obj.juros());
+          newPlan.setSaldoInicial(obj.saldoInicial());
+          newPlan.setSaldoFinal(obj.saldoFinal());
+          return newPlan;
+        })
+        .toList();
+    planoFinanceiroEntityRepository.saveAll(plans);
+  }
+
+  public void cancelLoan(String uuid) {
+    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    entity.setEstado(StatusEmprestimo.CANCELADO.name());
+    emprestimoEntityRepository.save(entity);
   }
 }
 

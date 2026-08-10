@@ -56,7 +56,7 @@ public class ParametrizacaoService {
 
   @Transactional
   public List<EstabelecimentoComboDTO> getEstabelecimentosAtivos(Long paisId) {
-    return estabelecimentoEntityRepository.findByPaisId(paisId);
+    return estabelecimentoEntityRepository.findByPaisId(List.of(paisId));
   }
 
   public List<ParametrizacaoDTO> getInstituicoes() {

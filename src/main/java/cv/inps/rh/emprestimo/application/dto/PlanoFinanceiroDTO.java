@@ -23,8 +23,7 @@ import java.util.List;
 public class PlanoFinanceiroDTO  {
 
 
-
-  private BigDecimal valorEmprestimo ;
+  private String valorEmprestimo;
 
 
   private BigDecimal taxaJuroAnual ;
@@ -42,10 +41,10 @@ public class PlanoFinanceiroDTO  {
   private BigDecimal jurosTotal ;
 
 
-  private BigDecimal custoTotalEmprestimo ;
+  private String custoTotalEmprestimo;
 
 
-  private BigDecimal pagamentoMensal ;
+  private String pagamentoMensal;
 
   @Valid
   private List<PlanoFinanceiroRowDTO> rows = new ArrayList<>();

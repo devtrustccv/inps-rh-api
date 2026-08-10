@@ -21,4 +21,6 @@ public class EstabelecimentoComboDTO {
   private String label;
 
   private Long value;
+
+  private String valueUuid;
 }

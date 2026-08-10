@@ -42,4 +42,7 @@ public class ResponsavelEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "secao_id", referencedColumnName = "id")
   private SecaoEntity secaoId;
+
+  @Column(name = "estado")
+  private String estado;
 }

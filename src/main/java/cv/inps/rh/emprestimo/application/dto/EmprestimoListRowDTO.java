@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -19,11 +20,9 @@ import java.time.LocalDate;
 @IgrpDTO
 public class EmprestimoListRowDTO  {
 
+  private UUID funcionarioId;
 
-
-  private String funcionarioId ;
   private String tipoSituacao ;
-
 
   private String estado ;
 
@@ -36,6 +35,8 @@ public class EmprestimoListRowDTO  {
 
   private String tipoEmprestimo ;
 
+  private String tipoEmprestimoDesc;
+
 
   private String renegociacaoDivida ;
 
@@ -46,6 +47,7 @@ public class EmprestimoListRowDTO  {
   private BigDecimal valorConcedido ;
 
 
+  private Long numeroTotalPrestacoes;
   private Long numeroPrestacoesPagas ;
 
 

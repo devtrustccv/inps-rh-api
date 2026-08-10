@@ -1,27 +1,32 @@
-/* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
-
 package cv.inps.rh.emprestimo.application.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import cv.igrp.framework.stereotype.IgrpDTO;
+import cv.inps.rh.emprestimo.application.dto.serializer.PlanoFinanceiroSerializer;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @IgrpDTO
-public record PlanoFinanceiroRowDTO (
+public record PlanoFinanceiroRowDTO(
 
-  Long numero,
+    Long numero,
 
-  LocalDate dataPagamento,
+    LocalDate dataPagamento,
 
-  BigDecimal saldoInicial,
+    @JsonSerialize(using = PlanoFinanceiroSerializer.class)
+    BigDecimal saldoInicial,
 
-  BigDecimal pagamento,
+    @JsonSerialize(using = PlanoFinanceiroSerializer.class)
+    BigDecimal pagamento,
 
-  BigDecimal principal,
+    @JsonSerialize(using = PlanoFinanceiroSerializer.class)
+    BigDecimal principal,
 
-  BigDecimal juros,
+    @JsonSerialize(using = PlanoFinanceiroSerializer.class)
+    BigDecimal juros,
 
-  BigDecimal saldoFinal
-){}
+    @JsonSerialize(using = PlanoFinanceiroSerializer.class)
+    BigDecimal saldoFinal
+) {
+}

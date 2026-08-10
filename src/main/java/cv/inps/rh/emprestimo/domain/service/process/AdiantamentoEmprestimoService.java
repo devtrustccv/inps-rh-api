@@ -38,6 +38,7 @@ public class AdiantamentoEmprestimoService {
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
   private final AdiantamentoEmprestimoHelper adiantamentoEmprestimoHelper;
 
+  @Transactional
   public String saveUpdatePedidoAdiantamento(PedidoAdiantamentoRequestDTO obj) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
@@ -46,16 +47,19 @@ public class AdiantamentoEmprestimoService {
 
     var newLoan = new EmprestimoEntity();
     BeanUtils.copyProperties(loan, newLoan);
+    newLoan.setId(null);
+    newLoan.setValorPago(null);
     newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
     newLoan.setValorAdiantado(obj.getValorAdiantamento());
     newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
     newLoan.setTipoSituacao(tipoSituacao.name());
     newLoan.setVersao(loan.getVersao() + 1);
-    newLoan.setValorPago(null);
     newLoan.setValorDivida(obj.getValorAdiantamento());
     newLoan.setValorEmprestimo(obj.getValorAdiantamento());
     newLoan.setEmprestimo(loan);
     newLoan.setNrPrestacao(obj.getNumeroPrestacao());
+    newLoan.setEstado(StatusEmprestimo.POR_SUBMETER.name());
+    newLoan.setPedido(loan.getPedido());
     var saved = emprestimoEntityRepository.save(loan);
 
     documentService.saveDocuments(
@@ -66,6 +70,9 @@ public class AdiantamentoEmprestimoService {
     );
 
     if (obj.getAction().equals(ProcessStepAction.NEXT)) {
+
+      newLoan.setEstado(StatusEmprestimo.SUBMETIDO.name());
+      newLoan = emprestimoEntityRepository.save(newLoan);
 
       var rowsInactivated = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
       LOGGER.debug("INACTIVATED {} ROWS FOR LOAN ID <{}> : ", rowsInactivated, loan.getId());
@@ -93,18 +100,15 @@ public class AdiantamentoEmprestimoService {
 
     if (request.getAction().equals(ProcessStepAction.NEXT)) {
       switch (request.getParecer()) {
-        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name());
-        case RETIFICACAO -> order.setEtapa(EtapaEmprestimo.PEDIDO.name());
-        default -> {
-
-          loan.setEstado(Estado.I.name());
-          var rowsActivatedFromLoan = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
-          LOGGER.debug("INACTIVATED {} ROWS FOR CURRENT LOAN ID <{}> : ", rowsActivatedFromLoan, loan.getId());
-
-          var father = loan.getEmprestimo();
-          var rowsActivated = planoFinanceiroEntityRepository.ativarPlanosNaoPagos(father.getId());
-          LOGGER.debug("ACTIVATED {} ROWS FOR LOAN FATHER ID <{}> : ", rowsActivated, father.getId());
+        case FAVORAVEL -> {
+          order.setEtapa(EtapaEmprestimo.ANEXAR_CONTRATO_ADIANTAMENTO.name());
+          loan.setEstado(StatusEmprestimo.VALIDADO_RH.name());
         }
+        case DESFAVORAVEL -> {
+          order.setEtapa(EtapaEmprestimo.PEDIDO.name());
+          loan.setEstado(StatusEmprestimo.VALIDADO_RH.name());
+        }
+        case RETIFICACAO -> loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
       }
     }
 

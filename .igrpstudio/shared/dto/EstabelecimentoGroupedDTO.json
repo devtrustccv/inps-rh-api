@@ -1,0 +1,23 @@
+{
+  "name": "EstabelecimentoGrouped",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "id",
+      "type": "string",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "type": "dto",
+  "module": "shared",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "id": "new-action-Contractasdasdasdasdasdasdasdasdasdasdasd"
+}

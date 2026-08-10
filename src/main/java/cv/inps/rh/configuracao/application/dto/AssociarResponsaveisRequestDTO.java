@@ -13,18 +13,28 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-
 @IgrpDTO
 public class AssociarResponsaveisRequestDTO {
+
+  @NotNull(message = "The field <direcaoData> is required")
+  private DirecaoData direcaoData;
 
   @NotNull(message = "The field <responsaveis> is required")
   @NotEmpty(message = "The field <responsaveis> must not be empty")
   @Valid
-  private List<ResponsavelRequestDTO> responsaveis = new ArrayList<>();
+  private List<ResponsavelRequestDTO> sessaoData = new ArrayList<>();
+
+  public record DirecaoData(
+      @NotNull
+      Long direcaoId,
+
+      UUID funcionarioResponsavelId
+  ) {
+  }
 
 }

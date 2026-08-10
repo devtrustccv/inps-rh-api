@@ -1,11 +1,10 @@
 {
-  "name": "ResponsaveisDirecaoResponse",
+  "name": "EstruturaOrganizacional",
   "template": "classic",
-  "readOnly": true,
   "attributes": [
     {
-      "name": "content",
-      "type": "ResponsavelResponse",
+      "name": "direcao",
+      "type": "DirecaoRow",
       "objectType": "dto",
       "required": false,
       "before": false,
@@ -21,5 +20,6 @@
   "type": "dto",
   "module": "configuracao",
   "enableCustonValidation": false,
-  "id": "efb6tbobly"
+  "readOnly": false,
+  "id": "new-action-Contrasaskjdsakjdhasjdkjsahdkjsakhdj"
 }

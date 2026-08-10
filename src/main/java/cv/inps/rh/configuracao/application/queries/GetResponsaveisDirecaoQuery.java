@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GetResponsaveisDirecaoQuery implements Query {
 
-  @NotBlank(message = "The field <seccaoId> is required")
-  private String seccaoId;
   @NotBlank(message = "The field <institutoId> is required")
   private String institutoId;
 

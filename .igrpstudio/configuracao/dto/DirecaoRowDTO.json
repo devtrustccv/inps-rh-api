@@ -1,15 +1,11 @@
 {
-  "type": "dto",
-  "module": "configuracao",
-  "name": "ResponsavelRequest",
+  "name": "DirecaoRow",
   "template": "classic",
-  "enableCustonValidation": false,
-  "readOnly": true,
   "attributes": [
     {
-      "name": "idResponsavel",
-      "objectType": "java",
+      "name": "direcaoId",
       "type": "long",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -19,33 +15,9 @@
       "primaryKey": false
     },
     {
-      "name": "idDirecao",
-      "objectType": "java",
-      "type": "long",
-      "required": true,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "idFuncionario",
-      "objectType": "java",
+      "name": "nome",
       "type": "string",
-      "required": true,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "idSeccao",
       "objectType": "java",
-      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -53,7 +25,37 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "estadoDirecao",
+      "type": "string",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "seccao",
+      "type": "SeccaoRow",
+      "objectType": "dto",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "configuracao"
     }
   ],
-  "id": "njfebjuby8"
+  "type": "dto",
+  "module": "configuracao",
+  "enableCustonValidation": false,
+  "readOnly": false,
+  "id": "new-action-configuracao-adsjhbcsjhbvfks"
 }
