@@ -8,7 +8,7 @@
     {
       "name": "valorEmprestimo",
       "objectType": "java",
-      "type": "decimal",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -80,7 +80,7 @@
     {
       "name": "custoTotalEmprestimo",
       "objectType": "java",
-      "type": "decimal",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,
@@ -92,7 +92,7 @@
     {
       "name": "pagamentoMensal",
       "objectType": "java",
-      "type": "decimal",
+      "type": "string",
       "required": false,
       "before": false,
       "after": false,

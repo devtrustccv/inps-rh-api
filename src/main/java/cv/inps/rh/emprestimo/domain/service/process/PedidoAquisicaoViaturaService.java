@@ -287,7 +287,7 @@ public class PedidoAquisicaoViaturaService {
 
     loan.setEstado(isNext ? StatusEmprestimo.CABIMENTADO.name() : loan.getEstado());
 
-    emprestimoWriteService.generateFinancialPlan(loan);
+    emprestimoWriteService.generateSaveFinancialPlan(loan);
 
     var step = isNext ?
         EtapaEmprestimo.PAGAMENTO :

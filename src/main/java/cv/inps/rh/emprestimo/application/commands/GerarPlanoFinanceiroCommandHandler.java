@@ -27,7 +27,7 @@ public class GerarPlanoFinanceiroCommandHandler implements CommandHandler<GerarP
 
     LOGGER.debug("GerarPlanoFinanceiroCommand : {}", command);
 
-    var data = emprestimoWriteService.generateFinancialPlan(command.getEmprestimoId());
+    var data = emprestimoWriteService.generateSaveFinancialPlan(command.getEmprestimoId());
 
     return ResponseEntity.ok(data);
   }
