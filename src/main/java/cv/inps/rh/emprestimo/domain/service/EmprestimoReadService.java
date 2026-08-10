@@ -177,17 +177,19 @@ public class EmprestimoReadService {
 
   public PlanoFinanceiroDTO getPlanoFinanceiro(String uuid) {
 
+    var formatter = NumberUtils.usDecimalFormat();
+
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
     var plan = new PlanoFinanceiroDTO();
-    plan.setValorEmprestimo(loan.getValorEmprestimo());
+    plan.setValorEmprestimo(loan.getValorEmprestimo() == null ? "" : formatter.format(loan.getValorEmprestimo()));
     plan.setTaxaJuroAnual(loan.getJuro());
     plan.setPeriodoEmprestimo(loan.getNrPrestacao() != null ? (loan.getNrPrestacao() / 12) : null);
     plan.setDataInicio(loan.getDataInicio());
     plan.setNumeroPagamento(loan.getNrPrestacao());
     plan.setJurosTotal(loan.getValorJuroTotal());
-    plan.setCustoTotalEmprestimo(NumberUtils.sum(loan.getValorJuroTotal(), loan.getValorEmprestimo()));
-    plan.setPagamentoMensal(loan.getValorPrestacao());
+    plan.setCustoTotalEmprestimo(formatter.format(NumberUtils.sum(loan.getValorJuroTotal(), loan.getValorEmprestimo())));
+    plan.setPagamentoMensal(loan.getValorPrestacao() == null ? "" : formatter.format(loan.getValorPrestacao()));
 
     if (plan.getDataInicio() == null) {
       plan.setRows(emprestimoWriteService.generateMockFinancialPlan(loan));
