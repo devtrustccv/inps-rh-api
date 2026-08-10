@@ -26,4 +26,7 @@ public class MissaoAutorizacaoItemResponseDTO  {
   private Long numeroCabimento;           // MissaoLogisticaEntity.cabId
   private String estadoCabimento;
 
+  // colaboradores afetos a esta linha — quem autoriza precisa de saber de quem é cada cabimento
+  private java.util.List<MissaoLogisticaDetResponseDTO> colaboradores;
+
 }

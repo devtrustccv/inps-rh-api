@@ -29,8 +29,9 @@ public class MissaoColaboradorEntity extends AuditEntity {
     @JoinColumn(name = "fun_id", referencedColumnName = "id")
     private FuncionarioEntity funId;
 
-    @Column(name = "num_documento")
-    private Long numDocumento;
+    // VARCHAR2 — o nº de documento pode ser alfanumérico (ex.: passaporte "PA466262")
+    @Column(name = "num_documento", length = 255)
+    private String numDocumento;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "missao_serv_id", referencedColumnName = "id")

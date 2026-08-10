@@ -95,6 +95,7 @@ public class MissaoServicoServiceRead {
       item.setCabId(l.getCabId());
       item.setEstadoCabimento(l.getEstadoCabimento());
       item.setFatura(fatura);
+      item.setColaboradores(mapDet(detByLogId.get(l.getId())));
       itens.add(item);
     }
 
@@ -144,6 +145,7 @@ public class MissaoServicoServiceRead {
       item.setValorTotal(l.getValorTotal());
       item.setNumeroCabimento(l.getCabId());
       item.setEstadoCabimento(l.getEstadoCabimento());
+      item.setColaboradores(mapDet(detByLogId.get(l.getId())));
       itens.add(item);
     }
 
@@ -272,6 +274,7 @@ public class MissaoServicoServiceRead {
     response.setSegurosViagem(seguros);
     response.setAlojamentos(alojamentos);
     response.setAjudasCusto(ajudas);
+    response.setColaboradoresMissao(colaboradoresDaMissaoComPrestador(missaoUuid));
     return ResponseEntity.ok(response);
   }
 
@@ -339,21 +342,7 @@ public class MissaoServicoServiceRead {
     var missaoUuid = IdentificadorUnico.from(query.getUuid()).valor();
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
 
-    var colaboradores = missaoColaboradorRepository.findAllByMissaoServId_Uuid(missaoUuid)
-        .stream()
-        .filter(c -> c != null && ESTADO_ATIVO.equals(c.getEstado()))
-        .map(c -> {
-          var dto = new MissaoColaboradorResponseDTO();
-          dto.setId(c.getId());
-          dto.setUuid(c.getUuid());
-          dto.setEstado(c.getEstado());
-          dto.setNumDocumento(c.getNumDocumento() != null ? String.valueOf(c.getNumDocumento()) : null);
-          dto.setFunId(c.getFunId() != null ? c.getFunId().getId() : null);
-          dto.setFunUuid(c.getFunId() != null ? c.getFunId().getUuid() : null);
-          dto.setNomeColaborador(c.getFunId() != null ? c.getFunId().getNome() : null);
-          return dto;
-        })
-        .toList();
+    var colaboradores = colaboradoresDaMissao(missaoUuid);
 
     var docs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_MISSAO_SERVICO.name(),
         missaoUuid);
@@ -525,6 +514,7 @@ public class MissaoServicoServiceRead {
     response.setMissaoId(missao.getId());
     response.setEtapaAtual(missao.getEtapa());
     response.setRequisicoes(itens);
+    response.setColaboradoresMissao(colaboradoresDaMissao(missaoUuid));
     return ResponseEntity.ok(response);
   }
 
@@ -721,6 +711,48 @@ public class MissaoServicoServiceRead {
     return dto;
   }
 
+  /** Colaboradores ativos afetos à missão — usado pelos ecrãs que precisam de popular multiselects. */
+  private List<MissaoColaboradorResponseDTO> colaboradoresDaMissao(UUID missaoUuid) {
+    return missaoColaboradorRepository.findAllByMissaoServId_Uuid(missaoUuid)
+        .stream()
+        .filter(c -> c != null && ESTADO_ATIVO.equals(c.getEstado()))
+        .map(this::toColaboradorDto)
+        .toList();
+  }
+
+  /**
+   * Como {@link #colaboradoresDaMissao}, mas com o prestador a que cada colaborador ficou associado
+   * na emissão de requisição. A logística só permite agrupar colaboradores do mesmo prestador numa
+   * linha de bilhete/seguro, e sem esta informação o multiselect ofereceria combinações inválidas.
+   */
+  private List<MissaoColaboradorResponseDTO> colaboradoresDaMissaoComPrestador(UUID missaoUuid) {
+    var prestadorPorColab = new HashMap<Long, MissaoPrestadorEntity>();
+    var requisicoes = missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid);
+    if (!CollectionUtils.isEmpty(requisicoes)) {
+      for (var r : requisicoes) {
+        if (r == null || !ESTADO_ATIVO.equals(r.getEstado()))
+          continue;
+        if (r.getMissaoColabId() == null || r.getMissaoColabId().getId() == null || r.getMissaoPrestId() == null)
+          continue;
+        prestadorPorColab.putIfAbsent(r.getMissaoColabId().getId(), r.getMissaoPrestId());
+      }
+    }
+
+    return missaoColaboradorRepository.findAllByMissaoServId_Uuid(missaoUuid)
+        .stream()
+        .filter(c -> c != null && ESTADO_ATIVO.equals(c.getEstado()))
+        .map(c -> {
+          var dto = toColaboradorDto(c);
+          var prest = prestadorPorColab.get(c.getId());
+          if (dto != null && prest != null) {
+            dto.setMissaoPrestId(prest.getId());
+            dto.setNomePrestador(prest.getNome());
+          }
+          return dto;
+        })
+        .toList();
+  }
+
   private MissaoColaboradorResponseDTO toColaboradorDto(MissaoColaboradorEntity c) {
     if (c == null)
       return null;
@@ -728,7 +760,12 @@ public class MissaoServicoServiceRead {
     dto.setId(c.getId());
     dto.setUuid(c.getUuid());
     dto.setEstado(c.getEstado());
-    dto.setNumDocumento(c.getNumDocumento() != null ? String.valueOf(c.getNumDocumento()) : null);
+    // Prefere o nº de documento do funcionário (fonte de verdade); a cópia em
+    // RH_T_MISSAO_COLABORADOR serve os registos antigos, gravados antes de a coluna passar a VARCHAR2.
+    var numDocumentoFuncionario = c.getFunId() != null ? c.getFunId().getNumDocumento() : null;
+    dto.setNumDocumento(StringUtils.hasText(numDocumentoFuncionario)
+        ? numDocumentoFuncionario
+        : c.getNumDocumento());
     dto.setFunId(c.getFunId() != null ? c.getFunId().getId() : null);
     dto.setFunUuid(c.getFunId() != null ? c.getFunId().getUuid() : null);
     dto.setNomeColaborador(c.getFunId() != null ? c.getFunId().getNome() : null);

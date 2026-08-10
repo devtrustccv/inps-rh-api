@@ -23,4 +23,7 @@ public class MissaoEmissaoReqResponseDTO  {
   private String etapaAtual;              // campo etapa de RH_T_MISSAO_SERVICO — usado pelo frontend para activar o step correcto
   private List<MissaoReqItemResponseDTO> requisicoes;
 
+  // universo de colaboradores afetos à missão — popula o multiselect de associação a cada prestador
+  private List<MissaoColaboradorResponseDTO> colaboradoresMissao;
+
 }

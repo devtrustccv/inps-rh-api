@@ -31,4 +31,8 @@ public class MissaoCabimentoItemResponseDTO  {
   private String estadoCabimento;         // CABIMENTADO
   private AnexoRespDTO fatura;    // fatura anexada
 
+  // colaboradores afetos a esta linha — distingue linhas com o mesmo prestador, tipo e valor
+  // (ex.: dois seguros da mesma seguradora, um por colaborador)
+  private java.util.List<MissaoLogisticaDetResponseDTO> colaboradores;
+
 }
