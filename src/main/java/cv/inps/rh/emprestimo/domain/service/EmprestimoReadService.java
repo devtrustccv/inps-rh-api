@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -192,7 +193,7 @@ public class EmprestimoReadService {
     plan.setPagamentoMensal(loan.getValorPrestacao() == null ? "" : formatter.format(loan.getValorPrestacao()));
 
     if (plan.getDataInicio() == null) {
-      plan.setRows(emprestimoWriteService.generateMockFinancialPlan(loan));
+      plan.setRows(emprestimoWriteService.generateFinancialPlan(loan, LocalDate.now(ZoneId.systemDefault())));
       return plan;
     }
 
