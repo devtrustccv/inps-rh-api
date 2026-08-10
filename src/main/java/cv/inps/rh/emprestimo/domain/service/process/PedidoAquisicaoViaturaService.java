@@ -78,29 +78,32 @@ public class PedidoAquisicaoViaturaService {
         TipoPedido.AQUISICAO_VIATURA.name(),
         Estado.A.name()
     );
+
+    PedidoEntity order;
+
     if (orderOP.isEmpty()) {
-      var order = new PedidoEntity();
+      order = new PedidoEntity();
       order.setFunId(funId);
       order.setUuid(UuidCreator.getTimeOrderedEpoch());
       order.setTipoPedido(TipoPedido.AQUISICAO_VIATURA.name());
       order.setOrigem("RH");
       order.setEtapa(EtapaEmprestimo.PEDIDO.name());
       order.setEstado(Estado.A.name());
-      var savedOrder = pedidoEntityRepository.save(order);
-      entity.setPedido(savedOrder);
-      entity = emprestimoEntityRepository.save(entity);
+      order = pedidoEntityRepository.save(order);
     } else {
 
-      if (request.getAction().equals(ProcessStepAction.NEXT)) {
-        var order = orderOP.get();
-        order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
-        pedidoEntityRepository.save(order);
+      order = orderOP.get();
 
+      if (request.getAction().equals(ProcessStepAction.NEXT)) {
+        order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
         entity.setEstado(StatusEmprestimo.SUBMETIDO.name());
-        entity = emprestimoEntityRepository.save(entity);
       }
 
+      order = pedidoEntityRepository.save(order);
     }
+
+    entity.setPedido(order);
+    entity = emprestimoEntityRepository.save(entity);
 
     var response = new IdDTO(entity.getUuid());
 

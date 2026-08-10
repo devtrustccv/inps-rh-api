@@ -29,29 +29,21 @@ public class PedidoEntity extends AuditEntity {
   @Column(name = "id", unique = true, nullable = false)
   private Long id;
 
-
-
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "fun_id", referencedColumnName = "id")
   private FuncionarioEntity funId;
   @Column(name = "tipo_pedido")
   private String tipoPedido;
 
-
   @Column(name = "origem")
   private String origem;
 
-
   @Column(name = "uuid")
   private UUID uuid;
-
 
   @Column(name = "etapa")
   private String etapa;
 
   @Column(name = "estado")
   private String estado;
-
-
 }
