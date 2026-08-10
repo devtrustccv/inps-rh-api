@@ -59,6 +59,7 @@ public class AdiantamentoEmprestimoService {
     newLoan.setEmprestimo(loan);
     newLoan.setNrPrestacao(obj.getNumeroPrestacao());
     newLoan.setEstado(StatusEmprestimo.POR_SUBMETER.name());
+    newLoan.setPedido(loan.getPedido());
     var saved = emprestimoEntityRepository.save(loan);
 
     documentService.saveDocuments(

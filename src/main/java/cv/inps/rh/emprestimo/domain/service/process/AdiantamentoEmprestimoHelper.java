@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 @Transactional
 @RequiredArgsConstructor
@@ -41,6 +42,8 @@ public class AdiantamentoEmprestimoHelper {
     // reforço mexe com valor em divida e com valor reforço
     // reforço sobre prestacao mexe com valor prestacao e com numero de pretacao
 
+    var startDate = loan.getDataInicio() != null ? loan.getDataInicio() : LocalDate.now(ZoneId.systemDefault());
+
     switch (tipoSituacao) {
       case REFORCO_AUMENTO_VALOR -> {
 
@@ -54,7 +57,7 @@ public class AdiantamentoEmprestimoHelper {
             loan.getValorDivida(),
             loan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
             (int) numeroPrestacoes,
-            loan.getDataInicio() != null ? loan.getDataInicio() : LocalDate.now()
+            startDate
         );
       }
       case REFORCO_AUMENTO_PRESTACAO, ADIANTAMENTO_DIMINUICAO_PRESTACAO -> {
@@ -66,7 +69,7 @@ public class AdiantamentoEmprestimoHelper {
             loan.getValorDivida(),
             loan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
             newNumeroPrestacao.intValue(),
-            loan.getDataInicio() != null ? loan.getDataInicio() : LocalDate.now()
+            startDate
         );
       }
       case REFORCO_AUMENTO_VALOR_AUMENTO_PRESTACAO -> {
@@ -80,7 +83,7 @@ public class AdiantamentoEmprestimoHelper {
             loan.getValorDivida(),
             loan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
             newNumeroPrestacao.intValue(),
-            loan.getDataInicio() != null ? loan.getDataInicio() : LocalDate.now()
+            startDate
         );
       }
       case ADIANTAMENTO_PAGAMENTO_ANTECIPADO -> {
@@ -95,7 +98,7 @@ public class AdiantamentoEmprestimoHelper {
             loan.getValorDivida(),
             loan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
             (int) numeroPrestacoes,
-            loan.getDataInicio() != null ? loan.getDataInicio() : LocalDate.now()
+            startDate
         );
       }
       case ADIANTAMENTO_PAGAMENTO_ANTECIPADO_DIMINUICAO_PRESTACAO -> {
@@ -109,7 +112,7 @@ public class AdiantamentoEmprestimoHelper {
             loan.getValorDivida(),
             loan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
             newNumeroPrestacao.intValue(),
-            loan.getDataInicio() != null ? loan.getDataInicio() : LocalDate.now()
+            startDate
         );
       }
     }

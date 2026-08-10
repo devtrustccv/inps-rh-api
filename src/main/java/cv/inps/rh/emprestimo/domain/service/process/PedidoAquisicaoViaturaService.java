@@ -37,14 +37,17 @@ public class PedidoAquisicaoViaturaService {
   private final EmprestimoDocumentService documentService;
   private final EmprestimoWriteService emprestimoWriteService;
 
-  public IdDTO saveUpdatePedidoEmprestimo(String uuid, PedidoEmprestimoRequestDTO request) {
+  public IdDTO saveUpdatePedidoEmprestimo(String emprestimoId, PedidoEmprestimoRequestDTO request) {
 
     var currentRelation = funcionarioRules.getTipoRelacionamentoAtual(UUID.fromString(request.getFuncionarioId()));
+    var funId = currentRelation.getFunId();
+
+    final var isLoanUpdate = StringUtils.hasText(emprestimoId);
 
     EmprestimoEntity entity;
 
-    if (StringUtils.hasText(uuid))
-      entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    if (isLoanUpdate)
+      entity = emprestimoEntityRepository.findByUuidOrThrow(emprestimoId);
     else {
       entity = new EmprestimoEntity();
       entity.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
@@ -69,19 +72,10 @@ public class PedidoAquisicaoViaturaService {
     entity.setJuro(request.getJuros());
     entity.setNib(request.getNib());
     entity.setNif(request.getNif());
-    entity = emprestimoEntityRepository.save(entity);
-
-    var funId = currentRelation.getFunId();
-
-    var orderOP = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(
-        funId,
-        TipoPedido.AQUISICAO_VIATURA.name(),
-        Estado.A.name()
-    );
 
     PedidoEntity order;
 
-    if (orderOP.isEmpty()) {
+    if (!isLoanUpdate) {
       order = new PedidoEntity();
       order.setFunId(funId);
       order.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -89,19 +83,18 @@ public class PedidoAquisicaoViaturaService {
       order.setOrigem("RH");
       order.setEtapa(EtapaEmprestimo.PEDIDO.name());
       order.setEstado(Estado.A.name());
-      order = pedidoEntityRepository.save(order);
+
     } else {
 
-      order = orderOP.get();
+      order = entity.getPedido();
 
       if (request.getAction().equals(ProcessStepAction.NEXT)) {
         order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
         entity.setEstado(StatusEmprestimo.SUBMETIDO.name());
       }
-
-      order = pedidoEntityRepository.save(order);
     }
 
+    order = pedidoEntityRepository.save(order);
     entity.setPedido(order);
     entity = emprestimoEntityRepository.save(entity);
 
