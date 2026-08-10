@@ -155,7 +155,7 @@ public class EmprestimoEntity extends AuditEntity {
 
   @Size(max = 1)
   @NotNull
-  @Column(name = "ESTADO", nullable = false, length = 1)
+  @Column(name = "ESTADO", nullable = false, length = 25)
   private String estado;
 
   @Size(max = 100)
