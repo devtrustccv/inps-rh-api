@@ -26,4 +26,10 @@ public class MissaoColaboradorResponseDTO  {
   private String nomeColaborador;
   private String numDocumento;
   private String estado;
+
+  // Prestador a que o colaborador ficou associado na etapa de emissão de requisição.
+  // Na logística, uma linha de bilhete/seguro só pode agrupar colaboradores do mesmo prestador —
+  // o frontend usa isto para agrupar o multiselect e não oferecer combinações inválidas.
+  private Long missaoPrestId;
+  private String nomePrestador;
 }

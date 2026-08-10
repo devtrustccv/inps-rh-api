@@ -95,6 +95,7 @@ public class MissaoServicoServiceRead {
       item.setCabId(l.getCabId());
       item.setEstadoCabimento(l.getEstadoCabimento());
       item.setFatura(fatura);
+      item.setColaboradores(mapDet(detByLogId.get(l.getId())));
       itens.add(item);
     }
 
@@ -144,6 +145,7 @@ public class MissaoServicoServiceRead {
       item.setValorTotal(l.getValorTotal());
       item.setNumeroCabimento(l.getCabId());
       item.setEstadoCabimento(l.getEstadoCabimento());
+      item.setColaboradores(mapDet(detByLogId.get(l.getId())));
       itens.add(item);
     }
 
@@ -272,7 +274,7 @@ public class MissaoServicoServiceRead {
     response.setSegurosViagem(seguros);
     response.setAlojamentos(alojamentos);
     response.setAjudasCusto(ajudas);
-    response.setColaboradoresMissao(colaboradoresDaMissao(missaoUuid));
+    response.setColaboradoresMissao(colaboradoresDaMissaoComPrestador(missaoUuid));
     return ResponseEntity.ok(response);
   }
 
@@ -715,6 +717,39 @@ public class MissaoServicoServiceRead {
         .stream()
         .filter(c -> c != null && ESTADO_ATIVO.equals(c.getEstado()))
         .map(this::toColaboradorDto)
+        .toList();
+  }
+
+  /**
+   * Como {@link #colaboradoresDaMissao}, mas com o prestador a que cada colaborador ficou associado
+   * na emissão de requisição. A logística só permite agrupar colaboradores do mesmo prestador numa
+   * linha de bilhete/seguro, e sem esta informação o multiselect ofereceria combinações inválidas.
+   */
+  private List<MissaoColaboradorResponseDTO> colaboradoresDaMissaoComPrestador(UUID missaoUuid) {
+    var prestadorPorColab = new HashMap<Long, MissaoPrestadorEntity>();
+    var requisicoes = missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid);
+    if (!CollectionUtils.isEmpty(requisicoes)) {
+      for (var r : requisicoes) {
+        if (r == null || !ESTADO_ATIVO.equals(r.getEstado()))
+          continue;
+        if (r.getMissaoColabId() == null || r.getMissaoColabId().getId() == null || r.getMissaoPrestId() == null)
+          continue;
+        prestadorPorColab.putIfAbsent(r.getMissaoColabId().getId(), r.getMissaoPrestId());
+      }
+    }
+
+    return missaoColaboradorRepository.findAllByMissaoServId_Uuid(missaoUuid)
+        .stream()
+        .filter(c -> c != null && ESTADO_ATIVO.equals(c.getEstado()))
+        .map(c -> {
+          var dto = toColaboradorDto(c);
+          var prest = prestadorPorColab.get(c.getId());
+          if (dto != null && prest != null) {
+            dto.setMissaoPrestId(prest.getId());
+            dto.setNomePrestador(prest.getNome());
+          }
+          return dto;
+        })
         .toList();
   }
 
