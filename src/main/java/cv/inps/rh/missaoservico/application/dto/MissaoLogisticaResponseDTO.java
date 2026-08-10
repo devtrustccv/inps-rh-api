@@ -28,4 +28,8 @@ public class MissaoLogisticaResponseDTO  {
   private List<AlojamentoResponseDTO> alojamentos;
   private List<AjudaCustoResponseDTO> ajudasCusto;
 
+  // universo de colaboradores afetos à missão — popula os multiselect de bilhete/seguro/alojamento
+  // e a seleção de colaborador da ajuda de custo
+  private List<MissaoColaboradorResponseDTO> colaboradoresMissao;
+
 }

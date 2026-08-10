@@ -989,11 +989,72 @@ public class MissaoServicoServiceWrite {
       }
     }
 
+    // Linhas existentes indexadas pelo conjunto de colaboradores — a chave estável de uma linha de
+    // logística. Permite reaproveitar a linha (id, uuid e anexos) em vez de a recriar a cada gravação.
+    var existentesPorChave = new HashMap<String, ArrayDeque<MissaoLogisticaEntity>>();
     if (!existentesRef.isEmpty()) {
-      existentesRef.forEach(e -> e.setEstado(ESTADO_INATIVO));
-      missaoLogisticaRepository.saveAll(existentesRef);
+      var idsExistentes = existentesRef.stream()
+          .map(MissaoLogisticaEntity::getId)
+          .filter(java.util.Objects::nonNull)
+          .toList();
+      var detsPorLog = new HashMap<Long, List<MissaoLogisticaDetEntity>>();
+      if (!idsExistentes.isEmpty()) {
+        var dets = missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(idsExistentes);
+        if (!CollectionUtils.isEmpty(dets)) {
+          for (var d : dets) {
+            if (d == null || !ESTADO_ATIVO.equals(d.getEstado())
+                || d.getMissaoLogistId() == null || d.getMissaoLogistId().getId() == null)
+              continue;
+            detsPorLog.computeIfAbsent(d.getMissaoLogistId().getId(), _ -> new ArrayList<>()).add(d);
+          }
+        }
+      }
+      for (var e : existentesRef) {
+        var colabIds = detsPorLog.getOrDefault(e.getId(), List.of()).stream()
+            .map(d -> d.getMissaoColabId() != null ? d.getMissaoColabId().getId() : null)
+            .filter(java.util.Objects::nonNull)
+            .toList();
+        existentesPorChave.computeIfAbsent(chaveLogistica(colabIds), _ -> new ArrayDeque<>()).add(e);
+      }
+    }
 
-      var ids = existentesRef.stream().map(MissaoLogisticaEntity::getId).filter(java.util.Objects::nonNull).toList();
+    var mapeados = new ArrayList<LogisticaPersist>();
+    for (var raw : items == null ? List.<T>of() : items) {
+      var p = mapper.apply(raw);
+      if (p != null) {
+        mapeados.add(p);
+      }
+    }
+
+    var reaproveitados = new ArrayList<MissaoLogisticaEntity>();
+    var novos = new ArrayList<LogisticaPersist>();
+    var novosLogs = new ArrayList<MissaoLogisticaEntity>();
+
+    for (var p : mapeados) {
+      var chave = chaveLogistica(p.colaboradores.stream()
+          .map(MissaoColaboradorEntity::getId)
+          .filter(java.util.Objects::nonNull)
+          .toList());
+      var candidatos = existentesPorChave.get(chave);
+      var existente = candidatos != null ? candidatos.poll() : null;
+
+      if (existente != null) {
+        copiarDadosLogistica(p.logistica, existente);
+        reaproveitados.add(existente);
+        p.logistica = existente;   // anexos passam a ser sincronizados contra a linha reaproveitada
+      } else {
+        novos.add(p);
+        novosLogs.add(p.logistica);
+      }
+    }
+
+    // O que sobrou das linhas existentes deixou de ser pedido — inativa linha, detalhes e documentos.
+    var orfas = existentesPorChave.values().stream().flatMap(java.util.Collection::stream).toList();
+    if (!orfas.isEmpty()) {
+      orfas.forEach(e -> e.setEstado(ESTADO_INATIVO));
+      missaoLogisticaRepository.saveAll(orfas);
+
+      var ids = orfas.stream().map(MissaoLogisticaEntity::getId).filter(java.util.Objects::nonNull).toList();
       if (!ids.isEmpty()) {
         var dets = missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(ids);
         if (!CollectionUtils.isEmpty(dets)) {
@@ -1002,7 +1063,7 @@ public class MissaoServicoServiceWrite {
         }
       }
 
-      for (var e : existentesRef) {
+      for (var e : orfas) {
         if (e == null || e.getUuid() == null)
           continue;
         var docs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(
@@ -1015,30 +1076,25 @@ public class MissaoServicoServiceWrite {
       }
     }
 
-    if (CollectionUtils.isEmpty(items)) {
-      return;
+    if (!reaproveitados.isEmpty()) {
+      missaoLogisticaRepository.saveAll(reaproveitados);
     }
 
-    var novosLogs = new ArrayList<MissaoLogisticaEntity>();
-    var novos = new ArrayList<LogisticaPersist>();
-    for (var raw : items) {
-      var p = mapper.apply(raw);
-      if (p == null)
-        continue;
-      novos.add(p);
-      novosLogs.add(p.logistica);
-    }
-
-    if (novosLogs.isEmpty())
+    if (mapeados.isEmpty())
       return;
 
-    novosLogs = new ArrayList<>(missaoLogisticaRepository.saveAll(novosLogs));
+    if (!novosLogs.isEmpty()) {
+      novosLogs = new ArrayList<>(missaoLogisticaRepository.saveAll(novosLogs));
+    }
 
     var detsToSave = new ArrayList<MissaoLogisticaDetEntity>();
 
+    // Só as linhas novas precisam de detalhes: as reaproveitadas já têm os mesmos colaboradores,
+    // por ser esse o critério que as fez casar.
     for (int i = 0; i < novos.size(); i++) {
       var p = novos.get(i);
       var log = novosLogs.get(i);
+      p.logistica = log;
 
       for (var colab : p.colaboradores) {
         var det = new MissaoLogisticaDetEntity();
@@ -1047,35 +1103,62 @@ public class MissaoServicoServiceWrite {
         det.setMissaoColabId(colab);
         detsToSave.add(det);
       }
-
-      if (p.anexo != null) {
-        var existentesDocs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(
-            TableName.RH_T_MISSAO_LOGISTICA.name(),
-            log.getUuid());
-        var sync = documentoMapper.syncDocumentos(
-            existentesDocs != null ? existentesDocs : new ArrayList<>(),
-            List.of(p.anexo),
-            TableName.RH_T_MISSAO_LOGISTICA.name(),
-            log.getId(),
-            log.getUuid(),
-            1L,
-            null);
-
-        if (sync != null && !sync.isEmpty()) {
-          sync.forEach(d -> {
-            if (d.getUuid() == null)
-              d.setUuid(UuidCreator.getTimeOrderedEpoch());
-            if (d.getEstado() == null)
-              d.setEstado(Estado.A);
-          });
-          documentoRepository.saveAll(sync);
-        }
-      }
     }
 
     if (!detsToSave.isEmpty()) {
       missaoLogisticaDetRepository.saveAll(detsToSave);
     }
+
+    // Anexos: sincronizados contra a linha final (nova ou reaproveitada), para que um anexo já
+    // existente não se perca numa segunda gravação.
+    for (var p : mapeados) {
+      if (p.anexo == null || p.logistica == null || p.logistica.getUuid() == null)
+        continue;
+
+      var existentesDocs = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(
+          TableName.RH_T_MISSAO_LOGISTICA.name(),
+          p.logistica.getUuid());
+      var sync = documentoMapper.syncDocumentos(
+          existentesDocs != null ? existentesDocs : new ArrayList<>(),
+          List.of(p.anexo),
+          TableName.RH_T_MISSAO_LOGISTICA.name(),
+          p.logistica.getId(),
+          p.logistica.getUuid(),
+          1L,
+          null);
+
+      if (sync != null && !sync.isEmpty()) {
+        sync.forEach(d -> {
+          if (d.getUuid() == null)
+            d.setUuid(UuidCreator.getTimeOrderedEpoch());
+          if (d.getEstado() == null)
+            d.setEstado(Estado.A);
+        });
+        documentoRepository.saveAll(sync);
+      }
+    }
+  }
+
+  /** Chave estável de uma linha de logística: o conjunto (ordenado) de colaboradores associados. */
+  private String chaveLogistica(List<Long> colaboradorIds) {
+    return colaboradorIds.stream().sorted().map(String::valueOf).collect(java.util.stream.Collectors.joining("-"));
+  }
+
+  /** Copia os dados de negócio da linha mapeada para a linha já persistida, preservando id/uuid/cabimento. */
+  private void copiarDadosLogistica(MissaoLogisticaEntity origem, MissaoLogisticaEntity destino) {
+    destino.setPrestadorServId(origem.getPrestadorServId());
+    destino.setNomeSeguradora(origem.getNomeSeguradora());
+    destino.setEntId(origem.getEntId());
+    destino.setValorTotal(origem.getValorTotal());
+    destino.setMoeda(origem.getMoeda());
+    destino.setLugarHospedagem(origem.getLugarHospedagem());
+    destino.setFlgAlimentacao(origem.getFlgAlimentacao());
+    destino.setValorDiario(origem.getValorDiario());
+    destino.setDataInicio(origem.getDataInicio());
+    destino.setDataFim(origem.getDataFim());
+    destino.setNrDias(origem.getNrDias());
+    destino.setFlgAlojamento(origem.getFlgAlojamento());
+    destino.setEstado(ESTADO_ATIVO);
   }
 
   private MissaoPrestadorEntity derivePrestadorFromRequisicao(
@@ -1131,7 +1214,8 @@ public class MissaoServicoServiceWrite {
   }
 
   private static final class LogisticaPersist {
-    private final MissaoLogisticaEntity logistica;
+    /** Não é final: passa a apontar para a linha existente quando a gravação a reaproveita. */
+    private MissaoLogisticaEntity logistica;
     private final List<MissaoColaboradorEntity> colaboradores;
     private final cv.inps.rh.shared.application.dto.AnexoReqDTO anexo;
 
@@ -1460,7 +1544,7 @@ public class MissaoServicoServiceWrite {
       e.setEstado(ESTADO_ATIVO);
       e.setFunId(fun);
       e.setMissaoServId(missao);
-      e.setNumDocumento(parseLong(fun.getNumDocumento()));
+      e.setNumDocumento(fun.getNumDocumento());
       result.add(e);
     }
 
@@ -1495,7 +1579,7 @@ public class MissaoServicoServiceWrite {
         if (dto != null) {
           e.setEstado(ESTADO_ATIVO);
           var fun = funcionarioRepository.findByUuidOrThrow(funUuid);
-          e.setNumDocumento(parseLong(fun.getNumDocumento()));
+          e.setNumDocumento(fun.getNumDocumento());
           toSave.add(e);
         } else if (e != null) {
           e.setEstado(ESTADO_INATIVO);
@@ -1511,7 +1595,7 @@ public class MissaoServicoServiceWrite {
       e.setEstado(ESTADO_ATIVO);
       e.setFunId(fun);
       e.setMissaoServId(missao);
-      e.setNumDocumento(parseLong(fun.getNumDocumento()));
+      e.setNumDocumento(fun.getNumDocumento());
       toSave.add(e);
     }
 
@@ -1623,15 +1707,6 @@ public class MissaoServicoServiceWrite {
     return "A missão Nº " + missao.getNrMissao() + " foi cancelada.";
   }
 
-  private Long parseLong(String raw) {
-    if (!StringUtils.hasText(raw))
-      return null;
-    try {
-      return Long.valueOf(raw.trim());
-    } catch (Exception e) {
-      return null;
-    }
-  }
 
   private void persistirDocumentos(MissaoSubmissaoRequestDTO dto, MissaoServicoEntity missao) {
     if (dto.getDocumentos() == null)
