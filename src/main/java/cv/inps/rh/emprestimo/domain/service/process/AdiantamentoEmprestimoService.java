@@ -38,6 +38,7 @@ public class AdiantamentoEmprestimoService {
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
   private final AdiantamentoEmprestimoHelper adiantamentoEmprestimoHelper;
 
+  @Transactional
   public String saveUpdatePedidoAdiantamento(PedidoAdiantamentoRequestDTO obj) {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
@@ -46,12 +47,13 @@ public class AdiantamentoEmprestimoService {
 
     var newLoan = new EmprestimoEntity();
     BeanUtils.copyProperties(loan, newLoan);
+    newLoan.setId(null);
+    newLoan.setValorPago(null);
     newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
     newLoan.setValorAdiantado(obj.getValorAdiantamento());
     newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
     newLoan.setTipoSituacao(tipoSituacao.name());
     newLoan.setVersao(loan.getVersao() + 1);
-    newLoan.setValorPago(null);
     newLoan.setValorDivida(obj.getValorAdiantamento());
     newLoan.setValorEmprestimo(obj.getValorAdiantamento());
     newLoan.setEmprestimo(loan);
