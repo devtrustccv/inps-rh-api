@@ -81,6 +81,7 @@ public class EmprestimoWriteService {
       entity.setEstado(StatusEmprestimo.POR_SUBMETER.name());
       entity.setValorPrestacao(request.getValorPrestacaoMensal());
       entity.setValorEmprestimo(request.getValorTotalEmprestimo());
+      entity.setValorDivida(request.getValorTotalEmprestimo());
       entity.setFinalidade(request.getFinalidade());
       entity.setTipoEmprestimo(TipoPedido.FUNDO_SOCIAL.name());
       entity.setTipoSituacao(TipoPedido.FUNDO_SOCIAL.name());
@@ -90,27 +91,24 @@ public class EmprestimoWriteService {
 
       var funId = currentRelation.getFunId();
 
-      var orderOP = pedidoEntityRepository.findByFunIdAndTipoPedidoAndEstado(funId, TipoPedido.FUNDO_SOCIAL.name(), Estado.A.name());
-      if (orderOP.isEmpty()) {
-        var order = new PedidoEntity();
-        order.setFunId(funId);
-        order.setUuid(UuidCreator.getTimeOrderedEpoch());
-        order.setTipoPedido(TipoPedido.FUNDO_SOCIAL.name());
-        order.setOrigem("RH");
-        order.setEtapa(EtapaEmprestimo.PEDIDO.name());
-        order.setEstado(Estado.A.name());
-        var savedOrder = pedidoEntityRepository.save(order);
-        entity.setPedido(savedOrder);
-      }
+      var order = new PedidoEntity();
+      order.setFunId(funId);
+      order.setUuid(UuidCreator.getTimeOrderedEpoch());
+      order.setTipoPedido(TipoPedido.FUNDO_SOCIAL.name());
+      order.setOrigem("RH");
+      order.setEtapa(EtapaEmprestimo.PEDIDO.name());
+      order.setEstado(Estado.A.name());
+      order = pedidoEntityRepository.save(order);
+      entity.setPedido(order);
 
-      var savedEntity = emprestimoEntityRepository.save(entity);
+      entity = emprestimoEntityRepository.save(entity);
 
-      generateFinancialPlanForFundoSocial(savedEntity);
+      generateFinancialPlanForFundoSocial(entity);
 
       documentService.saveDocuments(
           request.getDocumentos(),
           funId,
-          savedEntity.getUuid(),
+          entity.getUuid(),
           TipoPedido.FUNDO_SOCIAL.name()
       );
 

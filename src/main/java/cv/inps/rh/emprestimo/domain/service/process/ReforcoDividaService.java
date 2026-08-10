@@ -42,18 +42,20 @@ public class ReforcoDividaService {
 
     var newLoan = new EmprestimoEntity();
     BeanUtils.copyProperties(loan, newLoan);
+    newLoan.setId(null);
+    newLoan.setValorPago(null);
     newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
     newLoan.setValorAdiantado(obj.getValorReforco());
     newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
     newLoan.setVersao(loan.getVersao() + 1);
     newLoan.setTipoSituacao(tipoSituacao.name());
-    newLoan.setValorPago(null);
     newLoan.setEmprestimo(loan);
     newLoan.setNrPrestacao(obj.getNumeroPrestacao());
     newLoan.setValorEmprestimo(obj.getValorReforco());
     newLoan.setValorDivida(obj.getValorReforco());
     newLoan.setMotivo(obj.getMotivoReforco());
     newLoan.setEstado(StatusEmprestimo.POR_SUBMETER.name());
+    newLoan.setPedido(loan.getPedido());
     var saved = emprestimoEntityRepository.save(loan);
 
     documentService.saveDocuments(
@@ -139,6 +141,7 @@ public class ReforcoDividaService {
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.ANALISE_RH_REFORCO.name()
     );
   }
+
 
   public void saveUpdateDecisaoAnaliseFinanceira(String uuid, AnaliseFinanceiroRequestDTO request) {
 
