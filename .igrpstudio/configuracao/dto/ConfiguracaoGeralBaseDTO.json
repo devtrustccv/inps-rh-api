@@ -1,15 +1,11 @@
 {
-  "type": "dto",
-  "module": "configuracao",
-  "name": "ResponsavelRequest",
+  "name": "ConfiguracaoGeralBase",
   "template": "classic",
-  "enableCustonValidation": false,
-  "readOnly": true,
   "attributes": [
     {
-      "name": "idResponsavel",
+      "name": "id",
+      "type": "string",
       "objectType": "java",
-      "type": "long",
       "required": false,
       "before": false,
       "after": false,
@@ -19,10 +15,10 @@
       "primaryKey": false
     },
     {
-      "name": "idDirecao",
+      "name": "utilizadoRegisto",
+      "type": "string",
       "objectType": "java",
-      "type": "long",
-      "required": true,
+      "required": false,
       "before": false,
       "after": false,
       "positive": false,
@@ -31,10 +27,10 @@
       "primaryKey": false
     },
     {
-      "name": "idFuncionario",
+      "name": "dataRegisto",
+      "type": "date",
       "objectType": "java",
-      "type": "string",
-      "required": true,
+      "required": false,
       "before": false,
       "after": false,
       "positive": false,
@@ -43,9 +39,9 @@
       "primaryKey": false
     },
     {
-      "name": "idSeccao",
-      "objectType": "java",
+      "name": "estado",
       "type": "string",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -55,5 +51,9 @@
       "primaryKey": false
     }
   ],
-  "id": "njfebjuby8"
+  "type": "dto",
+  "module": "configuracao",
+  "enableCustonValidation": false,
+  "readOnly": false,
+  "id": "new-action-Contractxvxvsfdsfsdfdsfdsfsdfsfd"
 }

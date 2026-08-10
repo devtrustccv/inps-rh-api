@@ -4,34 +4,22 @@
 package cv.inps.rh.configuracao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-
+import java.util.UUID;
 
 @IgrpDTO
-public class ResponsavelRequestDTO {
+@Valid
+public record ResponsavelRequestDTO(
 
+    Long idResponsavel,
 
-  private Long idResponsavel;
-  @NotNull(message = "The field <idDirecao> is required")
+    UUID idFuncionario,
 
-  private Long idDirecao;
-  @NotBlank(message = "The field <IdFuncionario> is required")
+    UUID idSeccao,
 
-  private String IdFuncionario;
-  @NotBlank(message = "The field <email> is required")
-
-  private String email;
-
-
-  private String idSeccao;
-
+    @NotBlank
+    String nomeSeccao
+) {
 }

@@ -1,12 +1,12 @@
 {
-  "name": "EstabelecimentoRequest",
+  "name": "SeccaoRow",
   "template": "classic",
   "attributes": [
     {
-      "name": "nome",
+      "name": "seccaoId",
       "type": "string",
       "objectType": "java",
-      "required": true,
+      "required": false,
       "before": false,
       "after": false,
       "positive": false,
@@ -15,8 +15,20 @@
       "primaryKey": false
     },
     {
-      "name": "paisId",
-      "type": "long",
+      "name": "nome",
+      "type": "string",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "estadoSeccao",
+      "type": "string",
       "objectType": "java",
       "required": false,
       "before": false,
@@ -28,8 +40,8 @@
     }
   ],
   "type": "dto",
-  "module": "shared",
+  "module": "configuracao",
   "enableCustonValidation": false,
   "readOnly": false,
-  "id": "new-action-Contract-xcvrtfgwww"
+  "id": "new-action-Contract_secsecsec"
 }

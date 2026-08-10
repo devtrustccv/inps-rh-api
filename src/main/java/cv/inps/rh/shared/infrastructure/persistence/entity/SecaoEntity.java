@@ -46,7 +46,8 @@ public class SecaoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instit_id", referencedColumnName = "id")
     private DirecaoEntity instId;
-    @Enumerated(EnumType.STRING)
+
+  @Enumerated(EnumType.STRING)
     @Column(name="estado")
     private Estado estado;
 

@@ -6,27 +6,25 @@ package cv.inps.rh.configuracao.application.dto;
 import cv.igrp.framework.stereotype.IgrpDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-@EqualsAndHashCode(callSuper = true)
 @IgrpDTO
-public class ResponsavelResponseDTO extends ResponsavelRequestDTO {
+public class ResponsavelResponseDTO {
 
 
-  private String nomeSeccao;
+  private Long responsavelId;
 
 
-  private String nomeFuncionario;
+  private String seccao;
 
+
+  private String seccaoId;
 
   private String email;
 
-
-  private String nomeDirecao;
+  private String funcionarioId;
 
 }

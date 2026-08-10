@@ -1,26 +1,11 @@
 {
-  "type": "dto",
-  "module": "configuracao",
   "name": "ConfiguracaoGeral",
   "template": "classic",
-  "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "id",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
       "name": "jornadaDiaria",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": true,
       "before": false,
       "after": false,
@@ -31,8 +16,8 @@
     },
     {
       "name": "jornadaDiariaInicio",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": true,
       "before": false,
       "after": false,
@@ -43,8 +28,8 @@
     },
     {
       "name": "jornadaDiariaFim",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": true,
       "before": false,
       "after": false,
@@ -55,8 +40,8 @@
     },
     {
       "name": "almocoInicio",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": true,
       "before": false,
       "after": false,
@@ -67,8 +52,8 @@
     },
     {
       "name": "almocoFim",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": true,
       "before": false,
       "after": false,
@@ -79,8 +64,8 @@
     },
     {
       "name": "almocoDuracao",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": true,
       "before": false,
       "after": false,
@@ -91,8 +76,8 @@
     },
     {
       "name": "primeiroAtrazo",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -103,8 +88,8 @@
     },
     {
       "name": "faltaAplicadaPrimeiroAtrazo",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -115,8 +100,8 @@
     },
     {
       "name": "segundoAtrazo",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -127,8 +112,8 @@
     },
     {
       "name": "faltaAplicadaSegundoAtrazo",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -139,8 +124,8 @@
     },
     {
       "name": "movimentoIrregular",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -151,8 +136,8 @@
     },
     {
       "name": "dispensa",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -163,8 +148,8 @@
     },
     {
       "name": "horaAPartirDe",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": true,
       "before": false,
       "after": false,
@@ -175,8 +160,8 @@
     },
     {
       "name": "limiteDiario",
-      "objectType": "java",
       "type": "string",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -187,8 +172,8 @@
     },
     {
       "name": "percentagemDiasUteis",
-      "objectType": "java",
       "type": "decimal",
+      "objectType": "java",
       "required": true,
       "before": false,
       "after": false,
@@ -199,8 +184,8 @@
     },
     {
       "name": "percentagemDiasNaoUteis",
-      "objectType": "java",
       "type": "decimal",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -211,8 +196,8 @@
     },
     {
       "name": "periodoLimiteJustFalta",
-      "objectType": "java",
       "type": "integer",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -223,8 +208,8 @@
     },
     {
       "name": "prazoLimiteJustAusencia",
-      "objectType": "java",
       "type": "integer",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -235,8 +220,8 @@
     },
     {
       "name": "numeroMaximoMarcAno",
-      "objectType": "java",
       "type": "integer",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -247,8 +232,8 @@
     },
     {
       "name": "direitoAnual",
-      "objectType": "java",
       "type": "integer",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -259,8 +244,8 @@
     },
     {
       "name": "maximoAcumulacao",
-      "objectType": "java",
       "type": "integer",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -271,8 +256,8 @@
     },
     {
       "name": "dataVencimentoFerias",
-      "objectType": "java",
       "type": "date",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -283,8 +268,8 @@
     },
     {
       "name": "numeroMesesLimiteTrabalho",
-      "objectType": "java",
       "type": "integer",
+      "objectType": "java",
       "required": false,
       "before": false,
       "after": false,
@@ -295,8 +280,8 @@
     },
     {
       "name": "fusoHorario",
-      "objectType": "dto",
       "type": "FusoHorario",
+      "objectType": "dto",
       "required": false,
       "before": false,
       "after": false,
@@ -306,43 +291,15 @@
       "primaryKey": false,
       "collectionType": "list",
       "module": "configuracao"
-    },
-    {
-      "name": "dataRegisto",
-      "objectType": "java",
-      "type": "date",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "utilizadoRegisto",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "estado",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
     }
   ],
+  "type": "dto",
+  "module": "configuracao",
+  "enableCustonValidation": false,
+  "readOnly": false,
+  "extends": {
+    "name": "ConfiguracaoGeralBase",
+    "module": "configuracao"
+  },
   "id": "a4q9y22jzv"
 }

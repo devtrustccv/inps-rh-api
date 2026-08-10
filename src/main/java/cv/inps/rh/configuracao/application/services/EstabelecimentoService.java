@@ -5,27 +5,27 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
 import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
+import cv.inps.rh.parametrizacao.application.dto.EstabelecimentoComboDTO;
 import cv.inps.rh.shared.application.constants.Estado;
-import cv.inps.rh.shared.application.dto.EstabelecimentoRequestDTO;
+import cv.inps.rh.shared.application.dto.EstabelecimentoGroupedDTO;
 import cv.inps.rh.shared.application.dto.EstabelecimentoResponseDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EstabelecimentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EstabelecimentoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.GeografiaEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Transactional
 @Service("estabelecimento_type")
-public class EstabelecimentoService extends ConfigurationProcess<EstabelecimentoRequestDTO> {
+public class EstabelecimentoService extends ConfigurationProcess<EstabelecimentoGroupedDTO> {
 
   private final EstabelecimentoEntityRepository estabelecimentoRepository;
   private final GeografiaEntityRepository geografiaRepository;
@@ -36,44 +36,57 @@ public class EstabelecimentoService extends ConfigurationProcess<Estabelecimento
       Validator validator,
       ObjectMapper jsonMapper) {
 
-    super(validator, jsonMapper, EstabelecimentoRequestDTO.class);
+    super(validator, jsonMapper, EstabelecimentoGroupedDTO.class);
     this.estabelecimentoRepository = estabelecimentoRepository;
     this.geografiaRepository = geografiaRepository;
   }
 
   @Override
-  public Object create(EstabelecimentoRequestDTO dto) {
+  public Object create(EstabelecimentoGroupedDTO dto) {
 
-    var estabelecimento = new EstabelecimentoEntity();
-    estabelecimento.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-    estabelecimento.setEstado(Estado.A.getCode());
-    estabelecimento.setNome(dto.getNome());
+    var pais = geografiaRepository.findByIdOrThrow(dto.getPaisId());
 
-    if (dto.getPaisId() != null) {
-      var pais = geografiaRepository.findByIdOrThrow(dto.getPaisId());
-      estabelecimento.setPais(pais);
+    var estabelecimentos = dto.getEstabelecimentos() == null
+        ? List.<EstabelecimentoGroupedDTO.EstabelecimentoData>of()
+        : dto.getEstabelecimentos();
+
+    var idsRecebidos = estabelecimentos.stream()
+        .map(EstabelecimentoGroupedDTO.EstabelecimentoData::id)
+        .filter(StringUtils::hasText)
+        .collect(Collectors.toSet());
+
+    var existentes = estabelecimentoRepository.findEntityByPaisId(List.of(dto.getPaisId()));
+    existentes.stream()
+        .filter(e -> !idsRecebidos.contains(e.getUuid()))
+        .forEach(e -> {
+          e.setEstado(Estado.I.getCode());
+          estabelecimentoRepository.save(e);
+        });
+
+    for (var data : estabelecimentos) {
+
+      EstabelecimentoEntity estabelecimento;
+
+      if (StringUtils.hasText(data.id())) {
+        estabelecimento = estabelecimentoRepository.findByUuidOrThrow(data.id());
+      } else {
+        estabelecimento = new EstabelecimentoEntity();
+        estabelecimento.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+        estabelecimento.setPais(pais);
+        estabelecimento.setEstado(Estado.A.getCode());
+      }
+
+      estabelecimento.setNome(data.nome());
+      estabelecimentoRepository.save(estabelecimento);
     }
 
-    estabelecimento = estabelecimentoRepository.save(estabelecimento);
-
-    return buildResponse(estabelecimento);
+    return list(Map.of("filter", dto.getPaisId().toString()));
   }
 
   @Override
-  public Object update(String uuid, EstabelecimentoRequestDTO dto) {
+  public Object update(String uuid, EstabelecimentoGroupedDTO dto) {
 
-    var estabelecimento = estabelecimentoRepository.findByUuidOrThrow(uuid);
-    estabelecimento.setNome(dto.getNome());
-
-    if (dto.getPaisId() != null) {
-      var pais = geografiaRepository.findByIdOrThrow(dto.getPaisId());
-      estabelecimento.setPais(pais);
-    } else
-      estabelecimento.setPais(null);
-
-    estabelecimento = estabelecimentoRepository.save(estabelecimento);
-
-    return buildResponse(estabelecimento);
+    return null;
   }
 
   @Override
@@ -90,39 +103,55 @@ public class EstabelecimentoService extends ConfigurationProcess<Estabelecimento
     var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
 
     var nome = filters.get("nome");
-    var paisId = filters.get("paisId");
 
-    Specification<EstabelecimentoEntity> spec = (root, _, cb) -> {
+    Long paisId = StringUtils.hasText(filters.get("paisId"))
+        ? Long.valueOf(filters.get("paisId"))
+        : null;
 
-      var predicates = new ArrayList<Predicate>();
-
-      predicates.add(cb.equal(root.get("estado"), Estado.A.getCode()));
-
-      if (StringUtils.hasText(nome)) {
-        predicates.add(
-            cb.like(cb.lower(root.get("nome")), "%" + nome.toLowerCase() + "%")
-        );
-      }
-
-      if (StringUtils.hasText(paisId)) {
-        predicates.add(cb.equal(root.get("pais").get("id"), Long.valueOf(paisId)));
-      }
-
-      return cb.and(predicates.toArray(new Predicate[0]));
-    };
-
-    var data = estabelecimentoRepository.findAll(spec, pageable);
+    var paisPage = geografiaRepository.findCountries(
+        paisId,
+        StringUtils.hasText(nome) ? ConfigurationUtils.normalizeAndSetToLowerCaseText(nome) : null,
+        pageable
+    );
 
     var response = new WrapperListDTO();
+    PageMapper.fillPagination(paisPage, response);
 
-    PageMapper.fillPagination(data, response);
+    var paisIds = paisPage.getContent()
+        .stream()
+        .map(GeografiaEntity::getId)
+        .toList();
 
-    response.setContent(
-        data.getContent()
-            .stream()
-            .map(this::buildResponse)
-            .collect(Collectors.toUnmodifiableList())
-    );
+    var estabelecimentos = estabelecimentoRepository.findByPaisId(paisIds)
+        .stream()
+        .collect(Collectors.groupingBy(
+            EstabelecimentoComboDTO::getPaisId
+        ));
+
+    List<Object> content = paisPage.getContent()
+        .stream()
+        .map(row -> {
+
+          var data = estabelecimentos
+              .getOrDefault(row.getId(), List.of())
+              .stream()
+              .map(estabelecimento ->
+                  new EstabelecimentoGroupedDTO.EstabelecimentoData(
+                      estabelecimento.getValueUuid(),
+                      estabelecimento.getLabel()
+                  )
+              )
+              .toList();
+
+          return new EstabelecimentoGroupedDTO(
+              row.getId(),
+              row.getNome(),
+              data
+          );
+        })
+        .collect(Collectors.toUnmodifiableList());
+
+    response.setContent(content);
 
     return response;
   }
@@ -145,10 +174,6 @@ public class EstabelecimentoService extends ConfigurationProcess<Estabelecimento
   @Override
   public void delete(String uuid) {
 
-    var estabelecimento = estabelecimentoRepository.findByUuidOrThrow(uuid);
 
-    estabelecimento.setEstado(Estado.E.getCode());
-
-    estabelecimentoRepository.save(estabelecimento);
   }
 }

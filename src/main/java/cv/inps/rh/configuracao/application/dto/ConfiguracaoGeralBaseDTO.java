@@ -4,14 +4,11 @@
 package cv.inps.rh.configuracao.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -19,12 +16,18 @@ import java.util.UUID;
 
 
 @IgrpDTO
-public class ResponsaveisDirecaoResponseDTO {
+public class ConfiguracaoGeralBaseDTO {
 
-  private UUID responsavelDirecaoId;
-  private String responsavelDirecaoNome;
 
-  @Valid
-  private List<ResponsavelResponseDTO> content = new ArrayList<>();
+  private String id;
+
+
+  private String utilizadoRegisto;
+
+
+  private LocalDate dataRegisto;
+
+
+  private String estado;
 
 }

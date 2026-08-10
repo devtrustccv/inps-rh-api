@@ -5,6 +5,7 @@ import cv.inps.rh.emprestimo.application.commands.SaveConfiguracaoInfoEmprestimo
 import cv.inps.rh.emprestimo.application.dto.FundoSocialRequestDTO;
 import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
+import cv.inps.rh.emprestimo.domain.service.constants.StatusEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -49,9 +50,9 @@ public class EmprestimoWriteService {
 
       final ParamEmprestimoEntity entity;
 
-      if (StringUtils.hasText(row.getId())) {
+      if (StringUtils.hasText(row.getId()))
         entity = paramEmprestimoEntityRepository.findByUuidOrThrow(row.getId());
-      } else {
+      else {
         entity = new ParamEmprestimoEntity();
         entity.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
       }
@@ -77,7 +78,7 @@ public class EmprestimoWriteService {
       entity.setTmId(request.getTipoMovimentoId());
       entity.setDataInicio(request.getDataInicio());
       entity.setDataFim(request.getDataFim());
-      entity.setEstado(Estado.A.name());
+      entity.setEstado(StatusEmprestimo.POR_SUBMETER.name());
       entity.setValorPrestacao(request.getValorPrestacaoMensal());
       entity.setValorEmprestimo(request.getValorTotalEmprestimo());
       entity.setFinalidade(request.getFinalidade());
@@ -145,7 +146,7 @@ public class EmprestimoWriteService {
         entity.getValorEmprestimo(),
         entity.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
         entity.getNrPrestacao().intValue(),
-        entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now()
+        entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now(ZoneId.systemDefault())
     );
 
     savePlans(entity, plan);
@@ -168,7 +169,7 @@ public class EmprestimoWriteService {
         entity.getValorEmprestimo(),
         entity.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
         entity.getNrPrestacao().intValue(),
-        entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now()
+        entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now(ZoneId.systemDefault())
     );
 
     savePlans(entity, plan);
@@ -188,6 +189,12 @@ public class EmprestimoWriteService {
       newPlan.setSaldoFinal(obj.saldoFinal());
       planoFinanceiroEntityRepository.save(newPlan);
     }
+  }
+
+  public void cancelLoan(String uuid) {
+    var entity = emprestimoEntityRepository.findByUuidOrThrow(uuid);
+    entity.setEstado(StatusEmprestimo.CANCELADO.name());
+    emprestimoEntityRepository.save(entity);
   }
 }
 

@@ -53,6 +53,7 @@ public class ReforcoDividaService {
     newLoan.setValorEmprestimo(obj.getValorReforco());
     newLoan.setValorDivida(obj.getValorReforco());
     newLoan.setMotivo(obj.getMotivoReforco());
+    newLoan.setEstado(StatusEmprestimo.POR_SUBMETER.name());
     var saved = emprestimoEntityRepository.save(loan);
 
     documentService.saveDocuments(
@@ -63,6 +64,9 @@ public class ReforcoDividaService {
     );
 
     if (obj.getAction().equals(ProcessStepAction.NEXT)) {
+
+      newLoan.setEstado(StatusEmprestimo.SUBMETIDO.name());
+      newLoan = emprestimoEntityRepository.save(newLoan);
 
       var rowsInactivated = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
       LOGGER.debug("INACTIVATED {} ROWS FOR LOAN ID <{}> : ", rowsInactivated, loan.getId());
@@ -89,13 +93,15 @@ public class ReforcoDividaService {
     order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
 
     if (request.getAction().equals(ProcessStepAction.NEXT)) {
-
       switch (request.getParecer()) {
-        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
-        case RETIFICACAO -> order.setEtapa(EtapaEmprestimo.PEDIDO.name());
-        default -> {
-          loan.setEstado(Estado.I.name());
-          emprestimoEntityRepository.save(loan);
+        case FAVORAVEL -> {
+          order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
+          loan.setEstado(StatusEmprestimo.VALIDADO_RH.name());
+        }
+        case DESFAVORAVEL -> loan.setEstado(StatusEmprestimo.VALIDADO_RH.name());
+        case RETIFICACAO -> {
+          order.setEtapa(EtapaEmprestimo.PEDIDO.name());
+          loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
         }
       }
     }
@@ -146,7 +152,7 @@ public class ReforcoDividaService {
     pedidoEntityRepository.save(order);
 
     if (request.getAction().equals(ProcessStepAction.NEXT)) {
-
+      loan.setEstado(StatusEmprestimo.VALIDADO_DFI.name());
       switch (request.getParecer()) {
         case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_REFORCO.name());
         case DESFAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_RH_REFORCO.name());
@@ -194,12 +200,19 @@ public class ReforcoDividaService {
     order.setEtapa(EtapaEmprestimo.AUTORIZAR_COMISSAO_EXECUTIVA_REFORCO.name());
 
     if (request.getAction().equals(ProcessStepAction.NEXT)) {
-
       switch (request.getParecer()) {
-        case FAVORAVEL -> order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name());
-        case DESFAVORAVEL -> order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
-        default ->
-            throw IgrpResponseStatusException.badRequest("Invalid decison for this step %s".formatted(request.getParecer()));
+        case FAVORAVEL -> {
+          order.setEtapa(EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO.name());
+          loan.setEstado(StatusEmprestimo.AUTORIZADO.name());
+        }
+        case DESFAVORAVEL -> {
+          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+          loan.setEstado(StatusEmprestimo.NAO_AUTORIZADO.name());
+        }
+        case RETIFICACAO -> {
+          order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
+          loan.setEstado(StatusEmprestimo.EM_CORRECAO.name());
+        }
       }
     }
 
@@ -234,9 +247,13 @@ public class ReforcoDividaService {
 
   public void elaborarContrato(String uuid, ElaboracaoContratoRequestDTO request) {
 
+    var isNext = request.getAction().equals(ProcessStepAction.NEXT);
+
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
-    var step = request.getAction().equals(ProcessStepAction.NEXT) ?
+    loan.setEstado(isNext ? StatusEmprestimo.CABIMENTADO.name() : loan.getEstado());
+
+    var step = isNext ?
         EtapaEmprestimo.PAGAMENTO :
         EtapaEmprestimo.ELABORAR_CONTRATO_REFORCO;
 

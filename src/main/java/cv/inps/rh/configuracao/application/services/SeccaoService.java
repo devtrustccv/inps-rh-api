@@ -2,29 +2,22 @@ package cv.inps.rh.configuracao.application.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
-import cv.inps.rh.configuracao.application.dto.ConfigurationResponseIdDTO;
-import cv.inps.rh.configuracao.application.dto.SeccaoRequestDTO;
-import cv.inps.rh.configuracao.application.dto.SeccaoResponseDTO;
+import cv.inps.rh.configuracao.application.dto.*;
 import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
-import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
+import cv.inps.rh.configuracao.application.services.model.SectionData;
 import cv.inps.rh.configuracao.application.utils.ConfigurationUtils;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity_;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DirecaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SecaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
-import cv.inps.rh.shared.util.PageMapper;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Validator;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -85,37 +78,45 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
   @Override
   public Object list(Map<String, String> filters) {
 
-    var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
+    Long direcaoId = filters.get("direcaoId") != null ? Long.valueOf(filters.get("direcaoId")) : null;
 
-    var nome = filters.get("nome");
-    var direcaoId = filters.get("direcao");
-    var estado = filters.containsKey(SecaoEntity_.ESTADO)
-        ? Estado.valueOf(filters.get(SecaoEntity_.ESTADO))
-        : Estado.A;
+    var rows = secaoRepository.getAllData(direcaoId)
+        .stream()
+        .collect(Collectors.groupingBy(
+            SectionData::direcaoId,
+            LinkedHashMap::new,
+            Collectors.toList()
+        ))
+        .values()
+        .stream()
+        .map(sdList -> {
 
-    Specification<SecaoEntity> spec = (root, _, cb) -> {
+          var first = sdList.getFirst();
 
-      var predicates = new ArrayList<Predicate>();
-      predicates.add(cb.equal(root.get(SecaoEntity_.ESTADO), estado));
+          var dir = new DirecaoRowDTO();
+          dir.setDirecaoId(first.direcaoId());
+          dir.setNome(first.direcaoNome());
+          dir.setEstadoDirecao(first.estadoDirecao());
 
-      if (StringUtils.hasText(nome)) {
-        var value = "%" + ConfigurationUtils.normalizeAndSetToLowerCaseText(nome) + "%";
-        predicates.add(cb.like(cb.lower(root.get(SecaoEntity_.nomeNormalizado)), value));
-      }
+          dir.setSeccao(
+              sdList.stream()
+                  .map(sd -> {
+                    var sec = new SeccaoRowDTO();
+                    sec.setSeccaoId(sd.seccaoId().toString());
+                    sec.setNome(sd.seccaoNome());
+                    sec.setEstadoSeccao(sd.estadoSeccao().toString());
+                    return sec;
+                  })
+                  .toList()
+          );
 
-      if (StringUtils.hasText(direcaoId))
-        predicates.add(cb.equal(root.get(SecaoEntity_.instId).get(DirecaoEntity_.id), Long.valueOf(direcaoId)));
+          return dir;
+        })
+        .toList();
 
-      return cb.and(predicates.toArray(new Predicate[0]));
-    };
+    var response = new EstruturaOrganizacionalDTO();
+    response.setDirecao(rows);
 
-    var data = secaoRepository.findAll(spec, pageable);
-
-    var response = new WrapperListDTO();
-    PageMapper.fillPagination(data, response);
-    response.setContent(data.getContent().stream()
-        .map(this::buildResponse)
-        .collect(Collectors.toList()));
     return response;
   }
 
@@ -133,7 +134,7 @@ public class SeccaoService extends ConfigurationProcess<SeccaoRequestDTO> {
 
   private SeccaoResponseDTO buildResponse(SecaoEntity s) {
     var dto = new SeccaoResponseDTO();
-    if(Objects.nonNull(s.getInstId())) {
+    if (Objects.nonNull(s.getInstId())) {
       dto.setDirecaoId(s.getInstId().getId().toString());
       dto.setDireccao(s.getInstId().getNome());
     }

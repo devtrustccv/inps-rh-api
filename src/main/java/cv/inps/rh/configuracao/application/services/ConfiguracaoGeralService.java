@@ -1,6 +1,7 @@
 package cv.inps.rh.configuracao.application.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cv.inps.rh.configuracao.application.dto.ConfiguracaoGeralBaseDTO;
 import cv.inps.rh.configuracao.application.dto.ConfiguracaoGeralDTO;
 import cv.inps.rh.configuracao.application.dto.FusoHorarioDTO;
 import cv.inps.rh.configuracao.application.services.engine.ConfigurationProcess;
@@ -14,6 +15,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.FusoHorarioUpsEnt
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.validation.Validator;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -110,12 +112,25 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
 
   @Override
   public Object list(Map<String, String> filters) {
-    var pageable = ConfigurationUtils.buildDefaultPageRequest(filters);
+
+    var pageable = ConfigurationUtils.buildDefaultPageRequest(filters)
+        .withSort(Sort.by(Sort.Direction.DESC, "dtRegisto"));
     var data = repository.findAll(pageable);
 
     var response = new WrapperListDTO();
     PageMapper.fillPagination(data, response);
-    response.setContent(data.getContent().stream().map(this::buildResponse).collect(Collectors.toList()));
+    response.setContent(
+        data.getContent().stream()
+            .map(e -> {
+              var r = new ConfiguracaoGeralBaseDTO();
+              r.setId(e.getId().toString());
+              r.setEstado(e.getEstado());
+              r.setDataRegisto(e.getDtRegisto());
+              r.setUtilizadoRegisto(e.getUsrRegisto() != null ? e.getUsrRegisto().toString() : null);
+              return r;
+            })
+            .collect(Collectors.toList())
+    );
     return response;
   }
 
@@ -124,7 +139,7 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
     var entity = repository.findByIdOrThrow(Long.valueOf(id));
     entity.setEstado(Estado.E.getCode());
     entity.setDtFim(LocalDate.now());
-    entity.setUsrFim(1L);
+    entity.setUsrFim(1L); // TODO 08/08/2026 13:29 fix this user for current user
     repository.save(entity);
   }
 
@@ -162,11 +177,7 @@ public class ConfiguracaoGeralService extends ConfigurationProcess<ConfiguracaoG
     var fusos = new ArrayList<FusoHorarioDTO>();
 
     fusoHorarioUpsEntityRepository.findByIdParametrizacao(e.getId())
-        .forEach(obj -> {
-              var row = new FusoHorarioDTO(obj.getIdUps(), obj.getFuso());
-              fusos.add(row);
-            }
-        );
+        .forEach(obj -> fusos.add(new FusoHorarioDTO(obj.getIdUps(), obj.getFuso())));
 
     r.setFusoHorario(fusos);
 
