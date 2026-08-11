@@ -21,4 +21,7 @@ public class MissaoColaboradorRequestDTO  {
 
   private UUID colaboradorId ;
 
+  // Editável no ecrã. Se vier vazio, é preenchido com o nº de documento do funcionário.
+  private String numeroDocumento;
+
 }

@@ -24,13 +24,17 @@ public class MissaoSubmissaoResponseDTO  {
 
   private Long id;
   private UUID uuid;
-  private Long nrMissao;
-  private String etapaAtual;              // campo etapa de RH_T_MISSAO_SERVICO — usado pelo frontend para activar o step correcto
+  private Long nrMissao;                  // sequencial dentro do ano
+  private Integer ano;                    // ano de criação
+  private String nrMissaoFormatado;       // "nr/ano" — ex.: "1/2026"
+  private String etapaAtual;
+  private String etapaAtualDesc;          // descrição legível da etapa — ex.: "Processamento Logístico"
   private Long paisDestinoId;
   private String paisDestinoNome;
   private Integer flgDestino;
-  private String descricaoDestino;
-  private String ambitoMissao;
+  private String descricaoDestino;        // local preciso da missão
+  private String ambitoMissao;            // texto livre: objetivo/âmbito da missão
+  private String tipoDestino;             // "NACIONAL" | "INTERNACIONAL" — derivado de flgDestino
   private LocalDate dataInicio;
   private LocalDate dataFim;
   private Integer nrDias;

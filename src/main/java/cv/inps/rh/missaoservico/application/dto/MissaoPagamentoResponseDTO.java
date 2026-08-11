@@ -20,7 +20,8 @@ import java.time.LocalDate;
 public class MissaoPagamentoResponseDTO  {
 
   private Long missaoId;
-  private String etapaAtual;              // campo etapa de RH_T_MISSAO_SERVICO
+  private String etapaAtual;
+  private String etapaAtualDesc;          // descrição legível da etapa — ex.: "Processamento Logístico"
   private String estado;                  // A=Ativo
   private String referenciaPagamento;
   private LocalDate dataPagamento;
