@@ -20,7 +20,8 @@ import java.util.List;
 public class MissaoAutorizacaoResponseDTO  {
 
   private Long missaoId;
-  private String etapaAtual;              // campo etapa de RH_T_MISSAO_SERVICO
+  private String etapaAtual;
+  private String etapaAtualDesc;          // descrição legível da etapa — ex.: "Processamento Logístico"
   private List<MissaoAutorizacaoItemResponseDTO> itens;
 
 }

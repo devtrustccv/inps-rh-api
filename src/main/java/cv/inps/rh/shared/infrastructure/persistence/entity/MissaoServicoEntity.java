@@ -28,9 +28,14 @@ public class MissaoServicoEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
+    // Sequencial dentro do ano: reinicia a 1 em cada ano civil. Apresentado como "nr/ano".
     @NotNull(message = "nrMissao is mandatory")
     @Column(name = "nr_missao", nullable = false)
     private Long nrMissao;
+
+    // Ano de criação da missão — par (ano, nrMissao) é único (índice UX_MISSAO_NR_ANO)
+    @Column(name = "ano")
+    private Integer ano;
 
     @NotNull(message = "paisDestinoId is mandatory")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,6 +47,10 @@ public class MissaoServicoEntity extends AuditEntity {
 
     @Column(name = "descricao_destino", length = 200)
     private String descricaoDestino;
+
+    // Texto livre do ecrã "Âmbito da Missão" — não confundir com nacional/estrangeiro (flgDestino)
+    @Column(name = "ambito_missao", length = 2000)
+    private String ambitoMissao;
 
     @NotNull(message = "dataInicio is mandatory")
     @Column(name = "data_inicio", nullable = false)

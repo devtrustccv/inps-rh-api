@@ -20,7 +20,8 @@ import java.util.List;
 public class MissaoEmissaoReqResponseDTO  {
 
   private Long missaoId;
-  private String etapaAtual;              // campo etapa de RH_T_MISSAO_SERVICO — usado pelo frontend para activar o step correcto
+  private String etapaAtual;
+  private String etapaAtualDesc;          // descrição legível da etapa — ex.: "Processamento Logístico"
   private List<MissaoReqItemResponseDTO> requisicoes;
 
   // universo de colaboradores afetos à missão — popula o multiselect de associação a cada prestador

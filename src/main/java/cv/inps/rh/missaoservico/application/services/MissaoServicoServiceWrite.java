@@ -83,12 +83,16 @@ public class MissaoServicoServiceWrite {
 
     var pais = geografiaRepository.findByIdOrThrow(dto.getPaisDestinoId());
 
+    var ano = LocalDate.now().getYear();
+
     var missao = new MissaoServicoEntity();
     missao.setUuid(UuidCreator.getTimeOrderedEpoch());
-    missao.setNrMissao(nextNrMissao());
+    missao.setAno(ano);
+    missao.setNrMissao(nextNrMissao(ano));
     missao.setPaisDestinoId(pais);
     missao.setFlgDestino(isCaboVerde(pais) ? DESTINO_NACIONAL : DESTINO_ESTRANGEIRO);
     missao.setDescricaoDestino(dto.getDescricaoDestino());
+    missao.setAmbitoMissao(dto.getAmbitoMissao());
     missao.setDataInicio(dto.getDataInicio());
     missao.setDataFim(dto.getDataFim());
     missao.setNrDias(calcularNrDias(dto.getDataInicio(), dto.getDataFim()));
@@ -159,6 +163,7 @@ public class MissaoServicoServiceWrite {
     missao.setPaisDestinoId(pais);
     missao.setFlgDestino(isCaboVerde(pais) ? DESTINO_NACIONAL : DESTINO_ESTRANGEIRO);
     missao.setDescricaoDestino(dto.getDescricaoDestino());
+    missao.setAmbitoMissao(dto.getAmbitoMissao());
     missao.setDataInicio(dto.getDataInicio());
     missao.setDataFim(dto.getDataFim());
     missao.setNrDias(calcularNrDias(dto.getDataInicio(), dto.getDataFim()));
@@ -1509,9 +1514,28 @@ public class MissaoServicoServiceWrite {
     }
   }
 
-  private Long nextNrMissao() {
-    var max = missaoServicoRepository.findMaxNrMissao();
+  /**
+   * Próximo nº de missão do ano indicado. A numeração é sequencial dentro do ano e reinicia a 1
+   * em cada ano civil — apresentada como "nr/ano".
+   *
+   * <p>O índice único (ANO, NR_MISSAO) garante que duas criações simultâneas não ficam com o mesmo
+   * número: a segunda falha na gravação em vez de duplicar.
+   */
+  private Long nextNrMissao(Integer ano) {
+    var max = missaoServicoRepository.findMaxNrMissaoByAno(ano);
     return (max != null ? max : 0L) + 1L;
+  }
+
+  /**
+   * Nº de documento a gravar na missão: o que o utilizador escreveu no ecrã, ou o do funcionário
+   * quando o campo vem vazio (a spec descreve-o como "preenchido automaticamente"). É um snapshot
+   * — permite registar o documento usado naquela missão, ex.: passaporte quando o cadastro tem BI.
+   */
+  private String numDocumentoOuDoFuncionario(MissaoColaboradorRequestDTO dto, FuncionarioEntity fun) {
+    if (dto != null && StringUtils.hasText(dto.getNumeroDocumento())) {
+      return dto.getNumeroDocumento().trim();
+    }
+    return fun != null ? fun.getNumDocumento() : null;
   }
 
   private int calcularNrDias(java.time.LocalDate inicio, java.time.LocalDate fim) {
@@ -1547,7 +1571,7 @@ public class MissaoServicoServiceWrite {
       e.setEstado(ESTADO_ATIVO);
       e.setFunId(fun);
       e.setMissaoServId(missao);
-      e.setNumDocumento(fun.getNumDocumento());
+      e.setNumDocumento(numDocumentoOuDoFuncionario(c, fun));
       result.add(e);
     }
 
@@ -1582,7 +1606,7 @@ public class MissaoServicoServiceWrite {
         if (dto != null) {
           e.setEstado(ESTADO_ATIVO);
           var fun = funcionarioRepository.findByUuidOrThrow(funUuid);
-          e.setNumDocumento(fun.getNumDocumento());
+          e.setNumDocumento(numDocumentoOuDoFuncionario(dto, fun));
           toSave.add(e);
         } else if (e != null) {
           e.setEstado(ESTADO_INATIVO);
@@ -1591,14 +1615,14 @@ public class MissaoServicoServiceWrite {
       }
     }
 
-    for (var funUuid : incoming.keySet()) {
-      var fun = funcionarioRepository.findByUuidOrThrow(funUuid);
+    for (var entry : incoming.entrySet()) {
+      var fun = funcionarioRepository.findByUuidOrThrow(entry.getKey());
       var e = new MissaoColaboradorEntity();
       e.setUuid(UuidCreator.getTimeOrderedEpoch());
       e.setEstado(ESTADO_ATIVO);
       e.setFunId(fun);
       e.setMissaoServId(missao);
-      e.setNumDocumento(fun.getNumDocumento());
+      e.setNumDocumento(numDocumentoOuDoFuncionario(entry.getValue(), fun));
       toSave.add(e);
     }
 

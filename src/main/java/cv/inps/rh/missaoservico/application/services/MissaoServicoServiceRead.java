@@ -29,6 +29,7 @@ import java.util.*;
 public class MissaoServicoServiceRead {
 
   private static final String ESTADO_ATIVO = "A";
+  private static final String ESTADO_INATIVO = "I";
 
   private final MissaoServicoEntityRepository missaoServicoRepository;
   private final MissaoLogisticaEntityRepository missaoLogisticaRepository;
@@ -102,6 +103,7 @@ public class MissaoServicoServiceRead {
     var response = new MissaoCabimentoResponseDTO();
     response.setMissaoId(missao.getId());
     response.setEtapaAtual(missao.getEtapa());
+    response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
     response.setItens(itens);
 
     return ResponseEntity.ok(response);
@@ -152,6 +154,7 @@ public class MissaoServicoServiceRead {
     var response = new MissaoAutorizacaoResponseDTO();
     response.setMissaoId(missao.getId());
     response.setEtapaAtual(missao.getEtapa());
+    response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
     response.setItens(itens);
     return ResponseEntity.ok(response);
   }
@@ -270,6 +273,7 @@ public class MissaoServicoServiceRead {
     response.setMissaoId(missao.getId());
     response.setMissaoUuid(missao.getUuid());
     response.setEtapaAtual(missao.getEtapa());
+    response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
     response.setBilhetesPassagem(bilhetes);
     response.setSegurosViagem(seguros);
     response.setAlojamentos(alojamentos);
@@ -286,6 +290,7 @@ public class MissaoServicoServiceRead {
     var response = new MissaoPagamentoResponseDTO();
     response.setMissaoId(missao.getId());
     response.setEtapaAtual(missao.getEtapa());
+    response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
     response.setEstado(missao.getEstado());
     response.setReferenciaPagamento(missao.getReferenciaPagamento());
     response.setDataPagamento(missao.getDataPagamento());
@@ -332,6 +337,7 @@ public class MissaoServicoServiceRead {
     var response = new MissaoAnaliseResponseDTO();
     response.setMissaoId(missao.getId());
     response.setEtapaAtual(missao.getEtapa());
+    response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
     response.setPrestadores(prestadores);
     response.setNotificacao(notificacao);
     return ResponseEntity.ok(response);
@@ -360,12 +366,16 @@ public class MissaoServicoServiceRead {
     response.setId(missao.getId());
     response.setUuid(missao.getUuid());
     response.setNrMissao(missao.getNrMissao());
+    response.setAno(missao.getAno());
+    response.setNrMissaoFormatado(formatarNrMissao(missao));
     response.setEtapaAtual(missao.getEtapa());
+    response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
     response.setPaisDestinoId(missao.getPaisDestinoId() != null ? missao.getPaisDestinoId().getId() : null);
     response.setPaisDestinoNome(missao.getPaisDestinoId() != null ? missao.getPaisDestinoId().getNome() : null);
     response.setFlgDestino(missao.getFlgDestino());
     response.setDescricaoDestino(missao.getDescricaoDestino());
-    response.setAmbitoMissao(resolveAmbitoMissao(missao.getFlgDestino()));
+    response.setAmbitoMissao(missao.getAmbitoMissao());
+    response.setTipoDestino(resolveAmbitoMissao(missao.getFlgDestino()));
     response.setDataInicio(missao.getDataInicio());
     response.setDataFim(missao.getDataFim());
     response.setNrDias(missao.getNrDias());
@@ -513,6 +523,7 @@ public class MissaoServicoServiceRead {
     var response = new MissaoEmissaoReqResponseDTO();
     response.setMissaoId(missao.getId());
     response.setEtapaAtual(missao.getEtapa());
+    response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
     response.setRequisicoes(itens);
     response.setColaboradoresMissao(colaboradoresDaMissao(missaoUuid));
     return ResponseEntity.ok(response);
@@ -527,11 +538,14 @@ public class MissaoServicoServiceRead {
     response.setId(missao.getId());
     response.setUuid(missao.getUuid());
     response.setNrMissao(missao.getNrMissao());
+    response.setAno(missao.getAno());
+    response.setNrMissaoFormatado(formatarNrMissao(missao));
     response.setPaisDestinoId(missao.getPaisDestinoId() != null ? missao.getPaisDestinoId().getId() : null);
     response.setPaisDestinoNome(missao.getPaisDestinoId() != null ? missao.getPaisDestinoId().getNome() : null);
     response.setFlgDestino(missao.getFlgDestino());
     response.setDescricaoDestino(missao.getDescricaoDestino());
-    response.setAmbitoMissao(resolveAmbitoMissao(missao.getFlgDestino()));
+    response.setAmbitoMissao(missao.getAmbitoMissao());
+    response.setTipoDestino(resolveAmbitoMissao(missao.getFlgDestino()));
     response.setDataInicio(missao.getDataInicio());
     response.setDataFim(missao.getDataFim());
     response.setNrDias(missao.getNrDias());
@@ -554,18 +568,36 @@ public class MissaoServicoServiceRead {
   @Transactional(readOnly = true)
   public ResponseEntity<WrapperListMissaoServicoDTO> getLista(GetListaMissaoServicoQuery query) {
 
-    var nrMissao = parseLongSafe(query != null ? query.getNrMissao() : null);
+    // Aceita "12" (nº em qualquer ano) ou "12/2026" (nº daquele ano), tal como é apresentado.
+    var nrMissaoRaw = query != null ? query.getNrMissao() : null;
+    Long nrMissao;
+    Integer anoFiltro = null;
+    if (StringUtils.hasText(nrMissaoRaw) && nrMissaoRaw.contains("/")) {
+      var partes = nrMissaoRaw.split("/", 2);
+      nrMissao = parseLongSafe(partes[0].trim());
+      anoFiltro = parseIntOrNull(partes[1].trim());
+    } else {
+      nrMissao = parseLongSafe(nrMissaoRaw);
+    }
+
     var periodoDe = parseDateSafe(query != null ? query.getPeriodoDe() : null);
     var periodoAte = parseDateSafe(query != null ? query.getPeriodoAte() : null);
     int pageNumber = parseIntSafe(query != null ? query.getPageNumber() : null, 0);
     int pageSize = parseIntSafe(query != null ? query.getPageSize() : null, 10);
 
-    var pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "nrMissao"));
+    // Ordena por ano e depois por nº: com a numeração a reiniciar todos os anos, ordenar só pelo
+    // nº misturaria os anos (o 1/2027 apareceria depois do 9/2026).
+    var pageable = PageRequest.of(pageNumber, pageSize,
+        Sort.by(Sort.Direction.DESC, "ano").and(Sort.by(Sort.Direction.DESC, "nrMissao")));
 
+    final var ano = anoFiltro;
     Specification<cv.inps.rh.shared.infrastructure.persistence.entity.MissaoServicoEntity> spec = (root, q, cb) -> {
       var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
       if (nrMissao != null) {
         predicates.add(cb.equal(root.get("nrMissao"), nrMissao));
+      }
+      if (ano != null) {
+        predicates.add(cb.equal(root.get("ano"), ano));
       }
       if (periodoDe != null) {
         predicates.add(cb.greaterThanOrEqualTo(root.get("dataInicio"), periodoDe));
@@ -618,13 +650,16 @@ public class MissaoServicoServiceRead {
       if (m == null)
         continue;
 
-      var estado = resolveEstadoLista(m);
+      var estado = resolveEstadoMissao(m);
+      var situacao = resolveSituacaoLista(m);
 
       var sums = totalsByMissao.getOrDefault(m.getId(), java.util.Map.of());
       var dto = new MissaoServicoResumoDTO();
       dto.setId(m.getId());
       dto.setUuid(m.getUuid());
       dto.setNrMissao(m.getNrMissao());
+      dto.setAno(m.getAno());
+      dto.setNrMissaoFormatado(formatarNrMissao(m));
       dto.setDestino(m.getDescricaoDestino());
       dto.setNacionalInternacional(resolveNacionalInternacional(m.getFlgDestino()));
       dto.setDataMissao(m.getDataInicio());
@@ -632,6 +667,8 @@ public class MissaoServicoServiceRead {
       dto.setEtapaDesc(resolveEtapaLista(m.getEtapa()));
       dto.setEstado(estado.estado());
       dto.setEstadoDesc(estado.estadoDesc());
+      dto.setSituacao(situacao.estado());
+      dto.setSituacaoDesc(situacao.estadoDesc());
       dto.setValorAC(sums.get("AJUDA_CUSTO"));
       dto.setValorBP(sums.get("BILHETE_PASSAGEM"));
       dto.setValorAlojamento(sums.get("ALOJAMENTO"));
@@ -760,12 +797,13 @@ public class MissaoServicoServiceRead {
     dto.setId(c.getId());
     dto.setUuid(c.getUuid());
     dto.setEstado(c.getEstado());
-    // Prefere o nº de documento do funcionário (fonte de verdade); a cópia em
-    // RH_T_MISSAO_COLABORADOR serve os registos antigos, gravados antes de a coluna passar a VARCHAR2.
+    // O nº de documento gravado na missão manda: é editável no ecrã e representa o documento
+    // usado naquela missão (ex.: passaporte, quando o cadastro tem BI). Sem valor gravado —
+    // registos antigos — cai para o do funcionário.
     var numDocumentoFuncionario = c.getFunId() != null ? c.getFunId().getNumDocumento() : null;
-    dto.setNumDocumento(StringUtils.hasText(numDocumentoFuncionario)
-        ? numDocumentoFuncionario
-        : c.getNumDocumento());
+    dto.setNumDocumento(StringUtils.hasText(c.getNumDocumento())
+        ? c.getNumDocumento()
+        : numDocumentoFuncionario);
     dto.setFunId(c.getFunId() != null ? c.getFunId().getId() : null);
     dto.setFunUuid(c.getFunId() != null ? c.getFunId().getUuid() : null);
     dto.setNomeColaborador(c.getFunId() != null ? c.getFunId().getNome() : null);
@@ -792,7 +830,24 @@ public class MissaoServicoServiceRead {
     return null;
   }
 
-  private EstadoDesc resolveEstadoLista(MissaoServicoEntity missao) {
+  /**
+   * Estado da missão — o registo em si: activa ou cancelada (RH_T_MISSAO_SERVICO.ESTADO = 'A'/'I').
+   * Não confundir com a etapa (onde o processo vai) nem com a situação (o que falta fazer).
+   */
+  private EstadoDesc resolveEstadoMissao(MissaoServicoEntity missao) {
+    if (missao == null || !StringUtils.hasText(missao.getEstado())) {
+      return new EstadoDesc("", "");
+    }
+    return ESTADO_INATIVO.equals(missao.getEstado())
+        ? new EstadoDesc(ESTADO_INATIVO, "Cancelado")
+        : new EstadoDesc(ESTADO_ATIVO, "Activo");
+  }
+
+  /**
+   * Situação do processo — derivada da etapa, indica o que falta. Não vem da especificação;
+   * é o badge que a listagem já apresentava no campo "estado", agora com nome próprio.
+   */
+  private EstadoDesc resolveSituacaoLista(MissaoServicoEntity missao) {
     if (missao == null || !StringUtils.hasText(missao.getEtapa())) {
       return new EstadoDesc("", "");
     }
@@ -814,6 +869,30 @@ public class MissaoServicoServiceRead {
     }
 
     return new EstadoDesc("PENDENTE_REQUISICAO", "Pendente de Requisição");
+  }
+
+  /** Descrição legível da etapa — os mesmos rótulos dos separadores do processo. */
+  private String resolveEtapaDesc(String etapa) {
+    if (!StringUtils.hasText(etapa))
+      return "";
+    return switch (etapa) {
+      case "SUBMISSAO" -> "Submissão e Autorização";
+      case "ANALISE" -> "Análise / Verificação";
+      case "EMISSAO_REQUISICAO" -> "Emissão de Requisição";
+      case "LOGISTICA" -> "Processamento Logístico";
+      case "CABIMENTO" -> "Cabimento";
+      case "PAGAMENTO" -> "Pagamento";
+      default -> etapa;
+    };
+  }
+
+  /** Nº da missão como "nr/ano" — ex.: "1/2026". Sem ano (registos antigos), devolve só o número. */
+  private String formatarNrMissao(MissaoServicoEntity missao) {
+    if (missao == null || missao.getNrMissao() == null)
+      return null;
+    return missao.getAno() != null
+        ? missao.getNrMissao() + "/" + missao.getAno()
+        : String.valueOf(missao.getNrMissao());
   }
 
   private String resolveEtapaLista(String etapa) {
@@ -843,6 +922,16 @@ public class MissaoServicoServiceRead {
     try {
       return Long.valueOf(raw.trim());
     } catch (Exception e) {
+      return null;
+    }
+  }
+
+  private Integer parseIntOrNull(String raw) {
+    if (!StringUtils.hasText(raw))
+      return null;
+    try {
+      return Integer.valueOf(raw.trim());
+    } catch (NumberFormatException e) {
       return null;
     }
   }

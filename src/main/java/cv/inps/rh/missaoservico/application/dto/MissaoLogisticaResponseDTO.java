@@ -22,7 +22,8 @@ public class MissaoLogisticaResponseDTO  {
 
   private Long missaoId;
   private UUID missaoUuid;
-  private String etapaAtual;              // campo etapa de RH_T_MISSAO_SERVICO — usado pelo frontend para activar o step correcto
+  private String etapaAtual;
+  private String etapaAtualDesc;          // descrição legível da etapa — ex.: "Processamento Logístico"
   private List<BilhetePassagemResponseDTO> bilhetesPassagem;
   private List<SeguroViagemResponseDTO> segurosViagem;
   private List<AlojamentoResponseDTO> alojamentos;
