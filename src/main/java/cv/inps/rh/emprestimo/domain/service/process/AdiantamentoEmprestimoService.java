@@ -17,7 +17,6 @@ import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,8 +45,6 @@ public class AdiantamentoEmprestimoService {
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoSituacao());
 
     var newLoan = new EmprestimoEntity();
-    BeanUtils.copyProperties(loan, newLoan);
-    newLoan.setId(null);
     newLoan.setValorPago(null);
     newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
     newLoan.setValorAdiantado(obj.getValorAdiantamento());
@@ -61,7 +58,28 @@ public class AdiantamentoEmprestimoService {
     newLoan.setEstado(StatusEmprestimo.POR_SUBMETER.name());
     newLoan.setPedido(loan.getPedido());
     newLoan.setJuro(loan.getJuro());
-    newLoan = emprestimoEntityRepository.save(loan);
+    newLoan.setTiprel(loan.getTiprel());
+    newLoan.setMarca(loan.getMarca());
+    newLoan.setAnoFabrico(loan.getAnoFabrico());
+    newLoan.setCilincrada(loan.getCilincrada());
+    newLoan.setTipoViatura(loan.getTipoViatura());
+    newLoan.setCombustivel(loan.getCombustivel());
+    newLoan.setEstadoViatura(loan.getEstadoViatura());
+    newLoan.setBanco(loan.getBanco());
+    newLoan.setNib(loan.getNib());
+    newLoan.setNif(loan.getNif());
+    newLoan.setSwift(loan.getSwift());
+    newLoan.setValorPrestacao(loan.getValorPrestacao());
+    newLoan.setDescTaxaEsforco(loan.getDescTaxaEsforco());
+    newLoan.setRenogociacao(loan.getRenogociacao());
+    newLoan.setTmId(loan.getTmId());
+    newLoan.setFinalidade(loan.getFinalidade());
+    newLoan.setValorAdiantado(loan.getValorAdiantado());
+    newLoan.setTipoRenogociacao(loan.getTipoRenogociacao());
+    newLoan.setMotivoFecho(loan.getMotivoFecho());
+    newLoan.setValorReforco(loan.getValorReforco());
+    newLoan.setValorJuroTotal(loan.getValorJuroTotal());
+    newLoan = emprestimoEntityRepository.save(newLoan);
 
     documentService.saveDocuments(
         obj.getDocumentos(),

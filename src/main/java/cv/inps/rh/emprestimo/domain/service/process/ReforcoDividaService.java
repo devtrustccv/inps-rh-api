@@ -56,12 +56,12 @@ public class ReforcoDividaService {
     newLoan.setMotivo(obj.getMotivoReforco());
     newLoan.setEstado(StatusEmprestimo.POR_SUBMETER.name());
     newLoan.setPedido(loan.getPedido());
-    var saved = emprestimoEntityRepository.save(loan);
+    newLoan = emprestimoEntityRepository.save(newLoan);
 
     documentService.saveDocuments(
         obj.getDocumentos(),
         loan.getTiprel().getFunId(),
-        saved.getUuid(),
+        newLoan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.PEDIDO.name()
     );
 
@@ -81,7 +81,7 @@ public class ReforcoDividaService {
       );
     }
 
-    return saved.getUuid();
+    return newLoan.getUuid();
   }
 
   public void saveUpdateDecisaoAnaliseRh(String uuid, AnaliseRhRequestDTO request) {
