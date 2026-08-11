@@ -895,22 +895,14 @@ public class MissaoServicoServiceRead {
         : String.valueOf(missao.getNrMissao());
   }
 
+  /**
+   * Descrição da etapa na listagem — delega em {@link #resolveEtapaDesc} para a coluna Etapa
+   * mostrar o mesmo texto que os ecrãs do processo. Antes só traduzia três etapas e devolvia o
+   * código cru nas restantes, pelo que a lista mostrava "SUBMISSAO", "ANALISE" e
+   * "EMISSAO_REQUISICAO" ao utilizador.
+   */
   private String resolveEtapaLista(String etapa) {
-
-    if (!StringUtils.hasText(etapa))
-      return "";
-
-    if ("PAGAMENTO".equals(etapa))
-      return "Pagamento";
-
-    if ("CABIMENTO".equals(etapa))
-      return "Cabimento";
-
-    if ("LOGISTICA".equals(etapa)) {
-      return "Logística";
-    }
-
-    return etapa;
+    return resolveEtapaDesc(etapa);
   }
 
   private record EstadoDesc(String estado, String estadoDesc) {
