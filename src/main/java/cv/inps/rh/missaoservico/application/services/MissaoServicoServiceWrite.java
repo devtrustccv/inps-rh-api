@@ -335,16 +335,19 @@ public class MissaoServicoServiceWrite {
     var requisicoes = missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid);
     var logisticasExistentes = missaoLogisticaRepository.findAllByMissaoServId_Uuid(missaoUuid);
 
-    if (dto.getBilhetesPassagem() != null) {
+    // Uma secção só é sincronizada se vier preenchida. Ausente OU vazia significa "não mexer":
+    // o ecrã tem quatro tabs e envia sempre as quatro, pelo que uma lista vazia é quase sempre
+    // uma tab que o utilizador não preencheu — nunca um pedido para apagar o que lá está.
+    if (!CollectionUtils.isEmpty(dto.getBilhetesPassagem())) {
       syncLogisticaBilhete(missao, dto.getBilhetesPassagem(), logisticasExistentes, requisicoes);
     }
-    if (dto.getSegurosViagem() != null) {
+    if (!CollectionUtils.isEmpty(dto.getSegurosViagem())) {
       syncLogisticaSeguro(missao, dto.getSegurosViagem(), logisticasExistentes, requisicoes);
     }
-    if (dto.getAlojamentos() != null) {
+    if (!CollectionUtils.isEmpty(dto.getAlojamentos())) {
       syncLogisticaAlojamento(missao, dto.getAlojamentos(), logisticasExistentes, requisicoes);
     }
-    if (dto.getAjudasCusto() != null) {
+    if (!CollectionUtils.isEmpty(dto.getAjudasCusto())) {
       var alimentacaoByColabId = new HashMap<UUID, String>();
       if (dto.getAlojamentos() != null) {
         for (var a : dto.getAlojamentos()) {
@@ -737,10 +740,10 @@ public class MissaoServicoServiceWrite {
       if (bilhete == null)
         return null;
       if (CollectionUtils.isEmpty(bilhete.getColaboradorIds())) {
-        throw IgrpResponseStatusException.badRequest("colaboradorIds é obrigatório");
+        throw IgrpResponseStatusException.badRequest("bilhetesPassagem: colaboradorIds é obrigatório");
       }
       if (bilhete.getValor() == null) {
-        throw IgrpResponseStatusException.badRequest("valor é obrigatório");
+        throw IgrpResponseStatusException.badRequest("bilhetesPassagem: valor é obrigatório");
       }
 
       var colabs = new ArrayList<MissaoColaboradorEntity>();
@@ -751,7 +754,7 @@ public class MissaoServicoServiceWrite {
             .orElseThrow(() -> IgrpResponseStatusException.badRequest("Colaborador inválido: " + colabUuid)));
       }
       if (colabs.isEmpty()) {
-        throw IgrpResponseStatusException.badRequest("colaboradorIds inválido");
+        throw IgrpResponseStatusException.badRequest("bilhetesPassagem: colaboradorIds inválido");
       }
 
       var prestador = derivePrestadorFromRequisicao(missao.getUuid(), colabs, requisicoes);
@@ -781,16 +784,16 @@ public class MissaoServicoServiceWrite {
       if (seguro == null)
         return null;
       if (CollectionUtils.isEmpty(seguro.getColaboradorIds())) {
-        throw IgrpResponseStatusException.badRequest("colaboradorIds é obrigatório");
+        throw IgrpResponseStatusException.badRequest("segurosViagem: colaboradorIds é obrigatório");
       }
       if (seguro.getValor() == null) {
-        throw IgrpResponseStatusException.badRequest("valor é obrigatório");
+        throw IgrpResponseStatusException.badRequest("segurosViagem: valor é obrigatório");
       }
       if (seguro.getEntId() == null) {
-        throw IgrpResponseStatusException.badRequest("entId é obrigatório");
+        throw IgrpResponseStatusException.badRequest("segurosViagem: entId é obrigatório");
       }
       if (!StringUtils.hasText(seguro.getNomeSeguradora())) {
-        throw IgrpResponseStatusException.badRequest("nomeSeguradora é obrigatório");
+        throw IgrpResponseStatusException.badRequest("segurosViagem: nomeSeguradora é obrigatório");
       }
 
       var colabs = new ArrayList<MissaoColaboradorEntity>();
@@ -801,7 +804,7 @@ public class MissaoServicoServiceWrite {
             .orElseThrow(() -> IgrpResponseStatusException.badRequest("Colaborador inválido: " + colabUuid)));
       }
       if (colabs.isEmpty()) {
-        throw IgrpResponseStatusException.badRequest("colaboradorIds inválido");
+        throw IgrpResponseStatusException.badRequest("segurosViagem: colaboradorIds inválido");
       }
 
       var prestador = derivePrestadorFromRequisicao(missao.getUuid(), colabs, requisicoes);
@@ -833,28 +836,28 @@ public class MissaoServicoServiceWrite {
       if (aloj == null)
         return null;
       if (aloj.getColaboradorId() == null) {
-        throw IgrpResponseStatusException.badRequest("colaboradorId é obrigatório");
+        throw IgrpResponseStatusException.badRequest("alojamentos: colaboradorId é obrigatório");
       }
       if (!StringUtils.hasText(aloj.getLugarHospedagem())) {
-        throw IgrpResponseStatusException.badRequest("lugarHospedagem é obrigatório");
+        throw IgrpResponseStatusException.badRequest("alojamentos: lugarHospedagem é obrigatório");
       }
       if (aloj.getValorTotal() == null) {
-        throw IgrpResponseStatusException.badRequest("valorTotal é obrigatório");
+        throw IgrpResponseStatusException.badRequest("alojamentos: valorTotal é obrigatório");
       }
       if (aloj.getValorDiario() == null) {
-        throw IgrpResponseStatusException.badRequest("valorDiario é obrigatório");
+        throw IgrpResponseStatusException.badRequest("alojamentos: valorDiario é obrigatório");
       }
       if (aloj.getDataInicio() == null) {
-        throw IgrpResponseStatusException.badRequest("dataInicio é obrigatório");
+        throw IgrpResponseStatusException.badRequest("alojamentos: dataInicio é obrigatório");
       }
       if (aloj.getDataFim() == null) {
-        throw IgrpResponseStatusException.badRequest("dataFim é obrigatório");
+        throw IgrpResponseStatusException.badRequest("alojamentos: dataFim é obrigatório");
       }
       if (aloj.getDataFim().isBefore(aloj.getDataInicio())) {
-        throw IgrpResponseStatusException.badRequest("dataFim não pode ser anterior a dataInicio");
+        throw IgrpResponseStatusException.badRequest("alojamentos: dataFim não pode ser anterior a dataInicio");
       }
       if (!StringUtils.hasText(aloj.getFlgAlimentacao())) {
-        throw IgrpResponseStatusException.badRequest("flgAlimentacao é obrigatório");
+        throw IgrpResponseStatusException.badRequest("alojamentos: flgAlimentacao é obrigatório");
       }
 
       var colab = missaoColaboradorRepository.findByMissaoServId_UuidAndFunId_Uuid(missao.getUuid(), aloj.getColaboradorId())
@@ -891,16 +894,16 @@ public class MissaoServicoServiceWrite {
       if (ajuda == null)
         return null;
       if (ajuda.getColaboradorId() == null) {
-        throw IgrpResponseStatusException.badRequest("colaboradorId é obrigatório");
+        throw IgrpResponseStatusException.badRequest("ajudasCusto: colaboradorId é obrigatório");
       }
       if (ajuda.getFlgAlojamento() == null) {
-        throw IgrpResponseStatusException.badRequest("flgAlojamento é obrigatório");
+        throw IgrpResponseStatusException.badRequest("ajudasCusto: flgAlojamento é obrigatório");
       }
       if (ajuda.getNumeroDiasAlojamento() == null) {
-        throw IgrpResponseStatusException.badRequest("numeroDiasAlojamento é obrigatório");
+        throw IgrpResponseStatusException.badRequest("ajudasCusto: numeroDiasAlojamento é obrigatório");
       }
       if (ajuda.getValorDiario() == null) {
-        throw IgrpResponseStatusException.badRequest("valorDiario é obrigatório");
+        throw IgrpResponseStatusException.badRequest("ajudasCusto: valorDiario é obrigatório");
       }
 
       var colab = missaoColaboradorRepository.findByMissaoServId_UuidAndFunId_Uuid(missao.getUuid(), ajuda.getColaboradorId())
