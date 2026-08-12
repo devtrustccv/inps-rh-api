@@ -45,6 +45,8 @@ public class EmprestimoListRowDTO  {
 
 
   private BigDecimal valorConcedido ;
+  private BigDecimal valorAdiantamento;
+  private BigDecimal valorReforco;
 
 
   private Long numeroTotalPrestacoes;
