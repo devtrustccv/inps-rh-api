@@ -16,7 +16,6 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.PlanoFinanceiroEn
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,11 +40,8 @@ public class ReforcoDividaService {
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoRenegociacao());
 
     var newLoan = new EmprestimoEntity();
-    BeanUtils.copyProperties(loan, newLoan);
-    newLoan.setId(null);
-    newLoan.setValorPago(null);
     newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-    newLoan.setValorAdiantado(obj.getValorReforco());
+    newLoan.setValorReforco(obj.getValorReforco());
     newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
     newLoan.setVersao(loan.getVersao() + 1);
     newLoan.setTipoSituacao(tipoSituacao.name());
@@ -56,6 +52,26 @@ public class ReforcoDividaService {
     newLoan.setMotivo(obj.getMotivoReforco());
     newLoan.setEstado(StatusEmprestimo.POR_SUBMETER.name());
     newLoan.setPedido(loan.getPedido());
+    newLoan.setJuro(loan.getJuro());
+    newLoan.setTiprel(loan.getTiprel());
+    newLoan.setMarca(loan.getMarca());
+    newLoan.setAnoFabrico(loan.getAnoFabrico());
+    newLoan.setTipoViatura(loan.getTipoViatura());
+    newLoan.setCilincrada(loan.getCilincrada());
+    newLoan.setCombustivel(loan.getCombustivel());
+    newLoan.setEstadoViatura(loan.getEstadoViatura());
+    newLoan.setNib(loan.getNib());
+    newLoan.setBanco(loan.getBanco());
+    newLoan.setNif(loan.getNif());
+    newLoan.setSwift(loan.getSwift());
+    newLoan.setValorPrestacao(loan.getValorPrestacao());
+    newLoan.setDescTaxaEsforco(loan.getDescTaxaEsforco());
+    newLoan.setRenogociacao(loan.getRenogociacao());
+    newLoan.setTmId(loan.getTmId());
+    newLoan.setTipoRenogociacao(loan.getTipoRenogociacao());
+    newLoan.setFinalidade(loan.getFinalidade());
+    newLoan.setMotivoFecho(loan.getMotivoFecho());
+    newLoan.setValorJuroTotal(loan.getValorJuroTotal());
     newLoan = emprestimoEntityRepository.save(newLoan);
 
     documentService.saveDocuments(

@@ -126,6 +126,30 @@
       "primaryKey": false
     },
     {
+      "name": "valorAdiantamento",
+      "objectType": "java",
+      "type": "decimal",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "valorReforco",
+      "objectType": "java",
+      "type": "decimal",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "numeroTotalPrestacoes",
       "objectType": "java",
       "type": "long",

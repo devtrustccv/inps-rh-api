@@ -53,6 +53,8 @@ public interface EmprestimoEntityRepository extends
           e.renogociacao,
           e.uuid,
           e.valorEmprestimo,
+          e.valorAdiantado,
+          e.valorReforco,
           e.nrPrestacao,
            (
              SELECT COUNT(pf)
