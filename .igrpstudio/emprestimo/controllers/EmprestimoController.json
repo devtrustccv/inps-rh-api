@@ -187,11 +187,6 @@
           "type": "string",
           "name": "funcionarioId",
           "isRequired": false
-        },
-        {
-          "type": "string",
-          "name": "estado",
-          "isRequired": false
         }
       ]
     },

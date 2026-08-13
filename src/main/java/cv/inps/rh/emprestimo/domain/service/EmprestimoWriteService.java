@@ -97,13 +97,10 @@ public class EmprestimoWriteService {
       order.setTipoPedido(TipoPedido.FUNDO_SOCIAL.name());
       order.setOrigem("RH");
       order.setEtapa(EtapaEmprestimo.PEDIDO.name());
-      order.setEstado(Estado.A.name());
+      order.setEstado(StatusEmprestimo.POR_SUBMETER.name());
       order = pedidoEntityRepository.save(order);
       entity.setPedido(order);
-
       entity = emprestimoEntityRepository.save(entity);
-
-      generateSaveFinancialPlanForFundoSocial(entity);
 
       documentService.saveDocuments(
           request.getDocumentos(),
