@@ -152,7 +152,7 @@ public class EmprestimoReadService {
 
     var pageData = emprestimoEntityRepository.listLoans(
         StringUtils.hasText(query.getTipoEmprestimo()) ? query.getTipoEmprestimo() : null,
-        StringUtils.hasText(query.getEstado()) ? query.getEstado() : null,
+        StringUtils.hasText(query.getEstadoEmprestimo()) ? query.getEstadoEmprestimo() : null,
         StringUtils.hasText(query.getDataInicio()) ? LocalDate.parse(query.getDataInicio()) : null,
         StringUtils.hasText(query.getDataFim()) ? LocalDate.parse(query.getDataFim()) : null,
         StringUtils.hasText(query.getDireccaoId()) ? Long.valueOf(query.getDireccaoId()) : null,
