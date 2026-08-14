@@ -1,6 +1,10 @@
 package cv.inps.rh.shared.service;
 
 import cv.inps.rh.shared.service.model.nif.RootResponseDTO;
+
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -30,11 +34,20 @@ public class NifSearchService {
     var headers = new HttpHeaders();
     headers.setBearerAuth(token);
 
-    var finalUrl = UriComponentsBuilder.fromUriString(url)
+   /*  var finalUrl = UriComponentsBuilder.fromUriString(url)
         .queryParam("nm_contribuinte", name)
         .queryParam("num_id", numero)
         .queryParam("num_nif", nif)
-        .toUriString();
+        .toUriString();*/
+
+    var  finalUrl = UriComponentsBuilder.fromUriString(url)
+        .queryParam("nm_contribuinte", name)
+        .queryParam("num_id", numero)
+        .queryParam("num_nif", nif)
+        .build()
+        .encode(StandardCharsets.UTF_8)   // <-- faz o encode correcto (espaço -> %20)
+        .toUri();  
+
     headers.setContentType(MediaType.APPLICATION_JSON);
 
     var entity = new HttpEntity<>(headers);
