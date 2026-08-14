@@ -14,21 +14,11 @@ import java.util.List;
 public class FinancialPlanHelper {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FinancialPlanHelper.class);
-
   private static final MathContext MC = new MathContext(20, RoundingMode.HALF_UP);
 
   private FinancialPlanHelper() {
   }
 
-  /**
-   * Simula um plano financeiro usando o Sistema Francês (Price)
-   *
-   * @param valorEmprestimo Valor do empréstimo
-   * @param taxaAnual       Taxa de juros anual (ex: 0.035 = 3.5%)
-   * @param prazoMeses      Número de meses
-   * @param dataInicio      Data do primeiro pagamento
-   * @return Lista de linhas do plano financeiro
-   */
   public static List<PlanoFinanceiroRowDTO> generateFinancialPlan(
       BigDecimal valorEmprestimo,
       BigDecimal taxaAnual,
