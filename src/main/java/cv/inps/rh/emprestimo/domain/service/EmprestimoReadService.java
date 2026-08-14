@@ -72,6 +72,13 @@ public class EmprestimoReadService {
     dto.setMotivo(entity.getMotivo());
     dto.setNib(entity.getNib());
     dto.setNif(entity.getNif());
+    dto.setEstado(entity.getEstado());
+    dto.setEstadoDesc(StatusEmprestimo.codeDescriptionMap().getOrDefault(entity.getEstado(), entity.getEstado()));
+
+    var order = entity.getPedido();
+    dto.setEtapa(order.getEtapa());
+    dto.setEtapaDesc(EtapaEmprestimo.descriptionMap().getOrDefault(order.getEtapa(), order.getEtapa()));
+
     ofNullable(entity.getBanco()).ifPresent(o -> {
       dto.setBancoId(o.getId());
       dto.setNumeroContaBanco(o.getNuConta());
@@ -88,8 +95,6 @@ public class EmprestimoReadService {
         ))
         .toList();
     dto.setOutrosEmprestimos(another);
-
-    var order = entity.getPedido();
 
     final var allDecisions = new DecisaoEmprestimoDTO();
 
