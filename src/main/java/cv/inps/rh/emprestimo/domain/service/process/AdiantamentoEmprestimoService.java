@@ -45,7 +45,6 @@ public class AdiantamentoEmprestimoService {
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoSituacao());
 
     var newLoan = new EmprestimoEntity();
-    newLoan.setValorPago(null);
     newLoan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
     newLoan.setValorAdiantado(obj.getValorAdiantamento());
     newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
@@ -74,7 +73,6 @@ public class AdiantamentoEmprestimoService {
     newLoan.setRenogociacao(loan.getRenogociacao());
     newLoan.setTmId(loan.getTmId());
     newLoan.setFinalidade(loan.getFinalidade());
-    newLoan.setValorAdiantado(loan.getValorAdiantado());
     newLoan.setTipoRenogociacao(loan.getTipoRenogociacao());
     newLoan.setMotivoFecho(loan.getMotivoFecho());
     newLoan.setValorReforco(loan.getValorReforco());

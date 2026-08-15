@@ -24,33 +24,39 @@ import java.util.List;
 public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
 
 
-  private LocalDate dataInicio ;
+  private LocalDate dataInicio;
 
 
-  private LocalDate dataFim ;
+  private LocalDate dataFim;
 
 
-  private BigDecimal valorPrestacao ;
+  private BigDecimal valorPrestacao;
 
 
-  private String cabimentacaoOrcamental ;
+  private String cabimentacaoOrcamental;
 
 
-  private String avaliacaoTaxaEsforco ;
+  private String avaliacaoTaxaEsforco;
 
 
-  private BigDecimal valorAdiantamento ;
+  private BigDecimal valorAdiantamento;
 
 
-  private String tipoSituacao ;
+  private String tipoSituacao;
 
-  private String nib ;
+  private String nib;
 
-  private Long numeroContaBanco ;
+  private Long numeroContaBanco;
 
-  private String swift ;
+  private String swift;
 
-  private String motivo ;
+  private String motivo;
+
+  private String estado;
+  private String estadoDesc;
+
+  private String etapa;
+  private String etapaDesc;
 
   @Valid
   private List<OutrosEmprestimosDTO> outrosEmprestimos = new ArrayList<>();
@@ -59,6 +65,6 @@ public class DetalhesEmprestimoDTO extends PedidoEmprestimoDTO {
   private List<DocumentoDTO> documentos = new ArrayList<>();
 
   @Valid
-  private DecisaoEmprestimoDTO decisao ;
+  private DecisaoEmprestimoDTO decisao;
 
 }

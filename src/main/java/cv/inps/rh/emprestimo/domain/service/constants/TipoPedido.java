@@ -10,9 +10,7 @@ import java.util.stream.Collectors;
 public enum TipoPedido {
 
   AQUISICAO_VIATURA("Aquisição Viatura"),
-  FUNDO_SOCIAL("Fundo Social"),
-  EMPRESTIMO("Empréstimo"),
-  RENEGOCIACAO_DIVIDA("Renegociação Dívida");
+  FUNDO_SOCIAL("Fundo Social");
 
   private final String description;
 
