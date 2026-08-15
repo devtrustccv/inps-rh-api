@@ -130,7 +130,7 @@ public class NotificacaoDestinatarioResolver {
     if (mobilidade == null || mobilidade.getInstidId() == null) {
       LOGGER.warn("Colaborador {} sem mobilidade activa — não é possível determinar o responsável",
           colaborador.getUuid());
-      return List.of();
+      return List .of();
     }
 
     var direcaoId = mobilidade.getInstidId().getId();
