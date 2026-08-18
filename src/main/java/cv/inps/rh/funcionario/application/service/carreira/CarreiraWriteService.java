@@ -381,6 +381,13 @@ public class CarreiraWriteService {
 
   public void validarCarreira(String funcionarioId, ValidacaoCarreiraDTO dto) {
 
+    // "Corrigir" (domínio VALIDAR_REGISTO): terceira opção do combo, além de aprovar/rejeitar. O
+    // fluxo de correção ainda não está implementado — por agora não faz nada (evita o "Decisão
+    // inválida" do isAprovado, que só conhece SIM/NAO).
+    if (ValidationUtil.isCorrigir(dto.getValidacao())) {
+      return;
+    }
+
     var aprovado = ValidationUtil.isAprovado(dto.getValidacao());
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
 
