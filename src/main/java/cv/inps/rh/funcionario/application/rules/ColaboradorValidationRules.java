@@ -224,9 +224,19 @@ public class ColaboradorValidationRules {
       if (dto.getId() != null) continue;
       if (!StringUtils.hasText(dto.getNumDocumento())) continue;
       String doc = dto.getNumDocumento().trim().toUpperCase();
-      if (docsExistentes.contains(doc) || !docsNovos.add(doc)) {
+      String docOriginal = dto.getNumDocumento().trim();
+      String quem = StringUtils.hasText(dto.getNome()) ? " (" + dto.getNome().trim() + ")" : "";
+      // Já existe na BD, no agregado deste colaborador.
+      if (docsExistentes.contains(doc)) {
         throw IgrpResponseStatusException.conflict(
-            "O familiar com documento '" + dto.getNumDocumento() + "' já se encontra registado no agregado deste colaborador.");
+            "Já existe um agregado/dependente" + quem + " com o número de documento " + docOriginal
+                + " associado a este colaborador. Cada agregado deve ter um número de documento único.");
+      }
+      // Repetido dentro do próprio pedido (dois ou mais agregados com o mesmo documento no formulário).
+      if (!docsNovos.add(doc)) {
+        throw IgrpResponseStatusException.conflict(
+            "Adicionou mais do que um agregado/dependente com o número de documento " + docOriginal
+                + ". Cada agregado deve ter um número de documento único.");
       }
     }
   }
