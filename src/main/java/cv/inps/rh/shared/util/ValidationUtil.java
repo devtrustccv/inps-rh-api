@@ -17,6 +17,16 @@ public final class ValidationUtil {
 
   private static final List<String> DECISOES_APROVACAO = List.of("S", "SIM");
   private static final List<String> DECISOES_REJEICAO = List.of("N", "NAO", "NÃO");
+  private static final List<String> DECISOES_CORRIGIR = List.of("CORRIGIR");
+
+  /**
+   * {@code true} se a decisão é "Corrigir" (domínio {@code VALIDAR_REGISTO}) — a terceira opção
+   * do combo de validação, além de aprovar/rejeitar. O fluxo de correção ainda não está
+   * implementado, por isso quem chama deve tratá-la como no-op por agora.
+   */
+  public static boolean isCorrigir(String decision) {
+    return DECISOES_CORRIGIR.contains(normalizeDecision(decision));
+  }
 
   /**
    * Valida a decisão de validação/aprovação. Aceita, sem distinção de maiúsculas,

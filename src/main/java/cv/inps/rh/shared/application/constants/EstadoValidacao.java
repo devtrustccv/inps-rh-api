@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 public enum EstadoValidacao implements IgrpEnum<String> {
 
   SIM("SIM", "Sim"),
-    NAO("NAO", "Não")
+    NAO("NAO", "Não"),
+    CORRIGIR("CORRIGIR", "Corrigir")
   ;
 
   private final String code;

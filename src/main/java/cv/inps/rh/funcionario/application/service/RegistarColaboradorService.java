@@ -87,6 +87,14 @@ public class RegistarColaboradorService {
     FuncionarioEntity fun = funcionarioMapper.toEntity(dadosPessoais, Estado.P);
 
     if (dto.getFamiliares() != null) {
+      // Impede documento de familiar repetido no agregado deste colaborador ANTES do insert, senão
+      // rebenta no constraint UQ_UNIQ_FAM (nome+num_documento+fun_id) com erro cru da BD. Colaborador
+      // novo, por isso não há familiares existentes a comparar (existentes = null).
+      colaboradorValidationRules.verificarDuplicidadeFamiliares(dto.getFamiliares(), null);
+      // Regra de negócio (impacto no subsídio de filhos): um dependente só pode ter UM colaborador
+      // responsável. Se o mesmo documento já está como responsável (ativo A ou pendente P) noutro
+      // colaborador, bloqueia — o P fecha a fresta de dois registos simultâneos por validar.
+      colaboradorValidationRules.verificarResponsavelUnicoAgregado(dto.getFamiliares(), fun.getUuid());
       var list = dto.getFamiliares().stream().map(f -> {
         var fe = familiarMapper.toEntity(f, Estado.P, fun);
         return fe;

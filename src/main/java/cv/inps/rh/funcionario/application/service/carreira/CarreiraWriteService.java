@@ -381,6 +381,13 @@ public class CarreiraWriteService {
 
   public void validarCarreira(String funcionarioId, ValidacaoCarreiraDTO dto) {
 
+    // "Corrigir" (domínio VALIDAR_REGISTO): terceira opção do combo, além de aprovar/rejeitar. O
+    // fluxo de correção ainda não está implementado — por agora não faz nada (evita o "Decisão
+    // inválida" do isAprovado, que só conhece SIM/NAO).
+    if (ValidationUtil.isCorrigir(dto.getValidacao())) {
+      return;
+    }
+
     var aprovado = ValidationUtil.isAprovado(dto.getValidacao());
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
 
@@ -543,6 +550,35 @@ public class CarreiraWriteService {
       validation.setTiprelId(tiprelPendente);
       validacaoEntityRepository.save(validation);
     }
+
+    // PROGRESSÃO (só quando substitui carreira do mesmo tipo): registar o novo salário do escalão na
+    // BD via procedure Oracle, passando a carreira ANTERIOR (substituída) e a NOVA. Mesma transação:
+    // flush() antes para a procedure ver as linhas já ativadas; se rebentar, faz rollback de toda a
+    // progressão e propaga a mensagem Oracle.
+    if (carreiraMesmoTipo != null) {
+      entityManager.flush();
+      registarSalarioProgressao(carreiraMesmoTipo.getId(), carreira.getId());
+    }
+  }
+
+  /**
+   * Chama pkg_aumento_salarial.REGISTO_SALARIO(P_CARREIRA_ID_OLD, P_CARREIRA_ID_NEW,
+   * P_USER_REGISTO_ID, P_USER_REGISTO_NAME) na transação corrente.
+   * TODO: P_USER_REGISTO_ID/NAME hardcoded — trocar pelo utilizador do login quando disponível.
+   */
+  private void registarSalarioProgressao(Long carreiraIdOld, Long carreiraIdNew) {
+    final long userRegistoId = 1L;
+    final String userRegistoName = "SYSTEM";
+    entityManager.unwrap(org.hibernate.Session.class).doWork(conn -> {
+      try (java.sql.CallableStatement cs =
+               conn.prepareCall("{call pkg_aumento_salarial.REGISTO_SALARIO(?,?,?,?)}")) {
+        cs.setLong(1, carreiraIdOld);
+        cs.setLong(2, carreiraIdNew);
+        cs.setLong(3, userRegistoId);
+        cs.setString(4, userRegistoName);
+        cs.execute();
+      }
+    });
   }
 
   public void eliminarCareira(String carreiraId) {

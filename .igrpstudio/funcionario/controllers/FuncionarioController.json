@@ -133,6 +133,34 @@
       ]
     },
     {
+      "actionName": "getDetalheAlteracoes",
+      "path": "validacoes/{idValidacao}/detalhes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ValidacaoDetalhe",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "list",
+                "module": "funcionario"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "idValidacao",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
       "actionName": "getListFuncionarios",
       "method": "GET",
       "responses": {

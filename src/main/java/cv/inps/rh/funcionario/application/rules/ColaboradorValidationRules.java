@@ -12,15 +12,26 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FamiliarEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoMovimentoEntityRepository;
+import cv.inps.rh.shared.service.NifSearchService;
+import cv.inps.rh.shared.service.model.nif.EntriesDTO;
+import cv.inps.rh.shared.service.model.nif.EntryDTO;
+import cv.inps.rh.shared.service.model.nif.RootResponseDTO;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClientException;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,14 +40,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ColaboradorValidationRules {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(ColaboradorValidationRules.class);
+
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
   private final FamiliarEntityRepository familiarEntityRepository;
   private final EntityManager entityManager;
+  private final NifSearchService nifSearchService;
 
   public void validarDadosPessoais(DadosPessoaisReqDTO dp, UUID uuidExistente) {
     validarDocumentoUnico(dp, uuidExistente);
     validarNif(dp.getNif(), uuidExistente);
+    validarNifCorrespondeColaborador(dp);
     validarCamposObrigatorios(dp);
   }
 
@@ -71,6 +86,94 @@ public class ColaboradorValidationRules {
       throw IgrpResponseStatusException.conflict(
           "Já existe um colaborador registado com o NIF informado. Verifique os dados introduzidos.");
     }
+  }
+
+  /**
+   * Regra (spec DOSSIÊ): o NIF indicado tem de corresponder efetivamente ao colaborador, validado
+   * contra a API de pesquisa NIF por nome, data de nascimento, nome da mãe e nome do pai.
+   *
+   * <p>Consulta autoritativa pelo NIF; compara os campos normalizados (sem acentos/caixa/espaços a
+   * mais). Só invalida quando ambos os lados têm o valor e diferem — campos em falta não geram falso
+   * negativo. Falha de rede/API indisponível é <em>fail-open</em> (regista e segue): uma integração
+   * em baixo não é o mesmo que "NIF não corresponde", e não deve bloquear o registo.
+   */
+  private void validarNifCorrespondeColaborador(DadosPessoaisReqDTO dp) {
+    Long nif = dp.getNif();
+    if (nif == null) return; // obrigatoriedade já tratada em validarNif
+
+    RootResponseDTO resposta;
+    try {
+      resposta = nifSearchService.getEntries(null, null, nif);
+    } catch (RestClientException e) {
+      LOGGER.warn("Validação NIF↔colaborador ignorada: API de pesquisa NIF indisponível (nif={}): {}",
+          nif, e.getMessage());
+      return;
+    }
+
+    var entry = Optional.ofNullable(resposta)
+        .map(RootResponseDTO::getEntries)
+        .map(EntriesDTO::getEntry)
+        .orElse(List.of()).stream()
+        .filter(e -> e != null && Objects.equals(e.getNuNif(), nif))
+        .findFirst()
+        .orElse(null);
+
+    if (entry == null || !dadosNifBatem(dp, entry)) {
+      throw IgrpResponseStatusException.conflict(
+          "O NIF introduzido não corresponde ao colaborador selecionado");
+    }
+  }
+
+  private boolean dadosNifBatem(DadosPessoaisReqDTO dp, EntryDTO entry) {
+    return nomeNifBate(dp.getNome(), entry.getNmContribuinte(), entry.getNmPesquisa())
+        && nomeNifBate(dp.getNomeMae(), entry.getNmMae(), entry.getNmPesquisaMae())
+        && nomeNifBate(dp.getNomePai(), entry.getNmPai(), entry.getNmPesquisaPai())
+        && dataNifBate(dp.getDataNascimento(), entry.getDtNasc());
+  }
+
+  /** Bate se o valor do colaborador coincide com o da API (ou a sua variante de pesquisa). Valores
+   *  em falta de um dos lados não invalidam — só invalida quando ambos existem e diferem. */
+  private boolean nomeNifBate(String doColaborador, String daApi, String daApiPesquisa) {
+    String a = normalizarParaComparacao(doColaborador);
+    if (a == null) return true;
+    String b1 = normalizarParaComparacao(daApi);
+    String b2 = normalizarParaComparacao(daApiPesquisa);
+    if (b1 == null && b2 == null) return true;
+    return a.equals(b1) || a.equals(b2);
+  }
+
+  private boolean dataNifBate(LocalDate doColaborador, String daApi) {
+    if (doColaborador == null) return true;
+    LocalDate b = parseDataApiNif(daApi);
+    if (b == null) return true; // formato desconhecido/em falta → não invalida
+    return doColaborador.isEqual(b);
+  }
+
+  private static String normalizarParaComparacao(String v) {
+    String n = NifSearchService.normalizeName(v);
+    if (n == null) return null;
+    n = n.trim().toUpperCase();
+    return n.isEmpty() ? null : n;
+  }
+
+  private static final List<DateTimeFormatter> FORMATOS_DATA_NIF = List.of(
+      DateTimeFormatter.ISO_LOCAL_DATE,
+      DateTimeFormatter.ofPattern("dd-MM-yyyy"),
+      DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+      DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+
+  private static LocalDate parseDataApiNif(String v) {
+    if (!StringUtils.hasText(v)) return null;
+    String s = v.trim();
+    if (s.length() > 10) s = s.substring(0, 10); // corta a hora, se vier um datetime
+    for (var f : FORMATOS_DATA_NIF) {
+      try {
+        return LocalDate.parse(s, f);
+      } catch (DateTimeParseException ignored) {
+        // tenta o próximo formato
+      }
+    }
+    return null;
   }
 
   private void validarCamposObrigatorios(DadosPessoaisReqDTO dp) {
@@ -121,9 +224,19 @@ public class ColaboradorValidationRules {
       if (dto.getId() != null) continue;
       if (!StringUtils.hasText(dto.getNumDocumento())) continue;
       String doc = dto.getNumDocumento().trim().toUpperCase();
-      if (docsExistentes.contains(doc) || !docsNovos.add(doc)) {
+      String docOriginal = dto.getNumDocumento().trim();
+      String quem = StringUtils.hasText(dto.getNome()) ? " (" + dto.getNome().trim() + ")" : "";
+      // Já existe na BD, no agregado deste colaborador.
+      if (docsExistentes.contains(doc)) {
         throw IgrpResponseStatusException.conflict(
-            "O familiar com documento '" + dto.getNumDocumento() + "' já se encontra registado no agregado deste colaborador.");
+            "Já existe um agregado/dependente" + quem + " com o número de documento " + docOriginal
+                + " associado a este colaborador. Cada agregado deve ter um número de documento único.");
+      }
+      // Repetido dentro do próprio pedido (dois ou mais agregados com o mesmo documento no formulário).
+      if (!docsNovos.add(doc)) {
+        throw IgrpResponseStatusException.conflict(
+            "Adicionou mais do que um agregado/dependente com o número de documento " + docOriginal
+                + ". Cada agregado deve ter um número de documento único.");
       }
     }
   }

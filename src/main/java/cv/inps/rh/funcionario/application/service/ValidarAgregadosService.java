@@ -45,10 +45,11 @@ public class ValidarAgregadosService {
     }*/
 
     colaboradorValidationRules.verificarDuplicidadeFamiliares(agregadoDependenteReqDTO, funcionario.getFamiliares());
-    // TODO: R1 (DOSSIÊ 438-442) — validação de responsável único do agregado desativada por enquanto.
-    // Depende de decidir a normalização do campo `responsavel` na escrita (dados atuais inconsistentes:
-    // SIM/S/NAO/N/0/vazio). Reativar após normalizar. Ver ColaboradorValidationRules.verificarResponsavelUnicoAgregado.
-    // colaboradorValidationRules.verificarResponsavelUnicoAgregado(agregadoDependenteReqDTO, funcionario.getUuid());
+    // R1 (DOSSIÊ 438-442): um dependente só pode ter UM colaborador responsável (impacto no subsídio
+    // de filhos). Bloqueia se o documento já está como responsável (ativo A ou pendente P) noutro
+    // colaborador. Dados na BD consistentes (responsavel = "SIM"), pelo que o isResponsavel não dá
+    // falsos positivos.
+    colaboradorValidationRules.verificarResponsavelUnicoAgregado(agregadoDependenteReqDTO, funcionario.getUuid());
 
     var familiares = familiarMapper
         .syncFamiliares(funcionario.getFamiliares(), agregadoDependenteReqDTO, funcionario, Estado.A);

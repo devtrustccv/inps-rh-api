@@ -16,6 +16,13 @@
         "NAO",
         "Não"
       ]
+    },
+    {
+      "name": "CORRIGIR",
+      "attributes": [
+        "CORRIGIR",
+        "Corrigir"
+      ]
     }
   ],
   "attributes": [

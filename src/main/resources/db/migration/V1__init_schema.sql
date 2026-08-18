@@ -2182,6 +2182,61 @@ END;
 /
 
 /* =========================================================
+   TABELA: RH_T_VALIDACAO_DETALHE
+   Uma linha por campo alterado. Alimenta o ecrã "Detalhe de alterações".
+
+   NOTA: a spec de BD lista apenas ID, VALIDACAO_ID, CAMPO_ALTERADO,
+   VALOR_ANTERIOR, VALOR_NOVO, TABELA_NAME, TABELA_ID e UUID — mas o ecrã lê
+   USER_REGISTO_NAME e DATA_REGISTO, que faltam nessa lista. Incluídos aqui no
+   bloco de auditoria padrão das restantes tabelas.
+
+   VALOR_ANTERIOR/VALOR_NOVO ficam NULL-able (a spec diz obrigatório): um campo
+   que estava vazio e passou a ter valor é uma alteração legítima.
+   ========================================================= */
+CREATE TABLE RH_T_VALIDACAO_DETALHE (
+  ID                   NUMBER           NOT NULL,
+  VALIDACAO_ID         NUMBER           NOT NULL,  -- FK -> RH_T_VALIDACAO.ID
+  CAMPO_ALTERADO       VARCHAR2(100)    NOT NULL,
+  VALOR_ANTERIOR       VARCHAR2(500),
+  VALOR_NOVO           VARCHAR2(500),
+  TABELA_NAME          VARCHAR2(50),
+  TABELA_ID            NUMBER,
+  DATA_REGISTO         DATE             NOT NULL,
+  USER_REGISTO_ID      NUMBER           NOT NULL,
+  USER_REGISTO_NAME    VARCHAR2(200)    NOT NULL,
+  USER_ALTERACAO_ID    NUMBER,
+  USER_ALTERACAO_NAME  VARCHAR2(200),
+  DATA_ALTERACAO       DATE,
+  UUID                 VARCHAR2(36)     NOT NULL,
+
+  CONSTRAINT PK_VALIDACAO_DETALHE PRIMARY KEY (ID),
+  CONSTRAINT FK_VALID_DET_VALID  FOREIGN KEY (VALIDACAO_ID) REFERENCES RH_T_VALIDACAO (ID)
+);
+
+-- Índice do filtro do ecrã: VALIDACAO_ID = RH_T_VALIDACAO.ID
+CREATE INDEX IX_VALID_DET_VALIDACAO ON RH_T_VALIDACAO_DETALHE (VALIDACAO_ID);
+
+CREATE SEQUENCE SEQ_VALIDACAO_DETALHE
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+  NOCYCLE;
+
+CREATE OR REPLACE TRIGGER TRG_VALIDACAO_DETALHE
+BEFORE INSERT ON RH_T_VALIDACAO_DETALHE
+FOR EACH ROW
+BEGIN
+  IF :NEW.ID IS NULL THEN
+    SELECT SEQ_VALIDACAO_DETALHE.NEXTVAL INTO :NEW.ID FROM DUAL;
+  END IF;
+
+  IF :NEW.DATA_REGISTO IS NULL THEN
+    :NEW.DATA_REGISTO := SYSDATE;
+  END IF;
+END;
+/
+
+/* =========================================================
    TABELA: RH_T_PROCESSO_DISCIPLINAR
    ========================================================= */
 CREATE TABLE RH_T_PROCESSO_DISCIPLINAR (

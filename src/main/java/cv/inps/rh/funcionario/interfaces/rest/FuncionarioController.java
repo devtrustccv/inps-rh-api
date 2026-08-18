@@ -10,6 +10,7 @@ import cv.inps.rh.funcionario.application.commands.*;
 import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -129,6 +130,34 @@ public class FuncionarioController {
   {
 
       final var query = new GetValicoesUtilizadoresQuery(nomeColaborador, tipoOperacao, referenciaName, dataInicio, dataFim, pageNumber, pageSize);
+
+      return queryBus.handle(query);
+
+  }
+
+   @GetMapping(
+   value = "validacoes/{idValidacao}/detalhes"
+  )
+  @Operation(
+    summary = "Get detalhe de alteracoes",
+    description = "Campos alterados de uma validacao (valor anterior e novo), para o ecra 'Detalhe de alteracoes'",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              array = @ArraySchema(schema = @Schema(implementation = ValidacaoDetalheDTO.class))
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<List<ValidacaoDetalheDTO>> getDetalheAlteracoes(
+    @PathVariable(value = "idValidacao") String idValidacao)
+  {
+
+      final var query = new GetDetalheAlteracoesQuery(idValidacao);
 
       return queryBus.handle(query);
 
