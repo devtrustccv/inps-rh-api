@@ -2,15 +2,15 @@ package cv.inps.rh.funcionario.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.funcionario.application.dto.SubstituicaoDTO;
 import cv.inps.rh.funcionario.application.service.SubstituicaoWriteService;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ValidarSubstituicaoCommandHandler implements CommandHandler<ValidarSubstituicaoCommand, ResponseEntity<SubstituicaoDTO>> {
+public class ValidarSubstituicaoCommandHandler implements CommandHandler<ValidarSubstituicaoCommand, ResponseEntity<SuccessResponseDTO>> {
 
    private static final Logger LOGGER = LoggerFactory.getLogger(ValidarSubstituicaoCommandHandler.class);
 
@@ -22,7 +22,7 @@ public class ValidarSubstituicaoCommandHandler implements CommandHandler<Validar
    }
 
    @IgrpCommandHandler
-   public ResponseEntity<SubstituicaoDTO> handle(ValidarSubstituicaoCommand command) {
+   public ResponseEntity<SuccessResponseDTO> handle(ValidarSubstituicaoCommand command) {
 
       return ResponseEntity.ok().body(substituicaoWriteService.validar(command));
    }

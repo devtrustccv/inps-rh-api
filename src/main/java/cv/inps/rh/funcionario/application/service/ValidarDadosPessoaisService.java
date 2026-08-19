@@ -6,15 +6,13 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContactoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.FuncionarioMapper;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +29,7 @@ public class ValidarDadosPessoaisService {
   private final ColaboradorValidationRules colaboradorValidationRules;
 
   @Transactional
-  public Map<String, ?> executar(ValidaDadosPessoaisCommand command) {
+  public SuccessResponseDTO executar(ValidaDadosPessoaisCommand command) {
 
     var dto = command.getValidacaodadospessoais();
     var dadosPessoaisReqDTO = dto.getDadosPessoais();
@@ -99,10 +97,7 @@ public class ValidarDadosPessoaisService {
           validacaoEntityRepository.save(v);
         });*/
 
-    var result = new HashMap<String, Object>();
-    result.put("dadosPessoais", dto);
-    result.put("alertas", alertas);
-    return result;
+    return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Dados pessoais actualizados.", alertas);
   }
 
 

@@ -59,17 +59,23 @@ public class ContratoHistoricoWriteService {
    * setEstado / getSituacoesLaborais / aplicarEstado espalhado.
    */
   public void transicionarEstado(ContratoEntity contrato, Estado estado) {
+    // Origem = estado in-flight actual do contrato (P na validação normal, C no reenvio de uma
+    // correção do registo de colaborador). Capturado ANTES de mutar; o método adapta-se sozinho
+    // ao sentido da transição, sem o caller ter de o declarar.
+    var origem = contrato.getEstado();
     contrato.setEstado(estado);
     contrato.getSituacoesLaborais().stream()
-        .filter(s -> s.getEstado() == Estado.P)
+        .filter(s -> s.getEstado() == origem)
         .findFirst()
         .ifPresent(s -> s.setEstado(estado));
-    aplicarEstado(contrato, estado);
+    aplicarEstado(contrato, origem, estado);
   }
 
-  public void aplicarEstado(ContratoEntity contrato, Estado estado) {
+  // origem é passada por transicionarEstado: quando este método corre, contrato.getEstado() já foi
+  // mutado para o destino, logo a origem tem de ter sido capturada antes.
+  private void aplicarEstado(ContratoEntity contrato, Estado origem, Estado estado) {
     var pendenteOpt = contratoHistoricoEntityRepository
-        .findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.P);
+        .findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), origem);
     if (pendenteOpt.isEmpty()) {
       return;
     }

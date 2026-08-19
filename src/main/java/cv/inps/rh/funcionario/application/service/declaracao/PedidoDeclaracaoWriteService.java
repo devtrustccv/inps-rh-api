@@ -8,24 +8,28 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.application.services.EmailService;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
 public class PedidoDeclaracaoWriteService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PedidoDeclaracaoWriteService.class);
 
     private final FuncionarioEntityRepository funcionarioRepository;
     private final PedidoEntityRepository pedidoRepository;
@@ -40,7 +44,7 @@ public class PedidoDeclaracaoWriteService {
     private final OrdemServicoWriteService ordemServicoWriteService;
 
     @Transactional
-    public Map<String, ?> saveNovoPedido(NovoPedidoDeclaracaoCommand command) {
+    public SuccessResponseDTO saveNovoPedido(NovoPedidoDeclaracaoCommand command) {
 
         FuncionarioEntity funcionario = funcionarioRepository
                 .findByUuidOrThrow(command.getPedidodeclaracao().getFunId());
@@ -99,11 +103,11 @@ public class PedidoDeclaracaoWriteService {
       }
 
 
-        return Map.of("id", savedDeclaracao.getId(), "uuid", savedDeclaracao.getUuid().toString());
+        return new SuccessResponseDTO(true, savedDeclaracao.getUuid().toString(), "Pedido de declaração registado.", List.of());
     }
 
     @Transactional
-    public Map<String, ?> submeterAnalise(SubmeterAnalisePedidoDeclaracaoCommand command) {
+    public SuccessResponseDTO submeterAnalise(SubmeterAnalisePedidoDeclaracaoCommand command) {
         DeclaracaoEntity declaracao = declaracaoRepository.findByIdOrThrow(Long.parseLong(command.getId()));
 
         declaracao.setDecisaoAnalise(ValidationUtil.trimToNull(command.getPedidodeclaracaoanalise().getDecisaoAnalise()));
@@ -117,11 +121,21 @@ public class PedidoDeclaracaoWriteService {
 
         declaracaoRepository.save(declaracao);
 
-        return Map.of("message", "Análise submetida com sucesso.");
+        return new SuccessResponseDTO(true, declaracao.getUuid().toString(), "Análise submetida com sucesso.", List.of());
     }
 
     @Transactional
-    public Map<String, ?> validarPedido(ValidacaoPedidoDeclaracaoCommand command) {
+    public SuccessResponseDTO validarPedido(ValidacaoPedidoDeclaracaoCommand command) {
+
+        // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
+        // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
+        // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+        if (ValidationUtil.isCorrigir(command.getPedidodeclaracaovalidacao().getValidar())) {
+            LOGGER.info("[CORRIGIR] DECLARACAO (id={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
+                command.getId());
+            return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
+        }
+
         DeclaracaoEntity declaracao = declaracaoRepository.findByIdOrThrow(Long.parseLong(command.getId()));
         PedidoEntity pedido = declaracao.getPedidoId();
 
@@ -153,7 +167,10 @@ public class PedidoDeclaracaoWriteService {
 
         declaracaoRepository.save(declaracao);
 
-        return Map.of("message", "Pedido validado com sucesso.");
+        var mensagem = "SIM".equalsIgnoreCase(declaracao.getDecisaoRh())
+            ? "Pedido validado com sucesso."
+            : "Pedido rejeitado.";
+        return new SuccessResponseDTO(true, declaracao.getUuid().toString(), mensagem, List.of());
     }
 
     private void enviarNotificacaoDeclaracao(DeclaracaoEntity declaracao) {

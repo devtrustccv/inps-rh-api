@@ -1,7 +1,6 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidarRenovacaoContratoCommand;
-import cv.inps.rh.funcionario.application.dto.RenovacaoContratoDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.ContratoMapper;
@@ -9,21 +8,28 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ValidacaoRenovacaoContratoService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ValidacaoRenovacaoContratoService.class);
 
   private final ContratoMapper contratoMapper;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
@@ -32,9 +38,19 @@ public class ValidacaoRenovacaoContratoService {
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
 
   @Transactional
-  public RenovacaoContratoDTO validar(ValidarRenovacaoContratoCommand command) {
+  public SuccessResponseDTO validar(ValidarRenovacaoContratoCommand command) {
 
     var dto = command.getRenovacaocontrato();
+
+    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
+    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
+    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    if (EstadoValidacao.CORRIGIR.equals(dto.getValidacao())) {
+      LOGGER.info("[CORRIGIR] RENOVACAO_CONTRATO (funcionario={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
+          command.getIdFuncionario());
+      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
+    }
+
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
@@ -79,9 +95,10 @@ public class ValidacaoRenovacaoContratoService {
       }
     }
 
-    var renovacaoContratoDTO = new RenovacaoContratoDTO();
-    renovacaoContratoDTO.setDadosRenovacao(contratoMapper.toRenovacaoContratoReqDTO(contrato));
-    return renovacaoContratoDTO;
+    var mensagem = EstadoValidacao.SIM.equals(dto.getValidacao())
+        ? "Renovação de contrato validada."
+        : "Renovação de contrato actualizada.";
+    return new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, List.of());
   }
 
   /**

@@ -13,6 +13,7 @@ import cv.inps.rh.funcionario.application.dto.RegimeTrabalhoDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperRegimeListDTO;
 import cv.inps.rh.funcionario.application.queries.GetListRegimesQuery;
 import cv.inps.rh.funcionario.application.queries.GetRegimeByIdQuery;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -84,20 +85,20 @@ public class RegimeController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = RegimeTrabalhoDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<RegimeTrabalhoDTO> adicionarRegimeTrabalho(@Valid @RequestBody RegimeTrabalhoDTO adicionarRegimeTrabalhoRequest
+  public ResponseEntity<SuccessResponseDTO> adicionarRegimeTrabalho(@Valid @RequestBody RegimeTrabalhoDTO adicionarRegimeTrabalhoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
       final var command = new AdicionarRegimeTrabalhoCommand(adicionarRegimeTrabalhoRequest, idFuncionario);
 
-       ResponseEntity<RegimeTrabalhoDTO> response = commandBus.send(command);
+       ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
 
        return response;
   }
@@ -115,20 +116,20 @@ public class RegimeController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = RegimeTrabalhoDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<RegimeTrabalhoDTO> validarRegimeTrabalho(@Valid @RequestBody RegimeTrabalhoDTO validarRegimeTrabalhoRequest
+  public ResponseEntity<SuccessResponseDTO> validarRegimeTrabalho(@Valid @RequestBody RegimeTrabalhoDTO validarRegimeTrabalhoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "regimeId") String regimeId)
   {
 
       final var command = new ValidarRegimeTrabalhoCommand(validarRegimeTrabalhoRequest, idFuncionario, regimeId);
 
-       ResponseEntity<RegimeTrabalhoDTO> response = commandBus.send(command);
+       ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
 
        return response;
   }

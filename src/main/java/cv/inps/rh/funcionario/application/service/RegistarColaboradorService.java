@@ -7,6 +7,7 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
@@ -71,7 +72,7 @@ public class RegistarColaboradorService {
   private final ColaboradorValidationRules colaboradorValidationRules;
 
   @Transactional
-  public Map<String, ?> saveDossierColaborador(CreateFuncionarioCommand command) {
+  public SuccessResponseDTO saveDossierColaborador(CreateFuncionarioCommand command) {
     FuncionarioRequestDTO dto = command.getFuncionariorequest();
 
     var dadosPessoais = dto.getDadosPessoais();
@@ -282,10 +283,7 @@ public class RegistarColaboradorService {
           validacaoEntityRepository.save(e);
         });
 
-    var result = new java.util.HashMap<String, Object>();
-    result.put("uuid", saved.getUuid());
-    result.put("alertas", alertas);
-    return result;
+    return new SuccessResponseDTO(true, saved.getUuid().toString(), "Colaborador registado com sucesso.", alertas);
 
   }
 

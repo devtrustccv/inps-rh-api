@@ -11,6 +11,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
@@ -66,7 +67,7 @@ public class SubstituicaoWriteService {
   private static final int LIMIAR_DIAS_DEF = 15;
 
   @Transactional
-  public SubstituicaoDTO registrar(RegistarSubstituicaoCommand command) {
+  public SuccessResponseDTO registrar(RegistarSubstituicaoCommand command) {
 
     var dto = command.getSubstituicao();
 
@@ -144,13 +145,22 @@ public class SubstituicaoWriteService {
 
     funcionarioEntityRepository.save(funcionarioSubstituto);
 
-    return dto;
+    return new SuccessResponseDTO(true, substituicao.getUuid().toString(), "Substituição registada.", List.of());
 
   }
 
   @Transactional
-  public SubstituicaoDTO validar(ValidarSubstituicaoCommand command) {
+  public SuccessResponseDTO validar(ValidarSubstituicaoCommand command) {
     var dto = command.getSubstituicao();
+
+    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
+    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
+    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    if (EstadoValidacao.CORRIGIR.equals(dto.getValidar())) {
+      log.info("[CORRIGIR] SUBSTITUICAO (substituicao={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
+          command.getSubstituicaoId());
+      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
+    }
 
     var idSusbtituicao = IdentificadorUnico.from(command.getSubstituicaoId()).valor();
 
@@ -234,7 +244,10 @@ public class SubstituicaoWriteService {
     substituicaoEntityRepository.save(substituicao);
     funcionarioEntityRepository.save(funcionarioSubstituido);
 
-    return dto;
+    var mensagem = EstadoValidacao.SIM.equals(dto.getValidar())
+        ? "Substituição validada."
+        : "Substituição rejeitada.";
+    return new SuccessResponseDTO(true, substituicao.getUuid().toString(), mensagem, List.of());
   }
 
   /**

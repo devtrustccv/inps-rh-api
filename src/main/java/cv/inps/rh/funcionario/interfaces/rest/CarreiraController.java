@@ -18,6 +18,7 @@ import cv.inps.rh.funcionario.application.queries.GetCarreiraAtualQuery;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraByIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraListQuery;
 import cv.inps.rh.funcionario.application.queries.GetCarreiraProcessandoAtivaQuery;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -92,14 +93,14 @@ public class CarreiraController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<String> novaCarreira(@Valid @RequestBody CarreiraNovoDTO novaCarreiraRequest
+   public ResponseEntity<SuccessResponseDTO> novaCarreira(@Valid @RequestBody CarreiraNovoDTO novaCarreiraRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
@@ -122,14 +123,14 @@ public class CarreiraController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<String> validarCarreira(@Valid @RequestBody ValidacaoCarreiraDTO validarCarreiraRequest
+   public ResponseEntity<SuccessResponseDTO> validarCarreira(@Valid @RequestBody ValidacaoCarreiraDTO validarCarreiraRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId,@PathVariable(value = "carreiraId") String carreiraId)
   {
 
@@ -237,19 +238,19 @@ public class CarreiraController {
     description = "Eliminar carreira",
     responses = {
       @ApiResponse(
-          responseCode = "204",
+          responseCode = "200",
 
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<String> eliminarCarreira(
+   public ResponseEntity<SuccessResponseDTO> eliminarCarreira(
     @PathVariable(value = "carreiraId") String carreiraId)
   {
 
@@ -272,14 +273,14 @@ public class CarreiraController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<String> atualizarCarreira(@Valid @RequestBody CarreiraNovoDTO atualizarCarreiraRequest
+   public ResponseEntity<SuccessResponseDTO> atualizarCarreira(@Valid @RequestBody CarreiraNovoDTO atualizarCarreiraRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId,@PathVariable(value = "carreiraId") String carreiraId)
   {
 

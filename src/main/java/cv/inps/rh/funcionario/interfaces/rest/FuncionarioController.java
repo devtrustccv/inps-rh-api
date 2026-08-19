@@ -9,6 +9,7 @@ import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.funcionario.application.commands.*;
 import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.application.queries.*;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -51,14 +52,14 @@ public class FuncionarioController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> createFuncionario(@Valid @RequestBody FuncionarioRequestDTO createFuncionarioRequest
+   public ResponseEntity<SuccessResponseDTO> createFuncionario(@Valid @RequestBody FuncionarioRequestDTO createFuncionarioRequest
     )
   {
 
@@ -216,14 +217,14 @@ public class FuncionarioController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> validarRegistoColaborador(@Valid @RequestBody FuncionarioRequestDTO validarRegistoColaboradorRequest
+   public ResponseEntity<SuccessResponseDTO> validarRegistoColaborador(@Valid @RequestBody FuncionarioRequestDTO validarRegistoColaboradorRequest
     , @PathVariable(value = "id") String id)
   {
 
@@ -247,14 +248,14 @@ public class FuncionarioController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = ValidacaoDadosPessoaisDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<ValidacaoDadosPessoaisDTO> validaDadosPessoais(@Valid @RequestBody ValidacaoDadosPessoaisDTO validaDadosPessoaisRequest
+   public ResponseEntity<SuccessResponseDTO> validaDadosPessoais(@Valid @RequestBody ValidacaoDadosPessoaisDTO validaDadosPessoaisRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
@@ -277,14 +278,14 @@ public class FuncionarioController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = ValidarDadosAcademicosDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<ValidarDadosAcademicosDTO> validarDadosAcademicos(@Valid @RequestBody ValidarDadosAcademicosDTO validarDadosAcademicosRequest
+   public ResponseEntity<SuccessResponseDTO> validarDadosAcademicos(@Valid @RequestBody ValidarDadosAcademicosDTO validarDadosAcademicosRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
@@ -307,14 +308,14 @@ public class FuncionarioController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = ValidarAgregadosDependentesDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<ValidarAgregadosDependentesDTO> validarDadosFamiliares(@Valid @RequestBody ValidarAgregadosDependentesDTO validarDadosFamiliaresRequest
+   public ResponseEntity<SuccessResponseDTO> validarDadosFamiliares(@Valid @RequestBody ValidarAgregadosDependentesDTO validarDadosFamiliaresRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
@@ -337,14 +338,14 @@ public class FuncionarioController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = ValidarDadosBancariosDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<ValidarDadosBancariosDTO> validarDadosBancarios(@Valid @RequestBody ValidarDadosBancariosDTO validarDadosBancariosRequest
+   public ResponseEntity<SuccessResponseDTO> validarDadosBancarios(@Valid @RequestBody ValidarDadosBancariosDTO validarDadosBancariosRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
@@ -515,13 +516,13 @@ public class FuncionarioController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = AlterarSituacaoLaboralRequest.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
-   public ResponseEntity<AlterarSituacaoLaboralRequest> alterarSituacaoLaboral(
+   public ResponseEntity<SuccessResponseDTO> alterarSituacaoLaboral(
     @Valid @RequestBody AlterarSituacaoLaboralRequest alterarSituacaoLaboralRequest,
     @PathVariable(value = "idFuncionario") String idFuncionario)
   {

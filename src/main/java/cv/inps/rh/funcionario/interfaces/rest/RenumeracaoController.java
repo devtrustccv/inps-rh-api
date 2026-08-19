@@ -15,6 +15,7 @@ import cv.inps.rh.funcionario.application.queries.CalcularRemuneracaoQuery;
 import cv.inps.rh.funcionario.application.queries.GetListRenumeracoesQuery;
 import cv.inps.rh.funcionario.application.queries.GetPagamentosDescontosByIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetRenumeracaoByIdQuery;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -91,14 +92,14 @@ public class RenumeracaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<String> adicionarNovoRemuneracao(@Valid @RequestBody NovoRemuneracaoRequestDTO adicionarNovoRemuneracaoRequest
+   public ResponseEntity<SuccessResponseDTO> adicionarNovoRemuneracao(@Valid @RequestBody NovoRemuneracaoRequestDTO adicionarNovoRemuneracaoRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
@@ -121,14 +122,14 @@ public class RenumeracaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<String> adicionarNovoPagamento(@Valid @RequestBody NovoPagamentoRequestDTO adicionarNovoPagamentoRequest
+   public ResponseEntity<SuccessResponseDTO> adicionarNovoPagamento(@Valid @RequestBody NovoPagamentoRequestDTO adicionarNovoPagamentoRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
@@ -151,14 +152,14 @@ public class RenumeracaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<String> validarNovoRemuneracao(@Valid @RequestBody ValidarRemuneracaoRequestDTO validarNovoRemuneracaoRequest
+   public ResponseEntity<SuccessResponseDTO> validarNovoRemuneracao(@Valid @RequestBody ValidarRemuneracaoRequestDTO validarNovoRemuneracaoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "remuneracaoId") String remuneracaoId)
   {
 
@@ -181,14 +182,14 @@ public class RenumeracaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<String> validarNovoPagamento(@Valid @RequestBody ValidarPagamentoRequestDTO validarNovoPagamentoRequest
+   public ResponseEntity<SuccessResponseDTO> validarNovoPagamento(@Valid @RequestBody ValidarPagamentoRequestDTO validarNovoPagamentoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "pagamentoId") String pagamentoId)
   {
 

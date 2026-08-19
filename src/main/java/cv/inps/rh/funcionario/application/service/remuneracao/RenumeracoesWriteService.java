@@ -9,6 +9,7 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -16,15 +17,20 @@ import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class RenumeracoesWriteService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(RenumeracoesWriteService.class);
 
   private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
@@ -35,7 +41,7 @@ public class RenumeracoesWriteService {
   private final EntityManager entityManager;
   private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
 
-  public void novoRemuneracao(String funcionarioId, NovoRemuneracaoRequestDTO request) {
+  public SuccessResponseDTO novoRemuneracao(String funcionarioId, NovoRemuneracaoRequestDTO request) {
     validarRemuneracaoOuPagamento(request);
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
@@ -72,9 +78,11 @@ public class RenumeracoesWriteService {
     validation.setUuid(UuidCreator.getTimeOrderedEpoch());
     validation.setFunId(funcionario);
     validacaoEntityRepository.save(validation);
+
+    return new SuccessResponseDTO(true, remuneracao.getUuid().toString(), "Remuneração registada.", List.of());
   }
 
-  public void novoPagamento(String funcionarioId, NovoPagamentoRequestDTO request) {
+  public SuccessResponseDTO novoPagamento(String funcionarioId, NovoPagamentoRequestDTO request) {
     validarRemuneracaoOuPagamento(request);
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
@@ -112,11 +120,23 @@ public class RenumeracoesWriteService {
     validation.setUuid(UuidCreator.getTimeOrderedEpoch());
     validation.setFunId(funcionario);
     validacaoEntityRepository.save(validation);
+
+    return new SuccessResponseDTO(true, pagamento.getUuid().toString(), "Pagamento/desconto registado.", List.of());
   }
 
-  public void validarNovoRemuneracao(ValidarNovoRemuneracaoCommand command) {
+  public SuccessResponseDTO validarNovoRemuneracao(ValidarNovoRemuneracaoCommand command) {
 
     var data = command.getValidarremuneracaorequest();
+
+    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
+    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
+    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    if (ValidationUtil.isCorrigir(data.getValidacao())) {
+      LOGGER.info("[CORRIGIR] RENDIMENTO (remuneracao={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
+          command.getRemuneracaoId());
+      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
+    }
+
     var request = data.getDados();
     validarRemuneracaoOuPagamento(request);
 
@@ -146,11 +166,23 @@ public class RenumeracoesWriteService {
     }
 
     definicaoRemuneracaoEntityRepository.save(remuneracao);
+
+    return new SuccessResponseDTO(true, remuneracao.getUuid().toString(), "Remuneração actualizada.", List.of());
   }
 
-  public void validarNovoPagamento(ValidarNovoPagamentoCommand command) {
+  public SuccessResponseDTO validarNovoPagamento(ValidarNovoPagamentoCommand command) {
 
     var data = command.getValidarpagamentorequest();
+
+    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
+    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
+    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    if (ValidationUtil.isCorrigir(data.getValidacao())) {
+      LOGGER.info("[CORRIGIR] DESCONTO (pagamento={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
+          command.getPagamentoId());
+      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
+    }
+
     var request = data.getDados();
     validarRemuneracaoOuPagamento(request);
 
@@ -186,6 +218,8 @@ public class RenumeracoesWriteService {
     }
 
     defPagamentoEntityRepository.save(pagamento);
+
+    return new SuccessResponseDTO(true, pagamento.getUuid().toString(), "Pagamento/desconto actualizado.", List.of());
   }
 
   private void validarRemuneracaoOuPagamento(NovoRemuneracaoRequestDTO request) {

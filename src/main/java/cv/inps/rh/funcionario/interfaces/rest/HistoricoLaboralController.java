@@ -18,6 +18,7 @@ import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralByFunIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralComboQuery;
 import cv.inps.rh.funcionario.application.queries.GetRelacaoLaboralQuery;
 import cv.inps.rh.shared.application.dto.ComboItemDTO;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -95,14 +96,14 @@ public class HistoricoLaboralController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = RelacaoLaboralDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<RelacaoLaboralDTO> novaRelacaoLaboral(@Valid @RequestBody RelacaoLaboralReqDTO novaRelacaoLaboralRequest
+   public ResponseEntity<SuccessResponseDTO> novaRelacaoLaboral(@Valid @RequestBody RelacaoLaboralReqDTO novaRelacaoLaboralRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
@@ -125,14 +126,14 @@ public class HistoricoLaboralController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = RelacaoLaboralDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<RelacaoLaboralDTO> atualizarRelacaoLaboral(@Valid @RequestBody RelacaoLaboralReqDTO atualizarRelacaoLaboralRequest
+   public ResponseEntity<SuccessResponseDTO> atualizarRelacaoLaboral(@Valid @RequestBody RelacaoLaboralReqDTO atualizarRelacaoLaboralRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "tiprelUuid") String tiprelUuid)
   {
 

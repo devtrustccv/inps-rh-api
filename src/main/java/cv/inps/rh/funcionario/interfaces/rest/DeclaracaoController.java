@@ -27,6 +27,7 @@ import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoResponseDTO;
 import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoAnaliseDTO;
 import cv.inps.rh.funcionario.application.dto.PedidoDeclaracaoValidacaoDTO;
 import cv.inps.rh.shared.application.dto.NotificacaoInfoDTO;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 
 @IgrpController
 @RestController
@@ -58,14 +59,14 @@ public class DeclaracaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> novoPedidoDeclaracao(@Valid @RequestBody PedidoDeclaracaoDTO novoPedidoDeclaracaoRequest
+
+  public ResponseEntity<SuccessResponseDTO> novoPedidoDeclaracao(@Valid @RequestBody PedidoDeclaracaoDTO novoPedidoDeclaracaoRequest
     )
   {
 
@@ -153,14 +154,14 @@ public class DeclaracaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> submeterAnalisePedidoDeclaracao(@Valid @RequestBody PedidoDeclaracaoAnaliseDTO submeterAnalisePedidoDeclaracaoRequest
+
+  public ResponseEntity<SuccessResponseDTO> submeterAnalisePedidoDeclaracao(@Valid @RequestBody PedidoDeclaracaoAnaliseDTO submeterAnalisePedidoDeclaracaoRequest
     , @PathVariable(value = "id") String id)
   {
 
@@ -183,14 +184,14 @@ public class DeclaracaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
-  
-  public ResponseEntity<Map<String, ?>> validacaoPedidoDeclaracao(@Valid @RequestBody PedidoDeclaracaoValidacaoDTO validacaoPedidoDeclaracaoRequest
+
+  public ResponseEntity<SuccessResponseDTO> validacaoPedidoDeclaracao(@Valid @RequestBody PedidoDeclaracaoValidacaoDTO validacaoPedidoDeclaracaoRequest
     , @PathVariable(value = "id") String id)
   {
 

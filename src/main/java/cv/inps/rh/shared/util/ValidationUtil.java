@@ -20,6 +20,14 @@ public final class ValidationUtil {
   private static final List<String> DECISOES_CORRIGIR = List.of("CORRIGIR");
 
   /**
+   * Mensagem única para o no-op do "Corrigir" enquanto o fluxo de correção não estiver implementado.
+   * As validações do dossiê reconhecem CORRIGIR como terceira decisão, registam no log e devolvem
+   * esta mensagem sem alterar nada. Ver [[project]] / os serviços Validar*.
+   */
+  public static final String MSG_CORRIGIR_NAO_IMPLEMENTADO =
+      "A opção 'Corrigir' ainda não está disponível. Nenhuma alteração foi aplicada ao registo.";
+
+  /**
    * {@code true} se a decisão é "Corrigir" (domínio {@code VALIDAR_REGISTO}) — a terceira opção
    * do combo de validação, além de aprovar/rejeitar. O fluxo de correção ainda não está
    * implementado, por isso quem chama deve tratá-la como no-op por agora.

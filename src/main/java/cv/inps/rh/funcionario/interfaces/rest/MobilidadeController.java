@@ -14,6 +14,7 @@ import cv.inps.rh.funcionario.application.dto.WrapperListMobilidadeDTO;
 import cv.inps.rh.funcionario.application.queries.GetListMobilidadesQuery;
 import cv.inps.rh.funcionario.application.queries.GetMobilidadeAtualQuery;
 import cv.inps.rh.funcionario.application.queries.GetMobilidadeByIdQuery;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -148,20 +149,20 @@ public class MobilidadeController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = MobilidadeDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<MobilidadeDTO> saveMobilidade(@Valid @RequestBody MobilidadeDTO saveMobilidadeRequest
+  public ResponseEntity<SuccessResponseDTO> saveMobilidade(@Valid @RequestBody MobilidadeDTO saveMobilidadeRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
       final var command = new SaveMobilidadeCommand(saveMobilidadeRequest, idFuncionario);
 
-       ResponseEntity<MobilidadeDTO> response = commandBus.send(command);
+       ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
 
        return response;
   }
@@ -179,20 +180,20 @@ public class MobilidadeController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = MobilidadeDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<MobilidadeDTO> editarMobilidade(@Valid @RequestBody MobilidadeDTO editarMobilidadeRequest
+  public ResponseEntity<SuccessResponseDTO> editarMobilidade(@Valid @RequestBody MobilidadeDTO editarMobilidadeRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "mobilidadeId") String mobilidadeId)
   {
 
       final var command = new EditarMobilidadeCommand(editarMobilidadeRequest, idFuncionario, mobilidadeId);
 
-       ResponseEntity<MobilidadeDTO> response = commandBus.send(command);
+       ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
 
        return response;
   }
@@ -210,20 +211,20 @@ public class MobilidadeController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = MobilidadeDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<MobilidadeDTO> validarMobilidade(@Valid @RequestBody MobilidadeDTO validarMobilidadeRequest
+  public ResponseEntity<SuccessResponseDTO> validarMobilidade(@Valid @RequestBody MobilidadeDTO validarMobilidadeRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "mobilidadeId") String mobilidadeId)
   {
 
       final var command = new ValidarMobilidadeCommand(validarMobilidadeRequest, idFuncionario, mobilidadeId);
 
-       ResponseEntity<MobilidadeDTO> response = commandBus.send(command);
+       ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
 
        return response;
   }

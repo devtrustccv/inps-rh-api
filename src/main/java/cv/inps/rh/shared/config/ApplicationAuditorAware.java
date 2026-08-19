@@ -1,45 +1,56 @@
 package cv.inps.rh.shared.config;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.AuditorAware;
-import org.springframework.security.core.context.SecurityContextHolder;
-
 import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.AuditorAware;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 public class ApplicationAuditorAware implements AuditorAware<String> {
 
-  @Value("${spring.profiles.active}")
-  private String activeProfile;
 
-  @NotNull
+  private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationAuditorAware.class);
+
+  private static final String SYSTEM_FALLBACK = "system-bot@nosi.cv";
+
   @Override
   public Optional<String> getCurrentAuditor() {
-    var preferredUsername = getPreferredUsername();
-    return Optional.ofNullable(preferredUsername);
+    return Optional.ofNullable(getCurrentSubjectName()).filter(s -> !s.isBlank());
   }
 
   /**
-   * Retrieves the preferred username from the JWT token in the security context.
-   *
-   * @return preferred username
-   * @throws IllegalStateException if the JWT token is not found in the security context
+   * Resolves the current user identity for auditing purposes.
+   * Priority:
+   * 1) sub claim from JWT if present
+   * 2) Authentication#getName() if an Authentication exists
+   * 3) Fallback to system account for background processing
    */
-  public String getPreferredUsername() {
+  private String getCurrentSubjectName() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    if ("development".equals(activeProfile) || "staging".equals(activeProfile)) {
-      return "local";
+    if (authentication instanceof JwtAuthenticationToken jwtAuth) {
+      Jwt jwt = jwtAuth.getToken();
+      String sub = jwt.getClaimAsString("sub");
+      if (sub != null && !sub.isBlank()) {
+        LOGGER.debug("Resolved auditor from JWT sub: {}", sub);
+        return sub;
+      }
     }
 
-    var authentication = SecurityContextHolder.getContext().getAuthentication();
-
-    if (authentication == null || !authentication.isAuthenticated()
-        || "anonymousUser".equals(authentication.getPrincipal())) {
-      // Fallback when no user is authenticated (e.g., server-generated records)
-      return "system";
+    if (authentication != null) {
+      String name = authentication.getName();
+      if (name != null && !name.isBlank()) {
+        LOGGER.debug("Resolved auditor from authentication name: {}", name);
+        return name;
+      }
     }
 
-    return authentication.getName();
+    LOGGER.warn("No authenticated user found, falling back to system account");
+    return SYSTEM_FALLBACK;
   }
 
 }
