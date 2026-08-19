@@ -49,7 +49,6 @@ public class ValidarRegistoColaboradorService {
   private final RegimeTrabalhoMapper regimeTrabalhoMapper;
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final FuncionarioRules funcionarioRules;
-  private final TipoMovimentoHelper tipoMovimentoHelper;
   private final ValidarDadosContratuaisService validarDadosContratuaisService;
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
   private final OrdemServicoWriteService ordemServicoWriteService;
