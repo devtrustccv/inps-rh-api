@@ -10,7 +10,13 @@ public class AuditEntityListener {
   @PrePersist
   public void setCreatedById(AuditEntity entity) {
     entity.setCreatedById(getCurrentUserId());
-    entity.setLastModifiedById(getCurrentUserId());
+
+    // Os campos de alteração só fazem sentido em UPDATE. No registo (INSERT) devem ficar null.
+    // Este listener corre depois do AuditingEntityListener (que preenche lastModified* na criação),
+    // por isso limpamos aqui os três campos de alteração. Só o @PreUpdate os volta a preencher.
+    entity.setLastModifiedById(null);
+    entity.setLastModifiedBy(null);
+    entity.setLastModifiedDate(null);
   }
 
   @PreUpdate
