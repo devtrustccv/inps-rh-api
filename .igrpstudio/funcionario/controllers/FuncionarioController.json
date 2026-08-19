@@ -310,11 +310,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "ValidacaoDadosPessoais",
+                "type": "SuccessResponse",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
-                "module": "funcionario"
+                "module": "shared"
               }
             }
           }
@@ -351,11 +351,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "ValidarDadosAcademicos",
+                "type": "SuccessResponse",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
-                "module": "funcionario"
+                "module": "shared"
               }
             }
           }
@@ -392,11 +392,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "ValidarAgregadosDependentes",
+                "type": "SuccessResponse",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
-                "module": "funcionario"
+                "module": "shared"
               }
             }
           }
@@ -433,11 +433,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "ValidarDadosBancarios",
+                "type": "SuccessResponse",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
-                "module": "funcionario"
+                "module": "shared"
               }
             }
           }
@@ -638,11 +638,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "AlterarSituacaoLaboralRequest",
+                "type": "SuccessResponse",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
-                "module": "funcionario"
+                "module": "shared"
               }
             }
           }

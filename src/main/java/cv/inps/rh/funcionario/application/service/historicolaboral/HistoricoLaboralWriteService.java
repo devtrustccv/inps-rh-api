@@ -12,6 +12,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
@@ -51,7 +52,7 @@ public class HistoricoLaboralWriteService {
   private final HistoricoLaboralReadService historicoLaboralReadService;
 
   @Transactional
-  public RelacaoLaboralDTO novo(NovaRelacaoLaboralCommand command) {
+  public SuccessResponseDTO novo(NovaRelacaoLaboralCommand command) {
 
     // Registo de Relacao Laboral (use case): so a SITUACAO e editavel — mobilidade/carreira sao
     // SOMENTE LEITURA (tem ecras proprios) e este fluxo NAO passa por validacao (aplica direto).
@@ -85,7 +86,7 @@ public class HistoricoLaboralWriteService {
         ordemServicoWriteService.criar(funcionario, atual, dto.getTipoOrdemServico());
       }
       funcionarioEntityRepository.save(funcionario);
-      return detalhe(atual);
+      return new SuccessResponseDTO(true, atual.getUuid().toString(), "Relação laboral registada.", List.of());
     }
 
     var hoje = LocalDate.now();
@@ -137,11 +138,11 @@ public class HistoricoLaboralWriteService {
     }
 
     funcionarioEntityRepository.save(funcionario);
-    return detalhe(novoRelacionamento);
+    return new SuccessResponseDTO(true, novoRelacionamento.getUuid().toString(), "Relação laboral registada.", List.of());
   }
 
   @Transactional
-  public RelacaoLaboralDTO atualizar(AtualizarRelacaoLaboralCommand command) {
+  public SuccessResponseDTO atualizar(AtualizarRelacaoLaboralCommand command) {
     var dto = command.getRelacaolaboral();
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc);
@@ -189,7 +190,7 @@ public class HistoricoLaboralWriteService {
 
     tiposRelacionamentoEntityRepository.save(relacionamento);
     funcionarioEntityRepository.save(funcionario);
-    return detalhe(relacionamento);
+    return new SuccessResponseDTO(true, relacionamento.getUuid().toString(), "Relação laboral actualizada.", List.of());
   }
 
   /** Ha alteracao de situacao a aplicar? (situacao/motivo/datas/observacao). */

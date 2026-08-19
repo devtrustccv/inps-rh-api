@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.commands;
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.funcionario.application.service.carreira.CarreiraWriteService;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public class NovaCarreiraCommandHandler implements CommandHandler<NovaCarreiraCommand, ResponseEntity<String>> {
+public class NovaCarreiraCommandHandler implements CommandHandler<NovaCarreiraCommand, ResponseEntity<SuccessResponseDTO>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(NovaCarreiraCommandHandler.class);
 
@@ -21,13 +22,12 @@ public class NovaCarreiraCommandHandler implements CommandHandler<NovaCarreiraCo
   }
 
   @IgrpCommandHandler
-  public ResponseEntity<String> handle(NovaCarreiraCommand command) {
+  public ResponseEntity<SuccessResponseDTO> handle(NovaCarreiraCommand command) {
 
     LOGGER.info("Nova carreira para funcionario: {}", command);
 
-    carreiraWriteService.novaCarreira(command.getFuncionarioId(), command.getDadoscontratuaisreq());
-
-    return ResponseEntity.ok().build();
+    return ResponseEntity.ok(
+        carreiraWriteService.novaCarreira(command.getFuncionarioId(), command.getDadoscontratuaisreq()));
   }
 
 }

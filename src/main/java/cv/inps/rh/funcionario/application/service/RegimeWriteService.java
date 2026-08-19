@@ -6,6 +6,7 @@ import cv.inps.rh.funcionario.application.dto.RegimeTrabalhoDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RegimeModalidadeEntity;
@@ -15,15 +16,20 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.RegimeModalidadeE
 import cv.inps.rh.shared.infrastructure.persistence.repository.RegimeTrabalhoEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class RegimeWriteService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(RegimeWriteService.class);
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final FuncionarioRules funcionarioRules;
@@ -32,7 +38,7 @@ public class RegimeWriteService {
 
 
   @Transactional
-  public RegimeTrabalhoDTO alterarRegimeTrabalho(AdicionarRegimeTrabalhoCommand command) {
+  public SuccessResponseDTO alterarRegimeTrabalho(AdicionarRegimeTrabalhoCommand command) {
 
     var dto = command.getRegimetrabalho();
     var idFuncionario = IdentificadorUnico.from(command.getIdFuncionario()).valor();
@@ -67,13 +73,23 @@ public class RegimeWriteService {
       regimeModalidadeEntityRepository.saveAll(novasModalidades);
     }
 
-    return dto;
+    return new SuccessResponseDTO(true, regime.getUuid().toString(), "Regime de trabalho registado.", List.of());
   }
 
   @Transactional
-  public RegimeTrabalhoDTO validar(ValidarRegimeTrabalhoCommand command) {
+  public SuccessResponseDTO validar(ValidarRegimeTrabalhoCommand command) {
 
     var dto = command.getRegimetrabalho();
+
+    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
+    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
+    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    if (EstadoValidacao.CORRIGIR.equals(dto.getValidar())) {
+      LOGGER.info("[CORRIGIR] REGIME_TRABALHO (regime={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
+          command.getRegimeId());
+      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
+    }
+
     var idFuncionario = IdentificadorUnico.from(command.getIdFuncionario()).valor();
 
     var funcionario = funcionarioEntityRepository.findByUuid(idFuncionario)
@@ -146,7 +162,10 @@ public class RegimeWriteService {
 
     regimeTrabalhoEntityRepository.save(regime);
 
-    return dto;
+    var mensagem = EstadoValidacao.SIM.equals(dto.getValidar())
+        ? "Regime de trabalho validado."
+        : "Regime de trabalho rejeitado.";
+    return new SuccessResponseDTO(true, regime.getUuid().toString(), mensagem, List.of());
   }
 
 }

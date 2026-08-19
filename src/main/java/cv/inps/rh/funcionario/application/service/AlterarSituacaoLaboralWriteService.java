@@ -3,13 +3,13 @@ package cv.inps.rh.funcionario.application.service;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.AlterarSituacaoLaboralCommand;
 import cv.inps.rh.funcionario.application.constants.SituacaoLaboral;
-import cv.inps.rh.funcionario.application.dto.AlterarSituacaoLaboralRequest;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
@@ -26,14 +26,19 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamen
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class AlterarSituacaoLaboralWriteService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(AlterarSituacaoLaboralWriteService.class);
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ParamSituacaoEntityRepository paramSitLaboralEntityRepository;
@@ -47,9 +52,18 @@ public class AlterarSituacaoLaboralWriteService {
   private final OrdemServicoWriteService ordemServicoWriteService;
 
   @Transactional
-  public AlterarSituacaoLaboralRequest execute(AlterarSituacaoLaboralCommand command) {
+  public SuccessResponseDTO execute(AlterarSituacaoLaboralCommand command) {
 
     var dto = command.getAlterarsituacaolaboral();
+
+    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
+    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
+    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    if (EstadoValidacao.CORRIGIR.equals(dto.getValidar())) {
+      LOGGER.info("[CORRIGIR] ESTADO_COLABORADOR (funcionario={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
+          command.getId());
+      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
+    }
 
     var funcionarioPublicId = IdentificadorUnico.from(command.getId()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
@@ -109,7 +123,10 @@ public class AlterarSituacaoLaboralWriteService {
       }
 
       funcionarioEntityRepository.save(funcionario);
-      return dto;
+      var mensagem = EstadoValidacao.SIM.equals(dto.getValidar())
+          ? "Situação laboral validada."
+          : "Situação laboral rejeitada.";
+      return new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, List.of());
     }
 
     var dataInicio = DateFormatter.stringToLocalDate(dto.getDataInicio());
@@ -129,7 +146,7 @@ public class AlterarSituacaoLaboralWriteService {
         || !Objects.equals(motAtualId, dto.getMotivoId());
 
     if (!mudouSituacaoOuMotivo) {
-      return dto;
+      return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Situação laboral sem alterações.", List.of());
     }
 
     boolean processado = tiposRelacionamentoAtual.getUltProc() != null;
@@ -158,7 +175,7 @@ public class AlterarSituacaoLaboralWriteService {
         funcionario.getValidacoes().add(validUpd);
       }
       funcionarioEntityRepository.save(funcionario);
-      return dto;
+      return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Situação laboral actualizada.", List.of());
     }
 
     // Mudou E já processado → fecha o atual e cria novo registo (situação + tipos_relacionamento)
@@ -225,6 +242,6 @@ public class AlterarSituacaoLaboralWriteService {
       ausenciaEntityRepository.save(ausencia);
     }
 
-    return dto;
+    return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Situação laboral actualizada.", List.of());
   }
 }

@@ -1,7 +1,6 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidarDadosAcademicosCommand;
-import cv.inps.rh.funcionario.application.dto.ValidarDadosAcademicosDTO;
 import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
@@ -9,12 +8,15 @@ import cv.inps.rh.funcionario.infrastructure.mappers.ExperienciaProfissionalMapp
 import cv.inps.rh.funcionario.infrastructure.mappers.FormacaoFeitaMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.HabilitacaoLiterariaMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +33,7 @@ public class ValidarDadosAcademicosService {
   private final ColaboradorValidationRules colaboradorValidationRules;
 
   @Transactional
-  public ValidarDadosAcademicosDTO executar(ValidarDadosAcademicosCommand command) {
+  public SuccessResponseDTO executar(ValidarDadosAcademicosCommand command) {
 
     var dto = command.getValidardadosacademicos();
     var dadosAcademicosProfReqDTO = dto.getDadosAcademicosProf();
@@ -104,7 +106,7 @@ public class ValidarDadosAcademicosService {
           validacaoEntityRepository.save(v);
         });*/
 
-    return dto;
+    return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Dados academicos actualizados.", List.of());
 
   }
 

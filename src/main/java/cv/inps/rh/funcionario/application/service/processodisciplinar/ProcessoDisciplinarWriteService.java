@@ -6,6 +6,7 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ProcessoDisciplinarEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
@@ -15,9 +16,12 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRe
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -25,13 +29,15 @@ import java.util.UUID;
 @Transactional
 public class ProcessoDisciplinarWriteService {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(ProcessoDisciplinarWriteService.class);
+
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ProcessoDisciplinarEntityRepository processoDisciplinarEntityRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final FuncionarioRules funcionarioRules;
 
-  public UUID saveNovoProcessoDisciplinar(String funcionarioId, ProcessoDisciplinarRequestDTO request) {
+  public SuccessResponseDTO saveNovoProcessoDisciplinar(String funcionarioId, ProcessoDisciplinarRequestDTO request) {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
     var tiprel = tiposRelacionamentoEntityRepository.findByUuidOrThrow(UUID.fromString(request.getVinculoReferente()));
@@ -56,10 +62,19 @@ public class ProcessoDisciplinarWriteService {
     validation.setFunId(funcionario);
     validacaoEntityRepository.save(validation);
 
-    return process.getUuid();
+    return new SuccessResponseDTO(true, process.getUuid().toString(), "Processo disciplinar registado.", List.of());
   }
 
-  public void updateProcessoDisciplinar(String processoDisciplinarId, ProcessoDisciplinarRequestDTO request) {
+  public SuccessResponseDTO updateProcessoDisciplinar(String processoDisciplinarId, ProcessoDisciplinarRequestDTO request) {
+
+    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
+    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
+    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    if (ValidationUtil.isCorrigir(request.getValidar())) {
+      LOGGER.info("[CORRIGIR] PROCESSO_DISCIPLINAR (processo={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
+          processoDisciplinarId);
+      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
+    }
 
     var process = processoDisciplinarEntityRepository.findByUuidOrThrow(UUID.fromString(processoDisciplinarId));
     process.setTiprelId(tiposRelacionamentoEntityRepository.findByUuidOrThrow(UUID.fromString(request.getVinculoReferente())));
@@ -77,6 +92,8 @@ public class ProcessoDisciplinarWriteService {
     }
 
     processoDisciplinarEntityRepository.save(process);
+
+    return new SuccessResponseDTO(true, process.getUuid().toString(), "Processo disciplinar actualizado.", List.of());
   }
 
   private void populateEntity(ProcessoDisciplinarRequestDTO request, ProcessoDisciplinarEntity process) {
@@ -92,9 +109,11 @@ public class ProcessoDisciplinarWriteService {
     process.setNumOrdemServ(ValidationUtil.trimToNull(request.getNumeroOrdemServico()));
   }
 
-  public void deleteProcessoDisciplinar(String processoDisciplinarId) {
+  public SuccessResponseDTO deleteProcessoDisciplinar(String processoDisciplinarId) {
     var process = processoDisciplinarEntityRepository.findByUuidOrThrow(UUID.fromString(processoDisciplinarId));
     process.setEstado(Estado.E.name());
     processoDisciplinarEntityRepository.save(process);
+
+    return new SuccessResponseDTO(true, process.getUuid().toString(), "Processo disciplinar eliminado.", List.of());
   }
 }

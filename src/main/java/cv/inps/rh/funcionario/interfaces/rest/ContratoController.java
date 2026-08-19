@@ -18,6 +18,7 @@ import cv.inps.rh.funcionario.application.dto.WrapperListContratoDTO;
 import cv.inps.rh.funcionario.application.queries.GetContratoByIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetListContratosQuery;
 import cv.inps.rh.funcionario.application.queries.GetRenovacaoDetalheQuery;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -182,20 +183,20 @@ public class ContratoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = DadosContratuaisRespDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<DadosContratuaisRespDTO> validarContrato(@Valid @RequestBody NovoContratoDTO validarContratoRequest
+  public ResponseEntity<SuccessResponseDTO> validarContrato(@Valid @RequestBody NovoContratoDTO validarContratoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "contratoId") String contratoId)
   {
 
       final var command = new ValidarContratoCommand(validarContratoRequest, idFuncionario, contratoId);
 
-       ResponseEntity<DadosContratuaisRespDTO> response = commandBus.send(command);
+       ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
 
        return response;
   }
@@ -213,20 +214,20 @@ public class ContratoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = RenovacaoContratoDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<RenovacaoContratoDTO> validarRenovacaoContrato(@Valid @RequestBody RenovacaoContratoDTO validarRenovacaoContratoRequest
+  public ResponseEntity<SuccessResponseDTO> validarRenovacaoContrato(@Valid @RequestBody RenovacaoContratoDTO validarRenovacaoContratoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "contratoId") String contratoId)
   {
 
       final var command = new ValidarRenovacaoContratoCommand(validarRenovacaoContratoRequest, idFuncionario, contratoId);
 
-       ResponseEntity<RenovacaoContratoDTO> response = commandBus.send(command);
+       ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
 
        return response;
   }

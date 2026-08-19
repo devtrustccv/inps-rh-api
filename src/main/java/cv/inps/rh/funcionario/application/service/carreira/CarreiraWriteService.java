@@ -12,6 +12,7 @@ import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -19,6 +20,8 @@ import cv.inps.rh.shared.util.ValidationUtil;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -32,6 +35,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional
 public class CarreiraWriteService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(CarreiraWriteService.class);
 
   private final CarreiraEntityRepository carreiraEntityRepository;
   private final ContratoEntityRepository contratoEntityRepository;
@@ -89,7 +94,7 @@ public class CarreiraWriteService {
         "Tipo de carreira inválido (sem referência de carreira em " + DOMINIO_TIPO_MOV + "): " + tipoCarreira);
   }
 
-  public void novaCarreira(String funcionarioId, CarreiraNovoDTO dto) {
+  public SuccessResponseDTO novaCarreira(String funcionarioId, CarreiraNovoDTO dto) {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
 
@@ -135,6 +140,8 @@ public class CarreiraWriteService {
       throw IgrpResponseStatusException.conflict("O colaborador não pode ter mais de duas carreiras activas");
 
     criarPendenteContentor(funcionario, dto, contratoAtual, relacionamentoAtual, null);
+
+    return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Carreira registada.", List.of());
   }
 
   /**
@@ -379,13 +386,16 @@ public class CarreiraWriteService {
     return salario;
   }
 
-  public void validarCarreira(String funcionarioId, ValidacaoCarreiraDTO dto) {
+  public SuccessResponseDTO validarCarreira(String funcionarioId, ValidacaoCarreiraDTO dto) {
 
     // "Corrigir" (domínio VALIDAR_REGISTO): terceira opção do combo, além de aprovar/rejeitar. O
-    // fluxo de correção ainda não está implementado — por agora não faz nada (evita o "Decisão
-    // inválida" do isAprovado, que só conhece SIM/NAO).
+    // fluxo de correção ainda não está implementado — por agora é um NO-OP (regista no log e devolve
+    // 200 com mensagem, sem validar/gravar/mudar estado). Evita também o "Decisão inválida" do
+    // isAprovado, que só conhece SIM/NAO.
     if (ValidationUtil.isCorrigir(dto.getValidacao())) {
-      return;
+      LOGGER.info("[CORRIGIR] CARREIRA (funcionario={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
+          funcionarioId);
+      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
     }
 
     var aprovado = ValidationUtil.isAprovado(dto.getValidacao());
@@ -419,7 +429,7 @@ public class CarreiraWriteService {
         validation.setObs("Não Validado");
         validacaoEntityRepository.save(validation);
       }
-      return;
+      return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira rejeitada.", List.of());
     }
 
     // === Aprovado: ATIVAR o pendente (carreira/tiprel/def P->A) + consolidar (est_act_adm=flg,
@@ -559,6 +569,8 @@ public class CarreiraWriteService {
       entityManager.flush();
       registarSalarioProgressao(carreiraMesmoTipo.getId(), carreira.getId());
     }
+
+    return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira validada.", List.of());
   }
 
   /**
@@ -581,7 +593,7 @@ public class CarreiraWriteService {
     });
   }
 
-  public void eliminarCareira(String carreiraId) {
+  public SuccessResponseDTO eliminarCareira(String carreiraId) {
 
     var carreira = carreiraEntityRepository.findByUuidOrThrow(UUID.fromString(carreiraId));
     if (!Estado.P.equals(carreira.getEstado()))
@@ -607,9 +619,11 @@ public class CarreiraWriteService {
           v.setEstado(Estado.E);
           validacaoEntityRepository.save(v);
         });
+
+    return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira eliminada.", List.of());
   }
 
-  public void atualizarCarreira(String carreiraId, String funcionarioId, CarreiraNovoDTO dto) {
+  public SuccessResponseDTO atualizarCarreira(String carreiraId, String funcionarioId, CarreiraNovoDTO dto) {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
     var carreira = carreiraEntityRepository.findByUuidOrThrow(UUID.fromString(carreiraId));
@@ -637,7 +651,7 @@ public class CarreiraWriteService {
     // revalida só se mudar CARGO/CARR_PCCS/ESCALÃO. Sem tipoCarreira, mantém-se EDITAR.
     if (dto.getTipoCarreira() != null && contexto(dto.getTipoCarreira()) == ContextoCarreira.PROG_PROMO) {
       progredirCarreira(funcionario, carreira, dto);
-      return;
+      return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira actualizada.", List.of());
     }
 
     // Editar de carreira JÁ processada (PROCESSAMENTO > 0, doc l.4851-4905): só Escalão, Data Fim e
@@ -648,7 +662,7 @@ public class CarreiraWriteService {
       Long escalaoAtual = carreira.getEscalaoId() != null ? carreira.getEscalaoId().getId() : null;
       if (!Objects.equals(escalaoAtual, dto.getEscalaoReferenciaId())) {
         progredirCarreira(funcionario, carreira, dto);
-        return;
+        return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira actualizada.", List.of());
       }
       boolean eraProcessa = Integer.valueOf(1).equals(carreira.getFlgProcessa());
       boolean passaProcessa = Integer.valueOf(1).equals(dto.getFlgProcessa());
@@ -661,7 +675,7 @@ public class CarreiraWriteService {
         carreira.setDataFim(dto.getDataFim());
         carreiraEntityRepository.save(carreira);
       }
-      return;
+      return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira actualizada.", List.of());
     }
 
     // Doc (caso de uso l.462-474): editar só volta a validação se mudar CARGO_ID / CARR_PCCS_ID /
@@ -799,5 +813,7 @@ public class CarreiraWriteService {
       validation.setFunId(funcionario);
       validacaoEntityRepository.save(validation);
     }
+
+    return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira actualizada.", List.of());
   }
 }

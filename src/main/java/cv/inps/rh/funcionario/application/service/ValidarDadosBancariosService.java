@@ -1,7 +1,6 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidarDadosBancariosCommand;
-import cv.inps.rh.funcionario.application.dto.ValidarDadosBancariosDTO;
 import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosBancariosMapper;
@@ -10,18 +9,26 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ValidarDadosBancariosService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ValidarDadosBancariosService.class);
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final FuncionarioRules funcionarioRules;
@@ -31,9 +38,19 @@ public class ValidarDadosBancariosService {
   private final ColaboradorValidationRules colaboradorValidationRules;
 
   @Transactional
-  public ValidarDadosBancariosDTO executar(ValidarDadosBancariosCommand command) {
+  public SuccessResponseDTO executar(ValidarDadosBancariosCommand command) {
 
     var dto = command.getValidardadosbancarios();
+
+    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
+    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
+    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    if (EstadoValidacao.CORRIGIR.equals(dto.getValidar())) {
+      LOGGER.info("[CORRIGIR] DADOS_BANCARIOS (funcionario={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
+          command.getIdFuncionario());
+      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
+    }
+
     var dadosBancariosReqDTO = dto.getDadosBancarios();
     var estadoValidacao = dto.getValidar();
 
@@ -73,7 +90,10 @@ public class ValidarDadosBancariosService {
       mudarEstado(funcionario, novoEstado);
 
       funcionarioEntityRepository.save(funcionario);
-      return dto;
+      var mensagem = (estadoValidacao == EstadoValidacao.SIM)
+          ? "Dados bancarios validados."
+          : "Dados bancarios rejeitados.";
+      return new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, List.of());
     }
 
     boolean temPendentesParaValidar = funcionario.getDadosBancarios().stream()
@@ -81,7 +101,7 @@ public class ValidarDadosBancariosService {
 
     if (!temPendentesParaValidar) {
       funcionarioEntityRepository.save(funcionario);
-      return dto;
+      return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Dados bancarios actualizados.", List.of());
     }
 
     var tipoRel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -108,7 +128,7 @@ public class ValidarDadosBancariosService {
           validacaoEntityRepository.save(v);
         });
 
-    return dto;
+    return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Dados bancarios actualizados.", List.of());
 
   }
 

@@ -15,6 +15,7 @@ import cv.inps.rh.funcionario.application.dto.WrapperSubstituicaoSumaryDTO;
 import cv.inps.rh.funcionario.application.queries.CalcularSubstituicaoQuery;
 import cv.inps.rh.funcionario.application.queries.GetSubstituicaoByIdQuery;
 import cv.inps.rh.funcionario.application.queries.ListaSubstituicaoQuery;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -51,20 +52,20 @@ public class SubstituicaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = SubstituicaoDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<SubstituicaoDTO> registarSubstituicao(@Valid @RequestBody SubstituicaoDTO registarSubstituicaoRequest
+  public ResponseEntity<SuccessResponseDTO> registarSubstituicao(@Valid @RequestBody SubstituicaoDTO registarSubstituicaoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
       final var command = new RegistarSubstituicaoCommand(registarSubstituicaoRequest, idFuncionario);
 
-       ResponseEntity<SubstituicaoDTO> response = commandBus.send(command);
+       ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
 
        return response;
   }
@@ -82,20 +83,20 @@ public class SubstituicaoController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = SubstituicaoDTO.class,
+                  implementation = SuccessResponseDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<SubstituicaoDTO> validarSubstituicao(@Valid @RequestBody SubstituicaoDTO validarSubstituicaoRequest
+  public ResponseEntity<SuccessResponseDTO> validarSubstituicao(@Valid @RequestBody SubstituicaoDTO validarSubstituicaoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "substituicaoId") String substituicaoId)
   {
 
       final var command = new ValidarSubstituicaoCommand(validarSubstituicaoRequest, idFuncionario, substituicaoId);
 
-       ResponseEntity<SubstituicaoDTO> response = commandBus.send(command);
+       ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
 
        return response;
   }

@@ -1,7 +1,6 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidarContratoCommand;
-import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
@@ -11,9 +10,11 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
+import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefPagamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
@@ -22,16 +23,21 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEn
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class ValidarContratoService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ValidarContratoService.class);
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ContratoMapper contratoMapper;
@@ -53,9 +59,18 @@ public class ValidarContratoService {
   private final ReconciliacaoMovimentoVinculoService reconciliacaoMovimentoVinculoService;
 
   @Transactional
-  public ResponseEntity<DadosContratuaisRespDTO> validar(ValidarContratoCommand command) {
+  public ResponseEntity<SuccessResponseDTO> validar(ValidarContratoCommand command) {
 
     var dto = command.getNovocontrato();
+
+    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
+    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
+    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    if (EstadoValidacao.CORRIGIR.equals(dto.getValidar())) {
+      LOGGER.info("[CORRIGIR] CONTRATO (funcionario={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
+          command.getIdFuncionario());
+      return ResponseEntity.ok(new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of()));
+    }
 
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
 
@@ -183,16 +198,10 @@ public class ValidarContratoService {
 
     // Só os def vigentes deste tiprel (estado coincide com o do tiprel) — exclui E/I que ficaram
     // associados (ex.: manuais substituídos pelo sync), tal como no getById/CarreiraReadService.
-    var estadoTiprel = tiposRelacionamento.getEstado();
-    var remuneracoes = funcionarioRules
-        .getRemuneracoesAssociados(tiposRelacionamento.getId())
-        .stream().filter(r -> r.getEstado() == estadoTiprel).toList();
-    var pagamentos = funcionarioRules
-        .getPagamentosDescontosAssociados(tiposRelacionamento.getId())
-        .stream().filter(p -> p.getEstado() == estadoTiprel).toList();
-
-
-    return ResponseEntity.ok(dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento, pagamentos, remuneracoes));
+    var mensagem = EstadoValidacao.SIM.equals(dto.getValidar())
+        ? "Contrato validado."
+        : "Contrato actualizado.";
+    return ResponseEntity.ok(new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, List.of()));
 
   }
 

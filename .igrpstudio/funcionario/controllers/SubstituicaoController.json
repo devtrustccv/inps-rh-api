@@ -28,11 +28,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "Substituicao",
+                "type": "SuccessResponse",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
-                "module": "funcionario"
+                "module": "shared"
               }
             }
           }
@@ -69,11 +69,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "Substituicao",
+                "type": "SuccessResponse",
                 "objectType": "dto",
                 "name": "data",
                 "collectionType": "none",
-                "module": "funcionario"
+                "module": "shared"
               }
             }
           }

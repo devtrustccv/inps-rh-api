@@ -1,18 +1,20 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.commands.ValidarDadosFamiliaresCommand;
-import cv.inps.rh.funcionario.application.dto.ValidarAgregadosDependentesDTO;
 import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.FamiliarMapper;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +28,7 @@ public class ValidarAgregadosService {
   private final ColaboradorValidationRules colaboradorValidationRules;
 
   @Transactional
-  public ValidarAgregadosDependentesDTO executar(ValidarDadosFamiliaresCommand command) {
+  public SuccessResponseDTO executar(ValidarDadosFamiliaresCommand command) {
 
     var dto = command.getValidaragregadosdependentes();
     var agregadoDependenteReqDTO = dto.getFamiliares();
@@ -90,7 +92,7 @@ public class ValidarAgregadosService {
           validacaoEntityRepository.save(v);
         });*/
 
-    return dto;
+    return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Dados familiares actualizados.", List.of());
 
 
   }

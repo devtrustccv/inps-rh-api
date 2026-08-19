@@ -28,9 +28,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "SuccessResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "none"
+                "collectionType": "none",
+                "module": "shared"
               }
             }
           }
@@ -131,9 +133,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "SuccessResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "none"
+                "collectionType": "none",
+                "module": "shared"
               }
             }
           }
@@ -152,14 +156,16 @@
       "path": "processo-disciplinar/{processoDisciplinarId}",
       "method": "DELETE",
       "responses": {
-        "204": {
+        "200": {
           "name": "OK",
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "SuccessResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "none"
+                "collectionType": "none",
+                "module": "shared"
               }
             }
           }

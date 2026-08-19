@@ -13,6 +13,7 @@ import cv.inps.rh.funcionario.application.dto.ProcessoDisciplinarRequestDTO;
 import cv.inps.rh.funcionario.application.dto.ProcessoDisciplinarResponseDTO;
 import cv.inps.rh.funcionario.application.queries.GetProcessoDisciplinarByIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetProcessosFuncionarioQuery;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -51,14 +52,14 @@ public class ProcessoDisciplinarController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<String> novoProcessoDisciplinar(@Valid @RequestBody ProcessoDisciplinarRequestDTO novoProcessoDisciplinarRequest
+  public ResponseEntity<SuccessResponseDTO> novoProcessoDisciplinar(@Valid @RequestBody ProcessoDisciplinarRequestDTO novoProcessoDisciplinarRequest
     , @PathVariable(value = "funcionarioId") String funcionarioId)
   {
 
@@ -142,14 +143,14 @@ public class ProcessoDisciplinarController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<String> updateProcessoDisciplinar(@Valid @RequestBody ProcessoDisciplinarRequestDTO updateProcessoDisciplinarRequest
+  public ResponseEntity<SuccessResponseDTO> updateProcessoDisciplinar(@Valid @RequestBody ProcessoDisciplinarRequestDTO updateProcessoDisciplinarRequest
     , @PathVariable(value = "processoDisciplinarId") String processoDisciplinarId)
   {
 
@@ -167,19 +168,19 @@ public class ProcessoDisciplinarController {
     description = "Delete processo disciplinar",
     responses = {
       @ApiResponse(
-          responseCode = "204",
+          responseCode = "200",
           description = "",
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-  public ResponseEntity<String> deleteProcessoDisciplinar(
+  public ResponseEntity<SuccessResponseDTO> deleteProcessoDisciplinar(
     @PathVariable(value = "processoDisciplinarId") String processoDisciplinarId)
   {
 

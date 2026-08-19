@@ -11,11 +11,14 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity;
 import cv.inps.rh.shared.util.ValidationUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MobilidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
@@ -30,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class MobilidadeWriteService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(MobilidadeWriteService.class);
 
   private final FuncionarioRules funcionarioRules;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
@@ -52,7 +57,7 @@ public class MobilidadeWriteService {
   }
 
   @Transactional
-  public MobilidadeDTO save(SaveMobilidadeCommand command) {
+  public SuccessResponseDTO save(SaveMobilidadeCommand command) {
 
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
 
@@ -85,7 +90,7 @@ public class MobilidadeWriteService {
     valid.setReferenciaUuid(novaMobilidade.getUuid());
     entityManager.persist(valid);
 
-    return mobilidadeDto;
+    return new SuccessResponseDTO(true, novaMobilidade.getUuid().toString(), "Mobilidade registada.", java.util.List.of());
 
   }
 
@@ -135,11 +140,20 @@ public class MobilidadeWriteService {
   }
 
   @Transactional
-  public MobilidadeDTO validarMobilidade(ValidarMobilidadeCommand command){
+  public SuccessResponseDTO validarMobilidade(ValidarMobilidadeCommand command){
 
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
 
     var mobilidadeDto = command.getMobilidade();
+
+    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
+    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
+    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    if (EstadoValidacao.CORRIGIR.equals(mobilidadeDto.getValidar())) {
+      LOGGER.info("[CORRIGIR] MOBILIDADE (mobilidade={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
+          command.getMobilidadeId());
+      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, java.util.List.of());
+    }
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
@@ -246,7 +260,10 @@ public class MobilidadeWriteService {
     }
 
     funcionarioEntityRepository.save(funcionario);
-    return mobilidadeDto;
+    var mensagem = EstadoValidacao.SIM.equals(mobilidadeDto.getValidar())
+        ? "Mobilidade validada."
+        : "Mobilidade rejeitada.";
+    return new SuccessResponseDTO(true, mobilidade.getUuid().toString(), mensagem, java.util.List.of());
   }
 
   /**
@@ -257,7 +274,7 @@ public class MobilidadeWriteService {
    * via MOB_ID; a mobilidade volta a A quando validada.
    */
   @Transactional
-  public MobilidadeDTO editar(EditarMobilidadeCommand command) {
+  public SuccessResponseDTO editar(EditarMobilidadeCommand command) {
 
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
     var mobilidadeDto = command.getMobilidade();
@@ -294,7 +311,7 @@ public class MobilidadeWriteService {
     }
 
     funcionarioEntityRepository.save(funcionario);
-    return mobilidadeDto;
+    return new SuccessResponseDTO(true, mobilidade.getUuid().toString(), "Mobilidade actualizada.", java.util.List.of());
   }
 
 }
