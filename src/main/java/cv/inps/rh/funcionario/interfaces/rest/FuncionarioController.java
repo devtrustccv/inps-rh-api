@@ -9,6 +9,7 @@ import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.funcionario.application.commands.*;
 import cv.inps.rh.funcionario.application.dto.*;
 import cv.inps.rh.funcionario.application.queries.*;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -51,14 +52,14 @@ public class FuncionarioController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> createFuncionario(@Valid @RequestBody FuncionarioRequestDTO createFuncionarioRequest
+   public ResponseEntity<SuccessResponseDTO> createFuncionario(@Valid @RequestBody FuncionarioRequestDTO createFuncionarioRequest
     )
   {
 
@@ -216,14 +217,14 @@ public class FuncionarioController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = String.class,
-                  type = "String")
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<Map<String, ?>> validarRegistoColaborador(@Valid @RequestBody FuncionarioRequestDTO validarRegistoColaboradorRequest
+   public ResponseEntity<SuccessResponseDTO> validarRegistoColaborador(@Valid @RequestBody FuncionarioRequestDTO validarRegistoColaboradorRequest
     , @PathVariable(value = "id") String id)
   {
 

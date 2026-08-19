@@ -15,16 +15,22 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ValidarRegistoColaboradorService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ValidarRegistoColaboradorService.class);
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final FuncionarioMapper funcionarioMapper;
@@ -52,9 +58,19 @@ public class ValidarRegistoColaboradorService {
   private final ReconciliacaoMovimentoVinculoService reconciliacaoMovimentoVinculoService;
 
   @Transactional
-  public Map<String, ?> validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
+  public SuccessResponseDTO validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
 
     var registroColaborador = command.getFuncionariorequest();
+
+    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
+    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
+    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    if (EstadoValidacao.CORRIGIR.equals(registroColaborador.getValidar())) {
+      LOGGER.info("[CORRIGIR] REGISTO_COLABORADOR (funcionario={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
+          command.getId());
+      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
+    }
+
     var dadosContratuais = registroColaborador.getDadosContratuais();
     var dadosPessoaisReqDTO = registroColaborador.getDadosPessoais();
 
@@ -222,11 +238,10 @@ public class ValidarRegistoColaboradorService {
       tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
     }
 
-    var result = new java.util.HashMap<String, Object>();
-    result.put("id", funcionario.getId());
-    result.put("uuid", funcionario.getUuid());
-    result.put("alertas", alertas);
-    return result;
+    var mensagem = EstadoValidacao.SIM.equals(registroColaborador.getValidar())
+        ? "Registo de colaborador validado."
+        : "Registo de colaborador actualizado.";
+    return new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, alertas);
 
   }
 

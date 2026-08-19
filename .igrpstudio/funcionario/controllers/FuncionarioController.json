@@ -27,9 +27,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "SuccessResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "map"
+                "collectionType": "none",
+                "module": "shared"
               }
             }
           }
@@ -267,9 +269,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
+                "type": "SuccessResponse",
+                "objectType": "dto",
                 "name": "data",
-                "collectionType": "map"
+                "collectionType": "none",
+                "module": "shared"
               }
             }
           }
