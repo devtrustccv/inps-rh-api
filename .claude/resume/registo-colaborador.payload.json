@@ -1,0 +1,68 @@
+{
+  "dadosPessoais": {
+    "tipoDocumentoId": 1,
+    "numDocumento": "TEST-NICK-001",
+    "nome": "Joao Nicolau Teste",
+    "dataNascimento": "1990-05-15",
+    "genero": "M",
+    "nomeMae": "Maria Teste",
+    "nomePai": "Antonio Teste",
+    "estadoCivil": "S",
+    "nacionalidade": "CABOVERDIANA",
+    "naturalidadeId": 1238705002006004,
+    "localidade": "Praia",
+    "nif": 199888777,
+    "numSegurado": "SEG-NICK-001",
+    "contactos": [
+      { "tipoContacto": "TELEMOVEL", "contacto": "9912345" },
+      { "tipoContacto": "EMAIL", "contacto": "joao.teste@example.com" }
+    ],
+    "endereco": {
+      "paisId": 1238,
+      "ilhaId": 12387,
+      "concelhoId": 1238705,
+      "morada": "Rua de Teste, Praia"
+    }
+  },
+  "familiares": [
+    {
+      "tipoDocumentoId": 1,
+      "numDocumento": "FAM-NICK-001",
+      "nome": "Ana Teste Filha",
+      "dataNascimento": "2015-03-10",
+      "genero": "F",
+      "grauParentesco": "FILHO",
+      "dependente": "SIM",
+      "agregada": "SIM",
+      "responsavel": "NAO"
+    }
+  ],
+  "dadosAcademicosProf": {
+    "habilitacoesLiterarias": [
+      { "paisId": 1238, "grauAcademico": "LICENCIATURA", "curso": "Gestao", "concluido": 1 }
+    ]
+  },
+  "dadosContratuais": {
+    "tipoContratoId": 2,
+    "tipoVinculoLaboralId": 1,
+    "situacaoLaboralId": 1,
+    "direcaoId": 100010075,
+    "seccaoId": 2,
+    "carreiraId": 6,
+    "escalaoReferenciaId": 21,
+    "cargoPosicaoId": 2,
+    "regimeTrabalho": "INTEGRAL",
+    "moeda": "CVE",
+    "dataInicio": "2026-08-19",
+    "localTrabalhoId": 1
+  },
+  "dadosBancarios": [
+    {
+      "entidadeBancariaId": 1,
+      "numConta": 1234567,
+      "nib": "000100000000000012345",
+      "dataInicio": "2026-08-19"
+    }
+  ],
+  "anexos": []
+}
