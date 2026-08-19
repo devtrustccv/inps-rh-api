@@ -1,9 +1,12 @@
 package cv.inps.rh.shared.security;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -13,11 +16,13 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
 import org.springframework.security.oauth2.client.TokenExchangeOAuth2AuthorizedClientProvider;
+import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 /**
@@ -28,11 +33,19 @@ import org.springframework.web.cors.CorsConfiguration;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Value("${spring.profiles.active}")
-    private String activeProfile;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
 
-    @Value("${auth.jwt.issuer}")
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private String jwtIssuer;
+
+    @Value("${app.security.enabled:true}")
+    private boolean securityEnabled;
+
+    private final Environment environment;
+
+    public SecurityConfig(Environment environment) {
+        this.environment = environment;
+    }
 
     /**
      * Configures the security filter chain, enabling OAuth2 resource server with JWT and specifying
@@ -43,7 +56,7 @@ public class SecurityConfig {
      * @throws Exception if an error occurs while configuring the security
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, IAMUserProfileSyncFilter iamUserProfileSyncFilter) throws Exception {
 
         /*
           Creates and configures a CORS filter.
@@ -65,20 +78,24 @@ public class SecurityConfig {
           return configuration;
         }));
 
-        if ("development".equals(activeProfile) || "staging".equals(activeProfile)) {
-            // Disable security in development mode
-            http.csrf(AbstractHttpConfigurer::disable); // Disable CSRF protection
+        if (isSecurityDisabled()) {
+            LOGGER.warn("Security disabled — running in development mode without authentication enforcement.");
+            http.oauth2ResourceServer(oauth2 -> {
+                if (jwtIssuer == null || jwtIssuer.isBlank()) {
+                    // No issuer configured — ignore any token sent, requests pass through.
+                    LOGGER.warn("AUTH_JWT_ISSUER not configured — tokens will be ignored.");
+                    oauth2.bearerTokenResolver(request -> null);
+                }
+                oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()));
+            });
+            http.csrf(AbstractHttpConfigurer::disable);
             http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
-            return http.build();
-        }
-
-        // Configure OAuth2 Resource Server to use JWT tokens for authentication
-        http.oauth2ResourceServer((oauth2ResourceServer) -> oauth2ResourceServer
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-        );
-
-        // Configure authorization rules and policy enforcement
-                http.authorizeHttpRequests((authorize) -> authorize
+        } else {
+            LOGGER.info("Security enabled — issuer: {}", jwtIssuer);
+            http.oauth2ResourceServer(oauth2 -> oauth2
+                    .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+            );
+            http.authorizeHttpRequests(authorize -> authorize
                           .requestMatchers(
                               "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
                               "/swagger-resources/**", "/webjars/**", "/actuator/**"
@@ -92,8 +109,10 @@ public class SecurityConfig {
                     response.sendError(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
                 }));
 
-        // Set session management to stateless (no session created for API requests)
-        http.sessionManagement(t -> t.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+            http.sessionManagement(t -> t.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        }
+
+        http.addFilterBefore(iamUserProfileSyncFilter, AuthorizationFilter.class);
 
         return http.build();
     }
@@ -117,11 +136,23 @@ public class SecurityConfig {
      * @return the {@link JwtDecoder} for JWT token validation
      */
     @Bean
-    @Profile("!development & !staging")
     public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withIssuerLocation(jwtIssuer).build();
+        if (jwtIssuer == null || jwtIssuer.isBlank()) {
+            LOGGER.warn("AUTH_JWT_ISSUER not configured — JWT decoder disabled.");
+            return token -> null;
+        }
+        try {
+            LOGGER.info("JWT decoder configured — issuer: {}", jwtIssuer);
+            return NimbusJwtDecoder.withIssuerLocation(jwtIssuer).build();
+        } catch (Exception e) {
+            LOGGER.error("Failed to reach Keycloak at '{}': {}", jwtIssuer, e.getMessage());
+            if (isSecurityDisabled()) {
+                LOGGER.warn("Running in development mode — token validation will be unavailable until Keycloak is reachable.");
+                return token -> { throw new BadJwtException("Keycloak is not reachable. Fix AUTH_JWT_ISSUER in your .env file."); };
+            }
+            throw new IllegalStateException("Cannot start: Keycloak is not reachable at '" + jwtIssuer + "'.", e);
+        }
     }
-
     /**
      * Creates a bean for an OAuth2AuthorizedClientProvider that supports token exchange.
      *
@@ -132,8 +163,24 @@ public class SecurityConfig {
      * @return An instance of TokenExchangeOAuth2AuthorizedClientProvider.
     */
     @Bean
+    public FilterRegistrationBean<IAMUserProfileSyncFilter> iamUserProfileSyncFilterRegistration(IAMUserProfileSyncFilter filter) {
+        var registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(true);
+        return registration;
+    }
+
+    @Bean
     public OAuth2AuthorizedClientProvider tokenExchange() {
         return new TokenExchangeOAuth2AuthorizedClientProvider();
+    }
+
+    // SECURITY_ENABLED=false is only honoured in the development profile.
+    // In any other profile the flag is ignored and auth is always enforced.
+    private boolean isSecurityDisabled() {
+        if (!securityEnabled && !environment.matchesProfiles("development")) {
+            LOGGER.warn("SECURITY_ENABLED=false is set but the active profile is not 'development' — flag ignored, security will be enforced.");
+        }
+        return !securityEnabled && environment.matchesProfiles("development");
     }
 
 }
