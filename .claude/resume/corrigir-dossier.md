@@ -2,44 +2,32 @@
 
 ## Goal
 
-Normalizar a validação do dossiê para 3 caminhos (SIM/NAO/CORRIGIR), onde CORRIGIR é por agora NO-OP (log + 200), e fazer TODOS os endpoints de escrita do dossiê devolverem `SuccessResponseDTO` em vez de eco do DTO.
+Implementar a opção CORRIGIR da validação do dossiê (3º caminho: SIM/NAO/CORRIGIR) — começando pelo REGISTO_COLABORADOR — com transições de estado limpas e rigorosas. **OBS: depois de testar este fluxo/método, replicá-lo para os restantes serviços de validação do dossiê, juntamente com o CORRIGIR (claro).**
 
-## Current state — CONCLUÍDO (BUILD SUCCESS)
+## Current state
 
-`SuccessResponseDTO` (`sucesso`, `id`, `mensagem`, `alertas[]`) + `ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO`/`isCorrigir(String)` já existiam.
-
-Convertidos end-to-end (service + handler + controller + manifesto `.igrpstudio`) — **15 services / ~30 endpoints**:
-
-- **Registo Colaborador** (create + validar) — guard ✅
-- **ValidarDados\*** (funcionário/dossiê): Pessoais, Académicos, Familiares, Bancários — guard só em Bancários (validar ativo; os outros têm o bloco validar comentado → sem guard, só retorno padrão)
-- **Contrato**: validar, validar-renovação — guard ✅ ambos
-- **Substituição**: registar, validar — guard em validar
-- **Regime**: adicionar, validar — guard em validar
-- **Situação Laboral**: alterar (PATCH, FuncionarioController) — guard ✅
-- **Mobilidade**: save, editar, validar — guard em validar
-- **Renumerações**: novoRem, novoPag, validarRem, validarPag — guard em validarRem/validarPag (`isCorrigir` String)
-- **Processo Disciplinar**: novo, update, delete — guard em update (`isCorrigir` String); delete 204→200
-- **Histórico Laboral**: novo, atualizar — SEM guard (use case não passa por validação)
-- **Carreira**: nova, validar, eliminar, atualizar — guard em validar (já existia; passou a devolver Success); eliminar 204→200
-- **Declaração**: novoPedido, submeterAnalise, validarPedido — guard ADICIONADO em validarPedido (corrigiu bug: CORRIGIR caía no else = rejeição)
+- **REGISTO_COLABORADOR: CORRIGIR feito, compila (`mvn -o compile` EXIT=0), NÃO commitado.** Modelo **state-driven** (o estado do registo decide, sem flag do cliente):
+  - `P`+SIM→A ; `P`+NAO→I ; `P`+CORRIGIR→C (ignora payload) ; `C`+null→P (maker corrige e reenvia) ; `C`+validar→erro.
+- **Enum `Estado` +`C`** ("Em correção") em `Estado.json` + `Estado.java`.
+- **Refactor origem-aware**: `transicionarEstado`/`mudaEstado` derivam a origem da própria entidade (capturam `getEstado()` antes de mutar) — sem parâmetro redundante. `aplicarEstado` agora `private`, recebe origem por dentro.
 
 ## Decisions made — do not re-litigate
 
-- CORRIGIR = NO-OP (guard no TOPO, sem validar/gravar/mudar estado) + log + `SuccessResponseDTO(false,null,MSG,[])`. Estado `C` só existe em `RH_T_FUNCIONARIOS`; NÃO cascatear.
-- **Guard CORRIGIR só onde a validação está ATIVA**. Onde o bloco `validar`/`validacao` está comentado, NÃO descomentar e NÃO pôr guard — apenas trocar o retorno para `SuccessResponseDTO`.
-- Enum `EstadoValidacao.CORRIGIR.equals(...)`; String `ValidationUtil.isCorrigir(...)` (ProcessoDisciplinar, Renumerações, Declaração).
-- Alcance final = TODOS os endpoints de escrita do dossiê (registar/editar/eliminar/validar), decidido com o utilizador durante a sessão (incluídos HistoricoLaboral, Carreira, Declaração além da lista original de 9).
+- **State-driven, sem booleano `emCorrecao`**: rascunho em C é problema do frontend, não do domínio.
+- **Origem derivada da entidade, não passada pelo caller**: evita a classe de bug "origem errada".
+- **CORRIGIR (checker) não edita**: só P→C.
 
 ## Constraints
 
-- Manifesto ↔ Java sincronizados (schema resposta: `type:"SuccessResponse", objectType:"dto", module:"shared", collectionType:"none"`).
-- Compilar com JDK 23; app a correr segura o `target` → usar `mvn -o compile` (sem clean). Última compilação: BUILD SUCCESS.
+- Oracle 11g XE (62.84.179.137:xe); DbExec p/ DDL, DbQuery p/ ler. 22 tabelas do dossiê já aceitam `C`.
+- Ficheiros gerados (Estado.java, DTOs) — alterar via manifesto `.igrpstudio` + Java.
 
 ## Relevant files
 
-- ValidarRegistoColaboradorService.java — padrão de referência (guard + returns).
-- SuccessResponseDTO.java + .igrpstudio/shared/dto/SuccessResponseDTO.json.
+- `ValidarRegistoColaboradorService.java` — routing por estado + guards + `mudaEstado`.
+- `ContratoHistoricoWriteService.java:61` — `transicionarEstado` origem-aware.
+- `FuncionarioRules.java` — `temValidacaoPorCorrigir` + `getValidacao(estado)`.
 
 ## Next step
 
-Trabalho concluído. Se surgirem novos endpoints de escrita no dossiê, aplicar o mesmo padrão (guard CORRIGIR só se validar ativo + retorno `SuccessResponseDTO` + manifesto). Falta (opcional): atualizar `docs/frontend_changes_*` com o novo formato de resposta.
+Testar o fluxo real na BD viva: P→(CORRIGIR)→C→(reenvio)→P→(SIM)→A, confirmando contrato-histórico e validação nas duas direções.

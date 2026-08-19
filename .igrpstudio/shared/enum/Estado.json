@@ -30,6 +30,13 @@
         "P",
         "Pendente"
       ]
+    },
+    {
+      "name": "C",
+      "attributes": [
+        "C",
+        "Em correção"
+      ]
     }
   ],
   "attributes": [

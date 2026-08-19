@@ -37,6 +37,12 @@ public class FuncionarioRules {
         referenciaName.name());
   }
 
+  /** Existe validação em correção (estado C) — usada para confirmar que o registo foi devolvido pelo checker. */
+  public boolean temValidacaoPorCorrigir(UUID funUuid, TipoAcao tipoAccao, Referencia referenciaName) {
+    return validacaoEntityRepository.existsByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(funUuid, Estado.C, tipoAccao.name(),
+        referenciaName.name());
+  }
+
   /**
    * Guard de escrita: impede alterar/validar um registo que esteja Inactivo (I) ou Eliminado (E).
    * Lança 400 com mensagem clara para o cliente. Chamar depois de carregar o registo alvo, antes de mutar.
@@ -167,6 +173,12 @@ public class FuncionarioRules {
 
     return validacaoEntityRepository
         .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(funUuid, Estado.P, tipoAccao.name(), referenciaName.name());
+  }
+
+  /** Validação de um funcionário num estado específico (P pendente, C em correção, ...). */
+  public Optional<ValidacaoEntity> getValidacao(UUID funUuid, Estado estado, TipoAcao tipoAccao, Referencia referenciaName) {
+    return validacaoEntityRepository
+        .findByFunId_UuidAndEstadoAndTipoAccaoAndReferenciaName(funUuid, estado, tipoAccao.name(), referenciaName.name());
   }
 
   public Optional<ValidacaoEntity> getValidacaoPendenteByReferenciaUuid(UUID referenciaUuid, TipoAcao tipoAccao, Referencia referenciaName) {

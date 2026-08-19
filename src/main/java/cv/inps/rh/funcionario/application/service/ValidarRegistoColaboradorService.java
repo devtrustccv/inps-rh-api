@@ -17,7 +17,6 @@ import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,14 +59,47 @@ public class ValidarRegistoColaboradorService {
   public SuccessResponseDTO validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
 
     var registroColaborador = command.getFuncionariorequest();
+    var validar = registroColaborador.getValidar();
 
-    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
-    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
-    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
-    if (EstadoValidacao.CORRIGIR.equals(registroColaborador.getValidar())) {
-      LOGGER.info("[CORRIGIR] REGISTO_COLABORADOR (funcionario={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
-          command.getId());
-      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
+    var funcionarioPublicId = IdentificadorUnico.from(command.getId()).valor();
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
+    funcionarioRules.garantirEditavel(funcionario.getEstado());
+
+    // Fluxo maker-checker do registo de colaborador, governado pelo ESTADO do registo (não por
+    // flags do cliente):
+    //   - registo em P -> o checker decide: SIM (activa), NAO (rejeita) ou CORRIGIR (devolve).
+    //   - registo em C -> o maker corrige e reenvia (C -> P); 'validar' tem de vir nulo.
+
+    // Checker devolve para correção: P -> C, SEM aplicar o payload (o checker não edita).
+    if (EstadoValidacao.CORRIGIR.equals(validar)) {
+      if (funcionario.getEstado() != Estado.P
+          || !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT,
+              Referencia.REGISTO_COLABORADOR)) {
+        throw IgrpResponseStatusException.badRequest(
+            "Só é possível devolver para correção um registo de colaborador pendente de validação.");
+      }
+      mudaEstado(funcionario, Estado.C);
+      funcionarioEntityRepository.saveAndFlush(funcionario);
+      return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
+          "Registo de colaborador devolvido para correção.", List.of());
+    }
+
+    // A partir daqui aplica-se o payload. Se o registo está em C, é o maker a corrigir (C -> P):
+    // 'validar' não pode vir preenchido e tem de existir realmente uma validação por corrigir.
+    boolean estaPorCorrigir = funcionario.getEstado() == Estado.C;
+    if (estaPorCorrigir) {
+      if (validar != null) {
+        throw IgrpResponseStatusException.badRequest(
+            "Registo em correção: não pode ser validado. Corrija e reenvie primeiro.");
+      }
+      if (!funcionarioRules.temValidacaoPorCorrigir(funcionario.getUuid(), TipoAcao.INSERT,
+          Referencia.REGISTO_COLABORADOR)) {
+        throw IgrpResponseStatusException.badRequest("Este registo de colaborador não está por corrigir.");
+      }
+      if (registroColaborador.getDadosPessoais() == null || registroColaborador.getDadosContratuais() == null) {
+        throw IgrpResponseStatusException.badRequest(
+            "Correção sem dados: reenvie o formulário completo do colaborador.");
+      }
     }
 
     var dadosContratuais = registroColaborador.getDadosContratuais();
@@ -75,14 +107,9 @@ public class ValidarRegistoColaboradorService {
 
     validarDadosContratuaisService.validar(dadosContratuais);
 
-    var funcionarioPublicId = IdentificadorUnico.from(command.getId()).valor();
-
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
-    funcionarioRules.garantirEditavel(funcionario.getEstado());
-
     colaboradorValidationRules.validarDadosPessoais(dadosPessoaisReqDTO, funcionario.getUuid());
 
-    if (registroColaborador.getValidar() != null
+    if (validar != null
         && !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT,
             Referencia.REGISTO_COLABORADOR)) {
       throw IgrpResponseStatusException.badRequest(
@@ -204,8 +231,12 @@ public class ValidarRegistoColaboradorService {
     funcionario.setFormacoesFeitas(formacoesFeitas);
     funcionario.setExperienciasProfissionais(experienciasProfissionais);
 
-    if (registroColaborador.getValidar() != null) {
-      var estado = registroColaborador.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
+    if (estaPorCorrigir) {
+      // Correção reenviada pelo maker: C -> P (volta à fila de validação). Sem reconciliar nem
+      // ordem de serviço — isso só acontece na validação positiva (SIM).
+      mudaEstado(funcionario, Estado.P);
+    } else if (validar != null) {
+      var estado = EstadoValidacao.SIM.equals(validar) ? Estado.A : Estado.I;
       if (estado.equals(Estado.A)) {
         // derivar os movimentos fixos do vinculo — SO na validacao positiva (antes de activar)
         reconciliacaoMovimentoVinculoService.reconciliar(funcionario, tiposRelacionamento.getContrVinculoId(),
@@ -237,9 +268,11 @@ public class ValidarRegistoColaboradorService {
       tipoRelRemPagHelper.associarNovos(tiposRelacionamento, saved);
     }
 
-    var mensagem = EstadoValidacao.SIM.equals(registroColaborador.getValidar())
-        ? "Registo de colaborador validado."
-        : "Registo de colaborador actualizado.";
+    var mensagem = estaPorCorrigir
+        ? "Registo de colaborador corrigido e reenviado para validação."
+        : EstadoValidacao.SIM.equals(validar)
+            ? "Registo de colaborador validado."
+            : "Registo de colaborador actualizado.";
     return new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, alertas);
 
   }
@@ -247,6 +280,9 @@ public class ValidarRegistoColaboradorService {
   private void mudaEstado(FuncionarioEntity funcionarioEntity, Estado estado) {
     if (funcionarioEntity == null)
       return;
+    // Origem = estado in-flight actual do registo (P quando o checker decide, C quando o maker
+    // reenvia a correção). Capturada ANTES de mutar; o grafo move-se todo em lockstep.
+    var estadoOrigem = funcionarioEntity.getEstado();
     funcionarioEntity.setEstado(estado);
     funcionarioEntity.setEstadoValidacao(estado != null ? estado.name() : null);
 
@@ -347,7 +383,7 @@ public class ValidarRegistoColaboradorService {
         situacaoLaboral.setEstado(estado);
     }
 
-    funcionarioRules.getValidacaoPendente(funcionarioEntity.getUuid(), TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR)
+    funcionarioRules.getValidacao(funcionarioEntity.getUuid(), estadoOrigem, TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR)
         .ifPresent(v -> v.setEstado(estado));
 
   }

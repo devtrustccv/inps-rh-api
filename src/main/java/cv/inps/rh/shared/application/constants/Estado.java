@@ -18,7 +18,8 @@ public enum Estado implements IgrpEnum<String> {
   I("I", "Inactivo"),
     A("A", "Ativo"),
     E("E", "Eliminado"),
-    P("P", "Pendente")
+    P("P", "Pendente"),
+    C("C", "Em correção")
   ;
 
   private final String code;
