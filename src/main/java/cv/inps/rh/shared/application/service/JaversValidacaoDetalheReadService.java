@@ -6,7 +6,6 @@ import cv.inps.rh.shared.infrastructure.audit.JaversAuditConfig;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import jakarta.annotation.PostConstruct;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.javers.core.Javers;
 import org.javers.core.commit.CommitMetadata;
@@ -54,8 +53,8 @@ public class JaversValidacaoDetalheReadService {
   private static final DateTimeFormatter DATA_HORA = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
 
   private final Javers javers;
-  private final EntityManager entityManager;
   private final ValidacaoEntityRepository validacaoEntityRepository;
+  private final ReferenciaNomeResolver referenciaNomeResolver;
 
   /** Descritores por módulo (mobilidade, carreira…), injetados pelo Spring. Ver {@link #indexar}. */
   private final List<ValidacaoDetalheDescriptor> descriptors;
@@ -157,43 +156,14 @@ public class JaversValidacaoDetalheReadService {
 
   private String displayLeft(PropertyChange<?> change) {
     if (change instanceof ValueChange vc) return stringify(vc.getLeft());
-    if (change instanceof ReferenceChange rc) return nomeDaReferencia(rc.getLeft());
+    if (change instanceof ReferenceChange rc) return referenciaNomeResolver.resolver(rc.getLeft());
     return null;
   }
 
   private String displayRight(PropertyChange<?> change) {
     if (change instanceof ValueChange vc) return stringify(vc.getRight());
-    if (change instanceof ReferenceChange rc) return nomeDaReferencia(rc.getRight());
+    if (change instanceof ReferenceChange rc) return referenciaNomeResolver.resolver(rc.getRight());
     return null;
-  }
-
-  /**
-   * Traduz uma referência (FK) do JaVers para o nome legível. O {@link ReferenceChange} guarda a FK
-   * como {@link GlobalId} (ex.: {@code ...SecaoEntity/3}); aqui carregamos a entidade pelo id e lemos o
-   * seu {@code getNome()}. As entidades de referência da mobilidade (Secção, Local, Direção) expõem
-   * todas {@code getNome()}, por isso a resolução é genérica por reflexão. Se algo falhar (tipo sem
-   * {@code getNome}, entidade apagada), cai para o valor cru do id — nunca rebenta a grelha.
-   */
-  private String nomeDaReferencia(GlobalId globalId) {
-    if (globalId == null) {
-      return null;
-    }
-    if (globalId instanceof InstanceId instanceId) {
-      try {
-        Class<?> tipo = Class.forName(instanceId.getTypeName());
-        Long id = Long.valueOf(String.valueOf(instanceId.getCdoId()));
-        Object entidade = entityManager.find(tipo, id);
-        if (entidade != null) {
-          Object nome = tipo.getMethod("getNome").invoke(entidade);
-          if (nome != null && !nome.toString().isBlank()) {
-            return nome.toString();
-          }
-        }
-      } catch (ReflectiveOperationException | NumberFormatException e) {
-        LOGGER.debug("Não foi possível resolver nome da referência {}: {}", globalId.value(), e.toString());
-      }
-    }
-    return globalId.value(); // fallback: id cru
   }
 
   private String stringify(Object value) {
