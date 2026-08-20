@@ -1,32 +1,34 @@
-> Updated: 2026-08-20 19:45
+> Updated: 2026-08-20 21:45
 
 ## Goal
 
-Grelha "Detalhe de alterações" (antes→novo) servida pelo **JaVers** (auto-audit) em vez de RH_T_VALIDACAO_DETALHE. Piloto na mobilidade, já promovido ao endpoint oficial.
+Grelha "Detalhe de alterações" (antes→novo) servida pelo **JaVers** (auto-audit), extensível a todos os módulos de validação. Depois: implementar **CORRIGIR** na mobilidade.
 
 ## Current state
 
-- **Endpoint oficial migrado**: `GetDetalheAlteracoesQueryHandler` passou a chamar `JaversValidacaoDetalheReadService`. Path `GET api/v1/funcionarios/validacoes/{uuid}/detalhes` e `ValidacaoDetalheDTO` mantidos — front não quebra. Controller piloto `.../detalhes-javers` ainda existe.
-- **Provado end-to-end** (app na 8089, Oracle real): EDIÇÃO mostra só os campos mudados (sem ruído inter-mobilidade); REGISTO mostra todos os valores iniciais de negócio.
-- Compila (JDK 23, EXIT=0). App reiniciada; falta **1 curl ao path oficial `/detalhes`** para confirmar (foi interrompido).
+- **Mobilidade + Carreira** provados end-to-end pelo fluxo de ecrã (app 8089, Oracle real). Endpoint oficial `GET .../validacoes/{uuid}/detalhes` já serve JaVers (front intacto).
+- **Extensível**: `ValidacaoDetalheDescriptor` (bean por módulo) + `ReferenciaNomeResolver` (FK→nome, cascata `getNome…`+overrides). Ligar módulo novo = @JaversSpringDataAuditable no repo + 1 descriptor + carimbar o 1º save auditado.
+- **Performance resolvida**: entidades de referência como Shallow Reference no `JaversAuditConfig` → commit caiu de ~48s (snapshots:9) para ~0.2s (snapshots:1).
+- Commits: 24c8dfa9, 7664657a, 543764ce, 6702303c (em `develop`).
 
 ## Decisions made — do not re-litigate
 
-- **Filtro por instância-alvo** (`isAlvo` via `validacao.referenciaId`), não só por tipo: mata o ruído da mobilidade anterior desativada na consolidação.
-- **Allow-list** `CAMPOS_NEGOCIO` (secaoId, localTrabId, instidId, tipoSituacao, dataInicio, dataFim, obs): fora estado/funId/mobId/created*.
-- **Semântica por `tipoAccao`**: INSERT mostra valores iniciais completos; UPDATE só diffs reais.
-- Passo-2 (commit JaVers na validação) **revertido** — sem estado na grelha, era custo sem valor.
+- Nome ATUAL da referência (read-time), não histórico.
+- Semântica por `tipoAccao`: INSERT=valores iniciais; UPDATE=diff.
+- Allow-list de campos de negócio (fora estado/estActAdm/funId/mobId/contrVinculoId/created*).
+- Baseline: carimbar o **PRIMEIRO** `repository.save()` auditado (UUID de validação pré-gerado quando a validação só existe depois).
 
-## Relevant files
+## Constraints
 
-- `shared/application/service/JaversValidacaoDetalheReadService.java` — filtros/allow-list.
-- `funcionario/application/queries/GetDetalheAlteracoesQueryHandler.java:20` — fonte trocada.
+- Entidades geradas DO-NOT-MODIFY → shallow-ref e afins configurados programaticamente.
+- Oracle XE antigo; schema-mgmt do JaVers OFF; JDK 23 (`.../jdk-23.0.2.7-hotspot`).
+- Segurança OFF em dev. Helpers BD: `DbQuery` (ver [[reference_db_helpers]]).
 
 ## Open questions
 
-- `obs` = literal "MOBILIDADE" (marcador) aparece no REGISTO — tirar da whitelist?
-- Generalizar a outros services (carreira/contrato): o chamador só precisa de `repository.save()` com `ValidacaoAuditContext.set(...)`; TIPO_ALVO_SUFIXO/ROTULOS ainda são mobilidade-only.
+- 500 na validação de carreira do MESMO tipo = bug pré-existente do `PKG_AUMENTO_SALARIAL` (usa id de carreira como id de tiprel → ORA-01403). Não é nosso.
+- `obs`="CARREIRA"/"MOBILIDADE" (marcador) aparece na grelha — tirar da whitelist?
 
 ## Next step
 
-`curl .../validacoes/01a020de-b430-7f3b-9c71-7abb52743466/detalhes` e confirmar 3 linhas iguais ao `/detalhes-javers`.
+**Fase 3 — CORRIGIR na mobilidade**: tirar o NO-OP em `MobilidadeWriteService.validarMobilidade` (~166); replicar o CORRIGIR state-driven do registo colaborador (estado "Em correção" + get-by-id state-driven). Provar por fluxo de ecrã.
