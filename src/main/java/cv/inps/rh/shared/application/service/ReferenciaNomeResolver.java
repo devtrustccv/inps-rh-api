@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.application.service;
 
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.javers.core.metamodel.object.GlobalId;
@@ -40,10 +41,18 @@ public class ReferenciaNomeResolver {
 
   /**
    * Overrides por tipo, para entidades que não sigam a convenção. Chave = nome do tipo JaVers (FQN da
-   * classe da entidade). Vazio por omissão — só se acrescenta quando uma entidade concreta precisar.
-   * Ex.: {@code Map.of("cv.inps.rh...FuncionarioEntity", e -> ((FuncionarioEntity) e).getNomeCompleto())}.
+   * classe da entidade). Só se acrescenta quando uma entidade concreta precisar — tipicamente quando o
+   * rótulo visível é COMPOSTO (nenhum getter único o dá).
    */
-  private static final Map<String, Function<Object, String>> OVERRIDES = Map.of();
+  private static final Map<String, Function<Object, String>> OVERRIDES = Map.of(
+      // Escalão: o rótulo do UI ("16A") é nível + letra; nenhum getter único o devolve. Cai para o
+      // código (ex.: "DIR_SERV_16_A") se o nível não estiver preenchido.
+      ParamEscalaoEntity.class.getName(), e -> {
+        var esc = (ParamEscalaoEntity) e;
+        String composto = (esc.getNivelReferencia() != null ? esc.getNivelReferencia() : "")
+            + (esc.getEscalao() != null ? esc.getEscalao() : "");
+        return composto.isBlank() ? esc.getCodigo() : composto;
+      });
 
   private final EntityManager entityManager;
 
@@ -69,8 +78,11 @@ public class ReferenciaNomeResolver {
       } catch (ReflectiveOperationException | NumberFormatException e) {
         LOGGER.debug("Não foi possível resolver nome da referência {}: {}", globalId.value(), e.toString());
       }
+      // Resolução falhou: fallback legível (nome simples do tipo + id), nunca a FQN completa.
+      String tipo = instanceId.getTypeName();
+      return tipo.substring(tipo.lastIndexOf('.') + 1) + " #" + instanceId.getCdoId();
     }
-    return globalId.value(); // fallback: id cru
+    return globalId.value(); // não-InstanceId: valor cru do JaVers
   }
 
   private String nomeDe(Object entidade, String typeName, Class<?> tipo) {

@@ -1,9 +1,19 @@
 package cv.inps.rh.shared.infrastructure.audit;
 
 import cv.inps.rh.shared.application.services.AuthenticatedUserHelper;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCategoriaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.javers.core.Javers;
+import org.javers.core.metamodel.clazz.EntityDefinitionBuilder;
 import org.javers.hibernate.integration.HibernateUnproxyObjectAccessHook;
 import org.javers.repository.sql.ConnectionProvider;
 import org.javers.repository.sql.DialectName;
@@ -21,6 +31,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -71,14 +82,32 @@ public class JaversAuditConfig {
         .build();
   }
 
+  /**
+   * Entidades de REFERÊNCIA tratadas como <em>Shallow Reference</em>: o JaVers regista apenas o id da
+   * FK, sem fotografar o objeto referenciado nem percorrer o seu grafo. Sem isto, ao auditar a
+   * Mobilidade/Carreira o JaVers arrastava Contrato, Funcionário e params INTEIROS (grafo profundo) —
+   * o diff chegava a 20–50 s por commit. Marcando-os como rasos, o commit fotografa só o agregado
+   * auditado e resolve-se em milissegundos. Não perdemos nada: a grelha usa apenas o id da FK; o nome
+   * é resolvido na leitura pelo {@code ReferenciaNomeResolver}.
+   *
+   * <p>NÃO incluir aqui os agregados auditados (Mobilidade, Carreira) — ficariam comparados só por id,
+   * sem diff dos próprios campos.
+   */
+  private static final List<Class<?>> REFERENCIAS_RASAS = List.of(
+      FuncionarioEntity.class, ContratoEntity.class,
+      SecaoEntity.class, ParamLocalTrabEntity.class, DirecaoEntity.class,
+      ParamCargoEntity.class, ParamEscalaoEntity.class, ParamCategoriaEntity.class, ParamCarreiraEntity.class);
+
   @Bean
   Javers javers(JaversSqlRepository sqlRepository, PlatformTransactionManager transactionManager) {
-    return TransactionalJpaJaversBuilder
+    var builder = TransactionalJpaJaversBuilder
         .javers()
         .withTxManager(transactionManager)
         .registerJaversRepository(sqlRepository)
-        .withObjectAccessHook(new HibernateUnproxyObjectAccessHook<>())
-        .build();
+        .withObjectAccessHook(new HibernateUnproxyObjectAccessHook<>());
+    REFERENCIAS_RASAS.forEach(tipo ->
+        builder.registerEntity(EntityDefinitionBuilder.entityDefinition(tipo).withShallowReference().build()));
+    return builder.build();
   }
 
   @Bean

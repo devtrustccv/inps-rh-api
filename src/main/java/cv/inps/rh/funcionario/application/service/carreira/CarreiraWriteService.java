@@ -14,6 +14,7 @@ import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.ValidationUtil;
@@ -171,7 +172,18 @@ public class CarreiraWriteService {
     novaCarreira.setContrVinculoId(contratoAtual);
     novaCarreira.setEstActAdm(0);
     novaCarreira.setFlgProcessa(dto.getFlgProcessa());
-    carreiraEntityRepository.save(novaCarreira);
+
+    // Baseline JaVers do REGISTO: a validação ainda não existe aqui (precisa do id da carreira), por
+    // isso pré-geramos o seu UUID e carimbamos JÁ o PRIMEIRO save — que é o que cria o snapshot
+    // INITIAL. Carimbar um save POSTERIOR seria no-op (a entidade não mudou → o JaVers não faz commit),
+    // e a grelha do registo saía vazia. O mesmo UUID é depois usado na ValidacaoEntity abaixo.
+    var validacaoUuid = UuidCreator.getTimeOrderedEpoch();
+    try {
+      ValidacaoAuditContext.set(null, validacaoUuid, "RH_T_CARREIRA");
+      carreiraEntityRepository.save(novaCarreira);
+    } finally {
+      ValidacaoAuditContext.clear();
+    }
 
     // Tiprel pendente (P, est_act_adm=0 — NÃO é o atual). Clona o contexto do vínculo atual.
     var novoTiprel = contratuaisEntityMapper.toRelacionamento(dto, Estado.P);
@@ -252,7 +264,7 @@ public class CarreiraWriteService {
     validation.setReferenciaUuid(novaCarreira.getUuid());
     validation.setTiprelId(novoTiprel);
     validation.setEstado(Estado.P);
-    validation.setUuid(UuidCreator.getTimeOrderedEpoch());
+    validation.setUuid(validacaoUuid); // mesmo UUID já carimbado no baseline (ver save acima)
     validation.setFunId(funcionario);
     validacaoEntityRepository.save(validation);
   }
@@ -692,7 +704,22 @@ public class CarreiraWriteService {
 
     carreiraMapper.toUpdateEntity(carreira, dto);
     if (revalidar) carreira.setEstado(Estado.P);
-    carreiraEntityRepository.save(carreira);
+
+    // Auditoria JaVers da EDIÇÃO: como no registo, o diff tem de ser carimbado no PRÓPRIO save que
+    // captura a alteração (o auto-audit dispara aqui). Pré-geramos o UUID da validação (criada mais
+    // abaixo, só se revalidar) e usamo-lo já; um save posterior seria no-op. Sem revalidação não há
+    // grelha, logo grava-se sem contexto.
+    UUID validacaoUuidEdit = revalidar ? UuidCreator.getTimeOrderedEpoch() : null;
+    if (revalidar) {
+      try {
+        ValidacaoAuditContext.set(null, validacaoUuidEdit, "RH_T_CARREIRA");
+        carreiraEntityRepository.save(carreira);
+      } finally {
+        ValidacaoAuditContext.clear();
+      }
+    } else {
+      carreiraEntityRepository.save(carreira);
+    }
 
     if (relacionamento != null) {
       if (dto.getCargoPosicaoId() != null)
@@ -809,7 +836,7 @@ public class CarreiraWriteService {
       validation.setReferenciaUuid(carreira.getUuid());
       validation.setTiprelId(relacionamento);
       validation.setEstado(Estado.P);
-      validation.setUuid(UuidCreator.getTimeOrderedEpoch());
+      validation.setUuid(validacaoUuidEdit); // mesmo UUID já carimbado no save da edição (ver acima)
       validation.setFunId(funcionario);
       validacaoEntityRepository.save(validation);
     }
