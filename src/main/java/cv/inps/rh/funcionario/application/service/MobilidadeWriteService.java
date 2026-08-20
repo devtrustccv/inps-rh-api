@@ -15,6 +15,7 @@ import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
+import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity;
 import cv.inps.rh.shared.util.ValidationUtil;
 import org.slf4j.Logger;
@@ -89,6 +90,19 @@ public class MobilidadeWriteService {
     valid.setReferenciaId(novaMobilidade.getId());
     valid.setReferenciaUuid(novaMobilidade.getUuid());
     entityManager.persist(valid);
+    entityManager.flush();
+
+    // Baseline JaVers do REGISTO: grava o snapshot inicial da mobilidade recém-criada. Sem isto, o
+    // JaVers só passa a conhecer a entidade na 1ª EDIÇÃO — e essa edição sairia como snapshot inicial
+    // (sem "antes"), deixando a grelha vazia. Com o baseline aqui, qualquer edição futura (incluindo a
+    // primeira) já produz um diff antes→depois. Carimbado com a validação de INSERT; a grelha desta
+    // valida­ção fica vazia de propósito (um REGISTO é criação, não tem "antes").
+    try {
+      ValidacaoAuditContext.set(valid.getId(), valid.getUuid(), "RH_T_MOBILIDADE");
+      mobilidadeEntityRepository.save(novaMobilidade);
+    } finally {
+      ValidacaoAuditContext.clear();
+    }
 
     return new SuccessResponseDTO(true, novaMobilidade.getUuid().toString(), "Mobilidade registada.", java.util.List.of());
 
@@ -308,6 +322,17 @@ public class MobilidadeWriteService {
       valid.setReferenciaUuid(mobilidade.getUuid());
       entityManager.persist(valid);
       mobilidade.setEstado(Estado.P);
+
+      // Auditoria de alterações (JaVers): marca a validação corrente para o CommitPropertiesProvider
+      // e força o commit auto-audit da mobilidade — o save() no repositório dispara o aspecto. O
+      // JaVers calcula o diff antes/depois contra o seu próprio snapshot, pelo que é imune ao
+      // auto-flush do Hibernate que apagava o loadedState. O holder é sempre limpo no finally.
+      try {
+        ValidacaoAuditContext.set(valid.getId(), valid.getUuid(), "RH_T_MOBILIDADE");
+        mobilidadeEntityRepository.save(mobilidade);
+      } finally {
+        ValidacaoAuditContext.clear();
+      }
     }
 
     funcionarioEntityRepository.save(funcionario);

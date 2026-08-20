@@ -206,6 +206,17 @@
             <scope>compile</scope>
         </dependency>
 
+        <!--
+            JaVers - auditoria de alterações campo-a-campo (RH_T_VALIDACAO_DETALHE).
+            Auto-audit ao nível do repositório (@JaversSpringDataAuditable), sem tocar nas
+            entidades geradas pelo iGRP. Cria as tabelas JV_* no Oracle no arranque.
+        -->
+        <dependency>
+            <groupId>org.javers</groupId>
+            <artifactId>javers-spring-boot-starter-sql</artifactId>
+            <version>7.7.0</version>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>

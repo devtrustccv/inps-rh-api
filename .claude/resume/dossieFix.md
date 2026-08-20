@@ -1,35 +1,32 @@
-> Updated: 2026-07-30
+> Updated: 2026-08-20 19:45
 
 ## Goal
 
-Dossier def-doc handling + a pending request: at progression, call an Oracle stored procedure passing the NEW and PREVIOUS carreira ids.
+Grelha "Detalhe de alterações" (antes→novo) servida pelo **JaVers** (auto-audit) em vez de RH_T_VALIDACAO_DETALHE. Piloto na mobilidade, já promovido ao endpoint oficial.
 
 ## Current state
 
-Two commits on branch `fix/dossier-def-doc`:
-- `2210f9a9` — vencimento superseded stays `A` (close by DATA_FIM, `I` only for rejection); getById filters def by `estadoAlvo=(tiprel P ? P : A)`.
-- `0baf4749` — novo contrato = tudo novo (`encerrarEExcluirDefsContratoAnterior`: close old defs by DATA_FIM keep A + `removeIf` scoping); tms fixos por vínculo filter `Estado.A` (8 queries); `getContratoAtual` (via est_act_adm=1) + findEmVigor scoped to contract.
-Tested on fresh funcionarios. Guard restored. Not committed: procedure call (below).
+- **Endpoint oficial migrado**: `GetDetalheAlteracoesQueryHandler` passou a chamar `JaversValidacaoDetalheReadService`. Path `GET api/v1/funcionarios/validacoes/{uuid}/detalhes` e `ValidacaoDetalheDTO` mantidos — front não quebra. Controller piloto `.../detalhes-javers` ainda existe.
+- **Provado end-to-end** (app na 8089, Oracle real): EDIÇÃO mostra só os campos mudados (sem ruído inter-mobilidade); REGISTO mostra todos os valores iniciais de negócio.
+- Compila (JDK 23, EXIT=0). App reiniciada; falta **1 curl ao path oficial `/detalhes`** para confirmar (foi interrompido).
 
 ## Decisions made — do not re-litigate
 
-- Old contract defs: close by DATA_FIM keep A, NOT touch the shared sync — user rejected sync param.
-- Contract selection multi-contract: est_act_adm=1, not versão (ties at 1).
-
-## Constraints
-
-- NEVER commit `Db*.java/.class` or `.claude/settings.json` (hardcoded DB password).
-- Test from a FRESH funcionario; don't touch funcionário 958807.
+- **Filtro por instância-alvo** (`isAlvo` via `validacao.referenciaId`), não só por tipo: mata o ruído da mobilidade anterior desativada na consolidação.
+- **Allow-list** `CAMPOS_NEGOCIO` (secaoId, localTrabId, instidId, tipoSituacao, dataInicio, dataFim, obs): fora estado/funId/mobId/created*.
+- **Semântica por `tipoAccao`**: INSERT mostra valores iniciais completos; UPDATE só diffs reais.
+- Passo-2 (commit JaVers na validação) **revertido** — sem estado na grelha, era custo sem valor.
 
 ## Relevant files
 
-- `CarreiraWriteService.java:441-514` (validarCarreira) — `carreira`=new carreira, `carreiraMesmoTipo`=old (null if not progression). Both ids available; call procedure after activation (line 514).
-- `CalcularRemuneracaoRepositoryImpl.java:40-63` — project's stored-proc pattern (EntityManager→Session.doReturningWork→CallableStatement).
+- `shared/application/service/JaversValidacaoDetalheReadService.java` — filtros/allow-list.
+- `funcionario/application/queries/GetDetalheAlteracoesQueryHandler.java:20` — fonte trocada.
 
 ## Open questions
 
-- Procedure name/schema, params (order/types/IN-OUT), timing (in-tx w/ flush vs post-commit), failure behavior. User has NOT provided these yet.
+- `obs` = literal "MOBILIDADE" (marcador) aparece no REGISTO — tirar da whitelist?
+- Generalizar a outros services (carreira/contrato): o chamador só precisa de `repository.save()` com `ValidacaoAuditContext.set(...)`; TIPO_ALVO_SUFIXO/ROTULOS ainda são mobilidade-only.
 
 ## Next step
 
-Get the procedure signature from the user, then wire the call into `validarCarreira` after line 514, guarded by `carreiraMesmoTipo != null`.
+`curl .../validacoes/01a020de-b430-7f3b-9c71-7abb52743466/detalhes` e confirmar 3 linhas iguais ao `/detalhes-javers`.
