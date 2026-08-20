@@ -65,7 +65,7 @@ public class FuncionarioMapper {
   }
 
 
-  public FuncionarioResponseDTO toResponseDTO(FuncionarioEntity entity, boolean validacao) {
+  public FuncionarioResponseDTO toResponseDTO(FuncionarioEntity entity) {
     if (entity == null) return null;
 
     FuncionarioResponseDTO dto = new FuncionarioResponseDTO();
@@ -73,9 +73,11 @@ public class FuncionarioMapper {
     DadosPessoaisRespDTO dadosPessoais = toDadosPessoaisRespDTO(entity);
     dto.setDadosPessoais(dadosPessoais);
 
-    var permitidos = validacao
-        ? List.of(Estado.P)
-        : List.of(Estado.A, Estado.I);
+    // Filhos no MESMO estado do pai (funcionario). O estado da própria entidade decide o snapshot —
+    // Pendente (P) / Em correção (C) durante a validação, Activo (A) depois — sem flag do caller. Os
+    // filhos andam em lockstep com o pai (ver mudaEstado), logo "filhos no estado do pai" é sempre o
+    // snapshot correcto e exclui automaticamente os eliminados (E).
+    var permitidos = List.of(entity.getEstado());
 
     if (entity.getFamiliares() != null) {
       var familiaresFiltrados = entity.getFamiliares().stream()

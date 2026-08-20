@@ -90,11 +90,10 @@ public class FuncionarioController {
   )
 
    public ResponseEntity<FuncionarioResponseDTO> getFuncionarioById(
-    @PathVariable(value = "id") String id,
-    @RequestParam(value = "validacao", defaultValue = "false") boolean validacao)
+    @PathVariable(value = "id") String id)
   {
 
-      final var query = new GetFuncionarioByIdQuery(id, validacao);
+      final var query = new GetFuncionarioByIdQuery(id);
 
       return queryBus.handle(query);
 

@@ -167,6 +167,31 @@ public class FuncionarioRules {
 
   }
 
+  /** Remunerações associadas num estado específico — usado pelo get-by-id de validação para
+   *  devolver o snapshot no MESMO estado do funcionário (P pendente ou C em correção). */
+  public List<DefinicaoRemuneracaoEntity> getRemuneracoesAssociadosPorEstado(Long tipoRelacionamentoId, Estado estado) {
+
+    return tipoRelRemPagEntityRepository
+        .findByTiprelIdAndEstado(tipoRelacionamentoId, estado)
+        .stream()
+        .map(TipoRelRemPagEntity::getRemId)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+
+  }
+
+  /** Pagamentos/descontos associados num estado específico — ver {@link #getRemuneracoesAssociadosPorEstado}. */
+  public List<DefPagamentoEntity> getPagamentosDescontosAssociadosPorEstado(Long tipoRelacionamentoId, Estado estado) {
+
+    return tipoRelRemPagEntityRepository
+        .findByTiprelIdAndEstado(tipoRelacionamentoId, estado)
+        .stream()
+        .map(TipoRelRemPagEntity::getPagId)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+
+  }
+
 
 
   public Optional<ValidacaoEntity> getValidacaoPendente(UUID funUuid, TipoAcao tipoAccao, Referencia referenciaName) {

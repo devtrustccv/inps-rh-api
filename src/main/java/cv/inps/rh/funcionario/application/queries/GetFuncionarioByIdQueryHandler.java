@@ -51,7 +51,7 @@ public class GetFuncionarioByIdQueryHandler
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(query.getId()).valor());
 
-    var funcionarioResponseDTO = funcionarioMapper.toResponseDTO(funcionario, query.isValidacao());
+    var funcionarioResponseDTO = funcionarioMapper.toResponseDTO(funcionario);
 
     var documentos = documentoEntityRepository.findAllByReferenciaNameAndReferenciaUuid(
         TableName.RH_T_FUNCIONARIOS.name(), funcionario.getUuid());
@@ -63,12 +63,10 @@ public class GetFuncionarioByIdQueryHandler
 
     var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
-    var remuneracoes = query.isValidacao()
-        ? funcionarioRules.getRemuneracoesAssociadosPendentes(tiposRelacionamento.getId())
-        : funcionarioRules.getRemuneracoesAssociadosAtivos(tiposRelacionamento.getId());
-    var pagamentos = query.isValidacao()
-        ? funcionarioRules.getPagamentosDescontosAssociadosPendentes(tiposRelacionamento.getId())
-        : funcionarioRules.getPagamentosDescontosAssociadosAtivos(tiposRelacionamento.getId());
+    // Movimentos (REM/PAG) no MESMO estado do funcionário — coerente com o filtro dos filhos no
+    // FuncionarioMapper. O estado da entidade decide o snapshot (P/C durante a validação, A depois).
+    var remuneracoes = funcionarioRules.getRemuneracoesAssociadosPorEstado(tiposRelacionamento.getId(), funcionario.getEstado());
+    var pagamentos = funcionarioRules.getPagamentosDescontosAssociadosPorEstado(tiposRelacionamento.getId(), funcionario.getEstado());
 
     var dcr = dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamento, pagamentos,
         remuneracoes);
