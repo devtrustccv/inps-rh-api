@@ -63,18 +63,39 @@ public class ValidarContratoService {
 
     var dto = command.getNovocontrato();
 
-    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
-    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
-    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
+
+    // Contrato alvo = o do tiprel atual (o novo contrato registado, ainda por validar/corrigir).
+    var tiprelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    var contratoAlvo = tiprelAtual != null ? tiprelAtual.getContrVinculoId() : null;
+
+    // CORRIGIR (checker devolve ao maker): contrato pendente P -> C e validação P -> C, SEM aplicar
+    // payload nem tocar nos def. O maker corrige e reenvia por este mesmo endpoint com validar=null
+    // (C -> P). Espelha o ciclo do registo de colaborador / mobilidade / carreira.
     if (EstadoValidacao.CORRIGIR.equals(dto.getValidar())) {
-      LOGGER.info("[CORRIGIR] CONTRATO (funcionario={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
-          command.getIdFuncionario());
-      return ResponseEntity.ok(new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of()));
+      if (contratoAlvo == null || contratoAlvo.getEstado() != Estado.P) {
+        throw IgrpResponseStatusException.badRequest("Não há contrato pendente para devolver para correção.");
+      }
+      funcionarioRules.devolverParaCorrecao(contratoAlvo.getUuid(), contratoAlvo.getEstado(), Referencia.CONTRATO);
+      mudarEstado(funcionario, Estado.C);
+      funcionarioEntityRepository.saveAndFlush(funcionario);
+      LOGGER.info("[CORRIGIR] CONTRATO devolvido para correção (contrato={}).", contratoAlvo.getUuid());
+      return ResponseEntity.ok(new SuccessResponseDTO(true, contratoAlvo.getUuid().toString(),
+          "Contrato devolvido para correção.", List.of()));
     }
 
-    var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
-
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
+    // Maker corrige e reenvia (C -> P): 'validar' tem de vir nulo e tem de existir validação por corrigir.
+    boolean estaPorCorrigir = contratoAlvo != null && contratoAlvo.getEstado() == Estado.C;
+    if (estaPorCorrigir) {
+      if (dto.getValidar() != null) {
+        throw IgrpResponseStatusException.badRequest(
+            "Contrato em correção: não pode ser validado. Corrija e reenvie primeiro.");
+      }
+      if (!funcionarioRules.temValidacaoPorCorrigir(funcionario.getUuid(), TipoAcao.INSERT, Referencia.CONTRATO)) {
+        throw IgrpResponseStatusException.badRequest("Este contrato não está por corrigir.");
+      }
+    }
 
     var dadosContratuais = dto.getDadosContratuais();
 
@@ -186,6 +207,11 @@ public class ValidarContratoService {
         // colaborador ficaria sem contrato atual (o anterior foi fechado no registo).
         reverterRegistoNovoContrato(tiposRelacionamento);
       }
+    } else if (estaPorCorrigir) {
+      // Maker reenviou a correção: C -> P (volta à fila de validação). Sem consolidar nem ordem de
+      // serviço — isso só na validação positiva (SIM). Os manuais editados mantêm-se P.
+      funcionarioRules.reabrirParaValidacao(contratoAlvo.getUuid(), Referencia.CONTRATO);
+      mudarEstado(funcionario, Estado.P);
     }
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
@@ -198,9 +224,11 @@ public class ValidarContratoService {
 
     // Só os def vigentes deste tiprel (estado coincide com o do tiprel) — exclui E/I que ficaram
     // associados (ex.: manuais substituídos pelo sync), tal como no getById/CarreiraReadService.
-    var mensagem = EstadoValidacao.SIM.equals(dto.getValidar())
-        ? "Contrato validado."
-        : "Contrato actualizado.";
+    var mensagem = estaPorCorrigir
+        ? "Contrato corrigido e reenviado para validação."
+        : EstadoValidacao.SIM.equals(dto.getValidar())
+            ? "Contrato validado."
+            : "Contrato actualizado.";
     return ResponseEntity.ok(new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, List.of()));
 
   }

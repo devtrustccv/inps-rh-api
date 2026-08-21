@@ -1,0 +1,17 @@
+{
+  "dadosContratuais": {
+    "tipoContratoId": 2,
+    "tipoVinculoLaboralId": 1,
+    "situacaoLaboralId": 1,
+    "direcaoId": 100010075,
+    "seccaoId": 2,
+    "carreiraId": 6,
+    "escalaoReferenciaId": 21,
+    "cargoPosicaoId": 2,
+    "regimeTrabalho": "INTEGRAL",
+    "moeda": "CVE",
+    "dataInicio": "2026-08-21",
+    "localTrabalhoId": 1
+  },
+  "tipoOrdemServico": "NOMEACAO"
+}
