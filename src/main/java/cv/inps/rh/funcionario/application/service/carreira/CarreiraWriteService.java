@@ -231,45 +231,50 @@ public class CarreiraWriteService {
     var tmsFixosRem = tmsFixosDoVinculo(vinculoAtualId, "REM");
     var tmsFixosPag = tmsFixosDoVinculo(vinculoAtualId, "PAG");
 
-    // Salario: SEMPRE registo novo (valor do escalao). Na progressao o salario antigo e fechado no
-    // validar; os subsidios/descontos existentes NAO se copiam — RE-ASSOCIAM-se ao novo tiprel no
-    // validar (doc 29/07: TIPREL_REM_PAG "pega todos os registos do tiprel anterior").
-    var movREM = paramVinculoMovimentoEntityRepository
-        .findByVinculoId_IdAndTipoAndEstado(vinculoAtualId, "REM", Estado.A).stream().findFirst().orElse(null);
-    if (movREM != null) {
-      var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario, obsMovimento);
-      salario.setTmId(movREM.getTmId());
-      definicaoRemuneracaoEntityRepository.save(salario);
-      novasRem.add(salario);
-    }
-
-    // Subsidios/encargos: cria SO os NOVOS (sem id) do DTO — os manuais acrescentados de raiz — com a
-    // DATA_INICIO efetiva. Na progressao, os ecoados do getById (com id) NAO se recriam aqui: sao
-    // re-associados no validar (mesmas linhas). Em carreira nova (fonte == null) nao ha o que
-    // re-associar, logo cria todos os do DTO.
-    if (dto.getSubsidios() != null) {
-      for (var s : dto.getSubsidios()) {
-        if (s.getTipoSubsidioId() != null && tmsFixosRem.contains(s.getTipoSubsidioId())) continue;
-        if (fonte != null && s.getId() != null) continue; // existente → re-associa no validar
-        var obj = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
-        obj.setObs(obsMovimento);
-        obj.setDataInicio(dataEfetiva);
-        obj.setDataFim(null);
-        definicaoRemuneracaoEntityRepository.save(obj);
-        novasRem.add(obj);
+    // PROGRESSÃO/PROMOÇÃO: o dinheiro (vencimento + subsídios + descontos) é escrito PELO PROC
+    // REGISTO_SALARIO na validação — copia do tiprel antigo + regista o novo vencimento do escalão.
+    // Por isso o Java NÃO cria AQUI nenhum def na progressão: evita duplicar o que o proc faz. O
+    // cabeçalho (salário do escalão) fica visível pelo campo salario da carreira/tiprel. Em carreira
+    // NOVA (proc não corre) o Java mantém-se dono do dinheiro. Mesmo predicado do gate do proc no
+    // validar — Java-dinheiro e proc ficam complementares.
+    boolean progressao = ehProgressaoPromocao(novaCarreira);
+    if (!progressao) {
+      // Salario: registo novo (valor do escalao).
+      var movREM = paramVinculoMovimentoEntityRepository
+          .findByVinculoId_IdAndTipoAndEstado(vinculoAtualId, "REM", Estado.A).stream().findFirst().orElse(null);
+      if (movREM != null) {
+        var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario, obsMovimento);
+        salario.setTmId(movREM.getTmId());
+        definicaoRemuneracaoEntityRepository.save(salario);
+        novasRem.add(salario);
       }
-    }
 
-    if (dto.getEncargosDescontos() != null) {
-      for (var e : dto.getEncargosDescontos()) {
-        if (e.getTipoEncargoId() != null && tmsFixosPag.contains(e.getTipoEncargoId())) continue;
-        if (fonte != null && e.getId() != null) continue; // existente → re-associa no validar
-        var def = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
-        def.setObs(obsMovimento);
-        def.setDataInicio(dataEfetiva);
-        def.setDataFim(null);
-        defPagamentoEntityRepository.save(def);
-        novosPag.add(def);
+      // Subsidios/encargos: cria SO os NOVOS (sem id) do DTO — os manuais acrescentados de raiz — com a
+      // DATA_INICIO efetiva. Em carreira nova (fonte == null) cria todos os do DTO.
+      if (dto.getSubsidios() != null) {
+        for (var s : dto.getSubsidios()) {
+          if (s.getTipoSubsidioId() != null && tmsFixosRem.contains(s.getTipoSubsidioId())) continue;
+          if (fonte != null && s.getId() != null) continue; // existente → re-associa no validar
+          var obj = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
+          obj.setObs(obsMovimento);
+          obj.setDataInicio(dataEfetiva);
+          obj.setDataFim(null);
+          definicaoRemuneracaoEntityRepository.save(obj);
+          novasRem.add(obj);
+        }
+      }
+
+      if (dto.getEncargosDescontos() != null) {
+        for (var e : dto.getEncargosDescontos()) {
+          if (e.getTipoEncargoId() != null && tmsFixosPag.contains(e.getTipoEncargoId())) continue;
+          if (fonte != null && e.getId() != null) continue; // existente → re-associa no validar
+          var def = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
+          def.setObs(obsMovimento);
+          def.setDataInicio(dataEfetiva);
+          def.setDataFim(null);
+          defPagamentoEntityRepository.save(def);
+          novosPag.add(def);
+        }
       }
     }
 
@@ -497,27 +502,27 @@ public class CarreiraWriteService {
     var carreiraMesmoTipo = emVigor.stream()
         .filter(c -> (c.getCargoId() == null) == novoCargoNulo).findFirst().orElse(null);
 
-    // PROGRESSÃO (mesmo tipo em vigor): substitui o track. Doc 29/07: SÓ o VENCIMENTO é substituído
-    // (novo salário do escalão) → fecha-se; os subsídios/descontos RE-ASSOCIAM ao novo tiprel
-    // (mesmas linhas, via transferir — como renovação/mobilidade: "pega todos os registos do tiprel
-    // anterior"). Não se fecham nem se copiam os subsídios. Fecha-se depois o tiprel/carreira antigos.
-    if (carreiraMesmoTipo != null) {
+    // É PROGRESSÃO/PROMOÇÃO? Mesmo predicado do gate do proc. Nesse caso o dinheiro é TODO do proc e
+    // a estrutura antiga só se fecha DEPOIS de o proc a ler (mais abaixo) — o proc precisa do tiprel
+    // antigo ainda est_act_adm=1 para copiar os subsídios/descontos dele.
+    boolean progressao = carreiraMesmoTipo != null && ehProgressaoPromocao(carreira);
+
+    // CARREIRA NOVA do mesmo tipo em vigor (NÃO progressão): substitui o track e o Java é dono do
+    // dinheiro. Doc 29/07: SÓ o VENCIMENTO é substituído (novo salário do escalão) → fecha-se; os
+    // subsídios/descontos RE-ASSOCIAM ao novo tiprel (mesmas linhas, via transferir). Fecha-se depois
+    // o tiprel/carreira antigos. NA PROGRESSÃO nada disto corre aqui (o proc trata — ver abaixo).
+    if (carreiraMesmoTipo != null && !progressao) {
       var tiprelSubstituido = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreiraMesmoTipo.getUuid()).orElse(null);
       if (tiprelSubstituido != null) {
         // 1. Fecha SÓ o vencimento antigo (o def REM cujo tm é o salário do vínculo). Doc: fechar por
-        //    DATA_FIM e MANTER estado 'A' (o 'I' é só para rejeição). Fecha em dataEfetiva-1 (o dia
-        //    antes do novo período) para dar fronteira de período limpa: o antigo cobre até ao dia
-        //    anterior; o novo começa em dataEfetiva. Assim as vistas por período separam-nos sem sobrepor.
+        //    DATA_FIM e MANTER estado 'A' (o 'I' é só para rejeição). Fecha em dataEfetiva-1.
         Long salarioTmId = salarioTmIdDoContrato(carreira.getContrVinculoId());
         var fimAntigo = dataEfetiva.minusDays(1);
         var salariosFechadosIds = new java.util.HashSet<Long>();
         funcionarioRules.getRemuneracoesAssociadosAtivos(tiprelSubstituido.getId()).stream()
             .filter(r -> salarioTmId != null && r.getTmId() != null && Objects.equals(r.getTmId().getId(), salarioTmId))
             .forEach(o -> { o.setDataFim(fimAntigo); definicaoRemuneracaoEntityRepository.save(o); salariosFechadosIds.add(o.getId()); });
-        // 2. Re-associa os restantes ativos (subsídios + descontos) ao novo tiprel — mesmas linhas,
-        //    datas intactas. O vencimento antigo mantém-se 'A' (para não sumir da vista inicial), por
-        //    isso já não é o estado 'I' que o exclui do transfer: passa-se o seu id em excluirRemIds
-        //    para ele NÃO transitar (o novo tiprel já recebe o salário novo do escalão).
+        // 2. Re-associa os restantes ativos (subsídios + descontos) ao novo tiprel — mesmas linhas.
         if (tiprelPendente != null)
           tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tiprelSubstituido, tiprelPendente,
               List.of(), List.of(), salariosFechadosIds, java.util.Collections.emptySet());
@@ -586,8 +591,9 @@ public class CarreiraWriteService {
 
     // ATIVAR os def pendentes (P->A) — SÓ os desta carreira, pela ASSOCIAÇÃO do tiprel pendente
     // (TIPREL_REM_PAG). Não usar fun+estado=P: misturaria def de outros pendentes (outra carreira,
-    // rendimento/desconto) que não têm coluna de carreira.
-    if (tiprelPendente != null) {
+    // rendimento/desconto) que não têm coluna de carreira. NA PROGRESSÃO não há def do Java para
+    // ativar (o dinheiro não foi criado no registo — o proc cria-o já como 'A' mais abaixo).
+    if (tiprelPendente != null && !progressao) {
       funcionarioRules.getRemuneracoesAssociadosPendentes(tiprelPendente.getId())
           .forEach(o -> { o.setEstado(Estado.A); definicaoRemuneracaoEntityRepository.save(o); });
       funcionarioRules.getPagamentosDescontosAssociadosPendentes(tiprelPendente.getId())
@@ -600,18 +606,31 @@ public class CarreiraWriteService {
       validacaoEntityRepository.save(validation);
     }
 
-    // PROGRESSÃO/PROMOÇÃO: registar o novo salário do escalão na BD via procedure Oracle, passando a
-    // carreira ANTERIOR (substituída) e a NOVA. Mesma transação: flush() antes para a procedure ver as
-    // linhas já ativadas; se rebentar, faz rollback de toda a progressão e propaga a mensagem Oracle.
-    //
-    // O proc SÓ corre quando a carreira validada É mesmo uma Progressão/Promoção (tipo_situacao com
-    // referência CARREIRA_PROG_PROMO no domínio TIPO_MOV_LABORAL: valores PROGRESSAO/PROMOCAO). Uma
-    // carreira NOVA do mesmo tipo (CARGO_NOVO/MUDANCA_CARREIRA/CARREIRA_NOVO) também substitui o track
-    // aqui, mas NÃO é uma progressão salarial — não deve invocar o proc. Sem este guard, um POST de
-    // "carreira nova" do mesmo tipo disparava o REGISTO_SALARIO indevidamente.
-    if (carreiraMesmoTipo != null && ehProgressaoPromocao(carreira)) {
+    // PROGRESSÃO/PROMOÇÃO: o proc REGISTO_SALARIO escreve TODO o dinheiro no tiprel novo — copia os
+    // subsídios/descontos do tiprel ANTIGO, fecha o vencimento antigo e regista o novo do escalão +
+    // retroativos. O Java só faz a estrutura. Ordem CRÍTICA:
+    //   1) flush() para o proc ver a carreira/tiprel NOVOS já ativos;
+    //   2) o proc corre com o tiprel ANTIGO ainda est_act_adm=1 (senão a cópia dos subsídios é saltada
+    //      — condição V_EST_ACT_ADM_OLD=1 no proc);
+    //   3) SÓ DEPOIS se fecha a carreira/tiprel antigos (o proc já leu o dinheiro deles).
+    // Se o proc rebentar, faz rollback de toda a progressão e propaga a mensagem Oracle.
+    if (progressao) {
       entityManager.flush();
       registarSalarioProgressao(carreiraMesmoTipo.getId(), carreira.getId());
+
+      var tiprelSubstituido = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreiraMesmoTipo.getUuid()).orElse(null);
+      if (tiprelSubstituido != null) {
+        tiprelSubstituido.setDataFim(dataEfetiva);
+        tiprelSubstituido.setEstActAdm(0);
+        tiprelSubstituido.setFlgProcessa(0);
+        tiprelSubstituido.setEstado(Estado.I);
+        tiposRelacionamentoEntityRepository.save(tiprelSubstituido);
+      }
+      carreiraMesmoTipo.setDataFim(dataEfetiva);
+      carreiraMesmoTipo.setEstActAdm(0);
+      carreiraMesmoTipo.setFlgProcessa(0);
+      carreiraMesmoTipo.setEstado(Estado.I);
+      carreiraEntityRepository.save(carreiraMesmoTipo);
     }
 
     return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira validada.", List.of());
