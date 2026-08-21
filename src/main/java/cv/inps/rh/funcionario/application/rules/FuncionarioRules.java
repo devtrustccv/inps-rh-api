@@ -211,6 +211,16 @@ public class FuncionarioRules {
         .findByReferenciaUuidAndEstadoAndTipoAccaoAndReferenciaName(referenciaUuid, Estado.P, tipoAccao.name(), referenciaName.name());
   }
 
+  /**
+   * Variante genérica por estado (o método acima fixa P). Usada pelo ciclo maker-checker da
+   * mobilidade para localizar a validação DESTA referência num estado concreto — ex.: a que o
+   * checker deixou em correção (Estado.C) e o maker vai reactivar (C -> P).
+   */
+  public Optional<ValidacaoEntity> getValidacaoByReferenciaUuid(UUID referenciaUuid, Estado estado, TipoAcao tipoAccao, Referencia referenciaName) {
+    return validacaoEntityRepository
+        .findByReferenciaUuidAndEstadoAndTipoAccaoAndReferenciaName(referenciaUuid, estado, tipoAccao.name(), referenciaName.name());
+  }
+
   public List<String> validarContactosDuplicados(List<ContactoReqDTO> contactos, UUID funUuid) {
     if (contactos == null || contactos.isEmpty()) return List.of();
     List<String> alertas = new ArrayList<>();

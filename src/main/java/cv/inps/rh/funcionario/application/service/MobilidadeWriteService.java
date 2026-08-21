@@ -160,41 +160,56 @@ public class MobilidadeWriteService {
 
     var mobilidadeDto = command.getMobilidade();
 
-    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
-    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
-    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
-    if (EstadoValidacao.CORRIGIR.equals(mobilidadeDto.getValidar())) {
-      LOGGER.info("[CORRIGIR] MOBILIDADE (mobilidade={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
-          command.getMobilidadeId());
-      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, java.util.List.of());
-    }
-
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
-
     // A mobilidade a validar é identificada pelo uuid (path {mobilidadeId}) — já NÃO se descobre via
     // tiprel.getMobId(), porque no registo não se cria/troca tiprel nenhum.
     var mobilidade = mobilidadeEntityRepository.findByUuid(
         IdentificadorUnico.from(command.getMobilidadeId()).valor())
         .orElseThrow(() -> IgrpResponseStatusException.badRequest("Mobilidade não encontrada."));
+    var mobUuid = mobilidade.getUuid();
 
-    // Endpoint de VALIDAÇÃO — a decisão (SIM/NAO) é obrigatória; a edição vive no endpoint editar().
+    // Endpoint de VALIDAÇÃO (checker) — a decisão é obrigatória (SIM, NAO ou CORRIGIR). A edição/
+    // reenvio do maker vive no endpoint editar().
     if (mobilidadeDto.getValidar() == null)
-      throw IgrpResponseStatusException.badRequest("A decisão de validação (SIM ou NAO) é obrigatória.");
+      throw IgrpResponseStatusException.badRequest("A decisão de validação (SIM, NAO ou CORRIGIR) é obrigatória.");
 
-    if (mobilidadeDto.getValidar() != null) {
+    // Validação DESTA mobilidade (INSERT tem precedência sobre UPDATE) — filtra pelo referenciaUuid =
+    // uuid da mobilidade a validar, não por qualquer validação pendente do funcionário. Distingue
+    // REGISTO (INSERT) de EDIÇÃO (UPDATE) para o passo de consolidação de tiprel mais abaixo.
+    var validacaoInsert = funcionarioRules.getValidacaoPendenteByReferenciaUuid(mobUuid, TipoAcao.INSERT, Referencia.MOBILIDADE);
+    var validacao = validacaoInsert
+        .or(() -> funcionarioRules.getValidacaoPendenteByReferenciaUuid(mobUuid, TipoAcao.UPDATE, Referencia.MOBILIDADE))
+        .orElse(null);
+
+    // CORRIGIR (checker devolve ao maker): P -> C, SEM aplicar payload, validar ou tocar no vínculo.
+    // Espelha o ciclo do registo de colaborador (ValidarRegistoColaboradorService): o maker corrige e
+    // reenvia depois via editar() (C -> P). Guard: só uma mobilidade pendente (P) com validação pendente.
+    if (EstadoValidacao.CORRIGIR.equals(mobilidadeDto.getValidar())) {
+      if (mobilidade.getEstado() != Estado.P || validacao == null) {
+        throw IgrpResponseStatusException.badRequest(
+            "Só é possível devolver para correção uma mobilidade pendente de validação.");
+      }
+      mobilidade.setEstado(Estado.C);
+      validacao.setEstado(Estado.C);
+      validacaoEntityRepository.save(validacao);
+      mobilidadeEntityRepository.save(mobilidade);
+      LOGGER.info("[CORRIGIR] MOBILIDADE devolvida para correção (mobilidade={}).", mobUuid);
+      return new SuccessResponseDTO(true, mobUuid.toString(),
+          "Mobilidade devolvida para correção.", java.util.List.of());
+    }
+
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
+
+    // SIM / NAO — só sobre uma mobilidade PENDENTE (P). Uma em correção (C) tem de ser reenviada pelo
+    // maker (editar) antes de poder voltar à validação.
+    if (mobilidade.getEstado() != Estado.P) {
+      throw IgrpResponseStatusException.badRequest("Esta mobilidade não está pendente de validação.");
+    }
+
+    // Decisão SIM / NAO sobre a mobilidade pendente.
+    {
       // Aplica eventuais edições do formulário antes de decidir a validação.
       updateMobilidade(mobilidade, mobilidadeDto);
       var estado = mobilidadeDto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-
-      // Distingue REGISTO (INSERT) de EDIÇÃO (UPDATE) pela validação DESTA mobilidade — filtra pelo
-      // referenciaUuid = uuid da mobilidade a validar, não por qualquer validação pendente do
-      // funcionário. Assim, só a validação de um REGISTO novo (INSERT desta mobilidade) cria tiprel,
-      // mesmo que coexistam outras validações pendentes do colaborador.
-      var mobUuid = mobilidade.getUuid();
-      var validacaoInsert = funcionarioRules.getValidacaoPendenteByReferenciaUuid(mobUuid, TipoAcao.INSERT, Referencia.MOBILIDADE);
-      var validacao = validacaoInsert
-          .or(() -> funcionarioRules.getValidacaoPendenteByReferenciaUuid(mobUuid, TipoAcao.UPDATE, Referencia.MOBILIDADE))
-          .orElse(null);
       if (validacao != null) validacao.setEstado(estado);
       // Só o REGISTO (INSERT) muda o estado da mobilidade segundo a decisão e cria/troca
       // tipos_relacionamento. A validação de uma EDIÇÃO (UPDATE) NÃO mexe no tiprel — a alteração já
@@ -310,7 +325,29 @@ public class MobilidadeWriteService {
     // 1) UPDATE in place — direção/secção/local/datas na RH_T_MOBILIDADE.
     updateMobilidade(mobilidade, mobilidadeDto);
 
-    // 2) Vai para validação — cria validação pendente UPDATE + marca a mobilidade P (aparece como
+    var mobUuid = mobilidade.getUuid();
+
+    // 2a) Maker reenvia a correção: a mobilidade estava EM CORREÇÃO (C) porque o checker a devolveu.
+    //     Aplicado o payload acima, volta à fila de validação (C -> P) REACTIVANDO a mesma validação
+    //     que o checker deixou em C (INSERT tem precedência sobre UPDATE) — não cria uma nova. Espelha
+    //     o C -> P do registo de colaborador. A correção é auditada (JaVers) contra essa validação.
+    if (Estado.C.equals(mobilidade.getEstado())) {
+      var validacao = funcionarioRules.getValidacaoByReferenciaUuid(mobUuid, Estado.C, TipoAcao.INSERT, Referencia.MOBILIDADE)
+          .or(() -> funcionarioRules.getValidacaoByReferenciaUuid(mobUuid, Estado.C, TipoAcao.UPDATE, Referencia.MOBILIDADE))
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest("Esta mobilidade não está por corrigir."));
+      validacao.setEstado(Estado.P);
+      mobilidade.setEstado(Estado.P);
+      try {
+        ValidacaoAuditContext.set(validacao.getId(), validacao.getUuid(), "RH_T_MOBILIDADE");
+        mobilidadeEntityRepository.save(mobilidade);
+      } finally {
+        ValidacaoAuditContext.clear();
+      }
+      funcionarioEntityRepository.save(funcionario);
+      return new SuccessResponseDTO(true, mobUuid.toString(), "Correção reenviada para validação.", java.util.List.of());
+    }
+
+    // 2b) Vai para validação — cria validação pendente UPDATE + marca a mobilidade P (aparece como
     //    "por validar" na própria lista). Só para mobilidade já validada (A); se ainda P, a validação
     //    inicial (INSERT) cobre-a. Não duplica se já houver UPDATE pendente. NÃO cria/troca tiprel.
     if (Estado.A.equals(mobilidade.getEstado())
