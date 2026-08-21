@@ -1,44 +1,62 @@
-> Updated: 2026-08-21 10:05
+> Updated: 2026-08-21 10:30
 
 ## Goal
 
-Grelha "Detalhe de alterações" (antes→novo) via **JaVers**, extensível a todos os módulos. Depois: **CORRIGIR** na mobilidade (Fase 3). Tema paralelo: **procedure PKG_AUMENTO_SALARIAL** (progressão de carreira).
+Grelha "Detalhe de alterações" (antes→novo) via **JaVers** + ciclo **CORRIGIR** (maker-checker por estado), a replicar a todos os serviços do dossiê. Tema paralelo: **procedure PKG_AUMENTO_SALARIAL** (progressão de carreira) — a aguardar DBA.
 
 ## Current state
 
-- **Fases 0–2 concluídas e commitadas** (`develop`). JaVers extensível; endpoint `.../validacoes/{id}/detalhes` serve a grelha.
-- **Fase 3 (CORRIGIR mobilidade) CONCLUÍDA e PROVADA end-to-end** — ainda **NÃO commitada**.
-- **Procedure**: root cause do ORA-01403 confirmado e entregue ao DBA (a aguardar correção na BD).
+- **JaVers (Fases 0–2)**: concluído/commitado. Endpoint `.../validacoes/{id}/detalhes` serve a grelha. JaVers ligado em Mobilidade + Carreira.
+- **CORRIGIR — Mobilidade**: feito e provado, commitado (`58bf6cbf`).
+- **CORRIGIR — Carreira**: feito e provado, commitado (`309ab41f`). Extraído helper partilhado.
+- **Procedure**: root cause confirmado; log de diagnóstico ativo; **a aguardar DBA**.
 
-## Fase 3 — CORRIGIR mobilidade (feito, por commitar)
+## Ciclo CORRIGIR — helper partilhado (usar nos próximos serviços)
 
-Ciclo maker-checker por **estado**, espelhando `ValidarRegistoColaboradorService`:
+`FuncionarioRules`:
+- `devolverParaCorrecao(referenciaUuid, estadoEntidade, referencia)` — CHECKER: guard "entidade P + tem validação pendente" → passa validação a C (INSERT precede UPDATE); devolve-a. Caller põe a entidade em C e grava.
+- `reabrirParaValidacao(referenciaUuid, referencia)` — MAKER: acha validação em C → passa a P; devolve-a. Caller põe a entidade em P e grava.
+- `getValidacaoByReferenciaUuid(uuid, estado, tipoAccao, ref)` — variante por estado.
 
-- `FuncionarioRules.getValidacaoByReferenciaUuid(uuid, estado, tipoAccao, ref)` — novo helper (variante por estado do `getValidacaoPendenteByReferenciaUuid`, que fixava P).
-- `MobilidadeWriteService.validarMobilidade` — NO-OP removido:
-  - **CORRIGIR (checker)**: guard "mobilidade P + tem validação pendente" → `mobilidade P→C` + `validação P→C`, sem aplicar payload/tocar vínculo.
-  - **SIM/NAO**: novo guard "só sobre P" (uma em C dá 400 até reenvio).
-- `MobilidadeWriteService.editar` — novo ramo **maker reenvia (C→P)**: aplica payload, **reactiva a validação que estava em C** (não cria nova), com auditoria JaVers da correção.
+Padrão por serviço: (1) checker no `validar*` chama `devolverParaCorrecao`; (2) maker no endpoint de edição — se a entidade está em C, aplica payload, chama `reabrirParaValidacao`, põe entidade P, e carimba a validação reactivada no `ValidacaoAuditContext` (se o serviço tiver JaVers).
 
-**Teste HTTP provado** (func `01a00595-...404d`, mob `01a023fa-...1f04`): save→P; CORRIGIR→C (mob+valid); SIM-em-C→400; editar→C→P (direção corrigida 7); SIM→A + tiprel criado (est_act_adm=1); `detalhes` mostra o diff da correção com nomes legíveis. App corre com **JDK 23** (`Eclipse Adoptium/jdk-23.0.2.7-hotspot`) — o `spring-boot:run` com JDK 21 falha (class version 67 vs 65).
+**Carreira (referência do padrão "editar rico"):** um registo em C **salta** o roteamento progressão/processada (guards `!correcaoRegisto`) e cai no editar-in-place; no fim reactiva a validação INSERT em vez de criar UPDATE. Caminho normal byte-idêntico. Ver `CarreiraWriteService.validarCarreira:401` e `atualizarCarreira:648`.
+
+## CORRIGIR — serviços que FALTAM (NO-OP `MSG_CORRIGIR_NAO_IMPLEMENTADO`)
+
+Decisão: **só CORRIGIR primeiro**, JaVers como 2ª passagem. Ordem sugerida: família contrato a seguir.
+- AlterarSituacaoLaboralWriteService:65
+- ValidarDadosBancariosService:51
+- ValidarContratoService:72
+- ValidacaoRenovacaoContratoService:51
+- SubstituicaoWriteService:162
+- RenumeracoesWriteService:137 (remuneração) + :183 (pagamento)
+- RegimeWriteService:90 (edita no próprio validar — forma diferente)
+- ProcessoDisciplinarWriteService:76
+- PedidoDeclaracaoWriteService:136
+
+Nota: nem todos têm endpoint de edição separado; a metade maker (C→P) tem de respeitar a forma de cada um (uns editam no validar).
+
+## JaVers — serviços que FALTAM (2ª passagem)
+
+Só Mobilidade+Carreira têm `ValidacaoAuditContext`. Falta ligar aos restantes, **incl. ValidarRegistoColaboradorService** (já tem CORRIGIR completo, só falta a grelha).
 
 ## Procedure PKG_AUMENTO_SALARIAL — para o DBA (a aguardar)
 
-- **Erro reproduzido**: `ORA-01403: no data found` / `ORA-06512: at "INPSRH.PKG_AUMENTO_SALARIAL", line 695`.
-- **Params da chamada que falhou**: `REGISTO_SALARIO(720, 730, 1, 'SYSTEM')` — 720/730 são `RH_T_CARREIRA.ID` (old/new).
-- **Root cause (fonte confirmado via all_source)**: linhas **693 e 700** filtram `RH_T_TIPOS_RELACIONAMENTO WHERE ID = P_CARREIRA_ID_*` — deviam ser `WHERE CARREIRA_ID = P_CARREIRA_ID_*` (provavelmente `AND EST_ACT_ADM=1`). `MAX(ID)` dá NULL → linha 695 `SELECT INTO ... WHERE ID=NULL` → 0 linhas → ORA-01403.
-- **Bug latente extra**: linha 694 usa `V_RH_T_CARREIRA.DATA_INICIO` antes de a variável ser carregada (só na 698).
-- **Log de captura** em `CarreiraWriteService.registarSalarioProgressao` (~604): loga o stack Oracle e re-lança (comportamento inalterado). Temporário — remover após correção.
-- Utilitários no root (untracked): `DbQuery.java`, `DbProc.java` (chamam a BD; DbProc faz rollback).
+- Erro: `ORA-01403 / ORA-06512 at "INPSRH.PKG_AUMENTO_SALARIAL", line 695`.
+- **Progressão REAL** (mesma pessoa, fun 958881): `REGISTO_SALARIO(724, 726, 1, 'SYSTEM')` — 724 (cargo 2, A, contrato 679) e 726 (cargo 2, P, contrato 679). Substitui o caso 720/730 (pessoas diferentes) que o DBA assinalou.
+- Root cause: linhas 693/700 filtram `RH_T_TIPOS_RELACIONAMENTO WHERE ID = P_CARREIRA_ID_*` → deviam ser `WHERE CARREIRA_ID = ...` (prov. `AND EST_ACT_ADM=1`). `MAX(ID)` NULL → linha 695 `WHERE ID=NULL` → 0 linhas.
+- Bug latente: linha 694 usa `V_RH_T_CARREIRA.DATA_INICIO` antes de carregada (só na 698).
+- Log de captura em `registarSalarioProgressao` (re-lança; **manter** até correção — foi ele que apanhou 724→726).
+- Sequência pós-fix: DBA corrige → remover redundância Java↔proc na progressão (`transferirParaNovoTipoRelacionamento` + fecho/registo do vencimento no caminho `carreiraMesmoTipo`) → provar gravação única. NUNCA remover Java antes.
 
-## Decisions made — do not re-litigate
+## Ambiente de teste
 
-- CORRIGIR = maker-checker por estado (checker P→C sem payload; maker C→P via editar, validar null).
-- Progressão: **o procedure é o dono** de subsídios/vencimento/retroativos. Sequência: DBA corrige proc → só depois remover a redundância no Java (`transferirParaNovoTipoRelacionamento` + fecho/registo do vencimento no caminho `carreiraMesmoTipo`) → provar gravação única. NUNCA remover Java antes do proc funcionar.
-- Fallback Java-shadow do proc: **rejeitado** (duplicaria matemática de dinheiro; fallback dispara em erro real; dois donos). Ponte = tornar chamada não-fatal + log, não reimplementar.
+- App corre com **JDK 23** (`Eclipse Adoptium/jdk-23.0.2.7-hotspot`); `spring-boot:run` com JDK 21 falha (class 67 vs 65). Endpoints sem token no profile development.
+- BD via `DbQuery.java`/`DbProc.java` no root (untracked; DbProc faz rollback). ojdbc11 23.7 no ~/.m2.
 
 ## Next step
 
-1. **Commitar a Fase 3** (CORRIGIR mobilidade) — `MobilidadeWriteService`, `FuncionarioRules`.
-2. Decidir se o **log de diagnóstico** do proc fica ou reverte.
-3. Quando o DBA corrigir o proc: remover a redundância Java↔proc na progressão e provar.
+1. Quando o DBA corrigir o proc: validar `REGISTO_SALARIO(724,726,...)` + testar progressão pelo ecrã (o SIM da carreira 726 passará a ativar).
+2. Replicar CORRIGIR ao próximo serviço (família contrato) usando os helpers.
+3. 2ª passagem JaVers (incl. colaborador).
