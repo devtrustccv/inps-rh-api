@@ -1,27 +1,26 @@
-> Updated: 2026-08-21 14:20
+> Updated: 2026-08-21 17:05
 
 ## Goal
 
-Replicar o ciclo **CORRIGIR** (maker-checker por estado) e a grelha **JaVers** a todos os serviços do dossiê. Tema paralelo (procedure de progressão) já isolado em `.claude/resume/procedure-progressao.md`.
+Replicar o ciclo **CORRIGIR** (maker-checker por estado) e a grelha **JaVers** a todos os serviços do dossiê. Tema paralelo (procedure de progressão) em `.claude/resume/procedure-progressao.md`.
 
 ## Current state
 
-- **JaVers (Fases 0–2)** + **CORRIGIR Mobilidade** (`58bf6cbf`) e **Carreira** (`309ab41f`): feito, commitado. Helper partilhado `FuncionarioRules`.
-- **Gate do procedure REGISTO_SALARIO** (só progressão/promoção): commitado `b2821f68`. Resto do tema procedure em handoff próprio.
-- **CORRIGIR em `ValidarContratoService`**: IMPLEMENTADO e **TESTADO LIVE end-to-end** (2026-08-21): registo→GET→CORRIGIR (P→C)→reenvia c/ edição (C→P, edição aplicada)→SIM (A, anterior→I). Guia + payload em `.claude/resume/novo-contrato.md`. **A commitar.**
+- **JaVers (Fases 0–2)** + **CORRIGIR** em Mobilidade (`58bf6cbf`), Carreira (`309ab41f`) e **Contrato** (`fc69e68b`, testado live): feito e commitado. Helper partilhado `FuncionarioRules`.
+- **Gate do procedure REGISTO_SALARIO** (`b2821f68`) e **progressão não duplica dinheiro** (`402e2b4d`, testado live): Java só estrutura, proc dono do dinheiro. Ver `procedure-progressao.md`.
+- Guias + payloads: `.claude/resume/novo-contrato.md`, `registo-colaborador.md`.
 
 ## Decisions made — do not re-litigate
 
-- Contrato usa forma "edita-no-validar" (sem endpoint separado): maker reenvia por `PUT/POST validar` com `validar=null` quando contrato está em C.
-- Validação CONTRATO tem `referenciaUuid=contrato.getUuid()` → `devolverParaCorrecao`/`reabrirParaValidacao` encaixam.
+- Contrato/carreira/mobilidade CORRIGIR: forma "edita-no-validar" (sem endpoint separado), validar=null reenvia C→P.
+- Na progressão o Java NÃO escreve def de dinheiro; o proc faz tudo. Ver [[project_progressao_java_vs_proc]].
+- Editar/validar via API: SEMPRE GET by id antes e reenviar cada elemento dos arrays com o seu `id` (senão duplica). Ver [[feedback_get_before_put_ids]].
 
 ## Relevant files
 
-- ValidarContratoService.java:62-96 — checker CORRIGIR + deteção `estaPorCorrigir`
-- ValidarContratoService.java:~190 — ramo maker `else if (estaPorCorrigir)` (C→P)
-- NovoContratoService.java:165-168 — cria validação CONTRATO (referenciaUuid=contrato.uuid)
-- FuncionarioRules.java:230/248 — helpers devolver/reabrir
+- ValidarContratoService.java:76-98,210-215 — checker/maker CORRIGIR contrato
+- carreira/CarreiraWriteService.java — gate progressão (criarPendenteContentor + validarCarreira)
 
 ## Next step
 
-CORRIGIR do contrato TESTADO e commitado. Seguir para próximos serviços NO-OP (AlterarSituacaoLaboralWriteService:65, ValidarDadosBancariosService:51, etc.) e 2ª passagem JaVers (incl. ValidarRegistoColaboradorService). Notas: colaboradores de teste 958890/958892 têm dinheiro duplicado (limpar). Colaborador de teste desta sessão: uuid 01a0252c-4b19-7028-bcee-448e9491c95a (contrato v1 693=I expirado por SQL, novo 694=A).
+Próximos serviços NO-OP para CORRIGIR: `AlterarSituacaoLaboralWriteService:65`, `ValidarDadosBancariosService:51`, etc. + 2ª passagem JaVers (incl. `ValidarRegistoColaboradorService`). Limpar colaboradores de teste (958885+, 958894/95/97). App a correr JDK23 porta 8089.
