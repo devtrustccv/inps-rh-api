@@ -400,21 +400,30 @@ public class CarreiraWriteService {
 
   public SuccessResponseDTO validarCarreira(String funcionarioId, ValidacaoCarreiraDTO dto) {
 
-    // "Corrigir" (domínio VALIDAR_REGISTO): terceira opção do combo, além de aprovar/rejeitar. O
-    // fluxo de correção ainda não está implementado — por agora é um NO-OP (regista no log e devolve
-    // 200 com mensagem, sem validar/gravar/mudar estado). Evita também o "Decisão inválida" do
-    // isAprovado, que só conhece SIM/NAO.
-    if (ValidationUtil.isCorrigir(dto.getValidacao())) {
-      LOGGER.info("[CORRIGIR] CARREIRA (funcionario={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
-          funcionarioId);
-      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
-    }
-
-    var aprovado = ValidationUtil.isAprovado(dto.getValidacao());
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
 
     // Carreira pendente + o seu tiprel pendente (ambos criados em P no registo, est_act_adm=0).
     var carreira = carreiraEntityRepository.findByContrVinculoIdFunIdAndEstado(funcionario, Estado.P);
+
+    // CORRIGIR (checker devolve ao maker): carreira pendente P -> C, validação P -> C, SEM aplicar
+    // payload nem tocar no tiprel/def pendentes. O maker corrige e reenvia via atualizarCarreira
+    // (C -> P). Espelha o ciclo do registo de colaborador / mobilidade.
+    if (ValidationUtil.isCorrigir(dto.getValidacao())) {
+      if (carreira == null) {
+        throw IgrpResponseStatusException.badRequest("Não há carreira pendente para devolver para correção.");
+      }
+      var validacaoC = funcionarioRules.devolverParaCorrecao(carreira.getUuid(), carreira.getEstado(), Referencia.CARREIRA);
+      carreira.setEstado(Estado.C);
+      carreiraEntityRepository.save(carreira);
+      validacaoEntityRepository.save(validacaoC);
+      LOGGER.info("[CORRIGIR] CARREIRA devolvida para correção (carreira={}).", carreira.getUuid());
+      return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira devolvida para correção.", List.of());
+    }
+
+    var aprovado = ValidationUtil.isAprovado(dto.getValidacao());
+    if (carreira == null) {
+      throw IgrpResponseStatusException.badRequest("Não há carreira pendente para validar.");
+    }
     var tiprelPendente = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreira.getUuid()).orElse(null);
     var validation = funcionarioRules
         .getValidacaoPendenteByReferenciaUuid(carreira.getUuid(), TipoAcao.INSERT, Referencia.CARREIRA)
@@ -601,6 +610,16 @@ public class CarreiraWriteService {
         cs.setLong(3, userRegistoId);
         cs.setString(4, userRegistoName);
         cs.execute();
+      } catch (java.sql.SQLException e) {
+        // DIAGNÓSTICO (temporário — remover após correção do proc na BD): captura o stack Oracle
+        // completo (com o ORA-06512 "at PKG_AUMENTO_SALARIAL, line NNN") para enviar ao DBA. NÃO
+        // altera o comportamento — o erro é RE-LANÇADO e a transação continua a fazer rollback.
+        LOGGER.error("[PROGRESSAO][REGISTO_SALARIO] FALHOU pkg_aumento_salarial.REGISTO_SALARIO "
+            + "(P_CARREIRA_ID_OLD={}, P_CARREIRA_ID_NEW={}, P_USER_REGISTO_ID={}, P_USER_REGISTO_NAME={}) "
+            + "| SQLState={} ErrorCode={} | Oracle: {}",
+            carreiraIdOld, carreiraIdNew, userRegistoId, userRegistoName,
+            e.getSQLState(), e.getErrorCode(), e.getMessage(), e);
+        throw e;
       }
     });
   }
@@ -643,6 +662,11 @@ public class CarreiraWriteService {
     if (!carreira.getContrVinculoId().getFunId().getId().equals(funcionario.getId()))
       throw IgrpResponseStatusException.badRequest("Carreira não pertence a este funcionário");
 
+    // Correção de REGISTO devolvido pelo checker (carreira em C): é um registo ainda por validar, por
+    // isso salta o roteamento de progressão/processada e cai no caminho editar-in-place; no fim
+    // reactiva a validação INSERT (C -> P) em vez de criar uma UPDATE nova. Ciclo maker-checker.
+    boolean correcaoRegisto = Estado.C.equals(carreira.getEstado());
+
     // "Sem cargo" (CATEGORIA): o frontend envia cargoPosicaoId=0. Tratar 0 como null para a
     // classificação de tipo (mudouChave) e a gravação do cargo ficarem corretas.
     if (dto.getCargoPosicaoId() != null && dto.getCargoPosicaoId() == 0L) dto.setCargoPosicaoId(null);
@@ -661,7 +685,7 @@ public class CarreiraWriteService {
     // Roteamento (doc): Progressão/Promoção (CARREIRA_PROG_PROMO) cria um NOVO pendente SOBRE esta
     // carreira (herda os def e substitui na validação). Editar (CARREIRA_EDITAR) altera in place e
     // revalida só se mudar CARGO/CARR_PCCS/ESCALÃO. Sem tipoCarreira, mantém-se EDITAR.
-    if (dto.getTipoCarreira() != null && contexto(dto.getTipoCarreira()) == ContextoCarreira.PROG_PROMO) {
+    if (!correcaoRegisto && dto.getTipoCarreira() != null && contexto(dto.getTipoCarreira()) == ContextoCarreira.PROG_PROMO) {
       progredirCarreira(funcionario, carreira, dto);
       return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira actualizada.", List.of());
     }
@@ -670,7 +694,7 @@ public class CarreiraWriteService {
     // Processa Salário são editáveis. Escalão → progressão (novo INSERT). Os flips de flg e a Data
     // Fim são IMEDIATOS (não vão a validação). "Processada" segue a vista RH_V_CARREIRA (existe
     // registo em RH_T_PROC_FUNCIONARIOS para um tiprel desta carreira).
-    if (carreiraProcessada(carreira)) {
+    if (!correcaoRegisto && carreiraProcessada(carreira)) {
       Long escalaoAtual = carreira.getEscalaoId() != null ? carreira.getEscalaoId().getId() : null;
       if (!Objects.equals(escalaoAtual, dto.getEscalaoReferenciaId())) {
         progredirCarreira(funcionario, carreira, dto);
@@ -700,19 +724,27 @@ public class CarreiraWriteService {
     boolean mudouChave = !Objects.equals(escAtual, dto.getEscalaoReferenciaId())
         || !Objects.equals(cargoAtual, dto.getCargoPosicaoId())
         || !Objects.equals(carrPccsAtual, dto.getCarreiraId());
-    boolean revalidar = mudouChave && !Estado.P.equals(carreira.getEstado());
+    boolean revalidar = correcaoRegisto || (mudouChave && !Estado.P.equals(carreira.getEstado()));
+
+    // Correção reenviada pelo maker (C -> P): reactiva a validação INSERT que o checker deixou em C —
+    // não cria uma UPDATE nova. O seu UUID/ID carimbam a auditoria JaVers da correção (abaixo).
+    ValidacaoEntity validacaoCorrecao = correcaoRegisto
+        ? funcionarioRules.reabrirParaValidacao(carreira.getUuid(), Referencia.CARREIRA)
+        : null;
 
     carreiraMapper.toUpdateEntity(carreira, dto);
     if (revalidar) carreira.setEstado(Estado.P);
 
     // Auditoria JaVers da EDIÇÃO: como no registo, o diff tem de ser carimbado no PRÓPRIO save que
-    // captura a alteração (o auto-audit dispara aqui). Pré-geramos o UUID da validação (criada mais
-    // abaixo, só se revalidar) e usamo-lo já; um save posterior seria no-op. Sem revalidação não há
-    // grelha, logo grava-se sem contexto.
-    UUID validacaoUuidEdit = revalidar ? UuidCreator.getTimeOrderedEpoch() : null;
+    // captura a alteração (o auto-audit dispara aqui). Numa correção reenvia-se a validação INSERT
+    // existente (id/uuid reais); numa edição normal pré-gera-se o UUID da validação UPDATE (criada
+    // mais abaixo, só se revalidar). Sem revalidação não há grelha, logo grava-se sem contexto.
+    UUID validacaoUuidEdit = validacaoCorrecao != null ? validacaoCorrecao.getUuid()
+        : (revalidar ? UuidCreator.getTimeOrderedEpoch() : null);
+    Long validacaoIdEdit = validacaoCorrecao != null ? validacaoCorrecao.getId() : null;
     if (revalidar) {
       try {
-        ValidacaoAuditContext.set(null, validacaoUuidEdit, "RH_T_CARREIRA");
+        ValidacaoAuditContext.set(validacaoIdEdit, validacaoUuidEdit, "RH_T_CARREIRA");
         carreiraEntityRepository.save(carreira);
       } finally {
         ValidacaoAuditContext.clear();
@@ -829,18 +861,26 @@ public class CarreiraWriteService {
         defPagamentoEntityRepository.save(obj);
       });
 
-      var validation = new ValidacaoEntity();
-      validation.setTipoAccao(TipoAcao.UPDATE.name());
-      validation.setReferenciaName(Referencia.CARREIRA.name());
-      validation.setReferenciaId(carreira.getId());
-      validation.setReferenciaUuid(carreira.getUuid());
-      validation.setTiprelId(relacionamento);
-      validation.setEstado(Estado.P);
-      validation.setUuid(validacaoUuidEdit); // mesmo UUID já carimbado no save da edição (ver acima)
-      validation.setFunId(funcionario);
-      validacaoEntityRepository.save(validation);
+      if (correcaoRegisto) {
+        // Maker reenvia a correção: a validação INSERT já foi reactivada (C -> P) acima; só falta
+        // religar o tiprel e gravar. NÃO se cria uma validação UPDATE nova.
+        validacaoCorrecao.setTiprelId(relacionamento);
+        validacaoEntityRepository.save(validacaoCorrecao);
+      } else {
+        var validation = new ValidacaoEntity();
+        validation.setTipoAccao(TipoAcao.UPDATE.name());
+        validation.setReferenciaName(Referencia.CARREIRA.name());
+        validation.setReferenciaId(carreira.getId());
+        validation.setReferenciaUuid(carreira.getUuid());
+        validation.setTiprelId(relacionamento);
+        validation.setEstado(Estado.P);
+        validation.setUuid(validacaoUuidEdit); // mesmo UUID já carimbado no save da edição (ver acima)
+        validation.setFunId(funcionario);
+        validacaoEntityRepository.save(validation);
+      }
     }
 
-    return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira actualizada.", List.of());
+    return new SuccessResponseDTO(true, carreira.getUuid().toString(),
+        correcaoRegisto ? "Correção reenviada para validação." : "Carreira actualizada.", List.of());
   }
 }
