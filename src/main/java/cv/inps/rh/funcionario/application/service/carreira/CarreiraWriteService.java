@@ -95,6 +95,24 @@ public class CarreiraWriteService {
         "Tipo de carreira inválido (sem referência de carreira em " + DOMINIO_TIPO_MOV + "): " + tipoCarreira);
   }
 
+  /**
+   * {@code true} se a carreira representa uma Progressão/Promoção — o VALOR guardado em
+   * {@code tipo_situacao} tem referência {@link #REF_PROG_PROMO} no domínio {@link #DOMINIO_TIPO_MOV}
+   * (valores PROGRESSAO/PROMOCAO). Usado no {@code validarCarreira} para rotear a invocação do
+   * procedure REGISTO_SALARIO: só progressões/promoções registam evolução salarial.
+   *
+   * <p>Ao contrário de {@link #contexto(String)}, NÃO lança para valores sem referência de carreira:
+   * {@code tipo_situacao} pode ser INICIO (registo), CARGO_NOVO/MUDANCA_CARREIRA (novo) ou o literal
+   * CARREIRA_NOVO (default do POST sem tipoCarreira) — todos contam como não-progressão.</p>
+   */
+  private boolean ehProgressaoPromocao(CarreiraEntity carreira) {
+    var valor = carreira != null ? carreira.getTipoSituacao() : null;
+    if (valor == null) return false;
+    return domainEntityRepository
+        .findByDominioAndValorAndEstado(DOMINIO_TIPO_MOV, valor, Estado.A)
+        .stream().anyMatch(d -> REF_PROG_PROMO.equals(d.getReferencia()));
+  }
+
   public SuccessResponseDTO novaCarreira(String funcionarioId, CarreiraNovoDTO dto) {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
@@ -582,11 +600,16 @@ public class CarreiraWriteService {
       validacaoEntityRepository.save(validation);
     }
 
-    // PROGRESSÃO (só quando substitui carreira do mesmo tipo): registar o novo salário do escalão na
-    // BD via procedure Oracle, passando a carreira ANTERIOR (substituída) e a NOVA. Mesma transação:
-    // flush() antes para a procedure ver as linhas já ativadas; se rebentar, faz rollback de toda a
-    // progressão e propaga a mensagem Oracle.
-    if (carreiraMesmoTipo != null) {
+    // PROGRESSÃO/PROMOÇÃO: registar o novo salário do escalão na BD via procedure Oracle, passando a
+    // carreira ANTERIOR (substituída) e a NOVA. Mesma transação: flush() antes para a procedure ver as
+    // linhas já ativadas; se rebentar, faz rollback de toda a progressão e propaga a mensagem Oracle.
+    //
+    // O proc SÓ corre quando a carreira validada É mesmo uma Progressão/Promoção (tipo_situacao com
+    // referência CARREIRA_PROG_PROMO no domínio TIPO_MOV_LABORAL: valores PROGRESSAO/PROMOCAO). Uma
+    // carreira NOVA do mesmo tipo (CARGO_NOVO/MUDANCA_CARREIRA/CARREIRA_NOVO) também substitui o track
+    // aqui, mas NÃO é uma progressão salarial — não deve invocar o proc. Sem este guard, um POST de
+    // "carreira nova" do mesmo tipo disparava o REGISTO_SALARIO indevidamente.
+    if (carreiraMesmoTipo != null && ehProgressaoPromocao(carreira)) {
       entityManager.flush();
       registarSalarioProgressao(carreiraMesmoTipo.getId(), carreira.getId());
     }
