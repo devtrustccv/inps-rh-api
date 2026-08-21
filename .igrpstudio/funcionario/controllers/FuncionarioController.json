@@ -64,14 +64,6 @@
           "type": "string",
           "isRequired": true
         }
-      ],
-      "requestParams": [
-        {
-          "type": "boolean",
-          "name": "validacao",
-          "value": "false",
-          "isRequired": false
-        }
       ]
     },
     {

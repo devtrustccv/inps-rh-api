@@ -167,6 +167,31 @@ public class FuncionarioRules {
 
   }
 
+  /** Remunerações associadas num estado específico — usado pelo get-by-id de validação para
+   *  devolver o snapshot no MESMO estado do funcionário (P pendente ou C em correção). */
+  public List<DefinicaoRemuneracaoEntity> getRemuneracoesAssociadosPorEstado(Long tipoRelacionamentoId, Estado estado) {
+
+    return tipoRelRemPagEntityRepository
+        .findByTiprelIdAndEstado(tipoRelacionamentoId, estado)
+        .stream()
+        .map(TipoRelRemPagEntity::getRemId)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+
+  }
+
+  /** Pagamentos/descontos associados num estado específico — ver {@link #getRemuneracoesAssociadosPorEstado}. */
+  public List<DefPagamentoEntity> getPagamentosDescontosAssociadosPorEstado(Long tipoRelacionamentoId, Estado estado) {
+
+    return tipoRelRemPagEntityRepository
+        .findByTiprelIdAndEstado(tipoRelacionamentoId, estado)
+        .stream()
+        .map(TipoRelRemPagEntity::getPagId)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+
+  }
+
 
 
   public Optional<ValidacaoEntity> getValidacaoPendente(UUID funUuid, TipoAcao tipoAccao, Referencia referenciaName) {
@@ -184,6 +209,48 @@ public class FuncionarioRules {
   public Optional<ValidacaoEntity> getValidacaoPendenteByReferenciaUuid(UUID referenciaUuid, TipoAcao tipoAccao, Referencia referenciaName) {
     return validacaoEntityRepository
         .findByReferenciaUuidAndEstadoAndTipoAccaoAndReferenciaName(referenciaUuid, Estado.P, tipoAccao.name(), referenciaName.name());
+  }
+
+  /**
+   * Variante genérica por estado (o método acima fixa P). Usada pelo ciclo maker-checker da
+   * mobilidade para localizar a validação DESTA referência num estado concreto — ex.: a que o
+   * checker deixou em correção (Estado.C) e o maker vai reactivar (C -> P).
+   */
+  public Optional<ValidacaoEntity> getValidacaoByReferenciaUuid(UUID referenciaUuid, Estado estado, TipoAcao tipoAccao, Referencia referenciaName) {
+    return validacaoEntityRepository
+        .findByReferenciaUuidAndEstadoAndTipoAccaoAndReferenciaName(referenciaUuid, estado, tipoAccao.name(), referenciaName.name());
+  }
+
+  /**
+   * Ciclo CORRIGIR (metade do CHECKER), partilhada por todos os serviços do dossiê. Devolve um
+   * registo para correção: exige que a entidade esteja pendente (P) e exista validação pendente
+   * desta referência (INSERT tem precedência sobre UPDATE), e passa essa validação a C. O caller
+   * passa a própria entidade a Estado.C e grava ambas. Devolve a validação já em C.
+   */
+  public ValidacaoEntity devolverParaCorrecao(UUID referenciaUuid, Estado estadoEntidade, Referencia referenciaName) {
+    if (estadoEntidade != Estado.P) {
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível devolver para correção um registo pendente de validação.");
+    }
+    var validacao = getValidacaoPendenteByReferenciaUuid(referenciaUuid, TipoAcao.INSERT, referenciaName)
+        .or(() -> getValidacaoPendenteByReferenciaUuid(referenciaUuid, TipoAcao.UPDATE, referenciaName))
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest(
+            "Só é possível devolver para correção um registo pendente de validação."));
+    validacao.setEstado(Estado.C);
+    return validacao;
+  }
+
+  /**
+   * Ciclo CORRIGIR (metade do MAKER), partilhada. Localiza a validação que o checker deixou em C
+   * (INSERT tem precedência sobre UPDATE) e volta a pô-la em P. O caller passa a própria entidade a
+   * Estado.P e grava. Devolve a validação já em P.
+   */
+  public ValidacaoEntity reabrirParaValidacao(UUID referenciaUuid, Referencia referenciaName) {
+    var validacao = getValidacaoByReferenciaUuid(referenciaUuid, Estado.C, TipoAcao.INSERT, referenciaName)
+        .or(() -> getValidacaoByReferenciaUuid(referenciaUuid, Estado.C, TipoAcao.UPDATE, referenciaName))
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest("Este registo não está por corrigir."));
+    validacao.setEstado(Estado.P);
+    return validacao;
   }
 
   public List<String> validarContactosDuplicados(List<ContactoReqDTO> contactos, UUID funUuid) {

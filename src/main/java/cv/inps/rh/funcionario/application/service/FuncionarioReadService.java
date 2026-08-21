@@ -62,12 +62,13 @@ public class FuncionarioReadService {
       if (query.getCarreira() != null)
         predicates.add(cb.equal(root.get(RhVDossieEntity_.carreiraId), query.getCarreira()));
 
-      // Por defeito lista activos e pendentes (A, P); não mostra inactivos (I).
+      // Por defeito lista activos, pendentes, em correção e inactivos (A, P, C, I) — o maker precisa
+      // de ver os registos devolvidos para correção (C) sem ter de filtrar explicitamente.
       // Se for enviado um estado específico, filtra por esse.
       if (StringUtils.hasText(query.getEstado())) {
         predicates.add(cb.equal(root.get(RhVDossieEntity_.estadoColaborador), query.getEstado()));
       } else {
-        predicates.add(root.get(RhVDossieEntity_.estadoColaborador).in(Estado.A.name(), Estado.P.name(), Estado.I.name()));
+        predicates.add(root.get(RhVDossieEntity_.estadoColaborador).in(Estado.A.name(), Estado.P.name(), Estado.C.name(), Estado.I.name()));
       }
 
       if (StringUtils.hasText(query.getDataInicio())) {

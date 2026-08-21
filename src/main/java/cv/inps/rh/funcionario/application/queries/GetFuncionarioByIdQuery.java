@@ -15,6 +15,4 @@ public class GetFuncionarioByIdQuery implements Query {
   @NotBlank(message = "The field <id> is required")
   private String id;
 
-  private boolean validacao;
-
 }

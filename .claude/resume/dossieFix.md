@@ -1,35 +1,26 @@
-> Updated: 2026-07-30
+> Updated: 2026-08-21 17:05
 
 ## Goal
 
-Dossier def-doc handling + a pending request: at progression, call an Oracle stored procedure passing the NEW and PREVIOUS carreira ids.
+Replicar o ciclo **CORRIGIR** (maker-checker por estado) e a grelha **JaVers** a todos os serviços do dossiê. Tema paralelo (procedure de progressão) em `.claude/resume/procedure-progressao.md`.
 
 ## Current state
 
-Two commits on branch `fix/dossier-def-doc`:
-- `2210f9a9` — vencimento superseded stays `A` (close by DATA_FIM, `I` only for rejection); getById filters def by `estadoAlvo=(tiprel P ? P : A)`.
-- `0baf4749` — novo contrato = tudo novo (`encerrarEExcluirDefsContratoAnterior`: close old defs by DATA_FIM keep A + `removeIf` scoping); tms fixos por vínculo filter `Estado.A` (8 queries); `getContratoAtual` (via est_act_adm=1) + findEmVigor scoped to contract.
-Tested on fresh funcionarios. Guard restored. Not committed: procedure call (below).
+- **JaVers (Fases 0–2)** + **CORRIGIR** em Mobilidade (`58bf6cbf`), Carreira (`309ab41f`) e **Contrato** (`fc69e68b`, testado live): feito e commitado. Helper partilhado `FuncionarioRules`.
+- **Gate do procedure REGISTO_SALARIO** (`b2821f68`) e **progressão não duplica dinheiro** (`402e2b4d`, testado live): Java só estrutura, proc dono do dinheiro. Ver `procedure-progressao.md`.
+- Guias + payloads: `.claude/resume/novo-contrato.md`, `registo-colaborador.md`.
 
 ## Decisions made — do not re-litigate
 
-- Old contract defs: close by DATA_FIM keep A, NOT touch the shared sync — user rejected sync param.
-- Contract selection multi-contract: est_act_adm=1, not versão (ties at 1).
-
-## Constraints
-
-- NEVER commit `Db*.java/.class` or `.claude/settings.json` (hardcoded DB password).
-- Test from a FRESH funcionario; don't touch funcionário 958807.
+- Contrato/carreira/mobilidade CORRIGIR: forma "edita-no-validar" (sem endpoint separado), validar=null reenvia C→P.
+- Na progressão o Java NÃO escreve def de dinheiro; o proc faz tudo. Ver [[project_progressao_java_vs_proc]].
+- Editar/validar via API: SEMPRE GET by id antes e reenviar cada elemento dos arrays com o seu `id` (senão duplica). Ver [[feedback_get_before_put_ids]].
 
 ## Relevant files
 
-- `CarreiraWriteService.java:441-514` (validarCarreira) — `carreira`=new carreira, `carreiraMesmoTipo`=old (null if not progression). Both ids available; call procedure after activation (line 514).
-- `CalcularRemuneracaoRepositoryImpl.java:40-63` — project's stored-proc pattern (EntityManager→Session.doReturningWork→CallableStatement).
-
-## Open questions
-
-- Procedure name/schema, params (order/types/IN-OUT), timing (in-tx w/ flush vs post-commit), failure behavior. User has NOT provided these yet.
+- ValidarContratoService.java:76-98,210-215 — checker/maker CORRIGIR contrato
+- carreira/CarreiraWriteService.java — gate progressão (criarPendenteContentor + validarCarreira)
 
 ## Next step
 
-Get the procedure signature from the user, then wire the call into `validarCarreira` after line 514, guarded by `carreiraMesmoTipo != null`.
+Próximos serviços NO-OP para CORRIGIR: `AlterarSituacaoLaboralWriteService:65`, `ValidarDadosBancariosService:51`, etc. + 2ª passagem JaVers (incl. `ValidarRegistoColaboradorService`). Limpar colaboradores de teste (958885+, 958894/95/97). App a correr JDK23 porta 8089.

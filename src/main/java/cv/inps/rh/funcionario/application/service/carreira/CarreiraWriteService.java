@@ -14,6 +14,7 @@ import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.ValidationUtil;
@@ -94,6 +95,24 @@ public class CarreiraWriteService {
         "Tipo de carreira inválido (sem referência de carreira em " + DOMINIO_TIPO_MOV + "): " + tipoCarreira);
   }
 
+  /**
+   * {@code true} se a carreira representa uma Progressão/Promoção — o VALOR guardado em
+   * {@code tipo_situacao} tem referência {@link #REF_PROG_PROMO} no domínio {@link #DOMINIO_TIPO_MOV}
+   * (valores PROGRESSAO/PROMOCAO). Usado no {@code validarCarreira} para rotear a invocação do
+   * procedure REGISTO_SALARIO: só progressões/promoções registam evolução salarial.
+   *
+   * <p>Ao contrário de {@link #contexto(String)}, NÃO lança para valores sem referência de carreira:
+   * {@code tipo_situacao} pode ser INICIO (registo), CARGO_NOVO/MUDANCA_CARREIRA (novo) ou o literal
+   * CARREIRA_NOVO (default do POST sem tipoCarreira) — todos contam como não-progressão.</p>
+   */
+  private boolean ehProgressaoPromocao(CarreiraEntity carreira) {
+    var valor = carreira != null ? carreira.getTipoSituacao() : null;
+    if (valor == null) return false;
+    return domainEntityRepository
+        .findByDominioAndValorAndEstado(DOMINIO_TIPO_MOV, valor, Estado.A)
+        .stream().anyMatch(d -> REF_PROG_PROMO.equals(d.getReferencia()));
+  }
+
   public SuccessResponseDTO novaCarreira(String funcionarioId, CarreiraNovoDTO dto) {
 
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
@@ -171,7 +190,18 @@ public class CarreiraWriteService {
     novaCarreira.setContrVinculoId(contratoAtual);
     novaCarreira.setEstActAdm(0);
     novaCarreira.setFlgProcessa(dto.getFlgProcessa());
-    carreiraEntityRepository.save(novaCarreira);
+
+    // Baseline JaVers do REGISTO: a validação ainda não existe aqui (precisa do id da carreira), por
+    // isso pré-geramos o seu UUID e carimbamos JÁ o PRIMEIRO save — que é o que cria o snapshot
+    // INITIAL. Carimbar um save POSTERIOR seria no-op (a entidade não mudou → o JaVers não faz commit),
+    // e a grelha do registo saía vazia. O mesmo UUID é depois usado na ValidacaoEntity abaixo.
+    var validacaoUuid = UuidCreator.getTimeOrderedEpoch();
+    try {
+      ValidacaoAuditContext.set(null, validacaoUuid, "RH_T_CARREIRA");
+      carreiraEntityRepository.save(novaCarreira);
+    } finally {
+      ValidacaoAuditContext.clear();
+    }
 
     // Tiprel pendente (P, est_act_adm=0 — NÃO é o atual). Clona o contexto do vínculo atual.
     var novoTiprel = contratuaisEntityMapper.toRelacionamento(dto, Estado.P);
@@ -201,45 +231,50 @@ public class CarreiraWriteService {
     var tmsFixosRem = tmsFixosDoVinculo(vinculoAtualId, "REM");
     var tmsFixosPag = tmsFixosDoVinculo(vinculoAtualId, "PAG");
 
-    // Salario: SEMPRE registo novo (valor do escalao). Na progressao o salario antigo e fechado no
-    // validar; os subsidios/descontos existentes NAO se copiam — RE-ASSOCIAM-se ao novo tiprel no
-    // validar (doc 29/07: TIPREL_REM_PAG "pega todos os registos do tiprel anterior").
-    var movREM = paramVinculoMovimentoEntityRepository
-        .findByVinculoId_IdAndTipoAndEstado(vinculoAtualId, "REM", Estado.A).stream().findFirst().orElse(null);
-    if (movREM != null) {
-      var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario, obsMovimento);
-      salario.setTmId(movREM.getTmId());
-      definicaoRemuneracaoEntityRepository.save(salario);
-      novasRem.add(salario);
-    }
-
-    // Subsidios/encargos: cria SO os NOVOS (sem id) do DTO — os manuais acrescentados de raiz — com a
-    // DATA_INICIO efetiva. Na progressao, os ecoados do getById (com id) NAO se recriam aqui: sao
-    // re-associados no validar (mesmas linhas). Em carreira nova (fonte == null) nao ha o que
-    // re-associar, logo cria todos os do DTO.
-    if (dto.getSubsidios() != null) {
-      for (var s : dto.getSubsidios()) {
-        if (s.getTipoSubsidioId() != null && tmsFixosRem.contains(s.getTipoSubsidioId())) continue;
-        if (fonte != null && s.getId() != null) continue; // existente → re-associa no validar
-        var obj = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
-        obj.setObs(obsMovimento);
-        obj.setDataInicio(dataEfetiva);
-        obj.setDataFim(null);
-        definicaoRemuneracaoEntityRepository.save(obj);
-        novasRem.add(obj);
+    // PROGRESSÃO/PROMOÇÃO: o dinheiro (vencimento + subsídios + descontos) é escrito PELO PROC
+    // REGISTO_SALARIO na validação — copia do tiprel antigo + regista o novo vencimento do escalão.
+    // Por isso o Java NÃO cria AQUI nenhum def na progressão: evita duplicar o que o proc faz. O
+    // cabeçalho (salário do escalão) fica visível pelo campo salario da carreira/tiprel. Em carreira
+    // NOVA (proc não corre) o Java mantém-se dono do dinheiro. Mesmo predicado do gate do proc no
+    // validar — Java-dinheiro e proc ficam complementares.
+    boolean progressao = ehProgressaoPromocao(novaCarreira);
+    if (!progressao) {
+      // Salario: registo novo (valor do escalao).
+      var movREM = paramVinculoMovimentoEntityRepository
+          .findByVinculoId_IdAndTipoAndEstado(vinculoAtualId, "REM", Estado.A).stream().findFirst().orElse(null);
+      if (movREM != null) {
+        var salario = getSalarioDefinicaoRemuneracaoEntity(dto, funcionario, obsMovimento);
+        salario.setTmId(movREM.getTmId());
+        definicaoRemuneracaoEntityRepository.save(salario);
+        novasRem.add(salario);
       }
-    }
 
-    if (dto.getEncargosDescontos() != null) {
-      for (var e : dto.getEncargosDescontos()) {
-        if (e.getTipoEncargoId() != null && tmsFixosPag.contains(e.getTipoEncargoId())) continue;
-        if (fonte != null && e.getId() != null) continue; // existente → re-associa no validar
-        var def = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
-        def.setObs(obsMovimento);
-        def.setDataInicio(dataEfetiva);
-        def.setDataFim(null);
-        defPagamentoEntityRepository.save(def);
-        novosPag.add(def);
+      // Subsidios/encargos: cria SO os NOVOS (sem id) do DTO — os manuais acrescentados de raiz — com a
+      // DATA_INICIO efetiva. Em carreira nova (fonte == null) cria todos os do DTO.
+      if (dto.getSubsidios() != null) {
+        for (var s : dto.getSubsidios()) {
+          if (s.getTipoSubsidioId() != null && tmsFixosRem.contains(s.getTipoSubsidioId())) continue;
+          if (fonte != null && s.getId() != null) continue; // existente → re-associa no validar
+          var obj = definicaoRemuneracaoMapper.toDefinicaoRemuneracao(s, funcionario, Estado.P);
+          obj.setObs(obsMovimento);
+          obj.setDataInicio(dataEfetiva);
+          obj.setDataFim(null);
+          definicaoRemuneracaoEntityRepository.save(obj);
+          novasRem.add(obj);
+        }
+      }
+
+      if (dto.getEncargosDescontos() != null) {
+        for (var e : dto.getEncargosDescontos()) {
+          if (e.getTipoEncargoId() != null && tmsFixosPag.contains(e.getTipoEncargoId())) continue;
+          if (fonte != null && e.getId() != null) continue; // existente → re-associa no validar
+          var def = defPagamentoMapper.toDefPagamento(e, funcionario, Estado.P);
+          def.setObs(obsMovimento);
+          def.setDataInicio(dataEfetiva);
+          def.setDataFim(null);
+          defPagamentoEntityRepository.save(def);
+          novosPag.add(def);
+        }
       }
     }
 
@@ -252,7 +287,7 @@ public class CarreiraWriteService {
     validation.setReferenciaUuid(novaCarreira.getUuid());
     validation.setTiprelId(novoTiprel);
     validation.setEstado(Estado.P);
-    validation.setUuid(UuidCreator.getTimeOrderedEpoch());
+    validation.setUuid(validacaoUuid); // mesmo UUID já carimbado no baseline (ver save acima)
     validation.setFunId(funcionario);
     validacaoEntityRepository.save(validation);
   }
@@ -388,21 +423,30 @@ public class CarreiraWriteService {
 
   public SuccessResponseDTO validarCarreira(String funcionarioId, ValidacaoCarreiraDTO dto) {
 
-    // "Corrigir" (domínio VALIDAR_REGISTO): terceira opção do combo, além de aprovar/rejeitar. O
-    // fluxo de correção ainda não está implementado — por agora é um NO-OP (regista no log e devolve
-    // 200 com mensagem, sem validar/gravar/mudar estado). Evita também o "Decisão inválida" do
-    // isAprovado, que só conhece SIM/NAO.
-    if (ValidationUtil.isCorrigir(dto.getValidacao())) {
-      LOGGER.info("[CORRIGIR] CARREIRA (funcionario={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
-          funcionarioId);
-      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
-    }
-
-    var aprovado = ValidationUtil.isAprovado(dto.getValidacao());
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(funcionarioId));
 
     // Carreira pendente + o seu tiprel pendente (ambos criados em P no registo, est_act_adm=0).
     var carreira = carreiraEntityRepository.findByContrVinculoIdFunIdAndEstado(funcionario, Estado.P);
+
+    // CORRIGIR (checker devolve ao maker): carreira pendente P -> C, validação P -> C, SEM aplicar
+    // payload nem tocar no tiprel/def pendentes. O maker corrige e reenvia via atualizarCarreira
+    // (C -> P). Espelha o ciclo do registo de colaborador / mobilidade.
+    if (ValidationUtil.isCorrigir(dto.getValidacao())) {
+      if (carreira == null) {
+        throw IgrpResponseStatusException.badRequest("Não há carreira pendente para devolver para correção.");
+      }
+      var validacaoC = funcionarioRules.devolverParaCorrecao(carreira.getUuid(), carreira.getEstado(), Referencia.CARREIRA);
+      carreira.setEstado(Estado.C);
+      carreiraEntityRepository.save(carreira);
+      validacaoEntityRepository.save(validacaoC);
+      LOGGER.info("[CORRIGIR] CARREIRA devolvida para correção (carreira={}).", carreira.getUuid());
+      return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira devolvida para correção.", List.of());
+    }
+
+    var aprovado = ValidationUtil.isAprovado(dto.getValidacao());
+    if (carreira == null) {
+      throw IgrpResponseStatusException.badRequest("Não há carreira pendente para validar.");
+    }
     var tiprelPendente = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreira.getUuid()).orElse(null);
     var validation = funcionarioRules
         .getValidacaoPendenteByReferenciaUuid(carreira.getUuid(), TipoAcao.INSERT, Referencia.CARREIRA)
@@ -458,27 +502,27 @@ public class CarreiraWriteService {
     var carreiraMesmoTipo = emVigor.stream()
         .filter(c -> (c.getCargoId() == null) == novoCargoNulo).findFirst().orElse(null);
 
-    // PROGRESSÃO (mesmo tipo em vigor): substitui o track. Doc 29/07: SÓ o VENCIMENTO é substituído
-    // (novo salário do escalão) → fecha-se; os subsídios/descontos RE-ASSOCIAM ao novo tiprel
-    // (mesmas linhas, via transferir — como renovação/mobilidade: "pega todos os registos do tiprel
-    // anterior"). Não se fecham nem se copiam os subsídios. Fecha-se depois o tiprel/carreira antigos.
-    if (carreiraMesmoTipo != null) {
+    // É PROGRESSÃO/PROMOÇÃO? Mesmo predicado do gate do proc. Nesse caso o dinheiro é TODO do proc e
+    // a estrutura antiga só se fecha DEPOIS de o proc a ler (mais abaixo) — o proc precisa do tiprel
+    // antigo ainda est_act_adm=1 para copiar os subsídios/descontos dele.
+    boolean progressao = carreiraMesmoTipo != null && ehProgressaoPromocao(carreira);
+
+    // CARREIRA NOVA do mesmo tipo em vigor (NÃO progressão): substitui o track e o Java é dono do
+    // dinheiro. Doc 29/07: SÓ o VENCIMENTO é substituído (novo salário do escalão) → fecha-se; os
+    // subsídios/descontos RE-ASSOCIAM ao novo tiprel (mesmas linhas, via transferir). Fecha-se depois
+    // o tiprel/carreira antigos. NA PROGRESSÃO nada disto corre aqui (o proc trata — ver abaixo).
+    if (carreiraMesmoTipo != null && !progressao) {
       var tiprelSubstituido = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreiraMesmoTipo.getUuid()).orElse(null);
       if (tiprelSubstituido != null) {
         // 1. Fecha SÓ o vencimento antigo (o def REM cujo tm é o salário do vínculo). Doc: fechar por
-        //    DATA_FIM e MANTER estado 'A' (o 'I' é só para rejeição). Fecha em dataEfetiva-1 (o dia
-        //    antes do novo período) para dar fronteira de período limpa: o antigo cobre até ao dia
-        //    anterior; o novo começa em dataEfetiva. Assim as vistas por período separam-nos sem sobrepor.
+        //    DATA_FIM e MANTER estado 'A' (o 'I' é só para rejeição). Fecha em dataEfetiva-1.
         Long salarioTmId = salarioTmIdDoContrato(carreira.getContrVinculoId());
         var fimAntigo = dataEfetiva.minusDays(1);
         var salariosFechadosIds = new java.util.HashSet<Long>();
         funcionarioRules.getRemuneracoesAssociadosAtivos(tiprelSubstituido.getId()).stream()
             .filter(r -> salarioTmId != null && r.getTmId() != null && Objects.equals(r.getTmId().getId(), salarioTmId))
             .forEach(o -> { o.setDataFim(fimAntigo); definicaoRemuneracaoEntityRepository.save(o); salariosFechadosIds.add(o.getId()); });
-        // 2. Re-associa os restantes ativos (subsídios + descontos) ao novo tiprel — mesmas linhas,
-        //    datas intactas. O vencimento antigo mantém-se 'A' (para não sumir da vista inicial), por
-        //    isso já não é o estado 'I' que o exclui do transfer: passa-se o seu id em excluirRemIds
-        //    para ele NÃO transitar (o novo tiprel já recebe o salário novo do escalão).
+        // 2. Re-associa os restantes ativos (subsídios + descontos) ao novo tiprel — mesmas linhas.
         if (tiprelPendente != null)
           tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tiprelSubstituido, tiprelPendente,
               List.of(), List.of(), salariosFechadosIds, java.util.Collections.emptySet());
@@ -547,8 +591,9 @@ public class CarreiraWriteService {
 
     // ATIVAR os def pendentes (P->A) — SÓ os desta carreira, pela ASSOCIAÇÃO do tiprel pendente
     // (TIPREL_REM_PAG). Não usar fun+estado=P: misturaria def de outros pendentes (outra carreira,
-    // rendimento/desconto) que não têm coluna de carreira.
-    if (tiprelPendente != null) {
+    // rendimento/desconto) que não têm coluna de carreira. NA PROGRESSÃO não há def do Java para
+    // ativar (o dinheiro não foi criado no registo — o proc cria-o já como 'A' mais abaixo).
+    if (tiprelPendente != null && !progressao) {
       funcionarioRules.getRemuneracoesAssociadosPendentes(tiprelPendente.getId())
           .forEach(o -> { o.setEstado(Estado.A); definicaoRemuneracaoEntityRepository.save(o); });
       funcionarioRules.getPagamentosDescontosAssociadosPendentes(tiprelPendente.getId())
@@ -561,13 +606,31 @@ public class CarreiraWriteService {
       validacaoEntityRepository.save(validation);
     }
 
-    // PROGRESSÃO (só quando substitui carreira do mesmo tipo): registar o novo salário do escalão na
-    // BD via procedure Oracle, passando a carreira ANTERIOR (substituída) e a NOVA. Mesma transação:
-    // flush() antes para a procedure ver as linhas já ativadas; se rebentar, faz rollback de toda a
-    // progressão e propaga a mensagem Oracle.
-    if (carreiraMesmoTipo != null) {
+    // PROGRESSÃO/PROMOÇÃO: o proc REGISTO_SALARIO escreve TODO o dinheiro no tiprel novo — copia os
+    // subsídios/descontos do tiprel ANTIGO, fecha o vencimento antigo e regista o novo do escalão +
+    // retroativos. O Java só faz a estrutura. Ordem CRÍTICA:
+    //   1) flush() para o proc ver a carreira/tiprel NOVOS já ativos;
+    //   2) o proc corre com o tiprel ANTIGO ainda est_act_adm=1 (senão a cópia dos subsídios é saltada
+    //      — condição V_EST_ACT_ADM_OLD=1 no proc);
+    //   3) SÓ DEPOIS se fecha a carreira/tiprel antigos (o proc já leu o dinheiro deles).
+    // Se o proc rebentar, faz rollback de toda a progressão e propaga a mensagem Oracle.
+    if (progressao) {
       entityManager.flush();
       registarSalarioProgressao(carreiraMesmoTipo.getId(), carreira.getId());
+
+      var tiprelSubstituido = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreiraMesmoTipo.getUuid()).orElse(null);
+      if (tiprelSubstituido != null) {
+        tiprelSubstituido.setDataFim(dataEfetiva);
+        tiprelSubstituido.setEstActAdm(0);
+        tiprelSubstituido.setFlgProcessa(0);
+        tiprelSubstituido.setEstado(Estado.I);
+        tiposRelacionamentoEntityRepository.save(tiprelSubstituido);
+      }
+      carreiraMesmoTipo.setDataFim(dataEfetiva);
+      carreiraMesmoTipo.setEstActAdm(0);
+      carreiraMesmoTipo.setFlgProcessa(0);
+      carreiraMesmoTipo.setEstado(Estado.I);
+      carreiraEntityRepository.save(carreiraMesmoTipo);
     }
 
     return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira validada.", List.of());
@@ -589,6 +652,16 @@ public class CarreiraWriteService {
         cs.setLong(3, userRegistoId);
         cs.setString(4, userRegistoName);
         cs.execute();
+      } catch (java.sql.SQLException e) {
+        // DIAGNÓSTICO (temporário — remover após correção do proc na BD): captura o stack Oracle
+        // completo (com o ORA-06512 "at PKG_AUMENTO_SALARIAL, line NNN") para enviar ao DBA. NÃO
+        // altera o comportamento — o erro é RE-LANÇADO e a transação continua a fazer rollback.
+        LOGGER.error("[PROGRESSAO][REGISTO_SALARIO] FALHOU pkg_aumento_salarial.REGISTO_SALARIO "
+            + "(P_CARREIRA_ID_OLD={}, P_CARREIRA_ID_NEW={}, P_USER_REGISTO_ID={}, P_USER_REGISTO_NAME={}) "
+            + "| SQLState={} ErrorCode={} | Oracle: {}",
+            carreiraIdOld, carreiraIdNew, userRegistoId, userRegistoName,
+            e.getSQLState(), e.getErrorCode(), e.getMessage(), e);
+        throw e;
       }
     });
   }
@@ -631,6 +704,11 @@ public class CarreiraWriteService {
     if (!carreira.getContrVinculoId().getFunId().getId().equals(funcionario.getId()))
       throw IgrpResponseStatusException.badRequest("Carreira não pertence a este funcionário");
 
+    // Correção de REGISTO devolvido pelo checker (carreira em C): é um registo ainda por validar, por
+    // isso salta o roteamento de progressão/processada e cai no caminho editar-in-place; no fim
+    // reactiva a validação INSERT (C -> P) em vez de criar uma UPDATE nova. Ciclo maker-checker.
+    boolean correcaoRegisto = Estado.C.equals(carreira.getEstado());
+
     // "Sem cargo" (CATEGORIA): o frontend envia cargoPosicaoId=0. Tratar 0 como null para a
     // classificação de tipo (mudouChave) e a gravação do cargo ficarem corretas.
     if (dto.getCargoPosicaoId() != null && dto.getCargoPosicaoId() == 0L) dto.setCargoPosicaoId(null);
@@ -649,7 +727,7 @@ public class CarreiraWriteService {
     // Roteamento (doc): Progressão/Promoção (CARREIRA_PROG_PROMO) cria um NOVO pendente SOBRE esta
     // carreira (herda os def e substitui na validação). Editar (CARREIRA_EDITAR) altera in place e
     // revalida só se mudar CARGO/CARR_PCCS/ESCALÃO. Sem tipoCarreira, mantém-se EDITAR.
-    if (dto.getTipoCarreira() != null && contexto(dto.getTipoCarreira()) == ContextoCarreira.PROG_PROMO) {
+    if (!correcaoRegisto && dto.getTipoCarreira() != null && contexto(dto.getTipoCarreira()) == ContextoCarreira.PROG_PROMO) {
       progredirCarreira(funcionario, carreira, dto);
       return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira actualizada.", List.of());
     }
@@ -658,7 +736,7 @@ public class CarreiraWriteService {
     // Processa Salário são editáveis. Escalão → progressão (novo INSERT). Os flips de flg e a Data
     // Fim são IMEDIATOS (não vão a validação). "Processada" segue a vista RH_V_CARREIRA (existe
     // registo em RH_T_PROC_FUNCIONARIOS para um tiprel desta carreira).
-    if (carreiraProcessada(carreira)) {
+    if (!correcaoRegisto && carreiraProcessada(carreira)) {
       Long escalaoAtual = carreira.getEscalaoId() != null ? carreira.getEscalaoId().getId() : null;
       if (!Objects.equals(escalaoAtual, dto.getEscalaoReferenciaId())) {
         progredirCarreira(funcionario, carreira, dto);
@@ -688,11 +766,34 @@ public class CarreiraWriteService {
     boolean mudouChave = !Objects.equals(escAtual, dto.getEscalaoReferenciaId())
         || !Objects.equals(cargoAtual, dto.getCargoPosicaoId())
         || !Objects.equals(carrPccsAtual, dto.getCarreiraId());
-    boolean revalidar = mudouChave && !Estado.P.equals(carreira.getEstado());
+    boolean revalidar = correcaoRegisto || (mudouChave && !Estado.P.equals(carreira.getEstado()));
+
+    // Correção reenviada pelo maker (C -> P): reactiva a validação INSERT que o checker deixou em C —
+    // não cria uma UPDATE nova. O seu UUID/ID carimbam a auditoria JaVers da correção (abaixo).
+    ValidacaoEntity validacaoCorrecao = correcaoRegisto
+        ? funcionarioRules.reabrirParaValidacao(carreira.getUuid(), Referencia.CARREIRA)
+        : null;
 
     carreiraMapper.toUpdateEntity(carreira, dto);
     if (revalidar) carreira.setEstado(Estado.P);
-    carreiraEntityRepository.save(carreira);
+
+    // Auditoria JaVers da EDIÇÃO: como no registo, o diff tem de ser carimbado no PRÓPRIO save que
+    // captura a alteração (o auto-audit dispara aqui). Numa correção reenvia-se a validação INSERT
+    // existente (id/uuid reais); numa edição normal pré-gera-se o UUID da validação UPDATE (criada
+    // mais abaixo, só se revalidar). Sem revalidação não há grelha, logo grava-se sem contexto.
+    UUID validacaoUuidEdit = validacaoCorrecao != null ? validacaoCorrecao.getUuid()
+        : (revalidar ? UuidCreator.getTimeOrderedEpoch() : null);
+    Long validacaoIdEdit = validacaoCorrecao != null ? validacaoCorrecao.getId() : null;
+    if (revalidar) {
+      try {
+        ValidacaoAuditContext.set(validacaoIdEdit, validacaoUuidEdit, "RH_T_CARREIRA");
+        carreiraEntityRepository.save(carreira);
+      } finally {
+        ValidacaoAuditContext.clear();
+      }
+    } else {
+      carreiraEntityRepository.save(carreira);
+    }
 
     if (relacionamento != null) {
       if (dto.getCargoPosicaoId() != null)
@@ -802,18 +903,26 @@ public class CarreiraWriteService {
         defPagamentoEntityRepository.save(obj);
       });
 
-      var validation = new ValidacaoEntity();
-      validation.setTipoAccao(TipoAcao.UPDATE.name());
-      validation.setReferenciaName(Referencia.CARREIRA.name());
-      validation.setReferenciaId(carreira.getId());
-      validation.setReferenciaUuid(carreira.getUuid());
-      validation.setTiprelId(relacionamento);
-      validation.setEstado(Estado.P);
-      validation.setUuid(UuidCreator.getTimeOrderedEpoch());
-      validation.setFunId(funcionario);
-      validacaoEntityRepository.save(validation);
+      if (correcaoRegisto) {
+        // Maker reenvia a correção: a validação INSERT já foi reactivada (C -> P) acima; só falta
+        // religar o tiprel e gravar. NÃO se cria uma validação UPDATE nova.
+        validacaoCorrecao.setTiprelId(relacionamento);
+        validacaoEntityRepository.save(validacaoCorrecao);
+      } else {
+        var validation = new ValidacaoEntity();
+        validation.setTipoAccao(TipoAcao.UPDATE.name());
+        validation.setReferenciaName(Referencia.CARREIRA.name());
+        validation.setReferenciaId(carreira.getId());
+        validation.setReferenciaUuid(carreira.getUuid());
+        validation.setTiprelId(relacionamento);
+        validation.setEstado(Estado.P);
+        validation.setUuid(validacaoUuidEdit); // mesmo UUID já carimbado no save da edição (ver acima)
+        validation.setFunId(funcionario);
+        validacaoEntityRepository.save(validation);
+      }
     }
 
-    return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira actualizada.", List.of());
+    return new SuccessResponseDTO(true, carreira.getUuid().toString(),
+        correcaoRegisto ? "Correção reenviada para validação." : "Carreira actualizada.", List.of());
   }
 }
