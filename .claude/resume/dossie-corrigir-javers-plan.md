@@ -60,13 +60,19 @@ TipoMovimento) + 5 repos anotados `@JaversSpringDataAuditable` + 5 descriptors +
 
 **FASE 2 COMPLETA (5). Compila com JDK23.** NB: forçar `JAVA_HOME=/c/Program Files/Eclipse Adoptium/jdk-23.0.2.7-hotspot` no mvn.
 
-## FASE 3 — Teste live (porta 8089, JDK23)
+## FASE 3 — Teste live (porta 8089, JDK23) — colaborador 958897
 
-- [ ] Colaborador de teste ATIVO (registar → validar SIM) — reutilizar existente se já ativo.
-- [ ] Por service: GET (ler) → ação de escrita → GET (confirmar). Ciclo CORRIGIR: registar/pendente →
-      CORRIGIR (P→C) → reenviar (C→P) → SIM (A). Arrays sempre com `id`.
-- [ ] Confirmar grelha JaVers (detalhe de alterações) onde aplicável.
-- [ ] Ao verde: pedir autorização para merge com develop.
+- [x] ProcessoDisciplinar — CORRIGIR + JaVers PROVADO
+- [x] Rendimento — CORRIGIR + JaVers PROVADO
+- [x] Desconto — CORRIGIR + JaVers PROVADO
+- [x] SituacaoLaboral — CORRIGIR + JaVers PROVADO
+- [x] DadosBancarios — CORRIGIR PROVADO (JaVers deferido)
+- [ ] Substituicao — BLOQUEADO (dados: sem diferença salarial). Código = padrão provado.
+- [ ] Renovacao — BLOQUEADO (parametrização: contrato indeterminado não renovável). Código compila.
+- [x] BUG corrigido: ValidationUtil.isCorrigir(null) NPE.
+
+**5/7 fluxos live-provados. 2 bloqueados por dados/parametrização (não por código).**
+Ao verde: pedir autorização para merge com develop.
 
 ## Notas
 - Obs/inconveniências em `.claude/resume/dossie-corrigir-javers-obs.md`.

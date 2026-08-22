@@ -61,6 +61,34 @@
   TiposRelacionamento/TipoMovimento) + 6 repos anotados @JaversSpringDataAuditable. Compila. FALTA
   descriptors + carimbos.
 
+## FASE 3 — teste live (resultados)
+- Colaborador ativo usado: 958897 (uuid 01a0256d-dbed-7f2d-bdcc-a1789b9d5203), tiprel 01a02573-...
+- Arranque: forçar JAVA_HOME JDK23; carregar .env SEM `source` (password Pa$$w0rd tem `$$` → expandir
+  rebenta; ler linha-a-linha e tirar BOM). Segurança OFF em dev (permitAll, sem token).
+- **BUG corrigido**: `ValidationUtil.isCorrigir(null)` fazia NPE (`List.of(...).contains(null)`). O
+  reenvio (validar=null) expunha-o. Fix: null-safe. Afetava ProcessoDisciplinar e Renumeracoes.
+- **#7 ProcessoDisciplinar ✅ PROVADO** P→C→P→A + JaVers: grelha `[{Entidade: "Entidade A" →
+  "Entidade B CORRIGIDA"}]` via GET .../validacoes/{vuuid}/detalhes-javers.
+  NB: CORRIGIR exige payload COMPLETO (bean validation @NotBlank em entidade/tipoProcesso).
+
+### FASE 3 — resultados por fluxo (colaborador 958897)
+- ✅ **ProcessoDisciplinar** — CORRIGIR (P→C→P→A) + JaVers grid [Entidade A→B CORRIGIDA]. PROVADO.
+- ✅ **Rendimento** — CORRIGIR + JaVers [Valor 5000→7500]. PROVADO.
+- ✅ **Desconto** — CORRIGIR + JaVers [Valor 3000→4200]. PROVADO.
+- ✅ **SituacaoLaboral** — CORRIGIR + JaVers [Observações OBS INICIAL→OBS CORRIGIDA]. PROVADO.
+- ✅ **DadosBancarios** — CORRIGIR (P→C→P→A, nib editado). PROVADO. (JaVers deferido — sem grelha.)
+- ⚠️ **Substituicao** — BLOQUEADO por dados: o cálculo (proc CALCULAR_SUBSTITUICAO) não gera diferença
+  salarial com 958894/95/97 (vencimentos duplicados/iguais) → substituição nasce A, sem validação
+  pendente para CORRIGIR. Código idêntico em padrão aos 5 provados; compila; descriptor ativo no log.
+  Para provar live: colaborador substituto com salário claramente inferior ao substituído.
+- ⚠️ **Renovacao** — BLOQUEADO por parametrização: contrato tipo 2 (Indeterminado) NÃO é renovável;
+  958894/95/97 têm contrato indeterminado. Código CORRIGIR+helpers de histórico compilam. Para provar
+  live: colaborador novo com contrato a prazo (renovável), validado, depois renovação.
+
+### App/infra
+- App a correr: mvn spring-boot:run (JDK23), .env carregado sem `source`. Log em scratchpad/app_live.log.
+- Segurança OFF (dev) → sem token. autor dos commits JaVers = system-bot@nosi.cv (auditor dev).
+
 ## PENDENTE p/ Fase 3 (teste live) — atenção
 - ProcessoDisciplinar: só processos criados APÓS este fix têm referencia_uuid → CORRIGIR só funciona neles.
 - Renovação CORRIGIR: contrato mantém-se A; verificar que após C→P→SIM a renovação consolida igual ao normal.
