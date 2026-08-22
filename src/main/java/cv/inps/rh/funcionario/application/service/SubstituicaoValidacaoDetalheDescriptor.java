@@ -27,7 +27,7 @@ public class SubstituicaoValidacaoDetalheDescriptor implements ValidacaoDetalheD
 
   @Override
   public Set<String> camposNegocio() {
-    return Set.of("motivo", "obs", "dataInicio", "dataFim");
+    return Set.of("motivo", "obs", "dataInicio", "dataFim", "substituidoTiprelId");
   }
 
   @Override
@@ -36,6 +36,7 @@ public class SubstituicaoValidacaoDetalheDescriptor implements ValidacaoDetalheD
         "motivo", "Motivo",
         "obs", "Observações",
         "dataInicio", "Data início",
-        "dataFim", "Data fim");
+        "dataFim", "Data fim",
+        "substituidoTiprelId", "Colaborador substituído");
   }
 }

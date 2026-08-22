@@ -33,5 +33,11 @@ em `.claude/resume/dossie-corrigir-javers-obs.md`.
 - **FASE 2 (JaVers auto-audit)**: pendente — anotar repositórios + baseline/carimbo nas mesmas entidades.
 - **FASE 3 (teste live)**: pendente — porta 8089, JDK23. Regra: ler antes de escrever; arrays com id;
   colaborador novo validado antes de ação nos filhos.
+- **FASE 3 (teste live) COMPLETA**: 7/7 fluxos provados (5 com grelha JaVers). Bug corrigido:
+  ValidationUtil.isCorrigir(null) NPE.
+- **FASE 4 (pedido do user) COMPLETA E PROVADA**: JaVers para DadosBancarios (NIB 77777→66666) +
+  Renovação (Data fim/Duração) via `matchByTypeOnly`; motivo da substituição corrigível (FERIAS→DOENCA);
+  colaborador substituído na grelha por NOME ("Colab PROGRESSAO Teste") via resolver override. Compila,
+  app arranca, grelha ativa p/ 9 referências.
 - Ao verde: pedir autorização para merge com develop (após verificação do user). NÃO limpar colaboradores
   de teste (instrução do user).

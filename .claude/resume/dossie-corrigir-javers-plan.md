@@ -76,6 +76,33 @@ TipoMovimento) + 5 repos anotados `@JaversSpringDataAuditable` + 5 descriptors +
 **7/7 fluxos live-provados (5 com grelha JaVers). VERDE.**
 Ao verde: pedir autorização para merge com develop.
 
+## FASE 4 — JaVers DadosBancarios + Renovacao; motivo substituição; colaborador substituído
+
+Pedido do utilizador (2026-08-22). Mesmo processo: compilar+handoff por item, depois teste live.
+
+Abordagem (análise):
+- `ValidacaoDetalheDescriptor` ganha `default boolean matchByTypeOnly()` (=false). No read service,
+  `referenciaId = matchByTypeOnly ? null : validacao.getReferenciaId()` → filtro só-por-tipo. Resolve o
+  anchor mismatch de DadosBancarios (colecção, refId=funcionario) e Renovacao (histórico vs contrato.id).
+- DadosBancarios: anotar repo; injetar repo no service e `saveAll` explícito (baseline no edit normal,
+  carimbado na correção); descriptor matchByTypeOnly=true (DadosBancariosEntity).
+- Renovacao: anotar ContratoHistoricoEntityRepository; `reabrirRenovacaoCorrecao` grava via repo;
+  carimbo na correção (RH_T_CONTRATO_HISTORICO); descriptor matchByTypeOnly=true (ContratoHistoricoEntity).
+- Ponto 1: `SubstituicaoWriteService.validar()` passa a gravar `motivo` (setMotivo).
+- Ponto 2: `ReferenciaNomeResolver` override TiposRelacionamentoEntity→funId.nome (+ getNmBanco nos
+  candidatos p/ Banco); `substituidoTiprelId` no descriptor; carimbar o REGISTO da substituição
+  (baseline INSERT → grelha mostra "criado com" incl. substituído).
+
+- [x] Infra: matchByTypeOnly + resolver (override tiprel→funId.nome, getNmBanco)
+- [x] DadosBancarios JaVers — PROVADO (NIB 77777→66666)
+- [x] Renovacao JaVers — PROVADO (Data fim 2028-06-30→2027-12-31; Duração 12→6)
+- [x] Ponto 1 motivo substituição — PROVADO (Motivo FERIAS→DOENCA)
+- [x] Ponto 2 substituído — PROVADO (Colaborador substituído → "Colab PROGRESSAO Teste", NOME)
+- [x] Compila EXIT=0; app arranca; grelha ativa p/ 9 referências.
+
+**FASE 4 COMPLETA E PROVADA. Todos os 9 fluxos com grelha JaVers + 7 ciclos CORRIGIR verdes.**
+Ao verde: pedir autorização para merge com develop.
+
 ## Notas
 - Obs/inconveniências em `.claude/resume/dossie-corrigir-javers-obs.md`.
-- Compile rápido: `mvn -q -DskipTests compile`.
+- Compile rápido: `JAVA_HOME=...jdk-23; mvn -q -DskipTests compile`.

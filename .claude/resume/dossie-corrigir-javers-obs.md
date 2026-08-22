@@ -85,6 +85,22 @@
   + data_fim. Data corrigida no reenvio (2027-06-30) aplicou-se ao contrato SÓ no SIM; contrato manteve-se
   A durante a correção; histórico pendente C→P→(consolidação). (JaVers da renovacao continua deferido.)
 
+## FASE 4 (pedido do user) — PROVADA
+- **matchByTypeOnly** no ValidacaoDetalheDescriptor: quando true, o read service ignora referenciaId e
+  isola só por tipo. Resolve anchor mismatch de DadosBancarios (coleção, refId=funcionario) e Renovacao
+  (histórico vs contrato.id). Seguro: cada commit é carimbado com o seu validacaoUuid.
+- **DadosBancarios JaVers** ✅ (NIB 77777→66666). Repo anotado; service injeta o repo e faz saveAll
+  (baseline no create-pending sem carimbo; correção carimbada).
+- **Renovacao JaVers** ✅ (Data fim/Duração). ContratoHistoricoEntityRepository anotado;
+  reabrirRenovacaoCorrecao grava via repo; carimbo em ValidacaoRenovacaoContratoService.
+- **Ponto 1 (motivo)** ✅: setMotivo no validar() da substituição → motivo corrigível e aparece na grelha.
+- **Ponto 2 (substituído por NOME)** ✅: override no ReferenciaNomeResolver TiposRelacionamentoEntity→
+  funId.nome; substituidoTiprelId no descriptor (rótulo "Colaborador substituído"); registo da
+  substituição carimbado como baseline INSERT (entityManager.persist p/ não auditar o insert; depois
+  save carimbado) → grelha mostra "criado com" incl. o substituído (nome). getNmBanco nos candidatos p/ Banco.
+- NOTA: para validações INSERT a grelha mostra valores iniciais + correções (design do read service);
+  logo alguns campos aparecem 2x (inicial null→valor e depois antes→depois). Comportamento igual à Mobilidade.
+
 ### Mutações de dados de teste feitas (colaborador 958897 — NÃO limpar per instrução)
 - tiprel 173328 (atual do 958897): salario 186980 → 100000 (para diferença de substituição).
 - contrato 698: tp_contrato_id 2→1, data_fim → 2027-06-30 (renovação consolidada).

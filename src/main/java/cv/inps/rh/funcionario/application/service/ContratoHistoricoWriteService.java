@@ -79,6 +79,10 @@ public class ContratoHistoricoWriteService {
             h.setDataFim(dto.getDataFim());
             h.setDuracao(dto.getDuracaoMeses());
           }
+          // Grava via repo anotado (@JaversSpringDataAuditable) para disparar o auto-audit do JaVers.
+          // O caller carimba com ValidacaoAuditContext para o commit ficar ligado à validação (grelha
+          // "Detalhe de alterações"). Baseline vem de registrarRenovacaoPendente (também via repo).
+          contratoHistoricoEntityRepository.save(h);
         });
   }
 

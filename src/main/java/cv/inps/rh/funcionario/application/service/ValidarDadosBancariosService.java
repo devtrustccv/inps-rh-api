@@ -12,7 +12,9 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
+import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DadosBancariosEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ValidacaoEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
@@ -36,6 +38,7 @@ public class ValidarDadosBancariosService {
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final DadosBancariosMapper dadosBancariosMapper;
   private final ColaboradorValidationRules colaboradorValidationRules;
+  private final DadosBancariosEntityRepository dadosBancariosEntityRepository;
 
   @Transactional
   public SuccessResponseDTO executar(ValidarDadosBancariosCommand command) {
@@ -105,7 +108,15 @@ public class ValidarDadosBancariosService {
       funcionario.getDadosBancarios().stream()
           .filter(b -> b != null && b.getEstado() == Estado.C)
           .forEach(b -> b.setEstado(Estado.P));
-      funcionarioRules.reabrirParaValidacao(funcionario.getUuid(), Referencia.DADOS_BANCARIOS);
+      var validacaoReaberta = funcionarioRules.reabrirParaValidacao(funcionario.getUuid(), Referencia.DADOS_BANCARIOS);
+      // Auto-audit (JaVers): grava os bancários via repo anotado, carimbado com a validação — o baseline
+      // vem da 1ª edição (create-pending, mais abaixo, que grava sem carimbo). Grid via matchByTypeOnly.
+      try {
+        ValidacaoAuditContext.set(validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_DADOS_BANCARIOS");
+        dadosBancariosEntityRepository.saveAll(funcionario.getDadosBancarios());
+      } finally {
+        ValidacaoAuditContext.clear();
+      }
       funcionarioEntityRepository.saveAndFlush(funcionario);
       return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
           "Dados bancários corrigidos e reenviados para validação.", List.of());
@@ -157,6 +168,10 @@ public class ValidarDadosBancariosService {
           v.setReferenciaId(saved.getId());
           validacaoEntityRepository.save(v);
         });
+
+    // Baseline JaVers: grava os bancários via repo anotado para existir snapshot inicial (sem carimbo);
+    // a correção futura (reenvio) produz o diff antes→depois contra este baseline.
+    dadosBancariosEntityRepository.saveAll(funcionario.getDadosBancarios());
 
     return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Dados bancarios actualizados.", List.of());
 
