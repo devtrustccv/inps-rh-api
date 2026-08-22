@@ -41,6 +41,12 @@ public class MobilidadeDTO  {
   private String dirrecaoAntes ;
 
 
+  // Id da direcção "Antes" (só leitura). DirecaoEntity não tem uuid — o identificador é o Long id,
+  // igual ao usado em direcaoDepois e nos selects do formulário.
+  @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+  private Long direcaoAntesId ;
+
+
   private Long direcaoDepois ;
 
 

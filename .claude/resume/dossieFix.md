@@ -1,4 +1,4 @@
-> Updated: 2026-08-22 09:48
+> Updated: 2026-08-22 12:20
 
 ## Goal
 
@@ -28,11 +28,35 @@ Replicar o ciclo **CORRIGIR** (maker-checker por estado, P→C→P→A) e a grel
 - Arranque: JDK23 + carregar `.env` SEM `source` (password tem `$$`). Segurança OFF em dev.
 - SQL directo: usar `DbExec` (ver `reference_db_helpers`). NÃO limpar colaboradores de teste.
 
+## Sessão 2026-08-22 (pós-merge) — sintoma estado-C + direcaoAntesId
+
+Varredura de TODAS as listas que leem de vistas quanto ao sintoma "estado C invisível":
+- **Carreira** (RH_V_CARREIRA): vista colapsa C→'A' (CASE ELSE). Aplicado overlay P/C em
+  `CarreiraReadService.list` (lê estado real da tabela por carreira_id) — igual à mobilidade.
+- **Contrato** (RH_V_CONTRATO): expõe `d.estado` cru (emite C), mas o filtro era só (A,P,I) → renovação
+  em correção desaparecia. Fix: **+Estado.C no filtro** de `ContratoReadService.listaContratos` (sem overlay).
+- **Já corretos (sem alteração)**: Mobilidade (já tinha overlay P/C) e Dossiê/RH_V_DOSSIE (filtro já
+  inclui A,P,C,I + estado cru).
+- **N/A**: DadosBancarios, Substituicao, Rendimento, Desconto, ProcessoDisciplinar leem de TABELAS
+  (estado real), não de vistas. HistoricoLaboral aplica direto (sem maker-checker).
+
+Campo novo **`direcaoAntesId` (Long)** no `MobilidadeDTO` (só leitura) + mapper (2 métodos) + manifesto
+`.igrpstudio/funcionario/dto/MobilidadeDTO.json`. NB: `DirecaoEntity` NÃO tem uuid → identificador é o
+Long id (coerente com direcaoDepois e os selects). Pedido do user "por id, por agora".
+
+Doc frontend nova: `docs/frontend_changes_funcionario.md`.
+
+### Teste live (colaborador 958897, app em código novo na porta 8088)
+- ✅ direcaoAntesId=100010075 no GET mobilidade 660.
+- ✅ Contrato: renovação fresca (contrato 698, v4/hist 242) → CORRIGIR → lista mostra v4 estado C.
+- ✅ Carreira: progressão (carreira 756) → CORRIGIR → VISTA diz 'A', TABELA diz 'C', LISTA (overlay) diz 'C'.
+- Dados de teste criados via REST (deixados em C, coerentes): renovação 698 (tiprel 173330/hist 242) +
+  carreira 756. NÃO limpar. SQL directo bloqueado pelo classificador → tudo testado via REST real.
+
 ## Open questions
 
-- Outras listas que leem de vistas (ex.: Carreira) podem ter o mesmo sintoma da mobilidade (vista
-  ignora workflow) — verificar se o frontend reportar.
+- (resolvida a varredura) Nenhuma outra lista com o sintoma; todas as que leem de vista foram cobertas.
 
 ## Next step
 
-Aguardar feedback do frontend; se reportar o mesmo em Carreira/outra lista, aplicar o mesmo fix de leitura.
+Commit no branch feat/dossie-corrigir-javers-restantes; depois PR/merge para develop após revisão do user.

@@ -44,9 +44,12 @@ public class ContratoReadService {
       predicates.add(cb.equal(root.get("funUuid"), idFuncionario));
 
       // Gestão Contratual é uma vista de histórico (tem "Ver Informação Inicial/Atual"): mostra
-      // activos (A), pendentes de validação (P) e também os inactivos/encerrados (I) — o contrato
-      // anterior substituído por um novo fica I e deve continuar visível no histórico.
-      var estados = List.of(Estado.A.getCode(), Estado.P.getCode(), Estado.I.getCode());
+      // activos (A), pendentes de validação (P), em correção (C) e também os inactivos/encerrados (I)
+      // — o contrato anterior substituído por um novo fica I e deve continuar visível no histórico.
+      // O C é necessário porque uma renovação devolvida para correção põe o histórico em C
+      // (marcarRenovacaoPendenteComoCorrecao); sem ele a renovação em correção desaparecia da lista
+      // (RH_V_CONTRATO expõe d.estado cru, logo emite C — basta alargar o filtro, sem overlay).
+      var estados = List.of(Estado.A.getCode(), Estado.P.getCode(), Estado.C.getCode(), Estado.I.getCode());
       predicates.add(root.get("estado").in(estados));
 
       if (query.getVinculo() != null) {
