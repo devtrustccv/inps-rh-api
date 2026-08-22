@@ -71,6 +71,12 @@ public interface EmprestimoEntityRepository extends
       )
       FROM PedidoEntity p, EmprestimoEntity e, TiposRelacionamentoEntity tr, FuncionarioEntity f, MobilidadeEntity m
       WHERE p.id = e.pedido.id
+      AND e.id = (
+            SELECT MAX(latestLoan.id)
+            FROM EmprestimoEntity latestLoan
+            WHERE latestLoan.pedido.id = p.id
+      )
+      AND e.estado <> 'CANCELADO'
       AND e.tiprel.id = tr.id
       AND tr.estActAdm = 1
       AND tr.funId.id = f.id
