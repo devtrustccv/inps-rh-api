@@ -54,6 +54,35 @@ public class ContratoHistoricoWriteService {
   }
 
   /**
+   * Ciclo CORRIGIR da RENOVAÇÃO (checker devolve): o histórico pendente da renovação (estado P, versão
+   * mais alta) passa a C, sem criar nova versão. O contrato mantém-se A (é o vínculo em vigor); só a
+   * proposta de renovação é devolvida para correção. NO-OP se não houver histórico pendente.
+   */
+  public void marcarRenovacaoPendenteComoCorrecao(ContratoEntity contrato) {
+    contratoHistoricoEntityRepository
+        .findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.P)
+        .ifPresent(h -> h.setEstado(Estado.C));
+  }
+
+  /**
+   * Ciclo CORRIGIR da RENOVAÇÃO (maker reenvia): o histórico da renovação em correção (estado C, versão
+   * mais alta) volta a P e recebe as datas/duração corrigidas — sem criar nova versão. Repõe o estado
+   * pós-registo para que uma validação SIM posterior corra como uma renovação normal.
+   */
+  public void reabrirRenovacaoCorrecao(ContratoEntity contrato, RenovarContratoReqDTO dto) {
+    contratoHistoricoEntityRepository
+        .findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.C)
+        .ifPresent(h -> {
+          h.setEstado(Estado.P);
+          if (dto != null) {
+            h.setDataInicio(dto.getDataInicio());
+            h.setDataFim(dto.getDataFim());
+            h.setDuracao(dto.getDuracaoMeses());
+          }
+        });
+  }
+
+  /**
    * Transita contrato + situacaoLaboral pendente + historico pendente num único passo.
    * Deve ser chamado pelos serviços de validação em substituição do padrão
    * setEstado / getSituacoesLaborais / aplicarEstado espalhado.

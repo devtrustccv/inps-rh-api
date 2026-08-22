@@ -41,21 +41,30 @@ public class ValidarDadosBancariosService {
   public SuccessResponseDTO executar(ValidarDadosBancariosCommand command) {
 
     var dto = command.getValidardadosbancarios();
-
-    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
-    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
-    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
-    if (EstadoValidacao.CORRIGIR.equals(dto.getValidar())) {
-      LOGGER.info("[CORRIGIR] DADOS_BANCARIOS (funcionario={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
-          command.getIdFuncionario());
-      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
-    }
-
-    var dadosBancariosReqDTO = dto.getDadosBancarios();
     var estadoValidacao = dto.getValidar();
 
     var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
+
+    // CORRIGIR (checker devolve ao maker): dados bancários pendentes P -> C e validação P -> C, SEM
+    // aplicar payload. O maker corrige e reenvia por este mesmo endpoint com validar=null (C -> P).
+    // Espelha o ciclo do contrato / mobilidade / carreira. Âncora = funcionario.uuid (referencia_uuid
+    // gravado no registo dos dados bancários).
+    if (EstadoValidacao.CORRIGIR.equals(estadoValidacao)) {
+      if (!funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.DADOS_BANCARIOS)) {
+        throw IgrpResponseStatusException.badRequest("Não há dados bancários pendentes para devolver para correção.");
+      }
+      funcionarioRules.devolverParaCorrecao(funcionario.getUuid(), Estado.P, Referencia.DADOS_BANCARIOS);
+      funcionario.getDadosBancarios().stream()
+          .filter(b -> b != null && b.getEstado() == Estado.P)
+          .forEach(b -> b.setEstado(Estado.C));
+      funcionarioEntityRepository.saveAndFlush(funcionario);
+      LOGGER.info("[CORRIGIR] DADOS_BANCARIOS devolvidos para correção (funcionario={}).", funcionario.getUuid());
+      return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
+          "Dados bancários devolvidos para correção.", List.of());
+    }
+
+    var dadosBancariosReqDTO = dto.getDadosBancarios();
 
     // Vínculo ativo do colaborador (para saber se tem salário → NIB obrigatório)
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -64,6 +73,15 @@ public class ValidarDadosBancariosService {
         && tipoRelAtual.getContrVinculoId().getVinculoId() != null)
         ? tipoRelAtual.getContrVinculoId().getVinculoId().getId()
         : null;
+
+    // Maker reenvia a correção (C -> P): existe validação por corrigir. 'validar' tem de vir nulo —
+    // um registo em correção não pode ser validado antes de reenviado.
+    boolean estaPorCorrigir = funcionarioRules.temValidacaoPorCorrigir(funcionario.getUuid(), TipoAcao.UPDATE,
+        Referencia.DADOS_BANCARIOS);
+    if (estaPorCorrigir && estadoValidacao != null) {
+      throw IgrpResponseStatusException.badRequest(
+          "Dados bancários em correção: não podem ser validados. Corrija e reenvie primeiro.");
+    }
 
     boolean temPendentes = funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE,
         Referencia.DADOS_BANCARIOS);
@@ -80,6 +98,18 @@ public class ValidarDadosBancariosService {
 
     // NIB obrigatório quando o vínculo tem salário — valida o estado efetivo (existentes + enviados)
     colaboradorValidationRules.validarNibObrigatorioSeSalarioEfetivo(tipoVinculoId, dadosBancarios);
+
+    // Maker reenviou a correção: aplica as edições (sync acima) e reabre C -> P. Os itens que o sync
+    // não marcou P (não alterados) são repostos aqui; os alterados já vêm em P do próprio sync.
+    if (estaPorCorrigir) {
+      funcionario.getDadosBancarios().stream()
+          .filter(b -> b != null && b.getEstado() == Estado.C)
+          .forEach(b -> b.setEstado(Estado.P));
+      funcionarioRules.reabrirParaValidacao(funcionario.getUuid(), Referencia.DADOS_BANCARIOS);
+      funcionarioEntityRepository.saveAndFlush(funcionario);
+      return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
+          "Dados bancários corrigidos e reenviados para validação.", List.of());
+    }
 
     if (temPendentes) {
 

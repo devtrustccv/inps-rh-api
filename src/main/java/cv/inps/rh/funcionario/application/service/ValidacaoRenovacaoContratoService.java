@@ -42,15 +42,6 @@ public class ValidacaoRenovacaoContratoService {
 
     var dto = command.getRenovacaocontrato();
 
-    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
-    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
-    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
-    if (EstadoValidacao.CORRIGIR.equals(dto.getValidacao())) {
-      LOGGER.info("[CORRIGIR] RENOVACAO_CONTRATO (funcionario={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
-          command.getIdFuncionario());
-      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
-    }
-
     var idFunc = IdentificadorUnico.from(command.getIdFuncionario());
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
@@ -63,6 +54,41 @@ public class ValidacaoRenovacaoContratoService {
           "Funcionario com id '%s' não possui contrato ativo".formatted(idFunc));
 
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(contrato.getEstado());
+
+    // CORRIGIR (checker devolve ao maker): a PROPOSTA de renovação pendente é devolvida. Pendente =
+    // tiprel novo (P) + histórico da renovação (P) + validação (P); o contrato mantém-se A (vínculo em
+    // vigor). Âncora = contrato.uuid (referencia_uuid da validação UPDATE/RENOVACAO_CONTRATO). O maker
+    // corrige e reenvia por este mesmo endpoint com validacao=null (C -> P).
+    if (EstadoValidacao.CORRIGIR.equals(dto.getValidacao())) {
+      if (tiposRelacionamento.getEstado() != Estado.P
+          || !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.RENOVACAO_CONTRATO)) {
+        throw IgrpResponseStatusException.badRequest("Não há renovação pendente para devolver para correção.");
+      }
+      funcionarioRules.devolverParaCorrecao(contrato.getUuid(), Estado.P, Referencia.RENOVACAO_CONTRATO);
+      tiposRelacionamento.setEstado(Estado.C);
+      contratoHistoricoWriteService.marcarRenovacaoPendenteComoCorrecao(contrato);
+      funcionarioEntityRepository.saveAndFlush(funcionario);
+      LOGGER.info("[CORRIGIR] RENOVACAO_CONTRATO devolvida para correção (contrato={}).", contrato.getUuid());
+      return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
+          "Renovação de contrato devolvida para correção.", List.of());
+    }
+
+    // Maker reenvia a correção (C -> P): repõe o estado pós-registo (tiprel P + histórico P com as datas
+    // corrigidas + validação P), SEM consolidar. 'validacao' tem de vir nula.
+    boolean estaPorCorrigir = funcionarioRules.temValidacaoPorCorrigir(funcionario.getUuid(), TipoAcao.UPDATE,
+        Referencia.RENOVACAO_CONTRATO);
+    if (estaPorCorrigir && dto.getValidacao() != null) {
+      throw IgrpResponseStatusException.badRequest(
+          "Renovação em correção: não pode ser validada. Corrija e reenvie primeiro.");
+    }
+    if (estaPorCorrigir) {
+      contratoHistoricoWriteService.reabrirRenovacaoCorrecao(contrato, dto.getDadosRenovacao());
+      tiposRelacionamento.setEstado(Estado.P);
+      funcionarioRules.reabrirParaValidacao(contrato.getUuid(), Referencia.RENOVACAO_CONTRATO);
+      funcionarioEntityRepository.saveAndFlush(funcionario);
+      return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
+          "Renovação de contrato corrigida e reenviada para validação.", List.of());
+    }
 
     if (dto.getValidacao() != null) {
       var aprovado = dto.getValidacao().equals(EstadoValidacao.SIM);

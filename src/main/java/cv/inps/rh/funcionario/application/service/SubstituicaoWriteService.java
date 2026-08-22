@@ -153,15 +153,6 @@ public class SubstituicaoWriteService {
   public SuccessResponseDTO validar(ValidarSubstituicaoCommand command) {
     var dto = command.getSubstituicao();
 
-    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
-    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
-    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
-    if (EstadoValidacao.CORRIGIR.equals(dto.getValidar())) {
-      log.info("[CORRIGIR] SUBSTITUICAO (substituicao={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
-          command.getSubstituicaoId());
-      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
-    }
-
     var idSusbtituicao = IdentificadorUnico.from(command.getSubstituicaoId()).valor();
 
     if (dto.getColaboradorSubstituido() == null)
@@ -183,11 +174,44 @@ public class SubstituicaoWriteService {
         () -> IgrpResponseStatusException.badRequest("Substituição não encontrada.")
     );
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(substituicao.getEstado());
+
+    // CORRIGIR (checker devolve ao maker): substituição pendente P -> C e validação P -> C, SEM aplicar
+    // payload. O maker corrige e reenvia por este mesmo endpoint com validar=null (C -> P). Âncora =
+    // substituicao.uuid (a validação vive no SUBSTITUTO).
+    if (EstadoValidacao.CORRIGIR.equals(dto.getValidar())) {
+      if (substituicao.getEstado() != Estado.P
+          || funcionarioRules.getValidacaoPendenteByReferenciaUuid(substituicao.getUuid(), TipoAcao.INSERT, Referencia.SUBSTITUICAO).isEmpty()) {
+        throw IgrpResponseStatusException.badRequest("Só é possível devolver para correção uma substituição pendente de validação.");
+      }
+      funcionarioRules.devolverParaCorrecao(substituicao.getUuid(), Estado.P, Referencia.SUBSTITUICAO);
+      substituicao.setEstado(Estado.C);
+      substituicaoEntityRepository.save(substituicao);
+      log.info("[CORRIGIR] SUBSTITUICAO devolvida para correção (substituicao={}).", substituicao.getUuid());
+      return new SuccessResponseDTO(true, substituicao.getUuid().toString(),
+          "Substituição devolvida para correção.", List.of());
+    }
+    // Guard: substituição em correção não pode ser validada antes de reenviada pelo maker.
+    if (substituicao.getEstado() == Estado.C && dto.getValidar() != null) {
+      throw IgrpResponseStatusException.badRequest(
+          "Substituição em correção: não pode ser validada. Corrija e reenvie primeiro.");
+    }
+
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());
     substituicao.setObs(ValidationUtil.trimToNull(dto.getObs()));
     substituicao.setSubstitutoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid()));
     substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid()));
+
+    // Maker reenvia a correção (C -> P): as edições acima já foram aplicadas; reabre para validação
+    // (sem consolidar — isso só na validação SIM). 'validar' é nulo aqui (garantido pelo guard acima).
+    if (substituicao.getEstado() == Estado.C) {
+      substituicao.setEstado(Estado.P);
+      funcionarioRules.reabrirParaValidacao(substituicao.getUuid(), Referencia.SUBSTITUICAO);
+      substituicaoEntityRepository.save(substituicao);
+      funcionarioEntityRepository.save(funcionarioSubstituto);
+      return new SuccessResponseDTO(true, substituicao.getUuid().toString(),
+          "Substituição corrigida e reenviada para validação.", List.of());
+    }
 
     if(dto.getValidar()!=null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
