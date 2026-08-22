@@ -234,54 +234,6 @@
       ]
     },
     {
-      "actionName": "calcularBaixaMedica",
-      "path": "baixa-medica/calculo",
-      "method": "GET",
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "BaixaMedicaCalculo",
-                "objectType": "dto",
-                "name": "data",
-                "collectionType": "none",
-                "module": "processamento"
-              }
-            }
-          }
-        }
-      },
-      "requestParams": [
-        {
-          "type": "string",
-          "name": "colaborador",
-          "isRequired": true
-        },
-        {
-          "type": "string",
-          "name": "dataInicio",
-          "isRequired": true
-        },
-        {
-          "type": "string",
-          "name": "dataFim",
-          "isRequired": true
-        },
-        {
-          "type": "string",
-          "name": "tipoLicenca",
-          "isRequired": true
-        },
-        {
-          "type": "string",
-          "name": "dataInicioFalta",
-          "isRequired": false
-        }
-      ]
-    },
-    {
       "actionName": "getBaixaMedica",
       "path": "baixa-medica/{baixaMedicaId}",
       "method": "GET",
