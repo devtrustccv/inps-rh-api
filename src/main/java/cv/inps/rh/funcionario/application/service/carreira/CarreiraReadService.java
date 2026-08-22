@@ -6,6 +6,7 @@ import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
+import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RhVCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository;
@@ -28,7 +29,10 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -79,7 +83,28 @@ public class CarreiraReadService {
     var pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
     var page = rhVCarreiraEntityRepository.findAll(spec, pageable);
 
-    List<CarreiraListDTO> content = page.getContent().stream().map(this::toDTO).toList();
+    // A vista RH_V_CARREIRA calcula ESTADO_CARREIRA por datas/estado (A/P/I) mas NÃO reflete o estado
+    // de workflow "C" (em correção): uma carreira devolvida ao maker cai no ELSE do CASE e aparece como
+    // 'A'. Buscamos o estado real da TABELA por carreira_id para o sobrepor abaixo — mesmo sintoma/fix
+    // que a lista de mobilidade.
+    var carreiraIds = page.getContent().stream()
+        .map(RhVCarreiraEntity::getCarreiraId).filter(Objects::nonNull).toList();
+    Map<Long, Estado> estadoTabelaPorId = carreiraIds.isEmpty() ? Map.of()
+        : carreiraEntityRepository.findAllById(carreiraIds).stream()
+            .filter(e -> e.getId() != null && e.getEstado() != null)
+            .collect(Collectors.toMap(CarreiraEntity::getId, CarreiraEntity::getEstado));
+
+    List<CarreiraListDTO> content = page.getContent().stream().map(v -> {
+      var dto = toDTO(v);
+      // Sobrepõe o estado da vista com o estado de workflow da TABELA quando é P ou C, para o ciclo
+      // maker-checker (pendente / em correção) ficar visível na lista.
+      var estadoTabela = estadoTabelaPorId.get(v.getCarreiraId());
+      if (estadoTabela == Estado.P || estadoTabela == Estado.C) {
+        dto.setEstado(estadoTabela.getCode());
+        dto.setEstadoDesc(estadoTabela.getDescription());
+      }
+      return dto;
+    }).toList();
 
     var wrapper = new WrapperCarreiraListDTO();
     wrapper.setContent(content);
