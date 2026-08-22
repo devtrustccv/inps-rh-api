@@ -59,4 +59,6 @@ Doc frontend nova: `docs/frontend_changes_funcionario.md`.
 
 ## Next step
 
-Commit no branch feat/dossie-corrigir-javers-restantes; depois PR/merge para develop após revisão do user.
+MERGEADO em develop (merge `337dc3f1`, commit `26bda6c7`; branch feat/dossie-listas-estado-c apagado).
+Merge é LOCAL — falta `git push origin develop` (aguardar decisão do user). Artefactos de teste
+(DbExec*/DbQuery*/app*.log/scratchpad/) continuam untracked — candidatos a .gitignore.
