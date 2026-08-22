@@ -100,8 +100,15 @@ public class ProcessoDisciplinarWriteService {
     // Maker reenvia a correção (C -> P): edições aplicadas acima; reabre para validação.
     if (Estado.C.name().equals(process.getEstado())) {
       process.setEstado(Estado.P.name());
-      funcionarioRules.reabrirParaValidacao(process.getUuid(), Referencia.PROCESSO_DISCIPLINAR);
-      processoDisciplinarEntityRepository.save(process);
+      var validacaoReaberta = funcionarioRules.reabrirParaValidacao(process.getUuid(), Referencia.PROCESSO_DISCIPLINAR);
+      // Auto-audit (JaVers): carimba o save da correção; baseline vem do registo (saveNovoProcessoDisciplinar).
+      try {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
+            validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_PROCESSO_DISCIPLINAR");
+        processoDisciplinarEntityRepository.save(process);
+      } finally {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
+      }
       return new SuccessResponseDTO(true, process.getUuid().toString(),
           "Processo disciplinar corrigido e reenviado para validação.", List.of());
     }

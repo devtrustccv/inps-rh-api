@@ -41,14 +41,24 @@ Padrões consolidados a replicar:
 
 **FASE 1 COMPLETA — CORRIGIR nos 7. Compila. Falta commit + Fase 2 (JaVers) + Fase 3 (teste live).**
 
-## FASE 2 — JaVers auto-audit (mesmas entidades)
+## FASE 2 — JaVers auto-audit (5 entidades limpas; DadosBancarios+Renovacao DEFERIDAS)
 
-Por entidade: anotar `@JaversSpringDataAuditable` no repositório; refs rasas no `JaversAuditConfig` se
-necessário; baseline no registo; carimbo `ValidacaoAuditContext.set(...)` no save do reenvio (try/finally clear).
-Entidades: DadosBancarios, SituacaoLaboral, Contrato(renovacao), Substituicao, DefinicaoRemuneracao,
-DefPagamento, ProcessoDisciplinar.
+Decisão do user: ligar as 5 sem anchor mismatch agora; DadosBancarios (colecção, refId=funcionario) e
+Renovacao (histórico vs contrato.id) ficam para 3ª passagem.
 
-- [ ] #1..#7 JaVers — compile + handoff a cada
+Feito: `JaversAuditConfig` refs rasas (Banco/ParamSituacao/ParamSituacaoDetalhe/TiposRelacionamento/
+TipoMovimento) + 5 repos anotados `@JaversSpringDataAuditable` + 5 descriptors + carimbo
+`ValidacaoAuditContext` no save da correção (baseline já vem do registo via repo anotado).
+
+- [x] SituacaoLaboral (ESTADO_COLABORADOR) — JaVers ligado, compile EXIT=0
+- [x] Substituicao — JaVers ligado, compile EXIT=0
+- [x] Rendimento (RH_T_DEF_REMUNERACOES) — JaVers ligado, compile EXIT=0
+- [x] Desconto (RH_T_DEF_PAGAMENTOS) — JaVers ligado, compile EXIT=0
+- [x] ProcessoDisciplinar — JaVers ligado, compile EXIT=0
+- [ ] (DEFERIDO) DadosBancarios JaVers — anchor refId=funcionario
+- [ ] (DEFERIDO) Renovacao JaVers — anchor histórico vs contrato
+
+**FASE 2 COMPLETA (5). Compila com JDK23.** NB: forçar `JAVA_HOME=/c/Program Files/Eclipse Adoptium/jdk-23.0.2.7-hotspot` no mvn.
 
 ## FASE 3 — Teste live (porta 8089, JDK23)
 

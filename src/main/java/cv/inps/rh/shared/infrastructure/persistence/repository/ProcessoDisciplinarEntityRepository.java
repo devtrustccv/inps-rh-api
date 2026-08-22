@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
+import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ import java.util.UUID;
 
 
 @Repository
+@JaversSpringDataAuditable
 public interface ProcessoDisciplinarEntityRepository extends
     JpaRepository<ProcessoDisciplinarEntity, Long>,
     JpaSpecificationExecutor<ProcessoDisciplinarEntity> {

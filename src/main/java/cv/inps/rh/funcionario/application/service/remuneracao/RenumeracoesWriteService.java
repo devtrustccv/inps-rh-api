@@ -167,8 +167,15 @@ public class RenumeracoesWriteService {
     // Maker reenvia a correção (C -> P): edições aplicadas acima; reabre para validação.
     if (remuneracao.getEstado() == Estado.C) {
       remuneracao.setEstado(Estado.P);
-      funcionarioRules.reabrirParaValidacao(remuneracao.getUuid(), Referencia.RENDIMENTO);
-      definicaoRemuneracaoEntityRepository.save(remuneracao);
+      var validacaoReaberta = funcionarioRules.reabrirParaValidacao(remuneracao.getUuid(), Referencia.RENDIMENTO);
+      // Auto-audit (JaVers): carimba o save da correção; baseline vem do registo (novoRemuneracao).
+      try {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
+            validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_DEF_REMUNERACOES");
+        definicaoRemuneracaoEntityRepository.save(remuneracao);
+      } finally {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
+      }
       return new SuccessResponseDTO(true, remuneracao.getUuid().toString(),
           "Rendimento corrigido e reenviado para validação.", List.of());
     }
@@ -241,8 +248,15 @@ public class RenumeracoesWriteService {
     // Maker reenvia a correção (C -> P): edições aplicadas acima; reabre para validação.
     if (pagamento.getEstado() == Estado.C) {
       pagamento.setEstado(Estado.P);
-      funcionarioRules.reabrirParaValidacao(pagamento.getUuid(), Referencia.DESCONTO);
-      defPagamentoEntityRepository.save(pagamento);
+      var validacaoReaberta = funcionarioRules.reabrirParaValidacao(pagamento.getUuid(), Referencia.DESCONTO);
+      // Auto-audit (JaVers): carimba o save da correção; baseline vem do registo (novoPagamento).
+      try {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
+            validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_DEF_PAGAMENTOS");
+        defPagamentoEntityRepository.save(pagamento);
+      } finally {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
+      }
       return new SuccessResponseDTO(true, pagamento.getUuid().toString(),
           "Desconto corrigido e reenviado para validação.", List.of());
     }

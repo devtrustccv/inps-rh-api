@@ -13,6 +13,7 @@ import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
+import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AusenciaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SituacaoLaboralEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoRelRemPagEntity;
@@ -168,11 +169,18 @@ public class AlterarSituacaoLaboralWriteService {
       sit.setDataInicio(dataInicio);
       sit.setDataFim(dataFim);
       sit.setEstado(Estado.P);
-      situacaoLaboralEntityRepository.save(sit);
       tiposRelacionamentoAtual.setEstado(Estado.P);
       tiposRelacionamentoAtual.setFlgProcessa(
           Integer.valueOf(1).equals(paramSituacaoLaboral.getFlgRemuneracao()) ? 1 : 0);
-      funcionarioRules.reabrirParaValidacao(sit.getUuid(), Referencia.ESTADO_COLABORADOR);
+      var validacaoReaberta = funcionarioRules.reabrirParaValidacao(sit.getUuid(), Referencia.ESTADO_COLABORADOR);
+      // Auto-audit (JaVers): carimba o save da correção com a validação em curso — o detalhe de
+      // alterações filtra por este validacaoUuid. O baseline já existe do registo da situação.
+      try {
+        ValidacaoAuditContext.set(validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_SITUACAO_LABORAL");
+        situacaoLaboralEntityRepository.save(sit);
+      } finally {
+        ValidacaoAuditContext.clear();
+      }
       funcionarioEntityRepository.saveAndFlush(funcionario);
       return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
           "Situação laboral corrigida e reenviada para validação.", List.of());

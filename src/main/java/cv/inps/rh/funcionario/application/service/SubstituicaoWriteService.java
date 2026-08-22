@@ -206,8 +206,15 @@ public class SubstituicaoWriteService {
     // (sem consolidar — isso só na validação SIM). 'validar' é nulo aqui (garantido pelo guard acima).
     if (substituicao.getEstado() == Estado.C) {
       substituicao.setEstado(Estado.P);
-      funcionarioRules.reabrirParaValidacao(substituicao.getUuid(), Referencia.SUBSTITUICAO);
-      substituicaoEntityRepository.save(substituicao);
+      var validacaoReaberta = funcionarioRules.reabrirParaValidacao(substituicao.getUuid(), Referencia.SUBSTITUICAO);
+      // Auto-audit (JaVers): carimba o save da correção com a validação; o baseline vem do registo.
+      try {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
+            validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_SUBSTITUICAO");
+        substituicaoEntityRepository.save(substituicao);
+      } finally {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
+      }
       funcionarioEntityRepository.save(funcionarioSubstituto);
       return new SuccessResponseDTO(true, substituicao.getUuid().toString(),
           "Substituição corrigida e reenviada para validação.", List.of());

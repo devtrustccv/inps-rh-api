@@ -42,6 +42,25 @@
   `setReferenciaUuid(process.getUuid())` no registo (registos antigos não têm; testar com processo novo).
 - Import adicionado: IgrpResponseStatusException. Usa helpers partilhados via referenciaUuid.
 
+## FASE 2 (JaVers) — complicações encontradas (decisão pendente)
+- O detalhe (JaversValidacaoDetalheReadService) consulta SÓ commits carimbados com validacaoUuid, e
+  filtra pela instância via `isAlvo`: tipo==entityTypeSuffix E cdoId==validacao.referenciaId
+  (se referenciaId==null → filtro só-por-tipo).
+- **Anchor OK** (referenciaId == id da entidade auditada, ou null): SituacaoLaboral (refId null→tipo),
+  Substituicao, Rendimento, Desconto, ProcessoDisciplinar. → descriptor + carimbo funcionam limpo.
+- **Anchor MISMATCH**: 
+  - DadosBancarios: validação.referenciaId = funcionario.id; entidade = DadosBancariosEntity.id (colecção).
+    Grid ficaria vazio. Solução: referenciaId null → filtro por tipo (mostra todos os bancários da validação).
+  - Renovacao: validação.referenciaId = contrato.id; alteração real = ContratoHistoricoEntity (datas), id
+    diferente. Grid não casa. Precisa de anchoring próprio (auditar histórico com refId=histórico) — mexe
+    no registo/contagem de renovações. RISCO.
+- **Blast radius**: anotar DefinicaoRemuneracao/DefPagamento/SituacaoLaboral (repos partilhados) faz o
+  auto-audit disparar em MUITOS fluxos (processamento, progressão de carreira), não só na correção.
+  Refs rasas mantêm o commit rápido, mas cresce a JV_* e audita fluxos não relacionados.
+- Feito até agora na Fase 2: JaversAuditConfig refs rasas (Banco/ParamSituacao/ParamSituacaoDetalhe/
+  TiposRelacionamento/TipoMovimento) + 6 repos anotados @JaversSpringDataAuditable. Compila. FALTA
+  descriptors + carimbos.
+
 ## PENDENTE p/ Fase 3 (teste live) — atenção
 - ProcessoDisciplinar: só processos criados APÓS este fix têm referencia_uuid → CORRIGIR só funciona neles.
 - Renovação CORRIGIR: contrato mantém-se A; verificar que após C→P→SIM a renovação consolida igual ao normal.
