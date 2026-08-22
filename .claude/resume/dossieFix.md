@@ -23,4 +23,25 @@ Replicar o ciclo **CORRIGIR** (maker-checker por estado) e a grelha **JaVers** a
 
 ## Next step
 
-Próximos serviços NO-OP para CORRIGIR: `AlterarSituacaoLaboralWriteService:65`, `ValidarDadosBancariosService:51`, etc. + 2ª passagem JaVers (incl. `ValidarRegistoColaboradorService`). Limpar colaboradores de teste (958885+, 958894/95/97). App a correr JDK23 porta 8089.
+**EM CURSO (branch `feat/dossie-corrigir-javers-restantes`)**: CORRIGIR + JaVers nos 7 pontos NO-OP
+restantes. Plano/checklist em `.claude/resume/dossie-corrigir-javers-plan.md`; observações e armadilhas
+em `.claude/resume/dossie-corrigir-javers-obs.md`.
+
+- **FASE 1 (CORRIGIR) COMPLETA** nos 7: DadosBancarios, SituacaoLaboral, RenovacaoContrato, Substituicao,
+  Rendimento, Desconto, ProcessoDisciplinar. Compila (EXIT=0). Padrão "edita-no-validar" (validar=null
+  reenvia C→P). Regime/Declaração/RelacaoLaboral ficaram FORA (sem caminho de validação).
+- **FASE 2 (JaVers auto-audit)**: pendente — anotar repositórios + baseline/carimbo nas mesmas entidades.
+- **FASE 3 (teste live)**: pendente — porta 8089, JDK23. Regra: ler antes de escrever; arrays com id;
+  colaborador novo validado antes de ação nos filhos.
+- **FASE 3 (teste live) COMPLETA**: 7/7 fluxos provados (5 com grelha JaVers). Bug corrigido:
+  ValidationUtil.isCorrigir(null) NPE.
+- **FASE 4 (pedido do user) COMPLETA E PROVADA**: JaVers para DadosBancarios (NIB 77777→66666) +
+  Renovação (Data fim/Duração) via `matchByTypeOnly`; motivo da substituição corrigível (FERIAS→DOENCA);
+  colaborador substituído na grelha por NOME ("Colab PROGRESSAO Teste") via resolver override. Compila,
+  app arranca, grelha ativa p/ 9 referências.
+- **FASE 5 (bug reportado pelo frontend — Mobilidade CORRIGIR "não muda estado")**: DIAGNOSTICADO —
+  o CORRIGIR grava `C` na tabela (funciona), mas a vista `RH_V_MOBILIDADE` CALCULA o estado por datas
+  (A/I) e ignora a coluna de workflow → a lista mostrava "A". FIX no `MobilidadeReadService.getListMobilidade`:
+  sobrepõe o estado da vista com o da TABELA quando é P/C + inclui `C` no filtro. Compila. A testar live.
+- Ao verde: pedir autorização para merge com develop (após verificação do user). NÃO limpar colaboradores
+  de teste (instrução do user).

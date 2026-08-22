@@ -33,7 +33,10 @@ public final class ValidationUtil {
    * implementado, por isso quem chama deve tratá-la como no-op por agora.
    */
   public static boolean isCorrigir(String decision) {
-    return DECISOES_CORRIGIR.contains(normalizeDecision(decision));
+    // Null-safe: List.of(...).contains(null) rebenta com NPE (colecção imutável). No ciclo CORRIGIR o
+    // reenvio do maker vem com decisão a null (não é CORRIGIR) — tem de devolver false, não rebentar.
+    String normalized = normalizeDecision(decision);
+    return normalized != null && DECISOES_CORRIGIR.contains(normalized);
   }
 
   /**

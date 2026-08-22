@@ -7,6 +7,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ProcessoDisciplinarEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
@@ -56,6 +57,8 @@ public class ProcessoDisciplinarWriteService {
     validation.setTipoAccao(TipoAcao.INSERT.name());
     validation.setReferenciaName(Referencia.PROCESSO_DISCIPLINAR.name());
     validation.setReferenciaId(process.getId());
+    // referencia_uuid = uuid do processo — âncora do ciclo CORRIGIR (devolver/reabrir por referenciaUuid).
+    validation.setReferenciaUuid(process.getUuid());
     validation.setTiprelId(tiprel);
     validation.setEstado(Estado.P);
     validation.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -67,18 +70,48 @@ public class ProcessoDisciplinarWriteService {
 
   public SuccessResponseDTO updateProcessoDisciplinar(String processoDisciplinarId, ProcessoDisciplinarRequestDTO request) {
 
-    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
-    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
-    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    var process = processoDisciplinarEntityRepository.findByUuidOrThrow(UUID.fromString(processoDisciplinarId));
+
+    // CORRIGIR (checker devolve ao maker): processo pendente P -> C e validação P -> C, SEM aplicar
+    // payload. O maker corrige e reenvia por este mesmo endpoint com validar=null (C -> P). Âncora =
+    // process.uuid.
     if (ValidationUtil.isCorrigir(request.getValidar())) {
-      LOGGER.info("[CORRIGIR] PROCESSO_DISCIPLINAR (processo={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
-          processoDisciplinarId);
-      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
+      if (!Estado.P.name().equals(process.getEstado())
+          || funcionarioRules.getValidacaoPendenteByReferenciaUuid(process.getUuid(), TipoAcao.INSERT, Referencia.PROCESSO_DISCIPLINAR).isEmpty()) {
+        throw IgrpResponseStatusException.badRequest("Só é possível devolver para correção um processo disciplinar pendente de validação.");
+      }
+      funcionarioRules.devolverParaCorrecao(process.getUuid(), Estado.P, Referencia.PROCESSO_DISCIPLINAR);
+      process.setEstado(Estado.C.name());
+      processoDisciplinarEntityRepository.save(process);
+      LOGGER.info("[CORRIGIR] PROCESSO_DISCIPLINAR devolvido para correção (processo={}).", process.getUuid());
+      return new SuccessResponseDTO(true, process.getUuid().toString(),
+          "Processo disciplinar devolvido para correção.", List.of());
     }
 
-    var process = processoDisciplinarEntityRepository.findByUuidOrThrow(UUID.fromString(processoDisciplinarId));
+    // Guard: processo em correção não pode ser validado antes de reenviado pelo maker.
+    if (Estado.C.name().equals(process.getEstado()) && request.getValidar() != null) {
+      throw IgrpResponseStatusException.badRequest(
+          "Processo disciplinar em correção: não pode ser validado. Corrija e reenvie primeiro.");
+    }
+
     process.setTiprelId(tiposRelacionamentoEntityRepository.findByUuidOrThrow(UUID.fromString(request.getVinculoReferente())));
     populateEntity(request, process);
+
+    // Maker reenvia a correção (C -> P): edições aplicadas acima; reabre para validação.
+    if (Estado.C.name().equals(process.getEstado())) {
+      process.setEstado(Estado.P.name());
+      var validacaoReaberta = funcionarioRules.reabrirParaValidacao(process.getUuid(), Referencia.PROCESSO_DISCIPLINAR);
+      // Auto-audit (JaVers): carimba o save da correção; baseline vem do registo (saveNovoProcessoDisciplinar).
+      try {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
+            validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_PROCESSO_DISCIPLINAR");
+        processoDisciplinarEntityRepository.save(process);
+      } finally {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
+      }
+      return new SuccessResponseDTO(true, process.getUuid().toString(),
+          "Processo disciplinar corrigido e reenviado para validação.", List.of());
+    }
 
     if (request.getValidar() != null && Estado.P.name().equals(process.getEstado())) {
       var novoEstado = "S".equals(request.getValidar()) ? Estado.A : Estado.I;

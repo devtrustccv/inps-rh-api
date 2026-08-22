@@ -1,0 +1,108 @@
+> Plano de execução — CORRIGIR + JaVers nos services restantes do dossiê
+> Branch: `feat/dossie-corrigir-javers-restantes`  ·  Criado: 2026-08-22
+
+## Objetivo (mandato do utilizador)
+
+Entregar **ciclo CORRIGIR (maker-checker por estado)** E **JaVers (auto-audit)** implementados e
+testados live nos 7 pontos NO-OP restantes. Fases à minha escolha desde que:
+- Tudo num branch próprio; ao verde pedir autorização para merge com `develop` (após verificação do user).
+- A CADA service: compilar + handoff `dossieFix`, depois passar ao próximo.
+- Testar live no fim: **leitura antes de escrita**; **arrays reenviados com o seu `id`**; **colaborador
+  novo tem de ser validado ANTES de ação nos filhos** (1ª vez); obs/inconveniências → escrever em md.
+
+## Lista (7 pontos / 6 services)
+
+| # | Service | Ref | Decisão | Âncora | Convenção |
+|---|---------|-----|---------|--------|-----------|
+| 1 | ValidarDadosBancariosService | DADOS_BANCARIOS | UPDATE | funcionario.uuid | enum EstadoValidacao |
+| 2 | AlterarSituacaoLaboralWriteService | ESTADO_COLABORADOR | UPDATE | situacaoLaboral.uuid | enum |
+| 3 | ValidacaoRenovacaoContratoService | RENOVACAO_CONTRATO | UPDATE | contrato.uuid | enum |
+| 4 | SubstituicaoWriteService | SUBSTITUICAO | INSERT | substituicao.uuid | enum |
+| 5 | RenumeracoesWriteService.validarNovoRemuneracao | RENDIMENTO | INSERT | remuneracao.uuid | String (ValidationUtil) |
+| 6 | RenumeracoesWriteService.validarNovoPagamento | DESCONTO | INSERT | pagamento.uuid | String |
+| 7 | ProcessoDisciplinarWriteService.updateProcessoDisciplinar | PROCESSO_DISCIPLINAR | INSERT | process.uuid* | String; estado=String |
+
+\* ProcessoDisciplinar: validação NÃO grava `referencia_uuid` no registo → tratado inline (funId-based),
+  e adiciono `setReferenciaUuid(process.getUuid())` no registo para consistência/JaVers.
+
+## FASE 1 — CORRIGIR (padrão "edita-no-validar", validar=null reenvia C→P)
+
+Padrões consolidados a replicar:
+- **funcionario-centric** (ValidarContratoService): CORRIGIR → `funcionarioRules.devolverParaCorrecao(refUuid, estado, Ref)` + entidade→C + save. Reenvio (validar=null + entidade C) → aplica edições + `reabrirParaValidacao` + entidade→P. Guard: validar!=null com entidade C → 400.
+- **entity-uuid** (MobilidadeWriteService): CORRIGIR no validar() põe entidade+validação em C; reenvio aplica edições + C→P.
+
+- [x] #1 DadosBancarios — CORRIGIR feito, compile EXIT=0
+- [x] #2 SituacaoLaboral — CORRIGIR feito, compile EXIT=0
+- [x] #3 RenovacaoContrato — CORRIGIR feito (+2 helpers no ContratoHistoricoWriteService), compile EXIT=0
+- [x] #4 Substituicao — CORRIGIR feito, compile EXIT=0
+- [x] #5 Rendimento — CORRIGIR feito, compile EXIT=0
+- [x] #6 Desconto — CORRIGIR feito, compile EXIT=0
+- [x] #7 ProcessoDisciplinar — CORRIGIR feito (+referenciaUuid no registo), compile EXIT=0
+
+**FASE 1 COMPLETA — CORRIGIR nos 7. Compila. Falta commit + Fase 2 (JaVers) + Fase 3 (teste live).**
+
+## FASE 2 — JaVers auto-audit (5 entidades limpas; DadosBancarios+Renovacao DEFERIDAS)
+
+Decisão do user: ligar as 5 sem anchor mismatch agora; DadosBancarios (colecção, refId=funcionario) e
+Renovacao (histórico vs contrato.id) ficam para 3ª passagem.
+
+Feito: `JaversAuditConfig` refs rasas (Banco/ParamSituacao/ParamSituacaoDetalhe/TiposRelacionamento/
+TipoMovimento) + 5 repos anotados `@JaversSpringDataAuditable` + 5 descriptors + carimbo
+`ValidacaoAuditContext` no save da correção (baseline já vem do registo via repo anotado).
+
+- [x] SituacaoLaboral (ESTADO_COLABORADOR) — JaVers ligado, compile EXIT=0
+- [x] Substituicao — JaVers ligado, compile EXIT=0
+- [x] Rendimento (RH_T_DEF_REMUNERACOES) — JaVers ligado, compile EXIT=0
+- [x] Desconto (RH_T_DEF_PAGAMENTOS) — JaVers ligado, compile EXIT=0
+- [x] ProcessoDisciplinar — JaVers ligado, compile EXIT=0
+- [ ] (DEFERIDO) DadosBancarios JaVers — anchor refId=funcionario
+- [ ] (DEFERIDO) Renovacao JaVers — anchor histórico vs contrato
+
+**FASE 2 COMPLETA (5). Compila com JDK23.** NB: forçar `JAVA_HOME=/c/Program Files/Eclipse Adoptium/jdk-23.0.2.7-hotspot` no mvn.
+
+## FASE 3 — Teste live (porta 8089, JDK23) — colaborador 958897
+
+- [x] ProcessoDisciplinar — CORRIGIR + JaVers PROVADO
+- [x] Rendimento — CORRIGIR + JaVers PROVADO
+- [x] Desconto — CORRIGIR + JaVers PROVADO
+- [x] SituacaoLaboral — CORRIGIR + JaVers PROVADO
+- [x] DadosBancarios — CORRIGIR PROVADO (JaVers deferido)
+- [x] Substituicao — CORRIGIR + JaVers PROVADO (Observações subst diff→SUBST CORRIGIDA). Setup: tiprel
+      salario substituto=100000 < substituído=186980 (o cálculo usa tiprel.salario, não def_remuneracoes).
+- [x] Renovacao — CORRIGIR PROVADO (contrato 698 convertido p/ tipo 1 renovável; data corrigida
+      2027-06-30 aplicada ao contrato no SIM; contrato mantém-se A durante a correção).
+- [x] BUG corrigido: ValidationUtil.isCorrigir(null) NPE.
+
+**7/7 fluxos live-provados (5 com grelha JaVers). VERDE.**
+Ao verde: pedir autorização para merge com develop.
+
+## FASE 4 — JaVers DadosBancarios + Renovacao; motivo substituição; colaborador substituído
+
+Pedido do utilizador (2026-08-22). Mesmo processo: compilar+handoff por item, depois teste live.
+
+Abordagem (análise):
+- `ValidacaoDetalheDescriptor` ganha `default boolean matchByTypeOnly()` (=false). No read service,
+  `referenciaId = matchByTypeOnly ? null : validacao.getReferenciaId()` → filtro só-por-tipo. Resolve o
+  anchor mismatch de DadosBancarios (colecção, refId=funcionario) e Renovacao (histórico vs contrato.id).
+- DadosBancarios: anotar repo; injetar repo no service e `saveAll` explícito (baseline no edit normal,
+  carimbado na correção); descriptor matchByTypeOnly=true (DadosBancariosEntity).
+- Renovacao: anotar ContratoHistoricoEntityRepository; `reabrirRenovacaoCorrecao` grava via repo;
+  carimbo na correção (RH_T_CONTRATO_HISTORICO); descriptor matchByTypeOnly=true (ContratoHistoricoEntity).
+- Ponto 1: `SubstituicaoWriteService.validar()` passa a gravar `motivo` (setMotivo).
+- Ponto 2: `ReferenciaNomeResolver` override TiposRelacionamentoEntity→funId.nome (+ getNmBanco nos
+  candidatos p/ Banco); `substituidoTiprelId` no descriptor; carimbar o REGISTO da substituição
+  (baseline INSERT → grelha mostra "criado com" incl. substituído).
+
+- [x] Infra: matchByTypeOnly + resolver (override tiprel→funId.nome, getNmBanco)
+- [x] DadosBancarios JaVers — PROVADO (NIB 77777→66666)
+- [x] Renovacao JaVers — PROVADO (Data fim 2028-06-30→2027-12-31; Duração 12→6)
+- [x] Ponto 1 motivo substituição — PROVADO (Motivo FERIAS→DOENCA)
+- [x] Ponto 2 substituído — PROVADO (Colaborador substituído → "Colab PROGRESSAO Teste", NOME)
+- [x] Compila EXIT=0; app arranca; grelha ativa p/ 9 referências.
+
+**FASE 4 COMPLETA E PROVADA. Todos os 9 fluxos com grelha JaVers + 7 ciclos CORRIGIR verdes.**
+Ao verde: pedir autorização para merge com develop.
+
+## Notas
+- Obs/inconveniências em `.claude/resume/dossie-corrigir-javers-obs.md`.
+- Compile rápido: `JAVA_HOME=...jdk-23; mvn -q -DskipTests compile`.

@@ -1,6 +1,7 @@
 package cv.inps.rh.shared.application.service;
 
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.javers.core.metamodel.object.GlobalId;
@@ -37,7 +38,7 @@ public class ReferenciaNomeResolver {
 
   /** Getters candidatos a "rótulo de exibição", por ordem de preferência. */
   private static final List<String> GETTERS_CANDIDATOS =
-      List.of("getNome", "getDesignacao", "getDescricao", "getTitulo", "getNomeCompleto", "getLabel");
+      List.of("getNome", "getDesignacao", "getDescricao", "getTitulo", "getNomeCompleto", "getLabel", "getNmBanco");
 
   /**
    * Overrides por tipo, para entidades que não sigam a convenção. Chave = nome do tipo JaVers (FQN da
@@ -52,6 +53,13 @@ public class ReferenciaNomeResolver {
         String composto = (esc.getNivelReferencia() != null ? esc.getNivelReferencia() : "")
             + (esc.getEscalao() != null ? esc.getEscalao() : "");
         return composto.isBlank() ? esc.getCodigo() : composto;
+      },
+      // Tipo de relacionamento (tiprel): não tem nome próprio; o rótulo legível é o NOME do funcionário
+      // a que pertence. Usado ex.: no "Colaborador substituído" da grelha da Substituição, onde o campo
+      // é o substituidoTiprelId (FK para o tiprel do substituído).
+      TiposRelacionamentoEntity.class.getName(), e -> {
+        var tr = (TiposRelacionamentoEntity) e;
+        return tr.getFunId() != null ? tr.getFunId().getNome() : null;
       });
 
   private final EntityManager entityManager;

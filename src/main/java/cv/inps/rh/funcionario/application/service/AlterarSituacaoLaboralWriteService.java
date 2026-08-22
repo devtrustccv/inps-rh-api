@@ -13,6 +13,7 @@ import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
+import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AusenciaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SituacaoLaboralEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoRelRemPagEntity;
@@ -56,21 +57,40 @@ public class AlterarSituacaoLaboralWriteService {
 
     var dto = command.getAlterarsituacaolaboral();
 
-    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
-    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
-    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
-    if (EstadoValidacao.CORRIGIR.equals(dto.getValidar())) {
-      LOGGER.info("[CORRIGIR] ESTADO_COLABORADOR (funcionario={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
-          command.getId());
-      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
-    }
-
     var funcionarioPublicId = IdentificadorUnico.from(command.getId()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
+
+    // CORRIGIR (checker devolve ao maker): situação pendente P -> C e validação P -> C, SEM aplicar
+    // payload. O maker corrige e reenvia por este mesmo endpoint com validar=null (C -> P). Âncora =
+    // situacaoLaboral.uuid (referencia_uuid da validação UPDATE/ESTADO_COLABORADOR).
+    if (EstadoValidacao.CORRIGIR.equals(dto.getValidar())) {
+      var tiprelParaCorrigir = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+      var sitParaCorrigir = tiprelParaCorrigir.getSituacLaboralId();
+      if (sitParaCorrigir == null || sitParaCorrigir.getEstado() != Estado.P
+          || !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.ESTADO_COLABORADOR)) {
+        throw IgrpResponseStatusException.badRequest(
+            "Não há alteração de situação laboral pendente para devolver para correção.");
+      }
+      funcionarioRules.devolverParaCorrecao(sitParaCorrigir.getUuid(), Estado.P, Referencia.ESTADO_COLABORADOR);
+      sitParaCorrigir.setEstado(Estado.C);
+      tiprelParaCorrigir.setEstado(Estado.C);
+      funcionarioEntityRepository.saveAndFlush(funcionario);
+      LOGGER.info("[CORRIGIR] ESTADO_COLABORADOR devolvido para correção (situacao={}).", sitParaCorrigir.getUuid());
+      return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
+          "Situação laboral devolvida para correção.", List.of());
+    }
 
     var paramSituacaoLaboral = paramSitLaboralEntityRepository.getReferenceById(dto.getSituacaoLaboralId());
     var paramSituacaoLaboralDetalhe = dto.getMotivoId() != null
         ? paramSituacaoDetalheEntityRepository.getReferenceById(dto.getMotivoId()) : null;
+
+    // Guard: um registo em correção (C) não pode ser validado antes de reenviado pelo maker.
+    boolean estaPorCorrigir = funcionarioRules.temValidacaoPorCorrigir(funcionario.getUuid(), TipoAcao.UPDATE,
+        Referencia.ESTADO_COLABORADOR);
+    if (estaPorCorrigir && dto.getValidar() != null) {
+      throw IgrpResponseStatusException.badRequest(
+          "Situação laboral em correção: não pode ser validada. Corrija e reenvie primeiro.");
+    }
 
     if (dto.getValidar() != null && !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE,
         Referencia.ESTADO_COLABORADOR)) {
@@ -134,6 +154,37 @@ public class AlterarSituacaoLaboralWriteService {
 
     var tiposRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(tiposRelacionamentoAtual.getEstado());
+
+    // Maker reenvia a correção (C -> P): a situação atual está em correção. Aplica as edições in place
+    // no registo devolvido e reabre para validação — SEM criar novo tipos_relacionamento (a correção é
+    // sobre o mesmo registo que o checker devolveu).
+    if (estaPorCorrigir) {
+      var sit = tiposRelacionamentoAtual.getSituacLaboralId();
+      if (sit == null) {
+        throw IgrpResponseStatusException.badRequest("Situação laboral em correção não encontrada.");
+      }
+      sit.setSituacaoLaboralId(paramSituacaoLaboral);
+      sit.setMotivoSitLabId(paramSituacaoLaboralDetalhe);
+      sit.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
+      sit.setDataInicio(dataInicio);
+      sit.setDataFim(dataFim);
+      sit.setEstado(Estado.P);
+      tiposRelacionamentoAtual.setEstado(Estado.P);
+      tiposRelacionamentoAtual.setFlgProcessa(
+          Integer.valueOf(1).equals(paramSituacaoLaboral.getFlgRemuneracao()) ? 1 : 0);
+      var validacaoReaberta = funcionarioRules.reabrirParaValidacao(sit.getUuid(), Referencia.ESTADO_COLABORADOR);
+      // Auto-audit (JaVers): carimba o save da correção com a validação em curso — o detalhe de
+      // alterações filtra por este validacaoUuid. O baseline já existe do registo da situação.
+      try {
+        ValidacaoAuditContext.set(validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_SITUACAO_LABORAL");
+        situacaoLaboralEntityRepository.save(sit);
+      } finally {
+        ValidacaoAuditContext.clear();
+      }
+      funcionarioEntityRepository.saveAndFlush(funcionario);
+      return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
+          "Situação laboral corrigida e reenviada para validação.", List.of());
+    }
 
     // Caso de teste (Situação Laboral): só há registo novo quando muda Situação/Motivo E o registo
     // atual já foi processado. Se mudou mas ainda não processado → apenas UPDATE. Sem alteração → nada.
