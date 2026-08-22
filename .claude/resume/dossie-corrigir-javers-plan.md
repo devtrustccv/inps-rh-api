@@ -67,11 +67,13 @@ TipoMovimento) + 5 repos anotados `@JaversSpringDataAuditable` + 5 descriptors +
 - [x] Desconto — CORRIGIR + JaVers PROVADO
 - [x] SituacaoLaboral — CORRIGIR + JaVers PROVADO
 - [x] DadosBancarios — CORRIGIR PROVADO (JaVers deferido)
-- [ ] Substituicao — BLOQUEADO (dados: sem diferença salarial). Código = padrão provado.
-- [ ] Renovacao — BLOQUEADO (parametrização: contrato indeterminado não renovável). Código compila.
+- [x] Substituicao — CORRIGIR + JaVers PROVADO (Observações subst diff→SUBST CORRIGIDA). Setup: tiprel
+      salario substituto=100000 < substituído=186980 (o cálculo usa tiprel.salario, não def_remuneracoes).
+- [x] Renovacao — CORRIGIR PROVADO (contrato 698 convertido p/ tipo 1 renovável; data corrigida
+      2027-06-30 aplicada ao contrato no SIM; contrato mantém-se A durante a correção).
 - [x] BUG corrigido: ValidationUtil.isCorrigir(null) NPE.
 
-**5/7 fluxos live-provados. 2 bloqueados por dados/parametrização (não por código).**
+**7/7 fluxos live-provados (5 com grelha JaVers). VERDE.**
 Ao verde: pedir autorização para merge com develop.
 
 ## Notas

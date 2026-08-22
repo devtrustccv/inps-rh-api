@@ -77,13 +77,18 @@
 - ✅ **Desconto** — CORRIGIR + JaVers [Valor 3000→4200]. PROVADO.
 - ✅ **SituacaoLaboral** — CORRIGIR + JaVers [Observações OBS INICIAL→OBS CORRIGIDA]. PROVADO.
 - ✅ **DadosBancarios** — CORRIGIR (P→C→P→A, nib editado). PROVADO. (JaVers deferido — sem grelha.)
-- ⚠️ **Substituicao** — BLOQUEADO por dados: o cálculo (proc CALCULAR_SUBSTITUICAO) não gera diferença
-  salarial com 958894/95/97 (vencimentos duplicados/iguais) → substituição nasce A, sem validação
-  pendente para CORRIGIR. Código idêntico em padrão aos 5 provados; compila; descriptor ativo no log.
-  Para provar live: colaborador substituto com salário claramente inferior ao substituído.
-- ⚠️ **Renovacao** — BLOQUEADO por parametrização: contrato tipo 2 (Indeterminado) NÃO é renovável;
-  958894/95/97 têm contrato indeterminado. Código CORRIGIR+helpers de histórico compilam. Para provar
-  live: colaborador novo com contrato a prazo (renovável), validado, depois renovação.
+- ✅ **Substituicao** — CORRIGIR (C→P→A) + JaVers [Observações subst diff→SUBST CORRIGIDA]. PROVADO.
+  NB: o cálculo de diferença usa `tiprel.salario` (NÃO def_remuneracoes) — baixei tiprel.salario do
+  substituto (173328) p/ 100000 (<186980) para gerar diferença → substituição nasce P. vuuid
+  01a028e5-f52d-7324-9b49-17c3806155c4.
+- ✅ **Renovacao** — CORRIGIR (C→P→A). PROVADO. Setup: contrato 698 convertido p/ tipo 1 (renovável)
+  + data_fim. Data corrigida no reenvio (2027-06-30) aplicou-se ao contrato SÓ no SIM; contrato manteve-se
+  A durante a correção; histórico pendente C→P→(consolidação). (JaVers da renovacao continua deferido.)
+
+### Mutações de dados de teste feitas (colaborador 958897 — NÃO limpar per instrução)
+- tiprel 173328 (atual do 958897): salario 186980 → 100000 (para diferença de substituição).
+- contrato 698: tp_contrato_id 2→1, data_fim → 2027-06-30 (renovação consolidada).
+- def_remuneracoes 1426: mexido e RESTAURADO a 'A'.
 
 ### App/infra
 - App a correr: mvn spring-boot:run (JDK23), .env carregado sem `source`. Log em scratchpad/app_live.log.
