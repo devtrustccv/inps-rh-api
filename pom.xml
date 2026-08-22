@@ -44,10 +44,10 @@
     </properties>
     <dependencies>
 
-        <!-- <dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
-        </dependency> -->
+        </dependency>
 
         <!-- Source: https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
         <dependency>
@@ -103,7 +103,7 @@
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc11</artifactId>
-            <version>23.26.1.0.0</version>
+            <version>23.26.3.0.0</version>
         </dependency>
 
         <dependency>
@@ -202,7 +202,7 @@
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-pdf</artifactId>
-            <version>10.0.6</version>
+            <version>10.0.7</version>
             <scope>compile</scope>
         </dependency>
 
