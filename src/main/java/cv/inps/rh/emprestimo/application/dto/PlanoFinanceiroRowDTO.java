@@ -12,6 +12,8 @@ public record PlanoFinanceiroRowDTO(
 
     Long numero,
 
+    String estado,
+
     LocalDate dataPagamento,
 
     @JsonSerialize(using = PlanoFinanceiroSerializer.class)

@@ -3,7 +3,7 @@ package cv.inps.rh.emprestimo.application.commands;
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
 import cv.inps.rh.emprestimo.application.dto.IdDTO;
-import cv.inps.rh.emprestimo.domain.service.process.PedidoAquisicaoViaturaService;
+import cv.inps.rh.emprestimo.domain.service.process.AquisicaoViaturaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -16,9 +16,9 @@ public class SaveEmprestimoCommandHandler implements CommandHandler<SaveEmpresti
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SaveEmprestimoCommandHandler.class);
 
-  private final PedidoAquisicaoViaturaService service;
+  private final AquisicaoViaturaService service;
 
-  public SaveEmprestimoCommandHandler(PedidoAquisicaoViaturaService service) {
+  public SaveEmprestimoCommandHandler(AquisicaoViaturaService service) {
     this.service = service;
   }
 

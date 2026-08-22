@@ -12,10 +12,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoDecisaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.PlanoFinanceiroEntityRepository;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,13 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReforcoDividaService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ReforcoDividaService.class);
-
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
   private final PedidoEntityRepository pedidoEntityRepository;
   private final EmprestimoDocumentService documentService;
-  private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
   private final EmprestimoHelper adiantamentoEmprestimoHelper;
 
   public String saveUpdatePedidoReforco(PedidoReforcoRequestDTO obj) {
@@ -85,9 +79,6 @@ public class ReforcoDividaService {
 
       newLoan.setEstado(StatusEmprestimo.SUBMETIDO.name());
       newLoan = emprestimoEntityRepository.save(newLoan);
-
-      var rowsInactivated = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
-      LOGGER.debug("INACTIVATED {} ROWS FOR LOAN ID <{}> : ", rowsInactivated, loan.getId());
 
       adiantamentoEmprestimoHelper.saveByTipoSituacao(
           tipoSituacao,

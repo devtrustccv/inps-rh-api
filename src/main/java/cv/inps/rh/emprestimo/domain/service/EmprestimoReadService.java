@@ -151,6 +151,8 @@ public class EmprestimoReadService {
 
   public EmprestimoListDTO listLoans(ListarEmprestimosQuery query) {
 
+    // TODO 22/08/2026 16:50 return for each order the latest loan here
+
     var page = Integer.parseInt(query.getPage());
     var size = Integer.parseInt(query.getSize());
     var pageable = PageRequest.of(page, size, Sort.by("id").descending());
@@ -206,6 +208,7 @@ public class EmprestimoReadService {
         .stream()
         .map(obj -> new PlanoFinanceiroRowDTO(
             obj.getNrOrdemPrestacao(),
+            obj.getEstado(),
             obj.getDataPagamento(),
             obj.getSaldoInicial(),
             NumberUtils.sum(obj.getValorPrincipal(), obj.getValorJuros()),

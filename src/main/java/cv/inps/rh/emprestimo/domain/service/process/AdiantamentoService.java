@@ -15,8 +15,6 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,12 +23,7 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 @Service
-public class AdiantamentoEmprestimoService {
-
-  // TODO 21/08/2026 17:33 caso emprestimo senao forem validados positivamente activar ou desativar os planos
-  // TODO 21/08/2026 17:34 copiar planos pagos do emprestimo inicial para o reforço ou adinatmento
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(AdiantamentoEmprestimoService.class);
+public class AdiantamentoService {
 
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;
@@ -39,6 +32,8 @@ public class AdiantamentoEmprestimoService {
   private final EmprestimoDocumentService documentService;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
   private final EmprestimoHelper emprestimoHelper;
+
+  // todo caso emprestimo senao forem validados positivamente activar ou desativar os planos
 
   @Transactional
   public String saveUpdatePedidoAdiantamento(PedidoAdiantamentoRequestDTO obj) {
@@ -93,8 +88,6 @@ public class AdiantamentoEmprestimoService {
 
       newLoan.setEstado(StatusEmprestimo.SUBMETIDO.name());
       newLoan = emprestimoEntityRepository.save(newLoan);
-
-      var rowsInactivated = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(initialLoan.getId());
 
       emprestimoHelper.saveByTipoSituacao(
           tipoSituacao,

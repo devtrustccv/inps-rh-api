@@ -1,8 +1,12 @@
 package cv.inps.rh.emprestimo.domain.service.process;
 
+import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
 import cv.inps.rh.emprestimo.domain.service.FinancialPlanHelper;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoSituacao;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.PlanoFinanceiroEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EmprestimoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.PlanoFinanceiroEntityRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +19,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 
 @Transactional
 @RequiredArgsConstructor
@@ -26,97 +32,152 @@ public class EmprestimoHelper {
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
 
-  public void saveByTipoSituacao(TipoSituacao tipoSituacao, EmprestimoEntity loan, BigDecimal value, Long newNumeroPrestacao) {
+  public void saveByTipoSituacao(TipoSituacao tipoSituacao, EmprestimoEntity newLoan, BigDecimal value, Long newNumeroPrestacao) {
 
-    // TODO 21/08/2026 17:29 registar planos pagos em caso de haver para o novo emprestimo adinatamento ou reforço
+    var initialLoan = newLoan.getEmprestimo();
 
-    LOGGER.debug("TIPO SITUACAO: {}, LOAN ID: {}, VALUE: {}, NUMERO PRESTACOES: {}", tipoSituacao, loan.getId(), value, newNumeroPrestacao);
+    LOGGER.debug("TIPO SITUACAO: {}, LOAN ID: {}, VALUE: {}, NUMERO PRESTACOES: {}", tipoSituacao, newLoan.getId(), value, newNumeroPrestacao);
 
-    var allPlans = planoFinanceiroEntityRepository.findAllByEmprestimo(loan);
-
-    var numberOfPaidPrestations = allPlans.stream()
+    var allInitialPlans = planoFinanceiroEntityRepository.findAllByEmprestimo(initialLoan);
+    var allInitialPaidPlans = allInitialPlans.stream()
         .filter(obj -> "PAGO".equals(obj.getFlgPago()))
-        .count();
+        .toList();
+    var numberOfPaidPlans = allInitialPaidPlans.size();
+    var firstNewPlanNumber = numberOfPaidPlans + 1L;
+
+    copyPaidPlans(allInitialPaidPlans, newLoan);
+
+    planoFinanceiroEntityRepository.inativarPlanos(initialLoan.getId());
 
     // adiantamento valor, valor em divida diminui , valor pago , valor adiantado
     // adiantamento na prestacao, diminuir numero de prestacao e valor prestacao
-
     // reforço mexe com valor em divida e com valor reforço
-    // reforço sobre prestacao mexe com valor prestacao e com numero de pretacao
+    // reforço sobre prestacao mexe com valor prestacao e com numero de prestacao
 
-    var startDate = loan.getDataInicio() != null ? loan.getDataInicio() : LocalDate.now(ZoneId.systemDefault());
+    var startDate = newLoan.getDataInicio() != null ? newLoan.getDataInicio() : LocalDate.now(ZoneId.systemDefault());
+
+    List<PlanoFinanceiroRowDTO> newPlans = new ArrayList<>();
 
     switch (tipoSituacao) {
       case REFORCO_AUMENTO_VALOR -> {
 
-        var numeroPrestacoes = (loan.getNrPrestacao() - numberOfPaidPrestations);
+        var numeroPrestacoes = (newLoan.getNrPrestacao() - numberOfPaidPlans);
 
-        loan.setValorReforco(value);
-        loan.setValorDivida(loan.getValorDivida().add(value));
-        emprestimoEntityRepository.save(loan);
+        newLoan.setValorReforco(value);
+        newLoan.setValorDivida(newLoan.getValorDivida().add(value));
+        emprestimoEntityRepository.save(newLoan);
 
-        FinancialPlanHelper.generateFinancialPlan(
-            loan.getValorDivida(),
-            loan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
+        newPlans = FinancialPlanHelper.generateFinancialPlan(
+            newLoan.getValorDivida(),
+            newLoan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
             (int) numeroPrestacoes,
-            startDate
+            startDate,
+            firstNewPlanNumber
         );
       }
       case REFORCO_AUMENTO_PRESTACAO, ADIANTAMENTO_DIMINUICAO_PRESTACAO -> {
 
-        loan.setNrPrestacao(newNumeroPrestacao);
-        emprestimoEntityRepository.save(loan);
+        newLoan.setNrPrestacao(newNumeroPrestacao);
+        emprestimoEntityRepository.save(newLoan);
 
-        FinancialPlanHelper.generateFinancialPlan(
-            loan.getValorDivida(),
-            loan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
+        newPlans = FinancialPlanHelper.generateFinancialPlan(
+            newLoan.getValorDivida(),
+            newLoan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
             newNumeroPrestacao.intValue(),
-            startDate
+            startDate,
+            firstNewPlanNumber
         );
       }
       case REFORCO_AUMENTO_VALOR_AUMENTO_PRESTACAO -> {
 
-        loan.setNrPrestacao(newNumeroPrestacao);
-        loan.setValorReforco(value);
-        loan.setValorDivida(loan.getValorDivida().subtract(value));
-        emprestimoEntityRepository.save(loan);
+        newLoan.setNrPrestacao(newNumeroPrestacao);
+        newLoan.setValorReforco(value);
+        newLoan.setValorDivida(newLoan.getValorDivida().subtract(value));
+        emprestimoEntityRepository.save(newLoan);
 
-        FinancialPlanHelper.generateFinancialPlan(
-            loan.getValorDivida(),
-            loan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
+        newPlans = FinancialPlanHelper.generateFinancialPlan(
+            newLoan.getValorDivida(),
+            newLoan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
             newNumeroPrestacao.intValue(),
-            startDate
+            startDate,
+            firstNewPlanNumber
         );
       }
       case ADIANTAMENTO_PAGAMENTO_ANTECIPADO -> {
 
-        var numeroPrestacoes = (loan.getNrPrestacao() - numberOfPaidPrestations);
+        var numeroPrestacoes = (newLoan.getNrPrestacao() - numberOfPaidPlans);
 
-        loan.setValorAdiantado(value);
-        loan.setValorDivida(loan.getValorDivida().subtract(value));
-        emprestimoEntityRepository.save(loan);
+        newLoan.setValorAdiantado(value);
+        newLoan.setValorDivida(newLoan.getValorDivida().subtract(value));
+        emprestimoEntityRepository.save(newLoan);
 
-        FinancialPlanHelper.generateFinancialPlan(
-            loan.getValorDivida(),
-            loan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
+        newPlans = FinancialPlanHelper.generateFinancialPlan(
+            newLoan.getValorDivida(),
+            newLoan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
             (int) numeroPrestacoes,
-            startDate
+            startDate,
+            firstNewPlanNumber
         );
       }
       case ADIANTAMENTO_PAGAMENTO_ANTECIPADO_DIMINUICAO_PRESTACAO -> {
 
-        loan.setValorAdiantado(value);
-        loan.setNrPrestacao(newNumeroPrestacao);
-        loan.setValorDivida(loan.getValorDivida().subtract(value));
-        emprestimoEntityRepository.save(loan);
+        newLoan.setValorAdiantado(value);
+        newLoan.setNrPrestacao(newNumeroPrestacao);
+        newLoan.setValorDivida(newLoan.getValorDivida().subtract(value));
+        emprestimoEntityRepository.save(newLoan);
 
-        FinancialPlanHelper.generateFinancialPlan(
-            loan.getValorDivida(),
-            loan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
+        newPlans = FinancialPlanHelper.generateFinancialPlan(
+            newLoan.getValorDivida(),
+            newLoan.getJuro().divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP),
             newNumeroPrestacao.intValue(),
-            startDate
+            startDate,
+            firstNewPlanNumber
         );
       }
     }
+
+    savePlans(newLoan, newPlans);
+  }
+
+  public void savePlans(EmprestimoEntity entity, List<PlanoFinanceiroRowDTO> plan) {
+    var plans = plan.stream()
+        .map(obj -> {
+          var newPlan = new PlanoFinanceiroEntity();
+          newPlan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+          newPlan.setEstado(Estado.A.name());
+          newPlan.setEmprestimo(entity);
+          newPlan.setDataPagamento(obj.dataPagamento());
+          newPlan.setNrOrdemPrestacao(obj.numero());
+          newPlan.setValorPrincipal(obj.principal());
+          newPlan.setValorJuros(obj.juros());
+          newPlan.setSaldoInicial(obj.saldoInicial());
+          newPlan.setSaldoFinal(obj.saldoFinal());
+          return newPlan;
+        })
+        .toList();
+    planoFinanceiroEntityRepository.saveAll(plans);
+  }
+
+  private void copyPaidPlans(List<PlanoFinanceiroEntity> allInitialPaidPlans, EmprestimoEntity newLoan) {
+    var paidPlans = allInitialPaidPlans.stream()
+        .map(obj -> {
+          var copiedPlan = new PlanoFinanceiroEntity();
+          copiedPlan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+          copiedPlan.setEstado(Estado.A.name());
+          copiedPlan.setEmprestimo(newLoan);
+          copiedPlan.setNrOrdemPrestacao(obj.getNrOrdemPrestacao());
+          copiedPlan.setDataPagamento(obj.getDataPagamento());
+          copiedPlan.setValorPrincipal(obj.getValorPrincipal());
+          copiedPlan.setValorJuros(obj.getValorJuros());
+          copiedPlan.setFlgPago(obj.getFlgPago());
+          copiedPlan.setValorPago(obj.getValorPago());
+          copiedPlan.setDefpId(obj.getDefpId());
+          copiedPlan.setSaldoInicial(obj.getSaldoInicial());
+          copiedPlan.setSaldoFinal(obj.getSaldoFinal());
+          return copiedPlan;
+        })
+        .toList();
+
+    planoFinanceiroEntityRepository.saveAll(paidPlans);
   }
 }

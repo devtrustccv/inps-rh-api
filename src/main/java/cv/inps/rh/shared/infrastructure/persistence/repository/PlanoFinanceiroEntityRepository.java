@@ -24,7 +24,7 @@ public interface PlanoFinanceiroEntityRepository extends
   @Query("""
           UPDATE PlanoFinanceiroEntity p
              SET p.estado = 'I'
-           WHERE p.emprestimo.id = :emprestimoId AND p.flgPago <> 'PAGO'
+           WHERE p.emprestimo.id = :emprestimoId
       """)
-  int inativarPlanosNaoPagos(@Param("emprestimoId") Long emprestimoId);
+  void inativarPlanos(@Param("emprestimoId") Long emprestimoId);
 }
