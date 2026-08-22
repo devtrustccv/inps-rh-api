@@ -31,7 +31,7 @@ public class ReforcoDividaService {
   private final PedidoEntityRepository pedidoEntityRepository;
   private final EmprestimoDocumentService documentService;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
-  private final AdiantamentoEmprestimoHelper adiantamentoEmprestimoHelper;
+  private final EmprestimoHelper adiantamentoEmprestimoHelper;
 
   public String saveUpdatePedidoReforco(PedidoReforcoRequestDTO obj) {
 

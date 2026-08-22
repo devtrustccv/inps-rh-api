@@ -20,6 +20,8 @@ import java.util.UUID;
 @IgrpDTO
 public class EmprestimoListRowDTO  {
 
+  private UUID pedidoId;
+
   private UUID funcionarioId;
 
   private String tipoSituacao ;

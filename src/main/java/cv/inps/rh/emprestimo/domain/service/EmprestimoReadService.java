@@ -153,7 +153,7 @@ public class EmprestimoReadService {
 
     var page = Integer.parseInt(query.getPage());
     var size = Integer.parseInt(query.getSize());
-    var pageable = PageRequest.of(page, size, Sort.by("dataInicio").descending());
+    var pageable = PageRequest.of(page, size, Sort.by("id").descending());
 
     var pageData = emprestimoEntityRepository.listLoans(
         StringUtils.hasText(query.getTipoEmprestimo()) ? query.getTipoEmprestimo() : null,

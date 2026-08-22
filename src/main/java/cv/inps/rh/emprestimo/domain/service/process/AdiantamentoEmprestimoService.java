@@ -27,6 +27,9 @@ import java.util.List;
 @Service
 public class AdiantamentoEmprestimoService {
 
+  // TODO 21/08/2026 17:33 caso emprestimo senao forem validados positivamente activar ou desativar os planos
+  // TODO 21/08/2026 17:34 copiar planos pagos do emprestimo inicial para o reforço ou adinatmento
+
   private static final Logger LOGGER = LoggerFactory.getLogger(AdiantamentoEmprestimoService.class);
 
   private final EmprestimoEntityRepository emprestimoEntityRepository;
@@ -35,12 +38,12 @@ public class AdiantamentoEmprestimoService {
   private final BancoEntityRepository bancoEntityRepository;
   private final EmprestimoDocumentService documentService;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
-  private final AdiantamentoEmprestimoHelper adiantamentoEmprestimoHelper;
+  private final EmprestimoHelper emprestimoHelper;
 
   @Transactional
   public String saveUpdatePedidoAdiantamento(PedidoAdiantamentoRequestDTO obj) {
 
-    var loan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
+    var initialLoan = emprestimoEntityRepository.findByUuidOrThrow(obj.getEmprestimoId());
 
     var tipoSituacao = TipoSituacao.valueOf(obj.getTipoSituacao());
 
@@ -49,39 +52,39 @@ public class AdiantamentoEmprestimoService {
     newLoan.setValorAdiantado(obj.getValorAdiantamento());
     newLoan.setTipoEmprestimo(TipoPedido.AQUISICAO_VIATURA.name());
     newLoan.setTipoSituacao(tipoSituacao.name());
-    newLoan.setVersao(loan.getVersao() + 1);
+    newLoan.setVersao(initialLoan.getVersao() + 1);
     newLoan.setValorDivida(obj.getValorAdiantamento());
     newLoan.setValorEmprestimo(obj.getValorAdiantamento());
-    newLoan.setEmprestimo(loan);
+    newLoan.setEmprestimo(initialLoan);
     newLoan.setNrPrestacao(obj.getNumeroPrestacao());
     newLoan.setEstado(StatusEmprestimo.POR_SUBMETER.name());
-    newLoan.setPedido(loan.getPedido());
-    newLoan.setJuro(loan.getJuro());
-    newLoan.setTiprel(loan.getTiprel());
-    newLoan.setMarca(loan.getMarca());
-    newLoan.setAnoFabrico(loan.getAnoFabrico());
-    newLoan.setCilincrada(loan.getCilincrada());
-    newLoan.setTipoViatura(loan.getTipoViatura());
-    newLoan.setCombustivel(loan.getCombustivel());
-    newLoan.setEstadoViatura(loan.getEstadoViatura());
-    newLoan.setBanco(loan.getBanco());
-    newLoan.setNib(loan.getNib());
-    newLoan.setNif(loan.getNif());
-    newLoan.setSwift(loan.getSwift());
-    newLoan.setValorPrestacao(loan.getValorPrestacao());
-    newLoan.setDescTaxaEsforco(loan.getDescTaxaEsforco());
-    newLoan.setRenogociacao(loan.getRenogociacao());
-    newLoan.setTmId(loan.getTmId());
-    newLoan.setFinalidade(loan.getFinalidade());
-    newLoan.setTipoRenogociacao(loan.getTipoRenogociacao());
-    newLoan.setMotivoFecho(loan.getMotivoFecho());
-    newLoan.setValorReforco(loan.getValorReforco());
-    newLoan.setValorJuroTotal(loan.getValorJuroTotal());
+    newLoan.setPedido(initialLoan.getPedido());
+    newLoan.setJuro(initialLoan.getJuro());
+    newLoan.setTiprel(initialLoan.getTiprel());
+    newLoan.setMarca(initialLoan.getMarca());
+    newLoan.setAnoFabrico(initialLoan.getAnoFabrico());
+    newLoan.setCilincrada(initialLoan.getCilincrada());
+    newLoan.setTipoViatura(initialLoan.getTipoViatura());
+    newLoan.setCombustivel(initialLoan.getCombustivel());
+    newLoan.setEstadoViatura(initialLoan.getEstadoViatura());
+    newLoan.setBanco(initialLoan.getBanco());
+    newLoan.setNib(initialLoan.getNib());
+    newLoan.setNif(initialLoan.getNif());
+    newLoan.setSwift(initialLoan.getSwift());
+    newLoan.setValorPrestacao(initialLoan.getValorPrestacao());
+    newLoan.setDescTaxaEsforco(initialLoan.getDescTaxaEsforco());
+    newLoan.setRenogociacao(initialLoan.getRenogociacao());
+    newLoan.setTmId(initialLoan.getTmId());
+    newLoan.setFinalidade(initialLoan.getFinalidade());
+    newLoan.setTipoRenogociacao(initialLoan.getTipoRenogociacao());
+    newLoan.setMotivoFecho(initialLoan.getMotivoFecho());
+    newLoan.setValorReforco(initialLoan.getValorReforco());
+    newLoan.setValorJuroTotal(initialLoan.getValorJuroTotal());
     newLoan = emprestimoEntityRepository.save(newLoan);
 
     documentService.saveDocuments(
         obj.getDocumentos(),
-        loan.getTiprel().getFunId(),
+        initialLoan.getTiprel().getFunId(),
         newLoan.getUuid(),
         ReferenceName.RH_T_EMPRESTIMO + "_" + EtapaEmprestimo.PEDIDO.name()
     );
@@ -91,10 +94,9 @@ public class AdiantamentoEmprestimoService {
       newLoan.setEstado(StatusEmprestimo.SUBMETIDO.name());
       newLoan = emprestimoEntityRepository.save(newLoan);
 
-      var rowsInactivated = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(loan.getId());
-      LOGGER.debug("INACTIVATED {} ROWS FOR LOAN ID <{}> : ", rowsInactivated, loan.getId());
+      var rowsInactivated = planoFinanceiroEntityRepository.inativarPlanosNaoPagos(initialLoan.getId());
 
-      adiantamentoEmprestimoHelper.saveByTipoSituacao(
+      emprestimoHelper.saveByTipoSituacao(
           tipoSituacao,
           newLoan,
           obj.getValorAdiantamento(),

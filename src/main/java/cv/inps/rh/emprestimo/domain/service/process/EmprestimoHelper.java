@@ -19,14 +19,16 @@ import java.time.ZoneId;
 @Transactional
 @RequiredArgsConstructor
 @Service
-public class AdiantamentoEmprestimoHelper {
+public class EmprestimoHelper {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AdiantamentoEmprestimoHelper.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(EmprestimoHelper.class);
 
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
 
   public void saveByTipoSituacao(TipoSituacao tipoSituacao, EmprestimoEntity loan, BigDecimal value, Long newNumeroPrestacao) {
+
+    // TODO 21/08/2026 17:29 registar planos pagos em caso de haver para o novo emprestimo adinatamento ou reforço
 
     LOGGER.debug("TIPO SITUACAO: {}, LOAN ID: {}, VALUE: {}, NUMERO PRESTACOES: {}", tipoSituacao, loan.getId(), value, newNumeroPrestacao);
 

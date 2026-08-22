@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-
 @Repository
 public interface PlanoFinanceiroEntityRepository extends
     JpaRepository<PlanoFinanceiroEntity, Long>,
@@ -28,13 +27,4 @@ public interface PlanoFinanceiroEntityRepository extends
            WHERE p.emprestimo.id = :emprestimoId AND p.flgPago <> 'PAGO'
       """)
   int inativarPlanosNaoPagos(@Param("emprestimoId") Long emprestimoId);
-
-  @Transactional
-  @Modifying
-  @Query("""
-          UPDATE PlanoFinanceiroEntity p
-             SET p.estado = 'A'
-           WHERE p.emprestimo.id = :emprestimoId AND p.flgPago <> 'PAGO'
-      """)
-  int ativarPlanosNaoPagos(@Param("emprestimoId") Long emprestimoId);
 }

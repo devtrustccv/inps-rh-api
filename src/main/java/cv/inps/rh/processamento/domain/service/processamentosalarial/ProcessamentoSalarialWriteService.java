@@ -102,6 +102,10 @@ public class ProcessamentoSalarialWriteService {
   @Transactional
   public void validar(List<Long> ids, TipoValidacaoProcessamentoSalarial tipoValidacao) {
 
+    // todo send notification to previous person
+    // provisorio person that registered the row
+    //   defnitivo emai de pessoa que fez registo provisorio
+
     if (Objects.isNull(tipoValidacao))
       throw IgrpResponseStatusException.badRequest("Para validar deve indicar o tipo de validacao: [DEFINITIVO, PROVISORIO]");
 
