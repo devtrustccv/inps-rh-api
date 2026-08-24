@@ -105,7 +105,10 @@ public class ValidarRegistoColaboradorService {
     var dadosContratuais = registroColaborador.getDadosContratuais();
     var dadosPessoaisReqDTO = registroColaborador.getDadosPessoais();
 
-    validarDadosContratuaisService.validar(dadosContratuais);
+    // Registo de Colaborador: a data de início pode ser no passado (admissões retroativas), mas
+    // não no futuro; continua a não poder ser posterior à data de fim.
+    validarDadosContratuaisService.validar(dadosContratuais,
+        ValidarDadosContratuaisService.RegraDataInicio.NAO_FUTURA);
 
     colaboradorValidationRules.validarDadosPessoais(dadosPessoaisReqDTO, funcionario.getUuid());
 
