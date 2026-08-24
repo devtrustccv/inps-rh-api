@@ -1,7 +1,5 @@
 package cv.inps.rh.shared.config;
 
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.AuditorAware;
@@ -9,7 +7,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
+@Component
 public class ApplicationAuditorAware implements AuditorAware<String> {
 
 
@@ -29,7 +31,7 @@ public class ApplicationAuditorAware implements AuditorAware<String> {
    * 2) Authentication#getName() if an Authentication exists
    * 3) Fallback to system account for background processing
    */
-  private String getCurrentSubjectName() {
+  public String getCurrentSubjectName() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     if (authentication instanceof JwtAuthenticationToken jwtAuth) {

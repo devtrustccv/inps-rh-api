@@ -67,6 +67,18 @@
       "primaryKey": false
     },
     {
+      "name": "direcaoAntesId",
+      "objectType": "java",
+      "type": "long",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
       "name": "direcaoDepois",
       "objectType": "java",
       "type": "long",

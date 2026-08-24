@@ -25,8 +25,10 @@ public class MobilidadeMapper {
 
     var dto = new MobilidadeDTO();
 
-    if (Objects.nonNull(mobilidade.getInstidId()))
+    if (Objects.nonNull(mobilidade.getInstidId())) {
       dto.setDirrecaoAntes(mobilidade.getInstidId().getNome());
+      dto.setDirecaoAntesId(mobilidade.getInstidId().getId());
+    }
 
     if (Objects.nonNull(mobilidade.getSecaoId()))
       dto.setSeccaoAntes(mobilidade.getSecaoId().getNome() != null ? mobilidade.getSecaoId().getNome() : "");
@@ -69,8 +71,10 @@ public class MobilidadeMapper {
 
     // Antes = direção/secção/local do vínculo anterior (display)
     if (anterior != null) {
-      if (Objects.nonNull(anterior.getInstidId()))
+      if (Objects.nonNull(anterior.getInstidId())) {
         dto.setDirrecaoAntes(anterior.getInstidId().getNome());
+        dto.setDirecaoAntesId(anterior.getInstidId().getId());
+      }
       if (Objects.nonNull(anterior.getSecaoId()))
         dto.setSeccaoAntes(anterior.getSecaoId().getNome());
       if (Objects.nonNull(anterior.getLocalTrabId()))

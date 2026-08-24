@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
@@ -17,7 +16,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 
 @Repository
 public interface EmprestimoEntityRepository extends
@@ -43,6 +41,7 @@ public interface EmprestimoEntityRepository extends
 
   @Query("""
       SELECT new cv.inps.rh.emprestimo.application.dto.EmprestimoListRowDTO(
+          p.uuid,
           f.uuid,
           e.tipoSituacao,
           e.estado,
@@ -60,7 +59,8 @@ public interface EmprestimoEntityRepository extends
              SELECT COUNT(pf)
              FROM PlanoFinanceiroEntity pf
              WHERE pf.emprestimo = e
-             AND pf.estado = 'A' AND pf.flgPago = 'PAGO'
+             AND pf.estado = 'A'
+             AND pf.flgPago = 'PAGO'
              AND pf.dataPagamento IS NOT NULL
            ),
           e.valorPago,
@@ -69,29 +69,33 @@ public interface EmprestimoEntityRepository extends
           p.etapa,
           ''
       )
-      FROM EmprestimoEntity e
-      JOIN e.tiprel tr
-      JOIN tr.funId f
-      LEFT JOIN tr.mobId m
-      LEFT JOIN e.pedido p
-      WHERE
-          (:tipoEmprestimo IS NULL OR e.tipoEmprestimo = :tipoEmprestimo)
+      FROM PedidoEntity p, EmprestimoEntity e, TiposRelacionamentoEntity tr, FuncionarioEntity f, MobilidadeEntity m
+      WHERE p.id = e.pedido.id
+      AND e.id = (
+            SELECT MAX(latestLoan.id)
+            FROM EmprestimoEntity latestLoan
+            WHERE latestLoan.pedido.id = p.id
+      )
+      AND e.estado <> 'CANCELADO'
+      AND e.tiprel.id = tr.id
+      AND tr.estActAdm = 1
+      AND tr.funId.id = f.id
+      AND tr.mobId.id = m.id
+      AND (:tipoEmprestimo IS NULL OR e.tipoEmprestimo = :tipoEmprestimo)
       AND (:estado IS NULL OR e.estado = :estado)
       AND (
-              :dataInicio IS NULL
-           OR :dataFim IS NULL
-           OR e.dataInicio BETWEEN :dataInicio AND :dataFim
+            (:dataInicio IS NULL OR :dataFim IS NULL) OR (e.dataInicio BETWEEN :dataInicio AND :dataFim)
       )
       AND (:direccaoId IS NULL OR m.instidId.id = :direccaoId)
       AND (:funcionarioId IS NULL OR f.uuid = :funcionarioId)
       """)
   Page<EmprestimoListRowDTO> listLoans(
-      @Param("tipoEmprestimo") String tipoEmprestimo,
-      @Param("estado") String estado,
-      @Param("dataInicio") LocalDate dataInicio,
-      @Param("dataFim") LocalDate dataFim,
-      @Param("direccaoId") Long direccaoId,
-      @Param("funcionarioId") UUID funcionarioId,
+      String tipoEmprestimo,
+      String estado,
+      LocalDate dataInicio,
+      LocalDate dataFim,
+      Long direccaoId,
+      UUID funcionarioId,
       Pageable pageable
   );
 

@@ -25,6 +25,16 @@ public class FinancialPlanHelper {
       int prazoMeses,
       LocalDate dataInicio
   ) {
+    return generateFinancialPlan(valorEmprestimo, taxaAnual, prazoMeses, dataInicio, 1L);
+  }
+
+  public static List<PlanoFinanceiroRowDTO> generateFinancialPlan(
+      BigDecimal valorEmprestimo,
+      BigDecimal taxaAnual,
+      int prazoMeses,
+      LocalDate dataInicio,
+      long numeroInicialPrestacao
+  ) {
 
     LOGGER.debug("VALOR EMPRESTIMO : {}", valorEmprestimo);
     LOGGER.debug("TAXA ANUAL : {}", taxaAnual);
@@ -46,14 +56,15 @@ public class FinancialPlanHelper {
 
     var plano = new ArrayList<PlanoFinanceiroRowDTO>();
 
-    for (int i = 1; i <= prazoMeses; i++) {
+    for (int i = 0; i < prazoMeses; i++) {
 
-      var dataPagamento = dataInicio.plusMonths(i);
+      var numeroPrestacao = numeroInicialPrestacao + i;
+      var dataPagamento = dataInicio.plusMonths(i + 1L);
       var juros = saldoInicial.multiply(taxaMensal, MC);
       var principal = prestacaoFixa.subtract(juros);
       var pagamentoAtual = prestacaoFixa;
       // Ajuste no último mês para zerar saldo
-      if (i == prazoMeses) {
+      if (i == prazoMeses - 1) {
         principal = saldoInicial;
         pagamentoAtual = principal.add(juros);
       }
@@ -61,11 +72,12 @@ public class FinancialPlanHelper {
       var saldoFinal = saldoInicial.subtract(principal);
 
       LOGGER.debug("MÊS {} | DATA: {} | SALDO INICIAL: {} | JUROS: {} | PRINCIPAL: {} | PAGAMENTO ATUAL: {} | SALDO FINAL: {}",
-          i, dataPagamento, saldoInicial, juros, principal, pagamentoAtual, saldoFinal);
+          numeroPrestacao, dataPagamento, saldoInicial, juros, principal, pagamentoAtual, saldoFinal);
 
       plano.add(
           new PlanoFinanceiroRowDTO(
-              (long) i,
+              numeroPrestacao,
+              "",
               dataPagamento,
               saldoInicial.setScale(0, RoundingMode.HALF_UP),
               pagamentoAtual.setScale(0, RoundingMode.HALF_UP),
@@ -127,6 +139,7 @@ public class FinancialPlanHelper {
       plano.add(
           new PlanoFinanceiroRowDTO(
               (long) i,
+              "",
               dataPagamento,
               saldoInicial.setScale(0, RoundingMode.HALF_UP),
               pagamentoAtual.setScale(0, RoundingMode.HALF_UP),

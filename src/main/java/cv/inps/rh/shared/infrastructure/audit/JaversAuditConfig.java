@@ -9,6 +9,11 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCategoriaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamLocalTrabEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoDetalheEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.BancoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TipoMovimentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -96,7 +101,12 @@ public class JaversAuditConfig {
   private static final List<Class<?>> REFERENCIAS_RASAS = List.of(
       FuncionarioEntity.class, ContratoEntity.class,
       SecaoEntity.class, ParamLocalTrabEntity.class, DirecaoEntity.class,
-      ParamCargoEntity.class, ParamEscalaoEntity.class, ParamCategoriaEntity.class, ParamCarreiraEntity.class);
+      ParamCargoEntity.class, ParamEscalaoEntity.class, ParamCategoriaEntity.class, ParamCarreiraEntity.class,
+      // 2ª passagem (dossieFix): FKs das entidades agora auditadas (DadosBancarios, SituacaoLaboral,
+      // Substituicao, DefinicaoRemuneracao, DefPagamento, ProcessoDisciplinar). Rasas para o commit não
+      // arrastar o grafo profundo — a grelha usa só o id da FK (nome resolvido na leitura).
+      BancoEntity.class, ParamSituacaoEntity.class, ParamSituacaoDetalheEntity.class,
+      TiposRelacionamentoEntity.class, TipoMovimentoEntity.class);
 
   @Bean
   Javers javers(JaversSqlRepository sqlRepository, PlatformTransactionManager transactionManager) {

@@ -28,6 +28,9 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,9 +50,9 @@ public class MobilidadeReadService {
 
     var idFuncionario = IdentificadorUnico.from(query.getIdFuncionario()).valor().toString();
 
-    // Mostra activos, pendentes e inactivos (histórico completo). A edição/validação
+    // Mostra activos, pendentes, inactivos e EM CORREÇÃO (histórico completo). A edição/validação
     // de registos inactivos (I) ou eliminados (E) é bloqueada na camada de escrita.
-    var estados = List.of(Estado.A.getCode(), Estado.P.getCode(), Estado.I.getCode());
+    var estados = List.of(Estado.A.getCode(), Estado.P.getCode(), Estado.I.getCode(), Estado.C.getCode());
 
     String tipoSituacao = StringUtils.hasText(query.getTipoMobilidade()) ? query.getTipoMobilidade() : null;
     LocalDate dataInicio = StringUtils.hasText(query.getDataInicio())
@@ -61,6 +64,15 @@ public class MobilidadeReadService {
     Pageable pageable = PageRequest.of(pageNumber, pageSize);
     Page<RhVMobilidadeEntity> page = rhVMobilidadeEntityRepository.findByFunUuidWithFilters(
         idFuncionario, estados, tipoSituacao, dataInicio, dataFim, pageable);
+
+    // A vista RH_V_MOBILIDADE calcula o estado por datas (A/I) e NÃO reflete os estados de workflow
+    // (P pendente, C em correção). Buscamos o estado real da TABELA por mob_id para os sobrepor abaixo —
+    // sem isto o maker/checker não veem uma mobilidade devolvida para correção (aparecia como "Ativo").
+    var mobIds = page.getContent().stream().map(RhVMobilidadeEntity::getMobId).filter(Objects::nonNull).toList();
+    Map<Long, Estado> estadoTabelaPorId = mobIds.isEmpty() ? Map.of()
+        : mobilidadeEntityRepository.findAllById(mobIds).stream()
+            .filter(e -> e.getId() != null && e.getEstado() != null)
+            .collect(Collectors.toMap(MobilidadeEntity::getId, MobilidadeEntity::getEstado));
 
     List<MobilidadeListDTO> content = page.getContent().stream().map(m -> {
       MobilidadeListDTO dto = new MobilidadeListDTO();
@@ -76,6 +88,13 @@ public class MobilidadeReadService {
       dto.setProcessamento(m.getProcessamento() != null && m.getProcessamento() > 0);
       dto.setEstado(m.getEstado());
       dto.setEstadoDesc(Estado.fromCode(m.getEstado()).map(Estado::getDescription).orElse(null));
+      // Sobrepõe o estado da vista (A/I por datas) com o estado de workflow da TABELA quando é P ou C,
+      // para o ciclo maker-checker (pendente / em correção) ficar visível na lista.
+      var estadoTabela = estadoTabelaPorId.get(m.getMobId());
+      if (estadoTabela == Estado.P || estadoTabela == Estado.C) {
+        dto.setEstado(estadoTabela.getCode());
+        dto.setEstadoDesc(estadoTabela.getDescription());
+      }
       dto.setTipoMobilidade(m.getTipoSituacao());
       dto.setTipoMobilidadeDesc(m.getTipoSituacaoDesc());
 

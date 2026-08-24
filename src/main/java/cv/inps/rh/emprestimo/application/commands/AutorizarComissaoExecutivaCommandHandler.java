@@ -2,7 +2,7 @@ package cv.inps.rh.emprestimo.application.commands;
 
 import cv.igrp.framework.core.domain.CommandHandler;
 import cv.igrp.framework.stereotype.IgrpCommandHandler;
-import cv.inps.rh.emprestimo.domain.service.process.PedidoAquisicaoViaturaService;
+import cv.inps.rh.emprestimo.domain.service.process.AquisicaoViaturaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +14,9 @@ public class AutorizarComissaoExecutivaCommandHandler implements CommandHandler<
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AutorizarComissaoExecutivaCommandHandler.class);
 
-  private final PedidoAquisicaoViaturaService service;
+  private final AquisicaoViaturaService service;
 
-  public AutorizarComissaoExecutivaCommandHandler(PedidoAquisicaoViaturaService service) {
+  public AutorizarComissaoExecutivaCommandHandler(AquisicaoViaturaService service) {
     this.service = service;
   }
 

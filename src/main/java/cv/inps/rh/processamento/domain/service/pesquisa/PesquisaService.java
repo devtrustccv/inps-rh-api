@@ -26,9 +26,7 @@ public class PesquisaService {
     var directionId = StringUtils.hasText(query.getDireccao()) ? Long.valueOf(query.getDireccao()) : null;
     var nome = StringUtils.hasText(query.getNome()) ? query.getNome() : null;
     var uuidFuncionario = StringUtils.hasText(query.getUuidFuncionario()) ? UUID.fromString(query.getUuidFuncionario()) : null;
-    Integer processado = StringUtils.hasText(query.getProcessado()) ? 1 : null;
-    // TODO 06/12/2025 18:46 validate this Centro custo
-    //var centroCusto = StringUtils.hasText(query.getCentroCusto()) ? query.getCentroCusto() : null;
+    var processado = StringUtils.hasText(query.getProcessado()) ? 1 : null;
 
     var page = tiposRelacionamentoEntityRepository.pesquisaColaborador(
         directionId,

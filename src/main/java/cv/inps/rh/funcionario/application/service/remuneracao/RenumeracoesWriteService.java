@@ -10,6 +10,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
@@ -128,19 +129,33 @@ public class RenumeracoesWriteService {
 
     var data = command.getValidarremuneracaorequest();
 
-    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
-    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
-    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    var remuneracao = definicaoRemuneracaoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getRemuneracaoId()));
+
+    // CORRIGIR (checker devolve ao maker): rendimento pendente P -> C e validação P -> C, SEM aplicar
+    // payload. O maker corrige e reenvia por este mesmo endpoint com validacao=null (C -> P). Âncora =
+    // remuneracao.uuid.
     if (ValidationUtil.isCorrigir(data.getValidacao())) {
-      LOGGER.info("[CORRIGIR] RENDIMENTO (remuneracao={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
-          command.getRemuneracaoId());
-      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
+      if (remuneracao.getEstado() != Estado.P
+          || funcionarioRules.getValidacaoPendenteByReferenciaUuid(remuneracao.getUuid(), TipoAcao.INSERT, Referencia.RENDIMENTO).isEmpty()) {
+        throw IgrpResponseStatusException.badRequest("Só é possível devolver para correção um rendimento pendente de validação.");
+      }
+      funcionarioRules.devolverParaCorrecao(remuneracao.getUuid(), Estado.P, Referencia.RENDIMENTO);
+      remuneracao.setEstado(Estado.C);
+      definicaoRemuneracaoEntityRepository.save(remuneracao);
+      LOGGER.info("[CORRIGIR] RENDIMENTO devolvido para correção (remuneracao={}).", remuneracao.getUuid());
+      return new SuccessResponseDTO(true, remuneracao.getUuid().toString(),
+          "Rendimento devolvido para correção.", List.of());
+    }
+
+    // Guard: rendimento em correção não pode ser validado antes de reenviado pelo maker.
+    if (remuneracao.getEstado() == Estado.C && data.getValidacao() != null) {
+      throw IgrpResponseStatusException.badRequest(
+          "Rendimento em correção: não pode ser validado. Corrija e reenvie primeiro.");
     }
 
     var request = data.getDados();
     validarRemuneracaoOuPagamento(request);
 
-    var remuneracao = definicaoRemuneracaoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getRemuneracaoId()));
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(remuneracao.getEstado());
     remuneracao.setValor(request.getValor());
     remuneracao.setPercentagem(request.getPercentagem());
@@ -148,6 +163,22 @@ public class RenumeracoesWriteService {
     remuneracao.setTmId(tipoMovimentoEntityRepository.findByIdOrThrow(request.getMovimentoId()));
     remuneracao.setDataInicio(DateFormatter.stringToLocalDate(request.getDataInicio()));
     remuneracao.setDataFim(DateFormatter.stringToLocalDate(request.getDataFim()));
+
+    // Maker reenvia a correção (C -> P): edições aplicadas acima; reabre para validação.
+    if (remuneracao.getEstado() == Estado.C) {
+      remuneracao.setEstado(Estado.P);
+      var validacaoReaberta = funcionarioRules.reabrirParaValidacao(remuneracao.getUuid(), Referencia.RENDIMENTO);
+      // Auto-audit (JaVers): carimba o save da correção; baseline vem do registo (novoRemuneracao).
+      try {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
+            validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_DEF_REMUNERACOES");
+        definicaoRemuneracaoEntityRepository.save(remuneracao);
+      } finally {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
+      }
+      return new SuccessResponseDTO(true, remuneracao.getUuid().toString(),
+          "Rendimento corrigido e reenviado para validação.", List.of());
+    }
 
     if (data.getValidacao() != null) {
       if (remuneracao.getEstado() == Estado.P) {
@@ -174,19 +205,33 @@ public class RenumeracoesWriteService {
 
     var data = command.getValidarpagamentorequest();
 
-    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
-    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
-    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
+    var pagamento = defPagamentoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getPagamentoId()));
+
+    // CORRIGIR (checker devolve ao maker): desconto pendente P -> C e validação P -> C, SEM aplicar
+    // payload. O maker corrige e reenvia por este mesmo endpoint com validacao=null (C -> P). Âncora =
+    // pagamento.uuid.
     if (ValidationUtil.isCorrigir(data.getValidacao())) {
-      LOGGER.info("[CORRIGIR] DESCONTO (pagamento={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
-          command.getPagamentoId());
-      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
+      if (pagamento.getEstado() != Estado.P
+          || funcionarioRules.getValidacaoPendenteByReferenciaUuid(pagamento.getUuid(), TipoAcao.INSERT, Referencia.DESCONTO).isEmpty()) {
+        throw IgrpResponseStatusException.badRequest("Só é possível devolver para correção um desconto pendente de validação.");
+      }
+      funcionarioRules.devolverParaCorrecao(pagamento.getUuid(), Estado.P, Referencia.DESCONTO);
+      pagamento.setEstado(Estado.C);
+      defPagamentoEntityRepository.save(pagamento);
+      LOGGER.info("[CORRIGIR] DESCONTO devolvido para correção (pagamento={}).", pagamento.getUuid());
+      return new SuccessResponseDTO(true, pagamento.getUuid().toString(),
+          "Desconto devolvido para correção.", List.of());
+    }
+
+    // Guard: desconto em correção não pode ser validado antes de reenviado pelo maker.
+    if (pagamento.getEstado() == Estado.C && data.getValidacao() != null) {
+      throw IgrpResponseStatusException.badRequest(
+          "Desconto em correção: não pode ser validado. Corrija e reenvie primeiro.");
     }
 
     var request = data.getDados();
     validarRemuneracaoOuPagamento(request);
 
-    var pagamento = defPagamentoEntityRepository.findByUuidOrThrow(UUID.fromString(command.getPagamentoId()));
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(pagamento.getEstado());
 
     pagamento.setPercentagem(request.getPercentagem());
@@ -199,6 +244,22 @@ public class RenumeracoesWriteService {
     pagamento.setRhbId(ValidationUtil.ref(entityManager, BancoEntity.class, request.getBanco()));
     pagamento.setNif(request.getNif());
     pagamento.setEntId(request.getEntidade());
+
+    // Maker reenvia a correção (C -> P): edições aplicadas acima; reabre para validação.
+    if (pagamento.getEstado() == Estado.C) {
+      pagamento.setEstado(Estado.P);
+      var validacaoReaberta = funcionarioRules.reabrirParaValidacao(pagamento.getUuid(), Referencia.DESCONTO);
+      // Auto-audit (JaVers): carimba o save da correção; baseline vem do registo (novoPagamento).
+      try {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
+            validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_DEF_PAGAMENTOS");
+        defPagamentoEntityRepository.save(pagamento);
+      } finally {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
+      }
+      return new SuccessResponseDTO(true, pagamento.getUuid().toString(),
+          "Desconto corrigido e reenviado para validação.", List.of());
+    }
 
     if (data.getValidacao() != null) {
 

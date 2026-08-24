@@ -30,6 +30,9 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoDetal
 import cv.inps.rh.shared.infrastructure.persistence.repository.TipoRelRemPagEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SubstituicaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -60,6 +63,9 @@ public class SubstituicaoWriteService {
   private final ICalcularSubstituicaoRepository calcularSubstituicaoRepository;
   private final SubstituicaoDetalheEntityRepository substituicaoDetalheEntityRepository;
   private final ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   /** Caso de uso: mês completo do período conta sempre como 30 dias (Fev 28 / Ago 31 → 30). */
   private static final int DIAS_MES_COMPLETO = 30;
@@ -125,7 +131,10 @@ public class SubstituicaoWriteService {
     substituicao.setObs(ValidationUtil.trimToNull(dto.getObs()));
     substituicao.setUuid(IdentificadorUnico.create().valor());
     substituicao.setEstado(temDiferencaSalarial ? Estado.P : Estado.A);
-    substituicaoEntityRepository.save(substituicao);
+    // Insert inicial via EntityManager (NÃO dispara o auto-audit do JaVers) — assim o 1º commit auditado
+    // é o save carimbado abaixo (baseline da validação), tal como na Mobilidade.
+    entityManager.persist(substituicao);
+    entityManager.flush();
 
     // DETALHE mensal (RH_T_SUBSTITUICAO_DETALHE) criado NO REGISTO para TODOS os casos (caso de uso:
     // o Caso 1, sem diferença, também tem detalhe). O DEF_REMUNERACOES (diferença processada) só se
@@ -141,9 +150,20 @@ public class SubstituicaoWriteService {
       validacao.setReferenciaId(substituicao.getId());
       validacao.setReferenciaUuid(substituicao.getUuid());
       funcionarioSubstituto.getValidacoes().add(validacao);
-    }
+      funcionarioEntityRepository.saveAndFlush(funcionarioSubstituto);
 
-    funcionarioEntityRepository.save(funcionarioSubstituto);
+      // Baseline JaVers do REGISTO: 1º commit auditado da substituição, carimbado com a validação INSERT.
+      // Como a validação é INSERT, a grelha mostra os valores iniciais ("criado com…"), incluindo o
+      // colaborador substituído (substituidoTiprelId). As correções futuras acrescentam o antes→depois.
+      try {
+        ValidacaoAuditContext.set(validacao.getId(), validacao.getUuid(), "RH_T_SUBSTITUICAO");
+        substituicaoEntityRepository.save(substituicao);
+      } finally {
+        ValidacaoAuditContext.clear();
+      }
+    } else {
+      funcionarioEntityRepository.save(funcionarioSubstituto);
+    }
 
     return new SuccessResponseDTO(true, substituicao.getUuid().toString(), "Substituição registada.", List.of());
 
@@ -152,15 +172,6 @@ public class SubstituicaoWriteService {
   @Transactional
   public SuccessResponseDTO validar(ValidarSubstituicaoCommand command) {
     var dto = command.getSubstituicao();
-
-    // Terceiro caminho da validação (SIM / NAO / CORRIGIR). O fluxo de correção ainda não está
-    // implementado: por agora CORRIGIR é um NO-OP — regista no log e devolve 200 com mensagem, SEM
-    // validar, actualizar ou mudar qualquer estado. Guard no topo para não tocar em nada.
-    if (EstadoValidacao.CORRIGIR.equals(dto.getValidar())) {
-      log.info("[CORRIGIR] SUBSTITUICAO (substituicao={}): opção 'Corrigir' ainda não implementada; nenhuma alteração aplicada.",
-          command.getSubstituicaoId());
-      return new SuccessResponseDTO(false, null, ValidationUtil.MSG_CORRIGIR_NAO_IMPLEMENTADO, List.of());
-    }
 
     var idSusbtituicao = IdentificadorUnico.from(command.getSubstituicaoId()).valor();
 
@@ -183,11 +194,54 @@ public class SubstituicaoWriteService {
         () -> IgrpResponseStatusException.badRequest("Substituição não encontrada.")
     );
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(substituicao.getEstado());
+
+    // CORRIGIR (checker devolve ao maker): substituição pendente P -> C e validação P -> C, SEM aplicar
+    // payload. O maker corrige e reenvia por este mesmo endpoint com validar=null (C -> P). Âncora =
+    // substituicao.uuid (a validação vive no SUBSTITUTO).
+    if (EstadoValidacao.CORRIGIR.equals(dto.getValidar())) {
+      if (substituicao.getEstado() != Estado.P
+          || funcionarioRules.getValidacaoPendenteByReferenciaUuid(substituicao.getUuid(), TipoAcao.INSERT, Referencia.SUBSTITUICAO).isEmpty()) {
+        throw IgrpResponseStatusException.badRequest("Só é possível devolver para correção uma substituição pendente de validação.");
+      }
+      funcionarioRules.devolverParaCorrecao(substituicao.getUuid(), Estado.P, Referencia.SUBSTITUICAO);
+      substituicao.setEstado(Estado.C);
+      substituicaoEntityRepository.save(substituicao);
+      log.info("[CORRIGIR] SUBSTITUICAO devolvida para correção (substituicao={}).", substituicao.getUuid());
+      return new SuccessResponseDTO(true, substituicao.getUuid().toString(),
+          "Substituição devolvida para correção.", List.of());
+    }
+    // Guard: substituição em correção não pode ser validada antes de reenviada pelo maker.
+    if (substituicao.getEstado() == Estado.C && dto.getValidar() != null) {
+      throw IgrpResponseStatusException.badRequest(
+          "Substituição em correção: não pode ser validada. Corrija e reenvie primeiro.");
+    }
+
     substituicao.setDataInicio(dto.getDataInicio());
     substituicao.setDataFim(dto.getDataFim());
+    // Motivo também é editável na correção/validação (ponto 1): sem isto, o maker não podia corrigir o
+    // motivo e a grelha nunca mostrava a sua alteração.
+    substituicao.setMotivo(ValidationUtil.trimToNull(dto.getMotivoSubstituicao()));
     substituicao.setObs(ValidationUtil.trimToNull(dto.getObs()));
     substituicao.setSubstitutoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituto.getUuid()));
     substituicao.setSubstituidoTiprelId(funcionarioRules.getTipoRelacionamentoAtual(funcionarioSubstituido.getUuid()));
+
+    // Maker reenvia a correção (C -> P): as edições acima já foram aplicadas; reabre para validação
+    // (sem consolidar — isso só na validação SIM). 'validar' é nulo aqui (garantido pelo guard acima).
+    if (substituicao.getEstado() == Estado.C) {
+      substituicao.setEstado(Estado.P);
+      var validacaoReaberta = funcionarioRules.reabrirParaValidacao(substituicao.getUuid(), Referencia.SUBSTITUICAO);
+      // Auto-audit (JaVers): carimba o save da correção com a validação; o baseline vem do registo.
+      try {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.set(
+            validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_SUBSTITUICAO");
+        substituicaoEntityRepository.save(substituicao);
+      } finally {
+        cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext.clear();
+      }
+      funcionarioEntityRepository.save(funcionarioSubstituto);
+      return new SuccessResponseDTO(true, substituicao.getUuid().toString(),
+          "Substituição corrigida e reenviada para validação.", List.of());
+    }
 
     if(dto.getValidar()!=null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;

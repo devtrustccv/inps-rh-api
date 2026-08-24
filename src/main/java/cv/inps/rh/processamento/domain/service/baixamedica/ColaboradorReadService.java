@@ -35,9 +35,6 @@ public class ColaboradorReadService {
     var pageData = tiposRelacionamentoEntityRepository.getListaColaboradores(directionId, funcionario, startDate, endDate, pageRequest);
     pageData.forEach(obj -> obj.setEstadoSituacaoLaboralDesc(obj.getEstadoSituacaoLaboral().getDescription()));
 
-    // TODO 06/12/2025 18:19 falta defenir condicao pa saber k o registo é uma LICENSA SEM VENCIMENTO
-    // TODO 06/12/2025 18:19 ESTADO P, A ???
-
     var response = new WrapperListaColaboradorDTO();
     PageMapper.fillPagination(pageData, response);
     response.setContent(pageData.getContent());

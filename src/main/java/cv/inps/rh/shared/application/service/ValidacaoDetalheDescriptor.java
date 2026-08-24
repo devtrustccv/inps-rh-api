@@ -41,4 +41,17 @@ public interface ValidacaoDetalheDescriptor {
    * cai para o próprio nome da propriedade (nunca fica em branco).
    */
   Map<String, String> rotulos();
+
+  /**
+   * Quando {@code true}, a grelha isola a instância APENAS pelo tipo ({@link #entityTypeSuffix()}),
+   * ignorando o {@code REFERENCIA_ID} da validação. Necessário quando o {@code REFERENCIA_ID} não
+   * coincide com o id da entidade auditada — ex.: DADOS_BANCARIOS (referenciaId = funcionário; a
+   * entidade é uma <em>coleção</em> de DadosBancariosEntity) e RENOVACAO_CONTRATO (referenciaId =
+   * contrato; a entidade que muda é o ContratoHistoricoEntity). É seguro porque cada commit é carimbado
+   * com o seu {@code validacaoUuid}, tocando só nas linhas dessa validação. Por omissão {@code false}
+   * (mantém o isolamento por tipo+id, como Mobilidade/Carreira).
+   */
+  default boolean matchByTypeOnly() {
+    return false;
+  }
 }

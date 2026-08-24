@@ -92,7 +92,9 @@ public class JaversValidacaoDetalheReadService {
     // Ancorar aqui — e não só no tipo — remove o ruído inter-registo: ao percorrer o grafo do agregado
     // na aprovação, o JaVers regista alterações de OUTRAS instâncias do mesmo tipo (ex.: a mobilidade
     // anterior desativada na consolidação → "Estado A→I"); partilham o tipo mas têm outro id.
-    Long referenciaId = validacao.getReferenciaId();
+    // Isolamento da instância-alvo: normalmente por tipo+referenciaId; mas descritores de entidades cujo
+    // referenciaId NÃO bate com o id auditado (coleções/histórico) pedem só-por-tipo (matchByTypeOnly).
+    Long referenciaId = descriptor.matchByTypeOnly() ? null : validacao.getReferenciaId();
 
     // Semântica da grelha decidida pelo tipo de validação, não por acidente do JaVers:
     //  - INSERT (criação): é um evento "criado com…"; queremos TODOS os valores iniciais dos campos de
