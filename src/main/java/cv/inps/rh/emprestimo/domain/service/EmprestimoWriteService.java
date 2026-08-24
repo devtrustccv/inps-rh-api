@@ -7,6 +7,7 @@ import cv.inps.rh.emprestimo.application.dto.PlanoFinanceiroRowDTO;
 import cv.inps.rh.emprestimo.domain.service.constants.EtapaEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.StatusEmprestimo;
 import cv.inps.rh.emprestimo.domain.service.constants.TipoPedido;
+import cv.inps.rh.emprestimo.domain.service.process.EmprestimoHelper;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -36,11 +37,11 @@ public class EmprestimoWriteService {
   private final ParamCarreiraEntityRepository paramCarreiraEntityRepository;
   private final PedidoEntityRepository pedidoEntityRepository;
   private final FuncionarioRules funcionarioRules;
-  private final PlanoFinanceiroEntityRepository planoFinanceiroEntityRepository;
   private final DefPagamentoEntityRepository defPagamentoEntityRepository;
   private final TipoMovimentoEntityRepository tipoMovimentoEntityRepository;
   private final TipoRelRemPagEntityRepository tipoRelRemPagEntityRepository;
   private final EmprestimoDocumentService documentService;
+  private final EmprestimoHelper emprestimoHelper;
 
   public void saveConfiguracaoEmprestimo(SaveConfiguracaoInfoEmprestimoCommand command) {
 
@@ -142,7 +143,7 @@ public class EmprestimoWriteService {
         entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now(ZoneId.systemDefault())
     );
 
-    savePlans(entity, plan);
+    emprestimoHelper.savePlans(entity, plan);
 
     return plan;
   }
@@ -165,26 +166,7 @@ public class EmprestimoWriteService {
         entity.getDataInicio() != null ? entity.getDataInicio() : LocalDate.now(ZoneId.systemDefault())
     );
 
-    savePlans(entity, plan);
-  }
-
-  private void savePlans(EmprestimoEntity entity, List<PlanoFinanceiroRowDTO> plan) {
-    var plans = plan.stream()
-        .map(obj -> {
-          var newPlan = new PlanoFinanceiroEntity();
-          newPlan.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
-          newPlan.setEstado(Estado.A.name());
-          newPlan.setEmprestimo(entity);
-          newPlan.setDataPagamento(obj.dataPagamento());
-          newPlan.setNrOrdemPrestacao(obj.numero());
-          newPlan.setValorPrincipal(obj.principal());
-          newPlan.setValorJuros(obj.juros());
-          newPlan.setSaldoInicial(obj.saldoInicial());
-          newPlan.setSaldoFinal(obj.saldoFinal());
-          return newPlan;
-        })
-        .toList();
-    planoFinanceiroEntityRepository.saveAll(plans);
+    emprestimoHelper.savePlans(entity, plan);
   }
 
   public void cancelLoan(String uuid) {

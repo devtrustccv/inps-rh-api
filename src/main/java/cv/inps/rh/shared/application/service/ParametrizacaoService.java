@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -56,7 +57,8 @@ public class ParametrizacaoService {
 
   @Transactional
   public List<EstabelecimentoComboDTO> getEstabelecimentosAtivos(Long paisId) {
-    return estabelecimentoEntityRepository.findByPaisId(List.of(paisId));
+    List<Long> countries = Objects.nonNull(paisId) ? List.of(paisId) : null;
+    return estabelecimentoEntityRepository.findByPaisId(countries);
   }
 
   public List<ParametrizacaoDTO> getInstituicoes() {

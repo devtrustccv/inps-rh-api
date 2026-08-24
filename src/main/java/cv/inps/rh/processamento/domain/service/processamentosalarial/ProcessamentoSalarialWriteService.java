@@ -2,7 +2,10 @@ package cv.inps.rh.processamento.domain.service.processamentosalarial;
 
 import cv.inps.rh.processamento.application.constants.TipoValidacaoProcessamentoSalarial;
 import cv.inps.rh.processamento.application.dto.ProcessamentoSalarioRequestDTO;
-import cv.inps.rh.processamento.domain.service.processamentosalarial.api.ProcessarSalarioApi;
+import cv.inps.rh.shared.application.events.NotificationEvent;
+import cv.inps.rh.shared.application.services.IAMUserProfileService;
+import cv.inps.rh.shared.config.ApplicationAuditorAware;
+import cv.inps.rh.shared.domain.events.EventPublisher;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ProcessamentoSalarialEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoSalarialEntityRepository;
@@ -14,20 +17,17 @@ import oracle.jdbc.OracleTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
-import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -37,10 +37,11 @@ public class ProcessamentoSalarialWriteService {
 
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final ProcessamentoSalarialEntityRepository processamentoSalarialEntityRepository;
-  private final ProcessarSalarioApi processarSalarioApi;
-  private final ProcessamentoSalarialHelper processamentoSalarialHelper;
   private final DataSource dataSource;
   private final JdbcTemplate jdbcTemplate;
+  private final ApplicationAuditorAware applicationAuditorAware;
+  private final IAMUserProfileService iamUserProfileService;
+  private final EventPublisher eventPublisher;
 
   @Transactional
   public void removerFuncionariosProcessados(List<String> funcionariosIds) {
@@ -109,96 +110,130 @@ public class ProcessamentoSalarialWriteService {
     var statusPesquisa = isDefinitivo ? StatusProcessamento.VALIDADO_PROVISORIO : StatusProcessamento.PROCESSADO;
     var statusRegisto = isDefinitivo ? StatusProcessamento.VALIDADO_DEFINITIVO : StatusProcessamento.VALIDADO_PROVISORIO;
 
-    var processes = processamentoSalarialEntityRepository.findAllByIdInAndEstadoIn(
+    var processes = processamentoSalarialEntityRepository.findAllById(ids);
+    var username = applicationAuditorAware.getCurrentSubjectName();
+    var updatedRows = processamentoSalarialEntityRepository.atualizarEstadoEUtilizadores(
         ids,
-        List.of(statusPesquisa.name())
+        List.of(statusPesquisa.name()),
+        statusRegisto.name(),
+        isDefinitivo ? null : username,
+        isDefinitivo ? username : null,
+        null,
+        null
     );
-    if (processes.size() != ids.size())
+    if (updatedRows != ids.size())
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado %s".formatted(statusPesquisa.name()));
 
-    processes.forEach(process -> process.setEstado(statusRegisto.name()));
-
-    processamentoSalarialEntityRepository.saveAll(processes);
+    publicarNotificacoes(
+        processes,
+        isDefinitivo ? ProcessamentoSalarialEntity::getUserValidProv : ProcessamentoSalarialEntity::getCreatedBy,
+        isDefinitivo ? "Validação definitiva" : "Validação provisória"
+    );
   }
 
   @Transactional
   public void retroceder(List<Long> ids) {
 
-    var allowedStatusToBeRollback = List.of(
-        StatusProcessamento.VALIDADO_PROVISORIO.name(),
-        StatusProcessamento.VALIDADO_DEFINITIVO.name()
+    var processes = processamentoSalarialEntityRepository.findAllById(ids);
+    var provisionalRows = processamentoSalarialEntityRepository.atualizarEstadoEUtilizadores(
+        ids,
+        List.of(StatusProcessamento.VALIDADO_PROVISORIO.name()),
+        StatusProcessamento.PROCESSADO.name(),
+        null,
+        null,
+        null,
+        null
     );
-
-    var processes = processamentoSalarialEntityRepository.findAllByIdInAndEstadoIn(ids, allowedStatusToBeRollback);
-    if (processes.size() != ids.size())
+    var definitiveRows = processamentoSalarialEntityRepository.atualizarEstadoEUtilizadores(
+        ids,
+        List.of(StatusProcessamento.VALIDADO_DEFINITIVO.name()),
+        StatusProcessamento.VALIDADO_PROVISORIO.name(),
+        null,
+        null,
+        null,
+        null
+    );
+    if (provisionalRows + definitiveRows != ids.size())
       throw IgrpResponseStatusException.badRequest("Processos a serem retrocedidos devem estar nos estados de validaçao provisório ou definitivo");
 
-    processes.forEach(process -> {
-      var status = switch (StatusProcessamento.valueOf(process.getEstado())) {
-        case VALIDADO_PROVISORIO -> StatusProcessamento.PROCESSADO.name();
-        case VALIDADO_DEFINITIVO -> StatusProcessamento.VALIDADO_PROVISORIO.name();
-        default ->
-            throw new IllegalArgumentException("Invalid state for salary processing rollback!");
-      };
-      process.setEstado(status);
-    });
-
-    processamentoSalarialEntityRepository.saveAll(processes);
+    publicarNotificacoes(
+        processes,
+        process -> StatusProcessamento.VALIDADO_DEFINITIVO.name().equals(process.getEstado())
+            ? process.getUserValidDef()
+            : process.getUserValidProv(),
+        "Retrocesso"
+    );
   }
 
+  @Transactional
   public void cabimentar(List<Long> ids) {
 
-    var processes = processamentoSalarialEntityRepository.findAllByIdInAndEstadoIn(
+    var processes = processamentoSalarialEntityRepository.findAllById(ids);
+    var username = applicationAuditorAware.getCurrentSubjectName();
+    var updatedRows = processamentoSalarialEntityRepository.atualizarEstadoEUtilizadores(
         ids,
-        List.of(StatusProcessamento.VALIDADO_DEFINITIVO.name())
+        List.of(StatusProcessamento.VALIDADO_DEFINITIVO.name()),
+        StatusProcessamento.CABIMENTADO.name(),
+        null,
+        null,
+        username,
+        null
     );
-    if (processes.size() != ids.size())
+    if (updatedRows != ids.size())
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram Validados definitivamente");
 
-    processes.forEach(p -> {
-     /* var date = p.getDataProcDefinitivo().format(DateFormatter.DATE);
-      var response = processarSalarioApi.processarCabimento(p.getId().toString(), date);
-      LOGGER.debug("Cabimentar Response: {}", response);
-      if (response.content().issue().code() != 200)
-        throw IgrpResponseStatusException.badRequest("Erro ao processar cabimento", response.content().issue().diagnostics());*/
-      processamentoSalarialHelper.atualizarEstado(p.getId(), StatusProcessamento.CABIMENTADO.name());
-    });
+    publicarNotificacoes(
+        processes,
+        ProcessamentoSalarialEntity::getUserValidDef,
+        "Cabimento"
+    );
   }
 
+  @Transactional
   public void autorizar(List<Long> ids) {
 
-    var processes = processamentoSalarialEntityRepository.findAllByIdInAndEstadoIn(
+    var processes = processamentoSalarialEntityRepository.findAllById(ids);
+    var username = applicationAuditorAware.getCurrentSubjectName();
+    var updatedRows = processamentoSalarialEntityRepository.atualizarEstadoEUtilizadores(
         ids,
-        List.of(StatusProcessamento.CABIMENTADO.name())
+        List.of(StatusProcessamento.CABIMENTADO.name()),
+        StatusProcessamento.AUTORIZADO.name(),
+        null,
+        null,
+        null,
+        username
     );
-    if (processes.size() != ids.size())
+    if (updatedRows != ids.size())
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado Cabimentado");
 
-    processes.forEach(p -> {
-     /* var response = processarSalarioApi.autorizarSalario(p.getCab1Id().toString(), "SIM");
-      LOGGER.debug("Autorizar Salario Response: {}", response);
-      if (response.content().issue().code() != 200)
-        throw IgrpResponseStatusException.badRequest("Erro ao autorizar salario", response.content().issue().diagnostics());*/
-      processamentoSalarialHelper.atualizarEstado(p.getId(), StatusProcessamento.AUTORIZADO.name());
-    });
+    publicarNotificacoes(
+        processes,
+        ProcessamentoSalarialEntity::getUserCabimento,
+        "Autorização"
+    );
   }
 
+  @Transactional
   public void eliminarCabimento(List<Long> ids) {
 
-    var processes = processamentoSalarialEntityRepository.findAllByIdInAndEstadoIn(
+    var processes = processamentoSalarialEntityRepository.findAllById(ids);
+    var updatedRows = processamentoSalarialEntityRepository.atualizarEstadoEUtilizadores(
         ids,
-        List.of(StatusProcessamento.CABIMENTADO.name())
+        List.of(StatusProcessamento.CABIMENTADO.name()),
+        StatusProcessamento.VALIDADO_DEFINITIVO.name(),
+        null,
+        null,
+        null,
+        null
     );
-    if (processes.size() != ids.size())
+    if (updatedRows != ids.size())
       throw IgrpResponseStatusException.badRequest("Existem processos que não se encontram no estado Cabimentado");
 
-    processes.forEach(p -> {
-     /* var response = processarSalarioApi.extornarCabimento(p.getCab1Id().toString());
-      LOGGER.debug("Extornar Cabimento Response: {}", response);
-      if (response.content().issue().code() != 200)
-        throw IgrpResponseStatusException.badRequest("Erro ao eliminar cabimento", response.content().issue().diagnostics());*/
-      processamentoSalarialHelper.atualizarEstado(p.getId(), StatusProcessamento.VALIDADO_DEFINITIVO.name());
-    });
+    publicarNotificacoes(
+        processes,
+        ProcessamentoSalarialEntity::getUserCabimento,
+        "Eliminação do cabimento"
+    );
   }
 
   public String processarSalario(ProcessamentoSalarioRequestDTO request) {
@@ -242,12 +277,7 @@ public class ProcessamentoSalarialWriteService {
 
       stmt.setString(5, request.getTipo());
 
-      stmt.setString(
-          6,
-          Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
-              .map(Principal::getName)
-              .orElse("System")
-      );
+      stmt.setString(6, applicationAuditorAware.getCurrentSubjectName());
 
       stmt.setInt(7, 0);
 
@@ -260,6 +290,58 @@ public class ProcessamentoSalarialWriteService {
     } catch (SQLException ex) {
       throw new RuntimeException("Error executing PROCESSAR", ex);
     }
+  }
+
+  private void publicarNotificacoes(
+      List<ProcessamentoSalarialEntity> processes,
+      Function<ProcessamentoSalarialEntity, String> previousUserResolver,
+      String action
+  ) {
+    var processIdsByUser = new LinkedHashMap<String, List<Long>>();
+
+    for (var process : processes) {
+      var previousUser = previousUserResolver.apply(process);
+      if (StringUtils.hasText(previousUser)) {
+        processIdsByUser.computeIfAbsent(previousUser, ignored -> new ArrayList<>())
+            .add(process.getId());
+      }
+    }
+
+    if (processIdsByUser.isEmpty()) {
+      LOGGER.warn("No previous users found for salary processing notification: action={}", action);
+      return;
+    }
+
+    var profilesByUser = iamUserProfileService.resolverPerfis(processIdsByUser.keySet());
+    var notifications = new ArrayList<NotificationEvent>();
+
+    processIdsByUser.forEach((userId, processIds) -> {
+      var profile = profilesByUser.get(userId);
+      if (profile == null || !StringUtils.hasText(profile.getEmail())) {
+        LOGGER.warn("No email found for salary processing notification: user={} action={}", userId, action);
+        return;
+      }
+
+      var recipientName = StringUtils.hasText(profile.getFullName())
+          ? profile.getFullName()
+          : profile.getUsername();
+      var subject = "Processamento salarial - " + action;
+      var body = "Olá %s,%n%nFoi executada a ação \"%s\" nos processamentos salariais %s."
+          .formatted(recipientName, action, processIds);
+
+      notifications.add(NotificationEvent.text(profile.getEmail(), subject, body));
+    });
+
+    if (notifications.isEmpty())
+      return;
+
+    notifications.forEach(notification -> {
+      try {
+        eventPublisher.publish(notification);
+      } catch (RuntimeException exception) {
+        LOGGER.error("Unable to publish salary processing notification to {}", notification.recipient(), exception);
+      }
+    });
   }
 
   private enum StatusProcessamento {

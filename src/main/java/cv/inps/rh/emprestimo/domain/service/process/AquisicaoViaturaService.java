@@ -27,7 +27,7 @@ import java.util.UUID;
 @Transactional
 @RequiredArgsConstructor
 @Service
-public class PedidoAquisicaoViaturaService {
+public class AquisicaoViaturaService {
 
   private final EmprestimoEntityRepository emprestimoEntityRepository;
   private final PedidoDecisaoEntityRepository pedidoDecisaoEntityRepository;

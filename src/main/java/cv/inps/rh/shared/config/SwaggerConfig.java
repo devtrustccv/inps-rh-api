@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,11 +52,14 @@ public class SwaggerConfig {
   }
 
   @Bean
-  public GroupedOpenApi all() {
-    return GroupedOpenApi.builder()
+  public GroupedOpenApi all(ObjectProvider<IgrpEnumDynamicRestExposer> enumExposerProvider) {
+
+    var builder = GroupedOpenApi.builder()
         .group("All")
-        .pathsToMatch("/**")
-        .build();
+        .pathsToMatch("/**");
+
+    enumExposerProvider.ifAvailable(builder::addOpenApiCustomizer);
+    return builder.build();
   }
 
   @Bean
@@ -64,6 +68,17 @@ public class SwaggerConfig {
         .group("Fos")
         .pathsToMatch("/fos/**")
         .build();
+  }
+
+  @Bean
+  public GroupedOpenApi igrpEnums(ObjectProvider<IgrpEnumDynamicRestExposer> enumExposerProvider) {
+
+    var builder = GroupedOpenApi.builder()
+        .group("iGRP Enums")
+        .pathsToMatch("/api/v1/enums/**");
+
+    enumExposerProvider.ifAvailable(builder::addOpenApiCustomizer);
+    return builder.build();
   }
 
   @Bean

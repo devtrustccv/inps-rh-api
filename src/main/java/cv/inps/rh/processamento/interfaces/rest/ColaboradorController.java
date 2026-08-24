@@ -11,7 +11,10 @@ import cv.inps.rh.processamento.application.commands.ImportarMovimentosCommand;
 import cv.inps.rh.processamento.application.commands.ValidarBaixaMedicaCommand;
 import cv.inps.rh.processamento.application.commands.ValidarMovimentoImportadoCommand;
 import cv.inps.rh.processamento.application.dto.*;
-import cv.inps.rh.processamento.application.queries.*;
+import cv.inps.rh.processamento.application.queries.GetBaixaMedicaQuery;
+import cv.inps.rh.processamento.application.queries.GetListaBaixamedicaQuery;
+import cv.inps.rh.processamento.application.queries.GetListaLicensaSemVencimentoQuery;
+import cv.inps.rh.processamento.application.queries.GetMovimentosImportadosQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -194,32 +197,6 @@ public class ColaboradorController {
         final var command = new ValidarMovimentoImportadoCommand(validarMovimentoImportadoRequest, movimentoId);
 
         return commandBus.send(command);
-    }
-
-    @GetMapping(value = "baixa-medica/calculo")
-    @Operation(
-        summary = "Calcular baixa medica",
-        description = "Calcular baixa medica",
-        responses = {
-            @ApiResponse(
-                responseCode = "200",
-                content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = BaixaMedicaCalculoDTO.class)
-                )
-            ),
-        }
-    )
-    public ResponseEntity<BaixaMedicaCalculoDTO> calcularBaixaMedica(
-        @RequestParam(value = "colaborador") String colaborador,
-        @RequestParam(value = "dataInicio") String dataInicio,
-        @RequestParam(value = "dataFim") String dataFim,
-        @RequestParam(value = "tipoLicenca") String tipoLicenca,
-        @RequestParam(value = "dataInicioFalta", required = false) String dataInicioFalta
-    ) {
-        final var query = new CalcularBaixaMedicaQuery(colaborador, dataInicio, dataFim, tipoLicenca, dataInicioFalta);
-
-        return queryBus.handle(query);
     }
 
   @GetMapping(value = "baixa-medica/{baixaMedicaId}")

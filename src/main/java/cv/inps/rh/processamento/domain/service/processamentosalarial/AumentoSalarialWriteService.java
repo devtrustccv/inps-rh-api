@@ -3,6 +3,7 @@ package cv.inps.rh.processamento.domain.service.processamentosalarial;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.processamento.application.dto.AumentoSalarialRequestDTO;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.config.ApplicationAuditorAware;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AumentoSalarialEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AumentoSalarialEntityRepository;
@@ -25,6 +26,7 @@ public class AumentoSalarialWriteService {
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final ParamPccsEntityRepository paramPccsEntityRepository;
   private final DataSource dataSource;
+  private final ApplicationAuditorAware applicationAuditorAware;
 
   public void saveAumentoSalarial(AumentoSalarialRequestDTO request) {
 
@@ -85,7 +87,7 @@ public class AumentoSalarialWriteService {
         "P_DATA_REFERENTE", java.sql.Date.valueOf(salaryIncrease.getDataReferente()),
         "PERCENTAGEM", salaryIncrease.getPercentagem(),
         "P_USER_ID", "0", // TODO 17/05/2026 11:14 current user
-        "P_USER_NAME", "demo" // TODO 17/05/2026 11:14 current user name
+        "P_USER_NAME", applicationAuditorAware.getCurrentSubjectName()
     ));
   }
 

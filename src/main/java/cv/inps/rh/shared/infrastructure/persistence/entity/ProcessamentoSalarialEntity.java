@@ -61,4 +61,23 @@ public class ProcessamentoSalarialEntity extends AuditEntity {
 
   @Column(name = "TIPO_PROCESSAMENTO", length = 55)
   private String tipoProcessamento;
+
+  @Column(name = "INSTIT_ID")
+  private Long institId;
+
+  @Size(max = 100)
+  @Column(name = "USER_VALID_PROV", length = 100)
+  private String userValidProv;
+
+  @Size(max = 100)
+  @Column(name = "USER_VALID_DEF", length = 100)
+  private String userValidDef;
+
+  @Size(max = 100)
+  @Column(name = "USER_CABIMENTO", length = 100)
+  private String userCabimento;
+
+  @Size(max = 100)
+  @Column(name = "USER_AUTORIZACAO", length = 100)
+  private String userAutorizacao;
 }
