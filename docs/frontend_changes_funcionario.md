@@ -40,3 +40,34 @@ vistas que não expunham o C, pelo que um registo devolvido aparecia como "Ativo
 > (já incluía A, P, C, I no filtro).
 
 Valores possíveis de estado nas listas: `A` (Ativo), `P` (Pendente), `C` (Em correção), `I` (Inativo).
+
+---
+
+## 3. Data de início — deixa de ser rejeitada no passado (2026-08-24)
+
+Regra anterior: no **Registo de Colaborador** (e na sua validação) e na **Renovação de Contrato**, uma
+`dataInicio` anterior a hoje devolvia `400`. Isso impedia registar admissões/renovações retroativas.
+
+Regra actual (alinhada com o DOSSIÊ — "data início não maior que sysdate"):
+
+| Fluxo | Endpoint | Regra da `dataInicio` |
+|---|---|---|
+| Registo de Colaborador (gravar) | `POST .../funcionarios` | Passado **permitido**; futuro rejeitado |
+| Registo de Colaborador (validar) | `PUT .../funcionarios/{id}/validar` | Passado **permitido**; futuro rejeitado |
+| Novo Contrato (gravar/validar) | `.../contratos` | Passado **permitido**; futuro rejeitado (já era assim ao gravar; a validação estava incoerente e foi alinhada) |
+| Renovação de Contrato | `.../renovacao` | Passado **permitido**; sem restrição de futuro (a renovação arranca tipicamente em data futura) |
+
+Mantém-se em todos os fluxos:
+- `dataInicio` é **obrigatória**;
+- `dataInicio` **não pode ser posterior à `dataFim`** — mensagem: *"A Data de Início não pode ser posterior à Data de Fim."*;
+- contrato a termo continua a exigir `dataFim`.
+
+Mensagens de erro removidas (deixam de ocorrer nestes fluxos):
+- *"A data de início não pode ser uma data no passado."*
+- *"A data de início da renovação não pode ser uma data no passado."*
+
+Mensagem que passa a poder ocorrer no Registo de Colaborador:
+- *"A data de início não pode ser uma data no futuro."*
+
+Impacto no front-end: retirar (se existir) o `min = hoje` no date-picker da data de início do registo de
+colaborador e da renovação; no registo de colaborador definir antes `max = hoje`.

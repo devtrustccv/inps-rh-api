@@ -99,7 +99,10 @@ public class ValidarContratoService {
 
     var dadosContratuais = dto.getDadosContratuais();
 
-    validarDadosContratuaisService.validar(dadosContratuais);
+    // Mesma regra de datas do registo do Novo Contrato (DOSSIÊ): início pode ser no passado, mas
+    // não no futuro — senão um contrato criado com data retroativa não passaria na validação.
+    validarDadosContratuaisService.validar(dadosContratuais,
+        ValidarDadosContratuaisService.RegraDataInicio.NAO_FUTURA);
 
     var paramVinculo = entityManager.find(ParamVinculoEntity.class,
         dadosContratuais.getTipoVinculoLaboralId());

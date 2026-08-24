@@ -67,7 +67,8 @@ public class NovoContratoService {
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(idFunc.valor());
 
     // D1 (DOSSIÊ, Novo Contrato): a data de início não pode ser futura ("não maior que sysdate").
-    validarDadosContratuaisService.validar(dadosContratuais, true);
+    validarDadosContratuaisService.validar(dadosContratuais,
+        ValidarDadosContratuaisService.RegraDataInicio.NAO_FUTURA);
 
     var paramVinculo = entityManager.find(ParamVinculoEntity.class,
         dadosContratuais.getTipoVinculoLaboralId());

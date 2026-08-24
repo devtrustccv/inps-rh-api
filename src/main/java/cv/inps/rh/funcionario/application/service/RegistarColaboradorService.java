@@ -80,7 +80,10 @@ public class RegistarColaboradorService {
 
     colaboradorValidationRules.validarDadosPessoais(dadosPessoais, null);
 
-    validarDadosContratuaisService.validar(dadosContratuais);
+    // Registo de Colaborador: a data de início pode ser no passado (admissões retroativas), mas
+    // não no futuro; continua a não poder ser posterior à data de fim.
+    validarDadosContratuaisService.validar(dadosContratuais,
+        ValidarDadosContratuaisService.RegraDataInicio.NAO_FUTURA);
 
     var paramVinculo = entityManager.find(ParamVinculoEntity.class,
         dadosContratuais.getTipoVinculoLaboralId());

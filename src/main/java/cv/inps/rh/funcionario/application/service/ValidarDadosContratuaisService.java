@@ -18,18 +18,23 @@ public class ValidarDadosContratuaisService {
 
   private final EntityManager entityManager;
 
-  public void validar(DadosContratuaisReqDTO dc) {
-    // Fluxos gerais (ex.: registo de colaborador): data de início não pode ser no passado.
-    validar(dc, false);
+  /** Regra aplicada à data de início dos dados contratuais. */
+  public enum RegraDataInicio {
+    /** Não pode ser no passado (fluxos gerais). */
+    NAO_PASSADA,
+    /**
+     * Não pode ser no futuro — "Data início não ser maior que sysdate" (DOSSIÊ). Aceita datas
+     * retroativas; a coerência com a data de fim é validada à parte.
+     */
+    NAO_FUTURA
   }
 
-  /**
-   * @param dataInicioAteHoje quando {@code true}, aplica a regra do <b>Novo Contrato</b> (DOSSIÊ,
-   *     Gestão Contratual): "Data início não ser maior que sysdate" — i.e. a data de início não
-   *     pode ser <b>futura</b> (aceita hoje ou passado). Quando {@code false}, mantém a regra dos
-   *     restantes fluxos (não pode ser no passado).
-   */
-  public void validar(DadosContratuaisReqDTO dc, boolean dataInicioAteHoje) {
+  public void validar(DadosContratuaisReqDTO dc) {
+    // Fluxos gerais: data de início não pode ser no passado.
+    validar(dc, RegraDataInicio.NAO_PASSADA);
+  }
+
+  public void validar(DadosContratuaisReqDTO dc, RegraDataInicio regraDataInicio) {
     // -----------------------------
     // OBRIGATÓRIOS BÁSICOS
     // -----------------------------
@@ -87,12 +92,16 @@ public class ValidarDadosContratuaisService {
     // -----------------------------
     var hoje = LocalDate.now(ZoneId.systemDefault());
 
-    if (dataInicioAteHoje) {
-      // Novo Contrato: início não pode ser futuro (DOSSIÊ: "Data início não ser maior que sysdate").
-      if (dc.getDataInicio().isAfter(hoje))
-        throw IgrpResponseStatusException.badRequest("A data de início não pode ser uma data no futuro.");
-    } else if (dc.getDataInicio().isBefore(hoje)) {
-      throw IgrpResponseStatusException.badRequest("A data de início não pode ser uma data no passado.");
+    switch (regraDataInicio) {
+      case NAO_FUTURA -> {
+        // Novo Contrato: início não pode ser futuro (DOSSIÊ: "Data início não ser maior que sysdate").
+        if (dc.getDataInicio().isAfter(hoje))
+          throw IgrpResponseStatusException.badRequest("A data de início não pode ser uma data no futuro.");
+      }
+      case NAO_PASSADA -> {
+        if (dc.getDataInicio().isBefore(hoje))
+          throw IgrpResponseStatusException.badRequest("A data de início não pode ser uma data no passado.");
+      }
     }
 
     if (dc.getDataFim() != null && dc.getDataInicio().isAfter(dc.getDataFim()))
