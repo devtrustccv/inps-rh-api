@@ -71,3 +71,31 @@ Mensagem que passa a poder ocorrer no Registo de Colaborador:
 
 Impacto no front-end: retirar (se existir) o `min = hoje` no date-picker da data de início do registo de
 colaborador e da renovação; no registo de colaborador definir antes `max = hoje`.
+
+---
+
+## 4. Validação de NIF contra a API — mensagens de erro específicas (2026-08-24)
+
+Aplica-se ao registo e à validação de colaborador (`validarDadosPessoais`). Sem alteração de contrato:
+continua a ser `409 Conflict`, só muda o texto da mensagem.
+
+**Antes:** uma única mensagem genérica — *"O NIF introduzido não corresponde ao colaborador selecionado"*.
+
+**Agora:**
+
+| Situação | Mensagem |
+|---|---|
+| NIF não existe no cadastro de contribuintes | `O NIF <nif> não foi encontrado no cadastro de contribuintes. Confirme o número introduzido.` |
+| NIF existe mas os dados não batem | `O NIF <nif> pertence a outra pessoa: Nome: introduziu "X", no cadastro do NIF consta "Y"; Data de nascimento: ... Confirme o NIF e os dados do colaborador.` |
+
+A segunda mensagem lista **todos** os campos divergentes (Nome, Nome da mãe, Nome do pai, Data de
+nascimento), separados por `;` — o front-end pode mostrá-la tal como vem, ou partir por `;` para
+destacar cada campo no formulário.
+
+**API em baixo continua a deixar gravar (fail-open).** Falha de rede, timeout ou erro HTTP da API de
+NIF não bloqueia o registo — fica só um `warn` no log. Passou a ser igualmente fail-open a resposta
+`200` sem corpo ou sem o bloco `entries` (antes dava erro ao utilizador). Só uma lista de `entries`
+vazia é tratada como "NIF inexistente".
+
+Inalterado: NIF obrigatório, 9 dígitos, único entre colaboradores; comparação tolerante a acentos,
+caixa e espaços; campo em falta de um dos lados não invalida.

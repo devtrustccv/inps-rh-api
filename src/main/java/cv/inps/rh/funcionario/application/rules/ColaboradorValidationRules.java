@@ -28,6 +28,7 @@ import org.springframework.web.client.RestClientException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -96,6 +97,9 @@ public class ColaboradorValidationRules {
    * mais). Só invalida quando ambos os lados têm o valor e diferem — campos em falta não geram falso
    * negativo. Falha de rede/API indisponível é <em>fail-open</em> (regista e segue): uma integração
    * em baixo não é o mesmo que "NIF não corresponde", e não deve bloquear o registo.
+   *
+   * <p>Quando invalida, a mensagem diz <b>que campos</b> divergem e <b>que valor</b> a API tem, para
+   * o utilizador poder corrigir sem adivinhar.
    */
   private void validarNifCorrespondeColaborador(DadosPessoaisReqDTO dp) {
     Long nif = dp.getNif();
@@ -110,25 +114,61 @@ public class ColaboradorValidationRules {
       return;
     }
 
-    var entry = Optional.ofNullable(resposta)
-        .map(RootResponseDTO::getEntries)
-        .map(EntriesDTO::getEntry)
+    // Resposta sem corpo/sem bloco de entries = integração a responder mal, não "NIF errado" →
+    // fail-open, como na falha de rede. Só uma lista de entries vazia é resposta legítima.
+    var entries = Optional.ofNullable(resposta).map(RootResponseDTO::getEntries).orElse(null);
+    if (entries == null) {
+      LOGGER.warn("Validação NIF↔colaborador ignorada: API de pesquisa NIF devolveu resposta vazia (nif={})", nif);
+      return;
+    }
+
+    var entry = Optional.ofNullable(entries.getEntry())
         .orElse(List.of()).stream()
         .filter(e -> e != null && Objects.equals(e.getNuNif(), nif))
         .findFirst()
         .orElse(null);
 
-    if (entry == null || !dadosNifBatem(dp, entry)) {
+    if (entry == null) {
       throw IgrpResponseStatusException.conflict(
-          "O NIF introduzido não corresponde ao colaborador selecionado");
+          "O NIF %d não foi encontrado no cadastro de contribuintes. Confirme o número introduzido."
+              .formatted(nif));
+    }
+
+    var divergencias = divergenciasNif(dp, entry);
+    if (!divergencias.isEmpty()) {
+      throw IgrpResponseStatusException.conflict(
+          "O NIF %d pertence a outra pessoa: %s. Confirme o NIF e os dados do colaborador."
+              .formatted(nif, String.join("; ", divergencias)));
     }
   }
 
-  private boolean dadosNifBatem(DadosPessoaisReqDTO dp, EntryDTO entry) {
-    return nomeNifBate(dp.getNome(), entry.getNmContribuinte(), entry.getNmPesquisa())
-        && nomeNifBate(dp.getNomeMae(), entry.getNmMae(), entry.getNmPesquisaMae())
-        && nomeNifBate(dp.getNomePai(), entry.getNmPai(), entry.getNmPesquisaPai())
-        && dataNifBate(dp.getDataNascimento(), entry.getDtNasc());
+  /**
+   * Lista legível dos campos que não coincidem com o cadastro do NIF, no formato
+   * "Nome: introduziu 'X', o NIF está registado em nome de 'Y'". Vazia = tudo bate.
+   */
+  private List<String> divergenciasNif(DadosPessoaisReqDTO dp, EntryDTO entry) {
+    var divergencias = new ArrayList<String>();
+    if (!nomeNifBate(dp.getNome(), entry.getNmContribuinte(), entry.getNmPesquisa()))
+      divergencias.add(descreverDivergencia("Nome", dp.getNome(),
+          primeiroPreenchido(entry.getNmContribuinte(), entry.getNmPesquisa())));
+    if (!nomeNifBate(dp.getNomeMae(), entry.getNmMae(), entry.getNmPesquisaMae()))
+      divergencias.add(descreverDivergencia("Nome da mãe", dp.getNomeMae(),
+          primeiroPreenchido(entry.getNmMae(), entry.getNmPesquisaMae())));
+    if (!nomeNifBate(dp.getNomePai(), entry.getNmPai(), entry.getNmPesquisaPai()))
+      divergencias.add(descreverDivergencia("Nome do pai", dp.getNomePai(),
+          primeiroPreenchido(entry.getNmPai(), entry.getNmPesquisaPai())));
+    if (!dataNifBate(dp.getDataNascimento(), entry.getDtNasc()))
+      divergencias.add(descreverDivergencia("Data de nascimento",
+          String.valueOf(dp.getDataNascimento()), String.valueOf(parseDataApiNif(entry.getDtNasc()))));
+    return divergencias;
+  }
+
+  private static String descreverDivergencia(String campo, String introduzido, String noCadastro) {
+    return "%s: introduziu \"%s\", no cadastro do NIF consta \"%s\"".formatted(campo, introduzido, noCadastro);
+  }
+
+  private static String primeiroPreenchido(String a, String b) {
+    return StringUtils.hasText(a) ? a : b;
   }
 
   /** Bate se o valor do colaborador coincide com o da API (ou a sua variante de pesquisa). Valores
