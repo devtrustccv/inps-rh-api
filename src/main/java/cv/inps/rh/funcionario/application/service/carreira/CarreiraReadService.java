@@ -193,8 +193,12 @@ public class CarreiraReadService {
     dto.setTipoVinculoLaboralId(vinc != null ? vinc.getId() : null);
     dto.setSituacaoLaboralId(tr.getSituacLaboralId().getSituacaoLaboralId().getId());
 
-    dto.setDataInicio(DateFormatter.localDateToString(tr.getDataInicio()));
-    dto.setDataFim(DateFormatter.localDateToString(tr.getDataFim()));
+    // Datas da PRÓPRIA carreira (como a lista via RH_V_CARREIRA), não do tiprel: o tiprel ativo tem
+    // DATA_FIM = null (só é preenchida quando a relação laboral é encerrada/substituída), o que fazia
+    // o GET devolver dataFim vazio enquanto a lista mostrava a data-fim real da carreira. Fallback ao
+    // tiprel se a carreira não existir (defensivo).
+    dto.setDataInicio(DateFormatter.localDateToString(car != null ? car.getDataInicio() : tr.getDataInicio()));
+    dto.setDataFim(DateFormatter.localDateToString(car != null ? car.getDataFim() : tr.getDataFim()));
     dto.setProcessaSalarioNestaCarreira(tr.getFlgProcessa()== 1 ? "SIM" : "NAO");
     dto.setFlgProcessa(tr.getFlgProcessa());
     // PROCESSAMENTO (vista RH_V_CARREIRA): true se a carreira ja foi processada em folha
