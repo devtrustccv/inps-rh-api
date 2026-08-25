@@ -14,8 +14,10 @@ uniforme (feito e commitado, `274a2799`).
   MOBILIDADE, SITUACAO_LABORAL — valores legíveis, `tabelaName` desambigua.
 - Bug corrigido (c1de535e): `isAlvo` aceita `Set<String>` (o compile offline incremental mascarava;
   usar SEMPRE `mvn clean compile` antes de arrancar).
-- Adicionados **Documento pessoal** (RH_T_DOCUMENTO_PESSOAL) e **Remunerações/Pagamentos**
-  (RH_T_DEF_REMUNERACOES/PAGAMENTOS, por composição de Rendimento/Desconto). Clean compile OK.
+- Adicionados **Documento pessoal** (RH_T_DOCUMENTO_PESSOAL) ✅ testado live (nº documento
+  TEST-NICK-905→905B) e **Remunerações/Pagamentos** (RH_T_DEF_REMUNERACOES/PAGAMENTOS, por composição de
+  Rendimento/Desconto) — ligado/compila; falta teste live (Mario não tem def rem/pag por não ter sido
+  validado SIM; precisa de colaborador com subsídios/encargos a passar por correção).
 - FORA (com justificação no javadoc): TiposRelacionamento/Contrato (ligação/shallow) e os campos-núcleo
   do FuncionarioEntity (nome/NIF/nomes pais) — funcionário é ShallowReference; detalhá-los exige
   mecanismo dedicado fora do auto-audit.
