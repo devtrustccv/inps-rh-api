@@ -9,10 +9,8 @@ import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.configuracao.application.commands.SaveResponsaveisDirecaoCommand;
 import cv.inps.rh.configuracao.application.dto.AssociarResponsaveisRequestDTO;
 import cv.inps.rh.configuracao.application.dto.ResponsaveisDirecaoResponseDTO;
-import cv.inps.rh.configuracao.application.dto.ResponsavelEmailDTO;
 import cv.inps.rh.configuracao.application.dto.WrapperListResponsaveisDTO;
 import cv.inps.rh.configuracao.application.queries.GetResponsaveisDirecaoQuery;
-import cv.inps.rh.configuracao.application.queries.GetResponsaveisEmailsQuery;
 import cv.inps.rh.configuracao.application.queries.GetResponsaveisQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -133,39 +131,6 @@ public class ResponsavelController {
   {
 
       final var query = new GetResponsaveisQuery(pageNumber, pageSize, nomeFuncionario, nomeInstituicao, idInstituicao, nomeSecccao, idSeccao);
-
-      return queryBus.handle(query);
-
-  }
-
-   @GetMapping(
-   value = "responsaveis/emails"
-  )
-  @Operation(
-    summary = "Get emails dos responsaveis",
-    description = "Lista de emails de RH_T_RESPONSAVEL para o multiselect do ecra de notificacao. "
-        + "Passando funcionarioId, a direcao/seccao e deduzida da mobilidade activa do colaborador.",
-    responses = {
-      @ApiResponse(
-          responseCode = "200",
-
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(
-                  implementation = ResponsavelEmailDTO.class,
-                  type = "array")
-          )
-      )
-    }
-  )
-
-   public ResponseEntity<List<ResponsavelEmailDTO>> getResponsaveisEmails(
-    @RequestParam(value = "funcionarioId", required = false) String funcionarioId,
-    @RequestParam(value = "idInstituicao", required = false) Long idInstituicao,
-    @RequestParam(value = "idSeccao", required = false) Long idSeccao)
-  {
-
-      final var query = new GetResponsaveisEmailsQuery(funcionarioId, idInstituicao, idSeccao);
 
       return queryBus.handle(query);
 

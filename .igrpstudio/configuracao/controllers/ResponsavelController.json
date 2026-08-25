@@ -124,44 +124,6 @@
           "isRequired": false
         }
       ]
-    },
-    {
-      "actionName": "getResponsaveisEmails",
-      "path": "responsaveis/emails",
-      "method": "GET",
-      "responses": {
-        "200": {
-          "name": "OK",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "ResponsavelEmail",
-                "objectType": "dto",
-                "name": "data",
-                "collectionType": "list",
-                "module": "configuracao"
-              }
-            }
-          }
-        }
-      },
-      "requestParams": [
-        {
-          "type": "string",
-          "name": "funcionarioId",
-          "isRequired": false
-        },
-        {
-          "type": "long",
-          "name": "idInstituicao",
-          "isRequired": false
-        },
-        {
-          "type": "long",
-          "name": "idSeccao",
-          "isRequired": false
-        }
-      ]
     }
   ],
   "id": "l70rzcsd9p-getResponsaveisDirecao-getResponsaveisDirecao-getResponsaveis-getResponsaveis"
