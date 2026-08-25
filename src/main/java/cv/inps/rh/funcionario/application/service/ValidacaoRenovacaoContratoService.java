@@ -179,7 +179,10 @@ public class ValidacaoRenovacaoContratoService {
 
       ContratoEntity contrato = tr.getContrVinculoId();
       if (contrato != null) {
-        contratoHistoricoWriteService.transicionarEstado(contrato, estado);
+        // Renovação: o contrato mantém-se A (vínculo em vigor); só o histórico da proposta (P)
+        // transita. transicionarEstado localizaria o histórico pelo estado do contrato (A) e nunca
+        // tocaria na proposta — usar o caminho dedicado à renovação.
+        contratoHistoricoWriteService.transicionarRenovacao(contrato, estado);
       }
     }
 
