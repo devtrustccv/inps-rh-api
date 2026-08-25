@@ -26,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -117,8 +118,9 @@ public class JaversValidacaoDetalheReadService {
         .filter(change -> criacao || !(change instanceof InitialValueChange))
         // Só a instância-alvo (o registo EXATO em validação). Combina tipo (do descritor) + id da
         // referência: remove refs/coleções de entidades vizinhas (outro tipo) e outras instâncias do
-        // mesmo tipo (mesmo tipo, outro id) tocadas na consolidação.
-        .filter(change -> isAlvo(change.getAffectedGlobalId(), referenciaId, descriptor.entityTypeSuffix()))
+        // mesmo tipo (mesmo tipo, outro id) tocadas na consolidação. O descritor pode declarar VÁRIOS
+        // tipos-alvo (ex.: REGISTO_COLABORADOR, cujos filhos são de tipos diferentes na mesma validação).
+        .filter(change -> isAlvo(change.getAffectedGlobalId(), referenciaId, descriptor.entityTypeSuffixes()))
         // Só campos de negócio (allow-list do descritor): fora estado (workflow), FKs estruturais e
         // created*/lastModified* (auditoria). Tudo o que não estiver na lista fica de fora por omissão.
         .filter(change -> descriptor.camposNegocio().contains(change.getPropertyName()))
@@ -127,12 +129,15 @@ public class JaversValidacaoDetalheReadService {
   }
 
   /**
-   * Uma alteração é da instância-alvo quando é do {@code tipoAlvoSuffix} E o seu cdoId coincide com a
-   * {@code referenciaId} da validação. Se a validação não tiver referenciaId (registos antigos), cai
-   * para o filtro só-por-tipo — mantém o comportamento anterior em vez de esconder tudo.
+   * Uma alteração é da instância-alvo quando é de UM dos {@code tiposAlvo} E o seu cdoId coincide com a
+   * {@code referenciaId} da validação. Se a validação não tiver referenciaId (registos antigos, ou
+   * descritores {@code matchByTypeOnly}), cai para o filtro só-por-tipo — mantém o comportamento
+   * anterior em vez de esconder tudo. Aceita VÁRIOS sufixos: um descritor pode cobrir muitas entidades
+   * na mesma validação (ex.: REGISTO_COLABORADOR).
    */
-  private boolean isAlvo(GlobalId globalId, Long referenciaId, String tipoAlvoSuffix) {
-    if (!globalId.getTypeName().endsWith(tipoAlvoSuffix)) {
+  private boolean isAlvo(GlobalId globalId, Long referenciaId, Set<String> tiposAlvo) {
+    boolean tipoBate = tiposAlvo.stream().anyMatch(s -> globalId.getTypeName().endsWith(s));
+    if (!tipoBate) {
       return false;
     }
     if (referenciaId == null || !(globalId instanceof InstanceId instanceId)) {

@@ -39,4 +39,8 @@ public class DadosBancariosRespDTO  {
 
   private LocalDate dataFim ;
 
+  private String estado ;
+
+  private String estadoDesc ;
+
 }

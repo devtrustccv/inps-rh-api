@@ -2,6 +2,7 @@ package cv.inps.rh.shared.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,7 +31,12 @@ public class NotificarEnvioRequestDTO {
   @NotBlank(message = "The field <funcionarioId> is required")
   private String funcionarioId;
 
-  /** Id do registo de origem (ex.: a falta, a dispensa, o pedido de férias). */
+  /**
+   * Id do registo de origem (ex.: a falta, a dispensa, o pedido de férias). Obrigatório:
+   * RH_T_NOTIFICACAO.REFERENCIA_ID é NOT NULL, e sem esta anotação o pedido só rebentava no
+   * flush, com um erro vindo da entidade em vez de uma validação de campo.
+   */
+  @NotNull(message = "The field <referenciaId> is required")
   private Long referenciaId;
 
   /** Tabela do registo de origem (ex.: RH_T_FALTA). */
@@ -44,13 +50,19 @@ public class NotificarEnvioRequestDTO {
   private Boolean notificar;
 
   /**
-   * Valores do domínio DESTINATARIO_NOTIFICACAO escolhidos no multiselect. São etiquetas
-   * (COLABORADOR, RESPONSAVEL_COLABORADOR, RESPONSAVEL_REGISTO), nunca emails.
+   * Valores do domínio DESTINATARIO_NOTIFICACAO escolhidos no multiselect — as etiquetas de
+   * {@link cv.inps.rh.shared.application.constants.TipoDestinatarioNotificacao}: COLABORADOR,
+   * RESPONSAVEL_COLABORADOR, RESPONSAVEL_REGISTO.
+   *
+   * <p>O ecrã escolhe <em>tipos</em>, nunca endereços: a tradução para email é sempre do backend
+   * ({@link cv.inps.rh.shared.domain.service.NotificacaoDestinatarioResolver}). Aceitar emails no
+   * pedido permitiria enviar correio institucional para qualquer endereço e gravaria em
+   * RH_T_NOTIFICACAO um DESTINATARIO que não corresponde à realidade.</p>
+   *
+   * <p>Obrigatório quando {@code notificar = true} — validado no service e não por bean
+   * validation, porque com {@code notificar = false} a lista vazia é legítima.</p>
    */
   private List<String> destinatarios;
-
-  /** Emails escolhidos no multiselect "Email do Responsável", já resolvidos pelo frontend. */
-  private List<String> emailsAdicionais;
 
   /** Texto livre do campo "Mensagem da notificação". Vazio = usar o template configurado. */
   private String mensagem;

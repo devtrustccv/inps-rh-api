@@ -107,4 +107,8 @@ public class DadosContratuaisRespDTO  {
 
   private String localTrabalhoDesc ;
 
+  private String estado ;
+
+  private String estadoDesc ;
+
 }

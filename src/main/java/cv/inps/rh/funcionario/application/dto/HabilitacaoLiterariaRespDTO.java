@@ -52,4 +52,8 @@ public class HabilitacaoLiterariaRespDTO  {
 
   private Integer concluido ;
 
+  private String estado ;
+
+  private String estadoDesc ;
+
 }

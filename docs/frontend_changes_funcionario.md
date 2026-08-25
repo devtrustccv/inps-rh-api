@@ -99,3 +99,78 @@ vazia é tratada como "NIF inexistente".
 
 Inalterado: NIF obrigatório, 9 dígitos, único entre colaboradores; comparação tolerante a acentos,
 caixa e espaços; campo em falta de um dos lados não invalida.
+
+---
+
+## 5. Notificação — o utilizador deixa de indicar emails (2026-08-25)
+
+**Endpoint:** `POST api/v1/funcionarios/notificacoes/notificar`
+
+O ecrã passa a escolher apenas **tipos de destinatário**; os endereços de email são sempre
+resolvidos pelo backend. Já temos os três lados: o email do colaborador (contactos), o do
+responsável da direcção/secção onde ele está colocado, e o de quem está a registar (perfil IAM
+do utilizador autenticado).
+
+### 5.1 Campo removido do pedido: `emailsAdicionais`
+
+| | |
+|---|---|
+| **Campo** | `emailsAdicionais` (lista de emails) |
+| **Estado** | **Removido** — deixa de ser aceite |
+| **Substituto** | nenhum; usar o tipo `RESPONSAVEL_COLABORADOR` em `destinatarios` |
+
+Impacto no front-end: **retirar o multiselect "Email do Responsável"** do ecrã de notificação.
+
+### 5.2 Endpoint removido: `GET configuracao/responsaveis/emails`
+
+Existia só para preencher esse multiselect. **Deixa de existir** (404). Retirar a chamada.
+
+### 5.3 `destinatarios` — obrigatório quando `notificar = true`
+
+Valores aceites (domínio `DESTINATARIO_NOTIFICACAO`):
+
+| Valor | Email usado |
+|---|---|
+| `COLABORADOR` | contacto do colaborador do tipo `EMAIL` |
+| `RESPONSAVEL_COLABORADOR` | chefia da **secção** onde está colocado; se a secção não tiver responsável activo, sobe para a **chefia da direcção** (a linha de `RH_T_RESPONSAVEL` sem secção). O email vem dos contactos do funcionário responsável |
+| `RESPONSAVEL_REGISTO` | utilizador autenticado que está a fazer o registo (**passa a funcionar**; antes era ignorado com um aviso) |
+
+Qualquer outro valor → `400`. Lista vazia/ausente com `notificar = true` → `400` com a mensagem
+*"Indique pelo menos um destinatário da notificação."*
+Com `notificar = false` a lista continua a poder vir vazia (pedido legítimo, sem efeito).
+
+### 5.4 `referenciaId` — passa a ser validado como campo do pedido
+
+Já era obrigatório na prática (`RH_T_NOTIFICACAO.REFERENCIA_ID` é NOT NULL), mas só rebentava ao
+gravar, devolvendo um erro vindo da entidade. Agora é validado à entrada:
+
+| | Antes | Agora |
+|---|---|---|
+| Sem `referenciaId` | `400` *"Violação de restrição nos dados"* | `400` *"Erro de validação nos campos enviados — Campo 'referenciaId': The field &lt;referenciaId&gt; is required"* |
+
+Sem alteração de comportamento — só a mensagem fica accionável pelo formulário.
+
+### 5.5 Resposta enriquecida
+
+Antes: `{ "enviados": 2, "message": "..." }`.
+Agora acrescenta dois campos, para o ecrã poder dizer *quem* recebeu e *o que falhou*:
+
+```json
+{
+  "enviados": 2,
+  "message": "Notificação enviada para 2 destinatário(s).",
+  "destinatarios": [
+    { "tipo": "COLABORADOR", "nome": "João Silva", "email": "joao@x.cv" },
+    { "tipo": "RESPONSAVEL_COLABORADOR", "nome": "Ana Dias", "email": "ana@x.cv" }
+  ],
+  "semEmail": ["RESPONSAVEL_REGISTO"]
+}
+```
+
+`semEmail` lista os tipos pedidos que não deram nenhum endereço — colaborador sem contacto de
+email, direcção sem responsável configurado, ou sessão sem perfil IAM. Sugestão: mostrar como
+aviso ("O responsável da direcção não tem email configurado"), não como erro — os restantes
+foram enviados.
+
+Nota: `{"enviados": 0, "message": "Notificação não solicitada."}` (caso `notificar = false`)
+mantém-se sem os campos novos.

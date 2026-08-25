@@ -88,7 +88,8 @@ public class FamiliarMapper {
       fr.setDependente(f.getDependencia());
      fr.setAgregada(f.getMembroAgr());
      fr.setResponsavel(f.getResponsavel());
-      fr.setEstado(f.getEstado() != null ? f.getEstado().name() : null);
+      fr.setEstado(f.getEstado() != null ? f.getEstado().getCode() : null);
+      fr.setEstadoDesc(f.getEstado() != null ? f.getEstado().getDescription() : null);
       return fr;
     }).toList();
   }

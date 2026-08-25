@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
+import cv.inps.rh.funcionario.application.service.registodetalhe.RegistoDetalheCapturaService;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
@@ -54,6 +55,7 @@ public class ValidarRegistoColaboradorService {
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
   private final ColaboradorValidationRules colaboradorValidationRules;
   private final ReconciliacaoMovimentoVinculoService reconciliacaoMovimentoVinculoService;
+  private final RegistoDetalheCapturaService registoDetalheCaptura;
 
   @Transactional
   public SuccessResponseDTO validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -80,6 +82,11 @@ public class ValidarRegistoColaboradorService {
       }
       mudaEstado(funcionario, Estado.C);
       funcionarioEntityRepository.saveAndFlush(funcionario);
+      // Baseline JaVers do detalhe (filhos auditados + snapshots do funcionário/contrato). O funcionário é
+      // ShallowReference, logo o save em cascata não fotografa os filhos; a captura grava-os pelo repo
+      // auditável SEM ValidacaoAuditContext — o snapshot fica sem validacaoUuid e não aparece na grelha,
+      // servindo só para o reenvio C→P produzir um diff antes→depois em vez de um "valor inicial".
+      registoDetalheCaptura.baseline(funcionario);
       return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
           "Registo de colaborador devolvido para correção.", List.of());
     }
@@ -264,6 +271,14 @@ public class ValidarRegistoColaboradorService {
     });
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
+
+    // Detalhe de alterações do REGISTO: só no reenvio de correção (C→P), único momento em que o registo
+    // é editável. A captura regrava os filhos auditados pelo repo DENTRO do ValidacaoAuditContext e
+    // commita os snapshots do funcionário/contrato carimbados com esta validação — o JaVers compara com
+    // o baseline criado no CORRIGIR e produz o diff antes→depois que a grelha /detalhes mostra.
+    if (estaPorCorrigir) {
+      registoDetalheCaptura.capturar(saved);
+    }
 
     // Numa REJEICAO (validar=NAO) nao se associam defs ao tiprel rejeitado — RH_T_TIPREL_REM_PAG
     // nao tem estado, logo a unica forma de nao os ter e nao criar a associacao.

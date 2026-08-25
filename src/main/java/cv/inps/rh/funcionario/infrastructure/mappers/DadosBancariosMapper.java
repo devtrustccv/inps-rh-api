@@ -102,6 +102,8 @@ public class DadosBancariosMapper {
       br.setNib(b.getNib());
       br.setDataInicio(b.getDataInicio());
       br.setDataFim(b.getDataFim());
+      br.setEstado(b.getEstado() != null ? b.getEstado().getCode() : null);
+      br.setEstadoDesc(b.getEstado() != null ? b.getEstado().getDescription() : null);
       return br;
     }).toList();
   }

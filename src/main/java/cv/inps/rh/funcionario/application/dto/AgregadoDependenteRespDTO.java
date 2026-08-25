@@ -54,4 +54,6 @@ public class AgregadoDependenteRespDTO  {
 
   private String estado ;
 
+  private String estadoDesc ;
+
 }

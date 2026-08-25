@@ -85,7 +85,8 @@ public class ContactoMapper {
     cr.setUuid(entity.getUuid() != null ? entity.getUuid().toString() : null);
     cr.setTipoContacto(entity.getTipoContacto());
     cr.setContacto(entity.getContacto());
-    cr.setEstado(entity.getEstado() != null ? entity.getEstado().getDescription() : null);
+    cr.setEstado(entity.getEstado() != null ? entity.getEstado().getCode() : null);
+    cr.setEstadoDesc(entity.getEstado() != null ? entity.getEstado().getDescription() : null);
     return cr;
   }
 

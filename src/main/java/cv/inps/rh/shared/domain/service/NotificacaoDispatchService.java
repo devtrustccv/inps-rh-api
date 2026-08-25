@@ -18,40 +18,11 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * TODO: suportar o multiselect "Destinatários da notificação" (domínio DESTINATARIO_NOTIFICACAO,
- * linhas já inseridas em RH_T_DOMAINS). A resolução de cada valor para um email:
+ * Envio e registo de notificações. Cada envio grava uma linha em RH_T_NOTIFICACAO, mesmo quando
+ * o email falha — é isso que permite ao RH ver depois quem ficou por notificar.
  *
- * <ul>
- *   <li>COLABORADOR — contacto do funcionário com tipoContacto = "EMAIL" (ver FeriaWriteService).</li>
- *   <li>RESPONSAVEL_COLABORADOR — RH_T_RESPONSAVEL pela direção/secção do colaborador.</li>
- *   <li>RESPONSAVEL_REGISTO — o utilizador autenticado que criou o registo, ou seja o createdBy
- *       herdado de AuditEntity (decisão de negócio confirmada).</li>
- * </ul>
- *
- * BLOQUEIO em RESPONSAVEL_REGISTO: hoje não há como chegar ao utilizador do login.
- * AuditEntityListener.getCurrentUserId() é um stub — devolve sempre 1L (anónimo) ou 2L
- * (autenticado), nunca o ID real — e ApplicationAuditorAware devolve "local" hardcoded nos
- * perfis development/staging.
- *
- * A resolver replicando o padrão já em produção no projeto inss_core_service
- * (C:\Users\ivanick.santos\Nosi-work\projects_nosi_workspace\projects\inss_core_service),
- * em gw.inss.core.shared:
- *
- * <ol>
- *   <li>Tabela local de perfis IAM, chaveada pelo claim {@code sub} do JWT, com username, email,
- *       firstName/lastName/fullName.</li>
- *   <li>{@code IAMUserProfileSyncFilter} (OncePerRequestFilter) sincroniza o perfil em cada
- *       pedido autenticado, delegando em {@code IAMUserProfileService.syncFromJwt}, que faz
- *       curto-circuito por cache Caffeine (hash dos claims + TTL) para não ir à BD em todos os
- *       pedidos. Primeiro login reconcilia com linhas legacy por email.</li>
- *   <li>{@code ApplicationAuditorAware} passa a gravar o {@code sub} do JWT, com fallback para
- *       uma conta de sistema — em vez do "local" hardcoded.</li>
- *   <li>{@code AuthenticatedUserHelper} expõe getSub()/getUsername()/getProfile() para o resto
- *       da aplicação.</li>
- * </ol>
- *
- * Com isso, RESPONSAVEL_REGISTO resolve-se sem sequer passar por RH_T_FUNCIONARIO: o perfil IAM
- * já traz o email do claim, bastando ir de createdBy (= sub) ao perfil.
+ * <p>Os destinatários chegam aqui já resolvidos em endereços por
+ * {@link NotificacaoDestinatarioResolver}; este service não conhece as regras de quem recebe o quê.</p>
  */
 @Service
 @RequiredArgsConstructor

@@ -87,6 +87,44 @@ public class ContratoHistoricoWriteService {
   }
 
   /**
+   * RENOVAÇÃO — transita o histórico PENDENTE da proposta (versão mais alta em estado P, OBS
+   * "RENOVACAO") para o estado da decisão. NÃO se pode usar {@link #transicionarEstado}: numa
+   * renovação o CONTRATO mantém-se A (é o vínculo em vigor), logo localizar o histórico pelo estado
+   * do contrato encontraria sempre a linha do INÍCIO (A) em vez da proposta (P) — e a proposta ficava
+   * presa em P (aparece "Pendente" na Gestão Contratual mas já não na lista de Validação, porque a
+   * validação já transitou). Numa aprovação (A) a proposta passa a ser o histórico ACTUAL do
+   * funcionário (est_act_adm=1; os restantes activos → 0/I). Numa rejeição (I) a proposta fica I e o
+   * histórico do vínculo em vigor mantém-se intacto.
+   */
+  public void transicionarRenovacao(ContratoEntity contrato, Estado estado) {
+    var pendenteOpt = contratoHistoricoEntityRepository
+        .findFirstByContratoId_IdAndEstadoOrderByVersaoDesc(contrato.getId(), Estado.P);
+    if (pendenteOpt.isEmpty()) {
+      return;
+    }
+    var pendente = pendenteOpt.get();
+
+    if (estado == Estado.A) {
+      var funId = contrato.getFunId() != null ? contrato.getFunId().getId() : null;
+      if (funId != null) {
+        contratoHistoricoEntityRepository
+            .findByContratoId_FunId_IdAndEstActAdm(funId, 1)
+            .forEach(h -> {
+              h.setEstActAdm(0);
+              h.setEstado(Estado.I);
+              contratoHistoricoEntityRepository.save(h);
+            });
+      }
+      pendente.setEstActAdm(1);
+    }
+
+    // A proposta traz as suas próprias datas (as novas datas da renovação); não se propagam as do
+    // contrato, que conserva as datas do vínculo em vigor.
+    pendente.setEstado(estado);
+    contratoHistoricoEntityRepository.save(pendente);
+  }
+
+  /**
    * Transita contrato + situacaoLaboral pendente + historico pendente num único passo.
    * Deve ser chamado pelos serviços de validação em substituição do padrão
    * setEstado / getSituacoesLaborais / aplicarEstado espalhado.

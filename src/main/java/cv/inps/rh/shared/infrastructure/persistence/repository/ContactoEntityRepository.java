@@ -6,11 +6,13 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ContactoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
+import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
 @Repository
+@JaversSpringDataAuditable
 public interface ContactoEntityRepository extends
     JpaRepository<ContactoEntity, Long>,
     JpaSpecificationExecutor<ContactoEntity>

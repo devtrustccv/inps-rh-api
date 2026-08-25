@@ -87,7 +87,8 @@ public class FormacaoFeitaMapper {
       fr.setTipoFormacao(f.getRhtpfor());
       fr.setDesignacao(f.getCurso());
       fr.setNivel(f.getNivel());
-      fr.setEstado(f.getEstado() != null ? f.getEstado().name() : null);
+      fr.setEstado(f.getEstado() != null ? f.getEstado().getCode() : null);
+      fr.setEstadoDesc(f.getEstado() != null ? f.getEstado().getDescription() : null);
       return fr;
     }).toList();
   }

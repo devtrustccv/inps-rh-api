@@ -211,6 +211,9 @@ public class DadosContratuaisMapper {
       dcr.setEncargosDescontos(encs);
     }
 
+    dcr.setEstado(tiposRelacionamento.getEstado() != null ? tiposRelacionamento.getEstado().getCode() : null);
+    dcr.setEstadoDesc(tiposRelacionamento.getEstado() != null ? tiposRelacionamento.getEstado().getDescription() : null);
+
     return dcr;
   }
 

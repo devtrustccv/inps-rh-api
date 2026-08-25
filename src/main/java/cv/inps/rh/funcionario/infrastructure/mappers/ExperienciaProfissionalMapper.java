@@ -92,7 +92,8 @@ public class ExperienciaProfissionalMapper {
       er.setDataEntrada(e.getDataInicio());
       er.setDataSaida(e.getDataFim());
       er.setObservacoes(e.getObservacao());
-      er.setEstado(e.getEstado() != null ? e.getEstado().name() : null);
+      er.setEstado(e.getEstado() != null ? e.getEstado().getCode() : null);
+      er.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);
       return er;
     }).toList();
   }

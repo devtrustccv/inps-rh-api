@@ -50,4 +50,8 @@ public class ValidacaoResponseDTO  {
 
   private String utilizador ;
 
+  private String estado ;
+
+  private String estadoDesc ;
+
 }

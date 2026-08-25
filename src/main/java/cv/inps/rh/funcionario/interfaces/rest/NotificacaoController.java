@@ -142,9 +142,10 @@ public class NotificacaoController {
   )
   @Operation(
     summary = "Notificar destinatarios",
-    description = "Envia a notificacao para os destinatarios escolhidos no ecra (dominio "
-        + "DESTINATARIO_NOTIFICACAO) mais os emails adicionais. Grava um registo em "
-        + "RH_T_NOTIFICACAO por cada destinatario.",
+    description = "Envia a notificacao para os TIPOS de destinatario escolhidos no ecra "
+        + "(dominio DESTINATARIO_NOTIFICACAO: COLABORADOR, RESPONSAVEL_COLABORADOR, "
+        + "RESPONSAVEL_REGISTO). Os enderecos de email nao vem no pedido - sao resolvidos pelo "
+        + "backend. Grava um registo em RH_T_NOTIFICACAO por cada destinatario resolvido.",
     responses = {
       @ApiResponse(
           responseCode = "200",

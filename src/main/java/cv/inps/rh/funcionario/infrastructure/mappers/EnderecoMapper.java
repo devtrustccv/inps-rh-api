@@ -72,7 +72,8 @@ public class EnderecoMapper {
       er.setZonaDesc(entity.getZonaId().getNome());
     }
     er.setMorada(entity.getMorada());
-    er.setEstado(entity.getEstado() != null ? entity.getEstado().getDescription() : null);
+    er.setEstado(entity.getEstado() != null ? entity.getEstado().getCode() : null);
+    er.setEstadoDesc(entity.getEstado() != null ? entity.getEstado().getDescription() : null);
     er.setUuid(entity.getUuid() != null ? entity.getUuid().toString() : null);
     return er;
   }

@@ -49,4 +49,6 @@ public class ExperienciaProfissionalRespDTO  {
 
   private String estado ;
 
+  private String estadoDesc ;
+
 }

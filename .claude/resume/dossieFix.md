@@ -1,64 +1,64 @@
-> Updated: 2026-08-22 12:20
+> Updated: 2026-08-25 17:10
 
 ## Goal
 
-Replicar o ciclo **CORRIGIR** (maker-checker por estado, P→C→P→A) e a grelha **JaVers**
-("Detalhe de alterações") a todos os serviços do dossiê.
+Grelha "Detalhe de alterações" (JaVers) para o REGISTO_COLABORADOR, capturada só no PUT de reenvio de
+correção (C→P). Valores sempre LEGÍVEIS (rótulos PT, FKs→nome, nunca id). Antes: expor estado/estadoDesc
+uniforme (feito e commitado, `274a2799`).
 
 ## Current state
 
-- **MERGEADO em `develop`** (merge commit `fdc5c298`; branch de trabalho já apagado; push feito pelo user).
-- **CORRIGIR** em 7 services: DadosBancarios, SituacaoLaboral, RenovacaoContrato, Substituicao,
-  Rendimento, Desconto, ProcessoDisciplinar. Padrão "edita-no-validar" (validar=null reenvia C→P).
-- **Grelha JaVers** ativa em 9 referências (as 7 + Mobilidade/Carreira anteriores). DadosBancarios e
-  Renovacao ligados via `matchByTypeOnly` (anchor mismatch coleção/histórico).
-- **Extras**: motivo da substituição corrigível; colaborador substituído mostrado por NOME.
-- **Fixes**: `ValidationUtil.isCorrigir(null)` NPE; lista de mobilidade reflete estado workflow P/C.
-- Tudo provado LIVE contra Oracle dev (colaborador 958897). Detalhes/mutações em
-  `.claude/resume/dossie-corrigir-javers-obs.md` e `-plan.md`.
+- Âmbito: **todos os filhos que o registo toca** (pessoais + contratuais). TiposRelacionamento FORA.
+- TODOS os filhos LIGADOS e **testados live**: um reenvio com 6 edições devolveu 9 linhas em
+  `/detalhes` cobrindo CONTACTO, ENDERECO, FAMILIARES, HABILITACOES, DADOS_BANCARIOS, CARREIRA,
+  MOBILIDADE, SITUACAO_LABORAL — valores legíveis, `tabelaName` desambigua.
+- Bug corrigido (c1de535e): `isAlvo` aceita `Set<String>` (o compile offline incremental mascarava;
+  usar SEMPRE `mvn clean compile` antes de arrancar).
+- Adicionados **Documento pessoal** (RH_T_DOCUMENTO_PESSOAL) ✅ testado live (nº documento
+  TEST-NICK-905→905B) e **Remunerações/Pagamentos** (RH_T_DEF_REMUNERACOES/PAGAMENTOS, por composição de
+  Rendimento/Desconto) — ligado/compila; falta teste live (Mario não tem def rem/pag por não ter sido
+  validado SIM; precisa de colaborador com subsídios/encargos a passar por correção).
+- FORA (com justificação no javadoc): TiposRelacionamento/Contrato (ligação/shallow) e os campos-núcleo
+  do FuncionarioEntity (nome/NIF/nomes pais) — funcionário é ShallowReference; detalhá-los exige
+  mecanismo dedicado fora do auto-audit.
+- OBSERVAÇÃO: a grelha ACUMULA diffs de todos os ciclos de correção da MESMA validação (mesmo
+  validacaoUuid em P→C→P). Registo novo com 1 ciclo = 1 linha por campo. Afinar para "último por campo"
+  se o negócio quiser (só na leitura).
+- Read-model **multi-tipo** ligado: `isAlvo` usa `entityTypeSuffixes()`.
+- Descritor do registo faz **composição**: injeta descritores de módulo existentes (DadosBancarios já;
+  Carreira/Mobilidade/Situação a fazer) + config "dossiê" própria (mapa `DOSSIE`).
+- Serviço tem helpers genéricos `baseline(...)`/`capturar(...)` — cada filho novo = anotar repo
+  `@JaversSpringDataAuditable` + 1 linha em `criarBaselineFilhos`/`capturarDetalheFilhos` + entrada no
+  descritor.
+- TODO dos próximos filhos está **no código** (javadoc do descritor).
 
 ## Decisions made — do not re-litigate
 
-- CORRIGIR: forma "edita-no-validar"; CORRIGIR exige payload completo (bean validation).
-- `matchByTypeOnly` no ValidacaoDetalheDescriptor resolve anchor mismatch (não mexer em referenciaId).
-- Vista `RH_V_MOBILIDADE` calcula estado por datas (A/I) — leitura sobrepõe com estado da tabela p/ P/C.
+- Reutilizar descritores existentes por COMPOSIÇÃO (não duplicar campos/rótulos).
+- TiposRelacionamento e Contrato (campos próprios) FORA: tabela de ligação / shallow ref.
+- Detalhe só no PUT (C→P): registo só editável via CORRIGIR; depois usam-se os módulos individuais.
+- Baseline no CORRIGIR (P→C) SEM contexto (não entra na grelha); diff no reenvio DENTRO do
+  `ValidacaoAuditContext` carimbado com a validação.
+- `matchByTypeOnly=true` (referenciaId = funcionário, não o filho).
 
 ## Constraints
 
-- Arranque: JDK23 + carregar `.env` SEM `source` (password tem `$$`). Segurança OFF em dev.
-- SQL directo: usar `DbExec` (ver `reference_db_helpers`). NÃO limpar colaboradores de teste.
+- JDK23; `TableName` não tem RH_T_DADOS_BANCARIOS → usar string literal. Get-by-id/validar por UUID.
+- Filhos gravados em cascata + `FuncionarioEntity` é ShallowReference → filho só é auditado se o seu
+  repo for `@JaversSpringDataAuditable` e gravado pelo próprio repo.
 
-## Sessão 2026-08-22 (pós-merge) — sintoma estado-C + direcaoAntesId
+## Relevant files
 
-Varredura de TODAS as listas que leem de vistas quanto ao sintoma "estado C invisível":
-- **Carreira** (RH_V_CARREIRA): vista colapsa C→'A' (CASE ELSE). Aplicado overlay P/C em
-  `CarreiraReadService.list` (lê estado real da tabela por carreira_id) — igual à mobilidade.
-- **Contrato** (RH_V_CONTRATO): expõe `d.estado` cru (emite C), mas o filtro era só (A,P,I) → renovação
-  em correção desaparecia. Fix: **+Estado.C no filtro** de `ContratoReadService.listaContratos` (sem overlay).
-- **Já corretos (sem alteração)**: Mobilidade (já tinha overlay P/C) e Dossiê/RH_V_DOSSIE (filtro já
-  inclui A,P,C,I + estado cru).
-- **N/A**: DadosBancarios, Substituicao, Rendimento, Desconto, ProcessoDisciplinar leem de TABELAS
-  (estado real), não de vistas. HistoricoLaboral aplica direto (sem maker-checker).
-
-Campo novo **`direcaoAntesId` (Long)** no `MobilidadeDTO` (só leitura) + mapper (2 métodos) + manifesto
-`.igrpstudio/funcionario/dto/MobilidadeDTO.json`. NB: `DirecaoEntity` NÃO tem uuid → identificador é o
-Long id (coerente com direcaoDepois e os selects). Pedido do user "por id, por agora".
-
-Doc frontend nova: `docs/frontend_changes_funcionario.md`.
-
-### Teste live (colaborador 958897, app em código novo na porta 8088)
-- ✅ direcaoAntesId=100010075 no GET mobilidade 660.
-- ✅ Contrato: renovação fresca (contrato 698, v4/hist 242) → CORRIGIR → lista mostra v4 estado C.
-- ✅ Carreira: progressão (carreira 756) → CORRIGIR → VISTA diz 'A', TABELA diz 'C', LISTA (overlay) diz 'C'.
-- Dados de teste criados via REST (deixados em C, coerentes): renovação 698 (tiprel 173330/hist 242) +
-  carreira 756. NÃO limpar. SQL directo bloqueado pelo classificador → tudo testado via REST real.
+- `RegistoColaboradorValidacaoDetalheDescriptor.java` — descritor + TODO dos próximos filhos.
+- `ValidarRegistoColaboradorService.java` — `criarBaselineBancarios`, `capturarDetalheBancarios`.
+- `ValidacaoDetalheDescriptor.java:31` — `entityTypeSuffixes()` default (hook multi-tipo, por ligar).
 
 ## Open questions
 
-- (resolvida a varredura) Nenhuma outra lista com o sintoma; todas as que leem de vista foram cobertas.
+- `alteradoPor` em dev = `system-bot@nosi.cv` (auditor sem token real).
 
 ## Next step
 
-MERGEADO em develop (merge `337dc3f1`, commit `26bda6c7`; branch feat/dossie-listas-estado-c apagado).
-Merge é LOCAL — falta `git push origin develop` (aguardar decisão do user). Artefactos de teste
-(DbExec*/DbQuery*/app*.log/scratchpad/) continuam untracked — candidatos a .gitignore.
+Feature completa e testada. Decisão de negócio pendente: manter histórico acumulado por ciclo de
+correção OU mostrar só o último valor por campo (afinação na leitura do JaversValidacaoDetalheReadService).
+Opcional: ligar Documento pessoal e def rem/pag. Considerar push da branch develop.
