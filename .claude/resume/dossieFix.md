@@ -1,4 +1,4 @@
-> Updated: 2026-08-25 16:55
+> Updated: 2026-08-25 17:00
 
 ## Goal
 
@@ -9,10 +9,16 @@ uniforme (feito e commitado, `274a2799`).
 ## Current state
 
 - Âmbito: **todos os filhos que o registo toca** (pessoais + contratuais). TiposRelacionamento FORA.
-- TODOS os filhos LIGADOS e a compilar: dossiê (bancários✅live, contactos, endereço, familiares,
-  habilitações) + contratual por composição (carreira, mobilidade, situação). Falta **teste live
-  consolidado** dos novos. Fora de âmbito: TiposRelacionamento/Contrato (campos próprios), Documento
-  pessoal e def rem/pag (TODO opcional no javadoc do descritor).
+- TODOS os filhos LIGADOS e **testados live**: um reenvio com 6 edições devolveu 9 linhas em
+  `/detalhes` cobrindo CONTACTO, ENDERECO, FAMILIARES, HABILITACOES, DADOS_BANCARIOS, CARREIRA,
+  MOBILIDADE, SITUACAO_LABORAL — valores legíveis, `tabelaName` desambigua.
+- Bug corrigido (c1de535e): `isAlvo` aceita `Set<String>` (o compile offline incremental mascarava;
+  usar SEMPRE `mvn clean compile` antes de arrancar).
+- Fora de âmbito: TiposRelacionamento/Contrato (campos próprios), Documento pessoal, def rem/pag (TODO
+  opcional no javadoc do descritor).
+- OBSERVAÇÃO: a grelha ACUMULA diffs de todos os ciclos de correção da MESMA validação (mesmo
+  validacaoUuid em P→C→P). Registo novo com 1 ciclo = 1 linha por campo. Afinar para "último por campo"
+  se o negócio quiser (só na leitura).
 - Read-model **multi-tipo** ligado: `isAlvo` usa `entityTypeSuffixes()`.
 - Descritor do registo faz **composição**: injeta descritores de módulo existentes (DadosBancarios já;
   Carreira/Mobilidade/Situação a fazer) + config "dossiê" própria (mapa `DOSSIE`).
@@ -48,7 +54,6 @@ uniforme (feito e commitado, `274a2799`).
 
 ## Next step
 
-**Teste live consolidado**: registar colaborador → CORRIGIR → reenvio alterando ≥1 campo por secção
-(contacto, morada, familiar, habilitação, bancário, carreira/mobilidade/situação) → `GET
-.../validacoes/{uuid}/detalhes` e confirmar 1 linha legível por alteração, com `tabelaName` a
-desambiguar a secção. App: `spring-boot:run` (porta 8088), esperar "Started" no app_run.log.
+Feature completa e testada. Decisão de negócio pendente: manter histórico acumulado por ciclo de
+correção OU mostrar só o último valor por campo (afinação na leitura do JaversValidacaoDetalheReadService).
+Opcional: ligar Documento pessoal e def rem/pag. Considerar push da branch develop.
