@@ -1,4 +1,4 @@
-> Updated: 2026-08-25 16:30
+> Updated: 2026-08-25 16:38
 
 ## Goal
 
@@ -9,9 +9,9 @@ uniforme (feito e commitado, `274a2799`).
 ## Current state
 
 - Âmbito: **todos os filhos que o registo toca** (pessoais + contratuais). TiposRelacionamento FORA.
-- **DadosBancarios** ✅ (testado live), **Contactos** ✅, **Endereço** ✅ (ligados, compilam; falta
-  teste live de contactos/endereço). `GeografiaEntity`/`TipoDocumentoEntity`/`EstabelecimentoEntity`
-  já postos em `REFERENCIAS_RASAS` (cobre também familiares/habilitações que vêm a seguir).
+- **DadosBancarios** ✅ (testado live), **Contactos** ✅, **Endereço** ✅, **Familiares** ✅ (ligados,
+  compilam; falta teste live dos novos). `GeografiaEntity`/`TipoDocumentoEntity`/`EstabelecimentoEntity`
+  já em `REFERENCIAS_RASAS` (cobre também habilitações).
 - Read-model **multi-tipo** ligado: `isAlvo` usa `entityTypeSuffixes()`.
 - Descritor do registo faz **composição**: injeta descritores de módulo existentes (DadosBancarios já;
   Carreira/Mobilidade/Situação a fazer) + config "dossiê" própria (mapa `DOSSIE`).
@@ -47,7 +47,7 @@ uniforme (feito e commitado, `274a2799`).
 
 ## Next step
 
-Ligar **Familiares** (RH_T_FAMILIARES): anotar `FamiliarEntityRepository`, entrada no `DOSSIE`
-(`nome`,`numDocumento`,`dataNascimento`,`sexo`,`gdpId`,`dependencia`,`membroAgr`,`responsavel`,
-`tpDocumentoId`), 1 linha nos helpers. Shallow das FKs já feito. Depois: Habilitações, Documento
-pessoal, e a parte contratual por composição (Carreira/Mobilidade/Situação + repo-save no serviço).
+Ligar **Habilitações** (RH_T_HABILITACOES_LITERARIAS): anotar `HabilitacaoLiterariaEntityRepository`,
+entrada no `DOSSIE` (`nomeCurso`,`nivel`,`area`,`paisId`,`estabelecimento`,`dataInicio`,`dataFim`,
+`concluido`), 1 linha nos helpers. Shallow já feito. Depois: Documento pessoal, e a parte contratual
+por composição (injetar Carreira/Mobilidade/Situação em `reutilizados` + repo-save no serviço).

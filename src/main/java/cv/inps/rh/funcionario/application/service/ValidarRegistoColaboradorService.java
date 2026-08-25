@@ -21,6 +21,7 @@ import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ContactoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DadosBancariosEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EnderecoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.FamiliarEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -65,6 +66,7 @@ public class ValidarRegistoColaboradorService {
   private final DadosBancariosEntityRepository dadosBancariosEntityRepository;
   private final ContactoEntityRepository contactoEntityRepository;
   private final EnderecoEntityRepository enderecoEntityRepository;
+  private final FamiliarEntityRepository familiarEntityRepository;
 
   @Transactional
   public SuccessResponseDTO validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -315,6 +317,7 @@ public class ValidarRegistoColaboradorService {
     baseline(f.getDadosBancarios(), dadosBancariosEntityRepository, b -> b.getEstado() != Estado.E);
     baseline(f.getContactos(), contactoEntityRepository, c -> c.getEstado() != Estado.E);
     baseline(umOuNenhum(f.getEndereco()), enderecoEntityRepository, e -> e.getEstado() != Estado.E);
+    baseline(f.getFamiliares(), familiarEntityRepository, fa -> fa.getEstado() != Estado.E);
   }
 
   /**
@@ -335,6 +338,8 @@ public class ValidarRegistoColaboradorService {
         c -> c.getEstado() != Estado.E);
     capturar(umOuNenhum(f.getEndereco()), enderecoEntityRepository, validacao, "RH_T_ENDERECO",
         e -> e.getEstado() != Estado.E);
+    capturar(f.getFamiliares(), familiarEntityRepository, validacao, "RH_T_FAMILIARES",
+        fa -> fa.getEstado() != Estado.E);
   }
 
   /** Adapta um filho 1:1 (ex.: endereço) à API baseada em lista dos helpers. */

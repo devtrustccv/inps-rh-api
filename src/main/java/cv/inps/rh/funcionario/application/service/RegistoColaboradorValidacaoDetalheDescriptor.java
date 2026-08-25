@@ -57,7 +57,17 @@ public class RegistoColaboradorValidacaoDetalheDescriptor implements ValidacaoDe
           "ilhaId", "Ilha",
           "concelhoId", "Concelho",
           "freguesiaId", "Freguesia",
-          "zonaId", "Zona")
+          "zonaId", "Zona"),
+      "FamiliarEntity", Map.ofEntries(
+          Map.entry("nome", "Nome"),
+          Map.entry("numDocumento", "Nº de documento"),
+          Map.entry("tpDocumentoId", "Tipo de documento"),
+          Map.entry("dataNascimento", "Data de nascimento"),
+          Map.entry("sexo", "Género"),
+          Map.entry("gdpId", "Grau de parentesco"),
+          Map.entry("dependencia", "Dependente"),
+          Map.entry("membroAgr", "Membro do agregado"),
+          Map.entry("responsavel", "Responsável"))
   );
 
   @Override
