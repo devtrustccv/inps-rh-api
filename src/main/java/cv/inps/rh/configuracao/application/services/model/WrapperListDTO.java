@@ -10,6 +10,6 @@ import java.util.List;
 @Setter
 public class WrapperListDTO extends PageDTO {
 
-  private List<Object> content;
+  private List<?> content;
 
 }
