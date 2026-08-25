@@ -2,7 +2,6 @@ package cv.inps.rh.configuracao.application.services;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.dto.*;
-import cv.inps.rh.configuracao.application.queries.GetResponsaveisEmailsQuery;
 import cv.inps.rh.configuracao.application.queries.GetResponsaveisQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -405,71 +404,5 @@ public class ResponsavelService {
     return null;
   }
 
-  /**
-   * Emails de RH_T_RESPONSAVEL para o multiselect "Email do Responsável" do ecrã de notificação.
-   *
-   * <p>Quando vem {@code funcionarioId}, a direção/secção é deduzida da mobilidade activa do
-   * colaborador — é o que o ecrã tem em mão. Sem filtro nenhum devolve todos os responsáveis
-   * com email, o que é aceitável porque a tabela é pequena (uma linha por direção/secção).</p>
-   *
-   * <p>Linhas sem email ficam de fora: no multiselect seriam opções impossíveis de escolher.</p>
-   */
-  @Transactional(readOnly = true)
-  public List<ResponsavelEmailDTO> getResponsaveisEmails(GetResponsaveisEmailsQuery query) {
-
-    Long idInstituicao = query.getIdInstituicao();
-    Long idSeccao = query.getIdSeccao();
-
-    if (StringUtils.hasText(query.getFuncionarioId())) {
-      var funcionario = funcionarioEntityRepository.findByUuidOrThrow(UUID.fromString(query.getFuncionarioId()));
-      var mobilidade = mobilidadeEntityRepository.findByFunIdAndEstadoAndDataFimIsNull(funcionario, Estado.A);
-
-      if (mobilidade == null || mobilidade.getInstidId() == null) {
-        // Sem colocação conhecida não há como escolher responsáveis; devolver a lista toda seria
-        // pior do que devolver nada, porque sugeriria chefias de outras direções.
-        return List.of();
-      }
-
-      idInstituicao = mobilidade.getInstidId().getId();
-      idSeccao = mobilidade.getSecaoId() != null ? mobilidade.getSecaoId().getId() : null;
-    }
-
-    var filtroInstituicao = idInstituicao;
-    var filtroSeccao = idSeccao;
-
-    Specification<ResponsavelEntity> spec = (root, _, cb) -> {
-      var predicates = new ArrayList<Predicate>();
-      predicates.add(cb.isNotNull(root.get(ResponsavelEntity_.email)));
-
-      if (filtroInstituicao != null) {
-        predicates.add(cb.equal(root.get(ResponsavelEntity_.institId).get(DirecaoEntity_.ID), filtroInstituicao));
-      }
-      if (filtroSeccao != null) {
-        predicates.add(cb.equal(root.get(ResponsavelEntity_.secaoId).get(SecaoEntity_.ID), filtroSeccao));
-      }
-
-      return cb.and(predicates.toArray(new Predicate[0]));
-    };
-
-    return responsavelEntityRepository.findAll(spec).stream()
-        .filter(e -> StringUtils.hasText(e.getEmail()))
-        .map(e -> {
-          var dto = new ResponsavelEmailDTO();
-          dto.setIdResponsavel(e.getId());
-          dto.setEmail(e.getEmail().trim());
-
-          var fun = e.getFunId();
-          dto.setNome(fun != null && StringUtils.hasText(fun.getNome()) ? fun.getNome() : e.getEmail().trim());
-
-          var direcao = e.getInstitId();
-          if (direcao != null) dto.setDirecao(direcao.getNome());
-
-          var secao = e.getSecaoId();
-          if (secao != null) dto.setSeccao(secao.getNome());
-
-          return dto;
-        })
-        .toList();
-  }
 
 }

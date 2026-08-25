@@ -1,11 +1,13 @@
 package cv.inps.rh.shared.domain.service;
 
 import cv.inps.rh.shared.application.constants.TipoDestinatarioNotificacao;
+import cv.inps.rh.shared.application.services.AuthenticatedUserHelper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContactoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MobilidadeEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ResponsavelEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.application.constants.Estado;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -24,9 +26,12 @@ import java.util.Optional;
 /**
  * Traduz os valores do multiselect "Destinatários da notificação" para endereços de email
  * concretos, conforme a regra da spec: "o sistema deve obter automaticamente o endereço de
- * e-mail". O frontend envia apenas as etiquetas do domínio DESTINATARIO_NOTIFICACAO — nunca
- * emails — com excepção do campo "Email do Responsável", que já vem resolvido e entra aqui
- * por {@link #comEmailsAdicionais}.
+ * e-mail".
+ *
+ * <p>O frontend envia apenas as etiquetas do domínio DESTINATARIO_NOTIFICACAO — nunca emails.
+ * Os três tipos são todos resolúveis do lado do servidor: o colaborador pelos seus contactos, o
+ * responsável pela colocação activa, e o responsável do registo pelo perfil IAM do utilizador
+ * autenticado.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -37,12 +42,13 @@ public class NotificacaoDestinatarioResolver {
   private static final String TIPO_CONTACTO_EMAIL = "EMAIL";
 
   private final ResponsavelEntityRepository responsavelRepository;
-  private final MobilidadeEntityRepository mobilidadeRepository;
+  private final TiposRelacionamentoEntityRepository tiposRelacionamentoRepository;
+  private final AuthenticatedUserHelper authenticatedUserHelper;
 
   /**
-   * Um destinatário já resolvido. O {@code funcionario} pode ser nulo — por exemplo num email
-   * adicional escrito à mão, que não corresponde a nenhum funcionário conhecido — e nesse caso
-   * a notificação fica gravada sem FUN_ID.
+   * Um destinatário já resolvido. O {@code funcionario} pode ser nulo — o utilizador que fez o
+   * registo é uma identidade IAM e não tem necessariamente linha em RH_T_FUNCIONARIO — e nesse
+   * caso a notificação fica gravada sem FUN_ID.
    */
   public record Destinatario(String tipo, String nome, String email, FuncionarioEntity funcionario) {}
 
@@ -51,9 +57,9 @@ public class NotificacaoDestinatarioResolver {
    * com um aviso: a alternativa — rebentar o pedido inteiro — impediria o envio para os
    * restantes, que é o oposto do que o utilizador pediu.
    *
-   * <p>O resultado vem deduplicado por email (o primeiro a aparecer ganha), porque o responsável
-   * do colaborador e um email adicional escolhido à mão são com frequência a mesma pessoa, e
-   * enviar-lhe o mesmo email duas vezes gravaria também duas linhas em RH_T_NOTIFICACAO.</p>
+   * <p>O resultado vem deduplicado por email (o primeiro tipo a aparecer ganha), porque quem faz
+   * o registo é com frequência o próprio responsável do colaborador, e enviar-lhe o mesmo email
+   * duas vezes gravaria também duas linhas em RH_T_NOTIFICACAO.</p>
    */
   @Transactional(readOnly = true)
   public List<Destinatario> resolver(FuncionarioEntity colaborador,
@@ -66,16 +72,7 @@ public class NotificacaoDestinatarioResolver {
       switch (tipo) {
         case COLABORADOR -> resolverColaborador(colaborador).ifPresent(destinatarios::add);
         case RESPONSAVEL_COLABORADOR -> destinatarios.addAll(resolverResponsavelColaborador(colaborador));
-        // TODO RESPONSAVEL_REGISTO: enviar para o utilizador que fez login e criou o registo.
-        // Bloqueado — AuditEntityListener.getCurrentUserId() é um stub (devolve 1L/2L fixo) e
-        // ApplicationAuditorAware devolve "local" hardcoded em development/staging, portanto não
-        // há hoje forma de chegar à pessoa. A resolver replicando o padrão IAM do inss_core_service
-        // (perfil por claim `sub` do JWT + sync filter + AuthenticatedUserHelper); esse perfil já
-        // traz o email, logo bastará ir de createdBy (= sub) ao perfil. Ver o javadoc de
-        // NotificacaoDispatchService para o detalhe das peças a copiar.
-        case RESPONSAVEL_REGISTO -> LOGGER.warn(
-            "Destinatário RESPONSAVEL_REGISTO pedido mas ainda não implementado — "
-            + "requer identidade do utilizador autenticado (ver TODO acima)");
+        case RESPONSAVEL_REGISTO -> resolverResponsavelRegisto().ifPresent(destinatarios::add);
       }
     }
 
@@ -83,22 +80,30 @@ public class NotificacaoDestinatarioResolver {
   }
 
   /**
-   * Junta aos destinatários resolvidos os emails escolhidos no campo "Email do Responsável".
-   * Estes já vêm prontos do frontend — vindos de RH_T_RESPONSAVEL — e por isso não passam por
-   * nenhuma resolução, apenas por validação de formato mínima e deduplicação.
+   * Utilizador autenticado que está a fazer o registo. O email vem do perfil IAM sincronizado a
+   * partir do JWT ({@code sub}), o mesmo valor que fica em {@code createdBy} — não é preciso
+   * passar por RH_T_FUNCIONARIO.
+   *
+   * <p>Sem sessão autenticada (jobs, ou dev com segurança desligada) não há a quem enviar: fica
+   * o aviso e o destinatário é omitido, em vez de rebentar o envio para os restantes.</p>
    */
-  public List<Destinatario> comEmailsAdicionais(List<Destinatario> resolvidos,
-                                                Collection<String> emailsAdicionais) {
-    if (emailsAdicionais == null || emailsAdicionais.isEmpty()) return deduplicar(resolvidos);
+  private Optional<Destinatario> resolverResponsavelRegisto() {
+    var perfil = authenticatedUserHelper.getProfile();
+    if (perfil.isEmpty()) {
+      LOGGER.warn("RESPONSAVEL_REGISTO pedido mas não há utilizador autenticado com perfil IAM "
+          + "(sub={}) — destinatário omitido", authenticatedUserHelper.getSub());
+      return Optional.empty();
+    }
 
-    var todos = new ArrayList<>(resolvidos);
-    emailsAdicionais.stream()
-        .filter(StringUtils::hasText)
-        .map(String::trim)
-        .forEach(email -> todos.add(new Destinatario(
-            TipoDestinatarioNotificacao.RESPONSAVEL_COLABORADOR.name(), email, email, null)));
+    var p = perfil.get();
+    if (!StringUtils.hasText(p.getEmail())) {
+      LOGGER.warn("Perfil IAM {} sem email — RESPONSAVEL_REGISTO omitido", p.getUsername());
+      return Optional.empty();
+    }
 
-    return deduplicar(todos);
+    var nome = StringUtils.hasText(p.getFullName()) ? p.getFullName() : p.getUsername();
+    return Optional.of(new Destinatario(
+        TipoDestinatarioNotificacao.RESPONSAVEL_REGISTO.name(), nome, p.getEmail().trim(), null));
   }
 
   private Optional<Destinatario> resolverColaborador(FuncionarioEntity colaborador) {
@@ -117,7 +122,12 @@ public class NotificacaoDestinatarioResolver {
 
   /**
    * Responsáveis da direção/secção onde o colaborador está colocado. A colocação vem da
-   * mobilidade activa e sem data de fim — o mesmo critério usado no resto do módulo.
+   * mobilidade apontada pelo tiprel atual (est_act_adm=1).
+   *
+   * <p>Procura em dois níveis: primeiro a chefia da secção, e só se essa não existir a da direção.</p>
+   *
+   * <p>Só responsáveis com estado A: o soft-delete de RH_T_RESPONSAVEL põe estado='I' e notificar
+   * uma chefia já removida da direção seria fuga de informação.</p>
    *
    * <p>Devolve uma lista e não um único responsável: uma secção pode ter mais do que uma linha
    * em RH_T_RESPONSAVEL, e a spec diz explicitamente "deve ser possível selecionar mais do que
@@ -126,42 +136,75 @@ public class NotificacaoDestinatarioResolver {
   private List<Destinatario> resolverResponsavelColaborador(FuncionarioEntity colaborador) {
     if (colaborador == null) return List.of();
 
-    var mobilidade = mobilidadeRepository.findByFunIdAndEstadoAndDataFimIsNull(colaborador, Estado.A);
+    // A colocação vem da mobilidade referenciada pelo tiprel ATUAL (est_act_adm=1), e não de uma
+    // pesquisa por estado/data_fim em RH_T_MOBILIDADE: a FK MOB_ID é a fonte de verdade da
+    // colocação, é a definição de "relação laboral atual" usada no resto do módulo, e a query já
+    // traz a direção e a secção em fetch (open-in-view está desligado).
+    var mobilidade = tiposRelacionamentoRepository.findAtualByFuncionarioUuid(colaborador.getUuid())
+        .map(TiposRelacionamentoEntity::getMobId)
+        .orElse(null);
+
     if (mobilidade == null || mobilidade.getInstidId() == null) {
-      LOGGER.warn("Colaborador {} sem mobilidade activa — não é possível determinar o responsável",
-          colaborador.getUuid());
-      return List .of();
+      LOGGER.warn("Colaborador {} sem colocação no tipo de relacionamento atual — não é possível "
+          + "determinar o responsável", colaborador.getUuid());
+      return List.of();
     }
 
     var direcaoId = mobilidade.getInstidId().getId();
     var secao = mobilidade.getSecaoId();
 
-    // Sem secção conhecida cai-se para os responsáveis da direção; é preferível notificar a
-    // chefia de nível acima a não notificar ninguém.
+    // A chefia mais próxima primeiro: a da secção onde o colaborador está colocado. Só quando essa
+    // não existe — secção sem responsável activo, ou colocação sem secção — se sobe para a
+    // direção; é preferível notificar o nível acima a não notificar ninguém.
     var responsaveis = secao != null
-        ? responsavelRepository.findAllByInstitId_idAndSecaoId_uuid(direcaoId, secao.getUuid())
-        : responsavelRepository.findAllByInstitId_id(direcaoId);
+        ? responsavelRepository.findAllBySecaoId_uuidAndEstado(secao.getUuid(), Estado.A.name())
+        : List.<ResponsavelEntity>of();
 
     if (responsaveis.isEmpty()) {
-      LOGGER.warn("Sem responsáveis em RH_T_RESPONSAVEL para direcao={} secao={}",
+      responsaveis = responsavelRepository.findAllByInstitId_idAndSecaoIdIsNullAndEstado(
+          direcaoId, Estado.A.name());
+      LOGGER.debug("Secção {} sem responsável activo — a subir para a chefia da direção {}",
+          secao != null ? secao.getId() : null, direcaoId);
+    }
+
+    if (responsaveis.isEmpty()) {
+      LOGGER.warn("Sem responsáveis activos em RH_T_RESPONSAVEL para direcao={} secao={}",
           direcaoId, secao != null ? secao.getId() : null);
       return List.of();
     }
 
     return responsaveis.stream()
-        .filter(r -> StringUtils.hasText(r.getEmail()))
         .map(this::paraDestinatario)
+        .flatMap(Optional::stream)
         .toList();
   }
 
-  private Destinatario paraDestinatario(ResponsavelEntity responsavel) {
+  /**
+   * O email do responsável vem dos contactos do funcionário que ocupa o lugar — a mesma fonte do
+   * COLABORADOR. A coluna RH_T_RESPONSAVEL.EMAIL fica como fallback para dados legados: nenhum
+   * fluxo da aplicação a escreve (saveResponsaveis grava só funId/secaoId/institId/estado), pelo
+   * que confiar só nela deixaria esta resolução sem nunca encontrar ninguém.
+   */
+  private Optional<Destinatario> paraDestinatario(ResponsavelEntity responsavel) {
     var funcionario = responsavel.getFunId();
+
+    var email = (funcionario != null ? emailDe(funcionario) : Optional.<String>empty())
+        .or(() -> Optional.ofNullable(responsavel.getEmail())
+            .filter(StringUtils::hasText)
+            .map(String::trim));
+
+    if (email.isEmpty()) {
+      LOGGER.warn("Responsável {} sem email — nem nos contactos do funcionário nem na coluna "
+          + "RH_T_RESPONSAVEL.EMAIL — omitido", responsavel.getId());
+      return Optional.empty();
+    }
+
     var nome = funcionario != null && StringUtils.hasText(funcionario.getNome())
         ? funcionario.getNome()
-        : responsavel.getEmail();
-    return new Destinatario(
-        TipoDestinatarioNotificacao.RESPONSAVEL_COLABORADOR.name(),
-        nome, responsavel.getEmail().trim(), funcionario);
+        : email.get();
+
+    return Optional.of(new Destinatario(
+        TipoDestinatarioNotificacao.RESPONSAVEL_COLABORADOR.name(), nome, email.get(), funcionario));
   }
 
   private Optional<String> emailDe(FuncionarioEntity funcionario) {
