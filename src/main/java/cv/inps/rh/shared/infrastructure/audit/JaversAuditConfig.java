@@ -3,7 +3,10 @@ package cv.inps.rh.shared.infrastructure.audit;
 import cv.inps.rh.shared.application.services.AuthenticatedUserHelper;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.EstabelecimentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.GeografiaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCarreiraEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCategoriaEntity;
@@ -106,7 +109,12 @@ public class JaversAuditConfig {
       // Substituicao, DefinicaoRemuneracao, DefPagamento, ProcessoDisciplinar). Rasas para o commit não
       // arrastar o grafo profundo — a grelha usa só o id da FK (nome resolvido na leitura).
       BancoEntity.class, ParamSituacaoEntity.class, ParamSituacaoDetalheEntity.class,
-      TiposRelacionamentoEntity.class, TipoMovimentoEntity.class);
+      TiposRelacionamentoEntity.class, TipoMovimentoEntity.class,
+      // 3ª passagem (detalhe do registo de colaborador): FKs dos filhos do dossiê agora auditados —
+      // Endereço/Habilitação (país/ilha/concelho/freguesia/zona/estabelecimento) e Familiar (tipo de
+      // documento). Rasas para o commit não arrastar a hierarquia geográfica inteira; a grelha resolve
+      // o id para nome na leitura (ReferenciaNomeResolver).
+      GeografiaEntity.class, TipoDocumentoEntity.class, EstabelecimentoEntity.class);
 
   @Bean
   Javers javers(JaversSqlRepository sqlRepository, PlatformTransactionManager transactionManager) {

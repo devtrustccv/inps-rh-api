@@ -20,6 +20,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ContactoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DadosBancariosEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.EnderecoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +64,7 @@ public class ValidarRegistoColaboradorService {
   private final ReconciliacaoMovimentoVinculoService reconciliacaoMovimentoVinculoService;
   private final DadosBancariosEntityRepository dadosBancariosEntityRepository;
   private final ContactoEntityRepository contactoEntityRepository;
+  private final EnderecoEntityRepository enderecoEntityRepository;
 
   @Transactional
   public SuccessResponseDTO validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -312,6 +314,7 @@ public class ValidarRegistoColaboradorService {
   private void criarBaselineFilhos(FuncionarioEntity f) {
     baseline(f.getDadosBancarios(), dadosBancariosEntityRepository, b -> b.getEstado() != Estado.E);
     baseline(f.getContactos(), contactoEntityRepository, c -> c.getEstado() != Estado.E);
+    baseline(umOuNenhum(f.getEndereco()), enderecoEntityRepository, e -> e.getEstado() != Estado.E);
   }
 
   /**
@@ -330,6 +333,13 @@ public class ValidarRegistoColaboradorService {
         b -> b.getEstado() != Estado.E);
     capturar(f.getContactos(), contactoEntityRepository, validacao, "RH_T_CONTACTO",
         c -> c.getEstado() != Estado.E);
+    capturar(umOuNenhum(f.getEndereco()), enderecoEntityRepository, validacao, "RH_T_ENDERECO",
+        e -> e.getEstado() != Estado.E);
+  }
+
+  /** Adapta um filho 1:1 (ex.: endereço) à API baseada em lista dos helpers. */
+  private <T> List<T> umOuNenhum(T entidade) {
+    return entidade == null ? null : List.of(entidade);
   }
 
   /** Grava cada elemento vivo pelo repo auditável, SEM contexto de validação (baseline). */

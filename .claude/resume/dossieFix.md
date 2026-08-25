@@ -1,4 +1,4 @@
-> Updated: 2026-08-25 16:20
+> Updated: 2026-08-25 16:30
 
 ## Goal
 
@@ -9,7 +9,9 @@ uniforme (feito e commitado, `274a2799`).
 ## Current state
 
 - Âmbito: **todos os filhos que o registo toca** (pessoais + contratuais). TiposRelacionamento FORA.
-- **DadosBancarios** ✅ (testado live) e **Contactos** ✅ (ligado, compila; falta teste live).
+- **DadosBancarios** ✅ (testado live), **Contactos** ✅, **Endereço** ✅ (ligados, compilam; falta
+  teste live de contactos/endereço). `GeografiaEntity`/`TipoDocumentoEntity`/`EstabelecimentoEntity`
+  já postos em `REFERENCIAS_RASAS` (cobre também familiares/habilitações que vêm a seguir).
 - Read-model **multi-tipo** ligado: `isAlvo` usa `entityTypeSuffixes()`.
 - Descritor do registo faz **composição**: injeta descritores de módulo existentes (DadosBancarios já;
   Carreira/Mobilidade/Situação a fazer) + config "dossiê" própria (mapa `DOSSIE`).
@@ -45,8 +47,7 @@ uniforme (feito e commitado, `274a2799`).
 
 ## Next step
 
-Ligar **Endereço** (RH_T_ENDERECO): anotar `EnderecoEntityRepository`, adicionar ao `DOSSIE`
-(`morada` + FKs país/ilha/concelho/freguesia/zona), 1 linha nos helpers (é 1:1 → `List.of(endereco)`),
-e pôr `GeografiaEntity` em `REFERENCIAS_RASAS` (JaversAuditConfig) para as FKs saírem como nome, não id.
-Depois: Familiares (TipoDocumento→shallow), Habilitações (Estabelecimento→shallow), Documento pessoal,
-e por fim a parte contratual por composição (Carreira/Mobilidade/Situação + repo-save no serviço).
+Ligar **Familiares** (RH_T_FAMILIARES): anotar `FamiliarEntityRepository`, entrada no `DOSSIE`
+(`nome`,`numDocumento`,`dataNascimento`,`sexo`,`gdpId`,`dependencia`,`membroAgr`,`responsavel`,
+`tpDocumentoId`), 1 linha nos helpers. Shallow das FKs já feito. Depois: Habilitações, Documento
+pessoal, e a parte contratual por composição (Carreira/Mobilidade/Situação + repo-save no serviço).

@@ -5,10 +5,12 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.EnderecoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.http.HttpStatus;
+import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.springframework.stereotype.Repository;
 
 
 @Repository
+@JaversSpringDataAuditable
 public interface EnderecoEntityRepository extends
     JpaRepository<EnderecoEntity, Long>,
     JpaSpecificationExecutor<EnderecoEntity>

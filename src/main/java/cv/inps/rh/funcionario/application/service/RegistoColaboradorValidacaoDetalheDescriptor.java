@@ -50,7 +50,14 @@ public class RegistoColaboradorValidacaoDetalheDescriptor implements ValidacaoDe
   private static final Map<String, Map<String, String>> DOSSIE = Map.of(
       "ContactoEntity", Map.of(
           "tipoContacto", "Tipo de contacto",
-          "contacto", "Contacto")
+          "contacto", "Contacto"),
+      "EnderecoEntity", Map.of(
+          "morada", "Morada",
+          "paisId", "País",
+          "ilhaId", "Ilha",
+          "concelhoId", "Concelho",
+          "freguesiaId", "Freguesia",
+          "zonaId", "Zona")
   );
 
   @Override
