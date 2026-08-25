@@ -33,10 +33,12 @@ import java.util.Set;
  *
  * <p>Cobertura atual: dossiê (documento pessoal, dados bancários, contactos, endereço, familiares,
  * habilitações) + contratual/financeira reutilizada (carreira, mobilidade, situação laboral,
- * remunerações, pagamentos). FORA: TiposRelacionamento e Contrato (campos próprios) — tabela de ligação
- * / shallow ref; e os campos-núcleo do FuncionarioEntity (nome, NIF, nomes dos pais…), porque o
- * funcionário é ShallowReference no JaVers (necessário para a performance da auditoria dos outros
- * módulos); detalhá-los exigiria um mecanismo dedicado fora do auto-audit.
+ * remunerações, pagamentos) + campos-núcleo do FUNCIONÁRIO (nome, NIF, nomes dos pais, naturalidade…) e
+ * do CONTRATO (tipo, vínculo, duração). Estes dois últimos são ShallowReference no JaVers (necessário
+ * para a performance da auditoria dos outros módulos), pelo que o auto-audit nunca lhes diffa os
+ * escalares; capturam-se via POJOs-snapshot dedicados ({@code RegistoDetalheCapturaService}) com
+ * {@code @TypeName} próprio, sem tocar na config global. FORA fica só TiposRelacionamento — tabela de
+ * ligação, sem campos de negócio.
  */
 @Component
 public class RegistoColaboradorValidacaoDetalheDescriptor implements ValidacaoDetalheDescriptor {
@@ -92,7 +94,28 @@ public class RegistoColaboradorValidacaoDetalheDescriptor implements ValidacaoDe
           Map.entry("estabelecimento", "Estabelecimento"),
           Map.entry("dataInicio", "Data início"),
           Map.entry("dataFim", "Data fim"),
-          Map.entry("concluido", "Concluído"))
+          Map.entry("concluido", "Concluído")),
+      // Campos-núcleo do FUNCIONÁRIO e do CONTRATO: ambos ShallowReference no JaVers (para a auditoria
+      // dos outros módulos não arrastar o grafo do funcionário), logo os seus escalares nunca são
+      // diffados pelo auto-audit. São capturados via POJOs-snapshot dedicados
+      // (RegistoDetalheCapturaService) com @TypeName próprio — a grelha casa-os aqui pelo mesmo
+      // mecanismo suffix→campos→rótulos dos filhos dossiê. FKs já guardadas como NOME no snapshot.
+      "RegistoFuncionarioSnapshot", Map.ofEntries(
+          Map.entry("nome", "Nome"),
+          Map.entry("nif", "NIF"),
+          Map.entry("nomeMae", "Nome da mãe"),
+          Map.entry("nomePai", "Nome do pai"),
+          Map.entry("dataNascimento", "Data de nascimento"),
+          Map.entry("genero", "Género"),
+          Map.entry("estadoCivil", "Estado civil"),
+          Map.entry("nacionalidade", "Nacionalidade"),
+          Map.entry("naturalidade", "Naturalidade"),
+          Map.entry("localidade", "Localidade"),
+          Map.entry("numSegurado", "Nº de segurado")),
+      "RegistoContratoSnapshot", Map.of(
+          "tipoContrato", "Tipo de contrato",
+          "vinculo", "Vínculo",
+          "duracao", "Duração")
   );
 
   @Override

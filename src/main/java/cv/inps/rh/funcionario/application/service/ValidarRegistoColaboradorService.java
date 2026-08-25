@@ -5,6 +5,7 @@ import cv.inps.rh.funcionario.application.rules.ColaboradorValidationRules;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.application.service.helper.TipoRelRemPagHelper;
+import cv.inps.rh.funcionario.application.service.registodetalhe.RegistoDetalheCapturaService;
 import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
@@ -14,23 +15,9 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
-import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
-import cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.ContactoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DadosBancariosEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoPessoalEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.EnderecoEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FamiliarEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.HabilitacaoLiterariaEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.MobilidadeEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.SituacaoLaboralEntityRepository;
-import org.springframework.data.jpa.repository.JpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor
@@ -70,17 +55,7 @@ public class ValidarRegistoColaboradorService {
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
   private final ColaboradorValidationRules colaboradorValidationRules;
   private final ReconciliacaoMovimentoVinculoService reconciliacaoMovimentoVinculoService;
-  private final DadosBancariosEntityRepository dadosBancariosEntityRepository;
-  private final ContactoEntityRepository contactoEntityRepository;
-  private final EnderecoEntityRepository enderecoEntityRepository;
-  private final FamiliarEntityRepository familiarEntityRepository;
-  private final HabilitacaoLiterariaEntityRepository habilitacaoLiterariaEntityRepository;
-  private final CarreiraEntityRepository carreiraEntityRepository;
-  private final MobilidadeEntityRepository mobilidadeEntityRepository;
-  private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
-  private final DocumentoPessoalEntityRepository documentoPessoalEntityRepository;
-  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
-  private final DefPagamentoEntityRepository defPagamentoEntityRepository;
+  private final RegistoDetalheCapturaService registoDetalheCaptura;
 
   @Transactional
   public SuccessResponseDTO validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -107,12 +82,11 @@ public class ValidarRegistoColaboradorService {
       }
       mudaEstado(funcionario, Estado.C);
       funcionarioEntityRepository.saveAndFlush(funcionario);
-      // Baseline JaVers dos filhos AUDITADOS (fatia: dados bancários). O funcionário é ShallowReference,
-      // logo o save em cascata não fotografa os filhos; gravamos aqui pelo repo auditável para o JaVers
-      // passar a conhecer o estado atual. SEM ValidacaoAuditContext de propósito: este snapshot não deve
-      // aparecer na grelha (não fica carimbado com validação) — serve só para o reenvio C→P produzir um
-      // diff antes→depois em vez de um "valor inicial".
-      criarBaselineFilhos(funcionario);
+      // Baseline JaVers do detalhe (filhos auditados + snapshots do funcionário/contrato). O funcionário é
+      // ShallowReference, logo o save em cascata não fotografa os filhos; a captura grava-os pelo repo
+      // auditável SEM ValidacaoAuditContext — o snapshot fica sem validacaoUuid e não aparece na grelha,
+      // servindo só para o reenvio C→P produzir um diff antes→depois em vez de um "valor inicial".
+      registoDetalheCaptura.baseline(funcionario);
       return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
           "Registo de colaborador devolvido para correção.", List.of());
     }
@@ -299,11 +273,11 @@ public class ValidarRegistoColaboradorService {
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
     // Detalhe de alterações do REGISTO: só no reenvio de correção (C→P), único momento em que o registo
-    // é editável. Grava os filhos auditados (fatia: dados bancários) pelo repo auditável DENTRO do
-    // ValidacaoAuditContext, carimbando o commit com esta validação — o JaVers compara com o baseline
-    // criado no CORRIGIR e produz o diff antes→depois que a grelha /detalhes mostra.
+    // é editável. A captura regrava os filhos auditados pelo repo DENTRO do ValidacaoAuditContext e
+    // commita os snapshots do funcionário/contrato carimbados com esta validação — o JaVers compara com
+    // o baseline criado no CORRIGIR e produz o diff antes→depois que a grelha /detalhes mostra.
     if (estaPorCorrigir) {
-      capturarDetalheFilhos(saved);
+      registoDetalheCaptura.capturar(saved);
     }
 
     // Numa REJEICAO (validar=NAO) nao se associam defs ao tiprel rejeitado — RH_T_TIPREL_REM_PAG
@@ -319,103 +293,6 @@ public class ValidarRegistoColaboradorService {
             : "Registo de colaborador actualizado.";
     return new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, alertas);
 
-  }
-
-  /**
-   * Baseline JaVers dos filhos AUDITADOS. Grava-os pelo repo auditável SEM {@link ValidacaoAuditContext}
-   * — o snapshot fica sem validacaoUuid e não aparece na grelha; existe só para que a edição seguinte
-   * (reenvio C→P) produza um diff antes→depois. O funcionário é ShallowReference, logo o save em cascata
-   * não fotografa os filhos: por isso cada filho é gravado pelo seu próprio repo aqui.
-   */
-  private void criarBaselineFilhos(FuncionarioEntity f) {
-    baseline(f.getDadosBancarios(), dadosBancariosEntityRepository, b -> b.getEstado() != Estado.E);
-    baseline(f.getContactos(), contactoEntityRepository, c -> c.getEstado() != Estado.E);
-    baseline(umOuNenhum(f.getEndereco()), enderecoEntityRepository, e -> e.getEstado() != Estado.E);
-    baseline(f.getFamiliares(), familiarEntityRepository, fa -> fa.getEstado() != Estado.E);
-    baseline(f.getHabilitacoesLiterarias(), habilitacaoLiterariaEntityRepository,
-        h -> h.getEstado() != Estado.E);
-    baseline(umOuNenhum(f.getDocumentoPessoal()), documentoPessoalEntityRepository,
-        dp -> dp.getEstado() != Estado.E);
-    baseline(f.getDefinicoesRenumeracoes(), definicaoRemuneracaoEntityRepository,
-        r -> r.getEstado() != Estado.E);
-    baseline(f.getDefinicoesPagamentos(), defPagamentoEntityRepository, p -> p.getEstado() != Estado.E);
-
-    // Parte contratual: carreira/mobilidade/situação vêm do tiprel atual (não são coleções do
-    // funcionário). Reutilizam os descritores dos módulos próprios (composição no descritor do registo).
-    var tr = funcionarioRules.getTipoRelacionamentoAtual(f.getUuid());
-    if (tr != null) {
-      baseline(umOuNenhum(tr.getCarreiraId()), carreiraEntityRepository, c -> c.getEstado() != Estado.E);
-      baseline(umOuNenhum(tr.getMobId()), mobilidadeEntityRepository, m -> m.getEstado() != Estado.E);
-      baseline(umOuNenhum(tr.getSituacLaboralId()), situacaoLaboralEntityRepository,
-          s -> s.getEstado() != Estado.E);
-    }
-  }
-
-  /**
-   * Captura o diff dos filhos no reenvio de correção (C→P), carimbando cada commit com a validação de
-   * REGISTO em curso e a tabela do filho. O JaVers compara com o baseline criado no CORRIGIR; a grelha
-   * /detalhes lê por este validacaoUuid (todos os tipos-alvo do descritor do registo).
-   */
-  private void capturarDetalheFilhos(FuncionarioEntity f) {
-    var validacao = funcionarioRules
-        .getValidacaoPendente(f.getUuid(), TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR)
-        .orElse(null);
-    if (validacao == null) {
-      return;
-    }
-    capturar(f.getDadosBancarios(), dadosBancariosEntityRepository, validacao, "RH_T_DADOS_BANCARIOS",
-        b -> b.getEstado() != Estado.E);
-    capturar(f.getContactos(), contactoEntityRepository, validacao, "RH_T_CONTACTO",
-        c -> c.getEstado() != Estado.E);
-    capturar(umOuNenhum(f.getEndereco()), enderecoEntityRepository, validacao, "RH_T_ENDERECO",
-        e -> e.getEstado() != Estado.E);
-    capturar(f.getFamiliares(), familiarEntityRepository, validacao, "RH_T_FAMILIARES",
-        fa -> fa.getEstado() != Estado.E);
-    capturar(f.getHabilitacoesLiterarias(), habilitacaoLiterariaEntityRepository, validacao,
-        "RH_T_HABILITACOES_LITERARIAS", h -> h.getEstado() != Estado.E);
-    capturar(umOuNenhum(f.getDocumentoPessoal()), documentoPessoalEntityRepository, validacao,
-        "RH_T_DOCUMENTO_PESSOAL", dp -> dp.getEstado() != Estado.E);
-    capturar(f.getDefinicoesRenumeracoes(), definicaoRemuneracaoEntityRepository, validacao,
-        "RH_T_DEF_REMUNERACOES", r -> r.getEstado() != Estado.E);
-    capturar(f.getDefinicoesPagamentos(), defPagamentoEntityRepository, validacao,
-        "RH_T_DEF_PAGAMENTOS", p -> p.getEstado() != Estado.E);
-
-    var tr = funcionarioRules.getTipoRelacionamentoAtual(f.getUuid());
-    if (tr != null) {
-      capturar(umOuNenhum(tr.getCarreiraId()), carreiraEntityRepository, validacao, "RH_T_CARREIRA",
-          c -> c.getEstado() != Estado.E);
-      capturar(umOuNenhum(tr.getMobId()), mobilidadeEntityRepository, validacao, "RH_T_MOBILIDADE",
-          m -> m.getEstado() != Estado.E);
-      capturar(umOuNenhum(tr.getSituacLaboralId()), situacaoLaboralEntityRepository, validacao,
-          "RH_T_SITUACAO_LABORAL", s -> s.getEstado() != Estado.E);
-    }
-  }
-
-  /** Adapta um filho 1:1 (ex.: endereço) à API baseada em lista dos helpers. */
-  private <T> List<T> umOuNenhum(T entidade) {
-    return entidade == null ? null : List.of(entidade);
-  }
-
-  /** Grava cada elemento vivo pelo repo auditável, SEM contexto de validação (baseline). */
-  private <T> void baseline(List<T> lista, JpaRepository<T, Long> repo, Predicate<T> vivo) {
-    if (lista == null) {
-      return;
-    }
-    lista.stream().filter(Objects::nonNull).filter(vivo).forEach(repo::save);
-  }
-
-  /** Grava cada elemento vivo pelo repo auditável DENTRO do contexto da validação (diff). */
-  private <T> void capturar(List<T> lista, JpaRepository<T, Long> repo, ValidacaoEntity validacao,
-      String tabela, Predicate<T> vivo) {
-    if (lista == null || lista.isEmpty()) {
-      return;
-    }
-    try {
-      ValidacaoAuditContext.set(validacao.getId(), validacao.getUuid(), tabela);
-      lista.stream().filter(Objects::nonNull).filter(vivo).forEach(repo::save);
-    } finally {
-      ValidacaoAuditContext.clear();
-    }
   }
 
   private void mudaEstado(FuncionarioEntity funcionarioEntity, Estado estado) {
