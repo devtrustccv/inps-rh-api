@@ -7,6 +7,7 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
+import cv.inps.rh.processamento.application.commands.CriarSoatCommand;
 import cv.inps.rh.processamento.application.commands.FinalizarSoatCommand;
 import cv.inps.rh.processamento.application.queries.GetSoatListQuery;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,7 +65,7 @@ public class SoatController {
     return queryBus.handle(query);
   }
 
-  @PostMapping()
+  @PostMapping("finalizar")
   @Operation(
       summary = "Finalizar Soat",
       description = "Finalizar Soat",
@@ -83,6 +84,32 @@ public class SoatController {
   public ResponseEntity<Void> finalizarSoat(@RequestParam(value = "soatId") String soatId) {
 
     final var command = new FinalizarSoatCommand(soatId);
+
+    return commandBus.send(command);
+
+  }
+
+  @PostMapping("registar")
+  @Operation(
+      summary = "Registar Soat",
+      description = "Registar Soat",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      type = "String")
+              )
+          )
+      }
+  )
+  public ResponseEntity<Void> criarSoat(
+      @RequestParam(value = "ano") Integer ano,
+      @RequestParam(value = "mes") Integer mes
+  ) {
+
+    final var command = new CriarSoatCommand(mes, ano);
 
     return commandBus.send(command);
 

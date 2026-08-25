@@ -7,6 +7,8 @@ import cv.inps.rh.processamento.domain.service.model.SoatAggregateDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SoatEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SoatEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.ParameterMode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 public class SoatService {
 
   private final SoatEntityRepository soatRepository;
+  private final EntityManager entityManager;
 
   @Transactional(readOnly = true)
   public WrapperListDTO list(Integer anoReferente, Integer mesReferente, Integer page, Integer size) {
@@ -63,6 +66,16 @@ public class SoatService {
     var soat = soatRepository.findByUuidOrThrow(uuid);
     soat.setEstado(SoatStatus.F.getCode());
     soatRepository.save(soat);
+  }
+
+  @Transactional
+  public void criarSoat(Integer ano, Integer mes) {
+    entityManager.createStoredProcedureQuery("RH_PK_GERA_SOAT_DB.REGISTAR_LISTA_SOAT")
+        .registerStoredProcedureParameter("P_ANO", Integer.class, ParameterMode.IN)
+        .registerStoredProcedureParameter("P_MES", String.class, ParameterMode.IN)
+        .setParameter("P_ANO", ano)
+        .setParameter("P_MES", "%02d".formatted(mes))
+        .execute();
   }
 
 }
