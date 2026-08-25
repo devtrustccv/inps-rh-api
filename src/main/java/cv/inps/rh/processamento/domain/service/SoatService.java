@@ -1,6 +1,7 @@
 package cv.inps.rh.processamento.domain.service;
 
 import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
+import cv.inps.rh.processamento.application.constants.SoatStatus;
 import cv.inps.rh.processamento.application.dto.SoapRowResponseDTO;
 import cv.inps.rh.processamento.domain.service.model.SoatAggregateDTO;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SoatEntity;
@@ -9,6 +10,7 @@ import cv.inps.rh.shared.util.PageMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -20,6 +22,7 @@ public class SoatService {
 
   private final SoatEntityRepository soatRepository;
 
+  @Transactional(readOnly = true)
   public WrapperListDTO list(Integer anoReferente, Integer mesReferente, Integer page, Integer size) {
 
     var data = soatRepository.findSoatPage(anoReferente, mesReferente, PageRequest.of(page, size));
@@ -31,16 +34,19 @@ public class SoatService {
         : soatRepository.findAgregadosByIds(ids).stream()
         .collect(Collectors.toMap(SoatAggregateDTO::soatId, a -> a));
 
+    var soatStatus = SoatStatus.codeDescriptionMap();
+
     var resultPage = data.map(s -> {
           var agregado = agregadosPorId.getOrDefault(
               s.getId(), new SoatAggregateDTO(s.getId(), BigDecimal.ZERO, 0L));
+
           return new SoapRowResponseDTO(
               s.getUuid(),
               "%d%02d".formatted(s.getAnoReferente(), s.getMesReferente()),
               s.getCreatedDate(),
               agregado.totalRemuneracao(),
               agregado.totalColaboradores(),
-              s.getEstado()
+              soatStatus.getOrDefault(s.getEstado(), s.getEstado())
           );
         })
         .stream()
@@ -51,6 +57,12 @@ public class SoatService {
     response.setContent(resultPage);
 
     return response;
+  }
+
+  public void finalizarSoat(String uuid) {
+    var soat = soatRepository.findByUuidOrThrow(uuid);
+    soat.setEstado(SoatStatus.F.getCode());
+    soatRepository.save(soat);
   }
 
 }

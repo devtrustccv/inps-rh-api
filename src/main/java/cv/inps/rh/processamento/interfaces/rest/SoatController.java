@@ -7,6 +7,7 @@ import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
+import cv.inps.rh.processamento.application.commands.FinalizarSoatCommand;
 import cv.inps.rh.processamento.application.queries.GetSoatListQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,17 +15,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @IgrpController
 @RestController
-@RequestMapping(path = "soat")
+@RequestMapping(path = "processamento/soat")
 @Tag(
-    name = "Processamento",
-    description = "Operações SOAT"
+    name = "Processamento"
 )
 public class SoatController {
 
@@ -65,6 +62,29 @@ public class SoatController {
     final var query = new GetSoatListQuery(anoReferente, mesReferente, Integer.valueOf(page), Integer.valueOf(size));
 
     return queryBus.handle(query);
+  }
+
+  @PostMapping()
+  @Operation(
+      summary = "Finalizar Soat",
+      description = "Finalizar Soat",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      type = "String")
+              )
+          )
+      }
+  )
+
+  public ResponseEntity<Void> finalizarSoat(@RequestParam(value = "soatId") String soatId) {
+
+    final var command = new FinalizarSoatCommand(soatId);
+
+    return commandBus.send(command);
 
   }
 }
