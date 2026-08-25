@@ -174,18 +174,23 @@ public class NotificacaoDestinatarioResolver {
     }
 
     return responsaveis.stream()
-        .map(this::paraDestinatario)
+        .map(this::resolverResponsavel)
         .flatMap(Optional::stream)
         .toList();
   }
 
   /**
-   * O email do responsável vem dos contactos do funcionário que ocupa o lugar — a mesma fonte do
-   * COLABORADOR. A coluna RH_T_RESPONSAVEL.EMAIL fica como fallback para dados legados: nenhum
-   * fluxo da aplicação a escreve (saveResponsaveis grava só funId/secaoId/institId/estado), pelo
-   * que confiar só nela deixaria esta resolução sem nunca encontrar ninguém.
+   * Resolve uma linha de RH_T_RESPONSAVEL num destinatário. Público porque os fluxos que já sabem
+   * qual é o responsável — por exemplo o envio de direito a férias, que o traz no próprio pedido —
+   * precisam da mesma regra de email sem repetir a resolução da chefia.
+   *
+   * <p>O email vem dos contactos do funcionário que ocupa o lugar — a mesma fonte do COLABORADOR.
+   * A coluna RH_T_RESPONSAVEL.EMAIL fica como fallback para dados legados: nenhum fluxo da
+   * aplicação a escreve (saveResponsaveis grava só funId/secaoId/institId/estado), pelo que
+   * confiar só nela deixaria esta resolução sem nunca encontrar ninguém.</p>
    */
-  private Optional<Destinatario> paraDestinatario(ResponsavelEntity responsavel) {
+  @Transactional(readOnly = true)
+  public Optional<Destinatario> resolverResponsavel(ResponsavelEntity responsavel) {
     var funcionario = responsavel.getFunId();
 
     var email = (funcionario != null ? emailDe(funcionario) : Optional.<String>empty())
