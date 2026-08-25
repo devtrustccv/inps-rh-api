@@ -26,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -128,12 +129,15 @@ public class JaversValidacaoDetalheReadService {
   }
 
   /**
-   * Uma alteração é da instância-alvo quando é do {@code tipoAlvoSuffix} E o seu cdoId coincide com a
-   * {@code referenciaId} da validação. Se a validação não tiver referenciaId (registos antigos), cai
-   * para o filtro só-por-tipo — mantém o comportamento anterior em vez de esconder tudo.
+   * Uma alteração é da instância-alvo quando é de UM dos {@code tiposAlvo} E o seu cdoId coincide com a
+   * {@code referenciaId} da validação. Se a validação não tiver referenciaId (registos antigos, ou
+   * descritores {@code matchByTypeOnly}), cai para o filtro só-por-tipo — mantém o comportamento
+   * anterior em vez de esconder tudo. Aceita VÁRIOS sufixos: um descritor pode cobrir muitas entidades
+   * na mesma validação (ex.: REGISTO_COLABORADOR).
    */
-  private boolean isAlvo(GlobalId globalId, Long referenciaId, String tipoAlvoSuffix) {
-    if (!globalId.getTypeName().endsWith(tipoAlvoSuffix)) {
+  private boolean isAlvo(GlobalId globalId, Long referenciaId, Set<String> tiposAlvo) {
+    boolean tipoBate = tiposAlvo.stream().anyMatch(s -> globalId.getTypeName().endsWith(s));
+    if (!tipoBate) {
       return false;
     }
     if (referenciaId == null || !(globalId instanceof InstanceId instanceId)) {
