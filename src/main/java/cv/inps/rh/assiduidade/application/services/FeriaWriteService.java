@@ -19,6 +19,7 @@ import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.application.services.EmailService;
+import cv.inps.rh.shared.domain.service.NotificacaoDestinatarioResolver;
 import cv.inps.rh.shared.domain.service.NotificacaoDispatchService;
 import cv.inps.rh.assiduidade.application.commands.EnviarDireitoFeriasCommand;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +64,7 @@ public class FeriaWriteService {
   private final DocumentoMapper documentoMapper;
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final NotificacaoDispatchService notificacaoDispatchService;
+  private final NotificacaoDestinatarioResolver destinatarioResolver;
 
 
   @Transactional
@@ -382,17 +384,21 @@ public class FeriaWriteService {
             () -> LOGGER.warn("Funcionário {} sem email para envio de direito de férias", funcionario.getUuid())
         );
 
+    // O email do responsável sai dos contactos do funcionário que ocupa o lugar (ver
+    // NotificacaoDestinatarioResolver): a coluna RH_T_RESPONSAVEL.EMAIL, que aqui se lia
+    // directamente, está nula em todas as linhas porque nenhum fluxo da aplicação a escreve — a
+    // chefia nunca era notificada.
     if (ferias.getResponsavelId() != null) {
-      responsavelEntityRepository.findById(ferias.getResponsavelId()).ifPresent(responsavel -> {
-        String emailResp = responsavel.getEmail();
-        if (emailResp != null && !emailResp.isBlank()) {
-          var respFun = responsavel.getFunId();
-          notificacaoDispatchService.enviar(
-              "DIREITO_FERIAS", emailResp,
-              respFun != null ? respFun.getNome() : emailResp,
-              ferias.getId(), "RH_T_FERIAS_GOZADAS", ferias.getUuid(), respFun, vars);
-        }
-      });
+      responsavelEntityRepository.findById(ferias.getResponsavelId())
+          .flatMap(destinatarioResolver::resolverResponsavel)
+          .ifPresentOrElse(
+              destinatario -> notificacaoDispatchService.enviar(
+                  "DIREITO_FERIAS", destinatario.email(), destinatario.nome(),
+                  ferias.getId(), "RH_T_FERIAS_GOZADAS", ferias.getUuid(),
+                  destinatario.funcionario(), vars),
+              () -> LOGGER.warn("Responsável {} sem email para envio de direito de férias",
+                  ferias.getResponsavelId())
+          );
     }
 
     return Map.of("pedidoId", command.getPedidoId(), "enviado", true);
