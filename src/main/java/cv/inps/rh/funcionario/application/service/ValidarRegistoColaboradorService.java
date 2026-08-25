@@ -14,8 +14,10 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
+import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DadosBancariosEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -54,6 +56,7 @@ public class ValidarRegistoColaboradorService {
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
   private final ColaboradorValidationRules colaboradorValidationRules;
   private final ReconciliacaoMovimentoVinculoService reconciliacaoMovimentoVinculoService;
+  private final DadosBancariosEntityRepository dadosBancariosEntityRepository;
 
   @Transactional
   public SuccessResponseDTO validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -80,6 +83,12 @@ public class ValidarRegistoColaboradorService {
       }
       mudaEstado(funcionario, Estado.C);
       funcionarioEntityRepository.saveAndFlush(funcionario);
+      // Baseline JaVers dos filhos AUDITADOS (fatia: dados bancários). O funcionário é ShallowReference,
+      // logo o save em cascata não fotografa os filhos; gravamos aqui pelo repo auditável para o JaVers
+      // passar a conhecer o estado atual. SEM ValidacaoAuditContext de propósito: este snapshot não deve
+      // aparecer na grelha (não fica carimbado com validação) — serve só para o reenvio C→P produzir um
+      // diff antes→depois em vez de um "valor inicial".
+      criarBaselineBancarios(funcionario);
       return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
           "Registo de colaborador devolvido para correção.", List.of());
     }
@@ -265,6 +274,14 @@ public class ValidarRegistoColaboradorService {
 
     FuncionarioEntity saved = funcionarioEntityRepository.saveAndFlush(funcionario);
 
+    // Detalhe de alterações do REGISTO: só no reenvio de correção (C→P), único momento em que o registo
+    // é editável. Grava os filhos auditados (fatia: dados bancários) pelo repo auditável DENTRO do
+    // ValidacaoAuditContext, carimbando o commit com esta validação — o JaVers compara com o baseline
+    // criado no CORRIGIR e produz o diff antes→depois que a grelha /detalhes mostra.
+    if (estaPorCorrigir) {
+      capturarDetalheBancarios(saved);
+    }
+
     // Numa REJEICAO (validar=NAO) nao se associam defs ao tiprel rejeitado — RH_T_TIPREL_REM_PAG
     // nao tem estado, logo a unica forma de nao os ter e nao criar a associacao.
     if (!EstadoValidacao.NAO.equals(registroColaborador.getValidar())) {
@@ -278,6 +295,45 @@ public class ValidarRegistoColaboradorService {
             : "Registo de colaborador actualizado.";
     return new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, alertas);
 
+  }
+
+  /**
+   * Baseline JaVers dos dados bancários (filho auditado). Grava-os pelo repo auditável SEM
+   * {@link ValidacaoAuditContext} — o snapshot fica sem validacaoUuid e não aparece na grelha; existe
+   * só para que a edição seguinte (reenvio C→P) produza um diff antes→depois.
+   */
+  private void criarBaselineBancarios(FuncionarioEntity funcionario) {
+    if (funcionario.getDadosBancarios() == null) {
+      return;
+    }
+    funcionario.getDadosBancarios().stream()
+        .filter(b -> b != null && b.getEstado() != Estado.E)
+        .forEach(dadosBancariosEntityRepository::save);
+  }
+
+  /**
+   * Captura o diff dos dados bancários no reenvio de correção (C→P), carimbando o commit com a
+   * validação de REGISTO em curso. O JaVers compara com o baseline criado no CORRIGIR; a grelha
+   * /detalhes lê por este validacaoUuid.
+   */
+  private void capturarDetalheBancarios(FuncionarioEntity funcionario) {
+    if (funcionario.getDadosBancarios() == null) {
+      return;
+    }
+    var validacao = funcionarioRules
+        .getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR)
+        .orElse(null);
+    if (validacao == null) {
+      return;
+    }
+    try {
+      ValidacaoAuditContext.set(validacao.getId(), validacao.getUuid(), "RH_T_DADOS_BANCARIOS");
+      funcionario.getDadosBancarios().stream()
+          .filter(b -> b != null && b.getEstado() != Estado.E)
+          .forEach(dadosBancariosEntityRepository::save);
+    } finally {
+      ValidacaoAuditContext.clear();
+    }
   }
 
   private void mudaEstado(FuncionarioEntity funcionarioEntity, Estado estado) {

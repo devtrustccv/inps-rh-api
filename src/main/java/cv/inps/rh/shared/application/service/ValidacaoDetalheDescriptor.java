@@ -30,6 +30,17 @@ public interface ValidacaoDetalheDescriptor {
   String entityTypeSuffix();
 
   /**
+   * Conjunto de tipos-alvo, para descritores que cobrem VÁRIAS entidades numa só validação (ex.: o
+   * REGISTO_COLABORADOR, cujos filhos — bancários, contactos, familiares… — vivem todos sob a mesma
+   * validação). Por omissão é o singleton de {@link #entityTypeSuffix()}, pelo que os descritores de
+   * uma só entidade (mobilidade, carreira…) não precisam de mudar. Requer normalmente
+   * {@link #matchByTypeOnly()} = true (o {@code referenciaId} não bate com o id de cada filho).
+   */
+  default Set<String> entityTypeSuffixes() {
+    return Set.of(entityTypeSuffix());
+  }
+
+  /**
    * Allow-list dos campos de NEGÓCIO (nomes das propriedades Java da entidade) que a grelha mostra.
    * Lista fechada: tudo o que não estiver aqui — estado de workflow, FKs estruturais, carimbos de
    * auditoria — fica de fora por omissão.

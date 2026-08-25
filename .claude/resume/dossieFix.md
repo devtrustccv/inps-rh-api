@@ -1,53 +1,42 @@
-> Updated: 2026-08-25 14:45
+> Updated: 2026-08-25 16:05
 
 ## Goal
 
-Expor o estado de forma UNIFORME nas respostas do módulo funcionário: par `estado` (código
-P/A/I/E/C) + `estadoDesc` (descrição do enum `Estado`). Antes era inconsistente (uns davam
-descrição, outros o código, e várias secções não expunham estado nenhum).
+Grelha "Detalhe de alterações" (JaVers) para o REGISTO_COLABORADOR, capturada só no PUT de reenvio de
+correção (C→P). Valores sempre LEGÍVEIS (rótulos PT, FKs→nome, nunca id). Antes: expor estado/estadoDesc
+uniforme (feito e commitado, `274a2799`).
 
 ## Current state
 
-**FEITO e testado live** (app na porta **8088**, `spring-boot:run` default — NÃO 8089). Commit nesta
-sessão em `develop`. `mvn compile` EXIT=0.
-
-- `GET /api/v1/funcionarios/validacoes` → cada item traz `estado`/`estadoDesc` (mas filtro continua
-  só `P`, por decisão — ver abaixo). Confirmado.
-- `GET /api/v1/funcionarios/{uuid}` (uuid `01a038ed-ac9a-7675-908b-be570e60194c`, funcionário 958902)
-  → TODAS as secções expõem `estado`+`estadoDesc`: contactos, endereço, familiares, habilitações,
-  dadosContratuais, dadosBancarios. Confirmado (tudo `P`/"Pendente").
+- Fatia vertical **DadosBancarios** validada end-to-end: editar Nº de conta no reenvio → `/detalhes`
+  mostra `{campoAlterado:"Nº de conta", valorAnterior:"9019055", valorNovo:"9019099", tabelaName:...}`.
+- App a correr na **8088** (spring-boot:run default). Log confirma descritor REGISTO_COLABORADOR ativo.
+- TODO dos próximos filhos está **no código** (javadoc do descritor), não em doc.
 
 ## Decisions made — do not re-litigate
 
-- Padrão único: `estado` = `Estado.getCode()`; `estadoDesc` = `Estado.getDescription()`.
-- Lista de validações mantém o filtro `estado = P` (NÃO relaxar por agora); expõe o campo na mesma.
-- Manifestos `.igrpstudio/funcionario/dto/*.json` atualizados a par de cada DTO (via script Python
-  que insere os atributos string mantendo o `id` do manifesto).
-
-## Ficheiros tocados (nesta sessão)
-
-- DTOs (application/dto): Validacao, Contacto, Endereco, AgregadoDependente, ExperienciaProfissional,
-  FormacaoProfissional, Habilitacao­Literaria, DadosBancarios, DadosContratuais — todos `...RespDTO`.
-- Mappers (infrastructure/mappers): Validacao, Contacto, Endereco, Familiar, ExperienciaProfissional,
-  FormacaoFeita, HabilitacaoLiteraria, DadosBancarios, DadosContratuais.
-- Manifestos correspondentes em `.igrpstudio/funcionario/dto/`.
+- Detalhe só no PUT (C→P): registo só editável via CORRIGIR; depois usam-se os módulos individuais.
+- Baseline no CORRIGIR (P→C) SEM contexto (não entra na grelha); diff no reenvio DENTRO do
+  `ValidacaoAuditContext` carimbado com a validação.
+- `matchByTypeOnly=true` (referenciaId = funcionário, não o filho).
 
 ## Constraints
 
-- JDK23; `spring-boot:run` sobe na 8088 (não passa `-Dserver.port=8089`). Rebuild: matar processo na
-  porta e relançar `mvn -q -DskipTests spring-boot:run > app_run.log 2>&1 &`; esperar
-  "Started RhInpsServiceApplication" no log (~1–2 min).
-- Get-by-id recebe **UUID**, não o id numérico (id numérico → 400 Invalid UUID).
-- NÃO limpar dados de teste (colab 958902/958897; validação 962).
+- JDK23; `TableName` não tem RH_T_DADOS_BANCARIOS → usar string literal. Get-by-id/validar por UUID.
+- Filhos gravados em cascata + `FuncionarioEntity` é ShallowReference → filho só é auditado se o seu
+  repo for `@JaversSpringDataAuditable` e gravado pelo próprio repo.
+
+## Relevant files
+
+- `RegistoColaboradorValidacaoDetalheDescriptor.java` — descritor + TODO dos próximos filhos.
+- `ValidarRegistoColaboradorService.java` — `criarBaselineBancarios`, `capturarDetalheBancarios`.
+- `ValidacaoDetalheDescriptor.java:31` — `entityTypeSuffixes()` default (hook multi-tipo, por ligar).
 
 ## Open questions
 
-- `formacoesFeitas`/`experienciasProfissionais` vieram vazias no teste — mappers já alinhados mas
-  falta confirmar o par estado com dados reais.
-- Frontend: confirmar se consome o novo `estado` (código) onde antes recebia descrição em
-  contactos/endereço (mudança de valor: "Pendente" → "P").
+- `alteradoPor` em dev = `system-bot@nosi.cv` (auditor sem token real).
 
 ## Next step
 
-Fechar ciclo P→A: `PUT /api/v1/funcionarios/958902/validar` e reconfirmar que `estadoDesc` passa a
-"Ativo" nas secções.
+Ligar o read-model multi-tipo: usar `entityTypeSuffixes()` no `JaversValidacaoDetalheReadService.isAlvo`
+e replicar baseline/diff para Contactos (repo `@JaversSpringDataAuditable`), o filho mais simples.
