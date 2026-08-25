@@ -1,4 +1,4 @@
-> Updated: 2026-08-25 16:38
+> Updated: 2026-08-25 16:46
 
 ## Goal
 
@@ -9,9 +9,9 @@ uniforme (feito e commitado, `274a2799`).
 ## Current state
 
 - Âmbito: **todos os filhos que o registo toca** (pessoais + contratuais). TiposRelacionamento FORA.
-- **DadosBancarios** ✅ (testado live), **Contactos** ✅, **Endereço** ✅, **Familiares** ✅ (ligados,
-  compilam; falta teste live dos novos). `GeografiaEntity`/`TipoDocumentoEntity`/`EstabelecimentoEntity`
-  já em `REFERENCIAS_RASAS` (cobre também habilitações).
+- Dossiê LIGADO: **DadosBancarios** ✅ (testado live), **Contactos**, **Endereço**, **Familiares**,
+  **Habilitações** ✅ (compilam; falta teste live dos novos). Falta ainda **Documento pessoal** e a
+  parte **contratual** (por composição). FKs shallow já tratadas.
 - Read-model **multi-tipo** ligado: `isAlvo` usa `entityTypeSuffixes()`.
 - Descritor do registo faz **composição**: injeta descritores de módulo existentes (DadosBancarios já;
   Carreira/Mobilidade/Situação a fazer) + config "dossiê" própria (mapa `DOSSIE`).
@@ -47,7 +47,8 @@ uniforme (feito e commitado, `274a2799`).
 
 ## Next step
 
-Ligar **Habilitações** (RH_T_HABILITACOES_LITERARIAS): anotar `HabilitacaoLiterariaEntityRepository`,
-entrada no `DOSSIE` (`nomeCurso`,`nivel`,`area`,`paisId`,`estabelecimento`,`dataInicio`,`dataFim`,
-`concluido`), 1 linha nos helpers. Shallow já feito. Depois: Documento pessoal, e a parte contratual
-por composição (injetar Carreira/Mobilidade/Situação em `reutilizados` + repo-save no serviço).
+Parte **contratual** por composição: injetar `CarreiraValidacaoDetalheDescriptor`,
+`MobilidadeValidacaoDetalheDescriptor`, `SituacaoLaboralValidacaoDetalheDescriptor` em `reutilizados`
+do descritor do registo, e no serviço gravar carreira/mobilidade/situação (via os seus repos auditados)
+no baseline/captura (entidades vêm de `tiposRelacionamento`, não são coleções do funcionário).
+(Opcional) Documento pessoal. Depois: teste live consolidado editando ≥1 campo por secção.

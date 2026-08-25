@@ -67,7 +67,16 @@ public class RegistoColaboradorValidacaoDetalheDescriptor implements ValidacaoDe
           Map.entry("gdpId", "Grau de parentesco"),
           Map.entry("dependencia", "Dependente"),
           Map.entry("membroAgr", "Membro do agregado"),
-          Map.entry("responsavel", "Responsável"))
+          Map.entry("responsavel", "Responsável")),
+      "HabilitacaoLiterariaEntity", Map.ofEntries(
+          Map.entry("nomeCurso", "Curso"),
+          Map.entry("nivel", "Grau académico"),
+          Map.entry("area", "Área"),
+          Map.entry("paisId", "País"),
+          Map.entry("estabelecimento", "Estabelecimento"),
+          Map.entry("dataInicio", "Data início"),
+          Map.entry("dataFim", "Data fim"),
+          Map.entry("concluido", "Concluído"))
   );
 
   @Override

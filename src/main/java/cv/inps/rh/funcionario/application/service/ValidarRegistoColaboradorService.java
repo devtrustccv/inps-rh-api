@@ -23,6 +23,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.DadosBancariosEnt
 import cv.inps.rh.shared.infrastructure.persistence.repository.EnderecoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FamiliarEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.HabilitacaoLiterariaEntityRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -67,6 +68,7 @@ public class ValidarRegistoColaboradorService {
   private final ContactoEntityRepository contactoEntityRepository;
   private final EnderecoEntityRepository enderecoEntityRepository;
   private final FamiliarEntityRepository familiarEntityRepository;
+  private final HabilitacaoLiterariaEntityRepository habilitacaoLiterariaEntityRepository;
 
   @Transactional
   public SuccessResponseDTO validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -318,6 +320,8 @@ public class ValidarRegistoColaboradorService {
     baseline(f.getContactos(), contactoEntityRepository, c -> c.getEstado() != Estado.E);
     baseline(umOuNenhum(f.getEndereco()), enderecoEntityRepository, e -> e.getEstado() != Estado.E);
     baseline(f.getFamiliares(), familiarEntityRepository, fa -> fa.getEstado() != Estado.E);
+    baseline(f.getHabilitacoesLiterarias(), habilitacaoLiterariaEntityRepository,
+        h -> h.getEstado() != Estado.E);
   }
 
   /**
@@ -340,6 +344,8 @@ public class ValidarRegistoColaboradorService {
         e -> e.getEstado() != Estado.E);
     capturar(f.getFamiliares(), familiarEntityRepository, validacao, "RH_T_FAMILIARES",
         fa -> fa.getEstado() != Estado.E);
+    capturar(f.getHabilitacoesLiterarias(), habilitacaoLiterariaEntityRepository, validacao,
+        "RH_T_HABILITACOES_LITERARIAS", h -> h.getEstado() != Estado.E);
   }
 
   /** Adapta um filho 1:1 (ex.: endereço) à API baseada em lista dos helpers. */
