@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.EditarMobilidadeCommand;
 import cv.inps.rh.funcionario.application.commands.SaveMobilidadeCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarMobilidadeCommand;
+import cv.inps.rh.funcionario.application.constants.TipoMobilidade;
 import cv.inps.rh.funcionario.application.dto.MobilidadeDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
@@ -114,23 +115,70 @@ public class MobilidadeWriteService {
                                             MobilidadeEntity mobilidadeAnterior){
      if (mobilidadeDTO == null) return null;
 
-     if(mobilidadeDTO.getLocalTrabalhoDepois() == null && mobilidadeDTO.getSeccaoDepois() == null && mobilidadeDTO.getDirecaoDepois() == null){
-       throw IgrpResponseStatusException.badRequest("Local de trabalho, seção e direção são obrigatórios");
-     }
+    // Tipo de mobilidade = multi-select (códigos do domínio separados por vírgula, ex. "DIRECAO,SECAO").
+    // O ecrã só mostra os campos "(depois)" dos tipos escolhidos; tem de existir pelo menos um.
+    var selecionados = tiposSelecionados(mobilidadeDTO.getTipoMobilidade());
+    if (selecionados.isEmpty()) {
+      throw IgrpResponseStatusException.badRequest(
+          "Indique o tipo de mobilidade (Direcção, Unidade e/ou Local de trabalho).");
+    }
 
     var me = new MobilidadeEntity();
     me.setTipoSituacao(ValidationUtil.trimToNull(mobilidadeDTO.getTipoMobilidade()));
     me.setObs("MOBILIDADE");
     me.setUuid(UuidCreator.getTimeOrderedEpoch());
     me.setFunId(funcionario);
-    me.setLocalTrabId(ValidationUtil.ref(entityManager, ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDepois()));
-    me.setSecaoId(ValidationUtil.ref(entityManager, SecaoEntity.class, mobilidadeDTO.getSeccaoDepois()));
-    me.setInstidId(ValidationUtil.ref(entityManager, DirecaoEntity.class, mobilidadeDTO.getDirecaoDepois()));
     me.setDataInicio(mobilidadeDTO.getDataInicio());
     me.setDataFim(mobilidadeDTO.getDataFim());
     me.setEstado(Estado.P);
     me.setMobId(mobilidadeAnterior);
+    // Por cada tipo: se foi escolhido, o "(depois)" é obrigatório; se não, o campo não muda e herda o
+    // valor "antes" (mobilidade anterior), evitando exigir ao frontend reenviar o que não alterou.
+    aplicarCamposMobilidade(me, mobilidadeDTO, selecionados, mobilidadeAnterior);
     return me;
+  }
+
+  /**
+   * Interpreta o {@code tipoMobilidade} (códigos do domínio separados por vírgula) no conjunto de
+   * {@link TipoMobilidade}. Rejeita códigos desconhecidos — só DIRECAO/SECAO/LOCAL_TRABALHO são
+   * selecionáveis no ecrã de mobilidade.
+   */
+  private java.util.EnumSet<TipoMobilidade> tiposSelecionados(String tipoMobilidade) {
+    var selecionados = java.util.EnumSet.noneOf(TipoMobilidade.class);
+    if (tipoMobilidade == null) {
+      return selecionados;
+    }
+    for (var token : tipoMobilidade.split(",")) {
+      var codigo = ValidationUtil.trimToNull(token);
+      if (codigo == null) {
+        continue;
+      }
+      var tipo = TipoMobilidade.fromCodigo(codigo).orElseThrow(() ->
+          IgrpResponseStatusException.badRequest("Tipo de mobilidade inválido: '" + token.trim() + "'."));
+      selecionados.add(tipo);
+    }
+    return selecionados;
+  }
+
+  /**
+   * Preenche direção/unidade/local do novo registo: para cada tipo ESCOLHIDO exige o "(depois)" e
+   * resolve-o; para os NÃO escolhidos copia o valor "antes" (mobilidade anterior) — a mobilidade
+   * grava sempre os três campos, só mudando os que o utilizador selecionou.
+   */
+  private void aplicarCamposMobilidade(MobilidadeEntity me, MobilidadeDTO dto,
+      java.util.EnumSet<TipoMobilidade> selecionados, MobilidadeEntity anterior) {
+    for (var tipo : TipoMobilidade.values()) {
+      if (selecionados.contains(tipo)) {
+        var id = tipo.depoisId(dto);
+        if (id == null) {
+          throw IgrpResponseStatusException.badRequest(
+              "Escolheu mobilidade de " + tipo.getLabel() + ": indique o campo \"" + tipo.getLabel() + " (depois)\".");
+        }
+        tipo.set(me, ValidationUtil.ref(entityManager, tipo.getEntityType(), id));
+      } else {
+        tipo.set(me, tipo.antes(anterior));
+      }
+    }
   }
 
   private MobilidadeEntity updateMobilidade(MobilidadeEntity me ,MobilidadeDTO mobilidadeDTO){
