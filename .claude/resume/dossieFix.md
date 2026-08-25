@@ -1,4 +1,4 @@
-> Updated: 2026-08-25 16:46
+> Updated: 2026-08-25 16:55
 
 ## Goal
 
@@ -9,9 +9,10 @@ uniforme (feito e commitado, `274a2799`).
 ## Current state
 
 - Âmbito: **todos os filhos que o registo toca** (pessoais + contratuais). TiposRelacionamento FORA.
-- Dossiê LIGADO: **DadosBancarios** ✅ (testado live), **Contactos**, **Endereço**, **Familiares**,
-  **Habilitações** ✅ (compilam; falta teste live dos novos). Falta ainda **Documento pessoal** e a
-  parte **contratual** (por composição). FKs shallow já tratadas.
+- TODOS os filhos LIGADOS e a compilar: dossiê (bancários✅live, contactos, endereço, familiares,
+  habilitações) + contratual por composição (carreira, mobilidade, situação). Falta **teste live
+  consolidado** dos novos. Fora de âmbito: TiposRelacionamento/Contrato (campos próprios), Documento
+  pessoal e def rem/pag (TODO opcional no javadoc do descritor).
 - Read-model **multi-tipo** ligado: `isAlvo` usa `entityTypeSuffixes()`.
 - Descritor do registo faz **composição**: injeta descritores de módulo existentes (DadosBancarios já;
   Carreira/Mobilidade/Situação a fazer) + config "dossiê" própria (mapa `DOSSIE`).
@@ -47,8 +48,7 @@ uniforme (feito e commitado, `274a2799`).
 
 ## Next step
 
-Parte **contratual** por composição: injetar `CarreiraValidacaoDetalheDescriptor`,
-`MobilidadeValidacaoDetalheDescriptor`, `SituacaoLaboralValidacaoDetalheDescriptor` em `reutilizados`
-do descritor do registo, e no serviço gravar carreira/mobilidade/situação (via os seus repos auditados)
-no baseline/captura (entidades vêm de `tiposRelacionamento`, não são coleções do funcionário).
-(Opcional) Documento pessoal. Depois: teste live consolidado editando ≥1 campo por secção.
+**Teste live consolidado**: registar colaborador → CORRIGIR → reenvio alterando ≥1 campo por secção
+(contacto, morada, familiar, habilitação, bancário, carreira/mobilidade/situação) → `GET
+.../validacoes/{uuid}/detalhes` e confirmar 1 linha legível por alteração, com `tabelaName` a
+desambiguar a secção. App: `spring-boot:run` (porta 8088), esperar "Started" no app_run.log.

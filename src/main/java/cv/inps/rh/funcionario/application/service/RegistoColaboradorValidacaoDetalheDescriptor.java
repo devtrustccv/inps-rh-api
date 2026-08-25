@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.application.service;
 
+import cv.inps.rh.funcionario.application.service.carreira.CarreiraValidacaoDetalheDescriptor;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.service.ValidacaoDetalheDescriptor;
 import org.springframework.stereotype.Component;
@@ -28,9 +29,10 @@ import java.util.Set;
  * <p>{@link #matchByTypeOnly()} = true: a validação tem {@code referenciaId} = id do FUNCIONÁRIO, não
  * o id de cada filho. Seguro porque cada commit é carimbado com o seu {@code validacaoUuid}.
  *
- * <p>TODO: reutilizar também CarreiraValidacaoDetalheDescriptor, MobilidadeValidacaoDetalheDescriptor e
- * SituacaoLaboralValidacaoDetalheDescriptor (injetar em {@link #reutilizados}) quando a captura da parte
- * contratual for ligada no serviço. TiposRelacionamento NÃO entra (tabela de ligação + shallow ref).
+ * <p>Cobertura atual: dossiê (dados bancários, contactos, endereço, familiares, habilitações) +
+ * contratual reutilizada (carreira, mobilidade, situação laboral). TiposRelacionamento e Contrato
+ * (campos próprios) NÃO entram (tabela de ligação / shallow ref). TODO opcional: documento pessoal e
+ * def. remunerações/pagamentos, se se quiser detalhá-los também.
  */
 @Component
 public class RegistoColaboradorValidacaoDetalheDescriptor implements ValidacaoDetalheDescriptor {
@@ -39,8 +41,13 @@ public class RegistoColaboradorValidacaoDetalheDescriptor implements ValidacaoDe
   private final List<ValidacaoDetalheDescriptor> reutilizados;
 
   public RegistoColaboradorValidacaoDetalheDescriptor(
-      DadosBancariosValidacaoDetalheDescriptor dadosBancarios) {
-    this.reutilizados = List.of(dadosBancarios);
+      DadosBancariosValidacaoDetalheDescriptor dadosBancarios,
+      CarreiraValidacaoDetalheDescriptor carreira,
+      MobilidadeValidacaoDetalheDescriptor mobilidade,
+      SituacaoLaboralValidacaoDetalheDescriptor situacaoLaboral) {
+    // Reutiliza os mesmos tipos/campos/rótulos dos ecrãs próprios destes módulos, agora sob a validação
+    // do REGISTO. TiposRelacionamento e Contrato (campos próprios) NÃO entram: ligação / shallow ref.
+    this.reutilizados = List.of(dadosBancarios, carreira, mobilidade, situacaoLaboral);
   }
 
   /**

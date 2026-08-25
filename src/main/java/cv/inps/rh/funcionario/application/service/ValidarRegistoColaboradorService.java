@@ -18,12 +18,15 @@ import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
+import cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ContactoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DadosBancariosEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EnderecoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FamiliarEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.HabilitacaoLiterariaEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.MobilidadeEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.SituacaoLaboralEntityRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -69,6 +72,9 @@ public class ValidarRegistoColaboradorService {
   private final EnderecoEntityRepository enderecoEntityRepository;
   private final FamiliarEntityRepository familiarEntityRepository;
   private final HabilitacaoLiterariaEntityRepository habilitacaoLiterariaEntityRepository;
+  private final CarreiraEntityRepository carreiraEntityRepository;
+  private final MobilidadeEntityRepository mobilidadeEntityRepository;
+  private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
 
   @Transactional
   public SuccessResponseDTO validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -322,6 +328,16 @@ public class ValidarRegistoColaboradorService {
     baseline(f.getFamiliares(), familiarEntityRepository, fa -> fa.getEstado() != Estado.E);
     baseline(f.getHabilitacoesLiterarias(), habilitacaoLiterariaEntityRepository,
         h -> h.getEstado() != Estado.E);
+
+    // Parte contratual: carreira/mobilidade/situação vêm do tiprel atual (não são coleções do
+    // funcionário). Reutilizam os descritores dos módulos próprios (composição no descritor do registo).
+    var tr = funcionarioRules.getTipoRelacionamentoAtual(f.getUuid());
+    if (tr != null) {
+      baseline(umOuNenhum(tr.getCarreiraId()), carreiraEntityRepository, c -> c.getEstado() != Estado.E);
+      baseline(umOuNenhum(tr.getMobId()), mobilidadeEntityRepository, m -> m.getEstado() != Estado.E);
+      baseline(umOuNenhum(tr.getSituacLaboralId()), situacaoLaboralEntityRepository,
+          s -> s.getEstado() != Estado.E);
+    }
   }
 
   /**
@@ -346,6 +362,16 @@ public class ValidarRegistoColaboradorService {
         fa -> fa.getEstado() != Estado.E);
     capturar(f.getHabilitacoesLiterarias(), habilitacaoLiterariaEntityRepository, validacao,
         "RH_T_HABILITACOES_LITERARIAS", h -> h.getEstado() != Estado.E);
+
+    var tr = funcionarioRules.getTipoRelacionamentoAtual(f.getUuid());
+    if (tr != null) {
+      capturar(umOuNenhum(tr.getCarreiraId()), carreiraEntityRepository, validacao, "RH_T_CARREIRA",
+          c -> c.getEstado() != Estado.E);
+      capturar(umOuNenhum(tr.getMobId()), mobilidadeEntityRepository, validacao, "RH_T_MOBILIDADE",
+          m -> m.getEstado() != Estado.E);
+      capturar(umOuNenhum(tr.getSituacLaboralId()), situacaoLaboralEntityRepository, validacao,
+          "RH_T_SITUACAO_LABORAL", s -> s.getEstado() != Estado.E);
+    }
   }
 
   /** Adapta um filho 1:1 (ex.: endereço) à API baseada em lista dos helpers. */
