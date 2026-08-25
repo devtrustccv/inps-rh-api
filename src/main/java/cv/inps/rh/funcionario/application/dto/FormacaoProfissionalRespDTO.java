@@ -45,4 +45,6 @@ public class FormacaoProfissionalRespDTO  {
 
   private String estado ;
 
+  private String estadoDesc ;
+
 }

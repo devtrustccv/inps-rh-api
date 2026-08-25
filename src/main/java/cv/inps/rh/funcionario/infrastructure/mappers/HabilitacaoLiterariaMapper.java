@@ -100,6 +100,8 @@ public class HabilitacaoLiterariaMapper {
         hr.setDataInicio(h.getDataInicio());
         hr.setDataTermino(h.getDataFim());
         hr.setConcluido(h.getConcluido());
+        hr.setEstado(h.getEstado() != null ? h.getEstado().getCode() : null);
+        hr.setEstadoDesc(h.getEstado() != null ? h.getEstado().getDescription() : null);
         return hr;
       }).toList();
     }

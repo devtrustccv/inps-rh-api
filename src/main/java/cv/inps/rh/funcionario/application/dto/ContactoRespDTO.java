@@ -33,4 +33,6 @@ public class ContactoRespDTO  {
 
   private String estado ;
 
+  private String estadoDesc ;
+
 }

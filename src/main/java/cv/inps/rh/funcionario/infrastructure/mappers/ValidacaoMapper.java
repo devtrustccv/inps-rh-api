@@ -35,6 +35,8 @@ public class ValidacaoMapper {
     dto.setReferenciaId(validacao.getReferenciaId());
     dto.setIdFuncionario(validacao.getFunId() != null ? validacao.getFunId().getId() : 0L);
     dto.setUuidFuncionario(validacao.getFunId() != null ? validacao.getFunId().getUuid().toString(): null);
+    dto.setEstado(validacao.getEstado() != null ? validacao.getEstado().getCode() : null);
+    dto.setEstadoDesc(validacao.getEstado() != null ? validacao.getEstado().getDescription() : null);
 
     return dto;
   }
