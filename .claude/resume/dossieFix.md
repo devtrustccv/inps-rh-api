@@ -1,4 +1,4 @@
-> Updated: 2026-08-25 17:00
+> Updated: 2026-08-25 17:10
 
 ## Goal
 
@@ -14,8 +14,11 @@ uniforme (feito e commitado, `274a2799`).
   MOBILIDADE, SITUACAO_LABORAL — valores legíveis, `tabelaName` desambigua.
 - Bug corrigido (c1de535e): `isAlvo` aceita `Set<String>` (o compile offline incremental mascarava;
   usar SEMPRE `mvn clean compile` antes de arrancar).
-- Fora de âmbito: TiposRelacionamento/Contrato (campos próprios), Documento pessoal, def rem/pag (TODO
-  opcional no javadoc do descritor).
+- Adicionados **Documento pessoal** (RH_T_DOCUMENTO_PESSOAL) e **Remunerações/Pagamentos**
+  (RH_T_DEF_REMUNERACOES/PAGAMENTOS, por composição de Rendimento/Desconto). Clean compile OK.
+- FORA (com justificação no javadoc): TiposRelacionamento/Contrato (ligação/shallow) e os campos-núcleo
+  do FuncionarioEntity (nome/NIF/nomes pais) — funcionário é ShallowReference; detalhá-los exige
+  mecanismo dedicado fora do auto-audit.
 - OBSERVAÇÃO: a grelha ACUMULA diffs de todos os ciclos de correção da MESMA validação (mesmo
   validacaoUuid em P→C→P). Registo novo com 1 ciclo = 1 linha por campo. Afinar para "último por campo"
   se o negócio quiser (só na leitura).

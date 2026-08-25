@@ -21,6 +21,9 @@ import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.infrastructure.persistence.repository.CarreiraEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ContactoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DadosBancariosEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DefPagamentoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DefinicaoRemuneracaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DocumentoPessoalEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.EnderecoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FamiliarEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
@@ -75,6 +78,9 @@ public class ValidarRegistoColaboradorService {
   private final CarreiraEntityRepository carreiraEntityRepository;
   private final MobilidadeEntityRepository mobilidadeEntityRepository;
   private final SituacaoLaboralEntityRepository situacaoLaboralEntityRepository;
+  private final DocumentoPessoalEntityRepository documentoPessoalEntityRepository;
+  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoEntityRepository;
+  private final DefPagamentoEntityRepository defPagamentoEntityRepository;
 
   @Transactional
   public SuccessResponseDTO validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -328,6 +334,11 @@ public class ValidarRegistoColaboradorService {
     baseline(f.getFamiliares(), familiarEntityRepository, fa -> fa.getEstado() != Estado.E);
     baseline(f.getHabilitacoesLiterarias(), habilitacaoLiterariaEntityRepository,
         h -> h.getEstado() != Estado.E);
+    baseline(umOuNenhum(f.getDocumentoPessoal()), documentoPessoalEntityRepository,
+        dp -> dp.getEstado() != Estado.E);
+    baseline(f.getDefinicoesRenumeracoes(), definicaoRemuneracaoEntityRepository,
+        r -> r.getEstado() != Estado.E);
+    baseline(f.getDefinicoesPagamentos(), defPagamentoEntityRepository, p -> p.getEstado() != Estado.E);
 
     // Parte contratual: carreira/mobilidade/situação vêm do tiprel atual (não são coleções do
     // funcionário). Reutilizam os descritores dos módulos próprios (composição no descritor do registo).
@@ -362,6 +373,12 @@ public class ValidarRegistoColaboradorService {
         fa -> fa.getEstado() != Estado.E);
     capturar(f.getHabilitacoesLiterarias(), habilitacaoLiterariaEntityRepository, validacao,
         "RH_T_HABILITACOES_LITERARIAS", h -> h.getEstado() != Estado.E);
+    capturar(umOuNenhum(f.getDocumentoPessoal()), documentoPessoalEntityRepository, validacao,
+        "RH_T_DOCUMENTO_PESSOAL", dp -> dp.getEstado() != Estado.E);
+    capturar(f.getDefinicoesRenumeracoes(), definicaoRemuneracaoEntityRepository, validacao,
+        "RH_T_DEF_REMUNERACOES", r -> r.getEstado() != Estado.E);
+    capturar(f.getDefinicoesPagamentos(), defPagamentoEntityRepository, validacao,
+        "RH_T_DEF_PAGAMENTOS", p -> p.getEstado() != Estado.E);
 
     var tr = funcionarioRules.getTipoRelacionamentoAtual(f.getUuid());
     if (tr != null) {
