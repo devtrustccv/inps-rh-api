@@ -117,8 +117,9 @@ public class JaversValidacaoDetalheReadService {
         .filter(change -> criacao || !(change instanceof InitialValueChange))
         // Só a instância-alvo (o registo EXATO em validação). Combina tipo (do descritor) + id da
         // referência: remove refs/coleções de entidades vizinhas (outro tipo) e outras instâncias do
-        // mesmo tipo (mesmo tipo, outro id) tocadas na consolidação.
-        .filter(change -> isAlvo(change.getAffectedGlobalId(), referenciaId, descriptor.entityTypeSuffix()))
+        // mesmo tipo (mesmo tipo, outro id) tocadas na consolidação. O descritor pode declarar VÁRIOS
+        // tipos-alvo (ex.: REGISTO_COLABORADOR, cujos filhos são de tipos diferentes na mesma validação).
+        .filter(change -> isAlvo(change.getAffectedGlobalId(), referenciaId, descriptor.entityTypeSuffixes()))
         // Só campos de negócio (allow-list do descritor): fora estado (workflow), FKs estruturais e
         // created*/lastModified* (auditoria). Tudo o que não estiver na lista fica de fora por omissão.
         .filter(change -> descriptor.camposNegocio().contains(change.getPropertyName()))

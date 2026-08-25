@@ -4,49 +4,61 @@ import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.service.ValidacaoDetalheDescriptor;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * Descritor da grelha "Detalhe de alterações" para o REGISTO DE COLABORADOR.
  *
- * <p>Fatia vertical (1ª etapa): cobre os DADOS BANCÁRIOS, o único filho do registo já auditado pelo
- * JaVers ({@code DadosBancariosEntityRepository} é {@code @JaversSpringDataAuditable}). Os restantes
- * filhos (contactos, familiares, habilitações, endereço) entram depois — cada um exige tornar o seu
- * repositório auditável e capturar baseline/diff no {@code ValidarRegistoColaboradorService}.
+ * <p>O registo é um AGREGADO: uma só validação (INSERT/REGISTO_COLABORADOR) toca muitas tabelas. Este
+ * descritor cobre-as todas, por {@link #entityTypeSuffixes()} (multi-tipo). Só é capturado no PUT de
+ * reenvio de correção (C→P), único momento em que o registo é editável — ver
+ * {@code ValidarRegistoColaboradorService}. Valores sempre LEGÍVEIS (rótulos PT; FKs → nome via
+ * {@code ReferenciaNomeResolver}, nunca id).
  *
- * <p>{@link #matchByTypeOnly()} = true porque a validação (INSERT/REGISTO_COLABORADOR) tem
- * {@code referenciaId} = id do FUNCIONÁRIO, não o id do bancário — e os dados bancários são uma
- * coleção. O isolamento é feito só pelo tipo, seguro porque cada commit é carimbado com o seu
- * {@code validacaoUuid} (a captura do diff no reenvio C→P).
+ * <p><b>Reutilização:</b> para os filhos que já têm descritor de módulo próprio (dados bancários e,
+ * adiante, carreira/mobilidade/situação…), este descritor <b>injeta-os e agrega</b> os seus
+ * campos/rótulos/tipos — os mesmos dos ecrãs próprios, sem duplicar. Para os filhos "dossiê" sem
+ * descritor (contactos, endereço, familiares, habilitações, documento pessoal) a config vive em
+ * {@link #DOSSIE} aqui.
  *
- * <p>Só valores LEGÍVEIS: a coluna "campo alterado" usa os rótulos PT abaixo; {@code rhbId} é uma FK
- * resolvida para o NOME do banco pelo {@code ReferenciaNomeResolver} (nunca o id).
+ * <p>{@link #matchByTypeOnly()} = true: a validação tem {@code referenciaId} = id do FUNCIONÁRIO, não
+ * o id de cada filho. Seguro porque cada commit é carimbado com o seu {@code validacaoUuid}.
  *
- * <p>TODO (detalhe do registo — próximos filhos, mesmo molde: anotar repo {@code @JaversSpringDataAuditable}
- * + baseline no CORRIGIR + diff no reenvio em {@code ValidarRegistoColaboradorService} + campos/rótulos):
- * <ul>
- *   <li>Ligar o read-model multi-tipo: usar {@link ValidacaoDetalheDescriptor#entityTypeSuffixes()} no
- *       {@code JaversValidacaoDetalheReadService.isAlvo(...)} (o default já existe) e este descritor
- *       passar a devolver todos os tipos-alvo + união de campos/rótulos.</li>
- *   <li><b>Contactos</b> ({@code ContactoEntity}): {@code tipoContacto}, {@code contacto}.</li>
- *   <li><b>Endereço</b> ({@code EnderecoEntity}): {@code morada} + FKs país/ilha/concelho/freguesia/zona.</li>
- *   <li><b>Familiares</b> ({@code FamiliarEntity}): {@code nome}, {@code numDocumento}, {@code dataNascimento},
- *       {@code sexo}, {@code gdpId}, {@code dependencia}, {@code membroAgr}, {@code responsavel}, {@code tpDocumentoId}.</li>
- *   <li><b>Habilitações</b> ({@code HabilitacaoLiterariaEntity}): {@code nomeCurso}, {@code nivel}, {@code area},
- *       {@code paisId}, {@code estabelecimento}, {@code dataInicio}, {@code dataFim}, {@code concluido}.</li>
- *   <li>Rever {@code REFERENCIAS_RASAS} no {@code JaversAuditConfig}: os novos filhos NÃO rasos (senão não
- *       diffam), as FKs deles rasas (performance). Confirmar getters de nome no {@code ReferenciaNomeResolver}.</li>
- * </ul>
+ * <p>TODO: reutilizar também CarreiraValidacaoDetalheDescriptor, MobilidadeValidacaoDetalheDescriptor e
+ * SituacaoLaboralValidacaoDetalheDescriptor (injetar em {@link #reutilizados}) quando a captura da parte
+ * contratual for ligada no serviço. TiposRelacionamento NÃO entra (tabela de ligação + shallow ref).
  */
 @Component
 public class RegistoColaboradorValidacaoDetalheDescriptor implements ValidacaoDetalheDescriptor {
+
+  /** Descritores de módulo reutilizados: contribuem os mesmos tipos/campos/rótulos dos seus ecrãs. */
+  private final List<ValidacaoDetalheDescriptor> reutilizados;
+
+  public RegistoColaboradorValidacaoDetalheDescriptor(
+      DadosBancariosValidacaoDetalheDescriptor dadosBancarios) {
+    this.reutilizados = List.of(dadosBancarios);
+  }
+
+  /**
+   * Filhos "dossiê" sem descritor próprio: {@code entityTypeSuffix → (propriedade Java → rótulo PT)}.
+   * A allow-list de campos e os rótulos saem daqui.
+   */
+  private static final Map<String, Map<String, String>> DOSSIE = Map.of(
+      "ContactoEntity", Map.of(
+          "tipoContacto", "Tipo de contacto",
+          "contacto", "Contacto")
+  );
 
   @Override
   public String referenciaName() {
     return Referencia.REGISTO_COLABORADOR.name();
   }
 
+  /** Não usado na prática (a grelha usa {@link #entityTypeSuffixes()}); mantém o contrato satisfeito. */
   @Override
   public String entityTypeSuffix() {
     return "DadosBancariosEntity";
@@ -58,17 +70,26 @@ public class RegistoColaboradorValidacaoDetalheDescriptor implements ValidacaoDe
   }
 
   @Override
+  public Set<String> entityTypeSuffixes() {
+    Set<String> tipos = new HashSet<>();
+    reutilizados.forEach(d -> tipos.addAll(d.entityTypeSuffixes()));
+    tipos.addAll(DOSSIE.keySet());
+    return tipos;
+  }
+
+  @Override
   public Set<String> camposNegocio() {
-    return Set.of("rhbId", "numConta", "nib", "dataInicio", "dataFim");
+    Set<String> campos = new HashSet<>();
+    reutilizados.forEach(d -> campos.addAll(d.camposNegocio()));
+    DOSSIE.values().forEach(m -> campos.addAll(m.keySet()));
+    return campos;
   }
 
   @Override
   public Map<String, String> rotulos() {
-    return Map.of(
-        "rhbId", "Entidade bancária",
-        "numConta", "Nº de conta",
-        "nib", "NIB",
-        "dataInicio", "Data início",
-        "dataFim", "Data fim");
+    Map<String, String> rotulos = new HashMap<>();
+    reutilizados.forEach(d -> rotulos.putAll(d.rotulos()));
+    DOSSIE.values().forEach(rotulos::putAll);
+    return rotulos;
   }
 }

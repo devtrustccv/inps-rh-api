@@ -1,4 +1,4 @@
-> Updated: 2026-08-25 16:05
+> Updated: 2026-08-25 16:20
 
 ## Goal
 
@@ -8,13 +8,20 @@ uniforme (feito e commitado, `274a2799`).
 
 ## Current state
 
-- Fatia vertical **DadosBancarios** validada end-to-end: editar Nº de conta no reenvio → `/detalhes`
-  mostra `{campoAlterado:"Nº de conta", valorAnterior:"9019055", valorNovo:"9019099", tabelaName:...}`.
-- App a correr na **8088** (spring-boot:run default). Log confirma descritor REGISTO_COLABORADOR ativo.
-- TODO dos próximos filhos está **no código** (javadoc do descritor), não em doc.
+- Âmbito: **todos os filhos que o registo toca** (pessoais + contratuais). TiposRelacionamento FORA.
+- **DadosBancarios** ✅ (testado live) e **Contactos** ✅ (ligado, compila; falta teste live).
+- Read-model **multi-tipo** ligado: `isAlvo` usa `entityTypeSuffixes()`.
+- Descritor do registo faz **composição**: injeta descritores de módulo existentes (DadosBancarios já;
+  Carreira/Mobilidade/Situação a fazer) + config "dossiê" própria (mapa `DOSSIE`).
+- Serviço tem helpers genéricos `baseline(...)`/`capturar(...)` — cada filho novo = anotar repo
+  `@JaversSpringDataAuditable` + 1 linha em `criarBaselineFilhos`/`capturarDetalheFilhos` + entrada no
+  descritor.
+- TODO dos próximos filhos está **no código** (javadoc do descritor).
 
 ## Decisions made — do not re-litigate
 
+- Reutilizar descritores existentes por COMPOSIÇÃO (não duplicar campos/rótulos).
+- TiposRelacionamento e Contrato (campos próprios) FORA: tabela de ligação / shallow ref.
 - Detalhe só no PUT (C→P): registo só editável via CORRIGIR; depois usam-se os módulos individuais.
 - Baseline no CORRIGIR (P→C) SEM contexto (não entra na grelha); diff no reenvio DENTRO do
   `ValidacaoAuditContext` carimbado com a validação.
@@ -38,5 +45,8 @@ uniforme (feito e commitado, `274a2799`).
 
 ## Next step
 
-Ligar o read-model multi-tipo: usar `entityTypeSuffixes()` no `JaversValidacaoDetalheReadService.isAlvo`
-e replicar baseline/diff para Contactos (repo `@JaversSpringDataAuditable`), o filho mais simples.
+Ligar **Endereço** (RH_T_ENDERECO): anotar `EnderecoEntityRepository`, adicionar ao `DOSSIE`
+(`morada` + FKs país/ilha/concelho/freguesia/zona), 1 linha nos helpers (é 1:1 → `List.of(endereco)`),
+e pôr `GeografiaEntity` em `REFERENCIAS_RASAS` (JaversAuditConfig) para as FKs saírem como nome, não id.
+Depois: Familiares (TipoDocumento→shallow), Habilitações (Estabelecimento→shallow), Documento pessoal,
+e por fim a parte contratual por composição (Carreira/Mobilidade/Situação + repo-save no serviço).

@@ -16,9 +16,12 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ContactoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DadosBancariosEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor
@@ -57,6 +62,7 @@ public class ValidarRegistoColaboradorService {
   private final ColaboradorValidationRules colaboradorValidationRules;
   private final ReconciliacaoMovimentoVinculoService reconciliacaoMovimentoVinculoService;
   private final DadosBancariosEntityRepository dadosBancariosEntityRepository;
+  private final ContactoEntityRepository contactoEntityRepository;
 
   @Transactional
   public SuccessResponseDTO validarRegistoColaborador(ValidarRegistoColaboradorCommand command) {
@@ -88,7 +94,7 @@ public class ValidarRegistoColaboradorService {
       // passar a conhecer o estado atual. SEM ValidacaoAuditContext de propósito: este snapshot não deve
       // aparecer na grelha (não fica carimbado com validação) — serve só para o reenvio C→P produzir um
       // diff antes→depois em vez de um "valor inicial".
-      criarBaselineBancarios(funcionario);
+      criarBaselineFilhos(funcionario);
       return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
           "Registo de colaborador devolvido para correção.", List.of());
     }
@@ -279,7 +285,7 @@ public class ValidarRegistoColaboradorService {
     // ValidacaoAuditContext, carimbando o commit com esta validação — o JaVers compara com o baseline
     // criado no CORRIGIR e produz o diff antes→depois que a grelha /detalhes mostra.
     if (estaPorCorrigir) {
-      capturarDetalheBancarios(saved);
+      capturarDetalheFilhos(saved);
     }
 
     // Numa REJEICAO (validar=NAO) nao se associam defs ao tiprel rejeitado — RH_T_TIPREL_REM_PAG
@@ -298,39 +304,51 @@ public class ValidarRegistoColaboradorService {
   }
 
   /**
-   * Baseline JaVers dos dados bancários (filho auditado). Grava-os pelo repo auditável SEM
-   * {@link ValidacaoAuditContext} — o snapshot fica sem validacaoUuid e não aparece na grelha; existe
-   * só para que a edição seguinte (reenvio C→P) produza um diff antes→depois.
+   * Baseline JaVers dos filhos AUDITADOS. Grava-os pelo repo auditável SEM {@link ValidacaoAuditContext}
+   * — o snapshot fica sem validacaoUuid e não aparece na grelha; existe só para que a edição seguinte
+   * (reenvio C→P) produza um diff antes→depois. O funcionário é ShallowReference, logo o save em cascata
+   * não fotografa os filhos: por isso cada filho é gravado pelo seu próprio repo aqui.
    */
-  private void criarBaselineBancarios(FuncionarioEntity funcionario) {
-    if (funcionario.getDadosBancarios() == null) {
-      return;
-    }
-    funcionario.getDadosBancarios().stream()
-        .filter(b -> b != null && b.getEstado() != Estado.E)
-        .forEach(dadosBancariosEntityRepository::save);
+  private void criarBaselineFilhos(FuncionarioEntity f) {
+    baseline(f.getDadosBancarios(), dadosBancariosEntityRepository, b -> b.getEstado() != Estado.E);
+    baseline(f.getContactos(), contactoEntityRepository, c -> c.getEstado() != Estado.E);
   }
 
   /**
-   * Captura o diff dos dados bancários no reenvio de correção (C→P), carimbando o commit com a
-   * validação de REGISTO em curso. O JaVers compara com o baseline criado no CORRIGIR; a grelha
-   * /detalhes lê por este validacaoUuid.
+   * Captura o diff dos filhos no reenvio de correção (C→P), carimbando cada commit com a validação de
+   * REGISTO em curso e a tabela do filho. O JaVers compara com o baseline criado no CORRIGIR; a grelha
+   * /detalhes lê por este validacaoUuid (todos os tipos-alvo do descritor do registo).
    */
-  private void capturarDetalheBancarios(FuncionarioEntity funcionario) {
-    if (funcionario.getDadosBancarios() == null) {
-      return;
-    }
+  private void capturarDetalheFilhos(FuncionarioEntity f) {
     var validacao = funcionarioRules
-        .getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR)
+        .getValidacaoPendente(f.getUuid(), TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR)
         .orElse(null);
     if (validacao == null) {
       return;
     }
+    capturar(f.getDadosBancarios(), dadosBancariosEntityRepository, validacao, "RH_T_DADOS_BANCARIOS",
+        b -> b.getEstado() != Estado.E);
+    capturar(f.getContactos(), contactoEntityRepository, validacao, "RH_T_CONTACTO",
+        c -> c.getEstado() != Estado.E);
+  }
+
+  /** Grava cada elemento vivo pelo repo auditável, SEM contexto de validação (baseline). */
+  private <T> void baseline(List<T> lista, JpaRepository<T, Long> repo, Predicate<T> vivo) {
+    if (lista == null) {
+      return;
+    }
+    lista.stream().filter(Objects::nonNull).filter(vivo).forEach(repo::save);
+  }
+
+  /** Grava cada elemento vivo pelo repo auditável DENTRO do contexto da validação (diff). */
+  private <T> void capturar(List<T> lista, JpaRepository<T, Long> repo, ValidacaoEntity validacao,
+      String tabela, Predicate<T> vivo) {
+    if (lista == null || lista.isEmpty()) {
+      return;
+    }
     try {
-      ValidacaoAuditContext.set(validacao.getId(), validacao.getUuid(), "RH_T_DADOS_BANCARIOS");
-      funcionario.getDadosBancarios().stream()
-          .filter(b -> b != null && b.getEstado() != Estado.E)
-          .forEach(dadosBancariosEntityRepository::save);
+      ValidacaoAuditContext.set(validacao.getId(), validacao.getUuid(), tabela);
+      lista.stream().filter(Objects::nonNull).filter(vivo).forEach(repo::save);
     } finally {
       ValidacaoAuditContext.clear();
     }
