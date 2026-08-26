@@ -21,7 +21,6 @@ public class DadosInstituicaoResponseDTO {
   private String numCertidaoComercial;
   private LocalDate dataValidade;
   private Long telefone;
-  private Long telemovel;
   private String localidade;
   private String email;
   private String morada;
