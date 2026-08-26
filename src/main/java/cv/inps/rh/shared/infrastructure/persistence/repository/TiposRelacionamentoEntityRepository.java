@@ -27,6 +27,15 @@ public interface TiposRelacionamentoEntityRepository extends
     JpaRepository<TiposRelacionamentoEntity, Long>,
     JpaSpecificationExecutor<TiposRelacionamentoEntity> {
 
+  /**
+   * Tiprel mais recente (maior id) que aponta para este contrato, INDEPENDENTEMENTE de est_act_adm.
+   * Um contrato pode ter vários tiprels ao longo do tempo (ex.: mudança de situação laboral clona o
+   * tiprel mantendo o mesmo contrVinculoId); o mais recente é o que "manda". Necessário no
+   * ativar/desativar contrato: na desativação o tiprel atual está est_act_adm=1, mas na ativação o
+   * contrato está inativo (est_act_adm=0), pelo que o finder que filtra est_act_adm=1 não serve.
+   */
+  Optional<TiposRelacionamentoEntity> findFirstByContrVinculoId_UuidOrderByIdDesc(UUID contratoUuid);
+
   default TiposRelacionamentoEntity findByIdOrThrow(Long id) {
     return this.findById(id)
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND,

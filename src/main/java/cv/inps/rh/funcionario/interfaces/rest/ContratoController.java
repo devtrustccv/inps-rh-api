@@ -6,10 +6,12 @@ package cv.inps.rh.funcionario.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.funcionario.application.commands.AlterarEstadoContratoCommand;
 import cv.inps.rh.funcionario.application.commands.NovoContratoCommand;
 import cv.inps.rh.funcionario.application.commands.RenovarContratoCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarContratoCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarRenovacaoContratoCommand;
+import cv.inps.rh.funcionario.application.dto.AlterarEstadoContratoDTO;
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.application.dto.NovoContratoDTO;
 import cv.inps.rh.funcionario.application.dto.RenovacaoContratoDTO;
@@ -195,6 +197,37 @@ public class ContratoController {
   {
 
       final var command = new ValidarContratoCommand(validarContratoRequest, idFuncionario, contratoId);
+
+       ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
+
+       return response;
+  }
+
+   @PatchMapping(
+   value = "{idFuncionario}/contratos/{contratoId}/estado"
+  )
+  @Operation(
+    summary = "Ativar/Desativar contrato",
+    description = "Ativa (estado=A) ou desativa (estado=I) o contrato e toda a sua cadeia de filhos.",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<SuccessResponseDTO> alterarEstadoContrato(@Valid @RequestBody AlterarEstadoContratoDTO alterarEstadoContratoRequest
+    , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "contratoId") String contratoId)
+  {
+
+      final var command = new AlterarEstadoContratoCommand(alterarEstadoContratoRequest, idFuncionario, contratoId);
 
        ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
 
