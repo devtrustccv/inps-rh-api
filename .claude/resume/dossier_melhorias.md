@@ -73,9 +73,11 @@ Implementar melhorias de `docs/MELHORIAS_DOSSIER.md` (secção 2 — Dossiê), c
 `docs/Especificação Tecnica Funcional - DOSSIÊ DO COLABORADOR_19_08_26.md` e prints. Isolado no worktree
 `feat/dossier-melhorias` (base develop@aaaffb46) para não colidir com a app no 8088.
 
-## 2. Current state — CÓDIGO COMPLETO E A COMPILAR (BUILD SUCCESS)
+## 2. Current state — TESTADO LIVE FASES 0-7 (ver §0 para a tabela)
 
-Commits no branch `feat/dossier-melhorias`: `5462d631`, `a7a47659`, `7fb1a871`.
+Commits no branch `feat/dossier-melhorias`: `5462d631`, `a7a47659`, `7fb1a871`, `58aaf43d` (handoff),
+`32afd029` (**fixes PCCS sem carreira** — registo/validação), `f21aa798` (**vista relacao-laboral**).
+Handoff (este doc) commitado no repo principal `develop`: `da22e328`.
 
 | Item | Estado |
 |---|---|
@@ -236,9 +238,14 @@ reassociado, antigo I, novo A. T7.6 validar NAO → I, salário intacto. T7.7 CO
 **Evidências → HTML:** por teste, HTTP status + JSON cru + queries de verificação. Montar
 `docs/evidencias_teste_live_dossier.html` explicando cada fluxo e resultado.
 
-## 8. Next step
-BD de pé → FASE 0, depois backfill (com autorização), boot 8089 (**SQL antes**), FASES 3–9 com evidências,
-gerar HTML, e **pedir permissão para merge** (PR → `develop`, não `main`).
+## 8. Next step (retomar aqui)
+FASES 0-7 corridas live (0-6 e T7.3-T7.7 verdes). App a correr no 8089. Por fazer, por ordem:
+1. **Guards T7.1/T7.2** de Alterar Escalão/Cargo: com carreira → 400; não-PCCS → 400 (rápidos).
+2. **T7.8** (detalhe JaVers vazio) — decidir fix op.(a) ou (b) — ver §5b. (Utilizador escolheu parar antes.)
+3. **FASE 8** (remunerações: filtros situacaoLaboral/contrVinculo) e **FASE 9** (regressão: registo COM
+   carreira + progressão + detalhe mobilidade/carreira intactos).
+4. Gerar `docs/evidencias_teste_live_dossier.html`, **limpar fixtures** (§0), e **pedir permissão p/ merge**
+   (PR `feat/dossier-melhorias` → `develop`, não `main`).
 
 ## 9. Ficheiros-chave (relativos ao worktree)
 - `docs/db/melhorias_dossier_tipo_salario.sql` — ALTER + backfill.
