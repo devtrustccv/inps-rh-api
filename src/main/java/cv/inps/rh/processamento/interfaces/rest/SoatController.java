@@ -9,9 +9,14 @@ import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.processamento.application.commands.CriarSoatCommand;
 import cv.inps.rh.processamento.application.commands.FinalizarSoatCommand;
+import cv.inps.rh.processamento.application.commands.SalvarDadosApoliceCommand;
 import cv.inps.rh.processamento.application.commands.SalvarDadosInstituicaoCommand;
+import cv.inps.rh.processamento.application.dto.DadosApoliceRequestDTO;
+import cv.inps.rh.processamento.application.dto.DadosApoliceResponseDTO;
 import cv.inps.rh.processamento.application.dto.DadosInstituicaoRequestDTO;
 import cv.inps.rh.processamento.application.dto.DadosInstituicaoResponseDTO;
+import cv.inps.rh.processamento.application.queries.DownloadSoatPdfQuery;
+import cv.inps.rh.processamento.application.queries.GetDadosApolicesAtivosQuery;
 import cv.inps.rh.processamento.application.queries.GetDadosInstituicaoAtualQuery;
 import cv.inps.rh.processamento.application.queries.GetSoatListQuery;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,8 +25,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @IgrpController
 @RestController
@@ -166,4 +174,69 @@ public class SoatController {
 
         return queryBus.handle(query);
   }
+
+    @PostMapping("dados-apolices")
+    @Operation(
+            summary = "Create or update insurance policy data",
+            description = "Creates a policy for an island or versions its current active policy",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(
+                                            implementation = DadosApoliceResponseDTO.class,
+                                            type = "object")
+                            )
+                    )
+            }
+    )
+    public ResponseEntity<DadosApoliceResponseDTO> salvarDadosApolice(
+            @Valid @RequestBody DadosApoliceRequestDTO request) {
+
+        final var command = new SalvarDadosApoliceCommand(request);
+
+        return commandBus.send(command);
+    }
+
+    @GetMapping("dados-apolices")
+    @Operation(
+            summary = "Get active insurance policies",
+            description = "Gets the current active policy for each configured island",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(
+                                            implementation = DadosApoliceResponseDTO.class,
+                                            type = "array")
+                            )
+                    )
+            }
+    )
+    public ResponseEntity<List<DadosApoliceResponseDTO>> getDadosApolicesAtivos() {
+
+        final var query = new GetDadosApolicesAtivosQuery();
+
+        return queryBus.handle(query);
+    }
+
+    @GetMapping(value = "ficheiro", produces = MediaType.APPLICATION_PDF_VALUE)
+    @Operation(
+            summary = "Download SOAT PDF",
+            description = "Processes the SOAT Thymeleaf template and downloads the generated PDF",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            content = @Content(mediaType = MediaType.APPLICATION_PDF_VALUE)
+                    )
+            }
+    )
+    public ResponseEntity<byte[]> downloadFicheiroSoat(
+            @RequestParam(value = "soatId") String soatId,
+            @RequestParam(value = "apoliceId") String apoliceId) {
+
+        return queryBus.handle(new DownloadSoatPdfQuery(soatId, apoliceId));
+    }
 }

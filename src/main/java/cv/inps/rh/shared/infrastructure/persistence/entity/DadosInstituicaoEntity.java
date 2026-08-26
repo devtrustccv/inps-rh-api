@@ -48,6 +48,9 @@ public class DadosInstituicaoEntity extends AuditEntity {
   @Column(name = "TELEFONE")
   private Long telefone;
 
+  @Column(name = "TELEMOVEL")
+  private Long telemovel;
+
   @Size(max = 300)
   @Column(name = "LOCALIDADE", length = 300)
   private String localidade;
