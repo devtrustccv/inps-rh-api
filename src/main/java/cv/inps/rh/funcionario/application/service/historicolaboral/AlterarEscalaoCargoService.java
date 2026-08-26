@@ -12,6 +12,7 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.application.constants.custom.TipoSalarioVinculo;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.ValidationUtil;
@@ -63,11 +64,16 @@ public class AlterarEscalaoCargoService {
 
     garantirPccsSemCarreira(atual);
 
-    var tipos = dto.getTipoAlteracao() != null ? dto.getTipoAlteracao() : List.<String>of();
-    boolean alterarEscalao = tipos.stream().anyMatch("ESCALAO"::equalsIgnoreCase) || dto.getNovoEscalaoId() != null;
-    boolean alterarCargo = tipos.stream().anyMatch("CARGO"::equalsIgnoreCase) || dto.getNovoCargoId() != null;
+    // "Tipo Alteração" (multiselect, DOMAINS=TIPO_MOV_LABORAL / REFERENTE=GESTAO_LABORAL): o frontend
+    // envia os valores selecionados separados por vírgulas e guardam-se tal-e-qual em TIPO_SITUACAO.
+    // A decisão do que alterar NÃO interpreta os códigos do domínio (a confirmar na BD) — usa apenas a
+    // presença de novoEscalaoId / novoCargoId no pedido.
+    boolean alterarEscalao = dto.getNovoEscalaoId() != null;
+    boolean alterarCargo = dto.getNovoCargoId() != null;
     if (!alterarEscalao && !alterarCargo)
-      throw IgrpResponseStatusException.badRequest("Indique o que alterar: ESCALAO e/ou CARGO.");
+      throw IgrpResponseStatusException.badRequest("Indique o novo escalão e/ou o novo cargo.");
+    var tipoSituacao = org.springframework.util.StringUtils.hasText(dto.getTipoAlteracao())
+        ? dto.getTipoAlteracao().trim() : TIPO_SITUACAO;
 
     // Não permitir novo movimento enquanto houver um pendente sobre o mesmo tiprel.
     if (tiposRelacionamentoEntityRepository.findFirstByTiprelId_IdAndEstado(atual.getId(), Estado.P).isPresent())
@@ -79,7 +85,9 @@ public class AlterarEscalaoCargoService {
     if (alterarCargo && !alterarEscalao) {
       if (dto.getNovoCargoId() != null)
         atual.setCargoId(ValidationUtil.ref(entityManager, ParamCargoEntity.class, dto.getNovoCargoId()));
-      atual.setTipoSituacao(TIPO_SITUACAO);
+      atual.setTipoSituacao(tipoSituacao);
+      atual.setDataInicio(dataEfetiva);
+      atual.setDataFim(dto.getDataFim());
       if (dto.getObservacao() != null) atual.setObs(dto.getObservacao());
       tiposRelacionamentoEntityRepository.save(atual);
       return new SuccessResponseDTO(true, atual.getUuid().toString(), "Cargo alterado.", List.of());
@@ -90,22 +98,58 @@ public class AlterarEscalaoCargoService {
         ? entityManager.find(ParamEscalaoEntity.class, dto.getNovoEscalaoId()) : null;
     if (novoEscalao == null)
       throw IgrpResponseStatusException.badRequest("Novo escalão inválido.");
+    var novoCargo = dto.getNovoCargoId() != null
+        ? ValidationUtil.ref(entityManager, ParamCargoEntity.class, dto.getNovoCargoId()) : null;
+
+    // CORREÇÃO reenviada pelo MAKER: se houver um movimento em C derivado do atual, reabre-se (C→P) e
+    // reaplicam-se os campos, em vez de criar um pendente novo. Ciclo maker-checker (como a carreira).
+    var emCorrecao = tiposRelacionamentoEntityRepository
+        .findFirstByTiprelId_IdAndEstado(atual.getId(), Estado.C).orElse(null);
+    if (emCorrecao != null) {
+      emCorrecao.setEscalaoId(novoEscalao);
+      if (novoCargo != null) emCorrecao.setCargoId(novoCargo);
+      if (novoEscalao.getValor() != null) emCorrecao.setSalario(novoEscalao.getValor());
+      emCorrecao.setDataInicio(dataEfetiva);
+      emCorrecao.setDataFim(dto.getDataFim());
+      emCorrecao.setTipoSituacao(tipoSituacao);
+      if (dto.getObservacao() != null) emCorrecao.setObs(dto.getObservacao());
+      emCorrecao.setEstado(Estado.P);
+      var validacaoC = funcionarioRules.reabrirParaValidacao(emCorrecao.getUuid(), Referencia.GESTAO_LABORAL);
+      try {
+        ValidacaoAuditContext.set(validacaoC.getId(), validacaoC.getUuid(), "RH_T_TIPOS_RELACIONAMENTO");
+        tiposRelacionamentoEntityRepository.save(emCorrecao);
+      } finally {
+        ValidacaoAuditContext.clear();
+      }
+      validacaoC.setTiprelId(emCorrecao);
+      validacaoEntityRepository.save(validacaoC);
+      return new SuccessResponseDTO(true, emCorrecao.getUuid().toString(),
+          "Correção reenviada para validação.", List.of());
+    }
+
+    // Pré-gera o UUID da validação para carimbar JÁ o save do tiprel — é esse save que cria o snapshot
+    // JaVers da grelha "Detalhe de alterações". Carimbar um save posterior seria no-op.
+    var validacaoUuid = UuidCreator.getTimeOrderedEpoch();
 
     var novoTiprel = contratuaisEntityMapper.clone(atual);
     novoTiprel.setTiprelId(atual);
     novoTiprel.setCarreiraId(null);
     novoTiprel.setEscalaoId(novoEscalao);
-    if (alterarCargo && dto.getNovoCargoId() != null)
-      novoTiprel.setCargoId(ValidationUtil.ref(entityManager, ParamCargoEntity.class, dto.getNovoCargoId()));
+    if (novoCargo != null) novoTiprel.setCargoId(novoCargo);
     if (novoEscalao.getValor() != null) novoTiprel.setSalario(novoEscalao.getValor());
     novoTiprel.setEstado(Estado.P);
     novoTiprel.setEstActAdm(0);
     novoTiprel.setDataInicio(dataEfetiva);
-    novoTiprel.setDataFim(null);
-    novoTiprel.setTipoSituacao(TIPO_SITUACAO);
-    novoTiprel.setObs(dto.getObservacao() != null ? dto.getObservacao() : TIPO_SITUACAO);
+    novoTiprel.setDataFim(dto.getDataFim());
+    novoTiprel.setTipoSituacao(tipoSituacao);
+    novoTiprel.setObs(dto.getObservacao() != null ? dto.getObservacao() : tipoSituacao);
     novoTiprel.setReferente(TIPO_SITUACAO);
-    tiposRelacionamentoEntityRepository.save(novoTiprel);
+    try {
+      ValidacaoAuditContext.set(null, validacaoUuid, "RH_T_TIPOS_RELACIONAMENTO");
+      tiposRelacionamentoEntityRepository.save(novoTiprel);
+    } finally {
+      ValidacaoAuditContext.clear();
+    }
 
     var validacao = new ValidacaoEntity();
     validacao.setTipoAccao(TipoAcao.UPDATE.name());
@@ -114,7 +158,7 @@ public class AlterarEscalaoCargoService {
     validacao.setReferenciaUuid(novoTiprel.getUuid());
     validacao.setTiprelId(novoTiprel);
     validacao.setEstado(Estado.P);
-    validacao.setUuid(UuidCreator.getTimeOrderedEpoch());
+    validacao.setUuid(validacaoUuid); // mesmo UUID já carimbado no baseline
     validacao.setFunId(funcionario);
     validacaoEntityRepository.save(validacao);
 
@@ -174,8 +218,10 @@ public class AlterarEscalaoCargoService {
         salarioNovo.setValor(novoEscalao.getValor());
         salarioNovo.setEstado(Estado.A);
         salarioNovo.setObs(TIPO_SITUACAO);
+        // Doc (2.2.1): ao alterar escalão, o novo RH_T_DEF_REMUNERACOES herda DATA_INICIO e DATA_FIM do
+        // formulário (as mesmas gravadas no tiprel pendente).
         salarioNovo.setDataInicio(dataEfetiva);
-        salarioNovo.setDataFim(null);
+        salarioNovo.setDataFim(pendente.getDataFim());
         salarioNovo.setMoeda(pendente.getMoeda());
         salarioNovo.setFunId(funcionario);
         salarioNovo.setUuid(UuidCreator.getTimeOrderedEpoch());

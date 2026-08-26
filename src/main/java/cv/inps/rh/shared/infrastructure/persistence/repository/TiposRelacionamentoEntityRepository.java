@@ -16,12 +16,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import org.javers.spring.annotation.JaversSpringDataAuditable;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+// Auditado por JaVers para alimentar a grelha "Detalhe de alterações" do movimento GESTÃO LABORAL
+// (Alterar Escalão/Cargo). Commits sem ValidacaoAuditContext ficam sem propriedades (inofensivos),
+// como nos restantes repositórios auditados (DefinicaoRemuneracao, DefPagamento, Contacto, ...).
+@JaversSpringDataAuditable
 @Repository
 public interface TiposRelacionamentoEntityRepository extends
     JpaRepository<TiposRelacionamentoEntity, Long>,

@@ -32,13 +32,14 @@ Decisão do utilizador: **implementar agora, testar live depois**. Portanto:
 | 2.2.2 Regime | conforme doc | ✅ nada a fazer |
 | 2.4 Validação (detalhe) | JaVers | ✅ já resolvido |
 | 2.5 Conversão/Renovação | job do transversal | ⏭️ fora deste módulo |
-| **Break change** | `FLG_SALARIO` Integer→String (`TIPO_SALARIO_VINCULO`) + enum | 🟡 em curso |
-| **Break change** | refactor dos 11 consumidores "tem salário" | ✅ feito (compila) |
+| **Break change** | `FLG_SALARIO` Integer→String (`TIPO_SALARIO_VINCULO`) + enum + refactor consumidores | ✅ feito (compila) |
 | **2.1** | escalão no tiprel ao registar/validar colaborador **e contrato** (sem carreira) | ✅ feito (compila) |
 | **2.2.1 lista** | `categoria`→`escalao` na lista Gestão Laboral | ✅ feito (compila) |
+| **2.2.1 Alterar Escalão/Cargo** | novo fluxo (escalão→validação→substitui salário) | ✅ feito (compila) |
 | **2.3** | filtros `situacaoLaboral` + `contrVinculo` nas remunerações | ✅ feito (compila) |
-| **2.2.1 Alterar Escalão/Cargo** | novo fluxo (escalão→validação→substitui salário) | ⬜ por fazer |
-| **Manifestos IGRP** | `.igrpstudio/**.json` a refletir DTOs/endpoints alterados | ⬜ por fazer |
+| **Manifestos IGRP** | `.igrpstudio/**.json` (DTOs, controllers, modelos, enum, novo endpoint) | ✅ feito |
+| **Script SQL** (ALTER + backfill) | pronto, por aplicar | 🟡 aguarda BD |
+| **Teste live 8089 + evidências HTML + merge** | — | 🔴 aguarda BD |
 
 ## Ficheiros alterados / criados
 
@@ -97,22 +98,60 @@ Pendentes, todos dependentes da BD voltar:
 - [x] `shared/models/ParamVinculoEntity.json` — flg_salario integer→string.
 - [x] `shared/models/TiposRelacionamentoEntity.json` — +escalao_id (ManyToOne ParamEscalaoEntity).
 - [x] `shared/enum/Domains.json` — +TIPO_SALARIO_VINCULO.
-- [ ] (pendente) manifestos do novo endpoint/DTO Alterar Escalão/Cargo.
-- Nota: `TipoSalarioVinculo` é enum hand-written em `constants/custom` (como `Referencia`) — sem manifesto.
+- [x] `funcionario/dto/AlterarEscalaoCargoDTO.json` + 2 ações em `funcionario/controllers/HistoricoLaboralController.json`.
+- Nota: `TipoSalarioVinculo` e `Referencia` (+GESTAO_LABORAL) são enums hand-written em `constants/custom` — sem manifesto.
 
 ### BD — script pronto
 - [x] `docs/db/melhorias_dossier_tipo_salario.sql` — ALTER FLG_SALARIO + backfill (default SIM_FORA_PCCS
   para 1+sem-carreira) + guard ESCALAO_ID no tiprel. **Aplico eu via DbExec quando a BD voltar.**
 
+## Alterar Escalão/Cargo — CORRIGIR (C→P) + JaVers (Detalhe de alterações)
+- [x] **Ciclo maker-checker completo**: `validar()` faz P→C (devolver) e P→I/A; `alterar()` deteta um
+  movimento em C derivado do atual e **reabre (C→P)** reaplicando os campos (via `reabrirParaValidacao`),
+  em vez de criar novo pendente. Guard de pendente duplicado só bloqueia estado P.
+- [x] **JaVers / "Detalhe de alterações"**:
+  - Novo `GestaoLaboralValidacaoDetalheDescriptor` (referenciaName=GESTAO_LABORAL, alvo TiposRelacionamentoEntity,
+    campos escalao/cargo/salario/moeda/tipoSituacao/datas/obs).
+  - `@JaversSpringDataAuditable` no `TiposRelacionamentoEntityRepository` (⚠️ **app-wide**: todas as escritas
+    de tiprel passam a gerar commit JaVers; sem contexto ficam sem propriedades — inofensivos, consistente
+    com os outros repos auditados).
+  - `alterar()` carimba o save do tiprel com `ValidacaoAuditContext.set(..., "RH_T_TIPOS_RELACIONAMENTO")`
+    usando o UUID pré-gerado da validação (baseline da grelha).
+- Lista de validações (`ValidacoesReadService`) já apanha a GESTAO_LABORAL (filtra só estado=P); rótulo
+  "Gestão Laboral" via `Referencia` enum.
+
 ## Log de progresso
-- 2026-08-26: break-change + 2.1 (registo/validar colaborador+contrato) + 2.2.1-lista + 2.3 → **BUILD SUCCESS**.
-  BD ainda inacessível (teste live/backfill pendentes). A seguir: Alterar Escalão/Cargo + manifestos.
+- 2026-08-26: break-change + 2.1 (registo/validar colaborador+contrato) + 2.2.1-lista + 2.3 → BUILD SUCCESS.
+- 2026-08-26: fluxo Alterar Escalão/Cargo + manifestos + script SQL → BUILD SUCCESS; commit `5462d631`.
+- 2026-08-26: correções form (dataFim, tipoSituacao CSV, DEF_REM datas) + CORRIGIR C→P + JaVers → a compilar.
 
-### BD (aplicar quando a BD voltar)
-- [ ] `docs/db/melhorias_dossier_tipo_salario.sql` — ALTER `FLG_SALARIO` NUMBER→VARCHAR2 + backfill.
-- [ ] Confirmar `RH_T_TIPOS_RELACIONAMENTO.ESCALAO_ID` existe e é nullable.
+## Alinhamento ao formulário "Alterar Escalão/Cargo" (RESOLVIDO)
+Confirmado pelo utilizador + spec DOSSIÊ (secção Mobilidade análoga, l.4231-4244: multiselect
+DOMAINS=TIPO_MOV_LABORAL/REFERENTE grava em RH_T_TIPOS_RELACIONAMENTO.TIPO_SITUACAO; datas no tiprel):
+- [x] `AlterarEscalaoCargoDTO`: `tipoAlteracao` List→**String** (front envia CSV) + novo campo **`dataFim`**.
+- [x] Serviço grava `TIPO_SITUACAO` = valor(es) do multiselect (CSV), não a constante; decisão do que alterar
+  usa `novoEscalaoId`/`novoCargoId` (robusto aos códigos do domínio).
+- [x] `dataInicio` (default sysdate) + `dataFim` aplicados ao tiprel (`DATA_INICIO`/`DATA_FIM`) — no novo
+  tiprel (escalão) e no atual (cargo imediato). Confirmado pelo doc atualizado (gravam SEMPRE no tiprel).
+- [x] **Doc atualizado (regra nova)**: ao alterar escalão, o novo `RH_T_DEF_REMUNERACOES` herda também
+  `data_inicio` E `data_fim` do formulário → corrigido `salarioNovo.setDataFim(pendente.getDataFim())`
+  (antes era null).
+- [x] Manifesto `AlterarEscalaoCargoDTO.json` atualizado (tipoAlteracao string, +dataFim).
 
-## Pendências / riscos a confirmar no boot
-- `RH_T_TIPOS_RELACIONAMENTO.ESCALAO_ID` — existência/nullabilidade (schema V1 está desatualizado).
+### Domínio do "Tipo Alteração" — ⚠️ INVESTIGAR NA BD (nomes exatos)
+- Campo alimentado por **`TIPO_MOV_LABORAL`** filtrado por **`REFERENTE='GESTAO_LABORAL'`** (análogo à
+  Mobilidade que usa REFERENTE='MOBILIDADE'). Frontend obtém opções via
+  `DomainEntityRepository.getActiveDomainAndReferenciaByCode("TIPO_MOV_LABORAL","GESTAO_LABORAL")`.
+- **DECISÃO (utilizador): NÃO comparar/interpretar os códigos do domínio por string** — foi uma tentativa
+  minha (`token.contains("ESCAL"/"CARGO")`) e foi **rejeitada por ser demasiado frágil** (adivinha os
+  valores). Removida. A decisão do que alterar usa **apenas** a presença de `novoEscalaoId` / `novoCargoId`.
+- [ ] **Quando a BD voltar: investigar os valores REAIS** de `TIPO_MOV_LABORAL` com referência
+  `GESTAO_LABORAL` (`SELECT valor, referencia FROM <tabela_dominios> WHERE dominio='TIPO_MOV_LABORAL' AND referencia='GESTAO_LABORAL'`)
+  e usar os nomes exatos onde for preciso. Semear as linhas se não existirem.
+- [ ] Confirmar endpoint que devolve os "Anteriores" (Cargo/Escalão/Carreira) para o form preencher
+  (candidatos: `getRelacaoLaboralByFunId` / `getRelacaoLaboralByTiprelUuid`).
+
+## Pendências / riscos a confirmar no boot (BD)
+- `RH_T_TIPOS_RELACIONAMENTO.ESCALAO_ID` — existência/nullabilidade (schema V1 desatualizado; view expõe ESCALAO_ID). O script SQL adiciona a coluna se faltar.
 - `parseFlag` já não é usado para `remuneracao`; confirmar nenhuma regressão nos outros flags.
-- Backfill dos `flg_salario=1 & flg_carreira=0` → revisão manual dos PCCS.
+- Backfill dos `flg_salario=1 & flg_carreira=0` → revisão manual dos PCCS (default SIM_FORA_PCCS).
