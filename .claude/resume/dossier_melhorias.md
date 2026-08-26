@@ -240,15 +240,23 @@ reassociado, antigo I, novo A. T7.6 validar NAO → I, salário intacto. T7.7 CO
 **Evidências → HTML:** por teste, HTTP status + JSON cru + queries de verificação. Montar
 `docs/evidencias_teste_live_dossier.html` explicando cada fluxo e resultado.
 
-## 8. Next step (retomar aqui)
-**FASES 0-9 corridas live e verdes** (T7.8 é o único gap, adiado). App no 8089. Estado:
-1. ~~Guards T7.1/T7.2~~ ✅ live (ambos 400 com mensagem certa; não tocam BD).
-2. **T7.8** (detalhe JaVers vazio) — **ADIADO por decisão** (implementar depois). TODO deixado em
-   `JaversValidacaoDetalheReadService` (junto ao `boolean criacao`) com as opções (a)/(b) — ver §5b.
-3. ~~FASE 8~~ ✅ (filtros +/- discriminam) e ~~FASE 9~~ ✅ (relacao-laboral carreira, renumeracoes carreira,
-   detalhe JaVers mobilidade+carreira intactos).
-4. `docs/evidencias_teste_live_dossier.html` ✅ gerado. **Fixtures ficam na BD** (decisão: não limpar).
-   **PRÓXIMO E ÚNICO PASSO: pedir permissão p/ merge** (PR `feat/dossier-melhorias` → `develop`, não `main`).
+## 8. Next step (retomar aqui) — MERGE FEITO
+
+**FASES 0-9 verdes** (T7.8 adiado) e **branch MERGED em `develop`** (local, sem push).
+- Merge commit: **`de698d2a`** (`Merge branch 'feat/dossier-melhorias' into develop`). Verificado antes:
+  `merge-tree` limpo (1 só ficheiro sobreposto — `TiposRelacionamentoEntityRepository`, auto-merge
+  aditivo) + **compilação BUILD SUCCESS** num worktree descartável de develop.
+- `docs/evidencias_teste_live_dossier.html` ✅ gerado. **Fixtures ficam na BD** (decisão: não limpar).
+- `docs/frontend_changes_dossier.md` ✅ criado e commitado (`46819382`) — changelog de API p/ o front.
+- TODO T7.8 em `JaversValidacaoDetalheReadService` (opções (a)/(b), ver §5b).
+
+**Falta (controlo do utilizador):**
+1. **`git push` de `develop`** (o merge foi só local; passo público por decidir).
+2. **Aplicar migrações** (`docs/db/melhorias_dossier_*.sql`) em qualquer ambiente que corra develop e
+   ainda não as tenha (a BD live já as tem).
+3. **T7.8** — implementar o detalhe JaVers da Gestão Laboral (adiado).
+4. Resíduo: pasta `.claude/worktrees/_mergecheck` ficou bloqueada por um handle no `target/` (o registo
+   de worktree já foi prunado; apagar a pasta quando o processo largar / ao reiniciar).
 
 ## 9. Ficheiros-chave (relativos ao worktree)
 - `docs/db/melhorias_dossier_tipo_salario.sql` — ALTER + backfill.
