@@ -10,6 +10,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ContratoHistoricoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ProcessamentoFuncionarioRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
@@ -49,6 +50,7 @@ public class AlterarEstadoContratoService {
   private final ContratoEntityRepository contratoEntityRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
   private final ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
+  private final ContratoHistoricoEntityRepository contratoHistoricoEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
 
@@ -110,11 +112,24 @@ public class AlterarEstadoContratoService {
 
   /** Ativar: só o ÚLTIMO contrato do funcionário e sem outro contrato em vigor. */
   private void validarAtivacao(FuncionarioEntity funcionario, ContratoEntity contrato, UUID contratoUuid) {
-    if (contrato.getEstado() == Estado.A) {
-      throw IgrpResponseStatusException.badRequest("O contrato já está ativo.");
+    // Só se reativa um contrato INATIVO. Um contrato em P (pendente de validação), C (em correção) ou
+    // E (eliminado) não é elegível — essa transição pertence ao fluxo de validação, não a este toggle.
+    if (contrato.getEstado() != Estado.I) {
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível ativar um contrato inativo (estado I). Estado atual: " + contrato.getEstado() + ".");
     }
-    var ultimo = contratoEntityRepository.findTopByFunId_UuidOrderByIdDesc(funcionario.getUuid());
-    if (ultimo == null || !Objects.equals(ultimo.getUuid(), contratoUuid)) {
+    // "Último/atual contrato" = aquele cujo HISTÓRICO tem est_act_adm=1 (o atual administrativo).
+    // Robusto contra um Novo Contrato REJEITADO — cujo histórico nasce e permanece est_act_adm=0 —,
+    // ao contrário de max(id), que apontaria para o rejeitado (id maior). A desativação por este
+    // serviço mantém o est_act_adm=1 do histórico (só baixa o estado para I), pelo que este breadcrumb
+    // sobrevive à desativação e identifica sempre o contrato certo a reativar.
+    boolean ehAtual = contratoHistoricoEntityRepository
+        .findByContratoId_FunId_IdAndEstActAdm(funcionario.getId(), 1)
+        .stream()
+        .map(h -> h.getContratoId())
+        .filter(Objects::nonNull)
+        .anyMatch(c -> Objects.equals(c.getUuid(), contratoUuid));
+    if (!ehAtual) {
       throw IgrpResponseStatusException.badRequest(
           "Só é possível ativar o último contrato do funcionário.");
     }
@@ -152,13 +167,10 @@ public class AlterarEstadoContratoService {
     funcionarioRules.getPagamentosDescontosAssociadosPorEstado(tiprel.getId(), origem)
         .forEach(p -> p.setEstado(alvo));
 
-    // Histórico: na DESATIVAÇÃO o transicionarEstado não baixa o est_act_adm (só o faz no sentido da
-    // ativação). Fecha aqui o(s) histórico(s) ativo(s) deste contrato.
-    if (alvo == Estado.I && contrato.getHistoricos() != null) {
-      contrato.getHistoricos().stream()
-          .filter(h -> Objects.equals(1, h.getEstActAdm()))
-          .forEach(h -> h.setEstActAdm(0));
-    }
+    // Histórico: na DESATIVAÇÃO mantém-se est_act_adm=1 (o transicionarEstado só baixa o estado para I,
+    // não o est_act_adm). É de propósito: o est_act_adm=1 fica como breadcrumb do "atual
+    // administrativo" e é o que o guard de ATIVAÇÃO usa para saber qual é o contrato a reativar. Na
+    // ATIVAÇÃO o transicionarEstado repõe o est_act_adm=1 (garantindo um único histórico ativo).
   }
 
   private Estado parseEstado(String estado) {

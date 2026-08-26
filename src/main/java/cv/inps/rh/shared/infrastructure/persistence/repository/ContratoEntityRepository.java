@@ -85,13 +85,6 @@ public interface ContratoEntityRepository extends
 
   ContratoEntity findTopByFunId_UuidOrderByVersaoDesc(UUID funUuid);
 
-  /**
-   * Último contrato do funcionário = o de maior id (o último criado). Usado pelo guard de ATIVAÇÃO
-   * de contrato: só se pode reativar o último contrato — nunca um contrato antigo já superado por
-   * outro. A versão não serve para isto (é sempre 1 por cadeia de contrato).
-   */
-  ContratoEntity findTopByFunId_UuidOrderByIdDesc(UUID funUuid);
-
   @Query("""
       SELECT c FROM ContratoEntity c
       JOIN FETCH c.tpContratoId tp

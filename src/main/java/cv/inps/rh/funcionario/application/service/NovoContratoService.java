@@ -91,11 +91,17 @@ public class NovoContratoService {
 
     boolean isPrimeiroContrato = funcionario.getContratos().isEmpty();
 
-    if (isPrimeiroContrato) {
-      return primeiroContrato(funcionario, dadosContratuais);
-    }
+    // Sem vínculo ativo (est_act_adm=1) — ex.: o contrato atual foi DESATIVADO pelo toggle de estado.
+    // Nesse caso NÃO há tiprel anterior para fechar: cria-se um contrato fresco (como no 1º contrato),
+    // mas com TIPO_SITUACAO=CONTINUIDADE (já houve contratos antes). Usa-se a variante nullable para
+    // não rebentar (getTipoRelacionamentoAtual lança quando não há atual).
+    var tipoRelacionamentoAtual = isPrimeiroContrato ? null
+        : funcionarioRules.getTipoRelacionamentoAtualOrNull(funcionario.getUuid());
 
-    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    if (isPrimeiroContrato || tipoRelacionamentoAtual == null) {
+      return primeiroContrato(funcionario, dadosContratuais,
+          isPrimeiroContrato ? "INICIO" : "CONTINUIDADE");
+    }
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(tipoRelacionamentoAtual.getEstado());
     // Fecha o tiprel anterior (DOSSIÊ, Novo Contrato 2.5): est_act_adm=0 e DATA_FIM = data de início
     // do NOVO registo. Antes usava contratoAtual.getDataFim(), que podia ser null (contrato sem termo)
@@ -306,14 +312,15 @@ public class NovoContratoService {
     return nova;
   }
 
-  private DadosContratuaisRespDTO primeiroContrato(FuncionarioEntity funcionario, DadosContratuaisReqDTO dadosContratuais) {
+  private DadosContratuaisRespDTO primeiroContrato(FuncionarioEntity funcionario, DadosContratuaisReqDTO dadosContratuais,
+                                                   String tipoSituacao) {
 
     var paramVinculo = entityManager.find(ParamVinculoEntity.class,
         dadosContratuais.getTipoVinculoLaboralId());
 
     var contrato = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contrato.setFunId(funcionario);
-    contrato.setTipoSituacao("INICIO");
+    contrato.setTipoSituacao(tipoSituacao);
     contrato.setVersao(1);
     contrato.setContratoId(null);
 
