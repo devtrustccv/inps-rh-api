@@ -3,14 +3,14 @@ package cv.inps.rh.processamento.domain.service;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.processamento.application.constants.SoatStatus;
-import cv.inps.rh.processamento.application.dto.*;
+import cv.inps.rh.processamento.application.dto.DadosInstituicaoRequestDTO;
+import cv.inps.rh.processamento.application.dto.DadosInstituicaoResponseDTO;
+import cv.inps.rh.processamento.application.dto.SoapRowResponseDTO;
 import cv.inps.rh.processamento.domain.service.model.SoatAggregateDTO;
 import cv.inps.rh.processamento.domain.service.model.SoatPdfResult;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.DadosApoliceEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DadosInstituicaoEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.SoatDetalheEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SoatEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DadosApoliceEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DadosInstituicaoEntityRepository;
@@ -26,11 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,7 +37,6 @@ public class SoatService {
 
   private final SoatEntityRepository soatRepository;
   private final DadosInstituicaoEntityRepository dadosInstituicaoRepository;
-  private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
   private final DadosApoliceEntityRepository dadosApoliceRepository;
   private final SoatDetalheEntityRepository soatDetalheRepository;
   private final EntityManager entityManager;
@@ -149,12 +144,21 @@ public class SoatService {
 
     var response = new WrapperListDTO();
     PageMapper.fillPagination(data, response);
-    response.setContent(
-        data.getContent()
-            .stream()
-            .map(this::toResponse)
-            .toList()
-    );
+    response.setContent(data.getContent());
+
+    return response;
+  }
+
+  @Transactional(readOnly = true)
+  public WrapperListDTO getDetalhesSoat(String soatUuid, Integer page, Integer size) {
+
+    var pageable = PageRequest.of(page, size);
+
+    var data = soatDetalheRepository.findAllBySoatId(soatUuid, pageable);
+
+    var response = new WrapperListDTO();
+    PageMapper.fillPagination(data, response);
+    response.setContent(data.getContent());
 
     return response;
   }
@@ -216,7 +220,7 @@ public class SoatService {
     return null;
   }
 
-  private SoatPdfRowDTO toPdfRow(SoatDetalheEntity detalhe) {
+  /*private SoatPdfRowDTO toPdfRow(SoatDetalheEntity detalhe) {
 
     var funcionario = detalhe.getFun();
     var tipoDocumento = funcionario.getTipoDocumentoId() == null
@@ -289,7 +293,7 @@ public class SoatService {
   private String safeFilename(String value) {
     var sanitized = value == null ? "apolice" : value.replaceAll("[^a-zA-Z0-9._-]", "-");
     return sanitized.isBlank() ? "apolice" : sanitized;
-  }
+  }*/
 
   private DadosInstituicaoResponseDTO toResponse(DadosInstituicaoEntity entity) {
     return new DadosInstituicaoResponseDTO(
@@ -308,16 +312,4 @@ public class SoatService {
         entity.getEstado()
     );
   }
-
-  private DadosApoliceResponseDTO toResponse(DadosApoliceEntity entity) {
-    return new DadosApoliceResponseDTO(
-        entity.getId(),
-        entity.getDadosInstituicao().getUuid(), // TODO 26/08/2026 21:11 improve performance of this
-        entity.getNumApolice(),
-        entity.getIlhaId(),
-        entity.getDataApolice(),
-        entity.getEstado()
-    );
-  }
-
 }

@@ -13,10 +13,7 @@ import cv.inps.rh.processamento.application.commands.SalvarDadosInstituicaoComma
 import cv.inps.rh.processamento.application.dto.DadosApoliceResponseDTO;
 import cv.inps.rh.processamento.application.dto.DadosInstituicaoRequestDTO;
 import cv.inps.rh.processamento.application.dto.DadosInstituicaoResponseDTO;
-import cv.inps.rh.processamento.application.queries.DownloadSoatPdfQuery;
-import cv.inps.rh.processamento.application.queries.GetDadosApolicesAtivosQuery;
-import cv.inps.rh.processamento.application.queries.GetDadosInstituicaoAtualQuery;
-import cv.inps.rh.processamento.application.queries.GetSoatListQuery;
+import cv.inps.rh.processamento.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -194,6 +191,33 @@ public class SoatController {
   ) {
 
     final var query = new GetDadosApolicesAtivosQuery(Integer.valueOf(page), Integer.valueOf(size));
+
+    return queryBus.handle(query);
+  }
+
+  @GetMapping("soat/{soatId}")
+  @Operation(
+      summary = "Get soat details",
+      description = "Get soat details",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = WrapperListDTO.class,
+                      type = "array")
+              )
+          )
+      }
+  )
+  public ResponseEntity<WrapperListDTO> getDetalhesSoat(
+      @PathVariable(value = "soatId") String soatId,
+      @RequestParam(value = "page", required = false, defaultValue = "0") String page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") String size
+  ) {
+
+    final var query = new GetDetalhesSoatQuery(soatId, Integer.valueOf(page), Integer.valueOf(size));
 
     return queryBus.handle(query);
   }
