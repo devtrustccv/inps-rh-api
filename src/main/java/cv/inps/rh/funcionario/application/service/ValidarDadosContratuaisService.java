@@ -146,6 +146,17 @@ public class ValidarDadosContratuaisService {
         throw IgrpResponseStatusException.badRequest("Escalão inválido.");
       dc.setSalario(escalao.getValor());
     }
+    // PCCS SEM carreira (flgCarreira != 1): o escalão não pende de carreira, é gravado
+    // directamente no tiprel — mas o salário continua a ser automático (valor do escalão).
+    else if (TipoSalarioVinculo.ehPccs(vinculo.getFlgSalario())) {
+      if (dc.getEscalaoReferenciaId() == null)
+        throw IgrpResponseStatusException.badRequest("Escalão é obrigatório para este tipo de vínculo.");
+
+      var escalao = entityManager.find(ParamEscalaoEntity.class, dc.getEscalaoReferenciaId());
+      if (escalao == null)
+        throw IgrpResponseStatusException.badRequest("Escalão inválido.");
+      dc.setSalario(escalao.getValor());
+    }
 
     // vínculo tem salário (SIM_PCCS/SIM_FORA_PCCS) → salário é obrigatório
     if (TipoSalarioVinculo.temSalario(vinculo.getFlgSalario())) {

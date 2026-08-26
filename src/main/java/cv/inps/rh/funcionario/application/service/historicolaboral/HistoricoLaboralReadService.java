@@ -186,7 +186,8 @@ public class HistoricoLaboralReadService {
     var cat =entity.getCarreiraId()!= null ?  entity.getCarreiraId().getCategoriaId() : null;
     if (cat != null)
       dto.setCategoria(cat.getId());
-    var esc = entity.getCarreiraId()!= null ? entity.getCarreiraId().getEscalaoId() : null;
+    // PCCS sem carreira: escalão está directamente no tiprel (ESCALAO_ID), não na carreira.
+    var esc = entity.getCarreiraId()!= null ? entity.getCarreiraId().getEscalaoId() : entity.getEscalaoId();
     if (esc != null)
       dto.setEscalao(esc.getId());
     var cargo = entity.getCargoId();
@@ -255,7 +256,8 @@ public class HistoricoLaboralReadService {
     var cat =atual.getCarreiraId()!= null ?  atual.getCarreiraId().getCategoriaId() : null;
     if (cat != null)
       dto.setCategoria(cat.getId());
-    var esc = atual.getCarreiraId()!= null ? atual.getCarreiraId().getEscalaoId() : null;
+    // PCCS sem carreira: escalão está directamente no tiprel (ESCALAO_ID), não na carreira.
+    var esc = atual.getCarreiraId()!= null ? atual.getCarreiraId().getEscalaoId() : atual.getEscalaoId();
     if (esc != null)
       dto.setEscalao(esc.getId());
     var cargo = atual.getCargoId();

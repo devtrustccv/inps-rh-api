@@ -186,7 +186,8 @@ public class ValidarRegistoColaboradorService {
     mobilidadeMapper.toUpdateEntity(mobilidade, dadosContratuais);
 
     var carreira = tiposRelacionamento.getCarreiraId();
-    carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
+    // PCCS sem carreira: não existe entidade de carreira para atualizar (o escalão vive no tiprel).
+    if (carreira != null) carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
 
     var regime = tiposRelacionamento.getRegimeId();
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);

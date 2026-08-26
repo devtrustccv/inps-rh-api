@@ -3,10 +3,19 @@
 -- Aplicar QUANDO a BD estiver acessível. Idempotente onde possível.
 -- Autor: implementação worktree feat/dossier-melhorias (2026-08-26)
 --
--- PRÉ-REQUISITO: o domínio TIPO_SALARIO_VINCULO (SIM_PCCS / SIM_FORA_PCCS / NAO)
--- JÁ foi criado na tabela de domínios (confirmado pelo utilizador). Este script
--- NÃO cria o domínio — só migra a coluna e faz o backfill.
+-- PRÉ-REQUISITO: o domínio TIPO_SALARIO_VINCULO existe em RH_T_DOMAINS, mas foi
+-- criado com VALOR numérico (0/1/2) em vez dos códigos string que o documento
+-- (docs/MELHORIAS_DOSSIER.md, linhas 52/65) e o código (enum TipoSalarioVinculo)
+-- exigem. O passo 0 abaixo corrige as 3 linhas para NAO/SIM_PCCS/SIM_FORA_PCCS.
 -- =============================================================================
+
+-- -----------------------------------------------------------------------------
+-- 0) RH_T_DOMAINS : alinhar VALOR do domínio TIPO_SALARIO_VINCULO ao documento.
+--    Mapeamento (descrição mantida): 0->NAO, 1->SIM_PCCS, 2->SIM_FORA_PCCS.
+-- -----------------------------------------------------------------------------
+UPDATE RH_T_DOMAINS SET VALOR = 'NAO'           WHERE DOMINIO = 'TIPO_SALARIO_VINCULO' AND VALOR = '0';
+UPDATE RH_T_DOMAINS SET VALOR = 'SIM_PCCS'      WHERE DOMINIO = 'TIPO_SALARIO_VINCULO' AND VALOR = '1';
+UPDATE RH_T_DOMAINS SET VALOR = 'SIM_FORA_PCCS' WHERE DOMINIO = 'TIPO_SALARIO_VINCULO' AND VALOR = '2';
 
 -- -----------------------------------------------------------------------------
 -- 1) RH_T_PARAM_VINCULO.FLG_SALARIO : NUMBER(0/1) -> VARCHAR2 (TIPO_SALARIO_VINCULO)
