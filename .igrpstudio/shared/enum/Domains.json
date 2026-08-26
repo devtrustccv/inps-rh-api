@@ -67,6 +67,13 @@
       ]
     },
     {
+      "name": "TIPO_SALARIO_VINCULO",
+      "attributes": [
+        "TIPO_SALARIO_VINCULO",
+        "TIPO_SALARIO_VINCULO"
+      ]
+    },
+    {
       "name": "DESTINATARIO_NOTIFICACAO",
       "attributes": [
         "DESTINATARIO_NOTIFICACAO",

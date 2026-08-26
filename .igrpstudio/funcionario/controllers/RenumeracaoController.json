@@ -68,6 +68,16 @@
           "name": "validacao",
           "value": "false",
           "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "situacaoLaboral",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "contrVinculo",
+          "isRequired": false
         }
       ]
     },

@@ -14,7 +14,7 @@ public class ParamVinculo {
   private String codigo;
   private String nome;
   private Integer flgCarreira;
-  private Integer flgSalario;
+  private String flgSalario;
   private Integer flgContrato;
   private Integer flgTempoServico;
   private Estado estado;
@@ -25,7 +25,7 @@ public class ParamVinculo {
       String codigo,
       String nome,
       Integer flgCarreira,
-      Integer flgSalario,
+      String flgSalario,
       Integer flgContrato,
       Integer flgTempoServico,
       Estado estado
@@ -50,7 +50,7 @@ public class ParamVinculo {
       String codigo,
       String nome,
       Integer flgCarreira,
-      Integer flgSalario,
+      String flgSalario,
       Integer flgContrato,
       Integer flgTempoServico,
       Estado estado
@@ -64,7 +64,7 @@ public class ParamVinculo {
       String codigo,
       String nome,
       Integer flgCarreira,
-      Integer flgSalario,
+      String flgSalario,
       Integer flgContrato,
       Integer flgTempoServico,
       Estado estado
@@ -80,7 +80,7 @@ public class ParamVinculo {
       String codigo,
       String nome,
       Integer flgCarreira,
-      Integer flgSalario,
+      String flgSalario,
       Integer flgContrato,
       Integer flgTempoServico,
       Estado estado

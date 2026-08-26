@@ -90,7 +90,7 @@
       "primaryKey": false
     },
     {
-      "name": "categoria",
+      "name": "escalao",
       "objectType": "java",
       "type": "string",
       "required": false,

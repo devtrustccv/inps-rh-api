@@ -7,6 +7,7 @@ import cv.inps.rh.funcionario.application.dto.EncargosDescontosReqDTO;
 import cv.inps.rh.funcionario.application.dto.HabilitacaoLiterariaReqDTO;
 import cv.inps.rh.funcionario.application.dto.SubsidioReqDTO;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.TipoSalarioVinculo;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FamiliarEntityRepository;
@@ -352,11 +353,47 @@ public class ColaboradorValidationRules {
         .collect(Collectors.toSet());
   }
 
-  /** true se o tipo de vínculo tem salário (RH_T_PARAM_VINCULO.FLG_SALARIO = 1). */
+  /** true se o tipo de vínculo tem salário (FLG_SALARIO = SIM_PCCS ou SIM_FORA_PCCS; NAO = sem salário). */
   public boolean vinculoTemSalario(Long tipoVinculoId) {
     if (tipoVinculoId == null) return false;
     var vinculo = entityManager.find(ParamVinculoEntity.class, tipoVinculoId);
-    return vinculo != null && Objects.equals(1, vinculo.getFlgSalario());
+    return vinculo != null && TipoSalarioVinculo.temSalario(vinculo.getFlgSalario());
+  }
+
+  /** true se o vínculo tem salário do PCCS (FLG_SALARIO = SIM_PCCS) — caso em que há escalão. */
+  public boolean vinculoEhPccs(Long tipoVinculoId) {
+    if (tipoVinculoId == null) return false;
+    var vinculo = entityManager.find(ParamVinculoEntity.class, tipoVinculoId);
+    return vinculo != null && TipoSalarioVinculo.ehPccs(vinculo.getFlgSalario());
+  }
+
+  /**
+   * Melhoria 2.1 — vínculo SEM carreira mas com salário do PCCS (SIM_PCCS): não há RH_T_CARREIRA que
+   * segure o escalão, por isso grava-se directamente no tiprel (RH_T_TIPOS_RELACIONAMENTO.ESCALAO_ID)
+   * e deriva-se o salário do valor do escalão. Nos restantes casos (com carreira, SIM_FORA_PCCS ou
+   * NAO) não faz nada. Usado no registo/validação de colaborador e de contrato. Devolve o escalão
+   * aplicado (ou {@code null}).
+   */
+  public ParamEscalaoEntity aplicarEscalaoTiprelSemCarreira(
+      TiposRelacionamentoEntity tr, CarreiraEntity carreira,
+      ParamVinculoEntity paramVinculo, Long escalaoReferenciaId) {
+    if (tr == null || carreira != null || paramVinculo == null) return null;
+    if (!TipoSalarioVinculo.ehPccs(paramVinculo.getFlgSalario())) return null;
+    if (escalaoReferenciaId == null) return null;
+    var escalao = entityManager.find(ParamEscalaoEntity.class, escalaoReferenciaId);
+    if (escalao == null) return null;
+    tr.setEscalaoId(escalao);
+    if (escalao.getValor() != null) tr.setSalario(escalao.getValor());
+    return escalao;
+  }
+
+  /** Overload que resolve o vínculo pelo id (para callers que só têm o id do tipo de vínculo). */
+  public ParamEscalaoEntity aplicarEscalaoTiprelSemCarreira(
+      TiposRelacionamentoEntity tr, CarreiraEntity carreira,
+      Long tipoVinculoId, Long escalaoReferenciaId) {
+    var paramVinculo = tipoVinculoId == null ? null
+        : entityManager.find(ParamVinculoEntity.class, tipoVinculoId);
+    return aplicarEscalaoTiprelSemCarreira(tr, carreira, paramVinculo, escalaoReferenciaId);
   }
 
   /**

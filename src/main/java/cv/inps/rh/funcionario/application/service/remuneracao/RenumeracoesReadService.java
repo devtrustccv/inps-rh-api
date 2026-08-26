@@ -92,6 +92,19 @@ public class RenumeracoesReadService {
         predicates.add(cb.lessThanOrEqualTo(root.get("dataFim"), df));
       }
 
+      // Melhoria 2.3: filtros adicionais por Situação Laboral e por Contrato/Vínculo (IDs da vista
+      // RH_V_DEF_REMUNERACAO). Ignora valores não numéricos silenciosamente.
+      if (StringUtils.hasText(query.getSituacaoLaboral())) {
+        try {
+          predicates.add(cb.equal(root.get("situacLaboralId"), Long.valueOf(query.getSituacaoLaboral().trim())));
+        } catch (NumberFormatException ignored) {}
+      }
+      if (StringUtils.hasText(query.getContrVinculo())) {
+        try {
+          predicates.add(cb.equal(root.get("contrVinculoId"), Long.valueOf(query.getContrVinculo().trim())));
+        } catch (NumberFormatException ignored) {}
+      }
+
       return cb.and(predicates.toArray(new Predicate[0]));
     };
 

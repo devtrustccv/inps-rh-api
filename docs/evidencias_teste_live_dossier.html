@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evidências — Melhorias Dossiê do Colaborador</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#1c2430; --mut:#5b6675; --line:#e3e7ec;
+    --ok:#137a44; --okbg:#e6f4ec; --bad:#b02a2a; --badbg:#fbeaea; --warn:#8a5a00; --warnbg:#fdf3e0;
+    --code:#0f1620; --codeink:#d7e2ee; --accent:#2456b8;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#0f141a; --card:#161d26; --ink:#e6ecf3; --mut:#9aa7b6; --line:#26313d;
+    --ok:#57c98a; --okbg:#12301f; --bad:#f08a8a; --badbg:#331414; --warn:#e0b055; --warnbg:#332811;
+    --code:#0a0f15; --codeink:#cfe0f0; --accent:#78a6ff;
+  }}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 20px 80px}
+  h1{font-size:26px;margin:0 0 4px} h2{font-size:20px;margin:36px 0 10px;padding-top:10px;border-top:2px solid var(--line)}
+  h3{font-size:16px;margin:22px 0 6px}
+  .sub{color:var(--mut);margin:0 0 20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:14px 0}
+  .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:16px 0}
+  .meta div{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+  .meta b{display:block;color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  table{border-collapse:collapse;width:100%;margin:8px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:color-mix(in srgb,var(--card) 70%,var(--line));font-size:13px}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap}
+  .ok{color:var(--ok);background:var(--okbg)} .bad{color:var(--bad);background:var(--badbg)} .warn{color:var(--warn);background:var(--warnbg)}
+  pre{background:var(--code);color:var(--codeink);padding:12px 14px;border-radius:8px;overflow-x:auto;font:13px/1.5 "SF Mono",Consolas,Menlo,monospace;margin:8px 0}
+  code{font-family:"SF Mono",Consolas,Menlo,monospace;background:color-mix(in srgb,var(--card) 60%,var(--line));padding:1px 5px;border-radius:4px;font-size:13px}
+  .kv{color:var(--mut)} .accent{color:var(--accent)}
+  .foot{color:var(--mut);font-size:13px;margin-top:40px;border-top:1px solid var(--line);padding-top:14px}
+  details{margin:6px 0} summary{cursor:pointer;color:var(--accent);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Evidências — Melhorias Dossiê do Colaborador</h1>
+<p class="sub">Teste live end-to-end · branch <code>feat/dossier-melhorias</code> · BD Oracle <code>62.84.179.137:1521</code> (INPSRH) · app na porta <strong>8089</strong></p>
+
+<div class="meta">
+  <div><b>Data</b>2026-08-26</div>
+  <div><b>Branch</b>feat/dossier-melhorias @ f21aa798 (+ TODO T7.8)</div>
+  <div><b>Base URL</b>http://localhost:8089/api/v1/funcionarios</div>
+  <div><b>Segurança</b>dev (permitAll — sem token)</div>
+</div>
+
+<h2>1. Sumário por fase</h2>
+<table>
+  <tr><th>Fase / Teste</th><th>Descrição</th><th>Estado</th></tr>
+  <tr><td>0–6</td><td>Pré-voo, backfill <code>TIPO_SALARIO_VINCULO</code>, boot 8089, registo/validação PCCS sem carreira, novo contrato, lista Gestão Laboral (escalão)</td><td><span class="tag ok">✔ validado (sessão anterior)</span></td></tr>
+  <tr><td>7.3–7.7</td><td>Alterar Escalão/Cargo: cargo-só imediato, escalão→P, validar SIM/NAO, CORRIGIR C↔P</td><td><span class="tag ok">✔ validado (sessão anterior)</span></td></tr>
+  <tr><td><b>7.1</b></td><td>Guard: alterar escalão/cargo <b>com carreira</b> → 400</td><td><span class="tag ok">✔ live (esta sessão)</span></td></tr>
+  <tr><td><b>7.2</b></td><td>Guard: alterar escalão/cargo <b>não-PCCS</b> → 400</td><td><span class="tag ok">✔ live (esta sessão)</span></td></tr>
+  <tr><td><b>7.8</b></td><td>Detalhe de alterações (JaVers) para Gestão Laboral</td><td><span class="tag warn">⏸ gap conhecido — adiado (§5)</span></td></tr>
+  <tr><td><b>8</b></td><td>Remunerações: filtros <code>situacaoLaboral</code> + <code>contrVinculo</code></td><td><span class="tag ok">✔ live (esta sessão)</span></td></tr>
+  <tr><td><b>9</b></td><td>Regressão: registo COM carreira + remunerações + detalhe JaVers mobilidade/carreira intactos</td><td><span class="tag ok">✔ live (esta sessão)</span></td></tr>
+</table>
+<p class="kv">Nota: as fases 0–7.7 foram validadas na sessão de teste anterior (ver <code>.claude/resume/dossier_melhorias.md</code> §0); abaixo está a evidência crua dos testes corridos <b>nesta</b> sessão.</p>
+
+<h2>2. T7.1 / T7.2 — Guards do "Alterar Escalão/Cargo"</h2>
+<p>O guard <code>garantirPccsSemCarreira</code> corre no início de <code>alterar()</code>, <b>antes de qualquer escrita</b> — a rejeição não toca na BD.</p>
+
+<h3>T7.1 — colaborador COM carreira → 400</h3>
+<div class="card">
+  <p class="kv">Colaborador: Joao Nicolau Teste · <code>01a01a3a-…e223</code> · tiprel 173295 · carreira_id=730 (confirmado por query).</p>
+  <pre>POST /01a01a3a-ed2b-79e2-a9db-ca4f7548e223/relacao-laboral/alterar-escalao-cargo
+{"novoEscalaoId":21,"dataInicio":"2026-08-26","observacao":"teste guard T7.1"}
+
+HTTP 400
+{"type":"about:blank",
+ "title":"Alterar Escalão/Cargo só se aplica a vínculos sem carreira. Para carreira use Progressão/Promoção.",
+ "status":400,"igrpType":"validation"}</pre>
+  <p><span class="tag ok">PASS</span> HTTP 400 + mensagem esperada.</p>
+</div>
+
+<h3>T7.2 — colaborador SEM carreira, não-PCCS → 400</h3>
+<div class="card">
+  <p class="kv">Colaborador: Colaborador FORA PCCS F43 · <code>01a03f8c-…9de8</code> · tiprel 173357 · carreira_id=null · flg_salario=SIM_FORA_PCCS.</p>
+  <pre>POST /01a03f8c-de93-790f-8608-a0518f019de8/relacao-laboral/alterar-escalao-cargo
+{"novoEscalaoId":21,"dataInicio":"2026-08-26","observacao":"teste guard T7.2"}
+
+HTTP 400
+{"type":"about:blank",
+ "title":"Alterar Escalão/Cargo só se aplica a vínculos com salário do PCCS (SIM_PCCS).",
+ "status":400,"igrpType":"validation"}</pre>
+  <p><span class="tag ok">PASS</span> HTTP 400 + mensagem esperada.</p>
+</div>
+
+<h2>3. FASE 8 — Filtros de Remunerações (2.3)</h2>
+<p>Endpoint <code>GET /renumeracoes</code>. Sem <code>tiprelUuid</code> o serviço força <code>est_act_adm=1</code> (só vínculo ativo); os filtros <code>situacaoLaboral</code>→<code>situacLaboralId</code> e <code>contrVinculo</code>→<code>contrVinculoId</code> combinam-se por cima.</p>
+<div class="card">
+  <p class="kv">Colaborador <code>019ff58e-…945b</code>. Vínculo ativo = tiprel 173285 → situac_laboral_id=<b>624</b>, contr_vinculo_id=<b>675</b>, 3 remunerações (rem 1385/1386/1388). Valores 623/674 pertencem a vínculos inativos.</p>
+  <table>
+    <tr><th>Pedido</th><th>Esperado</th><th>count</th><th>HTTP</th><th></th></tr>
+    <tr><td>baseline (sem filtro)</td><td>3 (ativo)</td><td>3</td><td>200</td><td><span class="tag ok">PASS</span></td></tr>
+    <tr><td><code>situacaoLaboral=624</code> (match)</td><td>3</td><td>3</td><td>200</td><td><span class="tag ok">PASS</span></td></tr>
+    <tr><td><code>situacaoLaboral=623</code> (inativo)</td><td>0</td><td>0</td><td>200</td><td><span class="tag ok">PASS</span></td></tr>
+    <tr><td><code>contrVinculo=675</code> (match)</td><td>3</td><td>3</td><td>200</td><td><span class="tag ok">PASS</span></td></tr>
+    <tr><td><code>contrVinculo=674</code> (inativo)</td><td>0</td><td>0</td><td>200</td><td><span class="tag ok">PASS</span></td></tr>
+  </table>
+  <details><summary>Query de verificação (breakdown da vista)</summary>
+  <pre>SELECT REM_ID, TIPREL_ID, ESTADO, EST_ACT_ADM, SITUAC_LABORAL_ID, CONTR_VINCULO_ID, VALOR
+FROM RH_V_DEF_REMUNERACAO WHERE FUN_UUID='019ff58e-c6de-7b7c-8f37-38091075945b';
+-- ativo (est_act_adm=1): tiprel 173285, situac 624, vinculo 675 → rem 1385,1386,1388</pre></details>
+  <p><span class="tag ok">FASE 8 PASS</span> — os filtros discriminam corretamente (positivo devolve, negativo zera).</p>
+</div>
+
+<h2>4. FASE 9 — Regressão (caminho COM carreira + JaVers)</h2>
+
+<h3>R9.1 — Lista relacao-laboral (COM carreira)</h3>
+<div class="card">
+  <p class="kv">Colaborador Maria Luisa · <code>01a00595-…404d</code> · carreira 727.</p>
+  <pre>GET /01a00595-82dc-7b1d-909a-89c260ac404d/relacao-laboral   →  HTTP 200
+escalao = "16/A"   |   categoria = &lt;ausente&gt;   |   carreira = "Diretor de Serviço"</pre>
+  <p><span class="tag ok">PASS</span> — escalão preenchido a partir da carreira; campo <code>categoria</code> removido conforme 2.2.1.</p>
+</div>
+
+<h3>R9.2 — Remunerações (COM carreira)</h3>
+<div class="card">
+  <pre>GET /renumeracoes?idFuncionario=019fd759-2039-74b2-a587-cd2b5f131ae0   →  HTTP 200   (Barbosa, carreira 713)
+count=2  →  rem 1378 estado A valor 271819 · rem 1377 estado A valor 10000</pre>
+  <p class="kv">(Maria Luisa devolveu count=0 — legítimo: as suas 7 remunerações são todas <code>est_act_adm=0</code>, excluídas pelo default. Confirmado por query.)</p>
+  <p><span class="tag ok">PASS</span> — endpoint intacto para vínculo com carreira (a mudança FLG_SALARIO→String não quebrou a query).</p>
+</div>
+
+<h3>R9.3 — Detalhe de alterações JaVers (mobilidade e carreira)</h3>
+<div class="card">
+  <pre>GET /validacoes/01a02019-f10f-7595-8cb3-f6f3ddc6fa95/detalhes   →  HTTP 200   (MOBILIDADE UPDATE)
+[ { "campoAlterado":"Secção", "valorAnterior":"Unidade de Desenvolvimento",
+    "valorNovo":"Unidade de Contabilidade", "tabelaName":"RH_T_MOBILIDADE" } ]
+
+GET /validacoes/01a038f4-50de-786d-9927-eb3e20d56499/detalhes   →  HTTP 200   (CARREIRA UPDATE)
+[ {"campoAlterado":"Cargo","valorNovo":"Secretariado do CA"},
+  {"campoAlterado":"Escalão","valorNovo":"13C"},
+  {"campoAlterado":"Carreira (PCCS)","valorNovo":"Secretariado do CA"} ]</pre>
+  <p><span class="tag ok">PASS</span> — o detalhe JaVers partilhado continua a produzir diffs reais. O descriptor GESTAO_LABORAL novo e o <code>@JaversSpringDataAuditable</code> no tiprel não afetaram mobilidade/carreira.</p>
+</div>
+
+<h2>5. T7.8 — Gap conhecido (adiado)</h2>
+<div class="card">
+  <p><span class="tag warn">ADIADO</span> <code>GET /validacoes/{gestaoLaboralUuid}/detalhes</code> devolve <code>[]</code> (HTTP 200) para uma alteração de escalão.</p>
+  <p><b>Causa:</b> "Alterar Escalão/Cargo" regista-se como <code>UPDATE</code> mas consolida criando um <b>tiprel novo (clone)</b>. O clone só tem 1 snapshot inicial → todas as mudanças são <code>InitialValueChange</code> → o filtro de EDIÇÃO exclui-as → grelha vazia. Verificado live com a validação <code>01a03fb7-…d9ef</code>.</p>
+  <p><b>Fix (a decidir depois):</b> (a) tratar GESTAO_LABORAL como "criação" (mostra valores novos, sem o "antes"); ou (b) diff cross-instância tiprel-novo↔tiprel-anterior (antes→depois reais). Documentado em <code>JaversValidacaoDetalheReadService</code> (TODO T7.8) e no handoff §5b.</p>
+  <p class="kv">Comportamento atual (<code>[]</code>, não é erro) é inofensivo para o frontend e não bloqueia o merge.</p>
+</div>
+
+<p class="foot">Gerado em 2026-08-26 · evidência crua capturada contra a instância live (8089/INPSRH). Fixtures de teste mantidos na BD por decisão. Fonte de intenção: <code>.claude/resume/dossier_melhorias.md</code>.</p>
+
+</div>
+</body>
+</html>

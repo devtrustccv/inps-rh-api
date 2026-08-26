@@ -9,6 +9,7 @@ import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoSalarioVinculo;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
@@ -147,7 +148,7 @@ public class ValidarContratoService {
     // REJEICAO (NAO): o sync elimina os def existentes que nao vem no DTO, o que numa rejeicao
     // apagaria os def do contrato ANTERIOR (que o revert vai reativar). No NAO nao se mexe nos def:
     // os do novo contrato (P) vao a I pelo transicionarManuaisPendentes.
-    if (Objects.equals(1, paramVinculo.getFlgSalario())
+    if (TipoSalarioVinculo.temSalario(paramVinculo.getFlgSalario())
         && !EstadoValidacao.NAO.equals(dto.getValidar())) {
       colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
       colaboradorValidationRules.validarEncargosDescontosDuplicados(dadosContratuais.getEncargosDescontos());
@@ -197,9 +198,16 @@ public class ValidarContratoService {
         // novos — separação limpa por contrato, SEM inativar/apagar os antigos (ficam visíveis no
         // getById do contrato anterior).
         // reconciliar os movimentos fixos do vinculo — SO na validacao positiva e SO com salario
-        if (Objects.equals(1, paramVinculo.getFlgSalario())) {
+        if (TipoSalarioVinculo.temSalario(paramVinculo.getFlgSalario())) {
+          // Melhoria 2.1: vínculo sem carreira + SIM_PCCS → reafirma o escalão no tiprel e usa o valor
+          // do escalão como salário base a reconciliar (senão usa o salário do formulário).
+          var escalaoAplicado = colaboradorValidationRules.aplicarEscalaoTiprelSemCarreira(
+              tiposRelacionamento, tiposRelacionamento.getCarreiraId(), paramVinculo,
+              dadosContratuais.getEscalaoReferenciaId());
+          var salarioReconciliar = escalaoAplicado != null && escalaoAplicado.getValor() != null
+              ? escalaoAplicado.getValor() : dadosContratuais.getSalario();
           reconciliacaoMovimentoVinculoService.reconciliar(funcionario, contrato,
-              dadosContratuais.getSalario(), dadosContratuais.getMoeda(),
+              salarioReconciliar, dadosContratuais.getMoeda(),
               dadosContratuais.getDataInicio(), dadosContratuais.getDataFim());
         }
         ordemServicoWriteService.criar(funcionario, tiposRelacionamento, dto.getTipoOrdemServico());

@@ -16,12 +16,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import org.javers.spring.annotation.JaversSpringDataAuditable;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+// Auditado por JaVers para alimentar a grelha "Detalhe de alterações" do movimento GESTÃO LABORAL
+// (Alterar Escalão/Cargo). Commits sem ValidacaoAuditContext ficam sem propriedades (inofensivos),
+// como nos restantes repositórios auditados (DefinicaoRemuneracao, DefPagamento, Contacto, ...).
+@JaversSpringDataAuditable
 @Repository
 public interface TiposRelacionamentoEntityRepository extends
     JpaRepository<TiposRelacionamentoEntity, Long>,
@@ -131,6 +136,10 @@ public interface TiposRelacionamentoEntityRepository extends
    * pendente já tem tiprel (est_act_adm=0) — o findByCarreiraId_uuid só devolve o ativo (est_act_adm=1).
    */
   Optional<TiposRelacionamentoEntity> findFirstByCarreiraId_UuidOrderByIdDesc(UUID carreiraUuid);
+
+  /** Movimento (tiprel) derivado de {@code tiprelId} num dado estado — usado para detetar uma
+   *  alteração de escalão/cargo (Gestão Laboral) ainda pendente sobre o tiprel atual. */
+  Optional<TiposRelacionamentoEntity> findFirstByTiprelId_IdAndEstado(Long tiprelId, Estado estado);
 
   @Query("""
       select t

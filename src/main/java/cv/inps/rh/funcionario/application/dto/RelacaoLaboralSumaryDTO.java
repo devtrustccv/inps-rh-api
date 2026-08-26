@@ -39,7 +39,7 @@ public class RelacaoLaboralSumaryDTO  {
   private String carreira ;
 
 
-  private String categoria ;
+  private String escalao ;
 
 
   private String dataInicioFimContrato ;
