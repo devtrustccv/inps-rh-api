@@ -29,9 +29,11 @@
 | 7 T7.5 validar SIM → antigo I, novo A, REM antiga fechada por data, nova=escalão, TIPREL_REM_PAG reassociado | ✅ verde |
 | 7 T7.6 validar NAO → tiprel pendente I, salário ativo intacto | ✅ verde |
 | 7 T7.7 CORRIGIR (P→C) + re-POST reabre (C→P) sem duplicar | ✅ verde |
-| 7 T7.8 Detalhe de alterações (JaVers) | 🔴 GAP — grelha vazia (ver §5) |
-| 8 Remunerações filtros | ⏳ |
-| 9 Regressão | ⏳ |
+| 7 T7.1 guard COM carreira → 400 | ✅ verde (live 2026-08-26) |
+| 7 T7.2 guard não-PCCS → 400 | ✅ verde (live 2026-08-26) |
+| 7 T7.8 Detalhe de alterações (JaVers) | ⏸️ GAP ADIADO — TODO no código + §5b; `[]` inofensivo, não bloqueia merge |
+| 8 Remunerações filtros (situacaoLaboral/contrVinculo, +/-) | ✅ verde (live 2026-08-26) |
+| 9 Regressão (relacao-laboral carreira + renumeracoes + JaVers mob/carr) | ✅ verde (live 2026-08-26) |
 
 NOTA: "antigo I" no plano era impreciso — o modelo mantém A e fecha por data_fim (REM antiga
 2024-01-01→2024-12-31 fechada, nova 2026-08-26 aberta). Colaborador FASE 5: uuid
@@ -239,13 +241,14 @@ reassociado, antigo I, novo A. T7.6 validar NAO → I, salário intacto. T7.7 CO
 `docs/evidencias_teste_live_dossier.html` explicando cada fluxo e resultado.
 
 ## 8. Next step (retomar aqui)
-FASES 0-7 corridas live (0-6 e T7.3-T7.7 verdes). App a correr no 8089. Por fazer, por ordem:
-1. **Guards T7.1/T7.2** de Alterar Escalão/Cargo: com carreira → 400; não-PCCS → 400 (rápidos).
-2. **T7.8** (detalhe JaVers vazio) — decidir fix op.(a) ou (b) — ver §5b. (Utilizador escolheu parar antes.)
-3. **FASE 8** (remunerações: filtros situacaoLaboral/contrVinculo) e **FASE 9** (regressão: registo COM
-   carreira + progressão + detalhe mobilidade/carreira intactos).
-4. Gerar `docs/evidencias_teste_live_dossier.html`, **limpar fixtures** (§0), e **pedir permissão p/ merge**
-   (PR `feat/dossier-melhorias` → `develop`, não `main`).
+**FASES 0-9 corridas live e verdes** (T7.8 é o único gap, adiado). App no 8089. Estado:
+1. ~~Guards T7.1/T7.2~~ ✅ live (ambos 400 com mensagem certa; não tocam BD).
+2. **T7.8** (detalhe JaVers vazio) — **ADIADO por decisão** (implementar depois). TODO deixado em
+   `JaversValidacaoDetalheReadService` (junto ao `boolean criacao`) com as opções (a)/(b) — ver §5b.
+3. ~~FASE 8~~ ✅ (filtros +/- discriminam) e ~~FASE 9~~ ✅ (relacao-laboral carreira, renumeracoes carreira,
+   detalhe JaVers mobilidade+carreira intactos).
+4. `docs/evidencias_teste_live_dossier.html` ✅ gerado. **Fixtures ficam na BD** (decisão: não limpar).
+   **PRÓXIMO E ÚNICO PASSO: pedir permissão p/ merge** (PR `feat/dossier-melhorias` → `develop`, não `main`).
 
 ## 9. Ficheiros-chave (relativos ao worktree)
 - `docs/db/melhorias_dossier_tipo_salario.sql` — ALTER + backfill.
