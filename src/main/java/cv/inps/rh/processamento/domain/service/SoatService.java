@@ -1,10 +1,17 @@
 package cv.inps.rh.processamento.domain.service;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.processamento.application.constants.SoatStatus;
+import cv.inps.rh.processamento.application.dto.DadosInstituicaoRequestDTO;
+import cv.inps.rh.processamento.application.dto.DadosInstituicaoResponseDTO;
 import cv.inps.rh.processamento.application.dto.SoapRowResponseDTO;
 import cv.inps.rh.processamento.domain.service.model.SoatAggregateDTO;
+import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DadosInstituicaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SoatEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DadosInstituicaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.SoatEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.EntityManager;
@@ -23,6 +30,7 @@ import java.util.stream.Collectors;
 public class SoatService {
 
   private final SoatEntityRepository soatRepository;
+  private final DadosInstituicaoEntityRepository dadosInstituicaoRepository;
   private final EntityManager entityManager;
 
   @Transactional(readOnly = true)
@@ -76,6 +84,63 @@ public class SoatService {
         .setParameter("P_ANO", ano)
         .setParameter("P_MES", "%02d".formatted(mes))
         .execute();
+  }
+
+  @Transactional
+  public synchronized DadosInstituicaoResponseDTO salvarDadosInstituicao(DadosInstituicaoRequestDTO request) {
+
+    dadosInstituicaoRepository.findFirstByEstadoOrderByIdDesc(Estado.A.getCode())
+        .ifPresent(atual -> {
+          atual.setEstado(Estado.I.getCode());
+          dadosInstituicaoRepository.saveAndFlush(atual);
+        });
+
+    var novo = new DadosInstituicaoEntity();
+    novo.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
+    novo.setEstado(Estado.A.getCode());
+    apply(request, novo);
+
+    return toResponse(dadosInstituicaoRepository.save(novo));
+  }
+
+  @Transactional(readOnly = true)
+  public DadosInstituicaoResponseDTO obterDadosInstituicaoAtual() {
+    return dadosInstituicaoRepository.findFirstByEstadoOrderByIdDesc(Estado.A.getCode())
+        .map(this::toResponse)
+        .orElseThrow(() -> IgrpResponseStatusException.notFound(
+            "Active institution data not found"));
+  }
+
+  private void apply(DadosInstituicaoRequestDTO request, DadosInstituicaoEntity entity) {
+    entity.setNome(request.getNome());
+    entity.setNif(request.getNif());
+    entity.setCodCae(request.getCodCae());
+    entity.setAtividadeEconomica(request.getAtividadeEconomica());
+    entity.setNumCertidaoComercial(request.getNumCertidaoComercial());
+    entity.setDataValidade(request.getDataValidade());
+    entity.setTelefone(request.getTelefone());
+    entity.setLocalidade(request.getLocalidade());
+    entity.setEmail(request.getEmail());
+    entity.setMorada(request.getMorada());
+    entity.setConcelhoId(request.getConcelhoId());
+  }
+
+  private DadosInstituicaoResponseDTO toResponse(DadosInstituicaoEntity entity) {
+    return new DadosInstituicaoResponseDTO(
+        entity.getUuid(),
+        entity.getNome(),
+        entity.getNif(),
+        entity.getCodCae(),
+        entity.getAtividadeEconomica(),
+        entity.getNumCertidaoComercial(),
+        entity.getDataValidade(),
+        entity.getTelefone(),
+        entity.getLocalidade(),
+        entity.getEmail(),
+        entity.getMorada(),
+        entity.getConcelhoId(),
+        entity.getEstado()
+    );
   }
 
 }

@@ -48,7 +48,7 @@ public interface SoatEntityRepository extends
   @Query("""
       select new cv.inps.rh.processamento.domain.service.model.SoatAggregateDTO(
           s.id,
-          coalesce(sum(d.vlRemunMan), 0),
+          coalesce(sum(d.vlRemunMan),  0.0BD),
           count(distinct d.fun.id)
       )
       from SoatEntity s

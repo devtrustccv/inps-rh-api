@@ -9,12 +9,17 @@ import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.processamento.application.commands.CriarSoatCommand;
 import cv.inps.rh.processamento.application.commands.FinalizarSoatCommand;
+import cv.inps.rh.processamento.application.commands.SalvarDadosInstituicaoCommand;
+import cv.inps.rh.processamento.application.dto.DadosInstituicaoRequestDTO;
+import cv.inps.rh.processamento.application.dto.DadosInstituicaoResponseDTO;
+import cv.inps.rh.processamento.application.queries.GetDadosInstituicaoAtualQuery;
 import cv.inps.rh.processamento.application.queries.GetSoatListQuery;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -113,5 +118,52 @@ public class SoatController {
 
     return commandBus.send(command);
 
+  }
+
+    @PostMapping("dados-instituicao")
+    @Operation(
+            summary = "Create or update institution data",
+            description = "Creates the first institution data row or versions the current active row",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(
+                                            implementation = DadosInstituicaoResponseDTO.class,
+                                            type = "object")
+                            )
+                    )
+            }
+    )
+    public ResponseEntity<DadosInstituicaoResponseDTO> salvarDadosInstituicao(
+            @Valid @RequestBody DadosInstituicaoRequestDTO request) {
+
+        final var command = new SalvarDadosInstituicaoCommand(request);
+
+        return commandBus.send(command);
+    }
+
+    @GetMapping("dados-instituicao")
+    @Operation(
+            summary = "Get current institution data",
+            description = "Gets the current active institution data row",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(
+                                            implementation = DadosInstituicaoResponseDTO.class,
+                                            type = "object")
+                            )
+                    )
+            }
+    )
+    public ResponseEntity<DadosInstituicaoResponseDTO> getDadosInstituicaoAtual() {
+
+        final var query = new GetDadosInstituicaoAtualQuery();
+
+        return queryBus.handle(query);
   }
 }
