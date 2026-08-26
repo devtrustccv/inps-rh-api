@@ -1,64 +1,42 @@
-> Updated: 2026-08-25 17:10
+> Updated: 2026-08-25 21:10
 
 ## Goal
 
-Grelha "Detalhe de alterações" (JaVers) para o REGISTO_COLABORADOR, capturada só no PUT de reenvio de
-correção (C→P). Valores sempre LEGÍVEIS (rótulos PT, FKs→nome, nunca id). Antes: expor estado/estadoDesc
-uniforme (feito e commitado, `274a2799`).
+Correções e validações no dossiê do colaborador (RH INPS): detalhe de alterações do registo, renovação
+de contrato, novo contrato, datas da carreira e validação da mobilidade. Testar sempre live.
 
-## Current state
+## Current state — tudo COMMITADO em `develop` e testado live
 
-- Âmbito: **todos os filhos que o registo toca** (pessoais + contratuais). TiposRelacionamento FORA.
-- TODOS os filhos LIGADOS e **testados live**: um reenvio com 6 edições devolveu 9 linhas em
-  `/detalhes` cobrindo CONTACTO, ENDERECO, FAMILIARES, HABILITACOES, DADOS_BANCARIOS, CARREIRA,
-  MOBILIDADE, SITUACAO_LABORAL — valores legíveis, `tabelaName` desambigua.
-- Bug corrigido (c1de535e): `isAlvo` aceita `Set<String>` (o compile offline incremental mascarava;
-  usar SEMPRE `mvn clean compile` antes de arrancar).
-- Adicionados **Documento pessoal** (RH_T_DOCUMENTO_PESSOAL) ✅ testado live (nº documento
-  TEST-NICK-905→905B) e **Remunerações/Pagamentos** (RH_T_DEF_REMUNERACOES/PAGAMENTOS, por composição de
-  Rendimento/Desconto) — ligado/compila; falta teste live (Mario não tem def rem/pag por não ter sido
-  validado SIM; precisa de colaborador com subsídios/encargos a passar por correção).
-- FORA (com justificação no javadoc): TiposRelacionamento/Contrato (ligação/shallow) e os campos-núcleo
-  do FuncionarioEntity (nome/NIF/nomes pais) — funcionário é ShallowReference; detalhá-los exige
-  mecanismo dedicado fora do auto-audit.
-- OBSERVAÇÃO: a grelha ACUMULA diffs de todos os ciclos de correção da MESMA validação (mesmo
-  validacaoUuid em P→C→P). Registo novo com 1 ciclo = 1 linha por campo. Afinar para "último por campo"
-  se o negócio quiser (só na leitura).
-- Read-model **multi-tipo** ligado: `isAlvo` usa `entityTypeSuffixes()`.
-- Descritor do registo faz **composição**: injeta descritores de módulo existentes (DadosBancarios já;
-  Carreira/Mobilidade/Situação a fazer) + config "dossiê" própria (mapa `DOSSIE`).
-- Serviço tem helpers genéricos `baseline(...)`/`capturar(...)` — cada filho novo = anotar repo
-  `@JaversSpringDataAuditable` + 1 linha em `criarBaselineFilhos`/`capturarDetalheFilhos` + entrada no
-  descritor.
-- TODO dos próximos filhos está **no código** (javadoc do descritor).
+- `23e087c7` — detalhe do registo: snapshots funcionário/contrato via JaVers (RH_T_FUNCIONARIOS/RH_T_CONTRATO_VINCULO).
+- `f9af9ed9` — renovação: `ContratoHistoricoWriteService.transicionarRenovacao` (proposta P→decisão; deixava de ficar presa em P).
+- `4b962ff1` — carreira get-by-id: datas vêm de `car` (RH_T_CARREIRA), como a vista RH_V_CARREIRA; antes vinham do tiprel (dataFim null).
+- `aaaffb46` — mobilidade: enum `TipoMobilidade` + validação em `MobilidadeWriteService.createMobilidade`.
+
+App a correr na 8088 (recompilada com JDK23).
 
 ## Decisions made — do not re-litigate
 
-- Reutilizar descritores existentes por COMPOSIÇÃO (não duplicar campos/rótulos).
-- TiposRelacionamento e Contrato (campos próprios) FORA: tabela de ligação / shallow ref.
-- Detalhe só no PUT (C→P): registo só editável via CORRIGIR; depois usam-se os módulos individuais.
-- Baseline no CORRIGIR (P→C) SEM contexto (não entra na grelha); diff no reenvio DENTRO do
-  `ValidacaoAuditContext` carimbado com a validação.
-- `matchByTypeOnly=true` (referenciaId = funcionário, não o filho).
+- Não furar guards (D2 novo contrato; renovável só p/ renovação). Testar cenários válidos (ex.: contrato expirado p/ novo contrato).
+- Mobilidade: multi-select = códigos CSV; tipo escolhido → "(depois)" obrigatório; tipo não escolhido → copia "antes".
+- Manter JaVers no detalhe do registo; funcionário/contrato via snapshot dedicado.
 
-## Constraints
+## Constraints (preferências do utilizador — ver [[feedback-fluxo-validacao-teste]])
 
-- JDK23; `TableName` não tem RH_T_DADOS_BANCARIOS → usar string literal. Get-by-id/validar por UUID.
-- Filhos gravados em cascata + `FuncionarioEntity` é ShallowReference → filho só é auditado se o seu
-  repo for `@JaversSpringDataAuditable` e gravado pelo próprio repo.
+- Compilar SEMPRE `mvn clean compile` com `JAVA_HOME=.../Eclipse Adoptium/jdk-23.0.2.7-hotspot`; parar app antes (lock do target). App: `nohup mvn -DskipTests spring-boot:run > app_run.log 2>&1 &`, porta 8088.
+- GET (leitura) SEMPRE antes de cada validação/escrita; arrays com `id`; resultados em pretty (`python -m json.tool`); pedir AUTORIZAÇÃO antes de cada escrita; testar casos NEGATIVOS antes do happy path. contratoId no path = UUID. Body de mobilidade = `MobilidadeDTO` direto (sem wrapper).
 
 ## Relevant files
 
-- `RegistoColaboradorValidacaoDetalheDescriptor.java` — descritor + TODO dos próximos filhos.
-- `ValidarRegistoColaboradorService.java` — `criarBaselineBancarios`, `capturarDetalheBancarios`.
-- `ValidacaoDetalheDescriptor.java:31` — `entityTypeSuffixes()` default (hook multi-tipo, por ligar).
+- `funcionario/application/constants/TipoMobilidade.java` + `service/MobilidadeWriteService.java` (createMobilidade).
+- `service/carreira/CarreiraReadService.java` (getCarreiraResponseDTO ~L196).
+- `service/ContratoHistoricoWriteService.java` (transicionarRenovacao) + `service/ValidacaoRenovacaoContratoService.java`.
+- `service/registodetalhe/*` + `RegistoColaboradorValidacaoDetalheDescriptor.java`.
 
 ## Open questions
 
-- `alteradoPor` em dev = `system-bot@nosi.cv` (auditor sem token real).
+- Uniformizar formato de data entre get-by-id (dd-MM-yyyy) e listas (yyyy-MM-dd) — adiado.
+- Alinhar `MobilidadeWriteService.updateMobilidade` (editar/reenvio) com a mesma validação do enum — não feito.
 
 ## Next step
 
-Feature completa e testada. Decisão de negócio pendente: manter histórico acumulado por ciclo de
-correção OU mostrar só o último valor por campo (afinação na leitura do JaversValidacaoDetalheReadService).
-Opcional: ligar Documento pessoal e def rem/pag. Considerar push da branch develop.
+Nada pendente. Colaboradores de teste: 940 (`01a03aab-41c9-7412-a89f-0198e25319df`, com mobilidade H2 pendente por validar), 930, 926. Se quiser: validar a mobilidade H2 pendente, ou abrir PR contra `develop`.
