@@ -123,6 +123,10 @@ public interface TiposRelacionamentoEntityRepository extends
    */
   Optional<TiposRelacionamentoEntity> findFirstByCarreiraId_UuidOrderByIdDesc(UUID carreiraUuid);
 
+  /** Movimento (tiprel) derivado de {@code tiprelId} num dado estado — usado para detetar uma
+   *  alteração de escalão/cargo (Gestão Laboral) ainda pendente sobre o tiprel atual. */
+  Optional<TiposRelacionamentoEntity> findFirstByTiprelId_IdAndEstado(Long tiprelId, Estado estado);
+
   @Query("""
       select t
       from TiposRelacionamentoEntity t

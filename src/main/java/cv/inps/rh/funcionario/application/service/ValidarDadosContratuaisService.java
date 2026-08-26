@@ -1,6 +1,7 @@
 package cv.inps.rh.funcionario.application.service;
 
 import cv.inps.rh.funcionario.application.dto.DadosContratuaisReqDTO;
+import cv.inps.rh.shared.application.constants.custom.TipoSalarioVinculo;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.util.ValidationUtil;
@@ -146,8 +147,8 @@ public class ValidarDadosContratuaisService {
       dc.setSalario(escalao.getValor());
     }
 
-    // flgSalario = 1 → salário é obrigatório
-    if (vinculo.getFlgSalario() != null && vinculo.getFlgSalario() == 1) {
+    // vínculo tem salário (SIM_PCCS/SIM_FORA_PCCS) → salário é obrigatório
+    if (TipoSalarioVinculo.temSalario(vinculo.getFlgSalario())) {
       if (dc.getSalario() == null)
         throw IgrpResponseStatusException.badRequest("valor do salário é obrigatório para este tipo de vínculo.");
     }

@@ -21,7 +21,7 @@ public class VinculoDTO extends ParametrizacaoDTO {
   private Integer flgCarreira ;
 
 
-  private Integer flgSalario ;
+  private String flgSalario ;
 
 
   private Integer flgContrato ;

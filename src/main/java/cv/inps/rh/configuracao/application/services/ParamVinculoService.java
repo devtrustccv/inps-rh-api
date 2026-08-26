@@ -121,7 +121,7 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     e.setNomeNormalizado(ConfigurationUtils.normalizeAndSetToLowerCaseText(dto.getDescricao()));
     e.setFlgContrato(ConfigurationUtils.parseFlag(dto.getContrato()));
     e.setFlgCarreira(ConfigurationUtils.parseFlag(dto.getCarreira()));
-    e.setFlgSalario(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
+    e.setFlgSalario(validarTipoSalario(dto.getRemuneracao()));
     e.setFlgTempoServico(ConfigurationUtils.parseFlag(dto.getTempoServico()));
     e.setParamContratoId(StringUtils.hasText(dto.getContratoId()) ? paramContratoEntityRepository.findByUuidOrThrow(UUID.fromString(dto.getContratoId())) : null);
     e.setEstado(Estado.A);
@@ -137,7 +137,7 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     e.setNome(dto.getDescricao().trim());
     e.setNomeNormalizado(ConfigurationUtils.normalizeAndSetToLowerCaseText(dto.getDescricao()));
     e.setFlgCarreira(ConfigurationUtils.parseFlag(dto.getCarreira()));
-    e.setFlgSalario(ConfigurationUtils.parseFlag(dto.getRemuneracao()));
+    e.setFlgSalario(validarTipoSalario(dto.getRemuneracao()));
     e.setParamContratoId(StringUtils.hasText(dto.getContratoId()) ? paramContratoEntityRepository.findByUuidOrThrow(UUID.fromString(dto.getContratoId())) : null);
     e.setFlgTempoServico(ConfigurationUtils.parseFlag(dto.getTempoServico()));
     if (StringUtils.hasText(dto.getEstado()))
@@ -152,12 +152,27 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     var e = repository.findByUuidOrThrow(UUID.fromString(uuid));
 
     var domain = domainEntityRepository.getActiveDomainByCode(Domains.SIM_NAO_NUMBER.name());
+    var salarioDomain = domainEntityRepository.getActiveDomainByCode(Domains.TIPO_SALARIO_VINCULO.name());
 
-    return buildResponse(e, domain);
+    return buildResponse(e, domain, salarioDomain);
+  }
+
+  /**
+   * Valida o valor do campo "Tem Remuneração" contra o domínio TIPO_SALARIO_VINCULO
+   * (SIM_PCCS/SIM_FORA_PCCS/NAO) e devolve-o normalizado (maiúsculas) para gravar. Modelo
+   * "String crua + validação no service": a coluna é String; a garantia do domínio é aqui.
+   */
+  private String validarTipoSalario(String valor) {
+    if (!StringUtils.hasText(valor)) return null;
+    var v = valor.trim().toUpperCase();
+    if (!cv.inps.rh.shared.application.constants.custom.TipoSalarioVinculo.isValido(v))
+      throw IgrpResponseStatusException.badRequest(
+          "Valor inválido para 'Tem Remuneração': " + valor + ". Esperado SIM_PCCS, SIM_FORA_PCCS ou NAO.");
+    return v;
   }
 
   @NotNull
-  private Object buildResponse(ParamVinculoEntity e, Map<String, String> domain) {
+  private Object buildResponse(ParamVinculoEntity e, Map<String, String> domain, Map<String, String> salarioDomain) {
     var response = new VinculoLaboralResponseDTO();
     response.setId(e.getUuid().toString());
     response.setCodigo(e.getCodigo());
@@ -167,8 +182,8 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
     response.setContratoDesc(domain.get(e.getFlgContrato().toString()));
     response.setCarreira(e.getFlgCarreira().toString());
     response.setCarreiraDesc(domain.get(e.getFlgCarreira().toString()));
-    response.setRemuneracao(e.getFlgSalario().toString());
-    response.setRemuneracaoDesc(domain.get(e.getFlgSalario().toString()));
+    response.setRemuneracao(e.getFlgSalario());
+    response.setRemuneracaoDesc(e.getFlgSalario() != null ? salarioDomain.get(e.getFlgSalario()) : null);
     response.setTempoServico(e.getFlgTempoServico().toString());
     response.setTempoServicoDesc(domain.get(e.getFlgTempoServico().toString()));
     response.setEstado(e.getEstado().getCode());
@@ -205,11 +220,12 @@ public class ParamVinculoService extends ConfigurationProcess<VinculoLaboralRequ
 
     var data = repository.findAll(spec, pageable);
     var domain = domainEntityRepository.getActiveDomainByCode(Domains.SIM_NAO_NUMBER.name());
+    var salarioDomain = domainEntityRepository.getActiveDomainByCode(Domains.TIPO_SALARIO_VINCULO.name());
 
     var response = new WrapperListDTO();
     PageMapper.fillPagination(data, response);
     response.setContent(data.getContent().stream()
-        .map(e -> buildResponse(e, domain))
+        .map(e -> buildResponse(e, domain, salarioDomain))
             .toList());
     return response;
   }

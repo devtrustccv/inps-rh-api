@@ -10,6 +10,7 @@ import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.dto.SuccessResponseDTO;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TableName;
+import cv.inps.rh.shared.application.constants.custom.TipoSalarioVinculo;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.CarreiraEntity;
@@ -174,7 +175,7 @@ public class RegistarColaboradorService {
     }
 
     // verifica se vinculo tem salario
-    if (Objects.equals(1, paramVinculo.getFlgSalario())) {
+    if (TipoSalarioVinculo.temSalario(paramVinculo.getFlgSalario())) {
       /******************** INI RENUMERACOES ********************************/
       colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
 
@@ -239,6 +240,9 @@ public class RegistarColaboradorService {
     tr.setFunId(fun);
     tr.setContrVinculoId(contrato);
     tr.setCarreiraId(carreira);
+    // Melhoria 2.1: vínculo sem carreira + SIM_PCCS → escalão gravado no tiprel + salário do escalão.
+    colaboradorValidationRules.aplicarEscalaoTiprelSemCarreira(
+        tr, carreira, paramVinculo, dadosContratuais.getEscalaoReferenciaId());
     tr.setRegimeId(regime);
     tr.setMobId(mobilidade);
     tr.setFlgProcessa(1);

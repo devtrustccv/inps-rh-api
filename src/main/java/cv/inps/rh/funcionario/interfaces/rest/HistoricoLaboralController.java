@@ -6,8 +6,11 @@ package cv.inps.rh.funcionario.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
+import cv.inps.rh.funcionario.application.commands.AlterarEscalaoCargoCommand;
 import cv.inps.rh.funcionario.application.commands.AtualizarRelacaoLaboralCommand;
 import cv.inps.rh.funcionario.application.commands.NovaRelacaoLaboralCommand;
+import cv.inps.rh.funcionario.application.commands.ValidarEscalaoCargoCommand;
+import cv.inps.rh.funcionario.application.dto.AlterarEscalaoCargoDTO;
 import cv.inps.rh.funcionario.application.dto.RelacaoLaboralDTO;
 import cv.inps.rh.funcionario.application.dto.RelacaoLaboralReqDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperHistLaboralResponseDTO;
@@ -260,6 +263,64 @@ public class HistoricoLaboralController {
       final var query = new GetRelacaoLaboralComboQuery(funcionarioId);
 
       return queryBus.handle(query);
+
+  }
+
+   @PostMapping(
+   value = "{funcionarioId}/relacao-laboral/alterar-escalao-cargo"
+  )
+  @Operation(
+    summary = "Alterar escalao / cargo (Gestao Laboral)",
+    description = "Alterar escalao / cargo para colaboradores PCCS sem carreira. Escalao vai a validacao; cargo e imediato.",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<SuccessResponseDTO> alterarEscalaoCargo(@Valid @RequestBody AlterarEscalaoCargoDTO alterarEscalaoCargoRequest
+    , @PathVariable(value = "funcionarioId") String funcionarioId)
+  {
+
+      final var command = new AlterarEscalaoCargoCommand(alterarEscalaoCargoRequest, funcionarioId);
+
+      return commandBus.send(command);
+
+  }
+
+   @PutMapping(
+   value = "{funcionarioId}/relacao-laboral/alterar-escalao-cargo/{tiprelUuid}"
+  )
+  @Operation(
+    summary = "Validar alteracao de escalao / cargo",
+    description = "Validar (SIM/NAO/CORRIGIR) a alteracao de escalao pendente. Na validacao positiva fecha o vencimento anterior e abre um novo.",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<SuccessResponseDTO> validarEscalaoCargo(@Valid @RequestBody AlterarEscalaoCargoDTO validarEscalaoCargoRequest
+    , @PathVariable(value = "funcionarioId") String funcionarioId,@PathVariable(value = "tiprelUuid") String tiprelUuid)
+  {
+
+      final var command = new ValidarEscalaoCargoCommand(validarEscalaoCargoRequest, funcionarioId, tiprelUuid);
+
+      return commandBus.send(command);
 
   }
 

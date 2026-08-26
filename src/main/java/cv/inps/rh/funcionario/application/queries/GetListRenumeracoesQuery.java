@@ -26,5 +26,8 @@ public class GetListRenumeracoesQuery implements Query {
   private String estado;
   private String tiprelUuid;
   private boolean validacao;
+  // Melhoria 2.3: filtros adicionais (IDs). Opcionais.
+  private String situacaoLaboral;
+  private String contrVinculo;
 
 }

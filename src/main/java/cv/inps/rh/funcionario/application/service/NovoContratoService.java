@@ -11,6 +11,7 @@ import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.application.constants.custom.TipoSalarioVinculo;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -156,6 +157,9 @@ public class NovoContratoService {
     tiposRelacionamentoNovo.setTiprelId(tipoRelacionamentoAtual);
     tiposRelacionamentoNovo.setContrVinculoId(contratoNovo);
     tiposRelacionamentoNovo.setCarreiraId(carreira);
+    // Melhoria 2.1: vínculo sem carreira + SIM_PCCS → escalão gravado no tiprel + salário do escalão.
+    colaboradorValidationRules.aplicarEscalaoTiprelSemCarreira(
+        tiposRelacionamentoNovo, carreira, paramVinculo, dadosContratuais.getEscalaoReferenciaId());
     tiposRelacionamentoNovo.setRegimeId(regime);
     tiposRelacionamentoNovo.setMobId(mobilidade);
     tiposRelacionamentoNovo.setFlgProcessa(0);
@@ -170,7 +174,7 @@ public class NovoContratoService {
     funcionario.getValidacoes().add(valid);
 
     // verifica se vinculo tem salario
-    if (Objects.equals(1, paramVinculo.getFlgSalario())) {
+    if (TipoSalarioVinculo.temSalario(paramVinculo.getFlgSalario())) {
       /******************** INI RENUMERACOES ********************************/
       colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
 
@@ -346,6 +350,9 @@ public class NovoContratoService {
     tiposRelacionamento.setFunId(funcionario);
     tiposRelacionamento.setContrVinculoId(contrato);
     tiposRelacionamento.setCarreiraId(carreira);
+    // Melhoria 2.1: vínculo sem carreira + SIM_PCCS → escalão gravado no tiprel + salário do escalão.
+    colaboradorValidationRules.aplicarEscalaoTiprelSemCarreira(
+        tiposRelacionamento, carreira, paramVinculo, dadosContratuais.getEscalaoReferenciaId());
     tiposRelacionamento.setRegimeId(regime);
     tiposRelacionamento.setMobId(mobilidade);
     tiposRelacionamento.setFlgProcessa(0);
@@ -361,7 +368,7 @@ public class NovoContratoService {
 
 
     // verifica se vinculo tem salario
-    if (Objects.equals(1, paramVinculo.getFlgSalario())) {
+    if (TipoSalarioVinculo.temSalario(paramVinculo.getFlgSalario())) {
       /******************** INI RENUMERACOES ********************************/
       colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
 

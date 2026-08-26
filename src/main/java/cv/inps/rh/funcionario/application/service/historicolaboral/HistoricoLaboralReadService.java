@@ -110,6 +110,10 @@ public class HistoricoLaboralReadService {
       dto.setDirecao(r.getDirecaoDesc());
       dto.setSeccao(r.getSeccaoDesc());
       dto.setCarreira(r.getCarreiraDesc());
+      // Melhoria 2.2.1: a lista mostra o ESCALÃO (substitui a antiga "categoria"). Vem da vista
+      // RH_V_RELACAO_LABORAL — que já resolve o escalão da carreira OU, quando o vínculo não tem
+      // carreira, do próprio tiprel (RH_T_TIPOS_RELACIONAMENTO.ESCALAO_ID).
+      dto.setEscalao(r.getEscalaoDesc());
       dto.setDataInicioFimCarreira(r.getDataCarreira());
       dto.setDataInicioFimContrato(r.getDataContrato());
       dto.setCargo(r.getCargoDesc());
