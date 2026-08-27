@@ -84,4 +84,10 @@ public class DadosPessoaisRespDTO  {
   @Valid
   private EnderecoRespDTO endereco ;
 
+
+  private String estado ;
+
+
+  private String estadoDesc ;
+
 }

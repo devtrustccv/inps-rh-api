@@ -174,3 +174,26 @@ foram enviados.
 
 Nota: `{"enviados": 0, "message": "Notificação não solicitada."}` (caso `notificar = false`)
 mantém-se sem os campos novos.
+
+---
+
+## Novos campos `estado` / `estadoDesc` no GET do dossiê
+
+**Data:** 2026-08-27
+
+Aplica-se à resposta de `GET /api/v1/funcionarios/{id}` (`FuncionarioResponseDTO`).
+
+Quatro blocos passam a expor o estado de workflow (mesma convenção já usada nas outras secções —
+`estado` = código `P`/`C`/`A`/`I`/`E`, `estadoDesc` = descrição legível ex. "Pendente"):
+
+| Bloco | Caminho na resposta | Origem do estado |
+|---|---|---|
+| Funcionário | `dadosPessoais.estado` / `dadosPessoais.estadoDesc` | estado do próprio funcionário |
+| Subsídios | `dadosContratuais.subsidios[].estado` / `.estadoDesc` | `RH_T_DEF_REMUNERACOES` |
+| Encargos/Descontos | `dadosContratuais.encargosDescontos[].estado` / `.estadoDesc` | `RH_T_DEF_PAGAMENTOS` |
+| Anexos | `anexos[].estado` / `.estadoDesc` | `DocumentoEntity` |
+
+Só leitura (não enviar no corpo). Alteração **aditiva** — nenhum campo existente mudou.
+
+Nota: `AnexoRespDTO` é partilhado, pelo que `estado`/`estadoDesc` passam a aparecer também noutras
+respostas que o usem (missão/serviço, assiduidade, …); onde o respectivo mapper não os preenche vêm `null`.

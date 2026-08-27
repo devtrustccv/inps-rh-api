@@ -29,4 +29,10 @@ public class AnexoRespDTO  {
 
   private String documento ;
 
+
+  private String estado ;
+
+
+  private String estadoDesc ;
+
 }

@@ -94,6 +94,8 @@ public class DocumentoMapper {
     ar.setTipoDocumentoId(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getId() : null);
     ar.setTipoDocumentoDesc(d.getTpDocumentoId() != null ? d.getTpDocumentoId().getNome() : null);
     ar.setDocumento(d.getUrl());
+    ar.setEstado(d.getEstado() != null ? d.getEstado().getCode() : null);
+    ar.setEstadoDesc(d.getEstado() != null ? d.getEstado().getDescription() : null);
     return ar;
   }
 

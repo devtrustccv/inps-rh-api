@@ -44,4 +44,10 @@ public class EncargosDescontosRespDTO  {
 
   private String observacoes ;
 
+
+  private String estado ;
+
+
+  private String estadoDesc ;
+
 }
