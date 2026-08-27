@@ -61,6 +61,9 @@ public class FuncionarioMapper {
       dadosPessoais.setContactos(contactos);
     }
 
+    dadosPessoais.setEstado(entity.getEstado() != null ? entity.getEstado().getCode() : null);
+    dadosPessoais.setEstadoDesc(entity.getEstado() != null ? entity.getEstado().getDescription() : null);
+
     return dadosPessoais;
   }
 

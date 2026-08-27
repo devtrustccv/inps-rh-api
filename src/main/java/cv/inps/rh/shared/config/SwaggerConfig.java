@@ -107,4 +107,12 @@ public class SwaggerConfig {
         .pathsToMatch("/**/aumento-salarial/**")
         .build();
   }
+
+  @Bean
+  public GroupedOpenApi soat() {
+    return GroupedOpenApi.builder()
+        .group("Soat")
+        .pathsToMatch("/processamento/soat/**")
+        .build();
+  }
 }

@@ -192,6 +192,8 @@ public class DadosContratuaisMapper {
         sr.setPercentagem(s.getPercentagem() != null ? s.getPercentagem() : BigDecimal.ZERO);
         sr.setValor(s.getValor() != null ? s.getValor() : BigDecimal.ZERO);
         sr.setObservacoes(s.getObs());
+        sr.setEstado(s.getEstado() != null ? s.getEstado().getCode() : null);
+        sr.setEstadoDesc(s.getEstado() != null ? s.getEstado().getDescription() : null);
         return sr;
       }).toList();
 
@@ -210,6 +212,8 @@ public class DadosContratuaisMapper {
         er.setDataInicio(e.getDataInicio());
         er.setDataFim(e.getDataFim());
         er.setObservacoes(e.getObs());
+        er.setEstado(e.getEstado() != null ? e.getEstado().getCode() : null);
+        er.setEstadoDesc(e.getEstado() != null ? e.getEstado().getDescription() : null);
         return er;
       }).toList();
 

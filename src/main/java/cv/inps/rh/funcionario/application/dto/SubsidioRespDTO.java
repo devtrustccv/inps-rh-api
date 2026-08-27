@@ -37,4 +37,10 @@ public class SubsidioRespDTO  {
 
   private String observacoes ;
 
+
+  private String estado ;
+
+
+  private String estadoDesc ;
+
 }
