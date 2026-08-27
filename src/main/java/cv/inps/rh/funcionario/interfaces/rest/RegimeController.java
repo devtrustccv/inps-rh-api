@@ -6,8 +6,8 @@ package cv.inps.rh.funcionario.interfaces.rest;
 import cv.igrp.framework.core.domain.CommandBus;
 import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
-import cv.inps.rh.funcionario.application.commands.AdicionarRegimeTrabalhoCommand;
-import cv.inps.rh.funcionario.application.commands.ValidarRegimeTrabalhoCommand;
+import cv.inps.rh.funcionario.application.commands.AlterarRegimeTrabalhoCommand;
+import cv.inps.rh.funcionario.application.commands.RegistarRegimeTrabalhoCommand;
 import cv.inps.rh.funcionario.application.dto.RegimeDetalheDTO;
 import cv.inps.rh.funcionario.application.dto.RegimeTrabalhoDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperRegimeListDTO;
@@ -76,8 +76,8 @@ public class RegimeController {
    value = "{idFuncionario}/regimes"
   )
   @Operation(
-    summary = "Adicionar regime trabalho",
-    description = "Adicionar regime trabalho",
+    summary = "Registar regime trabalho",
+    description = "Registar regime trabalho",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -92,11 +92,11 @@ public class RegimeController {
     }
   )
 
-  public ResponseEntity<SuccessResponseDTO> adicionarRegimeTrabalho(@Valid @RequestBody RegimeTrabalhoDTO adicionarRegimeTrabalhoRequest
+  public ResponseEntity<SuccessResponseDTO> registarRegimeTrabalho(@Valid @RequestBody RegimeTrabalhoDTO registarRegimeTrabalhoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario)
   {
 
-      final var command = new AdicionarRegimeTrabalhoCommand(adicionarRegimeTrabalhoRequest, idFuncionario);
+      final var command = new RegistarRegimeTrabalhoCommand(registarRegimeTrabalhoRequest, idFuncionario);
 
        ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
 
@@ -107,8 +107,8 @@ public class RegimeController {
    value = "{idFuncionario}/regimes/{regimeId}"
   )
   @Operation(
-    summary = "Validar regime trabalho",
-    description = "Validar regime trabalho",
+    summary = "Alterar regime trabalho",
+    description = "Alterar regime trabalho",
     responses = {
       @ApiResponse(
           responseCode = "200",
@@ -123,11 +123,11 @@ public class RegimeController {
     }
   )
 
-  public ResponseEntity<SuccessResponseDTO> validarRegimeTrabalho(@Valid @RequestBody RegimeTrabalhoDTO validarRegimeTrabalhoRequest
+  public ResponseEntity<SuccessResponseDTO> alterarRegimeTrabalho(@Valid @RequestBody RegimeTrabalhoDTO alterarRegimeTrabalhoRequest
     , @PathVariable(value = "idFuncionario") String idFuncionario,@PathVariable(value = "regimeId") String regimeId)
   {
 
-      final var command = new ValidarRegimeTrabalhoCommand(validarRegimeTrabalhoRequest, idFuncionario, regimeId);
+      final var command = new AlterarRegimeTrabalhoCommand(alterarRegimeTrabalhoRequest, idFuncionario, regimeId);
 
        ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
 

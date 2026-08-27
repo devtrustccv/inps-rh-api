@@ -1,7 +1,7 @@
 package cv.inps.rh.funcionario.application.service;
 
-import cv.inps.rh.funcionario.application.commands.AdicionarRegimeTrabalhoCommand;
-import cv.inps.rh.funcionario.application.commands.ValidarRegimeTrabalhoCommand;
+import cv.inps.rh.funcionario.application.commands.AlterarRegimeTrabalhoCommand;
+import cv.inps.rh.funcionario.application.commands.RegistarRegimeTrabalhoCommand;
 import cv.inps.rh.funcionario.application.dto.RegimeTrabalhoDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -38,7 +38,7 @@ public class RegimeWriteService {
 
 
   @Transactional
-  public SuccessResponseDTO alterarRegimeTrabalho(AdicionarRegimeTrabalhoCommand command) {
+  public SuccessResponseDTO registar(RegistarRegimeTrabalhoCommand command) {
 
     var dto = command.getRegimetrabalho();
     var idFuncionario = IdentificadorUnico.from(command.getIdFuncionario()).valor();
@@ -77,7 +77,7 @@ public class RegimeWriteService {
   }
 
   @Transactional
-  public SuccessResponseDTO validar(ValidarRegimeTrabalhoCommand command) {
+  public SuccessResponseDTO alterar(AlterarRegimeTrabalhoCommand command) {
 
     var dto = command.getRegimetrabalho();
 
@@ -154,17 +154,24 @@ public class RegimeWriteService {
 
     /********************* VALIDAÇÃO ************************/
 
-    // Validação opcional: o mesmo PUT edita e, se vier o campo "validar", transiciona o estado.
+    // Estado na edição (spec "Alterar regime trabalho"): dois caminhos que gravam RH_T_REGIME_TRAB.ESTADO:
+    //  1) campo "validar" (radiolist SIM_NAO, oculto — só em modo validação): SIM→A, NAO→I;
+    //  2) campo "estado" (SELECT, visível só na edição): grava directamente o código escolhido.
+    // Se ambos vierem, "validar" tem precedência (modo validação). Sem nenhum, mantém o estado atual.
     if (dto.getValidar() != null) {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       regime.setEstado(estado);
+    } else if (dto.getEstado() != null && !dto.getEstado().isBlank()) {
+      regime.setEstado(Estado.fromCodeOrThrow(dto.getEstado()));
     }
 
     regimeTrabalhoEntityRepository.save(regime);
 
-    var mensagem = EstadoValidacao.SIM.equals(dto.getValidar())
-        ? "Regime de trabalho validado."
-        : "Regime de trabalho rejeitado.";
+    var mensagem = dto.getValidar() == null
+        ? "Regime de trabalho alterado."
+        : (EstadoValidacao.SIM.equals(dto.getValidar())
+            ? "Regime de trabalho validado."
+            : "Regime de trabalho rejeitado.");
     return new SuccessResponseDTO(true, regime.getUuid().toString(), mensagem, List.of());
   }
 

@@ -56,7 +56,7 @@
       ]
     },
     {
-      "actionName": "adicionarRegimeTrabalho",
+      "actionName": "registarRegimeTrabalho",
       "path": "{idFuncionario}/regimes",
       "method": "POST",
       "requestBody": {
@@ -97,7 +97,7 @@
       ]
     },
     {
-      "actionName": "validarRegimeTrabalho",
+      "actionName": "alterarRegimeTrabalho",
       "path": "{idFuncionario}/regimes/{regimeId}",
       "method": "PUT",
       "requestBody": {

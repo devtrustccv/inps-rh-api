@@ -10,11 +10,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdicionarRegimeTrabalhoCommand implements Command {
+public class AlterarRegimeTrabalhoCommand implements Command {
 
 
   private RegimeTrabalhoDTO regimetrabalho;
   @NotBlank(message = "The field <idFuncionario> is required")
   private String idFuncionario;
+  @NotBlank(message = "The field <regimeId> is required")
+  private String regimeId;
 
 }
