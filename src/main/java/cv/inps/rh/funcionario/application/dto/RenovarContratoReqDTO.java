@@ -19,13 +19,6 @@ import java.time.LocalDate;
 public class RenovarContratoReqDTO  {
 
 
-
-  private Long tipoContratoId ;
-
-
-  private Long tipoVinculoId ;
-
-
   private LocalDate dataInicio ;
 
 

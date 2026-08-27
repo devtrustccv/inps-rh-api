@@ -66,28 +66,11 @@ public class ContratoMapper {
     c.setVinculoId(ValidationUtil.ref(entityManager, ParamVinculoEntity.class, dc.getTipoVinculoLaboralId()));
     return c;
   }
-  public ContratoEntity toRenovarContrato(RenovarContratoReqDTO dc, Estado estado) {
-    if (dc == null) return null;
-    var c = new ContratoEntity();
-    c.setEstado(estado);
-    c.setDataInicio(dc.getDataInicio());
-    c.setDataFim(dc.getDataFim());
-    c.setDuracao(dc.getDuracaoMeses());
-    c.setTipoSituacao("RENOVACAO");
-    c.setObs("RENOVACAO");
-    c.setUuid(IdentificadorUnico.create().valor());
-    c.setTpContratoId(ValidationUtil.ref(entityManager, ParamContratoEntity.class, dc.getTipoContratoId()));
-    c.setVinculoId(ValidationUtil.ref(entityManager, ParamVinculoEntity.class, dc.getTipoVinculoId()));
-    return c;
-  }
-
   public RenovarContratoReqDTO toRenovacaoContratoReqDTO(ContratoEntity contratoEntity) {
     var renovacaoContrato = new RenovarContratoReqDTO();
     renovacaoContrato.setDataInicio(contratoEntity.getDataInicio());
     renovacaoContrato.setDataFim(contratoEntity.getDataFim());
     renovacaoContrato.setDuracaoMeses(contratoEntity.getDuracao());
-    renovacaoContrato.setTipoContratoId(contratoEntity.getTpContratoId().getId());
-    renovacaoContrato.setTipoVinculoId(contratoEntity.getVinculoId().getId());
     return renovacaoContrato;
   }
 
@@ -122,13 +105,11 @@ public class ContratoMapper {
     if (dc == null) return null;
     // Ponto 9: só sobrescrever campos enviados; a renovação não deve apagar tipo/vínculo (nem
     // datas) quando o payload da validação os omite (senão o contrato ficava com dados null).
+    // Renovação mantém o tipo de contrato/vínculo do contrato atual — não vêm no request
+    // (RenovarContratoReqDTO), só as datas/duração é que o utilizador altera.
     if (dc.getDataInicio() != null) entity.setDataInicio(dc.getDataInicio());
     if (dc.getDataFim() != null) entity.setDataFim(dc.getDataFim());
     if (dc.getDuracaoMeses() != null) entity.setDuracao(dc.getDuracaoMeses());
-    if (dc.getTipoContratoId() != null)
-      entity.setTpContratoId(ValidationUtil.ref(entityManager, ParamContratoEntity.class, dc.getTipoContratoId()));
-    if (dc.getTipoVinculoId() != null)
-      entity.setVinculoId(ValidationUtil.ref(entityManager, ParamVinculoEntity.class, dc.getTipoVinculoId()));
     return entity;
   }
 
