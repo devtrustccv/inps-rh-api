@@ -1,6 +1,6 @@
 # Handoff — Melhorias Dossiê do Colaborador
 
-> Updated: 2026-08-26.
+> Updated: 2026-08-27.
 > HANDOFF DETALHADO desta sessão (o `/resume dossier_melhorias` lê ISTO). Fonte única.
 > Paths de código são relativos ao worktree: `.claude/worktrees/dossier-melhorias/`.
 
@@ -68,6 +68,23 @@ Fixes commitados: **32afd029** (worktree feat/dossier-melhorias).
   (tiprel 173356, escalao_id=21, salario=186980, estado P).
 
 Confirmar BD: `java -cp ".;C:\Users\ivanick.santos\.m2\repository\com\oracle\database\jdbc\ojdbc11\21.9.0.0\ojdbc11-21.9.0.0.jar" DbQuery "SELECT 1 FROM dual"` (da raiz do repo).
+
+## 0b. Pós-merge — melhorias adicionais em `develop` (2026-08-27)
+
+Duas melhorias pedidas depois do merge, feitas **direto em `develop`** (não no worktree), testadas live no 8089:
+
+1. **`flgSalario` + `flgSalarioDesc` na lista relação-laboral** (commit **`cc6dfbfe`**). O
+   `GET {funcionarioId}/relacao-laboral` passa a devolver o tipo de salário do vínculo:
+   - `flgSalario` = valor cru do domínio `TIPO_SALARIO_VINCULO` (SIM_PCCS/SIM_FORA_PCCS/NAO);
+   - `flgSalarioDesc` = descrição traduzida (ex.: "Salario do PCCS").
+   - Cadeia: vista `RH_V_RELACAO_LABORAL` (+`c.FLG_SALARIO`, `c`=RH_T_PARAM_VINCULO) →
+     query nativa `relacaoLaboralFromViewByFuncionario` (+`FLG_SALARIO AS flgSalario`) →
+     projeção `RelacaoLaboralView.getFlgSalario()` → `HistoricoLaboralReadService.getRelacaoLaboral`
+     (traduz via `DominioService`) → `RelacaoLaboralSumaryDTO` (+2 campos) + manifesto IGRP.
+   - ⚠️ **Vista reaplicada na BD live** via `DbExec` (o `.sql` sozinho não chega). Verificado:
+     colaborador F4 devolve `flgSalario=SIM_PCCS`, escalão 13/B.
+
+2. **Refactor Regime Emprego — linguagem ubíqua** (commit **`aa000acb`**). Ver §10.
 
 ## 1. Goal
 
@@ -264,3 +281,29 @@ reassociado, antigo I, novo A. T7.6 validar NAO → I, salário intacto. T7.7 CO
 - `src/.../rules/ColaboradorValidationRules.java` — helper escalão.
 - `src/.../constants/custom/TipoSalarioVinculo.java` — enum do domínio.
 - `DbQuery.java` / `DbExec.java` (raiz) — SQL direto.
+
+## 10. Refactor Regime Emprego (2.2.2) — linguagem ubíqua (2026-08-27, commit `aa000acb`)
+
+Confirmado (spec `19_08_26`, secção "Alterar regime trabalho" L6333+): o fluxo de Regime **NÃO
+escreve em tabela de validação** — o "Validar" só grava `RH_T_REGIME_TRAB.ESTADO` na própria linha.
+Já estava assim; mantido.
+
+Alterações (rotas HTTP **inalteradas**; só nomes de operações/classes):
+- POST `{idFuncionario}/regimes`: `adicionarRegimeTrabalho` → **`registarRegimeTrabalho`**;
+  `AdicionarRegimeTrabalhoCommand(+Handler)` → **`RegistarRegimeTrabalho...`**; service
+  `alterarRegimeTrabalho(...)` → **`registar(...)`**.
+- PUT `{idFuncionario}/regimes/{regimeId}`: `validarRegimeTrabalho` → **`alterarRegimeTrabalho`**;
+  `ValidarRegimeTrabalhoCommand(+Handler)` → **`AlterarRegimeTrabalho...`**; service
+  `validar(...)` → **`alterar(...)`**.
+- `RegimeTrabalhoDTO`: **+`estado`** (SELECT, aplicado no PUT quando não vem `validar`; precedência
+  do `validar` mantida), **`tipoRegime`/`dataInicio`/`dataFim` obrigatórios** (`@NotBlank`/`@NotNull`).
+  `regimeModalidade` fica **opcional** (não quebrar front). Manifesto IGRP sincronizado (+`tipoOrdemServico`
+  que faltava no JSON).
+
+Testado live 8089 (colaborador `01a03f71-8385-72e3-a37f-7a0c8f94bdbb`): registar OK (regime 615);
+400 com obrigatórios em falta; alterar `estado=I` (regime 609); registar + modalidade (regime 616 +
+`RH_T_REGIME_MODAL`).
+
+⚠️ **Gap (não bloqueante):** domínios `MODALIDADE_REGIME` e `DIAS_SEMANA` **não existem** em
+`RH_T_DOMAINS` — modalidade/diasSemana aceitam qualquer string e `modalidadeDesc` cai no fallback.
+Criar os domínios se o negócio quiser dropdowns validados.
