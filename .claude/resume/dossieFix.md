@@ -1,74 +1,95 @@
-> Updated: 2026-08-27 (STAND-BY — utilizador vai correr outros testes antes de voltar a esta feature)
+> Updated: 2026-08-27 ~12:40
 
 ## Goal
 
-Nova funcionalidade **Ativar/Desativar Contrato** (RH INPS): PATCH que desativa (A→I) o contrato atual
-e toda a cadeia de filhos, e reativa (I→A) o último contrato — inverso simétrico da ativação da
-validação SIM, IMEDIATO (sem maker/checker) e SEM tocar em `funcionario.estado`. **Ainda em estudo** —
-o utilizador vai pedir mais análise antes de fechar.
+Testar e afinar, em live, os fluxos do **dossiê do colaborador** (Registo → validação maker-checker →
+Renovação → **Novo Contrato**) na BD de dev, com dados coerentes. O próximo teste imediato é o **Novo
+Contrato** do colaborador **C** (já preparado). `AlterarEstadoContrato` continua em **stand-by**.
 
-## Current state — COMMITADO em `develop`
+## Current state — tudo committado em `develop` (HEAD `32fe873d`)
 
-- Endpoint `PATCH api/v1/funcionarios/{idFuncionario}/contratos/{contratoId}/estado`, body `{"estado":"A"|"I"}`.
-- Padrão IGRP CommandBus: `AlterarEstadoContratoCommand` + `...CommandHandler` + `AlterarEstadoContratoService`.
-- Guards **desativar (A→I)**: tiprel atual `est_act_adm=1` · contrato `estado=A` · NÃO processado em folha
-  (`ProcessamentoFuncionarioRepository.existsByTiprel_Id`).
-- Guards **ativar (I→A)**: contrato `estado=I` (rejeita P/C/E) · é o ÚLTIMO/atual contrato · sem outro
-  contrato em vigor (`existeContratoEmVigor`, mesmo guard do registo/Novo Contrato).
-- Fix relacionado: **Novo Contrato pós-desativação** — quando não há vínculo atual, cria contrato fresco
-  (`primeiroContrato(..., "CONTINUIDADE")`) em vez de rebentar; `FuncionarioRules.getTipoRelacionamentoAtualOrNull`.
+Commits desta sessão (após `aa000acb`): `dcf2d231` docs · `fc8aa010` chore(gitignore: tools/db,
+scratchpad, *.log) · `4e8fdbed` feat expor `estado/estadoDesc` (subsidios, encargos, anexos, funcionario
+em dadosPessoais) no GET · `4b3cc2fa` fix normalizar def no registo (`obs="INICIO"` + período/moeda do
+contrato, simétrico com validação → elimina diffs fantasma no Detalhe de Alterações) · `32fe873d`
+refactor renovação: `RenovarContratoReqDTO` só tem `dataInicio/dataFim/duracaoMeses` (removidos
+`tipoContratoId/tipoVinculoId`); `ContratoMapper` limpo (removido método morto `toRenovarContrato`).
+
+Colaboradores de teste (todos ativos, validados SIM):
+- **A** 958911 (`01a04309-097c-7112-95ff-41e3af4d034d`) — indeterminado, contrato 714.
+- **B** 958912 (`01a04328-458e-7e15-ad7d-49072963f9ae`) — indeterminado; usado para validar o fix `4b3cc2fa`.
+- **C** 958913 (`01a04336-6953-7e81-9a15-7aee349dd6c7`) — **determinado**, contrato **716**, já **renovado**
+  (v2 atual). **Backdated por SQL** para 2023-08-27 → 2025-08-28 em TODAS as tabelas do vínculo, para o
+  guard D2 (`existeContratoEmVigor`) passar. Verificado: `em_vigor=0`. Pronto para Novo Contrato.
+
+App a correr na 8089 (profile development). Build compila limpo (JDK23).
 
 ## Decisions made — do not re-litigate
 
-- "Último/atual contrato" = **contrato cujo HISTÓRICO tem `est_act_adm=1`** (NÃO `max(id)` nem `versao`).
-  `versao` é sempre 1 (Novo Contrato e Registo); Renovação versiona só no histórico. `max(id)` falha no
-  edge do Novo Contrato REJEITADO (fica com id maior). Ver [[project_contrato_versao_model]].
-- Desativação **mantém `est_act_adm=1` no histórico** (só baixa `estado`→I) = breadcrumb do "atual
-  administrativo" que a reativação usa; a reativação repõe via `transicionarEstado`.
-- `est_act_adm` só existe no **tiprel** e no **histórico** (a `RH_T_CONTRATO_VINCULO` não tem a coluna).
-  Verificado na BD (prod): 0 contratos `ESTADO=A` sem histórico `est_act_adm=1`; func 940 → contrato 708
-  (A) hist `est_act_adm=1`, contrato 707 (I) hist `0`. Multi-tiprel por contrato confirmado (708 → 2
-  tiprels; usa-se o de maior id).
-- Toggle é IMEDIATO, sem maker/checker; não mexe em `funcionario.estado` (isso é só a Cessação/CESSADO).
+- def (`RH_T_DEF_*`) levam `obs="INICIO"` no registo E na validação, **sobrescrevendo** o ecrã — regra de
+  negócio, não bug. Ver [[project_def_obs_inicio_simetria]].
+- Renovação: tipo contrato/vínculo NÃO vêm no request (são os do contrato atual); ficam só no DTO de
+  leitura (`RenovarContratoRespDTO`, `RenovacaoDetalheDTO`).
+- Datas de renovação são **form-driven** (responsabilidade do user). Sobreposição de 1 dia (antigo fecha
+  com dataFim = início do novo) fica como está; no futuro, opção de guard no `RenovacaoContratoService`.
+- Backdating do C feito por SQL direto (não há endpoint) para exercitar Novo Contrato sem criar novo colaborador.
 
-## Tabelas afetadas na DESATIVAÇÃO (todas ESTADO='I')
+## Constraints
 
-`RH_T_CONTRATO_VINCULO` (contrato) · `RH_T_CONTRATO_HISTORICO` (linha atual, mantém EST_ACT_ADM=1) ·
-`RH_T_TIPOS_RELACIONAMENTO` (tiprel atual, **EST_ACT_ADM=0**) · `RH_T_MOBILIDADE` · `RH_T_CARREIRA` ·
-`RH_T_REGIME_TRAB` · `RH_T_SITUACAO_LABORAL` · `RH_T_DEF_REMUNERACOES`/`RH_T_DEF_PAGAMENTOS` (só os
-associados ao tiprel em estado A). NÃO toca: `RH_T_TIPREL_REM_PAG` (sem coluna estado), `RH_T_FUNCIONARIOS`,
-`RH_T_PROC_FUNCIONARIOS` (só lida no guard).
+- Compilar com `JAVA_HOME=.../Eclipse Adoptium/jdk-23.0.2.7-hotspot`. SQL direto: helpers em `tools/db/`
+  (gitignored) — correr de LÁ: `cd tools/db && java -cp ".;<ojdbc11 do .m2>" DbQuery "<SQL>"`. Usar
+  **DbExec** para DML (DbUpdate rebenta ORA-17273). Oracle XE antigo: sem `FETCH FIRST` → usar `ROWNUM`.
+  Ver [[reference_db_helpers]].
+- GET antes de cada escrita; **ids em todos os arrays** do payload; pedir autorização por cada fluxo de
+  escrita; testar negativos antes do happy path. contratoId no path = UUID. Ver [[feedback_fluxo_validacao_teste]].
+- Mostrar sempre a resposta crua (JSON + HTTP). Manter a `scratchpad/` como referência viva. Documentar
+  mudanças de API em `docs/frontend_changes_funcionario.md`.
 
-## Constraints (preferências do utilizador — ver [[feedback-fluxo-validacao-teste]])
+## Blockers & risks
 
-- Compilar SEMPRE com `JAVA_HOME=.../Eclipse Adoptium/jdk-23.0.2.7-hotspot`. Query direta à BD:
-  helpers movidos para `tools/db/` (gitignored) — correr de dentro da pasta:
-  `cd tools/db && java -cp ".;<ojdbc11 jar do .m2>" DbQuery "<SQL>"` (credenciais lá). Ver [[reference-db-helpers]].
-- GET SEMPRE antes de cada escrita; pedir AUTORIZAÇÃO por cada fluxo de escrita; testar casos NEGATIVOS
-  antes do happy path. contratoId no path = UUID.
-
-## Open questions (o utilizador vai aprofundar)
-
-- **Reativação de `def`**: o filtro é pelo estado do próprio def, logo `origem=I→A` reativaria TODOS os
-  def em I associados ao tiprel — incluindo algum subsídio já `I` de propósito antes da desativação.
-  Decidir: só reativar os que acompanham o contrato (ex.: por DATA_FIM), ou marcar quais foram desativados.
-- Tiprels/def "estacionados" (`est_act_adm=0`) com `estado=A` que não batem certo com o estado do
-  contrato — dados não normalizados; a feature não lhes toca (correto), mas convém saber a origem.
-- Maker/checker no toggle? Por agora é imediato.
+- Nenhum bloqueio. App de pé; BD acessível (62.84.179.137:xe).
+- Risco: o backdating do C é dados-de-teste diretos na BD; se a app for reiniciada não afeta (persistido).
+- `AnexoRespDTO` é partilhado — `estado/estadoDesc` agora aparecem noutros módulos (aditivo, vêm null).
 
 ## Relevant files
 
-- `service/AlterarEstadoContratoService.java` (guards + flip) + `commands/AlterarEstadoContrato*` + `dto/AlterarEstadoContratoDTO.java`.
-- `interfaces/rest/ContratoController.java` (PATCH `.../estado`).
-- `service/ContratoHistoricoWriteService.java` (`transicionarEstado`) · `service/NovoContratoService.java` (fix pós-desativação).
-- `rules/FuncionarioRules.java` (`getTipoRelacionamentoAtualOrNull`) · repos: `TiposRelacionamentoEntityRepository.findFirstByContrVinculoId_UuidOrderByIdDesc`.
+- `application/service/NovoContratoService.java:70-127` — guards D1 (dataInicio não futura), validação
+  pendente, **D2 `existeContratoEmVigor`** (só lê `RH_T_CONTRATO_VINCULO`), e o fluxo que fecha tiprel/contrato atual.
+- `shared/infrastructure/persistence/repository/ContratoEntityRepository.java:68-75` — query do guard D2.
+- `application/service/RegistarColaboradorService.java:258-279` — normalização def (`obs=INICIO`+datas/moeda).
+- `application/service/ValidarRegistoColaboradorService.java:270-279` — mesma normalização na validação.
+- `application/service/RenovacaoContratoService.java` + `ContratoHistoricoWriteService.java:40-54` — renovação.
+- `interfaces/rest/ContratoController.java` — endpoints contrato (novoContrato `POST {idFunc}/contratos`,
+  renovacao `POST {idFunc}/renovacao-contrato/{contratoUuid}`, validar-renovacao, lista `GET contratos?idFuncionario=`).
+
+## How to verify / resume
+
+- Arrancar app (se caída): `cd <root> && bash scratchpad/run_develop_8089.sh > scratchpad/boot_8089.log 2>&1 &`
+  e esperar `curl -s -o /dev/null -w "%{http_code}" http://localhost:8089/swagger-ui.html` = 302.
+- Confirmar guard do C liberado: `cd tools/db && java -cp ".;<ojdbc11>" DbQuery "SELECT COUNT(*) FROM
+  rh_t_contrato_vinculo WHERE fun_id=958913 AND estado='A' AND (data_fim IS NULL OR data_fim>=TRUNC(SYSDATE))"`
+  → deve dar **0**.
+- Estado dos contratos do C: `GET http://localhost:8089/api/v1/funcionarios/contratos?idFuncionario=01a04336-6953-7e81-9a15-7aee349dd6c7`.
+
+## Test / validation plan — NOVO CONTRATO do C (próximo passo)
+
+1. GET lista contratos do C (acima) → confirmar contrato 716 atual, dataFim 2025-08-28 (passado).
+2. Montar payload `NovoContratoDTO` (endpoint `POST api/v1/funcionarios/01a04336-6953-7e81-9a15-7aee349dd6c7/contratos`).
+   Reaproveitar a estrutura de `dadosContratuais` de `scratchpad/registo_C.json` (carreira 6, escalão 21,
+   vínculo 1, salário 186980, INTEGRAL, subsídio tm 1684, encargo tm 1721). `dataInicio` **≤ hoje (2026-08-27)**
+   para o guard D1 passar (ex.: `2026-08-27`). Escolher determinado (tipoContratoId 1 + dataFim/duracao) ou
+   indeterminado (tipoContratoId 2) — perguntar ao user.
+3. Disparar POST → esperar 200 e um novo contrato criado (novo `ContratoEntity`, `TIPO_SITUACAO=CONTINUIDADE`,
+   versao=1); o contrato 716 deve ir a `ESTADO=I` e o tiprel 173369 fechar (`est_act_adm=0`, dataFim=início do novo).
+4. GET lista contratos → deve mostrar o contrato novo (atual) + o 716 (inativo).
+5. Validar SIM o novo contrato (fluxo próprio) e reconfirmar estados. Capturar JSON+HTTP de cada passo em `scratchpad/`.
+
+## Open questions
+
+- Novo contrato do C: determinado ou indeterminado? (decide o user)
+- Guard de sobreposição de datas na renovação: implementar ou deixar form-driven? (deixado ao user por agora)
 
 ## Next step
 
-**STAND-BY.** O utilizador pausou esta feature para correr outros testes; volta a ela depois.
-Housekeeping feito entretanto (não afeta a feature): helpers `Db*` → `tools/db/` e scratchpads → `scratchpad/`,
-ambos gitignored; `*.log` também ignorado.
-
-Ao retomar: aguardar as perguntas/análise adicional do utilizador sobre a funcionalidade. Colaboradores de teste:
-940 (`01a03aab-41c9-7412-a89f-0198e25319df`, contrato atual 708), 930, 926. Depois: testar live
-(desativar → ativar, e desativar → novo contrato) e decidir as Open questions.
+Perguntar ao user o tipo do novo contrato do C, montar o payload do Novo Contrato (dataInicio ≤ hoje),
+mostrar antes de disparar, e executar o Test plan acima.
