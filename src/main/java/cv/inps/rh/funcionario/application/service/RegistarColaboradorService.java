@@ -255,6 +255,27 @@ public class RegistarColaboradorService {
     if (regime != null) regime.setTipoSituacao("INICIO");
     if (mobilidade != null) mobilidade.setTipoSituacao("INICIO");
 
+    // Def (remuneracoes + pagamentos) marcados com obs="INICIO" (sobrescreve o obs do ecra),
+    // simetrico com a validacao/reenvio (ValidarRegistoColaboradorService). Os subsidios herdam
+    // ainda o periodo e a moeda do contrato — sem isto o registo ficava por normalizar e o
+    // "Detalhe de alteracoes" mostrava diffs fantasma (obs->INICIO, moeda->CVE, dataFim->contrato)
+    // ao serem normalizados so na validacao. Ignora os E (eliminados).
+    if (fun.getDefinicoesRenumeracoes() != null) {
+      fun.getDefinicoesRenumeracoes().forEach(r -> {
+        if (r != null && r.getEstado() != Estado.E) {
+          r.setObs("INICIO");
+          r.setDataInicio(contrato.getDataInicio());
+          r.setDataFim(contrato.getDataFim());
+          if (r.getMoeda() == null) r.setMoeda(dadosContratuais.getMoeda());
+        }
+      });
+    }
+    if (fun.getDefinicoesPagamentos() != null) {
+      fun.getDefinicoesPagamentos().forEach(p -> {
+        if (p != null && p.getEstado() != Estado.E) p.setObs("INICIO");
+      });
+    }
+
     fun.setTiposrelacionamentos(new ArrayList<>(List.of(tr)));
     var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.INSERT.name(), Referencia.REGISTO_COLABORADOR.name(),
         Estado.P);
