@@ -16,16 +16,30 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import org.javers.spring.annotation.JaversSpringDataAuditable;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+// Auditado por JaVers para alimentar a grelha "Detalhe de alterações" do movimento GESTÃO LABORAL
+// (Alterar Escalão/Cargo). Commits sem ValidacaoAuditContext ficam sem propriedades (inofensivos),
+// como nos restantes repositórios auditados (DefinicaoRemuneracao, DefPagamento, Contacto, ...).
+@JaversSpringDataAuditable
 @Repository
 public interface TiposRelacionamentoEntityRepository extends
     JpaRepository<TiposRelacionamentoEntity, Long>,
     JpaSpecificationExecutor<TiposRelacionamentoEntity> {
+
+  /**
+   * Tiprel mais recente (maior id) que aponta para este contrato, INDEPENDENTEMENTE de est_act_adm.
+   * Um contrato pode ter vários tiprels ao longo do tempo (ex.: mudança de situação laboral clona o
+   * tiprel mantendo o mesmo contrVinculoId); o mais recente é o que "manda". Necessário no
+   * ativar/desativar contrato: na desativação o tiprel atual está est_act_adm=1, mas na ativação o
+   * contrato está inativo (est_act_adm=0), pelo que o finder que filtra est_act_adm=1 não serve.
+   */
+  Optional<TiposRelacionamentoEntity> findFirstByContrVinculoId_UuidOrderByIdDesc(UUID contratoUuid);
 
   default TiposRelacionamentoEntity findByIdOrThrow(Long id) {
     return this.findById(id)
@@ -122,6 +136,10 @@ public interface TiposRelacionamentoEntityRepository extends
    * pendente já tem tiprel (est_act_adm=0) — o findByCarreiraId_uuid só devolve o ativo (est_act_adm=1).
    */
   Optional<TiposRelacionamentoEntity> findFirstByCarreiraId_UuidOrderByIdDesc(UUID carreiraUuid);
+
+  /** Movimento (tiprel) derivado de {@code tiprelId} num dado estado — usado para detetar uma
+   *  alteração de escalão/cargo (Gestão Laboral) ainda pendente sobre o tiprel atual. */
+  Optional<TiposRelacionamentoEntity> findFirstByTiprelId_IdAndEstado(Long tiprelId, Estado estado);
 
   @Query("""
       select t
@@ -348,6 +366,7 @@ public interface TiposRelacionamentoEntityRepository extends
         EST_ACT_ADM as situacaoAtual,
         ESCALAO_DESC AS escalaoDesc,
         ESCALAO_ID AS escalaoId,
+        FLG_SALARIO AS flgSalario,
         DATA_CARREIRA AS dataCarreira,
         DATA_CONTRATO AS dataContrato,
         CARGO_DESC AS cargoDesc,

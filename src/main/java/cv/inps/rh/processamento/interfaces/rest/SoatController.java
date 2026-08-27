@@ -9,14 +9,22 @@ import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.processamento.application.commands.CriarSoatCommand;
 import cv.inps.rh.processamento.application.commands.FinalizarSoatCommand;
-import cv.inps.rh.processamento.application.queries.GetSoatListQuery;
+import cv.inps.rh.processamento.application.commands.SalvarDadosInstituicaoCommand;
+import cv.inps.rh.processamento.application.dto.DadosApoliceResponseDTO;
+import cv.inps.rh.processamento.application.dto.DadosInstituicaoRequestDTO;
+import cv.inps.rh.processamento.application.dto.DadosInstituicaoResponseDTO;
+import cv.inps.rh.processamento.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @IgrpController
 @RestController
@@ -112,6 +120,123 @@ public class SoatController {
     final var command = new CriarSoatCommand(mes, ano);
 
     return commandBus.send(command);
+  }
 
+  @PostMapping("dados-instituicao")
+  @Operation(
+      summary = "Create or update institution data",
+      description = "Creates the first institution data row or versions the current active row",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = DadosInstituicaoResponseDTO.class,
+                      type = "object")
+              )
+          )
+      }
+  )
+  public ResponseEntity<DadosInstituicaoResponseDTO> salvarDadosInstituicao(
+      @Valid @RequestBody DadosInstituicaoRequestDTO request) {
+
+    final var command = new SalvarDadosInstituicaoCommand(request);
+
+    return commandBus.send(command);
+  }
+
+  @GetMapping("dados-instituicao")
+  @Operation(
+      summary = "Get current institution data",
+      description = "Gets the current active institution data row",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = DadosInstituicaoResponseDTO.class,
+                      type = "object")
+              )
+          )
+      }
+  )
+  public ResponseEntity<DadosInstituicaoResponseDTO> getDadosInstituicaoAtual() {
+
+    final var query = new GetDadosInstituicaoAtualQuery();
+
+    return queryBus.handle(query);
+  }
+
+  @GetMapping("dados-apolice")
+  @Operation(
+      summary = "Get active insurance policies",
+      description = "Gets the current active policy for each configured island",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = DadosApoliceResponseDTO.class,
+                      type = "array")
+              )
+          )
+      }
+  )
+  public ResponseEntity<List<DadosApoliceResponseDTO>> getDadosApolicesAtivos(
+      @RequestParam(value = "page", required = false, defaultValue = "0") String page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") String size
+  ) {
+
+    final var query = new GetDadosApolicesAtivosQuery(Integer.valueOf(page), Integer.valueOf(size));
+
+    return queryBus.handle(query);
+  }
+
+  @GetMapping("soat/{soatId}")
+  @Operation(
+      summary = "Get soat details",
+      description = "Get soat details",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(
+                      implementation = WrapperListDTO.class,
+                      type = "array")
+              )
+          )
+      }
+  )
+  public ResponseEntity<WrapperListDTO> getDetalhesSoat(
+      @PathVariable(value = "soatId") String soatId,
+      @RequestParam(value = "page", required = false, defaultValue = "0") String page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") String size
+  ) {
+
+    final var query = new GetDetalhesSoatQuery(soatId, Integer.valueOf(page), Integer.valueOf(size));
+
+    return queryBus.handle(query);
+  }
+
+  @GetMapping(value = "ficheiro", produces = MediaType.APPLICATION_PDF_VALUE)
+  @Operation(
+      summary = "Download SOAT PDF",
+      description = "Processes the SOAT Thymeleaf template and downloads the generated PDF",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = MediaType.APPLICATION_PDF_VALUE)
+          )
+      }
+  )
+  public ResponseEntity<byte[]> downloadFicheiroSoat(
+      @RequestParam(value = "soatId") String soatId,
+      @RequestParam(value = "apoliceId") String apoliceId) {
+
+    return queryBus.handle(new DownloadSoatPdfQuery(soatId, apoliceId));
   }
 }

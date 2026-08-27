@@ -10,21 +10,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ValidarRegimeTrabalhoCommandHandler implements CommandHandler<ValidarRegimeTrabalhoCommand, ResponseEntity<SuccessResponseDTO>> {
+public class AlterarRegimeTrabalhoCommandHandler implements CommandHandler<AlterarRegimeTrabalhoCommand, ResponseEntity<SuccessResponseDTO>> {
 
-   private static final Logger LOGGER = LoggerFactory.getLogger(ValidarRegimeTrabalhoCommandHandler.class);
+   private static final Logger LOGGER = LoggerFactory.getLogger(AlterarRegimeTrabalhoCommandHandler.class);
 
    private final RegimeWriteService regimeWriteService;
 
-   public ValidarRegimeTrabalhoCommandHandler(RegimeWriteService regimeWriteService) {
+   public AlterarRegimeTrabalhoCommandHandler(RegimeWriteService regimeWriteService) {
 
      this.regimeWriteService = regimeWriteService;
    }
 
    @IgrpCommandHandler
-   public ResponseEntity<SuccessResponseDTO> handle(ValidarRegimeTrabalhoCommand command) {
+   public ResponseEntity<SuccessResponseDTO> handle(AlterarRegimeTrabalhoCommand command) {
 
-      return ResponseEntity.ok(regimeWriteService.validar(command));
+      return ResponseEntity.ok(regimeWriteService.alterar(command));
    }
 
 }

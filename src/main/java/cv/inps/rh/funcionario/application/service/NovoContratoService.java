@@ -11,6 +11,7 @@ import cv.inps.rh.funcionario.infrastructure.mappers.*;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
+import cv.inps.rh.shared.application.constants.custom.TipoSalarioVinculo;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
@@ -90,11 +91,17 @@ public class NovoContratoService {
 
     boolean isPrimeiroContrato = funcionario.getContratos().isEmpty();
 
-    if (isPrimeiroContrato) {
-      return primeiroContrato(funcionario, dadosContratuais);
-    }
+    // Sem vínculo ativo (est_act_adm=1) — ex.: o contrato atual foi DESATIVADO pelo toggle de estado.
+    // Nesse caso NÃO há tiprel anterior para fechar: cria-se um contrato fresco (como no 1º contrato),
+    // mas com TIPO_SITUACAO=CONTINUIDADE (já houve contratos antes). Usa-se a variante nullable para
+    // não rebentar (getTipoRelacionamentoAtual lança quando não há atual).
+    var tipoRelacionamentoAtual = isPrimeiroContrato ? null
+        : funcionarioRules.getTipoRelacionamentoAtualOrNull(funcionario.getUuid());
 
-    var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    if (isPrimeiroContrato || tipoRelacionamentoAtual == null) {
+      return primeiroContrato(funcionario, dadosContratuais,
+          isPrimeiroContrato ? "INICIO" : "CONTINUIDADE");
+    }
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(tipoRelacionamentoAtual.getEstado());
     // Fecha o tiprel anterior (DOSSIÊ, Novo Contrato 2.5): est_act_adm=0 e DATA_FIM = data de início
     // do NOVO registo. Antes usava contratoAtual.getDataFim(), que podia ser null (contrato sem termo)
@@ -156,6 +163,9 @@ public class NovoContratoService {
     tiposRelacionamentoNovo.setTiprelId(tipoRelacionamentoAtual);
     tiposRelacionamentoNovo.setContrVinculoId(contratoNovo);
     tiposRelacionamentoNovo.setCarreiraId(carreira);
+    // Melhoria 2.1: vínculo sem carreira + SIM_PCCS → escalão gravado no tiprel + salário do escalão.
+    colaboradorValidationRules.aplicarEscalaoTiprelSemCarreira(
+        tiposRelacionamentoNovo, carreira, paramVinculo, dadosContratuais.getEscalaoReferenciaId());
     tiposRelacionamentoNovo.setRegimeId(regime);
     tiposRelacionamentoNovo.setMobId(mobilidade);
     tiposRelacionamentoNovo.setFlgProcessa(0);
@@ -170,7 +180,7 @@ public class NovoContratoService {
     funcionario.getValidacoes().add(valid);
 
     // verifica se vinculo tem salario
-    if (Objects.equals(1, paramVinculo.getFlgSalario())) {
+    if (TipoSalarioVinculo.temSalario(paramVinculo.getFlgSalario())) {
       /******************** INI RENUMERACOES ********************************/
       colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
 
@@ -302,14 +312,15 @@ public class NovoContratoService {
     return nova;
   }
 
-  private DadosContratuaisRespDTO primeiroContrato(FuncionarioEntity funcionario, DadosContratuaisReqDTO dadosContratuais) {
+  private DadosContratuaisRespDTO primeiroContrato(FuncionarioEntity funcionario, DadosContratuaisReqDTO dadosContratuais,
+                                                   String tipoSituacao) {
 
     var paramVinculo = entityManager.find(ParamVinculoEntity.class,
         dadosContratuais.getTipoVinculoLaboralId());
 
     var contrato = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contrato.setFunId(funcionario);
-    contrato.setTipoSituacao("INICIO");
+    contrato.setTipoSituacao(tipoSituacao);
     contrato.setVersao(1);
     contrato.setContratoId(null);
 
@@ -346,6 +357,9 @@ public class NovoContratoService {
     tiposRelacionamento.setFunId(funcionario);
     tiposRelacionamento.setContrVinculoId(contrato);
     tiposRelacionamento.setCarreiraId(carreira);
+    // Melhoria 2.1: vínculo sem carreira + SIM_PCCS → escalão gravado no tiprel + salário do escalão.
+    colaboradorValidationRules.aplicarEscalaoTiprelSemCarreira(
+        tiposRelacionamento, carreira, paramVinculo, dadosContratuais.getEscalaoReferenciaId());
     tiposRelacionamento.setRegimeId(regime);
     tiposRelacionamento.setMobId(mobilidade);
     tiposRelacionamento.setFlgProcessa(0);
@@ -361,7 +375,7 @@ public class NovoContratoService {
 
 
     // verifica se vinculo tem salario
-    if (Objects.equals(1, paramVinculo.getFlgSalario())) {
+    if (TipoSalarioVinculo.temSalario(paramVinculo.getFlgSalario())) {
       /******************** INI RENUMERACOES ********************************/
       colaboradorValidationRules.validarSubsidiosDuplicados(dadosContratuais.getSubsidios());
 

@@ -22,7 +22,8 @@ public class VinculoLaboralResponseDTO extends VinculoLaboralRequestDTO {
 
   private String id;
 
-  private Integer salario;
+  // Espelha FLG_SALARIO (domínio TIPO_SALARIO_VINCULO) — era Integer, passou a String.
+  private String salario;
   private String contratoDesc;
   private String carreiraDesc;
   private String remuneracaoDesc;

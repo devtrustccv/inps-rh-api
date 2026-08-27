@@ -60,6 +60,15 @@ public class FuncionarioRules {
         .orElseThrow(()-> IgrpResponseStatusException.badRequest("Funcionario sem tipo de relacionamento atual"));
   }
 
+  /**
+   * Igual a {@link #getTipoRelacionamentoAtual} mas devolve {@code null} em vez de lançar quando o
+   * funcionário não tem relacionamento atual (est_act_adm=1) — ex.: o contrato atual foi desativado
+   * pelo toggle de estado. Usar quando a ausência de vínculo atual é um caso válido a tratar.
+   */
+  public TiposRelacionamentoEntity getTipoRelacionamentoAtualOrNull(UUID funUuid) {
+    return tiposRelacionamentoEntityRepository.findAtualByFuncionarioUuid(funUuid).orElse(null);
+  }
+
 
   public ContratoEntity getContratoComMaiorVersao(UUID funUuid) {
     return contratoEntityRepository.findTopByFunId_UuidOrderByVersaoDesc(funUuid);

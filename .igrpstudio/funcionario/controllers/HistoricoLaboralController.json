@@ -270,6 +270,93 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "alterarEscalaoCargo",
+      "path": "{funcionarioId}/relacao-laboral/alterar-escalao-cargo",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AlterarEscalaoCargo",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "SuccessResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "shared"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "validarEscalaoCargo",
+      "path": "{funcionarioId}/relacao-laboral/alterar-escalao-cargo/{tiprelUuid}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AlterarEscalaoCargo",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "SuccessResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "shared"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "funcionarioId",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tiprelUuid",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "yr7hgkcuf8-getHistoricoLaboral-getHistoricoLaboral-atualizarHistoricoLaboral-novaRelacaoLaboral-getRelacaoLaboralById-getRelacaoLaboralByCarreiraId-atualizarRelacaoLaboral-getRelacaoLaboral-getRelacaoLaboralByCarreiraId-getRelacaoLaboral-getRelacaoLaboralByFunId-getRelacaoLaboralCombo"

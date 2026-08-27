@@ -29,7 +29,8 @@ public enum Referencia {
   ORDEM_SERVICO("Ordem de Serviço"),
   BAIXA_MEDICA("Baixa Médica"),
   PROCESSO_DISCIPLINAR("Processo Disciplinar"),
-  REGULARIZACAO("Regularização");
+  REGULARIZACAO("Regularização"),
+  GESTAO_LABORAL("Gestão Laboral");
 
   private final String descricao;
 

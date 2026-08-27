@@ -102,6 +102,17 @@ public class JaversValidacaoDetalheReadService {
     //    negócio (incluindo escalares, que o JaVers emite como InitialValueChange).
     //  - UPDATE (edição): só diffs reais antes→depois; um eventual snapshot inicial (baseline) que
     //    escapasse não deve poluir a grelha.
+    // TODO(T7.8 — GESTAO_LABORAL detalhe vazio): "Alterar Escalão/Cargo" regista-se como UPDATE, mas
+    //   consolida criando um tiprel NOVO (clone). Esse clone só tem 1 snapshot (inicial) → todas as
+    //   mudanças são InitialValueChange → o filtro de EDIÇÃO (linha abaixo) exclui-as → grelha vazia.
+    //   Confirmado live: GET validacoes/{gestaoLaboralUuid}/detalhes devolve [] (HTTP 200).
+    //   Decisão de fix ADIADA (implementar depois). Duas opções:
+    //     (a) tratar GESTAO_LABORAL como "criação" aqui (manter InitialValueChange) → mostra valores
+    //         NOVOS mas sem o "antes"; ex.: `boolean criacao = INSERT || GESTAO_LABORAL`.
+    //     (b) diff cross-instância: comparar o snapshot do tiprel novo com o do tiprel anterior (antes→
+    //         depois reais) — mais trabalho, altera este serviço partilhado.
+    //   Ver handoff §5b (.claude/resume/dossier_melhorias.md). Comportamento atual ([] não-erro) é
+    //   inofensivo para o frontend; não bloqueia o merge.
     boolean criacao = TipoAcao.INSERT.name().equals(validacao.getTipoAccao());
 
     List<Change> changes = javers.findChanges(

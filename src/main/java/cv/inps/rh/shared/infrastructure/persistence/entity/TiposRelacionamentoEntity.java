@@ -37,6 +37,14 @@ public class TiposRelacionamentoEntity extends AuditEntity {
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cargo_id", referencedColumnName = "id")
     private ParamCargoEntity cargoId;
+
+  // Escalão gravado DIRECTAMENTE no tiprel para vínculos SEM carreira (SIM_PCCS mas flg_carreira=0):
+  // nestes casos não há RH_T_CARREIRA que segure o escalão, por isso o id fica aqui
+  // (RH_T_TIPOS_RELACIONAMENTO.ESCALAO_ID). Para vínculos COM carreira, o escalão continua a vir da
+  // carreira (carreiraId.escalaoId) e esta coluna fica null.
+  @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "escalao_id", referencedColumnName = "id")
+    private ParamEscalaoEntity escalaoId;
     @Column(name="salario")
     private BigDecimal salario;
 

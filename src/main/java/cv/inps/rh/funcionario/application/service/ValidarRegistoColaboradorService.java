@@ -186,7 +186,8 @@ public class ValidarRegistoColaboradorService {
     mobilidadeMapper.toUpdateEntity(mobilidade, dadosContratuais);
 
     var carreira = tiposRelacionamento.getCarreiraId();
-    carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
+    // PCCS sem carreira: não existe entidade de carreira para atualizar (o escalão vive no tiprel).
+    if (carreira != null) carreiraMapper.toUpdateEntity(carreira, dadosContratuais);
 
     var regime = tiposRelacionamento.getRegimeId();
     regimeTrabalhoMapper.toUpdateEntity(regime, dadosContratuais);
@@ -248,9 +249,16 @@ public class ValidarRegistoColaboradorService {
     } else if (validar != null) {
       var estado = EstadoValidacao.SIM.equals(validar) ? Estado.A : Estado.I;
       if (estado.equals(Estado.A)) {
+        // Melhoria 2.1: vínculo sem carreira + SIM_PCCS → reafirma o escalão no tiprel (caso o payload
+        // reenviado o tenha mudado) e usa o valor do escalão como salário base a reconciliar.
+        var escalaoAplicado = colaboradorValidationRules.aplicarEscalaoTiprelSemCarreira(
+            tiposRelacionamento, carreira, dadosContratuais.getTipoVinculoLaboralId(),
+            dadosContratuais.getEscalaoReferenciaId());
+        var salarioReconciliar = escalaoAplicado != null && escalaoAplicado.getValor() != null
+            ? escalaoAplicado.getValor() : dadosContratuais.getSalario();
         // derivar os movimentos fixos do vinculo — SO na validacao positiva (antes de activar)
         reconciliacaoMovimentoVinculoService.reconciliar(funcionario, tiposRelacionamento.getContrVinculoId(),
-            dadosContratuais.getSalario(), dadosContratuais.getMoeda(),
+            salarioReconciliar, dadosContratuais.getMoeda(),
             dadosContratuais.getDataInicio(), dadosContratuais.getDataFim());
         var validacao = funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT, Referencia.REGISTO_COLABORADOR).orElse(null);
         var descricao = "Registo de colaborador - " + funcionario.getNome();

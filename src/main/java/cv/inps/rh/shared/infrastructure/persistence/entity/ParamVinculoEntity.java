@@ -53,8 +53,11 @@ public class ParamVinculoEntity extends AuditEntity {
     private Integer flgCarreira;
 
 
+  // Domínio TIPO_SALARIO_VINCULO (SIM_PCCS / SIM_FORA_PCCS / NAO). Era um flag Integer 0/1; passou a
+  // String para distinguir salário PCCS (com escalão) de salário fora do PCCS (manual). Ver
+  // TipoSalarioVinculo — a validação do valor faz-se no service ao gravar.
   @Column(name="flg_salario")
-    private Integer flgSalario;
+    private String flgSalario;
 
 
   @Column(name="flg_contrato")

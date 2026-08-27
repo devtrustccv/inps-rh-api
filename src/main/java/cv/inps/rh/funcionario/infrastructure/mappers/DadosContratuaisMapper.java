@@ -152,11 +152,16 @@ public class DadosContratuaisMapper {
         tiposRelacionamento.getCarreiraId().getCategoriaId()!=null ?
             tiposRelacionamento.getCarreiraId().getCategoriaId().getNome() : null : null);
 
-    dcr.setEscalaoReferenciaId(tiposRelacionamento.getCarreiraId()!=null ?
-        tiposRelacionamento.getCarreiraId().getEscalaoId().getId() : null);
+    // Escalão: com carreira vem do escalão da carreira; PCCS SEM carreira grava o escalão
+    // directamente no tiprel (RH_T_TIPOS_RELACIONAMENTO.ESCALAO_ID) — usar esse como fallback
+    // para o round-trip get-by-id -> validar funcionar (senão volta null e a validação rejeita).
+    var escRef = tiposRelacionamento.getCarreiraId() != null
+        ? tiposRelacionamento.getCarreiraId().getEscalaoId()
+        : tiposRelacionamento.getEscalaoId();
 
-    dcr.setEscalaoReferenciaDesc(tiposRelacionamento.getCarreiraId()!=null ?
-        tiposRelacionamento.getCarreiraId().getEscalaoId().getEscalao() : null);
+    dcr.setEscalaoReferenciaId(escRef != null ? escRef.getId() : null);
+
+    dcr.setEscalaoReferenciaDesc(escRef != null ? escRef.getEscalao() : null);
 
     if(tiposRelacionamento.getMobId()!=null){
       if(tiposRelacionamento.getMobId().getLocalTrabId() != null) {
@@ -223,6 +228,7 @@ public class DadosContratuaisMapper {
     TiposRelacionamentoEntity clone = new TiposRelacionamentoEntity();
     clone.setUuid(IdentificadorUnico.create().valor());
     clone.setCargoId(original.getCargoId());
+    clone.setEscalaoId(original.getEscalaoId());
     clone.setSalario(original.getSalario());
     clone.setMoeda(original.getMoeda());
     clone.setTipoSituacao(original.getTipoSituacao());

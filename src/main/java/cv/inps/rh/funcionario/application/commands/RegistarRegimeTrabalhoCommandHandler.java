@@ -10,20 +10,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AdicionarRegimeTrabalhoCommandHandler implements CommandHandler<AdicionarRegimeTrabalhoCommand, ResponseEntity<SuccessResponseDTO>> {
+public class RegistarRegimeTrabalhoCommandHandler implements CommandHandler<RegistarRegimeTrabalhoCommand, ResponseEntity<SuccessResponseDTO>> {
 
-   private static final Logger LOGGER = LoggerFactory.getLogger(AdicionarRegimeTrabalhoCommandHandler.class);
+   private static final Logger LOGGER = LoggerFactory.getLogger(RegistarRegimeTrabalhoCommandHandler.class);
 
    private final RegimeWriteService regimeWriteService;
-   public AdicionarRegimeTrabalhoCommandHandler(RegimeWriteService regimeWriteService) {
+   public RegistarRegimeTrabalhoCommandHandler(RegimeWriteService regimeWriteService) {
 
      this.regimeWriteService = regimeWriteService;
    }
 
    @IgrpCommandHandler
-   public ResponseEntity<SuccessResponseDTO> handle(AdicionarRegimeTrabalhoCommand command) {
+   public ResponseEntity<SuccessResponseDTO> handle(RegistarRegimeTrabalhoCommand command) {
 
-      return ResponseEntity.ok(regimeWriteService.alterarRegimeTrabalho(command));
+      return ResponseEntity.ok(regimeWriteService.registar(command));
    }
 
 }

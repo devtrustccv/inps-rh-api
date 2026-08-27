@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="pt" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <title>Ficheiro SOAT</title>
+    <style type="text/css">
+        @page {
+            size: A4 landscape;
+            margin: 8mm;
+        }
+
+        body {
+            margin: 0;
+            color: #1f2933;
+            font-family: Arial, sans-serif;
+            font-size: 7pt;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header td {
+            vertical-align: middle;
+            border: 0;
+        }
+
+        .logo {
+            width: 62pt;
+        }
+
+        .logo img {
+            width: 55pt;
+            height: 45pt;
+        }
+
+        .title {
+            text-align: center;
+        }
+
+        .title-main {
+            font-size: 12pt;
+            font-weight: bold;
+        }
+
+        .title-sub {
+            margin-top: 3pt;
+            color: #1f4e78;
+            font-size: 10pt;
+            font-weight: bold;
+        }
+
+        .issued {
+            width: 105pt;
+            text-align: right;
+            vertical-align: top !important;
+            font-size: 7pt;
+        }
+
+        .section-title {
+            margin-top: 7pt;
+            padding: 4pt 5pt;
+            color: #1f2933;
+            background-color: #9bc2e6;
+            font-size: 8pt;
+            font-weight: bold;
+        }
+
+        .data-table td {
+            border: 0.5pt solid #bcc5ce;
+            padding: 3pt 4pt;
+            vertical-align: top;
+        }
+
+        .label {
+            width: 13%;
+            background-color: #edf1f4;
+            font-weight: bold;
+        }
+
+        .value {
+            width: 20%;
+        }
+
+        .summary {
+            margin-top: 5pt;
+        }
+
+        .people {
+            margin-top: 7pt;
+            table-layout: fixed;
+            -fs-table-paginate: paginate;
+        }
+
+        .people thead {
+            display: table-header-group;
+        }
+
+        .people th {
+            border: 0.5pt solid #7ba9d1;
+            padding: 2pt 1pt;
+            color: #1f2933;
+            background-color: #9bc2e6;
+            font-size: 4.4pt;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .people td {
+            border: 0.5pt solid #c8cfd5;
+            padding: 2pt 1pt;
+            font-size: 4.6pt;
+            vertical-align: middle;
+            overflow-wrap: break-word;
+        }
+
+        .odd {
+            background-color: #eaf3fb;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .no-data {
+            padding: 10pt !important;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        .legacy {
+            display: none;
+        }
+
+        .header {
+            margin-bottom: 7pt;
+        }
+
+        .header .logo-cell {
+            width: 90pt;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .header .logo {
+            width: 72pt;
+            height: auto;
+        }
+
+        .header .report-title {
+            color: #17365d;
+            font-size: 8pt;
+            font-weight: bold;
+            line-height: 1.45;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .header .header-spacer {
+            width: 90pt;
+        }
+
+        .instructions {
+            margin: 2pt 0 12pt 0;
+            color: #17365d;
+            font-size: 6.4pt;
+            line-height: 1.45;
+        }
+
+        .top-grid {
+            width: 100%;
+            margin-bottom: 14pt;
+            table-layout: fixed;
+        }
+
+        .top-grid > tbody > tr > td {
+            padding: 0;
+            border: 0;
+            vertical-align: top;
+        }
+
+        .top-grid .holder-cell {
+            width: 37%;
+        }
+
+        .top-grid .gap-small {
+            width: 6%;
+        }
+
+        .top-grid .policy-cell {
+            width: 20%;
+        }
+
+        .top-grid .gap-large {
+            width: 6%;
+        }
+
+        .top-grid .insurance-cell {
+            width: 31%;
+        }
+
+        .form-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #17365d;
+            font-size: 6.2pt;
+        }
+
+        .form-table th, .form-table td {
+            height: 12pt;
+            padding: 1.5pt 2pt;
+            border: 0.5pt solid #4f4f4f;
+            vertical-align: middle;
+        }
+
+        .form-table th, .form-label {
+            background-color: #9bc2e6;
+            font-weight: bold;
+        }
+
+        .form-table th {
+            text-align: center;
+        }
+
+        .form-label {
+            width: 38%;
+        }
+
+        .form-value {
+            background-color: #ffffff;
+        }
+
+        .form-value.highlight {
+            background-color: #deebf7;
+        }
+
+        .policy-summary {
+            margin-top: 9pt;
+        }
+
+        .required-note {
+            margin: 0 0 2pt 1pt;
+            color: #c65911;
+            font-size: 6.5pt;
+            font-weight: bold;
+        }
+
+        .required {
+            color: #c65911;
+            font-weight: bold;
+        }
+
+        .people {
+            margin-top: 0;
+        }
+
+        .people th {
+            border-color: #4f4f4f;
+            font-size: 4.7pt;
+            line-height: 1.25;
+        }
+
+        .people td {
+            height: 11pt;
+            border-color: #4f4f4f;
+        }
+    </style>
+</head>
+<body>
+<table class="header">
+    <tr>
+        <td class="logo-cell">
+            <img alt="Garantia Seguros"
+                 class="logo"
+                 src='data:image/jpeg;base64,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'/>
+        </td>
+        <td class="report-title">
+            <div>SEGURO DE ACIDENTES DE TRABALHO - TRABALHADORES POR CONTA DE OUTREM</div>
+            <div>QUADRO DE PESSOAL A SEGURAR E RETRIBUIÇÕES</div>
+        </td>
+        <td class="header-spacer"></td>
+    </tr>
+</table>
+
+<div class="instructions">
+    <div>A(S) PESSOAS A SEGURAR SÃO AS CONSTANTES DA FOLHA DE SALÁRIOS E QUE O TOMADOR DE SEGURO REMETE, ATÉ AO DIA 15
+        DE CADA MÊS, AO SEGURADOR, PREENCHENDO OS DADOS NO QUADRO ABAIXO, SENDO CONSIDERADAS, PARA EFEITOS DO PRESENTE
+        CONTRATO, AS PESSOAS E RETRIBUIÇÕES ALI IDENTIFICADAS.
+    </div>
+    <div>QUALQUER ALTERAÇÃO DE PESSOAL DEVERÁ SER COMUNICADA NOS 8 DIAS SUBSEQUENTES À SUA ADMISSÃO/ALTERAÇÃO.</div>
+    <div>FORM-0103-PTPT-00.23</div>
+</div>
+
+<table class="top-grid">
+    <tr>
+        <td class="holder-cell">
+            <table class="form-table">
+                <tr>
+                    <th colspan="4">DADOS DO TOMADOR DE SEGURO</th>
+                </tr>
+                <tr>
+                    <td class="form-label">NOME:</td>
+                    <td class="form-value" colspan="3" th:text="${soat.nomeInstituicao}"></td>
+                </tr>
+                <tr>
+                    <td class="form-label">NIF:</td>
+                    <td class="form-value" colspan="3" th:text="${soat.nifInstituicao}"></td>
+                </tr>
+                <tr>
+                    <td class="form-label">COD CAE:</td>
+                    <td class="form-value" colspan="3" th:text="${soat.codCae}"></td>
+                </tr>
+                <tr>
+                    <td class="form-label">ATIVIDADE ECONÓMICA:</td>
+                    <td class="form-value highlight" colspan="3" th:text="${soat.atividadeEconomica}"></td>
+                </tr>
+                <tr>
+                    <td class="form-label">N.º CERTIDÃO COMERCIAL (NC):</td>
+                    <td class="form-value" th:text="${soat.numeroCertidaoComercial}"></td>
+                    <td class="form-label">DATA VALIDADE NC:</td>
+                    <td class="form-value" th:text="${soat.dataValidadeCertidao}"></td>
+                </tr>
+                <tr>
+                    <td class="form-label">TELEFONE:</td>
+                    <td class="form-value" th:text="${soat.telefone}"></td>
+                    <td class="form-label">TELEMÓVEL:</td>
+                    <td class="form-value" th:text="${soat.telemovel}"></td>
+                </tr>
+                <tr>
+                    <td class="form-label">EMAIL:</td>
+                    <td class="form-value" colspan="3" th:text="${soat.email}"></td>
+                </tr>
+                <tr>
+                    <td class="form-label">MORADA:</td>
+                    <td class="form-value" colspan="3" th:text="${soat.morada}"></td>
+                </tr>
+                <tr>
+                    <td class="form-label">LOCALIDADE:</td>
+                    <td class="form-value" colspan="3" th:text="${soat.localidade}"></td>
+                </tr>
+                <tr>
+                    <td class="form-label">CONCELHO:</td>
+                    <td class="form-value" colspan="3" th:text="${soat.concelho}"></td>
+                </tr>
+            </table>
+        </td>
+        <td class="gap-small"></td>
+        <td class="policy-cell">
+            <table class="form-table">
+                <tr>
+                    <td class="form-label">APÓLICE N.º:</td>
+                    <td class="form-value" th:text="${soat.numeroApolice}"></td>
+                </tr>
+                <tr>
+                    <td class="form-label">DATA INÍCIO DA APÓLICE:</td>
+                    <td class="form-value" th:text="${soat.dataInicioApolice}"></td>
+                </tr>
+            </table>
+            <table class="form-table policy-summary">
+                <tr>
+                    <td class="form-label">DATA DE REFERÊNCIA <span class="required">(*)</span></td>
+                    <td class="form-value" th:text="${soat.referencia}"></td>
+                </tr>
+                <tr>
+                    <td class="form-label">N.º TOTAL DE PESSOAS SEGURAS</td>
+                    <td class="form-value highlight" th:text="${soat.totalPessoas}"></td>
+                </tr>
+                <tr>
+                    <td class="form-label">MASSA SALARIAL ANUAL SEGURA</td>
+                    <td class="form-value highlight"><span
+                            th:text="${#numbers.formatDecimal(soat.massaSalarialAnual, 1, 'POINT', 2, 'COMMA')}"></span>
+                        CVE
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td class="gap-large"></td>
+        <td class="insurance-cell">
+            <table class="form-table">
+                <tr>
+                    <td class="form-label">SEGURO NOVO / EXISTENTE:</td>
+                    <td class="form-value"></td>
+                </tr>
+                <tr>
+                    <td class="form-label">MODALIDADE:</td>
+                    <td class="form-value"></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<div class="section-title legacy">DADOS DO TOMADOR DE SEGURO</div>
+<table class="data-table legacy">
+    <tr>
+        <td class="label">Nome</td>
+        <td class="value" th:text="${soat.nomeInstituicao}"></td>
+        <td class="label">NIF</td>
+        <td class="value" th:text="${soat.nifInstituicao}"></td>
+        <td class="label">Código CAE</td>
+        <td class="value" th:text="${soat.codCae}"></td>
+    </tr>
+    <tr>
+        <td class="label">Atividade económica</td>
+        <td class="value" th:text="${soat.atividadeEconomica}"></td>
+        <td class="label">N.º certidão comercial</td>
+        <td class="value" th:text="${soat.numeroCertidaoComercial}"></td>
+        <td class="label">Validade da certidão</td>
+        <td class="value" th:text="${soat.dataValidadeCertidao}"></td>
+    </tr>
+    <tr>
+        <td class="label">Telefone</td>
+        <td class="value" th:text="${soat.telefone}"></td>
+        <td class="label">Telemóvel</td>
+        <td class="value" th:text="${soat.telemovel}"></td>
+        <td class="label">Email</td>
+        <td class="value" th:text="${soat.email}"></td>
+    </tr>
+    <tr>
+        <td class="label">Morada</td>
+        <td class="value" th:text="${soat.morada}"></td>
+        <td class="label">Localidade</td>
+        <td class="value" th:text="${soat.localidade}"></td>
+        <td class="label">Concelho</td>
+        <td class="value" th:text="${soat.concelho}"></td>
+    </tr>
+</table>
+
+<div class="section-title legacy">DADOS DA APÓLICE</div>
+<table class="data-table summary legacy">
+    <tr>
+        <td class="label">Apólice n.º</td>
+        <td class="value" th:text="${soat.numeroApolice}"></td>
+        <td class="label">Início da apólice</td>
+        <td class="value" th:text="${soat.dataInicioApolice}"></td>
+        <td class="label">Data de referência</td>
+        <td class="value" th:text="${soat.referencia}"></td>
+    </tr>
+    <tr>
+        <td class="label">Total de pessoas seguras</td>
+        <td class="value" th:text="${soat.totalPessoas}"></td>
+        <td class="label">Massa salarial anual segura</td>
+        <td class="value" th:text="${#numbers.formatDecimal(soat.massaSalarialAnual, 1, 'POINT', 2, 'COMMA')}"></td>
+        <td class="label">Seguro / Modalidade</td>
+        <td class="value">—</td>
+    </tr>
+</table>
+
+<div class="required-note">Todas as colunas assinaladas com (*) são de preenchimento obrigatório.</div>
+<table class="people">
+    <colgroup>
+        <col style="width:13%"/>
+        <col style="width:6%"/>
+        <col style="width:6%"/>
+        <col style="width:5.5%"/>
+        <col style="width:5%"/>
+        <col style="width:6%"/>
+        <col style="width:3%"/>
+        <col style="width:4.5%"/>
+        <col style="width:6.5%"/>
+        <col style="width:6%"/>
+        <col style="width:5%"/>
+        <col style="width:4.5%"/>
+        <col style="width:8%"/>
+        <col style="width:6%"/>
+        <col style="width:9%"/>
+        <col style="width:6%"/>
+    </colgroup>
+    <thead>
+    <tr>
+        <th rowspan="2">NOME COMPLETO <span class="required">(*)</span></th>
+        <th rowspan="2">TIPO DOC. IDENT. <span class="required">(*)</span></th>
+        <th rowspan="2">N.º DOC. IDENT. <span class="required">(*)</span></th>
+        <th rowspan="2">DATA VALIDADE DOC. IDENT. <span class="required">(*)</span></th>
+        <th rowspan="2">NIF <span class="required">(*)</span></th>
+        <th rowspan="2">DATA NASCIMENTO <span class="required">(*)</span></th>
+        <th rowspan="2">SEXO <span class="required">(*)</span></th>
+        <th rowspan="2">SITUAÇÃO <span class="required">(*)</span></th>
+        <th rowspan="2">PROFISSÃO <span class="required">(*)</span></th>
+        <th rowspan="2">APRENDIZ OU ESTAGIÁRIO <span class="required">(*)</span></th>
+        <th rowspan="2">N.º HORAS SEMANA <span class="required">(*)</span></th>
+        <th colspan="3">RETRIBUIÇÃO BASE <span class="required">(*)</span></th>
+        <th rowspan="2">TRABALHADOR TEMPORARIAMENTE NO ESTRANGEIRO <span class="required">(*)</span></th>
+        <th rowspan="2">OBSERVAÇÕES</th>
+    </tr>
+    <tr>
+        <th>HORA / DIA / MÊS <span class="required">(*)</span></th>
+        <th>RETRIBUIÇÃO HORA / DIÁRIO / MENSAL <span class="required">(*)</span></th>
+        <th>RETRIBUIÇÃO ANUAL <span class="required">(*)</span></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${soat.pessoas == null or soat.pessoas.isEmpty()}">
+        <td class="no-data" colspan="16">Sem pessoas seguras para apresentar.</td>
+    </tr>
+    <tr th:class="${stat.odd} ? 'odd' : ''" th:each="pessoa, stat : ${soat.pessoas}">
+        <td th:text="${pessoa.nome}"></td>
+        <td class="center" th:text="${pessoa.tipoDocumento}"></td>
+        <td th:text="${pessoa.numeroDocumento}"></td>
+        <td class="center" th:text="${pessoa.dataValidadeDocumento}"></td>
+        <td th:text="${pessoa.nif}"></td>
+        <td class="center" th:text="${pessoa.dataNascimento}"></td>
+        <td class="center" th:text="${pessoa.sexo}"></td>
+        <td class="center" th:text="${pessoa.situacao}"></td>
+        <td th:text="${pessoa.profissao}"></td>
+        <td class="center" th:text="${pessoa.aprendizOuEstagiario}"></td>
+        <td class="right" th:text="${#numbers.formatDecimal(pessoa.horasSemana, 1, 'POINT', 2, 'COMMA')}"></td>
+        <td class="center" th:text="${pessoa.unidadeRetribuicao}"></td>
+        <td class="right" th:text="${#numbers.formatDecimal(pessoa.retribuicao, 1, 'POINT', 2, 'COMMA')}"></td>
+        <td class="right" th:text="${#numbers.formatDecimal(pessoa.retribuicaoAnual, 1, 'POINT', 2, 'COMMA')}"></td>
+        <td class="center" th:text="${pessoa.temporariamenteEstrangeiro}"></td>
+        <td th:text="${pessoa.observacoes}"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
