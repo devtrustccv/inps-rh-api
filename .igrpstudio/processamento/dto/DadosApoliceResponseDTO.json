@@ -1,0 +1,83 @@
+{
+  "name": "DadosApoliceResponseDTO",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "id",
+      "type": "long",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "instituicaoUuid",
+      "type": "string",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "numeroApolice",
+      "type": "string",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "ilhaId",
+      "type": "long",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dataApolice",
+      "type": "date",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "estado",
+      "type": "string",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "type": "dto",
+  "module": "processamento",
+  "enableCustonValidation": false,
+  "readOnly": false,
+  "id": "new-action-Contract"
+}

@@ -35,12 +35,6 @@ public class SoatDetalheEntity extends AuditEntity {
   private FuncionarioEntity fun;
 
   @NotNull
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @OnDelete(action = OnDeleteAction.RESTRICT)
-  @JoinColumn(name = "PROCSAL_ID", nullable = false)
-  private ProcessamentoFuncionarioEntity procsal;
-
-  @NotNull
   @Column(name = "DIR_SERV_ID", nullable = false)
   private Long dirServId;
 
@@ -73,4 +67,10 @@ public class SoatDetalheEntity extends AuditEntity {
   @Size(max = 500)
   @Column(name = "OBS", length = 500)
   private String obs;
+
+  @NotNull
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @OnDelete(action = OnDeleteAction.RESTRICT)
+  @JoinColumn(name = "PR_REM_ID", nullable = false)
+  private RhTRemuneracoe prRem;
 }

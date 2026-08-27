@@ -1,11 +1,12 @@
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
-import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 
@@ -13,7 +14,7 @@ import java.time.LocalDate;
 @Setter
 @Entity
 @Table(name = "RH_T_DADOS_APOLICE")
-public class DadosApoliceEntity extends AuditEntity {
+public class DadosApoliceEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "RH_T_DADOS_APOLICE_id_gen")
@@ -43,8 +44,9 @@ public class DadosApoliceEntity extends AuditEntity {
   @Column(name = "ESTADO", nullable = false, length = 1)
   private String estado;
 
-  @Size(max = 100)
   @NotNull
-  @Column(name = "UUID", nullable = false, length = 100)
-  private String uuid;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @OnDelete(action = OnDeleteAction.RESTRICT)
+  @JoinColumn(name = "DADOS_INSTITUICAO_ID", nullable = false)
+  private DadosInstituicaoEntity dadosInstituicao;
 }

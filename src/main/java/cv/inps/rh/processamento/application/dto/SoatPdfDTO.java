@@ -9,8 +9,6 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class SoatPdfDTO {
-
-  private final String logoBase64;
   private final String dataEmissao;
   private final String referencia;
   private final String numeroApolice;

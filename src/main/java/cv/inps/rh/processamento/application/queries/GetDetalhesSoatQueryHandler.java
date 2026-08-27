@@ -10,26 +10,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GetDadosApolicesAtivosQueryHandler implements QueryHandler<GetDadosApolicesAtivosQuery, ResponseEntity<WrapperListDTO>> {
+public class GetDetalhesSoatQueryHandler implements QueryHandler<GetDetalhesSoatQuery, ResponseEntity<WrapperListDTO>> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(GetDadosApolicesAtivosQueryHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(GetDetalhesSoatQueryHandler.class);
 
   private final SoatService service;
 
-  public GetDadosApolicesAtivosQueryHandler(SoatService service) {
+  public GetDetalhesSoatQueryHandler(SoatService service) {
     this.service = service;
   }
 
   @IgrpQueryHandler
-  public ResponseEntity<WrapperListDTO> handle(GetDadosApolicesAtivosQuery query) {
+  public ResponseEntity<WrapperListDTO> handle(GetDetalhesSoatQuery query) {
 
-    LOGGER.debug("Getting active insurance policy data");
+    LOGGER.debug("GetListaAumentoSalarialQuery: {}", query);
 
-    var data = service.getDadosApoliceAtivos(
-        query.getPage(),
-        query.getSize()
-    );
+    var data = service.getDetalhesSoat(query.getSoatId(), query.getPage(), query.getSize());
 
     return ResponseEntity.ok(data);
   }
+
 }

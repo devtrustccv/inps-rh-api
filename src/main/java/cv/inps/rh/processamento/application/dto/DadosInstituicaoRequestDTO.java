@@ -37,8 +37,6 @@ public class DadosInstituicaoRequestDTO {
 
   private Long telefone;
 
-  private Long telemovel;
-
   @Size(max = 300, message = "The field <localidade> must have at most 300 characters")
   private String localidade;
 
