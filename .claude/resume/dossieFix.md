@@ -1,4 +1,4 @@
-> Updated: 2026-08-26 18:30
+> Updated: 2026-08-27 (STAND-BY — utilizador vai correr outros testes antes de voltar a esta feature)
 
 ## Goal
 
@@ -42,7 +42,8 @@ associados ao tiprel em estado A). NÃO toca: `RH_T_TIPREL_REM_PAG` (sem coluna 
 ## Constraints (preferências do utilizador — ver [[feedback-fluxo-validacao-teste]])
 
 - Compilar SEMPRE com `JAVA_HOME=.../Eclipse Adoptium/jdk-23.0.2.7-hotspot`. Query direta à BD:
-  `java -cp ".;<ojdbc11 jar do .m2>" DbQuery "<SQL>"` (helper em DbQuery.java, credenciais lá). Ver [[reference-db-helpers]].
+  helpers movidos para `tools/db/` (gitignored) — correr de dentro da pasta:
+  `cd tools/db && java -cp ".;<ojdbc11 jar do .m2>" DbQuery "<SQL>"` (credenciais lá). Ver [[reference-db-helpers]].
 - GET SEMPRE antes de cada escrita; pedir AUTORIZAÇÃO por cada fluxo de escrita; testar casos NEGATIVOS
   antes do happy path. contratoId no path = UUID.
 
@@ -64,6 +65,10 @@ associados ao tiprel em estado A). NÃO toca: `RH_T_TIPREL_REM_PAG` (sem coluna 
 
 ## Next step
 
-Aguardar as perguntas/análise adicional do utilizador sobre a funcionalidade. Colaboradores de teste:
+**STAND-BY.** O utilizador pausou esta feature para correr outros testes; volta a ela depois.
+Housekeeping feito entretanto (não afeta a feature): helpers `Db*` → `tools/db/` e scratchpads → `scratchpad/`,
+ambos gitignored; `*.log` também ignorado.
+
+Ao retomar: aguardar as perguntas/análise adicional do utilizador sobre a funcionalidade. Colaboradores de teste:
 940 (`01a03aab-41c9-7412-a89f-0198e25319df`, contrato atual 708), 930, 926. Depois: testar live
 (desativar → ativar, e desativar → novo contrato) e decidir as Open questions.

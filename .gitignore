@@ -34,3 +34,8 @@ build/
 .vscode/
 
 .env
+
+### Ferramentas locais / temporarios (nao versionar) ###
+/tools/db/
+/scratchpad/
+*.log
