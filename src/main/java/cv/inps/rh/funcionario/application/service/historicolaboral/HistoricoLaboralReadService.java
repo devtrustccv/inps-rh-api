@@ -100,6 +100,8 @@ public class HistoricoLaboralReadService {
     // O filtro é opcional na query (passar null traria todos).
     var rows = tiposRelacionamentoEntityRepository.relacaoLaboralFromViewByFuncionario(query.getFuncionarioId(), 1);
 
+    var tipoSalarioDominio = dominioService.getDominioMap("TIPO_SALARIO_VINCULO");
+
     var data = rows.stream().map(r -> {
       var dto = new RelacaoLaboralSumaryDTO();
       dto.setCarreiraId(r.getCarreiraId());
@@ -114,6 +116,10 @@ public class HistoricoLaboralReadService {
       // RH_V_RELACAO_LABORAL — que já resolve o escalão da carreira OU, quando o vínculo não tem
       // carreira, do próprio tiprel (RH_T_TIPOS_RELACIONAMENTO.ESCALAO_ID).
       dto.setEscalao(r.getEscalaoDesc());
+      // flgSalario = TIPO_SALARIO_VINCULO do vínculo (SIM_PCCS/SIM_FORA_PCCS/NAO); vem da vista
+      // RH_V_RELACAO_LABORAL (RH_T_PARAM_VINCULO.FLG_SALARIO). Desc traduzida pelo domínio.
+      dto.setFlgSalario(r.getFlgSalario());
+      dto.setFlgSalarioDesc(dominioService.traduzir(tipoSalarioDominio, r.getFlgSalario()));
       dto.setDataInicioFimCarreira(r.getDataCarreira());
       dto.setDataInicioFimContrato(r.getDataContrato());
       dto.setCargo(r.getCargoDesc());

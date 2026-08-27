@@ -31,6 +31,8 @@ public interface RelacaoLaboralView {
 
   Long getEscalaoId();
 
+  String getFlgSalario();
+
   String getDataCarreira();
 
   String getDataContrato();

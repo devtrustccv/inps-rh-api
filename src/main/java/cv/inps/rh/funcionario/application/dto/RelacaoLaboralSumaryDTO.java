@@ -42,6 +42,12 @@ public class RelacaoLaboralSumaryDTO  {
   private String escalao ;
 
 
+  private String flgSalario ;
+
+
+  private String flgSalarioDesc ;
+
+
   private String dataInicioFimContrato ;
 
 

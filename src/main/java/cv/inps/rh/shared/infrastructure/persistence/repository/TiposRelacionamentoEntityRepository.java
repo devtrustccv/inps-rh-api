@@ -366,6 +366,7 @@ public interface TiposRelacionamentoEntityRepository extends
         EST_ACT_ADM as situacaoAtual,
         ESCALAO_DESC AS escalaoDesc,
         ESCALAO_ID AS escalaoId,
+        FLG_SALARIO AS flgSalario,
         DATA_CARREIRA AS dataCarreira,
         DATA_CONTRATO AS dataContrato,
         CARGO_DESC AS cargoDesc,
