@@ -336,6 +336,11 @@ public class NovoContratoService {
 
     var contrato = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contrato.setFunId(funcionario);
+    // O contrato tem de pertencer à coleção do funcionário (managed) para ser persistido por cascade
+    // (funcionario.contratos = PERSIST). Sem isto, num Novo Contrato de CONTINUIDADE roteado por aqui
+    // (ex.: após DESATIVAR → est_act_adm=0), o contrato/carreira ficam só referenciados pelo tiprel
+    // (ManyToOne sem cascade) → TransientObjectException no flush. Espelha o ramo não-primeiro (registrar).
+    funcionario.getContratos().add(contrato);
     contrato.setTipoSituacao(tipoSituacao);
     contrato.setVersao(1);
     contrato.setContratoId(null);
