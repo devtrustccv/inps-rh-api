@@ -1,6 +1,6 @@
 # Handoff — Melhorias Dossiê do Colaborador
 
-> Updated: 2026-08-29 (+ secção TODO transversal / JOB Alerta).
+> Updated: 2026-08-29 (T7.8 testado live + protótipo `javers.compare`→RH_T_VALIDACAO_DETALHE, §0e).
 > HANDOFF DETALHADO desta sessão (o `/resume dossier_melhorias` lê ISTO). Fonte única.
 > Paths de código são relativos ao worktree: `.claude/worktrees/dossier-melhorias/`.
 > Nota: o trabalho pós-merge (§0b em diante) é **direto em `develop`** (raiz do repo), não no worktree.
@@ -40,6 +40,39 @@ Long); `flg_tratamento` estende a spec (S ao processar / N se rejeitado; grelha 
 (`'S'/'N'/'I'` seguros).
 
 ---
+
+## 0e. PROTÓTIPO — detalhe via `javers.compare` + persistência em RH_T_VALIDACAO_DETALHE (2026-08-29, NÃO commitado)
+
+Decisão do utilizador (discussão arquitetural): em vez de JaVers-histórico OU do reader on-the-fly, usar o
+**motor de diff** do JaVers (`javers.compare`, modalidade leve, sem histórico SQL) para **gravar** o
+detalhe na tabela que a spec exige, lido pela via comum. Prototipado e **testado live no 8089** (não
+commitado — a aguardar decisão de adoção). Ficheiros:
+- **NOVO** `service/historicolaboral/EscalaoDetalheDiffWriter` — `javers.compare(snapshotAntes,
+  snapshotDepois)` onde `Snapshot` é uma classe com **`@Id` constante** (`org.javers...annotation.Id`)
+  para o JaVers comparar duas linhas de tiprel como MESMA instância → `ValueChange` campo-a-campo (senão
+  daria NewObject/ObjectRemoved). `persistir()` grava 1 linha/campo em `RH_T_VALIDACAO_DETALHE`;
+  `comparar()` devolve DTO (leitura on-the-fly); `limpar()` apaga p/ reenvio de correção. Formatação
+  (escalão codigo|nível/escala, salário, datas) centralizada aqui (fonte única).
+- `AlteracaoEscalaoDetalheReadService` — refatorado: delega o diff ao `EscalaoDetalheDiffWriter.comparar`
+  (usa `javers.compare` também na leitura); só resolve antes/depois e carimba autor/data. Passa a ser
+  **fallback** para movimentos antigos sem linhas persistidas.
+- `AlterarEscalaoCargoService` — chama `persistir(validacao, atual, novoTiprel)` no registo e
+  `limpar()+persistir()` no reenvio de correção (C→P).
+- `GetDetalheAlteracoesQueryHandler` — router: ALTERACAO_ESCALAO → se `existsByValidacaoId_Uuid` na tabela
+  lê via `ValidacaoDetalheReadService` (comum); senão fallback on-the-fly. **Zero regressão.**
+
+**Testado live (8089, BUILD SUCCESS após `clean`):**
+- Registo antigo (val 1012, 0 linhas) → fallback on-the-fly, output idêntico ao de antes (prova refactor).
+- POST novo (13/B→13/C, escalão 23) → **4 linhas persistidas** em `RH_T_VALIDACAO_DETALHE`
+  (val `01a04cb3-8dc5-7b84-9d11-33bf8f83b50f`): Escalão SEC_CA_13_B→SEC_CA_13_C, Salário 178076→169595,
+  Data início 26-08→30-08, Observações. `GET .../detalhes` lê da TABELA, HTTP 200, mesmo `ValidacaoDetalheDTO`.
+- Mobilidade (JaVers-histórico) intacta, HTTP 200.
+
+**Vantagens vs reader on-the-fly:** snapshot imutável no momento (robusto a alterações do predecessor);
+popula a tabela que a spec manda; reusa o reader comum (sem 3º caminho de leitura).
+**Pendente de decisão:** (a) commitar/adotar; (b) generalizar o padrão `compare→persistir` a outros fluxos
+de clone; (c) opcional a longo prazo — aposentar o JaVers-histórico pesado. Gotcha Oracle: `target/` tinha
+um `.class` corrompido (`ClassFormatError ...ParamLinhaBaseResponseDTO`) → **arrancar sempre após `mvn clean`**.
 
 ## 0d. T7.8 RESOLVIDO + ✅ TESTADO LIVE — detalhe de alterações da Alteração de Escalão (reader manual isolado, 2026-08-29)
 
@@ -368,21 +401,23 @@ reassociado, antigo I, novo A. T7.6 validar NAO → I, salário intacto. T7.7 CO
 **Evidências → HTML:** por teste, HTTP status + JSON cru + queries de verificação. Montar
 `docs/evidencias_teste_live_dossier.html` explicando cada fluxo e resultado.
 
-## 8. Next step (retomar aqui) — ▶ TESTE LIVE DO T7.8
+## 8. Next step (retomar aqui) — ▶ DECIDIR o protótipo `javers.compare`→tabela (§0e)
 
-**⇒ PRÓXIMO PASSO = testar live o T7.8 no 8089** (código pronto e compilado, §0d; só falta a validação
-end-to-end contra a BD). Passos concretos:
-1. ✅ **App a correr no 8089** (2026-08-29, reiniciada com o build do T7.8; PID 78592, `Started ... in 22s`,
-   BD ligada, api-docs HTTP 200, dev-mode sem Keycloak). Log: `scratchpad/boot_t78_8089.log`.
-2. ◀ **A FAZER AGORA:** Colaborador PCCS **sem carreira** (ex.: os fixtures F4/F5 do §0, uuid `01a03f71-8385-72e3-a37f-7a0c8f94bdbb`
-   ou `01a03f90-fbf3-7924-ad2c-4b5d599a79b3`). `POST .../alterar-escalao-cargo` com novo escalão → tiprel P.
-3. Obter o `uuid` da validação criada e `GET validacoes/{uuid}/detalhes` → **confirmar linhas antes→depois**
-   (escalão `codigo`|nível/escala, salário, cargo, datas, obs) com rótulos PT; imprimir HTTP status + JSON cru.
-4. **Regressão "não quebrar os outros":** `GET .../detalhes` de uma validação de **mobilidade** e de
-   **carreira**/**situação laboral** → continuam a devolver o detalhe normal (via JaVers, inalterado).
-5. Registar evidência (HTTP + JSON + queries) — juntar a `docs/evidencias_teste_live_dossier.html`.
+**T7.8 ✅ testado live** (§0d, 2026-08-29) e **protótipo `javers.compare`→RH_T_VALIDACAO_DETALHE ✅
+testado live** (§0e, **NÃO commitado**). App reiniciada com o build do protótipo (arrancar SEMPRE após
+`mvn clean` — `target/` tinha um `.class` corrompido). Log: `scratchpad/boot_diffwriter_8089.log`.
 
-Ficheiros-alvo: `AlteracaoEscalaoDetalheReadService`, `GetDetalheAlteracoesQueryHandler` (commit `814dd683`).
+**⇒ PRÓXIMO PASSO = decisão do utilizador sobre o protótipo (§0e):**
+1. **Commitar/adotar** a via `compare→persistir` para o escalão? (4 ficheiros: novo
+   `EscalaoDetalheDiffWriter` + refactor de `AlteracaoEscalaoDetalheReadService`, `AlterarEscalaoCargoService`,
+   `GetDetalheAlteracoesQueryHandler`). Zero regressão comprovada (fallback on-the-fly p/ registos antigos).
+2. Se sim → **generalizar** o padrão a outros fluxos de clone (mover writer p/ `shared`)? e/ou aposentar
+   o JaVers-histórico pesado a longo prazo?
+3. Se não → **reverter** o protótipo (não commitado; `git checkout` dos 4 ficheiros) e ficar no §0d.
+
+Ficheiros-alvo do protótipo: `EscalaoDetalheDiffWriter` (novo), `AlteracaoEscalaoDetalheReadService`,
+`AlterarEscalaoCargoService`, `GetDetalheAlteracoesQueryHandler` (todos NÃO commitados).
+Evidências live em `scratchpad/t78_*.json` + BD (val `01a04cb3-8dc5-7b84-9d11-33bf8f83b50f` = 4 linhas persistidas).
 
 ---
 
@@ -398,7 +433,9 @@ Ficheiros-alvo: `AlteracaoEscalaoDetalheReadService`, `GetDetalheAlteracoesQuery
 1. **`git push` de `develop`** (o merge foi só local; passo público por decidir).
 2. **Aplicar migrações** (`docs/db/melhorias_dossier_*.sql`) em qualquer ambiente que corra develop e
    ainda não as tenha (a BD live já as tem).
-3. **T7.8** — ✅ RESOLVIDO via reader manual isolado (§0d); falta só **teste live** no 8089.
+3. **T7.8** — ✅ RESOLVIDO via reader manual isolado (§0d) e ✅ **testado live** no 8089.
+5. **Protótipo §0e (`javers.compare`→RH_T_VALIDACAO_DETALHE)** — testado live, **NÃO commitado**: decidir
+   adotar/generalizar ou reverter (4 ficheiros na árvore de trabalho).
 4. Resíduo: pasta `.claude/worktrees/_mergecheck` ficou bloqueada por um handle no `target/` (o registo
    de worktree já foi prunado; apagar a pasta quando o processo largar / ao reiniciar).
 

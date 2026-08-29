@@ -57,6 +57,7 @@ public class AlterarEscalaoCargoService {
   private final DadosContratuaisMapper contratuaisEntityMapper;
   private final FuncionarioRules funcionarioRules;
   private final EntityManager entityManager;
+  private final EscalaoDetalheDiffWriter escalaoDetalheDiffWriter;
 
   /** Cria o movimento: CARGO só → imediato; ESCALÃO (com ou sem cargo) → pendente para validação. */
   public SuccessResponseDTO alterar(String funcionarioId, AlterarEscalaoCargoDTO dto) {
@@ -126,6 +127,9 @@ public class AlterarEscalaoCargoService {
       }
       validacaoC.setTiprelId(emCorrecao);
       validacaoEntityRepository.save(validacaoC);
+      // Detalhe de alterações: regrava do zero (predecessor → movimento corrigido) via javers.compare.
+      escalaoDetalheDiffWriter.limpar(validacaoC.getUuid());
+      escalaoDetalheDiffWriter.persistir(validacaoC, emCorrecao.getTiprelId(), emCorrecao);
       return new SuccessResponseDTO(true, emCorrecao.getUuid().toString(),
           "Correção reenviada para validação.", List.of());
     }
@@ -164,6 +168,10 @@ public class AlterarEscalaoCargoService {
     validacao.setUuid(validacaoUuid); // mesmo UUID já carimbado no baseline
     validacao.setFunId(funcionario);
     validacaoEntityRepository.save(validacao);
+
+    // Detalhe de alterações persistido no momento (predecessor → novo tiprel) com o motor de diff do
+    // JaVers (javers.compare de dois snapshots) → uma linha por campo em RH_T_VALIDACAO_DETALHE.
+    escalaoDetalheDiffWriter.persistir(validacao, atual, novoTiprel);
 
     return new SuccessResponseDTO(true, novoTiprel.getUuid().toString(),
         "Alteração de escalão registada para validação.", List.of());
