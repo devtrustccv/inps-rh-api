@@ -102,17 +102,11 @@ public class JaversValidacaoDetalheReadService {
     //    negócio (incluindo escalares, que o JaVers emite como InitialValueChange).
     //  - UPDATE (edição): só diffs reais antes→depois; um eventual snapshot inicial (baseline) que
     //    escapasse não deve poluir a grelha.
-    // TODO(T7.8 — ALTERACAO_ESCALAO detalhe vazio): "Alterar Escalão/Cargo" regista-se como UPDATE, mas
-    //   consolida criando um tiprel NOVO (clone). Esse clone só tem 1 snapshot (inicial) → todas as
-    //   mudanças são InitialValueChange → o filtro de EDIÇÃO (linha abaixo) exclui-as → grelha vazia.
-    //   Confirmado live: GET validacoes/{alteracaoEscalaoUuid}/detalhes devolve [] (HTTP 200).
-    //   Decisão de fix ADIADA (implementar depois). Duas opções:
-    //     (a) tratar ALTERACAO_ESCALAO como "criação" aqui (manter InitialValueChange) → mostra valores
-    //         NOVOS mas sem o "antes"; ex.: `boolean criacao = INSERT || ALTERACAO_ESCALAO`.
-    //     (b) diff cross-instância: comparar o snapshot do tiprel novo com o do tiprel anterior (antes→
-    //         depois reais) — mais trabalho, altera este serviço partilhado.
-    //   Ver handoff §5b (.claude/resume/dossier_melhorias.md). Comportamento atual ([] não-erro) é
-    //   inofensivo para o frontend; não bloqueia o merge.
+    // NOTA(T7.8): ALTERACAO_ESCALAO NÃO passa por aqui. O tiprel é Shallow Reference (ver
+    //   JaversAuditConfig.REFERENCIAS_RASAS — necessário pela auto-referência tiprelId e FKs pesadas),
+    //   logo o JaVers grava-o com estado vazio (STATE={}) e os seus campos nunca apareceriam nesta
+    //   grelha. Essa referência é servida por AlteracaoEscalaoDetalheReadService (compara o tiprel
+    //   pendente com o predecessor — antes→depois reais), desviada ainda no GetDetalheAlteracoesQueryHandler.
     boolean criacao = TipoAcao.INSERT.name().equals(validacao.getTipoAccao());
 
     List<Change> changes = javers.findChanges(

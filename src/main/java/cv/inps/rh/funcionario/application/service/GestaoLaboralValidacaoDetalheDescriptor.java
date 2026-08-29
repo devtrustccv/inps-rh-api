@@ -8,9 +8,14 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Descritor da grelha "Detalhe de alterações" para o movimento GESTÃO LABORAL ("Alterar Escalão/Cargo",
- * melhoria 2.2.1). O movimento altera o próprio tiprel (RH_T_TIPOS_RELACIONAMENTO) — para vínculos sem
- * carreira o escalão/cargo/salário vivem lá — por isso o tipo-alvo JaVers é {@code TiposRelacionamentoEntity}.
+ * Descritor da grelha "Detalhe de alterações" para o movimento "Alterar Escalão/Cargo" (referência
+ * {@code ALTERACAO_ESCALAO}, melhoria 2.2.1). O movimento altera o próprio tiprel
+ * (RH_T_TIPOS_RELACIONAMENTO) — para vínculos sem carreira o escalão/cargo/salário vivem lá.
+ *
+ * <p><b>Nota:</b> ao contrário dos outros descritores, esta referência NÃO é lida pelo
+ * {@code JaversValidacaoDetalheReadService} — o tiprel é Shallow Reference e o JaVers grava-o vazio. A
+ * grelha é servida pelo {@code AlteracaoEscalaoDetalheReadService}, que reutiliza os {@link #rotulos()} e
+ * a allow-list {@link #camposNegocio()} deste descritor como fonte única de rótulos/campos.
  */
 @Component
 public class GestaoLaboralValidacaoDetalheDescriptor implements ValidacaoDetalheDescriptor {
