@@ -214,10 +214,9 @@ public class RenovacaoContratoService {
    * Dossier). O estado do alerta só transita para 'I' na validação positiva (ver
    * ValidacaoRenovacaoContratoService); numa rejeição o flag volta a 'N' e o alerta reaparece.
    */
-  private void marcarAlertaTratado(Long alertaId) {
+  private void marcarAlertaTratado(java.util.UUID alertaId) {
     if (alertaId == null) return;
-    var alerta = alertaEntityRepository.findByIdOrThrow(alertaId);
-    alerta.setFlgTratamento("S");
+    alertaEntityRepository.findByUuid(alertaId).ifPresent(a -> a.setFlgTratamento("S"));
   }
 
   /** Descrição legível de um erro de item para a lista agregada devolvida ao utilizador. */

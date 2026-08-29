@@ -11,6 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,7 +30,7 @@ public class RenovarLoteItemReqDTO  {
   private String contratoId ;
 
 
-  private Long alertaId ;
+  private UUID alertaId ;
 
   @Valid
   @NotNull(message = "The field <dadosRenovacao> is required")
