@@ -66,6 +66,9 @@ public class CarreiraListDTO  {
   private String processamento ;
 
 
+  private String processaSalarioNestaCarreira ;
+
+
   private String estado ;
 
 
