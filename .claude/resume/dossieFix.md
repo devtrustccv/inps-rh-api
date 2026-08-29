@@ -1,16 +1,31 @@
-> Updated: 2026-08-27 ~20:55
+> Updated: 2026-08-29 ~15:30
 
 ## Goal
 
 Testar/afinar em live **Ativar/Desativar Contrato** (`AlterarEstadoContrato`, PATCH de estado) no
-dossiê do colaborador **C**. Negativos já validados; falta o ciclo DESATIVAR (A→I) → REATIVAR (I→A) do
-contrato atual **717**, com rede de rollback pronta.
+dossiê do colaborador **C**. **Ciclo negativos → DESATIVAR (A→I) → REATIVAR (I→A) do 717: CONCLUÍDO e
+validado end-to-end.** A sessão descobriu um **defeito de modelação** (`est_act_adm` sobrecarregado) que
+fica documentado como task própria — ver Findings + [[project_est_act_adm_sobrecarga]].
 
 ## Current state
 
-`develop` HEAD `705a2576` (código idêntico ao handoff anterior; sem alterações de código nesta sessão —
-concluímos que **não se deve refactorar**, ver Decisões). **App UP** na 8089 (profile development, boot via
-`scratchpad/run_develop_8089.sh`; REST passa sem token). Build limpo (JDK23).
+`develop` HEAD `c4438d25` (16 commits à frente do handoff anterior `705a2576`, todos de OUTRAS features —
+o toggle `AlterarEstadoContratoService`/`ContratoController` NÃO foi tocado; **sem alterações de código
+nesta sessão**). **App UP** na 8089 (profile development, boot via `scratchpad/run_develop_8089.sh`; REST
+passa sem token). Build limpo (JDK23).
+
+**Ciclo de teste COMPLETO (tudo capturado em `scratchpad/ad_*`):**
+- Negativos N1–N4: todos 400, sem escrita (ver secção abaixo).
+- **DESATIVAR 717 (A→I)**: 200 "Contrato desativado."; cascata das 9 tabelas para I confirmada
+  (contrato 717→I, tiprel 173371→I/est_act_adm=**0**, histórico 264→I/est_act_adm=**1** breadcrumb,
+  mob 684/carreira 780/regime 620/situação 666→I, def rem 1459-1460 + pag 1626-1630→I).
+- **REATIVAR 717 (I→A)**: 200 "Contrato ativado."; tudo repõe A, tiprel est_act_adm→1, histórico A/1,
+  invariante = 1 tiprel corrente.
+- **C == baseline** (diff vs `rollback_C.sql` vazio) — dossiê limpo, rollback nunca foi preciso.
+
+**Open question do desativar RESOLVIDA:** `RH_V_CONTRATO.atual` deriva do **histórico**
+(`d.est_act_adm`, mantém 1) → 717 fica `atual:true` mesmo desativado. Já `RH_V_RELACAO_LABORAL` e os
+finders leem o **tiprel** (=0) → **split-brain** (ver Findings).
 
 **Rede de rollback CONSTRUÍDA e VALIDADA** (`scratchpad/`):
 - `snapshot_C.sh` — query que emite os próprios UPDATEs de reposição (estado + est_act_adm) das 9 tabelas
@@ -24,6 +39,32 @@ concluímos que **não se deve refactorar**, ver Decisões). **App UP** na 8089 
 "Só é possível ativar um contrato inativo (estado I). Estado atual: A."; N2 estado `X` → "Estado inválido:
 use 'A'…'I'."; N3 desativar 716 (antigo) → "Só é possível desativar o contrato atual do funcionário.";
 N4 estado vazio → validação `@NotBlank`.
+
+## Findings desta sessão (NOVO — decisão de negócio/arquitetura pendente)
+
+**`est_act_adm=1` do tiprel está SOBRECARREGADO com dois conceitos: "relação CORRENTE" E "relação ATIVA".**
+Ao desativar, o service põe o tiprel a 0 (`AlterarEstadoContratoService.java:156`), o que **órfã o
+funcionário de relação corrente** (fica Ativo mas com 0 tiprels est_act_adm=1). Consequências:
+
+- **Split-brain:** `RH_V_CONTRATO.atual` (histórico) diz `true`; `RH_V_RELACAO_LABORAL` + ~9 finders
+  (tiprel) fazem o funcionário evaporar de listas/pesquisas/abonos/empréstimos enquanto desativado.
+- **Levantamento (memória [[project_est_act_adm_sobrecarga]]):** Grupo A "corrente" (perde o funcionário):
+  `TiposRelacionamentoEntityRepository` L91/163/172/185/246/291/381, `Abonos` L52/95, `Emprestimo` L81,
+  toda a `FuncionarioRules.getTipoRelacionamentoAtual*/getContratoAtual`. Grupo B "ativo" (vazio é correto):
+  `TiposRel` L117 `findAtivaByCarreiraUuid` (já tem par `...OrderByIdDesc`).
+- **Invariante "≤1 tiprel est_act_adm=1 por funcionário": SEGURO** — validado empírico (39=39, zero
+  violações) e continuaria seguro sob "manter 1" (os fluxos fecham o anterior via est_act_adm=1).
+- **Porque NÃO é fix de 1 linha:** `NovoContratoService.java:100-110` foi escrito a contar com desativar→0
+  ("desativado ⇒ contrato fresco, sem anterior a fechar" via `getTipoRelacionamentoAtualOrNull`). Mudar
+  para "manter 1" inverte esse branch E faz o contrato desativado mascarar-se de "corrente ativo" p/ todos
+  os callers de `getTipoRelacionamentoAtual` — problema atual ao contrário — a menos que se acrescente
+  `AND estado='A'` onde se quer "ativo".
+- **Fix correto (task própria, c/ testes + negócio):** separação de modelo — ponteiro "corrente" que
+  sobrevive à desativação + `estado` a carregar ativo/inativo + `estado='A'` nos sítios "ativo". NÃO hackear
+  o toggle. Comportamento atual é coerente e reversível.
+- **Sobre reutilizar `AlterarEstadoContratoService` dentro do Novo Contrato: NÃO** (intenções diferentes —
+  data_fim, histórico breadcrumb=1, filhos reutilizados). Partilhável só a mecânica de baixo nível
+  "cascatear estado aos filhos/def" (candidato a helper privado), não o service inteiro.
 
 ## Decisions made — do not re-litigate
 
@@ -108,11 +149,14 @@ Baseline confirmado (`scratchpad/ad_lista_antes.json`): 717 A/atual=true/process
 
 ## Open questions
 
-- Após desativar, `RH_V_CONTRATO.est_act_adm` deriva do tiprel (→ atual vira false) ou do histórico (→ atual
-  fica true)? Confirmar empiricamente no passo 3 e alinhar expectativa com negócio.
+- ~~Após desativar, `RH_V_CONTRATO.est_act_adm` deriva do tiprel ou do histórico?~~ **RESOLVIDO:** deriva do
+  **histórico** (`d.est_act_adm`), fica `atual:true` mesmo desativado. Gera split-brain — ver Findings.
 - "Processado em folha" (guard que bloqueia desativar): 717 tem processamento=false, logo passa; como
   forçar `RH_T_PROC_FUNCIONARIOS` para testar o negativo fica para depois, se necessário.
 
 ## Next step
 
-Pedir autorização e correr o **DESATIVAR do 717** (passo 3), capturando JSON+HTTP e o estado BD antes/depois.
+Ciclo de teste do toggle **fechado**. Decisão pendente do user/negócio: avançar (ou não) com a **task de
+separação de modelo** do `est_act_adm` (ver Findings) — começaria por esboçar o helper de cascata + auditar
+os finders do Grupo A/B e acrescentar `estado='A'` onde se quer "ativo". Passo "Novo Contrato após
+desativar" continua **para depois**. Nada em aberto no dossiê do C (== baseline).
