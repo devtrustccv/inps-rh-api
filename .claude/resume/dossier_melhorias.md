@@ -1,9 +1,43 @@
 # Handoff — Melhorias Dossiê do Colaborador
 
-> Updated: 2026-08-29.
+> Updated: 2026-08-29 (+ secção TODO transversal / JOB Alerta).
 > HANDOFF DETALHADO desta sessão (o `/resume dossier_melhorias` lê ISTO). Fonte única.
 > Paths de código são relativos ao worktree: `.claude/worktrees/dossier-melhorias/`.
 > Nota: o trabalho pós-merge (§0b em diante) é **direto em `develop`** (raiz do repo), não no worktree.
+
+---
+
+## TODO — pendentes (TRANSVERSAL / JOB Alerta)
+
+Contexto: o "Processar" dos alertas (doc TRANSVERSAL 3.4.2) foi ligado aos fluxos do Dossiê. Detalhe
+completo em `.claude/resume/alerta-transversal.md` e `docs/frontend_changes_transversal.md`.
+
+**FEITO (commits em `develop`):**
+- `5632df70` — Processar RENOVAÇÃO em lote (`POST .../renovacao-contrato/lote`, atómico, erros agregados).
+- `866ef431` — Processar CONVERSÃO via Novo Contrato (`alertaId` opcional UUID no `NovoContratoDTO`;
+  maker marca `flg_tratamento='S'`; checker fecha `estado='I'`/repõe `'N'` por `referencia_id`). Lookup
+  do alerta por **UUID** (`findByUuid`) nos dois fluxos.
+
+**POR FAZER (só transversal — NÃO é Dossiê):**
+1. **JOB → notificação/email** — o JOB (`AlertaWriteService`) só CRIA o alerta (`flg_notificacao='N'`);
+   nunca gera notificação nem envia email. Ver **TODO no código** em
+   `src/main/java/cv/inps/rh/shared/domain/service/AlertaWriteService.java` (no `executarJobAlertas`).
+   Infra pronta a reutilizar: `NotificacaoDispatchService` + `NotificacaoDestinatarioResolver` +
+   `OracleEmailService`. **BLOQUEIO DE NEGÓCIO**: a spec **não diz quem recebe** (só define destinatários
+   p/ envio manual). Decisão do utilizador (supôs, não fechou): **admin do sistema configurável** +
+   talvez **colaborador** e/ou **responsável**. Implementar CONFIGURÁVEL: admin via env/`RH_T_DOMINIO`;
+   destinatários por tipo via `RH_T_DOMINIO`; **sem config → não envia** (`flg_notificacao` fica `'N'`).
+2. **Gerar alertas em falta no JOB** (hoje só gera renovação/conversão/licença-s-venc): **Doença**
+   (`LICENCA_C_VENCIMENTO`) e **Empréstimo** (pagamento atrasado; cessado com dívida). Doc 3.4 linhas ~1185/1211/1247.
+3. **Reconciliação `P→I`** do alerta de empréstimo quando a dívida é resolvida (doc ~1224/1257).
+
+**FORA DE ÂMBITO (Processamento Salarial, outra equipa/doc):** Processar `LICENCA_S_VENCIMENTO` e
+`LICENCA_C_VENCIMENTO` (abrem ecrãs do Proc. Salarial). Missão Serviço: doc marca "pendente / ver se faz sentido".
+
+**Convenções fixadas (não re-litigar):** alerta identificado por **UUID** (o `uuid` da lista, não o `id`
+Long); `flg_tratamento` estende a spec (S ao processar / N se rejeitado; grelha "por tratar" =
+`estado='P' AND flg_tratamento='N'`); `RH_T_ALERTA.FLG_TRATAMENTO`/`ESTADO` **sem CHECK** na BD viva
+(`'S'/'N'/'I'` seguros).
 
 ---
 
