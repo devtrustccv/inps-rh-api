@@ -18,6 +18,9 @@ public class NotificacaoMapper {
         dto.setId(entity.getId());
         dto.setAssunto(entity.getAssunto());
         dto.setNomeReceptor(entity.getNomeReceptor());
+        if (entity.getFunId() != null) {
+            dto.setFuncionarioId(entity.getFunId().getUuid());
+        }
         dto.setEmail(entity.getEmail());
         dto.setDataEnvio(entity.getDataEnvio() != null ? entity.getDataEnvio() : null);
         dto.setEstado(entity.getEstado());
