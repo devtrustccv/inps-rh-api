@@ -11,6 +11,7 @@ public class AlertaDTO {
     private String referenciaName;
     private Long referenciaId;
     private UUID referenciaUuid;
+    private UUID funcionarioId;
     private String descricao;
     private String estado;
     private String tipoSituacao;

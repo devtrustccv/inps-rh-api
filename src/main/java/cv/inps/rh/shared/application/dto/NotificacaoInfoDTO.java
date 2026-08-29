@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 
 @Data
@@ -24,6 +25,7 @@ public class NotificacaoInfoDTO  {
   private String assunto;
   private String corpo;
   private String nomeReceptor;
+  private UUID funcionarioId;
   private String email;
   private LocalDate dataEnvio;
   private String estado;
