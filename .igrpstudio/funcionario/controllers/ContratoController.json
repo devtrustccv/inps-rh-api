@@ -301,7 +301,41 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "processarRenovacaoLote",
+      "path": "renovacao-contrato/lote",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "RenovarLoteReq",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "funcionario"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "SuccessResponse",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "shared"
+              }
+            }
+          }
+        }
+      }
     }
   ],
-  "id": "zt8ilwt31b-getListContratos-getListContratos-validarContrato-validarContrato-getContratoById-getContratoById-novoContrato-validarContrato-novoContrato-renovarContrato-renovarContrato-novoContrato-validarContrato-renovarContrato-validarRenovacaoContrato-renovarContrato-renovarContrato-validarContrato-validarRenovacaoContrato-getRenovacaoDetalhe"
+  "id": "zt8ilwt31b-getListContratos-getListContratos-validarContrato-validarContrato-getContratoById-getContratoById-novoContrato-validarContrato-novoContrato-renovarContrato-renovarContrato-novoContrato-validarContrato-renovarContrato-validarRenovacaoContrato-renovarContrato-renovarContrato-validarContrato-validarRenovacaoContrato-getRenovacaoDetalhe-processarRenovacaoLote"
 }

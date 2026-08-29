@@ -8,6 +8,7 @@ import cv.igrp.framework.core.domain.QueryBus;
 import cv.igrp.framework.stereotype.IgrpController;
 import cv.inps.rh.funcionario.application.commands.AlterarEstadoContratoCommand;
 import cv.inps.rh.funcionario.application.commands.NovoContratoCommand;
+import cv.inps.rh.funcionario.application.commands.ProcessarRenovacaoLoteCommand;
 import cv.inps.rh.funcionario.application.commands.RenovarContratoCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarContratoCommand;
 import cv.inps.rh.funcionario.application.commands.ValidarRenovacaoContratoCommand;
@@ -16,6 +17,7 @@ import cv.inps.rh.funcionario.application.dto.DadosContratuaisRespDTO;
 import cv.inps.rh.funcionario.application.dto.NovoContratoDTO;
 import cv.inps.rh.funcionario.application.dto.RenovacaoContratoDTO;
 import cv.inps.rh.funcionario.application.dto.RenovacaoDetalheDTO;
+import cv.inps.rh.funcionario.application.dto.RenovarLoteReqDTO;
 import cv.inps.rh.funcionario.application.dto.WrapperListContratoDTO;
 import cv.inps.rh.funcionario.application.queries.GetContratoByIdQuery;
 import cv.inps.rh.funcionario.application.queries.GetListContratosQuery;
@@ -293,6 +295,36 @@ public class ContratoController {
 
       return queryBus.handle(query);
 
+  }
+
+   @PostMapping(
+   value = "renovacao-contrato/lote"
+  )
+  @Operation(
+    summary = "Processar renovacao em lote",
+    description = "Processa a renovacao de um grupo de colaboradores (ou apenas um). Atomico: se algum colaborador falhar, nenhum e renovado e sao devolvidos todos os erros de uma vez.",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = SuccessResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+  public ResponseEntity<SuccessResponseDTO> processarRenovacaoLote(@Valid @RequestBody RenovarLoteReqDTO renovarLoteRequest)
+  {
+
+      final var command = new ProcessarRenovacaoLoteCommand(renovarLoteRequest);
+
+       ResponseEntity<SuccessResponseDTO> response = commandBus.send(command);
+
+       return response;
   }
 
 }
