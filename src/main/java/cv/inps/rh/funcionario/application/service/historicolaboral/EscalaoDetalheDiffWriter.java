@@ -2,7 +2,6 @@ package cv.inps.rh.funcionario.application.service.historicolaboral;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.dto.ValidacaoDetalheDTO;
-import cv.inps.rh.funcionario.application.service.GestaoLaboralValidacaoDetalheDescriptor;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamCargoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamEscalaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
@@ -14,9 +13,15 @@ import org.javers.core.Javers;
 import org.javers.core.diff.changetype.ValueChange;
 import org.springframework.stereotype.Component;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -38,8 +43,12 @@ import java.util.UUID;
  * <p><b>Como o {@code javers.compare} vê duas linhas de tiprel:</b> mapeamos cada tiprel para um
  * {@link Snapshot} com {@code @Id} <b>constante</b> — assim o JaVers trata "antes" e "depois" como duas
  * versões da MESMA instância e emite {@link ValueChange} campo-a-campo (em vez de "objeto novo/removido",
- * que é o que aconteceria com ids diferentes). Os campos do snapshot já vêm formatados para exibição e
- * os seus nomes coincidem com as chaves de {@link GestaoLaboralValidacaoDetalheDescriptor#rotulos()}.
+ * que é o que aconteceria com ids diferentes).
+ *
+ * <p><b>Fonte única de campos+rótulos:</b> a grelha é definida <b>só</b> pelos campos do {@link Snapshot}
+ * e pela anotação {@link Rotulo} em cada um. {@link #rotulos()} deriva daí (nome→rótulo) e o
+ * {@code GestaoLaboralValidacaoDetalheDescriptor} delega neste método. Acrescentar/remover um campo da
+ * grelha é mexer <b>apenas</b> no {@link Snapshot} — não há segunda lista para manter em sincronia.
  */
 @Component
 @RequiredArgsConstructor
@@ -50,24 +59,31 @@ public class EscalaoDetalheDiffWriter {
 
   private final Javers javers;
   private final ValidacaoDetalheEntityRepository detalheRepo;
-  private final GestaoLaboralValidacaoDetalheDescriptor descriptor;
+
+  /** Rótulo de exibição do campo na grelha "Detalhe de alterações" (nome bonito, em PT). */
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(ElementType.FIELD)
+  public @interface Rotulo {
+    String value();
+  }
 
   /**
    * Snapshot sem identidade real (só um {@code @Id} constante) — ValueObject de comparação. Campos já
-   * formatados; nomes iguais às chaves de rótulos do descritor, para o {@code propertyName} do
-   * {@link ValueChange} mapear direto.
+   * formatados; a ordem de declaração é a ordem da grelha e {@link Rotulo} dá o nome de exibição. É a
+   * <b>única</b> definição de "que campos entram na grelha e com que rótulo".
    */
   public static final class Snapshot {
     @org.javers.core.metamodel.annotation.Id
     private final String id = "escalao"; // constante → antes/depois = mesma instância p/ o JaVers
-    private final String escalaoId;
-    private final String cargoId;
-    private final String salario;
-    private final String moeda;
-    private final String tipoSituacao;
-    private final String dataInicio;
-    private final String dataFim;
-    private final String obs;
+
+    @Rotulo("Escalão")           private final String escalaoId;
+    @Rotulo("Cargo")             private final String cargoId;
+    @Rotulo("Salário")           private final String salario;
+    @Rotulo("Moeda")             private final String moeda;
+    @Rotulo("Tipo de alteração") private final String tipoSituacao;
+    @Rotulo("Data início")       private final String dataInicio;
+    @Rotulo("Data fim")          private final String dataFim;
+    @Rotulo("Observações")       private final String obs;
 
     private Snapshot(String escalaoId, String cargoId, String salario, String moeda,
         String tipoSituacao, String dataInicio, String dataFim, String obs) {
@@ -82,6 +98,18 @@ public class EscalaoDetalheDiffWriter {
     }
   }
 
+  /** Nome do campo → rótulo, derivado das anotações {@link Rotulo} do {@link Snapshot} (fonte única). */
+  public static Map<String, String> rotulos() {
+    Map<String, String> m = new LinkedHashMap<>();
+    for (Field f : Snapshot.class.getDeclaredFields()) {
+      Rotulo r = f.getAnnotation(Rotulo.class);
+      if (r != null) {
+        m.put(f.getName(), r.value());
+      }
+    }
+    return m;
+  }
+
   /** Monta o snapshot formatado de um tiprel (null → snapshot todo-nulo = estado "antes" inexistente). */
   public Snapshot snapshot(TiposRelacionamentoEntity tr) {
     if (tr == null) {
@@ -93,7 +121,7 @@ public class EscalaoDetalheDiffWriter {
 
   /** Diff antes→depois (só campos alterados) como DTOs — leitura on-the-fly, sem persistir. */
   public List<ValidacaoDetalheDTO> comparar(TiposRelacionamentoEntity antes, TiposRelacionamentoEntity depois) {
-    Map<String, String> rotulos = descriptor.rotulos();
+    Map<String, String> rotulos = rotulos();
     return javers.compare(snapshot(antes), snapshot(depois))
         .getChangesByType(ValueChange.class)
         .stream()
@@ -110,7 +138,7 @@ public class EscalaoDetalheDiffWriter {
 
   /** Mesmo diff, mas PERSISTE em RH_T_VALIDACAO_DETALHE (uma linha por campo alterado). */
   public void persistir(ValidacaoEntity validacao, TiposRelacionamentoEntity antes, TiposRelacionamentoEntity depois) {
-    Map<String, String> rotulos = descriptor.rotulos();
+    Map<String, String> rotulos = rotulos();
     javers.compare(snapshot(antes), snapshot(depois))
         .getChangesByType(ValueChange.class)
         .forEach(vc -> {

@@ -1,5 +1,6 @@
 package cv.inps.rh.funcionario.application.service;
 
+import cv.inps.rh.funcionario.application.service.historicolaboral.EscalaoDetalheDiffWriter;
 import cv.inps.rh.shared.application.constants.custom.Referencia;
 import cv.inps.rh.shared.application.service.ValidacaoDetalheDescriptor;
 import org.springframework.stereotype.Component;
@@ -30,23 +31,17 @@ public class GestaoLaboralValidacaoDetalheDescriptor implements ValidacaoDetalhe
     return "TiposRelacionamentoEntity";
   }
 
+  // Campos e rótulos derivam do Snapshot do EscalaoDetalheDiffWriter (fonte única: as anotações @Rotulo).
+  // Fora da grelha, por omissão: estado (workflow), fun/contr/carreira/mob/regime/situac (estruturais),
+  // est_act_adm/flg_processa (workflow), created*/lastModified*.
+
   @Override
   public Set<String> camposNegocio() {
-    // Fora, por omissão: estado (workflow), fun/contr/carreira/mob/regime/situac (estruturais),
-    // est_act_adm/flg_processa (workflow), created*/lastModified*.
-    return Set.of("escalaoId", "cargoId", "salario", "moeda", "tipoSituacao", "dataInicio", "dataFim", "obs");
+    return EscalaoDetalheDiffWriter.rotulos().keySet();
   }
 
   @Override
   public Map<String, String> rotulos() {
-    return Map.of(
-        "escalaoId", "Escalão",
-        "cargoId", "Cargo",
-        "salario", "Salário",
-        "moeda", "Moeda",
-        "tipoSituacao", "Tipo de alteração",
-        "dataInicio", "Data início",
-        "dataFim", "Data fim",
-        "obs", "Observações");
+    return EscalaoDetalheDiffWriter.rotulos();
   }
 }
