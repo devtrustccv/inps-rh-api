@@ -76,6 +76,9 @@ public class AlertaWriteService {
       alerta.setReferencia("CONTRATO");
       alerta.setReferenciaName("RH_T_CONTRATO_VINCULO");
       alerta.setReferenciaId(contrato.getId());
+      // uuid do contrato — o frontend faz lookup pelos endpoints por UUID (get contrato by id),
+      // igual à lista de validações; evita traduzir id->uuid.
+      alerta.setReferenciaUuid(contrato.getUuid());
       alerta.setTipoAlerta(TIPO_RENOVACAO);
       alerta.setPrioridade(PRIORIDADE_ALTA);
       alerta.setDescricao(descricaoRenovacao(contrato));
@@ -102,6 +105,7 @@ public class AlertaWriteService {
       alerta.setReferencia("CONTRATO");
       alerta.setReferenciaName("RH_T_CONTRATO_VINCULO");
       alerta.setReferenciaId(contrato.getId());
+      alerta.setReferenciaUuid(contrato.getUuid());
       alerta.setTipoAlerta(TIPO_CONVERSAO);
       alerta.setPrioridade(PRIORIDADE_ALTA);
       alerta.setDescricao(descricaoConversao(contrato));
@@ -162,6 +166,7 @@ public class AlertaWriteService {
     alerta.setReferencia("LICENCA");
     alerta.setReferenciaName("RH_T_SITUACAO_LABORAL");
     alerta.setReferenciaId(licenca.getId());
+    alerta.setReferenciaUuid(licenca.getUuid());
     alerta.setTipoAlerta(TIPO_LICENCA_SV);
     alerta.setPrioridade(PRIORIDADE_MEDIA);
     return alerta;
