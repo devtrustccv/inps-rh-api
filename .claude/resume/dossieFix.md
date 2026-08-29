@@ -1,4 +1,36 @@
-> Updated: 2026-08-29 ~15:30
+> Updated: 2026-08-29 (sessão 2, tarde)
+
+## Sessão 2 (2026-08-29): Novo Contrato após Desativar — BUG ENCONTRADO E CORRIGIDO ✅
+
+Testado o passo que ficara para depois: **Novo Contrato depois de Desativar**. Ciclo completo validado
+end-to-end no C: DESATIVAR 717 → Novo Contrato 720 (P) → **Validar 720 (SIM → A)**. Tudo consolidou
+(tiprel 173385 A/est_act_adm=1, histórico 264 do 717 caiu a est_act_adm=0 → 1 único corrente, split-brain
+resolvido; `reconciliar` criou salário fixo 1458=186980 + PAG fixos; manuais 1468/1640/1641 → A).
+
+**BUG (corrigido, commit `531feabc`):** o ramo `primeiroContrato(...)` do `NovoContratoService` **não fazia
+`funcionario.getContratos().add(contrato)`** → contrato/carreira ficavam só referenciados pelo tiprel
+(`@ManyToOne` **sem cascade**) → `TransientObjectException: ...CarreiraEntity` no `entityManager.flush()`
+([NovoContratoService.java:429]). Fix de 1 linha (L343), espelhando o ramo não-primeiro (`registrar`, L133).
+Compilar JDK23. **Working tree == HEAD (fix já commitado por feluisdev).**
+
+**Porque só apareceu agora:** `primeiroContrato` é alcançado quando `isPrimeiroContrato || tipoRelacionamentoAtual==null`
+(L104-110). Todo colaborador nasce COM contrato (a criação inclui `dadosContratuais`), logo `isPrimeiroContrato=true`
+via este endpoint é *dead code* em produção; a **DESATIVAÇÃO** (est_act_adm→0) é o gatilho real que expõe a via.
+
+**Prova rigorosa (revert→500 / reapply→200):** feita num colaborador NOVO e limpo (**958916**, uuid
+`01a04d35-057f-7798-92e6-3095a377f702`): criado (contrato 721 P, carreira) → validado registo (PUT
+`/funcionarios/{id}` com `validar:SIM` + familiar com `id` + NIB) → 721 A → DESATIVAR 721 → tiprel 173386
+est_act_adm=0. Com fix REVERTIDO: POST Novo Contrato = **500** (mesmo `TransientObjectException` em
+`primeiroContrato:429`, prova que é geral, não específico do C). Com fix: **200**, contrato **722** P criado
+(tiprel 173388, carreira 787 própria). Payloads: `scratchpad/clean_*`, `scratchpad/nc_*`.
+
+**Nota de dados de teste:** ficou o colaborador 958916 (721 I desativado + 722 P por validar) e o C com
+720 A (atual) — o C já NÃO está no baseline `rollback_C.sql` (720 é agora o contrato ativo). Limpar 958916
+se/quando necessário (não pedido).
+
+---
+
+> Updated: 2026-08-29 ~15:30 (sessão 1 — histórico abaixo)
 
 ## Goal
 
