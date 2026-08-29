@@ -1,10 +1,40 @@
 # Handoff — Melhorias Dossiê do Colaborador
 
-> Updated: 2026-08-27.
+> Updated: 2026-08-29.
 > HANDOFF DETALHADO desta sessão (o `/resume dossier_melhorias` lê ISTO). Fonte única.
 > Paths de código são relativos ao worktree: `.claude/worktrees/dossier-melhorias/`.
+> Nota: o trabalho pós-merge (§0b em diante) é **direto em `develop`** (raiz do repo), não no worktree.
 
 ---
+
+## 0c. Referência de validação ALTERACAO_ESCALAO + TIPO_SITUACAO por domínio (2026-08-29)
+
+Feito **direto em `develop`**, commit **`90612692`**. Verificado na BD live (`RH_T_DOMAINS`) e compilado
+(BUILD SUCCESS, JDK23).
+
+**Decisão do utilizador:** o fluxo "Alterar Escalão/Cargo" passa a usar a referência de validação
+**`ALTERACAO_ESCALAO`** (não `GESTAO_LABORAL`). Regra: **acrescentar** o enum (NÃO renomear) e trocar o uso.
+
+- `Referencia.java` — **+`ALTERACAO_ESCALAO("Alteração de Escalão")`**; `GESTAO_LABORAL` **mantido**
+  (registos de teste antigos ainda resolvem via enum).
+- `AlterarEscalaoCargoService` + `GestaoLaboralValidacaoDetalheDescriptor` — todo o uso de
+  `Referencia.GESTAO_LABORAL` → `Referencia.ALTERACAO_ESCALAO` (referenciaName da validação, `referente`
+  do tiprel, reabrir/devolver-correção, lookup da validação, descriptor JaVers).
+- **`setReferente` guarda o NOME da Referencia** (padrão confirmado: Mobilidade/Carreira/Contrato/
+  RegistoColaborador) — logo `referente` = `ALTERACAO_ESCALAO`, distinto do TIPO_SITUACAO.
+- **TIPO_SITUACAO** (coluna do tiprel, domínio `TIPO_MOV_LABORAL`): deixou de gravar `"GESTAO_LABORAL"`
+  (**valor inexistente no domínio** — nunca esteve em `RH_T_DOMAINS`). Passa aos valores válidos
+  confirmados na BD: **`ESCALAO_NOVO`** (id 377, fluxo escalão) / **`CARGO_NOVO`** (ids 264/376, fluxo
+  cargo-só), como default quando o form não envia `tipoAlteracao`.
+- Comentários/javadoc alinhados (service, `AlterarEscalaoCargoDTO`, TODO T7.8 em `JaversValidacaoDetalheReadService`).
+
+**Gotchas:** DbQuery/DbExec vivem em `tools/db/` (não na raiz); URL live `62.84.179.137:1521:xe`, user
+`INPSRH`, pass no `tools/db/DbQuery.java`. Colunas do domínio: `DOMINIO/VALOR/DESCRICAO` (não `VALUE`).
+Referência `Referencia` é enum app-side (NÃO validado contra domínio) — `ALTERACAO_ESCALAO` como
+referenciaName não precisa de entrada em `RH_T_DOMAINS`. **Não testado live end-to-end** nesta sessão
+(só compilado + verificação de domínio); testar o fluxo Alterar Escalão quando a app subir no 8089.
+⚠️ Ainda **por fazer stage/commit por outra sessão**: `NovoContrato*`, `ValidarContratoService`,
+`MarcarAlertaTratadoCommand` estavam modificados/untracked na árvore — NÃO incluídos neste commit.
 
 ## 0. Estado live (2026-08-26, sessão de testes) — BD DE VOLTA
 
