@@ -328,9 +328,24 @@ reassociado, antigo I, novo A. T7.6 validar NAO → I, salário intacto. T7.7 CO
 **Evidências → HTML:** por teste, HTTP status + JSON cru + queries de verificação. Montar
 `docs/evidencias_teste_live_dossier.html` explicando cada fluxo e resultado.
 
-## 8. Next step (retomar aqui) — MERGE FEITO
+## 8. Next step (retomar aqui) — ▶ TESTE LIVE DO T7.8
 
-**FASES 0-9 verdes** (T7.8 adiado) e **branch MERGED em `develop`** (local, sem push).
+**⇒ PRÓXIMO PASSO = testar live o T7.8 no 8089** (código pronto e compilado, §0d; só falta a validação
+end-to-end contra a BD). Passos concretos:
+1. Arrancar no 8089 (`scratchpad/launch8089.py` — ver GOTCHAS do §0; JDK23, SERVICE_PORT=8089).
+2. Colaborador PCCS **sem carreira** (ex.: os fixtures F4/F5 do §0, uuid `01a03f71-8385-72e3-a37f-7a0c8f94bdbb`
+   ou `01a03f90-fbf3-7924-ad2c-4b5d599a79b3`). `POST .../alterar-escalao-cargo` com novo escalão → tiprel P.
+3. Obter o `uuid` da validação criada e `GET validacoes/{uuid}/detalhes` → **confirmar linhas antes→depois**
+   (escalão `codigo`|nível/escala, salário, cargo, datas, obs) com rótulos PT; imprimir HTTP status + JSON cru.
+4. **Regressão "não quebrar os outros":** `GET .../detalhes` de uma validação de **mobilidade** e de
+   **carreira**/**situação laboral** → continuam a devolver o detalhe normal (via JaVers, inalterado).
+5. Registar evidência (HTTP + JSON + queries) — juntar a `docs/evidencias_teste_live_dossier.html`.
+
+Ficheiros-alvo: `AlteracaoEscalaoDetalheReadService`, `GetDetalheAlteracoesQueryHandler` (commit `814dd683`).
+
+---
+
+**FASES 0-9 verdes** e **branch MERGED em `develop`** (local, sem push). T7.8 ✅ resolvido (§0d).
 - Merge commit: **`de698d2a`** (`Merge branch 'feat/dossier-melhorias' into develop`). Verificado antes:
   `merge-tree` limpo (1 só ficheiro sobreposto — `TiposRelacionamentoEntityRepository`, auto-merge
   aditivo) + **compilação BUILD SUCCESS** num worktree descartável de develop.
