@@ -41,10 +41,16 @@ Long); `flg_tratamento` estende a spec (S ao processar / N se rejeitado; grelha 
 
 ---
 
-## 0d. T7.8 RESOLVIDO — detalhe de alterações da Alteração de Escalão (reader manual isolado, 2026-08-29)
+## 0d. T7.8 RESOLVIDO + ✅ TESTADO LIVE — detalhe de alterações da Alteração de Escalão (reader manual isolado, 2026-08-29)
 
-Feito **direto em `develop`** (a seguir ao `90612692`). Compilado (BUILD SUCCESS, JDK23). **Não testado
-live** (app não subiu nesta sessão) — testar quando arrancar no 8089.
+Feito **direto em `develop`** (a seguir ao `90612692`). Compilado (BUILD SUCCESS, JDK23).
+**✅ TESTADO LIVE end-to-end no 8089 (2026-08-29):**
+- POST `.../alterar-escalao-cargo` (F4 uuid `01a03f71-...`, escalão 21=13/A) → pendente tiprel 173381,
+  validação 1012 (uuid `01a04c8d-1918-7044-86ea-61ab77a007ef`), HTTP 200.
+- `GET validacoes/{uuid}/detalhes` → linhas antes→depois com rótulos PT: **Escalão** SEC_CA_13_B→SEC_CA_13_A,
+  **Salário** 178076→186980, **Data início** 26-08→29-08, **Observações**. Só campos com diff. HTTP 200.
+- Regressão OK: MOBILIDADE (`RH_T_MOBILIDADE`) e CARREIRA (`RH_T_CARREIRA`) continuam via JaVers, HTTP 200.
+- Nota: em dev sem auth `alteradoPor=anonymousUser`. Deixado 1 pendente (val. 1012) na BD como evidência.
 
 **Diagnóstico do §5b estava ERRADO** (provado na BD `JV_SNAPSHOT`): não é o filtro `InitialValueChange`.
 A causa real é que **`TiposRelacionamentoEntity` é Shallow Reference** (`JaversAuditConfig.REFERENCIAS_RASAS`,
@@ -132,7 +138,7 @@ referenciaName não precisa de entrada em `RH_T_DOMAINS`. **Não testado live en
 | 7 T7.7 CORRIGIR (P→C) + re-POST reabre (C→P) sem duplicar | ✅ verde |
 | 7 T7.1 guard COM carreira → 400 | ✅ verde (live 2026-08-26) |
 | 7 T7.2 guard não-PCCS → 400 | ✅ verde (live 2026-08-26) |
-| 7 T7.8 Detalhe de alterações | ✅ RESOLVIDO (reader manual isolado, §0d) — compilado; falta teste live |
+| 7 T7.8 Detalhe de alterações | ✅ RESOLVIDO + TESTADO LIVE (reader manual isolado, §0d) 2026-08-29 |
 | 8 Remunerações filtros (situacaoLaboral/contrVinculo, +/-) | ✅ verde (live 2026-08-26) |
 | 9 Regressão (relacao-laboral carreira + renumeracoes + JaVers mob/carr) | ✅ verde (live 2026-08-26) |
 
