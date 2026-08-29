@@ -7,6 +7,43 @@
 
 ---
 
+## 0d. T7.8 RESOLVIDO — detalhe de alterações da Alteração de Escalão (reader manual isolado, 2026-08-29)
+
+Feito **direto em `develop`** (a seguir ao `90612692`). Compilado (BUILD SUCCESS, JDK23). **Não testado
+live** (app não subiu nesta sessão) — testar quando arrancar no 8089.
+
+**Diagnóstico do §5b estava ERRADO** (provado na BD `JV_SNAPSHOT`): não é o filtro `InitialValueChange`.
+A causa real é que **`TiposRelacionamentoEntity` é Shallow Reference** (`JaversAuditConfig.REFERENCIAS_RASAS`,
+adicionado na 2ª passagem do dossieFix). Consequência: todo commit do tiprel grava `STATE={}` / `CHANGED=[]`
+(verificado: snapshots 173373-173380 e até os antigos 173361/173363 têm estado vazio). Logo o JaVers **nunca**
+captura os campos do próprio tiprel → opções (a) e (b) do §5b **ambas inviáveis**.
+
+**Porque o shallow tem de ficar:** o tiprel tem **auto-referência** `tiprelId` (cadeia de tiprels
+anteriores) + é FK de muitos agregados auditados (Substituicao, ProcessoDisciplinar, EvolucaoCarreira…).
+Des-shallow faria cada commit percorrer a cadeia recursiva → o problema de 20-50s que o shallow evita.
+
+**Solução escolhida (decisão do utilizador): reader manual isolado — NÃO toca no JaVers nem nos outros fluxos.**
+- Novo `service/historicolaboral/AlteracaoEscalaoDetalheReadService` — compara o tiprel **pendente**
+  (`validacao.tiprelId` = "depois") com o **predecessor** (`pendente.tiprelId` = "antes"), ambos linhas
+  reais. Diff só dos campos com diferença (semântica de EDIÇÃO). Reutiliza `rotulos()`/`camposNegocio()`
+  do `GestaoLaboralValidacaoDetalheDescriptor` (fonte única). Campos: escalão (codigo|nível/escala),
+  cargo (nome), salário, moeda, tipoSituacao, dataInicio, dataFim, obs. autor/data via auditoria JPA do
+  pendente; tabelaName=RH_T_TIPOS_RELACIONAMENTO.
+- `GetDetalheAlteracoesQueryHandler` — branch: se `referenciaName==ALTERACAO_ESCALAO` → reader dedicado;
+  **senão → caminho JaVers intacto**. É a ÚNICA referência desviada. +`ValidacaoEntityRepository` para
+  ler a referência.
+- `JaversValidacaoDetalheReadService` — TODO T7.8 substituído por NOTA a explicar o desvio (nenhuma
+  mudança de lógica). `GestaoLaboralValidacaoDetalheDescriptor` — javadoc nota que serve rótulos ao reader.
+- ⚠️ **Verificação de "não quebrar os outros":** todos os outros descritores auditam entidades próprias
+  (Carreira→CarreiraEntity, Situação→SituacaoLaboralEntity, Substituicao→SubstituicaoEntity,
+  Mobilidade→MobilidadeEntity) — nenhum aponta ao tiprel. Só GESTAO_LABORAL apontava. Zero impacto.
+- **Gotcha Oracle XE (11g legacy):** sem `FETCH FIRST` — usar `ROWNUM`. Colunas `JV_GLOBAL_ID`: `LOCAL_ID`
+  (não `local_id_value`); `JV_SNAPSHOT`: `STATE`,`CHANGED_PROPERTIES`,`TYPE`,`GLOBAL_ID_FK`.
+
+**Por testar live (8089):** registar alteração de escalão → `GET validacoes/{uuid}/detalhes` devolve linhas
+antes→depois (escalão/salário/datas com rótulos PT); confirmar que os outros detalhes (mobilidade/carreira/
+situação) continuam intactos.
+
 ## 0c. Referência de validação ALTERACAO_ESCALAO + TIPO_SITUACAO por domínio (2026-08-29)
 
 Feito **direto em `develop`**, commit **`90612692`**. Verificado na BD live (`RH_T_DOMAINS`) e compilado
@@ -61,7 +98,7 @@ referenciaName não precisa de entrada em `RH_T_DOMAINS`. **Não testado live en
 | 7 T7.7 CORRIGIR (P→C) + re-POST reabre (C→P) sem duplicar | ✅ verde |
 | 7 T7.1 guard COM carreira → 400 | ✅ verde (live 2026-08-26) |
 | 7 T7.2 guard não-PCCS → 400 | ✅ verde (live 2026-08-26) |
-| 7 T7.8 Detalhe de alterações (JaVers) | ⏸️ GAP ADIADO — TODO no código + §5b; `[]` inofensivo, não bloqueia merge |
+| 7 T7.8 Detalhe de alterações | ✅ RESOLVIDO (reader manual isolado, §0d) — compilado; falta teste live |
 | 8 Remunerações filtros (situacaoLaboral/contrVinculo, +/-) | ✅ verde (live 2026-08-26) |
 | 9 Regressão (relacao-laboral carreira + renumeracoes + JaVers mob/carr) | ✅ verde (live 2026-08-26) |
 
@@ -213,7 +250,11 @@ string), `shared/models/TiposRelacionamentoEntity`(+escalao_id), `shared/enum/Do
 `funcionario/dto/AlterarEscalaoCargoDTO`(novo)+2 ações no `HistoricoLaboralController`. Enums hand-written
 (`TipoSalarioVinculo`, `Referencia`) sem manifesto.
 
-## 5b. GAP T7.8 — Detalhe de alterações (JaVers) vazio para Gestão Laboral
+## 5b. GAP T7.8 — Detalhe de alterações (JaVers) vazio para Gestão Laboral — ✅ RESOLVIDO (ver §0d)
+
+> ⚠️ O diagnóstico abaixo (InitialValueChange) revelou-se ERRADO. A causa real é o tiprel ser Shallow
+> Reference (STATE={} no JaVers). Resolvido com reader manual isolado — ver §0d. Mantido por histórico.
+
 
 **Sintoma:** `GET validacoes/{tiprelUuid}/detalhes` para uma alteração de escalão devolve `[]` (HTTP 200).
 **Causa raiz (confirmada):** `JaversValidacaoDetalheReadService` (linha ~105-118) decide a semântica pela
@@ -301,7 +342,7 @@ reassociado, antigo I, novo A. T7.6 validar NAO → I, salário intacto. T7.7 CO
 1. **`git push` de `develop`** (o merge foi só local; passo público por decidir).
 2. **Aplicar migrações** (`docs/db/melhorias_dossier_*.sql`) em qualquer ambiente que corra develop e
    ainda não as tenha (a BD live já as tem).
-3. **T7.8** — implementar o detalhe JaVers da Gestão Laboral (adiado).
+3. **T7.8** — ✅ RESOLVIDO via reader manual isolado (§0d); falta só **teste live** no 8089.
 4. Resíduo: pasta `.claude/worktrees/_mergecheck` ficou bloqueada por um handle no `target/` (o registo
    de worktree já foi prunado; apagar a pasta quando o processo largar / ao reiniciar).
 
