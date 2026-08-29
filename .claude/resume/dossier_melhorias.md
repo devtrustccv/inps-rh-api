@@ -366,8 +366,9 @@ reassociado, antigo I, novo A. T7.6 validar NAO → I, salário intacto. T7.7 CO
 
 **⇒ PRÓXIMO PASSO = testar live o T7.8 no 8089** (código pronto e compilado, §0d; só falta a validação
 end-to-end contra a BD). Passos concretos:
-1. Arrancar no 8089 (`scratchpad/launch8089.py` — ver GOTCHAS do §0; JDK23, SERVICE_PORT=8089).
-2. Colaborador PCCS **sem carreira** (ex.: os fixtures F4/F5 do §0, uuid `01a03f71-8385-72e3-a37f-7a0c8f94bdbb`
+1. ✅ **App a correr no 8089** (2026-08-29, reiniciada com o build do T7.8; PID 78592, `Started ... in 22s`,
+   BD ligada, api-docs HTTP 200, dev-mode sem Keycloak). Log: `scratchpad/boot_t78_8089.log`.
+2. ◀ **A FAZER AGORA:** Colaborador PCCS **sem carreira** (ex.: os fixtures F4/F5 do §0, uuid `01a03f71-8385-72e3-a37f-7a0c8f94bdbb`
    ou `01a03f90-fbf3-7924-ad2c-4b5d599a79b3`). `POST .../alterar-escalao-cargo` com novo escalão → tiprel P.
 3. Obter o `uuid` da validação criada e `GET validacoes/{uuid}/detalhes` → **confirmar linhas antes→depois**
    (escalão `codigo`|nível/escala, salário, cargo, datas, obs) com rótulos PT; imprimir HTTP status + JSON cru.
