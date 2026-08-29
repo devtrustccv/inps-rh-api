@@ -12,12 +12,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 /**
- * Melhoria 2.2.1 — "Alterar Escalão / Cargo" (Gestão Laboral). Só para colaboradores com salário do
- * PCCS mas SEM carreira (o escalão vive no tiprel, não numa RH_T_CARREIRA).
+ * Melhoria 2.2.1 — "Alterar Escalão / Cargo" (referência de validação ALTERACAO_ESCALAO). Só para
+ * colaboradores com salário do PCCS mas SEM carreira (o escalão vive no tiprel, não numa RH_T_CARREIRA).
  *
  * <ul>
- *   <li>{@code tipoAlteracao}: multiselect do domínio TIPO_MOV_LABORAL / referência GESTAO_LABORAL.
- *       O frontend envia os valores selecionados <b>separados por vírgulas</b> (ex.: "ESCALAO,CARGO");
+ *   <li>{@code tipoAlteracao}: multiselect do domínio TIPO_MOV_LABORAL (ESCALAO_NOVO/CARGO_NOVO).
+ *       O frontend envia os valores selecionados <b>separados por vírgulas</b> (ex.: "ESCALAO_NOVO,CARGO_NOVO");
  *       gravam-se tal-e-qual em RH_T_TIPOS_RELACIONAMENTO.TIPO_SITUACAO (ver spec Mobilidade análoga).</li>
  *   <li>{@code dataInicio}/{@code dataFim}: gravam em RH_T_TIPOS_RELACIONAMENTO.DATA_INICIO/DATA_FIM.</li>
  *   <li>Alterar CARGO é imediato; alterar ESCALÃO vai a validação (fecha o salário anterior e abre um

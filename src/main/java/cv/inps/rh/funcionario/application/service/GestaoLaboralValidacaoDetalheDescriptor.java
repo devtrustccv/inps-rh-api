@@ -17,7 +17,7 @@ public class GestaoLaboralValidacaoDetalheDescriptor implements ValidacaoDetalhe
 
   @Override
   public String referenciaName() {
-    return Referencia.GESTAO_LABORAL.name();
+    return Referencia.ALTERACAO_ESCALAO.name();
   }
 
   @Override
