@@ -122,3 +122,44 @@ detalhe de **Mobilidade, Carreira, Registo, Renovação**, etc. **não mudam** e
 
 **Ação front:** não assumir conteúdo na grelha de detalhe **especificamente para Gestão Laboral**; tratar
 lista vazia sem erro. (Será preenchida numa iteração seguinte.)
+
+---
+---
+
+# Alterações Front-End — Inativar/Ativar Colaborador + Licença S/Vencimento
+
+**Data:** 2026-08-29
+**Branch:** develop (commits `b4920553`, `7586e8bf`)
+**Âmbito:** endpoint de Situação Laboral (`PATCH .../funcionarios/{id}/situacao-laboral`). Testado live (fun 958915).
+
+## 7. Novas validações (HTTP 400) no registo de situação laboral
+
+Aplicam-se ao **registo/reenvio** (maker, `validar=null`), no `PATCH .../funcionarios/{id}/situacao-laboral`:
+
+| Situação | Resposta 400 (`title`) |
+|---|---|
+| `motivoId` em falta | *"O motivo da alteração da situação laboral é obrigatório."* |
+| Pedir **CESSADO** com colaborador já inativo | *"O colaborador já está inativo; não é necessária esta ação."* |
+| Pedir **ATIVO** com colaborador já ativo | *"O colaborador já está ativo; não é necessária esta ação."* |
+| Situação de **ausência** (ex.: Licença S/Venc.) sem `dataFim` | *"A data fim é obrigatória para situações de ausência (ex.: Licença Sem Vencimento)."* |
+
+**Ação front:** tornar **Motivo** obrigatório sempre; **Data fim** obrigatória quando a situação é de
+ausência (Licença S/Vencimento e afins); no combo **Estado**, não permitir escolher o estado atual
+(ativar quem está ativo / inativar quem está inativo).
+
+## 8. Comportamento — rejeição, datas e detalhe
+
+- **Rejeição (`validar=NAO`)** de uma cessação já processada faz **rollback**: o colaborador volta a
+  **Ativo** e o vínculo anterior é reaberto (antes ficava inativo e sem vínculo — corrigido).
+- **Datas:** o fecho do vínculo anterior e o novo vínculo passam a usar a **`dataInicio` do formulário**
+  (antes usavam a data do sistema). Enviar `dataInicio` coerente com o efeito pretendido.
+- **Detalhe de alterações** (`GET .../validacoes/{uuid}/detalhes`) passa a vir **preenchido já no registo**
+  (situação/motivo/datas/observação), não só após uma correção.
+
+## 9. Licença S/Vencimento (e outras ausências)
+
+Passa pelo **mesmo** endpoint, escolhendo a situação de ausência (ex.: `LIC_SV`). Efeitos:
+- **Não** altera o Estado do colaborador (continua **Ativo** — é uma licença, não uma cessação).
+- Regista automaticamente a **ausência** (período `dataInicio`–`dataFim`).
+- Na **aprovação** gera a **Ordem de Serviço** de Licença S/Vencimento (enviar `tipoOrdemServico`).
+- `dataFim` é **obrigatória** (ver secção 7).
