@@ -102,6 +102,10 @@ public class AlterarSituacaoLaboralWriteService {
       var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
       var tiposRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+      // Discriminador do ramo de registo: só o ramo "processado" cria um NOVO tiprel pendente (estado=P)
+      // que fechou o anterior. No ramo "não processado" (UPDATE in place) o tiprel fica estado=A e nenhum
+      // predecessor foi fechado por esta alteração — logo o rollback de rejeição NÃO deve reabrir nada.
+      boolean tiprelEraPendente = tiposRelacionamentoAtual.getEstado() == Estado.P;
       tiposRelacionamentoAtual.setEstado(estado);
 
       var situacaoLaboral = tiposRelacionamentoAtual.getSituacLaboralId();
@@ -118,9 +122,11 @@ public class AlterarSituacaoLaboralWriteService {
           .findFirst()
           .ifPresent(v -> v.setEstado(estado));
 
-      if (paramSituacaoLaboral.getCodigo().equals(SituacaoLaboral.CESSADO.name())) {
+      if (estado == Estado.A && paramSituacaoLaboral.getCodigo().equals(SituacaoLaboral.CESSADO.name())) {
         // Cessação APROVADA → o colaborador fica efetivamente inativo (RH_T_FUNCIONARIOS.ESTADO=I).
-        if (estado == Estado.A) funcionario.setEstado(Estado.I);
+        // Os efeitos de fecho (datas fim em mobilidade/carreira/contrato/rem/pag) só se aplicam na
+        // aprovação; numa rejeição são revertidos pelo rollback abaixo.
+        funcionario.setEstado(Estado.I);
         var dataFimValidacao = DateFormatter.stringToLocalDate(dto.getDataFim());
         tiposRelacionamentoAtual.setDataFim(dataFimValidacao);
         tiposRelacionamentoAtual.setEstActAdm(0);
@@ -142,11 +148,51 @@ public class AlterarSituacaoLaboralWriteService {
         ordemServicoWriteService.criar(funcionario, tiposRelacionamentoAtual, dto.getTipoOrdemServico());
       }
 
+      if (estado == Estado.I) {
+        // Rejeição (checker devolve NAO): rollback ao estado pré-registo. O registo (maker) fechou o
+        // tiprel anterior (est_act_adm=0) e criou este novo pendente; ao rejeitar, reabrir o anterior e
+        // descartar o novo, repondo RH_T_FUNCIONARIOS.ESTADO conforme a situação que estava vigente.
+        var tiprelAnterior = tiposRelacionamentoAtual.getTiprelId();
+        boolean anteriorFechadoPeloRegisto = tiprelEraPendente && tiprelAnterior != null
+            && Integer.valueOf(0).equals(tiprelAnterior.getEstActAdm());
+        if (anteriorFechadoPeloRegisto) {
+          tiprelAnterior.setEstActAdm(1);
+          tiprelAnterior.setDataFim(null);
+          tiposRelacionamentoEntityRepository.save(tiprelAnterior);
+          tiposRelacionamentoAtual.setEstActAdm(0);
+
+          var situacaoAnterior = tiprelAnterior.getSituacLaboralId();
+          var codigoAnterior = (situacaoAnterior != null && situacaoAnterior.getSituacaoLaboralId() != null)
+              ? situacaoAnterior.getSituacaoLaboralId().getCodigo() : null;
+          funcionario.setEstado(SituacaoLaboral.CESSADO.name().equals(codigoAnterior) ? Estado.I : Estado.A);
+        }
+      }
+
       funcionarioEntityRepository.save(funcionario);
       var mensagem = EstadoValidacao.SIM.equals(dto.getValidar())
           ? "Situação laboral validada."
           : "Situação laboral rejeitada.";
       return new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, List.of());
+    }
+
+    // Spec DOSSIÊ (Inativar/Ativar): "o utilizador deve indicar obrigatoriamente o motivo da alteração".
+    // Guard aplicado ao caminho de registo/reenvio (maker); a validação (checker) já reaproveita o motivo.
+    if (dto.getMotivoId() == null) {
+      throw IgrpResponseStatusException.badRequest(
+          "O motivo da alteração da situação laboral é obrigatório.");
+    }
+
+    // Guard do combo Inativar/Ativar (2 opções): não faz sentido CESSAR quem já está inativo, nem ATIVAR
+    // quem já está ativo. Aplica-se só às situações ATIVO/CESSADO; outras (ex.: Licença S/Vencimento)
+    // passam sem esta restrição. Não se aplica ao reenvio de correção (o maker reenvia o mesmo estado).
+    if (!estaPorCorrigir) {
+      var codigoAlvo = paramSituacaoLaboral.getCodigo();
+      if (SituacaoLaboral.CESSADO.name().equals(codigoAlvo) && funcionario.getEstado() == Estado.I) {
+        throw IgrpResponseStatusException.badRequest("O colaborador já está inativo; não é necessária esta ação.");
+      }
+      if (SituacaoLaboral.ATIVO.name().equals(codigoAlvo) && funcionario.getEstado() == Estado.A) {
+        throw IgrpResponseStatusException.badRequest("O colaborador já está ativo; não é necessária esta ação.");
+      }
     }
 
     var dataInicio = DateFormatter.stringToLocalDate(dto.getDataInicio());
@@ -202,7 +248,28 @@ public class AlterarSituacaoLaboralWriteService {
 
     boolean processado = tiposRelacionamentoAtual.getUltProc() != null;
     if (!processado) {
-      // Ainda não processado → UPDATE do registo existente, sem criar novo tipos_relacionamento
+      // Ainda não processado → UPDATE do registo existente, sem criar novo tipos_relacionamento.
+      // FLG_PROCESSA depende de a situação ter remuneração (RH_T_PARAM_SITUACAO.FLG_REMUNERACAO),
+      // tal como no ramo processado (novo tiprel). Sem isto, mudar p/ situação sem remuneração
+      // (ex.: Licença S/Vencimento) deixava o colaborador ainda marcado para processar salário.
+      tiposRelacionamentoAtual.setFlgProcessa(
+          Integer.valueOf(1).equals(paramSituacaoLaboral.getFlgRemuneracao()) ? 1 : 0);
+
+      // Garante uma validação pendente para esta alteração e persiste-a ANTES do save da situação,
+      // para carimbar o auto-audit (JaVers) — sem isto o "detalhe de alterações" do registo fica vazio.
+      var validacaoPend = funcionarioRules
+          .getValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.ESTADO_COLABORADOR)
+          .orElse(null);
+      if (validacaoPend == null) {
+        var validUpd = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.ESTADO_COLABORADOR.name(), Estado.P);
+        validUpd.setFunId(funcionario);
+        validUpd.setTiprelId(tiposRelacionamentoAtual);
+        validUpd.setReferenciaUuid(situacaoAtual != null ? situacaoAtual.getUuid() : null);
+        funcionario.getValidacoes().add(validUpd);
+        funcionarioEntityRepository.saveAndFlush(funcionario); // persiste a validação -> id/uuid
+        validacaoPend = validUpd;
+      }
+
       if (situacaoAtual != null) {
         situacaoAtual.setSituacaoLaboralId(paramSituacaoLaboral);
         situacaoAtual.setMotivoSitLabId(paramSituacaoLaboralDetalhe);
@@ -210,28 +277,22 @@ public class AlterarSituacaoLaboralWriteService {
         situacaoAtual.setDataInicio(dataInicio);
         situacaoAtual.setDataFim(dataFim);
         situacaoAtual.setEstado(Estado.P);
-        situacaoLaboralEntityRepository.save(situacaoAtual);
-      }
-      // FLG_PROCESSA depende de a situação ter remuneração (RH_T_PARAM_SITUACAO.FLG_REMUNERACAO),
-      // tal como no ramo processado (novo tiprel). Sem isto, mudar p/ situação sem remuneração
-      // (ex.: Licença S/Vencimento) deixava o colaborador ainda marcado para processar salário.
-      tiposRelacionamentoAtual.setFlgProcessa(
-          Integer.valueOf(1).equals(paramSituacaoLaboral.getFlgRemuneracao()) ? 1 : 0);
-      // garante uma validação pendente para esta alteração
-      if (funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.ESTADO_COLABORADOR).isEmpty()) {
-        var validUpd = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.ESTADO_COLABORADOR.name(), Estado.P);
-        validUpd.setFunId(funcionario);
-        validUpd.setTiprelId(tiposRelacionamentoAtual);
-        validUpd.setReferenciaUuid(situacaoAtual != null ? situacaoAtual.getUuid() : null);
-        funcionario.getValidacoes().add(validUpd);
+        // Auto-audit (JaVers): carimba o UPDATE da situação com a validação em curso — o detalhe de
+        // alterações filtra por este validacaoUuid (situacaoLaboralId/motivo/datas/obs).
+        try {
+          ValidacaoAuditContext.set(validacaoPend.getId(), validacaoPend.getUuid(), "RH_T_SITUACAO_LABORAL");
+          situacaoLaboralEntityRepository.save(situacaoAtual);
+        } finally {
+          ValidacaoAuditContext.clear();
+        }
       }
       funcionarioEntityRepository.save(funcionario);
       return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Situação laboral actualizada.", List.of());
     }
 
     // Mudou E já processado → fecha o atual e cria novo registo (situação + tipos_relacionamento)
-    // Caso de uso 1.6.3: anterior DATA_FIM = data do registo.
-    tiposRelacionamentoAtual.setDataFim(java.time.LocalDate.now());
+    // Spec DOSSIÊ 1.1: anterior DATA_FIM = data início (do formulário).
+    tiposRelacionamentoAtual.setDataFim(dataInicio);
     tiposRelacionamentoAtual.setEstActAdm(0);
 
     var situacaoLaboral = new SituacaoLaboralEntity();
@@ -246,8 +307,8 @@ public class AlterarSituacaoLaboralWriteService {
     situacaoLaboralEntityRepository.save(situacaoLaboral);
 
     var tipoRelacionamentoNovo = dadosContratuaisMapper.clone(tiposRelacionamentoAtual);
-    // Caso de uso 1.6.3: novo tiprel DATA_INICIO = data do registo, DATA_FIM = null.
-    tipoRelacionamentoNovo.setDataInicio(java.time.LocalDate.now());
+    // Spec DOSSIÊ 1.2: novo tiprel DATA_INICIO = data início (do formulário), DATA_FIM = null.
+    tipoRelacionamentoNovo.setDataInicio(dataInicio);
     tipoRelacionamentoNovo.setDataFim(null);
     tipoRelacionamentoNovo.setEstActAdm(1);
     tipoRelacionamentoNovo.setTipoSituacao("MUDANCA_SITUACAO_LABORAL");
