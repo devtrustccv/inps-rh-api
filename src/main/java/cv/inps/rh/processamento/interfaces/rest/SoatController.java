@@ -46,8 +46,8 @@ public class SoatController {
   @GetMapping(
   )
   @Operation(
-      summary = "Get lista SOAT",
-      description = "Get lista SOAT",
+      summary = "Get lista Soat",
+      description = "Get lista Soat",
       responses = {
           @ApiResponse(
               responseCode = "200",
@@ -124,8 +124,8 @@ public class SoatController {
 
   @PostMapping("dados-instituicao")
   @Operation(
-      summary = "Create or update institution data",
-      description = "Creates the first institution data row or versions the current active row",
+      summary = "Criar ou atualizar dados instituicao",
+      description = "Criar ou atualizar dados instituicao",
       responses = {
           @ApiResponse(
               responseCode = "200",
@@ -148,8 +148,8 @@ public class SoatController {
 
   @GetMapping("dados-instituicao")
   @Operation(
-      summary = "Get current institution data",
-      description = "Gets the current active institution data row",
+      summary = "Get dados instituicao",
+      description = "Gets dados instiruicao",
       responses = {
           @ApiResponse(
               responseCode = "200",
@@ -171,8 +171,8 @@ public class SoatController {
 
   @GetMapping("dados-apolice")
   @Operation(
-      summary = "Get active insurance policies",
-      description = "Gets the current active policy for each configured island",
+      summary = "Get dados apolices",
+      description = "Gets dados apolice",
       responses = {
           @ApiResponse(
               responseCode = "200",
@@ -195,10 +195,10 @@ public class SoatController {
     return queryBus.handle(query);
   }
 
-  @GetMapping("soat/{soatId}")
+  @GetMapping("/{soatId}")
   @Operation(
-      summary = "Get soat details",
-      description = "Get soat details",
+      summary = "Get detalhes soat",
+      description = "Get detalhes soat",
       responses = {
           @ApiResponse(
               responseCode = "200",
@@ -224,8 +224,8 @@ public class SoatController {
 
   @GetMapping(value = "ficheiro", produces = MediaType.APPLICATION_PDF_VALUE)
   @Operation(
-      summary = "Download SOAT PDF",
-      description = "Processes the SOAT Thymeleaf template and downloads the generated PDF",
+      summary = "Download Soat Pdf",
+      description = "Download Soat Pdf",
       responses = {
           @ApiResponse(
               responseCode = "200",
