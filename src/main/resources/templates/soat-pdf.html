@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xml:lang="pt" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="PT" xml:lang="pt" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
     <title>Ficheiro SOAT</title>
@@ -35,29 +35,6 @@
         .logo img {
             width: 55pt;
             height: 45pt;
-        }
-
-        .title {
-            text-align: center;
-        }
-
-        .title-main {
-            font-size: 12pt;
-            font-weight: bold;
-        }
-
-        .title-sub {
-            margin-top: 3pt;
-            color: #1f4e78;
-            font-size: 10pt;
-            font-weight: bold;
-        }
-
-        .issued {
-            width: 105pt;
-            text-align: right;
-            vertical-align: top !important;
-            font-size: 7pt;
         }
 
         .section-title {
@@ -115,10 +92,6 @@
             font-size: 4.6pt;
             vertical-align: middle;
             overflow-wrap: break-word;
-        }
-
-        .odd {
-            background-color: #eaf3fb;
         }
 
         .center {
@@ -230,7 +203,7 @@
         }
 
         .form-label {
-            width: 38%;
+            width: 35%;
         }
 
         .form-value {
@@ -307,47 +280,47 @@
                 </tr>
                 <tr>
                     <td class="form-label">NOME:</td>
-                    <td class="form-value" colspan="3" th:text="${soat.nomeInstituicao}"></td>
+                    <td class="form-value" colspan="3" th:text="${soat.nomeInstituicao()}"></td>
                 </tr>
                 <tr>
                     <td class="form-label">NIF:</td>
-                    <td class="form-value" colspan="3" th:text="${soat.nifInstituicao}"></td>
+                    <td class="form-value" colspan="3" th:text="${soat.nifInstituicao()}"></td>
                 </tr>
                 <tr>
                     <td class="form-label">COD CAE:</td>
-                    <td class="form-value" colspan="3" th:text="${soat.codCae}"></td>
+                    <td class="form-value" colspan="3" th:text="${soat.codCae()}"></td>
                 </tr>
                 <tr>
                     <td class="form-label">ATIVIDADE ECONÓMICA:</td>
-                    <td class="form-value highlight" colspan="3" th:text="${soat.atividadeEconomica}"></td>
+                    <td class="form-value highlight" colspan="3" th:text="${soat.atividadeEconomica()}"></td>
                 </tr>
                 <tr>
                     <td class="form-label">N.º CERTIDÃO COMERCIAL (NC):</td>
-                    <td class="form-value" th:text="${soat.numeroCertidaoComercial}"></td>
+                    <td class="form-value" th:text="${soat.numeroCertidaoComercial()}"></td>
                     <td class="form-label">DATA VALIDADE NC:</td>
-                    <td class="form-value" th:text="${soat.dataValidadeCertidao}"></td>
+                    <td class="form-value" th:text="${soat.dataValidadeCertidao()}"></td>
                 </tr>
                 <tr>
                     <td class="form-label">TELEFONE:</td>
-                    <td class="form-value" th:text="${soat.telefone}"></td>
+                    <td class="form-value" th:text="${soat.telefone()}"></td>
                     <td class="form-label">TELEMÓVEL:</td>
-                    <td class="form-value" th:text="${soat.telemovel}"></td>
+                    <td class="form-value" th:text="${soat.telemovel()}"></td>
                 </tr>
                 <tr>
                     <td class="form-label">EMAIL:</td>
-                    <td class="form-value" colspan="3" th:text="${soat.email}"></td>
+                    <td class="form-value" colspan="3" th:text="${soat.email()}"></td>
                 </tr>
                 <tr>
                     <td class="form-label">MORADA:</td>
-                    <td class="form-value" colspan="3" th:text="${soat.morada}"></td>
+                    <td class="form-value" colspan="3" th:text="${soat.morada()}"></td>
                 </tr>
                 <tr>
                     <td class="form-label">LOCALIDADE:</td>
-                    <td class="form-value" colspan="3" th:text="${soat.localidade}"></td>
+                    <td class="form-value" colspan="3" th:text="${soat.localidade()}"></td>
                 </tr>
                 <tr>
                     <td class="form-label">CONCELHO:</td>
-                    <td class="form-value" colspan="3" th:text="${soat.concelho}"></td>
+                    <td class="form-value" colspan="3" th:text="${soat.concelho()}"></td>
                 </tr>
             </table>
         </td>
@@ -356,27 +329,26 @@
             <table class="form-table">
                 <tr>
                     <td class="form-label">APÓLICE N.º:</td>
-                    <td class="form-value" th:text="${soat.numeroApolice}"></td>
+                    <td class="form-value" th:text="${soat.numeroApolice()}"></td>
                 </tr>
                 <tr>
                     <td class="form-label">DATA INÍCIO DA APÓLICE:</td>
-                    <td class="form-value" th:text="${soat.dataInicioApolice}"></td>
+                    <td class="form-value" th:text="${soat.dataInicioApolice()}"></td>
                 </tr>
             </table>
             <table class="form-table policy-summary">
                 <tr>
                     <td class="form-label">DATA DE REFERÊNCIA <span class="required">(*)</span></td>
-                    <td class="form-value" th:text="${soat.referencia}"></td>
+                    <td class="form-value" th:text="${soat.referencia()}"></td>
                 </tr>
                 <tr>
                     <td class="form-label">N.º TOTAL DE PESSOAS SEGURAS</td>
-                    <td class="form-value highlight" th:text="${soat.totalPessoas}"></td>
+                    <td class="form-value highlight" th:text="${soat.totalPessoas()}"></td>
                 </tr>
                 <tr>
                     <td class="form-label">MASSA SALARIAL ANUAL SEGURA</td>
                     <td class="form-value highlight"><span
-                            th:text="${#numbers.formatDecimal(soat.massaSalarialAnual, 1, 'POINT', 2, 'COMMA')}"></span>
-                        CVE
+                            th:text="${soat.massaSalarialAnual()}"></span>CVE
                     </td>
                 </tr>
             </table>
@@ -401,35 +373,35 @@
 <table class="data-table legacy">
     <tr>
         <td class="label">Nome</td>
-        <td class="value" th:text="${soat.nomeInstituicao}"></td>
+        <td class="value" th:text="${soat.nomeInstituicao()}"></td>
         <td class="label">NIF</td>
-        <td class="value" th:text="${soat.nifInstituicao}"></td>
+        <td class="value" th:text="${soat.nifInstituicao()}"></td>
         <td class="label">Código CAE</td>
-        <td class="value" th:text="${soat.codCae}"></td>
+        <td class="value" th:text="${soat.codCae()}"></td>
     </tr>
     <tr>
         <td class="label">Atividade económica</td>
-        <td class="value" th:text="${soat.atividadeEconomica}"></td>
+        <td class="value" th:text="${soat.atividadeEconomica()}"></td>
         <td class="label">N.º certidão comercial</td>
-        <td class="value" th:text="${soat.numeroCertidaoComercial}"></td>
+        <td class="value" th:text="${soat.numeroCertidaoComercial()}"></td>
         <td class="label">Validade da certidão</td>
-        <td class="value" th:text="${soat.dataValidadeCertidao}"></td>
+        <td class="value" th:text="${soat.dataValidadeCertidao()}"></td>
     </tr>
     <tr>
         <td class="label">Telefone</td>
-        <td class="value" th:text="${soat.telefone}"></td>
+        <td class="value" th:text="${soat.telefone()}"></td>
         <td class="label">Telemóvel</td>
-        <td class="value" th:text="${soat.telemovel}"></td>
+        <td class="value" th:text="${soat.telemovel()}"></td>
         <td class="label">Email</td>
-        <td class="value" th:text="${soat.email}"></td>
+        <td class="value" th:text="${soat.email()}"></td>
     </tr>
     <tr>
         <td class="label">Morada</td>
-        <td class="value" th:text="${soat.morada}"></td>
+        <td class="value" th:text="${soat.morada()}"></td>
         <td class="label">Localidade</td>
-        <td class="value" th:text="${soat.localidade}"></td>
+        <td class="value" th:text="${soat.localidade()}"></td>
         <td class="label">Concelho</td>
-        <td class="value" th:text="${soat.concelho}"></td>
+        <td class="value" th:text="${soat.concelho()}"></td>
     </tr>
 </table>
 
@@ -437,17 +409,17 @@
 <table class="data-table summary legacy">
     <tr>
         <td class="label">Apólice n.º</td>
-        <td class="value" th:text="${soat.numeroApolice}"></td>
+        <td class="value" th:text="${soat.numeroApolice()}"></td>
         <td class="label">Início da apólice</td>
-        <td class="value" th:text="${soat.dataInicioApolice}"></td>
+        <td class="value" th:text="${soat.dataInicioApolice()}"></td>
         <td class="label">Data de referência</td>
-        <td class="value" th:text="${soat.referencia}"></td>
+        <td class="value" th:text="${soat.referencia()}"></td>
     </tr>
     <tr>
         <td class="label">Total de pessoas seguras</td>
-        <td class="value" th:text="${soat.totalPessoas}"></td>
+        <td class="value" th:text="${soat.totalPessoas()}"></td>
         <td class="label">Massa salarial anual segura</td>
-        <td class="value" th:text="${#numbers.formatDecimal(soat.massaSalarialAnual, 1, 'POINT', 2, 'COMMA')}"></td>
+        <td class="value" th:text="${soat.massaSalarialAnual()}"></td>
         <td class="label">Seguro / Modalidade</td>
         <td class="value">—</td>
     </tr>
@@ -497,26 +469,26 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:if="${soat.pessoas == null or soat.pessoas.isEmpty()}">
+    <tr th:if="${soat.pessoas() == null or soat.pessoas().isEmpty()}">
         <td class="no-data" colspan="16">Sem pessoas seguras para apresentar.</td>
     </tr>
-    <tr th:class="${stat.odd} ? 'odd' : ''" th:each="pessoa, stat : ${soat.pessoas}">
-        <td th:text="${pessoa.nome}"></td>
-        <td class="center" th:text="${pessoa.tipoDocumento}"></td>
-        <td th:text="${pessoa.numeroDocumento}"></td>
-        <td class="center" th:text="${pessoa.dataValidadeDocumento}"></td>
+    <tr th:class="${stat.odd} ? 'odd' : ''" th:each="pessoa, stat : ${soat.pessoas()}">
+        <td th:text="${pessoa.nome()}"></td>
+        <td class="center" th:text="${pessoa.tipoDocumento()}"></td>
+        <td th:text="${pessoa.numeroDocumento()}"></td>
+        <td class="center" th:text="${pessoa.dataValidadeDocumento()}"></td>
         <td th:text="${pessoa.nif}"></td>
-        <td class="center" th:text="${pessoa.dataNascimento}"></td>
-        <td class="center" th:text="${pessoa.sexo}"></td>
-        <td class="center" th:text="${pessoa.situacao}"></td>
-        <td th:text="${pessoa.profissao}"></td>
-        <td class="center" th:text="${pessoa.aprendizOuEstagiario}"></td>
-        <td class="right" th:text="${#numbers.formatDecimal(pessoa.horasSemana, 1, 'POINT', 2, 'COMMA')}"></td>
-        <td class="center" th:text="${pessoa.unidadeRetribuicao}"></td>
-        <td class="right" th:text="${#numbers.formatDecimal(pessoa.retribuicao, 1, 'POINT', 2, 'COMMA')}"></td>
-        <td class="right" th:text="${#numbers.formatDecimal(pessoa.retribuicaoAnual, 1, 'POINT', 2, 'COMMA')}"></td>
-        <td class="center" th:text="${pessoa.temporariamenteEstrangeiro}"></td>
-        <td th:text="${pessoa.observacoes}"></td>
+        <td class="center" th:text="${pessoa.dataNascimento()}"></td>
+        <td class="center" th:text="${pessoa.sexo()}"></td>
+        <td class="center" th:text="${pessoa.situacao()}"></td>
+        <td th:text="${pessoa.profissao()}"></td>
+        <td class="center" th:text="${pessoa.aprendizOuEstagiario()}"></td>
+        <td class="right" th:text="${#numbers.formatDecimal(pessoa.horasSemana(), 1, 'POINT', 2, 'COMMA')}"></td>
+        <td class="center" th:text="${pessoa.unidadeRetribuicao()}"></td>
+        <td class="right" th:text="${#numbers.formatDecimal(pessoa.retribuicao(), 1, 'POINT', 2, 'COMMA')}"></td>
+        <td class="right" th:text="${#numbers.formatDecimal(pessoa.retribuicaoAnual(), 1, 'POINT', 2, 'COMMA')}"></td>
+        <td class="center" th:text="${pessoa.temporariamenteEstrangeiro()}"></td>
+        <td th:text="${pessoa.observacoes()}"></td>
     </tr>
     </tbody>
 </table>

@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "RH_T_SOAT_DETALHE")
 public class SoatDetalheEntity extends AuditEntity {
+
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "RH_T_SOAT_DETALHE_id_gen")
   @SequenceGenerator(name = "RH_T_SOAT_DETALHE_id_gen", sequenceName = "SEQ_SOAT_DETALHE", allocationSize = 1)
