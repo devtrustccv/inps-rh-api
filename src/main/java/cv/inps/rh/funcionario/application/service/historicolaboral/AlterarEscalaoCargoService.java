@@ -30,7 +30,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Melhoria 2.2.1 — "Alterar Escalão / Cargo" (Gestão Laboral) para colaboradores com salário do PCCS
+ * Melhoria 2.2.1 — "Alterar Escalão / Cargo" (referência de validação ALTERACAO_ESCALAO) para colaboradores com salário do PCCS
  * mas SEM carreira (o escalão vive no tiprel: RH_T_TIPOS_RELACIONAMENTO.ESCALAO_ID).
  *
  * <p>É a "progressão sem carreira": ao alterar o ESCALÃO, cria-se um tiprel pendente e, na validação,
@@ -44,7 +44,9 @@ import java.util.UUID;
 @Transactional
 public class AlterarEscalaoCargoService {
 
-  private static final String TIPO_SITUACAO = "GESTAO_LABORAL";
+  // TIPO_SITUACAO (coluna do tiprel) usa valores do domínio TIPO_MOV_LABORAL.
+  private static final String TIPO_SIT_ESCALAO = "ESCALAO_NOVO";
+  private static final String TIPO_SIT_CARGO = "CARGO_NOVO";
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
@@ -55,6 +57,7 @@ public class AlterarEscalaoCargoService {
   private final DadosContratuaisMapper contratuaisEntityMapper;
   private final FuncionarioRules funcionarioRules;
   private final EntityManager entityManager;
+  private final EscalaoDetalheDiffWriter escalaoDetalheDiffWriter;
 
   /** Cria o movimento: CARGO só → imediato; ESCALÃO (com ou sem cargo) → pendente para validação. */
   public SuccessResponseDTO alterar(String funcionarioId, AlterarEscalaoCargoDTO dto) {
@@ -64,16 +67,17 @@ public class AlterarEscalaoCargoService {
 
     garantirPccsSemCarreira(atual);
 
-    // "Tipo Alteração" (multiselect, DOMAINS=TIPO_MOV_LABORAL / REFERENTE=GESTAO_LABORAL): o frontend
-    // envia os valores selecionados separados por vírgulas e guardam-se tal-e-qual em TIPO_SITUACAO.
-    // A decisão do que alterar NÃO interpreta os códigos do domínio (a confirmar na BD) — usa apenas a
-    // presença de novoEscalaoId / novoCargoId no pedido.
+    // "Tipo Alteração" (multiselect, DOMAINS=TIPO_MOV_LABORAL; referência de validação ALTERACAO_ESCALAO):
+    // o frontend envia os valores selecionados (ESCALAO_NOVO/CARGO_NOVO) separados por vírgulas e guardam-se
+    // tal-e-qual em TIPO_SITUACAO. A decisão do que alterar NÃO interpreta os códigos do domínio — usa apenas
+    // a presença de novoEscalaoId / novoCargoId no pedido.
     boolean alterarEscalao = dto.getNovoEscalaoId() != null;
     boolean alterarCargo = dto.getNovoCargoId() != null;
     if (!alterarEscalao && !alterarCargo)
       throw IgrpResponseStatusException.badRequest("Indique o novo escalão e/ou o novo cargo.");
+    // Sem seleção do form, cai no valor de domínio do fluxo (escalão → ESCALAO_NOVO; cargo-só → CARGO_NOVO).
     var tipoSituacao = org.springframework.util.StringUtils.hasText(dto.getTipoAlteracao())
-        ? dto.getTipoAlteracao().trim() : TIPO_SITUACAO;
+        ? dto.getTipoAlteracao().trim() : (alterarEscalao ? TIPO_SIT_ESCALAO : TIPO_SIT_CARGO);
 
     // Não permitir novo movimento enquanto houver um pendente sobre o mesmo tiprel.
     if (tiposRelacionamentoEntityRepository.findFirstByTiprelId_IdAndEstado(atual.getId(), Estado.P).isPresent())
@@ -114,7 +118,7 @@ public class AlterarEscalaoCargoService {
       emCorrecao.setTipoSituacao(tipoSituacao);
       if (dto.getObservacao() != null) emCorrecao.setObs(dto.getObservacao());
       emCorrecao.setEstado(Estado.P);
-      var validacaoC = funcionarioRules.reabrirParaValidacao(emCorrecao.getUuid(), Referencia.GESTAO_LABORAL);
+      var validacaoC = funcionarioRules.reabrirParaValidacao(emCorrecao.getUuid(), Referencia.ALTERACAO_ESCALAO);
       try {
         ValidacaoAuditContext.set(validacaoC.getId(), validacaoC.getUuid(), "RH_T_TIPOS_RELACIONAMENTO");
         tiposRelacionamentoEntityRepository.save(emCorrecao);
@@ -123,6 +127,9 @@ public class AlterarEscalaoCargoService {
       }
       validacaoC.setTiprelId(emCorrecao);
       validacaoEntityRepository.save(validacaoC);
+      // Detalhe de alterações: regrava do zero (predecessor → movimento corrigido) via javers.compare.
+      escalaoDetalheDiffWriter.limpar(validacaoC.getUuid());
+      escalaoDetalheDiffWriter.persistir(validacaoC, emCorrecao.getTiprelId(), emCorrecao);
       return new SuccessResponseDTO(true, emCorrecao.getUuid().toString(),
           "Correção reenviada para validação.", List.of());
     }
@@ -143,7 +150,7 @@ public class AlterarEscalaoCargoService {
     novoTiprel.setDataFim(dto.getDataFim());
     novoTiprel.setTipoSituacao(tipoSituacao);
     novoTiprel.setObs(dto.getObservacao() != null ? dto.getObservacao() : tipoSituacao);
-    novoTiprel.setReferente(TIPO_SITUACAO);
+    novoTiprel.setReferente(Referencia.ALTERACAO_ESCALAO.name());
     try {
       ValidacaoAuditContext.set(null, validacaoUuid, "RH_T_TIPOS_RELACIONAMENTO");
       tiposRelacionamentoEntityRepository.save(novoTiprel);
@@ -153,7 +160,7 @@ public class AlterarEscalaoCargoService {
 
     var validacao = new ValidacaoEntity();
     validacao.setTipoAccao(TipoAcao.UPDATE.name());
-    validacao.setReferenciaName(Referencia.GESTAO_LABORAL.name());
+    validacao.setReferenciaName(Referencia.ALTERACAO_ESCALAO.name());
     validacao.setReferenciaId(novoTiprel.getId());
     validacao.setReferenciaUuid(novoTiprel.getUuid());
     validacao.setTiprelId(novoTiprel);
@@ -161,6 +168,10 @@ public class AlterarEscalaoCargoService {
     validacao.setUuid(validacaoUuid); // mesmo UUID já carimbado no baseline
     validacao.setFunId(funcionario);
     validacaoEntityRepository.save(validacao);
+
+    // Detalhe de alterações persistido no momento (predecessor → novo tiprel) com o motor de diff do
+    // JaVers (javers.compare de dois snapshots) → uma linha por campo em RH_T_VALIDACAO_DETALHE.
+    escalaoDetalheDiffWriter.persistir(validacao, atual, novoTiprel);
 
     return new SuccessResponseDTO(true, novoTiprel.getUuid().toString(),
         "Alteração de escalão registada para validação.", List.of());
@@ -176,12 +187,12 @@ public class AlterarEscalaoCargoService {
       throw IgrpResponseStatusException.badRequest("Este movimento não está pendente de validação.");
 
     var validacao = funcionarioRules
-        .getValidacaoPendenteByReferenciaUuid(pendente.getUuid(), TipoAcao.UPDATE, Referencia.GESTAO_LABORAL)
+        .getValidacaoPendenteByReferenciaUuid(pendente.getUuid(), TipoAcao.UPDATE, Referencia.ALTERACAO_ESCALAO)
         .orElse(null);
     var validar = dto != null ? dto.getValidar() : null;
 
     if (EstadoValidacao.CORRIGIR.equals(validar)) {
-      var vC = funcionarioRules.devolverParaCorrecao(pendente.getUuid(), pendente.getEstado(), Referencia.GESTAO_LABORAL);
+      var vC = funcionarioRules.devolverParaCorrecao(pendente.getUuid(), pendente.getEstado(), Referencia.ALTERACAO_ESCALAO);
       pendente.setEstado(Estado.C);
       tiposRelacionamentoEntityRepository.save(pendente);
       if (vC != null) validacaoEntityRepository.save(vC);
@@ -217,7 +228,7 @@ public class AlterarEscalaoCargoService {
         var salarioNovo = new DefinicaoRemuneracaoEntity();
         salarioNovo.setValor(novoEscalao.getValor());
         salarioNovo.setEstado(Estado.A);
-        salarioNovo.setObs(TIPO_SITUACAO);
+        salarioNovo.setObs(TIPO_SIT_ESCALAO);
         // Doc (2.2.1): ao alterar escalão, o novo RH_T_DEF_REMUNERACOES herda DATA_INICIO e DATA_FIM do
         // formulário (as mesmas gravadas no tiprel pendente).
         salarioNovo.setDataInicio(dataEfetiva);

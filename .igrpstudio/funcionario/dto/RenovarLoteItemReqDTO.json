@@ -1,41 +1,27 @@
 {
   "type": "dto",
   "module": "funcionario",
-  "name": "NovoContrato",
+  "name": "RenovarLoteItemReq",
   "template": "classic",
   "enableCustonValidation": false,
   "attributes": [
     {
-      "name": "validar",
-      "objectType": "enum",
-      "type": "EstadoValidacao",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false,
-      "module": "shared"
-    },
-    {
-      "name": "dadosContratuais",
-      "objectType": "dto",
-      "type": "DadosContratuaisReq",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false,
-      "module": "funcionario"
-    },
-    {
-      "name": "tipoOrdemServico",
+      "name": "funcionarioId",
       "objectType": "java",
       "type": "string",
-      "required": false,
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "contratoId",
+      "objectType": "java",
+      "type": "string",
+      "required": true,
       "before": false,
       "after": false,
       "positive": false,
@@ -54,7 +40,20 @@
       "isEmail": false,
       "isUrl": false,
       "primaryKey": false
+    },
+    {
+      "name": "dadosRenovacao",
+      "objectType": "dto",
+      "type": "RenovarContratoReq",
+      "required": true,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "module": "funcionario"
     }
   ],
-  "id": "x88ue9ii7h"
+  "id": "rnvloteitem1"
 }

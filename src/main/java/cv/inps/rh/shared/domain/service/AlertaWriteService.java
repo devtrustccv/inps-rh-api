@@ -41,6 +41,16 @@ public class AlertaWriteService {
   private final SituacaoLaboralEntityRepository situacaoLaboralRepository;
   private final DomainEntityRepository domainRepository;
 
+  // TODO(JOB->notificação): o JOB apenas CRIA o alerta (flg_notificacao='N'); NÃO gera notificação nem
+  // envia email. A infra existe e funciona (NotificacaoDispatchService + NotificacaoDestinatarioResolver
+  // + OracleEmailService — usada só pelo ecrã manual em NotificacaoController). Para ligar aqui:
+  //   1) injetar NotificacaoDispatchService (+ resolver) neste service;
+  //   2) por cada alerta criado, resolver destinatários e enviar; marcar alerta.setFlgNotificacao("S").
+  // BLOQUEIO DE NEGÓCIO (spec silente): a spec TRANSVERSAL não define QUEM recebe a notificação do JOB
+  // (só define destinatários para o envio MANUAL). Decisão pendente — provável: um ADMIN configurável +
+  // talvez COLABORADOR e/ou RESPONSAVEL_COLABORADOR. Implementar de forma CONFIGURÁVEL (não hardcodar):
+  // admin via env/RH_T_DOMINIO; destinatários por tipo de alerta via RH_T_DOMINIO; sem config -> não
+  // envia (flg_notificacao fica 'N'). Ver handoff dossier_melhorias.md (secção TODO).
   @Scheduled(cron = "${alerta.job.cron:0 0 6 * * *}")
   @Transactional
   public void executarJobAlertas() {
@@ -66,6 +76,9 @@ public class AlertaWriteService {
       alerta.setReferencia("CONTRATO");
       alerta.setReferenciaName("RH_T_CONTRATO_VINCULO");
       alerta.setReferenciaId(contrato.getId());
+      // uuid do contrato — o frontend faz lookup pelos endpoints por UUID (get contrato by id),
+      // igual à lista de validações; evita traduzir id->uuid.
+      alerta.setReferenciaUuid(contrato.getUuid());
       alerta.setTipoAlerta(TIPO_RENOVACAO);
       alerta.setPrioridade(PRIORIDADE_ALTA);
       alerta.setDescricao(descricaoRenovacao(contrato));
@@ -92,6 +105,7 @@ public class AlertaWriteService {
       alerta.setReferencia("CONTRATO");
       alerta.setReferenciaName("RH_T_CONTRATO_VINCULO");
       alerta.setReferenciaId(contrato.getId());
+      alerta.setReferenciaUuid(contrato.getUuid());
       alerta.setTipoAlerta(TIPO_CONVERSAO);
       alerta.setPrioridade(PRIORIDADE_ALTA);
       alerta.setDescricao(descricaoConversao(contrato));
@@ -152,6 +166,7 @@ public class AlertaWriteService {
     alerta.setReferencia("LICENCA");
     alerta.setReferenciaName("RH_T_SITUACAO_LABORAL");
     alerta.setReferenciaId(licenca.getId());
+    alerta.setReferenciaUuid(licenca.getUuid());
     alerta.setTipoAlerta(TIPO_LICENCA_SV);
     alerta.setPrioridade(PRIORIDADE_MEDIA);
     return alerta;

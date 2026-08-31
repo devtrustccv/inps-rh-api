@@ -10,15 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
 @Repository
 public interface DadosApoliceEntityRepository extends JpaRepository<DadosApoliceEntity, Long>, JpaSpecificationExecutor<DadosApoliceEntity> {
-
-  Optional<DadosApoliceEntity> findFirstByIlhaIdAndEstadoOrderByIdDesc(
-      Long ilhaId,
-      String estado
-  );
 
   @Query("""
       SELECT NEW cv.inps.rh.processamento.application.dto.DadosApoliceResponseDTO(

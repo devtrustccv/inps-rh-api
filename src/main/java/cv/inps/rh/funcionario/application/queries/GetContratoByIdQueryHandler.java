@@ -108,6 +108,11 @@ public class GetContratoByIdQueryHandler implements QueryHandler<GetContratoById
     var dadosContratuaisResp = dadosContratuaisMapper
         .dadosContratuaisRespDTO(tiposRelacionamento, pagamentos, remuneracoes);
 
+    // Mesmos 2 flags da lista (ContratoMapper.toDTO): `inicial` = versão 1 (a vista INICIAL só é
+    // resolvida quando o tiprel INICIO/versão 1 existe), `atual` = est_act_adm=1 (o tiprel em vigor).
+    dadosContratuaisResp.setInicial(versaoInicial != null && Integer.valueOf(1).equals(versaoInicial.getVersao()));
+    dadosContratuaisResp.setAtual(atual);
+
     // Só na vista INICIAL: as datas da versão vêm da VISTA (o tiprel INICIO tem data_fim = data do
     // fecho, não a da versão). No fallback/atual, versaoInicial fica null → usa as datas do tiprel atual.
     if (versaoInicial != null) {

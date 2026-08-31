@@ -20,7 +20,9 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoE
 import cv.inps.rh.shared.infrastructure.persistence.entity.DefPagamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamVinculoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.AlertaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +60,10 @@ public class ValidarContratoService {
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
   private final ReconciliacaoMovimentoVinculoService reconciliacaoMovimentoVinculoService;
+  private final AlertaEntityRepository alertaEntityRepository;
+
+  /** Tipo de alerta de conversão de contrato gerado pelo JOB (ver AlertaWriteService). */
+  private static final String TIPO_ALERTA_CONVERSAO = "CONVERSAO_CONTRATO";
 
   @Transactional
   public ResponseEntity<SuccessResponseDTO> validar(ValidarContratoCommand command) {
@@ -191,6 +197,12 @@ public class ValidarContratoService {
       // apos validar e nao seriam processados. Os movimentos FIXOS do vinculo sao tratados pelo
       // reconciliar (que os cria ja como A); aqui so se tocam os que estao pendentes.
       transicionarManuaisPendentes(funcionario, estado);
+      // Conversão via alerta (JOB Alerta / TRANSVERSAL 3.4.2 §2): fecha o alerta CONVERSAO_CONTRATO do
+      // contrato ANTERIOR (o que foi convertido). SIM -> estado='I' (resolvido); NÃO -> flg_tratamento='N'
+      // (volta à grelha). NO-OP num Novo Contrato normal (sem alerta de conversão sobre o contrato anterior).
+      var tiprelAntigoConversao = tiposRelacionamento.getTiprelId();
+      var contratoAntigoConversao = tiprelAntigoConversao != null ? tiprelAntigoConversao.getContrVinculoId() : null;
+      marcarAlertaConversao(contratoAntigoConversao, EstadoValidacao.SIM.equals(dto.getValidar()));
       if (estado == Estado.A) {
         // Os def do contrato ANTERIOR já foram encerrados (DATA_FIM, mantendo 'A') e retirados da
         // coleção de trabalho acima (encerrarEExcluirDefsContratoAnterior). Por isso o reconciliar
@@ -322,6 +334,26 @@ public class ValidarContratoService {
     if (antigo.getCarreiraId() != null) antigo.getCarreiraId().setDataFim(df);
     if (antigo.getMobId() != null) antigo.getMobId().setDataFim(df);
     if (antigo.getRegimeId() != null) antigo.getRegimeId().setDataFim(df);
+  }
+
+  /**
+   * Fecha ou reabre o alerta de conversão de origem conforme a decisão do checker. Localiza-o pelo
+   * referencia_id (= id do contrato ANTERIOR, que o alerta referencia) + tipo CONVERSAO_CONTRATO.
+   * NO-OP quando não há alerta de conversão associado (Novo Contrato normal).
+   *
+   * <ul>
+   *   <li>SIM (aprovado): estado='I' — contrato convertido, situação resolvida.</li>
+   *   <li>NÃO (rejeitado): flg_tratamento='N' — o alerta volta à grelha "por tratar".</li>
+   * </ul>
+   */
+  private void marcarAlertaConversao(ContratoEntity contratoAntigo, boolean aprovado) {
+    if (contratoAntigo == null) return;
+    alertaEntityRepository
+        .findFirstByReferenciaIdAndTipoAlertaOrderByIdDesc(contratoAntigo.getId(), TIPO_ALERTA_CONVERSAO)
+        .ifPresent(alerta -> {
+          if (aprovado) alerta.setEstado("I");
+          else alerta.setFlgTratamento("N");
+        });
   }
 
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {

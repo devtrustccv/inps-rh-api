@@ -25,4 +25,6 @@ public interface AlertaEntityRepository extends
 
   boolean existsByReferenciaIdAndTipoAlerta(Long referenciaId, String tipoAlerta);
 
+  Optional<AlertaEntity> findFirstByReferenciaIdAndTipoAlertaOrderByIdDesc(Long referenciaId, String tipoAlerta);
+
 }

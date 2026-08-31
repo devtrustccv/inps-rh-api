@@ -3,6 +3,7 @@ package cv.inps.rh.funcionario.application.service;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.AlterarSituacaoLaboralCommand;
 import cv.inps.rh.funcionario.application.constants.SituacaoLaboral;
+import cv.inps.rh.funcionario.application.dto.AlterarSituacaoLaboralRequest;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -15,8 +16,13 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
 import cv.inps.rh.shared.infrastructure.audit.ValidacaoAuditContext;
 import cv.inps.rh.shared.infrastructure.persistence.entity.AusenciaEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoDetalheEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SituacaoLaboralEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoRelRemPagEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AusenciaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoDetalheEntityRepository;
@@ -32,14 +38,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Alterar Situação Laboral (Inativar/Ativar Colaborador + Licença S/Vencimento e outras situações).
+ * O {@link #execute} é apenas o dispatcher: cada caminho de negócio (CORRIGIR, validar, reenvio de
+ * correção, registo processado/não-processado) vive no seu próprio método privado, e a lógica
+ * partilhada (flg_processa, ausência, carimbo JaVers, cópia de rem/pag) está em helpers reutilizados.
+ */
 @Service
 @RequiredArgsConstructor
 public class AlterarSituacaoLaboralWriteService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AlterarSituacaoLaboralWriteService.class);
+
+  private static final String TABELA_SITUACAO = "RH_T_SITUACAO_LABORAL";
+  private static final String REFERENTE_SITUACAO = "SITUACAO_LABORAL";
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ParamSituacaoEntityRepository paramSitLaboralEntityRepository;
@@ -56,243 +72,360 @@ public class AlterarSituacaoLaboralWriteService {
   public SuccessResponseDTO execute(AlterarSituacaoLaboralCommand command) {
 
     var dto = command.getAlterarsituacaolaboral();
+    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(IdentificadorUnico.from(command.getId()).valor());
 
-    var funcionarioPublicId = IdentificadorUnico.from(command.getId()).valor();
-    var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
-
-    // CORRIGIR (checker devolve ao maker): situação pendente P -> C e validação P -> C, SEM aplicar
-    // payload. O maker corrige e reenvia por este mesmo endpoint com validar=null (C -> P). Âncora =
-    // situacaoLaboral.uuid (referencia_uuid da validação UPDATE/ESTADO_COLABORADOR).
+    // CORRIGIR (checker devolve ao maker): situação/validação P -> C, SEM aplicar payload.
     if (EstadoValidacao.CORRIGIR.equals(dto.getValidar())) {
-      var tiprelParaCorrigir = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-      var sitParaCorrigir = tiprelParaCorrigir.getSituacLaboralId();
-      if (sitParaCorrigir == null || sitParaCorrigir.getEstado() != Estado.P
-          || !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.ESTADO_COLABORADOR)) {
-        throw IgrpResponseStatusException.badRequest(
-            "Não há alteração de situação laboral pendente para devolver para correção.");
-      }
-      funcionarioRules.devolverParaCorrecao(sitParaCorrigir.getUuid(), Estado.P, Referencia.ESTADO_COLABORADOR);
-      sitParaCorrigir.setEstado(Estado.C);
-      tiprelParaCorrigir.setEstado(Estado.C);
-      funcionarioEntityRepository.saveAndFlush(funcionario);
-      LOGGER.info("[CORRIGIR] ESTADO_COLABORADOR devolvido para correção (situacao={}).", sitParaCorrigir.getUuid());
-      return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
-          "Situação laboral devolvida para correção.", List.of());
+      return devolverParaCorrecao(funcionario);
     }
 
-    var paramSituacaoLaboral = paramSitLaboralEntityRepository.getReferenceById(dto.getSituacaoLaboralId());
-    var paramSituacaoLaboralDetalhe = dto.getMotivoId() != null
+    var param = paramSitLaboralEntityRepository.getReferenceById(dto.getSituacaoLaboralId());
+    var motivo = dto.getMotivoId() != null
         ? paramSituacaoDetalheEntityRepository.getReferenceById(dto.getMotivoId()) : null;
 
-    // Guard: um registo em correção (C) não pode ser validado antes de reenviado pelo maker.
     boolean estaPorCorrigir = funcionarioRules.temValidacaoPorCorrigir(funcionario.getUuid(), TipoAcao.UPDATE,
         Referencia.ESTADO_COLABORADOR);
     if (estaPorCorrigir && dto.getValidar() != null) {
       throw IgrpResponseStatusException.badRequest(
           "Situação laboral em correção: não pode ser validada. Corrija e reenvie primeiro.");
     }
-
     if (dto.getValidar() != null && !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE,
         Referencia.ESTADO_COLABORADOR)) {
       throw IgrpResponseStatusException.badRequest(
           "funcionario nao tem validacao pendente para o tipo de acao: UPDATE e referencia: ESTADO_COLABORADOR");
     }
 
+    // CHECKER: aprovar (SIM) ou rejeitar (NAO).
     if (dto.getValidar() != null) {
-      var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
-
-      var tiposRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-      tiposRelacionamentoAtual.setEstado(estado);
-
-      var situacaoLaboral = tiposRelacionamentoAtual.getSituacLaboralId();
-      situacaoLaboral.setEstado(estado);
-      situacaoLaboral.setMotivoSitLabId(paramSituacaoLaboralDetalhe);
-      situacaoLaboral.setSituacaoLaboralId(paramSituacaoLaboral);
-      situacaoLaboral.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
-      situacaoLaboralEntityRepository.save(situacaoLaboral);
-
-      funcionario.getValidacoes().stream()
-          .filter(v -> v.getEstado() == Estado.P)
-          .filter(v -> Referencia.ESTADO_COLABORADOR.name().equals(v.getReferenciaName())
-              && TipoAcao.UPDATE.name().equals(v.getTipoAccao()))
-          .findFirst()
-          .ifPresent(v -> v.setEstado(estado));
-
-      if (paramSituacaoLaboral.getCodigo().equals(SituacaoLaboral.CESSADO.name())) {
-        // Cessação APROVADA → o colaborador fica efetivamente inativo (RH_T_FUNCIONARIOS.ESTADO=I).
-        if (estado == Estado.A) funcionario.setEstado(Estado.I);
-        var dataFimValidacao = DateFormatter.stringToLocalDate(dto.getDataFim());
-        tiposRelacionamentoAtual.setDataFim(dataFimValidacao);
-        tiposRelacionamentoAtual.setEstActAdm(0);
-
-        var mobilidade = tiposRelacionamentoAtual.getMobId();
-        if (mobilidade != null) mobilidade.setDataFim(dataFimValidacao);
-
-        var carreira = tiposRelacionamentoAtual.getCarreiraId();
-        if (carreira != null) carreira.setDataFim(dataFimValidacao);
-
-        var contrato = tiposRelacionamentoAtual.getContrVinculoId();
-        if (contrato != null) contrato.setDataFim(dataFimValidacao);
-
-        funcionario.getDefinicoesRenumeracoes().forEach(r -> r.setDataFim(dataFimValidacao));
-        funcionario.getDefinicoesPagamentos().forEach(p -> p.setDataFim(dataFimValidacao));
-      }
-
-      if (estado == Estado.A) {
-        ordemServicoWriteService.criar(funcionario, tiposRelacionamentoAtual, dto.getTipoOrdemServico());
-      }
-
-      funcionarioEntityRepository.save(funcionario);
-      var mensagem = EstadoValidacao.SIM.equals(dto.getValidar())
-          ? "Situação laboral validada."
-          : "Situação laboral rejeitada.";
-      return new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, List.of());
+      return validar(dto, funcionario, param, motivo);
     }
+
+    // MAKER: guards do registo/reenvio.
+    if (dto.getMotivoId() == null) {
+      throw IgrpResponseStatusException.badRequest("O motivo da alteração da situação laboral é obrigatório.");
+    }
+    guardComboInativarAtivar(estaPorCorrigir, param, funcionario);
+    guardDataFimObrigatoriaEmAusencia(param, dto);
 
     var dataInicio = DateFormatter.stringToLocalDate(dto.getDataInicio());
     var dataFim = DateFormatter.stringToLocalDate(dto.getDataFim());
+    var tiprelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
-    var tiposRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
-    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(tiposRelacionamentoAtual.getEstado());
-
-    // Maker reenvia a correção (C -> P): a situação atual está em correção. Aplica as edições in place
-    // no registo devolvido e reabre para validação — SEM criar novo tipos_relacionamento (a correção é
-    // sobre o mesmo registo que o checker devolveu).
+    // Maker reenvia a correção (C -> P): edita in place o registo devolvido e reabre para validação.
     if (estaPorCorrigir) {
-      var sit = tiposRelacionamentoAtual.getSituacLaboralId();
-      if (sit == null) {
-        throw IgrpResponseStatusException.badRequest("Situação laboral em correção não encontrada.");
-      }
-      sit.setSituacaoLaboralId(paramSituacaoLaboral);
-      sit.setMotivoSitLabId(paramSituacaoLaboralDetalhe);
-      sit.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
-      sit.setDataInicio(dataInicio);
-      sit.setDataFim(dataFim);
-      sit.setEstado(Estado.P);
-      tiposRelacionamentoAtual.setEstado(Estado.P);
-      tiposRelacionamentoAtual.setFlgProcessa(
-          Integer.valueOf(1).equals(paramSituacaoLaboral.getFlgRemuneracao()) ? 1 : 0);
-      var validacaoReaberta = funcionarioRules.reabrirParaValidacao(sit.getUuid(), Referencia.ESTADO_COLABORADOR);
-      // Auto-audit (JaVers): carimba o save da correção com a validação em curso — o detalhe de
-      // alterações filtra por este validacaoUuid. O baseline já existe do registo da situação.
-      try {
-        ValidacaoAuditContext.set(validacaoReaberta.getId(), validacaoReaberta.getUuid(), "RH_T_SITUACAO_LABORAL");
-        situacaoLaboralEntityRepository.save(sit);
-      } finally {
-        ValidacaoAuditContext.clear();
-      }
-      funcionarioEntityRepository.saveAndFlush(funcionario);
-      return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
-          "Situação laboral corrigida e reenviada para validação.", List.of());
+      return reenviarCorrecao(dto, funcionario, param, motivo, dataInicio, dataFim, tiprelAtual);
     }
 
-    // Caso de teste (Situação Laboral): só há registo novo quando muda Situação/Motivo E o registo
-    // atual já foi processado. Se mudou mas ainda não processado → apenas UPDATE. Sem alteração → nada.
-    var situacaoAtual = tiposRelacionamentoAtual.getSituacLaboralId();
-    Long sitAtualId = (situacaoAtual != null && situacaoAtual.getSituacaoLaboralId() != null)
-        ? situacaoAtual.getSituacaoLaboralId().getId() : null;
-    Long motAtualId = (situacaoAtual != null && situacaoAtual.getMotivoSitLabId() != null)
-        ? situacaoAtual.getMotivoSitLabId().getId() : null;
-    boolean mudouSituacaoOuMotivo = !Objects.equals(sitAtualId, dto.getSituacaoLaboralId())
-        || !Objects.equals(motAtualId, dto.getMotivoId());
-
-    if (!mudouSituacaoOuMotivo) {
+    var situacaoAtual = tiprelAtual.getSituacLaboralId();
+    if (!mudouSituacaoOuMotivo(situacaoAtual, dto)) {
       return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Situação laboral sem alterações.", List.of());
     }
 
-    boolean processado = tiposRelacionamentoAtual.getUltProc() != null;
-    if (!processado) {
-      // Ainda não processado → UPDATE do registo existente, sem criar novo tipos_relacionamento
-      if (situacaoAtual != null) {
-        situacaoAtual.setSituacaoLaboralId(paramSituacaoLaboral);
-        situacaoAtual.setMotivoSitLabId(paramSituacaoLaboralDetalhe);
-        situacaoAtual.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
-        situacaoAtual.setDataInicio(dataInicio);
-        situacaoAtual.setDataFim(dataFim);
-        situacaoAtual.setEstado(Estado.P);
-        situacaoLaboralEntityRepository.save(situacaoAtual);
+    // Só há novo registo quando o tiprel atual já foi processado; senão, UPDATE in place.
+    return tiprelAtual.getUltProc() != null
+        ? registarProcessado(dto, funcionario, param, motivo, dataInicio, dataFim, tiprelAtual)
+        : registarNaoProcessado(dto, funcionario, param, motivo, dataInicio, dataFim, tiprelAtual, situacaoAtual);
+  }
+
+  // ------------------------------------------------------------------------------------------------
+  // Caminhos de negócio
+  // ------------------------------------------------------------------------------------------------
+
+  /** Checker devolve ao maker: situação pendente P -> C e validação P -> C. */
+  private SuccessResponseDTO devolverParaCorrecao(FuncionarioEntity funcionario) {
+    var tiprel = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    var situacao = tiprel.getSituacLaboralId();
+    if (situacao == null || situacao.getEstado() != Estado.P
+        || !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.ESTADO_COLABORADOR)) {
+      throw IgrpResponseStatusException.badRequest(
+          "Não há alteração de situação laboral pendente para devolver para correção.");
+    }
+    funcionarioRules.devolverParaCorrecao(situacao.getUuid(), Estado.P, Referencia.ESTADO_COLABORADOR);
+    situacao.setEstado(Estado.C);
+    tiprel.setEstado(Estado.C);
+    funcionarioEntityRepository.saveAndFlush(funcionario);
+    LOGGER.info("[CORRIGIR] ESTADO_COLABORADOR devolvido para correção (situacao={}).", situacao.getUuid());
+    return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
+        "Situação laboral devolvida para correção.", List.of());
+  }
+
+  /** Checker aprova (SIM -> A) ou rejeita (NAO -> I) a alteração pendente. */
+  private SuccessResponseDTO validar(AlterarSituacaoLaboralRequest dto, FuncionarioEntity funcionario,
+      ParamSituacaoEntity param, ParamSituacaoDetalheEntity motivo) {
+    var estado = dto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
+
+    var tiprelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    // Só o ramo "processado" cria um NOVO tiprel pendente (estado=P) que fechou o anterior; no ramo
+    // "não processado" o tiprel fica estado=A e nada foi fechado — logo a rejeição não reabre nada.
+    boolean tiprelEraPendente = tiprelAtual.getEstado() == Estado.P;
+    tiprelAtual.setEstado(estado);
+
+    var situacao = tiprelAtual.getSituacLaboralId();
+    situacao.setEstado(estado);
+    situacao.setMotivoSitLabId(motivo);
+    situacao.setSituacaoLaboralId(param);
+    situacao.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
+    situacaoLaboralEntityRepository.save(situacao);
+
+    funcionario.getValidacoes().stream()
+        .filter(v -> v.getEstado() == Estado.P)
+        .filter(v -> Referencia.ESTADO_COLABORADOR.name().equals(v.getReferenciaName())
+            && TipoAcao.UPDATE.name().equals(v.getTipoAccao()))
+        .findFirst()
+        .ifPresent(v -> v.setEstado(estado));
+
+    if (estado == Estado.A) {
+      if (SituacaoLaboral.CESSADO.name().equals(param.getCodigo())) {
+        aplicarEfeitosCessacao(dto, funcionario, tiprelAtual);
       }
-      // FLG_PROCESSA depende de a situação ter remuneração (RH_T_PARAM_SITUACAO.FLG_REMUNERACAO),
-      // tal como no ramo processado (novo tiprel). Sem isto, mudar p/ situação sem remuneração
-      // (ex.: Licença S/Vencimento) deixava o colaborador ainda marcado para processar salário.
-      tiposRelacionamentoAtual.setFlgProcessa(
-          Integer.valueOf(1).equals(paramSituacaoLaboral.getFlgRemuneracao()) ? 1 : 0);
-      // garante uma validação pendente para esta alteração
-      if (funcionarioRules.getValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.ESTADO_COLABORADOR).isEmpty()) {
-        var validUpd = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.ESTADO_COLABORADOR.name(), Estado.P);
-        validUpd.setFunId(funcionario);
-        validUpd.setTiprelId(tiposRelacionamentoAtual);
-        validUpd.setReferenciaUuid(situacaoAtual != null ? situacaoAtual.getUuid() : null);
-        funcionario.getValidacoes().add(validUpd);
-      }
-      funcionarioEntityRepository.save(funcionario);
-      return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Situação laboral actualizada.", List.of());
+      ordemServicoWriteService.criar(funcionario, tiprelAtual, dto.getTipoOrdemServico());
+    } else {
+      rollbackRejeicao(funcionario, tiprelAtual, tiprelEraPendente);
     }
 
-    // Mudou E já processado → fecha o atual e cria novo registo (situação + tipos_relacionamento)
-    // Caso de uso 1.6.3: anterior DATA_FIM = data do registo.
-    tiposRelacionamentoAtual.setDataFim(java.time.LocalDate.now());
-    tiposRelacionamentoAtual.setEstActAdm(0);
+    funcionarioEntityRepository.save(funcionario);
+    var mensagem = EstadoValidacao.SIM.equals(dto.getValidar()) ? "Situação laboral validada." : "Situação laboral rejeitada.";
+    return new SuccessResponseDTO(true, funcionario.getUuid().toString(), mensagem, List.of());
+  }
 
-    var situacaoLaboral = new SituacaoLaboralEntity();
-    situacaoLaboral.setUuid(UuidCreator.getTimeOrdered());
-    situacaoLaboral.setSituacaoLaboralId(paramSituacaoLaboral);
-    situacaoLaboral.setMotivoSitLabId(paramSituacaoLaboralDetalhe);
-    situacaoLaboral.setContrVinculoId(tiposRelacionamentoAtual.getContrVinculoId());
-    situacaoLaboral.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
-    situacaoLaboral.setDataInicio(dataInicio);
-    situacaoLaboral.setDataFim(dataFim);
-    situacaoLaboral.setEstado(Estado.P);
-    situacaoLaboralEntityRepository.save(situacaoLaboral);
+  /** Maker reenvia a correção devolvida (C -> P), editando o mesmo registo, com carimbo JaVers. */
+  private SuccessResponseDTO reenviarCorrecao(AlterarSituacaoLaboralRequest dto, FuncionarioEntity funcionario,
+      ParamSituacaoEntity param, ParamSituacaoDetalheEntity motivo, LocalDate dataInicio, LocalDate dataFim,
+      TiposRelacionamentoEntity tiprelAtual) {
+    var situacao = tiprelAtual.getSituacLaboralId();
+    if (situacao == null) {
+      throw IgrpResponseStatusException.badRequest("Situação laboral em correção não encontrada.");
+    }
+    situacao.setSituacaoLaboralId(param);
+    situacao.setMotivoSitLabId(motivo);
+    situacao.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
+    situacao.setDataInicio(dataInicio);
+    situacao.setDataFim(dataFim);
+    situacao.setEstado(Estado.P);
+    tiprelAtual.setEstado(Estado.P);
+    tiprelAtual.setFlgProcessa(flgProcessaDe(param));
+    var validacao = funcionarioRules.reabrirParaValidacao(situacao.getUuid(), Referencia.ESTADO_COLABORADOR);
+    salvarSituacaoComAudit(validacao, situacao);
+    funcionarioEntityRepository.saveAndFlush(funcionario);
+    return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
+        "Situação laboral corrigida e reenviada para validação.", List.of());
+  }
 
-    var tipoRelacionamentoNovo = dadosContratuaisMapper.clone(tiposRelacionamentoAtual);
-    // Caso de uso 1.6.3: novo tiprel DATA_INICIO = data do registo, DATA_FIM = null.
-    tipoRelacionamentoNovo.setDataInicio(java.time.LocalDate.now());
-    tipoRelacionamentoNovo.setDataFim(null);
-    tipoRelacionamentoNovo.setEstActAdm(1);
-    tipoRelacionamentoNovo.setTipoSituacao("MUDANCA_SITUACAO_LABORAL");
-    tipoRelacionamentoNovo.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
-    tipoRelacionamentoNovo.setSituacLaboralId(situacaoLaboral);
-    tipoRelacionamentoNovo.setReferente("SITUACAO_LABORAL");
-    tipoRelacionamentoNovo.setEstado(Estado.P);
-    // FLG_PROCESSA depende de a situação ter remuneração (RH_T_PARAM_SITUACAO.FLG_REMUNERACAO)
-    tipoRelacionamentoNovo.setFlgProcessa(Integer.valueOf(1).equals(paramSituacaoLaboral.getFlgRemuneracao()) ? 1 : 0);
-    var tiprelPersistido = tiposRelacionamentoEntityRepository.saveAndFlush(tipoRelacionamentoNovo);
+  /** Registo quando o tiprel atual ainda NÃO foi processado: UPDATE in place da situação existente. */
+  private SuccessResponseDTO registarNaoProcessado(AlterarSituacaoLaboralRequest dto, FuncionarioEntity funcionario,
+      ParamSituacaoEntity param, ParamSituacaoDetalheEntity motivo, LocalDate dataInicio, LocalDate dataFim,
+      TiposRelacionamentoEntity tiprelAtual, SituacaoLaboralEntity situacaoAtual) {
+    tiprelAtual.setFlgProcessa(flgProcessaDe(param));
+    var validacao = garantirValidacaoPendente(funcionario, tiprelAtual, situacaoAtual);
 
-    var valid = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.ESTADO_COLABORADOR.name(), Estado.P);
-    valid.setFunId(funcionario);
-    valid.setTiprelId(tiprelPersistido);
-    valid.setReferenciaUuid(situacaoLaboral.getUuid());
-    funcionario.getValidacoes().add(valid);
+    if (situacaoAtual != null) {
+      situacaoAtual.setSituacaoLaboralId(param);
+      situacaoAtual.setMotivoSitLabId(motivo);
+      situacaoAtual.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
+      situacaoAtual.setDataInicio(dataInicio);
+      situacaoAtual.setDataFim(dataFim);
+      situacaoAtual.setEstado(Estado.P);
+      salvarSituacaoComAudit(validacao, situacaoAtual);
+      criarAusenciaSeAplicavel(funcionario, param, situacaoAtual, dataInicio, dataFim);
+    }
+    funcionarioEntityRepository.save(funcionario);
+    return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Situação laboral actualizada.", List.of());
+  }
 
-    funcionario.setEstado(paramSituacaoLaboral.getCodigo().equals(SituacaoLaboral.CESSADO.name()) ? Estado.I :
-        paramSituacaoLaboral.getCodigo().equals(SituacaoLaboral.ATIVO.name()) ? Estado.A :
-            funcionario.getEstado());
+  /** Registo quando o tiprel atual JÁ foi processado: fecha o atual e cria novo (situação + tiprel). */
+  private SuccessResponseDTO registarProcessado(AlterarSituacaoLaboralRequest dto, FuncionarioEntity funcionario,
+      ParamSituacaoEntity param, ParamSituacaoDetalheEntity motivo, LocalDate dataInicio, LocalDate dataFim,
+      TiposRelacionamentoEntity tiprelAtual) {
+    // Spec DOSSIÊ 1.1: anterior DATA_FIM = data início (do formulário).
+    tiprelAtual.setDataFim(dataInicio);
+    tiprelAtual.setEstActAdm(0);
 
+    var situacao = new SituacaoLaboralEntity();
+    situacao.setUuid(UuidCreator.getTimeOrdered());
+    situacao.setSituacaoLaboralId(param);
+    situacao.setMotivoSitLabId(motivo);
+    situacao.setContrVinculoId(tiprelAtual.getContrVinculoId());
+    situacao.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
+    situacao.setDataInicio(dataInicio);
+    situacao.setDataFim(dataFim);
+    situacao.setEstado(Estado.P);
+    situacaoLaboralEntityRepository.save(situacao);
+
+    var novoTiprel = dadosContratuaisMapper.clone(tiprelAtual);
+    // Spec DOSSIÊ 1.2: novo tiprel DATA_INICIO = data início (do formulário), DATA_FIM = null.
+    novoTiprel.setDataInicio(dataInicio);
+    novoTiprel.setDataFim(null);
+    novoTiprel.setEstActAdm(1);
+    novoTiprel.setTipoSituacao("MUDANCA_SITUACAO_LABORAL");
+    novoTiprel.setObs(ValidationUtil.trimToNull(dto.getObservacao()));
+    novoTiprel.setSituacLaboralId(situacao);
+    novoTiprel.setReferente(REFERENTE_SITUACAO);
+    novoTiprel.setEstado(Estado.P);
+    novoTiprel.setFlgProcessa(flgProcessaDe(param));
+    var tiprelPersistido = tiposRelacionamentoEntityRepository.saveAndFlush(novoTiprel);
+
+    var validacao = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.ESTADO_COLABORADOR.name(), Estado.P);
+    validacao.setFunId(funcionario);
+    validacao.setTiprelId(tiprelPersistido);
+    validacao.setReferenciaUuid(situacao.getUuid());
+    funcionario.getValidacoes().add(validacao);
+
+    funcionario.setEstado(estadoDoFuncionarioPara(param, funcionario));
     funcionarioEntityRepository.save(funcionario);
 
-    var entradasAntigas = tipoRelRemPagEntityRepository.findByTiprelId_Id(tiposRelacionamentoAtual.getId());
-    var novasEntradas = entradasAntigas.stream().map(e -> {
+    copiarRemPag(tiprelAtual, tiprelPersistido);
+    criarAusenciaSeAplicavel(funcionario, param, situacao, dataInicio, dataFim);
+
+    return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Situação laboral actualizada.", List.of());
+  }
+
+  // ------------------------------------------------------------------------------------------------
+  // Efeitos e helpers partilhados
+  // ------------------------------------------------------------------------------------------------
+
+  /** Cessação APROVADA → colaborador inativo (ESTADO=I) e fecho da cadeia (datas fim). */
+  private void aplicarEfeitosCessacao(AlterarSituacaoLaboralRequest dto, FuncionarioEntity funcionario,
+      TiposRelacionamentoEntity tiprelAtual) {
+    funcionario.setEstado(Estado.I);
+    var dataFim = DateFormatter.stringToLocalDate(dto.getDataFim());
+    tiprelAtual.setDataFim(dataFim);
+    tiprelAtual.setEstActAdm(0);
+
+    var mobilidade = tiprelAtual.getMobId();
+    if (mobilidade != null) mobilidade.setDataFim(dataFim);
+    var carreira = tiprelAtual.getCarreiraId();
+    if (carreira != null) carreira.setDataFim(dataFim);
+    var contrato = tiprelAtual.getContrVinculoId();
+    if (contrato != null) contrato.setDataFim(dataFim);
+
+    funcionario.getDefinicoesRenumeracoes().forEach(r -> r.setDataFim(dataFim));
+    funcionario.getDefinicoesPagamentos().forEach(p -> p.setDataFim(dataFim));
+  }
+
+  /**
+   * Rejeição (validar=NAO): rollback ao estado pré-registo. O registo (maker) fechou o tiprel anterior
+   * e criou este novo pendente; ao rejeitar, reabre o anterior, descarta o novo e repõe o ESTADO do
+   * colaborador conforme a situação que estava vigente. Só se aplica quando este tiprel era pendente.
+   */
+  private void rollbackRejeicao(FuncionarioEntity funcionario, TiposRelacionamentoEntity tiprelAtual,
+      boolean tiprelEraPendente) {
+    var anterior = tiprelAtual.getTiprelId();
+    boolean fechadoPeloRegisto = tiprelEraPendente && anterior != null
+        && Integer.valueOf(0).equals(anterior.getEstActAdm());
+    if (!fechadoPeloRegisto) return;
+
+    anterior.setEstActAdm(1);
+    anterior.setDataFim(null);
+    tiposRelacionamentoEntityRepository.save(anterior);
+    tiprelAtual.setEstActAdm(0);
+
+    var situacaoAnterior = anterior.getSituacLaboralId();
+    var codigoAnterior = (situacaoAnterior != null && situacaoAnterior.getSituacaoLaboralId() != null)
+        ? situacaoAnterior.getSituacaoLaboralId().getCodigo() : null;
+    funcionario.setEstado(SituacaoLaboral.CESSADO.name().equals(codigoAnterior) ? Estado.I : Estado.A);
+  }
+
+  /** Get-or-create de uma validação pendente UPDATE/ESTADO_COLABORADOR, persistida (id/uuid) para o audit. */
+  private ValidacaoEntity garantirValidacaoPendente(FuncionarioEntity funcionario, TiposRelacionamentoEntity tiprel,
+      SituacaoLaboralEntity situacao) {
+    var existente = funcionarioRules
+        .getValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.ESTADO_COLABORADOR)
+        .orElse(null);
+    if (existente != null) return existente;
+
+    var nova = dadosContratuaisMapper.toValidacaoInsert(TipoAcao.UPDATE.name(), Referencia.ESTADO_COLABORADOR.name(), Estado.P);
+    nova.setFunId(funcionario);
+    nova.setTiprelId(tiprel);
+    nova.setReferenciaUuid(situacao != null ? situacao.getUuid() : null);
+    funcionario.getValidacoes().add(nova);
+    funcionarioEntityRepository.saveAndFlush(funcionario); // persiste a validação -> id/uuid
+    return nova;
+  }
+
+  /**
+   * Auto-audit (JaVers): carimba o save da situação com a validação em curso — o "detalhe de alterações"
+   * filtra por este validacaoUuid (situacaoLaboralId/motivo/datas/obs).
+   */
+  private void salvarSituacaoComAudit(ValidacaoEntity validacao, SituacaoLaboralEntity situacao) {
+    try {
+      ValidacaoAuditContext.set(validacao.getId(), validacao.getUuid(), TABELA_SITUACAO);
+      situacaoLaboralEntityRepository.save(situacao);
+    } finally {
+      ValidacaoAuditContext.clear();
+    }
+  }
+
+  /** Cria RH_T_AUSENCIA quando a situação tem flg_ausencia=1 (ex.: Licença S/Vencimento). Idempotente. */
+  private void criarAusenciaSeAplicavel(FuncionarioEntity funcionario, ParamSituacaoEntity param,
+      SituacaoLaboralEntity situacao, LocalDate dataInicio, LocalDate dataFim) {
+    if (!Integer.valueOf(1).equals(param.getFlgAusencia())) return;
+    if (situacao.getId() != null
+        && !ausenciaEntityRepository.findAllByReferenciaNameAndReferenciaId(REFERENTE_SITUACAO, situacao.getId()).isEmpty()) {
+      return; // já existe ausência para esta situação (reenvio/re-registo)
+    }
+    var ausencia = new AusenciaEntity();
+    ausencia.setUuid(UuidCreator.getTimeOrdered());
+    ausencia.setFunId(funcionario);
+    ausencia.setParamSitId(param);
+    ausencia.setDataInicio(dataInicio);
+    ausencia.setDataFim(dataFim);
+    ausencia.setReferenciaName(REFERENTE_SITUACAO);
+    ausencia.setReferenciaId(situacao.getId());
+    ausencia.setEstado(Estado.P);
+    ausenciaEntityRepository.save(ausencia);
+  }
+
+  /** Copia as entradas RH_T_TIPREL_REM_PAG do tiprel de origem para o de destino (mesmos rem/pag). */
+  private void copiarRemPag(TiposRelacionamentoEntity origem, TiposRelacionamentoEntity destino) {
+    var novas = tipoRelRemPagEntityRepository.findByTiprelId_Id(origem.getId()).stream().map(e -> {
       var nova = new TipoRelRemPagEntity();
-      nova.setTiprelId(tiprelPersistido);
+      nova.setTiprelId(destino);
       nova.setRemId(e.getRemId());
       nova.setPagId(e.getPagId());
       return nova;
     }).toList();
-    tipoRelRemPagEntityRepository.saveAll(novasEntradas);
+    tipoRelRemPagEntityRepository.saveAll(novas);
+  }
 
-    if (Integer.valueOf(1).equals(paramSituacaoLaboral.getFlgAusencia())) {
-      var ausencia = new AusenciaEntity();
-      ausencia.setUuid(UuidCreator.getTimeOrdered());
-      ausencia.setParamSitId(paramSituacaoLaboral);
-      ausencia.setDataInicio(dataInicio);
-      ausencia.setDataFim(dataFim);
-      ausencia.setReferenciaName("SITUACAO_LABORAL");
-      ausencia.setReferenciaId(situacaoLaboral.getId());
-      ausencia.setEstado(Estado.P);
-      ausenciaEntityRepository.save(ausencia);
+  private int flgProcessaDe(ParamSituacaoEntity param) {
+    return Integer.valueOf(1).equals(param.getFlgRemuneracao()) ? 1 : 0;
+  }
+
+  private Estado estadoDoFuncionarioPara(ParamSituacaoEntity param, FuncionarioEntity funcionario) {
+    if (SituacaoLaboral.CESSADO.name().equals(param.getCodigo())) return Estado.I;
+    if (SituacaoLaboral.ATIVO.name().equals(param.getCodigo())) return Estado.A;
+    return funcionario.getEstado(); // outras situações (ex.: Licença) não alteram o estado do colaborador
+  }
+
+  private boolean mudouSituacaoOuMotivo(SituacaoLaboralEntity situacaoAtual, AlterarSituacaoLaboralRequest dto) {
+    Long sitAtualId = (situacaoAtual != null && situacaoAtual.getSituacaoLaboralId() != null)
+        ? situacaoAtual.getSituacaoLaboralId().getId() : null;
+    Long motAtualId = (situacaoAtual != null && situacaoAtual.getMotivoSitLabId() != null)
+        ? situacaoAtual.getMotivoSitLabId().getId() : null;
+    return !Objects.equals(sitAtualId, dto.getSituacaoLaboralId()) || !Objects.equals(motAtualId, dto.getMotivoId());
+  }
+
+  // ------------------------------------------------------------------------------------------------
+  // Guards do maker
+  // ------------------------------------------------------------------------------------------------
+
+  /** Combo Inativar/Ativar (2 opções): não cessar quem já está inativo, nem ativar quem já está ativo. */
+  private void guardComboInativarAtivar(boolean estaPorCorrigir, ParamSituacaoEntity param, FuncionarioEntity funcionario) {
+    if (estaPorCorrigir) return; // o reenvio de correção repõe o mesmo estado
+    var codigo = param.getCodigo();
+    if (SituacaoLaboral.CESSADO.name().equals(codigo) && funcionario.getEstado() == Estado.I) {
+      throw IgrpResponseStatusException.badRequest("O colaborador já está inativo; não é necessária esta ação.");
     }
+    if (SituacaoLaboral.ATIVO.name().equals(codigo) && funcionario.getEstado() == Estado.A) {
+      throw IgrpResponseStatusException.badRequest("O colaborador já está ativo; não é necessária esta ação.");
+    }
+  }
 
-    return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Situação laboral actualizada.", List.of());
+  /** Situações de ausência (flg_ausencia=1, ex.: Licença S/Vencimento) exigem data fim (período). */
+  private void guardDataFimObrigatoriaEmAusencia(ParamSituacaoEntity param, AlterarSituacaoLaboralRequest dto) {
+    if (Integer.valueOf(1).equals(param.getFlgAusencia()) && ValidationUtil.trimToNull(dto.getDataFim()) == null) {
+      throw IgrpResponseStatusException.badRequest(
+          "A data fim é obrigatória para situações de ausência (ex.: Licença Sem Vencimento).");
+    }
   }
 }

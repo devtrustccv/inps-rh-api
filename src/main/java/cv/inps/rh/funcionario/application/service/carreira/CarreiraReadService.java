@@ -129,7 +129,11 @@ public class CarreiraReadService {
     dto.setSituacaoLaboral(v.getSituacaoLaboralDesc());
     dto.setDataInicio(v.getDataInicio());
     dto.setDataFim(v.getDataFim());
-    dto.setProcessamento(Integer.valueOf(1).equals(v.getFlgProcessa()) ? "SIM" : "NAO");
+    // PROCESSAMENTO (coluna da vista RH_V_CARREIRA): "SIM" se a carreira já saiu em folha
+    // (COUNT de rh_t_proc_funcionarios > 0). NÃO confundir com FLG_PROCESSA (= processa salário).
+    dto.setProcessamento(v.getProcessamento() != null && v.getProcessamento() > 0 ? "SIM" : "NAO");
+    // FLG_PROCESSA (vista RH_V_CARREIRA): qual carreira é a que processa o salário atualmente.
+    dto.setProcessaSalarioNestaCarreira(Integer.valueOf(1).equals(v.getFlgProcessa()) ? "SIM" : "NAO");
     dto.setEstado(v.getEstadoCarreira());
     dto.setEstadoDesc(Estado.fromCode(v.getEstadoCarreira()).map(Estado::getDescription).orElse(null));
     return dto;

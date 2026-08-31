@@ -30,7 +30,8 @@ public enum Referencia {
   BAIXA_MEDICA("Baixa Médica"),
   PROCESSO_DISCIPLINAR("Processo Disciplinar"),
   REGULARIZACAO("Regularização"),
-  GESTAO_LABORAL("Gestão Laboral");
+  GESTAO_LABORAL("Gestão Laboral"),
+  ALTERACAO_ESCALAO("Alteração de Escalão");
 
   private final String descricao;
 

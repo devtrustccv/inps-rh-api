@@ -235,7 +235,7 @@ public class SoatController {
   )
   public ResponseEntity<byte[]> downloadFicheiroSoat(
       @RequestParam(value = "soatId") String soatId,
-      @RequestParam(value = "apoliceId") String apoliceId) {
+      @RequestParam(value = "apoliceId") Long apoliceId) {
 
     return queryBus.handle(new DownloadSoatPdfQuery(soatId, apoliceId));
   }

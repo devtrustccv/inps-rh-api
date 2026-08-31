@@ -14,6 +14,7 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ContratoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.AlertaEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
 import cv.inps.rh.shared.util.ValidationUtil;
 import lombok.RequiredArgsConstructor;
@@ -31,11 +32,18 @@ public class ValidacaoRenovacaoContratoService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ValidacaoRenovacaoContratoService.class);
 
+  /** Tipo de alerta gerado pelo JOB para renovação de contrato (ver AlertaWriteService). */
+  private static final String TIPO_ALERTA_RENOVACAO = "RENOVACAO_CONTRATO";
+  /** Estado terminal do alerta quando a situação é resolvida (doc TRANSVERSAL: P -> I). */
+  private static final String ESTADO_ALERTA_INATIVO = "I";
+  private static final String FLG_TRATAMENTO_NAO = "N";
+
   private final ContratoMapper contratoMapper;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
   private final TipoRelRemPagHelper tipoRelRemPagHelper;
+  private final AlertaEntityRepository alertaEntityRepository;
 
   @Transactional
   public SuccessResponseDTO validar(ValidarRenovacaoContratoCommand command) {
@@ -110,6 +118,9 @@ public class ValidacaoRenovacaoContratoService {
         estenderDatasDimensoes(tiposRelacionamento, contrato.getDataInicio(), contrato.getDataFim());
       }
       mudarEstado(funcionario, aprovado ? Estado.A : Estado.I);
+      // Alerta de origem (se existir): SIM fecha-o (estado='I', situação resolvida — doc TRANSVERSAL);
+      // NÃO repõe flg_tratamento='N' para voltar à grelha "por tratar".
+      marcarAlerta(contrato, aprovado);
     }
 
     funcionarioEntityRepository.saveAndFlush(funcionario);
@@ -169,6 +180,26 @@ public class ValidacaoRenovacaoContratoService {
     funcionarioRules.getPagamentosDescontosAssociadosAtivos(antigo.getId()).stream()
         .filter(p -> p.getDataFim() == null || !p.getDataFim().isBefore(hoje))
         .forEach(p -> p.setDataFim(dataFim));
+  }
+
+  /**
+   * Fecha ou reabre o alerta de renovação de origem conforme a decisão do checker. Localiza o alerta
+   * pelo referencia_id (= id do contrato, que se mantém na renovação) e tipo RENOVACAO_CONTRATO.
+   * NO-OP quando a renovação não veio de um alerta (nenhum alerta corresponde ao contrato).
+   *
+   * <ul>
+   *   <li>SIM (aprovado): estado='I' — situação resolvida, sai definitivamente da grelha.</li>
+   *   <li>NÃO (rejeitado): flg_tratamento='N' — o alerta volta à grelha "por tratar".</li>
+   * </ul>
+   */
+  private void marcarAlerta(ContratoEntity contrato, boolean aprovado) {
+    if (contrato == null) return;
+    alertaEntityRepository
+        .findFirstByReferenciaIdAndTipoAlertaOrderByIdDesc(contrato.getId(), TIPO_ALERTA_RENOVACAO)
+        .ifPresent(alerta -> {
+          if (aprovado) alerta.setEstado(ESTADO_ALERTA_INATIVO);
+          else alerta.setFlgTratamento(FLG_TRATAMENTO_NAO);
+        });
   }
 
   private void mudarEstado(FuncionarioEntity funcionarioEntity, Estado estado) {

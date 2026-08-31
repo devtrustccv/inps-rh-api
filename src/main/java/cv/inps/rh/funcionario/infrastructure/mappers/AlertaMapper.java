@@ -21,6 +21,10 @@ public class AlertaMapper {
         dto.setId(entity.getId());
         dto.setReferenciaName(entity.getReferenciaName());
         dto.setReferenciaId(entity.getReferenciaId());
+        dto.setReferenciaUuid(entity.getReferenciaUuid());
+        if (entity.getFunId() != null) {
+            dto.setFuncionarioId(entity.getFunId().getUuid());
+        }
         dto.setDescricao(entity.getDescricao());
         dto.setEstado(entity.getEstado());
         dto.setTipoSituacao(entity.getTipoSituacao());

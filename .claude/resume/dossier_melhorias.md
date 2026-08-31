@@ -1,10 +1,150 @@
 # Handoff — Melhorias Dossiê do Colaborador
 
-> Updated: 2026-08-27.
+> Updated: 2026-08-29 (T7.8 testado live + protótipo `javers.compare`→RH_T_VALIDACAO_DETALHE, §0e).
 > HANDOFF DETALHADO desta sessão (o `/resume dossier_melhorias` lê ISTO). Fonte única.
 > Paths de código são relativos ao worktree: `.claude/worktrees/dossier-melhorias/`.
+> Nota: o trabalho pós-merge (§0b em diante) é **direto em `develop`** (raiz do repo), não no worktree.
 
 ---
+
+## TODO — pendentes (TRANSVERSAL / JOB Alerta)
+
+Contexto: o "Processar" dos alertas (doc TRANSVERSAL 3.4.2) foi ligado aos fluxos do Dossiê. Detalhe
+completo em `.claude/resume/alerta-transversal.md` e `docs/frontend_changes_transversal.md`.
+
+**FEITO (commits em `develop`):**
+- `5632df70` — Processar RENOVAÇÃO em lote (`POST .../renovacao-contrato/lote`, atómico, erros agregados).
+- `866ef431` — Processar CONVERSÃO via Novo Contrato (`alertaId` opcional UUID no `NovoContratoDTO`;
+  maker marca `flg_tratamento='S'`; checker fecha `estado='I'`/repõe `'N'` por `referencia_id`). Lookup
+  do alerta por **UUID** (`findByUuid`) nos dois fluxos.
+
+**POR FAZER (só transversal — NÃO é Dossiê):**
+1. **JOB → notificação/email** — o JOB (`AlertaWriteService`) só CRIA o alerta (`flg_notificacao='N'`);
+   nunca gera notificação nem envia email. Ver **TODO no código** em
+   `src/main/java/cv/inps/rh/shared/domain/service/AlertaWriteService.java` (no `executarJobAlertas`).
+   Infra pronta a reutilizar: `NotificacaoDispatchService` + `NotificacaoDestinatarioResolver` +
+   `OracleEmailService`. **BLOQUEIO DE NEGÓCIO**: a spec **não diz quem recebe** (só define destinatários
+   p/ envio manual). Decisão do utilizador (supôs, não fechou): **admin do sistema configurável** +
+   talvez **colaborador** e/ou **responsável**. Implementar CONFIGURÁVEL: admin via env/`RH_T_DOMINIO`;
+   destinatários por tipo via `RH_T_DOMINIO`; **sem config → não envia** (`flg_notificacao` fica `'N'`).
+2. **Gerar alertas em falta no JOB** (hoje só gera renovação/conversão/licença-s-venc): **Doença**
+   (`LICENCA_C_VENCIMENTO`) e **Empréstimo** (pagamento atrasado; cessado com dívida). Doc 3.4 linhas ~1185/1211/1247.
+3. **Reconciliação `P→I`** do alerta de empréstimo quando a dívida é resolvida (doc ~1224/1257).
+
+**FORA DE ÂMBITO (Processamento Salarial, outra equipa/doc):** Processar `LICENCA_S_VENCIMENTO` e
+`LICENCA_C_VENCIMENTO` (abrem ecrãs do Proc. Salarial). Missão Serviço: doc marca "pendente / ver se faz sentido".
+
+**Convenções fixadas (não re-litigar):** alerta identificado por **UUID** (o `uuid` da lista, não o `id`
+Long); `flg_tratamento` estende a spec (S ao processar / N se rejeitado; grelha "por tratar" =
+`estado='P' AND flg_tratamento='N'`); `RH_T_ALERTA.FLG_TRATAMENTO`/`ESTADO` **sem CHECK** na BD viva
+(`'S'/'N'/'I'` seguros).
+
+---
+
+## 0e. PROTÓTIPO — detalhe via `javers.compare` + persistência em RH_T_VALIDACAO_DETALHE (2026-08-29, NÃO commitado)
+
+Decisão do utilizador (discussão arquitetural): em vez de JaVers-histórico OU do reader on-the-fly, usar o
+**motor de diff** do JaVers (`javers.compare`, modalidade leve, sem histórico SQL) para **gravar** o
+detalhe na tabela que a spec exige, lido pela via comum. Prototipado e **testado live no 8089** (não
+commitado — a aguardar decisão de adoção). Ficheiros:
+- **NOVO** `service/historicolaboral/EscalaoDetalheDiffWriter` — `javers.compare(snapshotAntes,
+  snapshotDepois)` onde `Snapshot` é uma classe com **`@Id` constante** (`org.javers...annotation.Id`)
+  para o JaVers comparar duas linhas de tiprel como MESMA instância → `ValueChange` campo-a-campo (senão
+  daria NewObject/ObjectRemoved). `persistir()` grava 1 linha/campo em `RH_T_VALIDACAO_DETALHE`;
+  `comparar()` devolve DTO (leitura on-the-fly); `limpar()` apaga p/ reenvio de correção. Formatação
+  (escalão codigo|nível/escala, salário, datas) centralizada aqui (fonte única).
+- `AlteracaoEscalaoDetalheReadService` — refatorado: delega o diff ao `EscalaoDetalheDiffWriter.comparar`
+  (usa `javers.compare` também na leitura); só resolve antes/depois e carimba autor/data. Passa a ser
+  **fallback** para movimentos antigos sem linhas persistidas.
+- `AlterarEscalaoCargoService` — chama `persistir(validacao, atual, novoTiprel)` no registo e
+  `limpar()+persistir()` no reenvio de correção (C→P).
+- `GetDetalheAlteracoesQueryHandler` — router: ALTERACAO_ESCALAO → se `existsByValidacaoId_Uuid` na tabela
+  lê via `ValidacaoDetalheReadService` (comum); senão fallback on-the-fly. **Zero regressão.**
+
+**Testado live (8089, BUILD SUCCESS após `clean`):**
+- Registo antigo (val 1012, 0 linhas) → fallback on-the-fly, output idêntico ao de antes (prova refactor).
+- POST novo (13/B→13/C, escalão 23) → **4 linhas persistidas** em `RH_T_VALIDACAO_DETALHE`
+  (val `01a04cb3-8dc5-7b84-9d11-33bf8f83b50f`): Escalão SEC_CA_13_B→SEC_CA_13_C, Salário 178076→169595,
+  Data início 26-08→30-08, Observações. `GET .../detalhes` lê da TABELA, HTTP 200, mesmo `ValidacaoDetalheDTO`.
+- Mobilidade (JaVers-histórico) intacta, HTTP 200.
+
+**Vantagens vs reader on-the-fly:** snapshot imutável no momento (robusto a alterações do predecessor);
+popula a tabela que a spec manda; reusa o reader comum (sem 3º caminho de leitura).
+**Pendente de decisão:** (a) commitar/adotar; (b) generalizar o padrão `compare→persistir` a outros fluxos
+de clone; (c) opcional a longo prazo — aposentar o JaVers-histórico pesado. Gotcha Oracle: `target/` tinha
+um `.class` corrompido (`ClassFormatError ...ParamLinhaBaseResponseDTO`) → **arrancar sempre após `mvn clean`**.
+
+## 0d. T7.8 RESOLVIDO + ✅ TESTADO LIVE — detalhe de alterações da Alteração de Escalão (reader manual isolado, 2026-08-29)
+
+Feito **direto em `develop`** (a seguir ao `90612692`). Compilado (BUILD SUCCESS, JDK23).
+**✅ TESTADO LIVE end-to-end no 8089 (2026-08-29):**
+- POST `.../alterar-escalao-cargo` (F4 uuid `01a03f71-...`, escalão 21=13/A) → pendente tiprel 173381,
+  validação 1012 (uuid `01a04c8d-1918-7044-86ea-61ab77a007ef`), HTTP 200.
+- `GET validacoes/{uuid}/detalhes` → linhas antes→depois com rótulos PT: **Escalão** SEC_CA_13_B→SEC_CA_13_A,
+  **Salário** 178076→186980, **Data início** 26-08→29-08, **Observações**. Só campos com diff. HTTP 200.
+- Regressão OK: MOBILIDADE (`RH_T_MOBILIDADE`) e CARREIRA (`RH_T_CARREIRA`) continuam via JaVers, HTTP 200.
+- Nota: em dev sem auth `alteradoPor=anonymousUser`. Deixado 1 pendente (val. 1012) na BD como evidência.
+
+**Diagnóstico do §5b estava ERRADO** (provado na BD `JV_SNAPSHOT`): não é o filtro `InitialValueChange`.
+A causa real é que **`TiposRelacionamentoEntity` é Shallow Reference** (`JaversAuditConfig.REFERENCIAS_RASAS`,
+adicionado na 2ª passagem do dossieFix). Consequência: todo commit do tiprel grava `STATE={}` / `CHANGED=[]`
+(verificado: snapshots 173373-173380 e até os antigos 173361/173363 têm estado vazio). Logo o JaVers **nunca**
+captura os campos do próprio tiprel → opções (a) e (b) do §5b **ambas inviáveis**.
+
+**Porque o shallow tem de ficar:** o tiprel tem **auto-referência** `tiprelId` (cadeia de tiprels
+anteriores) + é FK de muitos agregados auditados (Substituicao, ProcessoDisciplinar, EvolucaoCarreira…).
+Des-shallow faria cada commit percorrer a cadeia recursiva → o problema de 20-50s que o shallow evita.
+
+**Solução escolhida (decisão do utilizador): reader manual isolado — NÃO toca no JaVers nem nos outros fluxos.**
+- Novo `service/historicolaboral/AlteracaoEscalaoDetalheReadService` — compara o tiprel **pendente**
+  (`validacao.tiprelId` = "depois") com o **predecessor** (`pendente.tiprelId` = "antes"), ambos linhas
+  reais. Diff só dos campos com diferença (semântica de EDIÇÃO). Reutiliza `rotulos()`/`camposNegocio()`
+  do `GestaoLaboralValidacaoDetalheDescriptor` (fonte única). Campos: escalão (codigo|nível/escala),
+  cargo (nome), salário, moeda, tipoSituacao, dataInicio, dataFim, obs. autor/data via auditoria JPA do
+  pendente; tabelaName=RH_T_TIPOS_RELACIONAMENTO.
+- `GetDetalheAlteracoesQueryHandler` — branch: se `referenciaName==ALTERACAO_ESCALAO` → reader dedicado;
+  **senão → caminho JaVers intacto**. É a ÚNICA referência desviada. +`ValidacaoEntityRepository` para
+  ler a referência.
+- `JaversValidacaoDetalheReadService` — TODO T7.8 substituído por NOTA a explicar o desvio (nenhuma
+  mudança de lógica). `GestaoLaboralValidacaoDetalheDescriptor` — javadoc nota que serve rótulos ao reader.
+- ⚠️ **Verificação de "não quebrar os outros":** todos os outros descritores auditam entidades próprias
+  (Carreira→CarreiraEntity, Situação→SituacaoLaboralEntity, Substituicao→SubstituicaoEntity,
+  Mobilidade→MobilidadeEntity) — nenhum aponta ao tiprel. Só GESTAO_LABORAL apontava. Zero impacto.
+- **Gotcha Oracle XE (11g legacy):** sem `FETCH FIRST` — usar `ROWNUM`. Colunas `JV_GLOBAL_ID`: `LOCAL_ID`
+  (não `local_id_value`); `JV_SNAPSHOT`: `STATE`,`CHANGED_PROPERTIES`,`TYPE`,`GLOBAL_ID_FK`.
+
+**Por testar live (8089):** registar alteração de escalão → `GET validacoes/{uuid}/detalhes` devolve linhas
+antes→depois (escalão/salário/datas com rótulos PT); confirmar que os outros detalhes (mobilidade/carreira/
+situação) continuam intactos.
+
+## 0c. Referência de validação ALTERACAO_ESCALAO + TIPO_SITUACAO por domínio (2026-08-29)
+
+Feito **direto em `develop`**, commit **`90612692`**. Verificado na BD live (`RH_T_DOMAINS`) e compilado
+(BUILD SUCCESS, JDK23).
+
+**Decisão do utilizador:** o fluxo "Alterar Escalão/Cargo" passa a usar a referência de validação
+**`ALTERACAO_ESCALAO`** (não `GESTAO_LABORAL`). Regra: **acrescentar** o enum (NÃO renomear) e trocar o uso.
+
+- `Referencia.java` — **+`ALTERACAO_ESCALAO("Alteração de Escalão")`**; `GESTAO_LABORAL` **mantido**
+  (registos de teste antigos ainda resolvem via enum).
+- `AlterarEscalaoCargoService` + `GestaoLaboralValidacaoDetalheDescriptor` — todo o uso de
+  `Referencia.GESTAO_LABORAL` → `Referencia.ALTERACAO_ESCALAO` (referenciaName da validação, `referente`
+  do tiprel, reabrir/devolver-correção, lookup da validação, descriptor JaVers).
+- **`setReferente` guarda o NOME da Referencia** (padrão confirmado: Mobilidade/Carreira/Contrato/
+  RegistoColaborador) — logo `referente` = `ALTERACAO_ESCALAO`, distinto do TIPO_SITUACAO.
+- **TIPO_SITUACAO** (coluna do tiprel, domínio `TIPO_MOV_LABORAL`): deixou de gravar `"GESTAO_LABORAL"`
+  (**valor inexistente no domínio** — nunca esteve em `RH_T_DOMAINS`). Passa aos valores válidos
+  confirmados na BD: **`ESCALAO_NOVO`** (id 377, fluxo escalão) / **`CARGO_NOVO`** (ids 264/376, fluxo
+  cargo-só), como default quando o form não envia `tipoAlteracao`.
+- Comentários/javadoc alinhados (service, `AlterarEscalaoCargoDTO`, TODO T7.8 em `JaversValidacaoDetalheReadService`).
+
+**Gotchas:** DbQuery/DbExec vivem em `tools/db/` (não na raiz); URL live `62.84.179.137:1521:xe`, user
+`INPSRH`, pass no `tools/db/DbQuery.java`. Colunas do domínio: `DOMINIO/VALOR/DESCRICAO` (não `VALUE`).
+Referência `Referencia` é enum app-side (NÃO validado contra domínio) — `ALTERACAO_ESCALAO` como
+referenciaName não precisa de entrada em `RH_T_DOMAINS`. **Não testado live end-to-end** nesta sessão
+(só compilado + verificação de domínio); testar o fluxo Alterar Escalão quando a app subir no 8089.
+⚠️ Ainda **por fazer stage/commit por outra sessão**: `NovoContrato*`, `ValidarContratoService`,
+`MarcarAlertaTratadoCommand` estavam modificados/untracked na árvore — NÃO incluídos neste commit.
 
 ## 0. Estado live (2026-08-26, sessão de testes) — BD DE VOLTA
 
@@ -31,7 +171,7 @@
 | 7 T7.7 CORRIGIR (P→C) + re-POST reabre (C→P) sem duplicar | ✅ verde |
 | 7 T7.1 guard COM carreira → 400 | ✅ verde (live 2026-08-26) |
 | 7 T7.2 guard não-PCCS → 400 | ✅ verde (live 2026-08-26) |
-| 7 T7.8 Detalhe de alterações (JaVers) | ⏸️ GAP ADIADO — TODO no código + §5b; `[]` inofensivo, não bloqueia merge |
+| 7 T7.8 Detalhe de alterações | ✅ RESOLVIDO + TESTADO LIVE (reader manual isolado, §0d) 2026-08-29 |
 | 8 Remunerações filtros (situacaoLaboral/contrVinculo, +/-) | ✅ verde (live 2026-08-26) |
 | 9 Regressão (relacao-laboral carreira + renumeracoes + JaVers mob/carr) | ✅ verde (live 2026-08-26) |
 
@@ -183,7 +323,11 @@ string), `shared/models/TiposRelacionamentoEntity`(+escalao_id), `shared/enum/Do
 `funcionario/dto/AlterarEscalaoCargoDTO`(novo)+2 ações no `HistoricoLaboralController`. Enums hand-written
 (`TipoSalarioVinculo`, `Referencia`) sem manifesto.
 
-## 5b. GAP T7.8 — Detalhe de alterações (JaVers) vazio para Gestão Laboral
+## 5b. GAP T7.8 — Detalhe de alterações (JaVers) vazio para Gestão Laboral — ✅ RESOLVIDO (ver §0d)
+
+> ⚠️ O diagnóstico abaixo (InitialValueChange) revelou-se ERRADO. A causa real é o tiprel ser Shallow
+> Reference (STATE={} no JaVers). Resolvido com reader manual isolado — ver §0d. Mantido por histórico.
+
 
 **Sintoma:** `GET validacoes/{tiprelUuid}/detalhes` para uma alteração de escalão devolve `[]` (HTTP 200).
 **Causa raiz (confirmada):** `JaversValidacaoDetalheReadService` (linha ~105-118) decide a semântica pela
@@ -257,9 +401,27 @@ reassociado, antigo I, novo A. T7.6 validar NAO → I, salário intacto. T7.7 CO
 **Evidências → HTML:** por teste, HTTP status + JSON cru + queries de verificação. Montar
 `docs/evidencias_teste_live_dossier.html` explicando cada fluxo e resultado.
 
-## 8. Next step (retomar aqui) — MERGE FEITO
+## 8. Next step (retomar aqui) — ▶ DECIDIR o protótipo `javers.compare`→tabela (§0e)
 
-**FASES 0-9 verdes** (T7.8 adiado) e **branch MERGED em `develop`** (local, sem push).
+**T7.8 ✅ testado live** (§0d, 2026-08-29) e **protótipo `javers.compare`→RH_T_VALIDACAO_DETALHE ✅
+testado live** (§0e, **NÃO commitado**). App reiniciada com o build do protótipo (arrancar SEMPRE após
+`mvn clean` — `target/` tinha um `.class` corrompido). Log: `scratchpad/boot_diffwriter_8089.log`.
+
+**⇒ PRÓXIMO PASSO = decisão do utilizador sobre o protótipo (§0e):**
+1. **Commitar/adotar** a via `compare→persistir` para o escalão? (4 ficheiros: novo
+   `EscalaoDetalheDiffWriter` + refactor de `AlteracaoEscalaoDetalheReadService`, `AlterarEscalaoCargoService`,
+   `GetDetalheAlteracoesQueryHandler`). Zero regressão comprovada (fallback on-the-fly p/ registos antigos).
+2. Se sim → **generalizar** o padrão a outros fluxos de clone (mover writer p/ `shared`)? e/ou aposentar
+   o JaVers-histórico pesado a longo prazo?
+3. Se não → **reverter** o protótipo (não commitado; `git checkout` dos 4 ficheiros) e ficar no §0d.
+
+Ficheiros-alvo do protótipo: `EscalaoDetalheDiffWriter` (novo), `AlteracaoEscalaoDetalheReadService`,
+`AlterarEscalaoCargoService`, `GetDetalheAlteracoesQueryHandler` (todos NÃO commitados).
+Evidências live em `scratchpad/t78_*.json` + BD (val `01a04cb3-8dc5-7b84-9d11-33bf8f83b50f` = 4 linhas persistidas).
+
+---
+
+**FASES 0-9 verdes** e **branch MERGED em `develop`** (local, sem push). T7.8 ✅ resolvido (§0d).
 - Merge commit: **`de698d2a`** (`Merge branch 'feat/dossier-melhorias' into develop`). Verificado antes:
   `merge-tree` limpo (1 só ficheiro sobreposto — `TiposRelacionamentoEntityRepository`, auto-merge
   aditivo) + **compilação BUILD SUCCESS** num worktree descartável de develop.
@@ -271,7 +433,9 @@ reassociado, antigo I, novo A. T7.6 validar NAO → I, salário intacto. T7.7 CO
 1. **`git push` de `develop`** (o merge foi só local; passo público por decidir).
 2. **Aplicar migrações** (`docs/db/melhorias_dossier_*.sql`) em qualquer ambiente que corra develop e
    ainda não as tenha (a BD live já as tem).
-3. **T7.8** — implementar o detalhe JaVers da Gestão Laboral (adiado).
+3. **T7.8** — ✅ RESOLVIDO via reader manual isolado (§0d) e ✅ **testado live** no 8089.
+5. **Protótipo §0e (`javers.compare`→RH_T_VALIDACAO_DETALHE)** — testado live, **NÃO commitado**: decidir
+   adotar/generalizar ou reverter (4 ficheiros na árvore de trabalho).
 4. Resíduo: pasta `.claude/worktrees/_mergecheck` ficou bloqueada por um handle no `target/` (o registo
    de worktree já foi prunado; apagar a pasta quando o processo largar / ao reiniciar).
 

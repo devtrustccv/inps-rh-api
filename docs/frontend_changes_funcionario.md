@@ -197,3 +197,22 @@ Só leitura (não enviar no corpo). Alteração **aditiva** — nenhum campo exi
 
 Nota: `AnexoRespDTO` é partilhado, pelo que `estado`/`estadoDesc` passam a aparecer também noutras
 respostas que o usem (missão/serviço, assiduidade, …); onde o respectivo mapper não os preenche vêm `null`.
+
+---
+
+## Renovação de contrato — request deixa de aceitar `tipoContratoId` / `tipoVinculoId`
+
+**Data:** 2026-08-27
+
+Endpoints afetados (corpo `RenovacaoContratoDTO.dadosRenovacao`, `RenovarContratoReqDTO`):
+- `POST /api/v1/funcionarios/{idFuncionario}/renovacao-contrato/{contratoId}`
+- `POST /api/v1/funcionarios/{idFuncionario}/validar-renovacao-contrato/{contratoId}`
+
+O `RenovarContratoReqDTO` passa a ter **apenas** `dataInicio`, `dataFim`, `duracaoMeses`. Removidos
+`tipoContratoId` e `tipoVinculoId` — na renovação o tipo de contrato/vínculo são **os do contrato
+atual** (não se alteram), logo não precisam de vir do formulário. Enviar esses campos deixa de ter
+efeito (são ignorados pela desserialização).
+
+Leitura mantém tudo: o GET `.../renovacao-contrato/{contratoId}` (`RenovacaoDetalheDTO`, com `atual` e
+`renovacao`) e o `RenovarContratoRespDTO` continuam a expor `tipoContratoId`/`tipoContratoDesc` e
+`tipoVinculoId`/`tipoVinculoDesc` para a parte informativa do modal.

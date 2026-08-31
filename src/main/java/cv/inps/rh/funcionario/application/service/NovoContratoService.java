@@ -56,6 +56,7 @@ public class NovoContratoService {
   private final ContratoHistoricoWriteService contratoHistoricoWriteService;
   private final ColaboradorValidationRules colaboradorValidationRules;
   private final ContratoEntityRepository contratoEntityRepository;
+  private final AlertaEntityRepository alertaEntityRepository;
 
 
   @Transactional
@@ -88,6 +89,11 @@ public class NovoContratoService {
       throw IgrpResponseStatusException.badRequest(
           "O funcionário já possui um contrato ativo. Para alterar o contrato em vigor, use a Renovação de Contrato.");
     }
+
+    // Conversão via "Processar" (JOB Alerta): quando o Novo Contrato é aberto a partir de um alerta de
+    // CONVERSAO_CONTRATO, marca-se o alerta como tratado (sai da grelha "por tratar"). NO-OP para um Novo
+    // Contrato normal (alertaId nulo). O fecho definitivo (estado='I') faz-se na validação positiva.
+    marcarAlertaConversaoTratado(dto.getAlertaId());
 
     boolean isPrimeiroContrato = funcionario.getContratos().isEmpty();
 
@@ -264,6 +270,16 @@ public class NovoContratoService {
     return dadosContratuaisMapper.dadosContratuaisRespDTO(tiposRelacionamentoNovo, pagamentos, remuneracoes);
   }
 
+  /**
+   * Marca o alerta de conversão de origem como tratado (flg_tratamento='S'), para sair da grelha
+   * "por tratar". Localiza pelo uuid (convenção externa da app). NO-OP quando o Novo Contrato não veio
+   * de um alerta (alertaId nulo/vazio).
+   */
+  private void marcarAlertaConversaoTratado(java.util.UUID alertaId) {
+    if (alertaId == null) return;
+    alertaEntityRepository.findByUuid(alertaId).ifPresent(a -> a.setFlgTratamento("S"));
+  }
+
   // D4 (DOSSIÊ, Novo Contrato): num contrato NÃO-primeiro encerram-se SEMPRE os registos ativos
   // (DATA_FIM IS NULL) de carreira/mobilidade/regime — pondo DATA_FIM = data de início do novo
   // contrato — e cria-se um novo registo (CONTINUIDADE). Não se reutiliza o do contrato anterior:
@@ -320,6 +336,11 @@ public class NovoContratoService {
 
     var contrato = contratoMapper.toContrato(dadosContratuais, Estado.P);
     contrato.setFunId(funcionario);
+    // O contrato tem de pertencer à coleção do funcionário (managed) para ser persistido por cascade
+    // (funcionario.contratos = PERSIST). Sem isto, num Novo Contrato de CONTINUIDADE roteado por aqui
+    // (ex.: após DESATIVAR → est_act_adm=0), o contrato/carreira ficam só referenciados pelo tiprel
+    // (ManyToOne sem cascade) → TransientObjectException no flush. Espelha o ramo não-primeiro (registrar).
+    funcionario.getContratos().add(contrato);
     contrato.setTipoSituacao(tipoSituacao);
     contrato.setVersao(1);
     contrato.setContratoId(null);

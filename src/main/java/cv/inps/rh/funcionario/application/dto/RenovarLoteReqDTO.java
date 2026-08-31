@@ -4,11 +4,14 @@
 package cv.inps.rh.funcionario.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -16,15 +19,11 @@ import java.time.LocalDate;
 
 
 @IgrpDTO
-public class RenovarContratoReqDTO  {
+public class RenovarLoteReqDTO  {
 
 
-  private LocalDate dataInicio ;
-
-
-  private LocalDate dataFim ;
-
-
-  private Integer duracaoMeses ;
+  @Valid
+  @NotEmpty(message = "The field <itens> must not be empty")
+  private List<RenovarLoteItemReqDTO> itens = new ArrayList<>();
 
 }

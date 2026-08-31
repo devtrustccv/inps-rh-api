@@ -24,6 +24,13 @@ public interface GeografiaEntityRepository extends
         .orElseThrow(() -> IgrpResponseStatusException.of(HttpStatus.NOT_FOUND, "GeografiaEntity not found for id: " + id));
   }
 
+  @Query("""
+      SELECT g.nome
+      FROM GeografiaEntity g
+      WHERE g.id = :id
+      """)
+  String getDescriptionById(Long id);
+
   @Query("SELECT g FROM GeografiaEntity g " +
          "WHERE g.nivelDetalhe = :nivelDetalhe " +
          "AND (:geogrId IS NULL OR g.geogrId = :geogrId) " +
