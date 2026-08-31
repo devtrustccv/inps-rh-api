@@ -25,9 +25,11 @@ public class DownloadSoatPdfQueryHandler
 
   @IgrpQueryHandler
   public ResponseEntity<byte[]> handle(DownloadSoatPdfQuery query) {
+
     LOGGER.debug("DownloadSoatPdfQuery: {}", query);
 
     var result = service.gerarFicheiroSoat(query.getSoatId(), query.getApoliceId());
+
     var disposition = ContentDisposition.attachment()
         .filename(result.filename(), StandardCharsets.UTF_8)
         .build();

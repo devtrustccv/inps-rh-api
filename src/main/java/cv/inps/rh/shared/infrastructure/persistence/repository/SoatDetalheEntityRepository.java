@@ -12,9 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
-
 
 @Repository
 public interface SoatDetalheEntityRepository extends
@@ -27,8 +25,6 @@ public interface SoatDetalheEntityRepository extends
   }
 
   Optional<SoatDetalheEntity> findByUuid(String uuid);
-
-  List<SoatDetalheEntity> findAllBySoat_IdOrderByFun_NomeAsc(Long soatId);
 
   default SoatDetalheEntity findByUuidOrThrow(String uuid) {
     return findByUuid(uuid)
