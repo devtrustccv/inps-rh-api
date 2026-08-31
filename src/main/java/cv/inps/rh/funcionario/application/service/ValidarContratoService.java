@@ -117,7 +117,8 @@ public class ValidarContratoService {
     if (dto.getValidar() != null && !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT,
         Referencia.CONTRATO)) {
       throw IgrpResponseStatusException.badRequest(
-          "funcionario nao tem validacao pendente para o tipo de acao: INSERT e referencia: CONTRATO");
+          "O funcionário '%s' não possui uma validação pendente de contrato."
+              .formatted(funcionario.getNome()));
     }
 
     var tiposRelacionamento = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());

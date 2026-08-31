@@ -92,7 +92,8 @@ public class AlterarSituacaoLaboralWriteService {
     if (dto.getValidar() != null && !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE,
         Referencia.ESTADO_COLABORADOR)) {
       throw IgrpResponseStatusException.badRequest(
-          "funcionario nao tem validacao pendente para o tipo de acao: UPDATE e referencia: ESTADO_COLABORADOR");
+          "O funcionário '%s' não possui uma validação pendente de alteração de situação laboral."
+              .formatted(funcionario.getNome()));
     }
 
     // CHECKER: aprovar (SIM) ou rejeitar (NAO).
