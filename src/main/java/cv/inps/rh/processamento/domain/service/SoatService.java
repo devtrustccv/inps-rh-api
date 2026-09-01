@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -146,6 +147,17 @@ public class SoatService {
     PageMapper.fillPagination(data, response);
     response.setContent(data.getContent());
     return response;
+  }
+
+  @Transactional(readOnly = true)
+  public void updateDetalhesSoat(List<UpdateDetalheSoatRequestDTO> data) {
+    for (var detail : data) {
+      soatDetalheRepository.updateByUuid(
+          detail.getDetalheSoatId(),
+          detail.getDiasTrabalho(),
+          detail.getRemuneracao()
+      );
+    }
   }
 
   @Transactional(readOnly = true)

@@ -10,9 +10,11 @@ import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.processamento.application.commands.CriarSoatCommand;
 import cv.inps.rh.processamento.application.commands.FinalizarSoatCommand;
 import cv.inps.rh.processamento.application.commands.SalvarDadosInstituicaoCommand;
+import cv.inps.rh.processamento.application.commands.UpdateSoatDetalhesCommand;
 import cv.inps.rh.processamento.application.dto.DadosApoliceResponseDTO;
 import cv.inps.rh.processamento.application.dto.DadosInstituicaoRequestDTO;
 import cv.inps.rh.processamento.application.dto.DadosInstituicaoResponseDTO;
+import cv.inps.rh.processamento.application.dto.UpdateDetalheSoatRequestDTO;
 import cv.inps.rh.processamento.application.queries.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -239,4 +241,25 @@ public class SoatController {
 
     return queryBus.handle(new DownloadSoatPdfQuery(soatId, apoliceId));
   }
+
+  @PostMapping("detalhes")
+  @Operation(
+      summary = "Atualizar detalhes soat",
+      description = "Atualizar detalhes soat",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(
+                  mediaType = "application/json"
+              )
+          )
+      }
+  )
+  public ResponseEntity<Void> updateDetalhesSoat(@Valid @RequestBody List<UpdateDetalheSoatRequestDTO> request) {
+
+    final var command = new UpdateSoatDetalhesCommand(request);
+
+    return commandBus.send(command);
+  }
+
 }
