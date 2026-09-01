@@ -197,7 +197,7 @@ public class SoatController {
     return queryBus.handle(query);
   }
 
-  @GetMapping("/{soatId}")
+  @GetMapping("/{soatId}/detalhes")
   @Operation(
       summary = "Get detalhes soat",
       description = "Get detalhes soat",
