@@ -20,7 +20,7 @@ public record SoatPdfDTO(
     String morada,
     String concelho,
     int totalPessoas,
-    String massaSalarialAnual,
+    long massaSalarialAnual,
     List<SoatPdfRowDTO> pessoas
 ) {
 }
