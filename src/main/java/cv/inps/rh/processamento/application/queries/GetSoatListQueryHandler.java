@@ -25,7 +25,7 @@ public class GetSoatListQueryHandler implements QueryHandler<GetSoatListQuery, R
 
     LOGGER.debug("GetSoatListQuery: {}", query);
 
-    var result = service.list(
+    var result = service.listSoat(
         query.getAnoReferente(),
         query.getMesReferente(),
         query.getPage(),

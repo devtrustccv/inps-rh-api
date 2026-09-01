@@ -69,7 +69,6 @@
         .people {
             margin-top: 7pt;
             table-layout: fixed;
-            -fs-table-paginate: paginate;
         }
 
         .people thead {
@@ -469,7 +468,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:if="${soat.pessoas() == null or soat.pessoas().isEmpty()}">
+    <tr th:if="${soat.pessoas().isEmpty()}">
         <td class="no-data" colspan="16">Sem pessoas seguras para apresentar.</td>
     </tr>
     <tr th:class="${stat.odd} ? 'odd' : ''" th:each="pessoa, stat : ${soat.pessoas()}">
@@ -482,11 +481,11 @@
         <td class="center" th:text="${pessoa.sexo()}"></td>
         <td class="center" th:text="${pessoa.situacao()}"></td>
         <td th:text="${pessoa.profissao()}"></td>
-        <td class="center" th:text="${pessoa.aprendizOuEstagiario()}"></td>
-        <td class="right" th:text="${#numbers.formatDecimal(pessoa.horasSemana(), 1, 'POINT', 2, 'COMMA')}"></td>
-        <td class="center" th:text="${pessoa.unidadeRetribuicao()}"></td>
-        <td class="right" th:text="${#numbers.formatDecimal(pessoa.retribuicao(), 1, 'POINT', 2, 'COMMA')}"></td>
-        <td class="right" th:text="${#numbers.formatDecimal(pessoa.retribuicaoAnual(), 1, 'POINT', 2, 'COMMA')}"></td>
+        <td class="center" th:text="${pessoa.aprendizEstagiario()}"></td>
+        <td class="right" th:text="${pessoa.horasSemana()}"></td>
+        <td class="right" th:text="${pessoa.retribuicaoHoraDiaMes()}"></td>
+        <td class="right" th:text="${pessoa.retribuicaoHoraDiarioMensal()}"></td>
+        <td class="right" th:text="${pessoa.retribuicaoAnual()}"></td>
         <td class="center" th:text="${pessoa.temporariamenteEstrangeiro()}"></td>
         <td th:text="${pessoa.observacoes()}"></td>
     </tr>

@@ -42,7 +42,7 @@ public class PdfGenerator {
 
     } catch (Exception e) {
       LOGGER.error("Erro ao gerar PDF", e);
-      throw IgrpResponseStatusException.internalServerError("Erro ao gerar PDF");
+      throw IgrpResponseStatusException.internalServerError("Erro ao gerar document pdf");
     }
   }
 

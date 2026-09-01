@@ -10,10 +10,10 @@ public record SoatPdfRowDTO(
     String sexo,
     String situacao,
     String profissao,
-    String aprendizOuEstagiario,
+    String aprendizEstagiario,
     String horasSemana,
-    String unidadeRetribuicao,
-    Long retribuicao,
+    Long retribuicaoHoraDiaMes,
+    String retribuicaoHoraDiarioMensal,
     Long retribuicaoAnual,
     String temporariamenteEstrangeiro,
     String observacoes
