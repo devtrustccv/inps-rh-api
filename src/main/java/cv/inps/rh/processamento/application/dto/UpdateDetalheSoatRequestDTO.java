@@ -30,4 +30,6 @@ public class UpdateDetalheSoatRequestDTO {
 
   private BigDecimal remuneracao;
 
+  private String obj;
+
 }

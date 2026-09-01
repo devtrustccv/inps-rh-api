@@ -31,7 +31,8 @@ public enum Referencia {
   PROCESSO_DISCIPLINAR("Processo Disciplinar"),
   REGULARIZACAO("Regularização"),
   GESTAO_LABORAL("Gestão Laboral"),
-  ALTERACAO_ESCALAO("Alteração de Escalão");
+  ALTERACAO_ESCALAO("Alteração de Escalão"),
+  SOAT("Soat");
 
   private final String descricao;
 
