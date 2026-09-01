@@ -136,7 +136,8 @@ public class RenumeracoesReadService {
     var renumeracao = definicaoRemuneracaoEntityRepository.findByUuidOrThrow(renumeracaoId);
 
     if(!Objects.equals(renumeracao.getFunId().getUuid(), idFuncionario)){
-      throw IgrpResponseStatusException.badRequest("Renumeracao nao pertence ao funcionario :" +renumeracao.getFunId().getNome());
+      throw IgrpResponseStatusException.badRequest(
+          "A remuneração não pertence ao funcionário '%s'.".formatted(renumeracao.getFunId().getNome()));
     }
 
     var response = new NovoRemuneracaoRequestDTO();
@@ -163,7 +164,8 @@ public class RenumeracoesReadService {
     var pagamento = defPagamentoEntityRepository.findByUuidOrThrow(pagamentoId);
 
     if(!Objects.equals(pagamento.getFunId().getUuid(), idFuncionario)){
-      throw IgrpResponseStatusException.badRequest("Pagamento Desconto nao pertence ao funcionario :" +pagamento.getFunId().getNome());
+      throw IgrpResponseStatusException.badRequest(
+          "O pagamento/desconto não pertence ao funcionário '%s'.".formatted(pagamento.getFunId().getNome()));
     }
 
     var response = new NovoPagamentoRequestDTO();

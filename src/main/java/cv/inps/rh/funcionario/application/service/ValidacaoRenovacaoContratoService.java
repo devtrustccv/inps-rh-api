@@ -59,7 +59,7 @@ public class ValidacaoRenovacaoContratoService {
     var contrato = tiposRelacionamento.getContrVinculoId();
     if (contrato == null)
       throw IgrpResponseStatusException.badRequest(
-          "Funcionario com id '%s' não possui contrato ativo".formatted(idFunc));
+          "O funcionário '%s' não possui contrato ativo".formatted(funcionario.getNome()));
 
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(contrato.getEstado());
 

@@ -123,12 +123,12 @@ public class RenovacaoContratoService {
     var tipoRelacionamentoAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     if (tipoRelacionamentoAtual == null)
       throw IgrpResponseStatusException.notFound(
-          "Funcionario com id '%s' não possui tipo de relacionamento atual".formatted(idFunc));
+          "O funcionário '%s' não possui tipo de relacionamento atual".formatted(funcionario.getNome()));
 
     var contratoAtual = tipoRelacionamentoAtual.getContrVinculoId();
     if (contratoAtual == null)
       throw IgrpResponseStatusException.notFound(
-          "Funcionario com id '%s' não possui contrato ativo".formatted(idFunc));
+          "O funcionário '%s' não possui contrato ativo".formatted(funcionario.getNome()));
 
     // Guard (datas da renovação): a data de início é obrigatória e pode ser no passado (renovações
     // registadas em atraso); a data de fim, se indicada, não pode ser anterior à de início.
@@ -162,7 +162,7 @@ public class RenovacaoContratoService {
 
     if (funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.RENOVACAO_CONTRATO))
       throw IgrpResponseStatusException.conflict(
-          "Funcionario com id '%s' possui uma validação pendente de renovação de contrato".formatted(idFunc));
+          "O funcionário '%s' possui uma validação pendente de renovação de contrato".formatted(funcionario.getNome()));
 
     return new ContextoRenovacao(funcionario, contratoAtual, tipoRelacionamentoAtual);
   }

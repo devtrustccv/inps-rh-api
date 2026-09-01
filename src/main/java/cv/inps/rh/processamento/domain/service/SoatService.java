@@ -42,11 +42,21 @@ public class SoatService {
   private final SoatDetalheEntityRepository soatDetalheRepository;
   private final GeografiaEntityRepository geografiaEntityRepository;
   private final SoatViewEntityRepository soatViewEntityRepository;
-  private final EntityManager entityManager;
   private final PdfGenerator pdfGenerator;
+  private final EntityManager entityManager;
+
+  @Transactional
+  public void criarSoat(Integer ano, Integer mes) {
+    entityManager.createStoredProcedureQuery("RH_PK_GERA_SOAT_DB.REGISTAR_LISTA_SOAT")
+        .registerStoredProcedureParameter("P_ANO", Integer.class, ParameterMode.IN)
+        .registerStoredProcedureParameter("P_MES", String.class, ParameterMode.IN)
+        .setParameter("P_ANO", ano)
+        .setParameter("P_MES", "%02d".formatted(mes))
+        .execute();
+  }
 
   @Transactional(readOnly = true)
-  public WrapperListDTO list(Integer anoReferente, Integer mesReferente, Integer page, Integer size) {
+  public WrapperListDTO listSoat(Integer anoReferente, Integer mesReferente, Integer page, Integer size) {
 
     var data = soatRepository.findSoatPage(anoReferente, mesReferente, PageRequest.of(page, size));
 
@@ -91,16 +101,6 @@ public class SoatService {
   }
 
   @Transactional
-  public void criarSoat(Integer ano, Integer mes) {
-    entityManager.createStoredProcedureQuery("RH_PK_GERA_SOAT_DB.REGISTAR_LISTA_SOAT")
-        .registerStoredProcedureParameter("P_ANO", Integer.class, ParameterMode.IN)
-        .registerStoredProcedureParameter("P_MES", String.class, ParameterMode.IN)
-        .setParameter("P_ANO", ano)
-        .setParameter("P_MES", "%02d".formatted(mes))
-        .execute();
-  }
-
-  @Transactional
   public synchronized DadosInstituicaoResponseDTO salvarDadosInstituicao(DadosInstituicaoRequestDTO request) {
 
     dadosInstituicaoRepository.findFirstByEstadoOrderByIdDesc(Estado.A.getCode())
@@ -112,23 +112,19 @@ public class SoatService {
     var novo = new DadosInstituicaoEntity();
     novo.setUuid(UuidCreator.getTimeOrderedEpoch().toString());
     novo.setEstado(Estado.A.getCode());
-    apply(request, novo);
+    novo.setNome(request.getNome());
+    novo.setNif(request.getNif());
+    novo.setCodCae(request.getCodCae());
+    novo.setAtividadeEconomica(request.getAtividadeEconomica());
+    novo.setNumCertidaoComercial(request.getNumCertidaoComercial());
+    novo.setDataValidade(request.getDataValidade());
+    novo.setTelefone(request.getTelefone());
+    novo.setLocalidade(request.getLocalidade());
+    novo.setEmail(request.getEmail());
+    novo.setMorada(request.getMorada());
+    novo.setConcelhoId(request.getConcelhoId());
 
     return toResponse(dadosInstituicaoRepository.save(novo));
-  }
-
-  private void apply(DadosInstituicaoRequestDTO request, DadosInstituicaoEntity entity) {
-    entity.setNome(request.getNome());
-    entity.setNif(request.getNif());
-    entity.setCodCae(request.getCodCae());
-    entity.setAtividadeEconomica(request.getAtividadeEconomica());
-    entity.setNumCertidaoComercial(request.getNumCertidaoComercial());
-    entity.setDataValidade(request.getDataValidade());
-    entity.setTelefone(request.getTelefone());
-    entity.setLocalidade(request.getLocalidade());
-    entity.setEmail(request.getEmail());
-    entity.setMorada(request.getMorada());
-    entity.setConcelhoId(request.getConcelhoId());
   }
 
   @Transactional(readOnly = true)
@@ -187,8 +183,8 @@ public class SoatService {
             obj.getCargoCarreira(),
             obj.getTipoContrato(), // TODO 30/08/2026 15:29 duvida aqui
             obj.getDiasTrabSemana(),
-            "", // TODO 30/08/2026 15:29 duvida aqui
             obj.getSalarioBase(),
+            "", // TODO 30/08/2026 15:29 duvida aqui
             obj.getSalarioBaseAnual(),
             obj.getColabNoEstrangeiro(),
             obj.getObs()
@@ -198,10 +194,10 @@ public class SoatService {
     var phoneNumber = ofNullable(dadosInstituicao.getTelefone()).map(Objects::toString).orElse("");
 
     var annualSalary = persons.stream()
-                           .map(SoatPdfRowDTO::retribuicaoAnual)
-                           .filter(Objects::nonNull)
-                           .mapToLong(Long::longValue)
-                           .sum() + "";
+        .map(SoatPdfRowDTO::retribuicaoAnual)
+        .filter(Objects::nonNull)
+        .mapToLong(Long::longValue)
+        .sum();
 
     var pdfData = new SoatPdfDTO(
         DateFormatter.DATE.format(LocalDate.now(ZoneId.systemDefault())),
@@ -220,14 +216,14 @@ public class SoatService {
         dadosInstituicao.getEmail(),
         dadosInstituicao.getMorada(),
         ofNullable(dadosInstituicao.getConcelhoId()).map(geografiaEntityRepository::getDescriptionById).orElse(""),
-        persons.size(), // TODO 30/08/2026 15:29 duvida aqui
+        persons.size(),
         annualSalary,
         persons
     );
 
     return new SoatPdfResult(
         "soat-%s.pdf".formatted(pdfData.referencia()),
-        pdfGenerator.generate("soat-pdf", Map.of("soat", pdfData))
+        pdfGenerator.generate("soat", Map.of("soat", pdfData))
     );
   }
 

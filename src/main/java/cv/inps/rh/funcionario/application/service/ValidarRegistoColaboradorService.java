@@ -123,7 +123,8 @@ public class ValidarRegistoColaboradorService {
         && !funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.INSERT,
             Referencia.REGISTO_COLABORADOR)) {
       throw IgrpResponseStatusException.badRequest(
-          "funcionario nao tem validacao pendente de REGISTO COLABORADOR");
+          "O colaborador '%s' não possui uma validação pendente de registo."
+              .formatted(funcionario.getNome()));
     }
 
     funcionario = funcionarioMapper.toUpdateEntity(funcionario, dadosPessoaisReqDTO);
