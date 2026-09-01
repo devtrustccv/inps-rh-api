@@ -2,7 +2,6 @@ package cv.inps.rh.funcionario.application.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.application.commands.AlterarSituacaoLaboralCommand;
-import cv.inps.rh.funcionario.application.constants.SituacaoLaboral;
 import cv.inps.rh.funcionario.application.dto.AlterarSituacaoLaboralRequest;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
@@ -56,6 +55,12 @@ public class AlterarSituacaoLaboralWriteService {
 
   private static final String TABELA_SITUACAO = "RH_T_SITUACAO_LABORAL";
   private static final String REFERENTE_SITUACAO = "SITUACAO_LABORAL";
+
+  // Domínio ESTADO_CONTRATO (RH_T_PARAM_SITUACAO.FLG_ESTADO_CONTRATO): A=Ativo, C=Cessado, S=Suspenso.
+  // A spec DOSSIÊ (01/09) tornou esta flag a fonte de verdade do estado do colaborador — a decisão
+  // deixa de estar presa ao CODIGO da situação (ex.: APOSENTADO tem flag C e também cessa).
+  private static final String ESTADO_CONTRATO_ATIVO = "A";
+  private static final String ESTADO_CONTRATO_CESSADO = "C";
 
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final ParamSituacaoEntityRepository paramSitLaboralEntityRepository;
@@ -176,7 +181,7 @@ public class AlterarSituacaoLaboralWriteService {
         .ifPresent(v -> v.setEstado(estado));
 
     if (estado == Estado.A) {
-      if (SituacaoLaboral.CESSADO.name().equals(param.getCodigo())) {
+      if (cessaContrato(param)) {
         aplicarEfeitosCessacao(dto, funcionario, tiprelAtual);
       }
       ordemServicoWriteService.criar(funcionario, tiprelAtual, dto.getTipoOrdemServico());
@@ -290,7 +295,10 @@ public class AlterarSituacaoLaboralWriteService {
     funcionario.setEstado(Estado.I);
     var dataFim = DateFormatter.stringToLocalDate(dto.getDataFim());
     tiprelAtual.setDataFim(dataFim);
-    tiprelAtual.setEstActAdm(0);
+    // NÃO zerar est_act_adm: o vínculo cessado continua a ser o "último/corrente" do colaborador
+    // (só passa a inativo). Assim o inativo mantém-se visível na lista (RH_V_DOSSIE.ULTIMO_VINCULO=1),
+    // como exige a spec (colaborador inativo visível, só com ação Ativar/Inativar). Alinhado com o
+    // AlterarEstadoContratoService, que na desativação também preserva est_act_adm=1.
 
     var mobilidade = tiprelAtual.getMobId();
     if (mobilidade != null) mobilidade.setDataFim(dataFim);
@@ -321,9 +329,8 @@ public class AlterarSituacaoLaboralWriteService {
     tiprelAtual.setEstActAdm(0);
 
     var situacaoAnterior = anterior.getSituacLaboralId();
-    var codigoAnterior = (situacaoAnterior != null && situacaoAnterior.getSituacaoLaboralId() != null)
-        ? situacaoAnterior.getSituacaoLaboralId().getCodigo() : null;
-    funcionario.setEstado(SituacaoLaboral.CESSADO.name().equals(codigoAnterior) ? Estado.I : Estado.A);
+    var paramAnterior = (situacaoAnterior != null) ? situacaoAnterior.getSituacaoLaboralId() : null;
+    funcionario.setEstado(cessaContrato(paramAnterior) ? Estado.I : Estado.A);
   }
 
   /** Get-or-create de uma validação pendente UPDATE/ESTADO_COLABORADOR, persistida (id/uuid) para o audit. */
@@ -393,9 +400,21 @@ public class AlterarSituacaoLaboralWriteService {
   }
 
   private Estado estadoDoFuncionarioPara(ParamSituacaoEntity param, FuncionarioEntity funcionario) {
-    if (SituacaoLaboral.CESSADO.name().equals(param.getCodigo())) return Estado.I;
-    if (SituacaoLaboral.ATIVO.name().equals(param.getCodigo())) return Estado.A;
-    return funcionario.getEstado(); // outras situações (ex.: Licença) não alteram o estado do colaborador
+    var flg = param != null ? param.getFlgEstadoContrato() : null;
+    if (ESTADO_CONTRATO_CESSADO.equalsIgnoreCase(flg)) return Estado.I;
+    if (ESTADO_CONTRATO_ATIVO.equalsIgnoreCase(flg)) return Estado.A;
+    // Suspenso (S) e situações de ausência (ex.: Licença) não alteram o estado do colaborador.
+    return funcionario.getEstado();
+  }
+
+  /** Situação cujo estado de contrato (FLG_ESTADO_CONTRATO) é 'C' (Cessado) — cessa o vínculo. */
+  private boolean cessaContrato(ParamSituacaoEntity param) {
+    return param != null && ESTADO_CONTRATO_CESSADO.equalsIgnoreCase(param.getFlgEstadoContrato());
+  }
+
+  /** Situação cujo estado de contrato (FLG_ESTADO_CONTRATO) é 'A' (Ativo) — (re)ativa o vínculo. */
+  private boolean ativaContrato(ParamSituacaoEntity param) {
+    return param != null && ESTADO_CONTRATO_ATIVO.equalsIgnoreCase(param.getFlgEstadoContrato());
   }
 
   private boolean mudouSituacaoOuMotivo(SituacaoLaboralEntity situacaoAtual, AlterarSituacaoLaboralRequest dto) {
@@ -413,11 +432,10 @@ public class AlterarSituacaoLaboralWriteService {
   /** Combo Inativar/Ativar (2 opções): não cessar quem já está inativo, nem ativar quem já está ativo. */
   private void guardComboInativarAtivar(boolean estaPorCorrigir, ParamSituacaoEntity param, FuncionarioEntity funcionario) {
     if (estaPorCorrigir) return; // o reenvio de correção repõe o mesmo estado
-    var codigo = param.getCodigo();
-    if (SituacaoLaboral.CESSADO.name().equals(codigo) && funcionario.getEstado() == Estado.I) {
+    if (cessaContrato(param) && funcionario.getEstado() == Estado.I) {
       throw IgrpResponseStatusException.badRequest("O colaborador já está inativo; não é necessária esta ação.");
     }
-    if (SituacaoLaboral.ATIVO.name().equals(codigo) && funcionario.getEstado() == Estado.A) {
+    if (ativaContrato(param) && funcionario.getEstado() == Estado.A) {
       throw IgrpResponseStatusException.badRequest("O colaborador já está ativo; não é necessária esta ação.");
     }
   }
