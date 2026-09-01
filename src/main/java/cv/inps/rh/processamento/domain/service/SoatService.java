@@ -179,12 +179,12 @@ public class SoatService {
             obj.getNif(),
             DateFormatter.DATE.format(obj.getDataNascimento()),
             obj.getSexo(),
-            "", // TODO 30/08/2026 15:29 duvida aqui
+            obj.getSituacao(),
             obj.getCargoCarreira(),
-            obj.getTipoContrato(), // TODO 30/08/2026 15:29 duvida aqui
+            obj.getEstagiarioAprendiz(),
             obj.getDiasTrabSemana(),
             obj.getSalarioBase(),
-            "", // TODO 30/08/2026 15:29 duvida aqui
+            obj.getSalarioBase(),
             obj.getSalarioBaseAnual(),
             obj.getColabNoEstrangeiro(),
             obj.getObs()

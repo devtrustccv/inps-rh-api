@@ -109,5 +109,17 @@ public class SoatViewEntity {
   @Column(name = "SOAT_DET_UUID", nullable = false, length = 100)
   private String soatDetUuid;
 
+  @Size(max = 4)
+  @Column(name = "ESTAGIARIO_APRENDIZ", length = 4)
+  private String estagiarioAprendiz;
 
+  @Lob
+  @Column(name = "SITUACAO")
+  private String situacao;
+
+  @Column(name = "ILHA_ID")
+  private Long ilhaId;
+
+  @Column(name = "PAIS_ID")
+  private Long paisId;
 }
