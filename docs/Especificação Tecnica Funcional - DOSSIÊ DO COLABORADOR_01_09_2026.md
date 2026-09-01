@@ -20,7 +20,7 @@ segurança e conformidade com as normas aplicáveis.
 # Âmbito 
 
 | **Funcionalidade** | **Descrição** |
-|----|:---|
+|:--:|----|
 | Registo do Colaborador | A funcionalidade de **Registo de Colaboradores** permite criar e atualizar o dossiê digital de cada trabalhador no sistema de RH. Através de uma interface intuitiva, o utilizador insere dados pessoais, contactos, identificação (NIF/BI), vínculo e informações contratuais, enquadramento organizacional (direção, função, escalão), dados bancários e qualificações académicas ou profissionais, podendo ainda anexar documentos relevantes como contratos e certidões. |
 | Lista de Colaboradores | A **Lista de Colaboradores** apresenta de forma organizada todos os trabalhadores registados no sistema de RH, com dados essenciais como nome, cargo, direção, vínculo e estado. Permite pesquisar, aplicar filtros e aceder rapidamente ao perfil detalhado de cada colaborador para consulta ou atualização. |
 | Dossiê do colaborador | O **Dossiê do Colaborador** reúne todas as informações individuais do trabalhador num único registo digital. Contém dados pessoais, contratuais, organizacionais, bancários, académicos e profissionais, bem como documentos anexos, servindo de base para gestão, consulta e atualização no sistema de RH. |
@@ -44,7 +44,7 @@ Nestas sessão se descreve de forma integrada o que o sistema deve fazer
 alt="Uma imagem com texto, captura de ecrã, ecrã, diagrama Os conteúdos gerados por IA podem estar incorretos." />
 
 | **Etapa** | **Responsável** | **Descrição** |
-|----|----|----|
+|:--:|----|----|
 | Registo / Atualização do Colaborador | Técnico | Os dados de registo do colaborador são inseridos no sistema pelo técnico com o perfil adequado. Esses registos permanecem no estado **Não Validado**, aguardando a validação do responsável. |
 | Validação | Técnico responsável com perfil para validação | O registo do colaborador é validado pelo técnico com o perfil adequado. Esse técnico pode atualizar os dados, caso seja necessário. Ao validar os dados, o registo é alterado para o estado **'Validado'**." |
 
@@ -74,7 +74,8 @@ style="text-align: center;"><strong>Descrição</strong></th>
 </thead>
 <tbody>
 <tr>
-<td colspan="5"><strong>identificação do Colaborador</strong></td>
+<td colspan="5" style="text-align: center;"><strong>identificação do
+Colaborador</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">*Tipo Documento Identificação</td>
@@ -207,7 +208,8 @@ indicado pelo colaborador.</td>
 <td><em>RH_T_CONTACTO.CONTACTO</em></td>
 </tr>
 <tr>
-<td colspan="5"><strong>Endereço</strong></td>
+<td colspan="5"
+style="text-align: center;"><strong>Endereço</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Pais</td>
@@ -254,10 +256,10 @@ rua, número de casa, referência, etc</td>
 <td><em>RH_T_ENDERECO.MORADA</em></td>
 </tr>
 <tr>
-<td colspan="5"><strong>REGRAS</strong></td>
+<td colspan="5" style="text-align: center;"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="5"><ul>
+<td colspan="5" style="text-align: center;"><ul>
 <li><p><em>A validação dos campos obrigatórios deve ser efetuada tanto
 ao nível do formulário como ao nível da tabela</em></p></li>
 <li><p><em>O sistema não permite duplicação de colaborador. Caso seja
@@ -282,10 +284,11 @@ colaborador”</em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="5"><strong>GRAVAÇÃO DE OUTROS CAMPOS</strong></td>
+<td colspan="5" style="text-align: center;"><strong>GRAVAÇÃO DE OUTROS
+CAMPOS</strong></td>
 </tr>
 <tr>
-<td colspan="3"><ol type="1">
+<td colspan="3" style="text-align: center;"><ol type="1">
 <li><p><em><strong>RH_T_FUNCIONARIOS</strong></em></p></li>
 </ol>
 <ul>
@@ -328,7 +331,7 @@ colaborador”</em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="5"><ol start="4" type="1">
+<td colspan="5" style="text-align: center;"><ol start="4" type="1">
 <li><p><em><strong>RH_T_DOCUMENTO_PESSOAL</strong></em></p></li>
 </ol>
 <ul>
@@ -424,10 +427,10 @@ alt="Uma imagem com texto, captura de ecrã, file, número Os conteúdos gerados
 <td><em>RH_T_FAMILIARES.RESPONSAVEL</em></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="4" style="text-align: center;"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><ul>
+<td colspan="4" style="text-align: center;"><ul>
 <li><p><em>A validação dos campos obrigatórios deve ser efetuada tanto
 ao nível do formulário como ao nível da tabela</em></p></li>
 <li><p><em>O sistema deve garantir que não existam duplicados de
@@ -443,11 +446,11 @@ responsável</strong>.”</mark></em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>GRAVAÇÃO DE OUTROS
+<td colspan="4" style="text-align: center;"><strong>GRAVAÇÃO DE OUTROS
 CAMPOS</strong></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><ol type="1">
+<td colspan="4" style="text-align: center;"><ol type="1">
 <li><p><em><strong>RH_T_FAMILIARES</strong></em></p></li>
 </ol>
 <ul>
@@ -557,20 +560,20 @@ aproveitamento.</p>
 <td>RH_T_HABILITACOES_LITERARIAS.CONCLUIDO</td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="4" style="text-align: center;"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><ul>
+<td colspan="4" style="text-align: center;"><ul>
 <li><p><em>A validação dos campos obrigatórios deve ser efetuada tanto
 ao nível do formulário como ao nível da tabela</em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>GRAVAÇÃO DE OUTROS
+<td colspan="4" style="text-align: center;"><strong>GRAVAÇÃO DE OUTROS
 CAMPOS</strong></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><p><strong>1.
+<td colspan="4" style="text-align: center;"><p><strong>1.
 RH_T_HABILITACOES_LITERARIAS</strong></p>
 <ul>
 <li><p><em>ESTADO <strong>= ‘A’</strong></em></p></li>
@@ -805,7 +808,7 @@ GET_PAIS_ILHA_TRAB(P_LOCAL_TRABALHO)</p></td>
 colspan="2"><em>-----------------------------------------------------</em></td>
 </tr>
 <tr>
-<td colspan="6" style="text-align: left;"><strong>Subsidios :</strong>
+<td colspan="6" style="text-align: center;"><strong>Subsidios :</strong>
 Indicação geral sobre a existência de subsídios atribuídos ao
 colaborador.</td>
 </tr>
@@ -835,7 +838,7 @@ subsídio</td>
 <td colspan="2"><em>RH_T_DEF_REMUNERACOES.VALOR</em></td>
 </tr>
 <tr>
-<td colspan="6" style="text-align: left;"><strong>Encargos / Descontos
+<td colspan="6" style="text-align: center;"><strong>Encargos / Descontos
 :</strong> Indicação geral sobre os encargos (patronais) ou descontos
 (do colaborador) aplicáveis.</td>
 </tr>
@@ -911,10 +914,10 @@ rowspan="2"><p><em>processamento_salarial_db.CalcularDesAtual</em></p>
 de impostos e descontos.</td>
 </tr>
 <tr>
-<td colspan="6" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="6" style="text-align: center;"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="6" style="text-align: left;"><ul>
+<td colspan="6" style="text-align: center;"><ul>
 <li><p><em>Data inicio não pode se superior a data fim de
 função</em></p></li>
 <li><p><em>Data inicio não ser maior que sysdate</em></p></li>
@@ -929,11 +932,11 @@ função</em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="6" style="text-align: left;"><strong>GRAVAÇÃO DE OUTROS
+<td colspan="6" style="text-align: center;"><strong>GRAVAÇÃO DE OUTROS
 CAMPOS</strong></td>
 </tr>
 <tr>
-<td colspan="3" style="text-align: left;"><p><em><strong>1</strong>
+<td colspan="3" style="text-align: center;"><p><em><strong>1</strong>
 Registo em <strong>RH_T_CONTRATO_VINCULO</strong></em></p>
 <ul>
 <li><p><em>DATA_REGISTO= ‘<strong>SYSDATE’</strong></em></p></li>
@@ -1233,21 +1236,21 @@ alt="Uma imagem com texto, captura de ecrã, file, Tipo de letra Os conteúdos g
 <td><em>RH_T_DADOS_BANCARIOS. DATA_FIM</em></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="4" style="text-align: center;"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><ul>
+<td colspan="4" style="text-align: center;"><ul>
 <li><p><mark>Caso o colaborador tenha salario , logo o nib deve ser
 obrigatorio. Para este caso o sistema deve emitir uma mensagem de Erro
 ‘<strong>Erro: O Nib é Obrigatório</strong>’</mark></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>GRAVAÇÃO DE OUTROS
+<td colspan="4" style="text-align: center;"><strong>GRAVAÇÃO DE OUTROS
 CAMPOS</strong></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><p><em><strong>1.registo na
+<td colspan="4" style="text-align: center;"><p><em><strong>1.registo na
 tabela RH_T_DADOS_BANCARIOS</strong></em></p>
 <ul>
 <li><p><em>FUN_ID = id de RH_T_FUNCIONARIOS</em></p></li>
@@ -1296,11 +1299,11 @@ alt="Uma imagem com texto, número, software, Tipo de letra Os conteúdos gerado
 <td><em>RH_T_DOCUMENTO.DOC_ID</em></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>GRAVAÇÃO DE OUTROS
+<td colspan="4" style="text-align: center;"><strong>GRAVAÇÃO DE OUTROS
 CAMPOS</strong></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><p><em><strong>1.Outros
+<td colspan="4" style="text-align: center;"><p><em><strong>1.Outros
 registos na tabela RH_T_DOCUMENTO</strong></em></p>
 <ul>
 <li><p><em>FUN_ID = id de RH_T_FUNCIONARIOS</em></p></li>
@@ -1386,20 +1389,20 @@ alt="Uma imagem com texto, software, número, Ícone de computador Os conteúdos
 </thead>
 <tbody>
 <tr>
-<td>Nome Colaborador</td>
+<td style="text-align: center;">Nome Colaborador</td>
 <td><em>TEXT</em></td>
 <td>Nome do Colaborador</td>
 <td><p><em>RH_T_FUNCIONARIOS.NOME</em></p>
 <p><em>(RH_T_VALIDACAO. FUN_ID = RH_T_FUNCIONARIOS.ID)</em></p></td>
 </tr>
 <tr>
-<td>Tipo Operação</td>
+<td style="text-align: center;">Tipo Operação</td>
 <td><em>SELECT</em></td>
 <td><em>DOMAINS = TIPO_ACAO</em></td>
 <td><em>RH_T_VALIDACAO.TIPO_ACCAO</em></td>
 </tr>
 <tr>
-<td>Referente a:</td>
+<td style="text-align: center;">Referente a:</td>
 <td><em>SELECT</em></td>
 <td><p>Permite Pesquisar por area na qual se pretende efectuar a
 validação</p>
@@ -1407,13 +1410,13 @@ validação</p>
 <td><em>RH_T_VALIDACAO. REFERENCIA</em></td>
 </tr>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td><em>DATE</em></td>
 <td>Período de Registo da Operação</td>
 <td><em>RH_T_VALIDACAO.DATA_REGISTO</em></td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td><em>DATE</em></td>
 <td>Período de Registo da Operação</td>
 <td><em>RH_T_VALIDACAO.DATA_REGISTO</em></td>
@@ -1425,7 +1428,7 @@ validação</p>
 <td style="text-align: center;"><strong>Fonte dados</strong></td>
 </tr>
 <tr>
-<td>Nome Colaborador</td>
+<td style="text-align: center;">Nome Colaborador</td>
 <td><em>TEXT</em></td>
 <td>Nome do colaborador</td>
 <td><p><em>RH_T_FUNCIONARIOS.NOME</em></p>
@@ -1433,27 +1436,27 @@ validação</p>
 RH_T_FUNCIONARIOS</strong>.ID)</em></p></td>
 </tr>
 <tr>
-<td>Tipo Operação</td>
+<td style="text-align: center;">Tipo Operação</td>
 <td><em>TEXT</em></td>
 <td>Tipo de operação (deve apresentar a descricão de
 <em><strong>RH_T_DOMAINS.</strong>DESCRICAO</em>)</td>
 <td><em>RH_T_VALIDACAO<strong>.</strong>TIPO_ACCAO</em></td>
 </tr>
 <tr>
-<td>Referente a</td>
+<td style="text-align: center;">Referente a</td>
 <td><em>TEXT</em></td>
 <td>Mostra o registo é referencia a colaborador (deve apresentar a
 descricão de <em><strong>RH_T_DOMAINS.</strong>DESCRICAO</em>)</td>
 <td><em>RH_T_VALIDACAO<strong>.</strong> REFERENCIA_NAME</em></td>
 </tr>
 <tr>
-<td>Data Operação</td>
+<td style="text-align: center;">Data Operação</td>
 <td><em>TEXT</em></td>
 <td>Data n qual foi feito o registo</td>
 <td><em>RH_T_VALIDACAO<strong>.DATA_REGISTO</strong></em></td>
 </tr>
 <tr>
-<td>Utilizador</td>
+<td style="text-align: center;">Utilizador</td>
 <td><em>TEXT</em></td>
 <td>Utilizador que efectou o registo</td>
 <td><em>RH_T_VALIDACAO<strong>.</strong>USER_REGISTO_NAME</em></td>
@@ -1468,35 +1471,35 @@ descricão de <em><strong>RH_T_DOMAINS.</strong>DESCRICAO</em>)</td>
 validador alterar os dados e validar os registos.</td>
 </tr>
 <tr>
-<td>Validar Mobilidade</td>
+<td style="text-align: center;">Validar Mobilidade</td>
 <td colspan="3">Abre o formulario de Edição de uma mobilidade</td>
 </tr>
 <tr>
-<td>Validar Carreira</td>
+<td style="text-align: center;">Validar Carreira</td>
 <td colspan="3">Abre o formulario de Edição de uma Carreira</td>
 </tr>
 <tr>
-<td>Validar Contrato</td>
+<td style="text-align: center;">Validar Contrato</td>
 <td colspan="3">Abre o formulario de registo de Desconto</td>
 </tr>
 <tr>
-<td>Validar Dados bancarios</td>
+<td style="text-align: center;">Validar Dados bancarios</td>
 <td colspan="3">Abre formulario de registo de dados Bancarios</td>
 </tr>
 <tr>
-<td>Validar Remuneracao / Desconto</td>
+<td style="text-align: center;">Validar Remuneracao / Desconto</td>
 <td colspan="3">Abre o o formulario registo de Rend / Enc</td>
 </tr>
 <tr>
-<td>Validar substituição</td>
+<td style="text-align: center;">Validar substituição</td>
 <td colspan="3">Abre o formulario de registo de Substituição</td>
 </tr>
 <tr>
-<td><strong>REGRAS</strong></td>
+<td style="text-align: center;"><strong>REGRAS</strong></td>
 <td colspan="3"></td>
 </tr>
 <tr>
-<td colspan="4"><ul>
+<td colspan="4" style="text-align: center;"><ul>
 <li><p>O Campo “<strong>Detalhe de alterações</strong>” fica visivel
 somente se o <em><strong>RH_T_VALIDACAO.</strong>TIPO_ACCAO for
 diferente de INSERT</em></p></li>
@@ -1575,40 +1578,40 @@ ESPECIFICAÇÃO</a>)</em></p></li>
 </thead>
 <tbody>
 <tr>
-<td>Campo alterado</td>
+<td style="text-align: center;">Campo alterado</td>
 <td>TEXT</td>
 <td>Indicar qual campo foi alterado</td>
 <td><em>RH_T_VALIDACAO_DETALHE. CAMPO_ALTERADO</em></td>
 </tr>
 <tr>
-<td>Valor anterior</td>
+<td style="text-align: center;">Valor anterior</td>
 <td>TEXT</td>
 <td>Qual o valor que o campo Tinha Antes</td>
 <td><em>RH_T_VALIDACAO_DETALHE. VALOR_ANTERIOR</em></td>
 </tr>
 <tr>
-<td>Novo Valor</td>
+<td style="text-align: center;">Novo Valor</td>
 <td>TEXT</td>
 <td>Qual o campo tem agora</td>
 <td><em>RH_T_VALIDACAO_DETALHE. VALOR_NOVO</em></td>
 </tr>
 <tr>
-<td>Alterado Por</td>
+<td style="text-align: center;">Alterado Por</td>
 <td>TEXT</td>
 <td>O utilizador responsavel pela alteração</td>
 <td><em>RH_T_VALIDACAO_DETALHE . USER_REGISTO_NAME</em></td>
 </tr>
 <tr>
-<td>Data da Alteração</td>
+<td style="text-align: center;">Data da Alteração</td>
 <td>DATE</td>
 <td>Data de alteração</td>
 <td><em>RH_T_VALIDACAO_DETALHE.DATA_REGISTO</em></td>
 </tr>
 <tr>
-<td colspan="4"><strong>REGRAS</strong></td>
+<td colspan="4" style="text-align: center;"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="4"><ul>
+<td colspan="4" style="text-align: center;"><ul>
 <li><p><em>Para trazer informações de detalhe na tabela
 <strong>RH_T_VALIDACAO_DETALHE,</strong> onde VALIDACAO_ID
 <strong>=</strong> ID de <strong>RH_T_VALIDACAO</strong></em></p></li>
@@ -1763,52 +1766,52 @@ alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos ger
 </thead>
 <tbody>
 <tr>
-<td>Nª Colaborador</td>
+<td style="text-align: center;">Nª Colaborador</td>
 <td><em>NUMBER</em></td>
 <td>Numero de colaborador</td>
 <td><em>RH_V_DOSSIE.ID_COLABORADOR</em></td>
 </tr>
 <tr>
-<td>Nome</td>
+<td style="text-align: center;">Nome</td>
 <td><em>TEXT</em></td>
 <td>Nome de Colaborador</td>
 <td><em>RH_V_DOSSIE.NOME</em></td>
 </tr>
 <tr>
-<td>Direcção</td>
+<td style="text-align: center;">Direcção</td>
 <td><em>SELECT</em></td>
 <td><p>Buscar dados no:</p>
 <p><em><strong>FUNÇÃO</strong>: GET_DIRECAO_SERVICO</em></p></td>
 <td><em>RH_V_DOSSIE. DIRECAO_ID</em></td>
 </tr>
 <tr>
-<td>Seccão</td>
+<td style="text-align: center;">Seccão</td>
 <td><em>SELECT</em></td>
 <td><p><em>Buscar dados no:</em></p>
 <p><em><strong>FUNÇÃO</strong>: GET_SECCAO (P_ SECCAO_ID)</em></p></td>
 <td><em>RH_T_TIPOS_RELACIONAMENTO.SESSAO_ID</em></td>
 </tr>
 <tr>
-<td>Tipo Vinculo Laboral</td>
+<td style="text-align: center;">Tipo Vinculo Laboral</td>
 <td><em>SELECT</em></td>
 <td><p>Buscar dados no:</p>
 <p><em><strong>FUNÇÃO</strong>: GET_TIPO_VINCULO</em></p></td>
 <td><em>RH_T_TIPOS_RELACIONAMENTO. VINCULO_ID</em></td>
 </tr>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td><em>DATE</em></td>
 <td></td>
 <td><em>RH_T_TIPOS_RELACIONAMENTO. DATA_INICIO_CONTRATO</em></td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td><em>DATE</em></td>
 <td></td>
 <td><em>RH_T_TIPOS_RELACIONAMENTO. DATA_FIM_CONTRATO</em></td>
 </tr>
 <tr>
-<td>Estado</td>
+<td style="text-align: center;">Estado</td>
 <td><em>SELECT</em></td>
 <td></td>
 <td><em>RH_T_FUNCIONARIOS. ESTADO_COLABORADOR</em></td>
@@ -1820,55 +1823,55 @@ alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos ger
 <td style="text-align: center;"><strong>Fonte dados</strong></td>
 </tr>
 <tr>
-<td>Estado do Registo</td>
+<td style="text-align: center;">Estado do Registo</td>
 <td><em>TEXT</em></td>
 <td>Indica se o registo de colaborador esté validado ou não</td>
 <td><em>RH_V_DOSSIE.ESTADO_VALIDACAO</em></td>
 </tr>
 <tr>
-<td>Estado do Colaborador</td>
+<td style="text-align: center;">Estado do Colaborador</td>
 <td><em>TEXT</em></td>
 <td>Estado do colaborador (ativo ou inativo)</td>
 <td><em>RH_V_DOSSIE. ESTADO_COLABORADOR</em></td>
 </tr>
 <tr>
-<td>Nº Colaborador</td>
+<td style="text-align: center;">Nº Colaborador</td>
 <td><em>TEXT</em></td>
 <td>Número do colaborador</td>
 <td><em>RH_V_DOSSIE.ID_COLABORADOR</em></td>
 </tr>
 <tr>
-<td>Nome</td>
+<td style="text-align: center;">Nome</td>
 <td><em>TEXT</em></td>
 <td>Nome do colaborador</td>
 <td><em>RH_V_DOSSIE.NOME</em></td>
 </tr>
 <tr>
-<td>Cargo</td>
+<td style="text-align: center;">Cargo</td>
 <td><em>TEXT</em></td>
 <td>Cargo que desempenha o colaborador</td>
 <td><em>RH_V_DOSSIE.CARGO_DESC</em></td>
 </tr>
 <tr>
-<td>Data inicio</td>
+<td style="text-align: center;">Data inicio</td>
 <td><em>TEXT</em></td>
 <td>Data inicio de função do colaborador</td>
 <td><em>RH_V_DOSSIE. DATA_INICIO_CONTRATO</em></td>
 </tr>
 <tr>
-<td>Direcção</td>
+<td style="text-align: center;">Direcção</td>
 <td><em>TEXT</em></td>
 <td>Direcção de trabalho do colaborador</td>
 <td><em>RH_V_DOSSIE.DIRECAO_DESC</em></td>
 </tr>
 <tr>
-<td>Secção</td>
+<td style="text-align: center;">Secção</td>
 <td><em>TEXT</em></td>
 <td>Secção de trabalho do colaborador</td>
 <td><em>RH_V_DOSSIE.SECCAO_DESC</em></td>
 </tr>
 <tr>
-<td>Carreira / Categoria</td>
+<td style="text-align: center;">Carreira / Categoria</td>
 <td></td>
 <td>Carreira/ categoria do Colaborador</td>
 <td><em>RH_V_DOSSIE.CARREIRA_DESC / RH_V_DOSSIE.CATEGORIA_DESC</em></td>
@@ -1878,19 +1881,19 @@ alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos ger
 <td colspan="3" style="text-align: center;"></td>
 </tr>
 <tr>
-<td>Ver Dossiê do colaborador</td>
+<td style="text-align: center;">Ver Dossiê do colaborador</td>
 <td colspan="3">Abrir um formulario para ver Dossie do Colaborador</td>
 </tr>
 <tr>
-<td>Inativar / Ativar Colaborador</td>
+<td style="text-align: center;">Inativar / Ativar Colaborador</td>
 <td colspan="3">Permite ativar ou inativar um colaborador, deve ter uma
 transação associada</td>
 </tr>
 <tr>
-<td colspan="4"><strong>REGRA</strong></td>
+<td colspan="4" style="text-align: center;"><strong>REGRA</strong></td>
 </tr>
 <tr>
-<td colspan="4"><ul>
+<td colspan="4" style="text-align: center;"><ul>
 <li><p><em>Se o <strong>estado de validação</strong> do colaborador
 estiver em <strong>“Pendente”</strong>, os botões <strong>“Ver Dossiê do
 Colaborador”</strong> e <strong>“Inativar/Ativar Colaborador”</strong>
@@ -1912,7 +1915,7 @@ os colaboradores com <strong>estado = 'A'</strong>.</em></p></li>
 
 ## Inativar / Ativar 
 
-<img src="media/image15.png" style="width:9.69306in;height:2.61944in" />
+<img src="media/image15.png" style="width:9.69306in;height:3.68194in" />
 
 <table>
 <colgroup>
@@ -1941,13 +1944,25 @@ style="text-align: center;"><strong>Descrição</strong></th>
 <p><em>RH_T_SITUACAO_LABORAL.ESTADO</em></p></td>
 </tr>
 <tr>
+<td style="text-align: left;">Estado</td>
+<td></td>
+<td colspan="2"><strong><mark>DOMAIN =
+ESTADO_CONTRATO</mark></strong></td>
+<td><em>---------------------------------</em></td>
+</tr>
+<tr>
 <td style="text-align: left;">Situação Laboral</td>
 <td></td>
 <td colspan="2"><p>A funcionalidade permite <strong>alterar o estado de
 um colaborador</strong> entre <strong>Ativo</strong> e
 <strong>Inativo</strong>, de acordo com o seu estado atual.</p>
-<p><strong>RH_T_PARAM_SIT_LABORAL.ID</strong>, Deve trazer somente valor
-´ATIVO´ e CESSADO</p></td>
+<p>, Deve trazer somente valor ´ATIVO´ e CESSADO de
+<mark>(<em><strong>RH_T_PARAM_SITUACAO</strong>.FLG_ESTADO_CONTRATO</em>)</mark></p>
+<p>Nota: para isso buscar as situcoes cuho o estado do contrao no
+vinculo associado ao colaborador
+(<strong>RH_T_CONTRATO_VINCULO</strong>.VINCULO_ID,
+<strong>RH_T_PARAM_VINCULO</strong>.ID ,
+<strong>RH_T_PARAM_SIT_LABORAL.</strong> VINCULO_ID)</p></td>
 <td><em>RH_T_SITUACAO_LABORAL. SITUACAO_LABORAL_ID</em></td>
 </tr>
 <tr>
@@ -1980,10 +1995,10 @@ RH_T_PARAM_SITUACAO_DET.ID</strong></p></td>
 <p><em>RH_T_TIPOS_RELACIONAMENTO. OBS</em></p></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="5" style="text-align: center;"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><ul>
+<td colspan="5" style="text-align: center;"><ul>
 <li><p><em>O sistema deve permitir visualizar dados de um colaborador
 inativo, mas não deve ser possivel realizar nenhuma ação em cima del ,
 ou seja deve ser retirado accão a qualquer ou outro botão que não seja
@@ -1994,11 +2009,11 @@ atribuido acesso, deve conseguir executalo</em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><strong>GRAVAÇÃO DE OUTROS
+<td colspan="5" style="text-align: center;"><strong>GRAVAÇÃO DE OUTROS
 CAMPOS</strong></td>
 </tr>
 <tr>
-<td colspan="3" style="text-align: left;"><p><em>1.Faz update nos
+<td colspan="3" style="text-align: center;"><p><em>1.Faz update nos
 registos anteriores , ou seja inativa os registos ativos</em></p>
 <p><em>1.1Inativa a mobilidade em estado ativo
 <strong>RH_T_TIPOS_RELACIONAMENTO (est_act_adm = 1 e data fim is not
@@ -2084,7 +2099,7 @@ NULL</strong></em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="3" style="text-align: left;"></td>
+<td colspan="3" style="text-align: center;"></td>
 <td colspan="2"><p><em><strong>2.1.</strong> Registo Detalhe de LOG na
 tabela <strong>RH_T_VALIDACAO_DETALHE (faz registo de cada campo
 alterado)</strong></em></p>
@@ -2167,9 +2182,10 @@ style="text-align: center;"><strong>Descrição</strong></th>
 </thead>
 <tbody>
 <tr>
-<td colspan="5"><strong>identificação do Colaborador (</strong>pega
-dados na vista <em><strong>RH_V_DOSSIE</strong> onde
-<strong>ULTIMO_VINCULO = 1</strong></em><strong>)</strong></td>
+<td colspan="5" style="text-align: center;"><strong>identificação do
+Colaborador (</strong>pega dados na vista
+<em><strong>RH_V_DOSSIE</strong> onde <strong>ULTIMO_VINCULO =
+1</strong></em><strong>)</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;"><del>Validar</del></td>
@@ -2298,9 +2314,10 @@ NU_SEG_INPS</em></p></td>
 <td><em>RH_FUNCIONARIOS.NU_SEG_INPS</em></td>
 </tr>
 <tr>
-<td colspan="5"><strong>Contacto (</strong>busca dados na vista
-<strong>RH_V_CONTATO,</strong> passando como paramentro
-<strong>FUN_ID</strong> = ID de <strong>RH_T_FUNCIONARIO )</strong></td>
+<td colspan="5" style="text-align: center;"><strong>Contacto
+(</strong>busca dados na vista <strong>RH_V_CONTATO,</strong> passando
+como paramentro <strong>FUN_ID</strong> = ID de <strong>RH_T_FUNCIONARIO
+)</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Tipo Contacto</td>
@@ -2321,9 +2338,9 @@ contacto indicado pelo colaborador.</p>
 <td><em>RH_T_CONTACTO.CONTACTO</em></td>
 </tr>
 <tr>
-<td colspan="5"><strong>Endereço (</strong>busca dados de Geografia no
-schema <strong>Global na</strong> tabela
-<strong>GLB_T_GEOGRAFIA)</strong></td>
+<td colspan="5" style="text-align: center;"><strong>Endereço
+(</strong>busca dados de Geografia no schema <strong>Global na</strong>
+tabela <strong>GLB_T_GEOGRAFIA)</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Pais</td>
@@ -2380,7 +2397,7 @@ rua, número de casa, referência, etc</td>
 <td><em>RH_T_ENDERECO.MORADA</em></td>
 </tr>
 <tr>
-<td colspan="5"><strong>ACÇÕES</strong></td>
+<td colspan="5" style="text-align: center;"><strong>ACÇÕES</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Eliminar</td>
@@ -2394,10 +2411,10 @@ sistema deve atualizar de imediato o respetivo estado. (estado =
 formulário, bem como os outros campos indicados abaixo</em></td>
 </tr>
 <tr>
-<td colspan="5"><strong>REGRAS</strong></td>
+<td colspan="5" style="text-align: center;"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="5"><ul>
+<td colspan="5" style="text-align: center;"><ul>
 <li><p><em>A validação dos campos obrigatórios deve ser efetuada tanto
 ao nível do formulário como ao nível da tabela</em></p></li>
 <li><p><em>O sistema não permite duplicação de colaborador. Caso seja
@@ -2426,10 +2443,11 @@ pai</strong></em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="5"><strong>ATUALIZAÇÃO DE OUTROS CAMPOS</strong></td>
+<td colspan="5" style="text-align: center;"><strong>ATUALIZAÇÃO DE
+OUTROS CAMPOS</strong></td>
 </tr>
 <tr>
-<td colspan="3"><ol type="1">
+<td colspan="3" style="text-align: center;"><ol type="1">
 <li><p><em><strong>RH_T_FUNCIONARIOS</strong></em></p></li>
 </ol>
 <ul>
@@ -2467,7 +2485,7 @@ endere<strong>)</strong></em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="3"><ol start="4" type="1">
+<td colspan="3" style="text-align: center;"><ol start="4" type="1">
 <li><p><em><strong>RH_T_DOCUMENTO_PESSOAL</strong></em></p>
 <ul>
 <li><p><em>ESTADO <strong>= ‘A’</strong></em></p></li>
@@ -3056,7 +3074,7 @@ style="text-align: center;"><strong>Descrição</strong></th>
 <td></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><ul>
+<td colspan="5" style="text-align: center;"><ul>
 <li><p><em>Qualquer altetação / registo, efectuado deve passar para
 validação (<strong>RH_T_VALIDACAO</strong>)</em></p></li>
 <li><p><mark>Caso o colaborador tenha salario , logo o nib deve ser
@@ -3082,11 +3100,11 @@ validado (<strong>RH_T_DADOS_BANCARIOS.ESTADO = ‘E’, DATA_FIM =
 SYSDATE</strong>)</em></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><strong>GRAVAÇÃO DE OUTROS
+<td colspan="5" style="text-align: center;"><strong>GRAVAÇÃO DE OUTROS
 CAMPOS</strong></td>
 </tr>
 <tr>
-<td colspan="3" style="text-align: left;"><p><em>1.Altera dados na
+<td colspan="3" style="text-align: center;"><p><em>1.Altera dados na
 tabela <strong>RH_T_DADOS_BANCARIOS</strong> dos campos de formulario e
 outros seguintes campos</em></p>
 <ul>
@@ -3159,7 +3177,7 @@ alt="Uma imagem com texto, software, número, Página web Os conteúdos gerados 
 </thead>
 <tbody>
 <tr>
-<td>Vinculo</td>
+<td style="text-align: center;">Vinculo</td>
 <td style="text-align: center;">SELECT</td>
 <td style="text-align: center;"></td>
 <td style="text-align: left;"><em>RH_T_CONTRATO_VINCULO.
@@ -3173,59 +3191,54 @@ VINCULO_ID</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Tipo Contrato</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"><em>RH_T_CONTRATO_VINCULO.
-TP_CONTRADO_ID</em></td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_T_CONTRATO_VINCULO. TP_CONTRADO_ID</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Tipo Vinculo</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"><em>RH_T_CONTRATO_VINCULO.
-VINCULO_ID</em></td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_T_CONTRATO_VINCULO. VINCULO_ID</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Data inicio</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
-<td
-style="text-align: left;"><em>RH_T_CONTRATO_VINCULO.DATA_INICIO</em></td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_T_CONTRATO_VINCULO.DATA_INICIO</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Duração</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"><em>RH_T_CONTRATO_VINCULO.
-DURACAO</em></td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_T_CONTRATO_VINCULO. DURACAO</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Data Fim</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"><em>RH_T_CONTRATO_VINCULO.
-DATA_FIM</em></td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_T_CONTRATO_VINCULO. DATA_FIM</em></td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>AÇÕES</strong></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"></td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 <tr>
 <td style="text-align: left;">Ver Informação Atual</td>
-<td colspan="3" style="text-align: center;"><em>Esse botão só deve ficar
-visivel na ultima versão do contrato</em></td>
+<td colspan="3"><em>Esse botão só deve ficar visivel na ultima versão do
+contrato</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Ver informação Inicial</td>
-<td colspan="3" style="text-align: center;"><em>Esse botão só deve ficar
-visivel na primeira versão do contrato</em></td>
+<td colspan="3"><em>Esse botão só deve ficar visivel na primeira versão
+do contrato</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Renovar Contrato</td>
-<td colspan="3" style="text-align: center;"><em>Esse botão só deve ficar
-visivel na ultima versão do contrato</em></td>
+<td colspan="3"><em>Esse botão só deve ficar visivel na ultima versão do
+contrato</em></td>
 </tr>
 </tbody>
 </table>
@@ -3255,7 +3268,8 @@ alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos ger
 </thead>
 <tbody>
 <tr>
-<td colspan="4"><p><strong>Dados Contratuais</strong></p>
+<td colspan="4" style="text-align: center;"><p><strong>Dados
+Contratuais</strong></p>
 <p><strong>Ver informação Atual: (</strong>busca dados em
 <em><strong>RH_V_MOBILIDADE</strong></em> TIPO_CONTRATO =
 ‘<strong>RENOVACAO’</strong> ), pego o ultimo contrato ativo do
@@ -3397,9 +3411,10 @@ for Cabo Verde</td>
 <td>RH_V_DOSSIE<em>. ILHA_TRAB_DESC</em></td>
 </tr>
 <tr>
-<td colspan="4"><strong>Subsidios :</strong> Indicação geral sobre a
-existência de subsídios atribuídos ao colaborador. (busca dados em
-RH_V_REND_ENC ONDE TIPO = ‘<strong>REM’</strong> e TIPO_MOBILIDADE =
+<td colspan="4" style="text-align: center;"><strong>Subsidios :</strong>
+Indicação geral sobre a existência de subsídios atribuídos ao
+colaborador. (busca dados em RH_V_REND_ENC ONDE TIPO =
+‘<strong>REM’</strong> e TIPO_MOBILIDADE =
 ‘<strong>NOVO_CONTRATO’</strong> ), pego o ultimo contrato do
 colaborador</td>
 </tr>
@@ -3425,11 +3440,12 @@ Férias, 13.º mês)</em></td>
 <td><em>RH_V_REND_ENC.VALOR</em></td>
 </tr>
 <tr>
-<td colspan="4"><strong>Encargos / Descontos :</strong> Indicação geral
-sobre os encargos (patronais) ou descontos (do colaborador) aplicáveis.
-. (busca dados em RH_V_REND_ENC ONDE TIPO = ‘<strong>PAG’</strong> e
-TIPO_MOBILIDADE = ‘<strong>NOVO_CONTRATO’</strong> ), pego o ultimo
-contrato do colaborador</td>
+<td colspan="4" style="text-align: center;"><strong>Encargos / Descontos
+:</strong> Indicação geral sobre os encargos (patronais) ou descontos
+(do colaborador) aplicáveis. . (busca dados em RH_V_REND_ENC ONDE TIPO =
+‘<strong>PAG’</strong> e TIPO_MOBILIDADE =
+‘<strong>NOVO_CONTRATO’</strong> ), pego o ultimo contrato do
+colaborador</td>
 </tr>
 <tr>
 <td style="text-align: left;">Tipo de Encargos / Descontao</td>
@@ -3938,7 +3954,7 @@ style="text-align: center;"><strong>Descrição</strong></th>
 <td></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><ul>
+<td colspan="5" style="text-align: center;"><ul>
 <li><p><em>O sistema deve aletar quando o prazo de contrato está quase a
 atingir o prazo. Deve ser criado um job que notifica o utilizador sempre
 que o contrato esta proximo a atingir o Prozo. (VER ESPECIFICAÇÃO
@@ -3952,8 +3968,8 @@ que o contrato esta proximo a atingir o Prozo. (VER ESPECIFICAÇÃO
 <td></td>
 </tr>
 <tr>
-<td colspan="3" style="text-align: left;"><p><em><mark>1.novo registo em
-<strong>RH_T_CONTRATO_HISTORICO</strong></mark></em></p>
+<td colspan="3" style="text-align: center;"><p><em><mark>1.novo registo
+em <strong>RH_T_CONTRATO_HISTORICO</strong></mark></em></p>
 <ul>
 <li><p><em>DATA_REGISTO</em></p></li>
 <li><p><em>USER_REGISTO_ID</em></p></li>
@@ -4087,19 +4103,19 @@ correspondente</strong>.</p></li>
 </thead>
 <tbody>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td style="text-align: center;">DATE</td>
 <td></td>
 <td><em>RH_V_MOBILIDADE.DATA_INICIO</em></td>
 </tr>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td style="text-align: center;">DATE</td>
 <td></td>
 <td><em>RH_V_MOBILIDADE.DATA_FIM</em></td>
 </tr>
 <tr>
-<td>Tipo Mobilidade</td>
+<td style="text-align: center;">Tipo Mobilidade</td>
 <td style="text-align: center;">SELECT</td>
 <td><strong>DOMAINS</strong> = TIPO_MOV_LABORAL, REFERENTE =
 ‘MOBILIDADE’</td>
@@ -4113,83 +4129,80 @@ correspondente</strong>.</p></li>
 </tr>
 <tr>
 <td style="text-align: left;">Tipo Mobilidade</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td><strong>DOMAINS</strong> = TIPO_MOV_LABORAL</td>
 <td><em>RH_V_MOBILIDADE.TIPO_SITUACAO_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Direção</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td></td>
 <td><em>RH_V_MOBILIDADE.DIRECAO_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Secão</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td></td>
 <td><em>RH_V_MOBILIDADE. SECAO_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;"><del>Cargo</del></td>
-<td style="text-align: center;"></td>
+<td></td>
 <td></td>
 <td><em><del>RH_V_MOBILIDADE. CARGO_DESC</del></em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Local Trabalho</td>
-<td style="text-align: center;"></td>
+<td></td>
 <td></td>
 <td><em>RH_V_MOBILIDADE. LOCAL_TRAB_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Data inicio</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td></td>
 <td><em>RH_V_MOBILIDADE.DATA_INICIO</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Data Fim</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td></td>
 <td><em>RH_V_MOBILIDADE.DATA_FIM</em></td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>REGRAS</strong></td>
-<td style="text-align: center;"></td>
+<td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="4"><ul>
+<td colspan="4" style="text-align: center;"><ul>
 <li><p><em>O sistema não deve deixar efectuar qq alteração quando a
 mobilidade em questão já tenho um processamento.</em></p></li>
 <li><p><em>Deve aparecer somente mobilidade Ativo</em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="4"><strong>ACCOES</strong></td>
+<td colspan="4" style="text-align: center;"><strong>ACCOES</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Editar</td>
-<td colspan="3" style="text-align: center;"><p><em>Somente deixa editar
-caso o registo ainda não for processado (RH_V_MOBILIDADE.PROCESSAMENTO =
-0)</em></p>
+<td colspan="3"><p><em>Somente deixa editar caso o registo ainda não for
+processado (RH_V_MOBILIDADE.PROCESSAMENTO = 0)</em></p>
 <p><em><strong>Nota: Ao editar não faz um novo registo, mas sim
 atualiza</strong></em></p></td>
 </tr>
 <tr>
 <td style="text-align: left;">Mobilidade</td>
-<td colspan="3" style="text-align: center;"><p><em>Aparece somente a
-mobilidade tenha um processamento (RH_V_MOBILIDADE.PROCESSAMENTO &gt;
-0)</em></p>
+<td colspan="3"><p><em>Aparece somente a mobilidade tenha um
+processamento (RH_V_MOBILIDADE.PROCESSAMENTO &gt; 0)</em></p>
 <p><em><strong>Nota: Ao editar faz um novo registo, mas sim
 atualiza</strong></em></p></td>
 </tr>
 <tr>
 <td style="text-align: left;">Eliminar</td>
-<td colspan="3" style="text-align: center;"><p><em>Somente deixa
-cancelar caso o registo ainda não for validade. (RH_V_MOBILIDADE.ESTADO
-= ‘P’).</em></p>
+<td colspan="3"><p><em>Somente deixa cancelar caso o registo ainda não
+for validade. (RH_V_MOBILIDADE.ESTADO = ‘P’).</em></p>
 <p><em>Ao eliminar o <strong>RH_</strong>V_MOBILIDADE.ESTADO =
 ‘E’</em></p></td>
 </tr>
@@ -4307,7 +4320,7 @@ RH_T_TIPOS_RELACIONAMENTO.SECAO_ID</em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><p><em><strong>Ao Clicar no
+<td colspan="5" style="text-align: center;"><p><em><strong>Ao Clicar no
 botão gravar, deve ser feito as seguintes ações</strong></em></p>
 <ul>
 <li><p><em>Deve quardar na tabela Log</em></p></li>
@@ -4316,15 +4329,15 @@ botão gravar, deve ser feito as seguintes ações</strong></em></p>
 </ul></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><strong>OUTRAS
+<td colspan="5" style="text-align: center;"><strong>OUTRAS
 GRAVAÇOES</strong></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><em>UPDATE</em></td>
+<td colspan="5" style="text-align: center;"><em>UPDATE</em></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><p><em>Faz update nos registos
-anteriores , ou seja inativa os registos ativos</em></p>
+<td colspan="5" style="text-align: center;"><p><em>Faz update nos
+registos anteriores , ou seja inativa os registos ativos</em></p>
 <p><em>1.2Inativa a mobilidade em estado ativo
 <strong>RH_T_TIPOS_RELACIONAMENTO</strong> (est_act_adm = 1 e data fim
 is not null<strong>)</strong></em></p>
@@ -4338,10 +4351,10 @@ utilizador</strong></em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><em>INSERT</em></td>
+<td colspan="5" style="text-align: center;"><em>INSERT</em></td>
 </tr>
 <tr>
-<td colspan="3" style="text-align: left;"><p><em>1-</em><em>Fazer uma
+<td colspan="3" style="text-align: center;"><p><em>1-</em><em>Fazer uma
 nova gravação na tabela de <strong>RH_T_MOBILIDADE</strong>, pegas todas
 informações do registo anterior , e regista com novas alteraçoes nos
 campos do formulario e outros seguinte campos</em></p>
@@ -4508,23 +4521,23 @@ especificado em Editar Mobilidade.</em></p>
 </thead>
 <tbody>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td style="text-align: center;">Date</td>
 <td style="text-align: center;"></td>
 <td style="text-align: left;"><em>RH_V_CARREIRA.DATA_INICIO</em></td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td style="text-align: center;">Date</td>
 <td style="text-align: center;"></td>
 <td style="text-align: left;"><em>RH_V_CARREIRA.DATA_FIM</em></td>
 </tr>
 <tr>
-<td>Tipo Carreira</td>
+<td style="text-align: center;">Tipo Carreira</td>
 <td style="text-align: center;">Select</td>
 <td style="text-align: left;"><strong>DOMAINS</strong> =
 TIPO_MOV_LABORAL, REFERENTE = ‘CARREIRA’</td>
-<td style="text-align: left;"><em>RH_T_CARREIRA. TIPO_SITUACAO</em></td>
+<td><em>RH_T_CARREIRA. TIPO_SITUACAO</em></td>
 </tr>
 <tr>
 <td style="text-align: center;"><strong>Lista</strong></td>
@@ -4534,78 +4547,76 @@ TIPO_MOV_LABORAL, REFERENTE = ‘CARREIRA’</td>
 </tr>
 <tr>
 <td style="text-align: left;">Tipo Carreira</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"><strong>DOMAINS</strong> =
-TIPO_MOV_LABORAL, REFERENTE = ‘CARREIRA’</td>
-<td
-style="text-align: left;"><em>RH_V_CARREIRA.TIPO_SITUACAO_DESC</em></td>
+<td><em>TEXT</em></td>
+<td><strong>DOMAINS</strong> = TIPO_MOV_LABORAL, REFERENTE =
+‘CARREIRA’</td>
+<td><em>RH_V_CARREIRA.TIPO_SITUACAO_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Estado</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"><em>RH_V_CARREIRA.ESTADO</em></td>
+<td></td>
+<td></td>
+<td><em>RH_V_CARREIRA.ESTADO</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Vinculo</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"><em>RH_V_CARREIRA.VINCULO_DESC</em></td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_V_CARREIRA.VINCULO_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Carreira</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"><em>RH_V_CARREIRA.CARREIRA_DESC</em></td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_V_CARREIRA.CARREIRA_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">cargo</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"><em>RH_V_CARREIRA.CARGO_DESC</em></td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_V_CARREIRA.CARGO_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Escalão</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"><em>RH_V_CARREIRA.ESCALAO_DESC</em></td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_V_CARREIRA.ESCALAO_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Salário</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"><em>RH_V_CARREIRA.SALARIO</em></td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_V_CARREIRA.SALARIO</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Situação Laboral</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
-<td
-style="text-align: left;"><em>RH_V_CARREIRA.SITUACAO_LABORAL_DESC</em></td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_V_CARREIRA.SITUACAO_LABORAL_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Data inicio</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"><em>RH_V_CARREIRA.DATA_INICIO</em></td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_V_CARREIRA.DATA_INICIO</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Data Fim</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"><em>RH_V_CARREIRA.DATA_FIM</em></td>
+<td><em>TEXT</em></td>
+<td></td>
+<td><em>RH_V_CARREIRA.DATA_FIM</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Processa Salário?</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: left;"><em>RH_V_CARREIRA.FLG_PROCESSA</em></td>
+<td></td>
+<td></td>
+<td><em>RH_V_CARREIRA.FLG_PROCESSA</em></td>
 </tr>
 <tr>
-<td colspan="4"><strong>REGRAS</strong></td>
+<td colspan="4" style="text-align: center;"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="4"><ul>
+<td colspan="4" style="text-align: center;"><ul>
 <li><p><em>A lista deve estar organizadas por data início de
 carreira</em></p></li>
 <li><p><em>Caso a carreira esteja validada ou processada o botão
@@ -4613,29 +4624,28 @@ Eliminar deve ficar invisivel</em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="4"><strong>AÇÕES</strong></td>
+<td colspan="4" style="text-align: center;"><strong>AÇÕES</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Novo</td>
-<td colspan="3" style="text-align: center;"><em>Campo Tipo Carreira de
-preenche com o seguinte: DOMINIO =<strong>TIPO_MOV_LABORAL</strong>,
-VALOR = <strong>CARREIRA_NOVO</strong></em></td>
+<td colspan="3"><em>Campo Tipo Carreira de preenche com o seguinte:
+DOMINIO =<strong>TIPO_MOV_LABORAL</strong>, VALOR =
+<strong>CARREIRA_NOVO</strong></em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Editar</td>
-<td colspan="3" style="text-align: center;"><p><em>so pemite editar
-todos campos caso ainda não tenha processamento associado
-(<strong>RH_V_CARREIRA. PROCESSAMENTO = 0), …</strong> Caso for editado,
-deve passar novamente para validação.</em></p>
+<td colspan="3"><p><em>so pemite editar todos campos caso ainda não
+tenha processamento associado (<strong>RH_V_CARREIRA. PROCESSAMENTO =
+0), …</strong> Caso for editado, deve passar novamente para
+validação.</em></p>
 <p><em>Campo Tipo Carreira de preenche com o seguinte: DOMINIO
 =<strong>TIPO_MOV_LABORAL</strong>, VALOR =
 <strong>CARREIRA_EDITAR</strong></em></p></td>
 </tr>
 <tr>
 <td style="text-align: left;">Progressão / Promoção</td>
-<td colspan="3" style="text-align: center;"><p><em>Este botão invoca a
-mesma página de editar, mas no campo tipo carreira deve aparecer o
-seguinte:</em></p>
+<td colspan="3"><p><em>Este botão invoca a mesma página de editar, mas
+no campo tipo carreira deve aparecer o seguinte:</em></p>
 <ul>
 <li><p><em>Campo Tipo Carreira de preenche com o seguinte: DOMINIO
 =<strong>TIPO_MOV_LABORAL</strong>, VALOR =
@@ -4644,9 +4654,9 @@ seguinte:</em></p>
 </tr>
 <tr>
 <td style="text-align: left;">Eliminar</td>
-<td colspan="3" style="text-align: center;"><p><em>Só pemite eliminar
-caso ainda não for validdo, ou seja, caso
-RH<strong>_T_CARREIRA.</strong>ESTADO <strong>= ‘P’</strong></em></p>
+<td colspan="3"><p><em>Só pemite eliminar caso ainda não for validdo, ou
+seja, caso RH<strong>_T_CARREIRA.</strong>ESTADO <strong>=
+‘P’</strong></em></p>
 <p><em>Ao eliminar o RH_V_MOBILIDADE.ESTADO = ‘E’</em></p></td>
 </tr>
 </tbody>
@@ -4756,8 +4766,8 @@ P_CATEGORIA)</em></td>
 <p><em>RH_T_TIPOS_RELACIONAMENTO. FLG_PROCESSA</em></p></td>
 </tr>
 <tr>
-<td colspan="8" style="text-align: left;"><strong>Subsido : deve trazer
-por defeito os subsisdios registados ativos</strong></td>
+<td colspan="8" style="text-align: center;"><strong>Subsido : deve
+trazer por defeito os subsisdios registados ativos</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Tipo de Subsídio</td>
@@ -4785,8 +4795,8 @@ subsídio</td>
 <td colspan="3"><em>RH_T_DEF_REMUNERACOES.VALOR</em></td>
 </tr>
 <tr>
-<td colspan="8" style="text-align: left;"><strong>Encargos / Descontos :
-deve trazer por defeito os descontos registados ativos</strong></td>
+<td colspan="8" style="text-align: center;"><strong>Encargos / Descontos
+: deve trazer por defeito os descontos registados ativos</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Tipo de Encargos / Descontao</td>
@@ -4819,10 +4829,10 @@ aplicável).</td>
 <td colspan="3"><em>RH_T_DEF_PAGAMENTOS.DATA_FIM</em></td>
 </tr>
 <tr>
-<td colspan="8" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="8" style="text-align: center;"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="8" style="text-align: left;"><p><em><strong>Regra
+<td colspan="8" style="text-align: center;"><p><em><strong>Regra
 Geral:</strong></em></p>
 <ul>
 <li><p><em>O campo processar salário deve ser obrigatório. Deve ser
@@ -4977,17 +4987,17 @@ cujo <strong>Estado</strong> esteja ativo
 </ul></td>
 </tr>
 <tr>
-<td colspan="8" style="text-align: left;"><strong>OUTRAS
+<td colspan="8" style="text-align: center;"><strong>OUTRAS
 GRAVAÇOES</strong></td>
 </tr>
 <tr>
-<td colspan="8" style="text-align: left;"><ol type="1">
+<td colspan="8" style="text-align: center;"><ol type="1">
 <li><p><strong>Update</strong></p></li>
 </ol></td>
 </tr>
 <tr>
-<td colspan="3" style="text-align: left;"><p><em>Faz update nos registos
-anteriores , ou seja inativa os registos ativos</em></p>
+<td colspan="3" style="text-align: center;"><p><em>Faz update nos
+registos anteriores , ou seja inativa os registos ativos</em></p>
 <p><em>1.2Inativa a mobilidade em estado ativo
 <strong>RH_T_TIPOS_RELACIONAMENTO (est_act_adm = 1 e data fim is not
 null)</strong></em></p>
@@ -5021,12 +5031,12 @@ utilizador</strong></em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="8" style="text-align: left;"><ol start="2" type="1">
+<td colspan="8" style="text-align: center;"><ol start="2" type="1">
 <li><p><strong>Insert</strong></p></li>
 </ol></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><p><em>1-Fazer uma nova
+<td colspan="4" style="text-align: center;"><p><em>1-Fazer uma nova
 gravação na tabela de RH_T_CARREIRA, pegas todas informações do registo
 anterior , e regista com novas alteraçoes nos campos do formulario e
 outros seguinte campos</em></p>
@@ -5340,12 +5350,12 @@ colspan="2"><em>RH_T_SUBSTITUICAO_DETALHE.VALOR_DO_SUBSTITUIDO</em></td>
 <td colspan="2"><em>RH_T_DOCUMENTO.DOC_ID</em></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><strong>OUTRAS
+<td colspan="5" style="text-align: center;"><strong>OUTRAS
 GRAVAÇÕES</strong></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><p><em><strong>1, gravação na
-tabela de RH_T_SUBSTITUICAO</strong></em></p>
+<td colspan="2" style="text-align: center;"><p><em><strong>1, gravação
+na tabela de RH_T_SUBSTITUICAO</strong></em></p>
 <ul>
 <li><p><em>DATA_REGISTO= ‘<strong>SYSDATE’</strong></em></p></li>
 <li><p><em>USER_REGISTO_ID = id de utilizador Logado</em></p></li>
@@ -5544,7 +5554,7 @@ alt="Uma imagem com texto, captura de ecrã, Tipo de letra, número Os conteúdo
 <td><em>RH_T_SUBSTITUICAO.OBSERVACAO</em></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>AÇÕES</strong></td>
+<td colspan="4" style="text-align: center;"><strong>AÇÕES</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Ver Detalhe</td>
@@ -5582,7 +5592,8 @@ style="text-align: center;"><strong>Gravação</strong></th>
 </thead>
 <tbody>
 <tr>
-<td colspan="6"><em><strong>CONTRATO VINCULO</strong></em></td>
+<td colspan="6" style="text-align: center;"><em><strong>CONTRATO
+VINCULO</strong></em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Validar</td>
@@ -5768,7 +5779,8 @@ FLG_SITUACAO_LABORAL = 1</em></p></td>
 <td colspan="2"><em>RH_T_SITUACAO_LABORAL.OBS</em></td>
 </tr>
 <tr>
-<td colspan="6"><em><strong>ACÕES</strong></em></td>
+<td colspan="6"
+style="text-align: center;"><em><strong>ACÕES</strong></em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Editar</td>
@@ -5787,7 +5799,7 @@ FLG_SITUACAO_LABORAL = 1</em></p></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="6"><p>1. Botão Editar:</p>
+<td colspan="6" style="text-align: center;"><p>1. Botão Editar:</p>
 <p><em><strong>1. Caso o Registo já tenha um processamento
 (RH_T_TIPOS_RELACIONAMENTO.FLG_PROCESSAMENTO não é
 nulo)</strong></em></p>
@@ -5825,11 +5837,11 @@ Processamento</strong></em></p>
 </ul></td>
 </tr>
 <tr>
-<td colspan="6">OUTRAS GRAVAÇÕES</td>
+<td colspan="6" style="text-align: center;">OUTRAS GRAVAÇÕES</td>
 </tr>
 <tr>
-<td colspan="3"><p><em>1—Caso For Alterado Dados de
-<strong>Mobilidade</strong> ,</em></p>
+<td colspan="3" style="text-align: center;"><p><em>1—Caso For Alterado
+Dados de <strong>Mobilidade</strong> ,</em></p>
 <ul>
 <li><p><em>Logo deve Registar na TABELA
 <strong>RH_T_MOBILIDADE</strong></em></p></li>
@@ -5882,48 +5894,49 @@ alt="Uma imagem com texto, número, Tipo de letra, captura de ecrã Os conteúdo
 </thead>
 <tbody>
 <tr>
-<td>Situação Atual</td>
+<td style="text-align: center;">Situação Atual</td>
 <td style="text-align: center;"></td>
 <td></td>
 <td><p>RH_T_CARREIRA.EST_ACT_ADM</p>
 <p><em>RH_V_RELACAO_LABORAL.ULTIMO_VINCULO</em></p></td>
 </tr>
 <tr>
-<td>vinculo</td>
+<td style="text-align: center;">vinculo</td>
 <td style="text-align: center;"></td>
 <td><strong>RH_T_PARAM_VINCULO</strong>.NOME</td>
 <td><em>RH_T_CONTRATO_VINCULO.VINCULO_ID</em></td>
 </tr>
 <tr>
-<td>Direção</td>
+<td style="text-align: center;">Direção</td>
 <td style="text-align: center;"></td>
 <td><strong>INPSIGOF.INSITUTICOES</strong>.NOME</td>
 <td
 style="text-align: left;"><em><strong>RH_T_MOBILIDE.</strong>INSTIT_ID</em></td>
 </tr>
 <tr>
-<td>Seccão</td>
+<td style="text-align: center;">Seccão</td>
 <td style="text-align: center;"></td>
 <td></td>
 <td
 style="text-align: left;"><em><strong>RH_T_MOBILIDE.</strong>SECAO_ID</em></td>
 </tr>
 <tr>
-<td>Carreira</td>
+<td style="text-align: center;">Carreira</td>
 <td style="text-align: center;"></td>
 <td></td>
 <td
 style="text-align: left;"><em><strong>RH_T_CARREIRA.</strong>CARR_PCCS_ID</em></td>
 </tr>
 <tr>
-<td>Escalão</td>
+<td style="text-align: center;">Escalão</td>
 <td style="text-align: center;"></td>
 <td><strong>RH_T_PARAM_ESCALAO.</strong> REFERENCIA / NIVEL</td>
 <td
 style="text-align: left;"><em><strong>RH_T_CARREIRA.ESCALAO_ID</strong></em></td>
 </tr>
 <tr>
-<td>Data Inicio Contrato / Data fim contrato</td>
+<td style="text-align: center;">Data Inicio Contrato / Data fim
+contrato</td>
 <td style="text-align: center;"></td>
 <td></td>
 <td
@@ -5931,7 +5944,8 @@ style="text-align: left;"><em><strong>RH_T_CONTRATO_VINCULO.</strong>DATA_INICIO
 <strong>|| RH_T_CARREIRA.</strong>DATA_INICIO</em></td>
 </tr>
 <tr>
-<td>Data inicio Carreira / Data Fim Carreira</td>
+<td style="text-align: center;">Data inicio Carreira / Data Fim
+Carreira</td>
 <td style="text-align: center;"></td>
 <td></td>
 <td
@@ -5939,25 +5953,25 @@ style="text-align: left;"><em><strong>RH_T_CONTRATO_VINCULO.</strong>DATA_FIM
 <strong>|| RH_T_CARREIRA.</strong>DATA_FIM</em></td>
 </tr>
 <tr>
-<td>Situação Laboral</td>
+<td style="text-align: center;">Situação Laboral</td>
 <td style="text-align: center;"></td>
 <td><strong>RH_T_PARAM_SITUACAO.</strong>NOME</td>
 <td
 style="text-align: left;"><em><strong>RH_T_SITUACAO_LABORAL.SITUACAO_LABORAL_ID</strong></em></td>
 </tr>
 <tr>
-<td><strong>Ações</strong></td>
+<td style="text-align: center;"><strong>Ações</strong></td>
 <td style="text-align: center;"></td>
 <td colspan="2"></td>
 </tr>
 <tr>
 <td style="text-align: left;">Novo / Editar</td>
-<td style="text-align: center;"></td>
+<td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
 <td style="text-align: left;">Regime Emprego</td>
-<td style="text-align: center;"></td>
+<td></td>
 <td colspan="2"></td>
 </tr>
 </tbody>
@@ -5987,121 +6001,119 @@ alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos ger
 </thead>
 <tbody>
 <tr>
-<td>Referencia</td>
+<td style="text-align: center;">Referencia</td>
 <td style="text-align: center;"><em>SELECT</em></td>
 <td><strong>DOMAINS</strong> = TIPO_MOV_LABORAL<em>, pega somente
 Referencia</em></td>
 <td><em>RH_V_HIST_LABORAL. REFERENCIA</em></td>
 </tr>
 <tr>
-<td>Tipo Situação</td>
+<td style="text-align: center;">Tipo Situação</td>
 <td style="text-align: center;"><em>SELECT</em></td>
 <td><em><strong>DOMAINS</strong>=</em> TIPO_MOV_LABORAL, pega valor de
 cada campo Referencia</td>
 <td><em>RH_V_HIST_LABORAL .TIPO_SITUACAO</em></td>
 </tr>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td style="text-align: center;"><em>DATE</em></td>
 <td></td>
 <td style="text-align: left;"><em>RH_V_HIST_LABORAL
 .DATA_INICIO</em></td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td style="text-align: center;"><em>DATE</em></td>
 <td></td>
 <td style="text-align: left;"><em>RH_V_HIST_LABORAL .DATA_FIM</em></td>
 </tr>
 <tr>
-<td><strong>Lista</strong></td>
+<td style="text-align: center;"><strong>Lista</strong></td>
 <td style="text-align: center;"><strong>Tipo</strong></td>
 <td colspan="2"><strong>Fonte de dados</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Ultimo Movimento</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2">RH_V_HIST_LABORAL.ULTIMO_VINCULO</td>
 </tr>
 <tr>
 <td style="text-align: left;">Tipo Situação</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2">RH_V_HIST_LABORAL. TIPO_SITUACAO_DESC</td>
 </tr>
 <tr>
 <td style="text-align: left;">Tipo contrato</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2">RH_V_HIST_LABORAL.<em>TIPO_CONTRATO_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Vinculo</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2">RH_V_HIST_LABORAL.<em>VINCULO_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Direção</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2">RH_V_HIST_LABORAL . <em>DIRECAO_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Seção</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2">RH_V_HIST_LABORAL . <em>SECCAO_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Referencia / Escalão</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2">RH_V_HIST_LABORAL .
 <em>REFERENCIA_ESCALAO_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Cargo</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2">RH_V_HIST_LABORAL. <em>CARGO_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Carreira</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2">RH_V_HIST_LABORAL.<em>CARREIRA_DESC</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Situação Laboral</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2">RH_V_HIST_LABORAL . SITUACAO_LABORAL</td>
 </tr>
 <tr>
 <td style="text-align: left;">Data Inicio / Data Fim</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2">RH_V_HIST_LABORAL . <em>DATA_INICIO /</em>
 RH_V_HIST_LABORAL . <em>DATA_FIM</em></td>
 </tr>
 <tr>
-<td colspan="4"><strong>Ações</strong></td>
+<td colspan="4" style="text-align: center;"><strong>Ações</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Registar Vinculo</td>
-<td colspan="3" style="text-align: center;">Abre formulário para o
-registo de um novo vinculo Laboral</td>
+<td colspan="3">Abre formulário para o registo de um novo vinculo
+Laboral</td>
 </tr>
 <tr>
 <td style="text-align: left;">Editar Vinculo</td>
-<td colspan="3" style="text-align: center;">Abre o mesmo formulario de
-registo</td>
+<td colspan="3">Abre o mesmo formulario de registo</td>
 </tr>
 <tr>
 <td style="text-align: left;">Eliminar</td>
-<td colspan="3" style="text-align: center;">Permite eliminar os dados
-registados</td>
+<td colspan="3">Permite eliminar os dados registados</td>
 </tr>
 <tr>
 <td style="text-align: left;">Alterar Situaçao Laboral</td>
-<td colspan="3" style="text-align: center;">Abre o formulário para
-editar situação Laboral de um colaborador</td>
+<td colspan="3">Abre o formulário para editar situação Laboral de um
+colaborador</td>
 </tr>
 <tr>
 <td style="text-align: left;">Alterar Regime</td>
-<td colspan="3" style="text-align: center;">Abre o formulário para
-alterar regime de um colaborador</td>
+<td colspan="3">Abre o formulário para alterar regime de um
+colaborador</td>
 </tr>
 </tbody>
 </table>
@@ -6212,11 +6224,11 @@ que não estejam eliminados</del></em></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: left;"><strong><del>OUTRAS
+<td colspan="5" style="text-align: center;"><strong><del>OUTRAS
 GRAVAÇOES</del></strong></td>
 </tr>
 <tr>
-<td colspan="3" style="text-align: left;"><p><em><del>1.Faz update nos
+<td colspan="3" style="text-align: center;"><p><em><del>1.Faz update nos
 registos anteriores , ou seja inativa os registos ativos</del></em></p>
 <p><em><del>1.1Inativa a mobilidade em estado ativo
 <strong>RH_T_TIPOS_RELACIONAMENTO (est_act_adm = 1 e data fim is not
@@ -6427,23 +6439,23 @@ regime(covid)</em></p></td>
 <td>RH_T_REGIME_MODAL.NUM_HORAS</td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="4" style="text-align: center;"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><ul>
+<td colspan="4" style="text-align: center;"><ul>
 <li><p><em>Validar Campos Obrigatorios</em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>OUTRA
+<td colspan="4" style="text-align: center;"><strong>OUTRA
 GRAVAÇOES</strong></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>UPDATE</strong></td>
+<td colspan="4" style="text-align: center;"><strong>UPDATE</strong></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><p><em>Faz update nos registos
-anteriores , ou seja inativa os registos ativos</em></p>
+<td colspan="4" style="text-align: center;"><p><em>Faz update nos
+registos anteriores , ou seja inativa os registos ativos</em></p>
 <p><em><del>1.2Inativa a mobilidade em estado ativo
 <strong>RH_T_TIPOS_RELACIONAMENTO (est_act_adm = 1 e data fim is not
 null)</strong></del></em></p>
@@ -6458,10 +6470,10 @@ utilizador</strong></del></em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>INSERT</strong></td>
+<td colspan="4" style="text-align: center;"><strong>INSERT</strong></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><ol type="1">
+<td colspan="4" style="text-align: center;"><ol type="1">
 <li><p><strong>Registar</strong></p>
 <ol type="1">
 <li><p>O sistema deve registar os dados introduzidos no formulário para
@@ -6572,13 +6584,13 @@ Logado</del></em></p></li>
 </thead>
 <tbody>
 <tr>
-<td>Estado</td>
+<td style="text-align: center;">Estado</td>
 <td style="text-align: center;"><em>SELECT</em></td>
 <td><strong>DOMAINS</strong> = STATUS</td>
 <td style="text-align: left;"><em>RH_T_REGIME_TRAB</em>.ESTADO</td>
 </tr>
 <tr>
-<td>Tipo Regime</td>
+<td style="text-align: center;">Tipo Regime</td>
 <td style="text-align: center;"><em>SELECT</em></td>
 <td><strong>DOMAIN</strong> = REGIME_TRABALHO</td>
 <td style="text-align: left;"><em>RH_T_REGIME_TRAB</em>.
@@ -6591,41 +6603,40 @@ Logado</del></em></p></li>
 </tr>
 <tr>
 <td style="text-align: left;">Tipo Regime</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2"><em>RH_T_REGIME_TRAB</em>. <em>TIPO_REGIME</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Data inicio</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2"><em>RH_T_REGIME_TRAB.DATA_INICIO</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Data Fim</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2"><em>RH_T_REGIME_TRAB.DATA_FIM</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Modalidade</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2"><em>Agrupar (RH_T_REGIME_MODAL.DIAS_SEMANA)</em></td>
 </tr>
 <tr>
 <td style="text-align: left;">Numero Horas</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2"><em>Sum (RH_T_REGIME_MODAL.</em>NUM_HORAS</td>
 </tr>
 <tr>
 <td style="text-align: left;">Estado</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td colspan="2"><em>RH_T_REGIME_TRAB.ESTADO</em></td>
 </tr>
 <tr>
-<td colspan="4"><strong>ACÇÕES</strong></td>
+<td colspan="4" style="text-align: center;"><strong>ACÇÕES</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Editar</td>
-<td colspan="3" style="text-align: center;"><em>Abre a mesma pagina de
-Registar</em></td>
+<td colspan="3"><em>Abre a mesma pagina de Registar</em></td>
 </tr>
 </tbody>
 </table>
@@ -6656,19 +6667,19 @@ alt="Uma imagem com texto, número, software, Tipo de letra Os conteúdos gerado
 </thead>
 <tbody>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td><em>DATE</em></td>
 <td></td>
 <td><em>RH_V_DEF_REMUNERACAO. DATA_INICIO</em></td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td><em>DATE</em></td>
 <td></td>
 <td><em>RH_V_DEF_REMUNERACAO. DATA_FIM</em></td>
 </tr>
 <tr>
-<td>Estado</td>
+<td style="text-align: center;">Estado</td>
 <td><em>select</em></td>
 <td><em><strong>DOMAINS</strong> = STATUS</em></td>
 <td><em>RH_V_DEF_REMUNERACAO.ESTADO</em></td>
@@ -6686,40 +6697,40 @@ alt="Uma imagem com texto, número, software, Tipo de letra Os conteúdos gerado
 <td><em>RH_V_DEF_REMUNERACAO.ESTADO_DESC</em></td>
 </tr>
 <tr>
-<td>Movimento</td>
+<td style="text-align: center;">Movimento</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td><em>RH_V_DEF_REMUNERACAO.</em> descricao</td>
 </tr>
 <tr>
-<td>Valor</td>
+<td style="text-align: center;">Valor</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td><em>RH_V_DEF_REMUNERACAO.VALOR</em></td>
 </tr>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td><em>TEXT</em></td>
 <td>A data deve sempre dia / mm / yyyy</td>
 <td><em>RH_V_DEF_REMUNERACAO.DATA_INICIO</em></td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td><em>TEXT</em></td>
 <td>A data deve sempre dia / mm / yyyy</td>
 <td><em>RH_V_DEF_REMUNERACAO.DATA_FIM</em></td>
 </tr>
 <tr>
-<td>Ultimo Proc</td>
+<td style="text-align: center;">Ultimo Proc</td>
 <td><em>TEXT</em></td>
 <td>A data deve sempre dia / mm / yyyy</td>
 <td><em>RH_V_DEF_REMUNERACAO.</em>DATA_ULTIMO_PROC</td>
 </tr>
 <tr>
-<td colspan="4">REGRAS</td>
+<td colspan="4" style="text-align: center;">REGRAS</td>
 </tr>
 <tr>
-<td colspan="4"><ul>
+<td colspan="4" style="text-align: center;"><ul>
 <li><p><em><strong>Por defeito</strong>, devem ser apresentadas apenas
 as remunerações ativas.
 <strong>RH_V_DEF_REMUNERACAO</strong>)</em></p></li>
@@ -6755,19 +6766,19 @@ alt="Uma imagem com texto, captura de ecrã, file, Tipo de letra Os conteúdos g
 </thead>
 <tbody>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td><em>DATE</em></td>
 <td></td>
 <td><em><mark>RH_V_DEF_PAGAMENTO. DATA_INICIO</mark></em></td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td><em>DATE</em></td>
 <td></td>
 <td><em><mark>RH_V_DEF_PAGAMENTO. DATA_FIM</mark></em></td>
 </tr>
 <tr>
-<td>Estado</td>
+<td style="text-align: center;">Estado</td>
 <td><em>select</em></td>
 <td><em><strong>DOMAINS</strong> = STATUS</em></td>
 <td><em><mark>RH_V_DEF_PAGAMENTO.ESTADO</mark></em></td>
@@ -6785,40 +6796,40 @@ alt="Uma imagem com texto, captura de ecrã, file, Tipo de letra Os conteúdos g
 <td><em><mark>RH_V_DEF_PAGAMENTO.ESTADO_DESC</mark></em></td>
 </tr>
 <tr>
-<td>Movimento</td>
+<td style="text-align: center;">Movimento</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td><em><mark>RH_V_DEF_PAGAMENTO. DESCRICAO</mark></em></td>
 </tr>
 <tr>
-<td>Valor</td>
+<td style="text-align: center;">Valor</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td><em><mark>RH_V_DEF_PAGAMENTO.VALOR</mark></em></td>
 </tr>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td><em>TEXT</em></td>
 <td><mark>A data deve sempre dia / mm / yyyy</mark></td>
 <td><em><mark>RH_V_DEF_PAGAMENTO.DATA_INICIO</mark></em></td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td><em>TEXT</em></td>
 <td><mark>A data deve sempre dia / mm / yyyy</mark></td>
 <td><em><mark>RH_V_DEF_PAGAMENTO.DATA_FIM</mark></em></td>
 </tr>
 <tr>
-<td>Ultimo Proc</td>
+<td style="text-align: center;">Ultimo Proc</td>
 <td><em>TEXT</em></td>
 <td><mark>A data deve sempre dia / mm / yyyy</mark></td>
 <td><mark><em>RH_V_DEF_PAGAMENTO..</em>DATA_ULTIMO_PROC</mark></td>
 </tr>
 <tr>
-<td colspan="4">REGRAS</td>
+<td colspan="4" style="text-align: center;">REGRAS</td>
 </tr>
 <tr>
-<td colspan="4"><ul>
+<td colspan="4" style="text-align: center;"><ul>
 <li><p><em><strong>Por defeito</strong>, devem ser apresentadas apenas
 as remunerações ativas.
 <strong>RH_V_DEF_REMUNERACAO</strong>)</em></p></li>
@@ -6912,20 +6923,20 @@ validação desse Registo. No modo validação esse campo é obrigatorio</p>
 <td><em>RH_T_DEF_REMUNERACOES.OBS</em></td>
 </tr>
 <tr>
-<td colspan="6" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="6" style="text-align: center;"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="6" style="text-align: left;"><ul>
+<td colspan="6" style="text-align: center;"><ul>
 <li><p><em>Caso a remuneração já tenha um processamento , logo somente
 se pode alterar Data Fim e Observaçáo</em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="6" style="text-align: left;"><strong>OUTRAS
+<td colspan="6" style="text-align: center;"><strong>OUTRAS
 GRAVAÇOES</strong></td>
 </tr>
 <tr>
-<td colspan="3" style="text-align: left;"><p><em><strong>1,</strong>
+<td colspan="3" style="text-align: center;"><p><em><strong>1,</strong>
 gravação na tabela de <strong>RH_T_DEF_REMUNERACOES</strong></em></p>
 <ul>
 <li><p><em>DATA_REGISTO= ‘<strong>SYSDATE’</strong></em></p></li>
@@ -7013,7 +7024,7 @@ ação</strong></em></p></li>
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: left;"><blockquote>
+<th><blockquote>
 <p><strong>Formulario</strong></p>
 </blockquote></th>
 <th style="text-align: center;"><strong>Tipo</strong></th>
@@ -7110,21 +7121,20 @@ validação desse Registo. No modo validação esse campo é obrigatorio</p>
 <td><em>RH_T_DEF_PAGAMENTOS.</em> <em>NIB</em></td>
 </tr>
 <tr>
-<td colspan="6" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="6"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="6" style="text-align: left;"><ul>
+<td colspan="6"><ul>
 <li><p><em>Caso a remuneração já tenha um processamento , logo somente
 se pode altrar Data Fim e Observaçáo</em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="6" style="text-align: left;"><strong>OUTRAS
-GRAVAÇOES</strong></td>
+<td colspan="6"><strong>OUTRAS GRAVAÇOES</strong></td>
 </tr>
 <tr>
-<td colspan="3" style="text-align: left;"><p><em><strong>1,</strong>
-gravação na tabela de <strong>RH_T_DEF_PAGAMENTOS</strong></em></p>
+<td colspan="3"><p><em><strong>1,</strong> gravação na tabela de
+<strong>RH_T_DEF_PAGAMENTOS</strong></em></p>
 <ul>
 <li><p><em>DATA_REGISTO= ‘<strong>SYSDATE’</strong></em></p></li>
 <li><p><em>USER_REGISTO_ID = id de utilizador Logado</em></p></li>
@@ -7255,42 +7265,42 @@ alt="Uma imagem com texto, número, Tipo de letra, software Os conteúdos gerado
 <p><em>RH_T_PROCESSO_DISCIPLINAR.TIPREL_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: left;">Sessao</td>
+<td style="text-align: center;">Sessao</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td><p><em>RH_V_MOBILIDADE.SESSAO, passando como parametro</em></p>
 <p><em>RH_T_PROCESSO_DISCIPLINAR.TIPREL_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: left;">Vinculo</td>
+<td style="text-align: center;">Vinculo</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td><p><em>RH_V_MOBILIDADE.VINCULO, passando como parametro</em></p>
 <p><em>RH_T_PROCESSO_DISCIPLINAR.TIPREL_ID</em></p></td>
 </tr>
 <tr>
-<td style="text-align: left;">Processo Disciplinar</td>
+<td style="text-align: center;">Processo Disciplinar</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td><em>RH_T_PROCESSO_DISCIPLINAR.TP_PROCESSO</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td><em>RH_T_PROCESSO_DISCIPLINAR.DATE_INIC_PD</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td><em>RH_T_PROCESSO_DISCIPLINAR.DATE_FIM_PD</em></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"></td>
+<td colspan="4" style="text-align: center;"></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><em><strong>Editar</strong>:
+<td colspan="4" style="text-align: center;"><em><strong>Editar</strong>:
 Abre o mesmo formulario que Registo</em></td>
 </tr>
 </tbody>
@@ -7310,7 +7320,7 @@ alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos ger
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: left;"><blockquote>
+<th><blockquote>
 <p><strong>Formulario</strong></p>
 </blockquote></th>
 <th style="text-align: center;"><strong>Tipo</strong></th>
@@ -7437,9 +7447,9 @@ disciplinar.</del></td>
 <td><em>RH_T_PROCESSO_DISCIPLINAR.DATA_ORDEM_SERV</em></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>OFA :</strong>
-Documento ou Ordem Formal Administrativa emitida pela entidade
-competente no âmbito do processo<strong>.</strong></td>
+<td colspan="4"><strong>OFA :</strong> Documento ou Ordem Formal
+Administrativa emitida pela entidade competente no âmbito do
+processo<strong>.</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;"><del>Nº Ofa</del></td>
@@ -7455,14 +7465,13 @@ emitida.</del></td>
 <td><em><del>RH_T_PROCESSO_DISCIPLINAR.DATA_EMISS_OFA</del></em></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>REGRAS</strong></td>
+<td colspan="4"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"></td>
+<td colspan="4"></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>OUTRAS
-GRAVAÇOES</strong></td>
+<td colspan="4"><strong>OUTRAS GRAVAÇOES</strong></td>
 </tr>
 <tr>
 <td colspan="4" style="text-align: left;"><p><em>Gravações de outros
@@ -7516,7 +7525,7 @@ correspondente</strong>.</p></li>
 ##### Recibo 
 
 | **Filtro** | **Tipo** | **Descrição** | **Fonte dados** |
-|----|----|----|----|
+|:--:|----|----|----|
 | Data Inicio | *DATE* |  | *<span class="mark">RH_T_PROC_FUNCIONARIOS.DATA_REFERENCIA_DE</span>* |
 | Data Fim | *DATE* |  | *<span class="mark">RH_T_PROC_FUNCIONARIOS.DATA_REFERENCIA_DE</span>* |
 | **Lista** | **Tipo** | **Descrição** |  |
@@ -7544,7 +7553,7 @@ Formulario de pedido de declaracao
 </colgroup>
 <thead>
 <tr>
-<th style="text-align: left;"><blockquote>
+<th><blockquote>
 <p><strong>Formulario</strong></p>
 </blockquote></th>
 <th style="text-align: center;"><strong>Tipo</strong></th>
@@ -7655,11 +7664,10 @@ Pedido</strong></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>ACÇOES</strong></td>
+<td colspan="4"><strong>ACÇOES</strong></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><p><em>GRAVACAO nas Seguintes
-TABELAS :</em></p>
+<td colspan="4"><p><em>GRAVACAO nas Seguintes TABELAS :</em></p>
 <ul>
 <li><p><em><strong>RH_T_PEDIDO</strong></em></p>
 <ul>
@@ -7701,19 +7709,19 @@ Lista de pedido de declaracao
 </thead>
 <tbody>
 <tr>
-<td>Nome Requerente</td>
+<td style="text-align: center;">Nome Requerente</td>
 <td style="text-align: center;"></td>
 <td>RH_T_FUNCIONARIOS.NOME</td>
 <td>RH_T_DECLARACAO.FUN_ID</td>
 </tr>
 <tr>
-<td>Data Pedido DE</td>
+<td style="text-align: center;">Data Pedido DE</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"></td>
 <td>RH_T_DECLARACAO.DATA</td>
 </tr>
 <tr>
-<td>Data Pedo Até</td>
+<td style="text-align: center;">Data Pedo Até</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"></td>
@@ -7726,56 +7734,54 @@ Lista de pedido de declaracao
 </tr>
 <tr>
 <td style="text-align: left;">Nome Requerente</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td><em>TEXT</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>Tipo Declaracao</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td style="text-align: center;">Tipo Declaracao</td>
+<td><em>TEXT</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>Finalidade</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td style="text-align: center;">Finalidade</td>
+<td><em>TEXT</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>Data necessária (prazo )</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td style="text-align: center;">Data necessária (prazo )</td>
+<td><em>TEXT</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>Estado</td>
-<td style="text-align: center;"><em>TEXT</em></td>
+<td style="text-align: center;">Estado</td>
+<td><em>TEXT</em></td>
 <td><strong>DOMAIN</strong> = ESTADO_PEDIDO</td>
 <td></td>
 </tr>
 <tr>
-<td><strong>Etapa</strong></td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>Etapa</strong></td>
+<td></td>
 <td><strong>DOMAIN</strong> = ETAPA_PEDIDO, onde referencia =
 DECLARACAO</td>
 <td></td>
 </tr>
 <tr>
-<td><strong>ACCÕES</strong></td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>ACCÕES</strong></td>
+<td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>Ver Detalhe</td>
-<td colspan="3" style="text-align: center;"><em>PERMITE VALIDAR E
-ENTREGAR O DOCUMENTO</em></td>
+<td style="text-align: center;">Ver Detalhe</td>
+<td colspan="3"><em>PERMITE VALIDAR E ENTREGAR O DOCUMENTO</em></td>
 </tr>
 <tr>
-<td>Ver Notificação</td>
-<td colspan="3" style="text-align: center;"><em>VER TODAS NOTIFICAÇÕES
-ASSOCIADA AO PEDIDO</em></td>
+<td style="text-align: center;">Ver Notificação</td>
+<td colspan="3"><em>VER TODAS NOTIFICAÇÕES ASSOCIADA AO PEDIDO</em></td>
 </tr>
 </tbody>
 </table>
@@ -7808,38 +7814,38 @@ alt="Uma imagem com texto, número, file, software Os conteúdos gerados por IA 
 <td><em>RH_T_ORDEM_SERVICO.DESCRICAO</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">Referente</td>
+<td style="text-align: center;">Referente</td>
 <td></td>
 <td><em><strong>DOMAINS:</strong> ACCAO_REFERENTE</em></td>
 <td><em>RH_T_ORDEM_SERVICO.REFERENTE</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">Numero</td>
+<td style="text-align: center;">Numero</td>
 <td></td>
 <td></td>
 <td><em>RH_T_ORDEM_SERVICO.NUMERO</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">Anexar Ordem Serviço</td>
+<td style="text-align: center;">Anexar Ordem Serviço</td>
 <td></td>
 <td></td>
 <td><p><em>RH_T_DOCUMENTO.DOC_ID</em></p>
 <p><em>RH_T_DOCUMENTO.</em></p></td>
 </tr>
 <tr>
-<td style="text-align: left;">Ver ordem Serviço</td>
+<td style="text-align: center;">Ver ordem Serviço</td>
 <td></td>
 <td></td>
 <td><em>RH_T_ORDEM_SERVICO.DOC_ID</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">OUTRAS GRAVAÇÕES</td>
+<td style="text-align: center;">OUTRAS GRAVAÇÕES</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><ol type="1">
+<td colspan="4" style="text-align: center;"><ol type="1">
 <li><p><em>Grava na tabela RH_T_DOCUMENTO</em></p></li>
 <li><p><em>Grava na tabela RH_T_ORDEM_SERVICO</em></p></li>
 </ol></td>
@@ -7870,7 +7876,7 @@ style="text-align: center;"><strong>Descrição</strong></th>
 </thead>
 <tbody>
 <tr>
-<td rowspan="2"><ol type="1">
+<td rowspan="2" style="text-align: center;"><ol type="1">
 <li><p>Alerta prazo Renovação</p></li>
 </ol></td>
 <td colspan="2"><p>O sistema deve alertar RH 45 dias antes de data de
@@ -7935,7 +7941,7 @@ RH_T_CONTRATO_VINCULO</em></p></li>
 </ul></td>
 </tr>
 <tr>
-<td><ol start="2" type="1">
+<td style="text-align: center;"><ol start="2" type="1">
 <li><p>Alerta data Fim de licença sem vencimento</p></li>
 </ol></td>
 <td colspan="2"><p>(ESPECIFICAÇÃO em outro documento)</p>
@@ -7943,7 +7949,7 @@ RH_T_CONTRATO_VINCULO</em></p></li>
 VENCIMENTO’</strong></p></td>
 </tr>
 <tr>
-<td><ol start="3" type="1">
+<td style="text-align: center;"><ol start="3" type="1">
 <li><p>Alerta de progressão e Promoção</p></li>
 </ol></td>
 <td colspan="2"><p>ESPECIFICAÇÃO em outro documento)</p>
@@ -7984,54 +7990,54 @@ VENCIMENTO’</strong></p></td>
 <td><em>RH_T_ALERTA.DESCRICAO</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">Nome de colaborador / Quantidade</td>
+<td style="text-align: center;">Nome de colaborador / Quantidade</td>
 <td></td>
 <td><em>RH_T_FUNCIONARIO.NOME</em></td>
 <td><em>RH_T_ALERTA_DETALHE.TIPREL_ID</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">Periodo</td>
+<td style="text-align: center;">Periodo</td>
 <td></td>
 <td></td>
 <td><em>RH_T_ALERTA_DETALHE.DATA_INICIO ||
 RH_T_ALERTA_DETALHE.DATA_FIM</em></td>
 </tr>
 <tr>
-<td style="text-align: left;">Estado</td>
+<td style="text-align: center;">Estado</td>
 <td></td>
 <td><strong>DOMINIO</strong>=STATUS</td>
 <td></td>
 </tr>
 <tr>
-<td style="text-align: left;">Selecionar todos</td>
+<td style="text-align: center;">Selecionar todos</td>
 <td><em>check</em></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>REGRAS</strong></td>
+<td style="text-align: center;"><strong>REGRAS</strong></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>AÇOES</strong></td>
+<td style="text-align: center;"><strong>AÇOES</strong></td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td style="text-align: left;">Renovar Contrato</td>
+<td style="text-align: center;">Renovar Contrato</td>
 <td colspan="3"></td>
 </tr>
 <tr>
-<td style="text-align: left;">Ver Notificação</td>
+<td style="text-align: center;">Ver Notificação</td>
 <td colspan="3"></td>
 </tr>
 </tbody>
