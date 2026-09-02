@@ -71,6 +71,42 @@ senão o Hibernate rebenta ao mapear `ESTADO_VALIDACAO`. O DDL completo está em
 - Nomes: situação = `RH_T_PARAM_SITUACAO` (`FLG_ESTADO_CONTRATO`: A/C/S); motivos = `RH_T_PARAM_SITUACAO_DET`
   (col **`MOTIVO`**). `RH_T_FUNCIONARIOS` **não** tem `estado_colaborador` — tem `estado` e `estado_validacao`.
 
+## 🔴 ACHADO CRÍTICO — "Ativar" não reativa (ramo não-processado)
+
+**Aprovar uma reativação não altera o estado do colaborador.** Provado live no 958930 (cenário 12):
+submeteu-se `Ativar` (situação flag `A`), aprovou-se com `validar=SIM` → HTTP 200, situação e validação
+ficaram `A`… e **`funcionario.estado` continuou `I`**, com `tiprel.data_fim` ainda fechado (2026-09-03).
+
+Causa — `funcionario.setEstado(...)` só existe em 3 sítios:
+
+| Linha | Onde | Efeito |
+|---|---|---|
+| 289 | `registarProcessado` (submissão, **só ramo processado**) | `estadoDoFuncionarioPara` → trata `A` e `I` |
+| 306 | `aplicarEfeitosCessacao` (aprovação, **só cessação**) | põe `I` |
+| 344 | `rollbackRejeicao` (rejeição, só se `fechadoPeloRegisto`) | põe `I` ou `A` |
+
+No ramo **não-processado** (`ult_proc == null`) nada põe `A`: existe `aplicarEfeitosCessacao` mas **não existe
+o simétrico de reativação**. Falta um `aplicarEfeitosReativacao` que ponha `estado=A` e reabra a cadeia de
+datas (`tiprel`/mobilidade/carreira/contrato com `data_fim=null`).
+
+**Impacto: metade da funcionalidade "Ativar/Inativar Colaborador" não funciona**, e o ramo não-processado é
+o caminho comum (todos os colaboradores de teste têm `ult_proc=null`). NÃO é regressão da sessão 4 — os três
+`setEstado` são pré-existentes; a sessão 4 só acrescentou linhas de `setEstadoValidacao`.
+
+**Reprodução limpa** (colaborador **958931** `Colaborador Teste Reativar`,
+uuid `01a06456-f966-7647-9bc9-259c4978e175`, criado de raiz só para isto — sem rejeições nem correções,
+para excluir contaminação de estado):
+
+| Passo | `f_est` | `f_val` | `tiprel.data_fim` | `sit` |
+|---|---|---|---|---|
+| 0. inicial | A | A | null | 1 |
+| 1. inativar (sit 9) | A | **P** | null | 9 P |
+| 2. aprovar | **I** | A | 2026-09-10 | 9 A |
+| 3. ativar (sit 22) | I | **P** | 2026-09-10 | 22 P |
+| 4. **aprovar** | **I** ❌ | A | **2026-09-10** ❌ | 22 A |
+
+O `estado_validacao` comporta-se corretamente nos 4 passos; o que falha é o `estado` do colaborador.
+
 ## Achados por resolver (NÃO são regressões desta sessão)
 
 1. **Rejeição no ramo não-processado é destrutiva.** `validar()` faz `tiprelAtual.setEstado(I)` e
@@ -87,10 +123,14 @@ senão o Hibernate rebenta ao mapear `ESTADO_VALIDACAO`. O DDL completo está em
    (ex.: id 15 "Falecimento de Familiares"). E mesmo que fossem escolhidas, `cessaContrato()` e
    `ativaContrato()` devolvem ambos `false` para `S` → `funcionario.estado` não mudaria.
    **O utilizador levantou isto** ("a documentação não diz para filtrar só A e C") e ficou por decidir.
-4. **`AlterarSituacaoLaboralRequest.estadoContrato` é um campo morto.** O ecrã envia-o, mas não há um único
-   `getEstadoContrato()` em todo o módulo `funcionario` — o backend deriva tudo da flag da situação
-   escolhida. Consequência: **nunca se valida** que o Estado escolhido no ecrã bate certo com a flag real
-   da situação; se os combos ficarem dessincronizados, o backend segue em silêncio pela flag da situação.
+4. **`AlterarSituacaoLaboralRequest.estadoContrato` não é lido pelo backend — e está decidido que fica
+   assim.** O ecrã envia-o (payload real: `{"estadoContrato":"C","situacaoLaboralId":9,...}` — o **código**,
+   não o label), mas não há um único `getEstadoContrato()` no módulo `funcionario`: o estado deriva sempre
+   da flag da situação escolhida.
+   **Decisão do utilizador (sessão 4): NÃO acrescentar guard de coerência.** Chegou a ser implementado e
+   foi revertido antes de commit. Razão, que é boa: o combo "Situação Laboral" é **populado a filtrar por**
+   o "Estado" escolhido, logo uma divergência é estruturalmente impossível a partir da UI — o guard só
+   apanharia chamadas feitas à mão. Não reabrir sem motivo novo.
 5. **`estadoRegistoDesc` usa labels do colaborador.** Para "Estado do Registo", `A` lê-se **"Ativo"** quando
    devia provavelmente ler-se **"Validado"**. Cosmético, por confirmar com negócio.
 6. **`registarProcessado` aplica o efeito antes da aprovação**: L280 faz
@@ -119,6 +159,40 @@ Nota: a `data_inicio` é a única peça **inferida** (bem fundamentada, mas infe
 **PROGRESSAO/CARREIRA** com `data_inicio=2028-11-01` — o ramo não-processado não lhe tocou nas datas, só no
 `estado`. A validação **1063** ficou `I` na BD como histórico do teste (não foi apagada).
 
+## Matriz de cenários validada (sessão 4)
+
+Colaborador **958930** (`Colaborador Teste Cenarios`, uuid `01a06448-061d-744d-9c3a-ab005acc134b`),
+criado de raiz: `POST` → `GET by id` → `PUT validar:SIM` → `A`/`A`, `ult_proc=null` (ramo não-processado).
+Payloads em `scratchpad/c*.json`, com datas em `DD/MM/YYYY` como o frontend real.
+
+| # | Cenário | Resultado | ✔ |
+|---|---|---|---|
+| 1 | `validar=SIM` sem pendente | 400 "não possui validação pendente" | ✅ |
+| 3 | Ativar quem já está ativo (flag A) | 400 "já está ativo" | ✅ |
+| 4 | Inativar (submissão, sit 9/motivo 23) | 200; `estado=A`, `est_validacao=P`, sit `P`, validação `P` | ✅ |
+| 5 | Grelha com pendente | `estadoColaborador=A/Ativo` + `estadoRegisto=P/Pendente` | ✅ |
+| 6 | `validar=CORRIGIR` | sit/tiprel/validação/`est_validacao` → `C`; `estado` fica `A` | ✅ |
+| 7 | Reenviar correção | tudo volta a `P`; `data_inicio` aceitou `03/09/2026` (DD/MM/YYYY) | ✅ |
+| 8 | `validar=SIM` (aprovar cessação) | `estado`→`I`, `est_validacao`→`A`; **cadeia toda fechada** (tiprel+mobilidade+carreira+contrato = 2026-09-03); ordem de serviço `CESSACAO` criada | ✅ |
+| 9 | Inativar quem já está inativo | 400 "já está inativo" | ✅ |
+| 10 | Ativar (submissão) | 200; `estado` fica `I`, `est_validacao=P` | ✅ |
+| 11 | `validar=NAO` (rejeitar) | `est_validacao`→`A`, `estado` fica `I` | ✅ (mas ver achado nº1 abaixo) |
+| 2 | No-op (mesma situação+motivo) | "Situação laboral sem alterações." | ✅ |
+| 12a | `motivoId=null` | 400 "motivo é obrigatório" | ✅ |
+| 12 | Ativar + aprovar | **FALHA — ver ACHADO CRÍTICO** | ❌ |
+
+**Nota sobre o cenário 2 (no-op):** só é alcançável por acidente. Os guards `guardComboInativarAtivar`
+correm **antes** do `mudouSituacaoOuMotivo`, e disparam para qualquer situação flag `A` (colaborador ativo)
+ou flag `C` (colaborador inativo). Chegou-se lá porque a rejeição do cenário 11 deixou a situação corrente
+em `1/2`, e reenviar `1/2` bateu no no-op — o que **bloqueia o caminho natural de reativação** ("ATIVO")
+até se usar outra situação. Há outras situações flag `A` com motivo (18, 22, 23, 24, 25, 26, 32, 39), por
+isso não é um beco definitivo, mas é uma armadilha real.
+
+**Dano observado no cenário 11 (achado nº1 em ação):** a rejeição da reativação deixou `tiprel=I` e
+`situacao=I`, e a situação corrente ficou `sit=1 (ATIVO)` — **a situação APOSENTADO (9), que era a realidade
+aprovada, foi sobrescrita in place e perdeu-se**. O colaborador ficou inativo sem registo do motivo.
+Consequência mais grave do que o caso do 958925.
+
 ## Evidência da validação live
 
 Ramo exercitado: **`registarNaoProcessado`** (todos os colaboradores têm `ult_proc=null`).
@@ -143,15 +217,28 @@ Estado verificado após a reposição (tudo consistente):
 | 958927 | I | A | 686 | A | 9 | A |
 | 958928 | P | P | 687 | P | 1 | P (registo pendente) |
 | 958929 | A | A | 688 | P | 9 | A (pendente da sessão 3) |
+| 958930 | I | A | 689 | A | 22 | A ← usado na matriz de cenários; APOSENTADO perdido no cenário 11 |
+| 958931 | I | A | — | A | 22 | A ← repro limpa do achado crítico; ficou `I` com reativação aprovada |
+
+Nota: **958930 e 958931 ficaram ambos `I` com uma reativação aprovada** — não por engano de teste, mas
+por causa do ACHADO CRÍTICO. Servem de caso de regressão: quando o "Ativar" for corrigido, ambos devem
+poder passar a `A`.
 
 ## Next step
 
-**O trabalho desta sessão está fechado e verificado.** O que fica em aberto é decisão de negócio:
+O `estado_validacao` está fechado e validado em todos os cenários. O que fica é **mais grave do que o
+trabalho original**, descoberto pela cobertura de cenários:
 
-1. Levar os achados **1**, **3** e **4** a negócio/analista. O **nº1** (rejeição destrutiva no ramo
-   não-processado) é o único com risco real de perda de dados — devia ser o próximo a atacar.
-2. Se o `RH_V_DOSSIE` tiver de existir noutro ambiente, **reaplicar o DDL à mão** (ver "Current state").
-3. Confirmar o label do `estadoRegistoDesc` (achado nº5) — trivial, mas visível ao utilizador.
+1. **🔴 Corrigir o "Ativar" (ACHADO CRÍTICO).** Falta o simétrico de `aplicarEfeitosCessacao`: um
+   `aplicarEfeitosReativacao` que ponha `funcionario.estado=A` e reabra a cadeia de datas
+   (`data_fim=null` em tiprel/mobilidade/carreira/contrato) quando `ativaContrato(param)` e a validação
+   é aprovada. Sem isto, reativar um colaborador é impossível pelo ecrã. **Prioridade 1.**
+2. **Achado nº1** — rejeição destrutiva no ramo não-processado (perde a situação anterior, deixa
+   tiprel/situação a `I`, e pode bloquear o caminho de reativação). A correção estrutural é **deixar de
+   editar in place** e passar a criar linha nova, como o ramo processado já faz — o que arruma o nº1 e o
+   problema de rollback de uma só vez.
+3. Levar os achados **3** (`S` sem UI nem comportamento) e **5** (label `estadoRegistoDesc`) a negócio.
+4. Se o `RH_V_DOSSIE` tiver de existir noutro ambiente, **reaplicar o DDL à mão** (ver "Current state").
 
 ## How to verify / resume
 
@@ -164,3 +251,19 @@ Estado verificado após a reposição (tudo consistente):
   `estadoColaborador` vs `estadoRegisto`.
 - Rota do write: `PATCH /api/v1/funcionarios/{uuid}/situacao-laboral`
   (`situacaoLaboralId`, `motivoId`, `dataInicio`, `dataFim`, `observacao`, `validar`).
+- Registo: `POST /api/v1/funcionarios` → `GET /api/v1/funcionarios/{uuid}` → `PUT /api/v1/funcionarios/{uuid}`
+  com `validar:SIM`. Payloads-modelo em `scratchpad/reg_m1.json`, `get_m1.json`, `validar_m1.json`
+  (o `scratchpad/` do **projeto**, que persiste entre sessões — não o temporário).
+- Helper de chamadas: `python scratchpad/call.py <METODO> <caminho> [body.json] [--save out.json]`
+  — imprime sempre HTTP status + corpo identado.
+
+### Formato de datas (importante)
+
+O frontend envia **`DD/MM/YYYY`** (`"dataInicio":"31/08/2026"`), não ISO. O `DateFormatter.stringToLocalDate`
+aceita ambos (ISO foi usado nos testes das sessões 3 e 4 sem erro), mas ao reproduzir o comportamento real
+usar `DD/MM/YYYY`. Payload real capturado do ecrã:
+
+```json
+{"validar":null,"estadoContrato":"C","situacaoLaboralId":9,"motivoId":23,
+ "observacao":"...","dataInicio":"31/08/2026","dataFim":"01/09/2026","tipoOrdemServico":""}
+```
