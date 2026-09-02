@@ -80,30 +80,44 @@ senão o Hibernate rebenta ao mapear `ESTADO_VALIDACAO`. O DDL completo está em
    *in place*, **perderam-se**. Bug pré-existente, agora com evidência reproduzível.
 2. **O JaVers não serve de rede de segurança aqui.** O snapshot `INITIAL` (v1) da situação 684 **já é a versão
    alterada** — o audit só começou a segui-la quando foi tocada. Não há registo do estado anterior.
-3. **`FLG_ESTADO_CONTRATO='S'` (Suspenso) não tem tratamento nenhum.** Só existem as constantes `A` e `C`;
-   `cessaContrato()` e `ativaContrato()` devolvem ambos `false` para `S` e o fluxo não faz nada — apesar de a
-   L59 documentar `S` como valor válido do domínio. **O utilizador levantou isto** e ficou por decidir.
-4. **`estadoRegistoDesc` usa labels do colaborador.** Para "Estado do Registo", `A` lê-se **"Ativo"** quando
+3. **`FLG_ESTADO_CONTRATO='S'` (Suspenso) está a meio caminho — existe no domínio e na BD, sem UI nem
+   comportamento.** O ecrã "Ativar/Inativar Colaborador" tem um combo **Estado** (= `FLG_ESTADO_CONTRATO`)
+   que filtra o combo **Situação Laboral** via `?flgEstadoContrato=` no endpoint de parametrização. Se o
+   combo Estado só oferecer *Ativo* e *Cessado*, as situações com flag `S` ficam **inalcançáveis**
+   (ex.: id 15 "Falecimento de Familiares"). E mesmo que fossem escolhidas, `cessaContrato()` e
+   `ativaContrato()` devolvem ambos `false` para `S` → `funcionario.estado` não mudaria.
+   **O utilizador levantou isto** ("a documentação não diz para filtrar só A e C") e ficou por decidir.
+4. **`AlterarSituacaoLaboralRequest.estadoContrato` é um campo morto.** O ecrã envia-o, mas não há um único
+   `getEstadoContrato()` em todo o módulo `funcionario` — o backend deriva tudo da flag da situação
+   escolhida. Consequência: **nunca se valida** que o Estado escolhido no ecrã bate certo com a flag real
+   da situação; se os combos ficarem dessincronizados, o backend segue em silêncio pela flag da situação.
+5. **`estadoRegistoDesc` usa labels do colaborador.** Para "Estado do Registo", `A` lê-se **"Ativo"** quando
    devia provavelmente ler-se **"Validado"**. Cosmético, por confirmar com negócio.
-5. **`registarProcessado` aplica o efeito antes da aprovação**: L280 faz
+6. **`registarProcessado` aplica o efeito antes da aprovação**: L280 faz
    `funcionario.setEstado(estadoDoFuncionarioPara(param, funcionario))` no **registo**, não na validação.
    Fora do âmbito desta sessão, mas cheira a bug.
 
-## ⚠️ Dado de teste por repor
+## Dado de teste — REPOSTO (já resolvido)
 
-**958925** (`Wilson Cabral Tavares`, uuid `01a061d6-f65c-74cd-a5e3-3c45f3de5734`) foi usado para o teste
-e ficou **danificado pelo achado nº1**:
+**958925** (`Wilson Cabral Tavares`, uuid `01a061d6-f65c-74cd-a5e3-3c45f3de5734`) foi danificado pelo
+achado nº1 durante o teste e **já foi reposto e verificado**. Todos os 5 colaboradores de teste
+(958925-958929) foram criados hoje (02/09) por `anonymousUser` — são dados de dev, não produção.
 
-- `funcionario`: `estado=A`, `estado_validacao=A` → **correto, não precisa de nada**.
-- `situacao 684`: `estado=I`, `situacao_laboral_id=9` (APOSENTADO), `motivo=23` → **era outra coisa, perdida**.
-- `tiprel 173407`: `estado=I` (com `est_act_adm=1`).
-
-Restauro proposto (**o utilizador ainda não respondeu**; 958926 usa situação `7`, 958928 usa `1`):
+Os valores originais da situação 684 tinham-se perdido (UPDATE in place, e o JaVers não tem snapshot
+anterior). Foram **reconstruídos por comparação** com a situação 687 (958928, por tocar), que revelou o
+padrão de uma situação `INICIO` acabada de criar: `situacao_laboral_id=1`, `motivo=null`, `obs='NOVO_CONTRATO'`,
+`data_fim=null`, e **`data_inicio` = `data_inicio` do respetivo contrato** (687→734 ambos 2026-08-25).
+Contrato do 958925 é o **731** (2026-01-01 → 2028-01-01), daí `data_inicio=2026-01-01`.
 
 ```sql
-UPDATE rh_t_situacao_laboral SET estado='A', situacao_laboral_id=1, motivo_sit_lab_id=NULL WHERE id=684;
+UPDATE rh_t_situacao_laboral SET estado='A', situacao_laboral_id=1, motivo_sit_lab_id=NULL,
+       data_inicio=DATE '2026-01-01', data_fim=NULL, obs='NOVO_CONTRATO' WHERE id=684;
 UPDATE rh_t_tipos_relacionamento SET estado='A' WHERE id=173407;
 ```
+
+Nota: a `data_inicio` é a única peça **inferida** (bem fundamentada, mas inferida). O `tiprel 173407` é uma
+**PROGRESSAO/CARREIRA** com `data_inicio=2028-11-01` — o ramo não-processado não lhe tocou nas datas, só no
+`estado`. A validação **1063** ficou `I` na BD como histórico do teste (não foi apagada).
 
 ## Evidência da validação live
 
@@ -120,9 +134,11 @@ antes mostrava `estadoRegisto: I/Inactivo` (errado); agora `A/Ativo`.
 
 ## Estado dos colaboradores de teste
 
+Estado verificado após a reposição (tudo consistente):
+
 | fun | estado | est_validacao | sit | sit_estado | situação | tiprel |
 |---|---|---|---|---|---|---|
-| 958925 | A | A | 684 | **I** | 9 | **I** ← ver "por repor" |
+| 958925 | A | A | 684 | A | 1 | A ← reposto |
 | 958926 | A | A | 685 | A | 7 | A |
 | 958927 | I | A | 686 | A | 9 | A |
 | 958928 | P | P | 687 | P | 1 | P (registo pendente) |
@@ -130,10 +146,12 @@ antes mostrava `estadoRegisto: I/Inactivo` (errado); agora `A/Ativo`.
 
 ## Next step
 
-1. **Decidir o restauro do 958925** (achado nº1) — é a única coisa pendente do trabalho desta sessão.
-2. Levar os achados **1** e **3** a negócio/analista: a rejeição destrutiva no ramo não-processado e o
-   `S` (Suspenso) sem tratamento. O nº1 é o que tem risco real de dados.
-3. Se o `RH_V_DOSSIE` tiver de existir noutro ambiente, **reaplicar o DDL à mão** (ver "Current state").
+**O trabalho desta sessão está fechado e verificado.** O que fica em aberto é decisão de negócio:
+
+1. Levar os achados **1**, **3** e **4** a negócio/analista. O **nº1** (rejeição destrutiva no ramo
+   não-processado) é o único com risco real de perda de dados — devia ser o próximo a atacar.
+2. Se o `RH_V_DOSSIE` tiver de existir noutro ambiente, **reaplicar o DDL à mão** (ver "Current state").
+3. Confirmar o label do `estadoRegistoDesc` (achado nº5) — trivial, mas visível ao utilizador.
 
 ## How to verify / resume
 
