@@ -7,9 +7,13 @@ import cv.inps.rh.processamento.application.dto.*;
 import cv.inps.rh.processamento.domain.service.model.SoatAggregateDTO;
 import cv.inps.rh.processamento.domain.service.model.SoatPdfResult;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.application.constants.custom.Referencia;
+import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DadosInstituicaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.SoatDetalheEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SoatEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
@@ -20,12 +24,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -42,6 +46,7 @@ public class SoatService {
   private final SoatDetalheEntityRepository soatDetalheRepository;
   private final GeografiaEntityRepository geografiaEntityRepository;
   private final SoatViewEntityRepository soatViewEntityRepository;
+  private final ValidacaoEntityRepository validacaoEntityRepository;
   private final PdfGenerator pdfGenerator;
   private final EntityManager entityManager;
 
@@ -149,6 +154,37 @@ public class SoatService {
   }
 
   @Transactional(readOnly = true)
+  public void updateDetalhesSoat(List<UpdateDetalheSoatRequestDTO> data) {
+
+    var detailRows = new ArrayList<SoatDetalheEntity>();
+    var validationRows = new ArrayList<ValidacaoEntity>();
+
+    for (var detail : data) {
+
+      var obj = soatDetalheRepository.findByUuidOrThrow(detail.getDetalheSoatId());
+      obj.setNuTrabMan(detail.getDiasTrabalho());
+      obj.setVlRemunMan(detail.getRemuneracao());
+      obj.setEstado(Estado.P.name());
+      obj.setObs(StringUtils.hasText(detail.getObj()) ? detail.getObj() : obj.getObs());
+      detailRows.add(obj);
+
+      var validation = new ValidacaoEntity();
+      validation.setTipoAccao(TipoAcao.UPDATE.name());
+      validation.setReferenciaName(Referencia.SOAT.name());
+      validation.setReferenciaId(obj.getId());
+      validation.setReferenciaUuid(UUID.fromString(obj.getUuid()));
+      validation.setEstado(Estado.P);
+      validation.setObs(detail.getObj());
+      validation.setUuid(UuidCreator.getTimeOrderedEpoch());
+      validation.setFunId(obj.getFun());
+      validationRows.add(validation);
+    }
+
+    soatDetalheRepository.saveAll(detailRows);
+    validacaoEntityRepository.saveAll(validationRows);
+  }
+
+  @Transactional(readOnly = true)
   public WrapperListDTO getDadosApoliceAtivos(Integer page, Integer size) {
 
     var data = dadosApoliceRepository.findAllByEstado(
@@ -179,12 +215,12 @@ public class SoatService {
             obj.getNif(),
             DateFormatter.DATE.format(obj.getDataNascimento()),
             obj.getSexo(),
-            "", // TODO 30/08/2026 15:29 duvida aqui
+            obj.getSituacao(),
             obj.getCargoCarreira(),
-            obj.getTipoContrato(), // TODO 30/08/2026 15:29 duvida aqui
+            obj.getEstagiarioAprendiz(),
             obj.getDiasTrabSemana(),
             obj.getSalarioBase(),
-            "", // TODO 30/08/2026 15:29 duvida aqui
+            obj.getSalarioBase(),
             obj.getSalarioBaseAnual(),
             obj.getColabNoEstrangeiro(),
             obj.getObs()

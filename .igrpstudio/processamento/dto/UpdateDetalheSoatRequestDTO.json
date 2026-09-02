@@ -1,24 +1,12 @@
 {
-  "name": "DadosApoliceResponseDTO",
+  "name": "UpdateDetalheSoatRequest",
   "template": "classic",
   "attributes": [
     {
-      "name": "id",
-      "type": "long",
-      "objectType": "java",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "instituicaoUuid",
+      "name": "detalheSoatId",
       "type": "string",
       "objectType": "java",
-      "required": false,
+      "required": true,
       "before": false,
       "after": false,
       "positive": false,
@@ -27,22 +15,10 @@
       "primaryKey": false
     },
     {
-      "name": "numeroApolice",
-      "type": "string",
-      "objectType": "java",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "ilhaId",
+      "name": "diasTrabalho",
       "type": "long",
       "objectType": "java",
-      "required": false,
+      "required": true,
       "before": false,
       "after": false,
       "positive": false,
@@ -51,10 +27,10 @@
       "primaryKey": false
     },
     {
-      "name": "dataApolice",
-      "type": "date",
+      "name": "remuneracao",
+      "type": "decimal",
       "objectType": "java",
-      "required": false,
+      "required": true,
       "before": false,
       "after": false,
       "positive": false,
@@ -63,7 +39,7 @@
       "primaryKey": false
     },
     {
-      "name": "estado",
+      "name": "obs",
       "type": "string",
       "objectType": "java",
       "required": false,
@@ -79,5 +55,5 @@
   "module": "processamento",
   "enableCustonValidation": false,
   "readOnly": false,
-  "id": "neasdaw-actiasdason-Contractasdas"
+  "id": "new-action-Contractqwerty"
 }

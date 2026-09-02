@@ -13,7 +13,7 @@ public record SoatPdfRowDTO(
     String aprendizEstagiario,
     String horasSemana,
     Long retribuicaoHoraDiaMes,
-    String retribuicaoHoraDiarioMensal,
+    Long retribuicaoHoraDiarioMensal,
     Long retribuicaoAnual,
     String temporariamenteEstrangeiro,
     String observacoes

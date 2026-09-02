@@ -53,5 +53,4 @@ public interface SoatDetalheEntityRepository extends
       @Param("soatUuid") String soatUuid,
       Pageable page
   );
-
 }
