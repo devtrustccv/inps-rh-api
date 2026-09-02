@@ -17,7 +17,7 @@ public class NomeacaoCoordenadorProvider implements OrdemServicoProvider {
 
   @Override
   public OrdemServico getTipo() {
-    return OrdemServico.NOMEACAO_COORDENADOR;
+    return OrdemServico.NOMEACAO;
   }
 
   @Override
