@@ -188,6 +188,8 @@ public class AlterarSituacaoLaboralWriteService {
     if (estado == Estado.A) {
       if (cessaContrato(param)) {
         aplicarEfeitosCessacao(dto, funcionario, tiprelAtual);
+      } else if (ativaContrato(param)) {
+        aplicarEfeitosReativacao(funcionario, tiprelAtual);
       }
       ordemServicoWriteService.criar(funcionario, tiprelAtual, dto.getTipoOrdemServico());
     } else {
@@ -320,6 +322,34 @@ public class AlterarSituacaoLaboralWriteService {
 
     funcionario.getDefinicoesRenumeracoes().forEach(r -> r.setDataFim(dataFim));
     funcionario.getDefinicoesPagamentos().forEach(p -> p.setDataFim(dataFim));
+  }
+
+  /**
+   * Reativação APROVADA → colaborador ativo (ESTADO=A) e reabertura da cadeia (datas fim a null).
+   * Simétrico de {@link #aplicarEfeitosCessacao}: sem isto, aprovar um "Ativar" marcava a situação e a
+   * validação como A mas deixava o colaborador em I com o vínculo fechado — metade do ecrã
+   * Ativar/Inativar não funcionava.
+   *
+   * <p>Tal como na cessação, NÃO se mexe em est_act_adm: o vínculo continua a ser o corrente.
+   *
+   * <p>Limitação conhecida: a cessação sobrescreve {@code contrato.DATA_FIM} com a data de cessação, pelo
+   * que o termo original de um contrato a prazo já se perdeu nesse momento e não é recuperável aqui.
+   * Reabrir (null) é o menos errado — deixar a data da cessação descreveria um contrato terminado por um
+   * evento que foi revertido. Ver o achado da edição in-place no handoff.
+   */
+  private void aplicarEfeitosReativacao(FuncionarioEntity funcionario, TiposRelacionamentoEntity tiprelAtual) {
+    funcionario.setEstado(Estado.A);
+    tiprelAtual.setDataFim(null);
+
+    var mobilidade = tiprelAtual.getMobId();
+    if (mobilidade != null) mobilidade.setDataFim(null);
+    var carreira = tiprelAtual.getCarreiraId();
+    if (carreira != null) carreira.setDataFim(null);
+    var contrato = tiprelAtual.getContrVinculoId();
+    if (contrato != null) contrato.setDataFim(null);
+
+    funcionario.getDefinicoesRenumeracoes().forEach(r -> r.setDataFim(null));
+    funcionario.getDefinicoesPagamentos().forEach(p -> p.setDataFim(null));
   }
 
   /**
