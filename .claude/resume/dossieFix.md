@@ -10,11 +10,12 @@ aparece como **Pendente** na grelha sem inativar quem continua a trabalhar.
 
 ## Current state
 
-`develop` HEAD = `ee65e9a6`, com 3 commits novos desta sessão (compilam, `mvn -o compile` exit 0, JDK23):
+`develop` com os commits desta sessão (compilam, `mvn -o compile` exit 0, JDK23):
 
 - **`379f4e66`** `fix(funcionario): estado do registo na lista vem de ESTADO_VALIDACAO` — entidade da view + read service.
 - **`854ba650`** `fix(funcionario): situacao laboral pendente marca ESTADO_VALIDACAO=P` — ciclo de vida no write service.
 - **`ee65e9a6`** `docs: specs DOSSIE (02/09) e PROCESSAMENTO SALARIAL (01/09)`.
+- **`78e879f1`** `fix(funcionario): aprovar reativacao volta a por o colaborador ativo` — `aplicarEfeitosReativacao`.
 
 **App UP** na 8089 (PID 4148, código destes commits). Reboot: `scratchpad/run_develop_8089.sh`.
 
@@ -71,9 +72,24 @@ senão o Hibernate rebenta ao mapear `ESTADO_VALIDACAO`. O DDL completo está em
 - Nomes: situação = `RH_T_PARAM_SITUACAO` (`FLG_ESTADO_CONTRATO`: A/C/S); motivos = `RH_T_PARAM_SITUACAO_DET`
   (col **`MOTIVO`**). `RH_T_FUNCIONARIOS` **não** tem `estado_colaborador` — tem `estado` e `estado_validacao`.
 
-## 🔴 ACHADO CRÍTICO — "Ativar" não reativa (ramo não-processado)
+## ✅ ACHADO CRÍTICO — "Ativar" não reativava — **CORRIGIDO** (`78e879f1`)
 
-**Aprovar uma reativação não altera o estado do colaborador.** Provado live no 958930 (cenário 12):
+> **Estado: resolvido, validado live e com regressão confirmada.** Mantém-se aqui a descrição porque
+> explica *porquê* a correção existe e serve de caso de regressão.
+
+**Correção:** novo `aplicarEfeitosReativacao(funcionario, tiprelAtual)`, chamado em `validar()` quando a
+validação é aprovada **e** `ativaContrato(param)` — põe `estado=A` e reabre a cadeia de datas
+(tiprel, mobilidade, carreira, contrato, def de remuneração/pagamento). Como na cessação, **não** mexe em
+`est_act_adm`. Fica dentro do `if (estado == Estado.A)`, por isso **não dispara na rejeição** (que corre
+com `estado=I`) — verificado.
+
+**Limitação documentada no método:** `aplicarEfeitosCessacao` sobrescreve `contrato.DATA_FIM` com a data
+de cessação, pelo que o termo original de um contrato a prazo já se perdeu nesse momento e não é
+recuperável na reativação. Reabrir (null) é o menos errado. É mais um sintoma da edição in-place (achado nº1).
+
+### Descrição original do bug
+
+**Aprovar uma reativação não alterava o estado do colaborador.** Provado live no 958930 (cenário 12):
 submeteu-se `Ativar` (situação flag `A`), aprovou-se com `validar=SIM` → HTTP 200, situação e validação
 ficaram `A`… e **`funcionario.estado` continuou `I`**, com `tiprel.data_fim` ainda fechado (2026-09-03).
 
@@ -105,7 +121,22 @@ para excluir contaminação de estado):
 | 3. ativar (sit 22) | I | **P** | 2026-09-10 | 22 P |
 | 4. **aprovar** | **I** ❌ | A | **2026-09-10** ❌ | 22 A |
 
-O `estado_validacao` comporta-se corretamente nos 4 passos; o que falha é o `estado` do colaborador.
+O `estado_validacao` comportou-se corretamente nos 4 passos; o que falhava era o `estado` do colaborador.
+
+### Regressão confirmada DEPOIS da correção (mesmo colaborador 958931)
+
+| Teste | Resultado |
+|---|---|
+| ativar + aprovar | `estado=A`, tiprel/mob/carreira/contrato `data_fim=null` ✅ |
+| guard "já está ativo" | 400 ✅ |
+| inativar (submeter) → aprovar | `A/P` → `I/A` com datas fechadas em 2026-09-25 ✅ |
+| guard "já está inativo" | 400 ✅ |
+| guard data fim obrigatória em ausência (sit 24 `tipo_ausencia=LICENCA`) | 400 ✅ |
+| ativar (submeter) → **rejeitar** | fica `I`, `est_validacao`→`A` ✅ (o fix não dispara na rejeição) |
+| ciclo `estado_validacao` (P/C/A) | intacto ✅ |
+
+Os dois colaboradores que tinham ficado presos (**958930** e **958931**) foram recuperados com a correção
+— ambos estão agora `A`/`A`.
 
 ## Achados por resolver (NÃO são regressões desta sessão)
 
@@ -217,27 +248,26 @@ Estado verificado após a reposição (tudo consistente):
 | 958927 | I | A | 686 | A | 9 | A |
 | 958928 | P | P | 687 | P | 1 | P (registo pendente) |
 | 958929 | A | A | 688 | P | 9 | A (pendente da sessão 3) |
-| 958930 | I | A | 689 | A | 22 | A ← usado na matriz de cenários; APOSENTADO perdido no cenário 11 |
-| 958931 | I | A | — | A | 22 | A ← repro limpa do achado crítico; ficou `I` com reativação aprovada |
+| 958930 | **A** | A | 689 | A | 23 | A ← matriz de cenários; APOSENTADO perdido no cenário 11 (achado nº1) |
+| 958931 | **A** | A | — | A | 23 | A ← repro limpa do achado crítico + regressão do fix |
 
-Nota: **958930 e 958931 ficaram ambos `I` com uma reativação aprovada** — não por engano de teste, mas
-por causa do ACHADO CRÍTICO. Servem de caso de regressão: quando o "Ativar" for corrigido, ambos devem
-poder passar a `A`.
+Ambos tinham ficado presos em `I` com uma reativação aprovada (o ACHADO CRÍTICO) e **foram recuperados
+pela correção `78e879f1`** — servem agora de caso de regressão para o "Ativar".
 
 ## Next step
 
-O `estado_validacao` está fechado e validado em todos os cenários. O que fica é **mais grave do que o
-trabalho original**, descoberto pela cobertura de cenários:
+O `estado_validacao` e o "Ativar" estão ambos fechados, validados em todos os cenários e com regressão
+confirmada. O que fica em aberto:
 
-1. **🔴 Corrigir o "Ativar" (ACHADO CRÍTICO).** Falta o simétrico de `aplicarEfeitosCessacao`: um
-   `aplicarEfeitosReativacao` que ponha `funcionario.estado=A` e reabra a cadeia de datas
-   (`data_fim=null` em tiprel/mobilidade/carreira/contrato) quando `ativaContrato(param)` e a validação
-   é aprovada. Sem isto, reativar um colaborador é impossível pelo ecrã. **Prioridade 1.**
-2. **Achado nº1** — rejeição destrutiva no ramo não-processado (perde a situação anterior, deixa
-   tiprel/situação a `I`, e pode bloquear o caminho de reativação). A correção estrutural é **deixar de
-   editar in place** e passar a criar linha nova, como o ramo processado já faz — o que arruma o nº1 e o
-   problema de rollback de uma só vez.
-3. Levar os achados **3** (`S` sem UI nem comportamento) e **5** (label `estadoRegistoDesc`) a negócio.
+1. **Achado nº1 — rejeição destrutiva no ramo não-processado.** É agora o mais grave por resolver: perde a
+   situação anterior (sobrescrita in place), deixa tiprel/situação a `I` mesmo com o colaborador ativo, e
+   pode bloquear o caminho natural de reativação (ver nota do cenário 2). A correção estrutural é **deixar
+   de editar in place** e passar a criar linha nova, como o ramo processado já faz — arruma o nº1, o
+   problema de rollback e a limitação do `contrato.DATA_FIM` de uma só vez. **Prioridade 1.**
+2. Levar os achados **3** (`S` sem UI nem comportamento) e **5** (label `estadoRegistoDesc`) a negócio.
+3. Rever o achado **6** (`registarProcessado` aplica o efeito no registo, antes da aprovação) — não foi
+   exercitado nesta sessão porque todos os colaboradores de teste têm `ult_proc=null`. **O ramo processado
+   continua por testar** e é onde vive esse achado.
 4. Se o `RH_V_DOSSIE` tiver de existir noutro ambiente, **reaplicar o DDL à mão** (ver "Current state").
 
 ## How to verify / resume
