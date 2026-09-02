@@ -149,6 +149,7 @@ public class AlterarSituacaoLaboralWriteService {
     funcionarioRules.devolverParaCorrecao(situacao.getUuid(), Estado.P, Referencia.ESTADO_COLABORADOR);
     situacao.setEstado(Estado.C);
     tiprel.setEstado(Estado.C);
+    funcionario.setEstadoValidacao(Estado.C.name());
     funcionarioEntityRepository.saveAndFlush(funcionario);
     LOGGER.info("[CORRIGIR] ESTADO_COLABORADOR devolvido para correção (situacao={}).", situacao.getUuid());
     return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
@@ -180,6 +181,10 @@ public class AlterarSituacaoLaboralWriteService {
         .findFirst()
         .ifPresent(v -> v.setEstado(estado));
 
+    // O ciclo de validação fechou (aprovado OU rejeitado): o registo do colaborador volta a estar
+    // validado. Rejeitar a ALTERAÇÃO não invalida o REGISTO — por isso 'A' nos dois ramos, e nunca 'I'.
+    funcionario.setEstadoValidacao(Estado.A.name());
+
     if (estado == Estado.A) {
       if (cessaContrato(param)) {
         aplicarEfeitosCessacao(dto, funcionario, tiprelAtual);
@@ -210,6 +215,7 @@ public class AlterarSituacaoLaboralWriteService {
     situacao.setEstado(Estado.P);
     tiprelAtual.setEstado(Estado.P);
     tiprelAtual.setFlgProcessa(flgProcessaDe(param));
+    funcionario.setEstadoValidacao(Estado.P.name());
     var validacao = funcionarioRules.reabrirParaValidacao(situacao.getUuid(), Referencia.ESTADO_COLABORADOR);
     salvarSituacaoComAudit(validacao, situacao);
     funcionarioEntityRepository.saveAndFlush(funcionario);
@@ -234,6 +240,9 @@ public class AlterarSituacaoLaboralWriteService {
       salvarSituacaoComAudit(validacao, situacaoAtual);
       criarAusenciaSeAplicavel(funcionario, param, situacaoAtual, dataInicio, dataFim);
     }
+    // Enviado para validação: o "Estado do Registo" da grelha passa a Pendente. NÃO se toca em
+    // funcionario.estado — o colaborador continua ativo enquanto a alteração espera aprovação.
+    funcionario.setEstadoValidacao(Estado.P.name());
     funcionarioEntityRepository.save(funcionario);
     return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Situação laboral actualizada.", List.of());
   }
@@ -278,6 +287,7 @@ public class AlterarSituacaoLaboralWriteService {
     funcionario.getValidacoes().add(validacao);
 
     funcionario.setEstado(estadoDoFuncionarioPara(param, funcionario));
+    funcionario.setEstadoValidacao(Estado.P.name());
     funcionarioEntityRepository.save(funcionario);
 
     copiarRemPag(tiprelAtual, tiprelPersistido);
