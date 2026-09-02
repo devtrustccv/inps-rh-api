@@ -118,8 +118,11 @@ public class FuncionarioReadService {
                   .map(Estado::getDescription)
                   .orElse("Desconhecido")
           );
-          dto.setEstadoRegisto(d.getEstadoColaborador());
-          dto.setEstadoRegistoDesc(Estado.fromCode(d.getEstadoColaborador())
+          // "Estado do Registo" indica se o registo do colaborador está validado ou não
+          // (maker-checker do registo) e tem fonte própria — RH_V_DOSSIE.ESTADO_VALIDACAO.
+          // Não confundir com o "Estado do Colaborador" (A/I/C), acima.
+          dto.setEstadoRegisto(d.getEstadoValidacao());
+          dto.setEstadoRegistoDesc(Estado.fromCode(d.getEstadoValidacao())
               .map(Estado::getDescription)
               .orElse("Desconhecido"));
           return dto;

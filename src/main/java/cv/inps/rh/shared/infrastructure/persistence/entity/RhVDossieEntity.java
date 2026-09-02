@@ -51,6 +51,9 @@ public class RhVDossieEntity  {
   @Column(name = "ESTADO_COLABORADOR")
   private String estadoColaborador;
 
+  @Column(name = "ESTADO_VALIDACAO")
+  private String estadoValidacao;
+
   @Column(name = "ID_COLABORADOR")
   private Long idColaborador;
 
