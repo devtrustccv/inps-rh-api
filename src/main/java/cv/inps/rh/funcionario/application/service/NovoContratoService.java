@@ -110,10 +110,12 @@ public class NovoContratoService {
     }
     // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(tipoRelacionamentoAtual.getEstado());
     // Fecha o tiprel anterior (DOSSIÊ, Novo Contrato 2.5): est_act_adm=0 e DATA_FIM = data de início
-    // do NOVO registo. Antes usava contratoAtual.getDataFim(), que podia ser null (contrato sem termo)
-    // e deixava o tiprel anterior por fechar.
+    // do NOVO registo MENOS 1 dia. Regra do analista: o relacionamento que fecha termina em inicio-1,
+    // para os períodos ficarem contíguos com o novo (que abre em inicio) sem sobreposição de 1 dia.
+    // Antes usava contratoAtual.getDataFim(), que podia ser null (contrato sem termo) e deixava o
+    // tiprel anterior por fechar.
     tipoRelacionamentoAtual.setEstActAdm(0);
-    tipoRelacionamentoAtual.setDataFim(dadosContratuais.getDataInicio());
+    tipoRelacionamentoAtual.setDataFim(dadosContratuais.getDataInicio().minusDays(1));
 
     var contratoAtual = tipoRelacionamentoAtual.getContrVinculoId();
     contratoAtual.setEstado(Estado.I);
@@ -290,19 +292,19 @@ public class NovoContratoService {
       DadosContratuaisReqDTO dc) {
 
     if (carreiraAtual != null && carreiraAtual.getDataFim() == null) {
-      carreiraAtual.setDataFim(dc.getDataInicio());
+      carreiraAtual.setDataFim(dc.getDataInicio().minusDays(1));
     }
     var nova = carreiraMapper.toCarreira(dc, Estado.P);
     nova.setTipoSituacao("CONTINUIDADE");
     return nova;
   }
 
-  // D4: encerra SEMPRE a mobilidade ativa (DATA_FIM = início do novo) e cria uma nova (CONTINUIDADE).
+  // D4: encerra SEMPRE a mobilidade ativa (DATA_FIM = início do novo - 1) e cria uma nova (CONTINUIDADE).
   private MobilidadeEntity mudaMobilidadeOuManter(MobilidadeEntity mobilidadeAtual, DadosContratuaisReqDTO dc,
                                                   FuncionarioEntity funcionario) {
 
     if (mobilidadeAtual != null && mobilidadeAtual.getDataFim() == null) {
-      mobilidadeAtual.setDataFim(dc.getDataInicio());
+      mobilidadeAtual.setDataFim(dc.getDataInicio().minusDays(1));
     }
 
     MobilidadeEntity nova = mobilidadeMapper.toMobilidade(dc, Estado.P);
@@ -313,11 +315,11 @@ public class NovoContratoService {
   }
 
 
-  // D4: encerra SEMPRE o regime ativo (DATA_FIM = início do novo) e cria um novo (CONTINUIDADE).
+  // D4: encerra SEMPRE o regime ativo (DATA_FIM = início do novo - 1) e cria um novo (CONTINUIDADE).
   private RegimeTrabalhoEntity mudaRegimeOuManter(RegimeTrabalhoEntity regimeAtual, DadosContratuaisReqDTO dc,
                                                   FuncionarioEntity funcionario) {
     if (regimeAtual != null && regimeAtual.getDataFim() == null) {
-      regimeAtual.setDataFim(dc.getDataInicio());
+      regimeAtual.setDataFim(dc.getDataInicio().minusDays(1));
     }
     var nova = regimeTrabalhoMapper.toRegime(dc, Estado.P);
     if (nova != null) {

@@ -246,8 +246,9 @@ public class AlterarEscalaoCargoService {
       tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(atual, pendente,
           novasRem, new ArrayList<DefPagamentoEntity>(), salariosFechados, Collections.emptySet());
 
-      // 4. Fecha o tiprel antigo.
-      atual.setDataFim(dataEfetiva);
+      // 4. Fecha o tiprel antigo em dataEfetiva-1 (regra do analista: o relacionamento fechado termina
+      //    em inicio-1, contíguo com o novo — alinhado com o vencimento antigo já fechado em fimAntigo).
+      atual.setDataFim(dataEfetiva.minusDays(1));
       atual.setEstActAdm(0);
       atual.setFlgProcessa(0);
       atual.setEstado(Estado.I);

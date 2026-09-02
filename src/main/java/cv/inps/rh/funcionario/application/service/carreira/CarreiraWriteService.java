@@ -527,13 +527,13 @@ public class CarreiraWriteService {
           tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tiprelSubstituido, tiprelPendente,
               List.of(), List.of(), salariosFechadosIds, java.util.Collections.emptySet());
         // 3. Fecha o tiprel antigo (est_act_adm=0, I). Os def re-associados ficam ativos.
-        tiprelSubstituido.setDataFim(dataEfetiva);
+        tiprelSubstituido.setDataFim(dataEfetiva.minusDays(1));
         tiprelSubstituido.setEstActAdm(0);
         tiprelSubstituido.setFlgProcessa(0);
         tiprelSubstituido.setEstado(Estado.I);
         tiposRelacionamentoEntityRepository.save(tiprelSubstituido);
       }
-      carreiraMesmoTipo.setDataFim(dataEfetiva);
+      carreiraMesmoTipo.setDataFim(dataEfetiva.minusDays(1));
       carreiraMesmoTipo.setEstActAdm(0);
       carreiraMesmoTipo.setFlgProcessa(0);
       carreiraMesmoTipo.setEstado(Estado.I);
@@ -620,13 +620,13 @@ public class CarreiraWriteService {
 
       var tiprelSubstituido = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreiraMesmoTipo.getUuid()).orElse(null);
       if (tiprelSubstituido != null) {
-        tiprelSubstituido.setDataFim(dataEfetiva);
+        tiprelSubstituido.setDataFim(dataEfetiva.minusDays(1));
         tiprelSubstituido.setEstActAdm(0);
         tiprelSubstituido.setFlgProcessa(0);
         tiprelSubstituido.setEstado(Estado.I);
         tiposRelacionamentoEntityRepository.save(tiprelSubstituido);
       }
-      carreiraMesmoTipo.setDataFim(dataEfetiva);
+      carreiraMesmoTipo.setDataFim(dataEfetiva.minusDays(1));
       carreiraMesmoTipo.setEstActAdm(0);
       carreiraMesmoTipo.setFlgProcessa(0);
       carreiraMesmoTipo.setEstado(Estado.I);

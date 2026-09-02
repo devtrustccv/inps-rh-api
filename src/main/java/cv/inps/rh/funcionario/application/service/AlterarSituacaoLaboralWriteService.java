@@ -242,8 +242,9 @@ public class AlterarSituacaoLaboralWriteService {
   private SuccessResponseDTO registarProcessado(AlterarSituacaoLaboralRequest dto, FuncionarioEntity funcionario,
       ParamSituacaoEntity param, ParamSituacaoDetalheEntity motivo, LocalDate dataInicio, LocalDate dataFim,
       TiposRelacionamentoEntity tiprelAtual) {
-    // Spec DOSSIÊ 1.1: anterior DATA_FIM = data início (do formulário).
-    tiprelAtual.setDataFim(dataInicio);
+    // Spec DOSSIÊ 1.1 + regra do analista: anterior DATA_FIM = data início (do formulário) - 1, para o
+    // relacionamento fechado terminar em inicio-1, contíguo com o novo (que abre em inicio) sem sobrepor.
+    tiprelAtual.setDataFim(dataInicio.minusDays(1));
     tiprelAtual.setEstActAdm(0);
 
     var situacao = new SituacaoLaboralEntity();

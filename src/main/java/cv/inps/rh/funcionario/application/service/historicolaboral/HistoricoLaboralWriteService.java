@@ -91,7 +91,9 @@ public class HistoricoLaboralWriteService {
 
     var hoje = LocalDate.now();
     atual.setEstActAdm(0);
-    atual.setDataFim(hoje);
+    // Regra do analista: o relacionamento fechado termina em inicio-1 (o novo abre em `hoje`), para os
+    // períodos ficarem contíguos sem sobreposição de 1 dia.
+    atual.setDataFim(hoje.minusDays(1));
 
     var novoRelacionamento = dadosContratuaisMapper.clone(atual);
     // Registo de Relação Laboral aplica-se DIRETAMENTE (use case não prevê validação).
