@@ -182,12 +182,13 @@ public class RenovacaoContratoService {
     contratoHistoricoWriteService.registrarRenovacaoPendente(contratoAtual, dadosRenovacao);
 
     // Fecha o TipoRelacionamento atual e cria novo apontando para o mesmo contrato.
-    // Spec da Renovação: o antigo fecha com DATA_FIM = "data inicio do novo registo" e o novo nasce
-    // com DATA_INICIO = "Data inicio" do formulário — NÃO sysdate (senão o tiprel fica com a data de
-    // hoje em vez do início real do contrato, e o antigo pode ficar com período invertido di > df).
+    // Spec da Renovação: o antigo fecha com DATA_FIM = "data inicio do novo registo" MENOS 1 dia (regra
+    // do analista: o relacionamento fechado termina em inicio-1, contíguo com o novo sem sobreposição)
+    // e o novo nasce com DATA_INICIO = "Data inicio" do formulário — NÃO sysdate (senão o tiprel fica
+    // com a data de hoje em vez do início real do contrato, e o antigo pode ficar com período invertido).
     var dataInicioRenovacao = dadosRenovacao.getDataInicio();
     tipoRelacionamentoAtual.setEstActAdm(0);
-    tipoRelacionamentoAtual.setDataFim(dataInicioRenovacao);
+    tipoRelacionamentoAtual.setDataFim(dataInicioRenovacao.minusDays(1));
 
     var novoTipoRelacionamento = dadosContratuaisMapper.clone(tipoRelacionamentoAtual);
     novoTipoRelacionamento.setEstActAdm(1);

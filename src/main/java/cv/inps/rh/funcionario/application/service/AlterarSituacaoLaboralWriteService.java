@@ -149,6 +149,7 @@ public class AlterarSituacaoLaboralWriteService {
     funcionarioRules.devolverParaCorrecao(situacao.getUuid(), Estado.P, Referencia.ESTADO_COLABORADOR);
     situacao.setEstado(Estado.C);
     tiprel.setEstado(Estado.C);
+    funcionario.setEstadoValidacao(Estado.C.name());
     funcionarioEntityRepository.saveAndFlush(funcionario);
     LOGGER.info("[CORRIGIR] ESTADO_COLABORADOR devolvido para correção (situacao={}).", situacao.getUuid());
     return new SuccessResponseDTO(true, funcionario.getUuid().toString(),
@@ -180,9 +181,15 @@ public class AlterarSituacaoLaboralWriteService {
         .findFirst()
         .ifPresent(v -> v.setEstado(estado));
 
+    // O ciclo de validação fechou (aprovado OU rejeitado): o registo do colaborador volta a estar
+    // validado. Rejeitar a ALTERAÇÃO não invalida o REGISTO — por isso 'A' nos dois ramos, e nunca 'I'.
+    funcionario.setEstadoValidacao(Estado.A.name());
+
     if (estado == Estado.A) {
       if (cessaContrato(param)) {
         aplicarEfeitosCessacao(dto, funcionario, tiprelAtual);
+      } else if (ativaContrato(param)) {
+        aplicarEfeitosReativacao(funcionario, tiprelAtual);
       }
       ordemServicoWriteService.criar(funcionario, tiprelAtual, dto.getTipoOrdemServico());
     } else {
@@ -210,6 +217,7 @@ public class AlterarSituacaoLaboralWriteService {
     situacao.setEstado(Estado.P);
     tiprelAtual.setEstado(Estado.P);
     tiprelAtual.setFlgProcessa(flgProcessaDe(param));
+    funcionario.setEstadoValidacao(Estado.P.name());
     var validacao = funcionarioRules.reabrirParaValidacao(situacao.getUuid(), Referencia.ESTADO_COLABORADOR);
     salvarSituacaoComAudit(validacao, situacao);
     funcionarioEntityRepository.saveAndFlush(funcionario);
@@ -234,6 +242,9 @@ public class AlterarSituacaoLaboralWriteService {
       salvarSituacaoComAudit(validacao, situacaoAtual);
       criarAusenciaSeAplicavel(funcionario, param, situacaoAtual, dataInicio, dataFim);
     }
+    // Enviado para validação: o "Estado do Registo" da grelha passa a Pendente. NÃO se toca em
+    // funcionario.estado — o colaborador continua ativo enquanto a alteração espera aprovação.
+    funcionario.setEstadoValidacao(Estado.P.name());
     funcionarioEntityRepository.save(funcionario);
     return new SuccessResponseDTO(true, funcionario.getUuid().toString(), "Situação laboral actualizada.", List.of());
   }
@@ -242,8 +253,9 @@ public class AlterarSituacaoLaboralWriteService {
   private SuccessResponseDTO registarProcessado(AlterarSituacaoLaboralRequest dto, FuncionarioEntity funcionario,
       ParamSituacaoEntity param, ParamSituacaoDetalheEntity motivo, LocalDate dataInicio, LocalDate dataFim,
       TiposRelacionamentoEntity tiprelAtual) {
-    // Spec DOSSIÊ 1.1: anterior DATA_FIM = data início (do formulário).
-    tiprelAtual.setDataFim(dataInicio);
+    // Spec DOSSIÊ 1.1 + regra do analista: anterior DATA_FIM = data início (do formulário) - 1, para o
+    // relacionamento fechado terminar em inicio-1, contíguo com o novo (que abre em inicio) sem sobrepor.
+    tiprelAtual.setDataFim(dataInicio.minusDays(1));
     tiprelAtual.setEstActAdm(0);
 
     var situacao = new SituacaoLaboralEntity();
@@ -277,6 +289,7 @@ public class AlterarSituacaoLaboralWriteService {
     funcionario.getValidacoes().add(validacao);
 
     funcionario.setEstado(estadoDoFuncionarioPara(param, funcionario));
+    funcionario.setEstadoValidacao(Estado.P.name());
     funcionarioEntityRepository.save(funcionario);
 
     copiarRemPag(tiprelAtual, tiprelPersistido);
@@ -309,6 +322,34 @@ public class AlterarSituacaoLaboralWriteService {
 
     funcionario.getDefinicoesRenumeracoes().forEach(r -> r.setDataFim(dataFim));
     funcionario.getDefinicoesPagamentos().forEach(p -> p.setDataFim(dataFim));
+  }
+
+  /**
+   * Reativação APROVADA → colaborador ativo (ESTADO=A) e reabertura da cadeia (datas fim a null).
+   * Simétrico de {@link #aplicarEfeitosCessacao}: sem isto, aprovar um "Ativar" marcava a situação e a
+   * validação como A mas deixava o colaborador em I com o vínculo fechado — metade do ecrã
+   * Ativar/Inativar não funcionava.
+   *
+   * <p>Tal como na cessação, NÃO se mexe em est_act_adm: o vínculo continua a ser o corrente.
+   *
+   * <p>Limitação conhecida: a cessação sobrescreve {@code contrato.DATA_FIM} com a data de cessação, pelo
+   * que o termo original de um contrato a prazo já se perdeu nesse momento e não é recuperável aqui.
+   * Reabrir (null) é o menos errado — deixar a data da cessação descreveria um contrato terminado por um
+   * evento que foi revertido. Ver o achado da edição in-place no handoff.
+   */
+  private void aplicarEfeitosReativacao(FuncionarioEntity funcionario, TiposRelacionamentoEntity tiprelAtual) {
+    funcionario.setEstado(Estado.A);
+    tiprelAtual.setDataFim(null);
+
+    var mobilidade = tiprelAtual.getMobId();
+    if (mobilidade != null) mobilidade.setDataFim(null);
+    var carreira = tiprelAtual.getCarreiraId();
+    if (carreira != null) carreira.setDataFim(null);
+    var contrato = tiprelAtual.getContrVinculoId();
+    if (contrato != null) contrato.setDataFim(null);
+
+    funcionario.getDefinicoesRenumeracoes().forEach(r -> r.setDataFim(null));
+    funcionario.getDefinicoesPagamentos().forEach(p -> p.setDataFim(null));
   }
 
   /**

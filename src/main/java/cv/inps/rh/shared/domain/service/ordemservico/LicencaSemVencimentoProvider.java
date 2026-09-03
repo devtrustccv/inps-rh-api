@@ -18,7 +18,7 @@ public class LicencaSemVencimentoProvider implements OrdemServicoProvider {
 
   @Override
   public OrdemServico getTipo() {
-    return OrdemServico.LICENSA_SEM_VENCIMENTO;
+    return OrdemServico.LICENSA_S_VENCIMENTO;
   }
 
   @Override

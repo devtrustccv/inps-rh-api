@@ -289,7 +289,8 @@ public class MobilidadeWriteService {
 
         // Opção A: data efetiva = data do pedido (mobilidade.data_inicio), não a data da validação,
         // para o processamento refletir quando a mobilidade realmente aconteceu. O vínculo antigo
-        // fecha com data_fim = mesma data. (A CK_TIPREL_PERIODO está DISABLED na BD, por isso não
+        // fecha com data_fim = data efetiva - 1 (regra do analista: o relacionamento fechado termina
+        // em inicio-1, contíguo com o novo). (A CK_TIPREL_PERIODO está DISABLED na BD, por isso não
         // impomos data_fim >= data_inicio aqui.)
         var dataEfetiva = mobilidade.getDataInicio();
 
@@ -298,14 +299,14 @@ public class MobilidadeWriteService {
         // histórico e as vistas já o mostram como I quando data_fim < sysdate). Não passar a I aqui
         // sem alinhar a convenção de forma transversal (mobilidade, carreira, etc.).
         tipoRelacionamentoAtual.setEstActAdm(0);
-        tipoRelacionamentoAtual.setDataFim(dataEfetiva);
+        tipoRelacionamentoAtual.setDataFim(dataEfetiva.minusDays(1));
 
         // Doc: "um colaborador deve ter um único registo de mobilidade ativo" — a mobilidade anterior
         // passa a I com data_fim = data efetiva. Percorre TODAS as activas (não só a do vínculo atual)
         // para o invariante ficar garantido mesmo em dados herdados com mais do que uma activa.
         for (var ativa : mobilidadeEntityRepository.findAllByFunIdAndEstado(funcionario, Estado.A)) {
           if (java.util.Objects.equals(ativa.getId(), mobilidade.getId())) continue;
-          ativa.setDataFim(dataEfetiva);
+          ativa.setDataFim(dataEfetiva.minusDays(1));
           ativa.setEstado(Estado.I);
         }
 

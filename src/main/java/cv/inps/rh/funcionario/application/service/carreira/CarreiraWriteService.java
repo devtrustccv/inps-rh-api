@@ -308,6 +308,21 @@ public class CarreiraWriteService {
   }
 
   /**
+   * Chave que define uma NOVA carreira (Caso de uso l.429-430 e l.462-474): CARGO_ID, CARR_PCCS_ID,
+   * ESCALAO_ID. Se nenhum destes muda, não há nova carreira/progressão — o documento (regra de
+   * Situação Laboral l.588-602 e Carreira l.426) manda apenas atualizar o registo existente, não
+   * inserir um novo. Comparar SEMPRE com a carreira em estado pré-update (antes do toUpdateEntity).
+   */
+  private boolean mudouChaveCarreira(CarreiraEntity carreira, CarreiraNovoDTO dto) {
+    Long esc = carreira.getEscalaoId() != null ? carreira.getEscalaoId().getId() : null;
+    Long cargo = carreira.getCargoId() != null ? carreira.getCargoId().getId() : null;
+    Long carrPccs = carreira.getCarrPccsId() != null ? carreira.getCarrPccsId().getId() : null;
+    return !Objects.equals(esc, dto.getEscalaoReferenciaId())
+        || !Objects.equals(cargo, dto.getCargoPosicaoId())
+        || !Objects.equals(carrPccs, dto.getCarreiraId());
+  }
+
+  /**
    * Editar carreira processada — FLG_PROCESSA 0→1 (doc l.4869-4891). IMEDIATO (não vai a validação):
    * cria um NOVO tiprel clonando o último vínculo (mob/regime/situação), EXCEPTO carreira_id que fica
    * ESTA carreira; EST_ACT_ADM=1, FLG=1. Copia os def activos DESTA carreira para o novo (via
@@ -527,13 +542,13 @@ public class CarreiraWriteService {
           tipoRelRemPagHelper.transferirParaNovoTipoRelacionamento(tiprelSubstituido, tiprelPendente,
               List.of(), List.of(), salariosFechadosIds, java.util.Collections.emptySet());
         // 3. Fecha o tiprel antigo (est_act_adm=0, I). Os def re-associados ficam ativos.
-        tiprelSubstituido.setDataFim(dataEfetiva);
+        tiprelSubstituido.setDataFim(dataEfetiva.minusDays(1));
         tiprelSubstituido.setEstActAdm(0);
         tiprelSubstituido.setFlgProcessa(0);
         tiprelSubstituido.setEstado(Estado.I);
         tiposRelacionamentoEntityRepository.save(tiprelSubstituido);
       }
-      carreiraMesmoTipo.setDataFim(dataEfetiva);
+      carreiraMesmoTipo.setDataFim(dataEfetiva.minusDays(1));
       carreiraMesmoTipo.setEstActAdm(0);
       carreiraMesmoTipo.setFlgProcessa(0);
       carreiraMesmoTipo.setEstado(Estado.I);
@@ -620,13 +635,13 @@ public class CarreiraWriteService {
 
       var tiprelSubstituido = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreiraMesmoTipo.getUuid()).orElse(null);
       if (tiprelSubstituido != null) {
-        tiprelSubstituido.setDataFim(dataEfetiva);
+        tiprelSubstituido.setDataFim(dataEfetiva.minusDays(1));
         tiprelSubstituido.setEstActAdm(0);
         tiprelSubstituido.setFlgProcessa(0);
         tiprelSubstituido.setEstado(Estado.I);
         tiposRelacionamentoEntityRepository.save(tiprelSubstituido);
       }
-      carreiraMesmoTipo.setDataFim(dataEfetiva);
+      carreiraMesmoTipo.setDataFim(dataEfetiva.minusDays(1));
       carreiraMesmoTipo.setEstActAdm(0);
       carreiraMesmoTipo.setFlgProcessa(0);
       carreiraMesmoTipo.setEstado(Estado.I);
@@ -727,10 +742,19 @@ public class CarreiraWriteService {
     // Roteamento (doc): Progressão/Promoção (CARREIRA_PROG_PROMO) cria um NOVO pendente SOBRE esta
     // carreira (herda os def e substitui na validação). Editar (CARREIRA_EDITAR) altera in place e
     // revalida só se mudar CARGO/CARR_PCCS/ESCALÃO. Sem tipoCarreira, mantém-se EDITAR.
-    if (!correcaoRegisto && dto.getTipoCarreira() != null && contexto(dto.getTipoCarreira()) == ContextoCarreira.PROG_PROMO) {
+    boolean pedidoProgressao = !correcaoRegisto && dto.getTipoCarreira() != null
+        && contexto(dto.getTipoCarreira()) == ContextoCarreira.PROG_PROMO;
+    // Só progride se a CHAVE mudou (CARGO/CARR_PCCS/ESCALÃO). Doc (Caso de uso l.426, l.462-474 e regra
+    // de Situação Laboral l.588-602): sem alteração na chave NÃO se cria novo registo — logo com o
+    // mesmo escalão/cargo/carr_pccs (salário é derivado do escalão, não muda) não há progressão.
+    if (pedidoProgressao && mudouChaveCarreira(carreira, dto)) {
       progredirCarreira(funcionario, carreira, dto);
       return new SuccessResponseDTO(true, carreira.getUuid().toString(), "Carreira actualizada.", List.of());
     }
+    // PROG_PROMO submetida SEM alteração de chave: cai no editar in-place abaixo (aplica dataFim/
+    // subsídios se vierem; se nada mudou, fica no-op). Não re-carimba PROGRESSAO no tipo_situacao —
+    // não houve progressão real.
+    if (pedidoProgressao) dto.setTipoCarreira(null);
 
     // Editar de carreira JÁ processada (PROCESSAMENTO > 0, doc l.4851-4905): só Escalão, Data Fim e
     // Processa Salário são editáveis. Escalão → progressão (novo INSERT). Os flips de flg e a Data
@@ -761,11 +785,7 @@ public class CarreiraWriteService {
     // (data fim, subsídios/encargos) fazem UPDATE in place sem nova validação. Calcular ANTES do
     // toUpdateEntity, que sobrepõe os campos da carreira.
     Long escAtual = carreira.getEscalaoId() != null ? carreira.getEscalaoId().getId() : null;
-    Long cargoAtual = carreira.getCargoId() != null ? carreira.getCargoId().getId() : null;
-    Long carrPccsAtual = carreira.getCarrPccsId() != null ? carreira.getCarrPccsId().getId() : null;
-    boolean mudouChave = !Objects.equals(escAtual, dto.getEscalaoReferenciaId())
-        || !Objects.equals(cargoAtual, dto.getCargoPosicaoId())
-        || !Objects.equals(carrPccsAtual, dto.getCarreiraId());
+    boolean mudouChave = mudouChaveCarreira(carreira, dto);
     boolean revalidar = correcaoRegisto || (mudouChave && !Estado.P.equals(carreira.getEstado()));
 
     // Correção reenviada pelo maker (C -> P): reactiva a validação INSERT que o checker deixou em C —
