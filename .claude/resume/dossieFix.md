@@ -200,6 +200,45 @@ criado por cada alteração) e usá-los só na rejeição. Não cria linha em `R
 viola nada.
 
 
+## 🔎 Onde é que se sabe que um colaborador foi cessado? (investigado, sessão 4)
+
+Pergunta do utilizador. Resposta curta: **o motivo da cessação não é guardado de forma durável.**
+
+**Não existe estado "Cessado".** O enum `Estado` (gerado pelo iGRP, `DO NOT MODIFY`) tem só
+`I=Inactivo, A=Ativo, E=Eliminado, P=Pendente, C=Em correção`. Uma cessação produz `estado='I'` —
+indistinguível de qualquer outra desativação. Alinhado com a spec, que pede *"Estado do colaborador
+(ativo ou inativo)"*.
+
+**⚠️ Armadilha: `C` significa duas coisas diferentes.**
+
+| Coluna | `C` significa |
+|---|---|
+| `RH_T_FUNCIONARIOS.ESTADO` / `RH_T_SITUACAO_LABORAL.ESTADO` | **Em correção** (maker-checker) |
+| `RH_T_PARAM_SITUACAO.FLG_ESTADO_CONTRATO` | **Cessado** |
+
+Daí `aplicarEfeitosCessacao` pôr `Estado.I` e não `Estado.C` — com `C` o colaborador apareceria na
+grelha como "Em correção".
+
+**O que fica registado de uma cessação:**
+
+1. `funcionario.estado='I'` — que está inativo, não porquê.
+2. `RH_T_SITUACAO_LABORAL` — situação + motivo, mas **só o atual** (uma linha por colaborador no ramo
+   não-processado, sobrescrita a cada alteração).
+3. `RH_T_ORDEM_SERVICO` — único rasto da *sequência* (ex.: 958931 tem
+   `CESSACAO → REATIVACAO → REATIVACAO → CESSACAO → REATIVACAO`). Mas guarda apenas `referente`, **e esse
+   valor vem do cliente** (`tipoOrdemServico` do payload) — se o frontend enviar vazio, não há rasto tipado.
+
+**O que NÃO registra:** `RH_T_TIPOS_RELACIONAMENTO_HIST` tem 0 linhas para estes colaboradores e as suas
+colunas são cargo/direção/escalão/vínculo (história organizacional, não situação). `RH_MOVIMENTOS` está
+vazia. O JaVers tem snapshots mas é infraestrutura de auditoria, e já se viu que o snapshot `INITIAL` pode
+ser a versão já mutada.
+
+**Isto alarga o achado nº1:** não é só a *rejeição* que perde dados. No ramo não-processado, **qualquer**
+alteração seguinte apaga o motivo da cessação anterior, mesmo no fluxo normal aprovado. Ressalva a favor:
+no ramo **processado** cria-se linha nova e a história acumula, e em produção a maioria já passou pela
+folha — a perda fica confinada a quem tem o vínculo corrente ainda não processado (ex.: admitido há pouco e
+cessado antes do primeiro processamento).
+
 ## Achados por resolver (NÃO são regressões desta sessão)
 
 1. **Rejeição no ramo não-processado é destrutiva.** `validar()` faz `tiprelAtual.setEstado(I)` e
