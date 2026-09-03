@@ -1,4 +1,4 @@
-> Updated: 2026-09-02 (sessão 4)
+> Updated: 2026-09-03 (sessão 4)
 
 ## Goal
 
@@ -35,7 +35,7 @@ Nota: a renovação fica quebrada nas **duas** opções — não serve para dese
 original (ex.: 2028-01-01 do contrato 731). Nenhuma reativação o recupera. Terceira via possível, não
 implementada: recalcular `data_fim = data_inicio + DURACAO` (a coluna `DURACAO` parece sobreviver).
 
-**App UP** na 8089 (PID 4148, código destes commits). Reboot: `scratchpad/run_develop_8089.sh`.
+**App UP** na 8089 (PID 22256, código destes commits). Reboot: `scratchpad/run_develop_8089.sh`.
 
 ### Alteração de BD JÁ APLICADA (⚠️ não versionada)
 
