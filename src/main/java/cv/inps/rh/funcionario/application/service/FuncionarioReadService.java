@@ -65,21 +65,24 @@ public class FuncionarioReadService {
       // Por defeito lista activos, pendentes, em correção e inactivos (A, P, C, I) — o maker precisa
       // de ver os registos devolvidos para correção (C) sem ter de filtrar explicitamente.
       // Se for enviado um estado específico, filtra por esse.
-      //
-      // O filtro tem de casar com o que a grelha MOSTRA (ver estadoColaboradorExibido): quando há
-      // validação aberta, o colaborador aparece como Pendente. Logo filtrar por 'P' também apanha quem
-      // tem ESTADO_VALIDACAO='P', e filtrar por outro estado exclui esses (senão o utilizador filtrava
-      // "Ativo" e recebia linhas a dizer "Pendente").
       if (StringUtils.hasText(query.getEstado())) {
-        var estadoPedido = query.getEstado();
-        var temValidacaoAberta = cb.equal(root.get(RhVDossieEntity_.estadoValidacao), Estado.P.name());
-        if (Estado.P.name().equals(estadoPedido)) {
-          predicates.add(cb.or(cb.equal(root.get(RhVDossieEntity_.estadoColaborador), Estado.P.name()),
-              temValidacaoAberta));
-        } else {
-          predicates.add(cb.and(cb.equal(root.get(RhVDossieEntity_.estadoColaborador), estadoPedido),
-              cb.not(temValidacaoAberta)));
-        }
+        predicates.add(cb.equal(root.get(RhVDossieEntity_.estadoColaborador), query.getEstado()));
+
+        // --- DESLIGADO (a aguardar decisão do analista) — "Estado do Colaborador" Pendente na grelha ---
+        // Acompanha o estadoColaboradorExibido() no fim da classe: se a grelha mostrar 'P' enquanto há
+        // validação aberta, o filtro tem de casar com o que é MOSTRADO, senão filtrar "Ativo" devolve
+        // linhas a dizer "Pendente". Reativar EM CONJUNTO com esse método, substituindo o predicado
+        // simples acima por este:
+        //
+        // var estadoPedido = query.getEstado();
+        // var temValidacaoAberta = cb.equal(root.get(RhVDossieEntity_.estadoValidacao), Estado.P.name());
+        // if (Estado.P.name().equals(estadoPedido)) {
+        //   predicates.add(cb.or(cb.equal(root.get(RhVDossieEntity_.estadoColaborador), Estado.P.name()),
+        //       temValidacaoAberta));
+        // } else {
+        //   predicates.add(cb.and(cb.equal(root.get(RhVDossieEntity_.estadoColaborador), estadoPedido),
+        //       cb.not(temValidacaoAberta)));
+        // }
       } else {
         predicates.add(root.get(RhVDossieEntity_.estadoColaborador).in(Estado.A.name(), Estado.P.name(), Estado.C.name(), Estado.I.name()));
       }
@@ -125,7 +128,10 @@ public class FuncionarioReadService {
           );
           dto.setDataInicio(d.getDataInicioContrato() != null ? d.getDataInicioContrato().toString() : null);
           dto.setVinculoId(d.getVinculoId());
-          var estadoColaborador = estadoColaboradorExibido(d);
+          // DESLIGADO (a aguardar decisão do analista): mostrar 'P' enquanto há validação aberta.
+          // Para reativar, trocar por `var estadoColaborador = estadoColaboradorExibido(d);` e usar essa
+          // variável nas duas linhas abaixo — ver o método no fim da classe e o filtro na Specification.
+          var estadoColaborador = d.getEstadoColaborador();
           dto.setEstadoColaborador(estadoColaborador);
           dto.setEstadoColaboradorDesc(
               Estado.fromCode(estadoColaborador)
@@ -149,23 +155,30 @@ public class FuncionarioReadService {
     return wrapper;
   }
 
-  /**
-   * "Estado do Colaborador" tal como a grelha o deve mostrar: <b>Pendente</b> enquanto existir uma
-   * validação aberta, senão o estado de domínio real (A/I/C).
+  /*
+   * DESLIGADO — a aguardar decisão do analista (sessão 4). NÃO apagar: volta a ligar-se assim que a
+   * regra for confirmada.
    *
-   * <p>Pedido do analista: ao enviar uma alteração para validação, tanto o "Estado do Registo" como o
-   * "Estado do Colaborador" devem aparecer Pendentes. Deriva-se aqui, na leitura, em vez de escrever 'P'
-   * em {@code RH_T_FUNCIONARIOS.ESTADO}: gravar 'P' destruiria o estado de domínio (A/I), que no ramo
-   * não-processado é irrecuperável na rejeição — a situação é editada in place — e faria falhar os guards
-   * de {@code guardComboInativarAtivar}, que comparam {@code == A} / {@code == I}. Assim a grelha mostra
-   * o que o negócio quer e a base de dados mantém a verdade.
+   * "Estado do Colaborador" tal como a grelha o mostraria: Pendente enquanto existir uma validação
+   * aberta, senão o estado de domínio real (A/I/C).
    *
-   * <p>O filtro por estado acompanha esta regra (ver a Specification acima), para não devolver linhas
-   * "Pendente" a quem filtrou por "Ativo".
+   * Pedido original: ao enviar uma alteração para validação, tanto o "Estado do Registo" como o
+   * "Estado do Colaborador" devem aparecer Pendentes. Derivar aqui, na leitura, em vez de escrever 'P'
+   * em RH_T_FUNCIONARIOS.ESTADO — gravar 'P' destruiria o estado de domínio (A/I), que no ramo
+   * não-processado é irrecuperável na rejeição (a situação é editada in place, por regra de negócio do
+   * Caso de uso), e faria falhar os guards de guardComboInativarAtivar, que comparam == A / == I.
+   *
+   * Validado live antes de ser desligado (colaborador 958931): BD manteve estado=A com
+   * estado_validacao=P; a grelha mostrou P/Pendente nas duas colunas; filtro estado=A devolveu 4 linhas
+   * excluindo o pendente, estado=P devolveu-o.
+   *
+   * Para reativar: descomentar este método, chamá-lo no mapeamento (`estadoColaboradorExibido(d)`) e
+   * repor o predicado alinhado na Specification — os dois em conjunto, nunca só um.
+   *
+   * private String estadoColaboradorExibido(RhVDossieEntity dossie) {
+   *   return Estado.P.name().equals(dossie.getEstadoValidacao())
+   *       ? Estado.P.name()
+   *       : dossie.getEstadoColaborador();
+   * }
    */
-  private String estadoColaboradorExibido(RhVDossieEntity dossie) {
-    return Estado.P.name().equals(dossie.getEstadoValidacao())
-        ? Estado.P.name()
-        : dossie.getEstadoColaborador();
-  }
 }

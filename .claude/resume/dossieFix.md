@@ -16,7 +16,7 @@ aparece como **Pendente** na grelha sem inativar quem continua a trabalhar.
 - **`854ba650`** `fix(funcionario): situacao laboral pendente marca ESTADO_VALIDACAO=P` — ciclo de vida no write service.
 - **`ee65e9a6`** `docs: specs DOSSIE (02/09) e PROCESSAMENTO SALARIAL (01/09)`.
 - **`78e879f1`** `fix(funcionario): aprovar reativacao volta a por o colaborador ativo` — `aplicarEfeitosReativacao`.
-- **`76402bb4`** `feat(funcionario): grelha mostra os dois estados Pendentes na validacao` — derivação na leitura + filtro alinhado.
+- **`76402bb4`** `feat(funcionario): grelha mostra os dois estados Pendentes na validacao` — derivação na leitura + filtro alinhado. **⏸️ depois DESLIGADO (comentado) a pedido do utilizador** — ver "Decisions made".
 
 ### Ponto em aberto para o testeR/analista (decisão do utilizador: deixar como está)
 
@@ -55,12 +55,15 @@ senão o Hibernate rebenta ao mapear `ESTADO_VALIDACAO`. O DDL completo está em
 - **A open question está respondida pela spec DOSSIÊ 02/09** (l.1826-1836): são duas colunas com duas fontes —
   `Estado do Registo` = `ESTADO_VALIDACAO`, `Estado do Colaborador` = `ESTADO_COLABORADOR`. O código colava
   as duas ao mesmo valor.
-- **Os dois estados aparecem Pendentes na grelha — mas por DERIVAÇÃO na leitura, não por escrita.**
-  O analista quer que ao enviar para validação tanto o "Estado do Registo" como o "Estado do Colaborador"
-  mostrem Pendente. Resolvido em `FuncionarioReadService.estadoColaboradorExibido()` (commit `76402bb4`):
-  se `ESTADO_VALIDACAO='P'`, a grelha mostra `P`; caso contrário mostra o `ESTADO` real. O filtro por
-  estado acompanha a regra (`estado=P` também apanha `estadoValidacao='P'`; `estado=X` exclui esses),
-  senão filtrar "Ativo" devolvia linhas a dizer "Pendente".
+- **⏸️ "Estado do Colaborador" Pendente na grelha — IMPLEMENTADO, VALIDADO e DESLIGADO (comentado).**
+  Foi pedido que ao enviar para validação tanto o "Estado do Registo" como o "Estado do Colaborador"
+  mostrassem Pendente. Implementado em `FuncionarioReadService` por **derivação na leitura** (commit
+  `76402bb4`), validado live, e depois **comentado a pedido do utilizador** — quer discutir a regra com o
+  analista antes de a ativar. **Não apagar; volta a ligar-se descomentando.**
+  Dois sítios, a reativar **em conjunto** (só um deles torna filtro e ecrã incoerentes):
+  1. `estadoColaboradorExibido(...)` no fim da classe (bloco comentado) + a chamada no mapeamento;
+  2. o predicado alinhado na Specification (`estado=P` também apanha `estadoValidacao='P'`;
+     `estado=X` exclui esses) — senão filtrar "Ativo" devolve linhas a dizer "Pendente".
   **Feito em Java e não na view** — a `RH_V_DOSSIE` não está versionada, e no serviço a regra é visível.
 - **`funcionario.estado` (a coluna gravada) NÃO vai a `P`.** É o mesmo requisito do ponto acima, resolvido
   sem tocar na BD. Pôr `estado='P'` gravado:
