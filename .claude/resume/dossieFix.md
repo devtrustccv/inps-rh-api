@@ -16,6 +16,24 @@ aparece como **Pendente** na grelha sem inativar quem continua a trabalhar.
 - **`854ba650`** `fix(funcionario): situacao laboral pendente marca ESTADO_VALIDACAO=P` — ciclo de vida no write service.
 - **`ee65e9a6`** `docs: specs DOSSIE (02/09) e PROCESSAMENTO SALARIAL (01/09)`.
 - **`78e879f1`** `fix(funcionario): aprovar reativacao volta a por o colaborador ativo` — `aplicarEfeitosReativacao`.
+- **`76402bb4`** `feat(funcionario): grelha mostra os dois estados Pendentes na validacao` — derivação na leitura + filtro alinhado.
+
+### Ponto em aberto para o testeR/analista (decisão do utilizador: deixar como está)
+
+`aplicarEfeitosReativacao` **reabre o contrato** (`contrato.setDataFim(null)`), simétrico ao
+`aplicarEfeitosCessacao` que fecha as 6 coisas (tiprel, mobilidade, carreira, **contrato**, def de
+remuneração e de pagamento). Cheguei a remover o contrato e o utilizador mandou reverter — fica simétrico
+e o analista avalia. O trade-off, para essa conversa:
+
+| | Estado resultante | `existeContratoEmVigor` | Renovação | Visibilidade |
+|---|---|---|---|---|
+| **Reabrir (atual)** | ativo, contrato **sem prazo** | `true` → bloqueia "Novo Contrato" | nunca alertado (`BETWEEN` não casa com null) | **silencioso** |
+| Não tocar | ativo, contrato **expirado** | `false` → "Novo Contrato" aparece | nunca alertado (data no passado) | visível/acionável |
+
+Nota: a renovação fica quebrada nas **duas** opções — não serve para desempatar. A raiz é que
+`aplicarEfeitosCessacao` **sobrescreve** `contrato.DATA_FIM` com a data de cessação, destruindo o termo
+original (ex.: 2028-01-01 do contrato 731). Nenhuma reativação o recupera. Terceira via possível, não
+implementada: recalcular `data_fim = data_inicio + DURACAO` (a coluna `DURACAO` parece sobreviver).
 
 **App UP** na 8089 (PID 4148, código destes commits). Reboot: `scratchpad/run_develop_8089.sh`.
 
@@ -37,9 +55,15 @@ senão o Hibernate rebenta ao mapear `ESTADO_VALIDACAO`. O DDL completo está em
 - **A open question está respondida pela spec DOSSIÊ 02/09** (l.1826-1836): são duas colunas com duas fontes —
   `Estado do Registo` = `ESTADO_VALIDACAO`, `Estado do Colaborador` = `ESTADO_COLABORADOR`. O código colava
   as duas ao mesmo valor.
-- **`funcionario.estado` NÃO vai a `P`** ao enviar situação laboral para validação. O utilizador começou por
-  pedir "os 2 pendentes", pediu análise profunda, e a decisão final foi **só `estado_validacao`**, porque
-  pôr `estado='P'`:
+- **Os dois estados aparecem Pendentes na grelha — mas por DERIVAÇÃO na leitura, não por escrita.**
+  O analista quer que ao enviar para validação tanto o "Estado do Registo" como o "Estado do Colaborador"
+  mostrem Pendente. Resolvido em `FuncionarioReadService.estadoColaboradorExibido()` (commit `76402bb4`):
+  se `ESTADO_VALIDACAO='P'`, a grelha mostra `P`; caso contrário mostra o `ESTADO` real. O filtro por
+  estado acompanha a regra (`estado=P` também apanha `estadoValidacao='P'`; `estado=X` exclui esses),
+  senão filtrar "Ativo" devolvia linhas a dizer "Pendente".
+  **Feito em Java e não na view** — a `RH_V_DOSSIE` não está versionada, e no serviço a regra é visível.
+- **`funcionario.estado` (a coluna gravada) NÃO vai a `P`.** É o mesmo requisito do ponto acima, resolvido
+  sem tocar na BD. Pôr `estado='P'` gravado:
   1. destrói o estado de domínio (A/I) — no ramo não-processado a situação é editada *in place*, o valor
      anterior fica irrecuperável e **a rejeição não teria a que voltar**;
   2. abre os guards de `guardComboInativarAtivar` (testam `== A` / `== I`; com `P` ambos falham);
@@ -248,8 +272,11 @@ Estado verificado após a reposição (tudo consistente):
 | 958927 | I | A | 686 | A | 9 | A |
 | 958928 | P | P | 687 | P | 1 | P (registo pendente) |
 | 958929 | A | A | 688 | P | 9 | A (pendente da sessão 3) |
-| 958930 | **A** | A | 689 | A | 23 | A ← matriz de cenários; APOSENTADO perdido no cenário 11 (achado nº1) |
-| 958931 | **A** | A | — | A | 23 | A ← repro limpa do achado crítico + regressão do fix |
+| 958930 | A | A | 689 | A | 23 | A ← matriz de cenários; APOSENTADO perdido no cenário 11 (achado nº1) |
+| 958931 | A | A | — | I | 9 | A ← repro do achado crítico, regressão do fix e teste do display |
+
+Nota 958931: a situação corrente ficou `I` (situação 9) por ter sido usada na última rejeição — é o
+achado nº1 outra vez. O `funcionario` está correto (`A`/`A`).
 
 Ambos tinham ficado presos em `I` com uma reativação aprovada (o ACHADO CRÍTICO) e **foram recuperados
 pela correção `78e879f1`** — servem agora de caso de regressão para o "Ativar".
