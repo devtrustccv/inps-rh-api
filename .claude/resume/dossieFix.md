@@ -37,6 +37,31 @@ implementada: recalcular `data_fim = data_inicio + DURACAO` (a coluna `DURACAO` 
 
 **App UP** na 8089 (PID 22256, código destes commits). Reboot: `scratchpad/run_develop_8089.sh`.
 
+### Limpeza de dados de teste feita no fim da sessão 4
+
+A pedido do utilizador, **958929, 958930 e 958931 foram apagados por completo** da BD: 111 linhas em
+22 tabelas, num único bloco PL/SQL atómico (COMMIT no fim, ROLLBACK no `EXCEPTION`). Verificado a zero.
+Script reutilizável: `scratchpad/apagar_colaboradores_teste.sql`, com a ordem de dependências comentada.
+
+**Lição a reter para a próxima limpeza:** as 37 FKs de `RH_T_FUNCIONARIOS` **não bastam**. A primeira
+tentativa rebentou em `FK_CONTR_HIST_CONTR_ID` — a `RH_T_CONTRATO_HISTORICO` aponta para o *contrato*,
+não para o funcionário. Enumerar também as FKs de **todas as tabelas-pai** que se vai apagar:
+
+```sql
+SELECT p.table_name pai, c.table_name filho, cc.column_name coluna
+FROM user_constraints c
+JOIN user_cons_columns cc ON cc.constraint_name = c.constraint_name
+JOIN user_constraints p   ON p.constraint_name = c.r_constraint_name
+WHERE c.constraint_type = 'R'
+  AND p.table_name IN ('RH_T_CONTRATO_VINCULO','RH_T_SITUACAO_LABORAL',
+        'RH_T_TIPOS_RELACIONAMENTO','RH_T_CARREIRA','RH_T_MOBILIDADE',
+        'RH_T_REGIME_TRAB','RH_T_DEF_REMUNERACOES','RH_T_DEF_PAGAMENTOS');
+```
+
+Isso revelou ainda que a `RH_T_CARREIRA` referencia o **contrato** (logo sai antes dele) e que
+`CONTRATO_VINCULO` e `TIPOS_RELACIONAMENTO` têm **auto-referência** (estavam a 0 nestes dados, mas podem
+não estar noutros). Usar **ids explícitos**, não subqueries: as linhas-pai desaparecem durante a execução.
+
 ### Alteração de BD JÁ APLICADA (⚠️ não versionada)
 
 `RH_V_DOSSIE` foi recriada com `CREATE OR REPLACE VIEW` para expor **`A.ESTADO_VALIDACAO AS ESTADO_VALIDACAO`**
@@ -136,7 +161,7 @@ datas (`tiprel`/mobilidade/carreira/contrato com `data_fim=null`).
 o caminho comum (todos os colaboradores de teste têm `ult_proc=null`). NÃO é regressão da sessão 4 — os três
 `setEstado` são pré-existentes; a sessão 4 só acrescentou linhas de `setEstadoValidacao`.
 
-**Reprodução limpa** (colaborador **958931** `Colaborador Teste Reativar`,
+**Reprodução limpa** (colaborador **958931** `Colaborador Teste Reativar` — **já apagado** —,
 uuid `01a06456-f966-7647-9bc9-259c4978e175`, criado de raiz só para isto — sem rejeições nem correções,
 para excluir contaminação de estado):
 
@@ -163,7 +188,8 @@ O `estado_validacao` comportou-se corretamente nos 4 passos; o que falhava era o
 | ciclo `estado_validacao` (P/C/A) | intacto ✅ |
 
 Os dois colaboradores que tinham ficado presos (**958930** e **958931**) foram recuperados com a correção
-— ambos estão agora `A`/`A`.
+e ficaram `A`/`A`. **Ambos foram apagados depois**, a pedido do utilizador — o fix continua em vigor no
+código (`78e879f1`), mas já não há um caso vivo em BD para o demonstrar.
 
 ## ⚠️ A edição in-place é REGRA DE NEGÓCIO — não a "corrijas" sem falar com o analista
 
@@ -293,7 +319,7 @@ Nota: a `data_inicio` é a única peça **inferida** (bem fundamentada, mas infe
 
 ## Matriz de cenários validada (sessão 4)
 
-Colaborador **958930** (`Colaborador Teste Cenarios`, uuid `01a06448-061d-744d-9c3a-ab005acc134b`),
+Colaborador **958930** (`Colaborador Teste Cenarios`) — **já apagado**, ver "Estado dos colaboradores de teste" —,
 criado de raiz: `POST` → `GET by id` → `PUT validar:SIM` → `A`/`A`, `ult_proc=null` (ramo não-processado).
 Payloads em `scratchpad/c*.json`, com datas em `DD/MM/YYYY` como o frontend real.
 
@@ -348,12 +374,20 @@ Estado verificado após a reposição (tudo consistente):
 | 958926 | A | A | 685 | A | 7 | A |
 | 958927 | I | A | 686 | A | 9 | A |
 | 958928 | P | P | 687 | P | 1 | P (registo pendente) |
-| 958929 | A | A | 688 | P | 9 | A (pendente da sessão 3) |
-| 958930 | A | A | 689 | A | 23 | A ← matriz de cenários; APOSENTADO perdido no cenário 11 (achado nº1) |
-| 958931 | A | A | — | I | 9 | A ← repro do achado crítico, regressão do fix e teste do display |
 
-Nota 958931: a situação corrente ficou `I` (situação 9) por ter sido usada na última rejeição — é o
-achado nº1 outra vez. O `funcionario` está correto (`A`/`A`).
+> ⚠️ **958929, 958930 e 958931 foram APAGADOS da BD** no fim da sessão 4, a pedido do utilizador
+> (111 linhas em 22 tabelas). As secções abaixo que os citam descrevem evidência **histórica** — os
+> dados já não existem. Para reverificar qualquer coisa é preciso **criar colaboradores novos**
+> (ver "How to verify / resume").
+
+Restam 4 na BD:
+
+| fun | estado | est_validacao | nota |
+|---|---|---|---|
+| 958925 | A | A | Wilson Cabral Tavares; contrato **731 a prazo** (2026-01-01 → 2028-01-01) — útil para testar o `contrato.DATA_FIM` na cessação/reativação |
+| 958926 | A | A | Ivanisa Sofia Delgado Silva |
+| 958927 | I | A | **Boa evidência do bug original**: `I / Inactivo` no colaborador com `A / Ativo` no registo. Antes do fix mostrava "Estado do Registo: Inactivo" |
+| 958928 | P | P | registo inicial por validar — lockstep correto |
 
 Ambos tinham ficado presos em `I` com uma reativação aprovada (o ACHADO CRÍTICO) e **foram recuperados
 pela correção `78e879f1`** — servem agora de caso de regressão para o "Ativar".
@@ -361,7 +395,13 @@ pela correção `78e879f1`** — servem agora de caso de regressão para o "Ativ
 ## Next step
 
 O `estado_validacao` e o "Ativar" estão ambos fechados, validados em todos os cenários e com regressão
-confirmada. O que fica em aberto:
+confirmada.
+
+**Antes de qualquer reverificação: os colaboradores de teste foram apagados.** Criar novos (ver
+"How to verify / resume"). A funcionalidade do "Estado do Colaborador" Pendente está **comentada**, a
+aguardar o analista — se o teste esperar ver as duas colunas a Pendente, é por isso que não vê.
+
+O que fica em aberto:
 
 1. **Achado nº1 — a rejeição de um registo editado in-place.** É o mais grave por resolver, mas **não é um
    refactor**: ver a secção "A edição in-place é regra de negócio" abaixo. O que falta é uma **decisão do
@@ -371,6 +411,12 @@ confirmada. O que fica em aberto:
    exercitado nesta sessão porque todos os colaboradores de teste têm `ult_proc=null`. **O ramo processado
    continua por testar** e é onde vive esse achado.
 4. Se o `RH_V_DOSSIE` tiver de existir noutro ambiente, **reaplicar o DDL à mão** (ver "Current state").
+5. Decidir o **"Estado do Colaborador" Pendente** (comentado) e o **contrato na reativação** — as duas
+   coisas que ficaram à espera do analista. Ambas têm o contexto completo já escrito acima.
+6. `historico-laboral` mostra **pendentes como se fossem factos** (visto ao vivo: situação `P` já
+   aparecia como "APOSENTADO" no histórico, com o colaborador ainda `A`). E como lista *tiprel*, no ramo
+   não-processado tem sempre **uma linha só** — não é histórico, é o estado atual. Endpoint fora do
+   âmbito desta sessão e **não testado**; confirmar com o analista se devia filtrar por `estado`.
 
 ## How to verify / resume
 
@@ -383,8 +429,12 @@ confirmada. O que fica em aberto:
   `estadoColaborador` vs `estadoRegisto`.
 - Rota do write: `PATCH /api/v1/funcionarios/{uuid}/situacao-laboral`
   (`situacaoLaboralId`, `motivoId`, `dataInicio`, `dataFim`, `observacao`, `validar`).
-- Registo: `POST /api/v1/funcionarios` → `GET /api/v1/funcionarios/{uuid}` → `PUT /api/v1/funcionarios/{uuid}`
-  com `validar:SIM`. Payloads-modelo em `scratchpad/reg_m1.json`, `get_m1.json`, `validar_m1.json`
+- **Criar colaborador de teste de raiz** (necessário agora, já que os de teste foram apagados):
+  `POST /api/v1/funcionarios` → `GET /api/v1/funcionarios/{uuid}` → `PUT /api/v1/funcionarios/{uuid}`
+  com `validar:SIM`. Partir de `scratchpad/reg_m1.json` e trocar **só** os identificadores únicos
+  (`nome`, `numDocumento`, `nif`, `numSegurado`, contactos, `numDocumento` dos familiares) — foi assim
+  que se criaram o 958930 e o 958931. Fica `estado=A`/`estado_validacao=A`, `ult_proc=null` (ramo
+  não-processado). Para um contrato **a prazo**, pôr `dadosContratuais.dataFim` e `duracaoMeses`. Payloads-modelo em `scratchpad/reg_m1.json`, `get_m1.json`, `validar_m1.json`
   (o `scratchpad/` do **projeto**, que persiste entre sessões — não o temporário).
 - Helper de chamadas: `python scratchpad/call.py <METODO> <caminho> [body.json] [--save out.json]`
   — imprime sempre HTTP status + corpo identado.
