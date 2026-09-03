@@ -23,102 +23,18 @@
             border-collapse: collapse;
         }
 
-        .header td {
-            vertical-align: middle;
-            border: 0;
-        }
-
-        .logo {
-            width: 62pt;
-        }
-
-        .logo img {
-            width: 55pt;
-            height: 45pt;
-        }
-
-        .section-title {
-            margin-top: 7pt;
-            padding: 4pt 5pt;
-            color: #1f2933;
-            background-color: #9bc2e6;
-            font-size: 8pt;
-            font-weight: bold;
-        }
-
-        .data-table td {
-            border: 0.5pt solid #bcc5ce;
-            padding: 3pt 4pt;
-            vertical-align: top;
-        }
-
-        .label {
-            width: 13%;
-            background-color: #edf1f4;
-            font-weight: bold;
-        }
-
-        .value {
-            width: 20%;
-        }
-
-        .summary {
-            margin-top: 5pt;
-        }
-
-        .people {
-            margin-top: 7pt;
-            table-layout: fixed;
-        }
-
-        .people thead {
-            display: table-header-group;
-        }
-
-        .people th {
-            border: 0.5pt solid #7ba9d1;
-            padding: 2pt 1pt;
-            color: #1f2933;
-            background-color: #9bc2e6;
-            font-size: 4.4pt;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        .people td {
-            border: 0.5pt solid #c8cfd5;
-            padding: 2pt 1pt;
-            font-size: 4.6pt;
-            vertical-align: middle;
-            overflow-wrap: break-word;
-        }
-
-        .center {
-            text-align: center;
-        }
-
-        .right {
-            text-align: right;
-        }
-
-        .no-data {
-            padding: 10pt !important;
-            color: #6b7280;
-            text-align: center;
-        }
-
-        .legacy {
-            display: none;
-        }
-
         .header {
             margin-bottom: 7pt;
+        }
+
+        .header td {
+            border: 0;
+            vertical-align: middle;
         }
 
         .header .logo-cell {
             width: 90pt;
             text-align: left;
-            vertical-align: middle;
         }
 
         .header .logo {
@@ -132,7 +48,6 @@
             font-weight: bold;
             line-height: 1.45;
             text-align: center;
-            vertical-align: middle;
         }
 
         .header .header-spacer {
@@ -185,14 +100,16 @@
             font-size: 6.2pt;
         }
 
-        .form-table th, .form-table td {
+        .form-table th,
+        .form-table td {
             height: 12pt;
             padding: 1.5pt 2pt;
             border: 0.5pt solid #4f4f4f;
             vertical-align: middle;
         }
 
-        .form-table th, .form-label {
+        .form-table th,
+        .form-label {
             background-color: #9bc2e6;
             font-weight: bold;
         }
@@ -231,17 +148,58 @@
 
         .people {
             margin-top: 0;
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            -fs-table-paginate: paginate;
+        }
+
+        .people thead {
+            display: table-header-group;
+        }
+
+        .people tbody {
+            display: table-row-group;
+        }
+
+        .people tr {
+            page-break-inside: avoid;
         }
 
         .people th {
-            border-color: #4f4f4f;
+            border: 0.5pt solid #4f4f4f;
+            padding: 2pt 1pt;
+            color: #1f2933;
+            background-color: #9bc2e6;
             font-size: 4.7pt;
+            font-weight: bold;
             line-height: 1.25;
+            text-align: center;
+            vertical-align: middle;
         }
 
         .people td {
             height: 11pt;
-            border-color: #4f4f4f;
+            border: 0.5pt solid #4f4f4f;
+            padding: 2pt 1pt;
+            font-size: 4.6pt;
+            vertical-align: middle;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .no-data {
+            padding: 10pt !important;
+            color: #6b7280;
+            text-align: center;
         }
     </style>
 </head>
@@ -347,7 +305,7 @@
                 <tr>
                     <td class="form-label">MASSA SALARIAL ANUAL SEGURA</td>
                     <td class="form-value highlight"><span
-                            th:text="${soat.massaSalarialAnual()}"></span>CVE
+                            th:text="${soat.massaSalarialAnual()}"></span> CVE
                     </td>
                 </tr>
             </table>
@@ -368,61 +326,6 @@
     </tr>
 </table>
 
-<div class="section-title legacy">DADOS DO TOMADOR DE SEGURO</div>
-<table class="data-table legacy">
-    <tr>
-        <td class="label">Nome</td>
-        <td class="value" th:text="${soat.nomeInstituicao()}"></td>
-        <td class="label">NIF</td>
-        <td class="value" th:text="${soat.nifInstituicao()}"></td>
-        <td class="label">Código CAE</td>
-        <td class="value" th:text="${soat.codCae()}"></td>
-    </tr>
-    <tr>
-        <td class="label">Atividade económica</td>
-        <td class="value" th:text="${soat.atividadeEconomica()}"></td>
-        <td class="label">N.º certidão comercial</td>
-        <td class="value" th:text="${soat.numeroCertidaoComercial()}"></td>
-        <td class="label">Validade da certidão</td>
-        <td class="value" th:text="${soat.dataValidadeCertidao()}"></td>
-    </tr>
-    <tr>
-        <td class="label">Telefone</td>
-        <td class="value" th:text="${soat.telefone()}"></td>
-        <td class="label">Telemóvel</td>
-        <td class="value" th:text="${soat.telemovel()}"></td>
-        <td class="label">Email</td>
-        <td class="value" th:text="${soat.email()}"></td>
-    </tr>
-    <tr>
-        <td class="label">Morada</td>
-        <td class="value" th:text="${soat.morada()}"></td>
-        <td class="label">Localidade</td>
-        <td class="value" th:text="${soat.localidade()}"></td>
-        <td class="label">Concelho</td>
-        <td class="value" th:text="${soat.concelho()}"></td>
-    </tr>
-</table>
-
-<div class="section-title legacy">DADOS DA APÓLICE</div>
-<table class="data-table summary legacy">
-    <tr>
-        <td class="label">Apólice n.º</td>
-        <td class="value" th:text="${soat.numeroApolice()}"></td>
-        <td class="label">Início da apólice</td>
-        <td class="value" th:text="${soat.dataInicioApolice()}"></td>
-        <td class="label">Data de referência</td>
-        <td class="value" th:text="${soat.referencia()}"></td>
-    </tr>
-    <tr>
-        <td class="label">Total de pessoas seguras</td>
-        <td class="value" th:text="${soat.totalPessoas()}"></td>
-        <td class="label">Massa salarial anual segura</td>
-        <td class="value" th:text="${soat.massaSalarialAnual()}"></td>
-        <td class="label">Seguro / Modalidade</td>
-        <td class="value">—</td>
-    </tr>
-</table>
 
 <div class="required-note">Todas as colunas assinaladas com (*) são de preenchimento obrigatório.</div>
 <table class="people">
@@ -476,7 +379,7 @@
         <td class="center" th:text="${pessoa.tipoDocumento()}"></td>
         <td th:text="${pessoa.numeroDocumento()}"></td>
         <td class="center" th:text="${pessoa.dataValidadeDocumento()}"></td>
-        <td th:text="${pessoa.nif}"></td>
+        <td th:text="${pessoa.nif()}"></td>
         <td class="center" th:text="${pessoa.dataNascimento()}"></td>
         <td class="center" th:text="${pessoa.sexo()}"></td>
         <td class="center" th:text="${pessoa.situacao()}"></td>
