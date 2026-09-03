@@ -162,6 +162,41 @@ O `estado_validacao` comportou-se corretamente nos 4 passos; o que falhava era o
 Os dois colaboradores que tinham ficado presos (**958930** e **958931**) foram recuperados com a correção
 — ambos estão agora `A`/`A`.
 
+## ⚠️ A edição in-place é REGRA DE NEGÓCIO — não a "corrijas" sem falar com o analista
+
+Investigado no fim da sessão 4, depois de eu ter recomendado (erradamente) "deixar de editar in place e
+criar linha nova". **Isso contrariaria uma regra escrita.** Origem: `docs/Caso de uso_teste_gravação.md`
+(~l.588-602), tabela `RH_T_SITUACAO_LABORAL`, implementada pelo commit **`7518be97`** (13/07/2026), cuja
+mensagem diz explicitamente *"Caso de teste (Gestao Laboral / Situacao Laboral)"*:
+
+> **Regra de Registo e Atualização da Situação Laboral**
+> - Criar registo **somente** quando houver alteração da Situação Laboral ou do Motivo, **desde que o
+>   registo atual já tenha sido processado**.
+> - Se houver alteração e o registo **ainda não tenha sido processado** → apenas **UPDATE do registo
+>   existente**, não criar novo.
+> - Se não houver alteração → nem novo registo nem atualização.
+
+Isto explica os três ramos do dispatcher **e** confirma que o no-op do cenário 12b
+("Situação laboral sem alterações.") é **comportamento intencional**, não um acidente.
+
+Intenção de negócio plausível: uma situação nunca processada em folha ainda é quase um rascunho —
+corrigir um motivo mal escolhido não deve deixar duas linhas no histórico.
+
+**O verdadeiro buraco é mais estreito:** a regra fala do *maker a corrigir o seu próprio registo* e é
+**silenciosa sobre a rejeição pelo checker**. Foi aí que se perdeu o APOSENTADO do 958930 — não por a
+regra estar errada, mas por não cobrir esse caso.
+
+**Pergunta para o analista** (não implementar antes da resposta):
+
+> Quando uma alteração de situação laboral é **rejeitada** e o registo foi atualizado in-place (regra dos
+> não-processados), a situação deve voltar aos valores anteriores? Se sim, esses valores têm de ser
+> guardados em algum lado, porque o UPDATE apaga-os.
+
+Terceira via que **respeita** a regra: guardar os valores anteriores no registo de **validação** (que já é
+criado por cada alteração) e usá-los só na rejeição. Não cria linha em `RH_T_SITUACAO_LABORAL`, logo não
+viola nada.
+
+
 ## Achados por resolver (NÃO são regressões desta sessão)
 
 1. **Rejeição no ramo não-processado é destrutiva.** `validar()` faz `tiprelAtual.setEstado(I)` e
@@ -286,11 +321,9 @@ pela correção `78e879f1`** — servem agora de caso de regressão para o "Ativ
 O `estado_validacao` e o "Ativar" estão ambos fechados, validados em todos os cenários e com regressão
 confirmada. O que fica em aberto:
 
-1. **Achado nº1 — rejeição destrutiva no ramo não-processado.** É agora o mais grave por resolver: perde a
-   situação anterior (sobrescrita in place), deixa tiprel/situação a `I` mesmo com o colaborador ativo, e
-   pode bloquear o caminho natural de reativação (ver nota do cenário 2). A correção estrutural é **deixar
-   de editar in place** e passar a criar linha nova, como o ramo processado já faz — arruma o nº1, o
-   problema de rollback e a limitação do `contrato.DATA_FIM` de uma só vez. **Prioridade 1.**
+1. **Achado nº1 — a rejeição de um registo editado in-place.** É o mais grave por resolver, mas **não é um
+   refactor**: ver a secção "A edição in-place é regra de negócio" abaixo. O que falta é uma **decisão do
+   analista**, porque a regra escrita é silenciosa sobre a rejeição. **Prioridade 1.**
 2. Levar os achados **3** (`S` sem UI nem comportamento) e **5** (label `estadoRegistoDesc`) a negócio.
 3. Rever o achado **6** (`registarProcessado` aplica o efeito no registo, antes da aprovação) — não foi
    exercitado nesta sessão porque todos os colaboradores de teste têm `ult_proc=null`. **O ramo processado
