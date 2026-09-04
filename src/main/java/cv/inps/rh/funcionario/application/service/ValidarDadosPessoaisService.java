@@ -37,6 +37,7 @@ public class ValidarDadosPessoaisService {
 
     var funcionarioPublicId = IdentificadorUnico.from(command.getIdFuncionario()).valor();
     var funcionario = funcionarioEntityRepository.findByUuidOrThrow(funcionarioPublicId);
+    funcionarioRules.garantirEditavel(funcionario.getEstado());
 
     colaboradorValidationRules.validarDadosPessoais(dadosPessoaisReqDTO, funcionario.getUuid());
 
