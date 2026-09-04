@@ -156,7 +156,7 @@ public class RenumeracoesWriteService {
     var request = data.getDados();
     validarRemuneracaoOuPagamento(request);
 
-    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(remuneracao.getEstado());
+    funcionarioRules.garantirEditavel(remuneracao.getEstado());
     remuneracao.setValor(request.getValor());
     remuneracao.setPercentagem(request.getPercentagem());
     remuneracao.setObs(ValidationUtil.trimToNull(request.getObservacao()));
@@ -232,7 +232,7 @@ public class RenumeracoesWriteService {
     var request = data.getDados();
     validarRemuneracaoOuPagamento(request);
 
-    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(pagamento.getEstado());
+    funcionarioRules.garantirEditavel(pagamento.getEstado());
 
     pagamento.setPercentagem(request.getPercentagem());
     pagamento.setValor(request.getValor());

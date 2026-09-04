@@ -125,7 +125,7 @@ public class ValidarContratoService {
     dadosContratuaisMapper.toUpdateRelacionamento(tiposRelacionamento, dadosContratuais);
 
     var contrato = tiposRelacionamento.getContrVinculoId();
-    // TODO(guard I/E temporariamente desativado): if (contrato != null) funcionarioRules.garantirEditavel(contrato.getEstado());
+    if (contrato != null) funcionarioRules.garantirEditavel(contrato.getEstado());
     contratoMapper.toUpdateEntity(contrato, dadosContratuais);
 
     var mobilidade = tiposRelacionamento.getMobId();

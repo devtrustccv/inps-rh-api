@@ -362,10 +362,8 @@ public class MobilidadeWriteService {
         IdentificadorUnico.from(command.getMobilidadeId()).valor())
         .orElseThrow(() -> IgrpResponseStatusException.badRequest("Mobilidade não encontrada."));
 
-    // Registos inactivos/eliminados são histórico — não se editam.
-    if (Estado.I.equals(mobilidade.getEstado()) || Estado.E.equals(mobilidade.getEstado())) {
-      throw IgrpResponseStatusException.badRequest("Não é possível editar uma mobilidade inactiva ou eliminada.");
-    }
+    // Registos inactivos/eliminados são histórico — não se editam (guard I/E comum a todo o dossiê).
+    funcionarioRules.garantirEditavel(mobilidade.getEstado());
     // Guard de processamento: se já entrou em folha, editar alteraria dados já processados.
     if (mobilidadeProcessada(mobilidade)) {
       throw IgrpResponseStatusException.badRequest("Não é possível editar uma mobilidade que já tem processamento salarial.");

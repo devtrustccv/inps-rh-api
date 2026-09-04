@@ -116,6 +116,7 @@ public class AlterarSituacaoLaboralWriteService {
     var dataInicio = DateFormatter.stringToLocalDate(dto.getDataInicio());
     var dataFim = DateFormatter.stringToLocalDate(dto.getDataFim());
     var tiprelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+    funcionarioRules.garantirEditavel(tiprelAtual.getEstado());
 
     // Maker reenvia a correção (C -> P): edita in place o registo devolvido e reabre para validação.
     if (estaPorCorrigir) {
@@ -165,7 +166,11 @@ public class AlterarSituacaoLaboralWriteService {
     // Só o ramo "processado" cria um NOVO tiprel pendente (estado=P) que fechou o anterior; no ramo
     // "não processado" o tiprel fica estado=A e nada foi fechado — logo a rejeição não reabre nada.
     boolean tiprelEraPendente = tiprelAtual.getEstado() == Estado.P;
-    tiprelAtual.setEstado(estado);
+    // Rejeitar a ALTERACAO nao invalida o VINCULO: no ramo "nao processado" o tiprel corrente estava A e
+    // nada foi fechado, logo tem de continuar A (e o que o comentario acima sempre declarou). Carimba-lo
+    // I deixava o vinculo corrente de um colaborador activo marcado como historico e, com o guard
+    // garantirEditavel activo, bloqueava todo o dossie por causa de um simples NAO do checker.
+    tiprelAtual.setEstado(estado == Estado.I && !tiprelEraPendente ? Estado.A : estado);
 
     var situacao = tiprelAtual.getSituacLaboralId();
     situacao.setEstado(estado);

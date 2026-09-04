@@ -61,7 +61,7 @@ public class ValidacaoRenovacaoContratoService {
       throw IgrpResponseStatusException.badRequest(
           "O funcionário '%s' não possui contrato ativo".formatted(funcionario.getNome()));
 
-    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(contrato.getEstado());
+    funcionarioRules.garantirEditavel(contrato.getEstado());
 
     // CORRIGIR (checker devolve ao maker): a PROPOSTA de renovação pendente é devolvida. Pendente =
     // tiprel novo (P) + histórico da renovação (P) + validação (P); o contrato mantém-se A (vínculo em

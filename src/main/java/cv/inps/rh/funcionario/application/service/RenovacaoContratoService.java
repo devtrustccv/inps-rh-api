@@ -158,7 +158,7 @@ public class RenovacaoContratoService {
       }
     }
 
-    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(contratoAtual.getEstado());
+    funcionarioRules.garantirEditavel(contratoAtual.getEstado());
 
     if (funcionarioRules.temValidacaoPendente(funcionario.getUuid(), TipoAcao.UPDATE, Referencia.RENOVACAO_CONTRATO))
       throw IgrpResponseStatusException.conflict(
