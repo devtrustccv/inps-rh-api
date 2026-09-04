@@ -186,13 +186,13 @@ public class MobilidadeWriteService {
     var tipoRef = ValidationUtil.trimToNull(mobilidadeDTO.getTipoMobilidade());
     if (tipoRef != null) me.setTipoSituacao(tipoRef);
 
-    var localTrabRef = ValidationUtil.ref(entityManager, ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDepois());
+    var localTrabRef = ValidationUtil.ref(entityManager, ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDestino());
     if (localTrabRef != null) me.setLocalTrabId(localTrabRef);
 
-    var secaoRef = ValidationUtil.ref(entityManager, SecaoEntity.class, mobilidadeDTO.getSeccaoDepois());
+    var secaoRef = ValidationUtil.ref(entityManager, SecaoEntity.class, mobilidadeDTO.getSeccaoDestino());
     if (secaoRef != null) me.setSecaoId(secaoRef);
 
-    var instidRef = ValidationUtil.ref(entityManager, DirecaoEntity.class, mobilidadeDTO.getDirecaoDepois());
+    var instidRef = ValidationUtil.ref(entityManager, DirecaoEntity.class, mobilidadeDTO.getDirecaoDestino());
     if (instidRef != null) me.setInstidId(instidRef);
 
     // Null-safe como os restantes campos: um payload parcial não deve apagar as datas do registo.

@@ -26,15 +26,15 @@ public class MobilidadeMapper {
     var dto = new MobilidadeDTO();
 
     if (Objects.nonNull(mobilidade.getInstidId())) {
-      dto.setDirrecaoAntes(mobilidade.getInstidId().getNome());
-      dto.setDirecaoAntesId(mobilidade.getInstidId().getId());
+      dto.setDirecaoOrigemDesc(mobilidade.getInstidId().getNome());
+      dto.setDirecaoOrigemId(mobilidade.getInstidId().getId());
     }
 
     if (Objects.nonNull(mobilidade.getSecaoId()))
-      dto.setSeccaoAntes(mobilidade.getSecaoId().getNome() != null ? mobilidade.getSecaoId().getNome() : "");
+      dto.setSeccaoOrigemDesc(mobilidade.getSecaoId().getNome() != null ? mobilidade.getSecaoId().getNome() : "");
 
     if (Objects.nonNull(mobilidade.getLocalTrabId()))
-      dto.setLocalTrabalhoAntes(mobilidade.getLocalTrabId().getNome());
+      dto.setLocalTrabalhoOrigemDesc(mobilidade.getLocalTrabId().getNome());
 
     dto.setTipoMobilidade(mobilidade.getTipoSituacao());
     dto.setDataInicio(mobilidade.getDataInicio());
@@ -46,39 +46,39 @@ public class MobilidadeMapper {
 
   /**
    * Detalhe/editar de uma mobilidade específica. Spec DOSSIÊ: o INSTIT_ID gravado é a
-   * "Direção (Depois)"; o "Antes" é a direção do vínculo anterior (só display).
+   * direção de destino; a origem é a direção do vínculo anterior (só display).
    *
-   * @param atual    a mobilidade que está a ser vista/editada (fornece o "Depois")
-   * @param anterior a mobilidade do vínculo anterior (fornece o "Antes"); pode ser null
+   * @param atual    a mobilidade que está a ser vista/editada (fornece o destino)
+   * @param anterior a mobilidade do vínculo anterior (fornece a origem); pode ser null
    */
   public MobilidadeDTO mobilidadeDetalheDTO(MobilidadeEntity atual, MobilidadeEntity anterior) {
     var dto = new MobilidadeDTO();
 
-    // Depois = valores gravados nesta mobilidade. O id alimenta os selects do formulário; a
+    // Destino = valores gravados nesta mobilidade. O id alimenta os selects do formulário; a
     // descrição existe para o ecrã de validação, que é só leitura e não carrega as listas.
     if (Objects.nonNull(atual.getInstidId())) {
-      dto.setDirecaoDepois(atual.getInstidId().getId());
-      dto.setDirecaoDepoisDesc(atual.getInstidId().getNome());
+      dto.setDirecaoDestino(atual.getInstidId().getId());
+      dto.setDirecaoDestinoDesc(atual.getInstidId().getNome());
     }
     if (Objects.nonNull(atual.getSecaoId())) {
-      dto.setSeccaoDepois(atual.getSecaoId().getId());
-      dto.setSeccaoDepoisDesc(atual.getSecaoId().getNome());
+      dto.setSeccaoDestino(atual.getSecaoId().getId());
+      dto.setSeccaoDestinoDesc(atual.getSecaoId().getNome());
     }
     if (Objects.nonNull(atual.getLocalTrabId())) {
-      dto.setLocalTrabalhoDepois(atual.getLocalTrabId().getId());
-      dto.setLocalTrabalhoDepoisDesc(atual.getLocalTrabId().getNome());
+      dto.setLocalTrabalhoDestino(atual.getLocalTrabId().getId());
+      dto.setLocalTrabalhoDestinoDesc(atual.getLocalTrabId().getNome());
     }
 
-    // Antes = direção/secção/local do vínculo anterior (display)
+    // Origem = direção/secção/local do vínculo anterior (display)
     if (anterior != null) {
       if (Objects.nonNull(anterior.getInstidId())) {
-        dto.setDirrecaoAntes(anterior.getInstidId().getNome());
-        dto.setDirecaoAntesId(anterior.getInstidId().getId());
+        dto.setDirecaoOrigemDesc(anterior.getInstidId().getNome());
+        dto.setDirecaoOrigemId(anterior.getInstidId().getId());
       }
       if (Objects.nonNull(anterior.getSecaoId()))
-        dto.setSeccaoAntes(anterior.getSecaoId().getNome());
+        dto.setSeccaoOrigemDesc(anterior.getSecaoId().getNome());
       if (Objects.nonNull(anterior.getLocalTrabId()))
-        dto.setLocalTrabalhoAntes(anterior.getLocalTrabId().getNome());
+        dto.setLocalTrabalhoOrigemDesc(anterior.getLocalTrabId().getNome());
     }
 
     dto.setTipoMobilidade(atual.getTipoSituacao());
