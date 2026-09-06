@@ -5,34 +5,34 @@ package cv.inps.rh.processamento.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @IgrpDTO
 public record SubsidioFeriasDetalheDTO(
 
-    String numero,
+    String nome,
 
-    String dataInicio,
+    Long funId,
+
+    LocalDate dataInicio,
 
     String dataFim,
 
-    String escalao,
-
     String escalaoDesc,
 
-    String valorEscalao,
+    BigDecimal valorEscalao,
 
-    String meses,
+    Long mesesTrabalhados,
 
-    String dias,
+    Long valorMes,
 
-    String mesesValor,
+    Long diasTrabalhados,
 
-    String diasValor,
+    Long valorDias,
 
-    String totalParcial,
+    Long valorEscalaotempo,
 
-    String id,
-
-    String funIdFilho
+    String situacao
 ) {
 }

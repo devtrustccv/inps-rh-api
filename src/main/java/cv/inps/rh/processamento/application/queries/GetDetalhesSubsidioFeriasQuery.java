@@ -8,10 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetSubsidioFeriasQuery implements Query {
-  private Long direcaoId;
-  private Long funcionarioId;
+public class GetDetalhesSubsidioFeriasQuery implements Query {
+  private Long funId;
   private Integer ano;
-  private Integer page;
-  private Integer size;
 }

@@ -239,9 +239,11 @@ public class ProcessoSalarialController {
   public ResponseEntity<List<SubsidioFeriasResponseDTO>> getSubsidioFerias(
       @RequestParam(value = "direcaoId", required = false) Long direcaoId,
       @RequestParam(value = "funcionarioId", required = false) Long funcionarioId,
-      @RequestParam(value = "dataProcessamento", required = false) String dataProcessamento
+      @RequestParam(value = "ano", required = false) Integer ano,
+      @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+      @RequestParam(value = "size", required = false, defaultValue = "20") Integer size
   ) {
-    final var query = new GetSubsidioFeriasQuery(direcaoId, funcionarioId, dataProcessamento);
+    final var query = new GetSubsidioFeriasQuery(direcaoId, funcionarioId, ano, page, size);
 
     return queryBus.handle(query);
   }
@@ -263,6 +265,83 @@ public class ProcessoSalarialController {
     final var command = new AtivarInactivarSubsidioNatalCommand(ativarInactivarSubsidioNatalRequest);
 
     return commandBus.send(command);
+  }
+
+  @PostMapping(value = "subsidio-feria/change-status/{subsidioId}")
+  @Operation(
+      summary = "Ativar inactivar subsidio ferias",
+      description = "Ativar inactivar subsidio ferias",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+          ),
+      }
+  )
+  public ResponseEntity<String> ativarInactivarSubsidioFerias(@PathVariable Long subsidioId) {
+
+    final var command = new AtivarInativarSubsidioFeriasCommand(subsidioId);
+
+    return commandBus.send(command);
+  }
+
+  @PostMapping(value = "subsidio-feria/{subsidioId}/validar")
+  @Operation(
+      summary = "Validar subsidio ferias",
+      description = "Validar subsidio ferias",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+          ),
+      }
+  )
+  public ResponseEntity<String> validarSubsidioFerias(@PathVariable Long subsidioId) {
+
+    final var command = new ValidarSubsidioFeriasCommand(subsidioId);
+
+    return commandBus.send(command);
+  }
+
+  @PostMapping(value = "subsidio-feria/calcular/{ano}")
+  @Operation(
+      summary = "Calcular subsidio ferias",
+      description = "Calcular subsidio ferias",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+          ),
+      }
+  )
+  public ResponseEntity<String> validarSubsidioFerias(@PathVariable Integer ano) {
+
+    final var command = new CalcularSubsidioFeriasCommand(ano);
+
+    return commandBus.send(command);
+  }
+
+  @GetMapping(value = "subsidio-feria/detalhes")
+  @Operation(
+      summary = "Get detalhes subsidio ferias",
+      description = "Get detalhes subsidio ferias",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = SubsidioFeriaDetalheFullDTO.class)
+              )
+          ),
+      }
+  )
+  public ResponseEntity<SubsidioFeriaDetalheFullDTO> getDetalhesSubsidioFerias(
+      @RequestParam(value = "ano") Integer ano,
+      @RequestParam(value = "funId") Long funId
+  ) {
+    final var query = new GetDetalhesSubsidioFeriasQuery(funId, ano);
+
+    return queryBus.handle(query);
   }
 
   @GetMapping(value = "aumento-salarial")

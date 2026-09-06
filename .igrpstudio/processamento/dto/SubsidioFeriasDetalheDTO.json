@@ -43,18 +43,6 @@
       "primaryKey": false
     },
     {
-      "name": "escalao",
-      "objectType": "java",
-      "type": "string",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
       "name": "escalaoDesc",
       "objectType": "java",
       "type": "string",
@@ -69,7 +57,7 @@
     {
       "name": "valorEscalao",
       "objectType": "java",
-      "type": "string",
+      "type": "decimal",
       "required": false,
       "before": false,
       "after": false,
