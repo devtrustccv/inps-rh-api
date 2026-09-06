@@ -7,6 +7,7 @@ import cv.inps.rh.processamento.application.dto.PesquisaColaboradorResponseDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
+import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +17,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
-import org.javers.spring.annotation.JaversSpringDataAuditable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -244,6 +244,7 @@ public interface TiposRelacionamentoEntityRepository extends
       LEFT JOIN c.cargoId cargo
       LEFT JOIN c.escalaoId esc
       WHERE t.estActAdm = 1
+         AND f.estado NOT IN (Estado.I, Estado.P)
          AND (:processado IS NULL OR t.flgProcessa = :processado)
          AND (:directionId IS NULL OR i.id = :directionId)
          AND (:nome IS NULL OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nome, '%')))
