@@ -224,7 +224,7 @@ public interface TiposRelacionamentoEntityRepository extends
              i.nome,
              s.nome,
              i.id,
-             null,
+             i.nome,
              cat.nome,
              pcc.nome,
              c.salario,
