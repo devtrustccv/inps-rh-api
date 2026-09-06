@@ -11,6 +11,7 @@ import cv.inps.rh.shared.config.ApplicationAuditorAware;
 import cv.inps.rh.shared.infrastructure.persistence.entity.SubsidioNatalEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ValidacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.NumberUtils;
 import cv.inps.rh.shared.util.PageMapper;
 import lombok.AllArgsConstructor;
 import oracle.jdbc.internal.OracleCallableStatement;
@@ -19,6 +20,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.Types;
 import java.time.Year;
@@ -206,18 +209,33 @@ public class SubsidioService {
   public SubsidioFeriaDetalheFullDTO getDetalhesSubsidio(Integer ano, Long funId) {
 
     var rows = subsidioFeriasDetailEntityRepository.getDetails(funId, ano);
+    if (rows.isEmpty())
+      return new SubsidioFeriaDetalheFullDTO();
 
-    var response = new SubsidioFeriaDetalheFullDTO();
-    response.setRows(rows);
+    var decimalFormat = NumberUtils.spaceDecimalFormat();
 
     long totalRemuneracao = 0L;
 
     for (var row : rows) {
-      totalRemuneracao = totalRemuneracao + row.valorEscalaotempo();
+      totalRemuneracao = totalRemuneracao + row.getValorEscalaotempoBD();
+      row.setValorEscalaotempo(decimalFormat.format(row.getValorEscalaotempoBD()));
+      row.setValorMes(decimalFormat.format(row.getValorMesBD()));
+      row.setValorEscalao(decimalFormat.format(row.getValorEscalaoBD()));
     }
 
-    response.setTotalRemuneracao(totalRemuneracao);
-    response.setSalarioBaseCalculo(null);
+    var salarioBaseCalculo = BigDecimal.valueOf(totalRemuneracao)
+        .multiply(BigDecimal.valueOf(30))
+        .divide(
+            BigDecimal.valueOf(360),
+            0,
+            RoundingMode.HALF_UP
+        )
+        .longValue();
+
+    var response = new SubsidioFeriaDetalheFullDTO();
+    response.setRows(rows);
+    response.setTotalRemuneracao(decimalFormat.format(totalRemuneracao));
+    response.setSalarioBaseCalculo(decimalFormat.format(salarioBaseCalculo));
     response.setValorSubsidio(null);
     return response;
   }

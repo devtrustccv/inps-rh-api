@@ -30,7 +30,10 @@ public interface VSubsidioFeriasDetailEntityRepository extends
            sf.diasTrab,
            sf.valorDia,
            COALESCE(sf.valorDia, 0) + COALESCE(sf.valorMes, 0),
-           sf.situacao
+           sf.situacao,
+           null,
+           null,
+           null
       )
       FROM VSubsidioFeriasDetailEntity sf
       WHERE sf.funId = :funId

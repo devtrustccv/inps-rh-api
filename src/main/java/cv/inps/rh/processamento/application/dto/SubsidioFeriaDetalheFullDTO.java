@@ -25,12 +25,12 @@ public class SubsidioFeriaDetalheFullDTO {
   private List<SubsidioFeriasDetalheDTO> rows = new ArrayList<>();
 
 
-  private Long totalRemuneracao;
+  private String totalRemuneracao;
 
 
-  private Long salarioBaseCalculo;
+  private String salarioBaseCalculo;
 
 
-  private Long valorSubsidio;
+  private String valorSubsidio;
 
 }

@@ -207,6 +207,7 @@ public interface TiposRelacionamentoEntityRepository extends
        AND (:funcionario IS NULL OR LOWER(t.funId.nome) LIKE LOWER(CONCAT('%', :funcionario, '%')))
        AND (:startDate IS NULL OR t.situacLaboralId.dataInicio = :startDate)
        AND (:endDate IS NULL OR t.situacLaboralId.dataFim = :endDate)
+       AND t.situacLaboralId.situacaoLaboralId.codigo = 'LIC_SV'
       """)
   Page<ColaboradorResponseDTO> getListaColaboradores(
       @Param("directionId") Long directionId,

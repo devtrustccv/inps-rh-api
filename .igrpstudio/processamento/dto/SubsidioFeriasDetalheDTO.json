@@ -2,7 +2,7 @@
   "type": "dto",
   "module": "processamento",
   "name": "SubsidioFeriasDetalhe",
-  "template": "record",
+  "template": "classic",
   "enableCustonValidation": false,
   "readOnly": false,
   "attributes": [
