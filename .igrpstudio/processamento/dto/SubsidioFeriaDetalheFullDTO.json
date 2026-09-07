@@ -1,0 +1,61 @@
+{
+  "name": "SubsidioFeriaDetalheFull",
+  "template": "classic",
+  "attributes": [
+    {
+      "name": "rows",
+      "type": "SubsidioFeriasDetalhe",
+      "objectType": "dto",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list",
+      "module": "processamento"
+    },
+    {
+      "name": "totalRemuneracao",
+      "type": "long",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "salarioBaseCalculo",
+      "type": "long",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "valorSubsidio",
+      "type": "long",
+      "objectType": "java",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    }
+  ],
+  "type": "dto",
+  "module": "processamento",
+  "enableCustonValidation": false,
+  "readOnly": false,
+  "id": "new-action-Contract-asdasdasdsadasdvfqwcz12312321312321"
+}

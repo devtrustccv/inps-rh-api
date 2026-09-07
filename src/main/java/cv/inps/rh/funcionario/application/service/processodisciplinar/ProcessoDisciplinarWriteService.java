@@ -71,6 +71,7 @@ public class ProcessoDisciplinarWriteService {
   public SuccessResponseDTO updateProcessoDisciplinar(String processoDisciplinarId, ProcessoDisciplinarRequestDTO request) {
 
     var process = processoDisciplinarEntityRepository.findByUuidOrThrow(UUID.fromString(processoDisciplinarId));
+    funcionarioRules.garantirEditavel(process.getEstado());
 
     // CORRIGIR (checker devolve ao maker): processo pendente P -> C e validação P -> C, SEM aplicar
     // payload. O maker corrige e reenvia por este mesmo endpoint com validar=null (C -> P). Âncora =
@@ -144,6 +145,7 @@ public class ProcessoDisciplinarWriteService {
 
   public SuccessResponseDTO deleteProcessoDisciplinar(String processoDisciplinarId) {
     var process = processoDisciplinarEntityRepository.findByUuidOrThrow(UUID.fromString(processoDisciplinarId));
+    funcionarioRules.garantirEditavel(process.getEstado());
     process.setEstado(Estado.E.name());
     processoDisciplinarEntityRepository.save(process);
 

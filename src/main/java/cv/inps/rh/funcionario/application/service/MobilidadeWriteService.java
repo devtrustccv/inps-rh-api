@@ -186,13 +186,13 @@ public class MobilidadeWriteService {
     var tipoRef = ValidationUtil.trimToNull(mobilidadeDTO.getTipoMobilidade());
     if (tipoRef != null) me.setTipoSituacao(tipoRef);
 
-    var localTrabRef = ValidationUtil.ref(entityManager, ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDepois());
+    var localTrabRef = ValidationUtil.ref(entityManager, ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDestino());
     if (localTrabRef != null) me.setLocalTrabId(localTrabRef);
 
-    var secaoRef = ValidationUtil.ref(entityManager, SecaoEntity.class, mobilidadeDTO.getSeccaoDepois());
+    var secaoRef = ValidationUtil.ref(entityManager, SecaoEntity.class, mobilidadeDTO.getSeccaoDestino());
     if (secaoRef != null) me.setSecaoId(secaoRef);
 
-    var instidRef = ValidationUtil.ref(entityManager, DirecaoEntity.class, mobilidadeDTO.getDirecaoDepois());
+    var instidRef = ValidationUtil.ref(entityManager, DirecaoEntity.class, mobilidadeDTO.getDirecaoDestino());
     if (instidRef != null) me.setInstidId(instidRef);
 
     // Null-safe como os restantes campos: um payload parcial não deve apagar as datas do registo.
@@ -362,10 +362,8 @@ public class MobilidadeWriteService {
         IdentificadorUnico.from(command.getMobilidadeId()).valor())
         .orElseThrow(() -> IgrpResponseStatusException.badRequest("Mobilidade não encontrada."));
 
-    // Registos inactivos/eliminados são histórico — não se editam.
-    if (Estado.I.equals(mobilidade.getEstado()) || Estado.E.equals(mobilidade.getEstado())) {
-      throw IgrpResponseStatusException.badRequest("Não é possível editar uma mobilidade inactiva ou eliminada.");
-    }
+    // Registos inactivos/eliminados são histórico — não se editam (guard I/E comum a todo o dossiê).
+    funcionarioRules.garantirEditavel(mobilidade.getEstado());
     // Guard de processamento: se já entrou em folha, editar alteraria dados já processados.
     if (mobilidadeProcessada(mobilidade)) {
       throw IgrpResponseStatusException.badRequest("Não é possível editar uma mobilidade que já tem processamento salarial.");

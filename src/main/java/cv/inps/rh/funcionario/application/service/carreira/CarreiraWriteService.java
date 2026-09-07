@@ -735,7 +735,7 @@ public class CarreiraWriteService {
         dto.setSalario(escalaoSel.getValor());
     }
 
-    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(carreira.getEstado());
+    funcionarioRules.garantirEditavel(carreira.getEstado());
 
     var relacionamento = tiposRelacionamentoEntityRepository.findFirstByCarreiraId_UuidOrderByIdDesc(carreira.getUuid()).orElse(null);
 

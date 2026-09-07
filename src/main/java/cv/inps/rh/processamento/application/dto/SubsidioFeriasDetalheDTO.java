@@ -1,38 +1,52 @@
-/* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
-
 package cv.inps.rh.processamento.application.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import cv.igrp.framework.stereotype.IgrpDTO;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @IgrpDTO
-public record SubsidioFeriasDetalheDTO(
+public class SubsidioFeriasDetalheDTO {
 
-    String numero,
+  private String nome;
 
-    String dataInicio,
+  private Long funId;
 
-    String dataFim,
+  private LocalDate dataInicio;
 
-    String escalao,
+  private String dataFim;
 
-    String escalaoDesc,
+  private String escalaoDesc;
 
-    String valorEscalao,
+  @JsonIgnore
+  private BigDecimal valorEscalaoBD;
 
-    String meses,
+  private Long mesesTrabalhados;
 
-    String dias,
+  @JsonIgnore
+  private Long valorMesBD;
 
-    String mesesValor,
+  private Long diasTrabalhados;
 
-    String diasValor,
+  private Long valorDias;
 
-    String totalParcial,
+  @JsonIgnore
+  private Long valorEscalaotempoBD;
 
-    String id,
+  private String situacao;
 
-    String funIdFilho
-) {
+  private String valorEscalao;
+
+  private String valorMes;
+
+  private String valorEscalaotempo;
 }

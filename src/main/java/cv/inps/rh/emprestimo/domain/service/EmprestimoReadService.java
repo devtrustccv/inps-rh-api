@@ -183,7 +183,7 @@ public class EmprestimoReadService {
 
   public PlanoFinanceiroDTO getPlanoFinanceiro(String uuid) {
 
-    var formatter = NumberUtils.usDecimalFormat();
+    var formatter = NumberUtils.spaceDecimalFormat();
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
@@ -223,7 +223,7 @@ public class EmprestimoReadService {
 
     var loan = emprestimoEntityRepository.findByUuidOrThrow(uuid);
 
-    var usDecimalFormatter = NumberUtils.usDecimalFormat();
+    var usDecimalFormatter = NumberUtils.spaceDecimalFormat();
 
     var rows = rhPagamentoEntityRepository.findByEstadoAndDefp_FunId(
             Estado.A.name(),

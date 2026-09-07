@@ -55,7 +55,7 @@
       "primaryKey": false
     },
     {
-      "name": "dirrecaoAntes",
+      "name": "direcaoOrigemDesc",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -67,7 +67,7 @@
       "primaryKey": false
     },
     {
-      "name": "direcaoAntesId",
+      "name": "direcaoOrigemId",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -79,7 +79,7 @@
       "primaryKey": false
     },
     {
-      "name": "direcaoDepois",
+      "name": "direcaoDestino",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -91,7 +91,7 @@
       "primaryKey": false
     },
     {
-      "name": "direcaoDepoisDesc",
+      "name": "direcaoDestinoDesc",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -103,7 +103,7 @@
       "primaryKey": false
     },
     {
-      "name": "seccaoAntes",
+      "name": "seccaoOrigemDesc",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -115,7 +115,7 @@
       "primaryKey": false
     },
     {
-      "name": "seccaoDepois",
+      "name": "seccaoDestino",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -127,7 +127,7 @@
       "primaryKey": false
     },
     {
-      "name": "seccaoDepoisDesc",
+      "name": "seccaoDestinoDesc",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -139,7 +139,7 @@
       "primaryKey": false
     },
     {
-      "name": "localTrabalhoAntes",
+      "name": "localTrabalhoOrigemDesc",
       "objectType": "java",
       "type": "string",
       "required": false,
@@ -151,7 +151,7 @@
       "primaryKey": false
     },
     {
-      "name": "localTrabalhoDepois",
+      "name": "localTrabalhoDestino",
       "objectType": "java",
       "type": "long",
       "required": false,
@@ -163,7 +163,7 @@
       "primaryKey": false
     },
     {
-      "name": "localTrabalhoDepoisDesc",
+      "name": "localTrabalhoDestinoDesc",
       "objectType": "java",
       "type": "string",
       "required": false,

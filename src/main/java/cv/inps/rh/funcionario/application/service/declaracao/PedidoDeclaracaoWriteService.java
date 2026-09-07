@@ -109,6 +109,7 @@ public class PedidoDeclaracaoWriteService {
     @Transactional
     public SuccessResponseDTO submeterAnalise(SubmeterAnalisePedidoDeclaracaoCommand command) {
         DeclaracaoEntity declaracao = declaracaoRepository.findByIdOrThrow(Long.parseLong(command.getId()));
+        funcionarioRules.garantirEditavel(declaracao.getEstado());
 
         declaracao.setDecisaoAnalise(ValidationUtil.trimToNull(command.getPedidodeclaracaoanalise().getDecisaoAnalise()));
         declaracao.setObsAnalise(ValidationUtil.trimToNull(command.getPedidodeclaracaoanalise().getObsAnalise()));
@@ -137,6 +138,7 @@ public class PedidoDeclaracaoWriteService {
         }
 
         DeclaracaoEntity declaracao = declaracaoRepository.findByIdOrThrow(Long.parseLong(command.getId()));
+        funcionarioRules.garantirEditavel(declaracao.getEstado());
         PedidoEntity pedido = declaracao.getPedidoId();
 
         declaracao.setDecisaoRh(ValidationUtil.trimToNull(command.getPedidodeclaracaovalidacao().getValidar()));

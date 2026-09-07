@@ -33,11 +33,11 @@ import java.util.function.Function;
  */
 public enum TipoMobilidade {
 
-  DIRECAO("Direcção", MobilidadeDTO::getDirecaoDepois, DirecaoEntity.class,
+  DIRECAO("Direcção", MobilidadeDTO::getDirecaoDestino, DirecaoEntity.class,
       MobilidadeEntity::getInstidId, (m, v) -> m.setInstidId((DirecaoEntity) v)),
-  SECAO("Unidade", MobilidadeDTO::getSeccaoDepois, SecaoEntity.class,
+  SECAO("Unidade", MobilidadeDTO::getSeccaoDestino, SecaoEntity.class,
       MobilidadeEntity::getSecaoId, (m, v) -> m.setSecaoId((SecaoEntity) v)),
-  LOCAL_TRABALHO("Local de trabalho", MobilidadeDTO::getLocalTrabalhoDepois, ParamLocalTrabEntity.class,
+  LOCAL_TRABALHO("Local de trabalho", MobilidadeDTO::getLocalTrabalhoDestino, ParamLocalTrabEntity.class,
       MobilidadeEntity::getLocalTrabId, (m, v) -> m.setLocalTrabId((ParamLocalTrabEntity) v));
 
   private final String label;

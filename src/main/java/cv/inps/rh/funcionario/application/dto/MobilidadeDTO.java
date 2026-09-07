@@ -38,42 +38,42 @@ public class MobilidadeDTO  {
   // do schema de request no Swagger. Substituir por MobilidadeReqDTO/MobilidadeRespDTO quando o
   // fluxo de mobilidade estabilizar — é a convenção do resto do módulo.
   @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-  private String dirrecaoAntes ;
+  private String direcaoOrigemDesc ;
 
 
-  // Id da direcção "Antes" (só leitura). DirecaoEntity não tem uuid — o identificador é o Long id,
-  // igual ao usado em direcaoDepois e nos selects do formulário.
+  // Id da direcção de origem (só leitura). DirecaoEntity não tem uuid — o identificador é o Long id,
+  // igual ao usado em direcaoDestino e nos selects do formulário.
   @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-  private Long direcaoAntesId ;
+  private Long direcaoOrigemId ;
 
 
-  private Long direcaoDepois ;
-
-
-  @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-  private String direcaoDepoisDesc ;
+  private Long direcaoDestino ;
 
 
   @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-  private String seccaoAntes ;
-
-
-  private Long seccaoDepois ;
+  private String direcaoDestinoDesc ;
 
 
   @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-  private String seccaoDepoisDesc ;
+  private String seccaoOrigemDesc ;
+
+
+  private Long seccaoDestino ;
 
 
   @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-  private String localTrabalhoAntes ;
-
-
-  private Long localTrabalhoDepois ;
+  private String seccaoDestinoDesc ;
 
 
   @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-  private String localTrabalhoDepoisDesc ;
+  private String localTrabalhoOrigemDesc ;
+
+
+  private Long localTrabalhoDestino ;
+
+
+  @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+  private String localTrabalhoDestinoDesc ;
 
   private String tipoOrdemServico ;
 

@@ -193,7 +193,7 @@ public class SubstituicaoWriteService {
     var substituicao = substituicaoEntityRepository.findByUuid(idSusbtituicao).orElseThrow(
         () -> IgrpResponseStatusException.badRequest("Substituição não encontrada.")
     );
-    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(substituicao.getEstado());
+    funcionarioRules.garantirEditavel(substituicao.getEstado());
 
     // CORRIGIR (checker devolve ao maker): substituição pendente P -> C e validação P -> C, SEM aplicar
     // payload. O maker corrige e reenvia por este mesmo endpoint com validar=null (C -> P). Âncora =

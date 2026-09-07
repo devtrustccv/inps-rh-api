@@ -11,7 +11,7 @@ import java.text.DecimalFormat;
 
 public class PlanoFinanceiroSerializer extends JsonSerializer<BigDecimal> {
 
-  private static final DecimalFormat US_DECIMAL_FORMAT = NumberUtils.usDecimalFormat();
+  private static final DecimalFormat US_DECIMAL_FORMAT = NumberUtils.spaceDecimalFormat();
 
   @Override
   public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider serializers) throws IOException {

@@ -62,7 +62,7 @@ public class RelatoriosService {
     var totDes = hasHeader ? header.getTotalDescontos() : 0L;
     var totLiq = hasHeader ? header.getTotalLiquido() : 0L;
 
-    var usDecimalFormat = NumberUtils.usDecimalFormat();
+    var usDecimalFormat = NumberUtils.dotDecimalFormat();
 
     var remuneracoes = remunRows.stream()
         .map(r -> Map.of(
@@ -130,7 +130,7 @@ public class RelatoriosService {
             Collectors.groupingBy(ProcSalCcEntity::getFunId)
         ));
 
-    var usDecimalFormat = NumberUtils.usDecimalFormat();
+    var usDecimalFormat = NumberUtils.dotDecimalFormat();
 
     grouped.forEach((_, funMap) ->
         funMap.forEach((_, rows) -> {

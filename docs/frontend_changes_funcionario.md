@@ -216,3 +216,33 @@ efeito (são ignorados pela desserialização).
 Leitura mantém tudo: o GET `.../renovacao-contrato/{contratoId}` (`RenovacaoDetalheDTO`, com `atual` e
 `renovacao`) e o `RenovarContratoRespDTO` continuam a expor `tipoContratoId`/`tipoContratoDesc` e
 `tipoVinculoId`/`tipoVinculoDesc` para a parte informativa do modal.
+
+---
+
+## Mobilidade — campos `Antes`/`Depois` renomeados para `Origem`/`Destino` (breaking)
+
+**Data:** 2026-09-04
+
+Endpoints afetados (todos os que devolvem/aceitam `MobilidadeDTO`):
+- `GET /api/v1/funcionarios/mobilidades/{idFuncionario}/atual`
+- `GET`/`POST`/`PUT` de detalhe, registo e validação de mobilidade.
+
+Os sufixos `Antes`/`Depois` não descreviam o que os campos são — são a **origem** e o **destino** da
+mobilidade. Renomeação directa (mesmos tipos, mesma semântica, mesmo acesso):
+
+| Antigo | Novo | Tipo | Acesso |
+|---|---|---|---|
+| `dirrecaoAntes` | `direcaoOrigemDesc` | `String` | só leitura |
+| `direcaoAntesId` | `direcaoOrigemId` | `Long` | só leitura |
+| `direcaoDepois` | `direcaoDestino` | `Long` | leitura/escrita |
+| `direcaoDepoisDesc` | `direcaoDestinoDesc` | `String` | só leitura |
+| `seccaoAntes` | `seccaoOrigemDesc` | `String` | só leitura |
+| `seccaoDepois` | `seccaoDestino` | `Long` | leitura/escrita |
+| `seccaoDepoisDesc` | `seccaoDestinoDesc` | `String` | só leitura |
+| `localTrabalhoAntes` | `localTrabalhoOrigemDesc` | `String` | só leitura |
+| `localTrabalhoDepois` | `localTrabalhoDestino` | `Long` | leitura/escrita |
+| `localTrabalhoDepoisDesc` | `localTrabalhoDestinoDesc` | `String` | só leitura |
+
+De passagem corrige-se o gralho `dirrecaoAntes` (duplo "r"). Os nomes antigos **deixam de existir**: os
+de escrita (`direcaoDepois`, `seccaoDepois`, `localTrabalhoDepois`) passam a ser ignorados na
+desserialização, pelo que a mobilidade gravaria sem destino se o front não for actualizado.

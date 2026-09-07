@@ -101,7 +101,7 @@ public class RegimeWriteService {
     if (regime.getFunId() == null || !regime.getFunId().getId().equals(funcionario.getId()))
       throw IgrpResponseStatusException.badRequest("Regime não pertence a este funcionário");
 
-    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(regime.getEstado());
+    funcionarioRules.garantirEditavel(regime.getEstado());
 
     // Atualização do regime
     regime.setTipoRegime(ValidationUtil.trimToNull(dto.getTipoRegime()));

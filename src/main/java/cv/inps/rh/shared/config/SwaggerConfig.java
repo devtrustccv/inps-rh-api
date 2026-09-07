@@ -115,4 +115,12 @@ public class SwaggerConfig {
         .pathsToMatch("/processamento/soat/**")
         .build();
   }
+
+  @Bean
+  public GroupedOpenApi subsidioferias() {
+    return GroupedOpenApi.builder()
+        .group("Subsídio Férias")
+        .pathsToMatch("/**/subsidio-feria/**")
+        .build();
+  }
 }

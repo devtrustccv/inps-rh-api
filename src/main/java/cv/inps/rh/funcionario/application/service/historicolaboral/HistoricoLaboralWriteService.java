@@ -162,7 +162,7 @@ public class HistoricoLaboralWriteService {
     if (relacionamento.getFunId() == null || !relacionamento.getFunId().getId().equals(funcionario.getId()))
       throw IgrpResponseStatusException.badRequest("Histórico laboral não pertence ao funcionário");
 
-    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(relacionamento.getEstado());
+    funcionarioRules.garantirEditavel(relacionamento.getEstado());
 
     // A edição da relação laboral só é permitida se ainda NÃO houver processamento salarial.
     // Deteção feita como na vista (RH_V_CONTRATO/RH_V_RELACAO_LABORAL): EXISTS em

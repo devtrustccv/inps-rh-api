@@ -65,6 +65,7 @@ public class AlterarEscalaoCargoService {
     var atual = tiposRelacionamentoEntityRepository.findAtualByFuncionarioUuid(funcionario.getUuid())
         .orElseThrow(() -> IgrpResponseStatusException.badRequest("O colaborador não tem relação laboral atual."));
 
+    funcionarioRules.garantirEditavel(atual.getEstado());
     garantirPccsSemCarreira(atual);
 
     // "Tipo Alteração" (multiselect, DOMAINS=TIPO_MOV_LABORAL; referência de validação ALTERACAO_ESCALAO):

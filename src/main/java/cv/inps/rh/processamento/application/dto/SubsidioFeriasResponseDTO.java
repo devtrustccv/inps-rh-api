@@ -1,41 +1,26 @@
-/* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME */
-
 package cv.inps.rh.processamento.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
 
-import java.util.List;
-
 @IgrpDTO
 public record SubsidioFeriasResponseDTO(
 
+    Long subsidioId,
+
     String nome,
 
-    String funId,
+    Long funId,
 
-    String anoReferente,
+    Long salarioBase,
 
     String estado,
 
-    String valorSubsidio,
+    String estadoSubsidio,
 
-    String diasTotal,
+    String mesDiasTrabalho,
 
-    String mesTotal,
+    Long diasferias,
 
-    String descSalBase,
-
-    String valorSalBase,
-
-    String descSubsidio,
-
-    String totalRemun,
-
-    String diasFeria,
-
-    String id,
-
-    List<SubsidioFeriasDetalheDTO> detalhes
+    Long valorSubsidio
 ) {
 }

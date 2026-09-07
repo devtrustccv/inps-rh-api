@@ -108,7 +108,10 @@ public class NovoContratoService {
       return primeiroContrato(funcionario, dadosContratuais,
           isPrimeiroContrato ? "INICIO" : "CONTINUIDADE");
     }
-    // TODO(guard I/E temporariamente desativado): funcionarioRules.garantirEditavel(tipoRelacionamentoAtual.getEstado());
+    // SEM guard I/E aqui (ao contrario dos restantes fluxos do dossie): o alvo nao e um registo que se
+    // esteja a editar, e o vinculo ANTERIOR que a linha seguinte vai ARQUIVAR. Desactivar um contrato
+    // poe o tiprel em I (AlterarEstadoContratoService.aplicarEstado), pelo que um guard aqui impediria
+    // dar um contrato novo a quem tem o anterior desactivado — que e precisamente o caso de uso.
     // Fecha o tiprel anterior (DOSSIÊ, Novo Contrato 2.5): est_act_adm=0 e DATA_FIM = data de início
     // do NOVO registo MENOS 1 dia. Regra do analista: o relacionamento que fecha termina em inicio-1,
     // para os períodos ficarem contíguos com o novo (que abre em inicio) sem sobreposição de 1 dia.

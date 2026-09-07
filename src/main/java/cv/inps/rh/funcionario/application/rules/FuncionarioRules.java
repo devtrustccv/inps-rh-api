@@ -55,6 +55,12 @@ public class FuncionarioRules {
     }
   }
 
+  /** Igual a {@link #garantirEditavel(Estado)} para entidades que guardam o estado como texto. */
+  public void garantirEditavel(String estado) {
+    if (estado == null) return;
+    garantirEditavel(Estado.valueOf(estado));
+  }
+
   public TiposRelacionamentoEntity getTipoRelacionamentoAtual(UUID funUuid) {
     return tiposRelacionamentoEntityRepository.findAtualByFuncionarioUuid(funUuid)
         .orElseThrow(()-> IgrpResponseStatusException.badRequest("Funcionario sem tipo de relacionamento atual"));
