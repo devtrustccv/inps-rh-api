@@ -179,6 +179,9 @@ public class ValidarRegistoColaboradorService {
 
     var situacaoLaboral = tiposRelacionamento.getSituacLaboralId();
     dadosContratuaisMapper.toUpdateSituacaoLaboral(situacaoLaboral, dadosContratuais);
+    // Recalcula o FLG_PROCESSA: o payload da validacao pode ter mudado a situacao laboral, e o
+    // toUpdateRelacionamento nao toca no campo — sem isto o valor do registo sobrevivia a aprovacao.
+    tiposRelacionamento.setFlgProcessa(funcionarioRules.flgProcessaDoRegisto(situacaoLaboral));
 
     var contrato = tiposRelacionamento.getContrVinculoId();
     contratoMapper.toUpdateEntity(contrato, dadosContratuais);
