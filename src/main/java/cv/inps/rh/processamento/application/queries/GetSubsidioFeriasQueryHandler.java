@@ -2,20 +2,15 @@ package cv.inps.rh.processamento.application.queries;
 
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
-import cv.inps.rh.processamento.application.dto.SubsidioFeriasResponseDTO;
+import cv.inps.rh.configuracao.application.services.model.WrapperListDTO;
 import cv.inps.rh.processamento.domain.service.SubsidioService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import java.sql.Date;
-import java.time.LocalDate;
-import java.util.List;
 
 @Component
-public class GetSubsidioFeriasQueryHandler implements QueryHandler<GetSubsidioFeriasQuery, ResponseEntity<List<SubsidioFeriasResponseDTO>>> {
+public class GetSubsidioFeriasQueryHandler implements QueryHandler<GetSubsidioFeriasQuery, ResponseEntity<WrapperListDTO>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetSubsidioFeriasQueryHandler.class);
 
@@ -26,32 +21,18 @@ public class GetSubsidioFeriasQueryHandler implements QueryHandler<GetSubsidioFe
   }
 
   @IgrpQueryHandler
-  public ResponseEntity<List<SubsidioFeriasResponseDTO>> handle(GetSubsidioFeriasQuery query) {
+  public ResponseEntity<WrapperListDTO> handle(GetSubsidioFeriasQuery query) {
 
     LOGGER.debug("GetSubsidioFeriasQuery: {}", query);
 
-    var dataProcessamento = getDate(query.getDataProcessamento());
-
     var result = subsidioService.getSubsidioFeriasData(
-        dataProcessamento,
-        dataProcessamento.toLocalDate().getYear(),
+        query.getAno(),
         query.getDirecaoId(),
-        query.getFuncionarioId()
+        query.getFuncionarioId(),
+        query.getPage(),
+        query.getSize()
     );
 
     return ResponseEntity.ok(result);
   }
-
-  private Date getDate(String dataProcessamento) {
-
-    try {
-      if (StringUtils.hasText(dataProcessamento))
-        return Date.valueOf(LocalDate.parse(dataProcessamento));
-    } catch (Exception e) {
-      LOGGER.error(e.getMessage(), e);
-    }
-
-    return Date.valueOf(LocalDate.now());
-  }
-
 }

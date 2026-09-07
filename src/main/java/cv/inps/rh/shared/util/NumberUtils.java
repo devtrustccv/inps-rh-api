@@ -12,9 +12,15 @@ public class NumberUtils {
   private NumberUtils() {
   }
 
-  public static DecimalFormat usDecimalFormat() {
+  public static DecimalFormat dotDecimalFormat() {
     var symbols = new DecimalFormatSymbols(Locale.US);
     symbols.setGroupingSeparator('.');
+    return new DecimalFormat("#,###", symbols);
+  }
+
+  public static DecimalFormat spaceDecimalFormat() {
+    var symbols = new DecimalFormatSymbols(Locale.US);
+    symbols.setGroupingSeparator(' ');
     return new DecimalFormat("#,###", symbols);
   }
 
