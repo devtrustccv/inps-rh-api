@@ -34,6 +34,17 @@ public class MobilidadeDTO  {
   private LocalDate dataFim ;
 
 
+  // Estado do registo (só leitura). O ecrã precisa dele para rotular o que recebe: um registo por
+  // validar (P/C) mostra uma proposta, um consolidado (A/I) mostra a posição já aplicada. Sem isto o
+  // frontend só conhecia o estado pela listagem.
+  @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+  private String estado ;
+
+
+  @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+  private String estadoDesc ;
+
+
   // Campos só de leitura: o servidor devolve-os, nunca os lê do corpo do pedido. O readOnly tira-os
   // do schema de request no Swagger. Substituir por MobilidadeReqDTO/MobilidadeRespDTO quando o
   // fluxo de mobilidade estabilizar — é a convenção do resto do módulo.

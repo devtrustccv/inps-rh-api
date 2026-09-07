@@ -39,52 +39,96 @@ public class MobilidadeMapper {
     dto.setTipoMobilidade(mobilidade.getTipoSituacao());
     dto.setDataInicio(mobilidade.getDataInicio());
     dto.setDataFim(mobilidade.getDataFim());
+    aplicarEstado(dto, mobilidade);
 
     return dto;
 
   }
 
   /**
-   * Detalhe/editar de uma mobilidade específica. Spec DOSSIÊ: o INSTIT_ID gravado é a
-   * direção de destino; a origem é a direção do vínculo anterior (só display).
+   * Detalhe/editar de uma mobilidade específica.
    *
-   * @param atual    a mobilidade que está a ser vista/editada (fornece o destino)
-   * @param anterior a mobilidade do vínculo anterior (fornece a origem); pode ser null
+   * <p>O par Origem/Destino é preenchido por comparação com o <b>pai</b> ({@code MOB_ID}, a
+   * mobilidade que estava em vigor quando esta foi registada), dimensão a dimensão:
+   *
+   * <ul>
+   *   <li><b>mudou</b> (valor difere do pai) → Origem = valor do pai, Destino = valor deste registo.
+   *       "Destino preenchido" passa a significar exactamente "isto alterou-se", que é o que o ecrã
+   *       de validação precisa de destacar.</li>
+   *   <li><b>não mudou</b> → Origem = valor deste registo, Destino = null. Evita devolver o mesmo
+   *       valor nos dois lados (fazia o ecrã parecer que a dimensão tinha mudado).</li>
+   *   <li><b>sem pai</b> (INICIO, NOVO_CONTRATO, registos antigos sem MOB_ID) → não é um movimento,
+   *       é uma posição: tudo em Origem, Destino todo null. Fica igual ao {@code /atual}.</li>
+   * </ul>
+   *
+   * <p>Compara-se com o pai em vez de interpretar o {@code tipoSituacao} porque este último é
+   * declarativo (o que foi escolhido no ecrã) e pode desalinhar-se dos valores reais — há registos
+   * onde as edições acumularam tipos que não descrevem um movimento.
+   *
+   * @param atual a mobilidade que está a ser vista/editada
+   * @param pai   a mobilidade em vigor antes desta (RH_T_MOBILIDADE.MOB_ID); pode ser null
    */
-  public MobilidadeDTO mobilidadeDetalheDTO(MobilidadeEntity atual, MobilidadeEntity anterior) {
+  public MobilidadeDTO mobilidadeDetalheDTO(MobilidadeEntity atual, MobilidadeEntity pai) {
     var dto = new MobilidadeDTO();
 
-    // Destino = valores gravados nesta mobilidade. O id alimenta os selects do formulário; a
-    // descrição existe para o ecrã de validação, que é só leitura e não carrega as listas.
-    if (Objects.nonNull(atual.getInstidId())) {
-      dto.setDirecaoDestino(atual.getInstidId().getId());
-      dto.setDirecaoDestinoDesc(atual.getInstidId().getNome());
-    }
-    if (Objects.nonNull(atual.getSecaoId())) {
-      dto.setSeccaoDestino(atual.getSecaoId().getId());
-      dto.setSeccaoDestinoDesc(atual.getSecaoId().getNome());
-    }
-    if (Objects.nonNull(atual.getLocalTrabId())) {
-      dto.setLocalTrabalhoDestino(atual.getLocalTrabId().getId());
-      dto.setLocalTrabalhoDestinoDesc(atual.getLocalTrabId().getNome());
+    var direcao = atual.getInstidId();
+    var secao = atual.getSecaoId();
+    var localTrab = atual.getLocalTrabId();
+
+    var direcaoPai = pai != null ? pai.getInstidId() : null;
+    var secaoPai = pai != null ? pai.getSecaoId() : null;
+    var localTrabPai = pai != null ? pai.getLocalTrabId() : null;
+
+    // Direção. O id do lado escolhido alimenta os selects do formulário; a descrição serve o ecrã de
+    // validação, que é só leitura e não carrega as listas.
+    if (mudou(direcao != null ? direcao.getId() : null, direcaoPai != null ? direcaoPai.getId() : null)) {
+      dto.setDirecaoOrigemId(direcaoPai.getId());
+      dto.setDirecaoOrigemDesc(direcaoPai.getNome());
+      dto.setDirecaoDestino(direcao.getId());
+      dto.setDirecaoDestinoDesc(direcao.getNome());
+    } else if (Objects.nonNull(direcao)) {
+      dto.setDirecaoOrigemId(direcao.getId());
+      dto.setDirecaoOrigemDesc(direcao.getNome());
     }
 
-    // Origem = direção/secção/local do vínculo anterior (display)
-    if (anterior != null) {
-      if (Objects.nonNull(anterior.getInstidId())) {
-        dto.setDirecaoOrigemDesc(anterior.getInstidId().getNome());
-        dto.setDirecaoOrigemId(anterior.getInstidId().getId());
-      }
-      if (Objects.nonNull(anterior.getSecaoId()))
-        dto.setSeccaoOrigemDesc(anterior.getSecaoId().getNome());
-      if (Objects.nonNull(anterior.getLocalTrabId()))
-        dto.setLocalTrabalhoOrigemDesc(anterior.getLocalTrabId().getNome());
+    // Secção
+    if (mudou(secao != null ? secao.getId() : null, secaoPai != null ? secaoPai.getId() : null)) {
+      dto.setSeccaoOrigemDesc(secaoPai.getNome());
+      dto.setSeccaoDestino(secao.getId());
+      dto.setSeccaoDestinoDesc(secao.getNome());
+    } else if (Objects.nonNull(secao)) {
+      dto.setSeccaoOrigemDesc(secao.getNome() != null ? secao.getNome() : "");
+    }
+
+    // Local de trabalho
+    if (mudou(localTrab != null ? localTrab.getId() : null, localTrabPai != null ? localTrabPai.getId() : null)) {
+      dto.setLocalTrabalhoOrigemDesc(localTrabPai.getNome());
+      dto.setLocalTrabalhoDestino(localTrab.getId());
+      dto.setLocalTrabalhoDestinoDesc(localTrab.getNome());
+    } else if (Objects.nonNull(localTrab)) {
+      dto.setLocalTrabalhoOrigemDesc(localTrab.getNome());
     }
 
     dto.setTipoMobilidade(atual.getTipoSituacao());
     dto.setDataInicio(atual.getDataInicio());
     dto.setDataFim(atual.getDataFim());
+    aplicarEstado(dto, atual);
     return dto;
+  }
+
+  /**
+   * Houve movimento nesta dimensão? Só quando existe pai (há com que comparar), o registo tem valor e
+   * os dois diferem. Sem pai não é um movimento — é a posição inicial.
+   */
+  private boolean mudou(Long valor, Long valorPai) {
+    return valor != null && valorPai != null && !Objects.equals(valor, valorPai);
+  }
+
+  private void aplicarEstado(MobilidadeDTO dto, MobilidadeEntity mobilidade) {
+    var estado = mobilidade.getEstado();
+    if (estado == null) return;
+    dto.setEstado(estado.getCode());
+    dto.setEstadoDesc(estado.getDescription());
   }
 
   public MobilidadeEntity toMobilidade(DadosContratuaisReqDTO dc, Estado estado) {
