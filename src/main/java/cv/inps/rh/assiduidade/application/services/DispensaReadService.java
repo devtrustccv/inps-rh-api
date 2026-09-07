@@ -178,7 +178,7 @@ public class DispensaReadService {
     dto.setDataInicio(e.getDataInicio());
     dto.setDataFim(e.getDataFim());
     dto.setHoraSaida(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
-    dto.setHoraEntrada(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
+    dto.setHoraEntrada(TimeUtils.intervalFormatToHHmm((e.getHoraFim())));
     var mins = TimeUtils.diffMinutes(e.getHoraInicio(), e.getHoraFim());
     dto.setTotalHoras(TimeUtils.formatMinutesToHHmm(mins));
     dto.setTipoMotivo(e.getTipoDispensa());
@@ -248,7 +248,7 @@ public class DispensaReadService {
     dto.setDataInicio(e.getDataInicio());
     dto.setDataFim(e.getDataFim());
     dto.setHoraSaida(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
-    dto.setHoraEntrada(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
+    dto.setHoraEntrada(TimeUtils.intervalFormatToHHmm((e.getHoraFim())));
     var mins = TimeUtils.diffMinutes(e.getHoraInicio(), e.getHoraFim());
     dto.setTotalHoras(TimeUtils.formatMinutesToHHmm(mins));
     dto.setTipoMotivo(e.getTipoDispensa());
