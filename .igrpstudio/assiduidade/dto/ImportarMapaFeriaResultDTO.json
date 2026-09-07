@@ -1,0 +1,75 @@
+{
+  "type": "dto",
+  "module": "assiduidade",
+  "name": "ImportarMapaFeriaResult",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "attributes": [
+    {
+      "name": "ano",
+      "objectType": "java",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "none"
+    },
+    {
+      "name": "linhasLidas",
+      "objectType": "java",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "none"
+    },
+    {
+      "name": "colaboradoresImportados",
+      "objectType": "java",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "none"
+    },
+    {
+      "name": "periodosImportados",
+      "objectType": "java",
+      "type": "integer",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "none"
+    },
+    {
+      "name": "erros",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false,
+      "collectionType": "list"
+    }
+  ],
+  "id": "b7a1r9k1qs"
+}

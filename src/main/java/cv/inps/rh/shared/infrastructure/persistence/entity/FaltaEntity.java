@@ -100,18 +100,21 @@ public class FaltaEntity extends AuditEntity {
   /**
    * Desconto de falta no salário.
    *
-   * <p>A falta desconta via <em>pagamento</em>, não via remuneração: PROCESSA_FALTA usa
-   * o tipo de movimento PAG_FALTA, grava em RH_T_DEF_PAGAMENTOS e actualiza esta coluna
-   * (package body, linha 2496).
+   * <p>Grava-se em {@code RH_T_DEF_REMUNERACOES} e associa-se por
+   * {@code RH_T_TIPREL_REM_PAG.REM_ID}, como manda a spec de 07/09/2026 (secção "Validar Falta").
    *
-   * <p>Existiu aqui um DEF_REM_ID que nunca chegou a ser usado — sem dados, sem PL/SQL
-   * e sem vistas a referi-lo — e foi removido da tabela. Não confundir com
-   * RH_T_HORA_EXTRA.DEF_REM_ID, esse sim alimentado por PROCESSA_HORA: a hora extra
-   * acresce como remuneração, a falta desconta como pagamento.
+   * <p>Isto já foi {@code DEF_PAG_ID} apontando a {@code RH_T_DEF_PAGAMENTOS}. A coluna deixou de
+   * existir na tabela — só existe {@code DEF_REM_ID} — e o mapeamento antigo rebentava com
+   * ORA-00904 em qualquer leitura que a incluísse.
+   *
+   * <p>Nota: a parametrização do tipo de movimento continua a ser procurada por
+   * {@code PAG_FALTA} em {@code RH_T_PARAM_VINCULO_MOV}, porque é a única que existe em BD (não há
+   * {@code REM_FALTA}). O nome do tipo é a chave de parametrização; o destino da definição é que
+   * mudou para remunerações.
    */
   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "def_pag_id", referencedColumnName = "id")
-    private DefPagamentoEntity defPagId;
+    @JoinColumn(name = "def_rem_id", referencedColumnName = "id")
+    private DefinicaoRemuneracaoEntity defRemId;
 
 
   /**

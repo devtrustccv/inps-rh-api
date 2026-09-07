@@ -37,7 +37,10 @@ public class DispensaReqDTO  {
   private String horasDisponiveis ;
 
 
-  private LocalDate dataDispensa ;
+  private LocalDate dataInicio ;
+
+
+  private LocalDate dataFim ;
 
 
   private String horaSaida ;

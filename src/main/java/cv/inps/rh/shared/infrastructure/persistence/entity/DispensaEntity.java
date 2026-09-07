@@ -52,8 +52,21 @@ public class DispensaEntity extends AuditEntity {
     private String descricaoMotivo;
 
 
-  @Column(name="data")
-    private LocalDate data;
+  /**
+   * Início da dispensa. A coluna chamava-se {@code DATA} (um único dia) e passou a
+   * {@code DATA_INICIO} + {@code DATA_FIM} na BD; o mapeamento antigo ficou a apontar para uma
+   * coluna que já não existe e a listagem rebentava com ORA-00904.
+   */
+  @Column(name="data_inicio", nullable = false)
+    private LocalDate dataInicio;
+
+
+  /**
+   * Fim da dispensa. Nullable: uma dispensa de um só dia dispensa o preenchimento, e nesse caso
+   * vale o {@link #dataInicio}.
+   */
+  @Column(name="data_fim")
+    private LocalDate dataFim;
 
 
   @Column(name="hora_inicio")
