@@ -25,16 +25,9 @@ public class MobilidadeMapper {
 
     var dto = new MobilidadeDTO();
 
-    if (Objects.nonNull(mobilidade.getInstidId())) {
-      dto.setDirecaoOrigemDesc(mobilidade.getInstidId().getNome());
-      dto.setDirecaoOrigemId(mobilidade.getInstidId().getId());
-    }
-
-    if (Objects.nonNull(mobilidade.getSecaoId()))
-      dto.setSeccaoOrigemDesc(mobilidade.getSecaoId().getNome() != null ? mobilidade.getSecaoId().getNome() : "");
-
-    if (Objects.nonNull(mobilidade.getLocalTrabId()))
-      dto.setLocalTrabalhoOrigemDesc(mobilidade.getLocalTrabId().getNome());
+    // Posição em vigor: vai toda no lado sem sufixo. Não há Destino — isto não é um movimento por
+    // concretizar, é onde o colaborador está.
+    aplicarPosicao(dto, mobilidade);
 
     dto.setTipoMobilidade(mobilidade.getTipoSituacao());
     dto.setDataInicio(mobilidade.getDataInicio());
@@ -46,24 +39,22 @@ public class MobilidadeMapper {
   }
 
   /**
-   * Detalhe/editar de uma mobilidade específica.
-   *
-   * <p>O par Origem/Destino é preenchido por comparação com o <b>pai</b> ({@code MOB_ID}, a
-   * mobilidade que estava em vigor quando esta foi registada), dimensão a dimensão:
+   * Detalhe/editar de uma mobilidade específica. A forma do response é governada pelo <b>estado</b> do
+   * registo:
    *
    * <ul>
-   *   <li><b>mudou</b> (valor difere do pai) → Origem = valor do pai, Destino = valor deste registo.
-   *       "Destino preenchido" passa a significar exactamente "isto alterou-se", que é o que o ecrã
-   *       de validação precisa de destacar.</li>
-   *   <li><b>não mudou</b> → Origem = valor deste registo, Destino = null. Evita devolver o mesmo
-   *       valor nos dois lados (fazia o ecrã parecer que a dimensão tinha mudado).</li>
-   *   <li><b>sem pai</b> (INICIO, NOVO_CONTRATO, registos antigos sem MOB_ID) → não é um movimento,
-   *       é uma posição: tudo em Origem, Destino todo null. Fica igual ao {@code /atual}.</li>
+   *   <li><b>Por validar (P/C)</b> — há um movimento por concretizar. Os campos <b>sem sufixo</b>
+   *       levam a posição de onde se parte (o pai, {@code RH_T_MOBILIDADE.MOB_ID}: onde o colaborador
+   *       está enquanto isto não é aplicado) e os campos <b>Destino</b> levam para onde vai (os
+   *       valores deste registo). É o que o ecrã de validação precisa para comparar, e o que o
+   *       formulário de edição reenvia no PUT.</li>
+   *   <li><b>Consolidado (A/I)</b> — já não há para onde ir. Devolve-se apenas o registo pedido, nos
+   *       campos sem sufixo, com o lado Destino todo a null. Não interessa se é o vínculo em vigor ou
+   *       histórico: é o registo cujo id foi pedido.</li>
+   *   <li><b>Por validar sem pai</b> (ex. um INICIO ainda pendente, ou registos gravados antes de
+   *       MOB_ID ser preenchido) — não há de onde partir, logo não é um movimento: trata-se como
+   *       consolidado, com os valores do próprio registo no lado sem sufixo.</li>
    * </ul>
-   *
-   * <p>Compara-se com o pai em vez de interpretar o {@code tipoSituacao} porque este último é
-   * declarativo (o que foi escolhido no ecrã) e pode desalinhar-se dos valores reais — há registos
-   * onde as edições acumularam tipos que não descrevem um movimento.
    *
    * @param atual a mobilidade que está a ser vista/editada
    * @param pai   a mobilidade em vigor antes desta (RH_T_MOBILIDADE.MOB_ID); pode ser null
@@ -71,42 +62,26 @@ public class MobilidadeMapper {
   public MobilidadeDTO mobilidadeDetalheDTO(MobilidadeEntity atual, MobilidadeEntity pai) {
     var dto = new MobilidadeDTO();
 
-    var direcao = atual.getInstidId();
-    var secao = atual.getSecaoId();
-    var localTrab = atual.getLocalTrabId();
+    if (porValidar(atual.getEstado()) && pai != null) {
+      // Sem sufixo = de onde parte (o pai); Destino = para onde vai (este registo). Os ids do lado
+      // Destino alimentam os selects do formulário; as descrições servem o ecrã de validação, que é
+      // só leitura e não carrega as listas.
+      aplicarPosicao(dto, pai);
 
-    var direcaoPai = pai != null ? pai.getInstidId() : null;
-    var secaoPai = pai != null ? pai.getSecaoId() : null;
-    var localTrabPai = pai != null ? pai.getLocalTrabId() : null;
-
-    // Direção. O id do lado escolhido alimenta os selects do formulário; a descrição serve o ecrã de
-    // validação, que é só leitura e não carrega as listas.
-    if (mudou(direcao != null ? direcao.getId() : null, direcaoPai != null ? direcaoPai.getId() : null)) {
-      dto.setDirecaoOrigemId(direcaoPai.getId());
-      dto.setDirecaoOrigemDesc(direcaoPai.getNome());
-      dto.setDirecaoDestino(direcao.getId());
-      dto.setDirecaoDestinoDesc(direcao.getNome());
-    } else if (Objects.nonNull(direcao)) {
-      dto.setDirecaoOrigemId(direcao.getId());
-      dto.setDirecaoOrigemDesc(direcao.getNome());
-    }
-
-    // Secção
-    if (mudou(secao != null ? secao.getId() : null, secaoPai != null ? secaoPai.getId() : null)) {
-      dto.setSeccaoOrigemDesc(secaoPai.getNome());
-      dto.setSeccaoDestino(secao.getId());
-      dto.setSeccaoDestinoDesc(secao.getNome());
-    } else if (Objects.nonNull(secao)) {
-      dto.setSeccaoOrigemDesc(secao.getNome() != null ? secao.getNome() : "");
-    }
-
-    // Local de trabalho
-    if (mudou(localTrab != null ? localTrab.getId() : null, localTrabPai != null ? localTrabPai.getId() : null)) {
-      dto.setLocalTrabalhoOrigemDesc(localTrabPai.getNome());
-      dto.setLocalTrabalhoDestino(localTrab.getId());
-      dto.setLocalTrabalhoDestinoDesc(localTrab.getNome());
-    } else if (Objects.nonNull(localTrab)) {
-      dto.setLocalTrabalhoOrigemDesc(localTrab.getNome());
+      if (Objects.nonNull(atual.getInstidId())) {
+        dto.setDirecaoDestino(atual.getInstidId().getId());
+        dto.setDirecaoDestinoDesc(atual.getInstidId().getNome());
+      }
+      if (Objects.nonNull(atual.getSecaoId())) {
+        dto.setSeccaoDestino(atual.getSecaoId().getId());
+        dto.setSeccaoDestinoDesc(atual.getSecaoId().getNome());
+      }
+      if (Objects.nonNull(atual.getLocalTrabId())) {
+        dto.setLocalTrabalhoDestino(atual.getLocalTrabId().getId());
+        dto.setLocalTrabalhoDestinoDesc(atual.getLocalTrabId().getNome());
+      }
+    } else {
+      aplicarPosicao(dto, atual);
     }
 
     dto.setTipoMobilidade(atual.getTipoSituacao());
@@ -116,12 +91,25 @@ public class MobilidadeMapper {
     return dto;
   }
 
-  /**
-   * Houve movimento nesta dimensão? Só quando existe pai (há com que comparar), o registo tem valor e
-   * os dois diferem. Sem pai não é um movimento — é a posição inicial.
-   */
-  private boolean mudou(Long valor, Long valorPai) {
-    return valor != null && valorPai != null && !Objects.equals(valor, valorPai);
+  /** Registo ainda em ciclo de validação: pendente (P) ou devolvido para correção (C). */
+  private boolean porValidar(Estado estado) {
+    return Estado.P.equals(estado) || Estado.C.equals(estado);
+  }
+
+  /** Preenche o lado sem sufixo com a direção/secção/local de uma mobilidade. */
+  private void aplicarPosicao(MobilidadeDTO dto, MobilidadeEntity mobilidade) {
+    if (Objects.nonNull(mobilidade.getInstidId())) {
+      dto.setDirecaoId(mobilidade.getInstidId().getId());
+      dto.setDirecaoDesc(mobilidade.getInstidId().getNome());
+    }
+    if (Objects.nonNull(mobilidade.getSecaoId())) {
+      dto.setSeccaoId(mobilidade.getSecaoId().getId());
+      dto.setSeccaoDesc(mobilidade.getSecaoId().getNome() != null ? mobilidade.getSecaoId().getNome() : "");
+    }
+    if (Objects.nonNull(mobilidade.getLocalTrabId())) {
+      dto.setLocalTrabalhoId(mobilidade.getLocalTrabId().getId());
+      dto.setLocalTrabalhoDesc(mobilidade.getLocalTrabId().getNome());
+    }
   }
 
   private void aplicarEstado(MobilidadeDTO dto, MobilidadeEntity mobilidade) {

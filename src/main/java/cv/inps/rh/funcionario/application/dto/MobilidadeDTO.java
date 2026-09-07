@@ -45,17 +45,25 @@ public class MobilidadeDTO  {
   private String estadoDesc ;
 
 
-  // Campos só de leitura: o servidor devolve-os, nunca os lê do corpo do pedido. O readOnly tira-os
-  // do schema de request no Swagger. Substituir por MobilidadeReqDTO/MobilidadeRespDTO quando o
+  // Campos SEM sufixo = a situação de onde se parte. Num registo por validar (P/C) são os valores do
+  // pai (RH_T_MOBILIDADE.MOB_ID), ou seja onde o colaborador está enquanto a mobilidade não é
+  // aplicada; nos restantes estados são os valores do próprio registo pedido.
+  //
+  // Campos com sufixo Destino = para onde vai. Só vêm preenchidos enquanto há movimento por
+  // concretizar (P/C); num registo consolidado (A/I) ficam null, porque já não há para onde ir.
+  //
+  // Todos os *Desc e os ids do lado sem sufixo são só de leitura: o servidor devolve-os, nunca os lê
+  // do corpo do pedido (o readOnly tira-os do schema de request no Swagger). O que o formulário
+  // reenvia no PUT/POST é o lado Destino. Substituir por MobilidadeReqDTO/MobilidadeRespDTO quando o
   // fluxo de mobilidade estabilizar — é a convenção do resto do módulo.
   @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-  private String direcaoOrigemDesc ;
+  private String direcaoDesc ;
 
 
-  // Id da direcção de origem (só leitura). DirecaoEntity não tem uuid — o identificador é o Long id,
-  // igual ao usado em direcaoDestino e nos selects do formulário.
+  // DirecaoEntity não tem uuid — o identificador é o Long id, igual ao usado em direcaoDestino e nos
+  // selects do formulário. O mesmo vale para seccaoId e localTrabalhoId.
   @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-  private Long direcaoOrigemId ;
+  private Long direcaoId ;
 
 
   private Long direcaoDestino ;
@@ -66,7 +74,11 @@ public class MobilidadeDTO  {
 
 
   @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-  private String seccaoOrigemDesc ;
+  private String seccaoDesc ;
+
+
+  @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+  private Long seccaoId ;
 
 
   private Long seccaoDestino ;
@@ -77,7 +89,11 @@ public class MobilidadeDTO  {
 
 
   @Schema(accessMode = Schema.AccessMode.READ_ONLY)
-  private String localTrabalhoOrigemDesc ;
+  private String localTrabalhoDesc ;
+
+
+  @Schema(accessMode = Schema.AccessMode.READ_ONLY)
+  private Long localTrabalhoId ;
 
 
   private Long localTrabalhoDestino ;

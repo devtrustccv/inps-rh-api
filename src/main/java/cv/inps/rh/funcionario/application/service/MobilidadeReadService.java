@@ -118,9 +118,10 @@ public class MobilidadeReadService {
         () -> IgrpResponseStatusException.notFound("mobilidade nao encontrada com id"+query.getId())
     );
 
-    // O "antes" é o pai directo do registo: RH_T_MOBILIDADE.MOB_ID, a mobilidade que estava em vigor
-    // quando esta foi registada. É o mapper que compara pai vs registo para decidir, dimensão a
-    // dimensão, o que mudou (Origem+Destino) e o que não mudou (só Origem).
+    // O "de onde parte" é o pai directo do registo: RH_T_MOBILIDADE.MOB_ID, a mobilidade que estava em
+    // vigor quando esta foi registada. É o mapper que decide como o usar: num registo por validar
+    // (P/C) o pai vai no lado sem sufixo e este registo no lado Destino; num consolidado (A/I) só
+    // este registo é devolvido.
     //
     // Não se sobe a cadeia de tiprel à procura do "antes": além de não funcionar enquanto a mobilidade
     // está pendente (ainda não existe tiprel a apontar-lhe), vários tiprels podem partilhar o mesmo MOB
