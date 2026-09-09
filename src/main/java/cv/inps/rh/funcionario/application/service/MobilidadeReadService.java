@@ -13,10 +13,8 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MobilidadeEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.RhVMobilidadeEntity;
-import cv.inps.rh.shared.infrastructure.persistence.entity.TiposRelacionamentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MobilidadeEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.RhVMobilidadeEntityRepository;
-import cv.inps.rh.shared.infrastructure.persistence.repository.TiposRelacionamentoEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -40,7 +38,6 @@ public class MobilidadeReadService {
   private final RhVMobilidadeEntityRepository rhVMobilidadeEntityRepository;
   private final MobilidadeMapper mobilidadeMapper;
   private final FuncionarioRules funcionarioRules;
-  private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
 
   @Transactional(readOnly = true)
   public WrapperListMobilidadeDTO getListMobilidade(GetListMobilidadesQuery query) {
@@ -121,28 +118,22 @@ public class MobilidadeReadService {
         () -> IgrpResponseStatusException.notFound("mobilidade nao encontrada com id"+query.getId())
     );
 
-    // "Antes" = direção do vínculo anterior. Com o padrão de contentores, vários tiprels podem
-    // partilhar o mesmo MOB (ex.: uma carreira que validou depois herdou-o). O que INTRODUZIU esta
-    // mobilidade é aquele cujo pai (TIPREL_ID) tem um MOB DIFERENTE; o MOB desse pai é o "antes".
-    MobilidadeEntity anterior = tiposRelacionamentoEntityRepository
-        .findAllByMobId_Id(mobilidade.getId())
-        .stream()
-        .map(TiposRelacionamentoEntity::getTiprelId)
-        .filter(java.util.Objects::nonNull)
-        .map(TiposRelacionamentoEntity::getMobId)
-        .filter(m -> m != null && !java.util.Objects.equals(m.getId(), mobilidade.getId()))
-        .findFirst()
-        .orElse(null);
+    // O "de onde parte" é o pai directo do registo: RH_T_MOBILIDADE.MOB_ID, a mobilidade que estava em
+    // vigor quando esta foi registada. É o mapper que decide como o usar: num registo por validar
+    // (P/C) o pai vai no lado sem sufixo e este registo no lado Destino; num consolidado (A/I) só
+    // este registo é devolvido.
+    //
+    // Não se sobe a cadeia de tiprel à procura do "antes": além de não funcionar enquanto a mobilidade
+    // está pendente (ainda não existe tiprel a apontar-lhe), vários tiprels podem partilhar o mesmo MOB
+    // e a heurística nunca acrescentava nada ao que o MOB_ID já diz. Fica null na primeira mobilidade
+    // do funcionário e em registos gravados antes de MOB_ID ser preenchido — e nesse caso o mapper
+    // trata o registo como posição, não como movimento.
+    var pai = mobilidade.getMobId() != null
+        && !java.util.Objects.equals(mobilidade.getMobId().getId(), mobilidade.getId())
+        ? mobilidade.getMobId()
+        : null;
 
-    // Fallback: enquanto a mobilidade está pendente (P) ainda não existe tiprel a apontar-lhe, por
-    // isso a derivação acima não devolve nada. Nesse caso usa-se o "antes" gravado no registo
-    // (RH_T_MOBILIDADE.MOB_ID). Fica null em registos antigos e na primeira mobilidade do funcionário.
-    if (anterior == null && mobilidade.getMobId() != null
-        && !java.util.Objects.equals(mobilidade.getMobId().getId(), mobilidade.getId())) {
-      anterior = mobilidade.getMobId();
-    }
-
-    return mobilidadeMapper.mobilidadeDetalheDTO(mobilidade, anterior);
+    return mobilidadeMapper.mobilidadeDetalheDTO(mobilidade, pai);
   }
 
   @Transactional(readOnly = true)

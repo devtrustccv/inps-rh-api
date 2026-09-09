@@ -25,66 +25,98 @@ public class MobilidadeMapper {
 
     var dto = new MobilidadeDTO();
 
-    if (Objects.nonNull(mobilidade.getInstidId())) {
-      dto.setDirecaoOrigemDesc(mobilidade.getInstidId().getNome());
-      dto.setDirecaoOrigemId(mobilidade.getInstidId().getId());
-    }
-
-    if (Objects.nonNull(mobilidade.getSecaoId()))
-      dto.setSeccaoOrigemDesc(mobilidade.getSecaoId().getNome() != null ? mobilidade.getSecaoId().getNome() : "");
-
-    if (Objects.nonNull(mobilidade.getLocalTrabId()))
-      dto.setLocalTrabalhoOrigemDesc(mobilidade.getLocalTrabId().getNome());
+    // Posição em vigor: vai toda no lado sem sufixo. Não há Destino — isto não é um movimento por
+    // concretizar, é onde o colaborador está.
+    aplicarPosicao(dto, mobilidade);
 
     dto.setTipoMobilidade(mobilidade.getTipoSituacao());
     dto.setDataInicio(mobilidade.getDataInicio());
     dto.setDataFim(mobilidade.getDataFim());
+    aplicarEstado(dto, mobilidade);
 
     return dto;
 
   }
 
   /**
-   * Detalhe/editar de uma mobilidade específica. Spec DOSSIÊ: o INSTIT_ID gravado é a
-   * direção de destino; a origem é a direção do vínculo anterior (só display).
+   * Detalhe/editar de uma mobilidade específica. A forma do response é governada pelo <b>estado</b> do
+   * registo:
    *
-   * @param atual    a mobilidade que está a ser vista/editada (fornece o destino)
-   * @param anterior a mobilidade do vínculo anterior (fornece a origem); pode ser null
+   * <ul>
+   *   <li><b>Por validar (P/C)</b> — há um movimento por concretizar. Os campos <b>sem sufixo</b>
+   *       levam a posição de onde se parte (o pai, {@code RH_T_MOBILIDADE.MOB_ID}: onde o colaborador
+   *       está enquanto isto não é aplicado) e os campos <b>Destino</b> levam para onde vai (os
+   *       valores deste registo). É o que o ecrã de validação precisa para comparar, e o que o
+   *       formulário de edição reenvia no PUT.</li>
+   *   <li><b>Consolidado (A/I)</b> — já não há para onde ir. Devolve-se apenas o registo pedido, nos
+   *       campos sem sufixo, com o lado Destino todo a null. Não interessa se é o vínculo em vigor ou
+   *       histórico: é o registo cujo id foi pedido.</li>
+   *   <li><b>Por validar sem pai</b> (ex. um INICIO ainda pendente, ou registos gravados antes de
+   *       MOB_ID ser preenchido) — não há de onde partir, logo não é um movimento: trata-se como
+   *       consolidado, com os valores do próprio registo no lado sem sufixo.</li>
+   * </ul>
+   *
+   * @param atual a mobilidade que está a ser vista/editada
+   * @param pai   a mobilidade em vigor antes desta (RH_T_MOBILIDADE.MOB_ID); pode ser null
    */
-  public MobilidadeDTO mobilidadeDetalheDTO(MobilidadeEntity atual, MobilidadeEntity anterior) {
+  public MobilidadeDTO mobilidadeDetalheDTO(MobilidadeEntity atual, MobilidadeEntity pai) {
     var dto = new MobilidadeDTO();
 
-    // Destino = valores gravados nesta mobilidade. O id alimenta os selects do formulário; a
-    // descrição existe para o ecrã de validação, que é só leitura e não carrega as listas.
-    if (Objects.nonNull(atual.getInstidId())) {
-      dto.setDirecaoDestino(atual.getInstidId().getId());
-      dto.setDirecaoDestinoDesc(atual.getInstidId().getNome());
-    }
-    if (Objects.nonNull(atual.getSecaoId())) {
-      dto.setSeccaoDestino(atual.getSecaoId().getId());
-      dto.setSeccaoDestinoDesc(atual.getSecaoId().getNome());
-    }
-    if (Objects.nonNull(atual.getLocalTrabId())) {
-      dto.setLocalTrabalhoDestino(atual.getLocalTrabId().getId());
-      dto.setLocalTrabalhoDestinoDesc(atual.getLocalTrabId().getNome());
-    }
+    if (porValidar(atual.getEstado()) && pai != null) {
+      // Sem sufixo = de onde parte (o pai); Destino = para onde vai (este registo). Os ids do lado
+      // Destino alimentam os selects do formulário; as descrições servem o ecrã de validação, que é
+      // só leitura e não carrega as listas.
+      aplicarPosicao(dto, pai);
 
-    // Origem = direção/secção/local do vínculo anterior (display)
-    if (anterior != null) {
-      if (Objects.nonNull(anterior.getInstidId())) {
-        dto.setDirecaoOrigemDesc(anterior.getInstidId().getNome());
-        dto.setDirecaoOrigemId(anterior.getInstidId().getId());
+      if (Objects.nonNull(atual.getInstidId())) {
+        dto.setDirecaoDestino(atual.getInstidId().getId());
+        dto.setDirecaoDestinoDesc(atual.getInstidId().getNome());
       }
-      if (Objects.nonNull(anterior.getSecaoId()))
-        dto.setSeccaoOrigemDesc(anterior.getSecaoId().getNome());
-      if (Objects.nonNull(anterior.getLocalTrabId()))
-        dto.setLocalTrabalhoOrigemDesc(anterior.getLocalTrabId().getNome());
+      if (Objects.nonNull(atual.getSecaoId())) {
+        dto.setSeccaoDestino(atual.getSecaoId().getId());
+        dto.setSeccaoDestinoDesc(atual.getSecaoId().getNome());
+      }
+      if (Objects.nonNull(atual.getLocalTrabId())) {
+        dto.setLocalTrabalhoDestino(atual.getLocalTrabId().getId());
+        dto.setLocalTrabalhoDestinoDesc(atual.getLocalTrabId().getNome());
+      }
+    } else {
+      aplicarPosicao(dto, atual);
     }
 
     dto.setTipoMobilidade(atual.getTipoSituacao());
     dto.setDataInicio(atual.getDataInicio());
     dto.setDataFim(atual.getDataFim());
+    aplicarEstado(dto, atual);
     return dto;
+  }
+
+  /** Registo ainda em ciclo de validação: pendente (P) ou devolvido para correção (C). */
+  private boolean porValidar(Estado estado) {
+    return Estado.P.equals(estado) || Estado.C.equals(estado);
+  }
+
+  /** Preenche o lado sem sufixo com a direção/secção/local de uma mobilidade. */
+  private void aplicarPosicao(MobilidadeDTO dto, MobilidadeEntity mobilidade) {
+    if (Objects.nonNull(mobilidade.getInstidId())) {
+      dto.setDirecaoId(mobilidade.getInstidId().getId());
+      dto.setDirecaoDesc(mobilidade.getInstidId().getNome());
+    }
+    if (Objects.nonNull(mobilidade.getSecaoId())) {
+      dto.setSeccaoId(mobilidade.getSecaoId().getId());
+      dto.setSeccaoDesc(mobilidade.getSecaoId().getNome() != null ? mobilidade.getSecaoId().getNome() : "");
+    }
+    if (Objects.nonNull(mobilidade.getLocalTrabId())) {
+      dto.setLocalTrabalhoId(mobilidade.getLocalTrabId().getId());
+      dto.setLocalTrabalhoDesc(mobilidade.getLocalTrabId().getNome());
+    }
+  }
+
+  private void aplicarEstado(MobilidadeDTO dto, MobilidadeEntity mobilidade) {
+    var estado = mobilidade.getEstado();
+    if (estado == null) return;
+    dto.setEstado(estado.getCode());
+    dto.setEstadoDesc(estado.getDescription());
   }
 
   public MobilidadeEntity toMobilidade(DadosContratuaisReqDTO dc, Estado estado) {

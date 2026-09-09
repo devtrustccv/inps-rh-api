@@ -138,7 +138,19 @@
       "primaryKey": false
     },
     {
-      "name": "dataDispensa",
+      "name": "dataInicio",
+      "objectType": "java",
+      "type": "string",
+      "required": false,
+      "before": false,
+      "after": false,
+      "positive": false,
+      "isEmail": false,
+      "isUrl": false,
+      "primaryKey": false
+    },
+    {
+      "name": "dataFim",
       "objectType": "java",
       "type": "string",
       "required": false,

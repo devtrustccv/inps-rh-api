@@ -4,6 +4,7 @@
 package cv.inps.rh.shared.infrastructure.persistence.entity;
 
 import cv.igrp.framework.stereotype.IgrpEntity;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.config.AuditEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -51,6 +52,17 @@ public class FeriasMapaEntity extends AuditEntity {
     private AnoEntity anoId;
     @Column(name="uuid")
     private UUID uuid;
+
+
+  /**
+   * Estado do mapa. A coluna é NOT NULL em BD e não estava mapeada — sem isto qualquer insert
+   * falhava. Ao importar um mapa novo para o mesmo colaborador/ano, os anteriores passam a 'I' e
+   * só o importado fica 'A' (regra da spec: "caso se importar um mapa que já existe, deve
+   * inactivar o outro").
+   */
+  @Enumerated(EnumType.STRING)
+    @Column(name="estado", nullable = false)
+    private Estado estado;
 
 
 }

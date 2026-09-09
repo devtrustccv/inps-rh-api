@@ -23,10 +23,10 @@ import java.util.Objects;
  *
  * <ul>
  *   <li><strong>Salário</strong> — quando {@code RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL = 1}.
- *       Grava em {@code RH_T_DEF_PAGAMENTOS}, associa em {@code RH_T_TIPREL_REM_PAG.PAG_ID} e
- *       actualiza {@code RH_T_FALTA.DEF_PAG_ID} — exactamente o que
- *       {@code RH_PROCESSAMENTO_SALARIAL_DB.GRAVA_REMUN_PAG(P_REM_PAG => 'PAG')} faz do lado
- *       da BD, e o que {@code PROCESSA_FALTA} espera encontrar.</li>
+ *       Grava em {@code RH_T_DEF_REMUNERACOES}, associa em {@code RH_T_TIPREL_REM_PAG.REM_ID} e
+ *       actualiza {@code RH_T_FALTA.DEF_REM_ID}, como manda a spec de 07/09/2026 (secção
+ *       "Validar Falta") — e é o único destino possível, porque DEF_PAG_ID já não existe na
+ *       tabela.</li>
  *   <li><strong>Férias</strong> — quando "Deduzir Falta Em" = {@code FERIAS}.
  *       Grava em {@code RH_T_FERIAS_GOZADAS}, validando primeiro se há saldo.</li>
  *   <li><strong>Dispensa</strong> — quando "Deduzir Falta Em" = {@code DISPENSA}.
@@ -43,11 +43,15 @@ public class FaltaDescontoService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FaltaDescontoService.class);
 
-  /** Tipo de movimento parametrizado para o desconto de falta no salário. */
+  /**
+   * Tipo de movimento parametrizado para o desconto de falta no salário. Mantém-se PAG_FALTA:
+   * é a única parametrização existente em RH_T_PARAM_VINCULO_MOV (não há REM_FALTA). O nome é a
+   * chave de parametrização; o desconto em si passou a ser gravado como remuneração.
+   */
   private static final String TIPO_MOV_PAG_FALTA = "PAG_FALTA";
 
-  /** Valor de RH_T_DEF_PAGAMENTOS.TIPO — usado por DELETE_ASSIDUIDADE para limpar. */
-  private static final String TIPO_PAGAMENTO_FALTA = "FALTA";
+  /** Valor de RH_T_DEF_REMUNERACOES.TIPO — usado por DELETE_ASSIDUIDADE para limpar. */
+  private static final String TIPO_REMUNERACAO_FALTA = "FALTA";
 
   private static final String MOEDA_PADRAO = "CVE";
 
@@ -57,7 +61,7 @@ public class FaltaDescontoService {
   /** RH_T_FALTA.TIPO. */
   public static final String TIPO_FALTA = "FALTA";
 
-  private final DefPagamentoEntityRepository defPagamentoRepository;
+  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoRepository;
   private final TipoRelRemPagEntityRepository tipoRelRemPagRepository;
   private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoRepository;
   private final FeriasGozadasEntityRepository feriasGozadasRepository;
@@ -121,26 +125,26 @@ public class FaltaDescontoService {
 
     var valor = falta.getValor() != null ? falta.getValor() : BigDecimal.ZERO;
 
-    var pagamento = new DefPagamentoEntity();
-    pagamento.setTmId(tipoMovimento);
-    pagamento.setValor(valor);
-    pagamento.setDataInicio(falta.getDataInicio().toLocalDate());
-    pagamento.setDataFim(falta.getDataFim().toLocalDate());
-    pagamento.setEstado(Estado.A);
-    pagamento.setFunId(funcionario);
-    pagamento.setTipo(TIPO_PAGAMENTO_FALTA);
-    pagamento.setMoeda(MOEDA_PADRAO);
-    pagamento.setObs("Falta registada referente a " + falta.getDataInicio().toLocalDate());
-    pagamento.setUuid(UuidCreator.getTimeOrderedEpoch());
-    pagamento = defPagamentoRepository.save(pagamento);
+    var remuneracao = new DefinicaoRemuneracaoEntity();
+    remuneracao.setTmId(tipoMovimento);
+    remuneracao.setValor(valor);
+    remuneracao.setDataInicio(falta.getDataInicio().toLocalDate());
+    remuneracao.setDataFim(falta.getDataFim().toLocalDate());
+    remuneracao.setEstado(Estado.A);
+    remuneracao.setFunId(funcionario);
+    remuneracao.setTipo(TIPO_REMUNERACAO_FALTA);
+    remuneracao.setMoeda(MOEDA_PADRAO);
+    remuneracao.setObs("Falta registada referente a " + falta.getDataInicio().toLocalDate());
+    remuneracao.setUuid(UuidCreator.getTimeOrderedEpoch());
+    remuneracao = definicaoRemuneracaoRepository.save(remuneracao);
 
     var associacao = new TipoRelRemPagEntity();
     associacao.setTiprelId(tipoRel);
-    associacao.setPagId(pagamento);
+    associacao.setRemId(remuneracao);
     tipoRelRemPagRepository.save(associacao);
 
     falta.setFlgDescontoSal(1);
-    falta.setDefPagId(pagamento);
+    falta.setDefRemId(remuneracao);
   }
 
   /**
@@ -199,7 +203,9 @@ public class FaltaDescontoService {
     var dispensa = new DispensaEntity();
     dispensa.setPedidoId(pedido);
     dispensa.setTiprelId(tipoRel);
-    dispensa.setData(falta.getDataInicio().toLocalDate());
+    dispensa.setDataInicio(falta.getDataInicio().toLocalDate());
+    dispensa.setDataFim(falta.getDataFim() != null
+        ? falta.getDataFim().toLocalDate() : falta.getDataInicio().toLocalDate());
     dispensa.setHoraInicio(TimeUtils.hhmmToIntervalFormat("00:00"));
     dispensa.setHoraFim(TimeUtils.hhmmToIntervalFormat(horasAusencia));
     dispensa.setTotalHora(TimeUtils.hhmmToMinutes(horasAusencia));

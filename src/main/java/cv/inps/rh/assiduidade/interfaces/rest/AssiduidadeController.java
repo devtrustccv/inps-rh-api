@@ -1124,6 +1124,25 @@ public class AssiduidadeController {
     return queryBus.handle(new GetExportarMapaFeriaQuery(ano, direcao));
   }
 
+  @PostMapping(value = "mapa-feria/importar", consumes = "multipart/form-data")
+  @Operation(
+    summary = "Importar mapa de férias",
+    description = "Importa o Excel-modelo do RH (uma linha por colaborador, até dois períodos de "
+        + "férias). Cada período preenchido gera um registo em RH_T_FERIAS_MAPA; importar um mapa "
+        + "para um colaborador/ano que já tenha mapa inactiva o anterior. Linhas inválidas não "
+        + "abortam o ficheiro — são devolvidas na lista de erros.",
+    responses = {
+      @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+          schema = @Schema(implementation = ImportarMapaFeriaResultDTO.class, type = "object")))
+    }
+  )
+  public ResponseEntity<ImportarMapaFeriaResultDTO> importarMapaFeria(
+    @RequestParam(value = "ficheiro") org.springframework.web.multipart.MultipartFile ficheiro,
+    @RequestParam(value = "ano") Integer ano) {
+
+    return commandBus.send(new ImportarMapaFeriaCommand(ficheiro, ano));
+  }
+
   @PostMapping(value = "picagens/importar")
   @Operation(
     summary = "Importar dados de picagem",

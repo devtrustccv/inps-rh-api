@@ -52,7 +52,10 @@ public class DispensaListDTO  {
   private String dataPedido ;
 
 
-  private String dataDispensa ;
+  private String dataInicio ;
+
+
+  private String dataFim ;
 
 
   private String intervaloHoras ;

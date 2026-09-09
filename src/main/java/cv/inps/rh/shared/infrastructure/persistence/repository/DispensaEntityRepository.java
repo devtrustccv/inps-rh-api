@@ -26,7 +26,11 @@ public interface DispensaEntityRepository extends
 
   Optional<DispensaEntity> findByPedidoId_Uuid(UUID uuid);
 
-  java.util.List<DispensaEntity> findAllByPedidoId_FunId_UuidAndDataBetween(
+  /**
+   * Dispensas de um colaborador cujo INÍCIO cai no intervalo. Serve o saldo mensal de horas, que é
+   * contado pelo mês em que a dispensa começa.
+   */
+  java.util.List<DispensaEntity> findAllByPedidoId_FunId_UuidAndDataInicioBetween(
       UUID funUuid,
       java.time.LocalDate dataInicio,
       java.time.LocalDate dataFim

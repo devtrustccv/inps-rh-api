@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import cv.inps.rh.shared.infrastructure.persistence.entity.SituacaoLaboralEntity;
 
 @Component
 @RequiredArgsConstructor
@@ -59,6 +60,19 @@ public class FuncionarioRules {
   public void garantirEditavel(String estado) {
     if (estado == null) return;
     garantirEditavel(Estado.valueOf(estado));
+  }
+
+  /**
+   * FLG_PROCESSA do tiprel no REGISTO/VALIDACAO do colaborador, derivado de
+   * RH_T_PARAM_SITUACAO.FLG_REMUNERACAO (use case), como nos restantes fluxos do dossie.
+   * <p>Diferenca deliberada face aos outros: aqui o default e <b>1</b>. Um colaborador novo tem de
+   * processar salario, logo so desce a 0 quando a situacao laboral escolhida diz explicitamente que
+   * nao remunera (FLG_REMUNERACAO=0) — nunca por omissao (sem situacao, sem param ou flag nula).
+   */
+  public int flgProcessaDoRegisto(SituacaoLaboralEntity situacao) {
+    var param = situacao != null ? situacao.getSituacaoLaboralId() : null;
+    if (param == null || param.getFlgRemuneracao() == null) return 1;
+    return Integer.valueOf(0).equals(param.getFlgRemuneracao()) ? 0 : 1;
   }
 
   public TiposRelacionamentoEntity getTipoRelacionamentoAtual(UUID funUuid) {

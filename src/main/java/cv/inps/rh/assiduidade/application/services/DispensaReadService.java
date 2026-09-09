@@ -48,7 +48,7 @@ public class DispensaReadService {
 
     Specification<DispensaEntity> spec = buildSpec(query);
 
-    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "data"));
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "dataInicio"));
     Page<DispensaEntity> page = dispensaRepository.findAll(spec, pageable);
 
     var content = page.getContent().stream()
@@ -84,13 +84,14 @@ public class DispensaReadService {
       if (StringUtils.hasText(query.getDataInicio())) {
         var di = DateFormatter.stringToLocalDate(query.getDataInicio());
         if (di != null) {
-          predicates.add(cb.greaterThanOrEqualTo(root.get("data"), di));
+          predicates.add(cb.greaterThanOrEqualTo(root.get("dataInicio"), di));
         }
       }
       if (StringUtils.hasText(query.getDataFim())) {
         var df = DateFormatter.stringToLocalDate(query.getDataFim());
         if (df != null) {
-          predicates.add(cb.lessThanOrEqualTo(root.get("data"), df));
+          predicates.add(cb.lessThanOrEqualTo(
+              cb.coalesce(root.get("dataFim"), root.get("dataInicio")), df));
         }
       }
 
@@ -137,7 +138,8 @@ public class DispensaReadService {
     dto.setDataPedido(
         e.getPedidoId() != null ? DateFormatter.localDateTimeToLocalDateString(e.getPedidoId().getCreatedDate())
             : null);
-    dto.setDataDispensa(e.getData() != null ? DateFormatter.localDateToString(e.getData()) : null);
+    dto.setDataInicio(e.getDataInicio() != null ? DateFormatter.localDateToString(e.getDataInicio()) : null);
+    dto.setDataFim(e.getDataFim() != null ? DateFormatter.localDateToString(e.getDataFim()) : null);
     var hi = e.getHoraInicio();
     var hf = e.getHoraFim();
     dto.setIntervaloHoras(
@@ -173,9 +175,10 @@ public class DispensaReadService {
         e.getPedidoId() != null && e.getPedidoId().getFunId() != null
             ? e.getPedidoId().getFunId().getNome()
             : null);
-    dto.setDataDispensa(e.getData());
+    dto.setDataInicio(e.getDataInicio());
+    dto.setDataFim(e.getDataFim());
     dto.setHoraSaida(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
-    dto.setHoraEntrada(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
+    dto.setHoraEntrada(TimeUtils.intervalFormatToHHmm((e.getHoraFim())));
     var mins = TimeUtils.diffMinutes(e.getHoraInicio(), e.getHoraFim());
     dto.setTotalHoras(TimeUtils.formatMinutesToHHmm(mins));
     dto.setTipoMotivo(e.getTipoDispensa());
@@ -193,10 +196,10 @@ public class DispensaReadService {
     dto.setObservacaoResponsavel(e.getObsResponsavel());
     dto.setObservacaoRh(e.getObsRh());
 
-    if (dto.getColaborador() != null && dto.getDataDispensa() != null) {
-      var inicioMes = dto.getDataDispensa().withDayOfMonth(1);
-      var fimMes = dto.getDataDispensa().withDayOfMonth(dto.getDataDispensa().lengthOfMonth());
-      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataBetween(
+    if (dto.getColaborador() != null && dto.getDataInicio() != null) {
+      var inicioMes = dto.getDataInicio().withDayOfMonth(1);
+      var fimMes = dto.getDataInicio().withDayOfMonth(dto.getDataInicio().lengthOfMonth());
+      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataInicioBetween(
           dto.getColaborador(), inicioMes, fimMes);
       int totalMin = 0;
       for (var d : listaMes) {
@@ -242,9 +245,10 @@ public class DispensaReadService {
         e.getPedidoId() != null && e.getPedidoId().getFunId() != null
             ? e.getPedidoId().getFunId().getNome()
             : null);
-    dto.setDataDispensa(e.getData());
+    dto.setDataInicio(e.getDataInicio());
+    dto.setDataFim(e.getDataFim());
     dto.setHoraSaida(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
-    dto.setHoraEntrada(TimeUtils.intervalFormatToHHmm((e.getHoraInicio())));
+    dto.setHoraEntrada(TimeUtils.intervalFormatToHHmm((e.getHoraFim())));
     var mins = TimeUtils.diffMinutes(e.getHoraInicio(), e.getHoraFim());
     dto.setTotalHoras(TimeUtils.formatMinutesToHHmm(mins));
     dto.setTipoMotivo(e.getTipoDispensa());
@@ -261,12 +265,12 @@ public class DispensaReadService {
           });
     }
 
-    if (dto.getColaborador() != null && dto.getDataDispensa() != null) {
+    if (dto.getColaborador() != null && dto.getDataInicio() != null) {
 
-      var inicioMes = dto.getDataDispensa().withDayOfMonth(1);
-      var fimMes = dto.getDataDispensa().withDayOfMonth(dto.getDataDispensa().lengthOfMonth());
+      var inicioMes = dto.getDataInicio().withDayOfMonth(1);
+      var fimMes = dto.getDataInicio().withDayOfMonth(dto.getDataInicio().lengthOfMonth());
 
-      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataBetween(
+      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataInicioBetween(
           dto.getColaborador(), inicioMes, fimMes);
       int totalMin = 0;
       for (var d : listaMes) {

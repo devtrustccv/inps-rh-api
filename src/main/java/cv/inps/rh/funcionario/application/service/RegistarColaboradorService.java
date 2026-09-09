@@ -245,7 +245,9 @@ public class RegistarColaboradorService {
         tr, carreira, paramVinculo, dadosContratuais.getEscalaoReferenciaId());
     tr.setRegimeId(regime);
     tr.setMobId(mobilidade);
-    tr.setFlgProcessa(1);
+    // FLG_PROCESSA deriva da situacao laboral escolhida (use case), com default 1: um colaborador
+    // novo processa salario, salvo se a situacao disser explicitamente que nao remunera.
+    tr.setFlgProcessa(funcionarioRules.flgProcessaDoRegisto(situacaoLaboral));
     tr.setEstActAdm(1);
     tr.setSituacLaboralId(situacaoLaboral);
 

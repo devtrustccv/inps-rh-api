@@ -51,8 +51,12 @@ public class DispensaWriteService {
       throw IgrpResponseStatusException.badRequest("Dados de dispensa ausentes");
     if (req.getColaborador() == null)
       throw IgrpResponseStatusException.badRequest("Colaborador obrigatório");
-    if (req.getDataDispensa() == null)
-      throw IgrpResponseStatusException.badRequest("Data da dispensa obrigatória");
+    if (req.getDataInicio() == null)
+      throw IgrpResponseStatusException.badRequest("Data de início da dispensa obrigatória");
+    // Fim é opcional (dispensa de um só dia), mas se vier não pode anteceder o início.
+    if (req.getDataFim() != null && req.getDataFim().isBefore(req.getDataInicio()))
+      throw IgrpResponseStatusException.badRequest(
+          "Data de fim da dispensa não pode ser anterior à data de início");
     if (!StringUtils.hasText(req.getHoraSaida()) || !StringUtils.hasText(req.getHoraEntrada()))
       throw IgrpResponseStatusException.badRequest("Intervalo de horas obrigatório");
 
@@ -67,7 +71,7 @@ public class DispensaWriteService {
           "Hora de entrada tem de ser posterior à hora de saída");
 
     dispensaHorasService.validarSaldo(
-        req.getColaborador(), req.getDataDispensa(), minutosPedidos, null);
+        req.getColaborador(), req.getDataInicio(), minutosPedidos, null);
 
     var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaborador());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -93,7 +97,8 @@ public class DispensaWriteService {
     disp.setTiprelId(tipoRelAtual);
     disp.setTipoDispensa(req.getTipoMotivo());
     disp.setDescricaoMotivo(req.getMotivo());
-    disp.setData(req.getDataDispensa());
+    disp.setDataInicio(req.getDataInicio());
+    disp.setDataFim(req.getDataFim());
     disp.setHoraInicio(TimeUtils.hhmmToIntervalFormat(req.getHoraSaida()));
     disp.setHoraFim(TimeUtils.hhmmToIntervalFormat(req.getHoraEntrada()));
     disp.setTotalHora(TimeUtils.diffMinutes(
@@ -158,7 +163,7 @@ public class DispensaWriteService {
     // A própria dispensa é excluída da contagem: já está gravada, contá-la seria duplicar.
     int minutosDesta = TimeUtils.diffMinutes(dispensa.getHoraInicio(), dispensa.getHoraFim());
     dispensaHorasService.validarSaldo(
-        funcionario.getUuid(), dispensa.getData(), minutosDesta, dispensa.getId());
+        funcionario.getUuid(), dispensa.getDataInicio(), minutosDesta, dispensa.getId());
 
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
     var ev = EstadoValidacao.fromCodeOrThrow(req.getValidar());
@@ -180,7 +185,8 @@ public class DispensaWriteService {
     dispensa.setEstado(estado);
     dispensa.setResponsavelId(responsavel != null ? responsavel.getId() : null);
     dispensa.setTiprelId(tipoRelAtual);
-    if (req.getDataDispensa() != null) dispensa.setData(req.getDataDispensa());
+    if (req.getDataInicio() != null) dispensa.setDataInicio(req.getDataInicio());
+    if (req.getDataFim() != null) dispensa.setDataFim(req.getDataFim());
     if (StringUtils.hasText(req.getHoraSaida())) dispensa.setHoraInicio(TimeUtils.hhmmToIntervalFormat(req.getHoraSaida()));
     if (StringUtils.hasText(req.getHoraEntrada())) dispensa.setHoraFim(TimeUtils.hhmmToIntervalFormat(req.getHoraEntrada()));
     if (StringUtils.hasText(req.getMotivo())) dispensa.setDescricaoMotivo(req.getMotivo());
@@ -226,8 +232,8 @@ public class DispensaWriteService {
         ausencia.setReferenciaName(TableName.RH_T_DISPENSA.name());
         ausencia.setReferenciaId(dispensa.getId());
         ausencia.setObs(dispensa.getTipoDispensa());
-        ausencia.setDataInicio(dispensa.getData());
-        ausencia.setDataFim(dispensa.getData());
+        ausencia.setDataInicio(dispensa.getDataInicio());
+        ausencia.setDataFim(dispensa.getDataFim() != null ? dispensa.getDataFim() : dispensa.getDataInicio());
         var minutos = TimeUtils.diffMinutes(dispensa.getHoraInicio(), dispensa.getHoraFim());
         ausencia.setHora(minutos);
         ausencia.setEstado(Estado.A);
@@ -271,7 +277,7 @@ public class DispensaWriteService {
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     // Valida o saldo com as horas novas, excluindo esta dispensa da contagem do mês.
-    var novaData = req.getDataDispensa() != null ? req.getDataDispensa() : dispensa.getData();
+    var novaData = req.getDataInicio() != null ? req.getDataInicio() : dispensa.getDataInicio();
     var novoInicio = StringUtils.hasText(req.getHoraSaida())
         ? TimeUtils.hhmmToIntervalFormat(req.getHoraSaida()) : dispensa.getHoraInicio();
     var novoFim = StringUtils.hasText(req.getHoraEntrada())
@@ -298,7 +304,8 @@ public class DispensaWriteService {
     dispensa.setResponsavelId(responsavel != null ? responsavel.getId() : null);
     dispensa.setEstado(Estado.P);
     dispensa.setTiprelId(tipoRelAtual);
-    if (req.getDataDispensa() != null) dispensa.setData(req.getDataDispensa());
+    if (req.getDataInicio() != null) dispensa.setDataInicio(req.getDataInicio());
+    if (req.getDataFim() != null) dispensa.setDataFim(req.getDataFim());
     if (StringUtils.hasText(req.getHoraSaida())) dispensa.setHoraInicio(TimeUtils.hhmmToIntervalFormat(req.getHoraSaida()));
     if (StringUtils.hasText(req.getHoraEntrada())) dispensa.setHoraFim(TimeUtils.hhmmToIntervalFormat(req.getHoraEntrada()));
     if (StringUtils.hasText(req.getMotivo())) dispensa.setDescricaoMotivo(req.getMotivo());

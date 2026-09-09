@@ -1475,6 +1475,39 @@
       ]
     },
     {
+      "actionName": "importarMapaFeria",
+      "path": "mapa-feria/importar",
+      "method": "POST",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ImportarMapaFeriaResult",
+                "objectType": "dto",
+                "name": "data",
+                "collectionType": "none",
+                "module": "assiduidade"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        {
+          "type": "file",
+          "name": "ficheiro",
+          "isRequired": true
+        },
+        {
+          "type": "integer",
+          "name": "ano",
+          "isRequired": true
+        }
+      ]
+    },
+    {
       "actionName": "importarDadosPicagem",
       "path": "picagens/importar",
       "method": "POST",

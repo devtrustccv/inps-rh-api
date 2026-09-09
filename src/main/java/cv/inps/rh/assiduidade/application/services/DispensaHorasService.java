@@ -42,7 +42,7 @@ public class DispensaHorasService {
       var inicioMes = dataReferencia.withDayOfMonth(1);
       var fimMes = dataReferencia.withDayOfMonth(dataReferencia.lengthOfMonth());
 
-      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataBetween(
+      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataInicioBetween(
           funcionarioUuid, inicioMes, fimMes);
 
       int usadasMin = 0;
