@@ -50,10 +50,15 @@ public class JustificarFaltaDTO  {
   private String obsResponsavel ;
 
 
-  private String despachoRh ;
-
 
   private Long tipoJustificacao ;
+
+  /**
+   * "Motivo" do bloco "Justificar Faltas Selecionadas" — um único texto aplicado a todas as
+   * faltas seleccionadas (o ecrã tem uma só caixa, não uma por dia). Guardado em
+   * RH_T_FALTA.DESCRICAO_MOTIVO, igual em todas as faltas do pedido.
+   */
+  private String motivo ;
 
   /**
    * "Com Justificativo?" (DOMAIN SIM_NAO) — o radio único do cabeçalho do formulário, que

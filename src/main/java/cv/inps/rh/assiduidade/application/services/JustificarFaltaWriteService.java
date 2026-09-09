@@ -172,15 +172,18 @@ public class JustificarFaltaWriteService {
       falta.setValor(valor);
       valorTotal = valorTotal.add(valor);
 
-      falta.setDescricaoMotivo(item.getMotivo());
-      // "Com justificativo?" é escolha do RH por falta — antes assumia-se sempre SIM.
+      // Motivo e "Com justificativo?" são do bloco "Justificar Faltas Selecionadas": uma
+      // caixa e um radio únicos, aplicados a todas as faltas seleccionadas ("A justificativa
+      // será aplicada às N faltas selecionadas"). Antes vinham por item, o que obrigava o
+      // frontend a repetir o mesmo valor em cada linha e deixava o mesmo pedido com motivos
+      // diferentes se falhasse numa.
+      falta.setDescricaoMotivo(dto.getMotivo());
       falta.setFlgJustificativo(
-          StringUtils.hasText(item.getComJustificativo()) ? item.getComJustificativo() : "SIM");
+          StringUtils.hasText(dto.getComJustificativo()) ? dto.getComJustificativo() : "SIM");
 
       falta.setDecisaoResponsavel(dto.getParecerResponsavel());
       falta.setResponsavelId(responsavel);
       falta.setObsResponsavel(dto.getObsResponsavel());
-      falta.setDespachoRh(dto.getDespachoRh());
 
       falta.setParamSitId(paramSituacao);
       falta.setFlgDescontoFalta(deducao);
@@ -324,9 +327,11 @@ public class JustificarFaltaWriteService {
             "Falta não encontrada para a síntese diária ID: " + item.getId());
       }
 
-      falta.setDescricaoMotivo(item.getMotivo());
+      // Do cabeçalho, como no registo. Só sobrepõe o motivo se veio no payload, para uma
+      // validação sem alterações não apagar o que o maker escreveu.
+      if (StringUtils.hasText(dto.getMotivo()))
+        falta.setDescricaoMotivo(dto.getMotivo());
       falta.setObsResponsavel(dto.getObsResponsavel());
-      falta.setDespachoRh(dto.getDespachoRh());
       // Só sobrepõe se o checker indicou um responsável — senão mantém o da justificação.
       if (responsavelValidacao != null)
         falta.setResponsavelId(responsavelValidacao);

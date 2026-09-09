@@ -2,6 +2,7 @@ package cv.inps.rh.assiduidade.application.services;
 
 import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
 import cv.inps.rh.assiduidade.application.dto.JustificarFaltaDTO;
+import cv.inps.rh.assiduidade.application.dto.ResumoFaltaMesDTO;
 import cv.inps.rh.assiduidade.application.queries.GetJustificacaoFaltaByPedidoQuery;
 import cv.inps.rh.assiduidade.application.queries.GetJustificacaoFaltaQuery;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
@@ -14,6 +15,7 @@ import cv.inps.rh.shared.infrastructure.persistence.entity.AssiduidadeSinteseDia
 import cv.inps.rh.shared.infrastructure.persistence.entity.DocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FaltaEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.FuncionarioEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,8 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,9 +50,11 @@ public class JustificarFaltaReadService {
    * "Inactiva" — neste ecrã o estado inactivo resulta de o RH ter recusado a
    * justificação.
    */
+  private static final String ESTADO_POR_JUSTIFICAR = "Por justificar";
+
   private static String descreverEstadoFalta(Estado estado) {
     if (estado == null)
-      return "Por justificar";
+      return ESTADO_POR_JUSTIFICAR;
     return switch (estado) {
       case P -> "Pendente";
       case A -> "Justificada";
@@ -62,7 +68,7 @@ public class JustificarFaltaReadService {
    * (ver JustificarFaltaWriteService). Os anexos de um dia continuam em RH_T_FALTA e são
    * devolvidos em {@code FaltaItemDTO.documento}.
    */
-  private List<AnexoReqDTO> anexosDoPedido(cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity pedido) {
+  private List<AnexoReqDTO> anexosDoPedido(PedidoEntity pedido) {
     if (pedido == null || pedido.getUuid() == null)
       return new java.util.ArrayList<>();
     return documentoEntityRepository
@@ -87,7 +93,7 @@ public class JustificarFaltaReadService {
   }
 
   @Transactional(readOnly = true)
-  public JustificarFaltaDTO getFaltaJustificadaResumo(GetJustificacaoFaltaQuery query) {
+  public ResumoFaltaMesDTO getFaltaJustificadaResumo(GetJustificacaoFaltaQuery query) {
 
     UUID funcUuid;
     try {
@@ -116,39 +122,59 @@ public class JustificarFaltaReadService {
         .findAllByFuncionarioAndPeriodo(funcUuid, inicioMes, fimMes)
         .stream()
         .filter(f -> f.getSinteseDiarioId() != null)
+        .sorted(Comparator.comparing(JustificarFaltaReadService::dataDaFalta,
+            Comparator.nullsLast(Comparator.naturalOrder())))
         .collect(Collectors.toMap(
             f -> f.getSinteseDiarioId().getId(),
             Function.identity(),
-            (a, b) -> a));
+            (a, b) -> a,
+            LinkedHashMap::new));
 
-    List<FaltaItemDTO> itensFalta = sinteses.stream().map(s -> {
-      FaltaItemDTO item = new FaltaItemDTO();
-      item.setId(s.getId());
-      item.setData(s.getData().toString());
-      // Normalizado para HH:MM — Oracle devolve o INTERVAL como "0 5:20:0.0" e o
-      // frontend não tem de conhecer esse formato.
-      item.setHorasAusencia(TimeUtils.intervalFormatToHHmm(s.getHorasAusencia()));
+    // Os dias JÁ justificados não vêm soltos: vão agrupados no pedido a que pertencem
+    // (dto.pedidos), cada grupo com o cabeçalho completo do formulário, para o Editar abrir
+    // sem uma segunda chamada. Soltos ficam só os dias que ainda não têm falta associada —
+    // os que a lista da esquerda oferece para seleccionar e justificar.
+    List<FaltaItemDTO> itensFalta = sinteses.stream()
+        .filter(sin -> !faltaPorSintese.containsKey(sin.getId()))
+        .map(sin -> {
+          FaltaItemDTO item = new FaltaItemDTO();
+          item.setId(sin.getId());
+          item.setData(sin.getData().toString());
+          // Normalizado para HH:MM — Oracle devolve o INTERVAL como "0 5:20:0.0" e o
+          // frontend não tem de conhecer esse formato.
+          item.setHorasAusencia(TimeUtils.intervalFormatToHHmm(sin.getHorasAusencia()));
+          item.setEstadoDesc(ESTADO_POR_JUSTIFICAR);
+          return item;
+        })
+        .toList();
 
-      var falta = faltaPorSintese.get(s.getId());
-      if (falta != null) {
-        item.setEstado(falta.getEstado() != null ? falta.getEstado().getCode() : null);
-        item.setEstadoDesc(descreverEstadoFalta(falta.getEstado()));
-        item.setMotivo(falta.getDescricaoMotivo());
-        item.setComJustificativo(falta.getFlgJustificativo());
-        item.setTipoFalta(falta.getParamSitId() != null ? falta.getParamSitId().getNome() : null);
-        item.setValorAusencia(falta.getValor() != null ? falta.getValor().intValue() : null);
-      } else {
-        // Dia com ausência mas ainda sem pedido de justificação.
-        item.setEstadoDesc("Por justificar");
-      }
-      return item;
-    }).toList();
+    // Um grupo por pedido, na ordem do dia mais antigo. Só as faltas DESTE mês entram no
+    // grupo: o painel é do mês consultado e um pedido pode atravessar dois meses — para o
+    // pedido completo há o GET .../pedido/{pedidoUuid}.
+    List<JustificarFaltaDTO> pedidos = faltaPorSintese.values().stream()
+        .filter(f -> f.getPedidoId() != null)
+        .collect(Collectors.groupingBy(
+            f -> f.getPedidoId().getId(),
+            LinkedHashMap::new,
+            Collectors.toList()))
+        .values().stream()
+        .map(faltasDoPedido -> {
+          var ordenadas = faltasDoPedido.stream()
+              .sorted(Comparator.comparing(JustificarFaltaReadService::dataDaFalta,
+                  Comparator.nullsLast(Comparator.naturalOrder())))
+              .toList();
+          return montarGrupo(ordenadas.getFirst().getPedidoId(), ordenadas);
+        })
+        .sorted(Comparator.comparing(
+            g -> g.getItensFalta().isEmpty() ? null : g.getItensFalta().getFirst().getData(),
+            Comparator.nullsLast(Comparator.naturalOrder())))
+        .toList();
 
-    // Montar DTO principal
-    JustificarFaltaDTO dto = new JustificarFaltaDTO();
+    var dto = new ResumoFaltaMesDTO();
     dto.setColaboradorId(funcionario.getUuid());
     dto.setNomeColaborador(funcionario.getNome());
     dto.setItensFalta(itensFalta);
+    dto.setPedidos(pedidos);
     dto.setAno(query.getAno());
     dto.setMes(query.getMes());
 
@@ -174,14 +200,24 @@ public class JustificarFaltaReadService {
         .orElseThrow(() -> IgrpResponseStatusException.notFound(
             "Pedido não encontrado com UUID: " + pedidoUuid));
 
-    var funcionario = pedido.getFunId();
-
     // Buscar todas as faltas associadas ao pedido
     List<FaltaEntity> faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido);
 
+    var dto = montarGrupo(pedido, faltas);
 
+    return dto;
+  }
 
-    // Mapear para FaltaItemDTO
+  /**
+   * Um pedido de justificação como o formulário o mostra: o cabeçalho do bloco "Justificar
+   * Faltas Selecionadas" (motivo, tipo, dedução, valores, parecer, responsável, anexos) mais
+   * os dias que o compõem. É a mesma forma devolvida pelo GET .../pedido/{pedidoUuid} e por
+   * cada elemento de {@code pedidos} no GET do mês, para o frontend ter um só formato.
+   */
+  private JustificarFaltaDTO montarGrupo(PedidoEntity pedido, List<FaltaEntity> faltas) {
+
+    var funcionario = pedido.getFunId();
+
     List<FaltaItemDTO> itensFalta = faltas.stream().map(f -> {
       var item = new FaltaItemDTO();
       // Nem toda a falta nasce de uma síntese diária: as que a baixa médica gera a
@@ -205,7 +241,7 @@ public class JustificarFaltaReadService {
           .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_FALTA.name(), f.getUuid());
 
       if (!documentos.isEmpty()) {
-        DocumentoEntity doc = documentos.getFirst(); // Pegando o primeiro documento como exemplo
+        DocumentoEntity doc = documentos.getFirst();
         AnexoReqDTO anexo = new AnexoReqDTO();
         anexo.setId(doc.getId());
         anexo.setTipoDocumentoId(doc.getTpDocumentoId() != null ? doc.getTpDocumentoId().getId() : null);
@@ -216,12 +252,10 @@ public class JustificarFaltaReadService {
       return item;
     }).toList();
 
-    // Montar DTO principal
     var dto = new JustificarFaltaDTO();
     dto.setColaboradorId(funcionario.getUuid());
     dto.setNomeColaborador(funcionario.getNome());
     dto.setItensFalta(itensFalta);
-
     dto.setPedidoId(pedido.getUuid());
     dto.setDocumentos(anexosDoPedido(pedido));
 
@@ -233,10 +267,8 @@ public class JustificarFaltaReadService {
       dto.setParecerResponsavel(primeira.getDecisaoResponsavel());
       dto.setResponsavelId(primeira.getResponsavelId() != null ? primeira.getResponsavelId().getId() : null);
       dto.setObsResponsavel(primeira.getObsResponsavel());
-      dto.setDespachoRh(primeira.getDespachoRh());
       dto.setTipoJustificacao(primeira.getParamSitId() != null ? primeira.getParamSitId().getId() : null);
-      // "Deduzir Falta Em" estava gravado (FLG_DESCONTO_FALTA) mas não era devolvido — ao
-      // reabrir o pedido para editar, a opção escolhida aparecia vazia.
+      dto.setMotivo(primeira.getDescricaoMotivo());
       dto.setComJustificativo(primeira.getFlgJustificativo());
       dto.setDeduzirFaltaEm(primeira.getFlgDescontoFalta());
       dto.setValorDiario(primeira.getValor());

@@ -37,9 +37,11 @@ public class FaltaItemDTO  {
   private Integer valorAusencia ;
 
 
+  /** Só de resposta — o motivo grava-se no cabeçalho (aplica-se a todas as seleccionadas). */
   private String motivo ;
 
 
+  /** Só de resposta — o radio "Com Justificativo?" é do cabeçalho. */
   private String comJustificativo ;
 
   /**

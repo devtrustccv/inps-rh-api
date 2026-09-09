@@ -904,14 +904,14 @@ public class AssiduidadeController {
           content = @Content(
               mediaType = "application/json",
               schema = @Schema(
-                  implementation = JustificarFaltaDTO.class,
+                  implementation = ResumoFaltaMesDTO.class,
                   type = "object")
           )
       )
     }
   )
 
-   public ResponseEntity<JustificarFaltaDTO> getJustificacaoFalta(
+   public ResponseEntity<ResumoFaltaMesDTO> getJustificacaoFalta(
     @RequestParam(value = "ano") Integer ano,
     @RequestParam(value = "mes") Integer mes, @PathVariable(value = "funcionarioId") String funcionarioId)
   {
