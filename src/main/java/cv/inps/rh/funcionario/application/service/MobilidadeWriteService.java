@@ -181,10 +181,47 @@ public class MobilidadeWriteService {
     }
   }
 
+  /**
+   * Tipo de situação + datas. Não são campos que definam um movimento de mobilidade — mudar só estes
+   * é uma edição simples, não algo a submeter ao checker (ver {@link #camposMobilidade}).
+   */
+  private void aplicarTipoEDatas(MobilidadeEntity me, MobilidadeDTO dto) {
+    var tipoRef = ValidationUtil.trimToNull(dto.getTipoMobilidade());
+    if (tipoRef != null) me.setTipoSituacao(tipoRef);
+    // Null-safe como os restantes campos: um payload parcial não deve apagar as datas do registo.
+    if (dto.getDataInicio() != null) me.setDataInicio(dto.getDataInicio());
+    if (dto.getDataFim() != null) me.setDataFim(dto.getDataFim());
+  }
+
+  /**
+   * Os TRÊS campos que definem a mobilidade — direção, unidade e local de trabalho. É a comparação
+   * destes, e só destes, que decide se uma edição constitui um movimento a validar.
+   */
+  private java.util.List<Long> camposMobilidade(MobilidadeEntity m) {
+    return java.util.Arrays.asList(
+        m.getInstidId() != null ? m.getInstidId().getId() : null,
+        m.getSecaoId() != null ? m.getSecaoId().getId() : null,
+        m.getLocalTrabId() != null ? m.getLocalTrabId().getId() : null);
+  }
+
+  /**
+   * Como {@link #tiposSelecionados}, mas TOLERANTE a códigos não selecionáveis: no ecrã de EDIÇÃO o
+   * multi-select vem pré-preenchido com o tipo de origem do registo (INICIO, NOVO_CONTRATO,
+   * RENOVACAO…), que não corresponde a nenhum campo editável. Esses são ignorados em vez de
+   * rejeitados; só DIRECAO/SECAO/LOCAL_TRABALHO escolhem campos.
+   */
+  private java.util.EnumSet<TipoMobilidade> tiposSelecionadosParaEdicao(String tipoMobilidade) {
+    var selecionados = java.util.EnumSet.noneOf(TipoMobilidade.class);
+    if (tipoMobilidade == null) return selecionados;
+    for (var token : tipoMobilidade.split(",")) {
+      TipoMobilidade.fromCodigo(ValidationUtil.trimToNull(token)).ifPresent(selecionados::add);
+    }
+    return selecionados;
+  }
+
   private MobilidadeEntity updateMobilidade(MobilidadeEntity me ,MobilidadeDTO mobilidadeDTO){
     if (mobilidadeDTO == null) return null;
-    var tipoRef = ValidationUtil.trimToNull(mobilidadeDTO.getTipoMobilidade());
-    if (tipoRef != null) me.setTipoSituacao(tipoRef);
+    aplicarTipoEDatas(me, mobilidadeDTO);
 
     var localTrabRef = ValidationUtil.ref(entityManager, ParamLocalTrabEntity.class, mobilidadeDTO.getLocalTrabalhoDestino());
     if (localTrabRef != null) me.setLocalTrabId(localTrabRef);
@@ -195,9 +232,6 @@ public class MobilidadeWriteService {
     var instidRef = ValidationUtil.ref(entityManager, DirecaoEntity.class, mobilidadeDTO.getDirecaoDestino());
     if (instidRef != null) me.setInstidId(instidRef);
 
-    // Null-safe como os restantes campos: um payload parcial não deve apagar as datas do registo.
-    if (mobilidadeDTO.getDataInicio() != null) me.setDataInicio(mobilidadeDTO.getDataInicio());
-    if (mobilidadeDTO.getDataFim() != null) me.setDataFim(mobilidadeDTO.getDataFim());
     return me;
   }
 
@@ -350,6 +384,12 @@ public class MobilidadeWriteService {
    * alteração passa por validação". Faz UPDATE in place na RH_T_MOBILIDADE + cria validação pendente
    * UPDATE + marca a mobilidade PENDENTE (P). NÃO toca no tipos_relacionamento — a alteração propaga
    * via MOB_ID; a mobilidade volta a A quando validada.
+   *
+   * <p><b>Só vai a validação se houver movimento.</b> "Alteração", aqui, é mudança de DIREÇÃO,
+   * UNIDADE ou LOCAL DE TRABALHO — os três campos que definem a mobilidade. Editar apenas as datas
+   * (ou o tipo) grava e fica por aí: a mobilidade continua ACTIVA e não se cria validação. O caso de
+   * uso diz "registo e alteração passa por validação", mas pressupõe que houve alteração; não prevê
+   * o gravar-sem-mudar, que de outro modo enviaria ao checker um pedido vazio.
    */
   @Transactional
   public SuccessResponseDTO editar(EditarMobilidadeCommand command) {
@@ -369,10 +409,21 @@ public class MobilidadeWriteService {
       throw IgrpResponseStatusException.badRequest("Não é possível editar uma mobilidade que já tem processamento salarial.");
     }
 
-    // 1) UPDATE in place — direção/secção/local/datas na RH_T_MOBILIDADE.
-    updateMobilidade(mobilidade, mobilidadeDto);
+    // Estado dos três campos ANTES de aplicar o payload — a base da comparação mais abaixo.
+    var antes = camposMobilidade(mobilidade);
+
+    // 1) UPDATE in place na RH_T_MOBILIDADE. Mesma mecânica do registo (createMobilidade): por cada
+    //    tipo escolhido no multi-select o respetivo "(depois)" é obrigatório; os tipos NÃO escolhidos
+    //    herdam o valor que já está no registo — aqui o "anterior" é a própria mobilidade, por ser
+    //    uma edição in place. Assim o ecrã de edição comporta-se como o de nova mobilidade.
+    aplicarCamposMobilidade(mobilidade, mobilidadeDto,
+        tiposSelecionadosParaEdicao(mobilidadeDto.getTipoMobilidade()), mobilidade);
+    aplicarTipoEDatas(mobilidade, mobilidadeDto);
 
     var mobUuid = mobilidade.getUuid();
+    // Houve movimento? Só direção/unidade/local contam. Alterar apenas datas (ou o tipo) não é um
+    // movimento de mobilidade — é uma correção de dados do próprio registo.
+    var houveAlteracao = !antes.equals(camposMobilidade(mobilidade));
 
     // 2a) Maker reenvia a correção: a mobilidade estava EM CORREÇÃO (C) porque o checker a devolveu.
     //     Aplicado o payload acima, volta à fila de validação (C -> P) REACTIVANDO a mesma validação
@@ -392,6 +443,17 @@ public class MobilidadeWriteService {
       }
       funcionarioEntityRepository.save(funcionario);
       return new SuccessResponseDTO(true, mobUuid.toString(), "Correção reenviada para validação.", java.util.List.of());
+    }
+
+    // 2a-bis) Nenhum dos três campos mudou: é uma edição simples (datas/tipo). Grava-se o que veio e
+    //    fica por aqui — NÃO se cria validação nem se tira a mobilidade de ACTIVA. Sem isto, gravar o
+    //    formulário sem tocar em nada mandava para o checker um pedido de aprovação de uma alteração
+    //    inexistente (e a grelha de detalhe mostrava os campos como se tivessem sido preenchidos de
+    //    raiz, por ser o primeiro diff do JaVers sobre o registo).
+    if (!houveAlteracao) {
+      mobilidadeEntityRepository.save(mobilidade);
+      funcionarioEntityRepository.save(funcionario);
+      return new SuccessResponseDTO(true, mobUuid.toString(), "Sem alterações.", java.util.List.of());
     }
 
     // 2b) Vai para validação — cria validação pendente UPDATE + marca a mobilidade P (aparece como

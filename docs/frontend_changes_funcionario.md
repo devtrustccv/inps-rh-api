@@ -323,3 +323,52 @@ aqui), pelo que se optou por os remover em vez de lhes fixar uma semântica.
 
 **Impacto no front-end:** nenhum, se não estavam a ser lidos. Quem precise de saber se um contrato
 é o actual ou a versão inicial deve usar a lista de contratos, que continua a expor os dois flags.
+
+---
+
+# Editar Mobilidade — só vai a validação se houver movimento
+
+**Data:** 2026-09-09
+**Branch:** develop
+
+`PUT /api/v1/funcionarios/{idFuncionario}/mobilidades/{mobilidadeId}`
+
+## O que muda
+
+Sem alteração de contrato de API (mesma rota, mesmo `MobilidadeDTO`). Muda o **comportamento** e a
+**mensagem** devolvida.
+
+Antes, qualquer gravação punha a mobilidade em `P` e criava uma validação `UPDATE` para o checker —
+mesmo que o utilizador não tivesse mudado nada. O checker recebia um pedido de aprovação de uma
+alteração inexistente, e o "Detalhe de alterações" mostrava os campos como se tivessem sido
+preenchidos de raiz (`valorAnterior: null`), por ser o primeiro diff registado sobre aquele registo.
+
+Agora a decisão depende dos **três campos que definem a mobilidade**: **Direcção**, **Unidade** e
+**Local de trabalho**.
+
+| Situação | Resposta | Estado da mobilidade | Vai a validação? |
+|---|---|---|---|
+| Nenhum dos três mudou | `"Sem alterações."` | continua `A` | **não** |
+| Só mudaram datas (ou o tipo) | `"Sem alterações."` | continua `A` (datas gravadas) | **não** |
+| Mudou Direcção, Unidade e/ou Local | `"Mobilidade actualizada."` | passa a `P` | sim |
+
+As datas continuam a ser sempre gravadas — só não são motivo para submeter ao checker.
+
+O reenvio de uma **correção** (mobilidade em `C`, devolvida pelo checker) não é afectado: continua a
+voltar à fila de validação (`C → P`) mesmo sem diferenças, porque aí o maker está a responder a uma
+devolução.
+
+## Campos "(Depois)" passam a ser validados como no registo
+
+O ecrã de edição comporta-se agora como o de nova mobilidade:
+
+- por cada tipo escolhido no multi-select (Direcção / Unidade / Local Trabalho), o respectivo campo
+  **"(Depois)" é obrigatório** — se vier vazio, resposta **400** com
+  `Escolheu mobilidade de <tipo>: indique o campo "<tipo> (depois)".`
+- os tipos **não** escolhidos herdam o valor actual do registo — o front-end não precisa de os reenviar.
+
+Antes, um "(Depois)" por preencher era ignorado em silêncio, e um valor enviado sem o tipo
+correspondente estar seleccionado era aplicado à mesma.
+
+Os códigos de origem que o ecrã traz pré-seleccionados (`INICIO`, `NOVO_CONTRATO`, `RENOVACAO`) são
+aceites e ignorados — só `DIRECAO`, `SECAO` e `LOCAL_TRABALHO` seleccionam campos.
