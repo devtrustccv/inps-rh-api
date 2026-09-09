@@ -288,3 +288,38 @@ A mensagem passa a acompanhar o sentido da operação — na ativação lê-se
 "desativar"). As restantes mantêm-se: "Só é possível desativar um contrato ativo.",
 "Não é possível desativar um contrato já processado em folha.", "Só é possível ativar um contrato
 inativo (estado I). Estado atual: X.", "O funcionário já possui um contrato ativo em vigor."
+
+---
+
+# Campos `inicial` e `atual` saem dos GET de detalhe
+
+**Data:** 2026-09-09
+**Branch:** develop
+
+## Campos removidos da resposta
+
+Deixam de existir em `DadosContratuaisRespDTO`, logo saem da resposta de:
+
+- `GET /api/v1/funcionarios/{idFuncionario}/contratos/{contratoId}` (detalhe do contrato)
+- `GET /api/v1/funcionarios/{idFuncionario}` (dossiê do colaborador, bloco `dadosContratuais`)
+
+| Campo | Tipo |
+|---|---|
+| `inicial` | `boolean` |
+| `atual` | `boolean` |
+
+**A lista NÃO muda.** `GET /api/v1/funcionarios/contratos?idFuncionario=...` (`ContratoListDTO`)
+mantém `inicial` e `atual` exactamente como hoje — é onde os dois flags estão correctos e são usados.
+
+## Porquê
+
+Foram introduzidos a 29/08/2026 apenas para o detalhe do contrato. Como o dossiê partilha o mesmo
+DTO, herdou-os sem que ninguém lhes atribuisse valor: vinham **sempre `false`**, para qualquer
+colaborador, mesmo quando o contrato era o atual. Sendo `boolean` primitivo, esse "nunca preenchido"
+chegava ao front-end como um `false` de aspecto legítimo.
+
+Nenhum consumidor lia os campos (nem código, nem front-end — nunca chegaram a ser documentados
+aqui), pelo que se optou por os remover em vez de lhes fixar uma semântica.
+
+**Impacto no front-end:** nenhum, se não estavam a ser lidos. Quem precise de saber se um contrato
+é o actual ou a versão inicial deve usar a lista de contratos, que continua a expor os dois flags.
