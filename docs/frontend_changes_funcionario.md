@@ -372,3 +372,22 @@ correspondente estar seleccionado era aplicado à mesma.
 
 Os códigos de origem que o ecrã traz pré-seleccionados (`INICIO`, `NOVO_CONTRATO`, `RENOVACAO`) são
 aceites e ignorados — só `DIRECAO`, `SECAO` e `LOCAL_TRABALHO` seleccionam campos.
+
+## Correspondência exacta entre tipos escolhidos e campos "(Depois)"
+
+A regra passa a ser validada nos **dois** sentidos, tanto no registo (`POST .../mobilidades`) como na
+edição (`PUT .../mobilidades/{mobilidadeId}`). Os `*Destino` enviados têm de corresponder
+exactamente aos tipos indicados em `tipoMobilidade`:
+
+| Payload | Resultado |
+|---|---|
+| Escolhe `SECAO` e envia `seccaoDestino` | **200** — só a unidade muda; direcção e local herdam |
+| Escolhe `SECAO` e **não** envia `seccaoDestino` | **400** `Escolheu mobilidade de Unidade: indique o campo "Unidade (depois)".` |
+| Escolhe `SECAO` mas envia também `direcaoDestino` | **400** `Enviou "Direcção (depois)" mas não escolheu mobilidade de Direcção.` |
+
+O terceiro caso era antes **ignorado em silêncio** na edição (e aplicado, no registo). Passa a dar
+400: o utilizador que escolhesse "Unidade" e enviasse também uma direcção ficava sem perceber porque
+é que a direcção não mudava.
+
+Em resumo, para cada movimento envie **apenas** o `*Destino` do tipo que seleccionou. Os tipos não
+seleccionados não precisam de ser enviados — herdam o valor actual do registo.

@@ -164,6 +164,10 @@ public class MobilidadeWriteService {
    * Preenche direção/unidade/local do novo registo: para cada tipo ESCOLHIDO exige o "(depois)" e
    * resolve-o; para os NÃO escolhidos copia o valor "antes" (mobilidade anterior) — a mobilidade
    * grava sempre os três campos, só mudando os que o utilizador selecionou.
+   *
+   * <p>A correspondência é EXACTA nos dois sentidos, e é o contrato da API: escolher um tipo sem
+   * enviar o seu "(depois)" é erro, e enviar um "(depois)" de um tipo não escolhido também. Ambos
+   * dão 400 — nenhum é ignorado em silêncio.
    */
   private void aplicarCamposMobilidade(MobilidadeEntity me, MobilidadeDTO dto,
       java.util.EnumSet<TipoMobilidade> selecionados, MobilidadeEntity anterior) {
@@ -176,6 +180,14 @@ public class MobilidadeWriteService {
         }
         tipo.set(me, ValidationUtil.ref(entityManager, tipo.getEntityType(), id));
       } else {
+        // Regra da API: os "(depois)" enviados têm de corresponder EXACTAMENTE aos tipos escolhidos.
+        // Um destino para um tipo não escolhido é o cliente a contradizer-se — rejeita-se em vez de o
+        // ignorar em silêncio, senão o utilizador escolhia "Unidade", enviava também uma direção e
+        // ficava sem perceber porque é que ela não mudou.
+        if (tipo.depoisId(dto) != null) {
+          throw IgrpResponseStatusException.badRequest("Enviou \"" + tipo.getLabel()
+              + " (depois)\" mas não escolheu mobilidade de " + tipo.getLabel() + ".");
+        }
         tipo.set(me, tipo.antes(anterior));
       }
     }
