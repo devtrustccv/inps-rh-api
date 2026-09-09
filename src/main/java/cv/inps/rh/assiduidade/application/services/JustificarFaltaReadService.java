@@ -236,19 +236,7 @@ public class JustificarFaltaReadService {
       item.setComJustificativo(f.getFlgJustificativo());
       item.setEstado(f.getEstado() != null ? f.getEstado().getCode() : null);
       item.setEstadoDesc(descreverEstadoFalta(f.getEstado()));
-
-      List<DocumentoEntity> documentos = documentoEntityRepository
-          .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_FALTA.name(), f.getUuid());
-
-      if (!documentos.isEmpty()) {
-        DocumentoEntity doc = documentos.getFirst();
-        AnexoReqDTO anexo = new AnexoReqDTO();
-        anexo.setId(doc.getId());
-        anexo.setTipoDocumentoId(doc.getTpDocumentoId() != null ? doc.getTpDocumentoId().getId() : null);
-        anexo.setDocumento(doc.getUrl());
-        item.setDocumento(anexo);
-      }
-
+      // Anexos não são por dia: vêm em dto.documentos, do pedido (ver anexosDoPedido).
       return item;
     }).toList();
 

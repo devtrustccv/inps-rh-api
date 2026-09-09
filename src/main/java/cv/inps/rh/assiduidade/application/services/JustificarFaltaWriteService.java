@@ -196,29 +196,11 @@ public class JustificarFaltaWriteService {
     // 6 Persistir faltas
     faltaRepository.saveAll(faltas);
 
-    Map<Long, FaltaEntity> faltaPorSinteseId = faltas.stream()
-        .filter(f -> f.getSinteseDiarioId() != null)
-        .collect(Collectors.toMap(f -> f.getSinteseDiarioId().getId(), Function.identity()));
-
+    // Os anexos são SEMPRE do pedido, nunca de um dia: justificar cria um RH_T_PEDIDO e todas
+    // as faltas seleccionadas nascem com esse PEDIDO_ID, e o ecrã só tem um bloco de anexos
+    // ("Anexar Documentos", no painel da justificação). Deixou por isso de existir anexo por
+    // item — ver FaltaItemDTO.
     List<DocumentoEntity> documentos = new ArrayList<>();
-    for (var item : selecionados) {
-      if (item.getDocumento() == null)
-        continue;
-      FaltaEntity faltaRef = faltaPorSinteseId.get(item.getId());
-      if (faltaRef == null)
-        continue;
-
-      var doc = documentoMapper.toEntity(
-          item.getDocumento(),
-          estadoInicial,
-          TableName.RH_T_FALTA.name(),
-          faltaRef.getId(),
-          faltaRef.getUuid(),
-          1L,
-          funcionario);
-      doc.setUuid(UuidCreator.getTimeOrderedEpoch());
-      documentos.add(doc);
-    }
     // Documentos do bloco "Justificar Faltas Selecionadas" — o formulário permite anexar
     // vários e aplicam-se a TODAS as faltas seleccionadas, não a um dia. Ficam por isso
     // ligados ao PEDIDO, que é o agrupador do conjunto (RH_T_FALTA.PEDIDO_ID).
