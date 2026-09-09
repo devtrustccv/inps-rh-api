@@ -922,6 +922,66 @@ public class AssiduidadeController {
 
   }
 
+   @PutMapping(
+   value = "falta/justificar/pedido/{pedidoId}"
+  )
+  @Operation(
+    summary = "Editar pedido justificacao",
+    description = "Editar pedido justificacao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<Map<String, ?>> editarPedidoJustificacao(@Valid @RequestBody JustificarFaltaDTO editarPedidoJustificacaoRequest
+    , @PathVariable(value = "pedidoId") String pedidoId)
+  {
+
+      final var command = new EditarPedidoJustificacaoCommand(editarPedidoJustificacaoRequest, pedidoId);
+
+      return commandBus.send(command);
+
+  }
+
+   @DeleteMapping(
+   value = "falta/justificar/pedido/{pedidoId}"
+  )
+  @Operation(
+    summary = "Eliminar pedido justificacao",
+    description = "Eliminar pedido justificacao",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<Map<String, ?>> eliminarPedidoJustificacao(
+    @PathVariable(value = "pedidoId") String pedidoId)
+  {
+
+      final var command = new EliminarPedidoJustificacaoCommand(pedidoId);
+
+      return commandBus.send(command);
+
+  }
+
    @GetMapping(
    value = "falta/justificar/pedido/{pedidoId}"
   )

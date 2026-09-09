@@ -1,6 +1,8 @@
 package cv.inps.rh.assiduidade.application.services;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.assiduidade.application.commands.EditarPedidoJustificacaoCommand;
+import cv.inps.rh.assiduidade.application.commands.EliminarPedidoJustificacaoCommand;
 import cv.inps.rh.assiduidade.application.commands.JustificarFaltaCommand;
 import cv.inps.rh.assiduidade.application.commands.ValidarFaltaJustificadaCommand;
 import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
@@ -430,6 +432,48 @@ public class JustificarFaltaWriteService {
     notificacaoDispatchService.enviar(
         "JUSTIFICACAO_FALTA", emailOpt.get(), funcionario.getNome(),
         pedido.getId(), "RH_T_PEDIDO", pedido.getUuid(), funcionario, vars);
+  }
+
+
+  /**
+   * Editar um pedido de justificação já gravado (acção "Editar" do resumo de faltas, spec
+   * 09/09 — "o grupo selecionado, agrupados por RH_T_FALTA.PEDIDO_ID"). Age no pedido
+   * inteiro, não em dias soltos.
+   *
+   * <p>TODO: por implementar. Decisões de negócio ainda em aberto:</p>
+   * <ul>
+   *   <li>que campos são editáveis depois de validado, e se a edição volta a P (a spec deixa
+   *       a coluna de gravação vazia);</li>
+   *   <li>se é permitido editar um pedido já processado em folha;</li>
+   *   <li>se se pode acrescentar ou retirar dias do pedido, ou só alterar o cabeçalho;</li>
+   *   <li>o que fazer aos efeitos já aplicados (RH_T_DEF_REMUNERACOES, RH_T_TIPREL_REM_PAG,
+   *       RH_T_DISPENSA / saldo de férias) quando o tipo ou a dedução mudam.</li>
+   * </ul>
+   */
+  @Transactional
+  public Map<String, ?> editarPedidoJustificacao(EditarPedidoJustificacaoCommand command) {
+    throw IgrpResponseStatusException.of(org.springframework.http.HttpStatus.NOT_IMPLEMENTED,
+        "Editar pedido de justificação ainda não está implementado");
+  }
+
+  /**
+   * Eliminar um pedido de justificação (acção "Eliminar" do resumo de faltas, spec 09/09).
+   * Soft-delete: RH_T_FALTA.ESTADO = 'E' em todas as faltas do pedido.
+   *
+   * <p>TODO: por implementar. Decisões de negócio ainda em aberto:</p>
+   * <ul>
+   *   <li>até quando se pode eliminar — validado (A) sim, processado em folha presumivelmente
+   *       não;</li>
+   *   <li>o que desfazer além da falta: o desconto em RH_T_DEF_REMUNERACOES e a associação em
+   *       RH_T_TIPREL_REM_PAG, a RH_T_DISPENSA criada por "Deduzir em: Dispensa" ou a reposição
+   *       do saldo de férias, o estado do pedido e dos seus anexos, e a validação pendente.
+   *       Sem isso o colaborador fica descontado por uma falta eliminada.</li>
+   * </ul>
+   */
+  @Transactional
+  public Map<String, ?> eliminarPedidoJustificacao(EliminarPedidoJustificacaoCommand command) {
+    throw IgrpResponseStatusException.of(org.springframework.http.HttpStatus.NOT_IMPLEMENTED,
+        "Eliminar pedido de justificação ainda não está implementado");
   }
 
 }
