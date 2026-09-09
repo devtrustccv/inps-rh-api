@@ -150,7 +150,7 @@ public class FaltaReadService {
             "Registo de marcacao de falta nao encontrada com: " + query.getPedidoId()));
 
     // Buscar todas as faltas desse pedido
-    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
+    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido);
     if (faltas.isEmpty()) {
       return new FaltaReqDTO();
     }

@@ -107,7 +107,7 @@ public class JustificarFaltaReadService {
 
     // Buscar todas as sínteses diárias do funcionário no mês
     List<AssiduidadeSinteseDiarioEntity> sinteses = assiduidadeSinteseDiarioEntityRepository
-        .findAllByFuncionarioIdAndDataBetween(funcionario, inicioMes, fimMes);
+        .findAllByFuncionarioIdAndDataBetweenOrderByDataAsc(funcionario, inicioMes, fimMes);
 
     // Faltas já registadas no período, indexadas pela síntese que as originou.
     // Sem isto o resumo não conseguiria mostrar o estado de cada dia
@@ -177,7 +177,7 @@ public class JustificarFaltaReadService {
     var funcionario = pedido.getFunId();
 
     // Buscar todas as faltas associadas ao pedido
-    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
+    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido);
 
 
 

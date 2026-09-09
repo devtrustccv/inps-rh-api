@@ -221,7 +221,7 @@ public class FaltaServiceWrite {
     var novoEstado = req.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid());
 
-    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
+    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido);
 
     for (FaltaEntity f : faltas) {
 

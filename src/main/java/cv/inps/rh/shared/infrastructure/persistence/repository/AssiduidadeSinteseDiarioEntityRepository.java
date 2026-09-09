@@ -22,7 +22,7 @@ public interface AssiduidadeSinteseDiarioEntityRepository extends
             "AssiduidadeSinteseDiarioEntity not found for id: " + id));
   }
 
-  List<AssiduidadeSinteseDiarioEntity> findAllByFuncionarioIdAndDataBetween(FuncionarioEntity funcionarioId, LocalDate dataAfter, LocalDate dataBefore);
+  List<AssiduidadeSinteseDiarioEntity> findAllByFuncionarioIdAndDataBetweenOrderByDataAsc(FuncionarioEntity funcionarioId, LocalDate dataAfter, LocalDate dataBefore);
 
   /**
    * Síntese de um colaborador num dia.

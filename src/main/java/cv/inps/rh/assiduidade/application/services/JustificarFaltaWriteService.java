@@ -294,7 +294,7 @@ public class JustificarFaltaWriteService {
     var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), algumComJustificativo);
 
     // Todas as faltas do pedido (já criadas na fase de justificar)
-    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
+    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido);
     Map<Long, FaltaEntity> faltaPorSinteseId = faltas.stream()
         .filter(f -> f.getSinteseDiarioId() != null)
         .collect(Collectors.toMap(
