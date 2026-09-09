@@ -1,451 +1,163 @@
-> Updated: 2026-09-03 (sessão 4)
+> Updated: 2026-09-09 12:40 -01:00
 
 ## Goal
 
-Fazer a **Lista de Funcionários** distinguir "Estado do Registo" de "Estado do Colaborador",
-conforme a spec DOSSIÊ 02/09 — e garantir que uma alteração de **situação laboral por validar**
-aparece como **Pendente** na grelha sem inativar quem continua a trabalhar.
-
-**Estado: resolvido e validado live.** A open question das sessões anteriores está fechada.
+Validar, contra a Oracle de dev e com a app a correr, os fluxos do Dossiê do Colaborador
+(registo → validação → contrato → mobilidade), corrigindo o que se desviar do caso de uso
+`docs/caso_uso_teste_gravacao_04_09_26.md`. Sessão anterior fechou contrato e mobilidade; falta
+continuar pelas restantes secções.
 
 ## Current state
 
-`develop` com os commits desta sessão (compilam, `mvn -o compile` exit 0, JDK23):
+4 commits em `develop` (sem push), todos com `mvn compile` limpo e verificados com a app a correr:
 
-- **`379f4e66`** `fix(funcionario): estado do registo na lista vem de ESTADO_VALIDACAO` — entidade da view + read service.
-- **`854ba650`** `fix(funcionario): situacao laboral pendente marca ESTADO_VALIDACAO=P` — ciclo de vida no write service.
-- **`ee65e9a6`** `docs: specs DOSSIE (02/09) e PROCESSAMENTO SALARIAL (01/09)`.
-- **`78e879f1`** `fix(funcionario): aprovar reativacao volta a por o colaborador ativo` — `aplicarEfeitosReativacao`.
-- **`76402bb4`** `feat(funcionario): grelha mostra os dois estados Pendentes na validacao` — derivação na leitura + filtro alinhado. **⏸️ depois DESLIGADO (comentado) a pedido do utilizador** — ver "Decisions made".
+- `15d1c6de` ativar/desativar contrato deixa de dar 400 com progressão por validar (finder do tiprel
+  passou a `est_act_adm=1`; desativação já não zera a marca)
+- `7971d4ef` remove `inicial`/`atual` dos dois GET de detalhe (ninguém os lia; no dossiê vinham
+  sempre `false`). A lista mantém-nos
+- `4e14fd0d` editar mobilidade só vai a validação se mudar direção/unidade/local
+- `20f780b1` rejeita `*Destino` de tipo não escolhido (400)
 
-### Ponto em aberto para o testeR/analista (decisão do utilizador: deixar como está)
+Changelog do front-end em `docs/frontend_changes_funcionario.md` (4 entradas novas, no fim).
 
-`aplicarEfeitosReativacao` **reabre o contrato** (`contrato.setDataFim(null)`), simétrico ao
-`aplicarEfeitosCessacao` que fecha as 6 coisas (tiprel, mobilidade, carreira, **contrato**, def de
-remuneração e de pagamento). Cheguei a remover o contrato e o utilizador mandou reverter — fica simétrico
-e o analista avalia. O trade-off, para essa conversa:
+Colaborador de teste criado e validado nesta sessão, em estado limpo:
+`Nuno Teste Sync`, id **958937**, uuid **01a085fa-fc04-7f08-a5d9-75b4b8a886b7**,
+contrato 746 (uuid `1f1ac43a-f979-63a4-a624-711ba536f6f7`), mobilidade 720
+(uuid `01a085fa-fc0f-7780-9958-e2696024cbad`), tiprel 173442. Tudo `A`, sem validações pendentes.
 
-| | Estado resultante | `existeContratoEmVigor` | Renovação | Visibilidade |
-|---|---|---|---|---|
-| **Reabrir (atual)** | ativo, contrato **sem prazo** | `true` → bloqueia "Novo Contrato" | nunca alertado (`BETWEEN` não casa com null) | **silencioso** |
-| Não tocar | ativo, contrato **expirado** | `false` → "Novo Contrato" aparece | nunca alertado (data no passado) | visível/acionável |
+Untracked/deleted em `docs/` no `git status` são anteriores a esta sessão — não mexer.
 
-Nota: a renovação fica quebrada nas **duas** opções — não serve para desempatar. A raiz é que
-`aplicarEfeitosCessacao` **sobrescreve** `contrato.DATA_FIM` com a data de cessação, destruindo o termo
-original (ex.: 2028-01-01 do contrato 731). Nenhuma reativação o recupera. Terceira via possível, não
-implementada: recalcular `data_fim = data_inicio + DURACAO` (a coluna `DURACAO` parece sobreviver).
+## Decisões tomadas — não re-litigar
 
-**App UP** na 8089 (PID 22256, código destes commits). Reboot: `scratchpad/run_develop_8089.sh`.
-
-### Limpeza de dados de teste feita no fim da sessão 4
-
-A pedido do utilizador, **958929, 958930 e 958931 foram apagados por completo** da BD: 111 linhas em
-22 tabelas, num único bloco PL/SQL atómico (COMMIT no fim, ROLLBACK no `EXCEPTION`). Verificado a zero.
-Script reutilizável: `scratchpad/apagar_colaboradores_teste.sql`, com a ordem de dependências comentada.
-
-**Lição a reter para a próxima limpeza:** as 37 FKs de `RH_T_FUNCIONARIOS` **não bastam**. A primeira
-tentativa rebentou em `FK_CONTR_HIST_CONTR_ID` — a `RH_T_CONTRATO_HISTORICO` aponta para o *contrato*,
-não para o funcionário. Enumerar também as FKs de **todas as tabelas-pai** que se vai apagar:
-
-```sql
-SELECT p.table_name pai, c.table_name filho, cc.column_name coluna
-FROM user_constraints c
-JOIN user_cons_columns cc ON cc.constraint_name = c.constraint_name
-JOIN user_constraints p   ON p.constraint_name = c.r_constraint_name
-WHERE c.constraint_type = 'R'
-  AND p.table_name IN ('RH_T_CONTRATO_VINCULO','RH_T_SITUACAO_LABORAL',
-        'RH_T_TIPOS_RELACIONAMENTO','RH_T_CARREIRA','RH_T_MOBILIDADE',
-        'RH_T_REGIME_TRAB','RH_T_DEF_REMUNERACOES','RH_T_DEF_PAGAMENTOS');
-```
-
-Isso revelou ainda que a `RH_T_CARREIRA` referencia o **contrato** (logo sai antes dele) e que
-`CONTRATO_VINCULO` e `TIPOS_RELACIONAMENTO` têm **auto-referência** (estavam a 0 nestes dados, mas podem
-não estar noutros). Usar **ids explícitos**, não subqueries: as linhas-pai desaparecem durante a execução.
-
-### Alteração de BD JÁ APLICADA (⚠️ não versionada)
-
-`RH_V_DOSSIE` foi recriada com `CREATE OR REPLACE VIEW` para expor **`A.ESTADO_VALIDACAO AS ESTADO_VALIDACAO`**
-(a coluna já existia em `RH_T_FUNCIONARIOS`; a view é que não a selecionava). View ficou **VALID**, 15 linhas
-(inalterado), e o literal `'Não'` do `DECODE` foi guardado como `UNISTR('N\00e3o')` — confirmado por
-`ASCIISTR` = `N\00E3o`, `LENGTH`=3.
-
-**O utilizador decidiu explicitamente NÃO versionar isto** (recusou o ficheiro de migration `V4__...`).
-Logo a alteração **só existe na BD de dev** — quem fizer deploy noutro ambiente tem de a reaplicar à mão,
-senão o Hibernate rebenta ao mapear `ESTADO_VALIDACAO`. O DDL completo está em
-`scratchpad/rh_v_dossie_add_validacao.sql` (scratchpad é efémero — se for preciso, re-extrair com
-`SELECT text FROM user_views WHERE view_name='RH_V_DOSSIE'`).
-
-## Decisions made — do not re-litigate
-
-- **A open question está respondida pela spec DOSSIÊ 02/09** (l.1826-1836): são duas colunas com duas fontes —
-  `Estado do Registo` = `ESTADO_VALIDACAO`, `Estado do Colaborador` = `ESTADO_COLABORADOR`. O código colava
-  as duas ao mesmo valor.
-- **⏸️ "Estado do Colaborador" Pendente na grelha — IMPLEMENTADO, VALIDADO e DESLIGADO (comentado).**
-  Foi pedido que ao enviar para validação tanto o "Estado do Registo" como o "Estado do Colaborador"
-  mostrassem Pendente. Implementado em `FuncionarioReadService` por **derivação na leitura** (commit
-  `76402bb4`), validado live, e depois **comentado a pedido do utilizador** — quer discutir a regra com o
-  analista antes de a ativar. **Não apagar; volta a ligar-se descomentando.**
-  Dois sítios, a reativar **em conjunto** (só um deles torna filtro e ecrã incoerentes):
-  1. `estadoColaboradorExibido(...)` no fim da classe (bloco comentado) + a chamada no mapeamento;
-  2. o predicado alinhado na Specification (`estado=P` também apanha `estadoValidacao='P'`;
-     `estado=X` exclui esses) — senão filtrar "Ativo" devolve linhas a dizer "Pendente".
-  **Feito em Java e não na view** — a `RH_V_DOSSIE` não está versionada, e no serviço a regra é visível.
-- **`funcionario.estado` (a coluna gravada) NÃO vai a `P`.** É o mesmo requisito do ponto acima, resolvido
-  sem tocar na BD. Pôr `estado='P'` gravado:
-  1. destrói o estado de domínio (A/I) — no ramo não-processado a situação é editada *in place*, o valor
-     anterior fica irrecuperável e **a rejeição não teria a que voltar**;
-  2. abre os guards de `guardComboInativarAtivar` (testam `== A` / `== I`; com `P` ambos falham);
-  3. esconderia da grelha por defeito (`estado='A'`, spec l.1909-1910) um colaborador que continua ativo;
-  4. contraria `AlterarEstadoContratoService` ("SEM tocar em funcionario.estado").
-  O estado de repouso do `estado_validacao` é **sempre `'A'`** → o rollback é um set incondicional.
-- **Ciclo de vida do `estado_validacao`**: submissão (`registarNaoProcessado` / `registarProcessado` /
-  `reenviarCorrecao`) → `P`; `devolverParaCorrecao` → `C`; `validar` **aprovado OU rejeitado** → `A`
-  (rejeitar a *alteração* não invalida o *registo*, por isso nunca `I`).
-- **O registo inicial continua em lockstep** (`estado` e `estado_validacao` ambos `P`) — isso está certo e
-  não se mexeu: um colaborador por validar não tem estado de domínio válido.
+- `est_act_adm=1` = **qual** é o vínculo corrente; `estado` = se está ativo. Dimensões independentes;
+  um tiprel `I` + `est_act_adm=1` é legítimo (confirmado pelo utilizador).
+- Nunca identificar o vínculo corrente por `max(id)` do tiprel — há sempre candidatos de workflow
+  (progressão P/E/I) com id maior.
+- `inicial`/`atual` só existem na **lista** de contratos. Não repor nos GET de detalhe.
+- Editar mobilidade: só direção, unidade e local disparam validação. Datas e tipo gravam-se sempre
+  mas não vão ao checker. O reenvio de correção (`C`) mantém-se e vai à fila mesmo sem diferenças.
+- Contrato da API da mobilidade: enviar **apenas** o `*Destino` do tipo selecionado. Falta → 400;
+  a mais → 400.
+- No ecrã de mobilidade só interessam **DIRECAO, SECAO e LOCAL_TRABALHO**. Os restantes valores de
+  `tipo_situacao` (`INICIO`, `NOVO_CONTRATO`, `RENOVACAO`) são carimbos deixados por outras ações —
+  registo de colaborador, contrato — e não são para tratar aqui. Decidido pelo utilizador: fica como
+  está, incluindo o `tipo_situacao` poder ficar híbrido (`INICIO,SECAO`) e aparecer na grelha do
+  checker. **Não reabrir.**
 
 ## Constraints
 
-- Compilar com `JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-23.0.2.7-hotspot"`.
-- SQL: correr de `tools/db`, ojdbc11 23.7.0.25.01. **`DbQuery`** = SELECT; **`DbExec`** = write (SQL em `args[0]`);
-  **`DbExecFile`** = write a partir de ficheiro UTF-8 (**criado nesta sessão**, para DDL multilinha sem mangling
-  de shell/encoding). `tools/db` parece estar gitignored — o `DbExecFile.java` não aparece no `git status`.
-- Oracle XE sem `FETCH FIRST` → `ROWNUM`; `TO_CHAR(data,'YYYY-MM-DD')` (datas cruas dão erro no helper).
-- Commits: `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`. PR contra `develop`.
-- Fluxo de teste: GET antes, **pedir autorização por cada escrita**, resposta crua (JSON+HTTP).
+- PR contra `develop`, nunca `main`. Conventional commits.
+- Pedir autorização ao utilizador **antes de cada escrita** (POST/PUT/PATCH); GET são livres.
+- Mostrar sempre o HTTP status + corpo cru indentado, não resumir.
+- Arrays nos PUT: sempre completos e com `id` — ver memória `reference_sync_arrays_put` (sem id
+  duplica; ausente do array é soft-deleted `E`; `null` preserva; `[]` limpa).
+- `contratoId`, `idFuncionario`, `mobilidadeId` nos paths e query params são **UUID**, não id numérico.
 
 ## Blockers & risks
 
-- **A tool Bash é POSIX, não PowerShell.** O here-string `@'...'@` entra **literal** e suja a mensagem de
-  commit (aconteceu; corrigido com `--amend -F -`). Usar heredoc `<<'EOF'` com `-F -`.
-- `boot.log` é partilhado por vários `mvn spring-boot:run` — um `BUILD FAILURE` no log pode ser do processo
-  **anterior** que se matou, não do atual. Confirmar pelo PID em `netstat` + `StartTime` do processo.
-- curl `-o` + `-w`: usar `curl ... -w "\n__HTTP__:%{http_code}" > ficheiro` (sem `-o`) e `rpartition('__HTTP__:')`.
-- Nomes: situação = `RH_T_PARAM_SITUACAO` (`FLG_ESTADO_CONTRATO`: A/C/S); motivos = `RH_T_PARAM_SITUACAO_DET`
-  (col **`MOTIVO`**). `RH_T_FUNCIONARIOS` **não** tem `estado_colaborador` — tem `estado` e `estado_validacao`.
-
-## ✅ ACHADO CRÍTICO — "Ativar" não reativava — **CORRIGIDO** (`78e879f1`)
-
-> **Estado: resolvido, validado live e com regressão confirmada.** Mantém-se aqui a descrição porque
-> explica *porquê* a correção existe e serve de caso de regressão.
-
-**Correção:** novo `aplicarEfeitosReativacao(funcionario, tiprelAtual)`, chamado em `validar()` quando a
-validação é aprovada **e** `ativaContrato(param)` — põe `estado=A` e reabre a cadeia de datas
-(tiprel, mobilidade, carreira, contrato, def de remuneração/pagamento). Como na cessação, **não** mexe em
-`est_act_adm`. Fica dentro do `if (estado == Estado.A)`, por isso **não dispara na rejeição** (que corre
-com `estado=I`) — verificado.
-
-**Limitação documentada no método:** `aplicarEfeitosCessacao` sobrescreve `contrato.DATA_FIM` com a data
-de cessação, pelo que o termo original de um contrato a prazo já se perdeu nesse momento e não é
-recuperável na reativação. Reabrir (null) é o menos errado. É mais um sintoma da edição in-place (achado nº1).
-
-### Descrição original do bug
-
-**Aprovar uma reativação não alterava o estado do colaborador.** Provado live no 958930 (cenário 12):
-submeteu-se `Ativar` (situação flag `A`), aprovou-se com `validar=SIM` → HTTP 200, situação e validação
-ficaram `A`… e **`funcionario.estado` continuou `I`**, com `tiprel.data_fim` ainda fechado (2026-09-03).
-
-Causa — `funcionario.setEstado(...)` só existe em 3 sítios:
-
-| Linha | Onde | Efeito |
-|---|---|---|
-| 289 | `registarProcessado` (submissão, **só ramo processado**) | `estadoDoFuncionarioPara` → trata `A` e `I` |
-| 306 | `aplicarEfeitosCessacao` (aprovação, **só cessação**) | põe `I` |
-| 344 | `rollbackRejeicao` (rejeição, só se `fechadoPeloRegisto`) | põe `I` ou `A` |
-
-No ramo **não-processado** (`ult_proc == null`) nada põe `A`: existe `aplicarEfeitosCessacao` mas **não existe
-o simétrico de reativação**. Falta um `aplicarEfeitosReativacao` que ponha `estado=A` e reabra a cadeia de
-datas (`tiprel`/mobilidade/carreira/contrato com `data_fim=null`).
-
-**Impacto: metade da funcionalidade "Ativar/Inativar Colaborador" não funciona**, e o ramo não-processado é
-o caminho comum (todos os colaboradores de teste têm `ult_proc=null`). NÃO é regressão da sessão 4 — os três
-`setEstado` são pré-existentes; a sessão 4 só acrescentou linhas de `setEstadoValidacao`.
-
-**Reprodução limpa** (colaborador **958931** `Colaborador Teste Reativar` — **já apagado** —,
-uuid `01a06456-f966-7647-9bc9-259c4978e175`, criado de raiz só para isto — sem rejeições nem correções,
-para excluir contaminação de estado):
-
-| Passo | `f_est` | `f_val` | `tiprel.data_fim` | `sit` |
-|---|---|---|---|---|
-| 0. inicial | A | A | null | 1 |
-| 1. inativar (sit 9) | A | **P** | null | 9 P |
-| 2. aprovar | **I** | A | 2026-09-10 | 9 A |
-| 3. ativar (sit 22) | I | **P** | 2026-09-10 | 22 P |
-| 4. **aprovar** | **I** ❌ | A | **2026-09-10** ❌ | 22 A |
-
-O `estado_validacao` comportou-se corretamente nos 4 passos; o que falhava era o `estado` do colaborador.
-
-### Regressão confirmada DEPOIS da correção (mesmo colaborador 958931)
-
-| Teste | Resultado |
-|---|---|
-| ativar + aprovar | `estado=A`, tiprel/mob/carreira/contrato `data_fim=null` ✅ |
-| guard "já está ativo" | 400 ✅ |
-| inativar (submeter) → aprovar | `A/P` → `I/A` com datas fechadas em 2026-09-25 ✅ |
-| guard "já está inativo" | 400 ✅ |
-| guard data fim obrigatória em ausência (sit 24 `tipo_ausencia=LICENCA`) | 400 ✅ |
-| ativar (submeter) → **rejeitar** | fica `I`, `est_validacao`→`A` ✅ (o fix não dispara na rejeição) |
-| ciclo `estado_validacao` (P/C/A) | intacto ✅ |
-
-Os dois colaboradores que tinham ficado presos (**958930** e **958931**) foram recuperados com a correção
-e ficaram `A`/`A`. **Ambos foram apagados depois**, a pedido do utilizador — o fix continua em vigor no
-código (`78e879f1`), mas já não há um caso vivo em BD para o demonstrar.
-
-## ⚠️ A edição in-place é REGRA DE NEGÓCIO — não a "corrijas" sem falar com o analista
-
-Investigado no fim da sessão 4, depois de eu ter recomendado (erradamente) "deixar de editar in place e
-criar linha nova". **Isso contrariaria uma regra escrita.** Origem: `docs/Caso de uso_teste_gravação.md`
-(~l.588-602), tabela `RH_T_SITUACAO_LABORAL`, implementada pelo commit **`7518be97`** (13/07/2026), cuja
-mensagem diz explicitamente *"Caso de teste (Gestao Laboral / Situacao Laboral)"*:
-
-> **Regra de Registo e Atualização da Situação Laboral**
-> - Criar registo **somente** quando houver alteração da Situação Laboral ou do Motivo, **desde que o
->   registo atual já tenha sido processado**.
-> - Se houver alteração e o registo **ainda não tenha sido processado** → apenas **UPDATE do registo
->   existente**, não criar novo.
-> - Se não houver alteração → nem novo registo nem atualização.
-
-Isto explica os três ramos do dispatcher **e** confirma que o no-op do cenário 12b
-("Situação laboral sem alterações.") é **comportamento intencional**, não um acidente.
-
-Intenção de negócio plausível: uma situação nunca processada em folha ainda é quase um rascunho —
-corrigir um motivo mal escolhido não deve deixar duas linhas no histórico.
-
-**O verdadeiro buraco é mais estreito:** a regra fala do *maker a corrigir o seu próprio registo* e é
-**silenciosa sobre a rejeição pelo checker**. Foi aí que se perdeu o APOSENTADO do 958930 — não por a
-regra estar errada, mas por não cobrir esse caso.
-
-**Pergunta para o analista** (não implementar antes da resposta):
-
-> Quando uma alteração de situação laboral é **rejeitada** e o registo foi atualizado in-place (regra dos
-> não-processados), a situação deve voltar aos valores anteriores? Se sim, esses valores têm de ser
-> guardados em algum lado, porque o UPDATE apaga-os.
-
-Terceira via que **respeita** a regra: guardar os valores anteriores no registo de **validação** (que já é
-criado por cada alteração) e usá-los só na rejeição. Não cria linha em `RH_T_SITUACAO_LABORAL`, logo não
-viola nada.
-
-
-## 🔎 Onde é que se sabe que um colaborador foi cessado? (investigado, sessão 4)
-
-Pergunta do utilizador. Resposta curta: **o motivo da cessação não é guardado de forma durável.**
-
-**Não existe estado "Cessado".** O enum `Estado` (gerado pelo iGRP, `DO NOT MODIFY`) tem só
-`I=Inactivo, A=Ativo, E=Eliminado, P=Pendente, C=Em correção`. Uma cessação produz `estado='I'` —
-indistinguível de qualquer outra desativação. Alinhado com a spec, que pede *"Estado do colaborador
-(ativo ou inativo)"*.
-
-**⚠️ Armadilha: `C` significa duas coisas diferentes.**
-
-| Coluna | `C` significa |
-|---|---|
-| `RH_T_FUNCIONARIOS.ESTADO` / `RH_T_SITUACAO_LABORAL.ESTADO` | **Em correção** (maker-checker) |
-| `RH_T_PARAM_SITUACAO.FLG_ESTADO_CONTRATO` | **Cessado** |
-
-Daí `aplicarEfeitosCessacao` pôr `Estado.I` e não `Estado.C` — com `C` o colaborador apareceria na
-grelha como "Em correção".
-
-**O que fica registado de uma cessação:**
-
-1. `funcionario.estado='I'` — que está inativo, não porquê.
-2. `RH_T_SITUACAO_LABORAL` — situação + motivo, mas **só o atual** (uma linha por colaborador no ramo
-   não-processado, sobrescrita a cada alteração).
-3. `RH_T_ORDEM_SERVICO` — único rasto da *sequência* (ex.: 958931 tem
-   `CESSACAO → REATIVACAO → REATIVACAO → CESSACAO → REATIVACAO`). Mas guarda apenas `referente`, **e esse
-   valor vem do cliente** (`tipoOrdemServico` do payload) — se o frontend enviar vazio, não há rasto tipado.
-
-**O que NÃO registra:** `RH_T_TIPOS_RELACIONAMENTO_HIST` tem 0 linhas para estes colaboradores e as suas
-colunas são cargo/direção/escalão/vínculo (história organizacional, não situação). `RH_MOVIMENTOS` está
-vazia. O JaVers tem snapshots mas é infraestrutura de auditoria, e já se viu que o snapshot `INITIAL` pode
-ser a versão já mutada.
-
-**Isto alarga o achado nº1:** não é só a *rejeição* que perde dados. No ramo não-processado, **qualquer**
-alteração seguinte apaga o motivo da cessação anterior, mesmo no fluxo normal aprovado. Ressalva a favor:
-no ramo **processado** cria-se linha nova e a história acumula, e em produção a maioria já passou pela
-folha — a perda fica confinada a quem tem o vínculo corrente ainda não processado (ex.: admitido há pouco e
-cessado antes do primeiro processamento).
-
-## Achados por resolver (NÃO são regressões desta sessão)
-
-1. **Rejeição no ramo não-processado é destrutiva.** `validar()` faz `tiprelAtual.setEstado(I)` e
-   `situacao.setEstado(I)`, e `rollbackRejeicao` faz `return` logo à entrada nesse ramo
-   (`if (!fechadoPeloRegisto) return;`). Resultado observado no 958925: **tiprel corrente e situação ficaram
-   `I` com `est_act_adm=1`**, apesar de o colaborador estar ativo — e a situação/motivo originais, sobrescritos
-   *in place*, **perderam-se**. Bug pré-existente, agora com evidência reproduzível.
-2. **O JaVers não serve de rede de segurança aqui.** O snapshot `INITIAL` (v1) da situação 684 **já é a versão
-   alterada** — o audit só começou a segui-la quando foi tocada. Não há registo do estado anterior.
-3. **`FLG_ESTADO_CONTRATO='S'` (Suspenso) está a meio caminho — existe no domínio e na BD, sem UI nem
-   comportamento.** O ecrã "Ativar/Inativar Colaborador" tem um combo **Estado** (= `FLG_ESTADO_CONTRATO`)
-   que filtra o combo **Situação Laboral** via `?flgEstadoContrato=` no endpoint de parametrização. Se o
-   combo Estado só oferecer *Ativo* e *Cessado*, as situações com flag `S` ficam **inalcançáveis**
-   (ex.: id 15 "Falecimento de Familiares"). E mesmo que fossem escolhidas, `cessaContrato()` e
-   `ativaContrato()` devolvem ambos `false` para `S` → `funcionario.estado` não mudaria.
-   **O utilizador levantou isto** ("a documentação não diz para filtrar só A e C") e ficou por decidir.
-4. **`AlterarSituacaoLaboralRequest.estadoContrato` não é lido pelo backend — e está decidido que fica
-   assim.** O ecrã envia-o (payload real: `{"estadoContrato":"C","situacaoLaboralId":9,...}` — o **código**,
-   não o label), mas não há um único `getEstadoContrato()` no módulo `funcionario`: o estado deriva sempre
-   da flag da situação escolhida.
-   **Decisão do utilizador (sessão 4): NÃO acrescentar guard de coerência.** Chegou a ser implementado e
-   foi revertido antes de commit. Razão, que é boa: o combo "Situação Laboral" é **populado a filtrar por**
-   o "Estado" escolhido, logo uma divergência é estruturalmente impossível a partir da UI — o guard só
-   apanharia chamadas feitas à mão. Não reabrir sem motivo novo.
-5. **`estadoRegistoDesc` usa labels do colaborador.** Para "Estado do Registo", `A` lê-se **"Ativo"** quando
-   devia provavelmente ler-se **"Validado"**. Cosmético, por confirmar com negócio.
-6. **`registarProcessado` aplica o efeito antes da aprovação**: L280 faz
-   `funcionario.setEstado(estadoDoFuncionarioPara(param, funcionario))` no **registo**, não na validação.
-   Fora do âmbito desta sessão, mas cheira a bug.
-
-## Dado de teste — REPOSTO (já resolvido)
-
-**958925** (`Wilson Cabral Tavares`, uuid `01a061d6-f65c-74cd-a5e3-3c45f3de5734`) foi danificado pelo
-achado nº1 durante o teste e **já foi reposto e verificado**. Todos os 5 colaboradores de teste
-(958925-958929) foram criados hoje (02/09) por `anonymousUser` — são dados de dev, não produção.
-
-Os valores originais da situação 684 tinham-se perdido (UPDATE in place, e o JaVers não tem snapshot
-anterior). Foram **reconstruídos por comparação** com a situação 687 (958928, por tocar), que revelou o
-padrão de uma situação `INICIO` acabada de criar: `situacao_laboral_id=1`, `motivo=null`, `obs='NOVO_CONTRATO'`,
-`data_fim=null`, e **`data_inicio` = `data_inicio` do respetivo contrato** (687→734 ambos 2026-08-25).
-Contrato do 958925 é o **731** (2026-01-01 → 2028-01-01), daí `data_inicio=2026-01-01`.
-
-```sql
-UPDATE rh_t_situacao_laboral SET estado='A', situacao_laboral_id=1, motivo_sit_lab_id=NULL,
-       data_inicio=DATE '2026-01-01', data_fim=NULL, obs='NOVO_CONTRATO' WHERE id=684;
-UPDATE rh_t_tipos_relacionamento SET estado='A' WHERE id=173407;
-```
-
-Nota: a `data_inicio` é a única peça **inferida** (bem fundamentada, mas inferida). O `tiprel 173407` é uma
-**PROGRESSAO/CARREIRA** com `data_inicio=2028-11-01` — o ramo não-processado não lhe tocou nas datas, só no
-`estado`. A validação **1063** ficou `I` na BD como histórico do teste (não foi apagada).
-
-## Matriz de cenários validada (sessão 4)
-
-Colaborador **958930** (`Colaborador Teste Cenarios`) — **já apagado**, ver "Estado dos colaboradores de teste" —,
-criado de raiz: `POST` → `GET by id` → `PUT validar:SIM` → `A`/`A`, `ult_proc=null` (ramo não-processado).
-Payloads em `scratchpad/c*.json`, com datas em `DD/MM/YYYY` como o frontend real.
-
-| # | Cenário | Resultado | ✔ |
-|---|---|---|---|
-| 1 | `validar=SIM` sem pendente | 400 "não possui validação pendente" | ✅ |
-| 3 | Ativar quem já está ativo (flag A) | 400 "já está ativo" | ✅ |
-| 4 | Inativar (submissão, sit 9/motivo 23) | 200; `estado=A`, `est_validacao=P`, sit `P`, validação `P` | ✅ |
-| 5 | Grelha com pendente | `estadoColaborador=A/Ativo` + `estadoRegisto=P/Pendente` | ✅ |
-| 6 | `validar=CORRIGIR` | sit/tiprel/validação/`est_validacao` → `C`; `estado` fica `A` | ✅ |
-| 7 | Reenviar correção | tudo volta a `P`; `data_inicio` aceitou `03/09/2026` (DD/MM/YYYY) | ✅ |
-| 8 | `validar=SIM` (aprovar cessação) | `estado`→`I`, `est_validacao`→`A`; **cadeia toda fechada** (tiprel+mobilidade+carreira+contrato = 2026-09-03); ordem de serviço `CESSACAO` criada | ✅ |
-| 9 | Inativar quem já está inativo | 400 "já está inativo" | ✅ |
-| 10 | Ativar (submissão) | 200; `estado` fica `I`, `est_validacao=P` | ✅ |
-| 11 | `validar=NAO` (rejeitar) | `est_validacao`→`A`, `estado` fica `I` | ✅ (mas ver achado nº1 abaixo) |
-| 2 | No-op (mesma situação+motivo) | "Situação laboral sem alterações." | ✅ |
-| 12a | `motivoId=null` | 400 "motivo é obrigatório" | ✅ |
-| 12 | Ativar + aprovar | **FALHA — ver ACHADO CRÍTICO** | ❌ |
-
-**Nota sobre o cenário 2 (no-op):** só é alcançável por acidente. Os guards `guardComboInativarAtivar`
-correm **antes** do `mudouSituacaoOuMotivo`, e disparam para qualquer situação flag `A` (colaborador ativo)
-ou flag `C` (colaborador inativo). Chegou-se lá porque a rejeição do cenário 11 deixou a situação corrente
-em `1/2`, e reenviar `1/2` bateu no no-op — o que **bloqueia o caminho natural de reativação** ("ATIVO")
-até se usar outra situação. Há outras situações flag `A` com motivo (18, 22, 23, 24, 25, 26, 32, 39), por
-isso não é um beco definitivo, mas é uma armadilha real.
-
-**Dano observado no cenário 11 (achado nº1 em ação):** a rejeição da reativação deixou `tiprel=I` e
-`situacao=I`, e a situação corrente ficou `sit=1 (ATIVO)` — **a situação APOSENTADO (9), que era a realidade
-aprovada, foi sobrescrita in place e perdeu-se**. O colaborador ficou inativo sem registo do motivo.
-Consequência mais grave do que o caso do 958925.
-
-## Evidência da validação live
-
-Ramo exercitado: **`registarNaoProcessado`** (todos os colaboradores têm `ult_proc=null`).
-
-| | `funcionario.estado` | `estado_validacao` | Lista |
-|---|---|---|---|
-| antes | A | A | `A/Ativo` + `A/Ativo` |
-| após PATCH inativar (sit 9 / motivo 23) | **A** | **P** | `estadoColaborador=A/Ativo` + `estadoRegisto=P/Pendente` ✅ |
-| após PATCH `validar=NAO` | **A** | **A** | volta a `A/A` ✅ |
-
-Prova do desacoplamento na leitura — **958927** (`estado=I`, `estado_validacao=A`):
-antes mostrava `estadoRegisto: I/Inactivo` (errado); agora `A/Ativo`.
-
-## Estado dos colaboradores de teste
-
-Estado verificado após a reposição (tudo consistente):
-
-| fun | estado | est_validacao | sit | sit_estado | situação | tiprel |
-|---|---|---|---|---|---|---|
-| 958925 | A | A | 684 | A | 1 | A ← reposto |
-| 958926 | A | A | 685 | A | 7 | A |
-| 958927 | I | A | 686 | A | 9 | A |
-| 958928 | P | P | 687 | P | 1 | P (registo pendente) |
-
-> ⚠️ **958929, 958930 e 958931 foram APAGADOS da BD** no fim da sessão 4, a pedido do utilizador
-> (111 linhas em 22 tabelas). As secções abaixo que os citam descrevem evidência **histórica** — os
-> dados já não existem. Para reverificar qualquer coisa é preciso **criar colaboradores novos**
-> (ver "How to verify / resume").
-
-Restam 4 na BD:
-
-| fun | estado | est_validacao | nota |
-|---|---|---|---|
-| 958925 | A | A | Wilson Cabral Tavares; contrato **731 a prazo** (2026-01-01 → 2028-01-01) — útil para testar o `contrato.DATA_FIM` na cessação/reativação |
-| 958926 | A | A | Ivanisa Sofia Delgado Silva |
-| 958927 | I | A | **Boa evidência do bug original**: `I / Inactivo` no colaborador com `A / Ativo` no registo. Antes do fix mostrava "Estado do Registo: Inactivo" |
-| 958928 | P | P | registo inicial por validar — lockstep correto |
-
-Ambos tinham ficado presos em `I` com uma reativação aprovada (o ACHADO CRÍTICO) e **foram recuperados
-pela correção `78e879f1`** — servem agora de caso de regressão para o "Ativar".
-
-## Next step
-
-O `estado_validacao` e o "Ativar" estão ambos fechados, validados em todos os cenários e com regressão
-confirmada.
-
-**Antes de qualquer reverificação: os colaboradores de teste foram apagados.** Criar novos (ver
-"How to verify / resume"). A funcionalidade do "Estado do Colaborador" Pendente está **comentada**, a
-aguardar o analista — se o teste esperar ver as duas colunas a Pendente, é por isso que não vê.
-
-O que fica em aberto:
-
-1. **Achado nº1 — a rejeição de um registo editado in-place.** É o mais grave por resolver, mas **não é um
-   refactor**: ver a secção "A edição in-place é regra de negócio" abaixo. O que falta é uma **decisão do
-   analista**, porque a regra escrita é silenciosa sobre a rejeição. **Prioridade 1.**
-2. Levar os achados **3** (`S` sem UI nem comportamento) e **5** (label `estadoRegistoDesc`) a negócio.
-3. Rever o achado **6** (`registarProcessado` aplica o efeito no registo, antes da aprovação) — não foi
-   exercitado nesta sessão porque todos os colaboradores de teste têm `ult_proc=null`. **O ramo processado
-   continua por testar** e é onde vive esse achado.
-4. Se o `RH_V_DOSSIE` tiver de existir noutro ambiente, **reaplicar o DDL à mão** (ver "Current state").
-5. Decidir o **"Estado do Colaborador" Pendente** (comentado) e o **contrato na reativação** — as duas
-   coisas que ficaram à espera do analista. Ambas têm o contexto completo já escrito acima.
-6. `historico-laboral` mostra **pendentes como se fossem factos** (visto ao vivo: situação `P` já
-   aparecia como "APOSENTADO" no histórico, com o colaborador ainda `A`). E como lista *tiprel*, no ramo
-   não-processado tem sempre **uma linha só** — não é histórico, é o estado atual. Endpoint fora do
-   âmbito desta sessão e **não testado**; confirmar com o analista se devia filtrar por `estado`.
+- Nenhum bloqueio. App a correr (task `bvylfuzcx`, porta **8087**).
+- `docs/frontend_changes_funcionario.md` cresceu muito; considerar dividir por tema.
+- Nada foi feito push — os 4 commits só existem localmente.
+
+## Relevant files
+
+- `src/main/java/cv/inps/rh/funcionario/application/service/MobilidadeWriteService.java:168` —
+  `aplicarCamposMobilidade`, a regra tipos↔"(depois)" nos dois sentidos; `editar()` ~L390 tem a
+  comparação que decide se vai a validação
+- `src/main/java/cv/inps/rh/funcionario/application/service/AlterarEstadoContratoService.java:74` —
+  finder do tiprel corrente
+- `docs/caso_uso_teste_gravacao_04_09_26.md:352` — secção Mobilidade do caso de uso
+- `tools/db/DbQuery.java`, `DbExec.java` — SQL directo (usar `DbExec` para escrita; `DbUpdate` dá
+  ORA-17273 depois de gravar)
 
 ## How to verify / resume
 
-- App UP: `curl -s -o /dev/null -w "%{http_code}" http://localhost:8089/swagger-ui.html` = **302**.
-  Se caída: `nohup bash scratchpad/run_develop_8089.sh > scratchpad/boot.log 2>&1 &` (~30-60s).
-- Compilar: `export JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-23.0.2.7-hotspot" && mvn -o compile`.
-- SQL: `cd tools/db && OJ='C:\Users\ivanick.santos\.m2\repository\com\oracle\database\jdbc\ojdbc11\23.7.0.25.01\ojdbc11-23.7.0.25.01.jar' && java -cp ".;$OJ" DbQuery "<SQL>"`.
-- Estado: `DbQuery "SELECT id, estado, estado_validacao FROM rh_t_funcionarios ORDER BY id"`.
-- Lista: `curl -s "http://localhost:8089/api/v1/funcionarios?pageNumber=0&pageSize=20"` → comparar
-  `estadoColaborador` vs `estadoRegisto`.
-- Rota do write: `PATCH /api/v1/funcionarios/{uuid}/situacao-laboral`
-  (`situacaoLaboralId`, `motivoId`, `dataInicio`, `dataFim`, `observacao`, `validar`).
-- **Criar colaborador de teste de raiz** (necessário agora, já que os de teste foram apagados):
-  `POST /api/v1/funcionarios` → `GET /api/v1/funcionarios/{uuid}` → `PUT /api/v1/funcionarios/{uuid}`
-  com `validar:SIM`. Partir de `scratchpad/reg_m1.json` e trocar **só** os identificadores únicos
-  (`nome`, `numDocumento`, `nif`, `numSegurado`, contactos, `numDocumento` dos familiares) — foi assim
-  que se criaram o 958930 e o 958931. Fica `estado=A`/`estado_validacao=A`, `ult_proc=null` (ramo
-  não-processado). Para um contrato **a prazo**, pôr `dadosContratuais.dataFim` e `duracaoMeses`. Payloads-modelo em `scratchpad/reg_m1.json`, `get_m1.json`, `validar_m1.json`
-  (o `scratchpad/` do **projeto**, que persiste entre sessões — não o temporário).
-- Helper de chamadas: `python scratchpad/call.py <METODO> <caminho> [body.json] [--save out.json]`
-  — imprime sempre HTTP status + corpo identado.
+Ambiente (2 armadilhas que custaram tempo):
 
-### Formato de datas (importante)
+- **JDK 23 obrigatório.** `JAVA_HOME` do sistema aponta para `jdk-21` e o arranque falha com
+  `UnsupportedClassVersionError` (class file 67 vs 65). Usar
+  `C:\Program Files\Eclipse Adoptium\jdk-23.0.2.7-hotspot`.
+- **A app sobe na porta 8087**, não na 8089 do CLAUDE.md.
+- O **Bash tool tem o PATH partido** (sem `ls`, `curl`, `git`, `python`). Usar PowerShell para
+  comandos; as ferramentas Read/Grep/Glob funcionam normalmente.
 
-O frontend envia **`DD/MM/YYYY`** (`"dataInicio":"31/08/2026"`), não ISO. O `DateFormatter.stringToLocalDate`
-aceita ambos (ISO foi usado nos testes das sessões 3 e 4 sem erro), mas ao reproduzir o comportamento real
-usar `DD/MM/YYYY`. Payload real capturado do ecrã:
+Arrancar:
 
-```json
-{"validar":null,"estadoContrato":"C","situacaoLaboralId":9,"motivoId":23,
- "observacao":"...","dataInicio":"31/08/2026","dataFim":"01/09/2026","tipoOrdemServico":""}
+```powershell
+$env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-23.0.2.7-hotspot"
+$env:PATH="$env:JAVA_HOME\bin;$env:PATH"
+cd C:\Users\ivanick.santos\Nick-personal\personal-workspace\projects\RH_INPS_SERVICE
+mvn spring-boot:run          # ~1-4 min; esperar "Started RhInpsServiceApplication"
 ```
+
+Chamadas HTTP (o `WebClient` com UTF-8 evita o mojibake que o `Invoke-WebRequest` produz nos acentos):
+
+```powershell
+$wc=New-Object System.Net.WebClient; $wc.Encoding=[System.Text.Encoding]::UTF8
+($wc.DownloadString("http://localhost:8087/api/v1/funcionarios?pageNumber=0&pageSize=20")) |
+  ConvertFrom-Json | ConvertTo-Json -Depth 12
+```
+
+SQL directo:
+
+```powershell
+cd tools\db
+$cp=".;C:/Users/ivanick.santos/.m2/repository/com/oracle/database/jdbc/ojdbc11/23.7.0.25.01/ojdbc11-23.7.0.25.01.jar"
+& "C:\Program Files\Eclipse Adoptium\jdk-23.0.2.7-hotspot\bin\java.exe" -cp $cp DbQuery "SELECT ..."
+```
+
+Nomes reais de tabelas/colunas (vários palpites falharam com ORA-00942/00904):
+`RH_T_FUNCIONARIOS`, `RH_T_SECAO`, `RH_T_MOBILIDADE` (coluna `INSTIT_ID`, não `INSTID_ID`),
+`RH_T_VALIDACAO` (coluna `TIPO_ACCAO`, dois C), `RH_T_CARREIRA`, `RH_T_CONTRATO_VINCULO`,
+`RH_T_TIPOS_RELACIONAMENTO`, `RH_V_CONTRATO`.
+
+Confirmar o estado herdado:
+
+```powershell
+git log --oneline -4        # deve mostrar 20f780b1, 4e14fd0d, 7971d4ef, 15d1c6de
+mvn -q compile -DskipTests  # EXIT=0
+```
+
+## Test / validation plan
+
+Colaborador **958937** (uuid `01a085fa-fc04-7f08-a5d9-75b4b8a886b7`), mobilidade uuid
+`01a085fa-fc0f-7780-9958-e2696024cbad`. Base: `PUT /api/v1/funcionarios/{funUuid}/mobilidades/{mobUuid}`.
+
+Regressões já verificadas nesta sessão — repetir só se se mexer em `MobilidadeWriteService`:
+
+1. **No-op** — payload igual ao que está na BD (`tipoMobilidade:"INICIO"`, `dataInicio:"2026-09-09"`).
+   Esperado: 200 `"Sem alterações."`; mobilidade fica `A`; nenhuma validação nova.
+2. **Só data** — `{"tipoMobilidade":"INICIO","dataInicio":"2026-09-09","dataFim":"2026-12-31"}`.
+   Esperado: 200 `"Sem alterações."`; `data_fim` gravada; estado `A`.
+3. **Alteração real** — `{"tipoMobilidade":"INICIO,SECAO","dataInicio":"2026-09-09","seccaoDestino":2}`.
+   Esperado: 200 `"Mobilidade actualizada."`; mobilidade `P`; validação `UPDATE MOBILIDADE` `P`.
+   Detalhe (`GET /api/v1/funcionarios/validacoes/{validacaoUuid}/detalhes`) tem de mostrar
+   `valorAnterior` preenchido — se vier `null`, o baseline JaVers partiu-se.
+4. **Falta o destino** — `{"tipoMobilidade":"SECAO","dataInicio":"2026-09-09"}`.
+   Esperado: 400 `Escolheu mobilidade de Unidade: indique o campo "Unidade (depois)".`; rollback total.
+5. **Destino a mais** — `{"tipoMobilidade":"SECAO",...,"seccaoDestino":12,"direcaoDestino":100010075}`.
+   Esperado: 400 `Enviou "Direcção (depois)" mas não escolheu mobilidade de Direcção.`
+6. **Herança** — depois do teste 3, confirmar por SQL que `instit_id` e `local_trab_id` ficaram
+   inalterados (100010973 e 5).
+
+Limpar depois de cada teste que deixe `P`: validar com
+`PUT .../mobilidades/{mobUuid}/validar` e body `{"validar":"SIM","tipoMobilidade":...}` (esperado
+200 `"Mobilidade validada."`, mobilidade volta a `A`, **tiprel não muda** — uma edição não cria nem
+troca tiprel). Em alternativa, repor por SQL com `DbExec`.
+
+Contrato — regressão do `15d1c6de`, no 958925 (uuid `01a061d6-f65c-74cd-a5e3-3c45f3de5734`,
+contrato uuid `1f1abadd-e93d-63b2-a3bf-b3e110b02d03`, que tem uma progressão rejeitada):
+`PATCH .../contratos/{contratoUuid}/estado` com `{"estado":"I"}` → 200; tiprel 173439 fica `I` com
+`est_act_adm=1` e o candidato 173440 intacto; depois `{"estado":"A"}` → 200 e o get-by-id volta
+idêntico. Num contrato **não** atual (731, uuid `1f1a6bff-07c9-698b-85ba-459f5766daec`) os dois
+sentidos devem dar 400.
+
+## Open questions
+
+- Fazer push / abrir PR dos 4 commits — o utilizador ainda não pediu.
+
+## Next step
+
+Retomar a validação do Dossiê nas secções ainda não cobertas (carreira, regime, situação laboral,
+dados bancários/familiares), seguindo `docs/caso_uso_teste_gravacao_04_09_26.md` e usando o 958937
+como colaborador de teste.

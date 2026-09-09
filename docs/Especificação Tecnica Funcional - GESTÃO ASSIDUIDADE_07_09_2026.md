@@ -41,38 +41,38 @@ alt="Uma imagem com texto, software, número, Ícone de computador Os conteúdos
 </thead>
 <tbody>
 <tr>
-<td>Nome Colaborador</td>
+<td style="text-align: center;">Nome Colaborador</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>RH_MOVIMENTOS.ID_COLABORADOR</td>
 </tr>
 <tr>
-<td>Direção</td>
+<td style="text-align: center;">Direção</td>
 <td><em>SELECT</em></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID</td>
 </tr>
 <tr>
-<td>Secção</td>
+<td style="text-align: center;">Secção</td>
 <td><em>SELECT</em></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID</td>
 </tr>
 <tr>
-<td>UPS</td>
+<td style="text-align: center;">UPS</td>
 <td><em>UPS</em></td>
 <td>SIPSGLOBAL.GLB_T_UPS.NOME</td>
 <td><p>RH_T_TIPOS_RELACIONAMENTO.LOCAL_TRAB_ID</p>
 <p>RH_T_LOCAL_TRABALHO. ID_UPS</p></td>
 </tr>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td><em>DATE</em></td>
 <td></td>
 <td>RH_MOVIMENTOS. DT_MOVIMENTO</td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td><em>DATE</em></td>
 <td></td>
 <td>RH_MOVIMENTOS. DT_MOVIMENTO</td>
@@ -84,25 +84,25 @@ alt="Uma imagem com texto, software, número, Ícone de computador Os conteúdos
 <td style="text-align: center;"><strong>Fonte dados</strong></td>
 </tr>
 <tr>
-<td>Nome Colaborador</td>
+<td style="text-align: center;">Nome Colaborador</td>
 <td><em>TEXT</em></td>
 <td>RH_T_FUNCIONARIOS.NOME</td>
 <td>RH_MOVIMENTOS.ID_COLABORADOR</td>
 </tr>
 <tr>
-<td>Data</td>
+<td style="text-align: center;">Data</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>RH_MOVIMENTOS.DT_MOVIMENTO</td>
 </tr>
 <tr>
-<td>Hora Entrada</td>
+<td style="text-align: center;">Hora Entrada</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>RH_MOVIMENTOS. getLocalUserMovimento</td>
 </tr>
 <tr>
-<td>Hora Saida</td>
+<td style="text-align: center;">Hora Saida</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>RH_MOVIMENTOS.hora_movimento Dir||' - '||.getLocalUserMovimento</td>
@@ -112,7 +112,7 @@ alt="Uma imagem com texto, software, número, Ícone de computador Os conteúdos
 <td colspan="3" style="text-align: center;"></td>
 </tr>
 <tr>
-<td><img src="media/image7.png"
+<td style="text-align: center;"><img src="media/image7.png"
 style="width:1.18264in;height:0.30347in" /></td>
 <td colspan="3"><p>Caso alguns dados não foi importado de forma
 automático, o RH Tem a possibilidade de o fazer manualmente com esse
@@ -179,32 +179,32 @@ alt="Uma imagem com texto, número, software, Tipo de letra Os conteúdos gerado
 </thead>
 <tbody>
 <tr>
-<td>Direção</td>
+<td style="text-align: center;">Direção</td>
 <td></td>
 <td>INPSSIGOF.INSTITUICOES.NOME</td>
 <td>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID</td>
 </tr>
 <tr>
-<td>Colaborador</td>
+<td style="text-align: center;">Colaborador</td>
 <td></td>
 <td>RH_T_FUNCIONARIOS.NOME</td>
 <td>RH_ASSIDUIDADE_SINTESE_DIARIA. FUNCIONARIO_ID</td>
 </tr>
 <tr>
-<td>UPS</td>
+<td style="text-align: center;">UPS</td>
 <td></td>
 <td>SIPSGLOBAL.GLB_T_UPS. NOME</td>
 <td><p>RH_T_TIPOS_RELACIONAMENTO.LOCAL_TRAB_ID</p>
 <p>RH_T_PARAM_LOCAL_TRAB.UPS_ID</p></td>
 </tr>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td></td>
 <td></td>
 <td>RH_ASSIDUIDADE_SINTESE_DIARIA .DATA</td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td></td>
 <td></td>
 <td>RH_ASSIDUIDADE_SINTESE_DIARIA .DATA</td>
@@ -216,7 +216,7 @@ alt="Uma imagem com texto, número, software, Tipo de letra Os conteúdos gerado
 <td style="text-align: center;"><strong>Fonte dados</strong></td>
 </tr>
 <tr>
-<td>Estado</td>
+<td style="text-align: center;">Estado</td>
 <td></td>
 <td><p>Estado da falta,conforme,inj<strong>ustiticada</strong>,
 <strong>justificada ,Pendente,</strong></p>
@@ -224,53 +224,53 @@ alt="Uma imagem com texto, número, software, Tipo de letra Os conteúdos gerado
 <td>RH_ASSIDUIDADE_SINTESE_DIARIA.ESTADO</td>
 </tr>
 <tr>
-<td>Mês Referencia</td>
+<td style="text-align: center;">Mês Referencia</td>
 <td></td>
 <td>AGRUPAR</td>
 <td>RH_ASSIDUIDADE_SINTESE_DIARIA.DATA</td>
 </tr>
 <tr>
-<td>Nome Colaborador</td>
+<td style="text-align: center;">Nome Colaborador</td>
 <td></td>
 <td><p>Nome do colaborador</p>
 <p>RH_T_FUNCIONARIOS.NOME</p></td>
 <td>RH_ASSIDUIDADE_SINTESE_DIARIA. FUNCIONARIO_ID</td>
 </tr>
 <tr>
-<td>Total de Falta</td>
+<td style="text-align: center;">Total de Falta</td>
 <td></td>
 <td>Contam todas faltas cujo estado =’SIM’</td>
 <td><strong>SUM</strong> (RH_ASSIDUIDADE_SINTESE_DIARIA.FALTA)</td>
 </tr>
 <tr>
-<td>Total de Dias</td>
+<td style="text-align: center;">Total de Dias</td>
 <td></td>
 <td>Agrupar as datas que tem falta</td>
 <td><strong>COUNT</strong> (RH_ASSIDUIDADE_SINTESE_DIARIA.DATA)</td>
 </tr>
 <tr>
-<td>Horas Trabalhadas</td>
+<td style="text-align: center;">Horas Trabalhadas</td>
 <td></td>
 <td>Somar as horas trabalhadas</td>
 <td><strong>COUNT</strong>(SUBSTR(TO_CHAR(<strong>RH_ASSIDUIDADE_SINTESE_DIARIA</strong>.HORAS_TRABALHADAS
 ), 4, 8);)</td>
 </tr>
 <tr>
-<td>Horas Extras</td>
+<td style="text-align: center;">Horas Extras</td>
 <td></td>
 <td>Somas as horas extras</td>
 <td><strong>COUNT</strong>(SUBSTR(TO_CHAR(<strong>RH_ASSIDUIDADE_SINTESE_DIARIA</strong>.HORAS_EXTRAS),
 4, 8);</td>
 </tr>
 <tr>
-<td>Hora Ausência</td>
+<td style="text-align: center;">Hora Ausência</td>
 <td></td>
 <td>Somar as horas Ausência</td>
 <td><strong>COUNT</strong>(SUBSTR(TO_CHAR(<strong>RH_ASSIDUIDADE_SINTESE_DIARIA</strong>.HORAS_AUSENCIA),
 4, 8);</td>
 </tr>
 <tr>
-<td><del>Motivo Ausencia</del></td>
+<td style="text-align: center;"><del>Motivo Ausencia</del></td>
 <td></td>
 <td><del>Verifica se o colaborador esta ausente de trabalhor neste
 periodo (caso sim vem preenchido )</del></td>
@@ -278,12 +278,12 @@ periodo (caso sim vem preenchido )</del></td>
 RH_T_PARAM_SITUACAO.</strong>NOME</del></td>
 </tr>
 <tr>
-<td colspan="4"><strong>REGRA</strong></td>
+<td colspan="4" style="text-align: center;"><strong>REGRA</strong></td>
 </tr>
 <tr>
-<td colspan="4"><ul>
+<td colspan="4" style="text-align: center;"><ul>
 <li><p>Os colaboradores com ausência justificada não devem aparecer na
-lista. Ou seja no período que o colaborador esta ausente de trabalho ,
+lista. Ou seja, no período que o colaborador esta ausente de trabalho,
 já seja por motivo de ferias, missão de serviço. Licença sem vencimento
 …etc , a sua falta fica justificada automaticamente e não deve aparecer
 na lista. Para ver se um colaboradors está ausente de trabalho – tabela
@@ -295,17 +295,17 @@ na lista. Para ver se um colaboradors está ausente de trabalho – tabela
 <td colspan="3" style="text-align: center;"></td>
 </tr>
 <tr>
-<td><img src="media/image9.png"
+<td style="text-align: center;"><img src="media/image9.png"
 style="width:1.03681in;height:0.29514in" /></td>
 <td colspan="3">Permite marcar um colaborador falta manualmente</td>
 </tr>
 <tr>
-<td><img src="media/image10.png"
+<td style="text-align: center;"><img src="media/image10.png"
 style="width:1.52847in;height:0.22014in" /></td>
 <td colspan="3">Abre formulario para justificacao de Falta</td>
 </tr>
 <tr>
-<td><img src="media/image11.png"
+<td style="text-align: center;"><img src="media/image11.png"
 style="width:1.59097in;height:0.24931in" /></td>
 <td colspan="3">Abre a mesma <strong>Lista de Movimento Picagem (Entrada
 / Saída), <mark>mas filtrado com dados de um colaborador
@@ -384,7 +384,7 @@ HORAS_AUSENCIA</p>
 <td><strong>---------------------</strong></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>Nota:</strong> os
+<td colspan="4" style="text-align: center;"><strong>Nota:</strong> os
 campos abaixo so aparecem caso Com Justificativo = SIM</td>
 </tr>
 <tr>
@@ -394,39 +394,39 @@ campos abaixo so aparecem caso Com Justificativo = SIM</td>
 <td><strong>RH_T_FALTA</strong>.DESCRICAO<strong>_</strong>MOTIVO</td>
 </tr>
 <tr>
-<td style="text-align: left;"><mark>Tipo Falta</mark></td>
-<td><mark>SELECT</mark></td>
-<td><mark>Deve buscar a descrição do tipo de falta escolhido … para
-buscar a justificativo, deve buscar da tabela de parametrização
-RH_T_PARAM_SITUACAO onde <em>FLG_ausencia = FALTA </em></mark></td>
-<td><mark>RH_T_FALTA<strong>.</strong>PARAM_SIT_ID</mark></td>
+<td style="text-align: left;">Tipo Falta</td>
+<td>SELECT</td>
+<td>Deve buscar a descrição do tipo de falta escolhido … para buscar a
+justificativo, deve buscar da tabela de parametrização
+RH_T_PARAM_SITUACAO onde <em>FLG_ausencia = FALTA</em></td>
+<td>RH_T_FALTA<strong>.</strong>PARAM_SIT_ID</td>
 </tr>
 <tr>
-<td style="text-align: left;"><mark>Desduzir Falta Em</mark></td>
+<td style="text-align: left;">Desduzir Falta Em</td>
 <td></td>
-<td><p><mark>Domains = TP_DESCONTO_FALTA</mark></p>
+<td><p>Domains = TP_DESCONTO_FALTA</p>
 <ul>
-<li><p><mark>Ferias</mark></p></li>
-<li><p><mark>Dispensa</mark></p></li>
+<li><p>Ferias</p></li>
+<li><p>Dispensa</p></li>
 </ul></td>
-<td><mark>RH_T_FALTA.FLG_DESCONTO_FALTA</mark></td>
+<td>RH_T_FALTA.FLG_DESCONTO_FALTA</td>
 </tr>
 <tr>
-<td style="text-align: left;"><mark>Valor diario Falta</mark></td>
+<td style="text-align: left;">Valor diario Falta</td>
 <td></td>
-<td><p><mark>Calcula o valor de falta por cada dia por cada horas de
-ausência</mark></p>
-<p><mark>RH_PROCESSAMENTO_SALARIAL_DB. CALCULO_FALTA_DIARIO (P_TIPREL_ID
-NUMBER, p_data_inicio DATE)</mark></p>
-<p><mark>Nota :essa funcao somente develvo o valor diario, que deve ser
-calculado por total de dias</mark></p></td>
-<td><mark>RH_T_FALTA.VALOR</mark></td>
+<td><p>Calcula o valor de falta por cada dia por cada horas de
+ausência</p>
+<p>RH_PROCESSAMENTO_SALARIAL_DB. CALCULO_FALTA_DIARIO (P_TIPREL_ID
+NUMBER, p_data_inicio DATE)</p>
+<p>Nota :essa funcao somente develvo o valor diario, que deve ser
+calculado por total de dias</p></td>
+<td>RH_T_FALTA.VALOR</td>
 </tr>
 <tr>
-<td style="text-align: left;"><mark>Valor Total</mark></td>
+<td style="text-align: left;">Valor Total</td>
 <td></td>
-<td><mark>Valor diário * totais dias</mark></td>
-<td><mark>-----------------------</mark></td>
+<td>Valor diário * totais dias</td>
+<td>-----------------------</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Parecer Responsável</strong></td>
@@ -434,7 +434,7 @@ calculado por total de dias</mark></p></td>
 Com Justificativo = SIM</td>
 </tr>
 <tr>
-<td style="text-align: left;">Parecer Responsável</td>
+<td style="text-align: left;">Parece Responsável</td>
 <td>SELECT</td>
 <td><strong>DOMAIN</strong> = PARECER_DECISAO, REFERENCIA =
 PARECER_RESPONSAVEL</td>
@@ -443,7 +443,7 @@ PARECER_RESPONSAVEL</td>
 <tr>
 <td style="text-align: left;">Responsavel</td>
 <td>SELECT</td>
-<td>Pegar da Tabela <strong>RH_T_RESPONSAVEL.FUN_ID</strong> ,
+<td>Pegar da Tabela <strong>RH_T_RESPONSAVEL.FUN_ID</strong>,
 <strong>RH_T_FUNCIONARIO</strong>.ID</td>
 <td>RH_T_FALTA RESPONSAVEL_ID</td>
 </tr>
@@ -454,7 +454,7 @@ PARECER_RESPONSAVEL</td>
 <td>RH_T_FALTA.OBS_RESPONSAVEL</td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>Anexar Documentos -
+<td colspan="4" style="text-align: center;"><strong>Anexar Documentos -
 Nota:</strong> este separador só aparece caso Com Justificativo =
 SIM</td>
 </tr>
@@ -481,31 +481,30 @@ REFERENCIA = ‘JUSTIFICACAO_FALTA’</p>
 <td></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><ul>
+<td colspan="4" style="text-align: center;"><ul>
 <li><p>Caso campo justificar for <strong>SIM</strong>:</p>
 <ul>
 <li><p>Deve aparecer o separador de <strong>Parecer Respnsável</strong>
 e <strong>Despacho RH</strong></p></li>
 <li><p>Regista na tabela RH_T_PEDIDO, e RH_T_FALTA</p></li>
-<li><p><mark>Campo Validar, fica visível somente em
-Validação</mark></p></li>
+<li><p>Campo Validar, fica visível somente em Validação</p></li>
 </ul></li>
 <li><p>O número de registo na tabela RH_T_FALTA dependerá do número de
 dias de falta (por cada dia de falta é um registo na tabela)</p></li>
-<li><p><mark>Somente deve ir para validação caso o número de falta for
-maior que 3 dias, e caso o tipo de justificação esta sujeito a desconto
-no salário
-(</mark><em><strong>RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL</strong></em><mark>)
-caso contrario o registo fica registado com estado ATIVO</mark></p></li>
+<li><p>Somente deve ir para validação caso o número de falta for maior
+que 3 dias, e caso o tipo de justificação esta sujeito a desconto no
+salário
+(<em><strong>RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL</strong></em>)
+caso contrário o registo fica registado com estado ATIVO</p></li>
 </ul>
 <p><strong>Pendente</strong>: calculo de valor na justificacao de
 Falta</p></td>
 </tr>
 <tr>
-<td colspan="4" style="text-align: left;"><strong>Ações</strong></td>
+<td colspan="4" style="text-align: center;"><strong>Ações</strong></td>
 </tr>
 <tr>
-<td style="text-align: left;"><img src="media/image13.png"
+<td style="text-align: center;"><img src="media/image13.png"
 style="width:0.6375in;height:0.26944in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><p>1.Grava na tabela
@@ -549,11 +548,10 @@ campos (regista aqui somente apos justificação de Falta)</p>
 <li><p>SINTESE_DIARIO_ID = id de
 <strong>RH_ASSIDUIDADE_SINTESE_DIARIO</strong></p></li>
 <li><p>TIPO = ‘FALTA’</p></li>
-<li><p>Estado = <mark>A</mark></p></li>
+<li><p>Estado = A</p></li>
 </ul>
 <p><strong>2.3</strong> Regista na tabela <strong>RH_T_VALIDACAO
-<mark>(Somento o Tipo de Falta tem Salarios
-Associado)</mark></strong></p></td>
+(Somento o Tipo de Falta tem Salarios Associado)</strong></p></td>
 </tr>
 </tbody>
 </table>
@@ -580,19 +578,20 @@ Associado)</mark></strong></p></td>
 <li><p><strong>caso o tipo de falta desconta salário, logo deve registar
 na Tabela</strong></p>
 <ul>
-<li><p><strong>RH_T_DEF_PAGAMENTO</strong></p></li>
-<li><p>atualiza id RH_T_DEF_PAGAMENTO em <strong>RH_T_FALTA.
-<mark>DEF_PAG_ID</mark></strong></p></li>
+<li><p><strong><del>RH_T_DEF_REMUNERACOES</del>
+<mark>RH_T_DEF_REMUNERACOES</mark></strong></p></li>
+<li><p>atualiza id RH_T_DEF_PAGAMENTO em <strong><mark>RH_T_FALTA.
+DEF_REM_ID</mark></strong></p></li>
 <li><p>Regista a associacao na tabela <strong><mark>RH_T_TIPREL_REM_PAG
-.PAG_ID</mark></strong></p></li>
+.REM_ID</mark></strong></p></li>
 </ul></li>
-<li><p><strong>Caso o tipo de falta for desconto nas ferias <mark>(campo
-DEDUZIR EM = FERIAS ),</mark></strong> logo deve registar na Tabela</p>
+<li><p><strong>Caso o tipo de falta for desconto nas ferias (campo
+DEDUZIR EM = FERIAS ),</strong> logo deve registar na Tabela</p>
 <ul>
 <li><p>Regista na tabela <strong>RH_T_FERIAS_GOZADAS</strong></p></li>
 </ul></li>
 <li><p><strong>Caso o tipo de justificação for desconto nas horas de
-Dispensa <mark>(campo DEDUZIR EM = DISPENSA ),</mark></strong></p>
+Dispensa (campo DEDUZIR EM = DISPENSA ),</strong></p>
 <ul>
 <li><p>Regista na <strong>RH_T_DISPENSA</strong></p></li>
 </ul></li>
@@ -624,7 +623,8 @@ Dispensa <mark>(campo DEDUZIR EM = DISPENSA ),</mark></strong></p>
 </thead>
 <tbody>
 <tr>
-<td colspan="4"><strong>RESUMO FALTAS</strong></td>
+<td colspan="4" style="text-align: center;"><strong>RESUMO
+FALTAS</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Selecionar</td>
@@ -653,7 +653,8 @@ Dispensa <mark>(campo DEDUZIR EM = DISPENSA ),</mark></strong></p>
 HORAS_AUSENCIA<strong>RH_T_T_FALTA.</strong>HORAS_AUSENCIA</td>
 </tr>
 <tr>
-<td colspan="4"><strong>JUSTIFICAR FALTAS SELECIONADAS</strong></td>
+<td colspan="4" style="text-align: center;"><strong>JUSTIFICAR FALTAS
+SELECIONADAS</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Validar</td>
@@ -682,29 +683,29 @@ RH_T_PARAM_SITUACAO onde <em>FLG_AUSENCIA = FALTA</em></td>
 <td>RH_T_FALTA<strong>.PARAM_SIT_ID</strong></td>
 </tr>
 <tr>
-<td style="text-align: left;"><mark>Desduzir Falta Em</mark></td>
+<td style="text-align: left;">Deduzir Falta Em</td>
 <td></td>
-<td><p><mark>Domains = TP_DESCONTO_FALTA</mark></p>
+<td><p>Domains = TP_DESCONTO_FALTA</p>
 <ul>
-<li><p><mark>Ferias</mark></p></li>
+<li><p>Ferias</p></li>
 </ul>
-<p><mark>Dispensa</mark></p></td>
-<td><mark>RH_T_FALTA.FLG_DESCONTO_FALTA</mark></td>
+<p>Dispensa</p></td>
+<td>RH_T_FALTA.FLG_DESCONTO_FALTA</td>
 </tr>
 <tr>
 <td style="text-align: left;">Valor Diário</td>
 <td></td>
 <td><p>Calcula o valor de falta por cada dia ..ou por cada horas de
 ausência</p>
-<p><mark>RH_PROCESSAMENTO_SALARIAL_DB. CALCULO_FALTA_DIARIO (P_TIPREL_ID
-NUMBER, p_data_inicio DATE)</mark></p></td>
+<p>RH_PROCESSAMENTO_SALARIAL_DB. CALCULO_FALTA_DIARIO (P_TIPREL_ID
+NUMBER, p_data_inicio DATE)</p></td>
 <td>RH_T_FALTA.VALOR</td>
 </tr>
 <tr>
-<td style="text-align: left;"><mark>Valor Total</mark></td>
+<td style="text-align: left;">Valor Total</td>
 <td></td>
-<td><mark>Valor diário * totais dias</mark></td>
-<td><mark>-----------------------</mark></td>
+<td>Valor diário * totais dias</td>
+<td>-----------------------</td>
 </tr>
 <tr>
 <td style="text-align: left;">-----------------------------</td>
@@ -732,8 +733,8 @@ NUMBER, p_data_inicio DATE)</mark></p></td>
 <td><p>RH_T_DOCUMENTO.<em>DOC_ID</em></p>
 <p>RH_T_DOCUMENTO.TIPO_DOCUMETO = ID DE TABELA RH_T_TIPO_DOCUMENTO ONDE
 REFERENCIA = ‘JUSTIFICACAO_FALTA’</p>
-<p><mark>REFERENCIA_NAME = ‘RH_T_FALTA’</mark></p>
-<p><mark>REFERENCIA_ID = id de RH_T_FALTA</mark></p></td>
+<p>REFERENCIA_NAME = ‘RH_T_FALTA’</p>
+<p>REFERENCIA_ID = id de RH_T_FALTA</p></td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Parecer Responsável</strong></td>
@@ -762,10 +763,10 @@ PARECER_RESPONSAVEL</td>
 <td>RH_T_FALTA.OBS_RESPONSAVEL</td>
 </tr>
 <tr>
-<td colspan="4"><strong>REGRA</strong></td>
+<td colspan="4" style="text-align: center;"><strong>REGRA</strong></td>
 </tr>
 <tr>
-<td colspan="4"><ul>
+<td colspan="4" style="text-align: center;"><ul>
 <li><p><em>Se o Tipo <strong>de Justificação</strong> é sujeito a
 desconto de salário, logo ao validar um o pedido, deve-se registar na
 RH_T_REMUNERACAO.</em></p></li>
@@ -776,23 +777,22 @@ Gozar)</em></p></li>
 <li><p><em>Ao validar é enviado uma notificação ao Colaborador. pegar o
 assunto e corpo na tabela <strong>RH_T_PARAM_NOTIFICACAO</strong> onde
 REFRENCIA = <strong>‘JUSTIFICACAO_FALTA’’</strong></em></p></li>
-<li><p><mark>Somente deve ir para validação caso o número de falta for
-maior que 3 dias , e caso o tipo de justificação esta sujeito a desconto
-no salário
-(</mark><em><strong>RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL</strong></em><mark>)
-caso contrario o registo fica registado com estado ATIVO</mark></p></li>
-<li><p><mark>Campo Validar , fica visível somente em
-Validação</mark></p></li>
-<li></li>
+<li><p>Somente deve ir para validação caso o número de falta for maior
+que 3 dias, e caso o tipo de justificação esta sujeito a desconto no
+salário
+(<em><strong>RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL</strong></em>)
+caso contrário o registo fica registado com estado ATIVO</p></li>
+<li><p>Campo Validar, fica visível somente em Validação</p></li>
 </ul>
-<p><strong>Pendente</strong>: calculo de valor na justificacao de
+<p><strong>Pendente</strong>: cálculo de valor na justificacao de
 Falta</p></td>
 </tr>
 <tr>
-<td colspan="4"><strong>Ações</strong></td>
+<td colspan="4" style="text-align: center;"><strong>Ações</strong></td>
 </tr>
 <tr>
-<td><img src="media/image13.png" style="width:0.6375in;height:0.26944in"
+<td style="text-align: center;"><img src="media/image13.png"
+style="width:0.6375in;height:0.26944in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><p>1-Registo na tabela <strong>RH_T_PEDIDO</strong></p>
 <ul>
@@ -842,17 +842,15 @@ ACCAO_REFERENTE<strong>)</strong></em></p></li>
 <li><p>Caso a justificação é sujeita a desconto no salário, logo deve
 registar no <strong>RH_T_DEF_PAGAMENTOS</strong> o registo de
 falta</p></li>
-<li><p>Regista a associacao na tabela <strong><mark>RH_T_TIPREL_REM_PAG
-.PAG_ID</mark></strong></p></li>
-<li><p>Atualiza o id de PAGAMENTO na tabela
-<mark><strong>RH_T_FALTA.</strong>
-<strong>DEF_PAG_ID</strong></mark></p></li>
-<li><p><strong>Caso o tipo de falta for desconto nas ferias <mark>(campo
-DEDUZIR EM = FERIAS ),</mark></strong> logo deve registar na
-Tabela</p></li>
+<li><p>Regista a associacao na tabela <strong>RH_T_TIPREL_REM_PAG
+.PAG_ID</strong></p></li>
+<li><p>Atualiza o id de PAGAMENTO na tabela <strong>RH_T_FALTA.</strong>
+<strong>DEF_PAG_ID</strong></p></li>
+<li><p><strong>Caso o tipo de falta for desconto nas ferias (campo
+DEDUZIR EM = FERIAS),</strong> logo deve registar na Tabela</p></li>
 <li><p>Regista na tabela <strong>RH_T_FERIAS_GOZADAS</strong></p></li>
 <li><p><strong>Caso o tipo de justificação for desconto nas horas de
-Dispensa <mark>(campo DEDUZIR EM = DISPENSA ),</mark></strong></p></li>
+Dispensa (campo DEDUZIR EM = DISPENSA),</strong></p></li>
 <li><p>Regista na <strong>RH_T_DISPENSA</strong></p></li>
 </ul></th>
 </tr>
@@ -867,7 +865,7 @@ Dispensa <mark>(campo DEDUZIR EM = DISPENSA ),</mark></strong></p></li>
 alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos gerados por IA podem estar incorretos." />
 
 | **Filtro** | **Tipo** | **Descrição** | **Fonte dados** |
-|----|----|----|----|
+|:--:|----|----|----|
 | Ilha |  |  | RH_T_TIPOS_RELACIONAMENTO.LOCAL_TRAB_ID |
 | Direção | *SELECT* |  | RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID |
 | Secção | *SELECT* |  | RH_T_TIPOS_RELACIONAMENTO.SECCAO_ID |
@@ -913,43 +911,43 @@ alt="Uma imagem com texto, número, Tipo de letra, software Os conteúdos gerado
 </thead>
 <tbody>
 <tr>
-<td>Colaborador</td>
+<td style="text-align: center;">Colaborador</td>
 <td><em>TEXT</em></td>
 <td>RH_T_FUNCIONARIOS.NOME</td>
 <td>RH_T_DISPENSA.TIPREL_ID</td>
 </tr>
 <tr>
-<td>Ilha</td>
+<td style="text-align: center;">Ilha</td>
 <td></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.LOCAL_TRAB_ID</td>
 </tr>
 <tr>
-<td>Direção</td>
+<td style="text-align: center;">Direção</td>
 <td><em>SELECT</em></td>
 <td>INPSSIGOF.INSTITUICOES.NOME</td>
 <td>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID</td>
 </tr>
 <tr>
-<td>Seccão</td>
+<td style="text-align: center;">Seccão</td>
 <td><em>SELECT</em></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.SECCAO_ID</td>
 </tr>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td><em>DATE</em></td>
 <td></td>
 <td>RH_T_DISPENSA.DATA</td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td><em>DATE</em></td>
 <td></td>
 <td>RH_T_DISPENSA.DATA</td>
 </tr>
 <tr>
-<td>ESTADO</td>
+<td style="text-align: center;">ESTADO</td>
 <td></td>
 <td>DOMAIN = ESTADO_DISPENSA</td>
 <td>RH_T_DISPENSA.ESTADO</td>
@@ -961,49 +959,49 @@ alt="Uma imagem com texto, número, Tipo de letra, software Os conteúdos gerado
 <td style="text-align: center;"><strong>Fonte dados</strong></td>
 </tr>
 <tr>
-<td>Direção</td>
+<td style="text-align: center;">Direção</td>
 <td></td>
 <td>INPSSIGOF.INSTITUICOES.NOME</td>
 <td>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID</td>
 </tr>
 <tr>
-<td>Colaborador</td>
+<td style="text-align: center;">Colaborador</td>
 <td></td>
 <td>RH_T_FUNCIONARIOS.NOME</td>
 <td>RH_T_DISPENSA.TIPREL_ID</td>
 </tr>
 <tr>
-<td>Vinculo</td>
+<td style="text-align: center;">Vinculo</td>
 <td></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.CONTRATO_VINCULO_ID</td>
 </tr>
 <tr>
-<td>Categoria</td>
+<td style="text-align: center;">Categoria</td>
 <td></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.CARGO_ID</td>
 </tr>
 <tr>
-<td>Data pedido</td>
+<td style="text-align: center;">Data pedido</td>
 <td></td>
 <td></td>
 <td>RH_T_DISPENSA. <em>DATA_REGISTO</em></td>
 </tr>
 <tr>
-<td>Data Dispensa</td>
+<td style="text-align: center;">Data Dispensa</td>
 <td></td>
 <td></td>
 <td>RH_T_DISPENSA.DATA</td>
 </tr>
 <tr>
-<td>Hora inicio / Fim</td>
+<td style="text-align: center;">Hora inicio / Fim</td>
 <td></td>
 <td></td>
 <td>RH_T_DISPENSA.HORA_INICIO/RH_T_DISPENSA.HORA_FIM</td>
 </tr>
 <tr>
-<td>Hora Direito</td>
+<td style="text-align: center;">Hora Direito</td>
 <td></td>
 <td><p>FAZ SUMATORIA DE TOTAL HORAS</p>
 <p>Lembrate , pode usar o total de horas em justificação de
@@ -1011,13 +1009,13 @@ falta</p></td>
 <td>SUM(RH_T_DISPENSA.TOTAL_HORA)</td>
 </tr>
 <tr>
-<td>Total Horas solicitada</td>
+<td style="text-align: center;">Total Horas solicitada</td>
 <td></td>
 <td></td>
 <td>RH_T_DISPENSA.TOTAL_HORA</td>
 </tr>
 <tr>
-<td>Motivo dispensa</td>
+<td style="text-align: center;">Motivo dispensa</td>
 <td></td>
 <td></td>
 <td>RH_T_DISPENSA.MOTIVO</td>
@@ -1027,7 +1025,7 @@ falta</p></td>
 <td colspan="3" style="text-align: center;"></td>
 </tr>
 <tr>
-<td>Novo</td>
+<td style="text-align: center;">Novo</td>
 <td colspan="3"></td>
 </tr>
 </tbody>
@@ -1035,8 +1033,7 @@ falta</p></td>
 
 ### Novo / Editar 
 
-<img src="media/image17.png" style="width:7.60833in;height:4.50417in"
-alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos gerados por IA podem estar incorretos." />
+<img src="media/image17.png" style="width:9.69306in;height:5.72917in" />
 
 <table>
 <colgroup>
@@ -1055,7 +1052,7 @@ alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos ger
 </thead>
 <tbody>
 <tr>
-<td colspan="4"></td>
+<td colspan="4" style="text-align: center;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">Colaborador</td>
@@ -1078,10 +1075,16 @@ somatoria de (HORA_INICIO, HORA_FIM)</td>
 <td></td>
 </tr>
 <tr>
-<td style="text-align: left;">Data</td>
+<td style="text-align: left;">Data início dispensa</td>
 <td></td>
 <td></td>
-<td>RH_T_DISPENSA.DATA</td>
+<td>RH_T_DISPENSA.DATA_INICIO</td>
+</tr>
+<tr>
+<td style="text-align: left;"><mark>Data Fim dispensa</mark></td>
+<td></td>
+<td></td>
+<td><mark>RH_T_DISPENSA.DATA_FIM</mark></td>
 </tr>
 <tr>
 <td style="text-align: left;">Hora Inicio</td>
@@ -1123,7 +1126,7 @@ PARECER_RESPONSAVEL</td>
 <tr>
 <td style="text-align: left;">Responsavel</td>
 <td>SELECT</td>
-<td>Pegar da Tabela <strong>RH_T_RESPONSAVEL.FUN_ID</strong> ,
+<td>Pegar da Tabela <strong>RH_T_RESPONSAVEL.FUN_ID</strong>,
 <strong>RH_T_FUNCIONARIO</strong>.ID</td>
 <td>RH_T_DISPENSA.RESPONSAVEL_ID</td>
 </tr>
@@ -1158,23 +1161,24 @@ PARECER_RESPONSAVEL</td>
 <td></td>
 </tr>
 <tr>
-<td>Tipo documento</td>
+<td style="text-align: center;">Tipo documento</td>
 <td></td>
 <td></td>
-<td>RH_T_DOCUMENTO.TIPO_DOMENTO_ID , onde tipo é referecia É igual a
+<td>RH_T_DOCUMENTO.TIPO_DOMENTO_ID, onde tipo é referecia É igual a
 <strong>DISPENSA</strong></td>
 </tr>
 <tr>
-<td>Documento</td>
+<td style="text-align: center;">Documento</td>
 <td></td>
 <td></td>
 <td>RH_T_DOCUMENTO.DOC_ID</td>
 </tr>
 <tr>
-<td colspan="4"><strong>Ações</strong></td>
+<td colspan="4" style="text-align: center;"><strong>Ações</strong></td>
 </tr>
 <tr>
-<td><img src="media/image13.png" style="width:0.6375in;height:0.26944in"
+<td style="text-align: center;"><img src="media/image13.png"
+style="width:0.6375in;height:0.26944in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><ol type="1">
 <li><p>Grava na tabela <strong>RH_T_PEDIDO</strong></p>
@@ -1278,31 +1282,31 @@ alt="Uma imagem com texto, software, número, Ícone de computador Os conteúdos
 </thead>
 <tbody>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td><em>DATE</em></td>
 <td></td>
 <td><em>RH_T_ABONOS_BENEFICIOS.DATA_INICIO</em></td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td><em>DATE</em></td>
 <td></td>
 <td><em>RH_T_ABONOS_BENEFICIOS.DATA_FIM</em></td>
 </tr>
 <tr>
-<td>Colaborador</td>
+<td style="text-align: center;">Colaborador</td>
 <td></td>
 <td>RH_T_FUNCIONARIO.NOME</td>
 <td><em>RH_T_ABONOS_BENEFICIOS.FUN_ID</em></td>
 </tr>
 <tr>
-<td>Direcção</td>
+<td style="text-align: center;">Direcção</td>
 <td></td>
-<td>RH_T_TIPOS_RELACIONAMENT.INSTIT_ID, do ultimo Vinculo</td>
+<td>RH_T_TIPOS_RELACIONAMENT.INSTIT_ID, do último Vínculo</td>
 <td><em>-----------------------------------------------------------</em></td>
 </tr>
 <tr>
-<td><p><del>Tipo Abono e Beneficio</del></p>
+<td style="text-align: center;"><p><del>Tipo Abono e Beneficio</del></p>
 <p><mark>Licença</mark></p></td>
 <td><em>SELECT</em></td>
 <td>RH_T_PARAM_SITUACAO.NOME</td>
@@ -1315,66 +1319,67 @@ alt="Uma imagem com texto, software, número, Ícone de computador Os conteúdos
 <td style="text-align: center;"><strong>Fonte dados</strong></td>
 </tr>
 <tr>
-<td>Estado</td>
+<td style="text-align: center;">Estado</td>
 <td></td>
 <td></td>
 <td><em>RH_T_ABONOS_BENEFICIOS.ESTADO</em></td>
 </tr>
 <tr>
-<td>Direção</td>
+<td style="text-align: center;">Direção</td>
 <td></td>
 <td></td>
 <td><p><em>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID</em></p>
 <p><em>INPSSIGOF.INSTITUICOES. NOME</em></p></td>
 </tr>
 <tr>
-<td>Seccão</td>
+<td style="text-align: center;">Seccão</td>
 <td></td>
 <td></td>
 <td><p><em>RH_T_TIPOS_RELACIONAMENTO.SECCAO_ID</em></p>
 <p><em>RH_T_SECCAO.NOME</em></p></td>
 </tr>
 <tr>
-<td>Nome</td>
+<td style="text-align: center;">Nome</td>
 <td></td>
 <td></td>
 <td><em>RH_T_FUNCIONARIOS.NOME</em></td>
 </tr>
 <tr>
-<td>Vínculo</td>
+<td style="text-align: center;">Vínculo</td>
 <td></td>
 <td></td>
 <td><p><em>RH_T_TIPOS_RELACIONAMENTO.CONTRATO_VíNCULO_ID</em></p>
 <p><em>RH_T_PARAM_VíNCULO.NOME</em></p></td>
 </tr>
 <tr>
-<td>Categoria</td>
+<td style="text-align: center;">Categoria</td>
 <td></td>
 <td></td>
 <td><p><em>RH_T_TIPOS_RELACIONAMENTO.CARGO_ID</em></p>
 <p><em>RH_T_PARAM_CARGO.NOME</em></p></td>
 </tr>
 <tr>
-<td><p><del>Tipo de Abono e Beneficio</del></p>
+<td style="text-align: center;"><p><del>Tipo de Abono e
+Beneficio</del></p>
 <p><mark>Tipo Licença</mark></p></td>
 <td></td>
 <td>RH_T_PARAM_SITUACAO.NOME</td>
 <td><em>RH_T_ABONOS_BENEFICIOS.PARAM_SIT_ID</em></td>
 </tr>
 <tr>
-<td>Motivo</td>
+<td style="text-align: center;">Motivo</td>
 <td></td>
 <td></td>
 <td><em>RH_T_ABONOS_BENEFICIOS. PARAM_SIT_DET_ID</em></td>
 </tr>
 <tr>
-<td>Data início</td>
+<td style="text-align: center;">Data início</td>
 <td></td>
 <td></td>
 <td><em>RH_T_ABONOS_BENEFICIOS.DATA_INICIO</em></td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td></td>
 <td></td>
 <td><em>RH_T_ABONOS_BENEFICIOS.DATA_FIM</em></td>
@@ -1383,24 +1388,29 @@ alt="Uma imagem com texto, software, número, Ícone de computador Os conteúdos
 <td colspan="4" style="text-align: left;"><strong>REGRAS</strong></td>
 </tr>
 <tr>
-<td colspan="4"></td>
+<td colspan="4" style="text-align: center;"></td>
 </tr>
 <tr>
 <td colspan="4" style="text-align: left;"><strong>ACÇÕES</strong></td>
 </tr>
 <tr>
-<td>Editar</td>
+<td style="text-align: center;">Editar</td>
 <td colspan="3">Abre o mesmo formulário de registo</td>
 </tr>
 <tr>
-<td>Regularização de contas</td>
+<td style="text-align: center;">Continuidade</td>
+<td colspan="3">Permite Registar Conituidade de Licença. Ou seja em cima
+de mesma licen</td>
+</tr>
+<tr>
+<td style="text-align: center;">Regularização de contas</td>
 <td colspan="3">Abre um formulario que pemite ajustar os valos pagos
 pelo RH e SDO referente baixa medica de um colaborador</td>
 </tr>
 </tbody>
 </table>
 
-### Novo / Editar
+### <span class="mark">Novo / Editar</span>
 
 RH_T_PARAM_SITUACAO
 
@@ -1410,7 +1420,7 @@ RH_T_FALTA
 
 RH_T_AUSENCIA
 
-<img src="media/image19.png" style="width:9.69306in;height:4.9875in" />
+<img src="media/image19.png" style="width:9.69306in;height:5.42153in" />
 
 <table>
 <colgroup>
@@ -1431,13 +1441,13 @@ style="text-align: center;"><strong>Descrição</strong></th>
 </thead>
 <tbody>
 <tr>
-<td>Validar</td>
+<td style="text-align: center;">Validar</td>
 <td></td>
 <td colspan="2"><strong>Fica visivel somente na validacao</strong></td>
 <td></td>
 </tr>
 <tr>
-<td><p><del>*Tipo Abono Benefício</del></p>
+<td style="text-align: center;"><p><del>*Tipo Abono Benefício</del></p>
 <p><mark>*Tipo Licença</mark></p></td>
 <td><em>SELECT</em></td>
 <td colspan="2"><strong>RH_T_PARAM_SITUACAO</strong>.NOME</td>
@@ -1446,49 +1456,71 @@ style="text-align: center;"><strong>Descrição</strong></th>
 <p><em>RH_T_AUSENCIA. PARAM_SIT_ID</em></p></td>
 </tr>
 <tr>
-<td>Motivo</td>
+<td style="text-align: center;">Motivo</td>
 <td><em>SELECT</em></td>
 <td colspan="2"><p><strong>RH_T_PARAM_SITUACAO_DET.NOME</strong></p>
 <p>Motivo não é obrigatário</p></td>
 <td><em>RH_T_ABONOS_BENEFICIOS. PARAM_SIT_DET_ID</em></td>
 </tr>
 <tr>
-<td>*Data Inicio Licença</td>
-<td><em>DATE</em></td>
-<td colspan="2"></td>
-<td><p><em>RH_T_ABONOS_BENEFICIOS.DATA_INICIO</em></p>
-<p><em>RH_T_AUSENCIA.DATA_INICIO</em></p></td>
-</tr>
-<tr>
-<td>Data Fim Licença</td>
-<td><em>DATE</em></td>
-<td colspan="2"></td>
-<td><p><em>RH_T_ABONOS_BENEFICIOS.DATA_FIM</em></p>
-<p><em>RH_T_AUSENCIA. DATA_FIM</em></p></td>
-</tr>
-<tr>
-<td>Data Inicio Falta</td>
-<td><em>DATE</em></td>
-<td colspan="2">Caso essa informação não for nula, logo deva enviar essa
-informação como parâmetro no Procedimento</td>
-<td><em><del>-------------------------------</del></em></td>
-</tr>
-<tr>
-<td>Dias Total Licença</td>
-<td><em>NUMBER</em></td>
-<td colspan="2">Contar número de dias entre <strong>Data Inicio de
-Licença</strong> e <strong>Data Fim Licença</strong></td>
-<td></td>
-</tr>
-<tr>
-<td>Observação</td>
+<td style="text-align: center;">Observação</td>
 <td><em>TEXTAREA</em></td>
 <td colspan="2"></td>
 <td><p><em>RH_T_ABONOS_BENEFICIOS OBS</em></p>
 <p><em>RH_T_AUSENCIA.OBS</em></p></td>
 </tr>
 <tr>
-<td>----------------------------</td>
+<td style="text-align: center;">Dias Total Licença</td>
+<td></td>
+<td colspan="2"></td>
+<td></td>
+</tr>
+<tr>
+<td colspan="5" style="text-align: center;"><strong>Periodo
+Licença</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;">Continuidade</td>
+<td></td>
+<td colspan="2"><strong>DOMINIO = SIM_NAO</strong></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">*Data Inicio Licença</td>
+<td><em>DATE</em></td>
+<td colspan="2"></td>
+<td><p><em>RH_T_ABONOS_BENEFICIOS_DET.DATA_INICIO</em></p>
+<p><em>RH_T_AUSENCIA.DATA_INICIO</em></p></td>
+</tr>
+<tr>
+<td style="text-align: center;">Data Fim Licença</td>
+<td><em>DATE</em></td>
+<td colspan="2"></td>
+<td><p><em>RH_T_ABONOS_BENEFICIOS_DET.DATA_FIM</em></p>
+<p><em>RH_T_AUSENCIA. DATA_FIM</em></p></td>
+</tr>
+<tr>
+<td style="text-align: center;"><del>Data Inicio Falta</del></td>
+<td><em><del>DATE</del></em></td>
+<td colspan="2"><del>Caso essa informação não for nula, logo deva enviar
+essa informação como parâmetro no Procedimento</del></td>
+<td><em><del>-------------------------------</del></em></td>
+</tr>
+<tr>
+<td style="text-align: center;">Dias Total Licença</td>
+<td><em>NUMBER</em></td>
+<td colspan="2">Contar número de dias entre <strong>Data Inicio de
+Licença</strong> e <strong>Data Fim Licença</strong></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;"></td>
+<td></td>
+<td colspan="2"></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align: center;">----------------------------</td>
 <td><em>HIDDEN</em></td>
 <td
 colspan="2">-------------------------------------------------------</td>
@@ -1497,88 +1529,89 @@ colspan="2">-------------------------------------------------------</td>
 <p><em>RH_T_AUSENCIA.FUN_ID</em></p></td>
 </tr>
 <tr>
-<td colspan="5"><strong>Informações Definidas No
-Regulamento</strong></td>
+<td colspan="5" style="text-align: center;"><strong>Informações
+Definidas No Regulamento</strong></td>
 </tr>
 <tr>
-<td
-colspan="5"><p><strong>RH_PROCESSAMENTO_SALARIAL_DB.CALCULO_FALTA_LICENCA(P_TIPREL_ID</strong>
+<td colspan="5"
+style="text-align: center;"><p><strong>RH_PROCESSAMENTO_SALARIAL_DB.CALCULO_FALTA_LICENCA(P_TIPREL_ID</strong>
 =: ID de RH_T_TIPOS_RELACIONAMENTO onde EST_ACT_ADM = 1,</p>
 <p><strong>P_DATA_INICIO</strong> =: Data Inicio Licença,</p>
 <p><strong>P_DATA_FIM</strong> := Data Fim Licença,</p>
-<p><strong>P_TIPO_LICENCA</strong> := Tipo Licença ,</p></td>
+<p><strong>P_TIPO_LICENCA</strong> := Tipo Licença,</p></td>
 </tr>
 <tr>
-<td>Desconto Sobre</td>
+<td style="text-align: center;">Desconto Sobre</td>
 <td></td>
 <td colspan="2"><em>p_desc_sobre</em></td>
 <td><em><del>-----------------------------------------------</del></em></td>
 </tr>
 <tr>
-<td>Dias Direito Licença</td>
+<td style="text-align: center;">Dias Direito Licença</td>
 <td></td>
 <td colspan="2"><em>p_dias_Direito</em></td>
 <td><em><del>------------------------------------------------</del></em></td>
 </tr>
 <tr>
-<td>Dias Descontado por RH</td>
+<td style="text-align: center;">Dias Descontado por RH</td>
 <td></td>
 <td colspan="2"><em>p_dias_desc_rh</em></td>
 <td><em><del>-----------------------------------------------</del></em></td>
 </tr>
 <tr>
-<td>Dias não descontado por RH</td>
+<td style="text-align: center;">Dias não descontado por RH</td>
 <td></td>
 <td colspan="2"><em>p_dias_ndesc_rh</em></td>
 <td><em><del>----------------------------------------------</del></em></td>
 </tr>
 <tr>
-<td><strong>Falta Mensal</strong></td>
+<td style="text-align: center;"><strong>Falta Mensal</strong></td>
 <td></td>
 <td colspan="2"></td>
 <td></td>
 </tr>
 <tr>
-<td>Mês</td>
+<td style="text-align: center;">Mês</td>
 <td></td>
 <td colspan="2"><em>p_meses</em></td>
 <td><em>-----------------------------------------------------</em></td>
 </tr>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td></td>
 <td colspan="2"><em>p_data_ini_falta</em></td>
 <td><em>RH_T_FALTA.DATA_INICIO</em></td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td></td>
 <td colspan="2"><em>p_data_fim_falta</em></td>
 <td><em>RH_T_FALTA.DATA_FIM</em></td>
 </tr>
 <tr>
-<td>Dias Falta Mensal</td>
+<td style="text-align: center;">Dias Falta Mensal</td>
 <td></td>
 <td colspan="2"><em>p_dias_falta</em></td>
 <td><em>RH_T_FALTA.AUSENCIA</em></td>
 </tr>
 <tr>
-<td>Salário Base</td>
+<td style="text-align: center;">Salário Base</td>
 <td></td>
 <td colspan="2"><em>p_valor_salario</em></td>
 <td><em>-----------------------------</em></td>
 </tr>
 <tr>
-<td>Valor Descontado</td>
+<td style="text-align: center;">Valor Descontado</td>
 <td></td>
 <td colspan="2"><em>p_valor_desc</em></td>
 <td><em>RH_T_FALTA.VALOR</em></td>
 </tr>
 <tr>
-<td colspan="5"><strong>Anexar Documento Comprovativo</strong></td>
+<td colspan="5" style="text-align: center;"><strong>Anexar Documento
+Comprovativo</strong></td>
 </tr>
 <tr>
-<td>Tipo Documento</td>
+<td style="text-align: center;">Tipo Documento</td>
 <td></td>
 <td colspan="2"></td>
 <td rowspan="2"><p>RH_T_DOCUMENTO.<em>DOC_ID</em></p>
@@ -1588,15 +1621,16 @@ REFERENCIA = ‘JUSTIFICACAO_FALTA’</p>
 <p>REFERENCIA_ID = id de <em>RH_T_ABONOS_BENEFICIOS</em></p></td>
 </tr>
 <tr>
-<td>Documento</td>
+<td style="text-align: center;">Documento</td>
 <td></td>
 <td colspan="2"></td>
 </tr>
 <tr>
-<td colspan="5"><em><strong>OUTRAS GRAVAÇÕES</strong></em></td>
+<td colspan="5" style="text-align: center;"><em><strong>OUTRAS
+GRAVAÇÕES</strong></em></td>
 </tr>
 <tr>
-<td colspan="3"><p><em>2-insert em
+<td colspan="3" style="text-align: center;"><p><em>2-insert em
 <strong>RH_T_ABONOS_BENEFICIOS</strong></em></p>
 <ul>
 <li><p><em>DATA_REGISTO= ‘<strong>SYSDATE’</strong></em></p></li>
@@ -1607,6 +1641,19 @@ REFERENCIA = ‘JUSTIFICACAO_FALTA’</p>
 <li><p><em>DATA_ALTERACAO = <strong>NULL</strong></em></p></li>
 <li><p><em>ESTADO = “<strong>P</strong>”</em></p></li>
 <li><p><em>FUN_ID = id de RH_T_FUNCIONARIOS</em></p></li>
+</ul>
+<p><em>2.<mark>1 insert em
+<strong>RH_T_ABONOS_BENEFICIOS_DET</strong></mark></em></p>
+<ul>
+<li><p><em>DATA_REGISTO= ‘<strong>SYSDATE’</strong></em></p></li>
+<li><p><em>USER_REGISTO_ID = id de utilizador Logado</em></p></li>
+<li><p><em>USER_REGISTO_NAME = nome de utilizador Logado</em></p></li>
+<li><p><em>USER_ALTERACAO _ID = <strong>NULL</strong></em></p></li>
+<li><p><em>USER_ALTERACAO_NAME = <strong>NULL</strong></em></p></li>
+<li><p><em>DATA_ALTERACAO = <strong>NULL</strong></em></p></li>
+<li><p><em>ESTADO = “<strong>P</strong>”</em></p></li>
+<li><p><em>ABONO_BENEF_ID = id de tabela
+<strong>RH_T_ABONOS_BENEFICIOS</strong></em></p></li>
 </ul>
 <p><em>4-Registo em <strong>RH_T_AVALIACAO,
 RH_T_VALIDACAO_DETALHE</strong></em></p></td>
@@ -1620,8 +1667,8 @@ RH_T_PARAM_SITUACAO.FLG_AUSENCIA = 1). Logo regista na tabela
 <li><p><em>DATA_FIM = Data Fim</em></p></li>
 <li><p><em>REFERENCIA_ID = id de
 <strong>RH_T_ABONOS_BENEFICIOS</strong></em></p></li>
-<li><p><em>REFERENCIA_NAME =
-‘<strong>RH_T_ABONOS_BENEFICIOS’</strong></em></p></li>
+<li><p><em><mark>REFERENCIA_NAME =
+‘<strong>RH_T_ABONOS_BENEFICIOS_DET’</strong></mark></em></p></li>
 <li><p><em>FUN_ID</em></p></li>
 </ul></td>
 </tr>
@@ -1679,86 +1726,87 @@ style="text-align: center;"><strong>Descrição</strong></th>
 </thead>
 <tbody>
 <tr>
-<td>Meses</td>
+<td style="text-align: center;">Meses</td>
 <td><em>TEXT</em></td>
 <td colspan="2"></td>
 <td>RH_T_REGULARIZACAO_SDO.MES_REFERENTE</td>
 </tr>
 <tr>
-<td>Valor Liquido Recevido</td>
+<td style="text-align: center;">Valor Liquido Recevido</td>
 <td><em>TEXT</em></td>
 <td colspan="2">RH_T_PROC_FUNCIONARIOS. TOT_LIQUIDO</td>
 <td>-------------------------------</td>
 </tr>
 <tr>
-<td>SDO Recebido</td>
+<td style="text-align: center;">SDO Recebido</td>
 <td><em>NUMBER</em></td>
 <td colspan="2"></td>
 <td>RH_T_REGULARIZACAO_SDO.SDO_RECEBIDO</td>
 </tr>
 <tr>
-<td>Retroativo Salário</td>
+<td style="text-align: center;">Retroativo Salário</td>
 <td></td>
 <td colspan="2"></td>
 <td>RH_T_REGULARIZACAO_SDO.VALOR_RETROATIVO_SALARIO</td>
 </tr>
 <tr>
-<td>Retroativo SDO</td>
+<td style="text-align: center;">Retroativo SDO</td>
 <td></td>
 <td colspan="2"></td>
 <td>RH_T_REGULARIZACAO_SDO.VALOR_RETROATIVO_SDO</td>
 </tr>
 <tr>
-<td>Subsidio fiscal Recebido</td>
+<td style="text-align: center;">Subsidio fiscal Recebido</td>
 <td></td>
 <td colspan="2">RH_T_PROC_FUNCIONARIOS. .TOT_REMUN_COLLECT</td>
 <td>-------------------------------------</td>
 </tr>
 <tr>
-<td>Salario Liquido + Subsidio Fiscal</td>
+<td style="text-align: center;">Salario Liquido + Subsidio Fiscal</td>
 <td></td>
 <td colspan="2">RH_T_PROC_FUNCIONARIOS.TOT_LIQUIDO +
 RH_T_PROC_FUNCIONARIOS. .TOT_REMUN_COLLECT</td>
 <td>----------------------------------------------</td>
 </tr>
 <tr>
-<td></td>
+<td style="text-align: center;"></td>
 <td></td>
 <td colspan="2"></td>
 <td></td>
 </tr>
 <tr>
-<td>TOTAL RECEBIDO</td>
+<td style="text-align: center;">TOTAL RECEBIDO</td>
 <td><em>TEXT</em></td>
-<td colspan="2">Somatoria entre o valor liquido recebido +SDO
+<td colspan="2">Somatoria entre o valor líquido recebido +SDO
 recebido</td>
 <td></td>
 </tr>
 <tr>
-<td>TOTAL DIREITO</td>
+<td style="text-align: center;">TOTAL DIREITO</td>
 <td><em>TEXT</em></td>
-<td colspan="2">Somatoria entre o valor liquido recebido + retroativo
-salario – retroativo SDO</td>
+<td colspan="2">Somatoria entre o valor líquido recebido + retroativo
+salário – retroativo SDO</td>
 <td></td>
 </tr>
 <tr>
-<td>DIFERENÇA POR EXPEDIENTE</td>
+<td style="text-align: center;">DIFERENÇA POR EXPEDIENTE</td>
 <td><em>TEXT</em></td>
-<td colspan="2">retroativo salario + retroativo salario</td>
+<td colspan="2">retroativo salário + retroativo salário</td>
 <td>??</td>
 </tr>
 <tr>
-<td>Validar</td>
+<td style="text-align: center;">Validar</td>
 <td><em>RADIOLIST</em></td>
 <td colspan="2">Só fica visivel ao validar salário</td>
 <td>RH_T_REGULARIZACAO_SDO.ESTADO</td>
 </tr>
 <tr>
-<td colspan="5"><em>OUTRAS GRAVAÇÕES</em></td>
+<td colspan="5" style="text-align: center;"><em>OUTRAS
+GRAVAÇÕES</em></td>
 </tr>
 <tr>
-<td colspan="3"><p><em>1.2 Fazer uma nova gravação na tabela de</em>
-<strong>RH_T_REGULARIZACAO_SDO</strong></p>
+<td colspan="3" style="text-align: center;"><p><em>1.2 Fazer uma nova
+gravação na tabela de</em> <strong>RH_T_REGULARIZACAO_SDO</strong></p>
 <ul>
 <li><p><em>DATA_REGISTO= ‘SYSDATE’</em></p></li>
 <li><p><em>USER_REGISTO_ID = id de utilizador Logado</em></p></li>
@@ -1825,14 +1873,16 @@ ações,</p>
 <ul>
 <li><p>Registo na tabela <strong>RH_T_DEF_REMUNERACOES</strong> (o valor
 do retroativo), para isso é necessário definir qual o TM_ID</p></li>
-<li><p>Registo na tabela de associação RH_T_REMUN_TIREPL</p></li>
+<li><p>Registo na tabela de associação
+<strong>RH_T_TIPREL_REM_PAG</strong></p></li>
 </ul></li>
 <li><p>Caso o colaborador tem a pagar</p>
 <ul>
 <li><p>Registo na tabela <strong>RH_T_DEF_REMUNERACOES</strong> (o valor
 do retroativo negativo), para isso é necessário definir qual o
 TM_ID</p></li>
-<li><p>Registo na tabela de associação RH_T_REMUN_TIREPL</p></li>
+<li><p>Registo na tabela de associação
+<strong>RH_T_TIPREL_REM_PAG</strong></p></li>
 </ul></li>
 </ul></li>
 </ul></th>
@@ -1866,43 +1916,43 @@ alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos ger
 </thead>
 <tbody>
 <tr>
-<td>Colaborador</td>
+<td style="text-align: center;">Colaborador</td>
 <td><em>TEXT</em></td>
 <td>RH_T_FUNCIONARIOS.NOME</td>
 <td>RH_T_TIPOS_RELACIONAMENTO.FUN_ID</td>
 </tr>
 <tr>
-<td>Ilha</td>
+<td style="text-align: center;">Ilha</td>
 <td></td>
 <td>SILGGLOBAL.GLB_GEOGRAFIA,RH_T_PARAM_LOCAL_TRAB.ILHA_ID</td>
 <td>RH_T_TIPOS_RELACIONAMENTO.LOCAL_TRAB_ID</td>
 </tr>
 <tr>
-<td>Direção</td>
+<td style="text-align: center;">Direção</td>
 <td><em>SELECT</em></td>
 <td>INPSSIGOF.INSTITUICOES.NOME</td>
 <td>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID</td>
 </tr>
 <tr>
-<td>Seccão</td>
+<td style="text-align: center;">Seccão</td>
 <td><em>SELECT</em></td>
 <td><em>RH_T_PARAM_SECAO.NOME</em></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.SECCAO_ID</td>
 </tr>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td><em>DATE</em></td>
 <td></td>
 <td>RH_T_HORA_EXTRA.DATA</td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td><em>DATE</em></td>
 <td></td>
 <td>RH_T_HORA_EXTRA.DATA</td>
 </tr>
 <tr>
-<td>Estado</td>
+<td style="text-align: center;">Estado</td>
 <td></td>
 <td></td>
 <td>RH_T_HORA_EXTRA.ESTADO</td>
@@ -1914,69 +1964,69 @@ alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos ger
 <td style="text-align: center;"><strong>Fonte dados</strong></td>
 </tr>
 <tr>
-<td>Estado</td>
+<td style="text-align: center;">Estado</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>RH_T_HORA_EXTRA.ESTADO</td>
 </tr>
 <tr>
-<td>Direção</td>
+<td style="text-align: center;">Direção</td>
 <td><em>TEXT</em></td>
 <td>INPSSIGOF.INSTITUICOES.NOME</td>
 <td>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID</td>
 </tr>
 <tr>
-<td>Secção</td>
+<td style="text-align: center;">Secção</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.SECCAO_ID</td>
 </tr>
 <tr>
-<td>Nome Colaborador</td>
+<td style="text-align: center;">Nome Colaborador</td>
 <td><em>TEXT</em></td>
 <td>RH_T_FUNCIONARIOS.NOME</td>
 <td>RH_T_HORA_EXTRA.TIPREL_ID</td>
 </tr>
 <tr>
-<td>Data Inicio / Data Fim</td>
+<td style="text-align: center;">Data Inicio / Data Fim</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>RH_T_HORA_EXTRA.DATA</td>
 </tr>
 <tr>
-<td>Hora Contratada (Diário / Mensal)</td>
+<td style="text-align: center;">Hora Contratada (Diário / Mensal)</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>RH_T_HORA_EXTRA.HORAS_DIARIAS/ RH_T_HORA_EXTRA.HORAS_DIARIASX
 12</td>
 </tr>
 <tr>
-<td>Hora de Trabalho</td>
+<td style="text-align: center;">Hora de Trabalho</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>SUBSTR(TO_CHAR(<strong>RH_ASSIDUIDADE_SINTESE_DIARIA</strong>.HORAS_EXTRAS),
 4, 8);</td>
 </tr>
 <tr>
-<td>Salario Mensal</td>
+<td style="text-align: center;">Salario Mensal</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.SALARIO</td>
 </tr>
 <tr>
-<td>Valor Horas Mensal</td>
+<td style="text-align: center;">Valor Horas Mensal</td>
 <td></td>
 <td></td>
 <td>RH_T_HORA_EXTRA.VALOR_DIARIO X 12</td>
 </tr>
 <tr>
-<td>Valor Horas Diário</td>
+<td style="text-align: center;">Valor Horas Diário</td>
 <td></td>
 <td></td>
 <td>RH_T_HORA_EXTRA.VALOR_DIARIO</td>
 </tr>
 <tr>
-<td>Percentagem</td>
+<td style="text-align: center;">Percentagem</td>
 <td></td>
 <td></td>
 <td>RH_T_HORA_EXTRA.PERCENTAGEM</td>
@@ -1986,7 +2036,7 @@ alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos ger
 <td colspan="3" style="text-align: center;"></td>
 </tr>
 <tr>
-<td>Nova</td>
+<td style="text-align: center;">Nova</td>
 <td colspan="3"></td>
 </tr>
 </tbody>
@@ -2013,7 +2063,7 @@ alt="Uma imagem com texto, captura de ecrã, número, software Os conteúdos ger
 </thead>
 <tbody>
 <tr>
-<td colspan="4"></td>
+<td colspan="4" style="text-align: center;"></td>
 </tr>
 <tr>
 <td style="text-align: left;">Validar</td>
@@ -2078,23 +2128,24 @@ VARCHAR2, P_HORAS_DIARIA NUMBER)</p></td>
 <td></td>
 </tr>
 <tr>
-<td>Tipo documento</td>
+<td style="text-align: center;">Tipo documento</td>
 <td>SELECT</td>
 <td>RH_T_TIPOS_DOCUMENTO.NOME onde a Referência =
 ‘<strong>HORA_EXTRA</strong>’</td>
 <td>RH_T_DOCUMENTO.TP_DOCUMENTO_ID</td>
 </tr>
 <tr>
-<td>Documento</td>
+<td style="text-align: center;">Documento</td>
 <td>UPLOAD</td>
 <td></td>
 <td>RH_T_DOCUMENTO.DOC_ID</td>
 </tr>
 <tr>
-<td colspan="4"><strong>Ações</strong></td>
+<td colspan="4" style="text-align: center;"><strong>Ações</strong></td>
 </tr>
 <tr>
-<td><img src="media/image13.png" style="width:0.6375in;height:0.26944in"
+<td style="text-align: center;"><img src="media/image13.png"
+style="width:0.6375in;height:0.26944in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="3"><ol type="1">
 <li><p>Gravação na tabela RH_T_HORA_EXTRA</p></li>
@@ -2131,7 +2182,7 @@ TIPO_ACAO<strong>)</strong></em></p></li>
 **Exemplo**:
 
 | **Data início** | **Data fim** | **Mês** | **Dias úteis** | **Dias não úteis** | **% aplicado** | **Valor diário (hora extra)** | **Valor acumulado no mês** |
-|---:|---:|---:|:--:|:--:|:---|:---|:---|
+|:--:|----|----|----|----|----|----|----|
 | **20/01/2026** | 31/01/2026 | 202601 | 9 | 3 | U=50% / N=100% | U=1.111,11 N=2.222,22 | 14.999,98 |
 | 01/02/2026 | 28/02/2026 | 202602 | 20 | 8 | U=50% / N=100% | U=1.111,11 N=2.222,22 | 31.111,08 |
 | 01/03/2026 | **10/03/2026** | 202603 | 8 | 2 | U=50% / N=100% | U=1.111,11 N=2.222,22 | 11.111,10 |
@@ -2183,31 +2234,31 @@ alt="Uma imagem com texto, captura de ecrã, software, Ícone de computador Os c
 </thead>
 <tbody>
 <tr>
-<td>Ano Referente</td>
+<td style="text-align: center;">Ano Referente</td>
 <td><em>S</em></td>
 <td>RH_T_ANO.ANO</td>
 <td></td>
 </tr>
 <tr>
-<td>Ilha</td>
+<td style="text-align: center;">Ilha</td>
 <td><em>SELECT</em></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.LOCAL_TRAB_ID</td>
 </tr>
 <tr>
-<td>Direção</td>
+<td style="text-align: center;">Direção</td>
 <td><em>SELECT</em></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID</td>
 </tr>
 <tr>
-<td>Secção</td>
+<td style="text-align: center;">Secção</td>
 <td><em>SELECT</em></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.SECCAO_ID</td>
 </tr>
 <tr>
-<td>Colaborador</td>
+<td style="text-align: center;">Colaborador</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.FUN_ID</td>
@@ -2219,56 +2270,58 @@ alt="Uma imagem com texto, captura de ecrã, software, Ícone de computador Os c
 <td style="text-align: center;"><strong>Fonte dados</strong></td>
 </tr>
 <tr>
-<td>Direcção</td>
+<td style="text-align: center;">Direcção</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID</td>
 </tr>
 <tr>
-<td>Secção</td>
+<td style="text-align: center;">Secção</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.SECCAO</td>
 </tr>
 <tr>
-<td>Nome Colaborador</td>
+<td style="text-align: center;">Nome Colaborador</td>
 <td><em>TEXT</em></td>
 <td>RH_T_FUNCIONARIOS.NOME</td>
 <td>RH_T_FERIAS.FUN_ID</td>
 </tr>
 <tr>
-<td>Vinculo</td>
+<td style="text-align: center;">Vinculo</td>
 <td><em>TEXT</em></td>
 <td>RH_T_CONTRATO_VINCULO.TP_VINCULO_ID, RH_T_PARAM_VINCULO.NOME</td>
 <td>RH_T_TIPOS_RELACIONAMENTO.CONTR_VINCULO_ID</td>
 </tr>
 <tr>
-<td>Categoria</td>
+<td style="text-align: center;">Categoria</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.CARGO</td>
 </tr>
 <tr>
-<td>Total Direito</td>
+<td style="text-align: center;">Total Direito</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td><strong>SUM</strong>(RH_T_FERIAS.NUM_DIA)</td>
 </tr>
 <tr>
-<td>Total direito (dias / ano)</td>
+<td style="text-align: center;">Total direito (dias / ano)</td>
 <td></td>
 <td>Caso não tenha dados logo apresenta 0</td>
 <td>(RH_T_FERIAS.NUM_DIA || RH_T_FERIAS.ANO_REFERENTE )</td>
 </tr>
 <tr>
-<td>Total Planeado (Data Inicio / data fim)</td>
+<td style="text-align: center;">Total Planeado (Data Inicio / data
+fim)</td>
 <td></td>
 <td>Caso não tenha dados logo apresenta 0</td>
 <td><p>RH_T_FERIAS_MAPA NUM_DIA (RH_T_FERIAS_MAPA.DATA_INICIO</p>
 <p>|| RH_T_FERIAS_MAPA.DATA_FIM)</p></td>
 </tr>
 <tr>
-<td>Total Gozado (Data Inicio / Data Fim )</td>
+<td style="text-align: center;">Total Gozado (Data Inicio / Data Fim
+)</td>
 <td></td>
 <td>Caso não tenha dados logo apresenta 0</td>
 <td>RH_T_FERIAS_GOZADA.NUM_DIA
@@ -2279,24 +2332,24 @@ alt="Uma imagem com texto, captura de ecrã, software, Ícone de computador Os c
 <td colspan="3" style="text-align: center;"></td>
 </tr>
 <tr>
-<td><img src="media/image25.png"
+<td style="text-align: center;"><img src="media/image25.png"
 style="width:1.17431in;height:0.28264in" /></td>
 <td colspan="3">Permite exportar dados de direitos a cada direção</td>
 </tr>
 <tr>
-<td><p><img src="media/image26.png"
+<td style="text-align: center;"><p><img src="media/image26.png"
 style="width:0.93681in;height:0.32014in" /></p>
 <p><img src="media/image27.png"
 style="width:1.14931in;height:0.23264in" /></p></td>
 <td colspan="3">Pemite Abrir formulario para solicitar Ferias</td>
 </tr>
 <tr>
-<td><img src="media/image28.png"
+<td style="text-align: center;"><img src="media/image28.png"
 style="width:1.11181in;height:0.26181in" /></td>
 <td colspan="3">Permite ver ferias agendadas e por gozar</td>
 </tr>
 <tr>
-<td><img src="media/image29.png"
+<td style="text-align: center;"><img src="media/image29.png"
 style="width:1.17014in;height:0.23264in" /></td>
 <td colspan="3">Permite enviar direito de ferias por email</td>
 </tr>
@@ -2306,12 +2359,12 @@ style="width:1.17014in;height:0.23264in" /></td>
 #### Exportar direito
 
 | **CODIGO_DIRECAO** | **NOME_DIRECAO** | **ID_COLABORADOR** | **NOME_COLABORADOR** | **TOTAL_DIREITO** | **TOTAL_DIREITO_ANO** |
-|:---|:---|---:|:---|---:|:---|
+|:--:|----|----|----|----|----|
 | 00.01.01 | Direção dos Recursos Humanos | 1223 | Gertrudes Helena | 44 | 22 (2023); 22 (2024) |
 | 00.00.01 | Direção dos Recursos Humanos | 1222 | Manuela gomes | 27 | 5 (2023); 22 (2024) |
 
 | **Coluna Excel** | **Fonte dados** |
-|----|----|
+|:--:|----|
 | CODIGO_DIRECAO | INPSSIGOF.INSTITUICAO.CODIGO |
 | NOME_DIRECAO | INPSSIGOF.INSTITUICAO.NOME |
 | ID_COLABORADOR | RH_T_FUNCIONARIOS.ID_COLABORADOR |
@@ -2343,7 +2396,8 @@ style="text-align: center;"><strong>Descrição</strong></th>
 </thead>
 <tbody>
 <tr>
-<td colspan="5"><strong>Dados Solicitação</strong></td>
+<td colspan="5" style="text-align: center;"><strong>Dados
+Solicitação</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Nome colaborador</td>
@@ -2388,8 +2442,8 @@ colaborador de férias</td>
 <p><mark>RH_T_SUBSTITUICAO.SUBSTITUTO_ID</mark></p></td>
 </tr>
 <tr>
-<td colspan="5"><strong>Alteração De Data Ferias (este separador só
-aparece em caso de edição)</strong></td>
+<td colspan="5" style="text-align: center;"><strong>Alteração De Data
+Ferias (este separador só aparece em caso de edição)</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Alteração Ferias</td>
@@ -2412,7 +2466,8 @@ rh_t_ferias_gozada que deu origem a essa alteração</td>
 <td>RH_T_FERIAS_GOZADAS.MOTIVO_ALTERACAO</td>
 </tr>
 <tr>
-<td colspan="5"><strong>Informaçoes Sobre conveniêncoa</strong></td>
+<td colspan="5" style="text-align: center;"><strong>Informaçoes Sobre
+conveniêncoa</strong></td>
 </tr>
 <tr>
 <td style="text-align: left;">Observação</td>
@@ -2492,26 +2547,26 @@ colspan="2">--------------------------------------------------------------------
 <td></td>
 </tr>
 <tr>
-<td>Tipo documento</td>
+<td style="text-align: center;">Tipo documento</td>
 <td>SELECT</td>
 <td colspan="2">Traz somente tipo documento cujo referencia =
 ´FERIAS´</td>
 <td>RH_T_DOCUMENTO.TP_DOCUMENTO_ID</td>
 </tr>
 <tr>
-<td>Documento</td>
+<td style="text-align: center;">Documento</td>
 <td>UPLOAD</td>
 <td colspan="2"></td>
 <td>RH_T_DOCUMENTO.DOC_ID</td>
 </tr>
 <tr>
-<td>REGRA</td>
+<td style="text-align: center;">REGRA</td>
 <td></td>
 <td colspan="2"></td>
 <td></td>
 </tr>
 <tr>
-<td colspan="5"><ol type="1">
+<td colspan="5" style="text-align: center;"><ol type="1">
 <li><p>Regista na tabela <strong>RH_T_SUBSTITUICAO</strong>, Caso for
 indicado o substituto</p></li>
 <li><p>Regista na tabela <strong>RH_T_DOCUMENTO</strong>, caso for
@@ -2530,8 +2585,8 @@ for validado ou seja decisão RH for SIM</mark></strong></p></li>
 </ol></td>
 </tr>
 <tr>
-<td colspan="5"><p><strong><mark>O descrição do registo na
-RH_T_AUSENCIA</mark></strong></p>
+<td colspan="5" style="text-align: center;"><p><strong><mark>O descrição
+do registo na RH_T_AUSENCIA</mark></strong></p>
 <ul>
 <li><p>PARAM_SIT_ID = ID de tabela <strong>RH_T_PARAM_SITUACAO</strong>
 onde nome = Ferias</p></li>
@@ -2549,10 +2604,11 @@ onde nome = Ferias</p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="5"><strong>Ações</strong></td>
+<td colspan="5" style="text-align: center;"><strong>Ações</strong></td>
 </tr>
 <tr>
-<td><img src="media/image13.png" style="width:0.6375in;height:0.26944in"
+<td style="text-align: center;"><img src="media/image13.png"
+style="width:0.6375in;height:0.26944in"
 alt="Uma imagem com Tipo de letra, texto, captura de ecrã, logótipo Os conteúdos gerados por IA podem estar incorretos." /></td>
 <td colspan="2"><p>Novo</p>
 <ol type="1">
@@ -2624,7 +2680,7 @@ alt="Uma imagem com texto, software, Ícone de computador, Página web Os conte�
 </thead>
 <tbody>
 <tr>
-<td>RH_T_FUNCIONARIO.NOME</td>
+<td style="text-align: center;">RH_T_FUNCIONARIO.NOME</td>
 <td><p>RH_T_FERIAS_MAPADATA_INICIO</p>
 <p>RH_T_FERIAS_MAPA.DATA_FIM</p></td>
 <td><p>RH_T_FERIAS_GOZADA.DATA_INICIO</p>
@@ -2677,35 +2733,34 @@ alt="Uma imagem com texto, captura de ecrã, software, número Os conteúdos ger
 </thead>
 <tbody>
 <tr>
-<td>Ano Referente</td>
+<td style="text-align: center;">Ano Referente</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"></td>
 <td>RH_T_FERIAS_MAPA.ANO_ID</td>
 </tr>
 <tr>
-<td>Ilha</td>
+<td style="text-align: center;">Ilha</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"></td>
 <td
 style="text-align: left;">RH_T_TIPOS_RELACIONAMENTO.LOCAL_TRAB_ID</td>
 </tr>
 <tr>
-<td>Direção</td>
+<td style="text-align: center;">Direção</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"></td>
 <td>RH_T_TIPOS_RELACIONAMENTO.INSTIT_ID</td>
 </tr>
 <tr>
-<td>Secção</td>
+<td style="text-align: center;">Secção</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"></td>
 <td>RH_T_SECAO.ID</td>
 </tr>
 <tr>
-<td>Estado</td>
+<td style="text-align: center;">Estado</td>
 <td style="text-align: center;"></td>
-<td style="text-align: center;"><strong>DOMAIN =</strong>
-ESTADO_VALIDACAO</td>
+<td><strong>DOMAIN =</strong> ESTADO_VALIDACAO</td>
 <td>RH_T_FERIAS_MAPA.ESTADO_VALIDACAO</td>
 </tr>
 <tr>
@@ -2715,62 +2770,60 @@ ESTADO_VALIDACAO</td>
 <td style="text-align: center;"><strong>Fonte dados</strong></td>
 </tr>
 <tr>
-<td>Estado</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;">Pendente, validado</td>
+<td style="text-align: center;">Estado</td>
+<td><em>TEXT</em></td>
+<td>Pendente, validado</td>
 <td>RH_T_FERIAS_MAPA.ESTADO</td>
 </tr>
 <tr>
-<td>Direcção</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;">Direcção</td>
+<td><em>TEXT</em></td>
+<td></td>
 <td>INPSSIGOF.INSTITTUICOES.NOME||</td>
 </tr>
 <tr>
-<td>Total Colaborador</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;">Total Colaborador</td>
+<td><em>TEXT</em></td>
+<td></td>
 <td><p>COUNT(<strong>RH_T_TIPOS_RELACIONAMENTO</strong>.EST_ACT_ADM = 1
 AND</p>
 <p><strong>RH_T_TIPOS_RELACIONAMENTO</strong>.INSTIT_ID =
 <strong>RH_T_FERIAS_MAPA</strong>.INSTIT_ID)</p></td>
 </tr>
 <tr>
-<td>Total Ferias Agendadas</td>
-<td style="text-align: center;"><em>TEXT</em></td>
-<td style="text-align: center;">Total Colaborador - Total Ferias
-Agendadas;</td>
+<td style="text-align: center;">Total Ferias Agendadas</td>
+<td><em>TEXT</em></td>
+<td>Total Colaborador - Total Ferias Agendadas;</td>
 <td>RH_T_FERIAS_MAPA.FUN_ID</td>
 </tr>
 <tr>
-<td><strong>Acções</strong></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>Acções</strong></td>
+<td></td>
+<td></td>
 <td></td>
 </tr>
 <tr>
-<td><img src="media/image33.png"
+<td style="text-align: center;"><img src="media/image33.png"
 style="width:1.14514in;height:0.25347in" /></td>
-<td colspan="3" style="text-align: center;">Botão que permite importar
-mapa, caso se importar uma mapa que já existe, log se deve
-<strong>inactivar</strong> o outra
+<td colspan="3">Botão que permite importar mapa, caso se importar uma
+mapa que já existe, log se deve <strong>inactivar</strong> o outra
 (<strong>RH_T_FERIAS_MAPA</strong>.ESTADO = “A”)</td>
 </tr>
 <tr>
-<td><img src="media/image34.png"
+<td style="text-align: center;"><img src="media/image34.png"
 style="width:1.17014in;height:0.24514in" /></td>
-<td colspan="3" style="text-align: center;">Permite exportar mapa por
-direção com os direitos de cada colaborador</td>
+<td colspan="3">Permite exportar mapa por direção com os direitos de
+cada colaborador</td>
 </tr>
 <tr>
-<td><img src="media/image35.png"
+<td style="text-align: center;"><img src="media/image35.png"
 style="width:1.15556in;height:0.25417in" /></td>
-<td colspan="3" style="text-align: center;"></td>
+<td colspan="3"></td>
 </tr>
 <tr>
-<td>Ver Mapa</td>
-<td colspan="3" style="text-align: center;">Invoca a mesma mapa descrita
-acima (<a href="#_Ver Mapa"><u>VER MAPA</u></a>)</td>
+<td style="text-align: center;">Ver Mapa</td>
+<td colspan="3">Invoca a mesma mapa descrita acima (<a
+href="#_Ver Mapa"><u>VER MAPA</u></a>)</td>
 </tr>
 </tbody>
 </table>
@@ -2779,9 +2832,19 @@ acima (<a href="#_Ver Mapa"><u>VER MAPA</u></a>)</td>
 
 (pendente RH envia Modelo)
 
+<img src="media/image36.png" style="width:9.69306in;height:0.49236in" />
+
+| Campo |     |
+|-------|-----|
+|       |     |
+
+####  Exportar Mapa
+
+<img src="media/image36.png" style="width:9.69306in;height:0.49236in" />
+
 ####  Ver detalhe 
 
-<img src="media/image36.png" style="width:9.69306in;height:4.39722in"
+<img src="media/image37.png" style="width:9.69306in;height:4.39722in"
 alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 <table>
@@ -2801,49 +2864,49 @@ alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdo
 </thead>
 <tbody>
 <tr>
-<td>Ferias Agendadas</td>
+<td style="text-align: center;">Ferias Agendadas</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>Nome Colaborador</td>
+<td style="text-align: center;">Nome Colaborador</td>
 <td><em>TEXT</em></td>
 <td>RH_T_FUNCIONARIO.NOME</td>
 <td>RH_T_FERIAS_MAPA.FUN_ID</td>
 </tr>
 <tr>
-<td>Total Direito</td>
+<td style="text-align: center;">Total Direito</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>COUNT(RH_T_FERIAS.NUM_DIA)</td>
 </tr>
 <tr>
-<td>Total direito por ano</td>
+<td style="text-align: center;">Total direito por ano</td>
 <td><em>TEXT</em></td>
 <td></td>
 <td>COUNT(RH_T_FERIAS.NUM_DIA) agrupando por RH_T_FERIAS.NUM_DIA</td>
 </tr>
 <tr>
-<td>Data Inicio</td>
+<td style="text-align: center;">Data Inicio</td>
 <td><em>DATE</em></td>
 <td></td>
 <td>RH_T_FERIAS_MAPA.DATA_INICIO</td>
 </tr>
 <tr>
-<td>Data Fim</td>
+<td style="text-align: center;">Data Fim</td>
 <td><em>DATE</em></td>
 <td></td>
 <td>RH_T_FERIAS_MAPA.DATA_FIM</td>
 </tr>
 <tr>
-<td>Ferias por Agendar</td>
+<td style="text-align: center;">Ferias por Agendar</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
 <tr>
-<td>Nome colaborador</td>
+<td style="text-align: center;">Nome colaborador</td>
 <td></td>
 <td><p>RH_T_FUNCIONARIO.NOME</p>
 <p>Verifica todos colaboradores de mesma Direção (RH_T_FERIAS.INSTIT_ID)
@@ -2852,13 +2915,13 @@ mas que não estão nessa tabela (RH_T_FERIAS_MAPA.INSTIT_ID)</p></td>
 <p>RH_T_FERIAS_MAPA.FUN_ID</p></td>
 </tr>
 <tr>
-<td>Total direito</td>
+<td style="text-align: center;">Total direito</td>
 <td></td>
 <td></td>
 <td>RH_T_FERIAS.NUM_ID</td>
 </tr>
 <tr>
-<td>Total direito por ano</td>
+<td style="text-align: center;">Total direito por ano</td>
 <td></td>
 <td></td>
 <td>RH_T_FERIAS. NUM_ID, RH_T_FERIAS.ANO_ID</td>
@@ -2870,18 +2933,18 @@ mas que não estão nessa tabela (RH_T_FERIAS_MAPA.INSTIT_ID)</p></td>
 
 ## FALTA
 
-<img src="media/image37.png" style="width:5.55208in;height:4.59375in"
+<img src="media/image38.png" style="width:5.55208in;height:4.59375in"
 alt="Uma imagem com texto, captura de ecrã, número, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 ## HORA EXTRA
 
-<img src="media/image38.png" style="width:7.61458in;height:3.11458in"
+<img src="media/image39.png" style="width:7.61458in;height:3.11458in"
 alt="Uma imagem com texto, captura de ecrã, diagrama, Tipo de letra Os conteúdos gerados por IA podem estar incorretos." />
 
 ## DISPENSA
 
-<img src="media/image39.png" style="width:8.36458in;height:2.59375in" />
+<img src="media/image40.png" style="width:8.36458in;height:2.59375in" />
 
 ## FERIAS
 
-<img src="media/image40.png" style="width:9.69306in;height:4.47014in" />
+<img src="media/image41.png" style="width:9.69306in;height:4.47014in" />

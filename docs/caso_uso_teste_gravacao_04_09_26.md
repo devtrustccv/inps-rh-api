@@ -110,7 +110,7 @@ Tipo de vínculo selecionado tem carreira
 </tr>
 <tr>
 <td style="text-align: left;">RH_T_DEF_REMUNERACOES</td>
-<td style="text-align: left;"><ol type="1">
+<td><ol type="1">
 <li><p>Faz um registo do Salário</p></li>
 <li><p>Faz registos de subsídios (número de registo dependendo do número
 de subsídio adicionado)</p></li>
@@ -120,7 +120,7 @@ colaborador tem Salário</p></td>
 </tr>
 <tr>
 <td style="text-align: left;">RH_T_DEF_PAGAMENTOS</td>
-<td style="text-align: left;"><ol type="1">
+<td><ol type="1">
 <li><p>Faz 3 registos de desconto (<strong>IUR</strong>, <strong>Valor
 Líquido</strong>, <strong>INPS</strong>)</p></li>
 <li><p>Faz registos de descontos (número de registo dependendo do número
@@ -138,20 +138,20 @@ RH_T_DEF_PAGAMENTOS E REMUNERACOES</p>
 colaborador tem salário</p></td>
 </tr>
 <tr>
-<td colspan="2" style="text-align: left;"><strong>DADOS
+<td colspan="2" style="text-align: center;"><strong>DADOS
 BANCARIOS</strong></td>
 </tr>
 <tr>
-<td style="text-align: left;">RH_T_DADOS_BANCARIOS</td>
-<td style="text-align: left;">Registo de dados bancários</td>
+<td style="text-align: center;">RH_T_DADOS_BANCARIOS</td>
+<td>Registo de dados bancários</td>
 </tr>
 <tr>
-<td style="text-align: left;"><strong>ANEXAR DOCUMENTO</strong></td>
-<td style="text-align: left;"></td>
+<td style="text-align: center;"><strong>ANEXAR DOCUMENTO</strong></td>
+<td></td>
 </tr>
 <tr>
-<td style="text-align: left;">RH_T_DOCUMENTO</td>
-<td style="text-align: left;">Registo de documentos anexados</td>
+<td style="text-align: center;">RH_T_DOCUMENTO</td>
+<td>Registo de documentos anexados</td>
 </tr>
 </tbody>
 </table>
@@ -310,13 +310,13 @@ A renovação de contrato deve afetar as seguintes tabelas
 </thead>
 <tbody>
 <tr>
-<td>RH_T_CONTRATO_HISTORICO</td>
+<td style="text-align: center;">RH_T_CONTRATO_HISTORICO</td>
 <td><ul>
 <li><p>Novo Registo nessa tabela</p></li>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_TIPOS_RELACIONAMENTO</td>
+<td style="text-align: center;">RH_T_TIPOS_RELACIONAMENTO</td>
 <td><ul>
 <li><p>Novo Registo nessa tabela (pega todos dados do anterior e somente
 muda o Tipo situação = “RENOVACAO_CONTRATO”)</p></li>
@@ -329,7 +329,7 @@ anterior para 0</p></li>
 </ul></td>
 </tr>
 <tr>
-<td><p>RH_T_CARREIRA</p>
+<td style="text-align: center;"><p>RH_T_CARREIRA</p>
 <p>RH_T_DEF_PAGAMENTOS</p>
 <p>RH_T_MOBILIDADE</p>
 <p>RH_T_DEF_REMUNERACOES</p>
@@ -340,7 +340,7 @@ anterior para 0</p></li>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_TIPREL_REM_PAG</td>
+<td style="text-align: center;">RH_T_TIPREL_REM_PAG</td>
 <td><ul>
 <li><p>pega todos os registos de <strong>tiprel_id</strong> anterior e
 faz um novo registo com novo <strong>tiprel_id</strong></p></li>
@@ -370,7 +370,7 @@ validação</span>
 </thead>
 <tbody>
 <tr>
-<td>RH_T_MOBILIDADE</td>
+<td style="text-align: center;">RH_T_MOBILIDADE</td>
 <td><p>Nova mobilidade</p>
 <ul>
 <li><p>Cria um registo Nessa tabela</p></li>
@@ -389,7 +389,7 @@ ativo.</p></li>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_TIPOS_RELACIONAMENTO</td>
+<td style="text-align: center;">RH_T_TIPOS_RELACIONAMENTO</td>
 <td><p><strong>Caso houver novo registo de mobilidade</strong></p>
 <p>Registo: Cria um registo Nessa tabela</p>
 <ul>
@@ -412,7 +412,7 @@ anterior para 0</p></li>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_TIPREL_REM_PAG</td>
+<td style="text-align: center;">RH_T_TIPREL_REM_PAG</td>
 <td>pega todos os registos de <strong>tiprel_id</strong> anterior e faz
 um novo registo com novo <strong>tiprel_id</strong></td>
 </tr>
@@ -444,7 +444,7 @@ um novo registo com novo <strong>tiprel_id</strong></td>
 </thead>
 <tbody>
 <tr>
-<td>RH_T_CARREIRA</td>
+<td style="text-align: center;">RH_T_CARREIRA</td>
 <td><p>Nova carreira</p>
 <ul>
 <li><p>Cria um registo Nessa tabela</p></li>
@@ -508,7 +508,7 @@ RH_T_DEF_REMUNERACOES , RH_T_TIPREL_REM_PAG</strong></p></li>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_TIPOS_RELACIONAMENTO</td>
+<td style="text-align: center;">RH_T_TIPOS_RELACIONAMENTO</td>
 <td><p>Registo de uma nova carreira implica novo registo de tipos
 Relacionamento</p>
 <p>Registo: Cria um registo Nessa tabela</p>
@@ -533,7 +533,7 @@ anterior para 0</p></li>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_DEF_REMUNERACOES</td>
+<td style="text-align: center;">RH_T_DEF_REMUNERACOES</td>
 <td><p>Registo de uma nova Carreira</p>
 <p>O registo de uma nova carreira sempre implica novos registos de
 Salário</p>
@@ -549,7 +549,7 @@ escalão</p></li>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_DEF_PAGAMENTOS</td>
+<td style="text-align: center;">RH_T_DEF_PAGAMENTOS</td>
 <td><p>Faz um registo nessa tabela somente quando houver o registo de
 uma nova carreira</p>
 <ol type="1">
@@ -561,7 +561,7 @@ de subsídio adicionado)</p></li>
 </ol></td>
 </tr>
 <tr>
-<td>RH_T_TIPREL_REM_PAG</td>
+<td style="text-align: center;">RH_T_TIPREL_REM_PAG</td>
 <td>pega todos os registos de <strong>tiprel_id</strong> anterior e faz
 um novo registo com novo <strong>tiprel_id</strong></td>
 </tr>
@@ -585,7 +585,7 @@ um novo registo com novo <strong>tiprel_id</strong></td>
 </thead>
 <tbody>
 <tr>
-<td>RH_T_SITUACAO LABORAL</td>
+<td style="text-align: center;">RH_T_SITUACAO LABORAL</td>
 <td><p><strong>Regra de Registo e Atualização da Situação
 Laboral</strong></p>
 <ul>
@@ -603,15 +603,15 @@ nenhum novo registo nem atualização.</p></li>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_MOBILIDADE</td>
+<td style="text-align: center;">RH_T_MOBILIDADE</td>
 <td>Campos do Formulário — Somente de Leitura</td>
 </tr>
 <tr>
-<td>RH_T CARREIRA</td>
+<td style="text-align: center;">RH_T CARREIRA</td>
 <td>Campos do Formulário — Somente de Leitura</td>
 </tr>
 <tr>
-<td>RH_T_TIPOS_RELACIONAMENTO</td>
+<td style="text-align: center;">RH_T_TIPOS_RELACIONAMENTO</td>
 <td><p>Faz um registo aqui sempre que se fizer registo em uma das
 tabelas acima e deve fazer as seguintes ações</p>
 <p>Registo: Cria um registo Nessa tabela</p>
@@ -642,7 +642,7 @@ anterior para 0</p></li>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_TIPREL_REM_PAG</td>
+<td style="text-align: center;">RH_T_TIPREL_REM_PAG</td>
 <td style="text-align: left;">Sempre que houver novo de
 <strong>RH_T_TIPOS_RELACIONAMENTO</strong>, logo, pega todos os registos
 de <strong>tiprel_id</strong> anterior e faz um novo registo com novo
@@ -672,7 +672,7 @@ outras tabelas nas quais provocaram esse registo~~
 </thead>
 <tbody>
 <tr>
-<td><del>RH_T_MOBILIDADE</del></td>
+<td style="text-align: center;"><del>RH_T_MOBILIDADE</del></td>
 <td><p><del>Somente se elimina Nessa tabela caso for feito um novo
 registo descrito no ponto <strong>1.4.1</strong></del></p>
 <p><del>Caso sim:</del></p>
@@ -683,7 +683,7 @@ eliminado</del></p></li>
 </ul></td>
 </tr>
 <tr>
-<td><del>RH_T CARREIRA</del></td>
+<td style="text-align: center;"><del>RH_T CARREIRA</del></td>
 <td><p><del>Somente se elimina Nessa tabela caso for feito um novo
 registo descrito no ponto <strong>1.4.1</strong></del></p>
 <p><del>Caso sim:</del></p>
@@ -694,7 +694,7 @@ eliminado</del></p></li>
 </ul></td>
 </tr>
 <tr>
-<td><del>RH_T_SITUACAO LABORAL</del></td>
+<td style="text-align: center;"><del>RH_T_SITUACAO LABORAL</del></td>
 <td><p><del>Somente se elimina Nessa tabela caso for feito um novo
 registo descrito no ponto <strong>1.4.1</strong></del></p>
 <p><del>Caso sim:</del></p>
@@ -705,7 +705,8 @@ eliminado</del></p></li>
 </ul></td>
 </tr>
 <tr>
-<td><del>RH_T_TIPOS_RELACIONAMENTO</del></td>
+<td
+style="text-align: center;"><del>RH_T_TIPOS_RELACIONAMENTO</del></td>
 <td><p><del>Deve fazer o seguinte Ações</del></p>
 <ul>
 <li><p><del>O registo a ser eliminado deve mudar estado para eliminado
@@ -715,7 +716,7 @@ RH_T_TIPOS_RELACIONAMENTO.ESTADO =E e EST_ACT_ADM = 0</del></p></li>
 </ul></td>
 </tr>
 <tr>
-<td><del>RH_T_DEF_REMUNERACOES</del></td>
+<td style="text-align: center;"><del>RH_T_DEF_REMUNERACOES</del></td>
 <td><p><del>Somente elimina aqui caso for feito um registo em
 1.4.1</del></p>
 <ul>
@@ -724,12 +725,12 @@ eliminado</del></p></li>
 </ul></td>
 </tr>
 <tr>
-<td><del>RH_T_DEF_PAGAMENTOS</del></td>
+<td style="text-align: center;"><del>RH_T_DEF_PAGAMENTOS</del></td>
 <td><del>Somente elimina aqui caso for feito um registo em
 1.4.1</del></td>
 </tr>
 <tr>
-<td><del>RH_T_TIPREL_REM_PAG</del></td>
+<td style="text-align: center;"><del>RH_T_TIPREL_REM_PAG</del></td>
 <td><del>Somente elimina aqui caso for feito um registo em
 1.4.1</del></td>
 </tr>
@@ -751,7 +752,7 @@ eliminado</del></p></li>
 </thead>
 <tbody>
 <tr>
-<td>RH_T_SITUACAO_LABORAL</td>
+<td style="text-align: center;">RH_T_SITUACAO_LABORAL</td>
 <td><p>Novo registo</p>
 <ul>
 <li><p>Faz registo Nessa tabela</p></li>
@@ -764,7 +765,7 @@ faz update</p></li>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_TIPOS_RELACIONAMENTO</td>
+<td style="text-align: center;">RH_T_TIPOS_RELACIONAMENTO</td>
 <td><p><strong>Caso houver novo registo de situação laboral</strong></p>
 <p>Registo: Cria um registo Nessa tabela</p>
 <ul>
@@ -791,7 +792,7 @@ anterior para 0</p></li>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_TIPREL_REM_PAG</td>
+<td style="text-align: center;">RH_T_TIPREL_REM_PAG</td>
 <td>pega todos os registos de <strong>tiprel_id</strong> anterior e faz
 um novo registo com novo <strong>tiprel_id</strong></td>
 </tr>
@@ -842,18 +843,18 @@ um novo registo com novo <strong>tiprel_id</strong></td>
 </thead>
 <tbody>
 <tr>
-<td>RH_T_SUBSTITUICAO</td>
+<td style="text-align: center;">RH_T_SUBSTITUICAO</td>
 <td style="text-align: left;">Revista as informações do colaborador a
 ser sustituido</td>
 </tr>
 <tr>
-<td>RH_T_SUBSTITUICAO_DETALHE</td>
-<td style="text-align: left;">Revista as informados detalhadas
-referentes a cada mes do período de substituição</td>
+<td style="text-align: center;">RH_T_SUBSTITUICAO_DETALHE</td>
+<td>Revista as informados detalhadas referentes a cada mes do período de
+substituição</td>
 </tr>
 <tr>
-<td>RH_T_DEF_REMUNERACOES</td>
-<td style="text-align: left;"><ul>
+<td style="text-align: center;">RH_T_DEF_REMUNERACOES</td>
+<td><ul>
 <li><p>O registo da diferença salarial deve ser efetuado somente quando
 existir uma diferença salarial a favor do colaborador substituto, ou
 seja, quando o salário do colaborador substituto for inferior ao salário
@@ -868,10 +869,9 @@ validação</p></li>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_TIPREL_REM_PAG</td>
-<td style="text-align: left;">Caso for Feito um registo em
-<strong>RH_T_DEF_REMUNERACOES</strong>, logo deve fazer um registo Nessa
-tabela</td>
+<td style="text-align: center;">RH_T_TIPREL_REM_PAG</td>
+<td>Caso for Feito um registo em <strong>RH_T_DEF_REMUNERACOES</strong>,
+logo deve fazer um registo Nessa tabela</td>
 </tr>
 </tbody>
 </table>
@@ -881,14 +881,28 @@ tabela</td>
 O Registo de uma nova Remuneração ou Desconto deve sempre passar para
 validação
 
-| TABELA                      | DESCRIÇÃO                    |
-|-----------------------------|------------------------------|
+|           TABELA            | DESCRIÇÃO                    |
+|:---------------------------:|------------------------------|
 | **Remunerações / subsídio** |                              |
-| RH_T_DEF_REMUNERACOES       | Campo OBS = **Novo Registo** |
-| RH_T_TIPREL_REM_PAG         |                              |
-| **Pagamento / descontos**   |                              |
-| RH_T_DEF_PAGAMENTOS         | Campo OBS = **Novo Registo** |
-| RH_T_TIPREL_REM_PAG         |                              |
+|    RH_T_DEF_REMUNERACOES    | Campo OBS = **Novo Registo** |
+|     RH_T_TIPREL_REM_PAG     |                              |
+|  **Pagamento / descontos**  |                              |
+|     RH_T_DEF_PAGAMENTOS     | Campo OBS = **Novo Registo** |
+|     RH_T_TIPREL_REM_PAG     |                              |
+
+## RH_T_TIPOS_RELACIONAMENTO (**Data início**, **Data Fim**)
+
+Esse campo vai servir para guardar data início e data Fim de
+**Escalao_id** e **Cargo_id**, para colaboradores que não tem carreira.
+
+| **Ações** | **Gravação (Data Inicio, Data Fim)** |
+|:--:|----|
+| Registo de um colaborador | SIM, caso o colaborador não tem carreira e tem **escalao_id** ou **cargo** |
+| Registo de contrato | SIM, caso o colaborador não tem carreira e tem **escalao_id** ou cargo |
+| Registo ou **update** Carreira | NÃO |
+| Registo ou **Update** mobilidade | NÃO: no registo ou update de uma mobilidade não deve fazer atualização Nessa data |
+| Registo ou **update** Situação Laboral | NÃO: no registo ou update de uma situação laboral não deve fazer atualização Nessa data |
+| Alteração de Escalão ou Cargo | SIM: a alteração de cargo ou carreira esta ativa so para caso de colaborador que não tem carreira |
 
 # Processamento Salarial
 
@@ -930,7 +944,7 @@ No quadro seguinte presenta regras dos botões
 <thead>
 <tr>
 <th>Botões</th>
-<th style="text-align: left;">Descrição</th>
+<th>Descrição</th>
 </tr>
 </thead>
 <tbody>
@@ -955,8 +969,8 @@ ou Selecionar varias Direções e Processar</mark></p></td>
 </tr>
 <tr>
 <td><strong>Eliminar</strong></td>
-<td style="text-align: left;">O processamento apenas pode ser eliminado
-quando se encontrar num dos seguintes estados:<br />
+<td>O processamento apenas pode ser eliminado quando se encontrar num
+dos seguintes estados:<br />
 <br />
 • <strong>PROCESSADO</strong><br />
 • <strong>ERRO_PROCESSAMENTO</strong><br />
@@ -1001,8 +1015,8 @@ associado.</td>
 </tr>
 <tr>
 <td><strong>CABIMENTAR</strong></td>
-<td style="text-align: left;">Um processamento apenas pode ser
-cabimentado quando se encontrar no estado:<br />
+<td>Um processamento apenas pode ser cabimentado quando se encontrar no
+estado:<br />
 <br />
 • <strong>VALIDADO_DEFINITIVO</strong><br />
 <br />
@@ -1018,8 +1032,8 @@ o respetivo Cabimento.</td>
 </tr>
 <tr>
 <td><strong>Eliminar Cabimento</strong></td>
-<td style="text-align: left;">O Cabimento apenas pode ser eliminado
-quando o processamento se encontrar no estado:<br />
+<td>O Cabimento apenas pode ser eliminado quando o processamento se
+encontrar no estado:<br />
 <br />
 • <strong>CABIMENTADO</strong><br />
 <br />
@@ -1032,8 +1046,8 @@ botão <strong>Eliminar Cabimento</strong> deve permanecer desativado
 </tr>
 <tr>
 <td><strong>Autorizar</strong></td>
-<td style="text-align: left;">Um processamento apenas pode ser
-autorizado quando se encontrar no estado:<br />
+<td>Um processamento apenas pode ser autorizado quando se encontrar no
+estado:<br />
 <br />
 • <strong>CABIMENTADO</strong><br />
 <br />
@@ -1066,10 +1080,11 @@ No quadro seguinte representa as ações em cada tabela em cada etapa:
 </thead>
 <tbody>
 <tr>
-<td colspan="2"><strong>Processar Salário</strong></td>
+<td colspan="2" style="text-align: center;"><strong>Processar
+Salário</strong></td>
 </tr>
 <tr>
-<td>RH_T_PROC_SALARIOS</td>
+<td style="text-align: center;">RH_T_PROC_SALARIOS</td>
 <td><p>Faz um registo nessa tabela por cada direção processado</p>
 <p>Relação das chaves estrangeiras:</p>
 <ul>
@@ -1080,7 +1095,7 @@ cabimento.</p></li>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_PROC_FUNCIONARIOS</td>
+<td style="text-align: center;">RH_T_PROC_FUNCIONARIOS</td>
 <td><p>Faz um registo nessa tabela por cada colaborador processado em
 uma direção</p>
 <p>Relação das chaves estrangeiras:</p>
@@ -1092,7 +1107,7 @@ RH_T_TIPOS_RELACIONAMENTO</p></li>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_REMUNERACOES</td>
+<td style="text-align: center;">RH_T_REMUNERACOES</td>
 <td><p>Regista Nessa tabela cada <strong>salário / subsido</strong> do
 colaborador ativo na tabela <strong>RH_T_DEF_REMUNERACOES</strong></p>
 <p>Relação das chaves estrangeiras:</p>
@@ -1102,7 +1117,7 @@ colaborador ativo na tabela <strong>RH_T_DEF_REMUNERACOES</strong></p>
 </ul></td>
 </tr>
 <tr>
-<td>RH_T_PAGAMENTOS</td>
+<td style="text-align: center;">RH_T_PAGAMENTOS</td>
 <td><p>Regista nessa tabela cada <strong>Desconto</strong> do
 colaborador ativo na tabela RH_T_DEF_PAGAMENTOS.</p>
 <p>Relação das chaves estrangeiras:</p>
@@ -1112,29 +1127,31 @@ colaborador ativo na tabela RH_T_DEF_PAGAMENTOS.</p>
 </ul></td>
 </tr>
 <tr>
-<td colspan="2"><strong>Eliminar Salario</strong></td>
+<td colspan="2" style="text-align: center;"><strong>Eliminar
+Salario</strong></td>
 </tr>
 <tr>
-<td>RH_T_PROC_SALARIOS</td>
+<td style="text-align: center;">RH_T_PROC_SALARIOS</td>
 <td>Elimina dados Nessa tabela</td>
 </tr>
 <tr>
-<td>RH_T_PROC_FUNCIONARIOS</td>
+<td style="text-align: center;">RH_T_PROC_FUNCIONARIOS</td>
 <td>Elimina dados Nessa tabela</td>
 </tr>
 <tr>
-<td>RH_T_REMUNERACOES</td>
+<td style="text-align: center;">RH_T_REMUNERACOES</td>
 <td>Elimina dados Nessa tabela</td>
 </tr>
 <tr>
-<td>RH_T_PAGAMENTOS</td>
+<td style="text-align: center;">RH_T_PAGAMENTOS</td>
 <td>Elimina dados Nessa tabela</td>
 </tr>
 <tr>
-<td colspan="2"><strong>Validar Salário Provisório</strong></td>
+<td colspan="2" style="text-align: center;"><strong>Validar Salário
+Provisório</strong></td>
 </tr>
 <tr>
-<td>RH_T_PROC_SALARIOS</td>
+<td style="text-align: center;">RH_T_PROC_SALARIOS</td>
 <td><p>Muda o estado:</p>
 <ul>
 <li><p>RH_T_PROC_SALARIOS.ESTADO =”
@@ -1142,20 +1159,22 @@ colaborador ativo na tabela RH_T_DEF_PAGAMENTOS.</p>
 </ul></td>
 </tr>
 <tr>
-<td><strong>Validar Salário Definitivo</strong></td>
+<td style="text-align: center;"><strong>Validar Salário
+Definitivo</strong></td>
 <td></td>
 </tr>
 <tr>
-<td>RH_T_PROC_SALARIOS</td>
+<td style="text-align: center;">RH_T_PROC_SALARIOS</td>
 <td><p>Muda o estado:</p>
 <p>RH_T_PROC_SALARIOS.ESTADO =”
 <strong>VALIDADO_DEFINITIVO</strong>”</p></td>
 </tr>
 <tr>
-<td colspan="2"><strong>Cabimentar</strong></td>
+<td colspan="2"
+style="text-align: center;"><strong>Cabimentar</strong></td>
 </tr>
 <tr>
-<td>RH_T_PROC_SALARIOS</td>
+<td style="text-align: center;">RH_T_PROC_SALARIOS</td>
 <td><ul>
 <li><p>Invoca um serviço financeiro para cabimentar</p></li>
 <li><p>Muda o estado: RH_T_PROC_SALARIOS.ESTADO =”
@@ -1165,10 +1184,11 @@ número de cabimento devolvido no serviço</strong></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="2"><strong>Eliminar Cabimento</strong></td>
+<td colspan="2" style="text-align: center;"><strong>Eliminar
+Cabimento</strong></td>
 </tr>
 <tr>
-<td>RH_T_PROC_SALARIOS</td>
+<td style="text-align: center;">RH_T_PROC_SALARIOS</td>
 <td><ul>
 <li><p>Invoca um serviço financeiro para eliminar cabimento</p></li>
 <li><p>Muda o estado: RH_T_PROC_SALARIOS.ESTADO =”
@@ -1176,10 +1196,11 @@ número de cabimento devolvido no serviço</strong></p></li>
 </ul></td>
 </tr>
 <tr>
-<td colspan="2"><strong>Autorizar</strong></td>
+<td colspan="2"
+style="text-align: center;"><strong>Autorizar</strong></td>
 </tr>
 <tr>
-<td>RH_T_PROC_SALARIOS</td>
+<td style="text-align: center;">RH_T_PROC_SALARIOS</td>
 <td><ul>
 <li><p>Invoca um serviço financeiro para autorizar</p></li>
 <li><p>Muda o estado: RH_T_PROC_SALARIOS.ESTADO =”
