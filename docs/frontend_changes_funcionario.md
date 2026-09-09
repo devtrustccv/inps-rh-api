@@ -246,3 +246,45 @@ mobilidade. Renomeação directa (mesmos tipos, mesma semântica, mesmo acesso):
 De passagem corrige-se o gralho `dirrecaoAntes` (duplo "r"). Os nomes antigos **deixam de existir**: os
 de escrita (`direcaoDepois`, `seccaoDepois`, `localTrabalhoDepois`) passam a ser ignorados na
 desserialização, pelo que a mobilidade gravaria sem destino se o front não for actualizado.
+
+---
+
+# Ativar/Desativar Contrato — desbloqueio com progressão pendente ou rejeitada
+
+**Data:** 2026-09-09
+**Branch:** develop
+
+## Comportamento corrigido (sem alteração de contrato de API)
+
+`PATCH /api/v1/funcionarios/{idFuncionario}/contratos/{contratoId}/estado`
+
+Antes, o pedido falhava com **400 — "Só é possível desativar o contrato atual do funcionário."**
+sempre que o colaborador tivesse passado por uma **progressão** que não fosse validada, mesmo
+quando a lista e o get-by-id devolviam `atual: true` para esse contrato. Bastava existir uma
+progressão **pendente (P)** ou **rejeitada (I / "Não Validado")** para o contrato ficar
+permanentemente indesativável pelo ecrã — não havia nada que o utilizador pudesse fazer para o
+desbloquear (rejeitar a progressão não resolvia).
+
+Causa: o backend identificava o vínculo do contrato pelo tiprel de maior id, e o candidato de
+progressão nasce com id superior ao do vínculo corrente. Passa a ser identificado pelo vínculo
+**corrente** (`est_act_adm=1`).
+
+**Impacto no front-end:** nenhum campo ou rota muda. O botão Ativar/Desativar passa simplesmente a
+funcionar nos colaboradores em que dava erro. Medido na BD de dev: 3 de 9 contratos estavam nesta
+situação.
+
+## Estados: "atual" e "ativo" são dimensões independentes
+
+Um contrato desativado **continua a ser o contrato atual** do colaborador — a desativação já não
+limpa a marca de vínculo corrente. Consequência visível: o colaborador com contrato desativado
+mantém-se na lista de Dossiê (`ULTIMO_VINCULO=1`) com o estado a `Inactivo`, em vez de perder o
+vínculo corrente. Alinha o Ativar/Desativar Contrato com o que a cessação e a inativação de
+situação laboral já faziam.
+
+## Mensagens de erro
+
+A mensagem passa a acompanhar o sentido da operação — na ativação lê-se
+**"Só é possível ativar o contrato atual do funcionário."** (antes só existia a variante
+"desativar"). As restantes mantêm-se: "Só é possível desativar um contrato ativo.",
+"Não é possível desativar um contrato já processado em folha.", "Só é possível ativar um contrato
+inativo (estado I). Estado atual: X.", "O funcionário já possui um contrato ativo em vigor."
