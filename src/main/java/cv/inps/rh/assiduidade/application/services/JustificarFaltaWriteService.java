@@ -101,11 +101,11 @@ public class JustificarFaltaWriteService {
 
     // O tipo de justificação só existe no formulário quando "Com Justificativo" = SIM
     // (spec: "os campos abaixo só aparecem caso Com Justificativo = SIM"). Marcar a
-    // falta como não justificada é um acto legítimo e não precisa de tipo.
-    boolean algumComJustificativo = selecionados.stream()
-        .anyMatch(i -> "SIM".equalsIgnoreCase(i.getComJustificativo()));
+    // falta como não justificada é um acto legítimo e não precisa de tipo. O radio é do
+    // cabeçalho — aplica-se a todas as faltas seleccionadas, não é escolha por dia.
+    boolean comJustificativo = "SIM".equalsIgnoreCase(dto.getComJustificativo());
 
-    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), algumComJustificativo);
+    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), comJustificativo);
 
     // Regra: só vai a validação se forem mais de 3 dias E o tipo de justificação
     // descontar no salário. Caso contrário fica logo activo.
@@ -272,11 +272,10 @@ public class JustificarFaltaWriteService {
     if (dto == null || dto.getItensFalta() == null || dto.getItensFalta().isEmpty()) {
       throw IgrpResponseStatusException.badRequest("Nenhuma falta selecionada para validação");
     }
-    // Parametrização da justificação — mesma tolerância ao "0" do formulário.
-    boolean algumComJustificativo = dto.getItensFalta().stream()
-        .filter(FaltaItemDTO::isSelecionar)
-        .anyMatch(i -> "SIM".equalsIgnoreCase(i.getComJustificativo()));
-    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), algumComJustificativo);
+    // Parametrização da justificação — mesma tolerância ao "0" do formulário. O radio
+    // "Com Justificativo?" é do cabeçalho, como no registo (não é escolha por dia).
+    boolean comJustificativo = "SIM".equalsIgnoreCase(dto.getComJustificativo());
+    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), comJustificativo);
 
     // Todas as faltas do pedido (já criadas na fase de justificar)
     List<FaltaEntity> faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido);
@@ -331,6 +330,29 @@ public class JustificarFaltaWriteService {
     }
 
     faltaRepository.saveAll(faltas);
+
+    // Anexos do pedido: o checker pode juntar um documento ao despachar, substituir ou
+    // retirar um que o maker anexou. Semântica dos arrays da casa (syncDocumentos):
+    // documentos == null preserva o que está; item sem id cria; item que desaparece do
+    // array fica 'E'. Os anexos são do PEDIDO — ver justificarFalta.
+    if (dto.getDocumentos() != null) {
+      var existentes = documentoEntityRepository
+          .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
+      var sincronizados = documentoMapper.syncDocumentos(
+          new ArrayList<>(existentes),
+          dto.getDocumentos(),
+          TableName.RH_T_PEDIDO.name(),
+          pedido.getId(),
+          pedido.getUuid(),
+          1L,
+          funcionario);
+      for (var doc : sincronizados) {
+        if (doc.getUuid() == null) doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+        // Um anexo novo nasce 'P' no mapper; ao validar acompanha o estado do pedido.
+        if (Estado.P.equals(doc.getEstado())) doc.setEstado(estadoFinal);
+      }
+      documentoEntityRepository.saveAll(sincronizados);
+    }
 
     if (estadoFinal == Estado.A)
       ordemServicoWriteService.criar(funcionario, tipoRelAtual, dto.getTipoOrdemServico());

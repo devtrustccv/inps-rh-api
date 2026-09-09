@@ -86,6 +86,20 @@ public class JustificarFaltaDTO  {
   private List<AnexoReqDTO> documentos = new ArrayList<>();
 
 
+  /**
+   * Estado do PEDIDO (RH_T_PEDIDO.ESTADO): {@code P} pendente de despacho, {@code A}
+   * validado, {@code I} rejeitado. Só de resposta — é por ele que o ecrã decide se o grupo
+   * ainda pode ser editado/eliminado ou se está à espera de validação.
+   */
+  private String estado ;
+
+  /** Descrição legível de {@link #estado}. */
+  private String estadoDesc ;
+
+  /** Etapa do workflow do pedido (RH_T_PEDIDO.ETAPA): DESPACHO_RH | FINALIZADO. */
+  private String etapa ;
+
+
   private EstadoValidacao validar ;
 
 

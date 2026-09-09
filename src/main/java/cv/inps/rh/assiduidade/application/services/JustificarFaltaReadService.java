@@ -246,6 +246,13 @@ public class JustificarFaltaReadService {
     dto.setItensFalta(itensFalta);
     dto.setPedidoId(pedido.getUuid());
     dto.setDocumentos(anexosDoPedido(pedido));
+    // Estado do pedido, não das faltas: o ecrã precisa dele para saber se o grupo está à
+    // espera de despacho (P) ou já fechado (A/I).
+    dto.setEstado(pedido.getEstado());
+    dto.setEstadoDesc(pedido.getEstado() != null
+        ? Estado.fromCode(pedido.getEstado()).map(Estado::getDescription).orElse(null)
+        : null);
+    dto.setEtapa(pedido.getEtapa());
 
     // Cabeçalho do formulário: o pedido é gravado com os mesmos valores em todas as suas
     // faltas (ver JustificarFaltaWriteService), por isso lê-se da primeira — excepto o
