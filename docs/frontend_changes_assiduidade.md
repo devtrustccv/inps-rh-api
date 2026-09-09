@@ -281,3 +281,76 @@ E o campo `estado` passa a admitir `JUSTIFICADA` e `PENDENTE`, além dos actuais
   (`salário base ÷ 30 ÷ jornada diária`) e registo em log quando o procedimento falha.
   O mesmo padrão de fallback é aplicado a `CALCULO_HORA_EXTRA`. O resultado é o mesmo
   em ambos os caminhos — o front não distingue.
+
+---
+
+## 🔴 7. Justificar Falta — cabeçalho do pedido e anexos de grupo (09/09/2026)
+
+### Porquê
+
+O ecrã de Justificar Falta ganhou as acções **Editar** e **Eliminar** por grupo
+(spec 09/09, *"agrupados por `RH_T_FALTA.PEDIDO_ID`"*). Para o Editar reabrir o
+formulário era preciso que a leitura devolvesse o que lá tinha sido gravado — e não
+devolvia: o cabeçalho vinha quase todo a `null`, e o próprio `pedidoId` não existia
+no contrato.
+
+### `GET /api/v1/assiduidade/falta/justificar/pedido/{pedidoUuid}`
+
+Campos **novos ou que deixaram de vir `null`** no cabeçalho:
+
+| Campo | Origem | Notas |
+|---|---|---|
+| `pedidoId` | `RH_T_PEDIDO.UUID` | **novo** — chave para o Editar/Eliminar do grupo |
+| `comJustificativo` | `RH_T_FALTA.FLG_JUSTIFICATIVO` | **novo** — repõe o radio obrigatório do formulário |
+| `deduzirFaltaEm` | `RH_T_FALTA.FLG_DESCONTO_FALTA` | estava gravado mas não era lido |
+| `valorDiario` | `RH_T_FALTA.VALOR` da 1.ª falta | |
+| `valorTotal` | soma do `VALOR` das faltas do pedido | igual ao que o POST devolve |
+| `ano` / `mes` | data mais antiga do pedido | permite voltar à lista do mês certo |
+| `documentos` | anexos do pedido | ver ponto seguinte |
+
+O `GET .../falta/justificar/{funcionarioUuid}?ano=&mes=` **não muda**: aí o cabeçalho
+não representa um pedido (o mês pode conter vários), pelo que continua vazio.
+
+### Anexos do bloco "Justificar Faltas Selecionadas"
+
+Passam a ser gravados com `REFERENCIA_NAME = 'RH_T_PEDIDO'` e `REFERENCIA_ID/UUID` do
+pedido, em vez de presos à primeira falta do grupo. **Diverge da especificação**
+(que diz `'RH_T_FALTA'`), por decisão de negócio: o anexo aplica-se a todas as faltas
+seleccionadas, e prendê-lo a um dia tornava-o indistinguível do anexo desse dia — a
+leitura devolvia um e escondia o outro, e eliminar esse dia deixava-o órfão.
+
+O anexo **de um dia** (`itensFalta[].documento`) mantém-se em `'RH_T_FALTA'`.
+
+> Sem migração: `RH_T_DOCUMENTO` não tinha nenhum anexo de falta gravado.
+
+### `POST /api/v1/assiduidade/falta/justificar/{funcionarioUuid}` e `PUT .../validar/{pedidoUuid}`
+
+`responsavelId` deixa de ser ignorado — é gravado em `RH_T_FALTA.RESPONSAVEL_ID`.
+Espera a **PK de `RH_T_RESPONSAVEL`**, a mesma que a leitura devolve. Na validação só
+sobrepõe o responsável se vier no payload.
+
+## 🔴 8. Marcar Falta — `despachoRh` removido, `tipoJustificacao` obrigatório
+
+`POST /api/v1/assiduidade/falta` e `POST .../falta/{pedidoUuid}`:
+
+- **`despachoRh` foi removido do contrato** (`FaltaReqDTO`). O formulário Marcar Falta /
+  Ausência não tem esse campo em nenhum dos modos (spec 09/09, ecrã 3.2.2 — só Parecer,
+  Responsável e Observação). Deixa também de ser devolvido na leitura da falta.
+- **`tipoJustificacao` passa a ser obrigatório** quando `justificar = "SIM"` → `400`
+  *"Tipo de falta é obrigatório quando a falta é marcada com justificativo"*. Sem ele o
+  `PARAM_SIT_ID` ficava nulo e a regra dos 3 dias nunca disparava: uma falta longa
+  entrava directamente a `A`, saltando o maker-checker.
+
+### Notas para o produto (sem alteração de contrato)
+
+- `RH_T_FALTA.DESPACHO_RH` é `VARCHAR2(3)`, mas o domínio que a documentação de base de
+  dados lhe atribui (`PARECER_DECISAO` / referência `DESPACHO_RH` = `JUSTIFICADA` |
+  `INJUSTIFICADA`) **não cabe na coluna**. O campo continua no contrato do ecrã de
+  Justificar; enviar um valor do domínio dá erro de base de dados. Precisa de decisão:
+  alargar a coluna ou retirar o campo.
+- O domínio `PARECER_DECISAO` só tem um registo em dev (`VALOR='TETS'`), sem
+  `FAVORAVEL`/`DESFAVORAVEL`. `parecer` continua **texto livre** no backend — a
+  parametrização e a validação da lista são responsabilidade do cliente.
+- Uma falta com tipo que desconta salário **e** `deduzirFaltaEm` preenchido aplica
+  **os dois** efeitos: desconto em `RH_T_DEF_REMUNERACOES` *e* dispensa/abate de férias.
+  São eixos independentes no código; confirmar com o negócio se é intencional.

@@ -57,6 +57,18 @@ public class JustificarFaltaWriteService {
   private final NotificacaoDispatchService notificacaoDispatchService;
   private final FaltaDescontoService faltaDescontoService;
   private final FaltaValorCalculator faltaValorCalculator;
+  private final ResponsavelEntityRepository responsavelEntityRepository;
+
+  /**
+   * Responsável do parecer. O DTO envia a PK de RH_T_RESPONSAVEL — a mesma que a leitura
+   * devolve em {@code responsavelId} — para o round-trip do formulário fechar. Sem isto o
+   * campo era aceite e descartado: o dropdown "Responsável" nunca era gravado.
+   */
+  private ResponsavelEntity resolverResponsavel(Long responsavelId) {
+    if (responsavelId == null)
+      return null;
+    return responsavelEntityRepository.findByIdOrThrow(responsavelId);
+  }
 
   @Transactional
   public Map<String, ?> justificarFalta(JustificarFaltaCommand command) {
@@ -103,6 +115,8 @@ public class JustificarFaltaWriteService {
     var deducao = StringUtils.hasText(dto.getDeduzirFaltaEm())
         ? TipoDescontoFalta.fromCodeOrThrow(dto.getDeduzirFaltaEm()).getCode()
         : null;
+
+    var responsavel = resolverResponsavel(dto.getResponsavelId());
 
     // Criar pedido de justificação
     PedidoEntity pedido = new PedidoEntity();
@@ -164,6 +178,7 @@ public class JustificarFaltaWriteService {
           StringUtils.hasText(item.getComJustificativo()) ? item.getComJustificativo() : "SIM");
 
       falta.setDecisaoResponsavel(dto.getParecerResponsavel());
+      falta.setResponsavelId(responsavel);
       falta.setObsResponsavel(dto.getObsResponsavel());
       falta.setDespachoRh(dto.getDespachoRh());
 
@@ -201,18 +216,23 @@ public class JustificarFaltaWriteService {
       doc.setUuid(UuidCreator.getTimeOrderedEpoch());
       documentos.add(doc);
     }
-    // Documentos do bloco "Justificar Faltas Selecionadas" — o formulário permite
-    // anexar vários e aplicam-se a todas as faltas seleccionadas. Ficam ligados à
-    // primeira falta do pedido, que é a âncora do conjunto.
-    if (dto.getDocumentos() != null && !dto.getDocumentos().isEmpty() && !faltas.isEmpty()) {
-      var ancora = faltas.getFirst();
+    // Documentos do bloco "Justificar Faltas Selecionadas" — o formulário permite anexar
+    // vários e aplicam-se a TODAS as faltas seleccionadas, não a um dia. Ficam por isso
+    // ligados ao PEDIDO, que é o agrupador do conjunto (RH_T_FALTA.PEDIDO_ID).
+    //
+    // A spec diz REFERENCIA_NAME='RH_T_FALTA' para os anexos, mas essa regra só funciona
+    // para o anexo de um dia (acima). Prendê-los à primeira falta — como se fazia antes —
+    // tornava-os indistinguíveis do anexo dessa falta: a leitura devolvia um e escondia o
+    // outro, e eliminar o dia âncora deixava o anexo do grupo órfão. Decidido com o
+    // utilizador: o anexo do grupo pertence ao pedido.
+    if (dto.getDocumentos() != null && !dto.getDocumentos().isEmpty()) {
       for (var anexo : dto.getDocumentos()) {
         var doc = documentoMapper.toEntity(
             anexo,
             estadoInicial,
-            TableName.RH_T_FALTA.name(),
-            ancora.getId(),
-            ancora.getUuid(),
+            TableName.RH_T_PEDIDO.name(),
+            pedido.getId(),
+            pedido.getUuid(),
             1L,
             funcionario);
         doc.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -288,6 +308,7 @@ public class JustificarFaltaWriteService {
 
     // Estado final
     final Estado estadoFinal = dto.getValidar() == EstadoValidacao.SIM ? Estado.A : Estado.I;
+    var responsavelValidacao = resolverResponsavel(dto.getResponsavelId());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     // Atualizar apenas as faltas correspondentes às sínteses selecionadas
@@ -306,6 +327,9 @@ public class JustificarFaltaWriteService {
       falta.setDescricaoMotivo(item.getMotivo());
       falta.setObsResponsavel(dto.getObsResponsavel());
       falta.setDespachoRh(dto.getDespachoRh());
+      // Só sobrepõe se o checker indicou um responsável — senão mantém o da justificação.
+      if (responsavelValidacao != null)
+        falta.setResponsavelId(responsavelValidacao);
       // Só sobrepõe se veio no payload — caso contrário mantém o que foi gravado na
       // justificação, em vez de o apagar.
       if (paramSituacao != null)

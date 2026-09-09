@@ -30,6 +30,13 @@ public class JustificarFaltaDTO  {
 
   private String nomeColaborador ;
 
+  /**
+   * UUID do pedido de justificação a que este conjunto de faltas pertence. Só de resposta,
+   * e só preenchido na leitura por pedido: é a chave com que o ecrã chama o Editar/Eliminar
+   * do grupo (spec 09/09: "agrupados por RH_T_FALTA.PEDIDO_ID").
+   */
+  private UUID pedidoId ;
+
   @Valid
   private List<FaltaItemDTO> itensFalta = new ArrayList<>();
 
@@ -47,6 +54,13 @@ public class JustificarFaltaDTO  {
 
 
   private Long tipoJustificacao ;
+
+  /**
+   * "Com Justificativo?" (DOMAIN SIM_NAO) — o radio único do cabeçalho do formulário, que
+   * comanda a visibilidade dos restantes blocos. Guardado em RH_T_FALTA.FLG_JUSTIFICATIVO,
+   * igual em todas as faltas do pedido; devolvido na leitura para o Editar repor o radio.
+   */
+  private String comJustificativo ;
 
   /** "Deduzir Falta Em" — DOMAIN TP_DESCONTO_FALTA: FERIAS | DISPENSA. */
   private String deduzirFaltaEm ;

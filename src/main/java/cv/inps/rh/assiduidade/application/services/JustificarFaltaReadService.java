@@ -20,9 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -53,6 +55,35 @@ public class JustificarFaltaReadService {
       case I -> "Rejeitada";
       default -> estado.getDescription();
     };
+  }
+
+  /**
+   * Anexos do bloco "Justificar Faltas Selecionadas": pertencem ao PEDIDO, não a um dia
+   * (ver JustificarFaltaWriteService). Os anexos de um dia continuam em RH_T_FALTA e são
+   * devolvidos em {@code FaltaItemDTO.documento}.
+   */
+  private List<AnexoReqDTO> anexosDoPedido(cv.inps.rh.shared.infrastructure.persistence.entity.PedidoEntity pedido) {
+    if (pedido == null || pedido.getUuid() == null)
+      return new java.util.ArrayList<>();
+    return documentoEntityRepository
+        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid())
+        .stream()
+        .map(doc -> {
+          var anexo = new AnexoReqDTO();
+          anexo.setId(doc.getId());
+          anexo.setTipoDocumentoId(doc.getTpDocumentoId() != null ? doc.getTpDocumentoId().getId() : null);
+          anexo.setDocumento(doc.getUrl());
+          return anexo;
+        })
+        .collect(Collectors.toCollection(java.util.ArrayList::new));
+  }
+
+  /** Data de uma falta: a da síntese diária que a originou, ou a sua própria data de início. */
+  private static LocalDate dataDaFalta(FaltaEntity f) {
+    var sintese = f.getSinteseDiarioId();
+    if (sintese != null && sintese.getData() != null)
+      return sintese.getData();
+    return f.getDataInicio() != null ? f.getDataInicio().toLocalDate() : null;
   }
 
   @Transactional(readOnly = true)
@@ -191,8 +222,12 @@ public class JustificarFaltaReadService {
     dto.setNomeColaborador(funcionario.getNome());
     dto.setItensFalta(itensFalta);
 
-    // Campos de decisão, despacho e tipoJustificacao podem ser preenchidos a partir
-    // da primeira falta
+    dto.setPedidoId(pedido.getUuid());
+    dto.setDocumentos(anexosDoPedido(pedido));
+
+    // Cabeçalho do formulário: o pedido é gravado com os mesmos valores em todas as suas
+    // faltas (ver JustificarFaltaWriteService), por isso lê-se da primeira — excepto o
+    // valor total, que é a soma dos dias, tal como o POST o devolve.
     if (!faltas.isEmpty()) {
       var primeira = faltas.getFirst();
       dto.setParecerResponsavel(primeira.getDecisaoResponsavel());
@@ -200,6 +235,27 @@ public class JustificarFaltaReadService {
       dto.setObsResponsavel(primeira.getObsResponsavel());
       dto.setDespachoRh(primeira.getDespachoRh());
       dto.setTipoJustificacao(primeira.getParamSitId() != null ? primeira.getParamSitId().getId() : null);
+      // "Deduzir Falta Em" estava gravado (FLG_DESCONTO_FALTA) mas não era devolvido — ao
+      // reabrir o pedido para editar, a opção escolhida aparecia vazia.
+      dto.setComJustificativo(primeira.getFlgJustificativo());
+      dto.setDeduzirFaltaEm(primeira.getFlgDescontoFalta());
+      dto.setValorDiario(primeira.getValor());
+      dto.setValorTotal(faltas.stream()
+          .map(FaltaEntity::getValor)
+          .filter(Objects::nonNull)
+          .reduce(BigDecimal.ZERO, BigDecimal::add));
+
+      // Mês de referência: é por ele que o ecrã volta à lista depois de editar. Vem da
+      // falta mais antiga do pedido (síntese diária, ou a data da falta quando não há
+      // síntese — caso das faltas geradas pela baixa médica).
+      faltas.stream()
+          .map(JustificarFaltaReadService::dataDaFalta)
+          .filter(Objects::nonNull)
+          .min(LocalDate::compareTo)
+          .ifPresent(d -> {
+            dto.setAno(d.getYear());
+            dto.setMes(d.getMonthValue());
+          });
     }
 
     return dto;

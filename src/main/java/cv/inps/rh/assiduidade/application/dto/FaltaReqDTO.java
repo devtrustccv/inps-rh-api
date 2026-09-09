@@ -45,6 +45,12 @@ public class FaltaReqDTO  {
   private String totalDeHorasAusentes ;
 
 
+  /**
+   * "Com Justificativo?" do formulário (DOMAIN SIM_NAO). Faz duas coisas: com "SIM" abre os
+   * blocos Motivo/Tipo Falta/Anexos/Parecer e cria pedido + RH_T_FALTA; com "NÃO" só se regista
+   * a síntese diária e o dia fica na lista por justificar. Gravado em
+   * RH_T_FALTA.FLG_JUSTIFICATIVO, o mesmo campo que o ecrã de Justificar Falta preenche.
+   */
   private String justificar ;
 
 
@@ -65,7 +71,6 @@ public class FaltaReqDTO  {
   private EstadoValidacao validar ;
 
 
-  private String despachoRh ;
 
 
   private Long tipoJustificacao ;

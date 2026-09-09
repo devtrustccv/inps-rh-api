@@ -194,7 +194,6 @@ public class FaltaReadService {
     dto.setMotivoAusencia(primeiraFalta.getDescricaoMotivo());
     dto.setParecer(primeiraFalta.getDecisaoResponsavel());
     dto.setObservacao(primeiraFalta.getObsResponsavel());
-    dto.setDespachoRh(primeiraFalta.getDespachoRh());
     // A guarda tem de cobrir também o funcionário do responsável: RH_T_RESPONSAVEL
     // pode existir sem FUN_ID preenchido.
     var funResponsavel = primeiraFalta.getResponsavelId() != null
