@@ -111,9 +111,10 @@ public class JustificarFaltaReadService {
     LocalDate inicioMes = LocalDate.of(query.getAno(), query.getMes(), 1);
     LocalDate fimMes = inicioMes.withDayOfMonth(inicioMes.lengthOfMonth());
 
-    // Buscar todas as sínteses diárias do funcionário no mês
+    // Dias por justificar do mês: só ausências (FALTA=1 ou horas de ausência > 0) e só as que
+    // ainda não têm falta associada. O filtro é feito em SQL — ver findAusenciasPorJustificar.
     List<AssiduidadeSinteseDiarioEntity> sinteses = assiduidadeSinteseDiarioEntityRepository
-        .findAllByFuncionarioIdAndDataBetweenOrderByDataAsc(funcionario, inicioMes, fimMes);
+        .findAusenciasPorJustificar(funcionario.getId(), inicioMes, fimMes);
 
     // Faltas já registadas no período, indexadas pela síntese que as originou.
     // Sem isto o resumo não conseguiria mostrar o estado de cada dia
@@ -132,10 +133,9 @@ public class JustificarFaltaReadService {
 
     // Os dias JÁ justificados não vêm soltos: vão agrupados no pedido a que pertencem
     // (dto.pedidos), cada grupo com o cabeçalho completo do formulário, para o Editar abrir
-    // sem uma segunda chamada. Soltos ficam só os dias que ainda não têm falta associada —
-    // os que a lista da esquerda oferece para seleccionar e justificar.
+    // sem uma segunda chamada. Soltos ficam só os dias por justificar, que a consulta acima
+    // já devolve filtrados.
     List<FaltaItemDTO> itensFalta = sinteses.stream()
-        .filter(sin -> !faltaPorSintese.containsKey(sin.getId()))
         .map(sin -> {
           FaltaItemDTO item = new FaltaItemDTO();
           item.setId(sin.getId());
