@@ -1,120 +1,130 @@
-> Updated: 2026-09-09 21:20 -01:00
+> Updated: 2026-09-10 12:07 -01:00
 
 ## Goal
 
-Alinhar o backend de Assiduidade — ecrãs **3.2.2 Marcar Falta** e **3.2.3 Justificar Falta** —
-com a spec `docs/Especificação Tecnica Funcional - GESTÃO ASSIDUIDADE_09_09_2026.md`, validando
-tudo contra a Oracle de dev com a app a correr. Falta implementar as duas acções novas da spec
-09/09: **Editar** e **Eliminar** um pedido de justificação (por grupo `RH_T_FALTA.PEDIDO_ID`).
+Alinhar o backend de **Assiduidade** com a spec
+`docs/Especificação Tecnica Funcional - GESTÃO ASSIDUIDADE_09_09_2026.md`, validando tudo
+live contra a Oracle de dev. A auditoria da spec está feita (19 lacunas). O lote B+C está
+fechado; falta **implementar Editar e Eliminar do pedido de justificação** (hoje 501) e três
+itens que mexem em vistas Oracle.
 
 ## Current state
 
-6 commits em `develop`, sem push, todos com `mvn clean compile` limpo e verificados live:
+3 commits em `develop`, **sem push**, todos com `mvn clean compile` limpo e verificados live:
 
-- `4bbbdc67` cabeçalho do `GET .../pedido/{uuid}` (pedidoId, deduzirFaltaEm, valores, ano/mes) +
-  anexos de grupo passam a `REFERENCIA_NAME='RH_T_PEDIDO'`
-- `3e21a2e7` ordena os dias do painel (finders com `OrderBy...Asc`)
-- `668ecdeb` **`ResumoFaltaMesDTO`** novo: o GET do mês deixa de reutilizar o DTO do pedido
-- `6720ae74` anexo por dia removido do contrato (`FaltaItemDTO.documento`)
-- `b87e121c` `estado`/`estadoDesc`/`etapa` do pedido em cada grupo + sync de anexos no validar
-- (por commitar) **stubs de Editar/Eliminar** — ver *Next step*
+- `ed137ef0` — validar procurava a validação por `FUN_ID` mas grava-a por `REFERENCIA_UUID`;
+  com dois pedidos pendentes do mesmo colaborador rebentava (non-unique). Falta + justificação.
+- `e8b54afb` — lote B+C: anexos (marcar falta lia `RH_T_FALTA` e escrevia `RH_T_PEDIDO`;
+  férias procurava por `FERIA`; hora extra por `pedido.uuid` em vez de `he.uuid`), validação de
+  férias com fallback `INSERT`→`UPDATE`, remuneração da hora extra registada depois do
+  recálculo, `valorAusencia` → `BigDecimal`, `DESPACHO_RH`=SIM/NAO, `ETAPA='FINALIZADO'`
+  também ao rejeitar, `FLG_DESCONTO_SAL` gravado no registo.
+- `1565e06c` — painel "por justificar" só oferece dias que são ausência, com o filtro em SQL
+  (`findAusenciasPorJustificar`).
 
-Endpoints do fluxo, todos testados live excepto os dois últimos:
+Working tree limpo (só `bash.exe.stackdump`, lixo untracked). BD de dev limpa: colaborador de
+teste sem nada depois de Setembro/2026.
 
-| Método | Rota | Estado |
+**Por fazer:**
+
+| # | Item | Nota |
 |---|---|---|
-| POST | `assiduidade/falta` | marcar, com e sem justificar ✅ |
-| POST | `assiduidade/falta/justificar/{funUuid}` | criar ✅ |
-| GET | `assiduidade/falta/justificar/{funUuid}?ano&mes` | mês: soltos + `pedidos[]` ✅ |
-| GET | `assiduidade/falta/justificar/pedido/{pedidoUuid}` | pedido ✅ |
-| PUT | `assiduidade/falta/justificar/validar/{pedidoUuid}` | validar ✅ |
-| PUT | `assiduidade/falta/justificar/pedido/{pedidoUuid}` | **stub → 501** |
-| DELETE | `assiduidade/falta/justificar/pedido/{pedidoUuid}` | **stub → 501** |
+| **A1** | `editarPedidoJustificacao` / `eliminarPedidoJustificacao` | 501; é o próximo trabalho |
+| C4 | Lista Gestão Falta: excluir quem tem ausência activa; estado do mês dá `INJUSTIFICADA` mesmo com dias justificados | vista `RH_V_RESUMO_ASSIDUIDADE` (DDL) |
+| C5b | Hora extra grava `ETAPA='VALIDACAO'`, fora do domínio `ETAPA_PROCESSO`, já publicado ao frontend | breaking change |
+| C6 | Coluna Motivo na lista de faltas | `RH_V_FALTA_MENSAL` não tem o campo e é agregada por mês |
+| — | Entrada do `valorAusencia` decimal em `docs/frontend_changes_assiduidade.md` | documentação |
 
-Changelog do frontend em `docs/frontend_changes_assiduidade.md`, secções 7 e 8.
+**Fora do nosso âmbito** (outro programador): regularização de contas sem
+`RH_T_DEF_REMUNERACOES` (TODO em `RegularizacaoService:137`), baixa médica sem
+`RH_T_ABONOS_BENEFICIOS_DET`, ausência da baixa a apontar à tabela errada, continuidade de
+licença.
 
 ## Decisões tomadas — não re-litigar
 
-- **Anexos do bloco "Justificar Faltas Selecionadas" pertencem ao PEDIDO**
-  (`REFERENCIA_NAME='RH_T_PEDIDO'`), **divergindo da spec** (que diz `'RH_T_FALTA'`): justificar
-  cria sempre um pedido e o ecrã só tem um sítio de anexar. Decidido pelo utilizador. Não houve
-  migração — `RH_T_DOCUMENTO` não tinha anexos de falta.
-- **Não existe anexo por dia.** `FaltaItemDTO.documento` saiu do contrato, request e response.
-- **`motivo` e `comJustificativo` são do cabeçalho**, aplicados a todas as faltas seleccionadas.
-  Nos itens ficam só de resposta.
-- **`despachoRh` saiu dos dois DTOs.** O campo não existe em nenhum dos dois ecrãs e a coluna
-  `RH_T_FALTA.DESPACHO_RH` é `VARCHAR2(3)`, onde os valores do domínio (`JUSTIFICADA`/
-  `INJUSTIFICADA`) não cabem. Escalado, não corrigido.
-- **`parecer` fica texto livre.** O domínio `PARECER_DECISAO` está por povoar em dev (único
-  registo: `VALOR='TETS'`); parametrizar é do lado do cliente, não nosso.
-- **DTOs separados**: `ResumoFaltaMesDTO` (mês) vs `JustificarFaltaDTO` (pedido). Um mês não é
-  um pedido e não tem cabeçalho de formulário.
-- **Editar/Eliminar são endpoints próprios por `pedidoUuid`**, não flags no POST: as guardas de
-  negócio são diferentes e um `pedidoId` esquecido no corpo criaria uma justificação duplicada.
-- **Editar/Eliminar agem no pedido inteiro** (bloco), não em dias soltos.
-- `tipoJustificacao` é obrigatório quando `justificar="SIM"` no Marcar Falta: sem ele o
-  `PARAM_SIT_ID` ficava nulo e a regra dos 3 dias nunca disparava.
+- **Editar e Eliminar são endpoints próprios por `pedidoUuid`**, agem no pedido inteiro.
+- **Eliminar = soft-delete**: `RH_T_FALTA.ESTADO='E'`. A spec di-lo explicitamente (`:665`).
+- **Eliminar desfaz também os efeitos financeiros** e repõe saldo de férias/dispensa —
+  decidido pelo utilizador. Sem isso o colaborador fica descontado por uma falta eliminada.
+- **Editar e Eliminar bloqueiam (400) se já houver processamento associado** — decidido pelo
+  utilizador; não vem da spec, vem do padrão do dossiê (`CarreiraWriteService:66`).
+- **Desenho acordado**: escrever um `FaltaDescontoService.reverter(falta)` simétrico do
+  `aplicar()`, partilhado pelos dois. O editar **não** é um update de campos: reverte os
+  efeitos, aplica as alterações e reaplica. Ver *Open questions* antes de codificar.
+- **C2 fechado sem alteração**: a spec diz `DEF_PAGAMENTOS`/`DEF_PAG_ID` na validação da
+  justificação (`:857`), mas `RH_T_FALTA` **não tem** coluna `DEF_PAG_ID` — só `DEF_REM_ID`,
+  com `FK_RH_FALTA_REM → RH_T_DEF_REMUNERACOES`. É erro do analista, o código está certo.
+- **C3 resolvido**: `DESPACHO_RH` é `VARCHAR2(3)` **de propósito** — guarda SIM/NAO, como
+  `DECISAO_RH` da dispensa e das férias. Não há nada a escalar ao DBA (contradiz o handoff
+  anterior, que dizia que a coluna era pequena de mais).
+- **Anexos da justificação pertencem ao PEDIDO** (`REFERENCIA_NAME='RH_T_PEDIDO'`), divergindo
+  da spec. **Não existe anexo por dia.** `motivo`/`comJustificativo` são do cabeçalho.
+- **Ciclo CORRIGIR (validar/rejeitar/**corrigir**) em standby** — verificado que não existe em
+  assiduidade; decisão do utilizador a 10/09 para não o fazer agora.
 
 ## Constraints
 
 - PR contra `develop`, nunca `main`. Conventional commits.
-- **Pedir autorização e mostrar o payload antes de cada escrita** (POST/PUT/PATCH/DELETE).
-  GET são livres.
-- **Mostrar sempre o corpo cru da resposta no chat** (HTTP status + JSON indentado), não
-  resumir em tabela — o utilizador insistiu nisto mais do que uma vez.
+- **Mostrar SEMPRE o payload completo antes de o executar** — mesmo com autorização já dada e
+  mesmo num retry corrigido. O utilizador insistiu nisto.
+- **Pedir autorização antes de cada escrita** (POST/PUT/PATCH/DELETE e SQL de escrita). GET livres.
+- **Mostrar o corpo cru da resposta** (HTTP status + JSON indentado), não resumir em tabela.
+- **Filtros de leitura em SQL, não em memória** — correcção pedida pelo utilizador em `1565e06c`.
 - Arrays nos PUT: completos e com `id` — sem id cria, omitido fica `E`, `null` preserva.
-- `pedidoId`, `funcionarioId` nos paths são **UUID**; `itensFalta[].id` é o **id da síntese
-  diária** (`RH_ASSIDUIDADE_SINTESE_DIARIA.ID`), não o da falta.
+- `pedidoId`/`funcionarioId` nos paths são **UUID**; `itensFalta[].id` é o id da **síntese
+  diária**, não o da falta.
 
 ## Blockers & risks
 
-- Nenhum bloqueio. App a correr na **8087** com o código actual.
-- `RH_PROCESSAMENTO_SALARIAL_DB` tem o *package body* inválido (ORA-04063) — o cálculo do valor
-  cai no **fallback Java** e funciona; não confundir com bug nosso.
-- **Efeitos colaterais são o risco central do Eliminar**: uma justificação validada cria
-  `RH_T_DEF_REMUNERACOES` + `RH_T_TIPREL_REM_PAG` + `RH_T_DISPENSA` (ou abate férias). Um
-  `ESTADO='E'` só na falta deixa o colaborador descontado por uma falta eliminada.
-- Uma falta com tipo que desconta salário **e** `deduzirFaltaEm` preenchido aplica **os dois**
-  efeitos (corte no vencimento *e* dispensa). Parece dupla penalização — por confirmar com o
-  negócio.
-- Menores, por corrigir: `FaltaItemDTO.valorAusencia` é `Integer` e trunca cêntimos (6344 vs
-  6344,56); a leitura devolve documentos em estado `E`; `colaboradorId`/`nomeColaborador`
-  repetem-se dentro de cada grupo do GET do mês.
+- Nenhum bloqueio técnico. Falta a resposta às três *Open questions* antes de codificar o A1.
+- **`RH_T_TIPREL_REM_PAG` não tem coluna ESTADO** — no reverter só resta apagar a linha.
+- **O saldo de dispensa não filtra estado**: `DispensaHorasService:45` soma
+  `findAllByPedidoId_FunId_UuidAndDataInicioBetween` sem olhar ao estado, logo uma dispensa
+  posta a `E` **continua a consumir as horas do mês**. Sem corrigir isto o eliminar não repõe
+  o saldo. (O de férias já filtra `estado='A'` — `FeriasGozadasEntityRepository:28`.)
+- **Dupla penalização por confirmar com o negócio**: o desconto no salário depende só do tipo
+  de falta e é **independente** do `deduzirFaltaEm`, logo uma falta pode gerar corte no
+  vencimento *e* abate de férias em simultâneo (`FaltaDescontoService:79-93`).
+- `RH_PROCESSAMENTO_SALARIAL_DB` tem o package body inválido (ORA-04063): `CALCULO_FALTA_DIARIO`
+  cai no fallback Java e funciona. Não confundir com bug nosso.
+- `CALCULO_FALTA_DIARIO` não existe na BD; `PARECER_DECISAO` está por povoar em dev (só `TETS`).
 
 ## Relevant files
 
-- `src/main/java/cv/inps/rh/assiduidade/application/services/JustificarFaltaWriteService.java` —
-  fim do ficheiro: os dois **stubs com TODO** (`editarPedidoJustificacao`,
-  `eliminarPedidoJustificacao`); `justificarFalta` ~L75; `validarFaltaJustificada` ~L260
-- `src/main/java/cv/inps/rh/assiduidade/application/services/JustificarFaltaReadService.java` —
-  `montarGrupo` é partilhado pelos dois GETs, por isso não podem divergir
-- `src/main/java/cv/inps/rh/assiduidade/application/services/FaltaDescontoService.java:113` —
-  `requerValidacao`: **>3 dias E tipo desconta salário**, cumulativo; `aplicar` (L79-95) é quem
-  cria os efeitos financeiros
-- `src/main/java/cv/inps/rh/assiduidade/application/services/FaltaServiceWrite.java` —
-  Marcar Falta; `deveJustificar` (L80) decide se cria pedido+falta ou só síntese
-- `docs/Especificação Tecnica Funcional - GESTÃO ASSIDUIDADE_09_09_2026.md:655` — acções
-  Editar/Eliminar (a única alteração de substância face à versão 07/09)
+- `src/main/java/cv/inps/rh/assiduidade/application/services/JustificarFaltaWriteService.java:454`
+  e `:474` — os dois stubs com TODO (`editarPedidoJustificacao`, `eliminarPedidoJustificacao`);
+  `justificarFalta` ~L76, `validarFaltaJustificada` ~L263
+- `src/main/java/cv/inps/rh/assiduidade/application/services/FaltaDescontoService.java:79` —
+  `aplicar()`: os três ramos a reverter. `:121` salário, `:173` férias, `:198` dispensa
+- `src/main/java/cv/inps/rh/assiduidade/application/services/DispensaHorasService.java:45` — o
+  saldo que ignora o estado
+- `src/main/java/cv/inps/rh/funcionario/application/service/carreira/CarreiraWriteService.java:66` —
+  padrão do guard "já processado" a replicar
+- `src/main/java/cv/inps/rh/shared/infrastructure/persistence/repository/ProcessamentoFuncionarioRepository.java:45` —
+  `existsByTiprel_IdAndDataReferenciaDeBetween`, candidato ao guard por mês
+- `docs/Especificação Tecnica Funcional - GESTÃO ASSIDUIDADE_09_09_2026.md:655-668` — Editar e
+  Eliminar (o documento diz pouco: o Editar tem a coluna de gravação vazia e a descrição do
+  Eliminar é copy-paste da do Editar)
 - `.igrpstudio/assiduidade/controllers/AssiduidadeController.json` — 39 actions
 
 ## How to verify / resume
 
-Ambiente (duas armadilhas que custam tempo):
-
-- **JDK 23 obrigatório** — `JAVA_HOME` do sistema aponta para outra versão.
-- **Porta 8087**, não a 8089 do CLAUDE.md.
-- Se o arranque falhar com `ClassFormatError` ou `NoClassDefFoundError`, é lixo de compilação
-  incremental: `mvn clean compile` resolve.
+Duas armadilhas de ambiente que custam tempo: **JDK 23 obrigatório** (o `JAVA_HOME` do sistema
+aponta para outra versão) e **porta 8087**, não a 8089 do CLAUDE.md. Se o arranque falhar com
+`ClassFormatError`, é lixo incremental: `mvn clean compile` resolve.
 
 ```powershell
 $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-23.0.2.7-hotspot"
 $env:PATH="$env:JAVA_HOME\bin;$env:PATH"
 cd C:\Users\ivanick.santos\Nick-personal\personal-workspace\projects\RH_INPS_SERVICE
-mvn -q clean compile -DskipTests          # EXIT=0
+mvn -q clean compile -DskipTests      # EXIT=0
 Start-Process mvn.cmd -ArgumentList "spring-boot:run" -RedirectStandardOutput "$env:TEMP\rh-app.log" -WindowStyle Hidden
-# esperar "Started RhInpsServiceApplication" no log (~2 min)
-git log --oneline -6                       # b87e121c no topo
+# esperar "Started RhInpsServiceApplication" no log (~25s)
+git log --oneline -4                  # 1565e06c no topo
 ```
+
+Nota: `nohup ... &` pelo Bash **não** funciona (o processo morre com a shell); usar
+`Start-Process`. A app pode estar já de pé — confirmar com `netstat -ano | grep ":8087"`.
 
 HTTP (o `WebClient` evita o mojibake que o `Invoke-WebRequest` produz nos acentos):
 
@@ -124,8 +134,8 @@ $wc=New-Object System.Net.WebClient; $wc.Encoding=[System.Text.Encoding]::UTF8
   ConvertFrom-Json | ConvertTo-Json -Depth 12
 ```
 
-SQL directo (usar `DbExec` para escrita — `DbUpdate` dá ORA-17273; sem `FETCH FIRST`, o
-`DbQuery` rebenta com ORA-00933: usar `WHERE ROWNUM<=n` numa subquery):
+SQL directo — **`DbExec` para escrita** (`DbUpdate` dá ORA-17273) e sem `FETCH FIRST`
+(`WHERE ROWNUM<=n` numa subquery, senão ORA-00933):
 
 ```powershell
 cd tools\db
@@ -134,69 +144,89 @@ $cp=".;C:/Users/ivanick.santos/.m2/repository/com/oracle/database/jdbc/ojdbc11/2
 ```
 
 Nomes reais (vários palpites falharam): `RH_T_FALTA`, `RH_T_PEDIDO`, `RH_T_DOCUMENTO`,
-`RH_ASSIDUIDADE_SINTESE_DIARIA`, `RH_T_TIPOS_DOCUMENTOS` (não `RH_T_TIPO_DOCUMENTO`),
-`RH_T_DOMAINS` (não `RH_T_DOMINIO`), `RH_V_RESUMO_ASSIDUIDADE`, `RH_V_FALTA_MENSAL`.
-`RH_T_DISPENSA` **não tem** coluna `FUN_ID` (liga-se pelo `PEDIDO_ID`).
+`RH_ASSIDUIDADE_SINTESE_DIARIA` (a coluna é **`FUNCIONARIO_ID`**, não `FUN_ID`),
+`RH_T_TIPOS_DOCUMENTOS`, `RH_T_DOMAINS` (colunas `DOMINIO`/`VALOR`/`REFERENCIA`),
+`RH_V_RESUMO_ASSIDUIDADE`, `RH_V_FALTA_MENSAL`. `RH_T_DISPENSA` **não tem** `FUN_ID` (liga-se
+pelo `PEDIDO_ID`).
 
 ## Test / validation plan
 
-**Colaborador de teste: Nuno Teste Sync, id 958937, uuid `01a085fa-fc04-7f08-a5d9-75b4b8a886b7`,
-tiprel 173442.** Responsável de teste: `RH_T_RESPONSAVEL.ID=23` (João Carlos, fun 958934,
-uuid `01a07627-dcdd-79a8-aebb-e4634ae8f01d`) — inserido à mão, a tabela estava vazia.
-Tipos de falta: **17** Motivo Pessoal e **18** Falta Injustificada, ambos com
-`FLG_FALTA_DECONTO_SAL=1`. Tipo de documento: **26**.
+**Fixtures reais (confirmados a 10/09):** colaborador **Nuno Teste Sync, id 958937, uuid
+`01a085fa-fc04-7f08-a5d9-75b4b8a886b7`, tiprel 173442**. Responsável `RH_T_RESPONSAVEL.ID=23`.
+Tipos de falta: **17** (Motivo Pessoal) e **18** (Falta Injustificada), ambos com
+`FLG_FALTA_DECONTO_SAL=1`. Tipo de documento **26** (`REFERENCIA='JUSTIFICACAO_FALTA'`).
+`RH_T_ANO`: id **2** = 2026. **`RH_T_FERIAS` está vazia** — ninguém tem direito de férias em
+dev; para testar dedução em férias é preciso inserir o direito primeiro:
 
-Estado deixado em setembro/2026 (confirmar antes de começar):
+```sql
+INSERT INTO RH_T_FERIAS (ID, ANO_ID, FUN_ID, NUM_DIA, ESTADO, DATA_REGISTO, USER_REGISTO_ID, USER_REGISTO_NAME, UUID)
+VALUES ((SELECT NVL(MAX(ID),0)+1 FROM RH_T_FERIAS), 2, 958937, 22, 'A', SYSDATE, 1, 'teste', 'teste-direito-2026');
+```
 
-| Síntese | Data | Pedido | Estado |
-|---|---|---|---|
-| 817, 818 | 15, 16/09 | 193 `01a0875d-9a21-7593-ba33-bd9d215af381` | A |
-| 819 | 17/09 | 195 `01a087f1-471c-79df-833c-bfd985acc772` | A |
-| 821-824 | 21-24/09 | 196 `01a087f7-e167-72fb-8127-d20392ee158f` | A (validado) |
-| 820, 825 | 18, 25/09 | — | por justificar |
+Estado limpo deixado em Setembro/2026 (confirmar antes de começar): pedidos **193**, **195**,
+**196** todos `A`/`FINALIZADO`; validação **1110** (pedido 196) `A`; nada depois de Setembro.
 
-**Regressões a repetir se se mexer em `JustificarFalta*Service`:**
+**Testes a fazer quando o A1 estiver implementado:**
 
-1. **GET do mês** → `itensFalta` só com 820 e 825; `pedidos[]` com 3 grupos ordenados por data,
-   cada um com cabeçalho completo e `estado`/`etapa` do pedido.
-2. **GET por pedido** (196) → resposta **idêntica** ao `pedidos[2]` do GET do mês (é o mesmo
-   `montarGrupo`).
-3. **Criar sem validação**: justificar ≤3 dias com tipo 17/18 → nasce `A`, `ETAPA=FINALIZADO`,
-   efeitos aplicados de imediato.
-4. **Criar com validação**: justificar **≥4 dias** com tipo 18 → nasce `P`,
-   `ETAPA=DESPACHO_RH`, `RH_T_VALIDACAO` `P`, e **sem** `DEF_REM_ID`/dispensas até validar.
-5. **Validar** (`PUT .../validar/{uuid}`, `validar:"SIM"`) → faltas `P`→`A`, pedido
-   `A`/`FINALIZADO`, validação `A`, e só então nascem `RH_T_DEF_REMUNERACOES` (6344,56/dia) +
-   `RH_T_TIPREL_REM_PAG` + `RH_T_DISPENSA`. Anexo do maker em `P` passa a `A`; anexo enviado
-   sem `id` é criado.
-6. **Guarda de férias**: `deduzirFaltaEm:"FERIAS"` no 958937 → **400** *"tem 0 dia(s) por gozar"*,
-   rollback total (o colaborador não tem saldo).
-7. **Marcar sem justificar** (`justificar:"NAO"`) → só sínteses, zero linhas em `RH_T_PEDIDO` e
-   `RH_T_FALTA`; `tipoJustificacao` não é exigido.
+1. **Eliminar sem efeitos** — justificar ≤3 dias com tipo 17 (nasce `A`, sem validação) →
+   `DELETE .../falta/justificar/pedido/{uuid}` → esperado: todas as `RH_T_FALTA` do pedido a
+   `'E'`, pedido a `'E'`/`'I'`, anexos a `'E'`. Evidência: SQL das quatro tabelas.
+2. **Eliminar com desconto salarial** — justificar ≥4 dias com tipo 18, validar `SIM` (nascem
+   `DEF_REMUNERACOES` a 6344,56/dia + `TIPREL_REM_PAG`), depois eliminar → esperado: faltas
+   `'E'`, `DEF_REMUNERACOES` revertido, `TIPREL_REM_PAG` sem linhas órfãs, validação fechada.
+   Evidência: contagem das três tabelas antes e depois.
+3. **Eliminar com dedução em férias** — inserir direito (SQL acima), justificar com
+   `deduzirFaltaEm:"FERIAS"`, validar → nasce `FERIAS_GOZADAS`; eliminar → esperado: saldo
+   volta ao valor inicial. Evidência: `GET .../feria/saldo/{funUuid}` antes e depois.
+4. **Eliminar com dedução em dispensa** — idem com `"DISPENSA"` → nasce `RH_T_DISPENSA`;
+   eliminar → esperado: horas do mês repostas. **Este é o que falha hoje** se o finder de
+   `DispensaHorasService:45` não for corrigido. Evidência:
+   `GET .../dispensa/saldo/{funUuid}` antes e depois.
+5. **Guard de processado** — criar processamento do tiprel no mês da falta (ou preencher
+   `DEF_REMUNERACOES.DATA_ULTIMO_PROC`, conforme o critério escolhido) → editar e eliminar →
+   esperado: **400** nos dois, com mensagem explícita e **rollback total**.
+6. **Editar só cabeçalho** (motivo/observação/anexos) → esperado: grava directo, efeitos
+   financeiros intactos, `DEF_REM_ID` inalterado.
+7. **Editar trocando `deduzirFaltaEm`** FERIAS → DISPENSA → esperado: `FERIAS_GOZADAS`
+   revertida e saldo reposto, `RH_T_DISPENSA` nova criada, **sem desconto duplicado**.
+8. **Editar trocando o tipo** de um que desconta salário para um que não desconta → esperado:
+   `DEF_REMUNERACOES` + `TIPREL_REM_PAG` revertidos, `FLG_DESCONTO_SAL` a 0.
+9. **Editar retirando um dia** do pedido → esperado: a falta desse dia fica `'E'` com os seus
+   efeitos revertidos; as restantes mantêm-se; a síntese volta a aparecer no painel "por
+   justificar" (`GET .../falta/justificar/{funUuid}?ano&mes`).
 
-**Ainda por testar:** rejeição (`validar:"NAO"` → tudo `I`) e o ramo de **remoção** do sync de
-anexos (omitir um documento do array → fica `E`).
+**Regressões a repetir se se mexer em `JustificarFalta*Service`:** GET do mês (soltos +
+`pedidos[]` ordenados, cada grupo com cabeçalho, `estado`/`etapa`); GET por pedido idêntico ao
+grupo correspondente (é o mesmo `montarGrupo`); criar ≤3 dias → `A`/`FINALIZADO` com efeitos
+imediatos; criar ≥4 dias tipo 18 → `P`/`DESPACHO_RH` sem `DEF_REM_ID`; validar → `A` + efeitos;
+`deduzirFaltaEm:"FERIAS"` sem saldo → **400** com rollback total.
 
-**Limpeza** (a ordem importa, por causa das FKs — `FK_DISPENSA_PEDIDO` bloqueia o pedido):
-`RH_T_TIPREL_REM_PAG` → `RH_T_DOCUMENTO` → `RH_T_FALTA` → `RH_T_DEF_REMUNERACOES` →
-`RH_T_DISPENSA` → `RH_T_PEDIDO` → `RH_ASSIDUIDADE_SINTESE_DIARIA`.
+**Limpeza** (a ordem importa, `FK_DISPENSA_PEDIDO` bloqueia o pedido):
+`RH_T_TIPREL_REM_PAG` (por `REM_ID`) → `RH_T_DOCUMENTO` → `RH_T_FALTA` → `RH_T_HORA_EXTRA` →
+`RH_T_DEF_REMUNERACOES` → `RH_T_AUSENCIA` → `RH_T_FERIAS_GOZADAS` → `RH_T_DISPENSA` →
+`RH_T_VALIDACAO` → `RH_T_PEDIDO` → `RH_ASSIDUIDADE_SINTESE_DIARIA` → `RH_T_FERIAS`.
 
 ## Open questions
 
-- **`itensFalta` no PUT de editar**: o array é a lista final de dias do pedido (tirar um dia
-  remove-o, semântica dos arrays da casa) ou os dias são fixos e só o cabeçalho se edita?
-  Recomendei a primeira; **por decidir pelo utilizador**.
-- **Editar volta a validação?** Proposto: muda tipo/dedução/conjunto de dias → volta a `P` e
+- **Critério de "já processado"** que bloqueia editar/eliminar:
+  `existsByTiprel_IdAndDataReferenciaDeBetween` (o mês da falta ter processamento — mais
+  conservador) ou `DEF_REMUNERACOES.DATA_ULTIMO_PROC` preenchido (mais preciso, mas só depois
+  de a linha ir à folha)? **Decide o utilizador.**
+- **`I` ou `E`** nos registos revertidos (`DEF_REMUNERACOES`, `FERIAS_GOZADAS`, `DISPENSA`)?
+  Proposta: `E` nos dois fluxos. `TIPREL_REM_PAG` não tem estado — só resta apagar a linha.
+- **O finder do saldo de dispensa entra neste lote** ou fica como correcção à parte? Sem ele o
+  eliminar não repõe as horas.
+- **Editar volta a validação?** Proposta: muda tipo/dedução/conjunto de dias → volta a `P` e
   reabre a `RH_T_VALIDACAO`; muda só motivo/observação/anexos → grava direto. A spec deixa a
   célula de gravação vazia.
-- **Editar/Eliminar num pedido já processado em folha** — bloquear com 400, como faz a carreira?
-- **O que o Eliminar desfaz** além de `RH_T_FALTA.ESTADO='E'` (ver *Blockers*).
-- `DESPACHO_RH VARCHAR2(3)` — alargar a coluna ou retirar o campo? Decisão do DBA/analista.
-- Estado do mês na lista Gestão Falta dá `INJUSTIFICADA` mesmo com dias justificados; o
-  utilizador ponderava um estado novo (parcial) ou as colunas Total Justificada/Injustificada.
+- **Dupla penalização** (corte no vencimento + dedução em férias/dispensa na mesma falta) — por
+  confirmar com o negócio.
+- **C5b**: mudar `ETAPA='VALIDACAO'` da hora extra para `DESPACHO_RH` é breaking para o
+  frontend (já documentado em `frontend_changes_assiduidade.md:75`). Decide o utilizador.
 
 ## Next step
 
-Implementar `editarPedidoJustificacao` e `eliminarPedidoJustificacao` em
-`JustificarFaltaWriteService` (hoje `throw ... NOT_IMPLEMENTED` → 501), depois de o utilizador
-responder às duas primeiras *Open questions*.
+Responder às três primeiras *Open questions* e depois implementar
+`FaltaDescontoService.reverter(falta)` — simétrico do `aplicar()` — seguido de
+`eliminarPedidoJustificacao` e `editarPedidoJustificacao` em `JustificarFaltaWriteService`
+(hoje `throw ... NOT_IMPLEMENTED` → 501).
