@@ -40,6 +40,13 @@ public interface FaltaEntityRepository extends
    * exacto — olha para a linha concreta, não para o mês — e é o que impede editar ou eliminar
    * uma falta cujo dinheiro já saiu.
    *
+   * <p>Só remunerações activas contam: uma remuneração anulada deixa de ser dinheiro pago e não
+   * deve bloquear o pedido. Faltas já eliminadas ({@code E}) também não contam.
+   *
+   * <p>Nota: uma falta coberta a 100% por férias ou dispensa não tem {@code DEF_REM_ID} e não é
+   * apanhada por esta query — de propósito. Aí a folha nunca foi tocada, só se consumiu saldo,
+   * e devolver esse saldo não mexe em histórico de pagamentos.
+   *
    * <p>Nativa: {@code RH_T_REMUNERACOES} está mapeada como {@code RhTRemuneracoe} mas sem o
    * {@code REM_1_ID}, e não tem repositório.
    */
@@ -50,6 +57,7 @@ public interface FaltaEntityRepository extends
         JOIN RH_T_REMUNERACOES c ON c.REM_1_ID = b.ID
        WHERE a.PEDIDO_ID = :pedidoId
          AND a.ESTADO <> 'E'
+         AND c.ESTADO = 'A'
       """, nativeQuery = true)
   long countFaltasProcessadasEmFolha(@Param("pedidoId") Long pedidoId);
 

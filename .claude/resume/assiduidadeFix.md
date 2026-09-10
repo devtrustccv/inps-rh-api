@@ -1,4 +1,4 @@
-> Updated: 2026-09-10 17:25 -01:00
+> Updated: 2026-09-10 17:45 -01:00
 
 ## Goal
 
@@ -99,7 +99,9 @@ qualquer um gravar. Não existe **um único lock em todo o projecto** (`@Lock`, 
   SELECT COUNT(a.ID) FROM RH_T_FALTA a
     JOIN RH_T_DEF_REMUNERACOES b ON b.ID = a.DEF_REM_ID
     JOIN RH_T_REMUNERACOES     c ON c.REM_1_ID = b.ID
-   WHERE a.PEDIDO_ID = :pedidoId AND a.ESTADO <> 'E';
+   WHERE a.PEDIDO_ID = :pedidoId
+     AND a.ESTADO <> 'E'
+     AND c.ESTADO = 'A';
   ```
 
   **Basta uma** falta processada para bloquear o pedido inteiro (400). Olha para a linha
@@ -107,6 +109,13 @@ qualquer um gravar. Não existe **um único lock em todo o projecto** (`@Lock`, 
   Substituiu um primeiro guard por `RH_T_PROC_FUNCIONARIOS`, que era mais conservador.
   Nativa porque `RH_T_REMUNERACOES` está mapeada (`RhTRemuneracoe`) **sem** o `REM_1_ID` e sem
   repositório — a coluna existe e está preenchida em todas as linhas.
+
+  A query original tinha `a.def_rem_id = a.id`, que junta a falta a si própria e deixa o `b`
+  solto: dava quase sempre 0 e o guard nunca bloquearia. O join certo é `a.def_rem_id = b.id`.
+
+  **Uma falta coberta a 100% por férias ou dispensa não tem `DEF_REM_ID` e escapa a esta query —
+  de propósito.** Aí a folha nunca foi tocada, só se consumiu saldo, e devolver saldo não mexe
+  em histórico de pagamentos. O guard cobre exactamente os casos em que houve dinheiro.
 - **Saldos só contam aprovados** (`A`). Ver D3 para a consequência.
 
 **Da auditoria da spec:**
@@ -140,12 +149,9 @@ qualquer um gravar. Não existe **um único lock em todo o projecto** (`@Lock`, 
   `FLG_DESCONTO_FALTA='DISPENSA'`, cada uma com `DEF_REM_ID` *e* linha em `RH_T_DISPENSA`. Pela
   regra fixada estão erradas. Encontrá-las:
   `SELECT * FROM RH_T_FALTA WHERE FLG_DESCONTO_FALTA IS NOT NULL AND DEF_REM_ID IS NOT NULL;`
-- **O guard só apanha faltas com desconto salarial.** Uma falta coberta a 100% por férias ou
-  dispensa não tem `DEF_REM_ID`, logo nunca casa com a query e continua editável e eliminável
-  mesmo depois de a folha correr. Se isso for problema, o guard precisa de um segundo braço
-  (pelas `FERIAS_GOZADAS`/`DISPENSA`, ou pelo mês). **Por confirmar com o utilizador.**
-- O guard também não olha ao **estado** da `RH_T_REMUNERACOES`: uma remuneração anulada bloqueia
-  na mesma.
+- **⚠️ O filtro `c.ESTADO = 'A'` do guard está commitado mas NÃO foi testado live** — compila e
+  mais nada. É o primeiro item do *Next step*. Em dev só existem remunerações em `A` (5 linhas),
+  logo o cenário de anulada tem de ser montado à mão.
 - **`RH_T_ANO` só tem 2026**: qualquer falta com dedução em férias noutro ano rebenta com
   `404 "Ano de referência 2027 não encontrado"` (`FaltaDescontoService.resolverAno`). É dados,
   não código, mas morde no virar do ano.
@@ -279,6 +285,26 @@ SELECT a.ID falta, TO_CHAR(a.DATA_INICIO,'YYYY-MM-DD') dia, a.DEF_REM_ID, c.ID r
 
 ### Por provar
 
+- **⚠️ A1.7 — o filtro `c.ESTADO = 'A'` do guard** (commitado em `9c1e...`, por testar). Montagem:
+
+  1. Criar um pedido de falta com desconto salarial (tipo 18, mês limpo, ≤3 dias no mês para
+     ficar `A` de imediato) e apanhar o `DEF_REM_ID` de uma das faltas;
+  2. Ligar-lhe uma remuneração **activa** e confirmar que editar e eliminar dão **400**:
+
+     ```sql
+     INSERT INTO RH_T_REMUNERACOES (ID, VALOR, DATA_REF, ESTADO, PRSAL_ID, REM_1_ID)
+     VALUES ((SELECT MAX(ID)+1 FROM RH_T_REMUNERACOES), 6344, DATE '2026-11-30', 'A',
+             (SELECT PRSAL_ID FROM RH_T_REMUNERACOES WHERE ROWNUM=1), :defRemId);
+     ```
+  3. **Anular** essa remuneração e confirmar que os dois voltam a passar (`200`):
+
+     ```sql
+     UPDATE RH_T_REMUNERACOES SET ESTADO='I' WHERE REM_1_ID = :defRemId;
+     ```
+  4. Limpar: `DELETE FROM RH_T_REMUNERACOES WHERE REM_1_ID = :defRemId;`
+
+  Sem o passo 3 a passar, o filtro não está provado — em dev só existem remunerações em `A`.
+
 - **Editar num pedido ainda `P`** (não validado): o `reverter()` não tem nada para reverter e o
   `aplicar()` não corre. Confirmar que grava os campos e não cria efeitos.
 - **Editar acrescentando um dia** que não estava no pedido: hoje o array só retira, não
@@ -292,8 +318,6 @@ SELECT a.ID falta, TO_CHAR(a.DATA_INICIO,'YYYY-MM-DD') dia, a.DEF_REM_ID, c.ID r
 
 ## Open questions
 
-- **O guard deve cobrir faltas sem desconto salarial?** Hoje uma falta 100% coberta por férias
-  ou dispensa não tem `DEF_REM_ID` e escapa ao guard, mesmo com a folha já corrida.
 - **As 18 faltas com desconto a dobrar**: corrigir os dados (reverter os `DEF_REMUNERACOES`
   indevidos) ou deixar como histórico? Os cenários já estão todos provados, que era a condição.
 - **D3**: quando arranca, e reserva-se mesmo (criar efeitos em `P`) ou fica só o lock?
@@ -305,14 +329,15 @@ SELECT a.ID falta, TO_CHAR(a.DATA_INICIO,'YYYY-MM-DD') dia, a.DEF_REM_ID, c.ID r
 
 ## Next step
 
-Actualizar `docs/frontend_changes_assiduidade.md` — é a única coisa que falta do trabalho já
-feito, e o frontend precisa dela:
-
-- `valorAusencia` passou de inteiro a **decimal**;
-- `estado` pode agora vir **`P`** onde antes vinha `A` (contagem mensal dos 3 dias);
-- o **400 de saldo insuficiente desapareceu** — o pedido passa sempre, com a parte não coberta
-  a ir ao vencimento;
-- dois **endpoints novos**: `PUT` e `DELETE .../assiduidade/falta/justificar/pedido/{pedidoUuid}`,
-  com o 400 do guard de processado.
-
-Depois disso, decidir entre o D3 e a correcção dos dados das 18 faltas.
+1. **Testar o filtro `c.ESTADO = 'A'` do guard** — cenário A1.7 acima. É a única coisa
+   commitada nesta sessão sem prova em BD.
+2. **Actualizar `docs/frontend_changes_assiduidade.md`** — o frontend ainda não sabe de nada do
+   que mudou hoje:
+   - `valorAusencia` passou de inteiro a **decimal**;
+   - `estado` pode agora vir **`P`** onde antes vinha `A` (contagem mensal dos 3 dias);
+   - o **400 de saldo insuficiente desapareceu** — o pedido passa sempre, com a parte não
+     coberta a ir ao vencimento;
+   - dois **endpoints novos**: `PUT` e `DELETE .../assiduidade/falta/justificar/pedido/{pedidoUuid}`,
+     com o 400 do guard de processado.
+3. Depois disso, decidir entre o **D3** (reserva + concorrência) e a **correcção dos dados das
+   18 faltas** com desconto a dobrar.
