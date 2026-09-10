@@ -109,9 +109,15 @@ public class JustificarFaltaWriteService {
 
     var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), comJustificativo);
 
-    // Regra: só vai a validação se forem mais de 3 dias E o tipo de justificação
+    // Regra: só vai a validação se forem mais de 3 dias no MÊS E o tipo de justificação
     // descontar no salário. Caso contrário fica logo activo.
-    boolean requerValidacao = faltaDescontoService.requerValidacao(selecionados.size(), paramSituacao);
+    // A data vem da síntese e não do DTO: o item traz `data` como texto e pode nem vir
+    // preenchido — o que o formulário garante é o id da síntese.
+    var mesReferencia = entityManager
+        .getReference(AssiduidadeSinteseDiarioEntity.class, selecionados.getFirst().getId())
+        .getData();
+    boolean requerValidacao = faltaDescontoService.requerValidacaoNoMes(
+        funcionario.getUuid(), mesReferencia, selecionados.size(), paramSituacao);
     var estadoInicial = requerValidacao ? Estado.P : Estado.A;
 
     var deducao = StringUtils.hasText(dto.getDeduzirFaltaEm())

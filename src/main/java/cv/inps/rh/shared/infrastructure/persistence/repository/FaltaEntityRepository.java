@@ -31,6 +31,32 @@ public interface FaltaEntityRepository extends
 
   List<FaltaEntity> findAllByPedidoIdOrderByDataInicioAsc(PedidoEntity pedidoId);
 
+  /**
+   * Dias de falta VIVOS do colaborador no período — a contagem que decide se o pedido vai a
+   * despacho ("mais de 3 faltas no mês", spec 09/09 :493).
+   *
+   * <p>Conta por mês e não por pedido: com a contagem por pedido, registar 2 dias hoje e 2
+   * amanhã nunca chegava a validação, enquanto registar os mesmos 4 de uma vez chegava — o
+   * controlo dependia de o RH ter carregado no botão uma ou duas vezes.
+   *
+   * <p>Só faltas vivas ({@code A} pendente de nada, {@code P} à espera de despacho): uma falta
+   * rejeitada ({@code I}) ou eliminada ({@code E}) não é falta e não deve pesar no limite.
+   */
+  @Query("""
+          SELECT COUNT(f)
+          FROM FaltaEntity f
+          JOIN f.sinteseDiarioId s
+          JOIN s.funcionarioId func
+          WHERE func.uuid = :funcionarioUuid
+            AND s.data BETWEEN :dataInicio AND :dataFim
+            AND f.estado IN (cv.inps.rh.shared.application.constants.Estado.A,
+                             cv.inps.rh.shared.application.constants.Estado.P)
+      """)
+  long countFaltasVivasNoPeriodo(
+      @Param("funcionarioUuid") UUID funcionarioUuid,
+      @Param("dataInicio") LocalDate dataInicio,
+      @Param("dataFim") LocalDate dataFim);
+
   @Query("""
           SELECT f
           FROM FaltaEntity f
@@ -40,6 +66,7 @@ public interface FaltaEntityRepository extends
             AND s.data BETWEEN :dataInicio AND :dataFim
           ORDER BY f.dataInicio
       """)
+
   List<FaltaEntity> findAllByFuncionarioAndPeriodo(
       @Param("funcionarioUuid") UUID funcionarioUuid,
       @Param("dataInicio") LocalDate dataInicio,

@@ -6,6 +6,7 @@ import cv.inps.rh.shared.application.constants.TipoDescontoFalta;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.infrastructure.persistence.repository.FaltaEntityRepository;
 import cv.inps.rh.shared.util.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Aplica os descontos decorrentes da validação de uma falta.
@@ -68,6 +70,8 @@ public class FaltaDescontoService {
   private final DispensaEntityRepository dispensaRepository;
   private final AnoEntityRepository anoRepository;
   private final SaldoFeriaService saldoFeriaService;
+  private final DispensaHorasService dispensaHorasService;
+  private final FaltaEntityRepository faltaRepository;
 
   /**
    * Aplica todos os descontos aplicáveis a uma falta já validada.
@@ -82,16 +86,25 @@ public class FaltaDescontoService {
       return;
 
     var funcionario = pedido.getFunId();
-
-    if (descontaSalario(falta))
-      aplicarDescontoSalario(falta, funcionario, tipoRel);
-
     var deducao = TipoDescontoFalta.fromCode(falta.getFlgDescontoFalta()).orElse(null);
 
+    int minutosAusencia = TimeUtils.parseHorasFlexivel(
+        TimeUtils.intervalFormatToHHmm(falta.getHorasAusencia()));
+
+    // O saldo cobre o que consegue; o vencimento paga o resto. Não são alternativas — são duas
+    // fases da mesma cobrança (regra de negócio, 10/09): 4 dias de falta com 2 de saldo dão 2
+    // dias gozados e 2 dias descontados. Cobre-se pela ordem cronológica, por isso os primeiros
+    // dias esgotam o saldo e os seguintes vão ao vencimento.
+    int minutosPorCobrir = minutosAusencia;
+
     if (deducao == TipoDescontoFalta.FERIAS)
-      aplicarDescontoFerias(falta, pedido, funcionario);
+      minutosPorCobrir = aplicarDescontoFerias(falta, pedido, funcionario, minutosAusencia);
     else if (deducao == TipoDescontoFalta.DISPENSA)
-      aplicarDescontoDispensa(falta, pedido, tipoRel);
+      minutosPorCobrir = aplicarDescontoDispensa(falta, pedido, tipoRel, minutosAusencia);
+
+    // Desconta-se só o que o saldo não cobriu. Sem dedução, minutosPorCobrir é a ausência toda.
+    if (minutosPorCobrir > 0 && descontaSalario(falta))
+      aplicarDescontoSalario(falta, funcionario, tipoRel, minutosAusencia, minutosPorCobrir);
   }
 
   /** @return true se o tipo de justificação implica desconto no salário. */
@@ -116,14 +129,46 @@ public class FaltaDescontoService {
         && Objects.equals(paramSituacao.getFlgFaltaDecontoSal(), 1);
   }
 
+  /**
+   * Igual a {@link #requerValidacao}, mas contando as faltas do <b>mês</b> e não só as deste
+   * pedido: às que estão a ser registadas agora somam-se as que o colaborador já tem vivas
+   * nesse mês.
+   *
+   * <p>Com a contagem por pedido o controlo era contornável sem querer — registar 2 dias hoje e
+   * 2 amanhã nunca ia a despacho, registar os mesmos 4 de uma vez ia. Decidido a 10/09.
+   *
+   * <p>Sem retroactividade: só o pedido novo vai a despacho, os anteriores ficam como foram
+   * decididos.
+   *
+   * @param dataReferencia um dia do período a registar — define o mês a contar
+   */
+  public boolean requerValidacaoNoMes(
+      UUID funcionarioUuid, LocalDate dataReferencia, int diasAgora, ParamSituacaoEntity paramSituacao) {
+
+    var inicioMes = dataReferencia.withDayOfMonth(1);
+    var fimMes = dataReferencia.withDayOfMonth(dataReferencia.lengthOfMonth());
+
+    long jaExistentes = faltaRepository.countFaltasVivasNoPeriodo(funcionarioUuid, inicioMes, fimMes);
+
+    return requerValidacao((int) jaExistentes + diasAgora, paramSituacao);
+  }
+
   // ------------------------------------------------------------------
 
+  /**
+   * @param minutosAusencia   ausência total do dia
+   * @param minutosPorCobrir  a parte que o saldo não cobriu — é só sobre esta que se desconta
+   */
   private void aplicarDescontoSalario(
-      FaltaEntity falta, FuncionarioEntity funcionario, TiposRelacionamentoEntity tipoRel) {
+      FaltaEntity falta, FuncionarioEntity funcionario, TiposRelacionamentoEntity tipoRel,
+      int minutosAusencia, int minutosPorCobrir) {
 
     var tipoMovimento = resolverTipoMovimentoFalta(tipoRel);
 
-    var valor = falta.getValor() != null ? falta.getValor() : BigDecimal.ZERO;
+    // falta.valor é o valor do dia inteiro (valor à hora x horas de ausência). Quando o saldo
+    // cobriu parte das horas — só acontece na dispensa, que conta em horas —, desconta-se a
+    // proporção que sobrou.
+    var valor = valorPorCobrir(falta, minutosAusencia, minutosPorCobrir);
 
     var remuneracao = new DefinicaoRemuneracaoEntity();
     remuneracao.setTmId(tipoMovimento);
@@ -170,18 +215,27 @@ public class FaltaDescontoService {
     return movimentos.getFirst().getTmId();
   }
 
-  private void aplicarDescontoFerias(
-      FaltaEntity falta, PedidoEntity pedido, FuncionarioEntity funcionario) {
+  /**
+   * Férias contam-se em DIAS, por isso o dia é coberto por inteiro ou não é coberto de todo.
+   *
+   * <p>Já não rejeita por saldo insuficiente: antes um pedido de 4 dias com 2 de saldo dava 400
+   * e não gravava nada. Agora consome o que há e devolve o que ficou por cobrir, para o
+   * vencimento pagar o resto.
+   *
+   * @return minutos que o saldo não cobriu (0 se cobriu o dia, a ausência toda se não havia saldo)
+   */
+  private int aplicarDescontoFerias(
+      FaltaEntity falta, PedidoEntity pedido, FuncionarioEntity funcionario, int minutosAusencia) {
 
     var dataInicio = falta.getDataInicio().toLocalDate();
     var dataFim = falta.getDataFim().toLocalDate();
     int numDias = (int) (dataFim.toEpochDay() - dataInicio.toEpochDay()) + 1;
 
+    // Saldo relido a cada dia: as férias gozadas gravadas nos dias anteriores deste mesmo
+    // pedido já cá estão, e é isso que faz o saldo esgotar-se pela ordem cronológica.
     int saldo = saldoFeriaService.getSaldo(funcionario.getUuid());
-    if (numDias > saldo)
-      throw IgrpResponseStatusException.badRequest(
-          "Não é possível deduzir a falta nas férias: o colaborador tem " + saldo
-              + " dia(s) por gozar e seriam necessários " + numDias + ".");
+    if (saldo < numDias)
+      return minutosAusencia;
 
     var feriasGozadas = new FeriasGozadasEntity();
     feriasGozadas.setFunId(funcionario);
@@ -193,26 +247,58 @@ public class FaltaDescontoService {
     feriasGozadas.setEstado(Estado.A);
     feriasGozadas.setUuid(UuidCreator.getTimeOrderedEpoch());
     feriasGozadasRepository.save(feriasGozadas);
+    return 0;
   }
 
-  private void aplicarDescontoDispensa(
-      FaltaEntity falta, PedidoEntity pedido, TiposRelacionamentoEntity tipoRel) {
+  /**
+   * Dispensa conta-se em HORAS, não em dias, por isso a cobertura pode ser parcial: 8h de
+   * ausência com 3h de saldo consomem as 3h e deixam 5h para o vencimento. A alternativa —
+   * tudo-ou-nada — desperdiçaria as 3h e faria o colaborador perder o dia inteiro.
+   *
+   * @return minutos que o saldo não cobriu
+   */
+  private int aplicarDescontoDispensa(
+      FaltaEntity falta, PedidoEntity pedido, TiposRelacionamentoEntity tipoRel,
+      int minutosAusencia) {
 
-    var horasAusencia = TimeUtils.intervalFormatToHHmm(falta.getHorasAusencia());
+    var dia = falta.getDataInicio().toLocalDate();
+
+    // Relido a cada dia, tal como nas férias: as dispensas gravadas nos dias anteriores do
+    // mesmo pedido já contam para as horas usadas do mês.
+    var status = dispensaHorasService.getHorasStatus(
+        pedido.getFunId().getUuid(), dia);
+    int disponiveis = status.getHorasRestantesMinutos() != null
+        ? status.getHorasRestantesMinutos() : 0;
+
+    int cobertos = Math.min(disponiveis, minutosAusencia);
+    if (cobertos <= 0)
+      return minutosAusencia;
 
     var dispensa = new DispensaEntity();
     dispensa.setPedidoId(pedido);
     dispensa.setTiprelId(tipoRel);
-    dispensa.setDataInicio(falta.getDataInicio().toLocalDate());
+    dispensa.setDataInicio(dia);
     dispensa.setDataFim(falta.getDataFim() != null
-        ? falta.getDataFim().toLocalDate() : falta.getDataInicio().toLocalDate());
+        ? falta.getDataFim().toLocalDate() : dia);
     dispensa.setHoraInicio(TimeUtils.hhmmToIntervalFormat("00:00"));
-    dispensa.setHoraFim(TimeUtils.hhmmToIntervalFormat(horasAusencia));
-    dispensa.setTotalHora(TimeUtils.hhmmToMinutes(horasAusencia));
+    dispensa.setHoraFim(TimeUtils.hhmmToIntervalFormat(TimeUtils.formatMinutesToHHmm(cobertos)));
+    dispensa.setTotalHora(cobertos);
     dispensa.setDescricaoMotivo(falta.getDescricaoMotivo());
     dispensa.setEstado(Estado.A);
     dispensa.setUuid(UuidCreator.getTimeOrderedEpoch());
     dispensaRepository.save(dispensa);
+
+    return minutosAusencia - cobertos;
+  }
+
+  /** Parte do valor do dia correspondente às horas que o saldo não cobriu. */
+  private BigDecimal valorPorCobrir(FaltaEntity falta, int minutosAusencia, int minutosPorCobrir) {
+    var valorDia = falta.getValor() != null ? falta.getValor() : BigDecimal.ZERO;
+    if (minutosAusencia <= 0 || minutosPorCobrir >= minutosAusencia)
+      return valorDia;
+    return valorDia
+        .multiply(BigDecimal.valueOf(minutosPorCobrir))
+        .divide(BigDecimal.valueOf(minutosAusencia), 2, java.math.RoundingMode.HALF_UP);
   }
 
   private AnoEntity resolverAno(LocalDate data) {

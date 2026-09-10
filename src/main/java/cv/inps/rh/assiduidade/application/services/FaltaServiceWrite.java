@@ -103,7 +103,8 @@ public class FaltaServiceWrite {
     // descontar no salário. Caso contrário fica logo activo.
     var paramSituacao = resolverParamSituacao(req.getTipoJustificacao());
     boolean requerValidacao = deveJustificar
-        && faltaDescontoService.requerValidacao(datas.size(), paramSituacao);
+        && faltaDescontoService.requerValidacaoNoMes(
+            funcionario.getUuid(), datas.getFirst(), datas.size(), paramSituacao);
     var estadoInicial = requerValidacao ? Estado.P : Estado.A;
 
     PedidoEntity pedido = null;
