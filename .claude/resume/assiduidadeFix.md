@@ -285,7 +285,7 @@ SELECT a.ID falta, TO_CHAR(a.DATA_INICIO,'YYYY-MM-DD') dia, a.DEF_REM_ID, c.ID r
 
 ### Por provar
 
-- **⚠️ A1.7 — o filtro `c.ESTADO = 'A'` do guard** (commitado em `9c1e...`, por testar). Montagem:
+- **⚠️ A1.7 — o filtro `c.ESTADO = 'A'` do guard** (commitado em `8c995326`, por testar). Montagem:
 
   1. Criar um pedido de falta com desconto salarial (tipo 18, mês limpo, ≤3 dias no mês para
      ficar `A` de imediato) e apanhar o `DEF_REM_ID` de uma das faltas;
