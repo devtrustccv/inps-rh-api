@@ -351,6 +351,139 @@ sobrepõe o responsável se vier no payload.
 - O domínio `PARECER_DECISAO` só tem um registo em dev (`VALOR='TETS'`), sem
   `FAVORAVEL`/`DESFAVORAVEL`. `parecer` continua **texto livre** no backend — a
   parametrização e a validação da lista são responsabilidade do cliente.
-- Uma falta com tipo que desconta salário **e** `deduzirFaltaEm` preenchido aplica
-  **os dois** efeitos: desconto em `RH_T_DEF_REMUNERACOES` *e* dispensa/abate de férias.
-  São eixos independentes no código; confirmar com o negócio se é intencional.
+- Uma falta com tipo que desconta salário **e** `deduzirFaltaEm` preenchido já **não**
+  aplica os dois efeitos por inteiro: o saldo cobre o que consegue e só o que sobrar vai
+  ao vencimento. Ver a secção 9. *(Esta nota perguntava se o duplo efeito era intencional;
+  o negócio decidiu a 10/09 que não.)*
+
+
+---
+
+## 🔴 9. Regra de desconto da falta — o saldo cobre o que consegue (10/09/2026)
+
+Decisão de negócio de 10/09. **O saldo e o vencimento não são alternativas — são duas fases
+da mesma cobrança.** Uma falta de 4 dias com 2 dias de saldo de férias dá 2 dias gozados e
+2 dias descontados no vencimento. A cobertura faz-se pelos **primeiros dias** (ordem
+cronológica); na dispensa, que conta em horas, pode ser **parcial** — 8h de ausência com 4h
+de saldo consomem as 4h e descontam o valor das outras 4h.
+
+### O `400` de saldo insuficiente desapareceu
+
+`POST /falta/justificar/{funcionarioId}` e `PUT /falta/justificar/validar/{pedidoId}`
+**deixaram de rejeitar** um pedido cujo saldo não cobre o período. Antes:
+
+```json
+{ "status": 400, "title": "Funcionario não tem saldo de ferias suficiente" }
+```
+
+Agora o pedido passa sempre, e a parte não coberta gera desconto no vencimento. **Se o
+frontend trata esse 400 com uma mensagem própria, esse ramo passa a ser código morto.**
+
+### `estado` pode vir `P` onde antes vinha `A`
+
+A regra dos "mais de 3 dias vai a despacho" passou a contar-se **por mês**, e não por
+pedido: às faltas do pedido novo somam-se as que o colaborador já tem vivas (`A` ou `P`)
+nesse mês. Registar 2 dias hoje e 2 amanhã já não escapa ao maker-checker.
+
+Consequência prática: **o mesmo payload pode devolver `A` ou `P` consoante o histórico do
+mês**. O ecrã não pode assumir que um pedido pequeno fica logo activo.
+
+```jsonc
+{ "estado": "P", "requerValidacao": true, "pedidoId": 225, "pedidoUuid": "01a08c75-…" }
+```
+
+Sem retroactividade: só o pedido novo vai a despacho, os anteriores ficam como estavam.
+
+### `valorAusencia` passou a decimal
+
+`FaltaItemDTO.valorAusencia` era `Integer` e truncava os cêntimos (`6344` em vez de
+`6344.56`). É agora `BigDecimal`. **O front tem de formatar casas decimais** — o mesmo se
+aplica a `valorDiario` e `valorTotal` da resposta.
+
+---
+
+## 🔴 10. Editar e Eliminar pedido de justificação — endpoints novos
+
+Dois endpoints novos, que agem sobre o **pedido inteiro** (todos os dias do grupo):
+
+| Método | Rota |
+|---|---|
+| `PUT` | `/api/v1/assiduidade/falta/justificar/pedido/{pedidoUuid}` |
+| `DELETE` | `/api/v1/assiduidade/falta/justificar/pedido/{pedidoUuid}` |
+
+- O `PUT` recebe o mesmo `JustificarFaltaDTO` do registo. Os `itensFalta[].id` são ids da
+  **síntese diária**, não da falta. Um dia omitido do array é **retirado** do pedido e volta
+  a aparecer no painel "por justificar"; hoje o array **só retira, não acrescenta** dias.
+- **Editar não volta a validação** — grava directamente, e reverte e reaplica os efeitos
+  financeiros em vez de os actualizar (trocar `FERIAS` por `DISPENSA` deixava as férias
+  gozadas lá e criava a dispensa por cima).
+- **Eliminar é soft-delete** (`ESTADO='E'`) e **desfaz os efeitos financeiros** — sem isso o
+  colaborador ficava descontado por uma falta que já não existe.
+
+### `400` novo — falta já processada em folha
+
+Os dois devolvem `400` quando **pelo menos uma** falta do pedido já foi apanhada por uma
+remuneração activa:
+
+```json
+{ "status": 400,
+  "title": "Não é possível editar este pedido: 1 falta(s) já foram processadas em folha." }
+```
+
+(Com `eliminar` no lugar de `editar`, conforme a operação.) Uma remuneração **anulada** não
+bloqueia. Uma falta coberta a 100% por férias ou dispensa nunca bloqueia — não tocou na
+folha, só consumiu saldo.
+
+---
+
+## 🔴 11. Saldos passam a reservar as faltas pendentes (10/09/2026)
+
+Uma falta ainda **por despachar** (`P`) que tenciona deduzir em férias ou dispensa passa a
+**reservar** esse saldo. Antes, dois pedidos pendentes viam ambos o saldo cheio e o segundo
+a ser despachado descobria que já não havia nada — o desconto ia todo ao vencimento sem
+ninguém ter sido avisado no registo.
+
+**O número muda sem o utilizador ter feito nada de novo** — é a alteração desta lista com
+maior probabilidade de ser reportada como bug.
+
+### `GET /api/v1/assiduidade/feria/saldo/{funcionarioId}`
+
+O `saldo` vem agora **líquido das reservas**. Colaborador com direito a 2 dias e um pedido
+de 4 dias pendente com `deduzirFaltaEm: "FERIAS"`:
+
+```jsonc
+{ "funcionarioUuid": "01a085fa-…", "anoReferencia": null, "saldo": 0 }   // antes: 2
+```
+
+A reserva desaparece sozinha se o pedido for rejeitado ou eliminado. O contrato não muda —
+muda o valor.
+
+### `GET /api/v1/assiduidade/dispensa/saldo/{funcionarioId}?data=YYYY-MM-DD`
+
+Dois campos **novos** (aditivos):
+
+| Campo | Notas |
+|---|---|
+| `horasReservadas` | `HH:MM` comprometidas por faltas pendentes |
+| `horasReservadasMinutos` | o mesmo em minutos |
+
+`horasUsadas` continua a ser **só o já consumido** por dispensas aprovadas; `horasRestantes`
+vem **líquido das duas**. Reserva-se a ausência inteira do dia — é o máximo que a falta pode
+vir a consumir.
+
+```jsonc
+{ "horasDisponiveis": "04:00", "horasUsadas": "00:00",
+  "horasReservadas": "32:00",  "horasRestantes": "00:00",
+  "horasDisponiveisMinutos": 240, "horasUsadasMinutos": 0,
+  "horasReservadasMinutos": 1920, "horasRestantesMinutos": 0 }
+```
+
+### Mensagem de erro da dispensa
+
+O `400` de horas insuficientes (`POST /dispensa`, `PUT /dispensa/{id}`, validação) passa a
+mencionar as reservadas:
+
+> Horas de dispensa insuficientes: o colaborador tem direito a 04:00 por mês, já usou 00:00,
+> tem 32:00 reservadas por faltas pendentes e está a pedir 02:00 (total 34:00).
+
+**Se o frontend faz *match* no texto da mensagem, esse match parte.**
