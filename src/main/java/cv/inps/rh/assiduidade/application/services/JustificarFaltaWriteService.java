@@ -1,6 +1,8 @@
 package cv.inps.rh.assiduidade.application.services;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import cv.inps.rh.assiduidade.application.commands.EditarPedidoJustificacaoCommand;
+import cv.inps.rh.assiduidade.application.commands.EliminarPedidoJustificacaoCommand;
 import cv.inps.rh.assiduidade.application.commands.JustificarFaltaCommand;
 import cv.inps.rh.assiduidade.application.commands.ValidarFaltaJustificadaCommand;
 import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
@@ -57,6 +59,18 @@ public class JustificarFaltaWriteService {
   private final NotificacaoDispatchService notificacaoDispatchService;
   private final FaltaDescontoService faltaDescontoService;
   private final FaltaValorCalculator faltaValorCalculator;
+  private final ResponsavelEntityRepository responsavelEntityRepository;
+
+  /**
+   * Responsável do parecer. O DTO envia a PK de RH_T_RESPONSAVEL — a mesma que a leitura
+   * devolve em {@code responsavelId} — para o round-trip do formulário fechar. Sem isto o
+   * campo era aceite e descartado: o dropdown "Responsável" nunca era gravado.
+   */
+  private ResponsavelEntity resolverResponsavel(Long responsavelId) {
+    if (responsavelId == null)
+      return null;
+    return responsavelEntityRepository.findByIdOrThrow(responsavelId);
+  }
 
   @Transactional
   public Map<String, ?> justificarFalta(JustificarFaltaCommand command) {
@@ -89,11 +103,11 @@ public class JustificarFaltaWriteService {
 
     // O tipo de justificação só existe no formulário quando "Com Justificativo" = SIM
     // (spec: "os campos abaixo só aparecem caso Com Justificativo = SIM"). Marcar a
-    // falta como não justificada é um acto legítimo e não precisa de tipo.
-    boolean algumComJustificativo = selecionados.stream()
-        .anyMatch(i -> "SIM".equalsIgnoreCase(i.getComJustificativo()));
+    // falta como não justificada é um acto legítimo e não precisa de tipo. O radio é do
+    // cabeçalho — aplica-se a todas as faltas seleccionadas, não é escolha por dia.
+    boolean comJustificativo = "SIM".equalsIgnoreCase(dto.getComJustificativo());
 
-    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), algumComJustificativo);
+    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), comJustificativo);
 
     // Regra: só vai a validação se forem mais de 3 dias E o tipo de justificação
     // descontar no salário. Caso contrário fica logo activo.
@@ -103,6 +117,8 @@ public class JustificarFaltaWriteService {
     var deducao = StringUtils.hasText(dto.getDeduzirFaltaEm())
         ? TipoDescontoFalta.fromCodeOrThrow(dto.getDeduzirFaltaEm()).getCode()
         : null;
+
+    var responsavel = resolverResponsavel(dto.getResponsavelId());
 
     // Criar pedido de justificação
     PedidoEntity pedido = new PedidoEntity();
@@ -158,14 +174,18 @@ public class JustificarFaltaWriteService {
       falta.setValor(valor);
       valorTotal = valorTotal.add(valor);
 
-      falta.setDescricaoMotivo(item.getMotivo());
-      // "Com justificativo?" é escolha do RH por falta — antes assumia-se sempre SIM.
+      // Motivo e "Com justificativo?" são do bloco "Justificar Faltas Selecionadas": uma
+      // caixa e um radio únicos, aplicados a todas as faltas seleccionadas ("A justificativa
+      // será aplicada às N faltas selecionadas"). Antes vinham por item, o que obrigava o
+      // frontend a repetir o mesmo valor em cada linha e deixava o mesmo pedido com motivos
+      // diferentes se falhasse numa.
+      falta.setDescricaoMotivo(dto.getMotivo());
       falta.setFlgJustificativo(
-          StringUtils.hasText(item.getComJustificativo()) ? item.getComJustificativo() : "SIM");
+          StringUtils.hasText(dto.getComJustificativo()) ? dto.getComJustificativo() : "SIM");
 
       falta.setDecisaoResponsavel(dto.getParecerResponsavel());
+      falta.setResponsavelId(responsavel);
       falta.setObsResponsavel(dto.getObsResponsavel());
-      falta.setDespachoRh(dto.getDespachoRh());
 
       falta.setParamSitId(paramSituacao);
       falta.setFlgDescontoFalta(deducao);
@@ -178,41 +198,28 @@ public class JustificarFaltaWriteService {
     // 6 Persistir faltas
     faltaRepository.saveAll(faltas);
 
-    Map<Long, FaltaEntity> faltaPorSinteseId = faltas.stream()
-        .filter(f -> f.getSinteseDiarioId() != null)
-        .collect(Collectors.toMap(f -> f.getSinteseDiarioId().getId(), Function.identity()));
-
+    // Os anexos são SEMPRE do pedido, nunca de um dia: justificar cria um RH_T_PEDIDO e todas
+    // as faltas seleccionadas nascem com esse PEDIDO_ID, e o ecrã só tem um bloco de anexos
+    // ("Anexar Documentos", no painel da justificação). Deixou por isso de existir anexo por
+    // item — ver FaltaItemDTO.
     List<DocumentoEntity> documentos = new ArrayList<>();
-    for (var item : selecionados) {
-      if (item.getDocumento() == null)
-        continue;
-      FaltaEntity faltaRef = faltaPorSinteseId.get(item.getId());
-      if (faltaRef == null)
-        continue;
-
-      var doc = documentoMapper.toEntity(
-          item.getDocumento(),
-          estadoInicial,
-          TableName.RH_T_FALTA.name(),
-          faltaRef.getId(),
-          faltaRef.getUuid(),
-          1L,
-          funcionario);
-      doc.setUuid(UuidCreator.getTimeOrderedEpoch());
-      documentos.add(doc);
-    }
-    // Documentos do bloco "Justificar Faltas Selecionadas" — o formulário permite
-    // anexar vários e aplicam-se a todas as faltas seleccionadas. Ficam ligados à
-    // primeira falta do pedido, que é a âncora do conjunto.
-    if (dto.getDocumentos() != null && !dto.getDocumentos().isEmpty() && !faltas.isEmpty()) {
-      var ancora = faltas.getFirst();
+    // Documentos do bloco "Justificar Faltas Selecionadas" — o formulário permite anexar
+    // vários e aplicam-se a TODAS as faltas seleccionadas, não a um dia. Ficam por isso
+    // ligados ao PEDIDO, que é o agrupador do conjunto (RH_T_FALTA.PEDIDO_ID).
+    //
+    // A spec diz REFERENCIA_NAME='RH_T_FALTA' para os anexos, mas essa regra só funciona
+    // para o anexo de um dia (acima). Prendê-los à primeira falta — como se fazia antes —
+    // tornava-os indistinguíveis do anexo dessa falta: a leitura devolvia um e escondia o
+    // outro, e eliminar o dia âncora deixava o anexo do grupo órfão. Decidido com o
+    // utilizador: o anexo do grupo pertence ao pedido.
+    if (dto.getDocumentos() != null && !dto.getDocumentos().isEmpty()) {
       for (var anexo : dto.getDocumentos()) {
         var doc = documentoMapper.toEntity(
             anexo,
             estadoInicial,
-            TableName.RH_T_FALTA.name(),
-            ancora.getId(),
-            ancora.getUuid(),
+            TableName.RH_T_PEDIDO.name(),
+            pedido.getId(),
+            pedido.getUuid(),
             1L,
             funcionario);
         doc.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -267,14 +274,13 @@ public class JustificarFaltaWriteService {
     if (dto == null || dto.getItensFalta() == null || dto.getItensFalta().isEmpty()) {
       throw IgrpResponseStatusException.badRequest("Nenhuma falta selecionada para validação");
     }
-    // Parametrização da justificação — mesma tolerância ao "0" do formulário.
-    boolean algumComJustificativo = dto.getItensFalta().stream()
-        .filter(FaltaItemDTO::isSelecionar)
-        .anyMatch(i -> "SIM".equalsIgnoreCase(i.getComJustificativo()));
-    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), algumComJustificativo);
+    // Parametrização da justificação — mesma tolerância ao "0" do formulário. O radio
+    // "Com Justificativo?" é do cabeçalho, como no registo (não é escolha por dia).
+    boolean comJustificativo = "SIM".equalsIgnoreCase(dto.getComJustificativo());
+    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), comJustificativo);
 
     // Todas as faltas do pedido (já criadas na fase de justificar)
-    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
+    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido);
     Map<Long, FaltaEntity> faltaPorSinteseId = faltas.stream()
         .filter(f -> f.getSinteseDiarioId() != null)
         .collect(Collectors.toMap(
@@ -288,6 +294,7 @@ public class JustificarFaltaWriteService {
 
     // Estado final
     final Estado estadoFinal = dto.getValidar() == EstadoValidacao.SIM ? Estado.A : Estado.I;
+    var responsavelValidacao = resolverResponsavel(dto.getResponsavelId());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     // Atualizar apenas as faltas correspondentes às sínteses selecionadas
@@ -303,9 +310,14 @@ public class JustificarFaltaWriteService {
             "Falta não encontrada para a síntese diária ID: " + item.getId());
       }
 
-      falta.setDescricaoMotivo(item.getMotivo());
+      // Do cabeçalho, como no registo. Só sobrepõe o motivo se veio no payload, para uma
+      // validação sem alterações não apagar o que o maker escreveu.
+      if (StringUtils.hasText(dto.getMotivo()))
+        falta.setDescricaoMotivo(dto.getMotivo());
       falta.setObsResponsavel(dto.getObsResponsavel());
-      falta.setDespachoRh(dto.getDespachoRh());
+      // Só sobrepõe se o checker indicou um responsável — senão mantém o da justificação.
+      if (responsavelValidacao != null)
+        falta.setResponsavelId(responsavelValidacao);
       // Só sobrepõe se veio no payload — caso contrário mantém o que foi gravado na
       // justificação, em vez de o apagar.
       if (paramSituacao != null)
@@ -320,6 +332,29 @@ public class JustificarFaltaWriteService {
     }
 
     faltaRepository.saveAll(faltas);
+
+    // Anexos do pedido: o checker pode juntar um documento ao despachar, substituir ou
+    // retirar um que o maker anexou. Semântica dos arrays da casa (syncDocumentos):
+    // documentos == null preserva o que está; item sem id cria; item que desaparece do
+    // array fica 'E'. Os anexos são do PEDIDO — ver justificarFalta.
+    if (dto.getDocumentos() != null) {
+      var existentes = documentoEntityRepository
+          .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
+      var sincronizados = documentoMapper.syncDocumentos(
+          new ArrayList<>(existentes),
+          dto.getDocumentos(),
+          TableName.RH_T_PEDIDO.name(),
+          pedido.getId(),
+          pedido.getUuid(),
+          1L,
+          funcionario);
+      for (var doc : sincronizados) {
+        if (doc.getUuid() == null) doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+        // Um anexo novo nasce 'P' no mapper; ao validar acompanha o estado do pedido.
+        if (Estado.P.equals(doc.getEstado())) doc.setEstado(estadoFinal);
+      }
+      documentoEntityRepository.saveAll(sincronizados);
+    }
 
     if (estadoFinal == Estado.A)
       ordemServicoWriteService.criar(funcionario, tipoRelAtual, dto.getTipoOrdemServico());
@@ -397,6 +432,48 @@ public class JustificarFaltaWriteService {
     notificacaoDispatchService.enviar(
         "JUSTIFICACAO_FALTA", emailOpt.get(), funcionario.getNome(),
         pedido.getId(), "RH_T_PEDIDO", pedido.getUuid(), funcionario, vars);
+  }
+
+
+  /**
+   * Editar um pedido de justificação já gravado (acção "Editar" do resumo de faltas, spec
+   * 09/09 — "o grupo selecionado, agrupados por RH_T_FALTA.PEDIDO_ID"). Age no pedido
+   * inteiro, não em dias soltos.
+   *
+   * <p>TODO: por implementar. Decisões de negócio ainda em aberto:</p>
+   * <ul>
+   *   <li>que campos são editáveis depois de validado, e se a edição volta a P (a spec deixa
+   *       a coluna de gravação vazia);</li>
+   *   <li>se é permitido editar um pedido já processado em folha;</li>
+   *   <li>se se pode acrescentar ou retirar dias do pedido, ou só alterar o cabeçalho;</li>
+   *   <li>o que fazer aos efeitos já aplicados (RH_T_DEF_REMUNERACOES, RH_T_TIPREL_REM_PAG,
+   *       RH_T_DISPENSA / saldo de férias) quando o tipo ou a dedução mudam.</li>
+   * </ul>
+   */
+  @Transactional
+  public Map<String, ?> editarPedidoJustificacao(EditarPedidoJustificacaoCommand command) {
+    throw IgrpResponseStatusException.of(org.springframework.http.HttpStatus.NOT_IMPLEMENTED,
+        "Editar pedido de justificação ainda não está implementado");
+  }
+
+  /**
+   * Eliminar um pedido de justificação (acção "Eliminar" do resumo de faltas, spec 09/09).
+   * Soft-delete: RH_T_FALTA.ESTADO = 'E' em todas as faltas do pedido.
+   *
+   * <p>TODO: por implementar. Decisões de negócio ainda em aberto:</p>
+   * <ul>
+   *   <li>até quando se pode eliminar — validado (A) sim, processado em folha presumivelmente
+   *       não;</li>
+   *   <li>o que desfazer além da falta: o desconto em RH_T_DEF_REMUNERACOES e a associação em
+   *       RH_T_TIPREL_REM_PAG, a RH_T_DISPENSA criada por "Deduzir em: Dispensa" ou a reposição
+   *       do saldo de férias, o estado do pedido e dos seus anexos, e a validação pendente.
+   *       Sem isso o colaborador fica descontado por uma falta eliminada.</li>
+   * </ul>
+   */
+  @Transactional
+  public Map<String, ?> eliminarPedidoJustificacao(EliminarPedidoJustificacaoCommand command) {
+    throw IgrpResponseStatusException.of(org.springframework.http.HttpStatus.NOT_IMPLEMENTED,
+        "Eliminar pedido de justificação ainda não está implementado");
   }
 
 }

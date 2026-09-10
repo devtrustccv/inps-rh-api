@@ -29,7 +29,7 @@ public interface FaltaEntityRepository extends
 
   Optional<FaltaEntity> findByUuid(UUID uuid);
 
-  List<FaltaEntity> findAllByPedidoId(PedidoEntity pedidoId);
+  List<FaltaEntity> findAllByPedidoIdOrderByDataInicioAsc(PedidoEntity pedidoId);
 
   @Query("""
           SELECT f

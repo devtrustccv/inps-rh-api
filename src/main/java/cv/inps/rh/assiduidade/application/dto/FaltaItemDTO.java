@@ -4,8 +4,6 @@
 package cv.inps.rh.assiduidade.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import cv.inps.rh.shared.application.dto.AnexoReqDTO;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,9 +35,11 @@ public class FaltaItemDTO  {
   private Integer valorAusencia ;
 
 
+  /** Só de resposta — o motivo grava-se no cabeçalho (aplica-se a todas as seleccionadas). */
   private String motivo ;
 
 
+  /** Só de resposta — o radio "Com Justificativo?" é do cabeçalho. */
   private String comJustificativo ;
 
   /**
@@ -51,8 +51,5 @@ public class FaltaItemDTO  {
 
   /** Descrição legível de {@link #estado}: Pendente / Justificada / Rejeitada. */
   private String estadoDesc ;
-
-  @Valid
-  private AnexoReqDTO documento ;
 
 }

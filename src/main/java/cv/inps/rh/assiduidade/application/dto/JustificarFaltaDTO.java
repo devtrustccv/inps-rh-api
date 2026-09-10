@@ -30,6 +30,13 @@ public class JustificarFaltaDTO  {
 
   private String nomeColaborador ;
 
+  /**
+   * UUID do pedido de justificação a que este conjunto de faltas pertence. Só de resposta,
+   * e só preenchido na leitura por pedido: é a chave com que o ecrã chama o Editar/Eliminar
+   * do grupo (spec 09/09: "agrupados por RH_T_FALTA.PEDIDO_ID").
+   */
+  private UUID pedidoId ;
+
   @Valid
   private List<FaltaItemDTO> itensFalta = new ArrayList<>();
 
@@ -43,10 +50,22 @@ public class JustificarFaltaDTO  {
   private String obsResponsavel ;
 
 
-  private String despachoRh ;
-
 
   private Long tipoJustificacao ;
+
+  /**
+   * "Motivo" do bloco "Justificar Faltas Selecionadas" — um único texto aplicado a todas as
+   * faltas seleccionadas (o ecrã tem uma só caixa, não uma por dia). Guardado em
+   * RH_T_FALTA.DESCRICAO_MOTIVO, igual em todas as faltas do pedido.
+   */
+  private String motivo ;
+
+  /**
+   * "Com Justificativo?" (DOMAIN SIM_NAO) — o radio único do cabeçalho do formulário, que
+   * comanda a visibilidade dos restantes blocos. Guardado em RH_T_FALTA.FLG_JUSTIFICATIVO,
+   * igual em todas as faltas do pedido; devolvido na leitura para o Editar repor o radio.
+   */
+  private String comJustificativo ;
 
   /** "Deduzir Falta Em" — DOMAIN TP_DESCONTO_FALTA: FERIAS | DISPENSA. */
   private String deduzirFaltaEm ;
@@ -65,6 +84,20 @@ public class JustificarFaltaDTO  {
    */
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();
+
+
+  /**
+   * Estado do PEDIDO (RH_T_PEDIDO.ESTADO): {@code P} pendente de despacho, {@code A}
+   * validado, {@code I} rejeitado. Só de resposta — é por ele que o ecrã decide se o grupo
+   * ainda pode ser editado/eliminado ou se está à espera de validação.
+   */
+  private String estado ;
+
+  /** Descrição legível de {@link #estado}. */
+  private String estadoDesc ;
+
+  /** Etapa do workflow do pedido (RH_T_PEDIDO.ETAPA): DESPACHO_RH | FINALIZADO. */
+  private String etapa ;
 
 
   private EstadoValidacao validar ;

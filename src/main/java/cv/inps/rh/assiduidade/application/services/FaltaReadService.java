@@ -150,7 +150,7 @@ public class FaltaReadService {
             "Registo de marcacao de falta nao encontrada com: " + query.getPedidoId()));
 
     // Buscar todas as faltas desse pedido
-    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
+    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido);
     if (faltas.isEmpty()) {
       return new FaltaReqDTO();
     }
@@ -194,7 +194,6 @@ public class FaltaReadService {
     dto.setMotivoAusencia(primeiraFalta.getDescricaoMotivo());
     dto.setParecer(primeiraFalta.getDecisaoResponsavel());
     dto.setObservacao(primeiraFalta.getObsResponsavel());
-    dto.setDespachoRh(primeiraFalta.getDespachoRh());
     // A guarda tem de cobrir também o funcionário do responsável: RH_T_RESPONSAVEL
     // pode existir sem FUN_ID preenchido.
     var funResponsavel = primeiraFalta.getResponsavelId() != null

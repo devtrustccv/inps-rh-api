@@ -111,10 +111,4 @@ public class DadosContratuaisRespDTO  {
 
   private String estadoDesc ;
 
-
-  private boolean inicial ;
-
-
-  private boolean atual ;
-
 }

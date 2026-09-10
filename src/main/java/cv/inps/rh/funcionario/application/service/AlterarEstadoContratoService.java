@@ -70,11 +70,12 @@ public class AlterarEstadoContratoService {
       throw IgrpResponseStatusException.badRequest("O contrato indicado não pertence ao funcionário.");
     }
 
-    // Tiprel mais recente do contrato (serve os dois sentidos — ver finder).
+    // Tiprel CORRENTE do contrato — est_act_adm=1, não max(id) (ver finder). Serve os dois sentidos
+    // porque a desativação preserva o est_act_adm.
     var tiprel = tiposRelacionamentoEntityRepository
-        .findFirstByContrVinculoId_UuidOrderByIdDesc(contratoUuid)
-        .orElseThrow(() -> IgrpResponseStatusException.badRequest(
-            "Não foi encontrada a relação (tiprel) do contrato."));
+        .findFirstByContrVinculoId_UuidAndEstActAdm(contratoUuid, 1)
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest("Só é possível "
+            + (estadoAlvo == Estado.I ? "desativar" : "ativar") + " o contrato atual do funcionário."));
 
     if (estadoAlvo == Estado.I) {
       validarDesativacao(contrato, tiprel);
@@ -95,12 +96,11 @@ public class AlterarEstadoContratoService {
   // GUARDS
   // -----------------------------------------------------------------------------------------------
 
-  /** Desativar: só o contrato ATUAL (est_act_adm=1), ativo e não processado em folha. */
+  /**
+   * Desativar: ativo e não processado em folha. O "só o contrato ATUAL" já foi garantido a montante
+   * pelo finder por est_act_adm=1 — que devolve vazio (e a mesma mensagem) se este não for o corrente.
+   */
   private void validarDesativacao(ContratoEntity contrato, TiposRelacionamentoEntity tiprel) {
-    if (!Objects.equals(1, tiprel.getEstActAdm())) {
-      throw IgrpResponseStatusException.badRequest(
-          "Só é possível desativar o contrato atual do funcionário.");
-    }
     if (contrato.getEstado() != Estado.A) {
       throw IgrpResponseStatusException.badRequest("Só é possível desativar um contrato ativo.");
     }
@@ -151,9 +151,12 @@ public class AlterarEstadoContratoService {
     // est_act_adm do histórico (garante um único histórico ativo por funcionário).
     contratoHistoricoWriteService.transicionarEstado(contrato, alvo);
 
-    // Tiprel e o seu est_act_adm.
+    // Tiprel: só o ESTADO. O est_act_adm NÃO se toca — são dimensões independentes: est_act_adm=1
+    // diz QUAL é o vínculo corrente, estado diz se está ativo. Um vínculo desativado continua a ser
+    // o corrente do colaborador (é o que o mantém visível em RH_V_DOSSIE.ULTIMO_VINCULO=1 e o que
+    // permite reencontrá-lo na reativação), tal como já fazem a cessação e a inativação em
+    // AlterarSituacaoLaboralWriteService e o histórico aqui em baixo.
     tiprel.setEstado(alvo);
-    tiprel.setEstActAdm(alvo == Estado.A ? 1 : 0);
 
     // Filhos diretos do tiprel.
     if (tiprel.getMobId() != null) tiprel.getMobId().setEstado(alvo);

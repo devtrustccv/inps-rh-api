@@ -246,3 +246,148 @@ mobilidade. Renomeação directa (mesmos tipos, mesma semântica, mesmo acesso):
 De passagem corrige-se o gralho `dirrecaoAntes` (duplo "r"). Os nomes antigos **deixam de existir**: os
 de escrita (`direcaoDepois`, `seccaoDepois`, `localTrabalhoDepois`) passam a ser ignorados na
 desserialização, pelo que a mobilidade gravaria sem destino se o front não for actualizado.
+
+---
+
+# Ativar/Desativar Contrato — desbloqueio com progressão pendente ou rejeitada
+
+**Data:** 2026-09-09
+**Branch:** develop
+
+## Comportamento corrigido (sem alteração de contrato de API)
+
+`PATCH /api/v1/funcionarios/{idFuncionario}/contratos/{contratoId}/estado`
+
+Antes, o pedido falhava com **400 — "Só é possível desativar o contrato atual do funcionário."**
+sempre que o colaborador tivesse passado por uma **progressão** que não fosse validada, mesmo
+quando a lista e o get-by-id devolviam `atual: true` para esse contrato. Bastava existir uma
+progressão **pendente (P)** ou **rejeitada (I / "Não Validado")** para o contrato ficar
+permanentemente indesativável pelo ecrã — não havia nada que o utilizador pudesse fazer para o
+desbloquear (rejeitar a progressão não resolvia).
+
+Causa: o backend identificava o vínculo do contrato pelo tiprel de maior id, e o candidato de
+progressão nasce com id superior ao do vínculo corrente. Passa a ser identificado pelo vínculo
+**corrente** (`est_act_adm=1`).
+
+**Impacto no front-end:** nenhum campo ou rota muda. O botão Ativar/Desativar passa simplesmente a
+funcionar nos colaboradores em que dava erro. Medido na BD de dev: 3 de 9 contratos estavam nesta
+situação.
+
+## Estados: "atual" e "ativo" são dimensões independentes
+
+Um contrato desativado **continua a ser o contrato atual** do colaborador — a desativação já não
+limpa a marca de vínculo corrente. Consequência visível: o colaborador com contrato desativado
+mantém-se na lista de Dossiê (`ULTIMO_VINCULO=1`) com o estado a `Inactivo`, em vez de perder o
+vínculo corrente. Alinha o Ativar/Desativar Contrato com o que a cessação e a inativação de
+situação laboral já faziam.
+
+## Mensagens de erro
+
+A mensagem passa a acompanhar o sentido da operação — na ativação lê-se
+**"Só é possível ativar o contrato atual do funcionário."** (antes só existia a variante
+"desativar"). As restantes mantêm-se: "Só é possível desativar um contrato ativo.",
+"Não é possível desativar um contrato já processado em folha.", "Só é possível ativar um contrato
+inativo (estado I). Estado atual: X.", "O funcionário já possui um contrato ativo em vigor."
+
+---
+
+# Campos `inicial` e `atual` saem dos GET de detalhe
+
+**Data:** 2026-09-09
+**Branch:** develop
+
+## Campos removidos da resposta
+
+Deixam de existir em `DadosContratuaisRespDTO`, logo saem da resposta de:
+
+- `GET /api/v1/funcionarios/{idFuncionario}/contratos/{contratoId}` (detalhe do contrato)
+- `GET /api/v1/funcionarios/{idFuncionario}` (dossiê do colaborador, bloco `dadosContratuais`)
+
+| Campo | Tipo |
+|---|---|
+| `inicial` | `boolean` |
+| `atual` | `boolean` |
+
+**A lista NÃO muda.** `GET /api/v1/funcionarios/contratos?idFuncionario=...` (`ContratoListDTO`)
+mantém `inicial` e `atual` exactamente como hoje — é onde os dois flags estão correctos e são usados.
+
+## Porquê
+
+Foram introduzidos a 29/08/2026 apenas para o detalhe do contrato. Como o dossiê partilha o mesmo
+DTO, herdou-os sem que ninguém lhes atribuisse valor: vinham **sempre `false`**, para qualquer
+colaborador, mesmo quando o contrato era o atual. Sendo `boolean` primitivo, esse "nunca preenchido"
+chegava ao front-end como um `false` de aspecto legítimo.
+
+Nenhum consumidor lia os campos (nem código, nem front-end — nunca chegaram a ser documentados
+aqui), pelo que se optou por os remover em vez de lhes fixar uma semântica.
+
+**Impacto no front-end:** nenhum, se não estavam a ser lidos. Quem precise de saber se um contrato
+é o actual ou a versão inicial deve usar a lista de contratos, que continua a expor os dois flags.
+
+---
+
+# Editar Mobilidade — só vai a validação se houver movimento
+
+**Data:** 2026-09-09
+**Branch:** develop
+
+`PUT /api/v1/funcionarios/{idFuncionario}/mobilidades/{mobilidadeId}`
+
+## O que muda
+
+Sem alteração de contrato de API (mesma rota, mesmo `MobilidadeDTO`). Muda o **comportamento** e a
+**mensagem** devolvida.
+
+Antes, qualquer gravação punha a mobilidade em `P` e criava uma validação `UPDATE` para o checker —
+mesmo que o utilizador não tivesse mudado nada. O checker recebia um pedido de aprovação de uma
+alteração inexistente, e o "Detalhe de alterações" mostrava os campos como se tivessem sido
+preenchidos de raiz (`valorAnterior: null`), por ser o primeiro diff registado sobre aquele registo.
+
+Agora a decisão depende dos **três campos que definem a mobilidade**: **Direcção**, **Unidade** e
+**Local de trabalho**.
+
+| Situação | Resposta | Estado da mobilidade | Vai a validação? |
+|---|---|---|---|
+| Nenhum dos três mudou | `"Sem alterações."` | continua `A` | **não** |
+| Só mudaram datas (ou o tipo) | `"Sem alterações."` | continua `A` (datas gravadas) | **não** |
+| Mudou Direcção, Unidade e/ou Local | `"Mobilidade actualizada."` | passa a `P` | sim |
+
+As datas continuam a ser sempre gravadas — só não são motivo para submeter ao checker.
+
+O reenvio de uma **correção** (mobilidade em `C`, devolvida pelo checker) não é afectado: continua a
+voltar à fila de validação (`C → P`) mesmo sem diferenças, porque aí o maker está a responder a uma
+devolução.
+
+## Campos "(Depois)" passam a ser validados como no registo
+
+O ecrã de edição comporta-se agora como o de nova mobilidade:
+
+- por cada tipo escolhido no multi-select (Direcção / Unidade / Local Trabalho), o respectivo campo
+  **"(Depois)" é obrigatório** — se vier vazio, resposta **400** com
+  `Escolheu mobilidade de <tipo>: indique o campo "<tipo> (depois)".`
+- os tipos **não** escolhidos herdam o valor actual do registo — o front-end não precisa de os reenviar.
+
+Antes, um "(Depois)" por preencher era ignorado em silêncio, e um valor enviado sem o tipo
+correspondente estar seleccionado era aplicado à mesma.
+
+Os códigos de origem que o ecrã traz pré-seleccionados (`INICIO`, `NOVO_CONTRATO`, `RENOVACAO`) são
+aceites e ignorados — só `DIRECAO`, `SECAO` e `LOCAL_TRABALHO` seleccionam campos.
+
+## Correspondência exacta entre tipos escolhidos e campos "(Depois)"
+
+A regra passa a ser validada nos **dois** sentidos, tanto no registo (`POST .../mobilidades`) como na
+edição (`PUT .../mobilidades/{mobilidadeId}`). Os `*Destino` enviados têm de corresponder
+exactamente aos tipos indicados em `tipoMobilidade`:
+
+| Payload | Resultado |
+|---|---|
+| Escolhe `SECAO` e envia `seccaoDestino` | **200** — só a unidade muda; direcção e local herdam |
+| Escolhe `SECAO` e **não** envia `seccaoDestino` | **400** `Escolheu mobilidade de Unidade: indique o campo "Unidade (depois)".` |
+| Escolhe `SECAO` mas envia também `direcaoDestino` | **400** `Enviou "Direcção (depois)" mas não escolheu mobilidade de Direcção.` |
+
+O terceiro caso era antes **ignorado em silêncio** na edição (e aplicado, no registo). Passa a dar
+400: o utilizador que escolhesse "Unidade" e enviasse também uma direcção ficava sem perceber porque
+é que a direcção não mudava.
+
+Em resumo, para cada movimento envie **apenas** o `*Destino` do tipo que seleccionou. Os tipos não
+seleccionados não precisam de ser enviados — herdam o valor actual do registo.

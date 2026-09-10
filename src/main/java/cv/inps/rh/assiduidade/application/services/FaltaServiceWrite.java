@@ -92,6 +92,13 @@ public class FaltaServiceWrite {
       }
     }
 
+    // "Tipo Falta" é obrigatório no formulário quando Com Justificativo = SIM (spec 09/09,
+    // ecrã 3.2.2). Sem ele o paramSituacao ficava null e o requerValidacao dava sempre false:
+    // uma falta de 20 dias entrava directamente a ATIVO, saltando o maker-checker.
+    if (deveJustificar && (req.getTipoJustificacao() == null || req.getTipoJustificacao() <= 0))
+      throw IgrpResponseStatusException.badRequest(
+          "Tipo de falta é obrigatório quando a falta é marcada com justificativo");
+
     // Regra: só vai a validação se forem mais de 3 dias E o tipo de justificação
     // descontar no salário. Caso contrário fica logo activo.
     var paramSituacao = resolverParamSituacao(req.getTipoJustificacao());
@@ -139,19 +146,21 @@ public class FaltaServiceWrite {
       totalRegistos++;
     }
 
-    // Anexos: REFERENCIA_ID aponta para o registo de RH_T_FALTA, conforme a
-    // especificação — antes apontava para o pedido.
+    // Anexos do formulário: aplicam-se ao conjunto de dias marcados, não a um dia, por isso
+    // ficam ligados ao PEDIDO (o agrupador — RH_T_FALTA.PEDIDO_ID), a par do que faz o ecrã
+    // de justificar. A spec diz REFERENCIA_NAME='RH_T_FALTA', mas prender o anexo do grupo à
+    // primeira falta tornava-o indistinguível de um anexo desse dia e deixava-o órfão se esse
+    // dia fosse eliminado. Decidido com o utilizador.
     if (deveJustificar && req.getDocumentos() != null && !req.getDocumentos().isEmpty()
-        && !faltas.isEmpty()) {
-      var primeiraFalta = faltas.getFirst();
+        && pedido != null) {
       List<DocumentoEntity> docs = new ArrayList<>();
       for (var d : req.getDocumentos()) {
         var doc = documentoMapper.toEntity(
             d,
             estadoInicial,
-            TableName.RH_T_FALTA.name(),
-            primeiraFalta.getId(),
-            primeiraFalta.getUuid(),
+            TableName.RH_T_PEDIDO.name(),
+            pedido.getId(),
+            pedido.getUuid(),
             1L,
             funcionario);
         doc.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -212,7 +221,7 @@ public class FaltaServiceWrite {
     var novoEstado = req.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid());
 
-    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoId(pedido);
+    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido);
 
     for (FaltaEntity f : faltas) {
 
@@ -222,8 +231,6 @@ public class FaltaServiceWrite {
         f.setDecisaoResponsavel(req.getParecer());
       if (StringUtils.hasText(req.getObservacao()))
         f.setObsResponsavel(req.getObservacao());
-      if (StringUtils.hasText(req.getDespachoRh()))
-        f.setDespachoRh(req.getDespachoRh());
 
       if (req.getTipoJustificacao() != null && req.getTipoJustificacao() > 0) {
         var ps = paramSituacaoRepository.findByIdOrThrow(req.getTipoJustificacao());
@@ -317,6 +324,9 @@ public class FaltaServiceWrite {
     if (StringUtils.hasText(req.getObservacao())) {
       falta.setObsResponsavel(req.getObservacao());
     }
+    // DESPACHO_RH não pertence a este fluxo: o formulário de Marcar Falta / Ausência não tem
+    // esse campo (spec 09/09, tabela do ecrã 3.2.2 — só Parecer, Responsável e Observação),
+    // nem em modo validação. Por isso foi removido do FaltaReqDTO.
 
     // Valor do dia = valor à hora x horas de ausência. O valor à hora vem de
     // CALCULO_FALTA_DIARIO (salário base / 30 / jornada diária), com fallback em Java.

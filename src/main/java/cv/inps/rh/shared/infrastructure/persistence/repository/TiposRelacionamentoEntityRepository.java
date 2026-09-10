@@ -33,13 +33,19 @@ public interface TiposRelacionamentoEntityRepository extends
     JpaSpecificationExecutor<TiposRelacionamentoEntity> {
 
   /**
-   * Tiprel mais recente (maior id) que aponta para este contrato, INDEPENDENTEMENTE de est_act_adm.
-   * Um contrato pode ter vários tiprels ao longo do tempo (ex.: mudança de situação laboral clona o
-   * tiprel mantendo o mesmo contrVinculoId); o mais recente é o que "manda". Necessário no
-   * ativar/desativar contrato: na desativação o tiprel atual está est_act_adm=1, mas na ativação o
-   * contrato está inativo (est_act_adm=0), pelo que o finder que filtra est_act_adm=1 não serve.
+   * Tiprel CORRENTE deste contrato (est_act_adm=1). Um contrato pode ter vários tiprels ao longo do
+   * tempo (mudança de situação laboral, progressão, mudança de carreira), mas só um é o corrente.
+   *
+   * <p>NÃO usar max(id) para o encontrar: o fluxo de progressão cria o candidato como um tiprel NOVO
+   * (id maior que o corrente) e esse candidato fica na tabela para sempre — quer seja validado, quer
+   * fique pendente (P), quer seja rejeitado (I/"Não Validado"). Só quando é validado é que passa ele
+   * próprio a est_act_adm=1; nos outros casos max(id) aponta para um tiprel que NUNCA foi o corrente.
+   *
+   * <p>Serve os dois sentidos do ativar/desativar contrato porque a desativação preserva o
+   * est_act_adm=1 do tiprel (só baixa o estado para I) — ver AlterarEstadoContratoService.
    */
-  Optional<TiposRelacionamentoEntity> findFirstByContrVinculoId_UuidOrderByIdDesc(UUID contratoUuid);
+  Optional<TiposRelacionamentoEntity> findFirstByContrVinculoId_UuidAndEstActAdm(
+      UUID contratoUuid, Integer estActAdm);
 
   default TiposRelacionamentoEntity findByIdOrThrow(Long id) {
     return this.findById(id)

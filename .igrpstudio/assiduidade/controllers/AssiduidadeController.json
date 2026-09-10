@@ -1536,6 +1536,71 @@
           "isRequired": true
         }
       ]
+    },
+    {
+      "actionName": "editarPedidoJustificacao",
+      "path": "falta/justificar/pedido/{pedidoId}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "JustificarFalta",
+              "collectionType": "none",
+              "name": "data",
+              "objectType": "dto",
+              "module": "assiduidade"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "pedidoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "actionName": "eliminarPedidoJustificacao",
+      "path": "falta/justificar/pedido/{pedidoId}",
+      "method": "DELETE",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "name": "data",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "pedidoId",
+          "type": "string",
+          "isRequired": true
+        }
+      ]
     }
   ],
   "id": "mxvoz9hyxu-getListaMovimentosResumidos-marcarHoraExtra-alterarPedidoFeria-justificarFalta-getListaMovimentosResumidos-getFaltaJustificada-justificarFalta-validarFaltaJustificada-getFalta-validarFalta-validarFalta-validarFaltaJustificada-validarDispensa-validarHoraExtra-getHoraExtra-getDetalheMapaFeria-verMapa-getDetalheMapaFeria-getPedidoFeria-alterarPedidoFeria-validarPedidoFeria-getListaFalta-getListaHoraExtra-getListaMovimentosResumidos-getListaPicagem"

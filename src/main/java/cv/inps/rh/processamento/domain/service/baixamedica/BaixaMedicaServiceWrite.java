@@ -183,7 +183,7 @@ public class BaixaMedicaServiceWrite {
         var pedido = pedidoRepository.findByUuid(pedidoUuid)
                 .orElseThrow(() -> IgrpResponseStatusException.badRequest("Pedido não encontrado"));
 
-        var faltas = faltaRepository.findAllByPedidoId(pedido);
+        var faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido);
         if (faltas.isEmpty())
             throw IgrpResponseStatusException.badRequest("Pedido já validado ou sem registos pendentes");
 
