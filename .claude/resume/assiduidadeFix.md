@@ -65,7 +65,6 @@ apagados (confirmado a zeros). Último `RH_T_PEDIDO` de teste: 241. Última sín
 
 ## Blockers & risks
 
-- **O trabalho não commitado é o maior risco.** Commitar antes de tudo o resto.
 - **`existeFaltaVivaNoDia` (`FaltaEntityRepository:125-135`) trata `E` como bloqueio** — só ignora
   `I`. Consequência viva hoje: depois de eliminar um pedido os dias reaparecem no painel
   (`findAusenciasPorJustificar` exclui `E`) mas o justificar recusa-os com *"Já existe uma falta
