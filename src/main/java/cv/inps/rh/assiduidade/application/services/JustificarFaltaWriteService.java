@@ -20,6 +20,7 @@ import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.service.NotificacaoDispatchService;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
+import cv.inps.rh.shared.domain.service.SaldoLockService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.TimeUtils;
@@ -60,6 +61,7 @@ public class JustificarFaltaWriteService {
   private final FaltaDescontoService faltaDescontoService;
   private final FaltaValorCalculator faltaValorCalculator;
   private final ResponsavelEntityRepository responsavelEntityRepository;
+  private final SaldoLockService saldoLockService;
 
   /**
    * Responsável do parecer. O DTO envia a PK de RH_T_RESPONSAVEL — a mesma que a leitura
@@ -85,6 +87,11 @@ public class JustificarFaltaWriteService {
 
     var funcionario = funcionarioRepository.findByUuid(funcionarioUuid)
         .orElseThrow(() -> IgrpResponseStatusException.badRequest("Funcionário não encontrado"));
+
+    // Antes de qualquer leitura de saldo: daqui para a frente lê-se quanto resta de férias e
+    // de dispensa e grava-se o consumo, e duas justificações simultâneas do mesmo colaborador
+    // concederiam ambas o mesmo saldo.
+    saldoLockService.lockColaborador(funcionarioUuid);
 
     var dto = command.getJustificarfalta();
     if (dto == null || dto.getItensFalta() == null || dto.getItensFalta().isEmpty())
@@ -278,6 +285,10 @@ public class JustificarFaltaWriteService {
         .orElseThrow(() -> IgrpResponseStatusException.badRequest("Pedido de justificação de falta não encontrado"));
 
     var funcionario = pedido.getFunId();
+
+    // É no despacho que os descontos são aplicados — é a escrita de saldo mais pesada de todo
+    // o fluxo, e a que não pode correr em paralelo com outra do mesmo colaborador.
+    saldoLockService.lockColaborador(funcionario.getUuid());
 
     var dto = command.getJustificarfalta();
     if (dto == null || dto.getItensFalta() == null || dto.getItensFalta().isEmpty()) {
@@ -492,6 +503,10 @@ public class JustificarFaltaWriteService {
     garantirNaoProcessado(pedido, "editar");
 
     var funcionario = pedido.getFunId();
+
+    // O editar reverte e reaplica: devolve saldo e volta a consumi-lo, portanto compete com
+    // qualquer outra escrita de saldo do mesmo colaborador.
+    saldoLockService.lockColaborador(funcionario.getUuid());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     boolean comJustificativo = "SIM".equalsIgnoreCase(dto.getComJustificativo());
@@ -582,6 +597,10 @@ public class JustificarFaltaWriteService {
 
     var vivas = faltasVivas(pedido);
     garantirNaoProcessado(pedido, "eliminar");
+
+    // Devolver saldo também é escrevê-lo: sem o lock, uma devolução a meio de um consumo
+    // simultâneo pode perder-se.
+    saldoLockService.lockColaborador(pedido.getFunId().getUuid());
 
     for (var falta : vivas) {
       faltaDescontoService.reverter(falta, pedido);

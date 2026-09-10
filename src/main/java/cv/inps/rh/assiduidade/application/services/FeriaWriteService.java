@@ -21,6 +21,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.application.services.EmailService;
 import cv.inps.rh.shared.domain.service.NotificacaoDestinatarioResolver;
 import cv.inps.rh.shared.domain.service.NotificacaoDispatchService;
+import cv.inps.rh.shared.domain.service.SaldoLockService;
 import cv.inps.rh.assiduidade.application.commands.EnviarDireitoFeriasCommand;
 import lombok.RequiredArgsConstructor;
 import org.flywaydb.core.internal.util.CollectionsUtils;
@@ -65,6 +66,7 @@ public class FeriaWriteService {
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final NotificacaoDispatchService notificacaoDispatchService;
   private final NotificacaoDestinatarioResolver destinatarioResolver;
+  private final SaldoLockService saldoLockService;
 
 
   @Transactional
@@ -72,6 +74,10 @@ public class FeriaWriteService {
     var req = command.getPedidoferiareq();
     if (req == null)
       throw IgrpResponseStatusException.badRequest("Dados de férias ausentes");
+
+    // O validatePedido ja le o saldo de ferias — o lock tem de vir antes dele.
+    saldoLockService.lockColaborador(req.getColaborador());
+
     validatePedido(req);
 
     var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaborador());
@@ -172,6 +178,8 @@ public class FeriaWriteService {
 
     var funcionario = ferias.getFunId();
 
+    saldoLockService.lockColaborador(funcionario.getUuid());
+
     // Verificar saldo usando funcionario das ferias (colaborador pode não vir no request de validação)
     var saldoFeria = saldoFeriaService.getSaldo(funcionario.getUuid());
     if (req.getNumDias() != null && req.getNumDias() > saldoFeria)
@@ -248,6 +256,9 @@ public class FeriaWriteService {
             "Pedido de férias não encontrado"));
 
     var funcionario = ferias.getFunId();
+
+    // Alterar um pedido devolve os dias antigos e consome os novos — ler-decidir-gravar.
+    saldoLockService.lockColaborador(funcionario.getUuid());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     var base = req.getFeria();

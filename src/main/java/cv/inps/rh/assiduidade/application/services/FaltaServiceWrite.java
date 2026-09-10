@@ -17,6 +17,7 @@ import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
+import cv.inps.rh.shared.domain.service.SaldoLockService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.TimeUtils;
@@ -53,6 +54,7 @@ public class FaltaServiceWrite {
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final FaltaDescontoService faltaDescontoService;
   private final FaltaValorCalculator faltaValorCalculator;
+  private final SaldoLockService saldoLockService;
 
 
   @Transactional
@@ -76,6 +78,11 @@ public class FaltaServiceWrite {
           "Total de horas ausente tem de ser superior a zero");
 
     var funcionario = funcionarioRepository.findByUuidOrThrow(req.getColaboradorId());
+
+    // Antes da primeira leitura de saldo — marcar falta com justificativo aplica os descontos
+    // de imediato quando não vai a despacho.
+    saldoLockService.lockColaborador(funcionario.getUuid());
+
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
     boolean deveJustificar = Objects.equals(req.getJustificar(), "SIM");
@@ -221,6 +228,9 @@ public class FaltaServiceWrite {
     var pedido = pedidoRepository.findByUuid(pedidoUuid)
         .orElseThrow(() -> IgrpResponseStatusException.badRequest(
             "Pedido marcação de falta não encontrado com id: " + pedidoUuid));
+
+    // O despacho aplica os descontos — mesma corrida que na justificação.
+    saldoLockService.lockColaborador(pedido.getFunId().getUuid());
 
     var novoEstado = req.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(pedido.getFunId().getUuid());
