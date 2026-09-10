@@ -37,6 +37,9 @@ public interface AssiduidadeSinteseDiarioEntityRepository extends
    * trabalhadas são zero, portanto uma ausência parcial — saiu três horas mais cedo — tem
    * {@code FALTA = 0} e continua a ser justificável.
    *
+   * <p>Uma falta ELIMINADA não bloqueia o dia: depois de o pedido ser eliminado, o dia volta a
+   * estar por justificar e tem de reaparecer no painel.
+   *
    * <p>O filtro tem de viver aqui e não em memória: o relógio de ponto cria uma síntese por
    * cada dia trabalhado, logo trazer o mês inteiro para deitar quase tudo fora enchia o ecrã
    * de dias que não são falta nenhuma.
@@ -49,7 +52,8 @@ public interface AssiduidadeSinteseDiarioEntityRepository extends
          AND (s.FALTA = 1 OR s.HORAS_AUSENCIA > INTERVAL '0' SECOND)
          AND NOT EXISTS (SELECT 1
                            FROM RH_T_FALTA f
-                          WHERE f.SINTESE_DIARIO_ID = s.ID)
+                          WHERE f.SINTESE_DIARIO_ID = s.ID
+                            AND f.ESTADO <> 'E')
        ORDER BY s.DATA
       """, nativeQuery = true)
   List<AssiduidadeSinteseDiarioEntity> findAusenciasPorJustificar(

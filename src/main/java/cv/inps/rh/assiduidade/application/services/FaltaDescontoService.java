@@ -107,6 +107,45 @@ public class FaltaDescontoService {
       aplicarDescontoSalario(falta, funcionario, tipoRel, minutosAusencia, minutosPorCobrir);
   }
 
+  /**
+   * Desfaz tudo o que o {@link #aplicar} criou para esta falta. Simétrico dele, e partilhado
+   * pelo Eliminar e pelo Editar — o editar não faz update dos efeitos, reverte-os e volta a
+   * aplicá-los a partir do estado novo, senão trocar "Deduzir em" de FERIAS para DISPENSA
+   * deixava as férias gozadas lá e criava a dispensa por cima, descontando duas vezes.
+   *
+   * <p>Os registos revertidos ficam em {@code E} (decisão de negócio, 10/09), o que os retira
+   * dos saldos — que só contam os aprovados. {@code RH_T_TIPREL_REM_PAG} não tem coluna de
+   * estado, por isso a linha é apagada.
+   */
+  public void reverter(FaltaEntity falta, PedidoEntity pedido) {
+
+    if (falta == null)
+      return;
+
+    // Desconto no salário: a associação ao vínculo desaparece e a definição fica eliminada.
+    var remuneracao = falta.getDefRemId();
+    if (remuneracao != null) {
+      tipoRelRemPagRepository.deleteAll(tipoRelRemPagRepository.findAllByRemId(remuneracao));
+      remuneracao.setEstado(Estado.E);
+      definicaoRemuneracaoRepository.save(remuneracao);
+      falta.setDefRemId(null);
+    }
+
+    // Dedução em férias / dispensa: ambas presas ao pedido. Filtra-se pelo dia da falta porque
+    // o pedido tem uma linha por dia e só este está a ser revertido.
+    var dia = falta.getDataInicio().toLocalDate();
+
+    var gozadas = feriasGozadasRepository.findAllByPedidoId_IdAndDataInicio(pedido.getId(), dia);
+    gozadas.forEach(g -> g.setEstado(Estado.E));
+    feriasGozadasRepository.saveAll(gozadas);
+
+    var dispensas = dispensaRepository.findAllByPedidoId_IdAndDataInicio(pedido.getId(), dia);
+    dispensas.forEach(d -> d.setEstado(Estado.E));
+    dispensaRepository.saveAll(dispensas);
+
+    falta.setFlgDescontoSal(0);
+  }
+
   /** @return true se o tipo de justificação implica desconto no salário. */
   public boolean descontaSalario(FaltaEntity falta) {
     return falta != null

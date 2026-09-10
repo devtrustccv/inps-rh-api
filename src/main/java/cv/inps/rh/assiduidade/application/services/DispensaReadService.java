@@ -199,8 +199,9 @@ public class DispensaReadService {
     if (dto.getColaborador() != null && dto.getDataInicio() != null) {
       var inicioMes = dto.getDataInicio().withDayOfMonth(1);
       var fimMes = dto.getDataInicio().withDayOfMonth(dto.getDataInicio().lengthOfMonth());
-      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataInicioBetween(
-          dto.getColaborador(), inicioMes, fimMes);
+      // Mesma regra do saldo (DispensaHorasService): só as aprovadas contam como usadas.
+      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataInicioBetweenAndEstado(
+          dto.getColaborador(), inicioMes, fimMes, Estado.A);
       int totalMin = 0;
       for (var d : listaMes) {
         var minsItem = TimeUtils.diffMinutes(d.getHoraInicio(), d.getHoraFim());
@@ -270,8 +271,9 @@ public class DispensaReadService {
       var inicioMes = dto.getDataInicio().withDayOfMonth(1);
       var fimMes = dto.getDataInicio().withDayOfMonth(dto.getDataInicio().lengthOfMonth());
 
-      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataInicioBetween(
-          dto.getColaborador(), inicioMes, fimMes);
+      // Mesma regra do saldo (DispensaHorasService): só as aprovadas contam como usadas.
+      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataInicioBetweenAndEstado(
+          dto.getColaborador(), inicioMes, fimMes, Estado.A);
       int totalMin = 0;
       for (var d : listaMes) {
         var minsItem = TimeUtils.diffMinutes(d.getHoraInicio(), d.getHoraFim());

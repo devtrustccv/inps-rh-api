@@ -63,4 +63,8 @@ public interface TipoRelRemPagEntityRepository extends
 
 
 
+
+  /** Associações ao vínculo desta definição de remuneração — o reverter apaga-as (a tabela não tem estado). */
+  java.util.List<TipoRelRemPagEntity> findAllByRemId(
+      cv.inps.rh.shared.infrastructure.persistence.entity.DefinicaoRemuneracaoEntity remId);
 }

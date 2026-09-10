@@ -123,6 +123,9 @@ public class JustificarFaltaReadService {
         .findAllByFuncionarioAndPeriodo(funcUuid, inicioMes, fimMes)
         .stream()
         .filter(f -> f.getSinteseDiarioId() != null)
+        // As eliminadas não contam para nada: nem aparecem no grupo, nem prendem o dia — que
+        // volta a ficar por justificar (ver findAusenciasPorJustificar).
+        .filter(f -> !Estado.E.equals(f.getEstado()))
         .sorted(Comparator.comparing(JustificarFaltaReadService::dataDaFalta,
             Comparator.nullsLast(Comparator.naturalOrder())))
         .collect(Collectors.toMap(

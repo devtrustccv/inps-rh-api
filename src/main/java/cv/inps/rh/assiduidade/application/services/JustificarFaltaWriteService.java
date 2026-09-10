@@ -58,6 +58,7 @@ public class JustificarFaltaWriteService {
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final NotificacaoDispatchService notificacaoDispatchService;
   private final FaltaDescontoService faltaDescontoService;
+  private final ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
   private final FaltaValorCalculator faltaValorCalculator;
   private final ResponsavelEntityRepository responsavelEntityRepository;
 
@@ -451,44 +452,188 @@ public class JustificarFaltaWriteService {
 
 
   /**
-   * Editar um pedido de justificação já gravado (acção "Editar" do resumo de faltas, spec
-   * 09/09 — "o grupo selecionado, agrupados por RH_T_FALTA.PEDIDO_ID"). Age no pedido
-   * inteiro, não em dias soltos.
+   * Guarda partilhado pelo Editar e pelo Eliminar: um pedido cujo mês já foi processado em
+   * folha não pode ser mexido — o desconto já saiu no vencimento, e alterá-lo aqui deixaria a
+   * folha e a assiduidade a dizer coisas diferentes.
    *
-   * <p>TODO: por implementar. Decisões de negócio ainda em aberto:</p>
-   * <ul>
-   *   <li>que campos são editáveis depois de validado, e se a edição volta a P (a spec deixa
-   *       a coluna de gravação vazia);</li>
-   *   <li>se é permitido editar um pedido já processado em folha;</li>
-   *   <li>se se pode acrescentar ou retirar dias do pedido, ou só alterar o cabeçalho;</li>
-   *   <li>o que fazer aos efeitos já aplicados (RH_T_DEF_REMUNERACOES, RH_T_TIPREL_REM_PAG,
-   *       RH_T_DISPENSA / saldo de férias) quando o tipo ou a dedução mudam.</li>
-   * </ul>
+   * <p>Critério: existir processamento do vínculo com período de referência dentro do mês da
+   * falta. É o mesmo que a carreira e a mobilidade usam ({@code CarreiraWriteService:66}) e é o
+   * mais conservador — bloqueia mesmo antes de a linha concreta ter ido à folha.
    */
-  @Transactional
-  public Map<String, ?> editarPedidoJustificacao(EditarPedidoJustificacaoCommand command) {
-    throw IgrpResponseStatusException.of(org.springframework.http.HttpStatus.NOT_IMPLEMENTED,
-        "Editar pedido de justificação ainda não está implementado");
+  private void garantirNaoProcessado(List<FaltaEntity> faltas, String accao) {
+    for (var falta : faltas) {
+      var tiprel = falta.getTiprelId();
+      if (tiprel == null) continue;
+      var dia = falta.getDataInicio().toLocalDate();
+      boolean processado = processamentoFuncionarioRepository
+          .existsByTiprel_IdAndDataReferenciaDeBetween(
+              tiprel.getId(), dia.withDayOfMonth(1), dia.withDayOfMonth(dia.lengthOfMonth()));
+      if (processado)
+        throw IgrpResponseStatusException.badRequest(
+            "Não é possível " + accao + " este pedido: as faltas de "
+                + dia.getMonthValue() + "/" + dia.getYear() + " já foram processadas em folha.");
+    }
   }
 
   /**
-   * Eliminar um pedido de justificação (acção "Eliminar" do resumo de faltas, spec 09/09).
-   * Soft-delete: RH_T_FALTA.ESTADO = 'E' em todas as faltas do pedido.
+   * Editar um pedido de justificação (acção "Editar" do resumo de faltas, spec 09/09 :655).
+   * Age no pedido inteiro, agrupado por {@code RH_T_FALTA.PEDIDO_ID}.
    *
-   * <p>TODO: por implementar. Decisões de negócio ainda em aberto:</p>
-   * <ul>
-   *   <li>até quando se pode eliminar — validado (A) sim, processado em folha presumivelmente
-   *       não;</li>
-   *   <li>o que desfazer além da falta: o desconto em RH_T_DEF_REMUNERACOES e a associação em
-   *       RH_T_TIPREL_REM_PAG, a RH_T_DISPENSA criada por "Deduzir em: Dispensa" ou a reposição
-   *       do saldo de férias, o estado do pedido e dos seus anexos, e a validação pendente.
-   *       Sem isso o colaborador fica descontado por uma falta eliminada.</li>
-   * </ul>
+   * <p>Não é um update de campos: os efeitos financeiros são <b>revertidos e reaplicados</b> a
+   * partir do estado novo. Sem isso, trocar "Deduzir em" de FERIAS para DISPENSA deixava as
+   * férias gozadas onde estavam e criava a dispensa por cima — dois descontos pelo mesmo dia.
+   *
+   * <p>Não volta a validação (decisão de negócio, 10/09): grava direto, seja o que for que mude.
+   */
+  @Transactional
+  public Map<String, ?> editarPedidoJustificacao(EditarPedidoJustificacaoCommand command) {
+
+    var pedido = pedidoRepository.findByUuid(UUID.fromString(command.getPedidoId()))
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest(
+            "Pedido de justificação de falta não encontrado"));
+
+    var dto = command.getJustificarfalta();
+    if (dto == null)
+      throw IgrpResponseStatusException.badRequest("Corpo do pedido em falta");
+
+    var vivas = faltasVivas(pedido);
+    garantirNaoProcessado(vivas, "editar");
+
+    var funcionario = pedido.getFunId();
+    var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
+
+    boolean comJustificativo = "SIM".equalsIgnoreCase(dto.getComJustificativo());
+    var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), comJustificativo);
+    var deducao = StringUtils.hasText(dto.getDeduzirFaltaEm())
+        ? TipoDescontoFalta.fromCodeOrThrow(dto.getDeduzirFaltaEm()).getCode()
+        : null;
+    var responsavel = resolverResponsavel(dto.getResponsavelId());
+
+    // Os dias que ficam. O array é a lista final do pedido: um dia que não venha nos itens é
+    // retirado da justificação, como nos restantes PUT da casa. Array vazio ou ausente preserva.
+    Set<Long> mantidos = (dto.getItensFalta() == null || dto.getItensFalta().isEmpty())
+        ? vivas.stream().map(f -> f.getSinteseDiarioId().getId()).collect(Collectors.toSet())
+        : dto.getItensFalta().stream().map(FaltaItemDTO::getId).collect(Collectors.toSet());
+
+    for (var falta : vivas) {
+
+      // Reverter SEMPRE antes de reaplicar — é isto que impede o desconto duplo quando o tipo
+      // ou a dedução mudam.
+      faltaDescontoService.reverter(falta, pedido);
+
+      if (!mantidos.contains(falta.getSinteseDiarioId().getId())) {
+        falta.setEstado(Estado.E);
+        continue;
+      }
+
+      if (StringUtils.hasText(dto.getMotivo()))
+        falta.setDescricaoMotivo(dto.getMotivo());
+      if (StringUtils.hasText(dto.getComJustificativo()))
+        falta.setFlgJustificativo(dto.getComJustificativo());
+      if (dto.getParecerResponsavel() != null)
+        falta.setDecisaoResponsavel(dto.getParecerResponsavel());
+      if (responsavel != null)
+        falta.setResponsavelId(responsavel);
+      if (dto.getObsResponsavel() != null)
+        falta.setObsResponsavel(dto.getObsResponsavel());
+      if (paramSituacao != null)
+        falta.setParamSitId(paramSituacao);
+      falta.setFlgDescontoFalta(deducao);
+      falta.setFlgDescontoSal(
+          paramSituacao != null && Integer.valueOf(1).equals(paramSituacao.getFlgFaltaDecontoSal())
+              ? 1 : 0);
+
+      // Reaplica com o estado novo. Uma falta ainda pendente só recebe os efeitos no despacho.
+      if (Estado.A.equals(falta.getEstado()))
+        faltaDescontoService.aplicar(falta, pedido, tipoRelAtual);
+    }
+
+    faltaRepository.saveAll(vivas);
+
+    // Anexos: semântica dos arrays da casa — null preserva, item sem id cria, ausente fica 'E'.
+    if (dto.getDocumentos() != null) {
+      var existentes = documentoEntityRepository
+          .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
+      var sincronizados = documentoMapper.syncDocumentos(
+          new ArrayList<>(existentes), dto.getDocumentos(),
+          TableName.RH_T_PEDIDO.name(), pedido.getId(), pedido.getUuid(), 1L, funcionario);
+      for (var doc : sincronizados)
+        if (doc.getUuid() == null) doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+      documentoEntityRepository.saveAll(sincronizados);
+    }
+
+    long ficaram = vivas.stream().filter(f -> !Estado.E.equals(f.getEstado())).count();
+    LOGGER.info("[EDITAR] Pedido de justificação {} editado ({} dias mantidos, {} retirados).",
+        pedido.getUuid(), ficaram, vivas.size() - ficaram);
+
+    return Map.of(
+        "pedidoId", pedido.getId(),
+        "pedidoUuid", pedido.getUuid(),
+        "estado", pedido.getEstado(),
+        "totalRegistos", ficaram);
+  }
+
+  /**
+   * Eliminar um pedido de justificação (acção "Eliminar" do resumo de faltas, spec 09/09 :665).
+   * Soft-delete: {@code RH_T_FALTA.ESTADO = 'E'}, tal como a spec manda.
+   *
+   * <p>Desfaz também os efeitos financeiros (decisão de negócio, 10/09): sem isso o colaborador
+   * ficava descontado no vencimento — ou com férias e horas de dispensa gastas — por uma falta
+   * que já não existe.
    */
   @Transactional
   public Map<String, ?> eliminarPedidoJustificacao(EliminarPedidoJustificacaoCommand command) {
-    throw IgrpResponseStatusException.of(org.springframework.http.HttpStatus.NOT_IMPLEMENTED,
-        "Eliminar pedido de justificação ainda não está implementado");
+
+    var pedido = pedidoRepository.findByUuid(UUID.fromString(command.getPedidoId()))
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest(
+            "Pedido de justificação de falta não encontrado"));
+
+    var vivas = faltasVivas(pedido);
+    garantirNaoProcessado(vivas, "eliminar");
+
+    for (var falta : vivas) {
+      faltaDescontoService.reverter(falta, pedido);
+      falta.setEstado(Estado.E);
+    }
+    faltaRepository.saveAll(vivas);
+
+    // Os anexos são do pedido e acompanham-no.
+    var anexos = documentoEntityRepository
+        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
+    anexos.forEach(a -> a.setEstado(Estado.E));
+    documentoEntityRepository.saveAll(anexos);
+
+    // Uma validação por despachar deixa de fazer sentido: o pedido que lhe deu origem sumiu.
+    funcionarioRules.getValidacaoPendenteByReferenciaUuid(
+            pedido.getUuid(), TipoAcao.INSERT, Referencia.JUSTIFICAR_FALTA)
+        .ifPresent(v -> {
+          v.setEstado(Estado.E);
+          validacaoEntityRepository.save(v);
+        });
+
+    pedido.setEstado(Estado.E.name());
+    pedido.setEtapa("FINALIZADO");
+    pedidoRepository.save(pedido);
+
+    LOGGER.info("[ELIMINAR] Pedido de justificação {} eliminado ({} dias).",
+        pedido.getUuid(), vivas.size());
+
+    return Map.of(
+        "pedidoId", pedido.getId(),
+        "pedidoUuid", pedido.getUuid(),
+        "estado", pedido.getEstado(),
+        "totalRegistos", vivas.size());
+  }
+
+  /** Faltas do pedido que ainda contam — as eliminadas não voltam a ser mexidas. */
+  private List<FaltaEntity> faltasVivas(PedidoEntity pedido) {
+    var faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido);
+    if (faltas.isEmpty())
+      throw IgrpResponseStatusException.badRequest("Não existem faltas associadas a este pedido");
+    var vivas = faltas.stream().filter(f -> !Estado.E.equals(f.getEstado())).toList();
+    if (vivas.isEmpty())
+      throw IgrpResponseStatusException.badRequest("Este pedido já foi eliminado");
+    return vivas;
   }
 
 }

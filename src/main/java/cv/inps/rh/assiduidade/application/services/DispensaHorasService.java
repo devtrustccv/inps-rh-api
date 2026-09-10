@@ -4,6 +4,7 @@ import cv.inps.rh.assiduidade.application.dto.HorasDispensaStatusDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AssiduidadeParametroEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.DispensaEntityRepository;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.util.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,8 +43,11 @@ public class DispensaHorasService {
       var inicioMes = dataReferencia.withDayOfMonth(1);
       var fimMes = dataReferencia.withDayOfMonth(dataReferencia.lengthOfMonth());
 
-      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataInicioBetween(
-          funcionarioUuid, inicioMes, fimMes);
+      // Só as APROVADAS consomem saldo (decisão de negócio, 10/09): uma dispensa pendente ainda
+      // não reserva as horas, e uma rejeitada ou eliminada devolve-as. Sem este filtro, uma
+      // dispensa posta a 'E' pelo eliminar continuava a comer as horas do mês.
+      var listaMes = dispensaRepository.findAllByPedidoId_FunId_UuidAndDataInicioBetweenAndEstado(
+          funcionarioUuid, inicioMes, fimMes, Estado.A);
 
       int usadasMin = 0;
       for (var d : listaMes) {

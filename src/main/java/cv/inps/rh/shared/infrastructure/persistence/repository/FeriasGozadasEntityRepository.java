@@ -32,4 +32,8 @@ public interface FeriasGozadasEntityRepository extends
     @Query("SELECT COALESCE(SUM(fg.numDia), 0) FROM FeriasGozadasEntity fg WHERE " +
         "fg.funId.uuid = :funcionarioId AND fg.estado = 'A'")
     Integer sumNumDiaByFuncionarioId(@Param("funcionarioId") UUID funcionarioId);
+
+    /** Férias gozadas geradas por um dia concreto de um pedido de falta — usado pelo reverter. */
+    java.util.List<FeriasGozadasEntity> findAllByPedidoId_IdAndDataInicio(
+        Long pedidoId, java.time.LocalDate dataInicio);
 }
