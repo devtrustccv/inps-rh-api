@@ -1,4 +1,4 @@
-> Updated: 2026-09-10 13:05 -01:00
+> Updated: 2026-09-10 15:40 -01:00
 
 ## Goal
 
@@ -62,6 +62,15 @@ licença.
     e mandar o resto para o vencimento. E o `DEF_REMUNERACOES` passa a nascer **só para os dias
     não cobertos**, em vez de para todos.
 - **Editar e Eliminar são endpoints próprios por `pedidoUuid`**, agem no pedido inteiro.
+- **Registos revertidos ficam em `E`** (não `I`) — decidido a 10/09. `RH_T_TIPREL_REM_PAG` não
+  tem coluna de estado, aí a linha é apagada.
+- **O editar NÃO volta a validação** por agora — decidido a 10/09. Grava direto, seja o que for
+  que mude.
+- **O finder do saldo de dispensa entra no lote do A1** — deixou de ser opcional: como os
+  revertidos ficam em `E` e `DispensaHorasService:45` soma sem filtrar estado, sem esta
+  correcção o eliminar não devolve as horas. Critério: somar só `A` e `P` (a pendente ainda
+  reserva as horas; a rejeitada e a eliminada libertam-nas). Em BD só existem `A` e `P` hoje,
+  logo não há dados a corrigir.
 - **Eliminar = soft-delete**: `RH_T_FALTA.ESTADO='E'`. A spec di-lo explicitamente (`:665`).
 - **Eliminar desfaz também os efeitos financeiros** e repõe saldo de férias/dispensa —
   decidido pelo utilizador. Sem isso o colaborador fica descontado por uma falta eliminada.
@@ -111,6 +120,9 @@ licença.
 - `RH_PROCESSAMENTO_SALARIAL_DB` tem o package body inválido (ORA-04063): `CALCULO_FALTA_DIARIO`
   cai no fallback Java e funciona. Não confundir com bug nosso.
 - `CALCULO_FALTA_DIARIO` não existe na BD; `PARECER_DECISAO` está por povoar em dev (só `TETS`).
+- **`RH_T_ANO` só tem 2026**: qualquer falta com dedução em férias noutro ano rebenta com
+  `404 "Ano de referência 2027 não encontrado em RH_T_ANO"` (`FaltaDescontoService.resolverAno`).
+  É dados, não código, mas morde no virar do ano.
 
 ## Relevant files
 
@@ -256,19 +268,12 @@ imediatos; criar ≥4 dias tipo 18 → `P`/`DESPACHO_RH` sem `DEF_REM_ID`; valid
 Resolvidas a 10/09 (ver *Decisões*): a regra de desconto, a ordem de cobertura, a cobertura
 parcial da dispensa e a responsabilidade da dedução. Por responder:
 
-**Bloqueiam o Editar / Eliminar (A1)**
+**Bloqueia o Editar / Eliminar (A1) — a última**
 
-- **Critério de "já processado"** que bloqueia os dois:
-  `existsByTiprel_IdAndDataReferenciaDeBetween` (o mês da falta ter processamento — mais
-  conservador) ou `DEF_REMUNERACOES.DATA_ULTIMO_PROC` preenchido (mais preciso, mas só depois
-  de a linha ir à folha)?
-- **`I` ou `E`** nos registos revertidos (`DEF_REMUNERACOES`, `FERIAS_GOZADAS`, `DISPENSA`)?
-  Proposta: `E` nos dois fluxos. `TIPREL_REM_PAG` não tem estado — só resta apagar a linha.
-- **O finder do saldo de dispensa entra neste lote** ou fica como correcção à parte? Sem ele o
-  eliminar não repõe as horas.
-- **Editar volta a validação?** Proposta: muda tipo/dedução/conjunto de dias → volta a `P` e
-  reabre a `RH_T_VALIDACAO`; muda só motivo/observação/anexos → grava direto. A spec deixa a
-  célula de gravação vazia.
+- **Critério de "já processado"** que bloqueia os dois com 400:
+  `existsByTiprel_IdAndDataReferenciaDeBetween` (o mês da falta já ter processamento — mais
+  conservador, bloqueia mais cedo) ou `DEF_REMUNERACOES.DATA_ULTIMO_PROC` preenchido (mais
+  preciso, mas só protege depois de a linha ter ido à folha)?
 
 **Âmbito a agendar**
 
