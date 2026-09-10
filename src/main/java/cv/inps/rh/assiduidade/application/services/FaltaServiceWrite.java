@@ -254,8 +254,9 @@ public class FaltaServiceWrite {
 
     pedidoRepository.save(pedido);
 
-    funcionarioRules.getValidacaoPendente(
-            pedido.getFunId().getUuid(), TipoAcao.INSERT, Referencia.FALTA)
+    // Pela referência (uuid do pedido) e não pelo funcionário — ver JustificarFaltaWriteService.
+    funcionarioRules.getValidacaoPendenteByReferenciaUuid(
+            pedido.getUuid(), TipoAcao.INSERT, Referencia.FALTA)
         .ifPresent(v -> {
           v.setEstado(novoEstado);
           validacaoEntityRepository.save(v);

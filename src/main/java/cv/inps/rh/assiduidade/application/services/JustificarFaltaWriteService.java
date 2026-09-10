@@ -366,9 +366,11 @@ public class JustificarFaltaWriteService {
 
     enviarNotificacaoJustificacaoFalta(pedido, funcionario);
 
-    // Atualizar validação pendente
-    funcionarioRules.getValidacaoPendente(
-        funcionario.getUuid(),
+    // Atualizar validação pendente. Pela referência (uuid do pedido), não pelo funcionário: a
+    // validação foi gravada com referenciaUuid = pedido.uuid e o mesmo colaborador pode ter mais
+    // do que um pedido pendente — procurar por funUuid apanhava o errado (ou rebentava).
+    funcionarioRules.getValidacaoPendenteByReferenciaUuid(
+        pedido.getUuid(),
         TipoAcao.INSERT,
         Referencia.JUSTIFICAR_FALTA)
         .ifPresent(v -> {
