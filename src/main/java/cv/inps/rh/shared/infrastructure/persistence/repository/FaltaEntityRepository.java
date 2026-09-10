@@ -138,4 +138,73 @@ public interface FaltaEntityRepository extends
       @Param("funId") Long funId,
       @Param("ano") Integer ano
   );
+
+  /**
+   * Dias já comprometidos em férias por faltas ainda <b>pendentes de despacho</b>.
+   *
+   * <p>Reserva de saldo sem criar linhas: a falta em {@code P} já diz, no
+   * {@code FLG_DESCONTO_FALTA}, que tenciona deduzir em férias, por isso o saldo pode
+   * descontá-la sem que seja preciso gravar {@code RH_T_FERIAS_GOZADAS} antecipadamente.
+   * Assim o segundo pedido do mês vê o saldo que sobra de verdade, em vez de descobrir no
+   * despacho que as férias já tinham sido gastas — e não há linhas em {@code P} para
+   * desfazer quando o pedido é rejeitado: a falta passa a {@code I} e deixa de contar.
+   *
+   * <p>{@code pedidoIdExcluir} serve o momento do despacho: a falta que está a ser aprovada
+   * ainda está em {@code P} e descontar-se-ia a si própria. Sem pedido a excluir, passar
+   * {@code -1}.
+   */
+  @Query("""
+          SELECT COUNT(f)
+          FROM FaltaEntity f
+          JOIN f.sinteseDiarioId s
+          JOIN s.funcionarioId func
+          WHERE func.uuid = :funcionarioUuid
+            AND f.estado = cv.inps.rh.shared.application.constants.Estado.P
+            AND f.flgDescontoFalta = 'FERIAS'
+            AND f.pedidoId.id <> :pedidoIdExcluir
+      """)
+  long countDiasPendentesDeducaoFerias(
+      @Param("funcionarioUuid") UUID funcionarioUuid,
+      @Param("pedidoIdExcluir") Long pedidoIdExcluir);
+
+  /** Igual a {@link #countDiasPendentesDeducaoFerias}, restrito ao ano do direito. */
+  @Query("""
+          SELECT COUNT(f)
+          FROM FaltaEntity f
+          JOIN f.sinteseDiarioId s
+          JOIN s.funcionarioId func
+          WHERE func.uuid = :funcionarioUuid
+            AND f.estado = cv.inps.rh.shared.application.constants.Estado.P
+            AND f.flgDescontoFalta = 'FERIAS'
+            AND YEAR(f.dataInicio) = :ano
+            AND f.pedidoId.id <> :pedidoIdExcluir
+      """)
+  long countDiasPendentesDeducaoFeriasNoAno(
+      @Param("funcionarioUuid") UUID funcionarioUuid,
+      @Param("ano") Integer ano,
+      @Param("pedidoIdExcluir") Long pedidoIdExcluir);
+
+  /**
+   * Faltas pendentes que tencionam deduzir em dispensa no período — a reserva do saldo de
+   * horas, pelo mesmo princípio das férias.
+   *
+   * <p>Devolve as faltas em vez da soma porque {@code HORAS_AUSENCIA} é
+   * {@code INTERVAL DAY TO SECOND} e só é somável em Java ({@code TimeUtils}).
+   */
+  @Query("""
+          SELECT f
+          FROM FaltaEntity f
+          JOIN f.sinteseDiarioId s
+          JOIN s.funcionarioId func
+          WHERE func.uuid = :funcionarioUuid
+            AND f.estado = cv.inps.rh.shared.application.constants.Estado.P
+            AND f.flgDescontoFalta = 'DISPENSA'
+            AND s.data BETWEEN :dataInicio AND :dataFim
+            AND f.pedidoId.id <> :pedidoIdExcluir
+      """)
+  List<FaltaEntity> findPendentesDeducaoDispensaNoPeriodo(
+      @Param("funcionarioUuid") UUID funcionarioUuid,
+      @Param("dataInicio") LocalDate dataInicio,
+      @Param("dataFim") LocalDate dataFim,
+      @Param("pedidoIdExcluir") Long pedidoIdExcluir);
 }

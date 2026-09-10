@@ -272,7 +272,11 @@ public class FaltaDescontoService {
 
     // Saldo relido a cada dia: as férias gozadas gravadas nos dias anteriores deste mesmo
     // pedido já cá estão, e é isso que faz o saldo esgotar-se pela ordem cronológica.
-    int saldo = saldoFeriaService.getSaldo(funcionario.getUuid());
+    //
+    // O próprio pedido é excluído da reserva: as suas faltas ainda estão em P neste
+    // instante (só passam a A depois de os descontos serem aplicados) e sem a exclusão
+    // reservariam contra si próprias — o pedido roubava-se a si mesmo o saldo que vem gastar.
+    int saldo = saldoFeriaService.getSaldo(funcionario.getUuid(), null, pedido.getId());
     if (saldo < numDias)
       return minutosAusencia;
 
@@ -303,9 +307,10 @@ public class FaltaDescontoService {
     var dia = falta.getDataInicio().toLocalDate();
 
     // Relido a cada dia, tal como nas férias: as dispensas gravadas nos dias anteriores do
-    // mesmo pedido já contam para as horas usadas do mês.
+    // mesmo pedido já contam para as horas usadas do mês. E, pela mesma razão das férias, o
+    // próprio pedido fica fora da reserva — as suas faltas ainda estão em P.
     var status = dispensaHorasService.getHorasStatus(
-        pedido.getFunId().getUuid(), dia);
+        pedido.getFunId().getUuid(), dia, null, pedido.getId());
     int disponiveis = status.getHorasRestantesMinutos() != null
         ? status.getHorasRestantesMinutos() : 0;
 
