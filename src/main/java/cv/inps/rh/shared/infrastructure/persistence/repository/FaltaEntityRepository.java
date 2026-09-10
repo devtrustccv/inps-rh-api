@@ -32,6 +32,28 @@ public interface FaltaEntityRepository extends
   List<FaltaEntity> findAllByPedidoIdOrderByDataInicioAsc(PedidoEntity pedidoId);
 
   /**
+   * O pedido já foi processado em folha? Basta uma falta processada para bloquear o pedido
+   * inteiro (regra do utilizador, 10/09).
+   *
+   * <p>Uma falta está processada quando o seu desconto ({@code RH_T_DEF_REMUNERACOES}) já foi
+   * apanhado por uma remuneração efectiva ({@code RH_T_REMUNERACOES.REM_1_ID}). É o critério
+   * exacto — olha para a linha concreta, não para o mês — e é o que impede editar ou eliminar
+   * uma falta cujo dinheiro já saiu.
+   *
+   * <p>Nativa: {@code RH_T_REMUNERACOES} está mapeada como {@code RhTRemuneracoe} mas sem o
+   * {@code REM_1_ID}, e não tem repositório.
+   */
+  @Query(value = """
+      SELECT COUNT(a.ID)
+        FROM RH_T_FALTA a
+        JOIN RH_T_DEF_REMUNERACOES b ON b.ID = a.DEF_REM_ID
+        JOIN RH_T_REMUNERACOES c ON c.REM_1_ID = b.ID
+       WHERE a.PEDIDO_ID = :pedidoId
+         AND a.ESTADO <> 'E'
+      """, nativeQuery = true)
+  long countFaltasProcessadasEmFolha(@Param("pedidoId") Long pedidoId);
+
+  /**
    * Dias de falta VIVOS do colaborador no período — a contagem que decide se o pedido vai a
    * despacho ("mais de 3 faltas no mês", spec 09/09 :493).
    *

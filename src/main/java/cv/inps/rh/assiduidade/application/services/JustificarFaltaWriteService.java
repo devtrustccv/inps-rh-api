@@ -58,7 +58,6 @@ public class JustificarFaltaWriteService {
   private final OrdemServicoWriteService ordemServicoWriteService;
   private final NotificacaoDispatchService notificacaoDispatchService;
   private final FaltaDescontoService faltaDescontoService;
-  private final ProcessamentoFuncionarioRepository processamentoFuncionarioRepository;
   private final FaltaValorCalculator faltaValorCalculator;
   private final ResponsavelEntityRepository responsavelEntityRepository;
 
@@ -452,27 +451,20 @@ public class JustificarFaltaWriteService {
 
 
   /**
-   * Guarda partilhado pelo Editar e pelo Eliminar: um pedido cujo mês já foi processado em
-   * folha não pode ser mexido — o desconto já saiu no vencimento, e alterá-lo aqui deixaria a
+   * Guarda partilhado pelo Editar e pelo Eliminar: um pedido cujo desconto já foi processado em
+   * folha não pode ser mexido — o dinheiro já saiu no vencimento, e alterá-lo aqui deixaria a
    * folha e a assiduidade a dizer coisas diferentes.
    *
-   * <p>Critério: existir processamento do vínculo com período de referência dentro do mês da
-   * falta. É o mesmo que a carreira e a mobilidade usam ({@code CarreiraWriteService:66}) e é o
-   * mais conservador — bloqueia mesmo antes de a linha concreta ter ido à folha.
+   * <p>Critério dado pelo utilizador (10/09): a falta tem {@code DEF_REM_ID} e essa definição já
+   * foi apanhada por uma {@code RH_T_REMUNERACOES} (via {@code REM_1_ID}). Basta **uma** falta
+   * do pedido nessas condições para bloquear o pedido inteiro.
    */
-  private void garantirNaoProcessado(List<FaltaEntity> faltas, String accao) {
-    for (var falta : faltas) {
-      var tiprel = falta.getTiprelId();
-      if (tiprel == null) continue;
-      var dia = falta.getDataInicio().toLocalDate();
-      boolean processado = processamentoFuncionarioRepository
-          .existsByTiprel_IdAndDataReferenciaDeBetween(
-              tiprel.getId(), dia.withDayOfMonth(1), dia.withDayOfMonth(dia.lengthOfMonth()));
-      if (processado)
-        throw IgrpResponseStatusException.badRequest(
-            "Não é possível " + accao + " este pedido: as faltas de "
-                + dia.getMonthValue() + "/" + dia.getYear() + " já foram processadas em folha.");
-    }
+  private void garantirNaoProcessado(PedidoEntity pedido, String accao) {
+    long processadas = faltaRepository.countFaltasProcessadasEmFolha(pedido.getId());
+    if (processadas > 0)
+      throw IgrpResponseStatusException.badRequest(
+          "Não é possível " + accao + " este pedido: "
+              + processadas + " falta(s) já foram processadas em folha.");
   }
 
   /**
@@ -497,7 +489,7 @@ public class JustificarFaltaWriteService {
       throw IgrpResponseStatusException.badRequest("Corpo do pedido em falta");
 
     var vivas = faltasVivas(pedido);
-    garantirNaoProcessado(vivas, "editar");
+    garantirNaoProcessado(pedido, "editar");
 
     var funcionario = pedido.getFunId();
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
@@ -589,7 +581,7 @@ public class JustificarFaltaWriteService {
             "Pedido de justificação de falta não encontrado"));
 
     var vivas = faltasVivas(pedido);
-    garantirNaoProcessado(vivas, "eliminar");
+    garantirNaoProcessado(pedido, "eliminar");
 
     for (var falta : vivas) {
       faltaDescontoService.reverter(falta, pedido);
