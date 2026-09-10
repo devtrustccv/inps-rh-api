@@ -293,11 +293,15 @@ public class HoraExtraServiceWrite {
 
     Estado estado = Objects.equals(req.getValidar(), EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
-    var anexosExistentes = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_HORA_EXTRA.name(), pedido.getUuid());
-    if (anexosExistentes != null && !anexosExistentes.isEmpty()) {
-      anexosExistentes.forEach(a -> a.setEstado(estado));
-      documentoEntityRepository.saveAll(anexosExistentes);
+    // Os anexos da hora extra são gravados por LINHA (referenciaUuid = he.uuid, ver marcarHoraExtra),
+    // não pelo pedido. A procura por pedido.uuid nunca casava, e o estado dos anexos ficava em P.
+    for (var he : horasExtra) {
+      var anexosLinha = documentoEntityRepository
+          .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_HORA_EXTRA.name(), he.getUuid());
+      if (anexosLinha != null && !anexosLinha.isEmpty()) {
+        anexosLinha.forEach(a -> a.setEstado(estado));
+        documentoEntityRepository.saveAll(anexosLinha);
+      }
     }
 
     Map<LocalDate, HoraExtraDTO> ajustes = new HashMap<>();
@@ -311,10 +315,6 @@ public class HoraExtraServiceWrite {
     for (var he : horasExtra) {
       he.setEstado(estado);
       horaExtraRepository.save(he);
-
-      // Validado ⇒ entra no processamento salarial como remuneração.
-      if (estado == Estado.A)
-        registarRemuneracaoHoraExtra(he);
 
       var ajuste = ajustes.get(he.getDataInicio());
 
@@ -366,6 +366,14 @@ public class HoraExtraServiceWrite {
             }
           }
       }
+
+      // Validado ⇒ entra no processamento salarial como remuneração. DEPOIS dos ajustes: se o
+      // checker corrigiu horas ou percentagem, o valor foi recalculado acima e é esse que conta.
+      // Antes gravava-se o valor pré-ajuste em RH_T_DEF_REMUNERACOES.
+      if (estado == Estado.A) {
+        horaExtraRepository.save(he);
+        registarRemuneracaoHoraExtra(he);
+      }
     }
 
     funcionarioRules.getValidacaoPendenteByReferenciaUuid(pedido.getUuid(), TipoAcao.INSERT, Referencia.HORA_EXTRA)
@@ -375,6 +383,8 @@ public class HoraExtraServiceWrite {
         });
 
     pedido.setEstado(estado.name());
+    // Fecha a etapa nos dois sentidos — antes ficava em VALIDACAO depois de decidida.
+    pedido.setEtapa("FINALIZADO");
     pedidoRepository.save(pedido);
 
     if (estado == Estado.A && !horasExtra.isEmpty()) {

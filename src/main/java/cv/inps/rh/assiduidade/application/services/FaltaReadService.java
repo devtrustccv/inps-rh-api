@@ -203,8 +203,10 @@ public class FaltaReadService {
     dto.setResponsavelNome(funResponsavel != null ? funResponsavel.getNome() : null);
     dto.setTipoJustificacao(primeiraFalta.getParamSitId() != null ? primeiraFalta.getParamSitId().getId() : null);
 
+    // Os anexos da marcação são gravados contra o PEDIDO (ver FaltaServiceWrite), por isso a
+    // leitura tem de usar a mesma referência: com RH_T_FALTA o GET nunca devolvia nada.
     var documentos = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_FALTA.name(),pedido.getUuid());
+        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
 
     if (!CollectionUtils.isEmpty(documentos)) {
       dto.setDocumentos(documentos.stream().map(d -> {

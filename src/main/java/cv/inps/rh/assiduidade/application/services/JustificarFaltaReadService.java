@@ -230,7 +230,7 @@ public class JustificarFaltaReadService {
       else if (f.getDataInicio() != null)
         item.setData(f.getDataInicio().toLocalDate().toString());
       item.setTipoFalta(f.getParamSitId() != null ? f.getParamSitId().getNome() : null);
-      item.setValorAusencia(f.getValor() != null ? f.getValor().intValue() : null);
+      item.setValorAusencia(f.getValor());
       item.setHorasAusencia(TimeUtils.intervalFormatToHHmm(f.getHorasAusencia()));
       item.setMotivo(f.getDescricaoMotivo());
       item.setComJustificativo(f.getFlgJustificativo());

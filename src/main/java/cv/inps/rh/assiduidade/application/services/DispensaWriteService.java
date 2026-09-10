@@ -242,8 +242,10 @@ public class DispensaWriteService {
       }
     }
 
-    // Atualizar estado do pedido
+    // Atualizar estado do pedido. A etapa fecha em FINALIZADO nos dois sentidos — antes ficava
+    // eternamente em DESPACHO_RH, mesmo depois de despachada.
     pedido.setEstado(estado.name());
+    pedido.setEtapa("FINALIZADO");
     pedidoRepository.save(pedido);
 
     Map<String, Object> resp = new HashMap<>();

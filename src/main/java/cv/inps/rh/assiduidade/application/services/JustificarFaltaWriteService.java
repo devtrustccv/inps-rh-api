@@ -188,6 +188,9 @@ public class JustificarFaltaWriteService {
       falta.setObsResponsavel(dto.getObsResponsavel());
 
       falta.setParamSitId(paramSituacao);
+      // Campo hidden derivado do tipo de falta — ver FaltaServiceWrite.
+      falta.setFlgDescontoSal(
+          paramSituacao != null && Integer.valueOf(1).equals(paramSituacao.getFlgFaltaDecontoSal()) ? 1 : 0);
       falta.setFlgDescontoFalta(deducao);
       falta.setEstado(estadoInicial);
       falta.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -326,6 +329,10 @@ public class JustificarFaltaWriteService {
 
       if (StringUtils.hasText(dto.getDeduzirFaltaEm()))
         falta.setFlgDescontoFalta(TipoDescontoFalta.fromCodeOrThrow(dto.getDeduzirFaltaEm()).getCode());
+
+      // Despacho do RH (SIM/NAO) em RH_T_FALTA.DESPACHO_RH — ver FaltaServiceWrite.
+      if (dto.getValidar() != null)
+        falta.setDespachoRh(dto.getValidar().getCode());
 
       if (estadoFinal == Estado.A)
         faltaDescontoService.aplicar(falta, pedido, tipoRelAtual);

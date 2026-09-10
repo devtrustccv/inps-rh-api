@@ -137,6 +137,9 @@ public class FaltaServiceWrite {
         var falta = createFaltaDoDia(req, pedido, dia, tipoRelAtual, sintese, horasAusenciaPorDia);
         falta.setEstado(estadoInicial);
         falta.setParamSitId(paramSituacao);
+        // Campo hidden do formulário (spec 09/09 :700): deriva do tipo de falta escolhido, não
+        // da aplicação do desconto. Assim uma falta ainda pendente já diz se desconta salário.
+        falta.setFlgDescontoSal(descontaSalario(paramSituacao));
         faltaRepository.save(falta);
         faltas.add(falta);
         if (falta.getValor() != null)
@@ -240,6 +243,11 @@ public class FaltaServiceWrite {
       if (StringUtils.hasText(req.getDeduzirFaltaEm()))
         f.setFlgDescontoFalta(TipoDescontoFalta.fromCodeOrThrow(req.getDeduzirFaltaEm()).getCode());
 
+      // Despacho do RH: RH_T_FALTA.DESPACHO_RH é VARCHAR2(3) e guarda SIM/NAO — o equivalente
+      // do DECISAO_RH da dispensa e das férias. É o registo da decisão do separador "Despacho RH"
+      // (spec 09/09 :488). Sem isto a coluna ficava sempre nula.
+      f.setDespachoRh(req.getValidar().getCode());
+
       if (novoEstado == Estado.A)
         faltaDescontoService.aplicar(f, pedido, tipoRelAtual);
     }
@@ -247,8 +255,10 @@ public class FaltaServiceWrite {
     faltaRepository.saveAll(faltas);
 
     pedido.setEstado(novoEstado.name());
+    // O despacho encerra o pedido em qualquer sentido: rejeitado também é decidido. Antes ficava
+    // em DESPACHO_RH depois de rejeitado, como se ainda esperasse decisão.
+    pedido.setEtapa("FINALIZADO");
     if (novoEstado == Estado.A) {
-      pedido.setEtapa("FINALIZADO");
       ordemServicoWriteService.criar(pedido.getFunId(), tipoRelAtual, req.getTipoOrdemServico());
     }
 
@@ -286,6 +296,11 @@ public class FaltaServiceWrite {
       d = d.plusDays(1);
     }
     return dias;
+  }
+
+  /** 1 quando o tipo de falta escolhido desconta salário (RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL). */
+  private Integer descontaSalario(ParamSituacaoEntity paramSituacao) {
+    return paramSituacao != null && Integer.valueOf(1).equals(paramSituacao.getFlgFaltaDecontoSal()) ? 1 : 0;
   }
 
   private FaltaEntity createFaltaDoDia(

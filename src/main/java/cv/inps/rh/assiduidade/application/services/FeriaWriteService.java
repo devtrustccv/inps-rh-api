@@ -212,7 +212,12 @@ public class FeriaWriteService {
     }
 
     if (pedido != null) {
+      // INSERT com recurso a UPDATE: a alteração de férias (alterarPedidoFeria) grava a validação
+      // do pedido novo com TipoAcao.UPDATE. Procurar só INSERT deixava-a pendente para sempre,
+      // com o pedido já validado — um fantasma na fila do checker.
       funcionarioRules.getValidacaoPendenteByReferenciaUuid(pedido.getUuid(), TipoAcao.INSERT, Referencia.FERIA)
+          .or(() -> funcionarioRules.getValidacaoPendenteByReferenciaUuid(
+              pedido.getUuid(), TipoAcao.UPDATE, Referencia.FERIA))
           .ifPresent(v -> {
             v.setEstado(estado);
             validacaoEntityRepository.save(v);
@@ -512,8 +517,10 @@ public class FeriaWriteService {
 
 
   private void saveDocuments(List<AnexoReqDTO> documentos, FuncionarioEntity funId, PedidoEntity pedido){
+    // A gravação usa TableName.RH_T_FERIAS_GOZADAS (abaixo); procurar por Referencia.FERIA nunca
+    // encontrava os existentes, pelo que cada edição duplicava os anexos em vez de os sincronizar.
     var anexosExistentes = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(Referencia.FERIA.name(), pedido.getUuid());
+        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_FERIAS_GOZADAS.name(), pedido.getUuid());
 
     var sincronizados = documentoMapper.syncDocumentos(
         anexosExistentes != null ? anexosExistentes : new ArrayList<>(),
