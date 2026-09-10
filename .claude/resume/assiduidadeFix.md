@@ -1,140 +1,158 @@
-> Updated: 2026-09-10 17:45 -01:00
+> Updated: 2026-09-10 19:10 -01:00
 
 ## Goal
 
 Alinhar o backend de **Assiduidade** com a spec
 `docs/Especificação Tecnica Funcional - GESTÃO ASSIDUIDADE_09_09_2026.md`, validando tudo live
-contra a Oracle de dev. A auditoria da spec está feita (19 lacunas). Os lotes B, C, D1, D2 e A1
-estão fechados e provados. Falta a **reserva de saldo + concorrência (D3)** e cinco itens que
-mexem em vistas Oracle ou em contrato já publicado.
+contra a Oracle de dev. A auditoria da spec está feita (19 lacunas). Os lotes B, C, D1, D2, A1
+e **D3** estão fechados e provados. O que falta é sobretudo **decisão de negócio** ou passa
+pelo **DBA** — só o C9 e o C10 são código à espera de ordem.
 
 ## Current state
 
-**7 commits de código em `develop`, sem push**, todos com `mvn clean compile` limpo e
-verificados live contra a BD. Nada foi dado como feito sem prova em BD — a coluna "provado" da
-tabela de cenários diz o que foi corrido e com que resultado.
+**15 commits em `develop`, ainda SEM PUSH**, todos com `mvn clean compile` limpo e verificados
+live contra a BD. Nada foi dado como feito sem prova em BD.
 
 | Commit | O quê |
 |---|---|
-| `ed137ef0` | validar procurava a validação por `FUN_ID` mas grava-a por `REFERENCIA_UUID` — com dois pedidos pendentes do mesmo colaborador rebentava (non-unique) |
-| `e8b54afb` | lote B+C: anexos (3 casos de chave de leitura ≠ escrita), validação de férias com fallback `INSERT`→`UPDATE`, remuneração da hora extra depois do recálculo, `valorAusencia`→`BigDecimal`, `DESPACHO_RH`=SIM/NAO, `ETAPA='FINALIZADO'` também ao rejeitar, `FLG_DESCONTO_SAL` no registo |
+| `ed137ef0` | validar procurava a validação por `FUN_ID` mas grava-a por `REFERENCIA_UUID` |
+| `e8b54afb` | lote B+C: anexos, validação de férias com fallback, `valorAusencia`→`BigDecimal`, `DESPACHO_RH`=SIM/NAO, `ETAPA='FINALIZADO'` ao rejeitar |
 | `1565e06c` | painel "por justificar" só oferece dias que são ausência, filtro em SQL |
 | `ae561324` | **regra de desconto** (D1) + **contagem mensal** (D2) — breaking |
-| `b66c317f` | **editar e eliminar** do pedido de justificação (A1) + `reverter()` + saldo de dispensa só conta aprovadas |
-| `6d7f16a2` | **guard de processado** pela remuneração efectiva (`RH_T_REMUNERACOES.REM_1_ID`) |
-| `9fa527ed`, `db75b544`, `5980efbc` | handoff e decisões |
+| `b66c317f` | **editar e eliminar** do pedido (A1) + `reverter()` |
+| `6d7f16a2` | **guard de processado** pela remuneração efectiva |
+| `8c995326` | guard só conta remunerações activas (`c.ESTADO='A'`) |
+| **`fb8c5369`** | **D3 parte 1 — reserva**: saldo desconta as faltas em `P` |
+| **`5efc5a6d`** | **D3 parte 2 — lock** pessimista por colaborador |
+| **`77ce36d6`** | **changelog de API** para o frontend (secções 9 a 11) |
+| `9fa527ed`, `db75b544`, `5980efbc`, `adb1f7f4`, `8497ba1e` | handoffs e decisões |
 
 Working tree limpo (só `bash.exe.stackdump`, lixo untracked). **BD de dev limpa**: colaborador
-de teste sem pedidos, sínteses ou direitos de férias criados nos testes.
+de teste sem pedidos, sem sínteses de teste, `RH_T_FERIAS` vazia, `RH_T_REMUNERACOES` de volta
+às 5 linhas originais (127–131). Último `RH_T_PEDIDO` usado nos testes: 232. Último
+`RH_ASSIDUIDADE_SINTESE_DIARIA` real: 884.
 
-**Por fazer:**
+### Fechado na sessão de 10/09 (tarde)
 
-| # | Item | Nota |
+**A1.7 — o filtro `c.ESTADO='A'` do guard**, que estava commitado sem prova. Provado nos dois
+sentidos: com remuneração activa ligada ao `DEF_REM_ID`, `PUT` e `DELETE` dão **400**
+(*"1 falta(s) já foram processadas em folha"*); com a mesma linha anulada (`ESTADO='I'`), os
+dois dão **200**. Armadilha descoberta: depois de um editar, o `DEF_REM_ID` da falta muda, por
+isso é preciso **reapontar** a remuneração anulada (`UPDATE ... SET REM_1_ID = <novo def>`)
+antes de testar o `DELETE` — senão o guard dá 0 por não haver *join*, e não pelo filtro.
+
+**D3 — reserva de saldo**, implementada **por leitura**, não por criação de linhas em `P`:
+
+```
+saldo = direito − gozadas(A) − dias de faltas em P com FLG_DESCONTO_FALTA='FERIAS'
+```
+
+O plano original (criar `FERIAS_GOZADAS`/`DISPENSA`/`DEF_REMUNERACOES` em `P` e activá-las no
+despacho) foi **descartado**: obrigava a inverter o papel do `aplicar()`, a rejeição a desfazer
+linhas e a repetir a bateria D1 inteira. A versão por leitura dá o mesmo resultado, não toca no
+caminho de escrita, e a rejeição/eliminação funcionam sozinhas — a falta sai de `P` e deixa de
+contar.
+
+**Subtileza obrigatória:** o `aplicar()` passa `pedido.getId()` como `pedidoIdExcluir`. No
+`validar`, o estado das faltas só é gravado no `saveAll` **depois** do ciclo, por isso os dias
+seguintes do próprio pedido ainda estão em `P` quando o primeiro dia calcula a cobertura — sem
+a exclusão o pedido reserva contra si próprio e desconta tudo ao vencimento.
+
+**D3 — lock**, `SaldoLockService.lockColaborador(uuid)` → `PESSIMISTIC_WRITE` na linha do
+colaborador (`FuncionarioEntityRepository.lockByUuid`). Tomado **à cabeça** de 8 casos de uso:
+justificar / validar / editar / eliminar falta, marcar e validar falta, 3 escritas de dispensa,
+marcar / validar / alterar férias. Um só lock, sempre o primeiro da transacção → não há duas
+ordens de aquisição possíveis, logo não há deadlock.
+
+## Por fazer
+
+| # | Item | Natureza |
 |---|---|---|
-| **D3** | **Reserva de saldo + concorrência** | secção própria abaixo |
-| C4 | Lista Gestão Falta: excluir quem tem ausência activa (spec `:285`); estado do mês dá `INJUSTIFICADA` mesmo com dias justificados | vista `RH_V_RESUMO_ASSIDUIDADE` (DDL) |
-| C5b | Hora extra grava `ETAPA='VALIDACAO'`, fora do domínio `ETAPA_PROCESSO` e já publicado | breaking |
-| C6 | Coluna Motivo na lista de faltas | `RH_V_FALTA_MENSAL` não tem o campo e é agregada por mês |
-| C9 | `TIPO_CONTAGEM_DIAS` (`DIAS_CORRIDO`/`DIAS_UTEIS`) nunca é lido — marcar falta conta sábados e domingos | lacuna nova |
-| C10 | `NUM_DIAS_ABONOS` (dias de direito por tipo: Maternidade 90, Paternidade 10) ignorado no fluxo de falta | lacuna nova |
-| — | Corrigir os dados das **18 faltas** com desconto a dobrar | a condição era "depois de todos os cenários provados" — já estão |
-| — | `docs/frontend_changes_assiduidade.md` | documentação, ver *Next step* |
+| **1** | **`git push`** dos 15 commits | risco de perda — só existem numa máquina |
+| **2** | **18 faltas com desconto a dobrar** | decisão: corrigir dados ou deixar histórico |
+| **3** | **C9** `TIPO_CONTAGEM_DIAS` | código + decisão (ver secção própria) |
+| **4** | **C10** `NUM_DIAS_ABONOS` | código + decisão |
+| **5** | Edição ir a validação (proposta do analista) | decisão de negócio |
+| **6** | **C5b** hora extra grava `ETAPA='VALIDACAO'` | decisão (breaking) |
+| **7** | **C4 / C6** | DBA — vistas `RH_V_RESUMO_ASSIDUIDADE` e `RH_V_FALTA_MENSAL` |
 
-**Fora do nosso âmbito** (outro programador): regularização de contas sem `RH_T_DEF_REMUNERACOES`
-(TODO em `RegularizacaoService:137`), baixa médica sem `RH_T_ABONOS_BENEFICIOS_DET`, ausência da
-baixa a apontar à tabela errada, continuidade de licença.
+**Fora do nosso âmbito** (outro programador): regularização sem `RH_T_DEF_REMUNERACOES`
+(TODO em `RegularizacaoService:137`), baixa médica sem `RH_T_ABONOS_BENEFICIOS_DET`, ausência
+da baixa a apontar à tabela errada, continuidade de licença.
 
-### D3 — reserva de saldo e concorrência (por fazer)
+### C9 — `TIPO_CONTAGEM_DIAS` (levantamento feito, decisões por tomar)
 
-Dois problemas distintos, levantados pelo utilizador.
+O campo (`DIAS_UTEIS` / `DIAS_CORRIDO`, domínio confirmado em `RH_T_DOMAINS`) é gravado e lido
+pelo CRUD de configuração (`SituacaoLaboralService:96,182`) e **nunca lido no fluxo de falta**.
+Quem expande o período é `FaltaServiceWrite.expandirDias` (~`:295`), com `plusDays(1)` até ao
+fim, sem olhar ao tipo — marcar falta de segunda a segunda conta sábado e domingo.
 
-**Reserva.** Decidido que **só os aprovados contam** para o saldo. Consequência aceite: dois
-pedidos pendentes podem consumir o mesmo saldo. A janela é longa — do pedido ao despacho, dias.
+**Prioridade real: baixa.** Dos 25 tipos, **20 têm o campo a null**, 3 a `DIAS_CORRIDO`, 1 a
+`DIAS_UTEIS`, 1 com lixo (`'0'`) — e **nenhum dos 5 preenchidos tem uma única falta associada**.
+Hoje não desconta a mais a ninguém; é mina por armar para quando a parametrização de produção
+entrar.
 
-Mudar o filtro para `A`+`P` **não chega** no fluxo das faltas: as linhas de efeito
-(`FERIAS_GOZADAS`, `DISPENSA`, `DEF_REMUNERACOES`) só nascem quando a falta fica `A`, logo
-enquanto está `P` não há nada para contar. Reservar a sério implica:
+**Recomendação dada ao utilizador (por aprovar):**
 
-1. Criar as linhas de efeito em `P` no registo e passá-las a `A` no despacho — muda o papel do
-   `FaltaDescontoService.aplicar()`, que hoje assume que só corre para faltas activas;
-2. A rejeição (`validar=NAO`) passar a pôr essas linhas em `I`/`E` — hoje não há nada a desfazer;
-3. Os dois saldos passarem a contar `A`+`P` (`FeriasGozadasEntityRepository:29,33` e
-   `DispensaHorasService:45`);
-4. Repetir a bateria D1 inteira: o cálculo de cobertura passa a ver consumo pendente.
+- **Excluir só fim-de-semana, não feriados.** `RH_T_PARAM_FERIADO` (6 registos) data de duas
+  maneiras — `DATA_ESPECIFICA` para móveis, `FIXO_ANO`+`DIA`+`MES` para fixos — e tem
+  `GEOGR_ID`, logo "é feriado para este colaborador" exige resolver feriados municipais, regra
+  que ninguém especificou. Além disso a **hora extra já ignora feriados de propósito**
+  (`HoraExtraServiceWrite:249`); contá-los só na falta criaria duas definições de "dia útil".
+- **Nulos = `DIAS_CORRIDO`** — único caminho que não altera silenciosamente 20 tipos.
+- **O dia excluído não gera falta** (o pedido passa a ter menos dias; o `dividirPorDias` das
+  horas ajusta-se sozinho).
+- **Aplica-se só ao Marcar Falta.** No Justificar os dias vêm de sínteses escolhidas à mão,
+  cada uma uma ausência real — se o utilizador selecciona um sábado, é porque houve ausência.
 
-**Concorrência.** Mesmo com reserva, dois pedidos em simultâneo lêem o mesmo saldo antes de
-qualquer um gravar. Não existe **um único lock em todo o projecto** (`@Lock`, `@Version`,
-`PESSIMISTIC`: zero ocorrências), logo é lacuna transversal — férias, dispensa e falta.
-`docs/plano_teste_carreira_mobilidade_concorrencia.md` não trata disto: ali "concorrência" é
-"duas dimensões pendentes ao mesmo tempo".
+**Aviso de teste:** como nenhum tipo com contagem tem faltas, provar isto ao vivo obriga a
+criar um tipo de teste ou alterar um existente em dev.
+
+### C10 — `NUM_DIAS_ABONOS`
+
+Existe em `ParamSituacaoEntity:101` e **nada o lê em todo o projecto**. Maternidade (90 dias) e
+Paternidade (10) não têm tecto: nada impede registar 120 dias de maternidade. Decisão em falta:
+se o pedido excede o direito, **bloqueia com 400 ou passa e avisa?**
 
 ## Decisões tomadas — não re-litigar
 
-**Regra de desconto da falta** (a decisão central, fixada pelo utilizador a 10/09):
+**Regra de desconto da falta** (fixada pelo utilizador a 10/09):
 
-- O **saldo cobre o que consegue e o vencimento paga o resto**. Não são alternativas nem se
-  acumulam — são duas fases da mesma cobrança. 4 dias de falta com 2 de saldo → 2 dias gozados
-  e 2 dias descontados.
+- O **saldo cobre o que consegue e o vencimento paga o resto** — duas fases da mesma cobrança,
+  não alternativas. 4 dias com 2 de saldo → 2 gozados e 2 descontados.
 - **Cobre-se pelos primeiros dias** (ordem cronológica).
-- **Dispensa cobre parcialmente**, por contar em horas: 8h de ausência com 4h de saldo consomem
-  4h e descontam o valor das outras 4h.
-- **A dedução é escolha e responsabilidade do utilizador**: um tipo que não desconta salário
-  deduz na mesma se o campo vier preenchido, e nunca gera desconto.
-- **Os 3 dias que mandam o pedido a despacho contam-se POR MÊS**, não por pedido. Só faltas
-  vivas (`A` e `P`). Sem retroactividade: só o pedido novo vai a despacho.
+- **Dispensa cobre parcialmente**, por contar em horas.
+- **A dedução é escolha e responsabilidade do utilizador.**
+- **Os 3 dias que mandam o pedido a despacho contam-se POR MÊS**, só faltas vivas (`A` e `P`),
+  sem retroactividade.
 - Consequência: o guard que rejeitava com 400 por saldo insuficiente **desapareceu**.
 
-**Editar e Eliminar:**
+**Editar e Eliminar:** endpoints próprios por `pedidoUuid`, agem no pedido inteiro; eliminar é
+soft-delete (`E`) e desfaz os efeitos; editar reverte e reaplica (não faz update); editar não
+volta a validação; `RH_T_TIPREL_REM_PAG` não tem estado, a linha é apagada.
 
-- Endpoints próprios por `pedidoUuid`, agem no pedido inteiro.
-- **Eliminar = soft-delete** (`RH_T_FALTA.ESTADO='E'`, spec `:665`) **e desfaz os efeitos
-  financeiros** — sem isso o colaborador ficava descontado por uma falta que já não existe.
-- **Editar reverte e reaplica**, não faz update dos efeitos: trocar "Deduzir em" de FERIAS para
-  DISPENSA deixava as férias gozadas lá e criava a dispensa por cima.
-- **Editar não volta a validação.** Grava direto.
-- **Registos revertidos ficam em `E`**; `RH_T_TIPREL_REM_PAG` não tem estado, a linha é apagada.
-- **Guard de processado** (critério dado pelo utilizador a 10/09, em SQL):
+**Guard de processado:** basta **uma** falta processada para bloquear o pedido (400). Só
+remunerações **activas** contam. Uma falta coberta a 100% por saldo não tem `DEF_REM_ID` e
+escapa **de propósito** — a folha nunca foi tocada.
 
-  ```sql
-  SELECT COUNT(a.ID) FROM RH_T_FALTA a
-    JOIN RH_T_DEF_REMUNERACOES b ON b.ID = a.DEF_REM_ID
-    JOIN RH_T_REMUNERACOES     c ON c.REM_1_ID = b.ID
-   WHERE a.PEDIDO_ID = :pedidoId
-     AND a.ESTADO <> 'E'
-     AND c.ESTADO = 'A';
-  ```
+**D3 — reserva por leitura, não por criação de linhas em `P`.** Ver *Current state*. Decidido
+depois de o utilizador propor a ideia de contar `A`+`P`; a versão barata foi preferida à cara.
 
-  **Basta uma** falta processada para bloquear o pedido inteiro (400). Olha para a linha
-  concreta — o desconto já ter sido apanhado por uma remuneração efectiva — e não para o mês.
-  Substituiu um primeiro guard por `RH_T_PROC_FUNCIONARIOS`, que era mais conservador.
-  Nativa porque `RH_T_REMUNERACOES` está mapeada (`RhTRemuneracoe`) **sem** o `REM_1_ID` e sem
-  repositório — a coluna existe e está preenchida em todas as linhas.
+**D3 — o lock é complementar, não alternativo.** A reserva fecha a janela de **dias** entre o
+pedido e o despacho; o lock fecha a de **milissegundos** entre duas escritas.
 
-  A query original tinha `a.def_rem_id = a.id`, que junta a falta a si própria e deixa o `b`
-  solto: dava quase sempre 0 e o guard nunca bloquearia. O join certo é `a.def_rem_id = b.id`.
+**Saldo de dispensa expõe `horasReservadas` separado de `horasUsadas`** — somadas, o ecrã
+mostrava "32:00 usadas" de um direito de 4h. O `validarSaldo` soma as duas.
 
-  **Uma falta coberta a 100% por férias ou dispensa não tem `DEF_REM_ID` e escapa a esta query —
-  de propósito.** Aí a folha nunca foi tocada, só se consumiu saldo, e devolver saldo não mexe
-  em histórico de pagamentos. O guard cobre exactamente os casos em que houve dinheiro.
-- **Saldos só contam aprovados** (`A`). Ver D3 para a consequência.
-
-**Da auditoria da spec:**
-
-- **C2 fechado sem alteração**: a spec diz `DEF_PAGAMENTOS`/`DEF_PAG_ID` na validação da
-  justificação (`:857`), mas `RH_T_FALTA` **não tem** essa coluna — só `DEF_REM_ID`, com
-  `FK_RH_FALTA_REM → RH_T_DEF_REMUNERACOES`. Erro do analista; o código está certo.
-- **C3 resolvido**: `DESPACHO_RH` é `VARCHAR2(3)` **de propósito** — guarda SIM/NAO, como o
-  `DECISAO_RH` da dispensa e das férias. Nada a escalar ao DBA (contradiz um handoff anterior).
-- **Anexos da justificação pertencem ao PEDIDO** (`REFERENCIA_NAME='RH_T_PEDIDO'`), divergindo
-  da spec. Não existe anexo por dia. `motivo`/`comJustificativo` são do cabeçalho.
-- **Ciclo CORRIGIR em standby** — verificado que assiduidade não o tem (só validar/rejeitar);
-  decisão do utilizador para não o fazer agora.
+**Da auditoria da spec:** C2 fechado sem alteração (o `DEF_PAG_ID` da spec `:857` não existe na
+tabela — erro do analista); C3 resolvido (`DESPACHO_RH` é `VARCHAR2(3)` de propósito, guarda
+SIM/NAO); anexos da justificação pertencem ao **pedido**; ciclo CORRIGIR em standby.
 
 ## Constraints
 
 - PR contra `develop`, nunca `main`. Conventional commits.
 - **Mostrar SEMPRE o payload completo antes de o executar** — mesmo com autorização já dada e
-  mesmo num retry corrigido. O utilizador insistiu nisto.
+  mesmo num retry corrigido.
 - **Pedir autorização antes de cada escrita** (POST/PUT/PATCH/DELETE e SQL de escrita). GET livres.
 - **Mostrar o corpo cru da resposta** (HTTP status + JSON indentado), não resumir em tabela.
 - **Filtros de leitura em SQL, não em memória.**
@@ -144,57 +162,66 @@ qualquer um gravar. Não existe **um único lock em todo o projecto** (`@Lock`, 
 
 ## Blockers & risks
 
-- Nenhum bloqueio. O D3 está especificado e pode arrancar; os restantes esperam decisão.
-- **18 faltas em BD com desconto a dobrar**: tipo com `FLG_FALTA_DECONTO_SAL=1` **e**
-  `FLG_DESCONTO_FALTA='DISPENSA'`, cada uma com `DEF_REM_ID` *e* linha em `RH_T_DISPENSA`. Pela
-  regra fixada estão erradas. Encontrá-las:
-  `SELECT * FROM RH_T_FALTA WHERE FLG_DESCONTO_FALTA IS NOT NULL AND DEF_REM_ID IS NOT NULL;`
-- **⚠️ O filtro `c.ESTADO = 'A'` do guard está commitado mas NÃO foi testado live** — compila e
-  mais nada. É o primeiro item do *Next step*. Em dev só existem remunerações em `A` (5 linhas),
-  logo o cenário de anulada tem de ser montado à mão.
-- **`RH_T_ANO` só tem 2026**: qualquer falta com dedução em férias noutro ano rebenta com
-  `404 "Ano de referência 2027 não encontrado"` (`FaltaDescontoService.resolverAno`). É dados,
-  não código, mas morde no virar do ano.
-- **`RH_T_TIPREL_REM_PAG` não tem coluna ESTADO** — o reverter apaga a linha.
+- Nenhum bloqueio técnico. O que falta espera decisão de negócio ou DBA.
+- **15 commits sem push.**
+- **18 faltas em BD com desconto a dobrar** (`FLG_DESCONTO_FALTA IS NOT NULL AND DEF_REM_ID IS
+  NOT NULL`) — todas `DISPENSA`, todas activas. Se alguma já foi paga, corrigir mexe em folha
+  passada.
+- **A corrida nunca foi vista a falhar sem o lock.** O teste em paralelo deu o resultado certo
+  *com* o lock; não se correu o mesmo teste com o lock removido, para não gravar dados
+  inconsistentes de propósito. O que sustenta a prova é o `for update` no log e o comportamento
+  serializado observado.
+- **`RH_T_ANO` só tem 2026**: falta com dedução em férias noutro ano dá
+  `404 "Ano de referência 2027 não encontrado"`. É dados, não código.
 - `RH_PROCESSAMENTO_SALARIAL_DB` tem o package body inválido (ORA-04063): `CALCULO_FALTA_DIARIO`
   cai no fallback Java e funciona. Não confundir com bug nosso.
 - `PARECER_DECISAO` está por povoar em dev (só `VALOR='TETS'`).
 
 ## Relevant files
 
-- `.../assiduidade/application/services/FaltaDescontoService.java` — o coração: `aplicar()` (a
-  regra de cobertura), `reverter()` (o simétrico, usado pelo editar e eliminar),
-  `requerValidacaoNoMes()` (contagem mensal), `valorPorCobrir()` (proporção da dispensa)
-- `.../assiduidade/application/services/JustificarFaltaWriteService.java` —
-  `editarPedidoJustificacao`, `eliminarPedidoJustificacao`, `garantirNaoProcessado`, `faltasVivas`.
-  O `justificarFalta` (~L76) e o `validarFaltaJustificada` (~L263) são o resto do fluxo
-- `.../assiduidade/application/services/DispensaHorasService.java:45` — saldo de horas, agora só
-  conta `Estado.A`
+- `.../assiduidade/application/services/FaltaDescontoService.java` — `aplicar()` (cobertura),
+  `reverter()`, `requerValidacaoNoMes()`, `valorPorCobrir()`. Passa `pedido.getId()` como
+  exclusão de reserva nos dois pontos de saldo
+- `.../assiduidade/application/services/SaldoFeriaService.java` — `getSaldo(uuid, ano,
+  pedidoIdExcluir)`; a reserva nunca faz o saldo passar a negativo, e um saldo já negativo por
+  dados antigos fica como está
+- `.../assiduidade/application/services/DispensaHorasService.java` — `getHorasStatus(..., dispensaIdExcluir,
+  pedidoIdExcluir)`; reserva a ausência inteira do dia (conservador, documentado)
+- `.../shared/domain/service/SaldoLockService.java` — **novo**, o lock
 - `.../shared/infrastructure/persistence/repository/FaltaEntityRepository.java` —
-  `countFaltasVivasNoPeriodo` (contagem mensal dos 3 dias) e `countFaltasProcessadasEmFolha`
-  (o guard, nativa)
-- `.../shared/infrastructure/persistence/repository/AssiduidadeSinteseDiarioEntityRepository.java` —
-  `findAusenciasPorJustificar` (nativa: `FALTA=1 OR HORAS_AUSENCIA > INTERVAL '0' SECOND`, e
-  ignora faltas eliminadas)
+  `countFaltasProcessadasEmFolha` (guard, nativa), `countFaltasVivasNoPeriodo`,
+  `countDiasPendentesDeducaoFerias[NoAno]`, `findPendentesDeducaoDispensaNoPeriodo`
+- `.../shared/infrastructure/persistence/repository/FuncionarioEntityRepository.java` — `lockByUuid`
+- `.../assiduidade/application/services/JustificarFaltaWriteService.java` — os 4 casos de uso
+- `docs/frontend_changes_assiduidade.md` — secções **9 a 11** cobrem tudo o que mudou a 10/09
 - `docs/Especificação Tecnica Funcional - GESTÃO ASSIDUIDADE_09_09_2026.md` — `:493` regra dos 3
   dias, `:578-596` efeitos do validar, `:655-668` Editar/Eliminar, `:857` o erro do `DEF_PAG_ID`
 
 ## How to verify / resume
 
-Armadilhas de ambiente: **JDK 23 obrigatório** (o `JAVA_HOME` do sistema aponta para outra
-versão) e **porta 8087**, não a 8089 do CLAUDE.md. `nohup ... &` pelo Bash **não** funciona (o
-processo morre com a shell) — usar `Start-Process`. Se o arranque falhar com `ClassFormatError`,
-é lixo incremental: `mvn clean compile`.
+Armadilhas de ambiente: **JDK 23 obrigatório** e **porta 8087**, não a 8089 do CLAUDE.md.
+`nohup ... &` pelo Bash **não** funciona — usar `Start-Process`. **Matar a app pelo porto**, não
+pelo nome do processo: um `Stop-Process` filtrado pela command line deixou uma instância viva a
+segurar o 8087 e o arranque seguinte falhou com *"Port 8087 was already in use"* — e a app que
+respondia era a **versão antiga**, o que é fácil de não notar.
 
 ```powershell
 $env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-23.0.2.7-hotspot"
 $env:PATH="$env:JAVA_HOME\bin;$env:PATH"
 cd C:\Users\ivanick.santos\Nick-personal\personal-workspace\projects\RH_INPS_SERVICE
 mvn -q clean compile -DskipTests      # EXIT=0
+
+# matar o que estiver no porto antes de arrancar
+Get-NetTCPConnection -LocalPort 8087 -State Listen -ErrorAction SilentlyContinue |
+  ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }
+
 Start-Process mvn.cmd -ArgumentList "spring-boot:run" -RedirectStandardOutput "$env:TEMP\rh-app.log" -WindowStyle Hidden
-# esperar "Started RhInpsServiceApplication" (~25s); confirmar: netstat -ano | grep ":8087"
-git log --oneline -8                  # 6d7f16a2 no topo
+# para ver o lock: acrescentar '-Dspring-boot.run.arguments=--spring.jpa.show-sql=true'
+# e depois: grep "for update" $env:TEMP\rh-app.log
 ```
+
+As queries JPQL novas só são validadas **no arranque** — compilar não chega, é preciso
+reiniciar para saber se estão certas.
 
 HTTP — o `WebClient` evita o mojibake que o `Invoke-WebRequest` produz nos acentos:
 
@@ -203,6 +230,9 @@ $wc=New-Object System.Net.WebClient; $wc.Encoding=[System.Text.Encoding]::UTF8
 ($wc.DownloadString("http://localhost:8087/api/v1/assiduidade/falta/justificar/01a085fa-fc04-7f08-a5d9-75b4b8a886b7?ano=2026&mes=9")) |
   ConvertFrom-Json | ConvertTo-Json -Depth 12
 ```
+
+Ao imprimir o resultado, **capturar antes de imprimir o status** (`$r=$wc.UploadString(...)`;
+só depois `"HTTP 200"; $r`) — imprimir "HTTP 200" antes da chamada mente quando ela falha.
 
 Em PowerShell, **não** chamar a uma função `Del` (colide com o alias de `Remove-Item`).
 
@@ -216,128 +246,101 @@ $cp=".;C:/Users/ivanick.santos/.m2/repository/com/oracle/database/jdbc/ojdbc11/2
 ```
 
 Nomes reais (vários palpites falharam): `RH_ASSIDUIDADE_SINTESE_DIARIA` tem **`FUNCIONARIO_ID`**,
-não `FUN_ID`; o parâmetro de assiduidade é **`RH_T_ASSIDUIDADE_PARAMETRO`** (com `RH_T_`);
+não `FUN_ID`; o parâmetro de assiduidade é **`RH_T_ASSIDUIDADE_PARAMETRO`**;
 `RH_T_TIPOS_DOCUMENTOS` (plural); `RH_T_DOMAINS` com colunas `DOMINIO`/`VALOR`/`REFERENCIA`;
-`RH_T_DISPENSA` **não tem** `FUN_ID` (liga-se pelo `PEDIDO_ID`).
+`RH_T_DISPENSA` **não tem** `FUN_ID` (liga-se pelo `PEDIDO_ID`); `RH_T_PARAM_SITUACAO` **não tem**
+`DESCRICAO`. O endpoint de saldo de dispensa usa `?data=`, não `?dataReferencia=`.
 
 ## Test / validation plan
 
 **Fixtures reais (confirmados a 10/09):** colaborador **Nuno Teste Sync, id 958937, uuid
 `01a085fa-fc04-7f08-a5d9-75b4b8a886b7`, tiprel 173442**. Responsável `RH_T_RESPONSAVEL.ID=23`.
-Tipos de falta: **17** Motivo Pessoal e **18** Falta Injustificada (`SAL=1`), **20** Doença do
+Tipos de falta: **17** Motivo Pessoal, **18** Falta Injustificada (`SAL=1`), **20** Doença do
 Trabalhador (`SAL=0`). Tipo de documento **26**. `RH_T_ANO`: id **2** = 2026 (**só existe 2026**).
-Crédito mensal de dispensa (`RH_T_ASSIDUIDADE_PARAMETRO.T_DISPENSA`, estado A) = **4 horas**.
-Valor da falta em dev = **6344,56/dia** (8h), proporcional às horas de ausência.
+Crédito mensal de dispensa = **4 horas**. Valor da falta em dev = **6344,56/dia** (8h).
 
-**`RH_T_FERIAS` está vazia** — ninguém tem direito de férias em dev. Para qualquer teste com
-dedução em férias, criar primeiro:
+**`RH_T_FERIAS` está vazia** — para qualquer teste com dedução em férias, criar o direito:
 
 ```sql
 INSERT INTO RH_T_FERIAS (ID, ANO_ID, FUN_ID, NUM_DIA, ESTADO, DATA_REGISTO, USER_REGISTO_ID, USER_REGISTO_NAME, UUID)
-VALUES ((SELECT NVL(MAX(ID),0)+1 FROM RH_T_FERIAS), 2, 958937, 10, 'A', SYSDATE, 1, 'teste', 'teste-direito');
+VALUES (1, 2, 958937, 2, 'A', SYSDATE, 1, 'teste', 'teste-direito');
 ```
 
-Estado limpo em Setembro/2026 (confirmar antes de começar): pedidos **193**, **195**, **196**
-todos `A`/`FINALIZADO`; validação **1110** (pedido 196) `A`; nada depois de Setembro. Atenção:
-Setembro **já tem faltas**, logo qualquer pedido novo nesse mês dispara a contagem mensal e sai
-`P` — usar um mês limpo quando se quiserem efeitos aplicados de imediato.
+**Criar ausências** (o painel de justificar só oferece dias que são ausência):
 
-### Cenários já provados (regressão — repetir se se mexer no `FaltaDescontoService`)
+```sql
+INSERT INTO RH_ASSIDUIDADE_SINTESE_DIARIA
+  (ID, FUNCIONARIO_ID, DATA, MES, ANO, HORAS_TRABALHADAS, HORAS_AUSENCIA, FALTA,
+   ESTADO, DATA_REGISTO, USER_REGISTO_ID, FLAG_RECECAO, USER_REGISTO_NAME, FORMA)
+VALUES (900, 958937, DATE '2026-12-01', 12, 2026,
+        INTERVAL '0 00:00:00' DAY TO SECOND, INTERVAL '0 08:00:00' DAY TO SECOND, 1,
+        'A', SYSDATE, 1, '1', 'teste', 'MANUAL');
+```
+
+Setembro **já tem faltas** (pedidos 193/195/196) — usar Outubro, Novembro ou Dezembro para
+cenários que precisem de mês limpo. Atenção: >3 dias no mês manda o pedido a `P`.
+
+### Cenários provados (regressão — repetir se se mexer no `FaltaDescontoService`)
 
 | # | Setup | Esperado | |
 |---|---|---|---|
-| D1.2 | 4 dias, saldo férias 2, `FERIAS` | 2 primeiros gozados, 2 últimos com `DEF_REM` de 6344,56 cada | ✅ antes dava 400 |
-| D1.3 | 2 dias, saldo 0, `FERIAS` | 0 gozados, 2 descontados | ✅ antes dava 400 |
+| D1.2 | 4 dias, saldo férias 2, `FERIAS` | 2 primeiros gozados, 2 últimos com `DEF_REM` de 6344,56 | ✅ **re-provado a 10/09 pós-reserva** |
+| D1.3 | 2 dias, saldo 0, `FERIAS` | 0 gozados, 2 descontados | ✅ |
 | D1.4 | 2 dias, campo vazio | 2 descontados, férias intactas | ✅ |
-| D1.5 | 1 dia de 8h, saldo dispensa 4h, `DISPENSA` | dispensa 240 min + `DEF_REM` de **3172,28** | ✅ |
-| D1.6 | 1 dia de **4h**, saldo 4h, `DISPENSA` | dispensa 240 min, **sem** `DEF_REM` | ✅ |
+| D1.5 | 1 dia de 8h, saldo dispensa 4h, `DISPENSA` | dispensa 240 min + `DEF_REM` de 3172,28 | ✅ |
+| D1.6 | 1 dia de **4h**, saldo 4h, `DISPENSA` | dispensa 240 min, **sem** `DEF_REM` | ✅ **re-provado a 10/09 pós-reserva** |
 | D1.7 | tipo **20** (`SAL=0`) + `FERIAS`, com saldo | dias gozados, **zero** desconto | ✅ |
 | D1.8 | tipo 20, campo vazio | nada | ✅ |
 | D2 | 2 dias num mês limpo, depois mais 2 no mesmo mês | 1.º `A`, 2.º **`P`** | ✅ |
-| — | justificar 4 dias com saldo 3 (itens **sem** campo `data`) | 3 gozados + 1 descontado | ✅ |
-| A1.1 | eliminar pedido com dedução em férias | faltas/gozadas/anexos/pedido a `E`, saldo reposto | ✅ |
-| A1.2 | eliminar pedido com desconto salarial | `DEF_REMUNERACOES` a `E`, `TIPREL_REM_PAG` apagada, `DEF_REM_ID` a null | ✅ |
-| A1.3 | eliminar pedido com dispensa | dispensa a `E`, minutos usados 240 → 0 | ✅ |
-| A1.4 | editar trocando `FERIAS` → `DISPENSA` | gozadas a `E` e saldo devolvido, dispensa nova activa, **sem** duplicar | ✅ |
-| A1.5 | editar enviando só 1 dos 2 dias | dia retirado a `E` com o desconto revertido; o outro reaplicado (`DEF_REM` **nova**); o dia retirado **reaparece** no painel | ✅ |
-| A1.6 | editar/eliminar com **uma** falta processada em folha | **400** nos dois: *"1 falta(s) já foram processadas em folha"* | ✅ |
+| A1.1–A1.5 | eliminar/editar com férias, desconto, dispensa | ver handoff anterior | ✅ |
+| A1.6 | editar/eliminar com **uma** falta processada | **400** nos dois | ✅ |
+| **A1.7** | guard com remuneração **anulada** | 400 com `A`, **200** com `I` | ✅ **10/09** |
+| **T1** | pedido de 4 dias `P` com `FERIAS`, direito 2 | `feria/saldo` passa de **2 → 0** | ✅ **10/09** |
+| **T4** | pedido de 4 dias `P` com `DISPENSA` | `horasReservadas 32:00`, restantes `00:00`, **nada** aplicado em BD | ✅ **10/09** |
+| **T5** | rejeitar (`validar:"NAO"`) esse pedido | reserva devolvida **sozinha**, sem código de compensação | ✅ **10/09** |
+| **Lock** | 2 POST em paralelo, 1 dia cada, direito **1** | um leva o dia gozado, o outro `DEF_REM` 6344,56; direito 1 / gozados 1 | ✅ **10/09** |
 
-Para o A1.6, ligar o `DEF_REM_ID` de UMA falta a uma remuneração e reverter no fim:
+Para o A1.6/A1.7, ligar o `DEF_REM_ID` de UMA falta a uma remuneração e reverter no fim:
 
 ```sql
--- :defRemId = RH_T_FALTA.DEF_REM_ID de uma das faltas do pedido
 INSERT INTO RH_T_REMUNERACOES (ID, VALOR, DATA_REF, ESTADO, PRSAL_ID, REM_1_ID)
 VALUES ((SELECT MAX(ID)+1 FROM RH_T_REMUNERACOES), 6344, DATE '2026-11-30', 'A',
         (SELECT PRSAL_ID FROM RH_T_REMUNERACOES WHERE ROWNUM=1), :defRemId);
 
-DELETE FROM RH_T_REMUNERACOES WHERE REM_1_ID = :defRemId;
-```
-
-Diagnóstico de "porque é que este pedido está bloqueado" — a mesma query do guard, detalhada:
-
-```sql
-SELECT a.ID falta, TO_CHAR(a.DATA_INICIO,'YYYY-MM-DD') dia, a.DEF_REM_ID, c.ID remuneracao
-  FROM RH_T_FALTA a
-  JOIN RH_T_DEF_REMUNERACOES b ON b.ID = a.DEF_REM_ID
-  JOIN RH_T_REMUNERACOES     c ON c.REM_1_ID = b.ID
- WHERE a.PEDIDO_ID = :pedidoId AND a.ESTADO <> 'E';
+UPDATE RH_T_REMUNERACOES SET ESTADO='I' WHERE REM_1_ID = :defRemId;   -- anular
+DELETE FROM RH_T_REMUNERACOES WHERE REM_1_ID = :defRemId;             -- limpar
 ```
 
 ### Por provar
 
-- **⚠️ A1.7 — o filtro `c.ESTADO = 'A'` do guard** (commitado em `8c995326`, por testar). Montagem:
-
-  1. Criar um pedido de falta com desconto salarial (tipo 18, mês limpo, ≤3 dias no mês para
-     ficar `A` de imediato) e apanhar o `DEF_REM_ID` de uma das faltas;
-  2. Ligar-lhe uma remuneração **activa** e confirmar que editar e eliminar dão **400**:
-
-     ```sql
-     INSERT INTO RH_T_REMUNERACOES (ID, VALOR, DATA_REF, ESTADO, PRSAL_ID, REM_1_ID)
-     VALUES ((SELECT MAX(ID)+1 FROM RH_T_REMUNERACOES), 6344, DATE '2026-11-30', 'A',
-             (SELECT PRSAL_ID FROM RH_T_REMUNERACOES WHERE ROWNUM=1), :defRemId);
-     ```
-  3. **Anular** essa remuneração e confirmar que os dois voltam a passar (`200`):
-
-     ```sql
-     UPDATE RH_T_REMUNERACOES SET ESTADO='I' WHERE REM_1_ID = :defRemId;
-     ```
-  4. Limpar: `DELETE FROM RH_T_REMUNERACOES WHERE REM_1_ID = :defRemId;`
-
-  Sem o passo 3 a passar, o filtro não está provado — em dev só existem remunerações em `A`.
-
-- **Editar num pedido ainda `P`** (não validado): o `reverter()` não tem nada para reverter e o
-  `aplicar()` não corre. Confirmar que grava os campos e não cria efeitos.
-- **Editar acrescentando um dia** que não estava no pedido: hoje o array só retira, não
-  acrescenta — os itens novos são ignorados. Confirmar se é o pretendido.
-- **Rejeição** (`validar:"NAO"`) depois do D1: faltas a `I`, nenhum efeito criado.
+- **Editar num pedido ainda `P`**: o `reverter()` não tem nada para reverter e o `aplicar()` não
+  corre. Confirmar que grava os campos e não cria efeitos.
+- **Editar acrescentando um dia** que não estava no pedido: hoje o array só retira. Confirmar se
+  é o pretendido.
+- **C9 / C10**, quando forem implementados.
 
 **Limpeza** (a ordem importa, `FK_DISPENSA_PEDIDO` bloqueia o pedido):
-`RH_T_TIPREL_REM_PAG` (por `REM_ID`) → `RH_T_FALTA` → `RH_T_DEF_REMUNERACOES` →
-`RH_T_FERIAS_GOZADAS` → `RH_T_DISPENSA` → `RH_T_DOCUMENTO` → `RH_T_VALIDACAO` → `RH_T_PEDIDO` →
-`RH_ASSIDUIDADE_SINTESE_DIARIA` → `RH_T_FERIAS` → `RH_T_REMUNERACOES` (a do guard).
+`RH_T_REMUNERACOES` (a do guard, por causa da FK para o def) → `RH_T_TIPREL_REM_PAG` (por
+`REM_ID`) → `RH_T_FALTA` → `RH_T_DEF_REMUNERACOES` → `RH_T_FERIAS_GOZADAS` → `RH_T_DISPENSA` →
+`RH_T_DOCUMENTO` → `RH_T_VALIDACAO` → `RH_T_PEDIDO` → `RH_ASSIDUIDADE_SINTESE_DIARIA` →
+`RH_T_FERIAS`.
 
 ## Open questions
 
-- **As 18 faltas com desconto a dobrar**: corrigir os dados (reverter os `DEF_REMUNERACOES`
-  indevidos) ou deixar como histórico? Os cenários já estão todos provados, que era a condição.
-- **D3**: quando arranca, e reserva-se mesmo (criar efeitos em `P`) ou fica só o lock?
-- **C5b**: mudar `ETAPA='VALIDACAO'` da hora extra para `DESPACHO_RH` é breaking para o frontend
-  (documentado em `frontend_changes_assiduidade.md:75`).
-- **C4 / C6**: mexem nas vistas `RH_V_RESUMO_ASSIDUIDADE` e `RH_V_FALTA_MENSAL` — passa pelo DBA.
-- **C9 / C10**: respeitar `TIPO_CONTAGEM_DIAS` e `NUM_DIAS_ABONOS` no fluxo de falta. O modelo
-  de dados já os suporta e a licença já usa o conceito via `CALCULO_FALTA_LICENCA`.
+1. **As 18 faltas com desconto a dobrar**: corrigir os dados ou deixar como histórico? (Se
+   alguma já foi paga, corrigir mexe em folha passada.)
+2. **C9**: aprovar a recomendação (fim-de-semana sim, feriados não; nulos = corridos; só no
+   Marcar Falta)?
+3. **C10**: exceder `NUM_DIAS_ABONOS` bloqueia com 400 ou passa e avisa?
+4. **Edição ir a validação** (proposta do analista): vale a condição cumulativa dos 3 dias, ou
+   só a do desconto salarial? Com a reserva já feita, uma edição em `P` passa a reservar em vez
+   de antecipar — o custo desceu.
+5. **C5b**: mudar `ETAPA='VALIDACAO'` da hora extra é breaking para o frontend
+   (`frontend_changes_assiduidade.md:75`).
+6. **C4 / C6**: passam pelo DBA.
 
 ## Next step
 
-1. **Testar o filtro `c.ESTADO = 'A'` do guard** — cenário A1.7 acima. É a única coisa
-   commitada nesta sessão sem prova em BD.
-2. **Actualizar `docs/frontend_changes_assiduidade.md`** — o frontend ainda não sabe de nada do
-   que mudou hoje:
-   - `valorAusencia` passou de inteiro a **decimal**;
-   - `estado` pode agora vir **`P`** onde antes vinha `A` (contagem mensal dos 3 dias);
-   - o **400 de saldo insuficiente desapareceu** — o pedido passa sempre, com a parte não
-     coberta a ir ao vencimento;
-   - dois **endpoints novos**: `PUT` e `DELETE .../assiduidade/falta/justificar/pedido/{pedidoUuid}`,
-     com o 400 do guard de processado.
-3. Depois disso, decidir entre o **D3** (reserva + concorrência) e a **correcção dos dados das
-   18 faltas** com desconto a dobrar.
+1. **`git push`** dos 15 commits — é o único item com risco de perda pura.
+2. Levar as questões **1 e 4** ao negócio numa conversa só (dependem da mesma pessoa).
+3. Com aprovação, **C9** e depois **C10** — os únicos que são código à espera de ordem.
