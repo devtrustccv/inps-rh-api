@@ -60,6 +60,9 @@ public class FaltaDescontoService {
   /** Acima deste número de dias — e só com desconto salarial — a falta vai a validação. */
   private static final int LIMITE_DIAS_SEM_VALIDACAO = 3;
 
+  /** Valor de "nenhum pedido a excluir" — a query compara sempre, sem null. */
+  private static final Long SEM_PEDIDO_A_EXCLUIR = -1L;
+
   /** RH_T_FALTA.TIPO. */
   public static final String TIPO_FALTA = "FALTA";
 
@@ -183,11 +186,26 @@ public class FaltaDescontoService {
    */
   public boolean requerValidacaoNoMes(
       UUID funcionarioUuid, LocalDate dataReferencia, int diasAgora, ParamSituacaoEntity paramSituacao) {
+    return requerValidacaoNoMes(funcionarioUuid, dataReferencia, diasAgora, paramSituacao, null);
+  }
+
+  /**
+   * Igual à anterior, mas ignorando as faltas de um pedido — a reavaliação do <b>editar</b>.
+   *
+   * <p>Ao editar, as faltas do pedido já estão gravadas e já contam no mês; sem as excluir,
+   * somar-lhes {@code diasAgora} contava-as duas vezes e um pedido de 4 dias ia sempre a
+   * despacho, mesmo quando nada de material tinha mudado.
+   */
+  public boolean requerValidacaoNoMes(
+      UUID funcionarioUuid, LocalDate dataReferencia, int diasAgora,
+      ParamSituacaoEntity paramSituacao, Long pedidoIdExcluir) {
 
     var inicioMes = dataReferencia.withDayOfMonth(1);
     var fimMes = dataReferencia.withDayOfMonth(dataReferencia.lengthOfMonth());
 
-    long jaExistentes = faltaRepository.countFaltasVivasNoPeriodo(funcionarioUuid, inicioMes, fimMes);
+    long jaExistentes = faltaRepository.countFaltasVivasNoPeriodo(
+        funcionarioUuid, inicioMes, fimMes,
+        pedidoIdExcluir != null ? pedidoIdExcluir : SEM_PEDIDO_A_EXCLUIR);
 
     return requerValidacao((int) jaExistentes + diasAgora, paramSituacao);
   }

@@ -46,6 +46,9 @@ public class JustificarFaltaWriteService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JustificarFaltaWriteService.class);
 
+  /** Valor de "Deduzir Falta Em" que remove a dedução no editar — ver resolverDeducaoEditada. */
+  private static final String DEDUCAO_NENHUMA = "NENHUM";
+
   private final FaltaEntityRepository faltaRepository;
   private final PedidoEntityRepository pedidoRepository;
   private final ValidacaoEntityRepository validacaoEntityRepository;
@@ -479,6 +482,40 @@ public class JustificarFaltaWriteService {
   }
 
   /**
+   * Só um pedido <b>activo</b> se edita ou elimina (decisão de negócio, 10/09).
+   *
+   * <p>Cada estado tem a sua razão, e por isso cada um tem a sua mensagem — dizer só "não pode"
+   * obrigava o utilizador a adivinhar porquê:
+   *
+   * <ul>
+   *   <li>{@code P} — está em despacho, pertence ao checker. Deixar o maker editá-lo por baixo
+   *       significaria o checker aprovar coisa diferente da que lhe foi apresentada. Quem se
+   *       arrependeu pede a rejeição e volta a justificar.</li>
+   *   <li>{@code I} — foi rejeitado, e a decisão é do checker. Editar um pedido recusado seria
+   *       contornar a recusa sem passar por ninguém.</li>
+   *   <li>{@code E} — já não existe.</li>
+   * </ul>
+   */
+  private void garantirPedidoActivo(PedidoEntity pedido, String accao) {
+
+    var estado = pedido.getEstado();
+
+    if (Estado.P.name().equals(estado))
+      throw IgrpResponseStatusException.badRequest(
+          "Não é possível " + accao + " este pedido: está em validação, à espera de despacho do RH. "
+              + "Só é possível " + accao + " depois de o pedido ser validado ou rejeitado.");
+
+    if (Estado.I.name().equals(estado))
+      throw IgrpResponseStatusException.badRequest(
+          "Não é possível " + accao + " este pedido: foi rejeitado no despacho. "
+              + "Para corrigir, registe uma nova justificação para os dias em causa.");
+
+    if (Estado.E.name().equals(estado))
+      throw IgrpResponseStatusException.badRequest(
+          "Não é possível " + accao + " este pedido: já foi eliminado.");
+  }
+
+  /**
    * Editar um pedido de justificação (acção "Editar" do resumo de faltas, spec 09/09 :655).
    * Age no pedido inteiro, agrupado por {@code RH_T_FALTA.PEDIDO_ID}.
    *
@@ -486,7 +523,15 @@ public class JustificarFaltaWriteService {
    * partir do estado novo. Sem isso, trocar "Deduzir em" de FERIAS para DISPENSA deixava as
    * férias gozadas onde estavam e criava a dispensa por cima — dois descontos pelo mesmo dia.
    *
-   * <p>Não volta a validação (decisão de negócio, 10/09): grava direto, seja o que for que mude.
+   * <p><b>Volta a despacho quando a edição mexe em dinheiro</b> — muda o tipo de justificação ou
+   * a dedução — e a regra do registo se verifica (mais de 3 dias no mês e tipo que desconta
+   * salário). Sem isto, registar 4 dias com um tipo que não desconta (fica activo de imediato) e
+   * editar para um que desconta deixava 4 dias descontados sem nunca terem passado por despacho:
+   * o maker-checker contornado por uma edição.
+   *
+   * <p>Alterações que não mexem em dinheiro — motivo, parecer, observação, responsável, anexos —
+   * gravam direto, como antes. Reabrir despacho por causa de uma gralha corrigida trancaria o
+   * pedido (ver {@link #garantirPedidoActivo}) até alguém o despachar de novo.
    */
   @Transactional
   public Map<String, ?> editarPedidoJustificacao(EditarPedidoJustificacaoCommand command) {
@@ -499,6 +544,9 @@ public class JustificarFaltaWriteService {
     if (dto == null)
       throw IgrpResponseStatusException.badRequest("Corpo do pedido em falta");
 
+    // O estado do pedido decide-se antes de ir buscar as faltas: é mais barato e é a
+    // mensagem certa para o utilizador.
+    garantirPedidoActivo(pedido, "editar");
     var vivas = faltasVivas(pedido);
     garantirNaoProcessado(pedido, "editar");
 
@@ -511,10 +559,40 @@ public class JustificarFaltaWriteService {
 
     boolean comJustificativo = "SIM".equalsIgnoreCase(dto.getComJustificativo());
     var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), comJustificativo);
-    var deducao = StringUtils.hasText(dto.getDeduzirFaltaEm())
-        ? TipoDescontoFalta.fromCodeOrThrow(dto.getDeduzirFaltaEm()).getCode()
-        : null;
     var responsavel = resolverResponsavel(dto.getResponsavelId());
+
+    // Estado ANTIGO, lido antes de o ciclo o sobrescrever — é com ele que se decide se a edição
+    // mexeu em dinheiro. Conjunto e não getFirst(): se os dias divergirem por alguma razão
+    // histórica, qualquer divergência face ao valor novo conta como mudança.
+    var tiposAntigos = vivas.stream()
+        .map(f -> f.getParamSitId() != null ? f.getParamSitId().getId() : null)
+        .collect(Collectors.toSet());
+    var deducoesAntigas = vivas.stream()
+        .map(FaltaEntity::getFlgDescontoFalta)
+        .collect(Collectors.toSet());
+
+    var deducao = resolverDeducaoEditada(dto.getDeduzirFaltaEm(), deducoesAntigas);
+
+    // "Material" = mexe em dinheiro. Só o tipo de justificação (que manda no desconto salarial) e
+    // a dedução o são; motivo, parecer, observação, responsável e anexos não.
+    boolean mudouTipo = paramSituacao != null
+        && !tiposAntigos.equals(Collections.singleton(paramSituacao.getId()));
+    boolean mudouDeducao = !deducoesAntigas.equals(Collections.singleton(deducao));
+    boolean mudancaMaterial = mudouTipo || mudouDeducao;
+
+    // Reavaliar o despacho pela MESMA regra do registo (>3 dias no mês E desconto salarial), e só
+    // quando algo material mudou: sem isto, editar 4 dias de um tipo que não desconta para um que
+    // desconta deixava-os activos sem nunca passarem por despacho — o maker-checker contornado
+    // por uma edição. Corrigir uma gralha no motivo não reabre nada, nem sequer vai à BD.
+    var tipoEfectivo = paramSituacao != null ? paramSituacao : vivas.getFirst().getParamSitId();
+    boolean requerValidacao = mudancaMaterial
+        && faltaDescontoService.requerValidacaoNoMes(
+            funcionario.getUuid(),
+            vivas.getFirst().getDataInicio().toLocalDate(),
+            vivas.size(),
+            tipoEfectivo,
+            pedido.getId());
+    var estadoAlvo = requerValidacao ? Estado.P : null;
 
     // O editar mexe no PEDIDO, não na composição dele: os dias que o compõem mantêm-se todos.
     // A spec (:658) só diz "permite editar a justificação de falta do grupo selecionado" e dá
@@ -528,9 +606,13 @@ public class JustificarFaltaWriteService {
     // dinheiro delas, sem erro nenhum à vista.
     for (var falta : vivas) {
 
-      // Reverter SEMPRE antes de reaplicar — é isto que impede o desconto duplo quando o tipo
-      // ou a dedução mudam.
-      faltaDescontoService.reverter(falta, pedido);
+      // Reverter antes de reaplicar — é isto que impede o desconto duplo quando o tipo ou a
+      // dedução mudam. Mas SÓ quando algo material mudou: reverter e reaplicar numa edição
+      // cosmética matava as linhas de desconto e criava outras iguais, o que enchia a base de
+      // linhas mortas, quebrava a ligação de qualquer remuneração já emitida à definição antiga
+      // e fazia o histórico parecer que se mexeu em dinheiro para corrigir uma gralha.
+      if (mudancaMaterial)
+        faltaDescontoService.reverter(falta, pedido);
 
       if (StringUtils.hasText(dto.getMotivo()))
         falta.setDescricaoMotivo(dto.getMotivo());
@@ -544,17 +626,37 @@ public class JustificarFaltaWriteService {
         falta.setObsResponsavel(dto.getObsResponsavel());
       if (paramSituacao != null)
         falta.setParamSitId(paramSituacao);
-      falta.setFlgDescontoFalta(deducao);
-      falta.setFlgDescontoSal(
-          paramSituacao != null && Integer.valueOf(1).equals(paramSituacao.getFlgFaltaDecontoSal())
-              ? 1 : 0);
 
-      // Reaplica com o estado novo. Uma falta ainda pendente só recebe os efeitos no despacho.
-      if (Estado.A.equals(falta.getEstado()))
-        faltaDescontoService.aplicar(falta, pedido, tipoRelAtual);
+      // Campos financeiros e efeitos: só se mexem quando a edição foi material. Numa edição
+      // cosmética o desconto que lá está continua a ser o certo — foi calculado a partir do
+      // mesmo tipo e da mesma dedução.
+      if (mudancaMaterial) {
+
+        falta.setFlgDescontoFalta(deducao);
+        // Derivado do tipo EFECTIVO e não do que veio no payload: com o tipo omitido,
+        // `paramSituacao` é null e a falta ficava a dizer "não desconta" apesar de descontar.
+        falta.setFlgDescontoSal(
+            tipoEfectivo != null && Integer.valueOf(1).equals(tipoEfectivo.getFlgFaltaDecontoSal())
+                ? 1 : 0);
+
+        if (estadoAlvo != null) {
+          falta.setEstado(estadoAlvo);
+          // O despacho anterior deixou de valer para esta falta: mantê-lo faria a falta aparecer
+          // em despacho já com a decisão do ciclo passado.
+          falta.setDespachoRh(null);
+        }
+
+        // Reaplica com o estado novo. Uma falta que volta a despacho não recebe efeitos agora — a
+        // reserva (saldo a contar as faltas em P) garante que o saldo continua comprometido.
+        if (!requerValidacao && Estado.A.equals(falta.getEstado()))
+          faltaDescontoService.aplicar(falta, pedido, tipoRelAtual);
+      }
     }
 
     faltaRepository.saveAll(vivas);
+
+    if (requerValidacao)
+      reabrirDespacho(pedido, funcionario, tipoRelAtual);
 
     // Anexos: semântica dos arrays da casa — null preserva, item sem id cria, ausente fica 'E'.
     if (dto.getDocumentos() != null) {
@@ -569,14 +671,71 @@ public class JustificarFaltaWriteService {
     }
 
     long ficaram = vivas.stream().filter(f -> !Estado.E.equals(f.getEstado())).count();
-    LOGGER.info("[EDITAR] Pedido de justificação {} editado ({} dias mantidos, {} retirados).",
-        pedido.getUuid(), ficaram, vivas.size() - ficaram);
+    LOGGER.info("[EDITAR] Pedido de justificação {} editado ({} dias; material={}, voltou a despacho={}).",
+        pedido.getUuid(), ficaram, mudancaMaterial, requerValidacao);
 
+    // O estado é lido DEPOIS de gravar: quem acabou de voltar a despacho tem de o ver na resposta.
     return Map.of(
         "pedidoId", pedido.getId(),
         "pedidoUuid", pedido.getUuid(),
         "estado", pedido.getEstado(),
+        "etapa", Objects.requireNonNullElse(pedido.getEtapa(), ""),
+        "requerValidacao", requerValidacao,
         "totalRegistos", ficaram);
+  }
+
+  /**
+   * "Deduzir Falta Em" no editar: {@code null} ou ausente <b>preserva</b> o que está gravado,
+   * {@code NENHUM} limpa, {@code FERIAS}/{@code DISPENSA} trocam.
+   *
+   * <p>Antes, o campo era atribuído incondicionalmente e um {@code PUT} que não o reenviasse
+   * apagava a dedução: as férias deixavam de cobrir e o dia inteiro passava a desconto salarial.
+   * Um campo ausente no payload não pode destruir estado financeiro — e, com a reavaliação do
+   * despacho, ainda mandaria o pedido a validação sem ninguém perceber porquê. Passa a valer o
+   * mesmo que o {@code validarFaltaJustificada} já fazia.
+   */
+  private String resolverDeducaoEditada(String deduzirFaltaEm, Set<String> deducoesAntigas) {
+
+    if (!StringUtils.hasText(deduzirFaltaEm))
+      return deducoesAntigas.size() == 1 ? deducoesAntigas.iterator().next() : null;
+
+    if (DEDUCAO_NENHUMA.equalsIgnoreCase(deduzirFaltaEm))
+      return null;
+
+    return TipoDescontoFalta.fromCodeOrThrow(deduzirFaltaEm).getCode();
+  }
+
+  /**
+   * Devolve o pedido ao despacho do RH depois de uma edição que mexeu em dinheiro.
+   *
+   * <p>A validação pendente é <b>reutilizada</b> quando existe. Duas linhas em {@code P} para o
+   * mesmo pedido partiriam o {@code validar} e o {@code eliminar}, que procuram a pendente com um
+   * {@code Optional} — e não há unique constraint em BD a impedi-lo. Já a validação de um despacho
+   * anterior está fechada em {@code A} e não colide: fica como histórico dessa aprovação, e esta
+   * ronda ganha a sua própria linha.
+   *
+   * <p>Sem notificação e sem ordem de serviço, por simetria com o registo: ambos pertencem ao
+   * despacho, não ao acto de o pedir.
+   */
+  private void reabrirDespacho(
+      PedidoEntity pedido, FuncionarioEntity funcionario, TiposRelacionamentoEntity tipoRelAtual) {
+
+    var pendente = funcionarioRules.getValidacaoPendenteByReferenciaUuid(
+        pedido.getUuid(), TipoAcao.INSERT, Referencia.JUSTIFICAR_FALTA);
+
+    if (pendente.isEmpty()) {
+      var validacao = dadosContratuaisMapper.toValidacaoInsert(
+          TipoAcao.INSERT.name(), Referencia.JUSTIFICAR_FALTA.name(), Estado.P);
+      validacao.setFunId(funcionario);
+      validacao.setTiprelId(tipoRelAtual);
+      validacao.setReferenciaId(pedido.getId());
+      validacao.setReferenciaUuid(pedido.getUuid());
+      validacaoEntityRepository.save(validacao);
+    }
+
+    pedido.setEstado(Estado.P.name());
+    pedido.setEtapa("DESPACHO_RH");
+    pedidoRepository.save(pedido);
   }
 
   /**
@@ -594,6 +753,7 @@ public class JustificarFaltaWriteService {
         .orElseThrow(() -> IgrpResponseStatusException.badRequest(
             "Pedido de justificação de falta não encontrado"));
 
+    garantirPedidoActivo(pedido, "eliminar");
     var vivas = faltasVivas(pedido);
     garantirNaoProcessado(pedido, "eliminar");
 

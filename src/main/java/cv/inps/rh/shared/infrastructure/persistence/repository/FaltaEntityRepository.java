@@ -71,6 +71,11 @@ public interface FaltaEntityRepository extends
    *
    * <p>Só faltas vivas ({@code A} pendente de nada, {@code P} à espera de despacho): uma falta
    * rejeitada ({@code I}) ou eliminada ({@code E}) não é falta e não deve pesar no limite.
+   *
+   * <p>{@code pedidoIdExcluir} serve a reavaliação feita ao <b>editar</b>: as faltas do pedido em
+   * edição já estão gravadas, por isso somar-lhes outra vez os dias do pedido contá-las-ia em
+   * duplicado e qualquer edição de um pedido de 4 dias iria sempre a despacho. Sem pedido a
+   * excluir, passar {@code -1}.
    */
   @Query("""
           SELECT COUNT(f)
@@ -81,11 +86,13 @@ public interface FaltaEntityRepository extends
             AND s.data BETWEEN :dataInicio AND :dataFim
             AND f.estado IN (cv.inps.rh.shared.application.constants.Estado.A,
                              cv.inps.rh.shared.application.constants.Estado.P)
+            AND (f.pedidoId IS NULL OR f.pedidoId.id <> :pedidoIdExcluir)
       """)
   long countFaltasVivasNoPeriodo(
       @Param("funcionarioUuid") UUID funcionarioUuid,
       @Param("dataInicio") LocalDate dataInicio,
-      @Param("dataFim") LocalDate dataFim);
+      @Param("dataFim") LocalDate dataFim,
+      @Param("pedidoIdExcluir") Long pedidoIdExcluir);
 
   @Query("""
           SELECT f
