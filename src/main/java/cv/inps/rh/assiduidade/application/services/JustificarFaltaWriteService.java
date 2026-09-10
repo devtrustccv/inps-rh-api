@@ -516,22 +516,21 @@ public class JustificarFaltaWriteService {
         : null;
     var responsavel = resolverResponsavel(dto.getResponsavelId());
 
-    // Os dias que ficam. O array é a lista final do pedido: um dia que não venha nos itens é
-    // retirado da justificação, como nos restantes PUT da casa. Array vazio ou ausente preserva.
-    Set<Long> mantidos = (dto.getItensFalta() == null || dto.getItensFalta().isEmpty())
-        ? vivas.stream().map(f -> f.getSinteseDiarioId().getId()).collect(Collectors.toSet())
-        : dto.getItensFalta().stream().map(FaltaItemDTO::getId).collect(Collectors.toSet());
-
+    // O editar mexe no PEDIDO, não na composição dele: os dias que o compõem mantêm-se todos.
+    // A spec (:658) só diz "permite editar a justificação de falta do grupo selecionado" e dá
+    // ao Eliminar — e só a ele — o efeito de pôr faltas em 'E'. Quem se quiser livrar de um dia
+    // elimina o pedido e volta a justificar os dias certos.
+    //
+    // Por isso o `itensFalta` é ignorado aqui, ao contrário da convenção de arrays dos outros
+    // PUT: aplicá-la neste ecrã era perigoso de mais. O FaltaItemDTO tem um campo `selecionar`,
+    // logo o formulário tem checkboxes, e um frontend que enviasse só as linhas marcadas —
+    // a coisa mais natural de fazer — apagava silenciosamente as restantes faltas e revertia o
+    // dinheiro delas, sem erro nenhum à vista.
     for (var falta : vivas) {
 
       // Reverter SEMPRE antes de reaplicar — é isto que impede o desconto duplo quando o tipo
       // ou a dedução mudam.
       faltaDescontoService.reverter(falta, pedido);
-
-      if (!mantidos.contains(falta.getSinteseDiarioId().getId())) {
-        falta.setEstado(Estado.E);
-        continue;
-      }
 
       if (StringUtils.hasText(dto.getMotivo()))
         falta.setDescricaoMotivo(dto.getMotivo());

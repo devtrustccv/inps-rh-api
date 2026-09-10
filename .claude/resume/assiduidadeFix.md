@@ -1,4 +1,4 @@
-> Updated: 2026-09-10 19:10 -01:00
+> Updated: 2026-09-10 20:20 -01:00
 
 ## Goal
 
@@ -10,7 +10,7 @@ pelo **DBA** — só o C9 e o C10 são código à espera de ordem.
 
 ## Current state
 
-**15 commits em `develop`, ainda SEM PUSH**, todos com `mvn clean compile` limpo e verificados
+**16+ commits em `develop`, ainda SEM PUSH**, todos com `mvn clean compile` limpo e verificados
 live contra a BD. Nada foi dado como feito sem prova em BD.
 
 | Commit | O quê |
@@ -37,9 +37,12 @@ de teste sem pedidos, sem sínteses de teste, `RH_T_FERIAS` vazia, `RH_T_REMUNER
 **A1.7 — o filtro `c.ESTADO='A'` do guard**, que estava commitado sem prova. Provado nos dois
 sentidos: com remuneração activa ligada ao `DEF_REM_ID`, `PUT` e `DELETE` dão **400**
 (*"1 falta(s) já foram processadas em folha"*); com a mesma linha anulada (`ESTADO='I'`), os
-dois dão **200**. Armadilha descoberta: depois de um editar, o `DEF_REM_ID` da falta muda, por
-isso é preciso **reapontar** a remuneração anulada (`UPDATE ... SET REM_1_ID = <novo def>`)
-antes de testar o `DELETE` — senão o guard dá 0 por não haver *join*, e não pelo filtro.
+dois dão **200**. Armadilha de **desenho de teste** (não é da aplicação): o editar refaz as
+linhas de desconto, por isso depois de um editar a remuneração de teste fica agarrada a uma
+definição morta e o `DELETE` a seguir passa por não haver *join* — não pelo filtro. **Não
+encadear**: testar cada um no seu pedido, ou o eliminar primeiro (que não cria definições
+novas). Encadear editar→eliminar é perfeitamente legítimo na aplicação; o que não serve é
+provar o guard assim.
 
 **D3 — reserva de saldo**, implementada **por leitura**, não por criação de linhas em `P`:
 
@@ -63,6 +66,23 @@ colaborador (`FuncionarioEntityRepository.lockByUuid`). Tomado **à cabeça** de
 justificar / validar / editar / eliminar falta, marcar e validar falta, 3 escritas de dispensa,
 marcar / validar / alterar férias. Um só lock, sempre o primeiro da transacção → não há duas
 ordens de aquisição possíveis, logo não há deadlock.
+
+### Contrato do editar mudou (10/09, tarde)
+
+O `PUT falta/justificar/pedido/{uuid}` deixou de partilhar o `JustificarFaltaDTO` e passou a
+ter **`EditarPedidoJustificacaoDTO`**, sem `itensFalta` — o editar mexe no **pedido**, não na
+composição dele, e os dias descobrem-se pelo pedido como no Eliminar (spec `:658` só dá ao
+Eliminar o efeito `ESTADO='E'`). Antes, um dia omitido do array era retirado com o desconto
+revertido; como o `FaltaItemDTO` tem `selecionar`, um ecrã que enviasse só as linhas marcadas
+apagava faltas em silêncio. Um `itensFalta` que ainda venha é aceite e ignorado.
+
+**⚠️ O manifesto IGRP está dessincronizado do Java.** O `JustificarFaltaDTO.json` não conhece
+`motivo`, `comJustificativo`, `pedidoId`, `estado`, `estadoDesc`, `etapa` nem
+`tipoOrdemServico` (todos em uso) e ainda declara `despachoRh` (removido do Java). **Correr o
+`igrp-spring-generator` sobre este módulo apaga campos em uso.** Por isso o DTO novo foi
+escrito à mão nas convenções do gerador e o manifesto actualizado à mão
+(`.igrpstudio/assiduidade/dto/EditarPedidoJustificacaoDTO.json` + a acção a apontar-lhe).
+Sincronizar o `JustificarFaltaDTO.json` com o Java é uma limpeza por fazer.
 
 ## Por fazer
 
@@ -292,7 +312,9 @@ cenários que precisem de mês limpo. Atenção: >3 dias no mês manda o pedido 
 | D1.7 | tipo **20** (`SAL=0`) + `FERIAS`, com saldo | dias gozados, **zero** desconto | ✅ |
 | D1.8 | tipo 20, campo vazio | nada | ✅ |
 | D2 | 2 dias num mês limpo, depois mais 2 no mesmo mês | 1.º `A`, 2.º **`P`** | ✅ |
-| A1.1–A1.5 | eliminar/editar com férias, desconto, dispensa | ver handoff anterior | ✅ |
+| A1.1–A1.4 | eliminar/editar com férias, desconto, dispensa | ver handoff anterior | ✅ |
+| ~~A1.5~~ | ~~editar enviando só 1 dos 2 dias → dia retirado a `E`~~ | **anulado a 10/09** — o editar já não retira dias | ⛔ |
+| **E1** | editar mandando só 1 de 2 dias (ou nenhum) | os **dois** dias ficam `A`, com `DEF_REM` novo e motivo actualizado | ✅ **10/09** |
 | A1.6 | editar/eliminar com **uma** falta processada | **400** nos dois | ✅ |
 | **A1.7** | guard com remuneração **anulada** | 400 com `A`, **200** com `I` | ✅ **10/09** |
 | **T1** | pedido de 4 dias `P` com `FERIAS`, direito 2 | `feria/saldo` passa de **2 → 0** | ✅ **10/09** |
@@ -315,8 +337,6 @@ DELETE FROM RH_T_REMUNERACOES WHERE REM_1_ID = :defRemId;             -- limpar
 
 - **Editar num pedido ainda `P`**: o `reverter()` não tem nada para reverter e o `aplicar()` não
   corre. Confirmar que grava os campos e não cria efeitos.
-- **Editar acrescentando um dia** que não estava no pedido: hoje o array só retira. Confirmar se
-  é o pretendido.
 - **C9 / C10**, quando forem implementados.
 
 **Limpeza** (a ordem importa, `FK_DISPENSA_PEDIDO` bloqueia o pedido):

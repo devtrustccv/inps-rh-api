@@ -942,7 +942,7 @@ public class AssiduidadeController {
     }
   )
 
-   public ResponseEntity<Map<String, ?>> editarPedidoJustificacao(@Valid @RequestBody JustificarFaltaDTO editarPedidoJustificacaoRequest
+   public ResponseEntity<Map<String, ?>> editarPedidoJustificacao(@Valid @RequestBody EditarPedidoJustificacaoDTO editarPedidoJustificacaoRequest
     , @PathVariable(value = "pedidoId") String pedidoId)
   {
 

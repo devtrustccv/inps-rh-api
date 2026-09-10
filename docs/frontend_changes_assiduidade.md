@@ -411,12 +411,33 @@ Dois endpoints novos, que agem sobre o **pedido inteiro** (todos os dias do grup
 | `PUT` | `/api/v1/assiduidade/falta/justificar/pedido/{pedidoUuid}` |
 | `DELETE` | `/api/v1/assiduidade/falta/justificar/pedido/{pedidoUuid}` |
 
-- O `PUT` recebe o mesmo `JustificarFaltaDTO` do registo. Os `itensFalta[].id` são ids da
-  **síntese diária**, não da falta. Um dia omitido do array é **retirado** do pedido e volta
-  a aparecer no painel "por justificar"; hoje o array **só retira, não acrescenta** dias.
+- O `PUT` tem **corpo próprio** (`EditarPedidoJustificacaoDTO`) — **já não é o
+  `JustificarFaltaDTO`** do registo, e **não tem `itensFalta`**:
+
+  ```jsonc
+  {
+    "motivo": "…",              "comJustificativo": "SIM",
+    "tipoJustificacao": 18,     "deduzirFaltaEm": "FERIAS",
+    "parecerResponsavel": "…",  "responsavelId": 23,  "obsResponsavel": "…",
+    "documentos": [ … ]         // null preserva, sem id cria, omitido fica 'E'
+  }
+  ```
+
+  **O editar mexe no pedido, não na composição dele.** Os dias que o compõem descobrem-se
+  pelo próprio pedido — tal como no Eliminar — e **mantêm-se todos**. Para deixar cair um
+  dia, elimina-se o pedido e voltam a justificar-se os dias certos.
+
+  > **Correcção de comportamento (10/09).** Numa versão anterior o `PUT` partilhava o DTO do
+  > registo e um dia omitido do `itensFalta` era **retirado** do pedido (`ESTADO='E'`) com o
+  > desconto revertido. Como o `FaltaItemDTO` tem `selecionar`, um ecrã que enviasse só as
+  > linhas marcadas apagava silenciosamente as restantes faltas e mexia em dinheiro sem erro
+  > à vista. Um `itensFalta` que ainda venha no corpo é **aceite e ignorado**, para o
+  > frontend poder ser adaptado sem pressa.
 - **Editar não volta a validação** — grava directamente, e reverte e reaplica os efeitos
   financeiros em vez de os actualizar (trocar `FERIAS` por `DISPENSA` deixava as férias
-  gozadas lá e criava a dispensa por cima).
+  gozadas lá e criava a dispensa por cima). Cada edição cria linhas de desconto **novas** em
+  `RH_T_DEF_REMUNERACOES` e põe as anteriores a `E`; é intencional, para o histórico
+  financeiro não ser reescrito por cima.
 - **Eliminar é soft-delete** (`ESTADO='E'`) e **desfaz os efeitos financeiros** — sem isso o
   colaborador ficava descontado por uma falta que já não existe.
 
