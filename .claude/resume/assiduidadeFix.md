@@ -1,4 +1,4 @@
-> Updated: 2026-09-10 17:10 -01:00
+> Updated: 2026-09-10 17:25 -01:00
 
 ## Goal
 
@@ -10,8 +10,9 @@ mexem em vistas Oracle ou em contrato já publicado.
 
 ## Current state
 
-**6 commits de código em `develop`, sem push**, todos com `mvn clean compile` limpo e
-verificados live contra a BD:
+**7 commits de código em `develop`, sem push**, todos com `mvn clean compile` limpo e
+verificados live contra a BD. Nada foi dado como feito sem prova em BD — a coluna "provado" da
+tabela de cenários diz o que foi corrido e com que resultado.
 
 | Commit | O quê |
 |---|---|
@@ -20,6 +21,7 @@ verificados live contra a BD:
 | `1565e06c` | painel "por justificar" só oferece dias que são ausência, filtro em SQL |
 | `ae561324` | **regra de desconto** (D1) + **contagem mensal** (D2) — breaking |
 | `b66c317f` | **editar e eliminar** do pedido de justificação (A1) + `reverter()` + saldo de dispensa só conta aprovadas |
+| `6d7f16a2` | **guard de processado** pela remuneração efectiva (`RH_T_REMUNERACOES.REM_1_ID`) |
 | `9fa527ed`, `db75b544`, `5980efbc` | handoff e decisões |
 
 Working tree limpo (só `bash.exe.stackdump`, lixo untracked). **BD de dev limpa**: colaborador
@@ -158,11 +160,13 @@ qualquer um gravar. Não existe **um único lock em todo o projecto** (`@Lock`, 
   regra de cobertura), `reverter()` (o simétrico, usado pelo editar e eliminar),
   `requerValidacaoNoMes()` (contagem mensal), `valorPorCobrir()` (proporção da dispensa)
 - `.../assiduidade/application/services/JustificarFaltaWriteService.java` —
-  `editarPedidoJustificacao`, `eliminarPedidoJustificacao`, `garantirNaoProcessado`, `faltasVivas`
+  `editarPedidoJustificacao`, `eliminarPedidoJustificacao`, `garantirNaoProcessado`, `faltasVivas`.
+  O `justificarFalta` (~L76) e o `validarFaltaJustificada` (~L263) são o resto do fluxo
 - `.../assiduidade/application/services/DispensaHorasService.java:45` — saldo de horas, agora só
   conta `Estado.A`
 - `.../shared/infrastructure/persistence/repository/FaltaEntityRepository.java` —
-  `countFaltasVivasNoPeriodo` (a contagem mensal, em SQL)
+  `countFaltasVivasNoPeriodo` (contagem mensal dos 3 dias) e `countFaltasProcessadasEmFolha`
+  (o guard, nativa)
 - `.../shared/infrastructure/persistence/repository/AssiduidadeSinteseDiarioEntityRepository.java` —
   `findAusenciasPorJustificar` (nativa: `FALTA=1 OR HORAS_AUSENCIA > INTERVAL '0' SECOND`, e
   ignora faltas eliminadas)
@@ -183,7 +187,7 @@ cd C:\Users\ivanick.santos\Nick-personal\personal-workspace\projects\RH_INPS_SER
 mvn -q clean compile -DskipTests      # EXIT=0
 Start-Process mvn.cmd -ArgumentList "spring-boot:run" -RedirectStandardOutput "$env:TEMP\rh-app.log" -WindowStyle Hidden
 # esperar "Started RhInpsServiceApplication" (~25s); confirmar: netstat -ano | grep ":8087"
-git log --oneline -6                  # b66c317f no topo
+git log --oneline -8                  # 6d7f16a2 no topo
 ```
 
 HTTP — o `WebClient` evita o mojibake que o `Invoke-WebRequest` produz nos acentos:
