@@ -773,6 +773,52 @@ o dinheiro delas**, em silêncio.
 
 ---
 
+## 🔴 21. Eliminar um pedido volta a permitir justificar esses dias (11/09/2026)
+
+`existeFaltaVivaNoDia` ignorava apenas as faltas em `I`, pelo que uma falta em `E` continuava a
+prender o dia. Mas o painel "por justificar" exclui `E` e **oferece** esse dia.
+
+Resultado, antes: depois de eliminar um pedido, os dias reapareciam no ecrã e o
+`POST falta/justificar` recusava-os com **`400`** *"Já existe uma falta associada à data"*. O ecrã
+prometia o que a escrita negava, e o caminho que a spec prevê para quem se enganou — eliminar e
+voltar a justificar — estava fechado à chave. O mesmo acontecia a uma **nova marcação com
+justificativo** nesse dia.
+
+Passa a ignorar `I` **e** `E`. Não abre porta a duplicados: `A` e `P`, os únicos estados com
+efeitos financeiros, continuam a bloquear.
+
+### O dia não aparece duas vezes
+
+Depois de rejustificar, o dia tem **duas** faltas na base — a eliminada (`E`) e a nova (`A`) —,
+mas o ecrã mostra-o uma só vez. A leitura já filtrava `E` e agrupa por síntese num `Map`, portanto
+há no máximo uma entrada por dia. Verificado em dev com os 14 dias de Outubro de um colaborador:
+todos a `1x`, apesar de quatro deles terem duas faltas gravadas.
+
+Cada dia está sempre num de dois sítios, nunca nos dois: em `itensFalta` (por justificar) **ou**
+dentro de **um** grupo de `pedidos`.
+
+### O que o eliminar desfaz, e o que não
+
+| Tabela | Representa | Efeito do eliminar |
+|---|---|---|
+| `RH_ASSIDUIDADE_SINTESE_DIARIA` | "neste dia houve ausência" | **nada** — fica intacta |
+| `RH_T_FALTA` | "esta ausência foi justificada assim" | `E` |
+| `RH_T_DEF_REMUNERACOES` | desconto no vencimento | `E`, e a associação em `RH_T_TIPREL_REM_PAG` é **apagada** |
+| `RH_T_FERIAS_GOZADAS` / `RH_T_DISPENSA` | saldo consumido | `E` — **o saldo é devolvido** |
+| `RH_T_VALIDACAO` | o despacho | `E` **só se ainda estiver pendente** |
+
+O eliminar mata a **justificação**, não a **ausência** — é por isso que o dia volta ao painel e
+pode ser justificado de novo, sobre a **mesma** síntese diária.
+
+A validação já despachada **fica como está** (`A` ou `I`): é o registo histórico de que alguém
+decidiu aquele pedido naquela data. Só uma validação ainda `P` passa a `E`, porque o pedido que
+lhe deu origem desapareceu antes de ser decidido.
+
+Verificado em dev, ponta a ponta: eliminar um pedido com dedução em dispensa devolveu as 4h
+(`horasUsadas` 04:00 → 00:00, `horasRestantes` 00:00 → 04:00) e pôs os 4 descontos em `E`.
+
+---
+
 ## Por decidir com o analista
 
 | # | Assunto |
