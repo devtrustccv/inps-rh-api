@@ -371,24 +371,28 @@ public class JustificarFaltaWriteService {
     // retirar um que o maker anexou. Semântica dos arrays da casa (syncDocumentos):
     // documentos == null preserva o que está; item sem id cria; item que desaparece do
     // array fica 'E'. Os anexos são do PEDIDO — ver justificarFalta.
-    if (dto.getDocumentos() != null) {
-      var existentes = documentoEntityRepository
-          .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
-      var sincronizados = documentoMapper.syncDocumentos(
-          new ArrayList<>(existentes),
-          dto.getDocumentos(),
-          TableName.RH_T_PEDIDO.name(),
-          pedido.getId(),
-          pedido.getUuid(),
-          1L,
-          funcionario);
-      for (var doc : sincronizados) {
-        if (doc.getUuid() == null) doc.setUuid(UuidCreator.getTimeOrderedEpoch());
-        // Um anexo novo nasce 'P' no mapper; ao validar acompanha o estado do pedido.
-        if (Estado.P.equals(doc.getEstado())) doc.setEstado(estadoFinal);
-      }
-      documentoEntityRepository.saveAll(sincronizados);
+    //
+    // A promoção dos pendentes corre SEMPRE, e não só quando o corpo traz documentos: um anexo
+    // que o editar juntou a um pedido que voltou a despacho está 'P' à espera deste momento, e
+    // com documentos omitido (= preservar) ficaria 'P' para sempre.
+    var existentes = documentoEntityRepository
+        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
+    var anexos = dto.getDocumentos() != null
+        ? documentoMapper.syncDocumentos(
+            new ArrayList<>(existentes),
+            dto.getDocumentos(),
+            TableName.RH_T_PEDIDO.name(),
+            pedido.getId(),
+            pedido.getUuid(),
+            1L,
+            funcionario)
+        : new ArrayList<>(existentes);
+    for (var doc : anexos) {
+      if (doc.getUuid() == null) doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+      // Um anexo novo nasce 'P' no mapper; ao validar acompanha o estado do pedido.
+      if (Estado.P.equals(doc.getEstado())) doc.setEstado(estadoFinal);
     }
+    documentoEntityRepository.saveAll(anexos);
 
     if (estadoFinal == Estado.A)
       ordemServicoWriteService.criar(funcionario, tipoRelAtual, dto.getTipoOrdemServico());
@@ -697,8 +701,14 @@ public class JustificarFaltaWriteService {
       var sincronizados = documentoMapper.syncDocumentos(
           new ArrayList<>(existentes), dto.getDocumentos(),
           TableName.RH_T_PEDIDO.name(), pedido.getId(), pedido.getUuid(), 1L, funcionario);
-      for (var doc : sincronizados)
+      // Um anexo novo nasce 'P' no mapper e acompanha o estado em que o pedido fica: 'A' se a
+      // edição gravou directo, 'P' se voltou a despacho — aí é o validar que o promove. Sem isto,
+      // um anexo juntado a um pedido já fechado ficava 'P' para sempre, invisível a quem filtra 'A'.
+      var estadoAnexo = requerValidacao ? Estado.P : Estado.A;
+      for (var doc : sincronizados) {
         if (doc.getUuid() == null) doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+        if (Estado.P.equals(doc.getEstado())) doc.setEstado(estadoAnexo);
+      }
       documentoEntityRepository.saveAll(sincronizados);
     }
 

@@ -943,6 +943,22 @@ Passa a seguir a convenção dos arrays da casa:
 
 Os `GET` continuam a devolver `documentos: []` quando não há anexos.
 
+### Um anexo novo acompanha o estado do pedido
+
+Um anexo juntado no **editar** ficava `P` para sempre — só o despacho promovia anexos, e só quando
+o corpo trazia `documentos`. Um pedido já fechado (`A`) ficava com um anexo `P`, invisível a
+qualquer ecrã que filtre só `A`.
+
+| Onde o anexo é juntado | Estado com que fica |
+|---|---|
+| editar que grava directo (pedido fica `A`) | `A` |
+| editar que volta a despacho (pedido fica `P`) | `P` — o despacho promove-o |
+| despacho `SIM` / `NAO` | `A` / `I` — **mesmo que o corpo omita `documentos`** |
+
+Provado em dev: anexo junto a um pedido `A` nasceu `A`, e um anexo que já estava preso em `P`
+passou a `A` na edição seguinte; num pedido que voltou a despacho o anexo nasceu `P` e passou a
+`A` num despacho sem a chave `documentos`.
+
 ---
 
 ## Por decidir com o analista
