@@ -54,7 +54,15 @@ public class FaltaReqDTO  {
   private String justificar ;
 
 
-  private String motivoAusencia ;
+  /**
+   * "Motivo Ausencia" do formulario, gravado em RH_T_FALTA.DESCRICAO_MOTIVO.
+   *
+   * <p>Chamava-se {@code motivoAusencia} e era o unico sitio da aplicacao com esse nome: o
+   * Justificar Falta, a dispensa e as ferias usam todos {@code motivo} para a mesma coluna.
+   * Dois nomes para o mesmo campo faziam com que um payload com o nome do outro ecra passasse
+   * em silencio -- 200, e o motivo perdido. Harmonizado a 11/09.
+   */
+  private String motivo ;
 
 
   private String parecer ;
@@ -83,6 +91,24 @@ public class FaltaReqDTO  {
 
   /** Só de resposta: valorDiario x totalDias. */
   private BigDecimal valorTotal ;
+
+
+  /**
+   * Quanto sai do vencimento: soma de RH_T_FALTA.VALOR_DESCONTO das faltas activas (o liquido
+   * que o processamento salarial le). Zero enquanto o pedido nao for despachado.
+   */
+  private BigDecimal valorDescontado ;
+
+
+  /** A parte que o saldo (ferias/dispensa) cobriu: valorTotal - valorDescontado. */
+  private BigDecimal valorCoberto ;
+
+
+  /**
+   * Só de resposta: true se alguma falta do pedido já foi apanhada pelo processamento salarial
+   * (RH_T_FALTA.DEF_REM_ID preenchido). Nesse caso editar/eliminar dão 400.
+   */
+  private boolean processado ;
 
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();

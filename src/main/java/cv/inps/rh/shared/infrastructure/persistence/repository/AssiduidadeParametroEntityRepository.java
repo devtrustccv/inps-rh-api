@@ -27,4 +27,17 @@ public interface AssiduidadeParametroEntityRepository extends
   @Query("SELECT a.tDispensa FROM AssiduidadeParametroEntity a WHERE a.estado = 'A' AND a.dtFim IS NULL")
   Optional<String> findActiveTDispensa();
 
+  /**
+   * A parametrização de assiduidade em vigor.
+   *
+   * <p>Mesmo critério do {@link #findActiveTDispensa}: {@code ESTADO='A'} <b>e</b> {@code DT_FIM}
+   * nulo. A tabela é historiada — as versões antigas ficam com data de fim —, por isso filtrar só
+   * pelo estado devolve lista e obriga a escolher uma à sorte. Era o que os leitores da jornada e
+   * das percentagens de hora extra faziam ({@code findAllByEstado('A').getFirst()}, sem
+   * ordenação): com duas linhas activas, o valor da falta e as horas trabalhadas da síntese podiam
+   * sair de parametrizações diferentes.
+   */
+  @Query("SELECT a FROM AssiduidadeParametroEntity a WHERE a.estado = 'A' AND a.dtFim IS NULL")
+  Optional<AssiduidadeParametroEntity> findActiveParametro();
+
 }

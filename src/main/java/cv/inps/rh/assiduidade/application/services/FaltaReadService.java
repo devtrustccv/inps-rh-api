@@ -17,6 +17,7 @@ import cv.inps.rh.shared.infrastructure.persistence.repository.PedidoEntityRepos
 import cv.inps.rh.shared.infrastructure.persistence.repository.VfaltaMensalEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
+import cv.inps.rh.shared.util.TimeUtils;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -189,9 +190,18 @@ public class FaltaReadService {
       dto.setTotalDias((int) Math.max(dias, 1));
     }
 
-    dto.setTotalDeHorasAusentes(primeiraFalta.getHorasAusencia());
+    // Total do PERÍODO, em HH:MM — é o que o formulário mostra e o que o POST recebe
+    // ("32:00" para 4 dias de 8h). Devolvia o intervalo Oracle cru de um só dia
+    // ("0 8:0:0.0"), que nem era o total nem era reenviável: o round-trip do ecrã não fechava.
+    int minutosTotais = faltas.stream()
+        .map(FaltaEntity::getHorasAusencia)
+        .filter(Objects::nonNull)
+        .mapToInt(h -> TimeUtils.parseHorasFlexivel(TimeUtils.intervalFormatToHHmm(h)))
+        .sum();
+    dto.setTotalDeHorasAusentes(String.format("%02d:%02d", minutosTotais / 60, minutosTotais % 60));
+
     dto.setJustificar(primeiraFalta.getFlgJustificativo());
-    dto.setMotivoAusencia(primeiraFalta.getDescricaoMotivo());
+    dto.setMotivo(primeiraFalta.getDescricaoMotivo());
     dto.setParecer(primeiraFalta.getDecisaoResponsavel());
     dto.setObservacao(primeiraFalta.getObsResponsavel());
     // A guarda tem de cobrir também o funcionário do responsável: RH_T_RESPONSAVEL
@@ -203,8 +213,29 @@ public class FaltaReadService {
     dto.setResponsavelNome(funResponsavel != null ? funResponsavel.getNome() : null);
     dto.setTipoJustificacao(primeiraFalta.getParamSitId() != null ? primeiraFalta.getParamSitId().getId() : null);
 
+    // "Deduzir Falta Em" era gravado e nunca lido. É o campo mais caro deste ecrã: o PUT de
+    // despacho aplica o que o formulário enviar, e um combo carregado a null reenviava null —
+    // a dedução em férias desaparecia no despacho e os dias iam todos a desconto no salário,
+    // sem ninguém o ter pedido.
+    dto.setDeduzirFaltaEm(primeiraFalta.getFlgDescontoFalta());
+
+    // Valores: o POST já os devolve, o GET devolvia null e o ecrã de despacho abria sem eles.
+    dto.setValorDiario(primeiraFalta.getValor());
+    var valorTotal = faltas.stream()
+        .map(FaltaEntity::getValor)
+        .filter(Objects::nonNull)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    dto.setValorTotal(valorTotal);
+
+    // Bruto vs efectivo — ver FaltaDescontoService.valorDescontado.
+    dto.setValorDescontado(FaltaDescontoService.valorDescontado(faltas));
+    dto.setValorCoberto(FaltaDescontoService.valorCoberto(faltas));
+    dto.setProcessado(FaltaDescontoService.processado(faltas));
+
+    // Os anexos da marcação são gravados contra o PEDIDO (ver FaltaServiceWrite), por isso a
+    // leitura tem de usar a mesma referência: com RH_T_FALTA o GET nunca devolvia nada.
     var documentos = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_FALTA.name(),pedido.getUuid());
+        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_PEDIDO.name(), pedido.getUuid());
 
     if (!CollectionUtils.isEmpty(documentos)) {
       dto.setDocumentos(documentos.stream().map(d -> {

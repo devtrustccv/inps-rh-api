@@ -33,12 +33,19 @@ public class GetFuncioarioSaldoFeriasQueryHandler
 
     var uuidFunc = UUID.fromString(query.getFuncionarioId());
 
-   var saldo = saldoFeriaService.getSaldo(uuidFunc, query.getAno());
+    var detalhe = saldoFeriaService.detalhe(uuidFunc, query.getAno(), null);
 
     final Map<String, Object> response = new HashMap<>();
     response.put("funcionarioUuid", query.getFuncionarioId());
-    response.put("anoReferencia", query.getAno());
-    response.put("saldo", saldo);
+    // Nulo quando nao se pede ano: o calculo e entao o acumulado de todos os anos. O `ambito`
+    // diz qual dos dois foi feito, em vez de deixar o ecra a adivinhar porque veio nulo.
+    response.put("anoReferencia", detalhe.anoReferencia());
+    response.put("ambito", detalhe.ambito());
+    // Parcelas: um `saldo: 0` sozinho nao distinguia "nao tem direito" de "ja gastou tudo".
+    response.put("direito", detalhe.direito());
+    response.put("gozado", detalhe.gozado());
+    response.put("reservado", detalhe.reservado());
+    response.put("saldo", detalhe.saldo());
 
     return ResponseEntity.ok(response);
   }

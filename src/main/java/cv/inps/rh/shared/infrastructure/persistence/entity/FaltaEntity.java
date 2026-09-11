@@ -98,23 +98,28 @@ public class FaltaEntity extends AuditEntity {
 
 
   /**
-   * Desconto de falta no salário.
+   * Desconto de falta no salário, em {@code RH_T_DEF_REMUNERACOES}.
    *
-   * <p>Grava-se em {@code RH_T_DEF_REMUNERACOES} e associa-se por
-   * {@code RH_T_TIPREL_REM_PAG.REM_ID}, como manda a spec de 07/09/2026 (secção "Validar Falta").
-   *
-   * <p>Isto já foi {@code DEF_PAG_ID} apontando a {@code RH_T_DEF_PAGAMENTOS}. A coluna deixou de
-   * existir na tabela — só existe {@code DEF_REM_ID} — e o mapeamento antigo rebentava com
-   * ORA-00904 em qualquer leitura que a incluísse.
-   *
-   * <p>Nota: a parametrização do tipo de movimento continua a ser procurada por
-   * {@code PAG_FALTA} em {@code RH_T_PARAM_VINCULO_MOV}, porque é a única que existe em BD (não há
-   * {@code REM_FALTA}). O nome do tipo é a chave de parametrização; o destino da definição é que
-   * mudou para remunerações.
+   * <p><b>Preenchido pelo procedimento do processamento salarial</b>, não pelo Java (decisão com o
+   * DBA, 11/09): o procedimento lê as faltas em {@code A} ainda sem {@code DEF_REM_ID}, cria a
+   * definição com o valor de {@link #valorDesconto} e grava aqui o id. A partir desse momento a
+   * falta está apanhada pelo processamento e o editar/eliminar do pedido ficam trancados.
    */
   @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "def_rem_id", referencedColumnName = "id")
     private DefinicaoRemuneracaoEntity defRemId;
+
+
+  /**
+   * O que esta falta desconta no vencimento — o <b>líquido</b>: {@link #valor} (bruto) menos o que
+   * férias ou dispensa cobriram, e {@code 0} se o tipo não desconta salário ou o saldo cobriu tudo.
+   * É a coluna que o procedimento do processamento salarial lê.
+   *
+   * <p>{@code null} = ainda não apurado: só se preenche quando a falta passa a {@code A} e volta a
+   * {@code null} quando o editar ou o eliminar revertem os efeitos.
+   */
+  @Column(name="valor_desconto")
+    private BigDecimal valorDesconto;
 
 
   /**

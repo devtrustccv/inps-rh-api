@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,6 +19,18 @@ import lombok.NoArgsConstructor;
 public class FaltaItemDTO  {
 
 
+  /**
+   * Checkbox do ecra. <b>Nao e lido por nenhum endpoint de escrita</b>:
+   *
+   * <ul>
+   *   <li><b>justificar</b> — justifica-se o que vier no array; o ecra envia so as linhas
+   *       marcadas (11/09/2026);</li>
+   *   <li><b>validar</b> — o despacho decide o pedido inteiro, tudo-ou-nada (11/09/2026).</li>
+   * </ul>
+   *
+   * <p>Mantido no DTO de proposito, por decidir o que fazer dele do lado do validar. As leituras
+   * emitem-no sempre a {@code false}.
+   */
   private boolean selecionar ;
 
 
@@ -32,7 +46,8 @@ public class FaltaItemDTO  {
   private String horasAusencia ;
 
 
-  private Integer valorAusencia ;
+  /** Valor da falta do dia. BigDecimal: como Integer truncava os cêntimos (6344 em vez de 6344,56). */
+  private BigDecimal valorAusencia ;
 
 
   /** Só de resposta — o motivo grava-se no cabeçalho (aplica-se a todas as seleccionadas). */

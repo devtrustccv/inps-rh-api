@@ -30,9 +30,14 @@ public interface DispensaEntityRepository extends
    * Dispensas de um colaborador cujo INÍCIO cai no intervalo. Serve o saldo mensal de horas, que é
    * contado pelo mês em que a dispensa começa.
    */
-  java.util.List<DispensaEntity> findAllByPedidoId_FunId_UuidAndDataInicioBetween(
+  java.util.List<DispensaEntity> findAllByPedidoId_FunId_UuidAndDataInicioBetweenAndEstado(
       UUID funUuid,
       java.time.LocalDate dataInicio,
-      java.time.LocalDate dataFim
+      java.time.LocalDate dataFim,
+      cv.inps.rh.shared.application.constants.Estado estado
   );
+
+  /** Dispensas geradas por um dia concreto de um pedido de falta — usado pelo reverter. */
+  java.util.List<DispensaEntity> findAllByPedidoId_IdAndDataInicio(
+      Long pedidoId, java.time.LocalDate dataInicio);
 }

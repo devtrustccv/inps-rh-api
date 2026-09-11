@@ -14,6 +14,7 @@ import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.constants.custom.TipoAcao;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.domain.service.OrdemServicoWriteService;
+import cv.inps.rh.shared.domain.service.SaldoLockService;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import cv.inps.rh.shared.util.TimeUtils;
@@ -41,6 +42,7 @@ public class DispensaWriteService {
   private final ResponsavelEntityRepository responsavelEntityRepository;
   private final DispensaHorasService dispensaHorasService;
   private final OrdemServicoWriteService ordemServicoWriteService;
+  private final SaldoLockService saldoLockService;
 
 
 
@@ -69,6 +71,9 @@ public class DispensaWriteService {
     if (minutosPedidos <= 0)
       throw IgrpResponseStatusException.badRequest(
           "Hora de entrada tem de ser posterior à hora de saída");
+
+    // Antes de ler o saldo de horas: ler-decidir-gravar tem de correr sozinho por colaborador.
+    saldoLockService.lockColaborador(req.getColaborador());
 
     dispensaHorasService.validarSaldo(
         req.getColaborador(), req.getDataInicio(), minutosPedidos, null);
@@ -162,6 +167,8 @@ public class DispensaWriteService {
     // Usar funcionario do pedido (não do request — pode não vir preenchido na validação).
     // A própria dispensa é excluída da contagem: já está gravada, contá-la seria duplicar.
     int minutosDesta = TimeUtils.diffMinutes(dispensa.getHoraInicio(), dispensa.getHoraFim());
+    saldoLockService.lockColaborador(funcionario.getUuid());
+
     dispensaHorasService.validarSaldo(
         funcionario.getUuid(), dispensa.getDataInicio(), minutosDesta, dispensa.getId());
 
@@ -242,8 +249,10 @@ public class DispensaWriteService {
       }
     }
 
-    // Atualizar estado do pedido
+    // Atualizar estado do pedido. A etapa fecha em FINALIZADO nos dois sentidos — antes ficava
+    // eternamente em DESPACHO_RH, mesmo depois de despachada.
     pedido.setEstado(estado.name());
+    pedido.setEtapa("FINALIZADO");
     pedidoRepository.save(pedido);
 
     Map<String, Object> resp = new HashMap<>();
@@ -287,6 +296,8 @@ public class DispensaWriteService {
     if (minutosPedidos <= 0)
       throw IgrpResponseStatusException.badRequest(
           "Hora de entrada tem de ser posterior à hora de saída");
+
+    saldoLockService.lockColaborador(funcionario.getUuid());
 
     dispensaHorasService.validarSaldo(
         funcionario.getUuid(), novaData, minutosPedidos, dispensa.getId());

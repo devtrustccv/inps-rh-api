@@ -76,14 +76,36 @@ public class JustificarFaltaDTO  {
   /** Só de resposta: soma dos dias justificados. */
   private BigDecimal valorTotal ;
 
+
+  /**
+   * Quanto sai do vencimento: soma de RH_T_FALTA.VALOR_DESCONTO das faltas activas (o liquido
+   * que o processamento salarial le). Zero enquanto o pedido nao for despachado.
+   */
+  private BigDecimal valorDescontado ;
+
+
+  /** A parte que o saldo (ferias/dispensa) cobriu. Zero enquanto o pedido nao for despachado. */
+  private BigDecimal valorCoberto ;
+
+
+  /**
+   * Só de resposta: true se alguma falta do pedido já foi apanhada pelo processamento salarial
+   * (RH_T_FALTA.DEF_REM_ID preenchido). Nesse caso editar/eliminar dão 400.
+   */
+  private boolean processado ;
+
   /**
    * Documentos comprovativos do bloco "Justificar Faltas Selecionadas" — o formulário
    * permite anexar vários ("Adicionar outro documento"). Aplicam-se a todas as faltas
    * seleccionadas; {@code FaltaItemDTO.documento} continua a servir o anexo de um dia
    * específico.
+   *
+   * <p>Sem valor inicial de propósito: com {@code new ArrayList<>()} um JSON sem o campo chegava
+   * como lista vazia, e o sync lia "o utilizador retirou tudo" e punha os anexos em 'E'. Assim,
+   * omitido = {@code null} = preserva, como nos outros PUT.
    */
   @Valid
-  private List<AnexoReqDTO> documentos = new ArrayList<>();
+  private List<AnexoReqDTO> documentos ;
 
 
   /**

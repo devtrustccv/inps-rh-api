@@ -7,7 +7,6 @@ import cv.inps.rh.assiduidade.application.dto.HoraExtraDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.application.service.helper.TipoMovimentoHelper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
-import cv.inps.rh.funcionario.infrastructure.mappers.DefinicaoRemuneracaoMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.EstadoValidacao;
@@ -41,25 +40,13 @@ public class HoraExtraServiceWrite {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(HoraExtraServiceWrite.class);
 
-  /** Tipo de movimento parametrizado para a remuneração de hora extra. */
-  private static final String TIPO_MOV_REM_HORA = "REM_HORA";
-
-  private static final String MOEDA_PADRAO = "CVE";
-
-  /** Valor de RH_T_DEF_REMUNERACOES.TIPO — usado por DELETE_ASSIDUIDADE para limpar. */
-  private static final String TIPO_REMUNERACAO_HORA_EXTRA = "HORA_EXTRA";
-
   private final HoraExtraEntityRepository horaExtraRepository;
-  private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoRepository;
-  private final TipoRelRemPagEntityRepository tipoRelRemPagRepository;
   private final FuncionarioEntityRepository funcionarioRepository;
   private final ValidacaoEntityRepository validacaoEntityRepository;
   private final FuncionarioRules funcionarioRules;
   private final AssiduidadeSinteseDiarioEntityRepository sinteseRepository;
   private final DadosContratuaisMapper dadosContratuaisMapper;
   private final AssiduidadeParametroEntityRepository assiduidadeParametroRepository;
-  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoRepository;
-  private final DefinicaoRemuneracaoMapper definicaoRemuneracaoMapper;
   private final TipoMovimentoHelper tipoMovimentoHelper;
   private final PedidoEntityRepository pedidoRepository;
   private final DocumentoEntityRepository documentoEntityRepository;
@@ -213,12 +200,13 @@ public class HoraExtraServiceWrite {
       Long tiprelId, LocalDate dataInicio, LocalDate dataFim,
       String percentagemReferente, Long horasDiaria) {
 
-    var parametros = assiduidadeParametroRepository.findAllByEstado(Estado.A.getCode());
-    if (parametros == null || parametros.isEmpty())
-      throw IgrpResponseStatusException.badRequest(
-          "Parametrização de assiduidade activa não encontrada — não é possível calcular a hora extra");
+    // Sem fallback, ao contrário da falta: aqui a jornada é o divisor do valor a pagar, e assumir
+    // 8h calado poderia pagar a mais. A leitura é a mesma dos outros (estado A e sem data de fim),
+    // e é a entidade inteira porque as percentagens abaixo têm de vir da MESMA parametrização.
+    var parametro = assiduidadeParametroRepository.findActiveParametro()
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest(
+            "Parametrização de assiduidade activa não encontrada — não é possível calcular a hora extra"));
 
-    var parametro = parametros.getFirst();
     int jornadaMinutos = TimeUtils.hhmmToMinutes(parametro.getDiaria());
     if (jornadaMinutos <= 0)
       throw IgrpResponseStatusException.badRequest("Jornada diária não parametrizada");
@@ -293,11 +281,15 @@ public class HoraExtraServiceWrite {
 
     Estado estado = Objects.equals(req.getValidar(), EstadoValidacao.SIM) ? Estado.A : Estado.I;
 
-    var anexosExistentes = documentoEntityRepository
-        .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_HORA_EXTRA.name(), pedido.getUuid());
-    if (anexosExistentes != null && !anexosExistentes.isEmpty()) {
-      anexosExistentes.forEach(a -> a.setEstado(estado));
-      documentoEntityRepository.saveAll(anexosExistentes);
+    // Os anexos da hora extra são gravados por LINHA (referenciaUuid = he.uuid, ver marcarHoraExtra),
+    // não pelo pedido. A procura por pedido.uuid nunca casava, e o estado dos anexos ficava em P.
+    for (var he : horasExtra) {
+      var anexosLinha = documentoEntityRepository
+          .findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_HORA_EXTRA.name(), he.getUuid());
+      if (anexosLinha != null && !anexosLinha.isEmpty()) {
+        anexosLinha.forEach(a -> a.setEstado(estado));
+        documentoEntityRepository.saveAll(anexosLinha);
+      }
     }
 
     Map<LocalDate, HoraExtraDTO> ajustes = new HashMap<>();
@@ -311,10 +303,6 @@ public class HoraExtraServiceWrite {
     for (var he : horasExtra) {
       he.setEstado(estado);
       horaExtraRepository.save(he);
-
-      // Validado ⇒ entra no processamento salarial como remuneração.
-      if (estado == Estado.A)
-        registarRemuneracaoHoraExtra(he);
 
       var ajuste = ajustes.get(he.getDataInicio());
 
@@ -366,6 +354,13 @@ public class HoraExtraServiceWrite {
             }
           }
       }
+
+      // Validado ⇒ o procedimento do processamento salarial apanha-a (ESTADO='A', DEF_REM_ID nulo),
+      // cria a RH_T_DEF_REMUNERACOES com o VALOR_DIARIO e preenche o DEF_REM_ID — já não é o Java
+      // (decisão com o DBA, 11/09, igual à falta). Grava-se DEPOIS dos ajustes: se o checker
+      // corrigiu horas ou percentagem, o valor recalculado acima é o que o procedimento vai ler.
+      if (estado == Estado.A)
+        horaExtraRepository.save(he);
     }
 
     funcionarioRules.getValidacaoPendenteByReferenciaUuid(pedido.getUuid(), TipoAcao.INSERT, Referencia.HORA_EXTRA)
@@ -375,6 +370,8 @@ public class HoraExtraServiceWrite {
         });
 
     pedido.setEstado(estado.name());
+    // Fecha a etapa nos dois sentidos — antes ficava em VALIDACAO depois de decidida.
+    pedido.setEtapa("FINALIZADO");
     pedidoRepository.save(pedido);
 
     if (estado == Estado.A && !horasExtra.isEmpty()) {
@@ -389,64 +386,6 @@ public class HoraExtraServiceWrite {
     resp.put("totalRegistos", horasExtra.size());
 
     return resp;
-  }
-
-  /**
-   * Regista a hora extra validada em {@code RH_T_DEF_REMUNERACOES} e associa em
-   * {@code RH_T_TIPREL_REM_PAG.REM_ID} — o equivalente a
-   * {@code GRAVA_REMUN_PAG(P_REM_PAG => 'REM')} do lado da BD, e o que
-   * {@code PROCESSA_HORA} espera encontrar.
-   *
-   * <p>O tipo de movimento vem da parametrização {@code REM_HORA} do vínculo, filtrada
-   * por estado activo — há linhas eliminadas ('E') em BD que não devem ser usadas.
-   */
-  private void registarRemuneracaoHoraExtra(HoraExtraEntity he) {
-
-    var tipoRel = he.getTiprelId();
-    if (tipoRel == null || tipoRel.getContrVinculoId() == null
-        || tipoRel.getContrVinculoId().getVinculoId() == null)
-      throw IgrpResponseStatusException.badRequest(
-          "Colaborador sem vínculo contratual associado — não é possível registar a hora extra");
-
-    var vinculoId = tipoRel.getContrVinculoId().getVinculoId().getId();
-
-    var movimentos = paramVinculoMovimentoRepository
-        .findByVinculoId_IdAndTipoAndEstado(vinculoId, TIPO_MOV_REM_HORA, Estado.A);
-
-    if (movimentos == null || movimentos.isEmpty())
-      throw IgrpResponseStatusException.badRequest(
-          "Não existe tipo de movimento '" + TIPO_MOV_REM_HORA + "' activo parametrizado para o vínculo "
-              + vinculoId + ". Configure-o em RH_T_PARAM_VINCULO_MOV antes de validar horas extra.");
-
-    var valor = he.getValorDiario() != null ? he.getValorDiario() : BigDecimal.ZERO;
-
-    var remuneracao = definicaoRemuneracaoMapper.createRenumeracao(
-        valor,
-        movimentos.getFirst().getTmId(),
-        he.getDataInicio(),
-        he.getDataFim(),
-        tipoRel.getFunId(),   // FUN_ID, tal como GRAVA_REMUN_PAG
-        MOEDA_PADRAO);
-
-    // O mapper cria em estado P (serve os fluxos que ainda vão a validação). Aqui a
-    // hora extra já foi validada, e GET_SALARIO_BASE / o processamento só olham para
-    // remunerações com ESTADO = 'A' — em P ficaria invisível ao salário.
-    remuneracao.setEstado(Estado.A);
-    // DELETE_ASSIDUIDADE filtra por TIPO = 'HORA_EXTRA' (package body, linha 2683).
-    remuneracao.setTipo(TIPO_REMUNERACAO_HORA_EXTRA);
-
-    remuneracao = definicaoRemuneracaoRepository.save(remuneracao);
-
-    var associacao = new TipoRelRemPagEntity();
-    associacao.setTiprelId(tipoRel);
-    associacao.setRemId(remuneracao);
-    tipoRelRemPagRepository.save(associacao);
-
-    // PROCESSA_HORA actualiza RH_T_HORA_EXTRA.DEF_REM_ID (package body, linha 2573) e
-    // DELETE_ASSIDUIDADE limpa-o por aí (linha 2686). Sem este elo o registo ficaria
-    // órfão do processamento.
-    he.setDefRemId(remuneracao);
-    horaExtraRepository.save(he);
   }
 
   private AssiduidadeSinteseDiarioEntity buildSinteseDia(FuncionarioEntity fun, LocalDate dia, Long horasExtra) {

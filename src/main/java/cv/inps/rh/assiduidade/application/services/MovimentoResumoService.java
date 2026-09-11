@@ -46,7 +46,11 @@ public class MovimentoResumoService {
       dto.setNomeColaborador(entity.getNomeFuncionario());
       dto.setDirecao(entity.getNomeDirecao());
       dto.setTotalDias(entity.getTotalDias());
+      // A vista ja separa os tres, mas so o primeiro chegava ao ecra: com as faltas todas
+      // registadas o totalFalta da 0 e o utilizador ficava sem saber que ha 4 justificadas.
       dto.setTotalFalta(entity.getTotalFaltas());
+      dto.setTotalFaltasPendentes(entity.getTotalFaltasPendentes());
+      dto.setTotalFaltasJustificadas(entity.getTotalFaltasJustificadas());
 
       dto.setTotalHorasTrabalhadas(formatarHoras(entity.getHorasTrabalhadas()));
       dto.setTotalHoraAlmoco(formatarHoras(entity.getHorasAlmoco()));

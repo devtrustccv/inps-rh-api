@@ -3,6 +3,7 @@ package cv.inps.rh.parametrizacao.application.queries;
 import cv.igrp.framework.core.domain.QueryHandler;
 import cv.igrp.framework.stereotype.IgrpQueryHandler;
 import cv.inps.rh.parametrizacao.application.dto.ParametrizacaoDTO;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ParamSituacaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamSituacaoEntityRepository;
 import jakarta.persistence.criteria.Predicate;
@@ -35,6 +36,10 @@ public class GetParamSituacoesAtivoQueryHandler implements QueryHandler<GetParam
 
     Specification<ParamSituacaoEntity> spec = (root, q, cb) -> {
       List<Predicate> predicates = new ArrayList<>();
+
+      // Só parametrizações activas — é o que o nome do endpoint promete. Sem isto, uma situação
+      // desactivada continuava a encher os combos e a poder ser gravada.
+      predicates.add(cb.equal(root.get("estado"), Estado.A));
 
       if (query.getFlgSituacaoLaboral() != null) {
         predicates.add(cb.equal(

@@ -111,9 +111,10 @@ public class JustificarFaltaReadService {
     LocalDate inicioMes = LocalDate.of(query.getAno(), query.getMes(), 1);
     LocalDate fimMes = inicioMes.withDayOfMonth(inicioMes.lengthOfMonth());
 
-    // Buscar todas as sínteses diárias do funcionário no mês
+    // Dias por justificar do mês: só ausências (FALTA=1 ou horas de ausência > 0) e só as que
+    // ainda não têm falta associada. O filtro é feito em SQL — ver findAusenciasPorJustificar.
     List<AssiduidadeSinteseDiarioEntity> sinteses = assiduidadeSinteseDiarioEntityRepository
-        .findAllByFuncionarioIdAndDataBetweenOrderByDataAsc(funcionario, inicioMes, fimMes);
+        .findAusenciasPorJustificar(funcionario.getId(), inicioMes, fimMes);
 
     // Faltas já registadas no período, indexadas pela síntese que as originou.
     // Sem isto o resumo não conseguiria mostrar o estado de cada dia
@@ -122,6 +123,9 @@ public class JustificarFaltaReadService {
         .findAllByFuncionarioAndPeriodo(funcUuid, inicioMes, fimMes)
         .stream()
         .filter(f -> f.getSinteseDiarioId() != null)
+        // As eliminadas não contam para nada: nem aparecem no grupo, nem prendem o dia — que
+        // volta a ficar por justificar (ver findAusenciasPorJustificar).
+        .filter(f -> !Estado.E.equals(f.getEstado()))
         .sorted(Comparator.comparing(JustificarFaltaReadService::dataDaFalta,
             Comparator.nullsLast(Comparator.naturalOrder())))
         .collect(Collectors.toMap(
@@ -132,10 +136,9 @@ public class JustificarFaltaReadService {
 
     // Os dias JÁ justificados não vêm soltos: vão agrupados no pedido a que pertencem
     // (dto.pedidos), cada grupo com o cabeçalho completo do formulário, para o Editar abrir
-    // sem uma segunda chamada. Soltos ficam só os dias que ainda não têm falta associada —
-    // os que a lista da esquerda oferece para seleccionar e justificar.
+    // sem uma segunda chamada. Soltos ficam só os dias por justificar, que a consulta acima
+    // já devolve filtrados.
     List<FaltaItemDTO> itensFalta = sinteses.stream()
-        .filter(sin -> !faltaPorSintese.containsKey(sin.getId()))
         .map(sin -> {
           FaltaItemDTO item = new FaltaItemDTO();
           item.setId(sin.getId());
@@ -230,7 +233,7 @@ public class JustificarFaltaReadService {
       else if (f.getDataInicio() != null)
         item.setData(f.getDataInicio().toLocalDate().toString());
       item.setTipoFalta(f.getParamSitId() != null ? f.getParamSitId().getNome() : null);
-      item.setValorAusencia(f.getValor() != null ? f.getValor().intValue() : null);
+      item.setValorAusencia(f.getValor());
       item.setHorasAusencia(TimeUtils.intervalFormatToHHmm(f.getHorasAusencia()));
       item.setMotivo(f.getDescricaoMotivo());
       item.setComJustificativo(f.getFlgJustificativo());
@@ -267,10 +270,18 @@ public class JustificarFaltaReadService {
       dto.setComJustificativo(primeira.getFlgJustificativo());
       dto.setDeduzirFaltaEm(primeira.getFlgDescontoFalta());
       dto.setValorDiario(primeira.getValor());
-      dto.setValorTotal(faltas.stream()
+      var valorTotal = faltas.stream()
           .map(FaltaEntity::getValor)
           .filter(Objects::nonNull)
-          .reduce(BigDecimal.ZERO, BigDecimal::add));
+          .reduce(BigDecimal.ZERO, BigDecimal::add);
+      dto.setValorTotal(valorTotal);
+
+      // valorTotal e o BRUTO da ausencia. Com deducao em ferias ou dispensa o saldo cobre parte
+      // e so o resto vai ao vencimento: um pedido de 25 378,24 podia ter descontado 22 205,96 e
+      // o ecra mostrava sempre o bruto. Ambos ficam a zero enquanto nao houver despacho.
+      dto.setValorDescontado(FaltaDescontoService.valorDescontado(faltas));
+      dto.setValorCoberto(FaltaDescontoService.valorCoberto(faltas));
+      dto.setProcessado(FaltaDescontoService.processado(faltas));
 
       // Mês de referência: é por ele que o ecrã volta à lista depois de editar. Vem da
       // falta mais antiga do pedido (síntese diária, ou a data da falta quando não há
