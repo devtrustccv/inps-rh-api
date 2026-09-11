@@ -6,7 +6,6 @@ import cv.inps.rh.shared.application.constants.TipoDescontoFalta;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
-import cv.inps.rh.shared.infrastructure.persistence.repository.FaltaEntityRepository;
 import cv.inps.rh.shared.util.TimeUtils;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * Aplica os descontos decorrentes da validação de uma falta.
@@ -60,9 +58,6 @@ public class FaltaDescontoService {
   /** Acima deste número de dias — e só com desconto salarial — a falta vai a validação. */
   private static final int LIMITE_DIAS_SEM_VALIDACAO = 3;
 
-  /** Valor de "nenhum pedido a excluir" — a query compara sempre, sem null. */
-  private static final Long SEM_PEDIDO_A_EXCLUIR = -1L;
-
   /** RH_T_FALTA.TIPO. */
   public static final String TIPO_FALTA = "FALTA";
 
@@ -74,7 +69,6 @@ public class FaltaDescontoService {
   private final AnoEntityRepository anoRepository;
   private final SaldoFeriaService saldoFeriaService;
   private final DispensaHorasService dispensaHorasService;
-  private final FaltaEntityRepository faltaRepository;
 
   /**
    * Aplica todos os descontos aplicáveis a uma falta já validada.
@@ -149,7 +143,20 @@ public class FaltaDescontoService {
     falta.setFlgDescontoSal(0);
   }
 
-  /** @return true se o tipo de justificação implica desconto no salário. */
+  /**
+   * @return true se o tipo de justificação implica desconto no salário.
+   *
+   * <p>A fonte é {@code RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL}, e é também de lá que sai
+   * {@code RH_T_FALTA.FLG_DESCONTO_SAL}. A spec contradiz-se sobre isto: a regra dos 3 dias
+   * (:494, :796) cita esta coluna, mas o campo hidden (:730) e o ecrã de falta
+   * justificada/injustificada (:901) mandam buscá-la a {@code RH_T_TIPO_FALTAS} via
+   * {@code RH_T_FALTA.TF_ID}.
+   *
+   * <p>Decidido a 11/09 ficar por {@code PARAM_SITUACAO} — é a única leitura implementável:
+   * {@code RH_T_FALTA} <b>não tem</b> coluna {@code TF_ID} (não há ligação à tabela de tipos) e
+   * {@code RH_T_TIPO_FALTAS} tem uma única linha, de teste e em {@code E}. Passar para lá exigiria
+   * alteração de BD e carregar os dados; até isso acontecer, a outra leitura daria sempre nulo.
+   */
   public boolean descontaSalario(FaltaEntity falta) {
     return falta != null
         && falta.getParamSitId() != null
@@ -164,50 +171,16 @@ public class FaltaDescontoService {
    *
    * <p>As duas condições são cumulativas: 5 dias sem desconto salarial não vão a
    * validação, e 2 dias com desconto também não.
+   *
+   * <p>Conta os dias <b>deste registo</b>, que é o que a spec diz ("o número de registo na
+   * tabela RH_T_FALTA dependerá do número de dias de falta [...] somente deve ir para validação
+   * caso o número de falta for maior que 3 dias"). Já esteve a contar as faltas vivas do mês
+   * inteiro — acumulação que a spec nunca pediu, removida a 11/09.
    */
   public boolean requerValidacao(int totalDias, ParamSituacaoEntity paramSituacao) {
     return totalDias > LIMITE_DIAS_SEM_VALIDACAO
         && paramSituacao != null
         && Objects.equals(paramSituacao.getFlgFaltaDecontoSal(), 1);
-  }
-
-  /**
-   * Igual a {@link #requerValidacao}, mas contando as faltas do <b>mês</b> e não só as deste
-   * pedido: às que estão a ser registadas agora somam-se as que o colaborador já tem vivas
-   * nesse mês.
-   *
-   * <p>Com a contagem por pedido o controlo era contornável sem querer — registar 2 dias hoje e
-   * 2 amanhã nunca ia a despacho, registar os mesmos 4 de uma vez ia. Decidido a 10/09.
-   *
-   * <p>Sem retroactividade: só o pedido novo vai a despacho, os anteriores ficam como foram
-   * decididos.
-   *
-   * @param dataReferencia um dia do período a registar — define o mês a contar
-   */
-  public boolean requerValidacaoNoMes(
-      UUID funcionarioUuid, LocalDate dataReferencia, int diasAgora, ParamSituacaoEntity paramSituacao) {
-    return requerValidacaoNoMes(funcionarioUuid, dataReferencia, diasAgora, paramSituacao, null);
-  }
-
-  /**
-   * Igual à anterior, mas ignorando as faltas de um pedido — a reavaliação do <b>editar</b>.
-   *
-   * <p>Ao editar, as faltas do pedido já estão gravadas e já contam no mês; sem as excluir,
-   * somar-lhes {@code diasAgora} contava-as duas vezes e um pedido de 4 dias ia sempre a
-   * despacho, mesmo quando nada de material tinha mudado.
-   */
-  public boolean requerValidacaoNoMes(
-      UUID funcionarioUuid, LocalDate dataReferencia, int diasAgora,
-      ParamSituacaoEntity paramSituacao, Long pedidoIdExcluir) {
-
-    var inicioMes = dataReferencia.withDayOfMonth(1);
-    var fimMes = dataReferencia.withDayOfMonth(dataReferencia.lengthOfMonth());
-
-    long jaExistentes = faltaRepository.countFaltasVivasNoPeriodo(
-        funcionarioUuid, inicioMes, fimMes,
-        pedidoIdExcluir != null ? pedidoIdExcluir : SEM_PEDIDO_A_EXCLUIR);
-
-    return requerValidacao((int) jaExistentes + diasAgora, paramSituacao);
   }
 
   // ------------------------------------------------------------------
