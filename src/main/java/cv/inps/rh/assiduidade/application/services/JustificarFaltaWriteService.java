@@ -46,8 +46,8 @@ public class JustificarFaltaWriteService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JustificarFaltaWriteService.class);
 
-  /** Valor de "Deduzir Falta Em" que remove a dedução no editar — ver resolverDeducaoEditada. */
-  private static final String DEDUCAO_NENHUMA = "NENHUM";
+  /** RH_T_PARAM_SITUACAO.TIPO_AUSENCIA das parametrizações que servem para faltas. */
+  static final String TIPO_AUSENCIA_FALTA = "FALTA";
 
   private final FaltaEntityRepository faltaRepository;
   private final PedidoEntityRepository pedidoRepository;
@@ -119,15 +119,10 @@ public class JustificarFaltaWriteService {
 
     var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), comJustificativo);
 
-    // Regra: só vai a validação se forem mais de 3 dias no MÊS E o tipo de justificação
-    // descontar no salário. Caso contrário fica logo activo.
-    // A data vem da síntese e não do DTO: o item traz `data` como texto e pode nem vir
-    // preenchido — o que o formulário garante é o id da síntese.
-    var mesReferencia = entityManager
-        .getReference(AssiduidadeSinteseDiarioEntity.class, selecionados.getFirst().getId())
-        .getData();
-    boolean requerValidacao = faltaDescontoService.requerValidacaoNoMes(
-        funcionario.getUuid(), mesReferencia, selecionados.size(), paramSituacao);
+    // Regra (spec :494): só vai a validação se forem mais de 3 dias NESTE registo E o tipo de
+    // justificação descontar no salário. Caso contrário fica logo activo.
+    boolean requerValidacao =
+        faltaDescontoService.requerValidacao(selecionados.size(), paramSituacao);
     var estadoInicial = requerValidacao ? Estado.P : Estado.A;
 
     var deducao = StringUtils.hasText(dto.getDeduzirFaltaEm())
@@ -438,11 +433,32 @@ public class JustificarFaltaWriteService {
         .orElseThrow(() -> IgrpResponseStatusException.badRequest(
             "Tipo de justificação inválido: " + tipoJustificacao));
 
-    // tipoFalta não nulo indica que este paramSituacao serve para justificar faltas
-    if (paramSituacao.getTipoFalta() == null)
-      throw IgrpResponseStatusException.badRequest("Tipo justificativo não permitido para falta");
+    garantirTipoDeFalta(paramSituacao);
 
     return paramSituacao;
+  }
+
+  /**
+   * Aceita só as parametrizações que o combo de "Tipo Falta" deve oferecer: uma ausência do local
+   * de trabalho, do tipo FALTA e activa — o mesmo critério com que a spec (:401, :698) manda
+   * alimentar o dropdown, aqui aplicado à escrita, que é chamável fora do ecrã.
+   *
+   * <p>Antes exigia-se {@code TIPO_FALTA IS NOT NULL}, que é a <b>classificação</b> da falta
+   * (FALTA_JUSTIFICADA, AUSENCIA_JUSTIFICADA, …) e não "serve para faltas": deixava passar as duas
+   * dispensas, a suspensão disciplinar e uma parametrização inactiva — três delas a descontar
+   * salário. O par usado aqui é o mesmo das férias e da dispensa (ver FeriaWriteService,
+   * DispensaWriteService).
+   */
+  static void garantirTipoDeFalta(ParamSituacaoEntity paramSituacao) {
+
+    boolean ausencia = Integer.valueOf(1).equals(paramSituacao.getFlgAusencia());
+    boolean deFalta = TIPO_AUSENCIA_FALTA.equals(paramSituacao.getTipoAusencia());
+    boolean activa = Estado.A.equals(paramSituacao.getEstado());
+
+    if (!ausencia || !deFalta || !activa)
+      throw IgrpResponseStatusException.badRequest(
+          "Tipo de falta inválido: " + paramSituacao.getNome()
+              + " não é um tipo de falta activo.");
   }
 
   private void enviarNotificacaoJustificacaoFalta(PedidoEntity pedido, FuncionarioEntity funcionario) {
@@ -571,7 +587,13 @@ public class JustificarFaltaWriteService {
         .map(FaltaEntity::getFlgDescontoFalta)
         .collect(Collectors.toSet());
 
-    var deducao = resolverDeducaoEditada(dto.getDeduzirFaltaEm(), deducoesAntigas);
+    // "Deduzir Falta Em" vale exactamente o que o formulário enviou, como no registo: o ecrã de
+    // edição manda o estado completo, logo um combo vazio é o utilizador a retirar a dedução, não
+    // um campo por preencher. O domínio é o TP_DESCONTO_FALTA da spec — FERIAS ou DISPENSA — e não
+    // há sentinela nenhuma para "limpar": vazio é limpar.
+    var deducao = StringUtils.hasText(dto.getDeduzirFaltaEm())
+        ? TipoDescontoFalta.fromCodeOrThrow(dto.getDeduzirFaltaEm()).getCode()
+        : null;
 
     // "Material" = mexe em dinheiro. Só o tipo de justificação (que manda no desconto salarial) e
     // a dedução o são; motivo, parecer, observação, responsável e anexos não.
@@ -580,18 +602,13 @@ public class JustificarFaltaWriteService {
     boolean mudouDeducao = !deducoesAntigas.equals(Collections.singleton(deducao));
     boolean mudancaMaterial = mudouTipo || mudouDeducao;
 
-    // Reavaliar o despacho pela MESMA regra do registo (>3 dias no mês E desconto salarial), e só
-    // quando algo material mudou: sem isto, editar 4 dias de um tipo que não desconta para um que
-    // desconta deixava-os activos sem nunca passarem por despacho — o maker-checker contornado
+    // Reavaliar o despacho pela MESMA regra do registo (>3 dias no pedido E desconto salarial), e
+    // só quando algo material mudou: sem isto, editar 4 dias de um tipo que não desconta para um
+    // que desconta deixava-os activos sem nunca passarem por despacho — o maker-checker contornado
     // por uma edição. Corrigir uma gralha no motivo não reabre nada, nem sequer vai à BD.
     var tipoEfectivo = paramSituacao != null ? paramSituacao : vivas.getFirst().getParamSitId();
     boolean requerValidacao = mudancaMaterial
-        && faltaDescontoService.requerValidacaoNoMes(
-            funcionario.getUuid(),
-            vivas.getFirst().getDataInicio().toLocalDate(),
-            vivas.size(),
-            tipoEfectivo,
-            pedido.getId());
+        && faltaDescontoService.requerValidacao(vivas.size(), tipoEfectivo);
     var estadoAlvo = requerValidacao ? Estado.P : null;
 
     // O editar mexe no PEDIDO, não na composição dele: os dias que o compõem mantêm-se todos.
@@ -682,27 +699,6 @@ public class JustificarFaltaWriteService {
         "etapa", Objects.requireNonNullElse(pedido.getEtapa(), ""),
         "requerValidacao", requerValidacao,
         "totalRegistos", ficaram);
-  }
-
-  /**
-   * "Deduzir Falta Em" no editar: {@code null} ou ausente <b>preserva</b> o que está gravado,
-   * {@code NENHUM} limpa, {@code FERIAS}/{@code DISPENSA} trocam.
-   *
-   * <p>Antes, o campo era atribuído incondicionalmente e um {@code PUT} que não o reenviasse
-   * apagava a dedução: as férias deixavam de cobrir e o dia inteiro passava a desconto salarial.
-   * Um campo ausente no payload não pode destruir estado financeiro — e, com a reavaliação do
-   * despacho, ainda mandaria o pedido a validação sem ninguém perceber porquê. Passa a valer o
-   * mesmo que o {@code validarFaltaJustificada} já fazia.
-   */
-  private String resolverDeducaoEditada(String deduzirFaltaEm, Set<String> deducoesAntigas) {
-
-    if (!StringUtils.hasText(deduzirFaltaEm))
-      return deducoesAntigas.size() == 1 ? deducoesAntigas.iterator().next() : null;
-
-    if (DEDUCAO_NENHUMA.equalsIgnoreCase(deduzirFaltaEm))
-      return null;
-
-    return TipoDescontoFalta.fromCodeOrThrow(deduzirFaltaEm).getCode();
   }
 
   /**
