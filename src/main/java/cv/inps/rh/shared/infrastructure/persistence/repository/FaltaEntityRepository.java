@@ -86,8 +86,15 @@ public interface FaltaEntityRepository extends
    * do que uma síntese (importada e manual), e a verificação por síntese deixava passar
    * duas faltas para a mesma data — apesar de a mensagem prometer o contrário.
    *
-   * <p>Faltas em {@code I} são ignoradas: uma justificação recusada não pode bloquear o
-   * dia para sempre.
+   * <p>Faltas em {@code I} e {@code E} sao ignoradas: uma justificacao recusada ou um pedido
+   * eliminado nao podem bloquear o dia para sempre. O {@code E} faltava, e a consequencia era
+   * visivel: depois de eliminar um pedido, os dias voltavam ao painel "por justificar" (essa
+   * consulta ja exclui {@code E}) mas o justificar recusava-os com "Ja existe uma falta
+   * associada a data" — o ecra prometia o que a escrita negava, e o caminho "eliminaste, faz
+   * nova marcacao" ficava fechado a chave. Provado live a 11/09.
+   *
+   * <p>Nao abre porta a duplicados: {@code A} e {@code P} — os unicos estados que produzem
+   * efeitos financeiros — continuam a bloquear.
    */
   @Query("""
           SELECT COUNT(f) > 0
@@ -95,7 +102,8 @@ public interface FaltaEntityRepository extends
           JOIN f.sinteseDiarioId s
           WHERE s.funcionarioId.id = :funcionarioId
             AND s.data = :data
-            AND f.estado <> cv.inps.rh.shared.application.constants.Estado.I
+            AND f.estado NOT IN (cv.inps.rh.shared.application.constants.Estado.I,
+                                 cv.inps.rh.shared.application.constants.Estado.E)
       """)
   boolean existeFaltaVivaNoDia(
       @Param("funcionarioId") Long funcionarioId,
