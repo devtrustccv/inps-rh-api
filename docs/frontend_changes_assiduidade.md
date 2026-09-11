@@ -508,3 +508,224 @@ mencionar as reservadas:
 > tem 32:00 reservadas por faltas pendentes e está a pedir 02:00 (total 34:00).
 
 **Se o frontend faz *match* no texto da mensagem, esse match parte.**
+
+---
+
+## 🔴 12. Regra dos 3 dias deixa de acumular o mês (11/09/2026)
+
+A decisão de um pedido ir a despacho conta agora **os dias desse registo**, não as faltas vivas
+do mês inteiro. É o que a spec diz (`:494`, `:796`): *"somente deve ir para validação caso o
+número de falta for maior que 3 dias"*, no contexto de *"o número de registo na tabela
+RH_T_FALTA dependerá do número de dias de falta"*.
+
+A acumulação mensal tinha sido acrescentada a 10/09 e **não tem suporte na spec**.
+
+**O que muda no ecrã:** 2 dias hoje e 2 dias amanhã, em pedidos separados, ficam agora **ambos
+activos**. Antes o segundo ia a despacho. O `requerValidacao` da resposta passa a ser `false`
+nesses casos.
+
+As duas condições continuam cumulativas: **mais de 3 dias** no registo **e** tipo de
+justificação que desconta salário (`RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL`).
+
+---
+
+## 🔴 13. Tipo de falta: o backend recusa o que o combo não oferece (11/09/2026)
+
+O guard do tipo de justificação exigia `TIPO_FALTA IS NOT NULL`, que é a **classificação** da
+falta e não "serve para faltas". Deixava passar as duas dispensas, a suspensão disciplinar e uma
+parametrização inactiva — **três delas a descontar salário**. O ecrã de Marcar Falta não validava
+nada: aceitava "Férias Anuais" ou "Baixa médica" como tipo de falta.
+
+### Como o combo deve ser filtrado
+
+```
+GET /api/v1/parametrizacao/param-situacoes/ativos?flgAusencia=1&tipoAusencia=FALTA
+```
+
+**Não usar `tipoFalta`** neste filtro — traz dispensas e a suspensão disciplinar à mistura.
+É o mesmo par que férias (`tipoAusencia=FERIAS`) e dispensa (`tipoAusencia=DISPENSA`) já usam.
+
+Devolve 7 tipos activos: 15 Falecimento de Familiares, 17 Motivo Pessoal, 18 Falta
+Injustificada, 20 Doença do Trabalhador, 39 Isolamento Profilático, 40 Maternidade,
+41 Licença Paternidade.
+
+O endpoint passou também a filtrar `ESTADO='A'` por si próprio — **nenhum combo servido por ele
+volta a trazer parametrizações desactivadas**.
+
+### `400` novo
+
+Enviar um `tipoJustificacao` fora dessa lista, no registo **ou** no despacho, dá:
+
+> Tipo de falta inválido: `<nome>` não é um tipo de falta activo.
+
+Nenhuma falta gravada usa um tipo que o guard novo recuse (verificado em BD).
+
+### Marcar sem justificativo
+
+Com `justificar: "NAO"` o `tipoJustificacao` deixou de ser validado — não é usado (não nasce
+falta nem pedido, só a síntese diária). A spec (`:355`) diz que esses campos nem aparecem nesse
+caso.
+
+---
+
+## 🔴 14. `deduzirFaltaEm` no editar: vazio agora **limpa** (11/09/2026)
+
+`PUT /api/v1/assiduidade/falta/justificar/pedido/{pedidoUuid}`
+
+| Payload | Antes | Agora |
+|---|---|---|
+| `"FERIAS"` / `"DISPENSA"` | troca | troca |
+| ausente / `null` / `""` | **preservava** o valor gravado | **limpa a dedução** |
+| `"NENHUM"` | limpava | **400** — não existe no domínio |
+
+O ecrã de edição envia o estado completo do formulário: um combo vazio é o utilizador a
+**retirar** a dedução, não um campo por preencher. E `NENHUM` não existe em
+`TP_DESCONTO_FALTA` — era uma sentinela nossa.
+
+**O formulário tem de reenviar `deduzirFaltaEm` sempre que o quiser manter.**
+
+---
+
+## 🔴 15. Despacho decide o pedido inteiro — as checkboxes deixam de ter efeito (11/09/2026)
+
+`PUT /api/v1/assiduidade/falta/justificar/validar/{pedidoUuid}`
+
+`SIM` aprova **todos** os dias do pedido, `NAO` rejeita **todos**. O `itensFalta` continua a ser
+aceite no corpo, por compatibilidade, mas **deixou de comandar**: o `selecionar` de cada item é
+ignorado e um array truncado já não tem efeito destrutivo.
+
+**Antes:** um dia não marcado ficava **órfão em `P`** — o pedido ia a `A`/`I`, a etapa a
+`FINALIZADO` e a validação fechava, mas o dia ficava pendente para sempre, invisível em todos os
+ecrãs e a reservar saldo. Um payload com tudo a `false` órfãos os dias todos, sem erro nenhum.
+
+**O ecrã de validação deve deixar de mostrar as checkboxes** — prometem uma escolha que não
+existe. O checker que discorde de um dia rejeita o pedido e o maker volta a justificar os dias
+certos, que é o caminho que a spec prevê (`:655-668`).
+
+### `400` novo — despacho repetido
+
+> Só é possível despachar um pedido de justificação pendente de validação.
+
+Dado quando o pedido não está em `P` **ou** já não tem linha pendente em `RH_T_VALIDACAO`.
+Antes, dois `PUT` seguidos criavam `DEF_REMUNERACOES` **a dobrar** — dinheiro a mais no
+vencimento. **Um frontend que reenvie despachos idempotentes parte aqui.**
+
+### Resposta enriquecida
+
+```jsonc
+{ "pedidoId": 244, "pedidoUuid": "…", "estado": "A",
+  "etapa": "FINALIZADO",      // novo
+  "totalRegistos": 4 }        // novo — dias decididos, não itens enviados
+```
+
+---
+
+## 🔴 16. `valorDescontado` e `valorCoberto` — quanto saiu mesmo do vencimento (11/09/2026)
+
+`valorTotal` é o **bruto** da ausência (valor diário × dias), como a spec define. Mas com dedução
+em férias ou dispensa o saldo cobre parte e só o resto vai ao vencimento — e o ecrã mostrava
+sempre o bruto. Um pedido de 25 378,24 podia ter descontado 22 205,96 sem ninguém ver.
+
+Dois campos novos em **`GET falta/justificar/pedido/{pedidoUuid}`**, em cada elemento de
+`pedidos` do **`GET falta/justificar/{funcionarioId}`**, e em **`GET falta/{pedidoId}`**:
+
+| Campo | Significado |
+|---|---|
+| `valorDescontado` | soma das `RH_T_DEF_REMUNERACOES` vivas — o que saiu do vencimento |
+| `valorCoberto` | `valorTotal - valorDescontado` — o que o saldo cobriu |
+
+Ambos a **zero** enquanto o pedido não for despachado. Exemplos reais (4 dias, 6 344,56/dia):
+
+| Dedução | `valorTotal` | `valorDescontado` | `valorCoberto` |
+|---|---|---|---|
+| férias, 2 dias de saldo | 25 378,24 | 12 689,12 | 12 689,12 |
+| dispensa, 4h de saldo | 25 378,24 | 22 205,96 | 3 172,28 |
+| férias, saldo esgotado | 25 378,24 | 25 378,24 | 0,00 |
+
+---
+
+## 🔴 17. `GET falta/{pedidoId}` devolvia campos vazios que já tinha gravados (11/09/2026)
+
+O ecrã que o checker abre para despachar uma **marcação de falta** perdia quatro campos:
+
+| Campo | Antes | Agora |
+|---|---|---|
+| `deduzirFaltaEm` | **`null`** | `"FERIAS"` / `"DISPENSA"` |
+| `valorDiario` | `null` | valor do dia |
+| `valorTotal` | `null` | soma dos dias |
+| `totalDeHorasAusentes` | `"0 8:0:0.0"` — intervalo Oracle cru de **um** dia | **`"32:00"`** — total do período |
+
+O `deduzirFaltaEm` era o mais caro: o despacho aplica o que o formulário enviar, logo um combo
+carregado a `null` reenviava `null` e **a dedução em férias desaparecia no despacho**, com os
+dias a irem todos a desconto no salário.
+
+**`totalDeHorasAusentes` mudou de formato** — é agora `HH:MM` e reenviável tal e qual no `POST`.
+
+`validar` e `tipoOrdemServico` continuam `null`: não são lidos de volta (decisão de negócio).
+
+---
+
+## 🔴 18. Saldo de férias devolve as parcelas (11/09/2026)
+
+`GET /api/v1/assiduidade/feria/saldo/{funcionarioId}[?ano=]`
+
+Um `saldo: 0` não distinguia *"não tem direito"* de *"já gastou tudo"*, e o `anoReferencia`
+limitava-se a ecoar o parâmetro de entrada — vinha `null` sem explicação.
+
+```jsonc
+{ "funcionarioUuid": "…",
+  "anoReferencia": null,        // 2026 quando se passa ?ano=
+  "ambito": "ACUMULADO",        // novo — ANUAL quando se passa ?ano=
+  "direito": 2,                 // novo
+  "gozado": 2,                  // novo
+  "reservado": 0,               // novo — faltas em P que tencionam deduzir em férias
+  "saldo": 0 }
+```
+
+`anoReferencia: null` significa **acumulado de todos os anos**, que é o que o cálculo faz quando
+não se pede ano — é para isso que serve o `ambito`. **O valor de `saldo` não mudou.**
+
+---
+
+## 🔴 19. Resumo mensal de assiduidade — contadores e um falso positivo corrigido (11/09/2026)
+
+`GET /api/v1/assiduidade/movimento-resumos`
+
+**`totalFalta` não é "total de faltas do mês"** — é **dias por justificar** (sem registo em
+`RH_T_FALTA`). Com as faltas todas registadas dá `0`, o que parecia um bug. Dois campos novos
+explicam o resto:
+
+```jsonc
+{ "totalFalta": 0,                  // por justificar
+  "totalFaltasPendentes": 0,        // novo — registadas, à espera de despacho
+  "totalFaltasJustificadas": 4 }    // novo — registadas e despachadas
+```
+
+**Correcção na vista `RH_V_RESUMO_ASSIDUIDADE`:** o `totalFalta` contava **todos** os dias sem
+registo em `RH_T_FALTA`, sem verificar se o dia era sequer uma falta — e um dia normal de
+trabalho também não tem essa linha. Um colaborador com um mês de picagens normais aparecia com
+*"N faltas injustificadas"* e `estado: "INJUSTIFICADA"`. Verificado em dev: 5 dias normais davam
+`totalFalta: 5`; agora dão `0` e `estado: "CONFORME"`.
+
+**Correcção na vista `RH_V_FALTA_MENSAL`** (lista de Gestão de Falta): comparava o flag de
+desconto com a string `'S'`, mas a coluna é `VARCHAR2` com `'0'`/`'1'` — a comparação era sempre
+falsa. Consequência: `descontoRenumeracao` vinha **sempre `false`** e o estado mensal **sempre
+`JUSTIFICADA`**, mesmo com faltas injustificadas com desconto. Em dev, um colaborador com 9
+faltas injustificadas aparecia como justificadas.
+
+> **Os dois DDL já estão aplicados em dev** (`docs/sql/rh_v_resumo_assiduidade_fix.sql` e
+> `rh_v_falta_mensal_fix.sql`, com os textos anteriores nos ficheiros `*_BACKUP_11-09.sql`).
+> **Têm de ser replicados em staging e produção pelo DBA.**
+
+---
+
+## Por decidir com o analista
+
+| # | Assunto |
+|---|---|
+| 1 | **Ordem de Serviço** — criada ao aprovar uma falta, mas "ordem de serviço" não aparece uma única vez na spec de assiduidade |
+| 2 | **A spec contradiz-se nos 3 dias** — a secção REGRA (`:494`, `:796`) diz "mais de 3 dias **e** desconta salário"; a secção Ações, nos **dois** ecrãs (`:553`, `:825`), diz que a linha em `RH_T_VALIDACAO` nasce **só** quando o tipo desconta salário, sem falar em dias |
+| 3 | **Eliminar desfaz os descontos** — a spec só manda pôr `RH_T_FALTA.ESTADO='E'`, nada sobre devolver férias, dispensa ou salário |
+| 4 | **Fuga dos 3 dias** — um dia rejeitado (`I`) deixa de contar no limite; rejeitar 4 e rejustificar um a um deixa passar 3 sem despacho |
+| 5 | **`estadoDesc` inconsistente** — o mesmo estado `A` sai como `"Justificada"` nos itens e `"Ativo"` no pedido, no mesmo payload |
+| 6 | **`RH_T_DISPENSA.TIPO_DISPENSA` fica `null`** nas linhas criadas por dedução de falta — ecrãs que filtrem por tipo não as vêem |
