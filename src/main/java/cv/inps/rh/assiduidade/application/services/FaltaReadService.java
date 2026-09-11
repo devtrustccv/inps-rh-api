@@ -201,7 +201,7 @@ public class FaltaReadService {
     dto.setTotalDeHorasAusentes(String.format("%02d:%02d", minutosTotais / 60, minutosTotais % 60));
 
     dto.setJustificar(primeiraFalta.getFlgJustificativo());
-    dto.setMotivoAusencia(primeiraFalta.getDescricaoMotivo());
+    dto.setMotivo(primeiraFalta.getDescricaoMotivo());
     dto.setParecer(primeiraFalta.getDecisaoResponsavel());
     dto.setObservacao(primeiraFalta.getObsResponsavel());
     // A guarda tem de cobrir também o funcionário do responsável: RH_T_RESPONSAVEL

@@ -350,7 +350,7 @@ public class FaltaServiceWrite {
     falta.setPedidoId(pedido);
     falta.setTiprelId(tipoRel);
     falta.setTipo(FaltaDescontoService.TIPO_FALTA);
-    falta.setDescricaoMotivo(req.getMotivoAusencia());
+    falta.setDescricaoMotivo(req.getMotivo());
     falta.setHorasAusencia(parseInterval(horasAusenciaPorDia));
 
     falta.setDataInicio(LocalDateTime.of(dia, LocalTime.MIN));

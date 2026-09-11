@@ -54,7 +54,15 @@ public class FaltaReqDTO  {
   private String justificar ;
 
 
-  private String motivoAusencia ;
+  /**
+   * "Motivo Ausencia" do formulario, gravado em RH_T_FALTA.DESCRICAO_MOTIVO.
+   *
+   * <p>Chamava-se {@code motivoAusencia} e era o unico sitio da aplicacao com esse nome: o
+   * Justificar Falta, a dispensa e as ferias usam todos {@code motivo} para a mesma coluna.
+   * Dois nomes para o mesmo campo faziam com que um payload com o nome do outro ecra passasse
+   * em silencio -- 200, e o motivo perdido. Harmonizado a 11/09.
+   */
+  private String motivo ;
 
 
   private String parecer ;
