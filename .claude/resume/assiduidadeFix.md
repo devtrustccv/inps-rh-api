@@ -52,6 +52,17 @@ Changelog em `docs/frontend_changes_assiduidade.md`, secções **12 a 21** + lis
   `RH_T_TIPO_FALTAS` tem uma linha de teste eliminada.
 - **`valorTotal` é o bruto**; `valorDescontado`/`valorCoberto` são os campos novos.
 - Uma **validação já despachada fica como está** ao eliminar — é histórico. Só as `P` vão a `E`.
+- **Responsabilidade do cliente — enviar o estado completo (decidido 11/09, não se protege no
+  backend):**
+  - **`documentos`**: se o pedido já tem anexos (gravados no `POST` do justificar ou num editar
+    anterior), o cliente tem de os reenviar com os `id` do `GET`, no editar e no despacho. O fix
+    `a6c232b5` só protege o campo **omitido** (`null` = preserva); um array sem os existentes (`[]`
+    ou só anexos novos) põe-nos em `E`, sem erro. Changelog secção 26.
+  - **`deduzirFaltaEm` no despacho**: vazio/`null` **retira** a dedução (fix `a6c232b5`, igual ao
+    editar). O backend não distingue omitido de `null` — o cliente manda sempre o valor do combo.
+    Changelog secção 24.
+- **Despacho continua a exigir `itensFalta` não vazio** apesar de o ignorar — mantido de propósito
+  (futura remoção por checkbox). Não mexer.
 
 ## Constraints
 

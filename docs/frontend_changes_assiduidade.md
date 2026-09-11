@@ -941,6 +941,19 @@ Passa a seguir a convenção dos arrays da casa:
 | `[]` | retira **todos** os anexos |
 | com itens | item com `id` mantém, item sem `id` cria, anexo existente que não vier fica `E` |
 
+⚠️ **Reenviar os anexos existentes — responsabilidade do cliente.** A correcção só protege o
+campo **omitido**. Se o pedido já tem anexos — gravados no `POST` do justificar ou num editar
+anterior —, o ecrã tem de reenviar `documentos` com os `id` que o `GET` devolveu, no editar e no
+despacho. Um array que venha sem eles (`[]`, ou só com anexos novos) **retira os existentes**
+(`E`), sem erro. Decidido a 11/09: não se protege isto no backend.
+
+```json
+"documentos": [
+  { "id": 491, "tipoDocumentoId": 26, "documento": "comprovativo.pdf" },
+  { "tipoDocumentoId": 26, "documento": "novo_anexo.pdf" }
+]
+```
+
 Os `GET` continuam a devolver `documentos: []` quando não há anexos.
 
 ### Um anexo novo acompanha o estado do pedido
