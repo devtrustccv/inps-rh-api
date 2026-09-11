@@ -974,6 +974,44 @@ passou a `A` na edição seguinte; num pedido que voltou a despacho o anexo nasc
 
 ---
 
+## 🔴 27. O desconto no salário passa para o processamento salarial (11/09/2026)
+
+Decisão com o DBA. **Nenhum campo de request muda**; muda o que o backend grava e a mensagem de
+erro do editar e do eliminar.
+
+**Quem faz o quê:**
+
+| | Antes | Agora |
+|---|---|---|
+| `RH_T_DEF_REMUNERACOES` + `RH_T_TIPREL_REM_PAG` | backend, no despacho | **procedimento** do processamento salarial |
+| `RH_T_FALTA.DEF_REM_ID` | backend | **procedimento** |
+| valor a descontar | só na `DEF_REMUNERACOES` | backend, em `RH_T_FALTA.VALOR_DESCONTO` (coluna nova) |
+| férias gozadas / dispensa | backend | backend (sem alteração) |
+
+O procedimento apanha as faltas em `A` com `DEF_REM_ID` nulo e `VALOR_DESCONTO > 0`.
+
+**`VALOR` e `VALOR_DESCONTO`:** `VALOR` continua a ser o bruto (o `valorTotal` do ecrã).
+`VALOR_DESCONTO` é o líquido: o bruto menos o que férias ou dispensa cobriram, e `0` quando o tipo
+não desconta salário.
+
+**`valorDescontado`** (nos três `GET` da secção 16) passa a ser a soma de `VALOR_DESCONTO` das
+faltas activas. O valor devolvido é o mesmo de antes; muda só a origem. Deixa de haver um intervalo
+em que saía `0` por ainda não existir `DEF_REMUNERACOES`.
+
+**Editar e eliminar — o bloqueio chega mais cedo.** Antes, só bloqueava depois de a folha fechar.
+Agora bloqueia logo que o procedimento apanha uma falta do pedido (`DEF_REM_ID` preenchido):
+
+```json
+{ "status": 400, "detail": "Não é possível editar este pedido: 4 falta(s) já foram apanhadas pelo processamento salarial." }
+```
+
+Um pedido coberto a 100% por férias ou dispensa nunca é apanhado e continua editável.
+
+**Deixa de existir** o 400 *"Não existe tipo de movimento 'PAG_FALTA' activo parametrizado para
+o vínculo…"* no despacho: a parametrização é agora assunto do procedimento.
+
+---
+
 ## Por decidir com o analista
 
 | # | Assunto |

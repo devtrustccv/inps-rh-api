@@ -288,7 +288,7 @@ public class JustificarFaltaWriteService {
     // sobre "há algo por decidir", e foi para isso que foi criada.
     //
     // Sem isto o endpoint não verificava nada: dois PUT com validar:SIM chamavam aplicar()
-    // duas vezes e criavam DEF_REMUNERACOES duplicados. Dinheiro a mais no vencimento.
+    // duas vezes e consumiam férias/dispensa a dobrar.
     var pendente = funcionarioRules.getValidacaoPendenteByReferenciaUuid(
         pedido.getUuid(), TipoAcao.INSERT, Referencia.JUSTIFICAR_FALTA);
 
@@ -500,20 +500,21 @@ public class JustificarFaltaWriteService {
 
 
   /**
-   * Guarda partilhado pelo Editar e pelo Eliminar: um pedido cujo desconto já foi processado em
-   * folha não pode ser mexido — o dinheiro já saiu no vencimento, e alterá-lo aqui deixaria a
-   * folha e a assiduidade a dizer coisas diferentes.
+   * Guarda partilhado pelo Editar e pelo Eliminar: um pedido cujo desconto já foi apanhado pelo
+   * processamento salarial não pode ser mexido — a definição de remuneração é do procedimento, e
+   * alterar a falta aqui deixaria a folha e a assiduidade a dizer coisas diferentes.
    *
-   * <p>Critério dado pelo utilizador (10/09): a falta tem {@code DEF_REM_ID} e essa definição já
-   * foi apanhada por uma {@code RH_T_REMUNERACOES} (via {@code REM_1_ID}). Basta **uma** falta
-   * do pedido nessas condições para bloquear o pedido inteiro.
+   * <p>Critério (11/09): a falta tem {@code DEF_REM_ID}, que só o procedimento preenche. Basta
+   * <b>uma</b> falta do pedido nessas condições para bloquear o pedido inteiro. É também isto que
+   * permite ao {@code reverter} ignorar a {@code RH_T_DEF_REMUNERACOES}: só se reverte o que o
+   * processamento ainda não apanhou.
    */
   private void garantirNaoProcessado(PedidoEntity pedido, String accao) {
-    long processadas = faltaRepository.countFaltasProcessadasEmFolha(pedido.getId());
+    long processadas = faltaRepository.countFaltasNoProcessamento(pedido.getId());
     if (processadas > 0)
       throw IgrpResponseStatusException.badRequest(
           "Não é possível " + accao + " este pedido: "
-              + processadas + " falta(s) já foram processadas em folha.");
+              + processadas + " falta(s) já foram apanhadas pelo processamento salarial.");
   }
 
   /**

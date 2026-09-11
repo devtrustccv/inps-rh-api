@@ -32,34 +32,27 @@ public interface FaltaEntityRepository extends
   List<FaltaEntity> findAllByPedidoIdOrderByDataInicioAsc(PedidoEntity pedidoId);
 
   /**
-   * O pedido já foi processado em folha? Basta uma falta processada para bloquear o pedido
+   * O pedido já foi apanhado pelo processamento salarial? Basta uma falta para bloquear o pedido
    * inteiro (regra do utilizador, 10/09).
    *
-   * <p>Uma falta está processada quando o seu desconto ({@code RH_T_DEF_REMUNERACOES}) já foi
-   * apanhado por uma remuneração efectiva ({@code RH_T_REMUNERACOES.REM_1_ID}). É o critério
-   * exacto — olha para a linha concreta, não para o mês — e é o que impede editar ou eliminar
-   * uma falta cujo dinheiro já saiu.
+   * <p>O critério é {@code RH_T_FALTA.DEF_REM_ID} preenchido, e já não "a definição foi paga numa
+   * {@code RH_T_REMUNERACOES}" (decisão de 11/09). Quem preenche o {@code DEF_REM_ID} é o
+   * procedimento do DBA, ao criar a definição de remuneração — e a partir daí o desconto é dele.
+   * Esperar pelo fecho da folha deixava uma janela em que se eliminava a falta e a definição criada
+   * pelo procedimento continuava viva, a descontar uma falta que já não existe.
    *
-   * <p>Só remunerações activas contam: uma remuneração anulada deixa de ser dinheiro pago e não
-   * deve bloquear o pedido. Faltas já eliminadas ({@code E}) também não contam.
-   *
-   * <p>Nota: uma falta coberta a 100% por férias ou dispensa não tem {@code DEF_REM_ID} e não é
-   * apanhada por esta query — de propósito. Aí a folha nunca foi tocada, só se consumiu saldo,
-   * e devolver esse saldo não mexe em histórico de pagamentos.
-   *
-   * <p>Nativa: {@code RH_T_REMUNERACOES} está mapeada como {@code RhTRemuneracoe} mas sem o
-   * {@code REM_1_ID}, e não tem repositório.
+   * <p>Faltas já eliminadas ({@code E}) não contam. Uma falta coberta a 100% por férias ou
+   * dispensa ({@code VALOR_DESCONTO = 0}) nunca recebe {@code DEF_REM_ID} e não tranca o pedido:
+   * aí a folha não é tocada, só se consumiu saldo.
    */
   @Query(value = """
       SELECT COUNT(a.ID)
         FROM RH_T_FALTA a
-        JOIN RH_T_DEF_REMUNERACOES b ON b.ID = a.DEF_REM_ID
-        JOIN RH_T_REMUNERACOES c ON c.REM_1_ID = b.ID
        WHERE a.PEDIDO_ID = :pedidoId
          AND a.ESTADO <> 'E'
-         AND c.ESTADO = 'A'
+         AND a.DEF_REM_ID IS NOT NULL
       """, nativeQuery = true)
-  long countFaltasProcessadasEmFolha(@Param("pedidoId") Long pedidoId);
+  long countFaltasNoProcessamento(@Param("pedidoId") Long pedidoId);
 
   @Query("""
           SELECT f

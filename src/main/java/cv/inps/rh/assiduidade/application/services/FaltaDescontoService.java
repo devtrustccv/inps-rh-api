@@ -21,23 +21,23 @@ import java.util.Objects;
 /**
  * Aplica os descontos decorrentes da validação de uma falta.
  *
- * <p>São três descontos independentes entre si:
- *
  * <ul>
- *   <li><strong>Salário</strong> — quando {@code RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL = 1}.
- *       Grava em {@code RH_T_DEF_REMUNERACOES}, associa em {@code RH_T_TIPREL_REM_PAG.REM_ID} e
- *       actualiza {@code RH_T_FALTA.DEF_REM_ID}, como manda a spec de 07/09/2026 (secção
- *       "Validar Falta") — e é o único destino possível, porque DEF_PAG_ID já não existe na
- *       tabela.</li>
  *   <li><strong>Férias</strong> — quando "Deduzir Falta Em" = {@code FERIAS}.
- *       Grava em {@code RH_T_FERIAS_GOZADAS}, validando primeiro se há saldo.</li>
+ *       Grava em {@code RH_T_FERIAS_GOZADAS}.</li>
  *   <li><strong>Dispensa</strong> — quando "Deduzir Falta Em" = {@code DISPENSA}.
  *       Grava em {@code RH_T_DISPENSA}.</li>
+ *   <li><strong>Salário</strong> — quando {@code RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL = 1}.
+ *       Só se <b>apura o valor</b> e grava-se em {@code RH_T_FALTA.VALOR_DESCONTO}.</li>
  * </ul>
  *
- * <p>O destino do desconto (férias vs dispensa) passou a ser escolha explícita do RH
- * através de {@code RH_T_FALTA.FLG_DESCONTO_FALTA}; antes era inferido de
- * {@code RH_T_PARAM_SITUACAO.TIPO_AUSENCIA}, o que adivinhava a intenção.
+ * <p>O desconto no salário deixou de ser escrito aqui (decisão com o DBA, 11/09): quem cria a
+ * {@code RH_T_DEF_REMUNERACOES}, a associação em {@code RH_T_TIPREL_REM_PAG} e preenche
+ * {@code RH_T_FALTA.DEF_REM_ID} é o procedimento do processamento salarial, que lê as faltas em
+ * {@code A} ainda sem {@code DEF_REM_ID}. A nossa responsabilidade é garantir o valor: o
+ * procedimento não sabe o que férias ou dispensa já cobriram, por isso recebe o líquido feito.
+ *
+ * <p>{@code VALOR} continua a ser o <b>bruto</b> (o "Valor Total" do ecrã); {@code VALOR_DESCONTO}
+ * é o que sai do vencimento. {@code null} = ainda não apurado (falta em P, I, E).
  */
 @Service
 @RequiredArgsConstructor
@@ -45,27 +45,12 @@ public class FaltaDescontoService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FaltaDescontoService.class);
 
-  /**
-   * Tipo de movimento parametrizado para o desconto de falta no salário. Mantém-se PAG_FALTA:
-   * é a única parametrização existente em RH_T_PARAM_VINCULO_MOV (não há REM_FALTA). O nome é a
-   * chave de parametrização; o desconto em si passou a ser gravado como remuneração.
-   */
-  private static final String TIPO_MOV_PAG_FALTA = "PAG_FALTA";
-
-  /** Valor de RH_T_DEF_REMUNERACOES.TIPO — usado por DELETE_ASSIDUIDADE para limpar. */
-  private static final String TIPO_REMUNERACAO_FALTA = "FALTA";
-
-  private static final String MOEDA_PADRAO = "CVE";
-
   /** Acima deste número de dias — e só com desconto salarial — a falta vai a validação. */
   private static final int LIMITE_DIAS_SEM_VALIDACAO = 3;
 
   /** RH_T_FALTA.TIPO. */
   public static final String TIPO_FALTA = "FALTA";
 
-  private final DefinicaoRemuneracaoEntityRepository definicaoRemuneracaoRepository;
-  private final TipoRelRemPagEntityRepository tipoRelRemPagRepository;
-  private final ParamVinculoMovimentoEntityRepository paramVinculoMovimentoRepository;
   private final FeriasGozadasEntityRepository feriasGozadasRepository;
   private final DispensaEntityRepository dispensaRepository;
   private final AnoEntityRepository anoRepository;
@@ -102,8 +87,10 @@ public class FaltaDescontoService {
       minutosPorCobrir = aplicarDescontoDispensa(falta, pedido, tipoRel, minutosAusencia);
 
     // Desconta-se só o que o saldo não cobriu. Sem dedução, minutosPorCobrir é a ausência toda.
-    if (minutosPorCobrir > 0 && descontaSalario(falta))
-      aplicarDescontoSalario(falta, funcionario, tipoRel, minutosAusencia, minutosPorCobrir);
+    // Zero (e não null) quando nada vai ao vencimento: a falta foi apurada, não há é o que cobrar.
+    falta.setValorDesconto(minutosPorCobrir > 0 && descontaSalario(falta)
+        ? valorPorCobrir(falta, minutosAusencia, minutosPorCobrir)
+        : BigDecimal.ZERO);
   }
 
   /**
@@ -113,22 +100,15 @@ public class FaltaDescontoService {
    * deixava as férias gozadas lá e criava a dispensa por cima, descontando duas vezes.
    *
    * <p>Os registos revertidos ficam em {@code E} (decisão de negócio, 10/09), o que os retira
-   * dos saldos — que só contam os aprovados. {@code RH_T_TIPREL_REM_PAG} não tem coluna de
-   * estado, por isso a linha é apagada.
+   * dos saldos — que só contam os aprovados.
+   *
+   * <p>Não toca em {@code RH_T_DEF_REMUNERACOES}: só se chega aqui com {@code DEF_REM_ID} nulo,
+   * porque o guard do editar/eliminar tranca o pedido logo que o processamento apanha uma falta.
    */
   public void reverter(FaltaEntity falta, PedidoEntity pedido) {
 
     if (falta == null)
       return;
-
-    // Desconto no salário: a associação ao vínculo desaparece e a definição fica eliminada.
-    var remuneracao = falta.getDefRemId();
-    if (remuneracao != null) {
-      tipoRelRemPagRepository.deleteAll(tipoRelRemPagRepository.findAllByRemId(remuneracao));
-      remuneracao.setEstado(Estado.E);
-      definicaoRemuneracaoRepository.save(remuneracao);
-      falta.setDefRemId(null);
-    }
 
     // Dedução em férias / dispensa: ambas presas ao pedido. Filtra-se pelo dia da falta porque
     // o pedido tem uma linha por dia e só este está a ser revertido.
@@ -142,24 +122,23 @@ public class FaltaDescontoService {
     dispensas.forEach(d -> d.setEstado(Estado.E));
     dispensaRepository.saveAll(dispensas);
 
-    falta.setFlgDescontoSal(0);
+    // De volta a "não apurado": se a falta voltar a A, o aplicar apura-o de novo.
+    falta.setValorDesconto(null);
   }
 
   /**
-   * Quanto é que um conjunto de faltas <b>descontou mesmo</b> no vencimento: a soma das
-   * {@code RH_T_DEF_REMUNERACOES} que o despacho lhes criou.
+   * Quanto é que um conjunto de faltas <b>desconta</b> no vencimento: a soma de
+   * {@code RH_T_FALTA.VALOR_DESCONTO} das faltas activas.
    *
    * <p>Não confundir com {@code RH_T_FALTA.VALOR}, que é o valor <b>bruto</b> da ausência
    * (valor diário × dias) e é o que a spec manda mostrar em "Valor Total". Quando há dedução em
-   * férias ou dispensa, o saldo cobre parte e só o resto vai ao vencimento — e o ecrã mostrava
-   * sempre o bruto, pelo que um pedido de 25 378,24 podia ter descontado 22 205,96 sem que
-   * ninguém o visse.
-   *
-   * <p>Ignora as definições em {@code E}: são as que o editar ou o eliminar reverteram.
+   * férias ou dispensa, o saldo cobre parte e só o resto vai ao vencimento.
    */
   public static BigDecimal valorDescontado(List<FaltaEntity> faltas) {
     return faltas.stream()
-        .map(FaltaDescontoService::descontadoNoDia)
+        .filter(f -> Estado.A.equals(f.getEstado()))
+        .map(FaltaEntity::getValorDesconto)
+        .filter(Objects::nonNull)
         .reduce(BigDecimal.ZERO, BigDecimal::add)
         .setScale(2, RoundingMode.HALF_UP);
   }
@@ -169,32 +148,23 @@ public class FaltaDescontoService {
    *
    * <p>Calcula-se por dia e so nos dias que iam mesmo ser descontados: subtrair o descontado ao
    * bruto, sobre o pedido todo, dava a resposta errada para um tipo que nao desconta salario —
-   * nada era cobrado e nada foi coberto, mas a subtraccao dava o bruto inteiro. Um pedido com
-   * "Doenca do Trabalhador" aparecia com 12 689,12 cobertos por um saldo que nunca foi tocado.
+   * nada era cobrado e nada foi coberto, mas a subtraccao dava o bruto inteiro.
    *
-   * <p>So conta faltas <b>despachadas</b> ({@code A}) e <b>com deducao</b>: e o unico caso em que
-   * um saldo pode ter coberto alguma coisa. Sem isto, um pedido em {@code P} (ainda sem descontos
-   * nenhuns) aparecia com o bruto inteiro "coberto", e um em {@code A} sem deducao tambem.
+   * <p>So conta faltas <b>despachadas</b> ({@code A}), <b>com deducao</b> e <b>já apuradas</b>
+   * ({@code VALOR_DESCONTO} preenchido): e o unico caso em que um saldo pode ter coberto alguma
+   * coisa. Uma falta sem valor apurado (anterior a esta coluna) nao aparece como coberta.
    */
   public static BigDecimal valorCoberto(List<FaltaEntity> faltas) {
     return faltas.stream()
-        .filter(f -> f.getValor() != null)
+        .filter(f -> f.getValor() != null && f.getValorDesconto() != null)
         .filter(f -> Estado.A.equals(f.getEstado()))
         .filter(f -> TipoDescontoFalta.fromCode(f.getFlgDescontoFalta()).isPresent())
         .filter(f -> f.getParamSitId() != null
             && Objects.equals(f.getParamSitId().getFlgFaltaDecontoSal(), 1))
-        .map(f -> f.getValor().subtract(descontadoNoDia(f)))
+        .map(f -> f.getValor().subtract(f.getValorDesconto()))
         .filter(v -> v.signum() > 0)
         .reduce(BigDecimal.ZERO, BigDecimal::add)
         .setScale(2, RoundingMode.HALF_UP);
-  }
-
-  /** O que a definicao de remuneracao viva desta falta desconta, ou zero. */
-  private static BigDecimal descontadoNoDia(FaltaEntity falta) {
-    var def = falta.getDefRemId();
-    if (def == null || Estado.E.equals(def.getEstado()) || def.getValor() == null)
-      return BigDecimal.ZERO;
-    return def.getValor();
   }
 
   /**
@@ -238,66 +208,6 @@ public class FaltaDescontoService {
   }
 
   // ------------------------------------------------------------------
-
-  /**
-   * @param minutosAusencia   ausência total do dia
-   * @param minutosPorCobrir  a parte que o saldo não cobriu — é só sobre esta que se desconta
-   */
-  private void aplicarDescontoSalario(
-      FaltaEntity falta, FuncionarioEntity funcionario, TiposRelacionamentoEntity tipoRel,
-      int minutosAusencia, int minutosPorCobrir) {
-
-    var tipoMovimento = resolverTipoMovimentoFalta(tipoRel);
-
-    // falta.valor é o valor do dia inteiro (valor à hora x horas de ausência). Quando o saldo
-    // cobriu parte das horas — só acontece na dispensa, que conta em horas —, desconta-se a
-    // proporção que sobrou.
-    var valor = valorPorCobrir(falta, minutosAusencia, minutosPorCobrir);
-
-    var remuneracao = new DefinicaoRemuneracaoEntity();
-    remuneracao.setTmId(tipoMovimento);
-    remuneracao.setValor(valor);
-    remuneracao.setDataInicio(falta.getDataInicio().toLocalDate());
-    remuneracao.setDataFim(falta.getDataFim().toLocalDate());
-    remuneracao.setEstado(Estado.A);
-    remuneracao.setFunId(funcionario);
-    remuneracao.setTipo(TIPO_REMUNERACAO_FALTA);
-    remuneracao.setMoeda(MOEDA_PADRAO);
-    remuneracao.setObs("Falta registada referente a " + falta.getDataInicio().toLocalDate());
-    remuneracao.setUuid(UuidCreator.getTimeOrderedEpoch());
-    remuneracao = definicaoRemuneracaoRepository.save(remuneracao);
-
-    var associacao = new TipoRelRemPagEntity();
-    associacao.setTiprelId(tipoRel);
-    associacao.setRemId(remuneracao);
-    tipoRelRemPagRepository.save(associacao);
-
-    falta.setFlgDescontoSal(1);
-    falta.setDefRemId(remuneracao);
-  }
-
-  /**
-   * Tipo de movimento do desconto de falta para o vínculo do colaborador. Filtra por
-   * estado activo — há parametrizações eliminadas ('E') em BD que não devem ser usadas.
-   */
-  private TipoMovimentoEntity resolverTipoMovimentoFalta(TiposRelacionamentoEntity tipoRel) {
-
-    if (tipoRel.getContrVinculoId() == null || tipoRel.getContrVinculoId().getVinculoId() == null)
-      throw IgrpResponseStatusException.badRequest(
-          "Colaborador sem vínculo contratual associado — não é possível apurar o desconto da falta");
-
-    var vinculoId = tipoRel.getContrVinculoId().getVinculoId().getId();
-
-    var movimentos = paramVinculoMovimentoRepository
-        .findByVinculoId_IdAndTipoAndEstado(vinculoId, TIPO_MOV_PAG_FALTA, Estado.A);
-
-    if (movimentos == null || movimentos.isEmpty())
-      throw IgrpResponseStatusException.badRequest(
-          "Não existe tipo de movimento '" + TIPO_MOV_PAG_FALTA + "' activo parametrizado para o vínculo "
-              + vinculoId + ". Configure-o em RH_T_PARAM_VINCULO_MOV antes de validar faltas com desconto salarial.");
-
-    return movimentos.getFirst().getTmId();
-  }
 
   /**
    * Férias contam-se em DIAS, por isso o dia é coberto por inteiro ou não é coberto de todo.
@@ -380,14 +290,20 @@ public class FaltaDescontoService {
     return minutosAusencia - cobertos;
   }
 
-  /** Parte do valor do dia correspondente às horas que o saldo não cobriu. */
+  /**
+   * Parte do valor do dia correspondente às horas que o saldo não cobriu.
+   *
+   * <p>falta.valor é o valor do dia inteiro (valor à hora x horas de ausência). Quando o saldo
+   * cobriu parte das horas — só acontece na dispensa, que conta em horas —, desconta-se a
+   * proporção que sobrou.
+   */
   private BigDecimal valorPorCobrir(FaltaEntity falta, int minutosAusencia, int minutosPorCobrir) {
     var valorDia = falta.getValor() != null ? falta.getValor() : BigDecimal.ZERO;
     if (minutosAusencia <= 0 || minutosPorCobrir >= minutosAusencia)
       return valorDia;
     return valorDia
         .multiply(BigDecimal.valueOf(minutosPorCobrir))
-        .divide(BigDecimal.valueOf(minutosAusencia), 2, java.math.RoundingMode.HALF_UP);
+        .divide(BigDecimal.valueOf(minutosAusencia), 2, RoundingMode.HALF_UP);
   }
 
   private AnoEntity resolverAno(LocalDate data) {
