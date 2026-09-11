@@ -5,7 +5,6 @@ import cv.inps.rh.assiduidade.application.commands.EditarPedidoJustificacaoComma
 import cv.inps.rh.assiduidade.application.commands.EliminarPedidoJustificacaoCommand;
 import cv.inps.rh.assiduidade.application.commands.JustificarFaltaCommand;
 import cv.inps.rh.assiduidade.application.commands.ValidarFaltaJustificadaCommand;
-import cv.inps.rh.assiduidade.application.dto.FaltaItemDTO;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.funcionario.infrastructure.mappers.DadosContratuaisMapper;
 import cv.inps.rh.funcionario.infrastructure.mappers.DefPagamentoMapper;
@@ -96,19 +95,20 @@ public class JustificarFaltaWriteService {
     saldoLockService.lockColaborador(funcionarioUuid);
 
     var dto = command.getJustificarfalta();
+    // Justifica-se o que vier no array, e mais nada. Pertencer ao array JA E o sinal: ter duas
+    // formas de dizer "este dia nao" — nao o mandar, ou manda-lo com selecionar:false — era
+    // ambiguidade sem ganho, e contraria a convencao da casa, onde e a presenca no array que
+    // manda. O ecra envia so as linhas marcadas (confirmado com o utilizador, 11/09).
+    //
+    // Ao contrario do editar, aqui a semantica de array e segura: pertencer CRIA. Omitir um dia
+    // nao destroi nada — ele fica onde estava, por justificar. No editar seria o inverso, e por
+    // isso la o itensFalta continua ignorado.
+    //
+    // O campo `selecionar` fica no DTO (partilhado com o validar) mas deixa de ser lido aqui.
     if (dto == null || dto.getItensFalta() == null || dto.getItensFalta().isEmpty())
       throw IgrpResponseStatusException.badRequest("Nenhuma falta informada para justificar");
 
-    // Validar se existe pelo menos uma síntese selecionada
-    boolean temSelecionado = dto.getItensFalta()
-        .stream()
-        .anyMatch(FaltaItemDTO::isSelecionar);
-
-    if (!temSelecionado)
-      throw IgrpResponseStatusException.badRequest(
-          "Nenhuma falta marcada para justificação");
-
-    var selecionados = dto.getItensFalta().stream().filter(FaltaItemDTO::isSelecionar).toList();
+    var selecionados = dto.getItensFalta();
 
     // O tipo de justificação só existe no formulário quando "Com Justificativo" = SIM
     // (spec: "os campos abaixo só aparecem caso Com Justificativo = SIM"). Marcar a

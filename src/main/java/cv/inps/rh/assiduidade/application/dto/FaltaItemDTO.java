@@ -19,6 +19,18 @@ import java.math.BigDecimal;
 public class FaltaItemDTO  {
 
 
+  /**
+   * Checkbox do ecra. <b>Nao e lido por nenhum endpoint de escrita</b>:
+   *
+   * <ul>
+   *   <li><b>justificar</b> — justifica-se o que vier no array; o ecra envia so as linhas
+   *       marcadas (11/09/2026);</li>
+   *   <li><b>validar</b> — o despacho decide o pedido inteiro, tudo-ou-nada (11/09/2026).</li>
+   * </ul>
+   *
+   * <p>Mantido no DTO de proposito, por decidir o que fazer dele do lado do validar. As leituras
+   * emitem-no sempre a {@code false}.
+   */
   private boolean selecionar ;
 
 
