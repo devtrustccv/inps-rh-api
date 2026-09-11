@@ -110,8 +110,7 @@ public class FaltaServiceWrite {
     // descontar no salário. Caso contrário fica logo activo.
     var paramSituacao = resolverParamSituacao(req.getTipoJustificacao());
     boolean requerValidacao = deveJustificar
-        && faltaDescontoService.requerValidacaoNoMes(
-            funcionario.getUuid(), datas.getFirst(), datas.size(), paramSituacao);
+        && faltaDescontoService.requerValidacao(datas.size(), paramSituacao);
     var estadoInicial = requerValidacao ? Estado.P : Estado.A;
 
     PedidoEntity pedido = null;
@@ -246,10 +245,10 @@ public class FaltaServiceWrite {
       if (StringUtils.hasText(req.getObservacao()))
         f.setObsResponsavel(req.getObservacao());
 
-      if (req.getTipoJustificacao() != null && req.getTipoJustificacao() > 0) {
-        var ps = paramSituacaoRepository.findByIdOrThrow(req.getTipoJustificacao());
+      // Mesmo guard do registo: o checker também não pode trocar o tipo por um que não seja falta.
+      var ps = resolverParamSituacao(req.getTipoJustificacao());
+      if (ps != null)
         f.setParamSitId(ps);
-      }
 
       if (StringUtils.hasText(req.getDeduzirFaltaEm()))
         f.setFlgDescontoFalta(TipoDescontoFalta.fromCodeOrThrow(req.getDeduzirFaltaEm()).getCode());
@@ -292,11 +291,21 @@ public class FaltaServiceWrite {
   }
 
 
+  /**
+   * Tipo de falta do formulário. O {@code 0} do frontend é a sentinela dele para "nada
+   * seleccionado" e lê-se como ausência de valor, como no ecrã de justificar.
+   *
+   * <p>Este ecrã não validava nada além de o id existir: aceitava "Férias Anuais", "Baixa médica"
+   * ou "Cessado" como tipo de falta. Passa pelo mesmo guard do justificar — o critério com que a
+   * spec manda alimentar o combo.
+   */
   private ParamSituacaoEntity resolverParamSituacao(Long tipoJustificacao) {
     if (tipoJustificacao == null || tipoJustificacao <= 0)
       return null;
-    return paramSituacaoRepository.findById(tipoJustificacao)
+    var paramSituacao = paramSituacaoRepository.findById(tipoJustificacao)
         .orElseThrow(() -> IgrpResponseStatusException.badRequest("Tipo justificativo inválido"));
+    JustificarFaltaWriteService.garantirTipoDeFalta(paramSituacao);
+    return paramSituacao;
   }
 
   private List<LocalDate> expandirDias(LocalDate inicio, LocalDate fim) {
@@ -398,10 +407,12 @@ public class FaltaServiceWrite {
     String horasAusenciaInterval = parseInterval(horasAusencia);
     sintese.setHorasAusencia(horasAusenciaInterval);
 
-    var jornada = assiduidadeParametroRepository.findAllByEstado(Estado.A.getCode());
-    String diaria = (jornada != null && !jornada.isEmpty())
-        ? jornada.getFirst().getDiaria()
-        : "08:00";
+    // A spec diz "HORAS_TRABALHADAS = 8 – horas Ausência" (:520), mas o 8 é o valor actual da
+    // jornada parametrizada, não uma constante: a mesma DIARIA divide o valor da falta e apura a
+    // hora extra, e o ecrã de configuração deixa editá-la. Fixar 8 aqui dessincronizava este ponto
+    // dos outros.
+    String diaria = assiduidadeParametroRepository.findActiveParametro().map(p -> p.getDiaria())
+        .orElse(FaltaValorCalculator.JORNADA_PADRAO);
 
     int totalMinutos = parseMin(diaria);
     int ausenciaMinutos = parseMin(horasAusencia);

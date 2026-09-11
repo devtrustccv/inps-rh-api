@@ -213,12 +213,13 @@ public class HoraExtraServiceWrite {
       Long tiprelId, LocalDate dataInicio, LocalDate dataFim,
       String percentagemReferente, Long horasDiaria) {
 
-    var parametros = assiduidadeParametroRepository.findAllByEstado(Estado.A.getCode());
-    if (parametros == null || parametros.isEmpty())
-      throw IgrpResponseStatusException.badRequest(
-          "Parametrização de assiduidade activa não encontrada — não é possível calcular a hora extra");
+    // Sem fallback, ao contrário da falta: aqui a jornada é o divisor do valor a pagar, e assumir
+    // 8h calado poderia pagar a mais. A leitura é a mesma dos outros (estado A e sem data de fim),
+    // e é a entidade inteira porque as percentagens abaixo têm de vir da MESMA parametrização.
+    var parametro = assiduidadeParametroRepository.findActiveParametro()
+        .orElseThrow(() -> IgrpResponseStatusException.badRequest(
+            "Parametrização de assiduidade activa não encontrada — não é possível calcular a hora extra"));
 
-    var parametro = parametros.getFirst();
     int jornadaMinutos = TimeUtils.hhmmToMinutes(parametro.getDiaria());
     if (jornadaMinutos <= 0)
       throw IgrpResponseStatusException.badRequest("Jornada diária não parametrizada");

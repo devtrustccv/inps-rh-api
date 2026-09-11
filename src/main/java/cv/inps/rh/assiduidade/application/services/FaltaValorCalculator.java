@@ -1,6 +1,5 @@
 package cv.inps.rh.assiduidade.application.services;
 
-import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AssiduidadeParametroEntityRepository;
 import cv.inps.rh.shared.util.TimeUtils;
@@ -55,7 +54,12 @@ public class FaltaValorCalculator {
   /** {@code v_divisor_falta} — constante do package RH_PROCESSAMENTO_SALARIAL_DB (linha 16). */
   private static final BigDecimal DIVISOR_FALTA = BigDecimal.valueOf(30);
 
-  private static final String JORNADA_PADRAO = "08:00";
+  /**
+   * Jornada usada quando não há parametrização em vigor. Partilhada com o {@code FaltaServiceWrite}
+   * de propósito: é o mesmo número a servir de divisor do valor da falta e a apurar as horas
+   * trabalhadas da síntese, e tê-lo escrito duas vezes deixava os dois divergirem em silêncio.
+   */
+  static final String JORNADA_PADRAO = "08:00";
 
   private final JdbcTemplate jdbcTemplate;
   private final AssiduidadeParametroEntityRepository assiduidadeParametroRepository;
@@ -202,10 +206,7 @@ public class FaltaValorCalculator {
   }
 
   private int getJornadaDiariaMinutos() {
-    var parametros = assiduidadeParametroRepository.findAllByEstado(Estado.A.getCode());
-    String diaria = (parametros != null && !parametros.isEmpty() && parametros.getFirst().getDiaria() != null)
-        ? parametros.getFirst().getDiaria()
-        : JORNADA_PADRAO;
-    return TimeUtils.hhmmToMinutes(diaria);
+    return TimeUtils.hhmmToMinutes(
+        assiduidadeParametroRepository.findActiveParametro().map(p -> p.getDiaria()).orElse(JORNADA_PADRAO));
   }
 }
