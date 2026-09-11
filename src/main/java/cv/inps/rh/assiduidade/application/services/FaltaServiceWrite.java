@@ -89,14 +89,24 @@ public class FaltaServiceWrite {
 
     var datas = expandirDias(req.getDataInicio(), req.getDataFim());
 
-    // A marcação não tinha guarda nenhuma: era possível marcar a mesma falta vezes sem
-    // conta, cada uma com o seu registo e o seu desconto. A justificação já verificava.
-    if (deveJustificar) {
-      for (var dia : datas) {
-        if (faltaRepository.existeFaltaVivaNoDia(funcionario.getId(), dia))
-          throw IgrpResponseStatusException.badRequest(
-              "Já existe uma falta associada à data " + dia);
-      }
+    // O guard vale para QUALQUER marcacao, com ou sem justificativo. Estava dentro de um
+    // `if (deveJustificar)` e o ramo sem justificativo passava por cima de tudo: a sintese e
+    // reaproveitada e as horas substituidas, pelo que marcar 4h num dia que ja tinha uma falta
+    // viva de 8h deixava a sintese a dizer 4h, a falta a dizer 8h e o desconto a cobrar o dobro
+    // do que o dia regista. Pior: HORAS_TRABALHADAS passava a 4h, FALTA caia para 0 pelo calculo
+    // `trabalhados == 0 ? 1 : 0`, e o dia sumia dos ecras que filtram FALTA=1 — com o desconto a
+    // ficar na folha. Provado live a 11/09 no dia 26/10.
+    //
+    // So bloqueiam as faltas VIVAS (A ou P): os dias libertos por uma eliminacao continuam a
+    // poder ser marcados, porque as faltas em E e I deixaram de contar (ver existeFaltaVivaNoDia).
+    //
+    // Consequencia assumida: corrigir as horas de um dia que ja tem falta viva deixa de ser
+    // possivel por aqui. Quem se enganou elimina o pedido e volta a marcar — corrigir horas com
+    // desconto ja emitido tem mesmo de passar pelo eliminar.
+    for (var dia : datas) {
+      if (faltaRepository.existeFaltaVivaNoDia(funcionario.getId(), dia))
+        throw IgrpResponseStatusException.badRequest(
+            "Já existe uma falta associada à data " + dia);
     }
 
     // "Tipo Falta" é obrigatório no formulário quando Com Justificativo = SIM (spec 09/09,
