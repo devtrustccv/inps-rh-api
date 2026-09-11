@@ -171,10 +171,16 @@ public class FaltaDescontoService {
    * bruto, sobre o pedido todo, dava a resposta errada para um tipo que nao desconta salario —
    * nada era cobrado e nada foi coberto, mas a subtraccao dava o bruto inteiro. Um pedido com
    * "Doenca do Trabalhador" aparecia com 12 689,12 cobertos por um saldo que nunca foi tocado.
+   *
+   * <p>So conta faltas <b>despachadas</b> ({@code A}) e <b>com deducao</b>: e o unico caso em que
+   * um saldo pode ter coberto alguma coisa. Sem isto, um pedido em {@code P} (ainda sem descontos
+   * nenhuns) aparecia com o bruto inteiro "coberto", e um em {@code A} sem deducao tambem.
    */
   public static BigDecimal valorCoberto(List<FaltaEntity> faltas) {
     return faltas.stream()
         .filter(f -> f.getValor() != null)
+        .filter(f -> Estado.A.equals(f.getEstado()))
+        .filter(f -> TipoDescontoFalta.fromCode(f.getFlgDescontoFalta()).isPresent())
         .filter(f -> f.getParamSitId() != null
             && Objects.equals(f.getParamSitId().getFlgFaltaDecontoSal(), 1))
         .map(f -> f.getValor().subtract(descontadoNoDia(f)))

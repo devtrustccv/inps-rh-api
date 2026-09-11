@@ -341,10 +341,21 @@ public class JustificarFaltaWriteService {
       // justificação, em vez de o apagar.
       if (paramSituacao != null)
         falta.setParamSitId(paramSituacao);
+      // Derivado do tipo EFECTIVO, como no editar: o checker pode trocar o tipo no despacho e a
+      // coluna ficava a dizer o contrario do desconto que o aplicar() fez (este decide pelo tipo).
+      falta.setFlgDescontoSal(faltaDescontoService.descontaSalario(falta) ? 1 : 0);
+      // "Parecer Responsavel" (spec :762 -> RH_T_FALTA.DECISAO_RESPONSAVEL) faz parte do
+      // formulario de validacao. So sobrepoe se veio, como o responsavel.
+      if (dto.getParecerResponsavel() != null)
+        falta.setDecisaoResponsavel(dto.getParecerResponsavel());
       falta.setEstado(estadoFinal);
 
-      if (StringUtils.hasText(dto.getDeduzirFaltaEm()))
-        falta.setFlgDescontoFalta(TipoDescontoFalta.fromCodeOrThrow(dto.getDeduzirFaltaEm()).getCode());
+      // "Deduzir Falta Em" vale o que o formulario enviou, como no registo e no editar: o ecra de
+      // validacao manda o estado completo (vem do GET do pedido), logo um combo vazio e o checker
+      // a retirar a deducao. Antes, vazio mantinha a do maker e nao havia forma de a tirar.
+      falta.setFlgDescontoFalta(StringUtils.hasText(dto.getDeduzirFaltaEm())
+          ? TipoDescontoFalta.fromCodeOrThrow(dto.getDeduzirFaltaEm()).getCode()
+          : null);
 
       // Despacho do RH (SIM/NAO) em RH_T_FALTA.DESPACHO_RH — ver FaltaServiceWrite.
       if (dto.getValidar() != null)

@@ -10,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -60,8 +59,11 @@ public class EditarPedidoJustificacaoDTO  {
   /**
    * Anexos do pedido. Semântica dos arrays da casa: {@code null} preserva, item sem id cria,
    * item existente omitido fica {@code 'E'}.
+   *
+   * <p>Sem valor inicial de propósito: com {@code new ArrayList<>()} o campo omitido chegava como
+   * lista vazia e apagava os anexos todos, em vez de os preservar.
    */
   @Valid
-  private List<AnexoReqDTO> documentos = new ArrayList<>();
+  private List<AnexoReqDTO> documentos ;
 
 }

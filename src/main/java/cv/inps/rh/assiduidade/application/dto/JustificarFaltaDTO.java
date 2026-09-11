@@ -84,7 +84,7 @@ public class JustificarFaltaDTO  {
   private BigDecimal valorDescontado ;
 
 
-  /** A parte que o saldo (ferias/dispensa) cobriu: valorTotal - valorDescontado. */
+  /** A parte que o saldo (ferias/dispensa) cobriu. Zero enquanto o pedido nao for despachado. */
   private BigDecimal valorCoberto ;
 
   /**
@@ -92,9 +92,13 @@ public class JustificarFaltaDTO  {
    * permite anexar vários ("Adicionar outro documento"). Aplicam-se a todas as faltas
    * seleccionadas; {@code FaltaItemDTO.documento} continua a servir o anexo de um dia
    * específico.
+   *
+   * <p>Sem valor inicial de propósito: com {@code new ArrayList<>()} um JSON sem o campo chegava
+   * como lista vazia, e o sync lia "o utilizador retirou tudo" e punha os anexos em 'E'. Assim,
+   * omitido = {@code null} = preserva, como nos outros PUT.
    */
   @Valid
-  private List<AnexoReqDTO> documentos = new ArrayList<>();
+  private List<AnexoReqDTO> documentos ;
 
 
   /**
