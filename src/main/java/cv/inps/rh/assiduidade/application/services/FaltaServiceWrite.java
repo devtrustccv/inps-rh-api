@@ -106,9 +106,14 @@ public class FaltaServiceWrite {
       throw IgrpResponseStatusException.badRequest(
           "Tipo de falta é obrigatório quando a falta é marcada com justificativo");
 
+    // Só se resolve o tipo quando há justificativo. Sem ele, nem falta nem pedido chegam a
+    // existir (ver abaixo) e o valor era descartado — mas passava pelo guard à mesma, o que
+    // dava 400 a uma marcação válida por causa de um tipo que o ecrã deixou no formulário.
+    // A spec (:355) diz que estes campos nem aparecem com "Com Justificativo = NAO".
+    var paramSituacao = deveJustificar ? resolverParamSituacao(req.getTipoJustificacao()) : null;
+
     // Regra: só vai a validação se forem mais de 3 dias E o tipo de justificação
     // descontar no salário. Caso contrário fica logo activo.
-    var paramSituacao = resolverParamSituacao(req.getTipoJustificacao());
     boolean requerValidacao = deveJustificar
         && faltaDescontoService.requerValidacao(datas.size(), paramSituacao);
     var estadoInicial = requerValidacao ? Estado.P : Estado.A;
