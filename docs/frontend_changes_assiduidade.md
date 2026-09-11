@@ -819,6 +819,132 @@ Verificado em dev, ponta a ponta: eliminar um pedido com dedução em dispensa d
 
 ---
 
+## 🔴 22. Marcar falta recusa um dia que já tem falta viva (11/09/2026)
+
+`POST /api/v1/assiduidade/falta`
+
+O guard de "já existe falta neste dia" só corria com **Com Justificativo = SIM**. No ramo `NAO`
+não verificava nada, e como a síntese diária é reaproveitada e as horas substituídas, marcar 4h
+num dia que já tinha uma falta viva de 8h estragava o dia sem aviso:
+
+- a síntese passava a dizer 4h e a falta continuava a dizer 8h, e o desconto cobrava o dobro do
+  que o dia registava;
+- o dia desaparecia dos ecrãs que filtram por falta, mas o desconto continuava na folha.
+
+Passa a valer para **qualquer** marcação:
+
+> Já existe uma falta associada à data 2026-10-26
+
+Só bloqueiam as faltas **vivas** (`A` ou `P`). Os dias libertados por um eliminar continuam a poder
+ser marcados (ver secção 21).
+
+**Consequência:** corrigir as horas de um dia que já tem falta viva deixa de ser possível por
+este ecrã. Quem se enganou elimina o pedido e volta a marcar.
+
+---
+
+## 🔴 23. Marcar Falta: `motivoAusencia` passa a chamar-se `motivo` (11/09/2026) — QUEBRA DE CONTRATO
+
+`POST /api/v1/assiduidade/falta` e `GET /api/v1/assiduidade/falta/{pedidoId}`
+
+| Antes | Agora |
+|---|---|
+| `"motivoAusencia": "..."` | `"motivo": "..."` |
+
+Era o único sítio da aplicação com esse nome: o Justificar Falta, a dispensa e as férias usam
+todos `motivo` para a mesma coluna (`RH_T_FALTA.DESCRICAO_MOTIVO`).
+
+⚠️ **O nome antigo não dá erro.** Um frontend que continue a enviar `motivoAusencia` recebe `200` e
+o motivo **não é gravado**, porque o campo desconhecido é ignorado em silêncio. Actualizar os dois
+lados, o envio e a leitura.
+
+---
+
+## 🔴 24. Despacho: o checker pode retirar a dedução e dar o parecer (11/09/2026)
+
+`PUT /api/v1/assiduidade/falta/justificar/validar/{pedidoId}`
+
+O despacho usa o mesmo corpo do justificar, e o ecrã monta-o a partir do `GET` do pedido. Três
+campos mudaram de comportamento:
+
+| Campo | Antes | Agora |
+|---|---|---|
+| `deduzirFaltaEm` | vazio **mantinha** a dedução do maker, e não havia forma de a tirar | vazio **retira** a dedução, como no registo e no editar |
+| `parecerResponsavel` | **ignorado** no despacho | gravado em `RH_T_FALTA.DECISAO_RESPONSAVEL` (spec `:762`); só substitui se vier |
+| `tipoJustificacao` | trocar o tipo não actualizava a indicação "desconta salário" na falta | a indicação segue o tipo efectivo |
+
+⚠️ **Enviar o estado completo — responsabilidade do cliente.** O backend não distingue "campo
+omitido" de "`null`": os dois retiram a dedução. O ecrã tem de mandar sempre `deduzirFaltaEm` com
+o que está no combo — o valor que o `GET` devolveu, se o checker não lhe mexeu. Um corpo parcial
+sem este campo retira a dedução do maker. Decidido a 11/09: não se protege isto no backend.
+
+| O checker no ecrã | O ecrã envia | Resultado |
+|---|---|---|
+| não mexe no combo | o valor do `GET` | mantém a dedução do maker |
+| escolhe outra | `"FERIAS"` / `"DISPENSA"` | aplica a nova |
+| limpa o combo | `null` | retira a dedução — o dia vai todo ao salário, se o tipo descontar |
+
+O dinheiro já saía certo quando o checker trocava o tipo, porque o desconto decide pelo tipo. A
+correcção é na coluna, que dizia o contrário do desconto aplicado.
+
+Provado em dev: o checker trocou o tipo 18 por 20, retirou a dedução em férias e deu parecer
+`SIM`. Nenhum desconto nem férias consumidas, as faltas ficaram com `FLG_DESCONTO_SAL=0`,
+`FLG_DESCONTO_FALTA=null` e `DECISAO_RESPONSAVEL='SIM'`, e o `GET` devolve
+`parecerResponsavel: "SIM"`.
+
+### O que mantém
+
+`itensFalta` **continua obrigatório**, com pelo menos um item, apesar de o despacho decidir o
+pedido inteiro. Um corpo sem itens dá `400` *"Nenhuma falta selecionada para validação"*. Fica
+assim de propósito, para uma futura remoção de itens por checkbox.
+
+---
+
+## 🔴 25. `valorCoberto` sai `0` enquanto o pedido não for despachado (11/09/2026)
+
+`GET falta/justificar/pedido/{pedidoId}`, `GET falta/justificar/{funcionarioId}` e
+`GET falta/{pedidoId}`
+
+Um pedido em `P` (à espera de despacho) mostrava o **bruto inteiro** em `valorCoberto`, como se o
+saldo o tivesse coberto:
+
+```json
+{ "estado": "P", "deduzirFaltaEm": null, "valorTotal": 25378.24, "valorDescontado": 0.00, "valorCoberto": 25378.24 }
+```
+
+Não houve saldo nenhum a cobrir nada. Passa a:
+
+```json
+{ "estado": "P", "deduzirFaltaEm": null, "valorTotal": 25378.24, "valorDescontado": 0.00, "valorCoberto": 0.00 }
+```
+
+`valorCoberto` só conta as faltas **despachadas** (`A`) que tenham dedução em férias ou dispensa,
+porque é o único caso em que um saldo pode ter coberto alguma coisa. Nos pedidos em `A` os valores
+não mudam; verificado em dev nos três pedidos de teste (3 172,28 com dispensa, 12 689,12 com
+férias, 0,00 sem dedução).
+
+---
+
+## 🔴 26. `documentos` omitido deixa de apagar os anexos (11/09/2026)
+
+`PUT falta/justificar/pedido/{pedidoId}` (editar) e `PUT falta/justificar/validar/{pedidoId}`
+(despacho)
+
+Um corpo **sem** o campo `documentos` chegava como lista vazia, e a sincronização lia-o como "o
+utilizador retirou todos os anexos": os anexos existentes passavam a `E`.
+
+Passa a seguir a convenção dos arrays da casa:
+
+| `documentos` | Efeito |
+|---|---|
+| omitido ou `null` | **preserva** os anexos |
+| `[]` | retira **todos** os anexos |
+| com itens | item com `id` mantém, item sem `id` cria, anexo existente que não vier fica `E` |
+
+Os `GET` continuam a devolver `documentos: []` quando não há anexos.
+
+---
+
 ## Por decidir com o analista
 
 | # | Assunto |
@@ -830,3 +956,4 @@ Verificado em dev, ponta a ponta: eliminar um pedido com dedução em dispensa d
 | 5 | **`estadoDesc` inconsistente** — o mesmo estado `A` sai como `"Justificada"` nos itens e `"Ativo"` no pedido, no mesmo payload |
 | 6 | **`RH_T_DISPENSA.TIPO_DISPENSA` fica `null`** nas linhas criadas por dedução de falta — ecrãs que filtrem por tipo não as vêem |
 | 7 | **`selecionar` não tem comportamento em endpoint nenhum** — fica no DTO à espera da decisão do lado do validar (ver secções 15 e 20) |
+| 8 | **`itensFalta` obrigatório mas ignorado no despacho** — mantido de propósito, a pensar numa futura remoção de itens por checkbox (ver secção 24) |
