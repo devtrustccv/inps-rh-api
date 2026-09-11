@@ -37,7 +37,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -284,6 +283,19 @@ public class JustificarFaltaWriteService {
 
     var funcionario = pedido.getFunId();
 
+    // O despacho só existe se houver despacho por dar. Verifica-se o MESMO que se altera a
+    // seguir: o estado do pedido e a linha pendente em RH_T_VALIDACAO — é ela a autoridade
+    // sobre "há algo por decidir", e foi para isso que foi criada.
+    //
+    // Sem isto o endpoint não verificava nada: dois PUT com validar:SIM chamavam aplicar()
+    // duas vezes e criavam DEF_REMUNERACOES duplicados. Dinheiro a mais no vencimento.
+    var pendente = funcionarioRules.getValidacaoPendenteByReferenciaUuid(
+        pedido.getUuid(), TipoAcao.INSERT, Referencia.JUSTIFICAR_FALTA);
+
+    if (!Estado.P.name().equals(pedido.getEstado()) || pendente.isEmpty())
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível despachar um pedido de justificação pendente de validação.");
+
     // É no despacho que os descontos são aplicados — é a escrita de saldo mais pesada de todo
     // o fluxo, e a que não pode correr em paralelo com outra do mesmo colaborador.
     saldoLockService.lockColaborador(funcionario.getUuid());
@@ -297,36 +309,25 @@ public class JustificarFaltaWriteService {
     boolean comJustificativo = "SIM".equalsIgnoreCase(dto.getComJustificativo());
     var paramSituacao = resolverTipoJustificacao(dto.getTipoJustificacao(), comJustificativo);
 
-    // Todas as faltas do pedido (já criadas na fase de justificar)
-    List<FaltaEntity> faltas = faltaRepository.findAllByPedidoIdOrderByDataInicioAsc(pedido);
-    Map<Long, FaltaEntity> faltaPorSinteseId = faltas.stream()
-        .filter(f -> f.getSinteseDiarioId() != null)
-        .collect(Collectors.toMap(
-            f -> f.getSinteseDiarioId().getId(),
-            Function.identity()));
-
-    if (faltas.isEmpty()) {
-      throw IgrpResponseStatusException.badRequest(
-          "Não existem faltas associadas a este pedido");
-    }
+    // O despacho decide o PEDIDO inteiro, por isso itera sobre as faltas dele e não sobre os
+    // itens recebidos. O `itensFalta` continua a ser aceite no corpo, por compatibilidade, mas
+    // deixou de comandar seja o que for.
+    var faltas = faltasVivas(pedido);
 
     // Estado final
     final Estado estadoFinal = dto.getValidar() == EstadoValidacao.SIM ? Estado.A : Estado.I;
     var responsavelValidacao = resolverResponsavel(dto.getResponsavelId());
     var tipoRelAtual = funcionarioRules.getTipoRelacionamentoAtual(funcionario.getUuid());
 
-    // Atualizar apenas as faltas correspondentes às sínteses selecionadas
-    for (var item : dto.getItensFalta()) {
-
-      if (!item.isSelecionar())
-        continue;
-
-      FaltaEntity falta = faltaPorSinteseId.get(item.getId());
-
-      if (falta == null) {
-        throw IgrpResponseStatusException.badRequest(
-            "Falta não encontrada para a síntese diária ID: " + item.getId());
-      }
+    // Todos os dias do pedido recebem decisão. Antes saltava-se o que não viesse marcado, mas o
+    // que está fora deste ciclo acontecia à mesma — o pedido ia a A/I, a etapa a FINALIZADO e a
+    // validação fechava —, pelo que um dia não marcado ficava órfão em P: sem validação aberta
+    // que o levasse a despacho, invisível em todos os ecrãs, e a reservar saldo para sempre. Um
+    // payload com tudo a false fechava o pedido e órfãos os dias todos, sem erro nenhum.
+    //
+    // Resolve ainda as faltas sem síntese (as que a baixa médica gera): não entravam no mapa por
+    // síntese, logo item nenhum as conseguia endereçar, e ficavam em P pela mesma razão.
+    for (var falta : faltas) {
 
       // Do cabeçalho, como no registo. Só sobrepõe o motivo se veio no payload, para uma
       // validação sem alterações não apagar o que o maker escreveu.
@@ -388,22 +389,25 @@ public class JustificarFaltaWriteService {
 
     enviarNotificacaoJustificacaoFalta(pedido, funcionario);
 
-    // Atualizar validação pendente. Pela referência (uuid do pedido), não pelo funcionário: a
-    // validação foi gravada com referenciaUuid = pedido.uuid e o mesmo colaborador pode ter mais
-    // do que um pedido pendente — procurar por funUuid apanhava o errado (ou rebentava).
-    funcionarioRules.getValidacaoPendenteByReferenciaUuid(
-        pedido.getUuid(),
-        TipoAcao.INSERT,
-        Referencia.JUSTIFICAR_FALTA)
-        .ifPresent(v -> {
-          v.setEstado(estadoFinal);
-          validacaoEntityRepository.save(v);
-        });
+    // Fechar a MESMA validação que o guard exigiu lá em cima — é a linha que representava "há
+    // despacho por dar". Reutiliza-se a que já foi procurada: procurá-la outra vez seria repetir
+    // a consulta e deixar a porta aberta a verificar uma e fechar outra.
+    pendente.ifPresent(v -> {
+      v.setEstado(estadoFinal);
+      validacaoEntityRepository.save(v);
+    });
 
-    return Map.of(
-        "pedidoId", pedido.getId(),
-        "pedidoUuid", pedido.getUuid(),
-        "estado", pedido.getEstado());
+    LOGGER.info("[DESPACHO] Pedido de justificação {} despachado com {} ({} dias).",
+        pedido.getUuid(), estadoFinal, faltas.size());
+
+    // HashMap e não Map.of: a etapa pode ser nula e o Map.of rebenta com nulls.
+    Map<String, Object> resp = new HashMap<>();
+    resp.put("pedidoId", pedido.getId());
+    resp.put("pedidoUuid", pedido.getUuid());
+    resp.put("estado", pedido.getEstado());
+    resp.put("etapa", pedido.getEtapa());
+    resp.put("totalRegistos", faltas.size());
+    return resp;
 
 
   }

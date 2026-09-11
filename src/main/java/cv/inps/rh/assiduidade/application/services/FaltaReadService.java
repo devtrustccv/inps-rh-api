@@ -221,10 +221,16 @@ public class FaltaReadService {
 
     // Valores: o POST já os devolve, o GET devolvia null e o ecrã de despacho abria sem eles.
     dto.setValorDiario(primeiraFalta.getValor());
-    dto.setValorTotal(faltas.stream()
+    var valorTotal = faltas.stream()
         .map(FaltaEntity::getValor)
         .filter(Objects::nonNull)
-        .reduce(BigDecimal.ZERO, BigDecimal::add));
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    dto.setValorTotal(valorTotal);
+
+    // Bruto vs efectivo — ver FaltaDescontoService.valorDescontado.
+    var descontado = FaltaDescontoService.valorDescontado(faltas);
+    dto.setValorDescontado(descontado);
+    dto.setValorCoberto(valorTotal.subtract(descontado));
 
     // Os anexos da marcação são gravados contra o PEDIDO (ver FaltaServiceWrite), por isso a
     // leitura tem de usar a mesma referência: com RH_T_FALTA o GET nunca devolvia nada.

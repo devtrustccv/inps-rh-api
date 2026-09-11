@@ -84,6 +84,17 @@ public class FaltaReqDTO  {
   /** Só de resposta: valorDiario x totalDias. */
   private BigDecimal valorTotal ;
 
+
+  /**
+   * Quanto saiu mesmo do vencimento: soma das RH_T_DEF_REMUNERACOES criadas no despacho.
+   * Zero enquanto o pedido nao for despachado.
+   */
+  private BigDecimal valorDescontado ;
+
+
+  /** A parte que o saldo (ferias/dispensa) cobriu: valorTotal - valorDescontado. */
+  private BigDecimal valorCoberto ;
+
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();
 

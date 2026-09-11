@@ -76,6 +76,17 @@ public class JustificarFaltaDTO  {
   /** Só de resposta: soma dos dias justificados. */
   private BigDecimal valorTotal ;
 
+
+  /**
+   * Quanto saiu mesmo do vencimento: soma das RH_T_DEF_REMUNERACOES criadas no despacho.
+   * Zero enquanto o pedido nao for despachado.
+   */
+  private BigDecimal valorDescontado ;
+
+
+  /** A parte que o saldo (ferias/dispensa) cobriu: valorTotal - valorDescontado. */
+  private BigDecimal valorCoberto ;
+
   /**
    * Documentos comprovativos do bloco "Justificar Faltas Selecionadas" — o formulário
    * permite anexar vários ("Adicionar outro documento"). Aplicam-se a todas as faltas

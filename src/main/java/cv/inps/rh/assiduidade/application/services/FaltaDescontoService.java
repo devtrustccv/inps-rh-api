@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -141,6 +142,28 @@ public class FaltaDescontoService {
     dispensaRepository.saveAll(dispensas);
 
     falta.setFlgDescontoSal(0);
+  }
+
+  /**
+   * Quanto é que um conjunto de faltas <b>descontou mesmo</b> no vencimento: a soma das
+   * {@code RH_T_DEF_REMUNERACOES} que o despacho lhes criou.
+   *
+   * <p>Não confundir com {@code RH_T_FALTA.VALOR}, que é o valor <b>bruto</b> da ausência
+   * (valor diário × dias) e é o que a spec manda mostrar em "Valor Total". Quando há dedução em
+   * férias ou dispensa, o saldo cobre parte e só o resto vai ao vencimento — e o ecrã mostrava
+   * sempre o bruto, pelo que um pedido de 25 378,24 podia ter descontado 22 205,96 sem que
+   * ninguém o visse.
+   *
+   * <p>Ignora as definições em {@code E}: são as que o editar ou o eliminar reverteram.
+   */
+  public static BigDecimal valorDescontado(List<FaltaEntity> faltas) {
+    return faltas.stream()
+        .map(FaltaEntity::getDefRemId)
+        .filter(Objects::nonNull)
+        .filter(d -> !Estado.E.equals(d.getEstado()))
+        .map(DefinicaoRemuneracaoEntity::getValor)
+        .filter(Objects::nonNull)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
   /**
