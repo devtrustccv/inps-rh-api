@@ -1010,6 +1010,14 @@ Um pedido coberto a 100% por férias ou dispensa nunca é apanhado e continua ed
 **Deixa de existir** o 400 *"Não existe tipo de movimento 'PAG_FALTA' activo parametrizado para
 o vínculo…"* no despacho: a parametrização é agora assunto do procedimento.
 
+### Hora extra — mesma mudança
+
+`PUT` de validação da hora extra. Validar com `SIM` deixa de criar `RH_T_DEF_REMUNERACOES`; o
+procedimento apanha as horas extra em `A` sem `DEF_REM_ID` e usa o `VALOR_DIARIO` (já recalculado
+com os ajustes do despacho). Não há coluna nova: nada cobre uma hora extra, por isso o valor que o
+procedimento paga é o que já lá está. Deixa de existir o 400 *"Não existe tipo de movimento
+'REM_HORA' activo parametrizado…"*. Request e resposta não mudam.
+
 ---
 
 ## Por decidir com o analista
