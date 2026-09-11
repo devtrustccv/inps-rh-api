@@ -39,6 +39,18 @@ public class SaldoFeriaService {
    *                        exclusão, descontar-se-ia a si próprio.
    */
   public int getSaldo(UUID funcionarioId, Integer ano, Long pedidoIdExcluir) {
+    return detalhe(funcionarioId, ano, pedidoIdExcluir).saldo();
+  }
+
+  /**
+   * O mesmo saldo, mas com as parcelas que lhe deram origem. O endpoint devolvia so o liquido,
+   * e um {@code 0} nao dizia se o colaborador nao tem direito ou se ja gastou tudo.
+   *
+   * <p>{@code anoReferencia} nulo significa <b>acumulado de todos os anos</b>, que e o que o
+   * calculo faz quando nao se pede um ano — dai o campo {@code ambito}. Nao se assume aqui o ano
+   * activo: seis chamadores decidem dinheiro com este numero e mudar o omisso mudava-lhes a conta.
+   */
+  public SaldoFeriasDetalhe detalhe(UUID funcionarioId, Integer ano, Long pedidoIdExcluir) {
 
     final var funcionario = funcionarioEntityRepository
         .findByUuid(funcionarioId)
@@ -48,6 +60,8 @@ public class SaldoFeriaService {
 
     int disponivel;
     long reservado;
+    int direito;
+    int gozado;
     if (ano != null) {
       final var anoEntity = anoEntityRepository.findByAno(String.valueOf(ano))
           .orElseThrow(() -> new RuntimeException("Ano não encontrado"));
@@ -61,6 +75,8 @@ public class SaldoFeriaService {
       final var gozadoAnual = feriasGozadasEntityRepository.sumNumDiaByFuncionarioIdAndAno(funcionario.getUuid(),
           anoEntity.getId());
 
+      direito = direitoAnual;
+      gozado = gozadoAnual;
       disponivel = direitoAnual - gozadoAnual;
       reservado = faltaEntityRepository
           .countDiasPendentesDeducaoFeriasNoAno(funcionario.getUuid(), ano, excluir);
@@ -69,6 +85,8 @@ public class SaldoFeriaService {
       final var direitoTotal = feriasEntityRepository.sumNumDiaByFuncionarioId(funcionario.getUuid());
       final var gozadoTotal = feriasGozadasEntityRepository.sumNumDiaByFuncionarioId(funcionario.getUuid());
 
+      direito = direitoTotal;
+      gozado = gozadoTotal;
       disponivel = direitoTotal - gozadoTotal;
       reservado = faltaEntityRepository
           .countDiasPendentesDeducaoFerias(funcionario.getUuid(), excluir);
@@ -78,11 +96,27 @@ public class SaldoFeriaService {
     // consumo. Um saldo que já estava negativo antes da reserva (direito menor do que o
     // gozado, que existe em dados antigos) fica como estava — corrigi-lo aqui seria esconder
     // um problema de dados atrás de um cálculo novo.
-    if (disponivel <= 0)
-      return disponivel;
+    int saldo = disponivel <= 0
+        ? disponivel
+        : Math.max(0, disponivel - (int) reservado);
 
-    return Math.max(0, disponivel - (int) reservado);
+    return new SaldoFeriasDetalhe(
+        ano, ano != null ? "ANUAL" : "ACUMULADO",
+        direito, gozado, (int) reservado, saldo);
+  }
 
+  /**
+   * Parcelas do saldo de ferias.
+   *
+   * @param direito   dias a que o colaborador tem direito
+   * @param gozado    dias ja consumidos por pedidos aprovados
+   * @param reservado dias comprometidos por faltas ainda em despacho (ver {@link #detalhe})
+   * @param saldo     o liquido: direito - gozado - reservado, nunca abaixo de zero por causa
+   *                  da reserva (um saldo ja negativo por dados antigos mantem-se negativo)
+   */
+  public record SaldoFeriasDetalhe(
+      Integer anoReferencia, String ambito,
+      int direito, int gozado, int reservado, int saldo) {
   }
 
   public int getSaldo(UUID funcionarioId, Integer ano) {

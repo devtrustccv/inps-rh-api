@@ -34,7 +34,16 @@ public class AssiduidadeListDTO  {
   private String direcao ;
 
 
+  /** Dias de falta do mes ainda POR justificar (sem registo em RH_T_FALTA). */
   private Integer totalFalta ;
+
+
+  /** Dias de falta ja registados e a aguardar despacho (RH_T_FALTA.ESTADO = 'P'). */
+  private Integer totalFaltasPendentes ;
+
+
+  /** Dias de falta ja registados e despachados (RH_T_FALTA.ESTADO = 'A'). */
+  private Integer totalFaltasJustificadas ;
 
 
   private Integer totalDias ;
