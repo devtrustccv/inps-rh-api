@@ -632,15 +632,26 @@ Dois campos novos em **`GET falta/justificar/pedido/{pedidoUuid}`**, em cada ele
 | Campo | Significado |
 |---|---|
 | `valorDescontado` | soma das `RH_T_DEF_REMUNERACOES` vivas — o que saiu do vencimento |
-| `valorCoberto` | `valorTotal - valorDescontado` — o que o saldo cobriu |
+| `valorCoberto` | o que o **saldo** (férias/dispensa) absorveu |
 
-Ambos a **zero** enquanto o pedido não for despachado. Exemplos reais (4 dias, 6 344,56/dia):
+Ambos a **zero** enquanto o pedido não for despachado, e ambos com 2 casas decimais.
 
-| Dedução | `valorTotal` | `valorDescontado` | `valorCoberto` |
+**`valorCoberto` não é `valorTotal - valorDescontado`.** É somado por dia e só conta os dias cujo
+tipo desconta salário: um tipo que **não** desconta nunca ia cobrar nada, logo nada foi coberto —
+a subtracção dava o bruto inteiro e um pedido de "Doença do Trabalhador" aparecia com 12 689,12
+cobertos por um saldo que nunca foi tocado.
+
+Exemplos reais (6 344,56/dia):
+
+| Cenário | `valorTotal` | `valorDescontado` | `valorCoberto` |
 |---|---|---|---|
-| férias, 2 dias de saldo | 25 378,24 | 12 689,12 | 12 689,12 |
-| dispensa, 4h de saldo | 25 378,24 | 22 205,96 | 3 172,28 |
-| férias, saldo esgotado | 25 378,24 | 25 378,24 | 0,00 |
+| 4 dias, tipo desconta, férias com 2 dias de saldo | 25 378,24 | 12 689,12 | 12 689,12 |
+| 4 dias, tipo desconta, dispensa com 4h de saldo | 25 378,24 | 22 205,96 | 3 172,28 |
+| 4 dias, tipo desconta, saldo esgotado | 25 378,24 | 25 378,24 | 0,00 |
+| 2 dias, **tipo que não desconta salário** | 12 689,12 | 0,00 | **0,00** |
+
+Na última linha `valorTotal` continua a mostrar o bruto da ausência — é o que a spec define para
+esse campo —, mas nem um cêntimo foi cobrado nem coberto.
 
 ---
 
@@ -719,6 +730,49 @@ faltas injustificadas aparecia como justificadas.
 
 ---
 
+## 🔴 20. Justificar guarda o que vier no array — `selecionar` deixa de ser lido (11/09/2026)
+
+`POST /api/v1/assiduidade/falta/justificar/{funcionarioId}`
+
+**Justifica-se tudo o que vier em `itensFalta`.** O campo `selecionar` de cada item deixou de ser
+lido: pertencer ao array já é o sinal. Ter duas formas de dizer "este dia não" — não o mandar, ou
+mandá-lo com `selecionar: false` — era ambiguidade sem ganho, e contraria a convenção da casa,
+onde é a presença no array que manda.
+
+**O ecrã tem de enviar só as linhas marcadas.** Um payload com a grelha inteira justifica agora
+todos os dias, não apenas os que o utilizador escolheu.
+
+### Um `400` desapareceu
+
+> ~~Nenhuma falta marcada para justificação~~
+
+Deixou de existir. **Mantém-se** o guard de array vazio ou nulo:
+
+> Nenhuma falta informada para justificar
+
+Na prática perde-se uma rede: antes, um array com tudo a `false` dava erro; agora justifica tudo.
+
+### O campo continua no DTO
+
+`selecionar` **não foi removido** de `FaltaItemDTO` e as leituras continuam a emiti-lo a `false`.
+Está por decidir o que fazer dele do lado do **validar**, que desde a secção 15 também o ignora —
+ou seja, hoje o campo não tem comportamento em endpoint nenhum.
+
+Considerou-se separar num DTO base mais um `FaltaItemSelecionavelDTO`, mas isso obriga a um
+wrapper próprio para o validar (Java não estreita o tipo de um campo numa subclasse), **tira o
+campo das respostas dos `GET`** e acrescenta divergência ao manifesto IGRP — tudo para preservar
+um campo sem comportamento. Decide-se o validar primeiro.
+
+### Porque é que o editar continua diferente
+
+No `PUT falta/justificar/pedido/{pedidoUuid}` o `itensFalta` **continua ignorado** e não vai
+passar a valer como aqui. A assimetria é de propósito: no justificar, pertencer ao array **cria**,
+e omitir um dia não destrói nada — ele fica onde estava, por justificar. No editar seria o
+inverso: um frontend que enviasse só as linhas marcadas **apagava as restantes faltas e revertia
+o dinheiro delas**, em silêncio.
+
+---
+
 ## Por decidir com o analista
 
 | # | Assunto |
@@ -729,3 +783,4 @@ faltas injustificadas aparecia como justificadas.
 | 4 | **Fuga dos 3 dias** — um dia rejeitado (`I`) deixa de contar no limite; rejeitar 4 e rejustificar um a um deixa passar 3 sem despacho |
 | 5 | **`estadoDesc` inconsistente** — o mesmo estado `A` sai como `"Justificada"` nos itens e `"Ativo"` no pedido, no mesmo payload |
 | 6 | **`RH_T_DISPENSA.TIPO_DISPENSA` fica `null`** nas linhas criadas por dedução de falta — ecrãs que filtrem por tipo não as vêem |
+| 7 | **`selecionar` não tem comportamento em endpoint nenhum** — fica no DTO à espera da decisão do lado do validar (ver secções 15 e 20) |
