@@ -87,6 +87,13 @@ public class JustificarFaltaDTO  {
   /** A parte que o saldo (ferias/dispensa) cobriu. Zero enquanto o pedido nao for despachado. */
   private BigDecimal valorCoberto ;
 
+
+  /**
+   * Só de resposta: true se alguma falta do pedido já foi apanhada pelo processamento salarial
+   * (RH_T_FALTA.DEF_REM_ID preenchido). Nesse caso editar/eliminar dão 400.
+   */
+  private boolean processado ;
+
   /**
    * Documentos comprovativos do bloco "Justificar Faltas Selecionadas" — o formulário
    * permite anexar vários ("Adicionar outro documento"). Aplicam-se a todas as faltas

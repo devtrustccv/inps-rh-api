@@ -103,6 +103,13 @@ public class FaltaReqDTO  {
   /** A parte que o saldo (ferias/dispensa) cobriu: valorTotal - valorDescontado. */
   private BigDecimal valorCoberto ;
 
+
+  /**
+   * Só de resposta: true se alguma falta do pedido já foi apanhada pelo processamento salarial
+   * (RH_T_FALTA.DEF_REM_ID preenchido). Nesse caso editar/eliminar dão 400.
+   */
+  private boolean processado ;
+
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();
 

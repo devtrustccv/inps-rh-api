@@ -281,6 +281,7 @@ public class JustificarFaltaReadService {
       // o ecra mostrava sempre o bruto. Ambos ficam a zero enquanto nao houver despacho.
       dto.setValorDescontado(FaltaDescontoService.valorDescontado(faltas));
       dto.setValorCoberto(FaltaDescontoService.valorCoberto(faltas));
+      dto.setProcessado(FaltaDescontoService.processado(faltas));
 
       // Mês de referência: é por ele que o ecrã volta à lista depois de editar. Vem da
       // falta mais antiga do pedido (síntese diária, ou a data da falta quando não há

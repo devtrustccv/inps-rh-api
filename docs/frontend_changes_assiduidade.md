@@ -1020,6 +1020,38 @@ procedimento paga é o que já lá está. Deixa de existir o 400 *"Não existe t
 
 ---
 
+## 🟢 28. Campo `processado` e regra dos botões Editar/Eliminar (11/09/2026)
+
+`GET falta/justificar/pedido/{pedidoId}`, `GET falta/justificar/{funcionarioId}` e
+`GET falta/{pedidoId}`: **campo novo, só de resposta**:
+
+```json
+{ "estado": "A", "etapa": "FINALIZADO", "processado": false }
+```
+
+`processado: true` quando alguma falta do pedido já foi apanhada pelo processamento salarial. Nesse
+caso o editar e o eliminar dão 400.
+
+**Gate dos botões Editar/Eliminar** — por **estado** e `processado`, não por `etapa` (a etapa
+`FINALIZADO` junta aprovados, rejeitados e eliminados):
+
+```ts
+const canEditarEliminar = pedido.estado === "A" && !pedido.processado;
+```
+
+| `estado` | `processado` | Backend | Botões |
+|---|---|---|---|
+| `P` (à espera de despacho) | — | 400 *"está em validação"* | desactivados |
+| `A` | `false` | permite | **activos** |
+| `A` | `true` | 400 *"já foram apanhadas pelo processamento salarial"* | desactivados |
+| `I` (rejeitado) | — | 400 *"foi rejeitado no despacho"* | desactivados |
+| `E` (eliminado) | — | 400 *"já foi eliminado"* | desactivados |
+
+O 400 continua a poder aparecer se o procedimento correr entre o `GET` e o clique. Mostrar ao
+utilizador o `title` da resposta.
+
+---
+
 ## Por decidir com o analista
 
 | # | Assunto |

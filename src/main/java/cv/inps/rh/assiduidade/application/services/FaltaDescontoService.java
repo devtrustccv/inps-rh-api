@@ -168,6 +168,17 @@ public class FaltaDescontoService {
   }
 
   /**
+   * O pedido já foi apanhado pelo processamento salarial? Mesmo critério do guard do
+   * editar/eliminar ({@code FaltaEntityRepository.countFaltasNoProcessamento}): uma falta viva com
+   * {@code DEF_REM_ID}, que só o procedimento preenche. Exposto no GET para o ecrã desactivar os
+   * botões em vez de só descobrir pelo 400. Não faz query: o id vem na própria linha da falta.
+   */
+  public static boolean processado(List<FaltaEntity> faltas) {
+    return faltas.stream()
+        .anyMatch(f -> !Estado.E.equals(f.getEstado()) && f.getDefRemId() != null);
+  }
+
+  /**
    * @return true se o tipo de justificação implica desconto no salário.
    *
    * <p>A fonte é {@code RH_T_PARAM_SITUACAO.FLG_FALTA_DECONTO_SAL}, e é também de lá que sai
