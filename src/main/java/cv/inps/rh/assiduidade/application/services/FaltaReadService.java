@@ -228,9 +228,8 @@ public class FaltaReadService {
     dto.setValorTotal(valorTotal);
 
     // Bruto vs efectivo — ver FaltaDescontoService.valorDescontado.
-    var descontado = FaltaDescontoService.valorDescontado(faltas);
-    dto.setValorDescontado(descontado);
-    dto.setValorCoberto(valorTotal.subtract(descontado));
+    dto.setValorDescontado(FaltaDescontoService.valorDescontado(faltas));
+    dto.setValorCoberto(FaltaDescontoService.valorCoberto(faltas));
 
     // Os anexos da marcação são gravados contra o PEDIDO (ver FaltaServiceWrite), por isso a
     // leitura tem de usar a mesma referência: com RH_T_FALTA o GET nunca devolvia nada.

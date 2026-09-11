@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -158,12 +159,36 @@ public class FaltaDescontoService {
    */
   public static BigDecimal valorDescontado(List<FaltaEntity> faltas) {
     return faltas.stream()
-        .map(FaltaEntity::getDefRemId)
-        .filter(Objects::nonNull)
-        .filter(d -> !Estado.E.equals(d.getEstado()))
-        .map(DefinicaoRemuneracaoEntity::getValor)
-        .filter(Objects::nonNull)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
+        .map(FaltaDescontoService::descontadoNoDia)
+        .reduce(BigDecimal.ZERO, BigDecimal::add)
+        .setScale(2, RoundingMode.HALF_UP);
+  }
+
+  /**
+   * Quanto e que o <b>saldo</b> (ferias ou dispensa) absorveu.
+   *
+   * <p>Calcula-se por dia e so nos dias que iam mesmo ser descontados: subtrair o descontado ao
+   * bruto, sobre o pedido todo, dava a resposta errada para um tipo que nao desconta salario —
+   * nada era cobrado e nada foi coberto, mas a subtraccao dava o bruto inteiro. Um pedido com
+   * "Doenca do Trabalhador" aparecia com 12 689,12 cobertos por um saldo que nunca foi tocado.
+   */
+  public static BigDecimal valorCoberto(List<FaltaEntity> faltas) {
+    return faltas.stream()
+        .filter(f -> f.getValor() != null)
+        .filter(f -> f.getParamSitId() != null
+            && Objects.equals(f.getParamSitId().getFlgFaltaDecontoSal(), 1))
+        .map(f -> f.getValor().subtract(descontadoNoDia(f)))
+        .filter(v -> v.signum() > 0)
+        .reduce(BigDecimal.ZERO, BigDecimal::add)
+        .setScale(2, RoundingMode.HALF_UP);
+  }
+
+  /** O que a definicao de remuneracao viva desta falta desconta, ou zero. */
+  private static BigDecimal descontadoNoDia(FaltaEntity falta) {
+    var def = falta.getDefRemId();
+    if (def == null || Estado.E.equals(def.getEstado()) || def.getValor() == null)
+      return BigDecimal.ZERO;
+    return def.getValor();
   }
 
   /**
