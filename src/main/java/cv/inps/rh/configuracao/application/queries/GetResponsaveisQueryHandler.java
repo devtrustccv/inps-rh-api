@@ -10,18 +10,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GetResponsaveisQueryHandler implements QueryHandler<GetResponsaveisQuery, ResponseEntity<WrapperListResponsaveisDTO>>{
+public class GetResponsaveisQueryHandler implements QueryHandler<GetResponsaveisQuery, ResponseEntity<WrapperListResponsaveisDTO>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GetResponsaveisQueryHandler.class);
 
   private final ResponsavelService responsavelService;
 
   public GetResponsaveisQueryHandler(ResponsavelService responsavelService) {
-
     this.responsavelService = responsavelService;
   }
 
-   @IgrpQueryHandler
+  @IgrpQueryHandler
   public ResponseEntity<WrapperListResponsaveisDTO> handle(GetResponsaveisQuery query) {
 
     LOGGER.debug("GetResponsaveisQuery: {}", query);

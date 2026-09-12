@@ -20,11 +20,15 @@ public class ResponsavelResponseDTO {
 
   private String seccao;
 
-
   private String seccaoId;
+
+  private String direcao;
+
+  private Long direcaoId;
 
   private String email;
 
   private String funcionarioId;
+  private String funcionario;
 
 }

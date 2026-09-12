@@ -1,5 +1,6 @@
 package cv.inps.rh.shared.config;
 
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.AuditorAware;
@@ -14,24 +15,24 @@ import java.util.Optional;
 @Component
 public class ApplicationAuditorAware implements AuditorAware<String> {
 
-
   private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationAuditorAware.class);
 
   private static final String SYSTEM_FALLBACK = "system-bot@nosi.cv";
 
   @Override
-  public Optional<String> getCurrentAuditor() {
+  public @NonNull Optional<String> getCurrentAuditor() {
     return Optional.ofNullable(getCurrentSubjectName()).filter(s -> !s.isBlank());
   }
 
   /**
    * Resolves the current user identity for auditing purposes.
    * Priority:
-   * 1) sub claim from JWT if present
+   * 1) Sub claim from JWT if present
    * 2) Authentication#getName() if an Authentication exists
-   * 3) Fallback to system account for background processing
+   * 3) Fallback to a system account for background processing
    */
   public String getCurrentSubjectName() {
+
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     if (authentication instanceof JwtAuthenticationToken jwtAuth) {
@@ -52,6 +53,7 @@ public class ApplicationAuditorAware implements AuditorAware<String> {
     }
 
     LOGGER.warn("No authenticated user found, falling back to system account");
+
     return SYSTEM_FALLBACK;
   }
 

@@ -1,13 +1,19 @@
 package cv.inps.rh.configuracao.application.services;
 
 import com.github.f4b6a3.uuid.UuidCreator;
-import cv.inps.rh.configuracao.application.dto.*;
+import cv.inps.rh.configuracao.application.dto.AssociarResponsaveisRequestDTO;
+import cv.inps.rh.configuracao.application.dto.ResponsaveisDirecaoResponseDTO;
+import cv.inps.rh.configuracao.application.dto.ResponsavelResponseDTO;
+import cv.inps.rh.configuracao.application.dto.WrapperListResponsaveisDTO;
 import cv.inps.rh.configuracao.application.queries.GetResponsaveisQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.util.PageMapper;
 import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -341,7 +347,7 @@ public class ResponsavelService {
 
   public WrapperListResponsaveisDTO getResponsaveis(GetResponsaveisQuery query) {
 
-   /* int pageNumber = StringUtils.hasText(query.getPageNumber()) ? Integer.parseInt(query.getPageNumber()) : 0;
+    int pageNumber = StringUtils.hasText(query.getPageNumber()) ? Integer.parseInt(query.getPageNumber()) : 0;
     int pageSize = StringUtils.hasText(query.getPageSize()) ? Integer.parseInt(query.getPageSize()) : 20;
 
     Specification<ResponsavelEntity> spec = (root, _, cb) -> {
@@ -378,20 +384,20 @@ public class ResponsavelService {
 
     var content = page.getContent().stream().map(e -> {
       var dto = new ResponsavelResponseDTO();
-      dto.setIdResponsavel(e.getId());
+      dto.setResponsavelId(e.getId());
 
       var instit = e.getInstitId();
-      dto.setIdDirecao(instit.getId());
-      dto.setNomeDirecao(instit.getNome());
+      dto.setDirecaoId(instit.getId());
+      dto.setDirecao(instit.getNome());
 
       var fun = e.getFunId();
-      dto.setIdFuncionario(fun.getUuid().toString());
-      dto.setNomeFuncionario(fun.getNome());
+      dto.setFuncionarioId(fun.getUuid().toString());
+      dto.setFuncionario(fun.getNome());
 
       var secao = e.getSecaoId();
       if (secao != null) {
-        dto.setIdSeccao(secao.getId().toString());
-        dto.setNomeSeccao(secao.getNome());
+        dto.setSeccaoId(secao.getId().toString());
+        dto.setSeccao(secao.getNome());
       }
 
       dto.setEmail(e.getEmail());
@@ -400,9 +406,7 @@ public class ResponsavelService {
 
     var wrapper = new WrapperListResponsaveisDTO();
     PageMapper.fillPagination(page, wrapper);
-    wrapper.setContent(content);*/
-    return null;
+    wrapper.setContent(content);
+    return wrapper;
   }
-
-
 }

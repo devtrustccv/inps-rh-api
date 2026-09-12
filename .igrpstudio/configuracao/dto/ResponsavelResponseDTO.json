@@ -66,6 +66,6 @@
   "type": "dto",
   "module": "configuracao",
   "enableCustonValidation": false,
-  "readOnly": false,
+  "readOnly": true,
   "id": "nnlywao0ll"
 }
