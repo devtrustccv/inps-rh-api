@@ -8,19 +8,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @IgrpDTO
 public class ResponsavelResponseDTO {
 
-
   private Long responsavelId;
-
 
   private String seccao;
 
-  private String seccaoId;
+  private Long seccaoId;
 
   private String direcao;
 
@@ -28,7 +28,7 @@ public class ResponsavelResponseDTO {
 
   private String email;
 
-  private String funcionarioId;
+  private UUID funcionarioId;
   private String funcionario;
 
 }

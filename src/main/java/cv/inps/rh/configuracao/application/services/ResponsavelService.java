@@ -8,38 +8,36 @@ import cv.inps.rh.configuracao.application.dto.WrapperListResponsaveisDTO;
 import cv.inps.rh.configuracao.application.queries.GetResponsaveisQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
-import cv.inps.rh.shared.infrastructure.persistence.entity.*;
-import cv.inps.rh.shared.infrastructure.persistence.repository.*;
+import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.SecaoEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DirecaoEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.FuncionarioEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.ResponsavelEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.SecaoEntityRepository;
 import cv.inps.rh.shared.util.PageMapper;
-import jakarta.persistence.criteria.Predicate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Transactional
 @Service
+@RequiredArgsConstructor
 public class ResponsavelService {
 
   private final ResponsavelEntityRepository responsavelEntityRepository;
   private final FuncionarioEntityRepository funcionarioEntityRepository;
   private final SecaoEntityRepository secaoEntityRepository;
   private final DirecaoEntityRepository instituicaoEntityRepository;
-  private final MobilidadeEntityRepository mobilidadeEntityRepository;
-
-  public ResponsavelService(ResponsavelEntityRepository responsavelEntityRepository, FuncionarioEntityRepository funcionarioEntityRepository, SecaoEntityRepository secaoEntityRepository, DirecaoEntityRepository instituicaoEntityRepository, MobilidadeEntityRepository mobilidadeEntityRepository) {
-    this.responsavelEntityRepository = responsavelEntityRepository;
-    this.funcionarioEntityRepository = funcionarioEntityRepository;
-    this.secaoEntityRepository = secaoEntityRepository;
-    this.instituicaoEntityRepository = instituicaoEntityRepository;
-    this.mobilidadeEntityRepository = mobilidadeEntityRepository;
-  }
 
   @Transactional
   public void saveResponsaveis(AssociarResponsaveisRequestDTO request) {
@@ -308,12 +306,6 @@ public class ResponsavelService {
     }
   }
 
-  private String normalize(String value) {
-    return value == null
-        ? null
-        : value.trim().toLowerCase(Locale.ROOT);
-  }
-
   public ResponsaveisDirecaoResponseDTO getResponsavelData(Long institutoId) {
 
     var response = new ResponsaveisDirecaoResponseDTO();
@@ -328,14 +320,14 @@ public class ResponsavelService {
         });
 
     var rows = savedResponsibles.stream()
-        .filter(obj -> obj.secaoId() != null)
+        .filter(obj -> obj.seccaoId() != null)
         .map(obj -> {
           var o = new ResponsavelResponseDTO();
           o.setResponsavelId(obj.responsavelId());
           o.setSeccao(obj.secaoNome());
-          o.setSeccaoId(obj.secaoId().toString());
+          o.setSeccaoId(obj.seccaoId());
           o.setEmail(obj.email());
-          o.setFuncionarioId(obj.funcionarioId() != null ? obj.funcionarioId().toString() : null);
+          o.setFuncionarioId(obj.funcionarioId());
           return o;
         })
         .toList();
@@ -347,67 +339,30 @@ public class ResponsavelService {
 
   public WrapperListResponsaveisDTO getResponsaveis(GetResponsaveisQuery query) {
 
-    int pageNumber = StringUtils.hasText(query.getPageNumber()) ? Integer.parseInt(query.getPageNumber()) : 0;
-    int pageSize = StringUtils.hasText(query.getPageSize()) ? Integer.parseInt(query.getPageSize()) : 20;
+    var pageable = PageRequest.of(
+        Integer.parseInt(query.getPageNumber()),
+        Integer.parseInt(query.getPageSize()),
+        Sort.by(Sort.Direction.ASC, "id")
+    );
 
-    Specification<ResponsavelEntity> spec = (root, _, cb) -> {
-      var predicates = new ArrayList<Predicate>();
-
-      if (StringUtils.hasText(query.getNomeFuncionario())) {
-        var value = "%" + query.getNomeFuncionario().toLowerCase() + "%";
-        predicates.add(cb.like(cb.lower(root.get(ResponsavelEntity_.funId).get(FuncionarioEntity_.NOME)), value));
-      }
-
-      if (StringUtils.hasText(query.getNomeInstituicao())) {
-        var value = "%" + query.getNomeInstituicao().toLowerCase() + "%";
-        predicates.add(cb.like(cb.lower(root.get(ResponsavelEntity_.institId).get(DirecaoEntity_.NOME)), value));
-      }
-
-      if (query.getIdInstituicao() != null) {
-        predicates.add(cb.equal(root.get(ResponsavelEntity_.institId).get(DirecaoEntity_.ID), query.getIdInstituicao()));
-      }
-
-      if (StringUtils.hasText(query.getNomeSecccao())) {
-        var value = "%" + query.getNomeSecccao().toLowerCase() + "%";
-        predicates.add(cb.like(cb.lower(root.get(ResponsavelEntity_.secaoId).get(SecaoEntity_.NOME)), value));
-      }
-
-      if (query.getIdSeccao() != null) {
-        predicates.add(cb.equal(root.get(ResponsavelEntity_.secaoId).get(SecaoEntity_.ID), query.getIdSeccao()));
-      }
-
-      return cb.and(predicates.toArray(new Predicate[0]));
-    };
-
-    var pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, ResponsavelEntity_.ID));
-    var page = responsavelEntityRepository.findAll(spec, pageable);
-
-    var content = page.getContent().stream().map(e -> {
-      var dto = new ResponsavelResponseDTO();
-      dto.setResponsavelId(e.getId());
-      dto.setEmail(e.getEmail());
-
-      var instit = e.getInstitId();
-      dto.setDirecaoId(instit.getId());
-      dto.setDirecao(instit.getNome());
-
-      var fun = e.getFunId();
-      dto.setFuncionarioId(fun.getUuid().toString());
-      dto.setFuncionario(fun.getNome());
-
-      var secao = e.getSecaoId();
-      if (secao != null) {
-        dto.setSeccaoId(secao.getId().toString());
-        dto.setSeccao(secao.getNome());
-      }
-
-      dto.setEmail(e.getEmail());
-      return dto;
-    }).toList();
+    var page = responsavelEntityRepository.findResponsaveis(
+        normalize(query.getNomeFuncionario()),
+        normalize(query.getNomeInstituicao()),
+        query.getIdInstituicao(),
+        normalize(query.getNomeSecccao()),
+        query.getIdSeccao(),
+        pageable
+    );
 
     var wrapper = new WrapperListResponsaveisDTO();
+
     PageMapper.fillPagination(page, wrapper);
-    wrapper.setContent(content);
+    wrapper.setContent(page.getContent());
+
     return wrapper;
+  }
+
+  private String normalize(String value) {
+    return StringUtils.hasText(value) ? value.trim() : null;
   }
 }
