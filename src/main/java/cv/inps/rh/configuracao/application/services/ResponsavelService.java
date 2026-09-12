@@ -385,6 +385,7 @@ public class ResponsavelService {
     var content = page.getContent().stream().map(e -> {
       var dto = new ResponsavelResponseDTO();
       dto.setResponsavelId(e.getId());
+      dto.setEmail(e.getEmail());
 
       var instit = e.getInstitId();
       dto.setDirecaoId(instit.getId());
