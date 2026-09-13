@@ -17,22 +17,17 @@ public class ColaboradorReadService {
   private final TiposRelacionamentoEntityRepository tiposRelacionamentoEntityRepository;
 
   public WrapperListaColaboradorDTO getListaLicensaSemvencimento(GetListaLicensaSemVencimentoQuery query) {
-    return getListas(query.getPage(), query.getSize(), query.getDataInicio(), query.getDataFim(), query.getDireccao(), query.getColaborador());
-  }
 
-  private WrapperListaColaboradorDTO getListas(String page, String size, String dataInicio, String dataFim, String direccao, String colaborador) {
-
-    var pageRequest = PageRequest.of(
-        Integer.parseInt(page),
-        Integer.parseInt(size)
+    var pageData = tiposRelacionamentoEntityRepository.getListaColaboradores(
+        StringUtils.hasText(query.getDireccao()) ? Long.valueOf(query.getDireccao()) : null,
+        StringUtils.hasText(query.getColaborador()) ? query.getColaborador() : null,
+        StringUtils.hasText(query.getDataInicio()) ? DateFormatter.stringToLocalDate(query.getDataInicio()) : null,
+        StringUtils.hasText(query.getDataFim()) ? DateFormatter.stringToLocalDate(query.getDataFim()) : null,
+        PageRequest.of(
+            Integer.parseInt(query.getPage()),
+            Integer.parseInt(query.getSize())
+        )
     );
-
-    var startDate = StringUtils.hasText(dataInicio) ? DateFormatter.stringToLocalDate(dataInicio) : null;
-    var endDate = StringUtils.hasText(dataFim) ? DateFormatter.stringToLocalDate(dataFim) : null;
-    var directionId = StringUtils.hasText(direccao) ? Long.valueOf(direccao) : null;
-    var funcionario = StringUtils.hasText(colaborador) ? colaborador : null;
-
-    var pageData = tiposRelacionamentoEntityRepository.getListaColaboradores(directionId, funcionario, startDate, endDate, pageRequest);
     pageData.forEach(obj -> obj.setEstadoSituacaoLaboralDesc(obj.getEstadoSituacaoLaboral().getDescription()));
 
     var response = new WrapperListaColaboradorDTO();
@@ -40,5 +35,4 @@ public class ColaboradorReadService {
     response.setContent(pageData.getContent());
     return response;
   }
-
 }

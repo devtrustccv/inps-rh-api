@@ -2,10 +2,12 @@ package cv.inps.rh.processamento.domain.service.baixamedica;
 
 import cv.inps.rh.processamento.application.dto.BaixaMedicaDetailDTO;
 import cv.inps.rh.processamento.application.dto.BaixaMedicaListDTO;
+import cv.inps.rh.processamento.application.dto.PeriodoLicensaRowDTO;
 import cv.inps.rh.processamento.application.queries.GetBaixaMedicaQuery;
 import cv.inps.rh.processamento.application.queries.GetListaBaixamedicaQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.infrastructure.persistence.repository.AbonosBeneficiosDetalheEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.AbonosBeneficiosEntityRepository;
 import cv.inps.rh.shared.util.DateFormatter;
 import cv.inps.rh.shared.util.PageMapper;
@@ -24,11 +26,13 @@ import static java.util.Optional.ofNullable;
 public class BaixaMedicaReadService {
 
   private final AbonosBeneficiosEntityRepository abonosRepository;
+  private final AbonosBeneficiosDetalheEntityRepository abonosDetalheRepository;
   private final BaixaMedicaServiceWrite baixaMedicaServiceWrite;
 
   @Transactional(readOnly = true)
   public BaixaMedicaDetailDTO getBaixaMedica(GetBaixaMedicaQuery query) {
-    return abonosRepository.getBaixaMedica(UUID.fromString(query.getBaixaMedicaId()))
+    var abonoUuid = UUID.fromString(query.getBaixaMedicaId());
+    var baixaMedicaDetailDTO = abonosRepository.getBaixaMedica(abonoUuid)
         .map(obj -> {
           obj.setEstadodesc(ofNullable(obj.getEstado()).map(Estado::getDescription).orElse(null));
           var calculation = baixaMedicaServiceWrite.chamarProcedure(
@@ -41,6 +45,22 @@ public class BaixaMedicaReadService {
           return obj;
         })
         .orElseThrow(() -> IgrpResponseStatusException.notFound("AbonosBeneficiosEntity not found for uuid: " + query.getBaixaMedicaId()));
+
+    var periodos = abonosDetalheRepository.findByAbonoBenef_Uuid(abonoUuid)
+        .stream()
+        .map(obj -> {
+          var periodo = new PeriodoLicensaRowDTO();
+          periodo.setContinuidade(null);
+          periodo.setDataInicio(obj.getDataInicio());
+          periodo.setDataFim(obj.getDataFim());
+          periodo.setId(obj.getUuid());
+          return periodo;
+        })
+        .toList();
+
+    baixaMedicaDetailDTO.setPeriodos(periodos);
+
+    return baixaMedicaDetailDTO;
   }
 
   public BaixaMedicaListDTO getListaBaixaMedica(GetListaBaixamedicaQuery query) {
@@ -60,17 +80,12 @@ public class BaixaMedicaReadService {
         pageRequest
     );
 
-    var content = pageData.getContent()
-        .stream()
-        .map(obj -> {
-          obj.setEstadodesc(ofNullable(obj.getEstado()).map(Estado::getDescription).orElse(null));
-          return obj;
-        })
-        .toList();
+    pageData.getContent()
+        .forEach(obj -> obj.setEstadodesc(ofNullable(obj.getEstado()).map(Estado::getDescription).orElse(null)));
 
     var response = new BaixaMedicaListDTO();
     PageMapper.fillPagination(pageData, response);
-    response.setContent(content);
+    response.setContent(pageData.getContent());
     return response;
   }
 }
