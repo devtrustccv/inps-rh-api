@@ -28,9 +28,10 @@ public class MissaoLogisticaEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-    // Sem prestador no seguro de viagem e na ajuda de custo (não passam pela requisição)
+    // Coluna real: MISSAO_PREST_ID (o mapeamento anterior, prestador_serv_id, não existe na tabela).
+    // Sem prestador no seguro de viagem e na ajuda de custo (não passam pela requisição).
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "prestador_serv_id", referencedColumnName = "id")
+    @JoinColumn(name = "missao_prest_id", referencedColumnName = "id")
     private MissaoPrestadorEntity prestadorServId;
 
     @Column(name = "nome_seguradora", length = 200)

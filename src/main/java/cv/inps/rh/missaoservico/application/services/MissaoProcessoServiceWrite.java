@@ -439,39 +439,45 @@ public class MissaoProcessoServiceWrite {
     documentoRepository.saveAll(sync);
   }
 
-  /** Gera o PDF da nota de encomenda, guarda-o no MinIO e regista-o; a versão anterior fica inactiva. */
+  /**
+   * Gera o PDF da nota de encomenda, guarda-o no MinIO e regista-o; a versão anterior fica inactiva.
+   *
+   * <p>Nada do que corra mal aqui trava a emissão da requisição: falha a gravação do documento, fica
+   * o log, e a nota de encomenda continua disponível em "Extrair Requisição", que a gera a partir
+   * dos dados.
+   */
   private void guardarPdfRequisicao(MissaoRequisicaoEntity requisicao) {
-    var tipoDocumento = support.tipoDocumento(TIPO_DOC_REQUISICAO).orElse(null);
-    if (tipoDocumento == null) {
-      LOGGER.warn("Tipo de documento {} não parametrizado — PDF da requisição {} não guardado",
-          TIPO_DOC_REQUISICAO, requisicao.getUuid());
-      return;
-    }
-
-    var pdf = requisicaoPdfService.gerar(requisicao);
-    var nomeFicheiro = "%d_%s".formatted(System.currentTimeMillis(), RequisicaoPdfService.nomeFicheiro(requisicao));
     try {
+      var tipoDocumento = support.tipoDocumento(TIPO_DOC_REQUISICAO).orElse(null);
+      if (tipoDocumento == null) {
+        LOGGER.warn("Tipo de documento {} não parametrizado — PDF da requisição {} não guardado",
+            TIPO_DOC_REQUISICAO, requisicao.getUuid());
+        return;
+      }
+
+      var pdf = requisicaoPdfService.gerar(requisicao);
+      var nomeFicheiro = "%d_%s".formatted(System.currentTimeMillis(), RequisicaoPdfService.nomeFicheiro(requisicao));
       storageService.uploadFile(pdf, nomeFicheiro, "application/pdf");
+
+      var anteriores = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(REF_DOC_REQUISICAO_PDF, requisicao.getUuid());
+      anteriores.stream().filter(d -> d.getEstado() == Estado.A).forEach(d -> d.setEstado(Estado.I));
+
+      var doc = new DocumentoEntity();
+      doc.setUuid(UuidCreator.getTimeOrderedEpoch());
+      doc.setTpDocumentoId(tipoDocumento);
+      doc.setUrl(nomeFicheiro);
+      doc.setReferenciaName(REF_DOC_REQUISICAO_PDF);
+      doc.setReferenciaId(String.valueOf(requisicao.getId()));
+      doc.setReferenciaUuid(requisicao.getUuid());
+      doc.setEstado(Estado.A);
+
+      var toSave = new ArrayList<>(anteriores);
+      toSave.add(doc);
+      documentoRepository.saveAll(toSave);
     } catch (Exception e) {
-      LOGGER.error("Falha ao guardar o PDF da requisição {} no storage", requisicao.getUuid(), e);
-      throw IgrpResponseStatusException.internalServerError("Não foi possível guardar o documento da requisição");
+      LOGGER.error("Falha ao gerar/guardar o PDF da requisição {} — requisição emitida sem documento",
+          requisicao.getUuid(), e);
     }
-
-    var anteriores = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(REF_DOC_REQUISICAO_PDF, requisicao.getUuid());
-    anteriores.stream().filter(d -> d.getEstado() == Estado.A).forEach(d -> d.setEstado(Estado.I));
-
-    var doc = new DocumentoEntity();
-    doc.setUuid(UuidCreator.getTimeOrderedEpoch());
-    doc.setTpDocumentoId(tipoDocumento);
-    doc.setUrl(nomeFicheiro);
-    doc.setReferenciaName(REF_DOC_REQUISICAO_PDF);
-    doc.setReferenciaId(String.valueOf(requisicao.getId()));
-    doc.setReferenciaUuid(requisicao.getUuid());
-    doc.setEstado(Estado.A);
-
-    var toSave = new ArrayList<>(anteriores);
-    toSave.add(doc);
-    documentoRepository.saveAll(toSave);
   }
 
   private void notificarRequisicao(MissaoServicoEntity missao, MissaoProcessoEntity processo,

@@ -8,6 +8,66 @@ Base de todos os endpoints: `/api/v1/missao-servico`
 
 ---
 
+## 2026-09-14 — LEIA PRIMEIRO: a missão deixou de ter uma etapa
+
+Este é o resumo da alteração estrutural da spec de 14/09. As secções por fase, mais abaixo,
+têm os payloads campo a campo.
+
+### O que mudou
+
+Antes, a missão tinha **uma** etapa e o ecrã avançava a missão inteira. Agora a missão tem
+**quatro processos independentes**, cada um com a sua etapa e o seu percurso:
+
+| Processo | Percurso |
+| --- | --- |
+| `BILHETE_PASSAGEM` | Prestador Serviço → Emissão Requisição → Logística → Validação UGAL → Aprovação RH → Cabimento → Autorização → Pagamento |
+| `ALOJAMENTO` | igual ao bilhete |
+| `SEGURO_VIAGEM` | começa na **Logística** (não passa por prestadores nem requisição) |
+| `AJUDA_CUSTO` | começa na **Logística** |
+
+A submissão cria os quatro processos de uma vez. Cada um avança ao seu ritmo: o bilhete pode
+estar em Cabimento enquanto a ajuda de custo ainda está na Logística.
+
+### O que isto obriga a mudar no front-end
+
+1. **Todas as rotas de etapa passam a levar o tipo de processo no caminho:**
+   `/{missaoUuid}/processos/{tipoProcesso}/{etapa}`.
+2. **A lista de trabalho passa a ser de processos, não de missões** — `GET /processos?etapa=…`
+   devolve uma linha por processo. A lista geral (`GET /missao-servico`) traz a missão com a
+   sub-lista dos seus quatro processos e respectivas etapas.
+3. **O ecrã a mostrar decide-se pela etapa do processo**, não pela etapa da missão.
+4. **Chamar uma etapa que o processo não percorre dá 400** (ex.: `prestadores` em
+   `SEGURO_VIAGEM`), tal como chamar uma etapa fora de sequência.
+
+### Endpoints antigos
+
+Os dez endpoints do modelo anterior continuam a responder, marcados `deprecated = true` no
+Swagger. Vão ser removidos numa fase seguinte — migrar para as rotas por processo.
+
+### Comportamentos a ter em conta
+
+- **Anexos e PDFs não bloqueiam o fluxo.** Se o storage falhar, a gravação da etapa é feita na
+  mesma e devolve `200`; fica um `ERROR` no log do servidor e o documento não aparece na
+  resposta. A nota de encomenda continua sempre disponível em *Extrair Requisição*, que a gera
+  a partir dos dados.
+- **Um parecer desfavorável devolve o processo à etapa anterior** e arquiva o parecer no
+  histórico; abre-se um ciclo novo.
+- **Na Aprovação RH a ordem é fixa:** o Coordenador emite primeiro, só depois o Director. O
+  parecer do Director é o que faz avançar.
+- **O valor da ajuda de custo é calculado pelo backend** a partir do valor diário que o ecrã
+  envia: 100% sem alojamento da instituição, ⅔ com alojamento sem alimentação, ⅓ com
+  alimentação.
+- **O pagamento só aceita a missão finalizada** — ou seja, com os quatro processos autorizados.
+
+### Validado em
+
+Bateria de 129 passos a percorrer os ecrãs pela ordem de utilização (lista → formulário →
+`GET by id` → editar → gravar → reler), com caminhos felizes e negativos, e com confirmação
+directa na base de dados depois de cada escrita. Evidências (pedido, resposta e SQL) em
+`scratchpad/evidencias_missao.html`.
+
+---
+
 ## 2026-09-14 — Listas e cancelamento (Fase 10)
 
 ### Lista Geral — sub-lista de processos

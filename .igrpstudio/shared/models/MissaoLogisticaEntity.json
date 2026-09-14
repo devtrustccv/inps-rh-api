@@ -21,7 +21,7 @@
       "sequenceName": "SEQ_MISSAO_LOGISTICA"
     },
     {
-      "name": "prestador_serv_id",
+      "name": "missao_prest_id",
       "type": "relation",
       "length": 255,
       "nullable": true,
