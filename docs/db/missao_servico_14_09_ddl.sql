@@ -328,6 +328,16 @@ ALTER TABLE RH_T_MISSAO_SERVICO MODIFY (ESTADO VARCHAR2(20))
 /
 
 
+-- -----------------------------------------------------------------------------
+-- 11. RH_T_MISSAO_LOGISTICA.MISSAO_PREST_ID passa a opcional
+--
+-- Decisão D2: seguro de viagem e ajuda de custo não passam por Prestadores
+-- Serviço nem por Emissão de Requisição — a linha de logística não tem prestador.
+-- -----------------------------------------------------------------------------
+ALTER TABLE RH_T_MISSAO_LOGISTICA MODIFY (MISSAO_PREST_ID NULL)
+/
+
+
 -- =============================================================================
 -- Verificação
 -- =============================================================================

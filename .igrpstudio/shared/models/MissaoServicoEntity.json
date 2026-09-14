@@ -49,6 +49,42 @@
             }
         },
         {
+            "name": "ilha_id",
+            "type": "relation",
+            "length": 255,
+            "nullable": true,
+            "unique": false,
+            "primaryKey": false,
+            "skipFieldRevision": false,
+            "relation": {
+                "type": "ManyToOne",
+                "entity": "GeografiaEntity",
+                "referencedColumnName": "id",
+                "cardinality": "oneWay",
+                "fetchType": "lazy",
+                "module": "shared",
+                "orphanRemoval": false
+            }
+        },
+        {
+            "name": "concelho_id",
+            "type": "relation",
+            "length": 255,
+            "nullable": true,
+            "unique": false,
+            "primaryKey": false,
+            "skipFieldRevision": false,
+            "relation": {
+                "type": "ManyToOne",
+                "entity": "GeografiaEntity",
+                "referencedColumnName": "id",
+                "cardinality": "oneWay",
+                "fetchType": "lazy",
+                "module": "shared",
+                "orphanRemoval": false
+            }
+        },
+        {
             "name": "flg_destino",
             "type": "int",
             "length": 255,
@@ -128,7 +164,7 @@
         {
             "name": "estado",
             "type": "string",
-            "length": 1,
+            "length": 20,
             "nullable": false,
             "unique": false,
             "primaryKey": false,
@@ -142,6 +178,44 @@
             "unique": false,
             "primaryKey": false,
             "skipFieldRevision": false
+        },
+        {
+            "name": "ano",
+            "type": "int",
+            "length": 255,
+            "nullable": true,
+            "unique": false,
+            "primaryKey": false,
+            "skipFieldRevision": false,
+            "objectType": "java"
+        },
+        {
+            "name": "ambito_missao",
+            "type": "string",
+            "length": 2000,
+            "nullable": true,
+            "unique": false,
+            "primaryKey": false,
+            "skipFieldRevision": false
+        },
+        {
+            "name": "referencia_pagamento",
+            "type": "string",
+            "length": 200,
+            "nullable": true,
+            "unique": false,
+            "primaryKey": false,
+            "skipFieldRevision": false
+        },
+        {
+            "name": "data_pagamento",
+            "type": "date",
+            "length": 255,
+            "nullable": true,
+            "unique": false,
+            "primaryKey": false,
+            "skipFieldRevision": false,
+            "objectType": "java"
         },
         {
             "name": "uuid",

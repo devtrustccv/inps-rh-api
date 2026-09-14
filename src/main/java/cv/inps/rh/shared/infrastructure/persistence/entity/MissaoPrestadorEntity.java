@@ -46,6 +46,14 @@ public class MissaoPrestadorEntity extends AuditEntity {
     @JoinColumn(name = "missao_serv_id", referencedColumnName = "id", nullable = false)
     private MissaoServicoEntity missaoServId;
 
+    // Modelo por processo (spec 14/09): prestador parametrizado e processo a que pertence
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "param_prest_id", referencedColumnName = "id")
+    private ParamPrestadorEntity paramPrestId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "missao_processo_id", referencedColumnName = "id")
+    private MissaoProcessoEntity missaoProcessoId;
 
     @Column(name = "estado", length = 1, nullable = false)
     private String estado;

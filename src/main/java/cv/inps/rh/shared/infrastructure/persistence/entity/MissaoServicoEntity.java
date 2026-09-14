@@ -84,8 +84,9 @@ public class MissaoServicoEntity extends AuditEntity {
     @Column(name = "etapa", length = 50, nullable = false)
     private String etapa;
 
+    // A (activa) | I (cancelada) | FINALIZADO (todos os processos activos pagos)
     @NotNull(message = "estado is mandatory")
-    @Column(name = "estado", length = 1, nullable = false)
+    @Column(name = "estado", length = 20, nullable = false)
     private String estado;
 
     @Column(name = "motivo_cancelamento", length = 500)

@@ -1,8 +1,8 @@
 {
   "type": "model",
   "module": "shared",
-  "name": "MissaoRequisicaoEntity",
-  "tableName": "RH_T_MISSAO_REQUISICAO",
+  "name": "MissaoProcessoEntity",
+  "tableName": "RH_T_MISSAO_PROCESSO",
   "audit": true,
   "crud": false,
   "revision": false,
@@ -18,10 +18,10 @@
       "generationType": "SEQUENCE",
       "skipFieldRevision": false,
       "objectType": "java",
-      "sequenceName": "SEQ_MISSAO_REQUISICAO"
+      "sequenceName": "SEQ_MISSAO_PROCESSO"
     },
     {
-      "name": "missao_prest_id",
+      "name": "missao_serv_id",
       "type": "relation",
       "length": 255,
       "nullable": false,
@@ -30,7 +30,7 @@
       "skipFieldRevision": false,
       "relation": {
         "type": "ManyToOne",
-        "entity": "MissaoPrestadorEntity",
+        "entity": "MissaoServicoEntity",
         "referencedColumnName": "id",
         "cardinality": "oneWay",
         "fetchType": "lazy",
@@ -39,52 +39,22 @@
       }
     },
     {
-      "name": "missao_colab_id",
-      "type": "relation",
-      "length": 255,
+      "name": "tipo_processo",
+      "type": "string",
+      "length": 100,
       "nullable": false,
       "unique": false,
       "primaryKey": false,
-      "skipFieldRevision": false,
-      "relation": {
-        "type": "ManyToOne",
-        "entity": "MissaoColaboradorEntity",
-        "referencedColumnName": "id",
-        "cardinality": "oneWay",
-        "fetchType": "lazy",
-        "module": "shared",
-        "orphanRemoval": false
-      }
+      "skipFieldRevision": false
     },
     {
-      "name": "nr_requisacao",
-      "type": "long",
-      "length": 255,
+      "name": "etapa",
+      "type": "string",
+      "length": 100,
       "nullable": false,
       "unique": false,
       "primaryKey": false,
-      "skipFieldRevision": false,
-      "objectType": "java"
-    },
-    {
-      "name": "ano",
-      "type": "int",
-      "length": 255,
-      "nullable": true,
-      "unique": false,
-      "primaryKey": false,
-      "skipFieldRevision": false,
-      "objectType": "java"
-    },
-    {
-      "name": "valor_total",
-      "type": "decimal",
-      "length": 255,
-      "nullable": true,
-      "unique": false,
-      "primaryKey": false,
-      "skipFieldRevision": false,
-      "objectType": "java"
+      "skipFieldRevision": false
     },
     {
       "name": "estado",
@@ -99,14 +69,14 @@
       "name": "uuid",
       "type": "uuid",
       "length": 255,
-      "nullable": true,
+      "nullable": false,
       "unique": false,
       "primaryKey": false,
       "skipFieldRevision": false,
       "objectType": "java"
     }
   ],
-  "id": "msv4missaoreq",
+  "id": "msv9missaoproc",
   "uniqueConstraints": [],
   "indexes": []
 }

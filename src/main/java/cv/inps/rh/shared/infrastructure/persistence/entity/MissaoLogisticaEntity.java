@@ -28,9 +28,9 @@ public class MissaoLogisticaEntity extends AuditEntity {
     @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
-    @NotNull(message = "prestadorServId is mandatory")
+    // Sem prestador no seguro de viagem e na ajuda de custo (não passam pela requisição)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "prestador_serv_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "prestador_serv_id", referencedColumnName = "id")
     private MissaoPrestadorEntity prestadorServId;
 
     @Column(name = "nome_seguradora", length = 200)
@@ -70,6 +70,10 @@ public class MissaoLogisticaEntity extends AuditEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "missao_serv_id", referencedColumnName = "id", nullable = false)
     private MissaoServicoEntity missaoServId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "missao_processo_id", referencedColumnName = "id")
+    private MissaoProcessoEntity missaoProcessoId;
 
     @Column(name = "flg_alojamento", length = 3)
     private String flgAlojamento;
