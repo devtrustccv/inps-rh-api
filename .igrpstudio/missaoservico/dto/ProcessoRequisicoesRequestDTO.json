@@ -1,0 +1,13 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ProcessoRequisicoesRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "requisicoes", "type": "ProcessoRequisicaoItemRequest", "objectType": "dto", "required": true, "collectionType": "list", "module": "missaoservico" },
+    { "name": "processoEtapaAction", "type": "ProcessStepAction", "objectType": "enum", "required": false, "module": "emprestimo" }
+  ],
+  "id": "msvdto11procreqreq"
+}

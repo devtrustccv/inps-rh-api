@@ -98,4 +98,97 @@ public class MissaoProcessoController {
 
   }
 
+   @GetMapping(
+   value = "{uuid}/processos/{tipoProcesso}/requisicoes"
+  )
+  @Operation(
+    summary = "Get requisicoes do processo",
+    description = "Get requisicoes do processo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ProcessoRequisicoesResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<ProcessoRequisicoesResponseDTO> getProcessoRequisicoes(
+    @PathVariable(value = "uuid") String uuid,
+    @PathVariable(value = "tipoProcesso") String tipoProcesso)
+  {
+
+      final var query = new GetProcessoRequisicoesQuery(uuid, tipoProcesso);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "{uuid}/processos/{tipoProcesso}/requisicoes"
+  )
+  @Operation(
+    summary = "Save requisicoes do processo",
+    description = "Save requisicoes do processo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<Map<String, ?>> saveProcessoRequisicoes(@Valid @RequestBody ProcessoRequisicoesRequestDTO saveProcessoRequisicoesRequest
+    , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso)
+  {
+
+      final var command = new SaveProcessoRequisicoesCommand(saveProcessoRequisicoesRequest, uuid, tipoProcesso);
+
+      return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "{uuid}/processos/{tipoProcesso}/requisicoes/{requisicaoUuid}/pdf"
+  )
+  @Operation(
+    summary = "Extrair requisicao em PDF",
+    description = "Extrair requisicao em PDF",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/pdf",
+              schema = @Schema(
+                  type = "string",
+                  format = "binary")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<byte[]> getRequisicaoPdf(
+    @PathVariable(value = "uuid") String uuid,
+    @PathVariable(value = "tipoProcesso") String tipoProcesso,
+    @PathVariable(value = "requisicaoUuid") String requisicaoUuid)
+  {
+
+      final var query = new GetRequisicaoPdfQuery(uuid, tipoProcesso, requisicaoUuid);
+
+      return queryBus.handle(query);
+
+  }
+
 }

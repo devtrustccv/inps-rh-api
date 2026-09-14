@@ -8,6 +8,72 @@ Base de todos os endpoints: `/api/v1/missao-servico`
 
 ---
 
+## 2026-09-14 — Emissão de Requisição, por processo (Fase 5)
+
+Uma **requisição por prestador**, com N colaboradores. Só existe em `BILHETE_PASSAGEM` e `ALOJAMENTO`.
+
+| Ecrã | Método | Path |
+|---|---|---|
+| Carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/requisicoes` |
+| Gravar / Avançar | `PUT` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/requisicoes` |
+| Extrair Requisição (PDF) | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/requisicoes/{requisicaoUuid}/pdf` |
+
+**GET** — um item por prestador activo do processo:
+```jsonc
+{
+  "processo": { "tipoProcesso": "BILHETE_PASSAGEM", "etapa": "EMISSAO_REQUISICAO" },
+  "requisicoes": [
+    { "missaoPrestUuid": "…", "nomePrestador": "Halcyon Viagens", "selecionado": true,
+      "requisicaoUuid": "…", "nrRequisicao": 3, "anoRequisicao": 2026, "notaEncomenda": "RMS-2026/3",
+      "valorTotal": 105000,
+      "colaboradores": [ { "uuid": "…", "funUuid": "…", "nomeColaborador": "Wilson Cabral Tavares" } ],
+      "proposta": { "id": 12, "tipoDocumentoId": 20, "documento": "proposta.pdf" },
+      "documentoRequisicao": { "id": 13, "documento": "…_requisicao_RMS-2026-3.pdf" } },   // só depois do NEXT
+    { "missaoPrestUuid": "…", "nomePrestador": "Cabo Verde Travel", "selecionado": false, "colaboradores": [] }
+  ],
+  "colaboradoresMissao": [ { "uuid": "…", "funUuid": "…", "nomeColaborador": "…" } ]
+}
+```
+
+**PUT**
+```jsonc
+{
+  "requisicoes": [
+    { "missaoPrestUuid": "…", "selecionado": true,
+      "funcionarioUuids": ["<funUuid>", "<funUuid>"],        // uuid do FUNCIONÁRIO (colaboradoresMissao[].funUuid)
+      "valorTotal": 105000,                                  // null = não mexer
+      "proposta": { "tipoDocumentoId": 20, "documento": "proposta.pdf" } }
+  ],
+  "processoEtapaAction": "NEXT"
+}
+```
+→ `{ "id": "<processoUuid>", "etapa": "LOGISTICA" }`
+
+- **Nº de requisição:** gerado na primeira gravação, sequencial dentro do ano e fixo daí em diante. Aparece no PDF como `RMS-{ano}/{nr}`.
+- **Prestador sem `selecionado: true`:** a requisição dele passa a inactiva.
+- **Colaboradores:** um colaborador só pode estar numa requisição de cada processo.
+- **`NEXT`:**
+  - gera o PDF da nota de encomenda e guarda-o (aparece em `documentoRequisicao`);
+  - envia email ao prestador (principal e emails adicionais);
+  - avança para `LOGISTICA`.
+- ⚠️ **O email segue sem o PDF anexado.** O serviço de correio (`sipsv0.SEND_MAIL_V1`) não suporta anexos; o PDF fica disponível para descarregar.
+- **Extrair:** gera o PDF com os dados actuais. Funciona antes do `NEXT`, como pré-visualização.
+- **PDF:** lista "{tipo} a favor de {colaborador}" e o **total** da requisição, também por extenso. Não há valor por linha, porque o modelo de dados só guarda o total.
+
+**Erros**
+
+| Situação | Resposta |
+|---|---|
+| Prestador que não está seleccionado no processo | **400** |
+| Requisição sem colaboradores | **400** |
+| Colaborador que não pertence à missão | **400** |
+| Colaborador já associado a outra requisição do mesmo processo | **400** |
+| `NEXT` sem nenhum prestador seleccionado | **400** |
+| Retirar uma requisição que já seguiu para a logística | **400** |
+| PDF de uma requisição que não pertence ao processo | **404** |
+
+---
+
 ## 2026-09-14 — Etapa Prestadores Serviço, por processo (Fase 4)
 
 Substitui o ecrã **Análise**. É executada **por processo** e só existe em `BILHETE_PASSAGEM` e `ALOJAMENTO`.

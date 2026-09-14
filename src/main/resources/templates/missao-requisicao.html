@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Nota de Encomenda</title>
+    <style>
+        @page { size: A4; margin: 20mm 18mm; }
+        body { font-family: "Times New Roman", serif; font-size: 12px; line-height: 1.4; }
+        .topo { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+        .topo td { vertical-align: top; }
+        .instituicao { font-weight: bold; font-size: 13px; }
+        .titulo { text-align: right; }
+        .titulo .nota { font-size: 15px; font-weight: bold; }
+        .bloco { margin-bottom: 14px; }
+        .rotulo { font-weight: bold; }
+        table.linhas { width: 100%; border-collapse: collapse; margin: 10px 0 6px; }
+        table.linhas th, table.linhas td { border: 1px solid #000; padding: 5px 6px; }
+        table.linhas th { background: #e6e6e6; text-align: left; }
+        .valor { text-align: right; white-space: nowrap; }
+        .total td { font-weight: bold; }
+        .extenso { margin: 8px 0 26px; }
+        .assinaturas { width: 100%; margin-top: 40px; border-collapse: collapse; }
+        .assinaturas td { width: 50%; text-align: center; vertical-align: bottom; padding: 0 12px; }
+        .linha-assinatura { border-top: 1px solid #000; margin-top: 46px; padding-top: 4px; }
+    </style>
+</head>
+<body>
+
+<table class="topo">
+    <tr>
+        <td>
+            <div class="instituicao" th:text="${nomeInstituicao}">Instituto Nacional de Previdência Social</div>
+            <div>NIF: <span th:text="${nifInstituicao}">000000000</span></div>
+        </td>
+        <td class="titulo">
+            <div>NOTA DE ENCOMENDA</div>
+            <div class="nota" th:text="${notaEncomenda}">RMS-2026/1</div>
+            <div th:text="${localData}">Praia, aos 14 de setembro de 2026</div>
+        </td>
+    </tr>
+</table>
+
+<div class="bloco">
+    <div><span class="rotulo">Requisita-se ao:</span> <span th:text="${prestadorNome}">Prestador</span></div>
+    <div><span class="rotulo">NIF:</span> <span th:text="${prestadorNif}">—</span></div>
+    <div><span class="rotulo">Endereço:</span> <span th:text="${prestadorMorada}">—</span></div>
+    <div><span class="rotulo">Missão de Serviço N.º:</span> <span th:text="${nrMissao}">1/2026</span></div>
+</div>
+
+<table class="linhas">
+    <thead>
+    <tr>
+        <th>Descrição</th>
+        <th class="valor">Valor</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="linha : ${linhas}">
+        <td th:text="${linha}">Bilhete Passagem a favor de Colaborador</td>
+        <td class="valor"></td>
+    </tr>
+    <tr class="total">
+        <td>Total da Requisição</td>
+        <td class="valor" th:text="${total}">0,00 CVE</td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="extenso">
+    <span class="rotulo">São:</span> <span th:text="${totalExtenso}">zero escudos</span>
+</div>
+
+<table class="assinaturas">
+    <tr>
+        <td>
+            <div>Elaborado por</div>
+            <div class="linha-assinatura" th:text="${elaboradoPor}">—</div>
+        </td>
+        <td>
+            <div>Aprovado por</div>
+            <div class="linha-assinatura" th:text="${aprovadoPor}">—</div>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

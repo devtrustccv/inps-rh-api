@@ -338,6 +338,20 @@ ALTER TABLE RH_T_MISSAO_LOGISTICA MODIFY (MISSAO_PREST_ID NULL)
 /
 
 
+-- -----------------------------------------------------------------------------
+-- 12. RH_T_MISSAO_REQUISICAO — uma requisição por prestador
+--
+-- Os colaboradores passam para RH_T_MISSAO_REQUISICAO_COLAB, por isso
+-- MISSAO_COLAB_ID deixa de ser obrigatório (removido no script de limpeza).
+-- Com uma linha por prestador, o nº de requisição passa a ser único no ano.
+-- A tabela estava vazia quando isto foi aplicado.
+-- -----------------------------------------------------------------------------
+ALTER TABLE RH_T_MISSAO_REQUISICAO MODIFY (MISSAO_COLAB_ID NULL)
+/
+CREATE UNIQUE INDEX UX_MISSAO_REQUIS_NR_ANO ON RH_T_MISSAO_REQUISICAO (ANO, NR_REQUISACAO) TABLESPACE TBSINPSDB
+/
+
+
 -- =============================================================================
 -- Verificação
 -- =============================================================================

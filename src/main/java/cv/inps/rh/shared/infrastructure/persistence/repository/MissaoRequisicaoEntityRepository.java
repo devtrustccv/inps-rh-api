@@ -22,6 +22,9 @@ public interface MissaoRequisicaoEntityRepository extends
 
   boolean existsByMissaoPrestId_IdAndEstado(Long missaoPrestId, String estado);
 
+  /** Requisições de um processo da missão (uma por prestador). */
+  List<MissaoRequisicaoEntity> findAllByMissaoPrestId_MissaoProcessoId_IdOrderByIdAsc(Long missaoProcessoId);
+
   @Query("select max(r.nrRequisacao) from MissaoRequisicaoEntity r where r.ano = :ano")
   Long findMaxNrRequisacaoByAno(@Param("ano") Integer ano);
 

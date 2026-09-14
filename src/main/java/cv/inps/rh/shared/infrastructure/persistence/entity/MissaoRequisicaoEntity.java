@@ -32,9 +32,10 @@ public class MissaoRequisicaoEntity extends AuditEntity {
     @JoinColumn(name = "missao_prest_id", referencedColumnName = "id", nullable = false)
     private MissaoPrestadorEntity missaoPrestId;
 
-    @NotNull(message = "missaoColabId is mandatory")
+    // Modelo antigo (uma linha por colaborador). No modelo por processo os colaboradores estão em
+    // RH_T_MISSAO_REQUISICAO_COLAB e esta coluna fica a null.
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "missao_colab_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "missao_colab_id", referencedColumnName = "id")
     private MissaoColaboradorEntity missaoColabId;
 
     // Sequencial dentro do ano, o mesmo para todas as linhas do mesmo prestador
