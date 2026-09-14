@@ -9,7 +9,6 @@ import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import org.javers.spring.annotation.JaversSpringDataAuditable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -28,9 +27,7 @@ import java.util.UUID;
 // como nos restantes repositórios auditados (DefinicaoRemuneracao, DefPagamento, Contacto, ...).
 @JaversSpringDataAuditable
 @Repository
-public interface TiposRelacionamentoEntityRepository extends
-    JpaRepository<TiposRelacionamentoEntity, Long>,
-    JpaSpecificationExecutor<TiposRelacionamentoEntity> {
+public interface TiposRelacionamentoEntityRepository extends JpaRepository<TiposRelacionamentoEntity, Long>, JpaSpecificationExecutor<TiposRelacionamentoEntity> {
 
   /**
    * Tiprel CORRENTE deste contrato (est_act_adm=1). Um contrato pode ter vários tiprels ao longo do
@@ -63,77 +60,12 @@ public interface TiposRelacionamentoEntityRepository extends
 
   boolean existsByMobId_SecaoId(SecaoEntity section);
 
-  // Tiprel que introduziu esta mobilidade (o mais antigo que a referencia). O seu TIPREL_ID (pai)
-  // aponta para o vínculo anterior, cujo MOB_ID é a mobilidade "antes". Usado no detalhe/editar.
-  Optional<TiposRelacionamentoEntity> findFirstByMobId_IdOrderByIdAsc(Long mobId);
-
-  // Todos os tiprels que referenciam esta mobilidade. Um mob pode aparecer em mais de um tiprel
-  // (ex.: a carreira faz snapshot do mob do atual ao criar o seu contentor e, ao validar depois,
-  // herda o mob novo). Usado no detalhe para achar o que INTRODUZIU a mobilidade — aquele cujo
-  // pai/tiprelId tem um mob DIFERENTE (o mob do pai é o "antes").
-  List<TiposRelacionamentoEntity> findAllByMobId_Id(Long mobId);
-
-  boolean existsByFunIdAndEstadoAndFlgProcessa(FuncionarioEntity funId, Estado estado, Integer flgProcessa);
-
-  // Igual ao anterior mas exclui um registo (o vínculo que está a ser fechado/substituído numa progressão).
-  boolean existsByFunIdAndEstadoAndFlgProcessaAndIdNot(FuncionarioEntity funId, Estado estado, Integer flgProcessa, Long id);
-
-  /** Existe OUTRO vínculo EM VIGOR (data_fim null) validado e a processar salário? (regra: só 1 processa). */
-  boolean existsByFunIdAndEstadoAndFlgProcessaAndDataFimIsNullAndIdNot(FuncionarioEntity funId, Estado estado, Integer flgProcessa, Long id);
-
   Optional<TiposRelacionamentoEntity> findByUuid(UUID uuid);
 
   default TiposRelacionamentoEntity findByUuidOrThrow(UUID uuid) {
     return this.findByUuid(uuid).orElseThrow(
         () -> IgrpResponseStatusException
             .notFound("TiposRelacionamentoEntity not found for id: " + uuid));
-  }
-
-  @Query("""
-      select t
-      from TiposRelacionamentoEntity t
-      left join fetch t.mobId m
-      left join fetch m.instidId inst
-      where t.estActAdm = 1
-        and t.funId.uuid in :funcionarioUuids
-      """)
-  List<TiposRelacionamentoEntity> findAtuaisByFuncionarioUuids(@Param("funcionarioUuids") List<UUID> funcionarioUuids);
-
-  TiposRelacionamentoEntity findByFunIdAndEstadoAndDataFimIsNull(FuncionarioEntity funcionario, Estado estado);
-
-  @Query("""
-      select t
-      from TiposRelacionamentoEntity t
-      left join fetch t.contrVinculoId c
-      left join fetch c.tpContratoId
-      left join fetch c.vinculoId
-      left join fetch t.situacLaboralId sl
-      left join fetch sl.situacaoLaboralId
-      left join fetch t.cargoId
-      left join fetch t.mobId m
-      left join fetch m.instidId
-      left join fetch m.secaoId
-      left join fetch m.localTrabId
-      left join fetch t.carreiraId car
-      left join fetch car.carrPccsId
-      left join fetch car.categoriaId
-      left join fetch car.escalaoId
-      left join fetch t.regimeId
-      where car.uuid = :carreiraUuid
-        and t.estActAdm = 1
-      order by t.dataInicio desc
-      """)
-  List<TiposRelacionamentoEntity> findAtivaByCarreiraUuid(@Param("carreiraUuid") UUID carreiraUuid,
-      Pageable pageable);
-
-  /**
-   * Devolve a relação laboral ativa (estActAdm = 1) associada à carreira. Uma carreira pode ter
-   * várias relações associadas; devolve-se apenas a ativa e, em empate, a de dataInicio mais
-   * recente. Retorna {@code null} quando não existe relação ativa para a carreira.
-   */
-  default TiposRelacionamentoEntity findByCarreiraId_uuid(UUID carreiraId) {
-    var resultados = findAtivaByCarreiraUuid(carreiraId, PageRequest.of(0, 1));
-    return resultados.isEmpty() ? null : resultados.get(0);
   }
 
   /**
@@ -143,8 +75,10 @@ public interface TiposRelacionamentoEntityRepository extends
    */
   Optional<TiposRelacionamentoEntity> findFirstByCarreiraId_UuidOrderByIdDesc(UUID carreiraUuid);
 
-  /** Movimento (tiprel) derivado de {@code tiprelId} num dado estado — usado para detetar uma
-   *  alteração de escalão/cargo (Gestão Laboral) ainda pendente sobre o tiprel atual. */
+  /**
+   * Movimento (tiprel) derivado de {@code tiprelId} num dado estado — usado para detetar uma
+   * alteração de escalão/cargo (Gestão Laboral) ainda pendente sobre o tiprel atual.
+   */
   Optional<TiposRelacionamentoEntity> findFirstByTiprelId_IdAndEstado(Long tiprelId, Estado estado);
 
   @Query("""
@@ -302,8 +236,10 @@ public interface TiposRelacionamentoEntityRepository extends
       @Param("funUuid") UUID funUuid,
       @Param("contratoUuid") UUID contratoUuid);
 
-  /** Tiprel do contrato por TIPO_SITUACAO (ex.: 'INICIO' para a vista "Ver Informação Inicial").
-   *  ORDER BY id para escolher o 1º de forma determinística caso exista mais que um. */
+  /**
+   * Tiprel do contrato por TIPO_SITUACAO (ex.: 'INICIO' para a vista "Ver Informação Inicial").
+   * ORDER BY id para escolher o 1º de forma determinística caso exista mais que um.
+   */
   @Query("""
       select tr
       from TiposRelacionamentoEntity tr
@@ -345,33 +281,8 @@ public interface TiposRelacionamentoEntityRepository extends
         SECCAO_ID AS seccaoId,
         CARREIRA_DESC AS carreiraDesc,
         CARREIRA_ID AS carreiraId,
-        ESCALAO_DESC AS escalaoDesc,
-        ESCALAO_ID AS escalaoId,
-        DATA_CARREIRA AS dataCarreira,
-        DATA_CONTRATO AS dataContrato,
-        CARGO_DESC AS cargoDesc,
-        CARGO_ID AS cargoId,
-        SITUACAO_LABORAL_DESC AS situacaoLaboralDesc,
-        SITUACAO_LABORAL_ID AS situacaoLaboralId
-      FROM RH_V_RELACAO_LABORAL
-      """, nativeQuery = true)
-  List<RelacaoLaboralView> relacaoLaboralFromView();
-
-  @Query(value = """
-      SELECT
-        FUNCIONARIO_UUID AS funcionarioUuid,
-        CONTRATO_DESC AS contratoDesc,
-        CONTRATO_ID AS contratoId,
-        VINCULO_DESC AS vinculoDesc,
-        VINCULO_ID AS vinculoId,
-        DIRECAO_DESC AS direcaoDesc,
-        DIRECAO_ID AS direcaoId,
-        SECCAO_DESC AS seccaoDesc,
-        SECCAO_ID AS seccaoId,
-        CARREIRA_DESC AS carreiraDesc,
-        CARREIRA_ID AS carreiraId,
         CARREIRA_UUID AS carreiraUuid,
-        EST_ACT_ADM as situacaoAtual,
+        EST_ACT_ADM AS situacaoAtual,
         ESCALAO_DESC AS escalaoDesc,
         ESCALAO_ID AS escalaoId,
         FLG_SALARIO AS flgSalario,
@@ -389,6 +300,6 @@ public interface TiposRelacionamentoEntityRepository extends
         AND (:situacaoAtual IS NULL OR EST_ACT_ADM = :situacaoAtual)
       """, nativeQuery = true)
   List<RelacaoLaboralView> relacaoLaboralFromViewByFuncionario(@Param("funcionarioUuid") String funcionarioUuid,
-      @Param("situacaoAtual") Integer situacaoAtual);
+                                                               @Param("situacaoAtual") Integer situacaoAtual);
 
 }

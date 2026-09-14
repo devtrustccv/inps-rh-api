@@ -18,31 +18,32 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-
 @IgrpDTO
-public class BaixaMedicaReqDTO  {
+public class BaixaMedicaReqDTO {
 
 
-  private UUID colaborador ;
+  private UUID colaborador;
 
 
-  private Long tipoLicenca ;
+  private Long tipoLicenca;
 
 
-  private Long motivo ;
+  private Long motivo;
 
 
-  private LocalDate dataInicio ;
+  private LocalDate dataInicio;
 
 
-  private LocalDate dataFim ;
+  private LocalDate dataFim;
 
 
-  private LocalDate dataInicioFalta ;
+  private LocalDate dataInicioFalta;
 
 
-  private String observacao ;
+  private String observacao;
+
+  @Valid
+  private List<PeriodoLicensaRowDTO> periodos = new ArrayList<>();
 
   @Valid
   private List<AnexoReqDTO> documentos = new ArrayList<>();

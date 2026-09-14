@@ -1,24 +1,12 @@
 {
-  "name": "ResponsavelResponse",
+  "name": "PeriodoLicensaRow",
   "template": "classic",
   "attributes": [
     {
-      "name": "responsavelId",
-      "type": "long",
-      "objectType": "java",
-      "required": false,
-      "before": false,
-      "after": false,
-      "positive": false,
-      "isEmail": false,
-      "isUrl": false,
-      "primaryKey": false
-    },
-    {
-      "name": "seccao",
+      "name": "continuidade",
       "type": "string",
       "objectType": "java",
-      "required": false,
+      "required": true,
       "before": false,
       "after": false,
       "positive": false,
@@ -27,10 +15,10 @@
       "primaryKey": false
     },
     {
-      "name": "seccaoId",
-      "type": "string",
+      "name": "dataInicio",
+      "type": "date",
       "objectType": "java",
-      "required": false,
+      "required": true,
       "before": false,
       "after": false,
       "positive": false,
@@ -39,10 +27,10 @@
       "primaryKey": false
     },
     {
-      "name": "email",
-      "type": "string",
+      "name": "dataFim",
+      "type": "date",
       "objectType": "java",
-      "required": false,
+      "required": true,
       "before": false,
       "after": false,
       "positive": false,
@@ -51,7 +39,7 @@
       "primaryKey": false
     },
     {
-      "name": "funcionarioId",
+      "name": "id",
       "type": "string",
       "objectType": "java",
       "required": false,
@@ -64,8 +52,8 @@
     }
   ],
   "type": "dto",
-  "module": "configuracao",
+  "module": "processamento",
   "enableCustonValidation": false,
-  "readOnly": true,
-  "id": "nnlywao0ll"
+  "readOnly": false,
+  "id": "new-action-Contract"
 }

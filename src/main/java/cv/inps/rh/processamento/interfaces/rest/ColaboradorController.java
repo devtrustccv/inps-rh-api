@@ -252,9 +252,9 @@ public class ColaboradorController {
     public ResponseEntity<String> validarBaixaMedica(
         @Valid @RequestBody BaixaMedicaReqDTO validarBaixaMedicaRequest,
         @RequestParam(value = "validar") String validar,
-        @PathVariable(value = "pedidoId") String pedidoId
+        @PathVariable(value = "abonoId") String abonoId
     ) {
-        final var command = new ValidarBaixaMedicaCommand(validarBaixaMedicaRequest, validar, pedidoId);
+      final var command = new ValidarBaixaMedicaCommand(validarBaixaMedicaRequest, validar, abonoId);
 
         return commandBus.send(command);
     }

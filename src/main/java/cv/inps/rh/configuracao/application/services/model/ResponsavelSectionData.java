@@ -3,7 +3,7 @@ package cv.inps.rh.configuracao.application.services.model;
 import java.util.UUID;
 
 public record ResponsavelSectionData(
-    UUID secaoId,
+    Long seccaoId,
     String secaoNome,
     Long responsavelId,
     UUID funcionarioId,

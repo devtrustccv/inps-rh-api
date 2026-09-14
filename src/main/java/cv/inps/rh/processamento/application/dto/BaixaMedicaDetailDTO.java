@@ -4,15 +4,15 @@
 package cv.inps.rh.processamento.application.dto;
 
 import cv.igrp.framework.stereotype.IgrpDTO;
-import cv.inps.rh.processamento.application.dto.BaixaMedicaCalculoDTO;
 import cv.inps.rh.shared.application.constants.Estado;
-import jakarta.validation.*;
-import jakarta.validation.constraints.*;
-import java.time.LocalDate;
-import java.util.UUID;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -20,40 +20,42 @@ import lombok.NoArgsConstructor;
 @IgrpDTO
 public class BaixaMedicaDetailDTO {
 
-    private String estadodesc;
+  private String estadodesc;
 
-    private Estado estado;
+  private Estado estado;
 
-    private String direcao;
+  private String direcao;
 
-    private String seccao;
+  private String seccao;
 
-    private String nome;
+  private String nome;
 
-    private UUID uuidFuncionario;
+  private UUID uuidFuncionario;
 
-    private String vinculo;
+  private String vinculo;
 
-    private String categoria;
+  private String categoria;
 
-    private Long tipoLicensaId;
+  private Long tipoLicensaId;
 
-    private String tipoLicensaNome;
+  private String tipoLicensaNome;
 
-    private Long motivoId;
+  private Long motivoId;
 
-    private String motivoNome;
+  private String motivoNome;
 
-    private LocalDate dataInicio;
+  private LocalDate dataInicio;
 
-    private LocalDate dataFim;
+  private LocalDate dataFim;
 
-    private UUID id;
+  private UUID id;
 
-    @Valid
-    private BaixaMedicaCalculoDTO calculo;
+  @Valid
+  private BaixaMedicaCalculoDTO calculo;
 
-    private Long relacionamentoId;
+  private Long relacionamentoId;
 
-    private Long paramSitId;
+  private Long paramSitId;
+
+  private List<PeriodoLicensaRowDTO> periodos;
 }
