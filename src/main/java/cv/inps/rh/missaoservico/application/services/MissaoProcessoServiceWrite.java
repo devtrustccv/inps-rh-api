@@ -5,6 +5,8 @@ import cv.igrp.platform.filemanager.StorageService;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.commands.SaveProcessoPrestadoresCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveAvaliacaoPrestadorCommand;
+import cv.inps.rh.missaoservico.application.commands.SaveProcessoAutorizacaoCommand;
+import cv.inps.rh.missaoservico.application.commands.SaveProcessoCabimentoCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveProcessoLogisticaCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveProcessoParecerCommand;
 import cv.inps.rh.missaoservico.application.constants.Parecer;
@@ -77,6 +79,7 @@ public class MissaoProcessoServiceWrite {
   private final EntidadeEntityRepository entidadeRepository;
   private final MissaoProcessoDetEntityRepository missaoProcessoDetRepository;
   private final MissaoPrestadorAvalEntityRepository missaoPrestadorAvalRepository;
+  private final MissaoServicoEntityRepository missaoServicoRepository;
 
   // ---------------------------------------------------------------------------------------------
   // Etapa Prestadores Serviço
@@ -1143,6 +1146,145 @@ public class MissaoProcessoServiceWrite {
         "id", avaliacao.getUuid().toString(),
         "total", total,
         "designacao", avaliacao.getDesignacao()));
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Etapas Cabimento e Autorização
+  // ---------------------------------------------------------------------------------------------
+
+  private static final String ESTADO_CABIMENTADO = "CABIMENTADO";
+  private static final String ESTADO_AUTORIZADO = "AUTORIZADO";
+  private static final String ESTADO_MISSAO_FINALIZADA = "FINALIZADO";
+
+  /**
+   * Cabimentação das linhas do processo. SAVE grava anexos e nº de cabimento manual; NEXT (Cabimentar)
+   * marca as linhas seleccionadas como CABIMENTADO e só avança para Autorização quando todas as linhas
+   * activas estão cabimentadas — não há autorização parcial.
+   *
+   * <p>O nº de cabimento do SGAL não é gerado (integração sem contrato); os cabimentos manuais e
+   * internacionais podem enviar o {@code cabId}.
+   */
+  @Transactional
+  public ResponseEntity<Map<String, ?>> salvarCabimento(SaveProcessoCabimentoCommand command) {
+    var missaoUuid = IdentificadorUnico.from(command != null ? command.getUuid() : null).valor();
+    var dto = command.getProcessocabimentorequest();
+    if (dto == null) {
+      throw IgrpResponseStatusException.badRequest("Payload inválido");
+    }
+
+    var processo = support.processo(missaoUuid, command.getTipoProcesso(), true);
+    var avancar = support.isNext(dto.getProcessoEtapaAction());
+    guard.exigirEtapa(processo, EtapaProcesso.CABIMENTO, avancar);
+    if (avancar && !EtapaProcesso.CABIMENTO.name().equals(processo.getEtapa())) {
+      throw IgrpResponseStatusException.badRequest(
+          "O cabimento só pode ser confirmado com o processo na etapa CABIMENTO (etapa actual: " + processo.getEtapa() + ")");
+    }
+
+    var linhas = linhasAtivas(processo);
+    var porUuid = new HashMap<UUID, MissaoLogisticaEntity>();
+    linhas.forEach(l -> porUuid.put(l.getUuid(), l));
+
+    var toSave = new LinkedHashSet<MissaoLogisticaEntity>();
+    for (var item : dto.getItens() == null ? List.<cv.inps.rh.missaoservico.application.dto.ProcessoCabimentoItemRequestDTO>of() : dto.getItens()) {
+      if (item == null)
+        continue;
+      if (item.getLogisticaUuid() == null) {
+        throw IgrpResponseStatusException.badRequest("logisticaUuid é obrigatório");
+      }
+      var linha = porUuid.get(item.getLogisticaUuid());
+      if (linha == null) {
+        throw IgrpResponseStatusException.badRequest("A linha " + item.getLogisticaUuid() + " não pertence a este processo");
+      }
+      if (item.getCabId() != null && !Objects.equals(item.getCabId(), linha.getCabId())) {
+        if (ESTADO_AUTORIZADO.equals(linha.getEstadoCabimento())) {
+          throw IgrpResponseStatusException.badRequest("A linha " + linha.getUuid() + " já foi autorizada e o nº de cabimento não pode mudar");
+        }
+        linha.setCabId(item.getCabId());
+      }
+      if (avancar && Boolean.TRUE.equals(item.getSelecionado()) && linha.getEstadoCabimento() == null) {
+        if (linha.getCabId() == null) {
+          LOGGER.warn("Integração SGAL pendente: cabimento não gerado para a linha de logística {}", linha.getUuid());
+        }
+        linha.setEstadoCabimento(ESTADO_CABIMENTADO);
+      }
+      if (item.getAnexo() != null) {
+        sincronizarAnexo(TableName.RH_T_MISSAO_LOGISTICA.name(), linha.getId(), linha.getUuid(), item.getAnexo());
+      }
+      toSave.add(linha);
+    }
+    if (!toSave.isEmpty()) {
+      missaoLogisticaRepository.saveAll(toSave);
+    }
+
+    if (avancar) {
+      var porCabimentar = linhas.stream().filter(l -> l.getEstadoCabimento() == null).count();
+      if (linhas.isEmpty() || porCabimentar > 0) {
+        throw IgrpResponseStatusException.badRequest(linhas.isEmpty()
+            ? "O processo não tem linhas de logística para cabimentar"
+            : "Faltam cabimentar " + porCabimentar + " linha(s) do processo — seleccione todas para confirmar o cabimento");
+      }
+      guard.avancarApos(processo, EtapaProcesso.CABIMENTO);
+      missaoProcessoRepository.save(processo);
+    }
+
+    return ResponseEntity.ok(Map.of(
+        "id", processo.getUuid().toString(),
+        "etapa", processo.getEtapa()));
+  }
+
+  /**
+   * Autorização dos cabimentos do processo. NEXT põe todas as linhas cabimentadas em AUTORIZADO e o
+   * processo em PAGAMENTO; quando todos os processos activos da missão lá chegam, a missão fica
+   * FINALIZADO (spec). SAVE não altera nada — o ecrã não tem campos.
+   */
+  @Transactional
+  public ResponseEntity<Map<String, ?>> salvarAutorizacao(SaveProcessoAutorizacaoCommand command) {
+    var missaoUuid = IdentificadorUnico.from(command != null ? command.getUuid() : null).valor();
+    var dto = command.getProcessoetapaactionrequest();
+
+    var processo = support.processo(missaoUuid, command.getTipoProcesso(), true);
+    var missao = processo.getMissaoServId();
+    var avancar = dto != null && support.isNext(dto.getProcessoEtapaAction());
+    guard.exigirEtapa(processo, EtapaProcesso.AUTORIZACAO, avancar);
+
+    if (avancar) {
+      if (!EtapaProcesso.AUTORIZACAO.name().equals(processo.getEtapa())) {
+        throw IgrpResponseStatusException.badRequest(
+            "A autorização só pode ser confirmada com o processo na etapa AUTORIZACAO (etapa actual: " + processo.getEtapa() + ")");
+      }
+      var linhas = linhasAtivas(processo);
+      if (linhas.stream().anyMatch(l -> l.getEstadoCabimento() == null)) {
+        throw IgrpResponseStatusException.badRequest("Há linhas do processo sem cabimento");
+      }
+      linhas.forEach(l -> l.setEstadoCabimento(ESTADO_AUTORIZADO));
+      missaoLogisticaRepository.saveAll(linhas);
+
+      guard.avancarApos(processo, EtapaProcesso.AUTORIZACAO);
+      missaoProcessoRepository.save(processo);
+      finalizarMissaoSeConcluida(missao);
+    }
+
+    return ResponseEntity.ok(Map.of(
+        "id", processo.getUuid().toString(),
+        "etapa", processo.getEtapa(),
+        "estadoMissao", missao.getEstado()));
+  }
+
+  private List<MissaoLogisticaEntity> linhasAtivas(MissaoProcessoEntity processo) {
+    return missaoLogisticaRepository.findAllByMissaoProcessoId_IdOrderByIdAsc(processo.getId()).stream()
+        .filter(l -> ESTADO_ATIVO.equals(l.getEstado()))
+        .toList();
+  }
+
+  /** Missão FINALIZADO quando todos os processos activos chegaram a PAGAMENTO (os inactivos não contam). */
+  private void finalizarMissaoSeConcluida(MissaoServicoEntity missao) {
+    var ativos = missaoProcessoRepository.findAllByMissaoServId_UuidOrderByIdAsc(missao.getUuid()).stream()
+        .filter(p -> ESTADO_ATIVO.equals(p.getEstado()))
+        .toList();
+    if (!ativos.isEmpty() && ativos.stream().allMatch(p -> EtapaProcesso.PAGAMENTO.name().equals(p.getEtapa()))) {
+      missao.setEstado(ESTADO_MISSAO_FINALIZADA);
+      missaoServicoRepository.save(missao);
+    }
   }
 
   // ---------------------------------------------------------------------------------------------

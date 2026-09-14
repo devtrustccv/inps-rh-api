@@ -437,4 +437,126 @@ public class MissaoProcessoController {
 
   }
 
+   @GetMapping(
+   value = "{uuid}/processos/{tipoProcesso}/cabimento"
+  )
+  @Operation(
+    summary = "Get cabimento do processo",
+    description = "Get cabimento do processo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ProcessoCabimentoResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<ProcessoCabimentoResponseDTO> getProcessoCabimento(
+    @PathVariable(value = "uuid") String uuid,
+    @PathVariable(value = "tipoProcesso") String tipoProcesso)
+  {
+
+      final var query = new GetProcessoCabimentoQuery(uuid, tipoProcesso);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "{uuid}/processos/{tipoProcesso}/cabimento"
+  )
+  @Operation(
+    summary = "Save cabimento do processo",
+    description = "Save cabimento do processo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<Map<String, ?>> saveProcessoCabimento(@Valid @RequestBody ProcessoCabimentoRequestDTO saveProcessoCabimentoRequest
+    , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso)
+  {
+
+      final var command = new SaveProcessoCabimentoCommand(saveProcessoCabimentoRequest, uuid, tipoProcesso);
+
+      return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "{uuid}/processos/{tipoProcesso}/autorizacao"
+  )
+  @Operation(
+    summary = "Get autorizacao do processo",
+    description = "Get autorizacao do processo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ProcessoCabimentoResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<ProcessoCabimentoResponseDTO> getProcessoAutorizacao(
+    @PathVariable(value = "uuid") String uuid,
+    @PathVariable(value = "tipoProcesso") String tipoProcesso)
+  {
+
+      final var query = new GetProcessoCabimentoQuery(uuid, tipoProcesso);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "{uuid}/processos/{tipoProcesso}/autorizacao"
+  )
+  @Operation(
+    summary = "Save autorizacao do processo",
+    description = "Save autorizacao do processo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<Map<String, ?>> saveProcessoAutorizacao(@Valid @RequestBody ProcessoEtapaActionRequestDTO saveProcessoAutorizacaoRequest
+    , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso)
+  {
+
+      final var command = new SaveProcessoAutorizacaoCommand(saveProcessoAutorizacaoRequest, uuid, tipoProcesso);
+
+      return commandBus.send(command);
+
+  }
+
 }

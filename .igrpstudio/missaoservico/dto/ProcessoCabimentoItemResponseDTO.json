@@ -1,0 +1,20 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ProcessoCabimentoItemResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "logisticaUuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "referencia", "type": "string", "objectType": "java", "required": false },
+    { "name": "nome", "type": "string", "objectType": "java", "required": false },
+    { "name": "valorTotal", "type": "decimal", "objectType": "java", "required": false },
+    { "name": "moeda", "type": "string", "objectType": "java", "required": false },
+    { "name": "cabId", "type": "long", "objectType": "java", "required": false },
+    { "name": "estadoCabimento", "type": "string", "objectType": "java", "required": false },
+    { "name": "colaboradores", "type": "MissaoLogisticaDetResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "documento", "type": "AnexoResp", "objectType": "dto", "required": false, "module": "shared" }
+  ],
+  "id": "msvdto28cabitemresp"
+}

@@ -8,6 +8,64 @@ Base de todos os endpoints: `/api/v1/missao-servico`
 
 ---
 
+## 2026-09-14 — Cabimentação e Autorização, por processo (Fase 9)
+
+| Ecrã | Método | Path |
+|---|---|---|
+| Cabimentação — carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/cabimento` |
+| Cabimentação — gravar / cabimentar | `PUT` | idem |
+| Autorização — carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/autorizacao` |
+| Autorização — autorizar | `PUT` | idem |
+
+Os dois `GET` devolvem a mesma estrutura:
+```jsonc
+{
+  "processo": { "tipoProcesso": "BILHETE_PASSAGEM", "etapa": "CABIMENTO" },
+  "estadoMissao": "A",
+  "valorTotal": 180000,
+  "itens": [
+    { "logisticaUuid": "…", "referencia": "BILHETE_PASSAGEM", "nome": "Halcyon Viagens",
+      "valorTotal": 90000, "moeda": "CVE", "cabId": null, "estadoCabimento": null,
+      "colaboradores": [ { "nomeColaborador": "…" } ], "documento": { … } }
+  ]
+}
+```
+Na coluna `nome` aparece o **prestador** (bilhete e alojamento), a **seguradora** (seguro) ou o **colaborador** (ajuda de custo).
+
+**PUT Cabimentação**
+```jsonc
+{ "itens": [ { "logisticaUuid": "…", "selecionado": true,
+               "cabId": null,                                   // só em cabimento manual/internacional
+               "anexo": { "tipoDocumentoId": 21, "documento": "nota_transferencia.pdf" } } ],
+  "processoEtapaAction": "NEXT" }
+```
+
+**PUT Autorização** — sem campos:
+```jsonc
+{ "processoEtapaAction": "NEXT" }
+```
+→ `{ "id": "…", "etapa": "PAGAMENTO", "estadoMissao": "FINALIZADO" }`
+
+| Acção | Efeito |
+|---|---|
+| Cabimentação `SAVE` | Grava anexos e `cabId` manual; não muda estados |
+| Cabimentação `NEXT` | Linhas seleccionadas → `CABIMENTADO`. Só avança para `AUTORIZACAO` com **todas** as linhas cabimentadas; se faltar alguma → **400** |
+| Autorização `SAVE` | Não faz nada |
+| Autorização `NEXT` | **Todas** as linhas → `AUTORIZADO`; processo → `PAGAMENTO` |
+| Último processo activo a chegar a `PAGAMENTO` | Missão `estado: "FINALIZADO"` |
+
+- ✅ **Acabou a autorização parcial:** o `NEXT` exige todas as linhas.
+- ⚠️ **`cabId` continua `null`:** a integração com o SGAL ainda não existe.
+- **Erros:**
+
+| Situação | Resposta |
+|---|---|
+| Linha que não pertence ao processo | **400** |
+| Alterar o `cabId` de uma linha já autorizada | **400** |
+| `NEXT` fora da etapa | **400** |
+
+---
+
 ## 2026-09-14 — Validação UGAL, Aprovação RH e Avaliar Prestador (Fases 7–8)
 
 ### Pareceres

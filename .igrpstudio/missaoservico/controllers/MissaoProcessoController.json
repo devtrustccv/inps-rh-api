@@ -242,6 +242,60 @@
         { "name": "tipoProcesso", "type": "string", "isRequired": true },
         { "name": "missaoPrestUuid", "type": "string", "isRequired": true }
       ]
+    },
+    {
+      "actionName": "getProcessoCabimento",
+      "path": "{uuid}/processos/{tipoProcesso}/cabimento",
+      "method": "GET",
+      "responses": {
+        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "ProcessoCabimentoResponse", "objectType": "dto", "collectionType": "none", "module": "missaoservico" } } } }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true },
+        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+      ]
+    },
+    {
+      "actionName": "saveProcessoCabimento",
+      "path": "{uuid}/processos/{tipoProcesso}/cabimento",
+      "method": "PUT",
+      "requestBody": {
+        "content": { "application/json": { "schema": { "type": "ProcessoCabimentoRequest", "collectionType": "none", "objectType": "dto", "module": "missaoservico" } } }
+      },
+      "responses": {
+        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "string", "collectionType": "map" } } } }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true },
+        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+      ]
+    },
+    {
+      "actionName": "getProcessoAutorizacao",
+      "path": "{uuid}/processos/{tipoProcesso}/autorizacao",
+      "method": "GET",
+      "responses": {
+        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "ProcessoCabimentoResponse", "objectType": "dto", "collectionType": "none", "module": "missaoservico" } } } }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true },
+        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+      ]
+    },
+    {
+      "actionName": "saveProcessoAutorizacao",
+      "path": "{uuid}/processos/{tipoProcesso}/autorizacao",
+      "method": "PUT",
+      "requestBody": {
+        "content": { "application/json": { "schema": { "type": "ProcessoEtapaActionRequest", "collectionType": "none", "objectType": "dto", "module": "missaoservico" } } }
+      },
+      "responses": {
+        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "string", "collectionType": "map" } } } }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true },
+        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+      ]
     }
   ],
   "id": "msvctrl03missaoproc"

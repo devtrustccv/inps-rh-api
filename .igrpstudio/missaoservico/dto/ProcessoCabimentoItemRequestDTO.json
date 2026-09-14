@@ -1,0 +1,15 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ProcessoCabimentoItemRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "logisticaUuid", "type": "uuid", "objectType": "java", "required": true },
+    { "name": "selecionado", "type": "boolean", "objectType": "java", "required": false },
+    { "name": "cabId", "type": "long", "objectType": "java", "required": false },
+    { "name": "anexo", "type": "AnexoReq", "objectType": "dto", "required": false, "module": "shared" }
+  ],
+  "id": "msvdto25cabitemreq"
+}

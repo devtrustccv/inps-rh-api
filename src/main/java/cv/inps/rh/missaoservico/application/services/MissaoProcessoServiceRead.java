@@ -8,6 +8,7 @@ import cv.inps.rh.missaoservico.application.queries.GetProcessoRequisicoesQuery;
 import cv.inps.rh.missaoservico.application.constants.ResponsavelParecer;
 import cv.inps.rh.missaoservico.application.queries.GetAvaliacaoPrestadorQuery;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoAprovacaoRhQuery;
+import cv.inps.rh.missaoservico.application.queries.GetProcessoCabimentoQuery;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoLogisticaQuery;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoValidacaoUgalQuery;
 import cv.inps.rh.missaoservico.application.queries.GetRequisicaoPdfQuery;
@@ -506,6 +507,72 @@ public class MissaoProcessoServiceRead {
       case AvaliacaoPrestadorCalculo.PRECO -> a.getPreco();
       default -> null;
     };
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Etapas Cabimento e Autorização
+  // ---------------------------------------------------------------------------------------------
+
+  /** Linhas do processo com o estado do cabimento — alimenta os ecrãs Cabimentação e Autorização. */
+  @Transactional(readOnly = true)
+  public ResponseEntity<ProcessoCabimentoResponseDTO> getCabimento(GetProcessoCabimentoQuery query) {
+    var missaoUuid = IdentificadorUnico.from(query != null ? query.getUuid() : null).valor();
+    var processo = support.processo(missaoUuid, query.getTipoProcesso(), false);
+    var missao = processo.getMissaoServId();
+    var tipo = TipoProcesso.fromCodeOrThrow(processo.getTipoProcesso());
+
+    var linhas = missaoLogisticaRepository.findAllByMissaoProcessoId_IdOrderByIdAsc(processo.getId()).stream()
+        .filter(l -> ESTADO_ATIVO.equals(l.getEstado()))
+        .toList();
+    var detsPorLinha = new HashMap<Long, List<MissaoLogisticaDetEntity>>();
+    var ids = linhas.stream().map(MissaoLogisticaEntity::getId).toList();
+    if (!ids.isEmpty()) {
+      missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(ids).stream()
+          .filter(d -> ESTADO_ATIVO.equals(d.getEstado()))
+          .sorted(Comparator.comparing(MissaoLogisticaDetEntity::getId))
+          .forEach(d -> detsPorLinha.computeIfAbsent(d.getMissaoLogistId().getId(), _ -> new ArrayList<>()).add(d));
+    }
+
+    var itens = new ArrayList<ProcessoCabimentoItemResponseDTO>();
+    var total = java.math.BigDecimal.ZERO;
+    for (var l : linhas) {
+      var colaboradores = detsPorLinha.getOrDefault(l.getId(), List.of()).stream().map(this::toDetDto).toList();
+      var item = new ProcessoCabimentoItemResponseDTO();
+      item.setLogisticaUuid(l.getUuid());
+      item.setReferencia(l.getReferencia());
+      item.setNome(switch (tipo) {
+        case SEGURO_VIAGEM -> l.getNomeSeguradora();
+        case AJUDA_CUSTO -> colaboradores.isEmpty() ? null : colaboradores.getFirst().getNomeColaborador();
+        default -> l.getPrestadorServId() != null ? l.getPrestadorServId().getNome() : null;
+      });
+      item.setValorTotal(l.getValorTotal());
+      item.setMoeda(l.getMoeda());
+      item.setCabId(l.getCabId());
+      item.setEstadoCabimento(l.getEstadoCabimento());
+      item.setColaboradores(colaboradores);
+      item.setDocumento(documentoMaisRecente(TableName.RH_T_MISSAO_LOGISTICA.name(), l.getUuid(), false));
+      itens.add(item);
+      if (l.getValorTotal() != null) {
+        total = total.add(l.getValorTotal());
+      }
+    }
+
+    var response = new ProcessoCabimentoResponseDTO();
+    response.setMissaoUuid(missao.getUuid());
+    response.setNrMissaoFormatado(support.nrMissaoFormatado(missao));
+    response.setEstadoMissao(missao.getEstado());
+    response.setProcesso(support.toProcessoDto(processo));
+    response.setItens(itens);
+    response.setValorTotal(total);
+    linhas.stream()
+        .max(Comparator.comparing(l -> l.getLastModifiedDate() != null ? l.getLastModifiedDate() : l.getCreatedDate(),
+            Comparator.nullsFirst(Comparator.naturalOrder())))
+        .ifPresent(l -> {
+          response.setExecutadoPor(l.getLastModifiedBy() != null ? l.getLastModifiedBy() : l.getCreatedBy());
+          var data = l.getLastModifiedDate() != null ? l.getLastModifiedDate() : l.getCreatedDate();
+          response.setDataExecucao(data != null ? data.toLocalDate() : null);
+        });
+    return ResponseEntity.ok(response);
   }
 
   // ---------------------------------------------------------------------------------------------
