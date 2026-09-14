@@ -3,6 +3,7 @@ package cv.inps.rh.missaoservico.application.services;
 import com.github.f4b6a3.uuid.UuidCreator;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.commands.*;
+import cv.inps.rh.missaoservico.application.constants.TipoProcesso;
 import cv.inps.rh.missaoservico.application.dto.*;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -64,6 +65,7 @@ public class MissaoServicoServiceWrite {
   private final MissaoLogisticaEntityRepository missaoLogisticaRepository;
   private final MissaoLogisticaDetEntityRepository missaoLogisticaDetRepository;
   private final MissaoRequisicaoEntityRepository missaoRequisicaoRepository;
+  private final MissaoProcessoEntityRepository missaoProcessoRepository;
   private final GeografiaEntityRepository geografiaRepository;
   private final FuncionarioEntityRepository funcionarioRepository;
   private final DocumentoEntityRepository documentoRepository;
@@ -103,6 +105,7 @@ public class MissaoServicoServiceWrite {
     missao.setEstado(StringUtils.hasText(dto.getEstado()) ? dto.getEstado() : ESTADO_ATIVO);
 
     missao = missaoServicoRepository.save(missao);
+    sincronizarProcessos(missao, dto.getAlojamento());
 
     var colaboradores = persistirColaboradores(dto.getColaboradores(), missao);
     if (!colaboradores.isEmpty()) {
@@ -178,6 +181,7 @@ public class MissaoServicoServiceWrite {
       avancarEtapa(missao, ETAPA_2);
     }
     missao = missaoServicoRepository.save(missao);
+    sincronizarProcessos(missao, dto.getAlojamento());
 
     var colaboradores = syncColaboradores(missao, dto.getColaboradores());
     if (!colaboradores.isEmpty()) {
@@ -1576,6 +1580,54 @@ public class MissaoServicoServiceWrite {
       if (valor != null) {
         r.setValorTotal(valor);
       }
+    }
+  }
+
+  /**
+   * Garante os quatro processos da missão — a spec manda registar por defeito 4 linhas em
+   * RH_T_MISSAO_PROCESSO ao gravar a submissão — e aplica o campo Alojamento ao estado do processo
+   * ALOJAMENTO. Idempotente: só cria os que faltam. {@code alojamento} null não mexe (na criação,
+   * o processo fica activo).
+   *
+   * <p>Retirar o alojamento só é permitido enquanto o processo não saiu da primeira etapa — depois
+   * disso já há prestadores, requisição ou logística associados a ele.
+   */
+  private void sincronizarProcessos(MissaoServicoEntity missao, Boolean alojamento) {
+    var porTipo = new HashMap<String, MissaoProcessoEntity>();
+    missaoProcessoRepository.findAllByMissaoServId_UuidOrderByIdAsc(missao.getUuid())
+        .forEach(p -> porTipo.put(p.getTipoProcesso(), p));
+
+    var toSave = new ArrayList<MissaoProcessoEntity>();
+    for (var tipo : TipoProcesso.values()) {
+      var processo = porTipo.get(tipo.name());
+      var ehAlojamento = tipo == TipoProcesso.ALOJAMENTO;
+
+      if (processo == null) {
+        processo = new MissaoProcessoEntity();
+        processo.setUuid(UuidCreator.getTimeOrderedEpoch());
+        processo.setMissaoServId(missao);
+        processo.setTipoProcesso(tipo.name());
+        processo.setEtapa(tipo.primeiraEtapa().name());
+        processo.setEstado(ehAlojamento && Boolean.FALSE.equals(alojamento) ? ESTADO_INATIVO : ESTADO_ATIVO);
+        toSave.add(processo);
+        continue;
+      }
+
+      if (ehAlojamento && alojamento != null) {
+        var estado = alojamento ? ESTADO_ATIVO : ESTADO_INATIVO;
+        if (estado.equals(processo.getEstado()))
+          continue;
+        if (!alojamento && !tipo.primeiraEtapa().name().equals(processo.getEtapa())) {
+          throw IgrpResponseStatusException.badRequest(
+              "Não é possível retirar o alojamento: o processo ALOJAMENTO já está na etapa " + processo.getEtapa());
+        }
+        processo.setEstado(estado);
+        toSave.add(processo);
+      }
+    }
+
+    if (!toSave.isEmpty()) {
+      missaoProcessoRepository.saveAll(toSave);
     }
   }
 

@@ -1,6 +1,8 @@
 package cv.inps.rh.missaoservico.application.services;
 
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
+import cv.inps.rh.missaoservico.application.constants.EtapaProcesso;
+import cv.inps.rh.missaoservico.application.constants.TipoProcesso;
 import cv.inps.rh.missaoservico.application.dto.*;
 import cv.inps.rh.missaoservico.application.queries.*;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -40,6 +42,7 @@ public class MissaoServicoServiceRead {
   private final NotificacaoEntityRepository notificacaoRepository;
   private final MissaoColaboradorEntityRepository missaoColaboradorRepository;
   private final MissaoRequisicaoEntityRepository missaoRequisicaoRepository;
+  private final MissaoProcessoEntityRepository missaoProcessoRepository;
 
   @Transactional(readOnly = true)
   public ResponseEntity<MissaoCabimentoResponseDTO> getCabimento(GetMissaoServicoCabimentoQuery query) {
@@ -389,6 +392,10 @@ public class MissaoServicoServiceRead {
     response.setEstado(missao.getEstado());
     response.setColaboradores(colaboradores);
     response.setDocumentos(documentos);
+    var processos = processosDaMissao(missaoUuid);
+    response.setProcessos(processos);
+    response.setAlojamento(processos.stream()
+        .anyMatch(p -> TipoProcesso.ALOJAMENTO.name().equals(p.getTipoProcesso()) && ESTADO_ATIVO.equals(p.getEstado())));
 
     response.setDataRegisto(toLocalDate(missao.getCreatedDate()));
     response.setUserRegistoId(missao.getCreatedById());
@@ -820,6 +827,25 @@ public class MissaoServicoServiceRead {
     dto.setFunUuid(c.getFunId() != null ? c.getFunId().getUuid() : null);
     dto.setNomeColaborador(c.getFunId() != null ? c.getFunId().getNome() : null);
     return dto;
+  }
+
+  /** Os processos da missão, pela ordem de criação, com as descrições de tipo e etapa. */
+  private List<MissaoProcessoResponseDTO> processosDaMissao(UUID missaoUuid) {
+    return missaoProcessoRepository.findAllByMissaoServId_UuidOrderByIdAsc(missaoUuid)
+        .stream()
+        .map(p -> {
+          var dto = new MissaoProcessoResponseDTO();
+          dto.setId(p.getId());
+          dto.setUuid(p.getUuid());
+          dto.setTipoProcesso(p.getTipoProcesso());
+          dto.setTipoProcessoDesc(TipoProcesso.fromCodeOrThrow(p.getTipoProcesso()).getDescricao());
+          dto.setEtapa(p.getEtapa());
+          var etapa = EtapaProcesso.fromCode(p.getEtapa());
+          dto.setEtapaDesc(etapa != null ? etapa.getDescricao() : p.getEtapa());
+          dto.setEstado(p.getEstado());
+          return dto;
+        })
+        .toList();
   }
 
   private String resolveAmbitoMissao(Integer flgDestino) {

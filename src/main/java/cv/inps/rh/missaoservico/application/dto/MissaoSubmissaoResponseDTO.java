@@ -48,6 +48,8 @@ public class MissaoSubmissaoResponseDTO  {
   private String estado;
   private List<MissaoColaboradorResponseDTO> colaboradores;
   private List<AnexoRespDTO> documentos;
+  private Boolean alojamento;             // processo ALOJAMENTO activo
+  private List<MissaoProcessoResponseDTO> processos;
   // audit
   private LocalDate dataRegisto;
   private Long userRegistoId;

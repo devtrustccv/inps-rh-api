@@ -8,6 +8,83 @@ Base de todos os endpoints: `/api/v1/missao-servico`
 
 ---
 
+## 2026-09-14 — Submissão cria os 4 processos (Fase 3)
+
+**Endpoints:** `POST /submissao`, `PUT /{uuid}/submissao` (request) e `GET /{uuid}/submissao` (response)
+
+Cada missão passa a ter 4 processos, cada um com a sua etapa. São criados na primeira gravação.
+
+```jsonc
+// request — campo novo
+{ ..., "alojamento": true }
+
+// response — campos novos
+{
+  "alojamento": true,
+  "processos": [
+    { "uuid": "…", "tipoProcesso": "BILHETE_PASSAGEM", "tipoProcessoDesc": "Bilhete Passagem",
+      "etapa": "PRESTADOR_SERVICO", "etapaDesc": "Prestador Serviço", "estado": "A" },
+    { "uuid": "…", "tipoProcesso": "SEGURO_VIAGEM", "etapa": "LOGISTICA", "estado": "A" },
+    { "uuid": "…", "tipoProcesso": "AJUDA_CUSTO",   "etapa": "LOGISTICA", "estado": "A" },
+    { "uuid": "…", "tipoProcesso": "ALOJAMENTO",    "etapa": "PRESTADOR_SERVICO", "estado": "A" }
+  ]
+}
+```
+
+- **Percursos:** bilhete e alojamento começam em `PRESTADOR_SERVICO`; seguro e ajuda de custo começam em `LOGISTICA` (não têm prestador nem requisição).
+- **`alojamento`:** `false` inactiva o processo `ALOJAMENTO`; `true` reactiva-o. Omitido ou `null` não altera nada; na criação, sem o campo, fica activo.
+- Retirar o alojamento com o processo já fora da primeira etapa → **400** `Não é possível retirar o alojamento: o processo ALOJAMENTO já está na etapa …`.
+
+---
+
+## 2026-09-14 — Gestão de Prestadores de Serviço (Fase 2)
+
+Menu próprio. Base: `/api/v1/missao-servico/prestadores`
+
+| Ecrã | Método | Path |
+|---|---|---|
+| Lista | `GET` | `?nome=&ilhaId=&estado=&pageNumber=0&pageSize=10` |
+| Detalhe / Editar (carregar) | `GET` | `/{uuid}` |
+| Registar | `POST` | `/` |
+| Editar | `PUT` | `/{uuid}` |
+| Ver Avaliação | `GET` | `/{uuid}/avaliacoes` |
+
+**Registar / Editar**
+```jsonc
+{
+  "entId": 11,                          // lookup GET /api/v1/parametrizacao/entidades/ativos — obrigatório
+  "nome": "Halcyon Viagens",            // opcional: por defeito, o nome da entidade
+  "nif": "200123456",
+  "email": "reservas@halcyon.cv",       // obrigatório
+  "telefone": "2601234",
+  "ilhaId": 2387,
+  "morada": "Praia, Plateau",
+  "estado": "A",                        // A | I — no registo, por defeito A
+  "emails": [                           // outros emails
+    { "email": "financeiro@halcyon.cv" },
+    { "id": 4, "email": "geral@halcyon.cv" }
+  ]
+}
+```
+→ `{ "id": "<uuid>" }`
+
+- **`emails`:** sem `id` cria; com `id` actualiza; um email que fica de fora do array passa a `estado: "I"`. Omitido ou `null` não altera nada; `[]` inactiva todos.
+- **Erros:**
+
+| Situação | Resposta |
+|---|---|
+| `entId` inexistente | **400** `Entidade inválida` |
+| Entidade já registada noutro prestador | **409** |
+| Email principal ou adicional mal formado | **400** `Email inválido` |
+| Email repetido (entre o principal e os adicionais) | **400** `Email duplicado` |
+| `estado` diferente de `A`/`I` | **400** |
+
+**Lista** — `content[]` com `nome`, `email`, `morada`, `telefone`, `estado`/`estadoDesc` e os `emails` **activos**. O **detalhe** traz todos os emails, com o respectivo estado.
+
+**Ver Avaliação** — `[{ nrMissaoFormatado, tipoProcesso, sistemaQualidade, prazoFornecimento, qualidadeProduto, capacidadeResposta, preco, total, designacao }]`. Fica vazio até existir o ecrã Avaliar Prestador.
+
+---
+
 ## 2026-09-14 — Ilha/concelho na submissão e nº/valor da requisição
 
 **Branch:** `feat/missao-servico-processos`
