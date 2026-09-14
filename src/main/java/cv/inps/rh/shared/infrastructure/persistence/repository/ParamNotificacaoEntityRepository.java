@@ -25,6 +25,9 @@ public interface ParamNotificacaoEntityRepository extends
 
   Optional<ParamNotificacaoEntity> findByTipoNotificacao(String tipoNotificacao);
 
+  /** Template activo mais recente — o tipo pode ter várias linhas (versões antigas inactivas). */
+  Optional<ParamNotificacaoEntity> findFirstByTipoNotificacaoAndEstadoOrderByIdDesc(String tipoNotificacao, String estado);
+
   default ParamNotificacaoEntity findByUuidOrThrow(UUID uuid) {
     return findByUuid(uuid)
         .orElseThrow(() -> IgrpResponseStatusException.notFound("ParamNotificacaoEntity não encontrada para id: " + uuid));

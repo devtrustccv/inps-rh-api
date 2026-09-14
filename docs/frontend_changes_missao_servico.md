@@ -8,6 +8,58 @@ Base de todos os endpoints: `/api/v1/missao-servico`
 
 ---
 
+## 2026-09-14 — Etapa Prestadores Serviço, por processo (Fase 4)
+
+Substitui o ecrã **Análise**. É executada **por processo** e só existe em `BILHETE_PASSAGEM` e `ALOJAMENTO`.
+
+| Ecrã | Método | Path |
+|---|---|---|
+| Carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/prestadores` |
+| Gravar / Avançar | `PUT` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/prestadores` |
+
+`{tipoProcesso}` = `BILHETE_PASSAGEM` | `ALOJAMENTO` (vem de `processos[].tipoProcesso` do GET da submissão).
+
+**Lookup de prestadores:** `GET /api/v1/missao-servico/prestadores?estado=A`
+
+**GET**
+```jsonc
+{
+  "missaoUuid": "…", "nrMissaoFormatado": "3/2026",
+  "processo": { "uuid": "…", "tipoProcesso": "BILHETE_PASSAGEM", "etapa": "PRESTADOR_SERVICO", "estado": "A" },
+  "prestadores": [
+    { "uuid": "…", "paramPrestUuid": "…", "nome": "Halcyon Viagens",
+      "email": "reservas@halcyon.cv", "emails": ["reservas@halcyon.cv", "financeiro@halcyon.cv"], "estado": "A" }
+  ],
+  "notificacao": { "assunto": "…", "corpoEmail": "…" },   // pré-preenchida com o template (editável)
+  "executadoPor": "…", "dataExecucao": "2026-09-14"
+}
+```
+
+**PUT**
+```jsonc
+{
+  "prestadores": ["<paramPrestUuid>", "<paramPrestUuid>"],   // selecção completa, 1 a 3
+  "notificacao": { "assunto": "…", "corpoEmail": "…" },     // opcional — vazio usa o template
+  "processoEtapaAction": "SAVE"                              // SAVE | NEXT
+}
+```
+→ `{ "id": "<processoUuid>", "etapa": "EMISSAO_REQUISICAO" }`
+
+- **`NEXT`:** envia o pedido de proposta a **todos os emails activos** de cada prestador (o principal e os adicionais) e avança o processo para `EMISSAO_REQUISICAO`.
+- Um `NEXT` com o processo já adiante só notifica os prestadores **acrescentados** nessa gravação.
+- **Erros:**
+
+| Situação | Resposta |
+|---|---|
+| Nenhum prestador seleccionado, ou mais de 3 | **400** |
+| Prestador inactivo ou inexistente | **400** |
+| Retirar um prestador que já tem requisição activa | **400** |
+| Tipo de processo que não passa por esta etapa (`SEGURO_VIAGEM`, `AJUDA_CUSTO`) | **400** |
+| Missão cancelada | **400** |
+| `NEXT` com o processo numa etapa anterior | **400** |
+
+---
+
 ## 2026-09-14 — Submissão cria os 4 processos (Fase 3)
 
 **Endpoints:** `POST /submissao`, `PUT /{uuid}/submissao` (request) e `GET /{uuid}/submissao` (response)

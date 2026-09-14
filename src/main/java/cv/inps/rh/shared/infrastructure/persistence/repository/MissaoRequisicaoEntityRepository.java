@@ -20,6 +20,8 @@ public interface MissaoRequisicaoEntityRepository extends
 
   List<MissaoRequisicaoEntity> findAllByMissaoPrestId_MissaoServId_Uuid(UUID missaoUuid);
 
+  boolean existsByMissaoPrestId_IdAndEstado(Long missaoPrestId, String estado);
+
   @Query("select max(r.nrRequisacao) from MissaoRequisicaoEntity r where r.ano = :ano")
   Long findMaxNrRequisacaoByAno(@Param("ano") Integer ano);
 

@@ -18,6 +18,9 @@ public interface MissaoPrestadorEntityRepository extends
 
   List<MissaoPrestadorEntity> findAllByMissaoServId_Uuid(UUID missaoUuid);
 
+  /** Prestadores seleccionados num processo da missão (modelo por processo, spec 14/09). */
+  List<MissaoPrestadorEntity> findAllByMissaoProcessoId_IdOrderByIdAsc(Long missaoProcessoId);
+
   Optional<MissaoPrestadorEntity> findByUuid(UUID uuid);
 
   default MissaoPrestadorEntity findByUuidOrThrow(UUID uuid) {

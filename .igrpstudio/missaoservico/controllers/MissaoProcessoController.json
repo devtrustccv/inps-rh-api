@@ -1,0 +1,68 @@
+{
+  "type": "controller",
+  "name": "MissaoProcesso",
+  "module": "missaoservico",
+  "description": "etapas dos processos da missao servico",
+  "basePath": "api/v1/missao-servico",
+  "actions": [
+    {
+      "actionName": "getProcessoPrestadores",
+      "path": "{uuid}/processos/{tipoProcesso}/prestadores",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ProcessoPrestadoresResponse",
+                "objectType": "dto",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true },
+        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+      ]
+    },
+    {
+      "actionName": "saveProcessoPrestadores",
+      "path": "{uuid}/processos/{tipoProcesso}/prestadores",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ProcessoPrestadoresRequest",
+              "collectionType": "none",
+              "objectType": "dto",
+              "module": "missaoservico"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true },
+        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+      ]
+    }
+  ],
+  "id": "msvctrl03missaoproc"
+}
