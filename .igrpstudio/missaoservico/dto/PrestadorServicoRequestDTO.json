@@ -1,0 +1,20 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "PrestadorServicoRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "entId", "type": "long", "objectType": "java", "required": true },
+    { "name": "nome", "type": "string", "objectType": "java", "required": false },
+    { "name": "nif", "type": "string", "objectType": "java", "required": false },
+    { "name": "email", "type": "string", "objectType": "java", "required": true, "isEmail": true },
+    { "name": "telefone", "type": "string", "objectType": "java", "required": false },
+    { "name": "ilhaId", "type": "long", "objectType": "java", "required": false },
+    { "name": "morada", "type": "string", "objectType": "java", "required": false },
+    { "name": "estado", "type": "string", "objectType": "java", "required": false },
+    { "name": "emails", "type": "PrestadorEmailRequest", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" }
+  ],
+  "id": "msvdto01prestreq"
+}

@@ -1,0 +1,144 @@
+{
+  "type": "controller",
+  "name": "PrestadorServico",
+  "module": "missaoservico",
+  "description": "gestao prestadores servico da missao",
+  "basePath": "api/v1/missao-servico/prestadores",
+  "actions": [
+    {
+      "actionName": "createPrestadorServico",
+      "method": "POST",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "PrestadorServicoRequest",
+              "collectionType": "none",
+              "objectType": "dto",
+              "module": "missaoservico"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "actionName": "updatePrestadorServico",
+      "path": "{uuid}",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "PrestadorServicoRequest",
+              "collectionType": "none",
+              "objectType": "dto",
+              "module": "missaoservico"
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true }
+      ]
+    },
+    {
+      "actionName": "getListaPrestadorServico",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListPrestadorServico",
+                "objectType": "dto",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
+      },
+      "requestParams": [
+        { "type": "string", "name": "nome", "isRequired": false },
+        { "type": "string", "name": "ilhaId", "isRequired": false },
+        { "type": "string", "name": "estado", "isRequired": false },
+        { "type": "string", "name": "pageNumber", "value": "0", "isRequired": false },
+        { "type": "string", "name": "pageSize", "value": "10", "isRequired": false }
+      ]
+    },
+    {
+      "actionName": "getPrestadorServico",
+      "path": "{uuid}",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "PrestadorServicoResponse",
+                "objectType": "dto",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true }
+      ]
+    },
+    {
+      "actionName": "getAvaliacoesPrestadorServico",
+      "path": "{uuid}/avaliacoes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "PrestadorAvaliacaoResponse",
+                "objectType": "dto",
+                "collectionType": "list",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true }
+      ]
+    }
+  ],
+  "id": "msvctrl02prestserv"
+}

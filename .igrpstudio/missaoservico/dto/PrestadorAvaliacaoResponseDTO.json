@@ -1,0 +1,24 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "PrestadorAvaliacaoResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "uuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "missaoUuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "nrMissao", "type": "long", "objectType": "java", "required": false },
+    { "name": "nrMissaoFormatado", "type": "string", "objectType": "java", "required": false },
+    { "name": "tipoProcesso", "type": "string", "objectType": "java", "required": false },
+    { "name": "sistemaQualidade", "type": "string", "objectType": "java", "required": false },
+    { "name": "prazoFornecimento", "type": "string", "objectType": "java", "required": false },
+    { "name": "qualidadeProduto", "type": "string", "objectType": "java", "required": false },
+    { "name": "capacidadeResposta", "type": "string", "objectType": "java", "required": false },
+    { "name": "preco", "type": "string", "objectType": "java", "required": false },
+    { "name": "total", "type": "decimal", "objectType": "java", "required": false },
+    { "name": "designacao", "type": "string", "objectType": "java", "required": false },
+    { "name": "dataRegisto", "type": "date", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto06prestavalresp"
+}

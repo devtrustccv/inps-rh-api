@@ -1,0 +1,28 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "PrestadorServicoResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "id", "type": "long", "objectType": "java", "required": false },
+    { "name": "uuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "entId", "type": "long", "objectType": "java", "required": false },
+    { "name": "nome", "type": "string", "objectType": "java", "required": false },
+    { "name": "nif", "type": "string", "objectType": "java", "required": false },
+    { "name": "email", "type": "string", "objectType": "java", "required": false },
+    { "name": "telefone", "type": "string", "objectType": "java", "required": false },
+    { "name": "ilhaId", "type": "long", "objectType": "java", "required": false },
+    { "name": "ilhaNome", "type": "string", "objectType": "java", "required": false },
+    { "name": "morada", "type": "string", "objectType": "java", "required": false },
+    { "name": "estado", "type": "string", "objectType": "java", "required": false },
+    { "name": "estadoDesc", "type": "string", "objectType": "java", "required": false },
+    { "name": "emails", "type": "PrestadorEmailResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "dataRegisto", "type": "date", "objectType": "java", "required": false },
+    { "name": "userRegistoName", "type": "string", "objectType": "java", "required": false },
+    { "name": "dataAlteracao", "type": "date", "objectType": "java", "required": false },
+    { "name": "userAlteracaoName", "type": "string", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto03prestresp"
+}

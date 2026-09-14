@@ -1,0 +1,13 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "PrestadorEmailRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "id", "type": "long", "objectType": "java", "required": false },
+    { "name": "email", "type": "string", "objectType": "java", "required": true, "isEmail": true }
+  ],
+  "id": "msvdto02prestemailreq"
+}
