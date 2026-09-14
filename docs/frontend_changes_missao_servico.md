@@ -8,6 +8,49 @@ Base de todos os endpoints: `/api/v1/missao-servico`
 
 ---
 
+## 2026-09-14 — Ilha/concelho na submissão e nº/valor da requisição
+
+**Branch:** `feat/missao-servico-processos`
+
+Primeiro passo rumo à spec 14/09 (modelo por processo). Só campos novos — nada foi removido nem mudou de nome.
+
+### Submissão — `ilhaId` e `concelhoId`
+
+**Endpoints:** `POST /submissao`, `PUT /{uuid}/submissao` (request) e `GET /{uuid}/submissao` (response)
+
+```jsonc
+// request — só quando o país de destino é Cabo Verde
+{ "paisDestinoId": 1238, "ilhaId": 2387, "concelhoId": 238704, ... }
+
+// response
+{ "ilhaId": 2387, "ilhaNome": "Santiago", "concelhoId": 238704, "concelhoNome": "Praia", ... }
+```
+
+- Opcionais. Com destino **estrangeiro** são ignorados e gravados a `null`.
+- Id inexistente em `GLB_T_GEOGRAFIA` → **404**.
+
+### Emissão de Requisição — `valorTotal` e nº de requisição
+
+`PUT /{uuid}/emissao-requisicao` — novo campo opcional por prestador:
+```jsonc
+{ "requisicoes": [
+    { "missaoPrestId": 17, "selecionado": true, "valorTotal": 105000,
+      "missaoColabIds": ["<funUuid>"], "documentoProposta": { ... } } ],
+  "processoEtapaAction": "SAVE" }
+```
+- `valorTotal` omitido ou `null` **mantém** o valor gravado.
+
+`GET /{uuid}/emissao-requisicao` — cada item de `requisicoes[]` passa a trazer:
+```jsonc
+{ "missaoPrestId": 17, "nrRequisicao": 3, "anoRequisicao": 2026, "valorTotal": 105000, ... }
+```
+- `nrRequisicao` é **gerado** ao gravar: sequencial dentro do ano, o mesmo para todos os colaboradores do mesmo prestador. Não muda em gravações seguintes.
+- Prestador ainda sem requisição → `nrRequisicao`, `anoRequisicao` e `valorTotal` a `null`.
+
+> **Corrige:** a BD passou a exigir `NR_REQUISACAO` (NOT NULL) e a gravação da Emissão de Requisição falhava com `ORA-01400`.
+
+---
+
 ## 1. Correção — `cabId` deixou de ser obrigatório
 
 `PUT /{uuid}/cabimento` rejeitava com **400 `cabId é obrigatório`** qualquer item selecionado sem `cabId`.

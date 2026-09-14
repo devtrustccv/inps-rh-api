@@ -91,6 +91,7 @@ public class MissaoServicoServiceWrite {
     missao.setNrMissao(nextNrMissao(ano));
     missao.setPaisDestinoId(pais);
     missao.setFlgDestino(isCaboVerde(pais) ? DESTINO_NACIONAL : DESTINO_ESTRANGEIRO);
+    aplicarIlhaConcelho(missao, pais, dto);
     missao.setDescricaoDestino(dto.getDescricaoDestino());
     missao.setAmbitoMissao(dto.getAmbitoMissao());
     missao.setDataInicio(dto.getDataInicio());
@@ -162,6 +163,7 @@ public class MissaoServicoServiceWrite {
 
     missao.setPaisDestinoId(pais);
     missao.setFlgDestino(isCaboVerde(pais) ? DESTINO_NACIONAL : DESTINO_ESTRANGEIRO);
+    aplicarIlhaConcelho(missao, pais, dto);
     missao.setDescricaoDestino(dto.getDescricaoDestino());
     missao.setAmbitoMissao(dto.getAmbitoMissao());
     missao.setDataInicio(dto.getDataInicio());
@@ -208,6 +210,7 @@ public class MissaoServicoServiceWrite {
 
     var desired = new HashSet<String>();
     var propostaByPrestador = new HashMap<Long, cv.inps.rh.shared.application.dto.AnexoReqDTO>();
+    var valorByPrestador = new HashMap<Long, java.math.BigDecimal>();
     var selectedPrestIds = new LinkedHashSet<Long>();
 
     for (var item : dto.getRequisicoes()) {
@@ -220,6 +223,9 @@ public class MissaoServicoServiceWrite {
 
       selectedPrestIds.add(item.getMissaoPrestId());
       propostaByPrestador.putIfAbsent(item.getMissaoPrestId(), item.getDocumentoProposta());
+      if (item.getValorTotal() != null) {
+        valorByPrestador.putIfAbsent(item.getMissaoPrestId(), item.getValorTotal());
+      }
 
       var prest = missaoPrestadorRepository.findById(item.getMissaoPrestId())
           .orElseThrow(() -> IgrpResponseStatusException.badRequest("Prestador inválido: " + item.getMissaoPrestId()));
@@ -276,6 +282,8 @@ public class MissaoServicoServiceWrite {
       req.setMissaoColabId(colab);
       toSave.add(req);
     }
+
+    atribuirNrEValorRequisicao(toSave, valorByPrestador);
 
     if (!toSave.isEmpty()) {
       toSave = new ArrayList<>(missaoRequisicaoRepository.saveAll(toSave));
@@ -1524,6 +1532,62 @@ public class MissaoServicoServiceWrite {
   private Long nextNrMissao(Integer ano) {
     var max = missaoServicoRepository.findMaxNrMissaoByAno(ano);
     return (max != null ? max : 0L) + 1L;
+  }
+
+  /**
+   * Nº e valor total da requisição. O nº é sequencial dentro do ano, independente do tipo de missão,
+   * e agrupado por prestador (spec): todas as linhas do mesmo prestador partilham o nº. Linhas já
+   * numeradas mantêm o nº; um prestador novo recebe o próximo do ano.
+   *
+   * <p>Enquanto o modelo guardar uma linha por par prestador × colaborador, o nº e o valor repetem-se
+   * nessas linhas — quem lê usa o de qualquer uma delas. Sem índice único (as linhas partilham o nº),
+   * duas emissões simultâneas podem obter o mesmo nº.
+   */
+  private void atribuirNrEValorRequisicao(
+      List<MissaoRequisicaoEntity> requisicoes,
+      Map<Long, java.math.BigDecimal> valorByPrestador) {
+    var numeradaPorPrestador = new HashMap<Long, MissaoRequisicaoEntity>();
+    for (var r : requisicoes) {
+      if (r.getNrRequisacao() != null) {
+        numeradaPorPrestador.putIfAbsent(r.getMissaoPrestId().getId(), r);
+      }
+    }
+
+    var ano = LocalDate.now().getYear();
+    Long proximo = null;
+    for (var r : requisicoes) {
+      var prestId = r.getMissaoPrestId().getId();
+      if (r.getNrRequisacao() == null) {
+        var numerada = numeradaPorPrestador.get(prestId);
+        if (numerada != null) {
+          r.setNrRequisacao(numerada.getNrRequisacao());
+          r.setAno(numerada.getAno());
+        } else {
+          if (proximo == null) {
+            var max = missaoRequisicaoRepository.findMaxNrRequisacaoByAno(ano);
+            proximo = (max != null ? max : 0L) + 1L;
+          }
+          r.setNrRequisacao(proximo++);
+          r.setAno(ano);
+          numeradaPorPrestador.put(prestId, r);
+        }
+      }
+      var valor = valorByPrestador.get(prestId);
+      if (valor != null) {
+        r.setValorTotal(valor);
+      }
+    }
+  }
+
+  /** Ilha e concelho só se aplicam a missões nacionais (spec: só aparecem se o destino for Cabo Verde). */
+  private void aplicarIlhaConcelho(MissaoServicoEntity missao, GeografiaEntity pais, MissaoSubmissaoRequestDTO dto) {
+    if (!isCaboVerde(pais)) {
+      missao.setIlhaId(null);
+      missao.setConcelhoId(null);
+      return;
+    }
+    missao.setIlhaId(dto.getIlhaId() != null ? geografiaRepository.findByIdOrThrow(dto.getIlhaId()) : null);
+    missao.setConcelhoId(dto.getConcelhoId() != null ? geografiaRepository.findByIdOrThrow(dto.getConcelhoId()) : null);
   }
 
   /**

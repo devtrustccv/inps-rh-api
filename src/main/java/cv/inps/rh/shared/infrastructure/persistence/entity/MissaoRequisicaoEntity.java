@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Getter
@@ -35,6 +36,16 @@ public class MissaoRequisicaoEntity extends AuditEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "missao_colab_id", referencedColumnName = "id", nullable = false)
     private MissaoColaboradorEntity missaoColabId;
+
+    // Sequencial dentro do ano, o mesmo para todas as linhas do mesmo prestador
+    @Column(name = "nr_requisacao", nullable = false)
+    private Long nrRequisacao;
+
+    @Column(name = "ano")
+    private Integer ano;
+
+    @Column(name = "valor_total")
+    private BigDecimal valorTotal;
 
     @NotNull(message = "estado is mandatory")
     @Column(name = "estado", length = 1, nullable = false)

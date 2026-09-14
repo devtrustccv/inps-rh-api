@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +27,9 @@ public class MissaoReqItemResponseDTO {
   private String emailPrestador;
   private List<MissaoColaboradorResponseDTO> colaboradores;
   private AnexoRespDTO proposta;
+  private Long nrRequisicao;              // sequencial dentro do ano
+  private Integer anoRequisicao;
+  private BigDecimal valorTotal;
   private Boolean selecionado;
   private String estado;
 

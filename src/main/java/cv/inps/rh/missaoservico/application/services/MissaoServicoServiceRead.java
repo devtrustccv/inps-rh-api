@@ -372,6 +372,10 @@ public class MissaoServicoServiceRead {
     response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
     response.setPaisDestinoId(missao.getPaisDestinoId() != null ? missao.getPaisDestinoId().getId() : null);
     response.setPaisDestinoNome(missao.getPaisDestinoId() != null ? missao.getPaisDestinoId().getNome() : null);
+    response.setIlhaId(missao.getIlhaId() != null ? missao.getIlhaId().getId() : null);
+    response.setIlhaNome(missao.getIlhaId() != null ? missao.getIlhaId().getNome() : null);
+    response.setConcelhoId(missao.getConcelhoId() != null ? missao.getConcelhoId().getId() : null);
+    response.setConcelhoNome(missao.getConcelhoId() != null ? missao.getConcelhoId().getNome() : null);
     response.setFlgDestino(missao.getFlgDestino());
     response.setDescricaoDestino(missao.getDescricaoDestino());
     response.setAmbitoMissao(missao.getAmbitoMissao());
@@ -464,6 +468,10 @@ public class MissaoServicoServiceRead {
         item.setEmailPrestador(prest.getEmail());
         item.setColaboradores(colaboradores);
         item.setProposta(proposta);
+        var numerada = list.isEmpty() ? null : list.getFirst();
+        item.setNrRequisicao(numerada != null ? numerada.getNrRequisacao() : null);
+        item.setAnoRequisicao(numerada != null ? numerada.getAno() : null);
+        item.setValorTotal(numerada != null ? numerada.getValorTotal() : null);
         item.setSelecionado(selecionado);
         item.setEstado(ESTADO_ATIVO);
         itens.add(item);
@@ -514,6 +522,10 @@ public class MissaoServicoServiceRead {
         item.setEmailPrestador(prest.getEmail());
         item.setColaboradores(colaboradores);
         item.setProposta(proposta);
+        var numerada = list.isEmpty() ? null : list.getFirst();
+        item.setNrRequisicao(numerada != null ? numerada.getNrRequisacao() : null);
+        item.setAnoRequisicao(numerada != null ? numerada.getAno() : null);
+        item.setValorTotal(numerada != null ? numerada.getValorTotal() : null);
         item.setSelecionado(selecionado);
         item.setEstado(ESTADO_ATIVO);
         itens.add(item);

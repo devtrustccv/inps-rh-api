@@ -42,6 +42,15 @@ public class MissaoServicoEntity extends AuditEntity {
     @JoinColumn(name = "pais_destino_id", referencedColumnName = "id", nullable = false)
     private GeografiaEntity paisDestinoId;
 
+    // Só em missões nacionais (país de destino = Cabo Verde)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ilha_id", referencedColumnName = "id")
+    private GeografiaEntity ilhaId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "concelho_id", referencedColumnName = "id")
+    private GeografiaEntity concelhoId;
+
     @Column(name = "flg_destino")
     private Integer flgDestino;
 

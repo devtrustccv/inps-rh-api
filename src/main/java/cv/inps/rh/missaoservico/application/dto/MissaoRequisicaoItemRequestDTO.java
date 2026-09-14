@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,5 +26,6 @@ public class MissaoRequisicaoItemRequestDTO  {
   private Boolean selecionado;            // checkbox — se deve emitir requisição para este prestador
   private List<UUID> missaoColabIds;      // colaboradores associados (multiselect)
   private AnexoReqDTO documentoProposta;
+  private BigDecimal valorTotal;          // valor total da requisição deste prestador (null = não mexer)
 
 }

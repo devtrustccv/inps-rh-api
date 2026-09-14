@@ -24,6 +24,8 @@ import java.util.List;
 public class MissaoSubmissaoRequestDTO  {
 
   private Long paisDestinoId;
+  private Long ilhaId;                    // só se o país de destino for Cabo Verde
+  private Long concelhoId;                // só se o país de destino for Cabo Verde
   private String descricaoDestino;
   private String ambitoMissao;
   private LocalDate dataInicio;
