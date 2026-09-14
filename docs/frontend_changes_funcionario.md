@@ -391,3 +391,30 @@ O terceiro caso era antes **ignorado em silêncio** na edição (e aplicado, no 
 
 Em resumo, para cada movimento envie **apenas** o `*Destino` do tipo que seleccionou. Os tipos não
 seleccionados não precisam de ser enviados — herdam o valor actual do registo.
+
+---
+
+# Validar edição de Mobilidade — rejeitar passa a inactivar
+
+**Data:** 2026-09-14
+**Branch:** develop
+
+`PUT /api/v1/funcionarios/{idFuncionario}/mobilidades/{mobilidadeId}/validar` (validação de uma
+mobilidade **editada** — validação `UPDATE`)
+
+## O que muda
+
+Sem alteração de contrato de API. Muda o **estado** final da mobilidade quando o checker rejeita uma
+edição.
+
+| Decisão | Antes | Agora |
+|---|---|---|
+| `SIM` | mobilidade `A` | mobilidade `A` (igual) |
+| `NAO` | mobilidade `A` (igual ao SIM) | mobilidade **`I`** |
+| `CORRIGIR` | mobilidade `C` | mobilidade `C` (igual) |
+
+A edição é um update no próprio registo, pelo que rejeitar **não reverte valores** — o registo fica
+com os dados editados e passa a inactivo. Se o colaborador precisar de outra mobilidade, regista-se uma
+nova (`POST .../mobilidades`).
+
+A validação do **registo** de uma mobilidade nova (`INSERT`) não é afectada: já seguia `A`/`I`.

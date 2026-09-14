@@ -305,17 +305,12 @@ public class MobilidadeWriteService {
       updateMobilidade(mobilidade, mobilidadeDto);
       var estado = mobilidadeDto.getValidar().equals(EstadoValidacao.SIM) ? Estado.A : Estado.I;
       if (validacao != null) validacao.setEstado(estado);
-      // Só o REGISTO (INSERT) muda o estado da mobilidade segundo a decisão e cria/troca
-      // tipos_relacionamento. A validação de uma EDIÇÃO (UPDATE) NÃO mexe no tiprel — a alteração já
-      // está in place e o tiprel atual referencia-a via MOB_ID.
-      if (validacaoInsert.isPresent()) {
-        // REGISTO: A (aprovado) ou I (rejeitado).
+      // A mobilidade segue a decisão — A (aprovada) ou I (rejeitada) — tanto no REGISTO (INSERT) como
+      // na EDIÇÃO (UPDATE). Rejeitar uma edição NÃO reverte valores: o update in place fica e o registo
+      // passa a inactivo; se o colaborador precisar de outra mobilidade, regista-se uma nova. Só o
+      // REGISTO cria/troca tipos_relacionamento (mais abaixo); a EDIÇÃO não mexe no tiprel.
+      if (validacao != null) {
         mobilidade.setEstado(estado);
-      } else if (validacao != null) {
-        // EDIÇÃO: a mobilidade estava PENDENTE (P) com os dados já editados in place; validar tira-a
-        // do pendente → volta a ACTIVA (A), quer aprovada quer rejeitada (o update foi feito "na
-        // mesma"; sem snapshot não se revertem valores).
-        mobilidade.setEstado(Estado.A);
       }
 
       if (estado.equals(Estado.A) && validacaoInsert.isPresent()) {
@@ -395,7 +390,7 @@ public class MobilidadeWriteService {
    * update registo (in place); o botão só fica visível se não tiver processamento" + "registo e
    * alteração passa por validação". Faz UPDATE in place na RH_T_MOBILIDADE + cria validação pendente
    * UPDATE + marca a mobilidade PENDENTE (P). NÃO toca no tipos_relacionamento — a alteração propaga
-   * via MOB_ID; a mobilidade volta a A quando validada.
+   * via MOB_ID; a mobilidade passa a A se aprovada ou a I se rejeitada (sem reverter valores).
    *
    * <p><b>Só vai a validação se houver movimento.</b> "Alteração", aqui, é mudança de DIREÇÃO,
    * UNIDADE ou LOCAL DE TRABALHO — os três campos que definem a mobilidade. Editar apenas as datas
