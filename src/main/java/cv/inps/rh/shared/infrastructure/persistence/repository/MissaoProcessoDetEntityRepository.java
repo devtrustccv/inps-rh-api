@@ -14,6 +14,8 @@ public interface MissaoProcessoDetEntityRepository extends
 
   List<MissaoProcessoDetEntity> findAllByMissaoProcessoId_IdOrderByIdAsc(Long missaoProcessoId);
 
+  List<MissaoProcessoDetEntity> findAllByMissaoProcessoId_MissaoServId_Uuid(java.util.UUID missaoUuid);
+
   /** Pareceres do ciclo actual de um responsável (P = rascunho, A = emitido; I = anulado por devolução). */
   List<MissaoProcessoDetEntity> findAllByMissaoProcessoId_IdAndResponsavelAndEstadoInOrderByIdDesc(
       Long missaoProcessoId, String responsavel, java.util.Collection<String> estados);

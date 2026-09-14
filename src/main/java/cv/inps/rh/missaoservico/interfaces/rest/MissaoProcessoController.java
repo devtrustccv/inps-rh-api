@@ -559,4 +559,37 @@ public class MissaoProcessoController {
 
   }
 
+   @GetMapping(
+   value = "processos"
+  )
+  @Operation(
+    summary = "Get lista de processos por etapa",
+    description = "Get lista de processos por etapa",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = WrapperListProcessoEtapaDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<WrapperListProcessoEtapaDTO> getListaProcessosEtapa(
+    @RequestParam(value = "etapa", required = false) String etapa,
+    @RequestParam(value = "tipoProcesso", required = false) String tipoProcesso,
+    @RequestParam(value = "pageNumber", required = false, defaultValue = "0") String pageNumber,
+    @RequestParam(value = "pageSize", required = false, defaultValue = "10") String pageSize)
+  {
+
+      final var query = new GetListaProcessosEtapaQuery(etapa, tipoProcesso, pageNumber, pageSize);
+
+      return queryBus.handle(query);
+
+  }
+
 }

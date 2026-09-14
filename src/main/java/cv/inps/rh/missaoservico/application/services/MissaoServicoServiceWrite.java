@@ -66,6 +66,9 @@ public class MissaoServicoServiceWrite {
   private final MissaoLogisticaDetEntityRepository missaoLogisticaDetRepository;
   private final MissaoRequisicaoEntityRepository missaoRequisicaoRepository;
   private final MissaoProcessoEntityRepository missaoProcessoRepository;
+  private final MissaoProcessoDetEntityRepository missaoProcessoDetRepository;
+  private final MissaoRequisicaoColabEntityRepository missaoRequisicaoColabRepository;
+  private final MissaoPrestadorAvalEntityRepository missaoPrestadorAvalRepository;
   private final GeografiaEntityRepository geografiaRepository;
   private final FuncionarioEntityRepository funcionarioRepository;
   private final DocumentoEntityRepository documentoRepository;
@@ -610,6 +613,14 @@ public class MissaoServicoServiceWrite {
     var dto = command != null ? command.getMissaocancelarrequest() : null;
 
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+    if (ESTADO_INATIVO.equals(missao.getEstado())) {
+      throw IgrpResponseStatusException.badRequest("A missão já está cancelada");
+    }
+    if ("FINALIZADO".equals(missao.getEstado())) {
+      throw IgrpResponseStatusException.badRequest("A missão está finalizada e não pode ser cancelada");
+    }
+    // Decide-se antes de inactivar: depende da etapa dos processos, não do seu estado
+    var notificar = deveNotificarCancelamento(missao);
 
     missao.setMotivoCancelamento(dto != null ? dto.getMotivoCancelamento() : null);
     missao.setEstado(ESTADO_INATIVO);
@@ -643,7 +654,25 @@ public class MissaoServicoServiceWrite {
     if (!CollectionUtils.isEmpty(requisicoes)) {
       requisicoes.forEach(r -> r.setEstado(ESTADO_INATIVO));
       missaoRequisicaoRepository.saveAll(requisicoes);
+
+      var colabsRequisicao = missaoRequisicaoColabRepository.findAllByMissaoRequisicaoId_IdIn(
+          requisicoes.stream().map(MissaoRequisicaoEntity::getId).toList());
+      colabsRequisicao.forEach(rc -> rc.setEstado(ESTADO_INATIVO));
+      missaoRequisicaoColabRepository.saveAll(colabsRequisicao);
     }
+
+    // Modelo por processo (spec 14/09): pareceres, avaliações e os próprios processos
+    var pareceres = missaoProcessoDetRepository.findAllByMissaoProcessoId_MissaoServId_Uuid(missaoUuid);
+    pareceres.forEach(d -> d.setEstado(ESTADO_INATIVO));
+    missaoProcessoDetRepository.saveAll(pareceres);
+
+    var avaliacoes = missaoPrestadorAvalRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid);
+    avaliacoes.forEach(a -> a.setEstado(ESTADO_INATIVO));
+    missaoPrestadorAvalRepository.saveAll(avaliacoes);
+
+    var processos = missaoProcessoRepository.findAllByMissaoServId_UuidOrderByIdAsc(missaoUuid);
+    processos.forEach(p -> p.setEstado(ESTADO_INATIVO));
+    missaoProcessoRepository.saveAll(processos);
 
     var documentos = documentoRepository.findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_MISSAO_SERVICO.name(),
         missaoUuid);
@@ -652,7 +681,7 @@ public class MissaoServicoServiceWrite {
       documentoRepository.saveAll(documentos);
     }
 
-    if (deveNotificarCancelamento(missao)) {
+    if (notificar) {
       persistirNotificacaoCancelamento(missao, dto);
     }
 
@@ -1745,9 +1774,19 @@ public class MissaoServicoServiceWrite {
     return toSave;
   }
 
+  /**
+   * O cancelamento é notificado quando a missão já saiu da análise (spec): algum processo passou a
+   * primeira etapa do seu percurso — houve pedidos de proposta, requisições ou avisos de logística.
+   * Missões sem processos (modelo antigo) usam a etapa da missão.
+   */
   private boolean deveNotificarCancelamento(MissaoServicoEntity missao) {
     if (missao == null)
       return false;
+    var processos = missaoProcessoRepository.findAllByMissaoServId_UuidOrderByIdAsc(missao.getUuid());
+    if (!processos.isEmpty()) {
+      return processos.stream().anyMatch(p ->
+          !TipoProcesso.fromCodeOrThrow(p.getTipoProcesso()).primeiraEtapa().name().equals(p.getEtapa()));
+    }
     if (!StringUtils.hasText(missao.getEtapa()))
       return false;
     return !ETAPA_1.equals(missao.getEtapa()) && !ETAPA_2.equals(missao.getEtapa());
@@ -1761,9 +1800,23 @@ public class MissaoServicoServiceWrite {
 
     // Complementar com emails do histórico de notificações gravadas com referencia da missão
     // (compatibilidade com notificações criadas noutros pontos do fluxo).
-    var anteriores = notificacaoRepository.findAllByReferenciaNameAndReferenciaUuid(
+    // No modelo por processo as notificações ficam referenciadas ao prestador (pedido de proposta,
+    // um registo por email, incluindo os adicionais) e à requisição — todos esses destinatários recebem o aviso.
+    var anteriores = new ArrayList<>(notificacaoRepository.findAllByReferenciaNameAndReferenciaUuid(
         TableName.RH_T_MISSAO_SERVICO.name(),
-        missao.getUuid());
+        missao.getUuid()));
+    for (var prest : prestadores) {
+      if (prest != null && prest.getUuid() != null) {
+        anteriores.addAll(notificacaoRepository.findAllByReferenciaNameAndReferenciaUuid(
+            TableName.RH_T_MISSAO_PRESTADOR.name(), prest.getUuid()));
+      }
+    }
+    for (var req : missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missao.getUuid())) {
+      if (req != null && req.getUuid() != null) {
+        anteriores.addAll(notificacaoRepository.findAllByReferenciaNameAndReferenciaUuid(
+            TableName.RH_T_MISSAO_REQUISICAO.name(), req.getUuid()));
+      }
+    }
 
     var seen = new HashSet<String>();
     var toSave = new ArrayList<NotificacaoEntity>();
@@ -1835,6 +1888,25 @@ public class MissaoServicoServiceWrite {
         n.setEstado(estado);
         toSave.add(n);
       }
+    }
+
+    // 3. Colaboradores da missão — aviso no portal (sem email)
+    for (var colab : missaoColaboradorRepository.findAllByMissaoServId_Uuid(missao.getUuid())) {
+      if (colab == null || colab.getFunId() == null)
+        continue;
+      var n = new NotificacaoEntity();
+      n.setUuid(UuidCreator.getTimeOrderedEpoch());
+      n.setTipoNotificacao(TIPO_NOTIF_CANCELAMENTO);
+      n.setReferenciaId(missao.getId());
+      n.setReferenciaName(TableName.RH_T_MISSAO_COLABORADOR.name());
+      n.setReferenciaUuid(colab.getUuid());
+      n.setAssunto(assunto);
+      n.setMessage(message);
+      n.setNomeReceptor(colab.getFunId().getNome());
+      n.setFunId(colab.getFunId());
+      n.setDataEnvio(LocalDate.now());
+      n.setEstado("Pendente");
+      toSave.add(n);
     }
 
     if (!toSave.isEmpty()) {

@@ -296,6 +296,20 @@
         { "name": "uuid", "type": "string", "isRequired": true },
         { "name": "tipoProcesso", "type": "string", "isRequired": true }
       ]
+    },
+    {
+      "actionName": "getListaProcessosEtapa",
+      "path": "processos",
+      "method": "GET",
+      "responses": {
+        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "WrapperListProcessoEtapa", "objectType": "dto", "collectionType": "none", "module": "missaoservico" } } } }
+      },
+      "requestParams": [
+        { "type": "string", "name": "etapa", "isRequired": false },
+        { "type": "string", "name": "tipoProcesso", "isRequired": false },
+        { "type": "string", "name": "pageNumber", "value": "0", "isRequired": false },
+        { "type": "string", "name": "pageSize", "value": "10", "isRequired": false }
+      ]
     }
   ],
   "id": "msvctrl03missaoproc"

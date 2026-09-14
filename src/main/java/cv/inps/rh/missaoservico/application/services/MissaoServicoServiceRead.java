@@ -641,6 +641,13 @@ public class MissaoServicoServiceRead {
     }
 
     var totalsByMissao = new HashMap<Long, Map<String, BigDecimal>>();
+    var totaisPorProcesso = new HashMap<Long, BigDecimal>();
+    var processosPorMissao = new HashMap<Long, List<MissaoProcessoEntity>>();
+    if (!missaoIds.isEmpty()) {
+      for (var p : missaoProcessoRepository.findAllByMissaoServId_IdIn(missaoIds)) {
+        processosPorMissao.computeIfAbsent(p.getMissaoServId().getId(), _ -> new ArrayList<>()).add(p);
+      }
+    }
     if (!missaoIds.isEmpty()) {
       Specification<MissaoLogisticaEntity> logSpec = (root, q, cb) -> cb.and(
           root.get("missaoServId").get("id").in(missaoIds),
@@ -660,6 +667,9 @@ public class MissaoServicoServiceRead {
           totalsByMissao
               .computeIfAbsent(mid, _ -> new HashMap<>())
               .merge(ref.toUpperCase(), v, BigDecimal::add);
+          if (l.getMissaoProcessoId() != null) {
+            totaisPorProcesso.merge(l.getMissaoProcessoId().getId(), v, BigDecimal::add);
+          }
         }
       }
     }
@@ -670,7 +680,9 @@ public class MissaoServicoServiceRead {
         continue;
 
       var estado = resolveEstadoMissao(m);
-      var situacao = resolveSituacaoLista(m);
+      var processosDaMissao = processosPorMissao.getOrDefault(m.getId(), List.of());
+      var situacao = processosDaMissao.isEmpty() ? resolveSituacaoLista(m) : situacaoPorProcessos(m, processosDaMissao);
+      var etapaAtrasada = processoMaisAtrasado(processosDaMissao).map(MissaoProcessoEntity::getEtapa).orElse(m.getEtapa());
 
       var sums = totalsByMissao.getOrDefault(m.getId(), java.util.Map.of());
       var dto = new MissaoServicoResumoDTO();
@@ -682,8 +694,10 @@ public class MissaoServicoServiceRead {
       dto.setDestino(m.getDescricaoDestino());
       dto.setNacionalInternacional(resolveNacionalInternacional(m.getFlgDestino()));
       dto.setDataMissao(m.getDataInicio());
-      dto.setEtapa(m.getEtapa());
-      dto.setEtapaDesc(resolveEtapaLista(m.getEtapa()));
+      // Etapa da missão = a do processo activo mais atrasado (a etapa da missão fica em SUBMISSAO)
+      dto.setEtapa(etapaAtrasada);
+      var etapaEnum = EtapaProcesso.fromCode(etapaAtrasada);
+      dto.setEtapaDesc(etapaEnum != null ? etapaEnum.getDescricao() : resolveEtapaLista(etapaAtrasada));
       dto.setEstado(estado.estado());
       dto.setEstadoDesc(estado.estadoDesc());
       dto.setSituacao(situacao.estado());
@@ -692,6 +706,21 @@ public class MissaoServicoServiceRead {
       dto.setValorBP(sums.get("BILHETE_PASSAGEM"));
       dto.setValorAlojamento(sums.get("ALOJAMENTO"));
       dto.setValorSeguro(sums.get("SEGURO_VIAGEM"));
+      dto.setProcessos(processosDaMissao.stream()
+          .sorted(Comparator.comparing(MissaoProcessoEntity::getId))
+          .map(p -> {
+            var pd = new MissaoProcessoResumoDTO();
+            pd.setUuid(p.getUuid());
+            pd.setTipoProcesso(p.getTipoProcesso());
+            pd.setTipoProcessoDesc(TipoProcesso.fromCodeOrThrow(p.getTipoProcesso()).getDescricao());
+            pd.setEtapa(p.getEtapa());
+            var e = EtapaProcesso.fromCode(p.getEtapa());
+            pd.setEtapaDesc(e != null ? e.getDescricao() : p.getEtapa());
+            pd.setEstado(p.getEstado());
+            pd.setValorTotal(totaisPorProcesso.get(p.getId()));
+            return pd;
+          })
+          .toList());
       content.add(dto);
     }
 
@@ -876,9 +905,37 @@ public class MissaoServicoServiceRead {
     if (missao == null || !StringUtils.hasText(missao.getEstado())) {
       return new EstadoDesc("", "");
     }
-    return ESTADO_INATIVO.equals(missao.getEstado())
-        ? new EstadoDesc(ESTADO_INATIVO, "Cancelado")
-        : new EstadoDesc(ESTADO_ATIVO, "Activo");
+    if (ESTADO_INATIVO.equals(missao.getEstado()))
+      return new EstadoDesc(ESTADO_INATIVO, "Cancelado");
+    if ("FINALIZADO".equals(missao.getEstado()))
+      return new EstadoDesc("FINALIZADO", "Finalizado");
+    return new EstadoDesc(ESTADO_ATIVO, "Activo");
+  }
+
+  /** Processo activo mais atrasado — define a etapa e a situação da missão na lista. */
+  private Optional<MissaoProcessoEntity> processoMaisAtrasado(List<MissaoProcessoEntity> processos) {
+    return processos.stream()
+        .filter(p -> ESTADO_ATIVO.equals(p.getEstado()))
+        .min(Comparator.comparing(p -> {
+          var e = EtapaProcesso.fromCode(p.getEtapa());
+          return e != null ? e.ordinal() : -1;
+        }));
+  }
+
+  /** Situação da missão no modelo por processo: o que falta ao processo mais atrasado. */
+  private EstadoDesc situacaoPorProcessos(MissaoServicoEntity missao, List<MissaoProcessoEntity> processos) {
+    if ("FINALIZADO".equals(missao.getEstado()))
+      return new EstadoDesc("PAGO", "Pago");
+    var etapa = processoMaisAtrasado(processos).map(p -> EtapaProcesso.fromCode(p.getEtapa())).orElse(null);
+    if (etapa == null)
+      return new EstadoDesc("", "");
+    return switch (etapa) {
+      case PRESTADOR_SERVICO, EMISSAO_REQUISICAO -> new EstadoDesc("PENDENTE_REQUISICAO", "Pendente de Requisição");
+      case LOGISTICA -> new EstadoDesc("PENDENTE_FATURA", "Pendente de Fatura");
+      case VALIDACAO_UGAL, APROVACAO_RH -> new EstadoDesc("EM_VALIDACAO", "Em Validação");
+      case CABIMENTO, AUTORIZACAO -> new EstadoDesc("POR_PAGAR", "Por pagar");
+      case PAGAMENTO -> new EstadoDesc("PAGO", "Pago");
+    };
   }
 
   /**

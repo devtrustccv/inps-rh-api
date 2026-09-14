@@ -17,4 +17,6 @@ public interface MissaoPrestadorAvalEntityRepository extends
   List<MissaoPrestadorAvalEntity> findAllByMissaoPrestId_ParamPrestId_IdAndEstadoOrderByIdDesc(Long paramPrestId, String estado);
 
   Optional<MissaoPrestadorAvalEntity> findFirstByMissaoPrestId_IdAndEstadoOrderByIdDesc(Long missaoPrestId, String estado);
+
+  List<MissaoPrestadorAvalEntity> findAllByMissaoPrestId_MissaoServId_Uuid(java.util.UUID missaoUuid);
 }

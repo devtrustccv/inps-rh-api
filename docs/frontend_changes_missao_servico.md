@@ -8,6 +8,55 @@ Base de todos os endpoints: `/api/v1/missao-servico`
 
 ---
 
+## 2026-09-14 — Listas e cancelamento (Fase 10)
+
+### Lista Geral — sub-lista de processos
+
+`GET /api/v1/missao-servico` — cada missão de `content[]` traz agora:
+```jsonc
+{
+  "nrMissaoFormatado": "3/2026",
+  "estado": "A", "estadoDesc": "Activo",           // A | I (Cancelado) | FINALIZADO (Finalizado)
+  "etapa": "LOGISTICA", "etapaDesc": "Processamento Logístico",   // etapa do processo activo mais atrasado
+  "situacao": "PENDENTE_FATURA", "situacaoDesc": "Pendente de Fatura",
+  "processos": [
+    { "uuid": "…", "tipoProcesso": "BILHETE_PASSAGEM", "tipoProcessoDesc": "Bilhete Passagem",
+      "etapa": "CABIMENTO", "etapaDesc": "Cabimento", "estado": "A", "valorTotal": 180000 },
+    { "uuid": "…", "tipoProcesso": "ALOJAMENTO", "etapa": "PRESTADOR_SERVICO", "estado": "I", "valorTotal": null }
+  ]
+}
+```
+- **`etapa` e `situacao` da missão:** passam a vir do **processo activo mais atrasado**. A etapa ao nível da missão fica sempre em `SUBMISSAO`.
+- **Valores da `situacao`:** `PENDENTE_REQUISICAO`, `PENDENTE_FATURA`, `EM_VALIDACAO` (novo), `POR_PAGAR`, `PAGO`.
+- **Link "Executar":** usar `processos[].tipoProcesso` + `processos[].etapa` para abrir o ecrã da etapa desse processo.
+
+### Lista Etapa Missão (novo)
+
+`GET /api/v1/missao-servico/processos?etapa=VALIDACAO_UGAL&tipoProcesso=BILHETE_PASSAGEM&pageNumber=0&pageSize=10`
+
+- Filtros opcionais: `etapa` (domínio `TIPO_PROCESSO_ETAPA`) e `tipoProcesso` (domínio `TIPO_PROCESSO`). Um valor fora do domínio → **400**.
+- Só mostra processos activos de missões activas (sem canceladas nem finalizadas).
+```jsonc
+{ "content": [
+    { "missaoUuid": "…", "nrMissaoFormatado": "3/2026", "nacionalInternacional": "Internacional",
+      "destino": "Paris", "dataInicio": "2026-10-05", "dataFim": "2026-10-09",
+      "processoUuid": "…", "tipoProcesso": "BILHETE_PASSAGEM", "etapa": "VALIDACAO_UGAL", "etapaDesc": "Validação UGAL" } ],
+  "pageNumber": 0, "pageSize": 10, "totalElements": 1, "totalPages": 1, "first": true, "last": true }
+```
+
+### Cancelar
+
+`PATCH /api/v1/missao-servico/{uuid}/cancelar` — o corpo não muda: `{ "motivoCancelamento": "…" }`.
+
+- **O que fica inactivo:** para além do que já ficava, também os processos, os pareceres, os colaboradores das requisições e as avaliações.
+- **Missão já cancelada** → **400**. **Missão finalizada** → **400**.
+- **Quando se notifica:** se algum processo já passou da primeira etapa do seu percurso.
+- **Quem é notificado:**
+  - todos os que já receberam emails desta missão: prestadores, emails adicionais e destinatários das requisições;
+  - cada colaborador recebe um aviso no portal.
+
+---
+
 ## 2026-09-14 — Cabimentação e Autorização, por processo (Fase 9)
 
 | Ecrã | Método | Path |

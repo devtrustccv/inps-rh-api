@@ -5,7 +5,9 @@ import cv.inps.rh.missaoservico.application.constants.TipoProcesso;
 import cv.inps.rh.missaoservico.application.dto.*;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoPrestadoresQuery;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoRequisicoesQuery;
+import cv.inps.rh.missaoservico.application.constants.EtapaProcesso;
 import cv.inps.rh.missaoservico.application.constants.ResponsavelParecer;
+import cv.inps.rh.missaoservico.application.queries.GetListaProcessosEtapaQuery;
 import cv.inps.rh.missaoservico.application.queries.GetAvaliacaoPrestadorQuery;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoAprovacaoRhQuery;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoCabimentoQuery;
@@ -20,11 +22,15 @@ import cv.inps.rh.shared.domain.models.IdentificadorUnico;
 import cv.inps.rh.shared.infrastructure.persistence.entity.*;
 import cv.inps.rh.shared.infrastructure.persistence.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -49,6 +55,7 @@ public class MissaoProcessoServiceRead {
   private final MissaoLogisticaDetEntityRepository missaoLogisticaDetRepository;
   private final MissaoProcessoDetEntityRepository missaoProcessoDetRepository;
   private final MissaoPrestadorAvalEntityRepository missaoPrestadorAvalRepository;
+  private final MissaoProcessoEntityRepository missaoProcessoRepository;
 
   // ---------------------------------------------------------------------------------------------
   // Etapa Prestadores Serviço
@@ -573,6 +580,79 @@ public class MissaoProcessoServiceRead {
           response.setDataExecucao(data != null ? data.toLocalDate() : null);
         });
     return ResponseEntity.ok(response);
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Lista Etapa Missão
+  // ---------------------------------------------------------------------------------------------
+
+  /**
+   * Processos activos de missões activas, filtrados por etapa e/ou tipo — o ecrã "Lista Etapa
+   * Missão", de onde o utilizador abre o processo na etapa em que está.
+   */
+  @Transactional(readOnly = true)
+  public ResponseEntity<WrapperListProcessoEtapaDTO> listarPorEtapa(GetListaProcessosEtapaQuery query) {
+    var etapa = query != null && StringUtils.hasText(query.getEtapa())
+        ? EtapaProcesso.fromCodeOrThrow(query.getEtapa().trim().toUpperCase())
+        : null;
+    var tipo = query != null && StringUtils.hasText(query.getTipoProcesso())
+        ? TipoProcesso.fromCodeOrThrow(query.getTipoProcesso().trim().toUpperCase())
+        : null;
+    var pageNumber = parseIntOr(query != null ? query.getPageNumber() : null, 0);
+    var pageSize = parseIntOr(query != null ? query.getPageSize() : null, 10);
+
+    Specification<MissaoProcessoEntity> spec = (root, q, cb) -> {
+      var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
+      predicates.add(cb.equal(root.get("estado"), ESTADO_ATIVO));
+      predicates.add(cb.equal(root.get("missaoServId").get("estado"), ESTADO_ATIVO));
+      if (etapa != null) {
+        predicates.add(cb.equal(root.get("etapa"), etapa.name()));
+      }
+      if (tipo != null) {
+        predicates.add(cb.equal(root.get("tipoProcesso"), tipo.name()));
+      }
+      return cb.and(predicates.toArray(jakarta.persistence.criteria.Predicate[]::new));
+    };
+
+    var page = missaoProcessoRepository.findAll(spec,
+        PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "id")));
+
+    var wrapper = new WrapperListProcessoEtapaDTO();
+    wrapper.setContent(page.getContent().stream().map(p -> {
+      var missao = p.getMissaoServId();
+      var dto = new ProcessoEtapaListaItemDTO();
+      dto.setMissaoUuid(missao.getUuid());
+      dto.setNrMissaoFormatado(support.nrMissaoFormatado(missao));
+      dto.setNacionalInternacional(Integer.valueOf(1).equals(missao.getFlgDestino()) ? "Nacional"
+          : Integer.valueOf(2).equals(missao.getFlgDestino()) ? "Internacional" : null);
+      dto.setDestino(missao.getDescricaoDestino());
+      dto.setDataInicio(missao.getDataInicio());
+      dto.setDataFim(missao.getDataFim());
+      dto.setProcessoUuid(p.getUuid());
+      dto.setTipoProcesso(p.getTipoProcesso());
+      dto.setTipoProcessoDesc(TipoProcesso.fromCodeOrThrow(p.getTipoProcesso()).getDescricao());
+      dto.setEtapa(p.getEtapa());
+      var e = EtapaProcesso.fromCode(p.getEtapa());
+      dto.setEtapaDesc(e != null ? e.getDescricao() : p.getEtapa());
+      return dto;
+    }).toList());
+    wrapper.setPageNumber(page.getNumber());
+    wrapper.setPageSize(page.getSize());
+    wrapper.setTotalElements(page.getTotalElements());
+    wrapper.setTotalPages(page.getTotalPages());
+    wrapper.setFirst(page.isFirst());
+    wrapper.setLast(page.isLast());
+    return ResponseEntity.ok(wrapper);
+  }
+
+  private int parseIntOr(String raw, int fallback) {
+    if (!StringUtils.hasText(raw))
+      return fallback;
+    try {
+      return Math.max(0, Integer.parseInt(raw.trim()));
+    } catch (NumberFormatException e) {
+      return fallback;
+    }
   }
 
   // ---------------------------------------------------------------------------------------------
