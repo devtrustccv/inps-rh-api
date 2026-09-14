@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -32,7 +33,8 @@ public class AlojamentoResponseDTO  {
   private LocalDate dataInicio;
   private LocalDate dataFim;
   private Integer nrDias;                 // calculado
-  private MissaoLogisticaDetResponseDTO colaborador;
+  private MissaoLogisticaDetResponseDTO colaborador;          // primeiro colaborador (compatibilidade)
+  private List<MissaoLogisticaDetResponseDTO> colaboradores;  // todos os colaboradores do alojamento
   private AnexoRespDTO documento;
   private String estado;
   // referencia = 'ALOJAMENTO' (interno)

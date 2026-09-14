@@ -114,6 +114,51 @@
         { "name": "tipoProcesso", "type": "string", "isRequired": true },
         { "name": "requisicaoUuid", "type": "string", "isRequired": true }
       ]
+    },
+    {
+      "actionName": "getProcessoLogistica",
+      "path": "{uuid}/processos/{tipoProcesso}/logistica",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": { "type": "ProcessoLogisticaResponse", "objectType": "dto", "collectionType": "none", "module": "missaoservico" }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true },
+        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+      ]
+    },
+    {
+      "actionName": "saveProcessoLogistica",
+      "path": "{uuid}/processos/{tipoProcesso}/logistica",
+      "method": "PUT",
+      "requestBody": {
+        "content": {
+          "application/json": {
+            "schema": { "type": "ProcessoLogisticaRequest", "collectionType": "none", "objectType": "dto", "module": "missaoservico" }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": { "type": "string", "collectionType": "map" }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true },
+        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+      ]
     }
   ],
   "id": "msvctrl03missaoproc"

@@ -8,10 +8,13 @@ import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoProcessoResponseDTO;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoColaboradorEntity;
+import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoPrestadorEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoProcessoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoServicoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.TipoDocumentoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoColaboradorEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoRequisicaoColabEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoRequisicaoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoProcessoEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.repository.ParamNotificacaoEntityRepository;
 import jakarta.persistence.EntityManager;
@@ -19,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -40,6 +44,8 @@ public class MissaoProcessoSupport {
   private final MissaoProcessoEntityRepository missaoProcessoRepository;
   private final MissaoColaboradorEntityRepository missaoColaboradorRepository;
   private final ParamNotificacaoEntityRepository paramNotificacaoRepository;
+  private final MissaoRequisicaoEntityRepository missaoRequisicaoRepository;
+  private final MissaoRequisicaoColabEntityRepository missaoRequisicaoColabRepository;
   private final EntityManager entityManager;
 
   public record Conteudo(String assunto, String corpo) {}
@@ -145,6 +151,38 @@ public class MissaoProcessoSupport {
             + "- Colaboradores: " + vars.get("colaboradores") + "\n"
             + "- Valor total: " + vars.get("valorTotal") + "\n\n"
             + "Com os melhores cumprimentos,\nINPS - Recursos Humanos");
+  }
+
+  /** Aviso ao colaborador de que a logística do processo está registada (template MISSAO_LOGISTICA_COLABORADOR). */
+  public Conteudo conteudoLogisticaColaborador(Map<String, String> vars, MissaoNotificacaoRequestDTO editado) {
+    return conteudo("MISSAO_LOGISTICA_COLABORADOR", vars, editado,
+        "Detalhes da sua Missão Nº " + vars.get("nrMissao") + " - " + vars.get("tipoProcesso"),
+        "Exmo(a) Colaborador(a),\n\n"
+            + "Informamos que está registado o " + vars.get("tipoProcesso") + " da sua missão de serviço Nº "
+            + vars.get("nrMissao") + ".\n"
+            + "- Destino: " + vars.get("destino") + "\n"
+            + "- Datas: " + vars.get("dataInicio") + " a " + vars.get("dataFim") + "\n\n"
+            + "Os detalhes podem ser consultados no portal RH.\n\nCom os melhores cumprimentos,\nINPS - Recursos Humanos");
+  }
+
+  /**
+   * Prestador a que cada colaborador ficou associado nas requisições activas do processo
+   * (id de RH_T_MISSAO_COLABORADOR → prestador). Colaboradores sem requisição não aparecem.
+   */
+  public Map<Long, MissaoPrestadorEntity> prestadorPorColaborador(MissaoProcessoEntity processo) {
+    var out = new HashMap<Long, MissaoPrestadorEntity>();
+    var ids = missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoProcessoId_IdOrderByIdAsc(processo.getId()).stream()
+        .filter(r -> ESTADO_ATIVO.equals(r.getEstado()))
+        .map(r -> r.getId())
+        .toList();
+    if (ids.isEmpty())
+      return out;
+    for (var rc : missaoRequisicaoColabRepository.findAllByMissaoRequisicaoId_IdIn(ids)) {
+      if (ESTADO_ATIVO.equals(rc.getEstado())) {
+        out.putIfAbsent(rc.getMissaoColabId().getId(), rc.getMissaoRequisicaoId().getMissaoPrestId());
+      }
+    }
+    return out;
   }
 
   private Conteudo conteudo(String tipoNotificacao, Map<String, String> vars, MissaoNotificacaoRequestDTO editado,

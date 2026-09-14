@@ -4,11 +4,17 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.igrp.platform.filemanager.StorageService;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.commands.SaveProcessoPrestadoresCommand;
+import cv.inps.rh.missaoservico.application.commands.SaveProcessoLogisticaCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveProcessoRequisicoesCommand;
 import cv.inps.rh.missaoservico.application.constants.EtapaProcesso;
 import cv.inps.rh.missaoservico.application.constants.TipoProcesso;
 import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.AjudaCustoRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.AlojamentoRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.BilhetePassagemRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.ProcessoLogisticaRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.ProcessoRequisicaoItemRequestDTO;
+import cv.inps.rh.missaoservico.application.dto.SeguroViagemRequestDTO;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoReqDTO;
@@ -23,8 +29,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.time.temporal.ChronoUnit;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -58,6 +68,9 @@ public class MissaoProcessoServiceWrite {
   private final NotificacaoEntityRepository notificacaoRepository;
   private final EmailService emailService;
   private final StorageService storageService;
+  private final MissaoLogisticaEntityRepository missaoLogisticaRepository;
+  private final MissaoLogisticaDetEntityRepository missaoLogisticaDetRepository;
+  private final EntidadeEntityRepository entidadeRepository;
 
   // ---------------------------------------------------------------------------------------------
   // Etapa Prestadores Serviço
@@ -399,10 +412,15 @@ public class MissaoProcessoServiceWrite {
 
   /** Proposta (fatura proforma) anexada: com id actualiza, sem id cria e marca a anterior como eliminada. */
   private void sincronizarProposta(MissaoRequisicaoEntity requisicao, AnexoReqDTO proposta) {
+    sincronizarAnexo(TableName.RH_T_MISSAO_REQUISICAO.name(), requisicao.getId(), requisicao.getUuid(), proposta);
+  }
+
+  /** Anexo único de um registo: com id actualiza, sem id cria e marca o anterior como eliminado. */
+  private void sincronizarAnexo(String referenciaName, Long referenciaId, UUID referenciaUuid, AnexoReqDTO anexo) {
     var existentes = new ArrayList<>(documentoRepository.findAllByReferenciaNameAndReferenciaUuid(
-        TableName.RH_T_MISSAO_REQUISICAO.name(), requisicao.getUuid()));
-    var sync = documentoMapper.syncDocumentos(existentes, List.of(proposta),
-        TableName.RH_T_MISSAO_REQUISICAO.name(), requisicao.getId(), requisicao.getUuid(), 1L, null);
+        referenciaName, referenciaUuid));
+    var sync = documentoMapper.syncDocumentos(existentes, List.of(anexo),
+        referenciaName, referenciaId, referenciaUuid, 1L, null);
     sync.forEach(d -> {
       if (d.getUuid() == null)
         d.setUuid(UuidCreator.getTimeOrderedEpoch());
@@ -469,6 +487,454 @@ public class MissaoProcessoServiceWrite {
     nf.setMinimumFractionDigits(2);
     nf.setMaximumFractionDigits(2);
     return nf.format(requisicao.getValorTotal()) + " CVE";
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Etapa Logística
+  // ---------------------------------------------------------------------------------------------
+
+  private static final String TIPO_NOTIF_LOGISTICA_COLAB = "MISSAO_LOGISTICA_COLABORADOR";
+
+  /** Linha de logística pedida pelo ecrã, já validada: dados a gravar, colaboradores e anexo. */
+  private record LinhaLogistica(MissaoLogisticaEntity dados, List<MissaoColaboradorEntity> colaboradores, AnexoReqDTO anexo) {}
+
+  /**
+   * Logística de um processo — só a secção do seu tipo (bilhete, seguro, alojamento ou ajuda de
+   * custo). A lista enviada é a secção completa; {@code null} não mexe. As linhas reaproveitam-se
+   * pelo conjunto de colaboradores, pelo que ids e anexos se mantêm entre gravações. Linhas já
+   * cabimentadas não podem ser removidas nem mudar de valor.
+   *
+   * <p>NEXT exige pelo menos uma linha, avança para Validação UGAL e avisa os colaboradores.
+   */
+  @Transactional
+  public ResponseEntity<Map<String, ?>> salvarLogistica(SaveProcessoLogisticaCommand command) {
+    var missaoUuid = IdentificadorUnico.from(command != null ? command.getUuid() : null).valor();
+    var dto = command.getProcessologisticarequest();
+    if (dto == null) {
+      throw IgrpResponseStatusException.badRequest("Payload inválido");
+    }
+
+    var processo = support.processo(missaoUuid, command.getTipoProcesso(), true);
+    var missao = processo.getMissaoServId();
+    var tipo = TipoProcesso.fromCodeOrThrow(processo.getTipoProcesso());
+    var avancar = support.isNext(dto.getProcessoEtapaAction());
+    guard.exigirEtapa(processo, EtapaProcesso.LOGISTICA, avancar);
+    validarSeccoes(dto, tipo);
+
+    List<LinhaLogistica> pedidas = switch (tipo) {
+      case BILHETE_PASSAGEM -> dto.getBilhetesPassagem() == null ? null : linhasBilhete(missao, processo, dto.getBilhetesPassagem());
+      case SEGURO_VIAGEM -> dto.getSegurosViagem() == null ? null : linhasSeguro(missao, processo, dto.getSegurosViagem());
+      case ALOJAMENTO -> dto.getAlojamentos() == null ? null : linhasAlojamento(missao, processo, dto.getAlojamentos());
+      case AJUDA_CUSTO -> dto.getAjudasCusto() == null ? null : linhasAjudaCusto(missao, processo, dto.getAjudasCusto());
+    };
+    if (pedidas != null) {
+      validarColaboradoresUnicos(pedidas, tipo);
+      sincronizarLogistica(processo, pedidas);
+    }
+
+    if (avancar) {
+      var ativas = missaoLogisticaRepository.findAllByMissaoProcessoId_IdOrderByIdAsc(processo.getId()).stream()
+          .filter(l -> ESTADO_ATIVO.equals(l.getEstado()))
+          .toList();
+      if (ativas.isEmpty()) {
+        throw IgrpResponseStatusException.badRequest(
+            "Registe pelo menos uma linha de " + tipo.getDescricao() + " antes de avançar");
+      }
+      var etapaAntes = processo.getEtapa();
+      guard.avancarApos(processo, EtapaProcesso.LOGISTICA);
+      missaoProcessoRepository.save(processo);
+      if (EtapaProcesso.LOGISTICA.name().equals(etapaAntes)) {
+        notificarColaboradoresLogistica(missao, tipo, ativas, dto.getNotificacao());
+      }
+    }
+
+    return ResponseEntity.ok(Map.of(
+        "id", processo.getUuid().toString(),
+        "etapa", processo.getEtapa()));
+  }
+
+  private void validarSeccoes(ProcessoLogisticaRequestDTO dto, TipoProcesso tipo) {
+    var seccoes = new LinkedHashMap<TipoProcesso, List<?>>();
+    seccoes.put(TipoProcesso.BILHETE_PASSAGEM, dto.getBilhetesPassagem());
+    seccoes.put(TipoProcesso.SEGURO_VIAGEM, dto.getSegurosViagem());
+    seccoes.put(TipoProcesso.ALOJAMENTO, dto.getAlojamentos());
+    seccoes.put(TipoProcesso.AJUDA_CUSTO, dto.getAjudasCusto());
+    for (var e : seccoes.entrySet()) {
+      if (e.getKey() != tipo && e.getValue() != null && !e.getValue().isEmpty()) {
+        throw IgrpResponseStatusException.badRequest(
+            "O processo " + tipo.name() + " só aceita a secção do seu tipo — recebida a secção de " + e.getKey().name());
+      }
+    }
+  }
+
+  private List<LinhaLogistica> linhasBilhete(MissaoServicoEntity missao, MissaoProcessoEntity processo,
+                                             List<BilhetePassagemRequestDTO> itens) {
+    var prestadorPorColab = support.prestadorPorColaborador(processo);
+    var out = new ArrayList<LinhaLogistica>();
+    for (var item : itens) {
+      if (item == null)
+        continue;
+      if (item.getValor() == null) {
+        throw IgrpResponseStatusException.badRequest("bilhetesPassagem: valor é obrigatório");
+      }
+      var colabs = colaboradoresDaLinha(missao.getUuid(), item.getColaboradorIds(), "bilhetesPassagem");
+      var log = novaLinha(missao, processo);
+      log.setPrestadorServId(prestadorDaLinha(colabs, prestadorPorColab, "bilhetesPassagem"));
+      log.setValorTotal(item.getValor());
+      log.setMoeda("CVE");
+      out.add(new LinhaLogistica(log, colabs, item.getAnexo()));
+    }
+    return out;
+  }
+
+  private List<LinhaLogistica> linhasSeguro(MissaoServicoEntity missao, MissaoProcessoEntity processo,
+                                            List<SeguroViagemRequestDTO> itens) {
+    var out = new ArrayList<LinhaLogistica>();
+    for (var item : itens) {
+      if (item == null)
+        continue;
+      if (item.getEntId() == null) {
+        throw IgrpResponseStatusException.badRequest("segurosViagem: entId é obrigatório");
+      }
+      if (item.getValor() == null) {
+        throw IgrpResponseStatusException.badRequest("segurosViagem: valor é obrigatório");
+      }
+      var seguradora = entidadeRepository.findById(item.getEntId())
+          .orElseThrow(() -> IgrpResponseStatusException.badRequest("segurosViagem: seguradora inválida: " + item.getEntId()));
+      var colabs = colaboradoresDaLinha(missao.getUuid(), item.getColaboradorIds(), "segurosViagem");
+
+      var log = novaLinha(missao, processo);
+      log.setEntId(seguradora.getId());
+      log.setNomeSeguradora(StringUtils.hasText(item.getNomeSeguradora()) ? item.getNomeSeguradora().trim() : seguradora.getNome());
+      log.setValorTotal(item.getValor());
+      log.setMoeda("CVE");
+      out.add(new LinhaLogistica(log, colabs, item.getAnexo()));
+    }
+    return out;
+  }
+
+  private List<LinhaLogistica> linhasAlojamento(MissaoServicoEntity missao, MissaoProcessoEntity processo,
+                                                List<AlojamentoRequestDTO> itens) {
+    var prestadorPorColab = support.prestadorPorColaborador(processo);
+    var out = new ArrayList<LinhaLogistica>();
+    for (var item : itens) {
+      if (item == null)
+        continue;
+      if (!StringUtils.hasText(item.getLugarHospedagem())) {
+        throw IgrpResponseStatusException.badRequest("alojamentos: lugarHospedagem é obrigatório");
+      }
+      var alimentacao = item.getFlgAlimentacao() != null ? item.getFlgAlimentacao().trim().toUpperCase() : null;
+      if (!"SIM".equals(alimentacao) && !"NAO".equals(alimentacao)) {
+        throw IgrpResponseStatusException.badRequest("alojamentos: flgAlimentacao é obrigatório (SIM ou NAO)");
+      }
+      if (item.getValorDiario() == null) {
+        throw IgrpResponseStatusException.badRequest("alojamentos: valorDiario é obrigatório");
+      }
+      var inicio = item.getDataInicio() != null ? item.getDataInicio() : missao.getDataInicio();
+      var fim = item.getDataFim() != null ? item.getDataFim() : missao.getDataFim();
+      if (inicio == null || fim == null) {
+        throw IgrpResponseStatusException.badRequest("alojamentos: dataInicio e dataFim são obrigatórias");
+      }
+      if (fim.isBefore(inicio)) {
+        throw IgrpResponseStatusException.badRequest("alojamentos: dataFim não pode ser anterior a dataInicio");
+      }
+      var nrDias = (int) ChronoUnit.DAYS.between(inicio, fim) + 1;
+
+      var funUuids = item.getColaboradorIds() != null && !item.getColaboradorIds().isEmpty()
+          ? item.getColaboradorIds()
+          : item.getColaboradorId() != null ? List.of(item.getColaboradorId()) : List.<UUID>of();
+      var colabs = colaboradoresDaLinha(missao.getUuid(), funUuids, "alojamentos");
+
+      var log = novaLinha(missao, processo);
+      log.setPrestadorServId(prestadorDaLinha(colabs, prestadorPorColab, "alojamentos"));
+      log.setLugarHospedagem(item.getLugarHospedagem().trim());
+      log.setFlgAlimentacao(alimentacao);
+      log.setValorDiario(item.getValorDiario());
+      log.setValorTotal(item.getValorTotal() != null
+          ? item.getValorTotal()
+          : item.getValorDiario().multiply(BigDecimal.valueOf(nrDias)));
+      log.setMoeda(StringUtils.hasText(item.getMoeda()) ? item.getMoeda().trim().toUpperCase() : "CVE");
+      log.setDataInicio(inicio);
+      log.setDataFim(fim);
+      log.setNrDias(nrDias);
+      out.add(new LinhaLogistica(log, colabs, item.getAnexo()));
+    }
+    return out;
+  }
+
+  private List<LinhaLogistica> linhasAjudaCusto(MissaoServicoEntity missao, MissaoProcessoEntity processo,
+                                                List<AjudaCustoRequestDTO> itens) {
+    var alimentacaoPorColab = alimentacaoPorColaborador(missao.getUuid());
+    var out = new ArrayList<LinhaLogistica>();
+    for (var item : itens) {
+      if (item == null)
+        continue;
+      if (item.getColaboradorId() == null) {
+        throw IgrpResponseStatusException.badRequest("ajudasCusto: colaboradorId é obrigatório");
+      }
+      if (item.getFlgAlojamento() == null) {
+        throw IgrpResponseStatusException.badRequest("ajudasCusto: flgAlojamento é obrigatório");
+      }
+      if (item.getNumeroDiasAlojamento() == null || item.getNumeroDiasAlojamento() < 0) {
+        throw IgrpResponseStatusException.badRequest("ajudasCusto: numeroDiasAlojamento é obrigatório e não pode ser negativo");
+      }
+      if (item.getValorDiario() == null) {
+        throw IgrpResponseStatusException.badRequest("ajudasCusto: valorDiario é obrigatório");
+      }
+      var colab = colaboradoresDaLinha(missao.getUuid(), List.of(item.getColaboradorId()), "ajudasCusto").getFirst();
+      var diario = calcularValorDiarioAjudaCusto(item.getValorDiario(), item.getFlgAlojamento(), alimentacaoPorColab.get(colab.getId()));
+
+      var log = novaLinha(missao, processo);
+      log.setFlgAlojamento(item.getFlgAlojamento() ? "SIM" : "NAO");
+      log.setNrDias(item.getNumeroDiasAlojamento());
+      log.setValorDiario(diario);
+      log.setValorTotal(diario.multiply(BigDecimal.valueOf(item.getNumeroDiasAlojamento())));
+      log.setMoeda("CVE");
+      out.add(new LinhaLogistica(log, List.of(colab), null));
+    }
+    return out;
+  }
+
+  /**
+   * Fração do valor diário base da ajuda de custo (spec): 100% com alojamento próprio ou em casa de
+   * família, ⅔ se a instituição paga alojamento sem alimentação, ⅓ se paga alojamento com alimentação.
+   *
+   * <p>O valor base vem do cliente — a tabela de preços da ajuda de custo (por função e missão
+   * nacional/internacional) não está especificada.
+   */
+  private BigDecimal calcularValorDiarioAjudaCusto(BigDecimal base, boolean incluiAlojamento, String flgAlimentacao) {
+    if (!incluiAlojamento)
+      return base;
+    var fracao = "SIM".equalsIgnoreCase(flgAlimentacao) ? 1 : 2;
+    return base.multiply(BigDecimal.valueOf(fracao)).divide(BigDecimal.valueOf(3), 2, RoundingMode.HALF_UP);
+  }
+
+  /** Alimentação incluída no alojamento de cada colaborador (linhas activas do processo ALOJAMENTO). */
+  private Map<Long, String> alimentacaoPorColaborador(UUID missaoUuid) {
+    var linhas = missaoLogisticaRepository.findAllByMissaoServId_Uuid(missaoUuid).stream()
+        .filter(l -> ESTADO_ATIVO.equals(l.getEstado()) && TipoProcesso.ALOJAMENTO.name().equals(l.getReferencia()))
+        .toList();
+    var out = new HashMap<Long, String>();
+    if (linhas.isEmpty())
+      return out;
+    var porId = new HashMap<Long, MissaoLogisticaEntity>();
+    linhas.forEach(l -> porId.put(l.getId(), l));
+    for (var det : missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(new ArrayList<>(porId.keySet()))) {
+      if (ESTADO_ATIVO.equals(det.getEstado())) {
+        out.putIfAbsent(det.getMissaoColabId().getId(), porId.get(det.getMissaoLogistId().getId()).getFlgAlimentacao());
+      }
+    }
+    return out;
+  }
+
+  private MissaoLogisticaEntity novaLinha(MissaoServicoEntity missao, MissaoProcessoEntity processo) {
+    var log = new MissaoLogisticaEntity();
+    log.setUuid(UuidCreator.getTimeOrderedEpoch());
+    log.setEstado(ESTADO_ATIVO);
+    log.setMissaoServId(missao);
+    log.setMissaoProcessoId(processo);
+    log.setReferencia(processo.getTipoProcesso());
+    log.setDataInicio(missao.getDataInicio());
+    log.setDataFim(missao.getDataFim());
+    log.setNrDias(missao.getNrDias());
+    return log;
+  }
+
+  private List<MissaoColaboradorEntity> colaboradoresDaLinha(UUID missaoUuid, List<UUID> funUuids, String seccao) {
+    var distintos = funUuids == null ? List.<UUID>of() : funUuids.stream().filter(Objects::nonNull).distinct().toList();
+    if (distintos.isEmpty()) {
+      throw IgrpResponseStatusException.badRequest(seccao + ": indique pelo menos um colaborador");
+    }
+    return distintos.stream()
+        .map(funUuid -> missaoColaboradorRepository.findByMissaoServId_UuidAndFunId_Uuid(missaoUuid, funUuid)
+            .filter(c -> ESTADO_ATIVO.equals(c.getEstado()))
+            .orElseThrow(() -> IgrpResponseStatusException.badRequest(seccao + ": colaborador não pertence à missão: " + funUuid)))
+        .toList();
+  }
+
+  private MissaoPrestadorEntity prestadorDaLinha(List<MissaoColaboradorEntity> colabs,
+                                                 Map<Long, MissaoPrestadorEntity> prestadorPorColab, String seccao) {
+    MissaoPrestadorEntity prestador = null;
+    for (var colab : colabs) {
+      var p = prestadorPorColab.get(colab.getId());
+      if (p == null) {
+        throw IgrpResponseStatusException.badRequest(
+            seccao + ": o colaborador " + nomeColaborador(colab) + " não tem requisição neste processo");
+      }
+      if (prestador != null && !prestador.getId().equals(p.getId())) {
+        throw IgrpResponseStatusException.badRequest(
+            seccao + ": os colaboradores de uma linha têm de pertencer à requisição do mesmo prestador");
+      }
+      prestador = p;
+    }
+    return prestador;
+  }
+
+  private void validarColaboradoresUnicos(List<LinhaLogistica> linhas, TipoProcesso tipo) {
+    var vistos = new HashSet<Long>();
+    for (var linha : linhas) {
+      for (var colab : linha.colaboradores()) {
+        if (!vistos.add(colab.getId())) {
+          throw IgrpResponseStatusException.badRequest(
+              tipo.getDescricao() + ": o colaborador " + nomeColaborador(colab) + " aparece em mais do que uma linha");
+        }
+      }
+    }
+  }
+
+  private void sincronizarLogistica(MissaoProcessoEntity processo, List<LinhaLogistica> pedidas) {
+    var existentes = missaoLogisticaRepository.findAllByMissaoProcessoId_IdOrderByIdAsc(processo.getId()).stream()
+        .filter(l -> ESTADO_ATIVO.equals(l.getEstado()))
+        .toList();
+
+    var detsPorLinha = new HashMap<Long, List<MissaoLogisticaDetEntity>>();
+    var idsExistentes = existentes.stream().map(MissaoLogisticaEntity::getId).toList();
+    if (!idsExistentes.isEmpty()) {
+      for (var det : missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(idsExistentes)) {
+        if (ESTADO_ATIVO.equals(det.getEstado())) {
+          detsPorLinha.computeIfAbsent(det.getMissaoLogistId().getId(), _ -> new ArrayList<>()).add(det);
+        }
+      }
+    }
+
+    // Linhas existentes indexadas pelo conjunto de colaboradores — a chave estável de uma linha.
+    var porChave = new HashMap<String, ArrayDeque<MissaoLogisticaEntity>>();
+    for (var e : existentes) {
+      var chave = chaveLogistica(detsPorLinha.getOrDefault(e.getId(), List.of()).stream()
+          .map(d -> d.getMissaoColabId().getId())
+          .toList());
+      porChave.computeIfAbsent(chave, _ -> new ArrayDeque<>()).add(e);
+    }
+
+    var destinoPorLinha = new LinkedHashMap<LinhaLogistica, MissaoLogisticaEntity>();
+    var novas = new ArrayList<LinhaLogistica>();
+    var toSave = new ArrayList<MissaoLogisticaEntity>();
+
+    for (var pedida : pedidas) {
+      var chave = chaveLogistica(pedida.colaboradores().stream().map(MissaoColaboradorEntity::getId).toList());
+      var existente = Optional.ofNullable(porChave.get(chave)).map(ArrayDeque::poll).orElse(null);
+      if (existente != null) {
+        if (existente.getEstadoCabimento() != null && !mesmoValor(existente.getValorTotal(), pedida.dados().getValorTotal())) {
+          throw IgrpResponseStatusException.badRequest(
+              "A linha de " + existente.getReferencia() + " já foi cabimentada e o valor não pode ser alterado");
+        }
+        copiarDadosLogistica(pedida.dados(), existente);
+        destinoPorLinha.put(pedida, existente);
+        toSave.add(existente);
+      } else {
+        novas.add(pedida);
+        destinoPorLinha.put(pedida, pedida.dados());
+        toSave.add(pedida.dados());
+      }
+    }
+
+    // O que sobrou deixou de ser pedido: linha, detalhes e documentos são inactivados.
+    var detsToSave = new ArrayList<MissaoLogisticaDetEntity>();
+    var docsToSave = new ArrayList<DocumentoEntity>();
+    for (var orfa : porChave.values().stream().flatMap(Collection::stream).toList()) {
+      if (orfa.getEstadoCabimento() != null) {
+        throw IgrpResponseStatusException.badRequest(
+            "A linha de " + orfa.getReferencia() + " já foi cabimentada e não pode ser removida");
+      }
+      orfa.setEstado(ESTADO_INATIVO);
+      toSave.add(orfa);
+      for (var det : detsPorLinha.getOrDefault(orfa.getId(), List.of())) {
+        det.setEstado(ESTADO_INATIVO);
+        detsToSave.add(det);
+      }
+      for (var doc : documentoRepository.findAllByReferenciaNameAndReferenciaUuid(TableName.RH_T_MISSAO_LOGISTICA.name(), orfa.getUuid())) {
+        doc.setEstado(Estado.I);
+        docsToSave.add(doc);
+      }
+    }
+
+    missaoLogisticaRepository.saveAll(toSave);
+
+    // Só as linhas novas precisam de detalhes: as reaproveitadas casaram precisamente pelos colaboradores.
+    for (var nova : novas) {
+      for (var colab : nova.colaboradores()) {
+        var det = new MissaoLogisticaDetEntity();
+        det.setEstado(ESTADO_ATIVO);
+        det.setMissaoLogistId(nova.dados());
+        det.setMissaoColabId(colab);
+        detsToSave.add(det);
+      }
+    }
+    if (!detsToSave.isEmpty()) {
+      missaoLogisticaDetRepository.saveAll(detsToSave);
+    }
+    if (!docsToSave.isEmpty()) {
+      documentoRepository.saveAll(docsToSave);
+    }
+
+    for (var entry : destinoPorLinha.entrySet()) {
+      var anexo = entry.getKey().anexo();
+      var log = entry.getValue();
+      if (anexo != null) {
+        sincronizarAnexo(TableName.RH_T_MISSAO_LOGISTICA.name(), log.getId(), log.getUuid(), anexo);
+      }
+    }
+  }
+
+  private String chaveLogistica(List<Long> colaboradorIds) {
+    return colaboradorIds.stream().sorted().map(String::valueOf).collect(Collectors.joining("-"));
+  }
+
+  /** Copia os dados de negócio para a linha já persistida, preservando id, uuid e cabimento. */
+  private void copiarDadosLogistica(MissaoLogisticaEntity origem, MissaoLogisticaEntity destino) {
+    destino.setPrestadorServId(origem.getPrestadorServId());
+    destino.setNomeSeguradora(origem.getNomeSeguradora());
+    destino.setEntId(origem.getEntId());
+    destino.setValorTotal(origem.getValorTotal());
+    destino.setMoeda(origem.getMoeda());
+    destino.setLugarHospedagem(origem.getLugarHospedagem());
+    destino.setFlgAlimentacao(origem.getFlgAlimentacao());
+    destino.setValorDiario(origem.getValorDiario());
+    destino.setDataInicio(origem.getDataInicio());
+    destino.setDataFim(origem.getDataFim());
+    destino.setNrDias(origem.getNrDias());
+    destino.setFlgAlojamento(origem.getFlgAlojamento());
+    destino.setMissaoProcessoId(origem.getMissaoProcessoId());
+    destino.setEstado(ESTADO_ATIVO);
+  }
+
+  private static boolean mesmoValor(BigDecimal a, BigDecimal b) {
+    return a == null ? b == null : b != null && a.compareTo(b) == 0;
+  }
+
+  private static String nomeColaborador(MissaoColaboradorEntity colab) {
+    return colab.getFunId() != null ? colab.getFunId().getNome() : String.valueOf(colab.getUuid());
+  }
+
+  /** Um aviso por colaborador das linhas do processo — gravado em RH_T_NOTIFICACAO para o portal. */
+  private void notificarColaboradoresLogistica(MissaoServicoEntity missao, TipoProcesso tipo,
+                                               List<MissaoLogisticaEntity> linhas, MissaoNotificacaoRequestDTO editado) {
+    var conteudo = support.conteudoLogisticaColaborador(support.varsMissao(missao, tipo), editado);
+    var colaboradores = new LinkedHashMap<Long, MissaoColaboradorEntity>();
+    var ids = linhas.stream().map(MissaoLogisticaEntity::getId).toList();
+    for (var det : missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(ids)) {
+      if (ESTADO_ATIVO.equals(det.getEstado())) {
+        colaboradores.putIfAbsent(det.getMissaoColabId().getId(), det.getMissaoColabId());
+      }
+    }
+
+    for (var colab : colaboradores.values()) {
+      if (colab.getFunId() == null)
+        continue;
+      var n = new NotificacaoEntity();
+      n.setUuid(UuidCreator.getTimeOrderedEpoch());
+      n.setTipoNotificacao(TIPO_NOTIF_LOGISTICA_COLAB);
+      n.setReferenciaId(colab.getId());
+      n.setReferenciaName(TableName.RH_T_MISSAO_COLABORADOR.name());
+      n.setReferenciaUuid(colab.getUuid());
+      n.setAssunto(conteudo.assunto());
+      n.setMessage(conteudo.corpo());
+      n.setNomeReceptor(colab.getFunId().getNome());
+      n.setFunId(colab.getFunId());
+      n.setDataEnvio(LocalDate.now());
+      n.setEstado("Pendente");
+      notificacaoRepository.save(n);
+    }
   }
 
   // ---------------------------------------------------------------------------------------------

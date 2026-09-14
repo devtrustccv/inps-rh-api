@@ -5,6 +5,7 @@ import cv.inps.rh.missaoservico.application.constants.TipoProcesso;
 import cv.inps.rh.missaoservico.application.dto.*;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoPrestadoresQuery;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoRequisicoesQuery;
+import cv.inps.rh.missaoservico.application.queries.GetProcessoLogisticaQuery;
 import cv.inps.rh.missaoservico.application.queries.GetRequisicaoPdfQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
@@ -39,6 +40,8 @@ public class MissaoProcessoServiceRead {
   private final ParamPrestadorDetEntityRepository paramPrestadorDetRepository;
   private final DocumentoEntityRepository documentoRepository;
   private final DocumentoMapper documentoMapper;
+  private final MissaoLogisticaEntityRepository missaoLogisticaRepository;
+  private final MissaoLogisticaDetEntityRepository missaoLogisticaDetRepository;
 
   // ---------------------------------------------------------------------------------------------
   // Etapa Prestadores Serviço
@@ -166,6 +169,160 @@ public class MissaoProcessoServiceRead {
         .contentType(MediaType.APPLICATION_PDF)
         .contentLength(pdf.length)
         .body(pdf);
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Etapa Logística
+  // ---------------------------------------------------------------------------------------------
+
+  /**
+   * Linhas de logística do processo — só a secção do seu tipo vem preenchida — e os colaboradores
+   * que podem entrar numa linha. No bilhete e no alojamento só entram colaboradores com requisição,
+   * e cada um vem com o prestador, para o ecrã agrupar o multiselect.
+   */
+  @Transactional(readOnly = true)
+  public ResponseEntity<ProcessoLogisticaResponseDTO> getLogistica(GetProcessoLogisticaQuery query) {
+    var missaoUuid = IdentificadorUnico.from(query != null ? query.getUuid() : null).valor();
+    var processo = support.processo(missaoUuid, query.getTipoProcesso(), false);
+    var missao = processo.getMissaoServId();
+    var tipo = TipoProcesso.fromCodeOrThrow(processo.getTipoProcesso());
+
+    var linhas = missaoLogisticaRepository.findAllByMissaoProcessoId_IdOrderByIdAsc(processo.getId()).stream()
+        .filter(l -> ESTADO_ATIVO.equals(l.getEstado()))
+        .toList();
+    var detsPorLinha = new HashMap<Long, List<MissaoLogisticaDetEntity>>();
+    var ids = linhas.stream().map(MissaoLogisticaEntity::getId).toList();
+    if (!ids.isEmpty()) {
+      missaoLogisticaDetRepository.findAllByMissaoLogistId_IdIn(ids).stream()
+          .filter(d -> ESTADO_ATIVO.equals(d.getEstado()))
+          .sorted(Comparator.comparing(MissaoLogisticaDetEntity::getId))
+          .forEach(d -> detsPorLinha.computeIfAbsent(d.getMissaoLogistId().getId(), _ -> new ArrayList<>()).add(d));
+    }
+
+    var bilhetes = new ArrayList<BilhetePassagemResponseDTO>();
+    var seguros = new ArrayList<SeguroViagemResponseDTO>();
+    var alojamentos = new ArrayList<AlojamentoResponseDTO>();
+    var ajudas = new ArrayList<AjudaCustoResponseDTO>();
+
+    for (var l : linhas) {
+      var colaboradores = detsPorLinha.getOrDefault(l.getId(), List.of()).stream().map(this::toDetDto).toList();
+      var primeiro = colaboradores.isEmpty() ? null : colaboradores.getFirst();
+      var documento = documentoMaisRecente(TableName.RH_T_MISSAO_LOGISTICA.name(), l.getUuid(), false);
+
+      switch (tipo) {
+        case BILHETE_PASSAGEM -> {
+          var dto = new BilhetePassagemResponseDTO();
+          dto.setId(l.getId());
+          dto.setUuid(l.getUuid());
+          dto.setColaboradores(colaboradores);
+          dto.setValor(l.getValorTotal());
+          dto.setDocumento(documento);
+          dto.setEstado(l.getEstado());
+          bilhetes.add(dto);
+        }
+        case SEGURO_VIAGEM -> {
+          var dto = new SeguroViagemResponseDTO();
+          dto.setId(l.getId());
+          dto.setUuid(l.getUuid());
+          dto.setEntId(l.getEntId());
+          dto.setNomeSeguradora(l.getNomeSeguradora());
+          dto.setColaboradores(colaboradores);
+          dto.setValor(l.getValorTotal());
+          dto.setDocumento(documento);
+          dto.setEstado(l.getEstado());
+          seguros.add(dto);
+        }
+        case ALOJAMENTO -> {
+          var dto = new AlojamentoResponseDTO();
+          dto.setId(l.getId());
+          dto.setUuid(l.getUuid());
+          dto.setFlgAlimentacao(l.getFlgAlimentacao());
+          dto.setLugarHospedagem(l.getLugarHospedagem());
+          dto.setValorDiario(l.getValorDiario());
+          dto.setValorTotal(l.getValorTotal());
+          dto.setMoeda(l.getMoeda());
+          dto.setDataInicio(l.getDataInicio());
+          dto.setDataFim(l.getDataFim());
+          dto.setNrDias(l.getNrDias());
+          dto.setColaborador(primeiro);
+          dto.setColaboradores(colaboradores);
+          dto.setDocumento(documento);
+          dto.setEstado(l.getEstado());
+          alojamentos.add(dto);
+        }
+        case AJUDA_CUSTO -> {
+          var dto = new AjudaCustoResponseDTO();
+          dto.setId(l.getId());
+          dto.setUuid(l.getUuid());
+          dto.setColaborador(primeiro);
+          dto.setFlgAlojamento("SIM".equalsIgnoreCase(l.getFlgAlojamento()));
+          dto.setNumeroDiasAlojamento(l.getNrDias());
+          dto.setValorDiario(l.getValorDiario());
+          dto.setValorTotal(l.getValorTotal());
+          dto.setEstado(l.getEstado());
+          ajudas.add(dto);
+        }
+      }
+    }
+
+    var ativos = missaoColaboradorRepository.findAllByMissaoServId_Uuid(missaoUuid).stream()
+        .filter(c -> ESTADO_ATIVO.equals(c.getEstado()))
+        .toList();
+    List<MissaoColaboradorResponseDTO> disponiveis;
+    if (tipo.temPrestador()) {
+      var prestadorPorColab = support.prestadorPorColaborador(processo);
+      disponiveis = ativos.stream()
+          .filter(c -> prestadorPorColab.containsKey(c.getId()))
+          .map(c -> {
+            var dto = support.toColaboradorDto(c);
+            var prestador = prestadorPorColab.get(c.getId());
+            dto.setMissaoPrestId(prestador.getId());
+            dto.setNomePrestador(prestador.getNome());
+            return dto;
+          })
+          .toList();
+    } else {
+      disponiveis = ativos.stream().map(support::toColaboradorDto).toList();
+    }
+
+    var conteudo = support.conteudoLogisticaColaborador(support.varsMissao(missao, tipo), null);
+    var notificacao = new MissaoNotificacaoResponseDTO();
+    notificacao.setAssunto(conteudo.assunto());
+    notificacao.setCorpoEmail(conteudo.corpo());
+
+    var response = new ProcessoLogisticaResponseDTO();
+    response.setMissaoUuid(missao.getUuid());
+    response.setNrMissaoFormatado(support.nrMissaoFormatado(missao));
+    response.setProcesso(support.toProcessoDto(processo));
+    response.setDataInicioMissao(missao.getDataInicio());
+    response.setDataFimMissao(missao.getDataFim());
+    response.setBilhetesPassagem(bilhetes);
+    response.setSegurosViagem(seguros);
+    response.setAlojamentos(alojamentos);
+    response.setAjudasCusto(ajudas);
+    response.setColaboradoresDisponiveis(disponiveis);
+    response.setNotificacao(notificacao);
+
+    linhas.stream()
+        .max(Comparator.comparing(MissaoLogisticaEntity::getId))
+        .ifPresent(l -> {
+          response.setExecutadoPor(l.getLastModifiedBy() != null ? l.getLastModifiedBy() : l.getCreatedBy());
+          var data = l.getLastModifiedDate() != null ? l.getLastModifiedDate() : l.getCreatedDate();
+          response.setDataExecucao(data != null ? data.toLocalDate() : null);
+        });
+
+    return ResponseEntity.ok(response);
+  }
+
+  private MissaoLogisticaDetResponseDTO toDetDto(MissaoLogisticaDetEntity d) {
+    var dto = new MissaoLogisticaDetResponseDTO();
+    dto.setId(d.getId());
+    dto.setEstado(d.getEstado());
+    var colab = d.getMissaoColabId();
+    dto.setMissaoColabUuid(colab != null ? colab.getUuid() : null);
+    dto.setFuncionarioUuid(colab != null && colab.getFunId() != null ? colab.getFunId().getUuid() : null);
+    dto.setNomeColaborador(colab != null && colab.getFunId() != null ? colab.getFunId().getNome() : null);
+    return dto;
   }
 
   // ---------------------------------------------------------------------------------------------

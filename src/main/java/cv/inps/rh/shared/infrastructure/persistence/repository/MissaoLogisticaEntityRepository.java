@@ -18,6 +18,9 @@ public interface MissaoLogisticaEntityRepository extends
 
   List<MissaoLogisticaEntity> findAllByMissaoServId_Uuid(UUID missaoUuid);
 
+  /** Linhas de logística de um processo da missão (modelo por processo, spec 14/09). */
+  List<MissaoLogisticaEntity> findAllByMissaoProcessoId_IdOrderByIdAsc(Long missaoProcessoId);
+
   Optional<MissaoLogisticaEntity> findByUuid(UUID uuid);
 
   default MissaoLogisticaEntity findByUuidOrThrow(UUID uuid) {

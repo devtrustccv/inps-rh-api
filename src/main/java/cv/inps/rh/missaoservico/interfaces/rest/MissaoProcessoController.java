@@ -191,4 +191,65 @@ public class MissaoProcessoController {
 
   }
 
+   @GetMapping(
+   value = "{uuid}/processos/{tipoProcesso}/logistica"
+  )
+  @Operation(
+    summary = "Get logistica do processo",
+    description = "Get logistica do processo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ProcessoLogisticaResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<ProcessoLogisticaResponseDTO> getProcessoLogistica(
+    @PathVariable(value = "uuid") String uuid,
+    @PathVariable(value = "tipoProcesso") String tipoProcesso)
+  {
+
+      final var query = new GetProcessoLogisticaQuery(uuid, tipoProcesso);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "{uuid}/processos/{tipoProcesso}/logistica"
+  )
+  @Operation(
+    summary = "Save logistica do processo",
+    description = "Save logistica do processo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<Map<String, ?>> saveProcessoLogistica(@Valid @RequestBody ProcessoLogisticaRequestDTO saveProcessoLogisticaRequest
+    , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso)
+  {
+
+      final var command = new SaveProcessoLogisticaCommand(saveProcessoLogisticaRequest, uuid, tipoProcesso);
+
+      return commandBus.send(command);
+
+  }
+
 }

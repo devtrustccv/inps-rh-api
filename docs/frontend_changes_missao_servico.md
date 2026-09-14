@@ -8,6 +8,91 @@ Base de todos os endpoints: `/api/v1/missao-servico`
 
 ---
 
+## 2026-09-14 — Logística, por processo (Fase 6)
+
+Um ecrã por processo. Os 4 tipos passam por esta etapa.
+
+| Ecrã | Método | Path |
+|---|---|---|
+| Carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/logistica` |
+| Gravar / Avançar | `PUT` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/logistica` |
+
+**GET**
+```jsonc
+{
+  "processo": { "tipoProcesso": "ALOJAMENTO", "etapa": "LOGISTICA" },
+  "dataInicioMissao": "2026-10-05", "dataFimMissao": "2026-10-09",
+  "bilhetesPassagem": [], "segurosViagem": [], "ajudasCusto": [],     // só a secção do tipo vem preenchida
+  "alojamentos": [
+    { "uuid": "…", "lugarHospedagem": "Hotel Praia Mar", "flgAlimentacao": "NAO",
+      "valorDiario": 12000, "valorTotal": 60000, "moeda": "CVE",
+      "dataInicio": "2026-10-05", "dataFim": "2026-10-09", "nrDias": 5,
+      "colaboradores": [ { "funcionarioUuid": "…", "nomeColaborador": "…" } ],
+      "colaborador": { … },                                           // primeiro (compatibilidade)
+      "documento": { "id": 40, "documento": "reserva.pdf" } }
+  ],
+  "colaboradoresDisponiveis": [
+    { "funUuid": "…", "nomeColaborador": "…", "missaoPrestId": 17, "nomePrestador": "Halcyon Viagens" }
+  ],
+  "notificacao": { "assunto": "…", "corpoEmail": "…" }
+}
+```
+
+**`colaboradoresDisponiveis`** — no bilhete e no alojamento só aparecem os colaboradores com **requisição** neste processo, cada um com o seu prestador (usar para agrupar o multiselect). No seguro e na ajuda de custo aparecem todos os colaboradores activos da missão.
+
+**PUT** — enviar **só** a secção do tipo do processo:
+```jsonc
+// BILHETE_PASSAGEM
+{ "bilhetesPassagem": [ { "colaboradorIds": ["<funUuid>"], "valor": 90000,
+                          "anexo": { "tipoDocumentoId": 21, "documento": "bilhete.pdf" } } ],
+  "processoEtapaAction": "SAVE" }
+
+// SEGURO_VIAGEM
+{ "segurosViagem": [ { "entId": 12, "nomeSeguradora": "Impar Seguros",     // nome opcional: por defeito, o da entidade
+                       "colaboradorIds": ["<funUuid>"], "valor": 15000 } ] }
+
+// ALOJAMENTO — agora com vários colaboradores
+{ "alojamentos": [ { "colaboradorIds": ["<funUuid>", "<funUuid>"], "lugarHospedagem": "Hotel Praia Mar",
+                     "flgAlimentacao": "NAO", "valorDiario": 12000,
+                     "valorTotal": null,                  // null = valorDiario × nº de dias
+                     "dataInicio": null, "dataFim": null, // null = datas da missão
+                     "moeda": "CVE" } ] }
+
+// AJUDA_CUSTO — uma linha por colaborador
+{ "ajudasCusto": [ { "colaboradorId": "<funUuid>", "flgAlojamento": true,
+                     "numeroDiasAlojamento": 5, "valorDiario": 12000 } ] }
+```
+→ `{ "id": "<processoUuid>", "etapa": "VALIDACAO_UGAL" }`
+
+- **Secção:** a lista enviada é a **secção completa**. Uma linha que fica de fora é removida (inactivada) e `null` não altera nada.
+- **Linhas reaproveitadas:** uma linha com o mesmo conjunto de colaboradores mantém o `uuid` e o anexo entre gravações.
+- **Ajuda de custo:** o valor diário gravado é `valorDiario` × a fracção:
+
+| Situação | Fracção |
+|---|---|
+| `flgAlojamento: false` (alojamento próprio ou casa de família) | 100% |
+| `flgAlojamento: true` e alojamento **sem** alimentação | ⅔ |
+| `flgAlojamento: true` e alojamento **com** alimentação | ⅓ |
+
+  A alimentação é lida do alojamento do colaborador, no processo `ALOJAMENTO`. Por isso, registe primeiro o alojamento.
+- **`NEXT`:** exige pelo menos uma linha, avança para `VALIDACAO_UGAL` e grava um aviso para cada colaborador envolvido.
+
+**Erros**
+
+| Situação | Resposta |
+|---|---|
+| Secção de outro tipo | **400** `O processo X só aceita a secção do seu tipo` |
+| Campo obrigatório em falta | **400** |
+| `flgAlimentacao` diferente de `SIM` ou `NAO` | **400** |
+| Colaborador sem requisição neste processo (bilhete ou alojamento) | **400** |
+| Colaboradores de prestadores diferentes na mesma linha | **400** |
+| Colaborador repetido em duas linhas | **400** |
+| Seguradora inexistente | **400** |
+| Remover ou alterar o valor de uma linha já cabimentada | **400** |
+| `NEXT` sem linhas | **400** |
+
+---
+
 ## 2026-09-14 — Emissão de Requisição, por processo (Fase 5)
 
 Uma **requisição por prestador**, com N colaboradores. Só existe em `BILHETE_PASSAGEM` e `ALOJAMENTO`.
