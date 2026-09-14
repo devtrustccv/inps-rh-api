@@ -8,6 +8,101 @@ Base de todos os endpoints: `/api/v1/missao-servico`
 
 ---
 
+## 2026-09-14 — Validação UGAL, Aprovação RH e Avaliar Prestador (Fases 7–8)
+
+### Pareceres
+
+| Ecrã | Método | Path |
+|---|---|---|
+| Validação UGAL — carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/validacao-ugal` |
+| Validação UGAL — gravar / emitir | `PUT` | idem |
+| Aprovação RH — carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/aprovacao-rh` |
+| Aprovação RH — gravar / emitir | `PUT` | idem |
+
+**PUT** (os dois ecrãs usam o mesmo corpo)
+```jsonc
+{
+  "responsavel": "COORDENADOR_RH",   // só na Aprovação RH: COORDENADOR_RH | DIRECTOR_RH (na UGAL omitir)
+  "parecer": "DESFAVORAVEL",         // domínio PARECER: FAVORAVEL | DESFAVORAVEL
+  "observacao": "Fatura com valor diferente da proposta",  // obrigatória com DESFAVORAVEL (máx. 500)
+  "processoEtapaAction": "NEXT"      // SAVE = rascunho | NEXT = emitir
+}
+```
+→ `{ "id": "<processoUuid>", "etapa": "APROVACAO_RH", "parecer": "<parecerUuid>" }`
+
+**Regras**
+
+| Situação | Efeito |
+|---|---|
+| `SAVE` | Guarda **rascunho** (`estado: "P"`); pode ser regravado |
+| `NEXT` | **Emite** (`estado: "A"`); só com o processo **exactamente** nessa etapa |
+| UGAL favorável | Processo → `APROVACAO_RH` |
+| Coordenador (qualquer parecer) | Fica registado; **não** muda a etapa (não vinculativo) |
+| Director sem parecer emitido do Coordenador | **400** |
+| Director favorável | Processo → `CABIMENTO` |
+| UGAL **ou** Director desfavorável | Processo → **`LOGISTICA`**; os pareceres do ciclo ficam `"I"` (anulados) e a ronda recomeça |
+| Emitir de novo no mesmo ciclo | **400** `já foi emitido neste ciclo` |
+
+**GET Validação UGAL**
+```jsonc
+{
+  "autorizacao": [ { "documento": "convite.pdf", … } ],        // anexos da submissão
+  "requisicoes": [ { "documento": "…_requisicao_RMS-2026-3.pdf" } ],  // só bilhete/alojamento
+  "faturas": [ { "documento": "bilhete.pdf" } ],                // anexos da logística
+  "parecerAtual": { "parecer": "FAVORAVEL", "estado": "P", "estadoDesc": "Rascunho", "executadoPor": "…" },
+  "historico": [ … ]                                            // inclui os anulados ("I")
+}
+```
+
+**GET Aprovação RH** → `parecerCoordenador`, `parecerDirector` (do ciclo actual), `parecerUgal` (o parecer emitido que abriu a etapa) e `historico`.
+
+> ⚠️ O "cabimento automático" no fim da Aprovação RH ainda não chama o SGAL (integração sem contrato). O processo segue para `CABIMENTO` sem nº de cabimento.
+
+### Avaliar Prestador
+
+| Ecrã | Método | Path |
+|---|---|---|
+| Carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/prestadores/{missaoPrestUuid}/avaliacao` |
+| Gravar | `PUT` | idem |
+
+`{missaoPrestUuid}` = `prestadores[].uuid` do GET de prestadores do processo.
+
+**PUT** — valores do domínio `AVALIACAO_FORNECEDOR` (`opcoesAvaliacao` do GET):
+```jsonc
+{ "sistemaQualidade": "100", "prazoFornecimento": "100", "qualidadeProduto": "100",
+  "capacidadeResposta": "100", "preco": "75" }
+```
+→ `{ "id": "<uuid>", "total": 95.00, "designacao": "A" }`
+
+**GET**
+```jsonc
+{
+  "nomePrestador": "Halcyon Viagens", "podeAvaliar": true, "avaliado": true,
+  "criterios": [
+    { "criterio": "SISTEMA_QUALIDADE", "peso": 5, "avaliacao": "100", "avaliacaoDesc": "Muito Bom", "pontos": 5.00 },
+    …
+  ],
+  "total": 95.00, "designacao": "A", "designacaoDesc": "Fornecedor Preferencial",
+  "opcoesAvaliacao": [ { "valor": "100", "descricao": "Muito Bom" }, { "valor": "75", "descricao": "Bom" }, … ]
+}
+```
+
+- **Pesos:** vêm do domínio (referência `PESO`); os da spec são o valor por defeito: 5, 15, 40, 20, 20.
+- **Classes:** A &gt; 75, B ]40;75], C ]25;40], D [0;25].
+- **Quem se pode avaliar:** só prestadores com **requisição activa** no processo. Os outros vêm com `podeAvaliar: false` e o `PUT` devolve **400**.
+- Regravar **actualiza** a avaliação existente.
+- A avaliação passa a aparecer em `GET /prestadores/{uuid}/avaliacoes`.
+
+**Erros**
+
+| Situação | Resposta |
+|---|---|
+| Critério em falta | **400** |
+| Valor fora do domínio | **400** |
+| Prestador que não pertence ao processo | **404** |
+
+---
+
 ## 2026-09-14 — Logística, por processo (Fase 6)
 
 Um ecrã por processo. Os 4 tipos passam por esta etapa.

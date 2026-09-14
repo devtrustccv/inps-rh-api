@@ -6,7 +6,12 @@ import cv.inps.rh.missaoservico.application.constants.TipoProcesso;
 import cv.inps.rh.missaoservico.application.dto.MissaoColaboradorResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoProcessoResponseDTO;
+import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
+import cv.inps.rh.shared.domain.models.IdentificadorUnico;
+import cv.inps.rh.shared.infrastructure.persistence.entity.DomainEntity;
+import cv.inps.rh.shared.infrastructure.persistence.repository.DomainEntityRepository;
+import cv.inps.rh.shared.infrastructure.persistence.repository.MissaoPrestadorEntityRepository;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoColaboradorEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoPrestadorEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.MissaoProcessoEntity;
@@ -22,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -46,6 +52,8 @@ public class MissaoProcessoSupport {
   private final ParamNotificacaoEntityRepository paramNotificacaoRepository;
   private final MissaoRequisicaoEntityRepository missaoRequisicaoRepository;
   private final MissaoRequisicaoColabEntityRepository missaoRequisicaoColabRepository;
+  private final MissaoPrestadorEntityRepository missaoPrestadorRepository;
+  private final DomainEntityRepository domainEntityRepository;
   private final EntityManager entityManager;
 
   public record Conteudo(String assunto, String corpo) {}
@@ -151,6 +159,43 @@ public class MissaoProcessoSupport {
             + "- Colaboradores: " + vars.get("colaboradores") + "\n"
             + "- Valor total: " + vars.get("valorTotal") + "\n\n"
             + "Com os melhores cumprimentos,\nINPS - Recursos Humanos");
+  }
+
+  /** Prestador activo do processo pelo uuid de RH_T_MISSAO_PRESTADOR; 404 se não pertencer ao processo. */
+  public MissaoPrestadorEntity prestadorDoProcesso(MissaoProcessoEntity processo, String missaoPrestUuid) {
+    var uuid = IdentificadorUnico.from(missaoPrestUuid).valor();
+    return missaoPrestadorRepository.findByUuid(uuid)
+        .filter(p -> p.getMissaoProcessoId() != null
+            && processo.getId().equals(p.getMissaoProcessoId().getId())
+            && ESTADO_ATIVO.equals(p.getEstado()))
+        .orElseThrow(() -> IgrpResponseStatusException.notFound("Prestador não encontrado neste processo: " + uuid));
+  }
+
+  /**
+   * Opções do domínio AVALIACAO_FORNECEDOR para uma referência (AVALIACAO, PESO, DESIGNACAO), como
+   * valor → descrição, pela ordem de registo.
+   */
+  public LinkedHashMap<String, String> dominioAvaliacaoFornecedor(String referencia) {
+    var out = new LinkedHashMap<String, String>();
+    domainEntityRepository.findByDominioAndReferenciaAndEstado("AVALIACAO_FORNECEDOR", referencia, Estado.A).stream()
+        .sorted(Comparator.comparing(DomainEntity::getId))
+        .forEach(d -> out.putIfAbsent(d.getValor(), d.getDescricao()));
+    return out;
+  }
+
+  /** Peso de cada critério: o do domínio (referência PESO: valor = peso, descrição = critério) ou o da spec. */
+  public Map<String, Integer> pesosAvaliacao() {
+    var pesos = new HashMap<>(AvaliacaoPrestadorCalculo.PESOS_POR_DEFEITO);
+    for (var d : domainEntityRepository.findByDominioAndReferenciaAndEstado("AVALIACAO_FORNECEDOR", "PESO", Estado.A)) {
+      if (d.getDescricao() == null || d.getValor() == null)
+        continue;
+      try {
+        pesos.put(d.getDescricao().trim(), Integer.parseInt(d.getValor().trim()));
+      } catch (NumberFormatException ignored) {
+        // peso mal parametrizado: fica o da spec
+      }
+    }
+    return pesos;
   }
 
   /** Aviso ao colaborador de que a logística do processo está registada (template MISSAO_LOGISTICA_COLABORADOR). */

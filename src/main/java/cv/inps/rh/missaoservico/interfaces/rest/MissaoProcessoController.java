@@ -252,4 +252,189 @@ public class MissaoProcessoController {
 
   }
 
+   @GetMapping(
+   value = "{uuid}/processos/{tipoProcesso}/validacao-ugal"
+  )
+  @Operation(
+    summary = "Get validacao UGAL do processo",
+    description = "Get validacao UGAL do processo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ProcessoValidacaoUgalResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<ProcessoValidacaoUgalResponseDTO> getProcessoValidacaoUgal(
+    @PathVariable(value = "uuid") String uuid,
+    @PathVariable(value = "tipoProcesso") String tipoProcesso)
+  {
+
+      final var query = new GetProcessoValidacaoUgalQuery(uuid, tipoProcesso);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "{uuid}/processos/{tipoProcesso}/validacao-ugal"
+  )
+  @Operation(
+    summary = "Save parecer UGAL do processo",
+    description = "Save parecer UGAL do processo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<Map<String, ?>> saveProcessoValidacaoUgal(@Valid @RequestBody ParecerRequestDTO saveProcessoValidacaoUgalRequest
+    , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso)
+  {
+
+      final var command = new SaveProcessoParecerCommand(saveProcessoValidacaoUgalRequest, uuid, tipoProcesso, "VALIDACAO_UGAL");
+
+      return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "{uuid}/processos/{tipoProcesso}/aprovacao-rh"
+  )
+  @Operation(
+    summary = "Get aprovacao RH do processo",
+    description = "Get aprovacao RH do processo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = ProcessoAprovacaoRhResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<ProcessoAprovacaoRhResponseDTO> getProcessoAprovacaoRh(
+    @PathVariable(value = "uuid") String uuid,
+    @PathVariable(value = "tipoProcesso") String tipoProcesso)
+  {
+
+      final var query = new GetProcessoAprovacaoRhQuery(uuid, tipoProcesso);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "{uuid}/processos/{tipoProcesso}/aprovacao-rh"
+  )
+  @Operation(
+    summary = "Save parecer da aprovacao RH do processo",
+    description = "Save parecer da aprovacao RH do processo",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<Map<String, ?>> saveProcessoAprovacaoRh(@Valid @RequestBody ParecerRequestDTO saveProcessoAprovacaoRhRequest
+    , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso)
+  {
+
+      final var command = new SaveProcessoParecerCommand(saveProcessoAprovacaoRhRequest, uuid, tipoProcesso, "APROVACAO_RH");
+
+      return commandBus.send(command);
+
+  }
+
+   @GetMapping(
+   value = "{uuid}/processos/{tipoProcesso}/prestadores/{missaoPrestUuid}/avaliacao"
+  )
+  @Operation(
+    summary = "Get avaliacao do prestador",
+    description = "Get avaliacao do prestador",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = AvaliacaoPrestadorResponseDTO.class,
+                  type = "object")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<AvaliacaoPrestadorResponseDTO> getAvaliacaoPrestador(
+    @PathVariable(value = "uuid") String uuid,
+    @PathVariable(value = "tipoProcesso") String tipoProcesso,
+    @PathVariable(value = "missaoPrestUuid") String missaoPrestUuid)
+  {
+
+      final var query = new GetAvaliacaoPrestadorQuery(uuid, tipoProcesso, missaoPrestUuid);
+
+      return queryBus.handle(query);
+
+  }
+
+   @PutMapping(
+   value = "{uuid}/processos/{tipoProcesso}/prestadores/{missaoPrestUuid}/avaliacao"
+  )
+  @Operation(
+    summary = "Save avaliacao do prestador",
+    description = "Save avaliacao do prestador",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = String.class,
+                  type = "String")
+          )
+      )
+    }
+  )
+
+   public ResponseEntity<Map<String, ?>> saveAvaliacaoPrestador(@Valid @RequestBody AvaliacaoPrestadorRequestDTO saveAvaliacaoPrestadorRequest
+    , @PathVariable(value = "uuid") String uuid, @PathVariable(value = "tipoProcesso") String tipoProcesso,
+    @PathVariable(value = "missaoPrestUuid") String missaoPrestUuid)
+  {
+
+      final var command = new SaveAvaliacaoPrestadorCommand(saveAvaliacaoPrestadorRequest, uuid, tipoProcesso, missaoPrestUuid);
+
+      return commandBus.send(command);
+
+  }
+
 }

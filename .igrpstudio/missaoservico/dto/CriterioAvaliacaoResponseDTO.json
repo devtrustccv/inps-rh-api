@@ -1,0 +1,16 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "CriterioAvaliacaoResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "criterio", "type": "string", "objectType": "java", "required": false },
+    { "name": "peso", "type": "int", "objectType": "java", "required": false },
+    { "name": "avaliacao", "type": "string", "objectType": "java", "required": false },
+    { "name": "avaliacaoDesc", "type": "string", "objectType": "java", "required": false },
+    { "name": "pontos", "type": "decimal", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto23criterioaval"
+}

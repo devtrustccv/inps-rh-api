@@ -159,6 +159,89 @@
         { "name": "uuid", "type": "string", "isRequired": true },
         { "name": "tipoProcesso", "type": "string", "isRequired": true }
       ]
+    },
+    {
+      "actionName": "getProcessoValidacaoUgal",
+      "path": "{uuid}/processos/{tipoProcesso}/validacao-ugal",
+      "method": "GET",
+      "responses": {
+        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "ProcessoValidacaoUgalResponse", "objectType": "dto", "collectionType": "none", "module": "missaoservico" } } } }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true },
+        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+      ]
+    },
+    {
+      "actionName": "saveProcessoValidacaoUgal",
+      "path": "{uuid}/processos/{tipoProcesso}/validacao-ugal",
+      "method": "PUT",
+      "requestBody": {
+        "content": { "application/json": { "schema": { "type": "ParecerRequest", "collectionType": "none", "objectType": "dto", "module": "missaoservico" } } }
+      },
+      "responses": {
+        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "string", "collectionType": "map" } } } }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true },
+        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+      ]
+    },
+    {
+      "actionName": "getProcessoAprovacaoRh",
+      "path": "{uuid}/processos/{tipoProcesso}/aprovacao-rh",
+      "method": "GET",
+      "responses": {
+        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "ProcessoAprovacaoRhResponse", "objectType": "dto", "collectionType": "none", "module": "missaoservico" } } } }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true },
+        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+      ]
+    },
+    {
+      "actionName": "saveProcessoAprovacaoRh",
+      "path": "{uuid}/processos/{tipoProcesso}/aprovacao-rh",
+      "method": "PUT",
+      "requestBody": {
+        "content": { "application/json": { "schema": { "type": "ParecerRequest", "collectionType": "none", "objectType": "dto", "module": "missaoservico" } } }
+      },
+      "responses": {
+        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "string", "collectionType": "map" } } } }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true },
+        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+      ]
+    },
+    {
+      "actionName": "getAvaliacaoPrestador",
+      "path": "{uuid}/processos/{tipoProcesso}/prestadores/{missaoPrestUuid}/avaliacao",
+      "method": "GET",
+      "responses": {
+        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "AvaliacaoPrestadorResponse", "objectType": "dto", "collectionType": "none", "module": "missaoservico" } } } }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true },
+        { "name": "tipoProcesso", "type": "string", "isRequired": true },
+        { "name": "missaoPrestUuid", "type": "string", "isRequired": true }
+      ]
+    },
+    {
+      "actionName": "saveAvaliacaoPrestador",
+      "path": "{uuid}/processos/{tipoProcesso}/prestadores/{missaoPrestUuid}/avaliacao",
+      "method": "PUT",
+      "requestBody": {
+        "content": { "application/json": { "schema": { "type": "AvaliacaoPrestadorRequest", "collectionType": "none", "objectType": "dto", "module": "missaoservico" } } }
+      },
+      "responses": {
+        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "string", "collectionType": "map" } } } }
+      },
+      "pathVariables": [
+        { "name": "uuid", "type": "string", "isRequired": true },
+        { "name": "tipoProcesso", "type": "string", "isRequired": true },
+        { "name": "missaoPrestUuid", "type": "string", "isRequired": true }
+      ]
     }
   ],
   "id": "msvctrl03missaoproc"

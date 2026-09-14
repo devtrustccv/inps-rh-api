@@ -1,0 +1,24 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "AvaliacaoPrestadorResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "missaoPrestUuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "nomePrestador", "type": "string", "objectType": "java", "required": false },
+    { "name": "nrMissaoFormatado", "type": "string", "objectType": "java", "required": false },
+    { "name": "tipoProcesso", "type": "string", "objectType": "java", "required": false },
+    { "name": "podeAvaliar", "type": "boolean", "objectType": "java", "required": false },
+    { "name": "avaliado", "type": "boolean", "objectType": "java", "required": false },
+    { "name": "criterios", "type": "CriterioAvaliacaoResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "total", "type": "decimal", "objectType": "java", "required": false },
+    { "name": "designacao", "type": "string", "objectType": "java", "required": false },
+    { "name": "designacaoDesc", "type": "string", "objectType": "java", "required": false },
+    { "name": "opcoesAvaliacao", "type": "OpcaoDominioResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
+    { "name": "executadoPor", "type": "string", "objectType": "java", "required": false },
+    { "name": "dataExecucao", "type": "date", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto22avalprestresp"
+}

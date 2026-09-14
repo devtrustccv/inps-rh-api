@@ -1,0 +1,13 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "OpcaoDominioResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "valor", "type": "string", "objectType": "java", "required": false },
+    { "name": "descricao", "type": "string", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto24opcaodominio"
+}

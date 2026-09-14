@@ -5,7 +5,11 @@ import cv.inps.rh.missaoservico.application.constants.TipoProcesso;
 import cv.inps.rh.missaoservico.application.dto.*;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoPrestadoresQuery;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoRequisicoesQuery;
+import cv.inps.rh.missaoservico.application.constants.ResponsavelParecer;
+import cv.inps.rh.missaoservico.application.queries.GetAvaliacaoPrestadorQuery;
+import cv.inps.rh.missaoservico.application.queries.GetProcessoAprovacaoRhQuery;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoLogisticaQuery;
+import cv.inps.rh.missaoservico.application.queries.GetProcessoValidacaoUgalQuery;
 import cv.inps.rh.missaoservico.application.queries.GetRequisicaoPdfQuery;
 import cv.inps.rh.shared.application.constants.Estado;
 import cv.inps.rh.shared.application.constants.custom.TableName;
@@ -42,6 +46,8 @@ public class MissaoProcessoServiceRead {
   private final DocumentoMapper documentoMapper;
   private final MissaoLogisticaEntityRepository missaoLogisticaRepository;
   private final MissaoLogisticaDetEntityRepository missaoLogisticaDetRepository;
+  private final MissaoProcessoDetEntityRepository missaoProcessoDetRepository;
+  private final MissaoPrestadorAvalEntityRepository missaoPrestadorAvalRepository;
 
   // ---------------------------------------------------------------------------------------------
   // Etapa Prestadores Serviço
@@ -323,6 +329,183 @@ public class MissaoProcessoServiceRead {
     dto.setFuncionarioUuid(colab != null && colab.getFunId() != null ? colab.getFunId().getUuid() : null);
     dto.setNomeColaborador(colab != null && colab.getFunId() != null ? colab.getFunId().getNome() : null);
     return dto;
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Etapas de parecer: Validação UGAL e Aprovação RH
+  // ---------------------------------------------------------------------------------------------
+
+  /** Validação UGAL: os três documentos do processo (autorização, requisição, fatura) e os pareceres UGAL. */
+  @Transactional(readOnly = true)
+  public ResponseEntity<ProcessoValidacaoUgalResponseDTO> getValidacaoUgal(GetProcessoValidacaoUgalQuery query) {
+    var missaoUuid = IdentificadorUnico.from(query != null ? query.getUuid() : null).valor();
+    var processo = support.processo(missaoUuid, query.getTipoProcesso(), false);
+    var missao = processo.getMissaoServId();
+
+    var requisicaoUuids = missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoProcessoId_IdOrderByIdAsc(processo.getId()).stream()
+        .filter(r -> ESTADO_ATIVO.equals(r.getEstado()))
+        .map(MissaoRequisicaoEntity::getUuid)
+        .toList();
+    var linhaUuids = missaoLogisticaRepository.findAllByMissaoProcessoId_IdOrderByIdAsc(processo.getId()).stream()
+        .filter(l -> ESTADO_ATIVO.equals(l.getEstado()))
+        .map(MissaoLogisticaEntity::getUuid)
+        .toList();
+
+    var ugal = pareceres(processo, Set.of(ResponsavelParecer.UGAL.name()));
+
+    var response = new ProcessoValidacaoUgalResponseDTO();
+    response.setMissaoUuid(missao.getUuid());
+    response.setNrMissaoFormatado(support.nrMissaoFormatado(missao));
+    response.setProcesso(support.toProcessoDto(processo));
+    response.setAutorizacao(documentos(TableName.RH_T_MISSAO_SERVICO.name(), List.of(missao.getUuid()), false));
+    response.setRequisicoes(documentos(REF_DOC_REQUISICAO_PDF, requisicaoUuids, true));
+    response.setFaturas(documentos(TableName.RH_T_MISSAO_LOGISTICA.name(), linhaUuids, false));
+    response.setParecerAtual(parecerDoCiclo(ugal));
+    response.setHistorico(ugal.stream().map(this::toParecerDto).toList());
+    return ResponseEntity.ok(response);
+  }
+
+  /** Aprovação RH: pareceres do Coordenador e do Director no ciclo actual, o parecer UGAL e o histórico. */
+  @Transactional(readOnly = true)
+  public ResponseEntity<ProcessoAprovacaoRhResponseDTO> getAprovacaoRh(GetProcessoAprovacaoRhQuery query) {
+    var missaoUuid = IdentificadorUnico.from(query != null ? query.getUuid() : null).valor();
+    var processo = support.processo(missaoUuid, query.getTipoProcesso(), false);
+    var missao = processo.getMissaoServId();
+
+    var coordenador = pareceres(processo, Set.of(ResponsavelParecer.COORDENADOR_RH.name()));
+    var director = pareceres(processo, Set.of(ResponsavelParecer.DIRECTOR_RH.name()));
+    var ugal = pareceres(processo, Set.of(ResponsavelParecer.UGAL.name()));
+
+    var response = new ProcessoAprovacaoRhResponseDTO();
+    response.setMissaoUuid(missao.getUuid());
+    response.setNrMissaoFormatado(support.nrMissaoFormatado(missao));
+    response.setProcesso(support.toProcessoDto(processo));
+    response.setParecerCoordenador(parecerDoCiclo(coordenador));
+    response.setParecerDirector(parecerDoCiclo(director));
+    response.setParecerUgal(ugal.stream()
+        .filter(d -> "A".equals(d.getEstado()))
+        .findFirst()
+        .map(this::toParecerDto)
+        .orElse(null));
+    response.setHistorico(pareceres(processo, Set.of(ResponsavelParecer.COORDENADOR_RH.name(), ResponsavelParecer.DIRECTOR_RH.name()))
+        .stream()
+        .map(this::toParecerDto)
+        .toList());
+    return ResponseEntity.ok(response);
+  }
+
+  /** Pareceres do processo para os responsáveis indicados, do mais recente para o mais antigo. */
+  private List<MissaoProcessoDetEntity> pareceres(MissaoProcessoEntity processo, Set<String> responsaveis) {
+    return missaoProcessoDetRepository.findAllByMissaoProcessoId_IdOrderByIdAsc(processo.getId()).stream()
+        .filter(d -> responsaveis.contains(d.getResponsavel()))
+        .sorted(Comparator.comparing(MissaoProcessoDetEntity::getId).reversed())
+        .toList();
+  }
+
+  /** Rascunho ou parecer emitido do ciclo actual (os anulados por devolução ficam só no histórico). */
+  private ParecerResponseDTO parecerDoCiclo(List<MissaoProcessoDetEntity> pareceres) {
+    return pareceres.stream()
+        .filter(d -> "P".equals(d.getEstado()) || "A".equals(d.getEstado()))
+        .findFirst()
+        .map(this::toParecerDto)
+        .orElse(null);
+  }
+
+  private ParecerResponseDTO toParecerDto(MissaoProcessoDetEntity d) {
+    var dto = new ParecerResponseDTO();
+    dto.setUuid(d.getUuid());
+    dto.setResponsavel(d.getResponsavel());
+    dto.setParecer(d.getParecer());
+    dto.setParecerDesc("FAVORAVEL".equals(d.getParecer()) ? "Favorável" : "DESFAVORAVEL".equals(d.getParecer()) ? "Desfavorável" : d.getParecer());
+    dto.setObservacao(d.getObservacao());
+    dto.setEstado(d.getEstado());
+    dto.setEstadoDesc(switch (d.getEstado()) {
+      case "P" -> "Rascunho";
+      case "A" -> "Emitido";
+      case "I" -> "Anulado (processo devolvido à logística)";
+      default -> d.getEstado();
+    });
+    dto.setExecutadoPor(d.getLastModifiedBy() != null ? d.getLastModifiedBy() : d.getCreatedBy());
+    var data = d.getLastModifiedDate() != null ? d.getLastModifiedDate() : d.getCreatedDate();
+    dto.setDataExecucao(data != null ? data.toLocalDate() : null);
+    return dto;
+  }
+
+  private List<AnexoRespDTO> documentos(String referenciaName, List<UUID> referencias, boolean soAtivos) {
+    return referencias.stream()
+        .flatMap(uuid -> documentoRepository.findAllByReferenciaNameAndReferenciaUuid(referenciaName, uuid).stream())
+        .filter(d -> soAtivos ? d.getEstado() == Estado.A : d.getEstado() != Estado.E && d.getEstado() != Estado.I)
+        .sorted(Comparator.comparing(DocumentoEntity::getId))
+        .map(documentoMapper::toRespDto)
+        .toList();
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Avaliar Prestador
+  // ---------------------------------------------------------------------------------------------
+
+  @Transactional(readOnly = true)
+  public ResponseEntity<AvaliacaoPrestadorResponseDTO> getAvaliacao(GetAvaliacaoPrestadorQuery query) {
+    var missaoUuid = IdentificadorUnico.from(query != null ? query.getUuid() : null).valor();
+    var processo = support.processo(missaoUuid, query.getTipoProcesso(), false);
+    var prestador = support.prestadorDoProcesso(processo, query.getMissaoPrestUuid());
+
+    var opcoes = support.dominioAvaliacaoFornecedor("AVALIACAO");
+    var designacoes = support.dominioAvaliacaoFornecedor("DESIGNACAO");
+    var pesos = support.pesosAvaliacao();
+    var avaliacao = missaoPrestadorAvalRepository
+        .findFirstByMissaoPrestId_IdAndEstadoOrderByIdDesc(prestador.getId(), ESTADO_ATIVO)
+        .orElse(null);
+
+    var criterios = new ArrayList<CriterioAvaliacaoResponseDTO>();
+    for (var criterio : AvaliacaoPrestadorCalculo.CRITERIOS) {
+      var dto = new CriterioAvaliacaoResponseDTO();
+      dto.setCriterio(criterio);
+      dto.setPeso(pesos.getOrDefault(criterio, 0));
+      var valor = avaliacao != null ? valorDoCriterio(avaliacao, criterio) : null;
+      dto.setAvaliacao(valor);
+      dto.setAvaliacaoDesc(valor != null ? opcoes.get(valor) : null);
+      if (valor != null) {
+        try {
+          dto.setPontos(AvaliacaoPrestadorCalculo.pontos(dto.getPeso(), Integer.parseInt(valor)));
+        } catch (NumberFormatException ignored) {
+          // valor gravado fora do domínio: sem pontos
+        }
+      }
+      criterios.add(dto);
+    }
+
+    var response = new AvaliacaoPrestadorResponseDTO();
+    response.setMissaoPrestUuid(prestador.getUuid());
+    response.setNomePrestador(prestador.getNome());
+    response.setNrMissaoFormatado(support.nrMissaoFormatado(processo.getMissaoServId()));
+    response.setTipoProcesso(processo.getTipoProcesso());
+    response.setPodeAvaliar(missaoRequisicaoRepository.existsByMissaoPrestId_IdAndEstado(prestador.getId(), ESTADO_ATIVO));
+    response.setAvaliado(avaliacao != null);
+    response.setCriterios(criterios);
+    response.setOpcoesAvaliacao(opcoes.entrySet().stream()
+        .map(e -> new OpcaoDominioResponseDTO(e.getKey(), e.getValue()))
+        .toList());
+    if (avaliacao != null) {
+      response.setTotal(avaliacao.getTotal());
+      response.setDesignacao(avaliacao.getDesignacao());
+      response.setDesignacaoDesc(designacoes.get(avaliacao.getDesignacao()));
+      response.setExecutadoPor(avaliacao.getLastModifiedBy() != null ? avaliacao.getLastModifiedBy() : avaliacao.getCreatedBy());
+      var data = avaliacao.getLastModifiedDate() != null ? avaliacao.getLastModifiedDate() : avaliacao.getCreatedDate();
+      response.setDataExecucao(data != null ? data.toLocalDate() : null);
+    }
+    return ResponseEntity.ok(response);
+  }
+
+  private String valorDoCriterio(MissaoPrestadorAvalEntity a, String criterio) {
+    return switch (criterio) {
+      case AvaliacaoPrestadorCalculo.SISTEMA_QUALIDADE -> a.getSistemaQualidade();
+      case AvaliacaoPrestadorCalculo.PRAZO_FORNECIMENTO -> a.getPrazoFornecimento();
+      case AvaliacaoPrestadorCalculo.QUALIDADE_PRODUTO -> a.getQualidadeProduto();
+      case AvaliacaoPrestadorCalculo.CAPACIDADE_RESPOSTA -> a.getCapacidadeResposta();
+      case AvaliacaoPrestadorCalculo.PRECO -> a.getPreco();
+      default -> null;
+    };
   }
 
   // ---------------------------------------------------------------------------------------------

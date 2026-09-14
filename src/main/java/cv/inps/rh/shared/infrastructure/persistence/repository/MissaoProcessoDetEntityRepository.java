@@ -13,4 +13,8 @@ public interface MissaoProcessoDetEntityRepository extends
     JpaSpecificationExecutor<MissaoProcessoDetEntity> {
 
   List<MissaoProcessoDetEntity> findAllByMissaoProcessoId_IdOrderByIdAsc(Long missaoProcessoId);
+
+  /** Pareceres do ciclo actual de um responsável (P = rascunho, A = emitido; I = anulado por devolução). */
+  List<MissaoProcessoDetEntity> findAllByMissaoProcessoId_IdAndResponsavelAndEstadoInOrderByIdDesc(
+      Long missaoProcessoId, String responsavel, java.util.Collection<String> estados);
 }

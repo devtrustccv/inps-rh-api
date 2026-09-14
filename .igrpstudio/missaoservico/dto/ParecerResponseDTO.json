@@ -1,0 +1,20 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "ParecerResponse",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "uuid", "type": "uuid", "objectType": "java", "required": false },
+    { "name": "responsavel", "type": "string", "objectType": "java", "required": false },
+    { "name": "parecer", "type": "string", "objectType": "java", "required": false },
+    { "name": "parecerDesc", "type": "string", "objectType": "java", "required": false },
+    { "name": "observacao", "type": "string", "objectType": "java", "required": false },
+    { "name": "estado", "type": "string", "objectType": "java", "required": false },
+    { "name": "estadoDesc", "type": "string", "objectType": "java", "required": false },
+    { "name": "executadoPor", "type": "string", "objectType": "java", "required": false },
+    { "name": "dataExecucao", "type": "date", "objectType": "java", "required": false }
+  ],
+  "id": "msvdto18parecerresp"
+}

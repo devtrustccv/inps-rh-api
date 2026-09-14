@@ -4,7 +4,11 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import cv.igrp.platform.filemanager.StorageService;
 import cv.inps.rh.funcionario.infrastructure.mappers.DocumentoMapper;
 import cv.inps.rh.missaoservico.application.commands.SaveProcessoPrestadoresCommand;
+import cv.inps.rh.missaoservico.application.commands.SaveAvaliacaoPrestadorCommand;
 import cv.inps.rh.missaoservico.application.commands.SaveProcessoLogisticaCommand;
+import cv.inps.rh.missaoservico.application.commands.SaveProcessoParecerCommand;
+import cv.inps.rh.missaoservico.application.constants.Parecer;
+import cv.inps.rh.missaoservico.application.constants.ResponsavelParecer;
 import cv.inps.rh.missaoservico.application.commands.SaveProcessoRequisicoesCommand;
 import cv.inps.rh.missaoservico.application.constants.EtapaProcesso;
 import cv.inps.rh.missaoservico.application.constants.TipoProcesso;
@@ -71,6 +75,8 @@ public class MissaoProcessoServiceWrite {
   private final MissaoLogisticaEntityRepository missaoLogisticaRepository;
   private final MissaoLogisticaDetEntityRepository missaoLogisticaDetRepository;
   private final EntidadeEntityRepository entidadeRepository;
+  private final MissaoProcessoDetEntityRepository missaoProcessoDetRepository;
+  private final MissaoPrestadorAvalEntityRepository missaoPrestadorAvalRepository;
 
   // ---------------------------------------------------------------------------------------------
   // Etapa Prestadores Serviço
@@ -935,6 +941,208 @@ public class MissaoProcessoServiceWrite {
       n.setEstado("Pendente");
       notificacaoRepository.save(n);
     }
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Etapas de parecer: Validação UGAL e Aprovação RH
+  // ---------------------------------------------------------------------------------------------
+
+  private static final String PARECER_RASCUNHO = "P";
+  private static final String PARECER_EMITIDO = "A";
+
+  /**
+   * Parecer da Validação UGAL ou da Aprovação RH (decisão D3). SAVE guarda um rascunho; NEXT emite-o,
+   * e só com o processo exactamente nessa etapa. Um parecer emitido não se altera no mesmo ciclo.
+   *
+   * <p>Decidem o parecer da UGAL e o do Director: favorável avança (a Aprovação RH segue para
+   * Cabimento); desfavorável devolve o processo à Logística e anula os pareceres do ciclo, para que a
+   * nova ronda comece do zero. O parecer do Coordenador é obrigatório antes do do Director, mas não
+   * é vinculativo.
+   */
+  @Transactional
+  public ResponseEntity<Map<String, ?>> salvarParecer(SaveProcessoParecerCommand command) {
+    var missaoUuid = IdentificadorUnico.from(command != null ? command.getUuid() : null).valor();
+    var dto = command.getParecerrequest();
+    if (dto == null) {
+      throw IgrpResponseStatusException.badRequest("Payload inválido");
+    }
+    var etapa = EtapaProcesso.fromCodeOrThrow(command.getEtapa());
+    if (etapa != EtapaProcesso.VALIDACAO_UGAL && etapa != EtapaProcesso.APROVACAO_RH) {
+      throw IgrpResponseStatusException.badRequest("A etapa " + etapa.name() + " não tem parecer");
+    }
+
+    var processo = support.processo(missaoUuid, command.getTipoProcesso(), true);
+    var avancar = support.isNext(dto.getProcessoEtapaAction());
+    guard.exigirEtapa(processo, etapa, avancar);
+    if (avancar && !etapa.name().equals(processo.getEtapa())) {
+      throw IgrpResponseStatusException.badRequest(
+          "O parecer só pode ser emitido com o processo na etapa " + etapa.name() + " (etapa actual: " + processo.getEtapa() + ")");
+    }
+
+    if (!StringUtils.hasText(dto.getParecer())) {
+      throw IgrpResponseStatusException.badRequest("parecer é obrigatório (FAVORAVEL ou DESFAVORAVEL)");
+    }
+    var parecer = Parecer.fromCodeOrThrow(dto.getParecer().trim().toUpperCase());
+    if (parecer == Parecer.DESFAVORAVEL && !StringUtils.hasText(dto.getObservacao())) {
+      throw IgrpResponseStatusException.badRequest("A observação é obrigatória num parecer desfavorável");
+    }
+    if (dto.getObservacao() != null && dto.getObservacao().trim().length() > 500) {
+      throw IgrpResponseStatusException.badRequest("A observação não pode ter mais de 500 caracteres");
+    }
+    var responsavel = responsavelDoParecer(etapa, dto.getResponsavel());
+
+    if (avancar && responsavel == ResponsavelParecer.DIRECTOR_RH
+        && missaoProcessoDetRepository.findAllByMissaoProcessoId_IdAndResponsavelAndEstadoInOrderByIdDesc(
+            processo.getId(), ResponsavelParecer.COORDENADOR_RH.name(), List.of(PARECER_EMITIDO)).isEmpty()) {
+      throw IgrpResponseStatusException.badRequest("O parecer do Director exige o parecer emitido do Coordenador RH");
+    }
+
+    var ciclo = missaoProcessoDetRepository.findAllByMissaoProcessoId_IdAndResponsavelAndEstadoInOrderByIdDesc(
+        processo.getId(), responsavel.name(), List.of(PARECER_RASCUNHO, PARECER_EMITIDO));
+    if (ciclo.stream().anyMatch(d -> PARECER_EMITIDO.equals(d.getEstado()))) {
+      throw IgrpResponseStatusException.badRequest("O parecer " + responsavel.name() + " já foi emitido neste ciclo do processo");
+    }
+    var det = ciclo.stream().findFirst().orElseGet(() -> {
+      var novo = new MissaoProcessoDetEntity();
+      novo.setUuid(UuidCreator.getTimeOrderedEpoch());
+      novo.setMissaoProcessoId(processo);
+      novo.setResponsavel(responsavel.name());
+      return novo;
+    });
+    det.setParecer(parecer.name());
+    det.setObservacao(StringUtils.hasText(dto.getObservacao()) ? dto.getObservacao().trim() : null);
+    det.setEstado(avancar ? PARECER_EMITIDO : PARECER_RASCUNHO);
+    missaoProcessoDetRepository.save(det);
+
+    if (avancar && responsavel != ResponsavelParecer.COORDENADOR_RH) {
+      if (parecer == Parecer.FAVORAVEL) {
+        guard.avancarApos(processo, etapa);
+        if (etapa == EtapaProcesso.APROVACAO_RH) {
+          gerarCabimentoAutomatico(processo);
+        }
+      } else {
+        devolverParaLogistica(processo);
+      }
+      missaoProcessoRepository.save(processo);
+    }
+
+    return ResponseEntity.ok(Map.of(
+        "id", processo.getUuid().toString(),
+        "etapa", processo.getEtapa(),
+        "parecer", det.getUuid().toString()));
+  }
+
+  private ResponsavelParecer responsavelDoParecer(EtapaProcesso etapa, String responsavel) {
+    if (etapa == EtapaProcesso.VALIDACAO_UGAL) {
+      if (StringUtils.hasText(responsavel) && !ResponsavelParecer.UGAL.name().equalsIgnoreCase(responsavel.trim())) {
+        throw IgrpResponseStatusException.badRequest("Na Validação UGAL o responsável é UGAL");
+      }
+      return ResponsavelParecer.UGAL;
+    }
+    if (!StringUtils.hasText(responsavel)) {
+      throw IgrpResponseStatusException.badRequest("responsavel é obrigatório (COORDENADOR_RH ou DIRECTOR_RH)");
+    }
+    var r = responsavel.trim().toUpperCase();
+    if (ResponsavelParecer.COORDENADOR_RH.name().equals(r))
+      return ResponsavelParecer.COORDENADOR_RH;
+    if (ResponsavelParecer.DIRECTOR_RH.name().equals(r))
+      return ResponsavelParecer.DIRECTOR_RH;
+    throw IgrpResponseStatusException.badRequest("responsavel inválido: " + responsavel + " (COORDENADOR_RH ou DIRECTOR_RH)");
+  }
+
+  /** Parecer desfavorável decisivo: pareceres do ciclo anulados (histórico mantido) e processo de volta à Logística. */
+  private void devolverParaLogistica(MissaoProcessoEntity processo) {
+    var pareceres = missaoProcessoDetRepository.findAllByMissaoProcessoId_IdOrderByIdAsc(processo.getId()).stream()
+        .filter(d -> PARECER_RASCUNHO.equals(d.getEstado()) || PARECER_EMITIDO.equals(d.getEstado()))
+        .toList();
+    pareceres.forEach(d -> d.setEstado(ESTADO_INATIVO));
+    missaoProcessoDetRepository.saveAll(pareceres);
+    guard.devolver(processo, EtapaProcesso.LOGISTICA);
+  }
+
+  /**
+   * Cabimento automático pedido pela spec no fim da Aprovação RH. A integração com o SGAL continua sem
+   * contrato (endpoint, payload, origem do nº de cabimento): as linhas seguem para a etapa Cabimento
+   * sem CAB_ID, onde o cabimento é confirmado.
+   */
+  private void gerarCabimentoAutomatico(MissaoProcessoEntity processo) {
+    LOGGER.warn("Integração SGAL pendente: cabimento automático não gerado para o processo {}", processo.getUuid());
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Avaliar Prestador
+  // ---------------------------------------------------------------------------------------------
+
+  /**
+   * Avaliação do prestador neste processo (spec: 5 critérios com peso, total e classe A–D). Só para
+   * prestadores com requisição activa — foram eles que prestaram o serviço. Regravar actualiza a
+   * avaliação existente.
+   */
+  @Transactional
+  public ResponseEntity<Map<String, ?>> salvarAvaliacao(SaveAvaliacaoPrestadorCommand command) {
+    var missaoUuid = IdentificadorUnico.from(command != null ? command.getUuid() : null).valor();
+    var dto = command.getAvaliacaoprestadorrequest();
+    if (dto == null) {
+      throw IgrpResponseStatusException.badRequest("Payload inválido");
+    }
+
+    var processo = support.processo(missaoUuid, command.getTipoProcesso(), true);
+    var prestador = support.prestadorDoProcesso(processo, command.getMissaoPrestUuid());
+    if (!missaoRequisicaoRepository.existsByMissaoPrestId_IdAndEstado(prestador.getId(), ESTADO_ATIVO)) {
+      throw IgrpResponseStatusException.badRequest(
+          "Só é possível avaliar um prestador com requisição emitida neste processo");
+    }
+
+    var opcoes = support.dominioAvaliacaoFornecedor("AVALIACAO");
+    var pesos = support.pesosAvaliacao();
+    var escolhas = new LinkedHashMap<String, String>();
+    escolhas.put(AvaliacaoPrestadorCalculo.SISTEMA_QUALIDADE, dto.getSistemaQualidade());
+    escolhas.put(AvaliacaoPrestadorCalculo.PRAZO_FORNECIMENTO, dto.getPrazoFornecimento());
+    escolhas.put(AvaliacaoPrestadorCalculo.QUALIDADE_PRODUTO, dto.getQualidadeProduto());
+    escolhas.put(AvaliacaoPrestadorCalculo.CAPACIDADE_RESPOSTA, dto.getCapacidadeResposta());
+    escolhas.put(AvaliacaoPrestadorCalculo.PRECO, dto.getPreco());
+
+    var total = BigDecimal.ZERO;
+    for (var e : escolhas.entrySet()) {
+      if (!StringUtils.hasText(e.getValue())) {
+        throw IgrpResponseStatusException.badRequest("Avaliação obrigatória para o critério " + e.getKey());
+      }
+      var valor = e.getValue().trim();
+      if (!opcoes.containsKey(valor)) {
+        throw IgrpResponseStatusException.badRequest(
+            "Avaliação inválida para " + e.getKey() + ": " + valor + " (valores: " + String.join(", ", opcoes.keySet()) + ")");
+      }
+      int percentagem;
+      try {
+        percentagem = Integer.parseInt(valor);
+      } catch (NumberFormatException ex) {
+        throw IgrpResponseStatusException.badRequest("Avaliação sem valor numérico no domínio: " + valor);
+      }
+      e.setValue(valor);
+      total = total.add(AvaliacaoPrestadorCalculo.pontos(pesos.getOrDefault(e.getKey(), 0), percentagem));
+    }
+
+    var avaliacao = missaoPrestadorAvalRepository.findFirstByMissaoPrestId_IdAndEstadoOrderByIdDesc(prestador.getId(), ESTADO_ATIVO)
+        .orElseGet(() -> {
+          var nova = new MissaoPrestadorAvalEntity();
+          nova.setUuid(UuidCreator.getTimeOrderedEpoch());
+          nova.setMissaoPrestId(prestador);
+          nova.setEstado(ESTADO_ATIVO);
+          return nova;
+        });
+    avaliacao.setSistemaQualidade(escolhas.get(AvaliacaoPrestadorCalculo.SISTEMA_QUALIDADE));
+    avaliacao.setPrazoFornecimento(escolhas.get(AvaliacaoPrestadorCalculo.PRAZO_FORNECIMENTO));
+    avaliacao.setQualidadeProduto(escolhas.get(AvaliacaoPrestadorCalculo.QUALIDADE_PRODUTO));
+    avaliacao.setCapacidadeResposta(escolhas.get(AvaliacaoPrestadorCalculo.CAPACIDADE_RESPOSTA));
+    avaliacao.setPreco(escolhas.get(AvaliacaoPrestadorCalculo.PRECO));
+    avaliacao.setTotal(total);
+    avaliacao.setDesignacao(AvaliacaoPrestadorCalculo.designacao(total));
+    missaoPrestadorAvalRepository.save(avaliacao);
+
+    return ResponseEntity.ok(Map.of(
+        "id", avaliacao.getUuid().toString(),
+        "total", total,
+        "designacao", avaliacao.getDesignacao()));
   }
 
   // ---------------------------------------------------------------------------------------------

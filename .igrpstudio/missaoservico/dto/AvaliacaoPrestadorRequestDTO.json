@@ -1,0 +1,16 @@
+{
+  "type": "dto",
+  "module": "missaoservico",
+  "name": "AvaliacaoPrestadorRequest",
+  "template": "classic",
+  "enableCustonValidation": false,
+  "readOnly": true,
+  "attributes": [
+    { "name": "sistemaQualidade", "type": "string", "objectType": "java", "required": true },
+    { "name": "prazoFornecimento", "type": "string", "objectType": "java", "required": true },
+    { "name": "qualidadeProduto", "type": "string", "objectType": "java", "required": true },
+    { "name": "capacidadeResposta", "type": "string", "objectType": "java", "required": true },
+    { "name": "preco", "type": "string", "objectType": "java", "required": true }
+  ],
+  "id": "msvdto21avalprestreq"
+}
