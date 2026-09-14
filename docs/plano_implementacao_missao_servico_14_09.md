@@ -116,7 +116,16 @@ Cada fase fecha com: compilação, teste live (com autorização por fluxo de es
 - **Lista Etapa Missão:** `GET /processos?etapa=&tipoProcesso=` paginada.
 - **Cancelar:** inactiva também processos, pareceres, requisição-colab e avaliações; se algum processo passou de `PRESTADOR_SERVICO`, renotifica todos os já notificados (nº missão + motivo).
 
-### Fase 11 — Limpeza do modelo antigo
+### Fase 11 — Limpeza do modelo antigo — **revista em 14/09: faseada**
+
+> Feito agora:
+> - endpoints antigos por missão marcados como **obsoletos** no Swagger (continuam a funcionar);
+> - `PUT /{uuid}/pagamento` passa a exigir a missão `FINALIZADO`;
+> - limpeza de BD documentada como pendente (DDL secção 13).
+>
+> Remover os endpoints e as colunas só **depois de o frontend migrar**, para não partir o `develop`. `MISSAO_SERV_ID` fica: é usado como atalho pelo modelo novo.
+
+Plano original:
 - DDL: remover `MISSAO_SERV_ID` de prestador/logística, `ENT_ID/NOME/EMAIL` de prestador, `MISSAO_COLAB_ID` de requisição; tornar `MISSAO_PROCESSO_ID` `NOT NULL`.
 - Remover endpoints antigos por missão (`/analise`, `/emissao-requisicao`, `/logistica`, …).
 - Actualizar `MISSAO_ENTITIES.md`.

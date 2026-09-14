@@ -353,6 +353,25 @@ CREATE UNIQUE INDEX UX_MISSAO_REQUIS_NR_ANO ON RH_T_MISSAO_REQUISICAO (ANO, NR_R
 
 
 -- =============================================================================
+-- 13. LIMPEZA DO MODELO ANTIGO — POR APLICAR (não executar ainda)
+--
+-- Só depois de o frontend migrar para os endpoints por processo e de os endpoints
+-- antigos (/analise, /emissao-requisicao, /logistica, /cabimento, /autorizacao)
+-- serem removidos do MissaoController.
+--
+-- MANTÊM-SE de propósito (usados pelo modelo novo como atalho para a missão):
+--   RH_T_MISSAO_PRESTADOR.MISSAO_SERV_ID, RH_T_MISSAO_LOGISTICA.MISSAO_SERV_ID,
+--   RH_T_MISSAO_PRESTADOR.ENT_ID/NOME/EMAIL (fotografia do prestador na selecção).
+--
+-- Candidatos:
+--   ALTER TABLE RH_T_MISSAO_REQUISICAO DROP CONSTRAINT FK_MIS_REQUIS_COLAB;
+--   ALTER TABLE RH_T_MISSAO_REQUISICAO DROP COLUMN MISSAO_COLAB_ID;
+--   ALTER TABLE RH_T_MISSAO_LOGISTICA MODIFY (MISSAO_PROCESSO_ID NOT NULL);
+--   ALTER TABLE RH_T_MISSAO_PRESTADOR MODIFY (MISSAO_PROCESSO_ID NOT NULL, PARAM_PREST_ID NOT NULL);
+-- =============================================================================
+
+
+-- =============================================================================
 -- Verificação
 -- =============================================================================
 -- SELECT object_type, object_name, status FROM user_objects

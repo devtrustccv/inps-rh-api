@@ -71,7 +71,8 @@ public class MissaoController {
    value = "{uuid}/analise"
   )
   @Operation(
-    summary = "Save analise processo missao servico",
+    summary = "Save analise processo missao servico (obsoleto: usar PUT /{uuid}/processos/{tipoProcesso}/prestadores)",
+    deprecated = true,
     description = "Save analise processo missao servico",
     responses = {
       @ApiResponse(
@@ -224,7 +225,8 @@ public class MissaoController {
    value = "{uuid}/analise"
   )
   @Operation(
-    summary = "Get analise processo missao servico",
+    summary = "Get analise processo missao servico (obsoleto: usar GET /{uuid}/processos/{tipoProcesso}/prestadores)",
+    deprecated = true,
     description = "Get analise processo missao servico",
     responses = {
       @ApiResponse(
@@ -284,7 +286,8 @@ public class MissaoController {
    value = "{uui}/emissao-requisicao"
   )
   @Operation(
-    summary = "Get submissao servico emissao requisicao",
+    summary = "Get submissao servico emissao requisicao (obsoleto: usar GET /{uuid}/processos/{tipoProcesso}/requisicoes)",
+    deprecated = true,
     description = "Get submissao servico emissao requisicao",
     responses = {
       @ApiResponse(
@@ -314,7 +317,8 @@ public class MissaoController {
    value = "{uui}/emissao-requisicao"
   )
   @Operation(
-    summary = "Save submissao servico emissao requisicao",
+    summary = "Save submissao servico emissao requisicao (obsoleto: usar PUT /{uuid}/processos/{tipoProcesso}/requisicoes)",
+    deprecated = true,
     description = "Save submissao servico emissao requisicao",
     responses = {
       @ApiResponse(
@@ -344,7 +348,8 @@ public class MissaoController {
    value = "{uuid}/logistica"
   )
   @Operation(
-    summary = "Get missao servico logistica",
+    summary = "Get missao servico logistica (obsoleto: usar GET /{uuid}/processos/{tipoProcesso}/logistica)",
+    deprecated = true,
     description = "Get missao servico logistica",
     responses = {
       @ApiResponse(
@@ -374,7 +379,8 @@ public class MissaoController {
    value = "{uuid}/logistica"
   )
   @Operation(
-    summary = "Save missao servico logistica",
+    summary = "Save missao servico logistica (obsoleto: usar PUT /{uuid}/processos/{tipoProcesso}/logistica)",
+    deprecated = true,
     description = "Save missao servico logistica",
     responses = {
       @ApiResponse(
@@ -404,7 +410,8 @@ public class MissaoController {
    value = "{uuid}/cabimento"
   )
   @Operation(
-    summary = "Get missao servico cabimento",
+    summary = "Get missao servico cabimento (obsoleto: usar GET /{uuid}/processos/{tipoProcesso}/cabimento)",
+    deprecated = true,
     description = "Get missao servico cabimento",
     responses = {
       @ApiResponse(
@@ -434,7 +441,8 @@ public class MissaoController {
    value = "{uuid}/cabimento"
   )
   @Operation(
-    summary = "Save missao servico cabimento",
+    summary = "Save missao servico cabimento (obsoleto: usar PUT /{uuid}/processos/{tipoProcesso}/cabimento)",
+    deprecated = true,
     description = "Save missao servico cabimento",
     responses = {
       @ApiResponse(
@@ -464,7 +472,8 @@ public class MissaoController {
    value = "{uuid}/autorizacao"
   )
   @Operation(
-    summary = "Get missao servico autorizacao",
+    summary = "Get missao servico autorizacao (obsoleto: usar GET /{uuid}/processos/{tipoProcesso}/autorizacao)",
+    deprecated = true,
     description = "Get missao servico autorizacao",
     responses = {
       @ApiResponse(
@@ -494,7 +503,8 @@ public class MissaoController {
    value = "{uuid}/autorizacao"
   )
   @Operation(
-    summary = "Save missao servico autorizacao",
+    summary = "Save missao servico autorizacao (obsoleto: usar PUT /{uuid}/processos/{tipoProcesso}/autorizacao)",
+    deprecated = true,
     description = "Save missao servico autorizacao",
     responses = {
       @ApiResponse(

@@ -594,12 +594,15 @@ public class MissaoServicoServiceWrite {
     validarPagamento(dto);
 
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
-    // O pagamento é registado pelo sistema financeiro — exige sempre a etapa atingida.
-    exigirEtapaMinima(missao, ETAPA_7, true);
+    // Registo do pagamento pelo financeiro: no modelo por processo só depois de todos os processos
+    // activos autorizados (missão FINALIZADO) — a etapa da missão já não avança até PAGAMENTO.
+    if (!"FINALIZADO".equals(missao.getEstado())) {
+      throw IgrpResponseStatusException.badRequest(
+          "O pagamento só pode ser registado com a missão finalizada (todos os processos autorizados)");
+    }
 
     missao.setReferenciaPagamento(dto.getReferenciaPagamento());
     missao.setDataPagamento(dto.getDataPagamento());
-    avancarEtapa(missao, ETAPA_7);
     missaoServicoRepository.save(missao);
 
     Map<String, Object> resp = new HashMap<>();

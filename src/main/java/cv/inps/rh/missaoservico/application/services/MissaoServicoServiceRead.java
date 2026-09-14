@@ -925,7 +925,9 @@ public class MissaoServicoServiceRead {
   /** Situação da missão no modelo por processo: o que falta ao processo mais atrasado. */
   private EstadoDesc situacaoPorProcessos(MissaoServicoEntity missao, List<MissaoProcessoEntity> processos) {
     if ("FINALIZADO".equals(missao.getEstado()))
-      return new EstadoDesc("PAGO", "Pago");
+      return missao.getReferenciaPagamento() != null || missao.getDataPagamento() != null
+          ? new EstadoDesc("PAGO", "Pago")
+          : new EstadoDesc("POR_PAGAR", "Autorizado — por pagar");
     var etapa = processoMaisAtrasado(processos).map(p -> EtapaProcesso.fromCode(p.getEtapa())).orElse(null);
     if (etapa == null)
       return new EstadoDesc("", "");
