@@ -722,6 +722,18 @@ public class MissaoProcessoServiceRead {
       emails.add(p.getEmail());
     }
     dto.setEmails(List.copyOf(emails));
+
+    // Coluna "Nota Avaliação": a avaliação mais recente deste prestador, em qualquer missão.
+    if (p.getParamPrestId() != null) {
+      missaoPrestadorAvalRepository
+          .findAllByMissaoPrestId_ParamPrestId_IdAndEstadoOrderByIdDesc(p.getParamPrestId().getId(), ESTADO_ATIVO)
+          .stream().findFirst()
+          .ifPresent(aval -> {
+            dto.setNotaAvaliacao(aval.getTotal());
+            dto.setNotaAvaliacaoDesignacao(aval.getDesignacao());
+            dto.setNotaAvaliacaoDesc(support.dominioAvaliacaoFornecedor("DESIGNACAO").get(aval.getDesignacao()));
+          });
+    }
     return dto;
   }
 }

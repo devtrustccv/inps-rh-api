@@ -126,6 +126,16 @@ th { background: var(--thead); font-weight: 600; }
 <tr><td>array <code>[]</code></td><td>inactiva tudo</td></tr>
 </tbody></table></div>
 <p>Regravar o mesmo payload <strong>não duplica linhas</strong> — os ids mantêm-se.</p>
+<h3>Anexos — fluxo de dois passos</h3>
+<p>O campo <code>documento</code> de um anexo <strong>não é o nome do ficheiro</strong>: é o <code>fileId</code> devolvido pelo upload.</p>
+<ol>
+<li><code>POST /api/v1/documento/private</code> com o ficheiro → devolve o <code>fileId</code></li>
+<li>Enviar esse <code>fileId</code> em <code>documento</code>, com o <code>tipoDocumentoId</code> do lookup</li>
+<li>Para ver ou descarregar: <code>GET /api/v1/documento?fileId={documento}</code> → devolve uma **URL</li>
+</ol>
+<p>pré-assinada** do storage, com validade limitada</p>
+<p>Enviar um nome de ficheiro inventado grava o texto mas o passo 3 responde <strong>400</strong>. É este <code>GET</code> que serve o ícone &quot;Ver documento&quot; do ecrã de Validação UGAL.</p>
+<p>Anexos enviados pelo ecrã ficam em <code>estado: &quot;P&quot;</code>; os gerados pelo sistema (PDF da requisição) ficam em <code>&quot;A&quot;</code>.</p>
 <h3>Anexos e PDFs nunca bloqueiam o fluxo</h3>
 <p>Se o storage falhar, a etapa grava na mesma e devolve <strong>200</strong>; fica um <code>ERROR</code> no log do servidor e o documento não aparece na resposta. A nota de encomenda continua disponível em *Extrair Requisição*, que a gera a partir dos dados.</p>
 <h3>Formato dos erros</h3>
@@ -277,6 +287,7 @@ th { background: var(--thead); font-weight: 600; }
   &quot;processoEtapaAction&quot;: &quot;NEXT&quot;
 }</code></pre>
 <p>No <code>GET</code>, cada prestador traz <code>emails[]</code> — o principal <strong>mais os adicionais activos</strong>. São esses que recebem o pedido de proposta no <code>NEXT</code>.</p>
+<p>A coluna <strong>Nota Avaliação</strong> vem em <code>notaAvaliacao</code> (total 0–100), <code>notaAvaliacaoDesignacao</code> (<code>A</code>–<code>D</code>) e <code>notaAvaliacaoDesc</code> (ex.: &quot;Fornecedor Preferencial&quot;). É a avaliação <strong>mais recente</strong> desse prestador, de qualquer missão; vem <code>null</code> enquanto nunca tiver sido avaliado.</p>
 <p><code>NEXT</code> → etapa passa a <code>EMISSAO_REQUISICAO</code> e notifica todos esses emails.</p>
 <p><strong>Erros:</strong></p>
 <div class="table-wrap"><table>
@@ -469,6 +480,10 @@ th { background: var(--thead); font-weight: 600; }
 <tr><td>Alojamento em grupo</td><td>O DTO força uma linha por colaborador; a spec admite cabimento único para o mesmo hotel</td></tr>
 <tr><td>Identidade do utilizador</td><td><code>executadoPor</code> grava <code>anonymousUser</code> em desenvolvimento; sem bloqueio por perfil nesta fase</td></tr>
 <tr><td>Encoding</td><td>Enviar <code>Content-Type: application/json; charset=utf-8</code></td></tr>
+<tr><td><strong>&quot;Ver Notificação&quot;</strong> (Lista Missão)</td><td>Sem endpoint por missão. <code>GET /api/v1/funcionarios/notificacoes</code> devolve <strong>todas</strong> as notificações e <strong>não traz referência à missão</strong>, por isso nem filtrar no cliente é possível. O botão não é implementável sem um endpoint novo</td></tr>
+<tr><td><strong>&quot;Ver Alerta&quot;</strong> (Lista Missão)</td><td><code>GET /api/v1/funcionarios/alertas</code> devolve vazio — o *job* de alertas é fase 2 do projecto. O botão não tem o que mostrar</td></tr>
+<tr><td><code>GET /{uuid}/pagamento</code></td><td>Devolve <code>etapaAtual: &quot;SUBMISSAO&quot;</code> mesmo com a missão <code>FINALIZADO</code>. O campo é vestigial do modelo antigo — usar <code>estado</code>, não <code>etapaAtual</code></td></tr>
+<tr><td>Templates de notificação</td><td>Em desenvolvimento, o template <code>MISSAO_PRESTADOR</code> tem texto de preenchimento (&quot;Polhover imoant…&quot;). É dado de parametrização, não código</td></tr>
 </tbody></table></div>
 <hr>
 <h1>Histórico</h1>

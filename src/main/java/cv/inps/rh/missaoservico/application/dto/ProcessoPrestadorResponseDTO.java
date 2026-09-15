@@ -25,5 +25,10 @@ public class ProcessoPrestadorResponseDTO {
   private String email;                   // email principal
   private List<String> emails;            // todos os emails activos que recebem a notificação
   private String estado;
+  // Coluna "Nota Avaliação" do ecrã: a avaliação mais recente deste prestador, de qualquer
+  // missão. null enquanto nunca tiver sido avaliado.
+  private java.math.BigDecimal notaAvaliacao;
+  private String notaAvaliacaoDesignacao;   // A | B | C | D
+  private String notaAvaliacaoDesc;         // ex.: "Fornecedor Preferencial"
 
 }
