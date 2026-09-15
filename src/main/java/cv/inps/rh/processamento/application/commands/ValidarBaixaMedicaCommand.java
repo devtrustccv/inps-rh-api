@@ -18,5 +18,5 @@ public class ValidarBaixaMedicaCommand implements Command {
     private String validar;
 
     @NotBlank(message = "The field <pedidoId> is required")
-    private String pedidoId;
+    private String abonoId;
 }

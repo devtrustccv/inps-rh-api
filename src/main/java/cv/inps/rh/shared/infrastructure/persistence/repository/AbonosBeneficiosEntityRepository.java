@@ -86,7 +86,8 @@ public interface AbonosBeneficiosEntityRepository extends
           t.uuid,
           null,
           tr.id,
-          ps.id
+          ps.id,
+          null
       )
       FROM AbonosBeneficiosEntity t, TiposRelacionamentoEntity tr
       LEFT JOIN t.funId f

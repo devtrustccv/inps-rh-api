@@ -1,12 +1,16 @@
 package cv.inps.rh.shared.infrastructure.persistence.repository;
 
+import cv.inps.rh.configuracao.application.dto.ResponsavelResponseDTO;
 import cv.inps.rh.configuracao.application.services.model.ResponsavelSectionData;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.DirecaoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.ResponsavelEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
@@ -46,7 +50,7 @@ public interface ResponsavelEntityRepository extends
 
   @Query("""
           SELECT NEW cv.inps.rh.configuracao.application.services.model.ResponsavelSectionData(
-                s.uuid,
+                s.id,
                 s.nome,
                 r.id,
                 r.funId.uuid,
@@ -70,5 +74,50 @@ public interface ResponsavelEntityRepository extends
   List<ResponsavelEntity> findByInstitIdAndSecaoIdIsNotNullAndEstado(
       DirecaoEntity direcao,
       String estado
+  );
+
+  @Query("""
+      SELECT new cv.inps.rh.configuracao.application.dto.ResponsavelResponseDTO(
+          r.id,
+          s.nome,
+          s.id,
+          i.nome,
+          i.id,
+          r.email,
+          r.funId.uuid,
+          r.funId.nome
+      )
+      FROM ResponsavelEntity r
+      JOIN r.institId i
+      JOIN r.funId f
+      LEFT JOIN r.secaoId s
+      WHERE (
+          :nomeFuncionario IS NULL
+          OR LOWER(f.nome) LIKE LOWER(CONCAT('%', :nomeFuncionario, '%'))
+      )
+      AND (
+          :nomeInstituicao IS NULL
+          OR LOWER(i.nome) LIKE LOWER(CONCAT('%', :nomeInstituicao, '%'))
+      )
+      AND (
+          :idInstituicao IS NULL
+          OR i.id = :idInstituicao
+      )
+      AND (
+          :nomeSeccao IS NULL
+          OR LOWER(s.nome) LIKE LOWER(CONCAT('%', :nomeSeccao, '%'))
+      )
+      AND (
+          :idSeccao IS NULL
+          OR s.id = :idSeccao
+      )
+      """)
+  Page<ResponsavelResponseDTO> findResponsaveis(
+      @Param("nomeFuncionario") String nomeFuncionario,
+      @Param("nomeInstituicao") String nomeInstituicao,
+      @Param("idInstituicao") Long idInstituicao,
+      @Param("nomeSeccao") String nomeSeccao,
+      @Param("idSeccao") Long idSeccao,
+      Pageable pageable
   );
 }

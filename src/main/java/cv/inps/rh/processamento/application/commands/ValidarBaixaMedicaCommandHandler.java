@@ -28,7 +28,7 @@ public class ValidarBaixaMedicaCommandHandler implements CommandHandler<ValidarB
 
     LOGGER.debug("ValidarBaixaMedicaCommand: {}", command);
 
-    return ResponseEntity.ok(baixaMedicaServiceWrite.validar(command.getPedidoId(), EstadoValidacao.fromCodeOrThrow(command.getValidar()), command.getBaixamedicareq()));
+    return ResponseEntity.ok(baixaMedicaServiceWrite.validar(command.getAbonoId(), EstadoValidacao.fromCodeOrThrow(command.getValidar()), command.getBaixamedicareq()));
   }
 
 }
