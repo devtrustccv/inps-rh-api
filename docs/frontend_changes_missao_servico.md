@@ -1,719 +1,640 @@
-# Alterações Front-End — Missão de Serviço
+# Missão de Serviço — guia de implementação para o front-end
 
-**Data:** 2026-08-10
-**Branch:** develop
-**Commits:** `a16c0989`, `dca10c31`
+**Última actualização:** 2026-09-15 · **Base de todos os endpoints:** `/api/v1/missao-servico`
 
-Base de todos os endpoints: `/api/v1/missao-servico`
+> Versão em HTML para partilhar: [evidencias_missao.html](evidencias_missao.html) — gerada a partir
+> deste ficheiro; em caso de divergência, vale o Markdown.
 
-> Versão em HTML para partilhar com a equipa de front-end: [evidencias_missao.html](evidencias_missao.html)
-> (gerada a partir deste ficheiro — em caso de divergência, vale o Markdown).
+Este documento substitui o changelog anterior. Está organizado **por ecrã**, pela ordem em que o
+utilizador os percorre. Cada capítulo traz os *lookups* que o ecrã precisa, o `GET` que o preenche,
+o payload da gravação e os erros esperados. Tudo aqui foi verificado contra a API em execução a
+2026-09-15.
 
----
-
-## 2026-09-15 — Correcções saídas da bateria de testes
-
-Alterações **retro-compatíveis**: nada do que já funcionava deixa de funcionar.
-
-### Os identificadores de colaborador deixaram de ser ambíguos
-
-Nos ecrãs de **Logística** e **Emissão de Requisição**, o `GET` devolve, para cada colaborador,
-dois identificadores lado a lado — `funUuid` (do funcionário) e `uuid` (do colaborador *desta*
-missão). Antes só um deles era aceite na gravação, e o outro dava `400 "colaborador não pertence
-à missão"`. **Agora os dois são aceites**, em todos os campos de colaborador:
-`bilhetesPassagem[].colaboradorIds`, `segurosViagem[].colaboradorIds`,
-`alojamentos[].colaboradorId`, `ajudasCusto[].colaboradorId` e
-`requisicoes[].funcionarioUuids`.
-
-### Dois campos passaram a ser validados
-
-| Campo | Onde | Antes | Agora |
-| --- | --- | --- | --- |
-| `ambitoMissao` | `POST`/`PUT /submissao` | aceite vazio | **400** — é obrigatório no ecrã |
-| `motivoCancelamento` | `PATCH /{uuid}/cancelar` | aceite vazio | **400** — sem ele perdia-se o motivo no registo e nas notificações |
-
-> `alojamento` continua opcional: quando não vem, a criação assume **Sim**. É um valor por
-> defeito deliberado, não um esquecimento.
-
-### Os `GET` passaram a servir as opções dos *selects*
-
-O ecrã de avaliação já devolvia `opcoesAvaliacao`; os outros obrigavam a replicar os domínios em
-código. Agora todos os servem:
-
-| Ecrã | Campo novo na resposta | Conteúdo |
-| --- | --- | --- |
-| Validação UGAL | `opcoesParecer` | `FAVORAVEL` / `DESFAVORAVEL`, com descrição |
-| Aprovação RH | `opcoesParecer`, `opcoesResponsavel` | pareceres e `COORDENADOR_RH` / `DIRECTOR_RH` |
-| Lista Missão por Etapa | `opcoesEtapa`, `opcoesTipoProcesso` | as 8 etapas e os 4 tipos, pela ordem do fluxo |
-
-Cada opção é `{ "valor": "...", "descricao": "..." }` — usar `valor` no `PUT` e `descricao` no ecrã.
-
-### De onde vêm os restantes *selects* (fora do módulo de missão)
-
-Quatro campos dos ecrãs não são servidos pelos endpoints da missão — vêm da parametrização
-partilhada. Todos foram verificados em execução:
-
-| Campo do ecrã | Endpoint | Notas |
-| --- | --- | --- |
-| País de Destino | `GET /api/v1/parametrizacao/geografias?nivelDetalhe=1` | 223 países. Cabo Verde é `1238` |
-| Ilha | `GET /api/v1/parametrizacao/geografias?nivelDetalhe=2&geogrId=1238` | 10 ilhas; só para destino em Cabo Verde |
-| Concelho | `GET /api/v1/parametrizacao/geografias?nivelDetalhe=3&geogrId={ilhaId}` | ex.: `12387` (Santiago) → 9 concelhos, Praia = `1238704` |
-| Tipo Documento (anexos) | `GET /api/v1/parametrizacao/tipo-documento/ativos` | 28 tipos; `value` é o `tipoDocumentoId` a enviar |
-| Prestador (`entId`) | `GET /api/v1/parametrizacao/entidades/ativos` | o `value` é o `entId` do registo de prestador |
-
-Formato de todas: `{ "label": "...", "value": 123 }` — `value` é o que segue no `PUT`.
-
-> `entidades/ativos` devolve **11 981** registos de uma vez, sem filtro nem paginação. Para a caixa
-> "Pesquisar prestador de serviços…" do ecrã de registo, filtrar no cliente ou pedir um endpoint
-> de pesquisa.
-
-### Ordem que importa: ajuda de custo depois do alojamento
-
-O valor da ajuda de custo é ⅓ do diário **apenas** quando o processo `ALOJAMENTO` já tem, para
-esse colaborador, uma linha de logística com `flgAlimentacao = "SIM"`. Se a ajuda de custo for
-gravada antes, sai ⅔ — sem erro. Gravar o **alojamento primeiro**, ou regravar a ajuda de custo
-depois.
-
-| `flgAlojamento` | alimentação no alojamento | valor diário |
-| --- | --- | --- |
-| `false` | — | **100%** do enviado |
-| `true` | `NAO` ou sem linha de alojamento | **⅔** |
-| `true` | `SIM` | **⅓** |
+O changelog cronológico e a documentação do modelo anterior estão no fim, em **[Histórico](#histórico)**.
 
 ---
 
-## 2026-09-14 — LEIA PRIMEIRO: a missão deixou de ter uma etapa
+## 1. O que mudou — leitura obrigatória
 
-Este é o resumo da alteração estrutural da spec de 14/09. As secções por fase, mais abaixo,
-têm os payloads campo a campo.
-
-### O que mudou
-
-Antes, a missão tinha **uma** etapa e o ecrã avançava a missão inteira. Agora a missão tem
-**quatro processos independentes**, cada um com a sua etapa e o seu percurso:
+A missão **deixou de ter uma etapa única**. Passou a ter **quatro processos independentes**, cada um
+com a sua etapa e o seu percurso:
 
 | Processo | Percurso |
 | --- | --- |
 | `BILHETE_PASSAGEM` | Prestador Serviço → Emissão Requisição → Logística → Validação UGAL → Aprovação RH → Cabimento → Autorização → Pagamento |
 | `ALOJAMENTO` | igual ao bilhete |
-| `SEGURO_VIAGEM` | começa na **Logística** (não passa por prestadores nem requisição) |
+| `SEGURO_VIAGEM` | começa na **Logística** — não passa por prestadores nem requisição |
 | `AJUDA_CUSTO` | começa na **Logística** |
 
-A submissão cria os quatro processos de uma vez. Cada um avança ao seu ritmo: o bilhete pode
-estar em Cabimento enquanto a ajuda de custo ainda está na Logística.
+A submissão cria os quatro de uma vez. Cada um avança ao seu ritmo: o bilhete pode estar em
+Cabimento enquanto a ajuda de custo ainda está na Logística.
 
-### O que isto obriga a mudar no front-end
+**Consequências directas:**
 
-1. **Todas as rotas de etapa passam a levar o tipo de processo no caminho:**
-   `/{missaoUuid}/processos/{tipoProcesso}/{etapa}`.
-2. **A lista de trabalho passa a ser de processos, não de missões** — `GET /processos?etapa=…`
-   devolve uma linha por processo. A lista geral (`GET /missao-servico`) traz a missão com a
-   sub-lista dos seus quatro processos e respectivas etapas.
-3. **O ecrã a mostrar decide-se pela etapa do processo**, não pela etapa da missão.
-4. **A guarda de etapa está no `PUT`, não no `GET`.** Gravar numa etapa que o processo não
-   percorre (ex.: `prestadores` em `SEGURO_VIAGEM` ou `AJUDA_CUSTO`), ou fora de sequência, dá
-   **400**. O `GET` correspondente devolve **200** com as listas vazias — não uses o `GET` para
-   decidir se o ecrã existe; usa o percurso do tipo de processo (tabela acima).
+1. As rotas de etapa levam o tipo de processo no caminho: `/{missaoUuid}/processos/{tipoProcesso}/{etapa}`.
+2. A lista de trabalho é de **processos**, não de missões.
+3. O ecrã a mostrar decide-se pela **etapa do processo**.
+4. `AUTORIZACAO` é agora uma **etapa própria**. Acabou o artifício de distinguir Cabimentação de
+   Autorização pelo `estadoCabimento`.
 
-### Endpoints antigos — para onde migrar
+### Migração dos endpoints antigos
 
-Os dez endpoints do modelo anterior continuam a responder, marcados `deprecated = true` no
-Swagger. Vão ser removidos numa fase seguinte, assim que o front-end migrar.
+Os dez endpoints do modelo anterior continuam a responder, marcados `deprecated` no Swagger, e serão
+removidos assim que o front-end migrar.
 
-`{tipoProcesso}` é um de `BILHETE_PASSAGEM` | `SEGURO_VIAGEM` | `AJUDA_CUSTO` | `ALOJAMENTO`.
-Onde a chamada era **uma por missão**, passa a ser **uma por processo**.
+| Antigo (deprecated) | Novo |
+|---|---|
+| `GET`/`PUT /{uuid}/analise` | `GET`/`PUT /{uuid}/processos/{tipoProcesso}/prestadores` |
+| `GET`/`PUT /{uuid}/emissao-requisicao` | `GET`/`PUT /{uuid}/processos/{tipoProcesso}/requisicoes` |
+| `GET`/`PUT /{uuid}/logistica` | `GET`/`PUT /{uuid}/processos/{tipoProcesso}/logistica` |
+| `GET`/`PUT /{uuid}/cabimento` | `GET`/`PUT /{uuid}/processos/{tipoProcesso}/cabimento` |
+| `GET`/`PUT /{uuid}/autorizacao` | `GET`/`PUT /{uuid}/processos/{tipoProcesso}/autorizacao` |
 
-| Antigo (deprecated) | Novo | Nota |
-|---|---|---|
-| `GET /{uuid}/analise` | `GET /{uuid}/processos/{tipoProcesso}/prestadores` | Só em `BILHETE_PASSAGEM` e `ALOJAMENTO` |
-| `PUT /{uuid}/analise` | `PUT /{uuid}/processos/{tipoProcesso}/prestadores` | idem |
-| `GET /{uuid}/emissao-requisicao` | `GET /{uuid}/processos/{tipoProcesso}/requisicoes` | idem |
-| `PUT /{uuid}/emissao-requisicao` | `PUT /{uuid}/processos/{tipoProcesso}/requisicoes` | Uma requisição **por prestador**, com N colaboradores |
-| `GET /{uuid}/logistica` | `GET /{uuid}/processos/{tipoProcesso}/logistica` | Devolve só a secção daquele processo |
-| `PUT /{uuid}/logistica` | `PUT /{uuid}/processos/{tipoProcesso}/logistica` | idem |
-| `GET /{uuid}/cabimento` | `GET /{uuid}/processos/{tipoProcesso}/cabimento` | |
-| `PUT /{uuid}/cabimento` | `PUT /{uuid}/processos/{tipoProcesso}/cabimento` | |
-| `GET /{uuid}/autorizacao` | `GET /{uuid}/processos/{tipoProcesso}/autorizacao` | Etapa própria — já não se distingue pelo `estadoCabimento` |
-| `PUT /{uuid}/autorizacao` | `PUT /{uuid}/processos/{tipoProcesso}/autorizacao` | Acabou a autorização parcial |
+Mantêm o caminho: `POST /submissao`, `GET`/`PUT /{uuid}/submissao`, `GET /{uuid}`,
+`GET /api/v1/missao-servico`, `PATCH /{id}/cancelar` e `GET`/`PUT /{uuid}/pagamento`.
 
-> No Swagger, os dois `emissao-requisicao` antigos têm o parâmetro de caminho escrito `uui` em vez
-> de `uuid` (gralha do modelo antigo). A URL é a mesma; só afecta quem gere cliente a partir do
-> OpenAPI. As rotas novas não têm o problema.
-
-### Endpoints novos, sem equivalente antigo
-
-| Ecrã | Método | Path |
-|---|---|---|
-| Gestão de Prestadores — criar | `POST` | `/api/v1/missao-servico/prestadores` |
-| Gestão de Prestadores — editar | `PUT` | `/api/v1/missao-servico/prestadores/{uuid}` |
-| Gestão de Prestadores — lista | `GET` | `/api/v1/missao-servico/prestadores` |
-| Gestão de Prestadores — detalhe | `GET` | `/api/v1/missao-servico/prestadores/{uuid}` |
-| Ver Avaliação do prestador | `GET` | `/api/v1/missao-servico/prestadores/{uuid}/avaliacoes` |
-| Lista Etapa Missão (lista de trabalho) | `GET` | `/api/v1/missao-servico/processos?etapa=&tipoProcesso=` |
-| Validação UGAL | `GET`/`PUT` | `/{uuid}/processos/{tipoProcesso}/validacao-ugal` |
-| Aprovação RH | `GET`/`PUT` | `/{uuid}/processos/{tipoProcesso}/aprovacao-rh` |
-| Avaliar Prestador | `GET`/`PUT` | `/{uuid}/processos/{tipoProcesso}/prestadores/{missaoPrestUuid}/avaliacao` |
-| Extrair Requisição (PDF) | `GET` | `/{uuid}/processos/{tipoProcesso}/requisicoes/{requisicaoUuid}/pdf` |
-
-### Endpoints que se mantêm
-
-`POST /submissao`, `GET`/`PUT /{uuid}/submissao`, `GET /{uuid}`, a lista `GET /api/v1/missao-servico`
-e `PATCH /{id}/cancelar` mantêm o caminho. Mudou o **conteúdo**: a submissão aceita `ilhaId`/
-`concelhoId` e o campo `alojamento`, e as respostas ganham `processos[]`.
-
-`GET`/`PUT /{uuid}/pagamento` mantém o caminho e continua a ser **por missão** — mas o `PUT` passou
-a exigir a missão em `FINALIZADO` (os quatro processos activos autorizados), senão devolve **400**.
-
-### Comportamentos a ter em conta
-
-- **Anexos e PDFs não bloqueiam o fluxo.** Se o storage falhar, a gravação da etapa é feita na
-  mesma e devolve `200`; fica um `ERROR` no log do servidor e o documento não aparece na
-  resposta. A nota de encomenda continua sempre disponível em *Extrair Requisição*, que a gera
-  a partir dos dados.
-- **Um parecer desfavorável devolve o processo à etapa anterior** e arquiva o parecer no
-  histórico; abre-se um ciclo novo.
-- **Na Aprovação RH a ordem é fixa:** o Coordenador emite primeiro, só depois o Director. O
-  parecer do Director é o que faz avançar.
-- **O valor da ajuda de custo é calculado pelo backend** a partir do valor diário que o ecrã
-  envia: 100% sem alojamento da instituição, ⅔ com alojamento sem alimentação, ⅓ com
-  alimentação.
-- **O pagamento só aceita a missão finalizada** — ou seja, com os quatro processos autorizados.
-
-### Validado em
-
-Bateria de 129 passos a percorrer os ecrãs pela ordem de utilização (lista → formulário →
-`GET by id` → editar → gravar → reler), com caminhos felizes e negativos, e com confirmação
-directa na base de dados depois de cada escrita. Todos os payloads e respostas documentados
-abaixo saíram dessa bateria, corrida contra o ambiente de desenvolvimento.
+> Os dois `emissao-requisicao` antigos declaram o parâmetro de caminho como `uui` em vez de `uuid`
+> (gralha do modelo antigo). Só afecta quem gera cliente a partir do OpenAPI.
 
 ---
 
-## 2026-09-14 — Listas e cancelamento (Fase 10)
+## 2. Regras transversais
 
-### Lista Geral — sub-lista de processos
+Valem para todos os ecrãs de etapa. Lê isto uma vez e não precisas de o repetir por capítulo.
 
-`GET /api/v1/missao-servico` — cada missão de `content[]` traz agora:
+### `SAVE` vs `NEXT`
+
+Todos os `PUT` de etapa aceitam `processoEtapaAction`:
+
+- **`SAVE`** — grava e fica na etapa. Grava mesmo fora de ordem (fica só um aviso no log), para não
+  perder o que o utilizador preencheu.
+- **`NEXT`** — valida, grava e avança. Exige que o processo já tenha atingido a etapa do ecrã.
+
+A etapa **nunca retrocede**, excepto por parecer desfavorável, que devolve o processo à etapa
+anterior de propósito.
+
+### A guarda de etapa está no `PUT`, não no `GET`
+
+Gravar numa etapa que o processo não percorre (`prestadores` em `SEGURO_VIAGEM`, por exemplo) ou
+fora de sequência dá **400**. O `GET` correspondente devolve **200** com as listas vazias.
+
+**Não uses o `GET` para decidir se o ecrã existe** — usa o percurso do tipo de processo (tabela do
+capítulo 1).
+
+### Identificadores de colaborador
+
+Onde há colaboradores, o `GET` devolve dois identificadores lado a lado: `funUuid` (do funcionário)
+e `uuid` (do colaborador *desta* missão). **Ambos são aceites** na gravação, em todos os campos:
+`colaboradorId`, `colaboradorIds` e `funcionarioUuids`.
+
+### Sincronização de listas
+
+Nos `PUT` que recebem arrays (emails do prestador, linhas de logística, requisições):
+
+| No payload | Efeito |
+|---|---|
+| item **sem** `id` | cria |
+| item **com** `id` | actualiza |
+| item **omitido** do array | inactiva (`estado: "I"`) |
+| campo a `null` | preserva o que está gravado |
+| array `[]` | inactiva tudo |
+
+Regravar o mesmo payload **não duplica linhas** — os ids mantêm-se.
+
+### Anexos e PDFs nunca bloqueiam o fluxo
+
+Se o storage falhar, a etapa grava na mesma e devolve **200**; fica um `ERROR` no log do servidor e
+o documento não aparece na resposta. A nota de encomenda continua disponível em *Extrair Requisição*,
+que a gera a partir dos dados.
+
+### Formato dos erros
+
+Todos os erros de validação vêm assim, com a mensagem em `title`:
+
+```jsonc
+{ "type": "about:blank", "title": "ambitoMissao é obrigatório", "status": 400,
+  "instance": "/api/v1/missao-servico/submissao", "igrpType": "validation" }
+```
+
+### Encoding
+
+Enviar sempre `Content-Type: application/json; charset=utf-8`.
+
+---
+
+## 3. *Lookups* partilhados
+
+Cinco campos não são servidos pelo módulo de missão — vêm da parametrização partilhada. Todos
+devolvem `{ "label": "...", "value": 123 }`; o `value` é o que segue no payload.
+
+| Campo do ecrã | Endpoint | Referência |
+| --- | --- | --- |
+| País de Destino | `GET /api/v1/parametrizacao/geografias?nivelDetalhe=1` | 223 países; Cabo Verde = `1238` |
+| Ilha | `GET /api/v1/parametrizacao/geografias?nivelDetalhe=2&geogrId=1238` | 10 ilhas; só para destino em Cabo Verde |
+| Concelho | `GET /api/v1/parametrizacao/geografias?nivelDetalhe=3&geogrId={ilhaId}` | Santiago = `12387` → Praia = `1238704` |
+| Tipo Documento | `GET /api/v1/parametrizacao/tipo-documento/ativos` | 28 tipos; `value` é o `tipoDocumentoId` |
+| Entidade (`entId`) | `GET /api/v1/parametrizacao/entidades/ativos` | `value` é o `entId` do prestador |
+| Colaboradores | `GET /api/v1/funcionarios?pageNumber=0&pageSize=10` | pesquisa de colaborador |
+
+Os *selects* de domínio (parecer, etapa, tipo de processo, avaliação) **vêm na resposta do próprio
+ecrã** — ver cada capítulo.
+
+> `entidades/ativos` devolve **11 981 registos** de uma vez, sem filtro nem paginação. Para a caixa
+> "Pesquisar prestador de serviços…" é preciso filtrar no cliente ou pedir um endpoint de pesquisa.
+
+---
+
+## 4. Ecrã — Gestão de Prestadores de Serviço
+
+Menu próprio, independente do fluxo da missão. É aqui que se parametrizam os prestadores que depois
+se escolhem na etapa Prestadores Serviço.
+
+| Acção | Método | Path |
+|---|---|---|
+| Lista | `GET` | `/prestadores` |
+| Detalhe (ecrã de edição) | `GET` | `/prestadores/{uuid}` |
+| Registar | `POST` | `/prestadores` |
+| Editar | `PUT` | `/prestadores/{uuid}` |
+| Ver Avaliação | `GET` | `/prestadores/{uuid}/avaliacoes` |
+
+**Lookups:** `entidades/ativos` (campo Nome → `entId`) e `geografias?nivelDetalhe=2&geogrId=1238` (Ilha).
+
+**Registar / Editar:**
 ```jsonc
 {
-  "nrMissaoFormatado": "3/2026",
-  "estado": "A", "estadoDesc": "Activo",           // A | I (Cancelado) | FINALIZADO (Finalizado)
-  "etapa": "LOGISTICA", "etapaDesc": "Processamento Logístico",   // etapa do processo activo mais atrasado
-  "situacao": "PENDENTE_FATURA", "situacaoDesc": "Pendente de Fatura",
-  "processos": [
-    { "uuid": "…", "tipoProcesso": "BILHETE_PASSAGEM", "tipoProcessoDesc": "Bilhete Passagem",
-      "etapa": "CABIMENTO", "etapaDesc": "Cabimento", "estado": "A", "valorTotal": 180000 },
-    { "uuid": "…", "tipoProcesso": "ALOJAMENTO", "etapa": "PRESTADOR_SERVICO", "estado": "I", "valorTotal": null }
+  "entId": 100000007,                      // obrigatório — do lookup de entidades
+  "nome": "Atlantico Viagens",             // se omitido, usa-se o nome da entidade
+  "nif": "200987654",
+  "email": "geral@atlanticoviagens.cv",    // obrigatório — email principal
+  "telefone": "2612345",
+  "ilhaId": 12387,
+  "morada": "Av. Cidade de Lisboa, Praia",
+  "estado": "A",                           // no registo, por defeito "A"
+  "emails": [                              // aba "Outros Email"; null = não mexer
+    { "email": "reservas@atlanticoviagens.cv" },   // sem id → cria
+    { "id": 19, "email": "financeiro@..." }        // com id → mantém
   ]
 }
 ```
-- **`etapa` e `situacao` da missão:** passam a vir do **processo activo mais atrasado**. A etapa ao nível da missão fica sempre em `SUBMISSAO`.
-- **Valores da `situacao`:** `PENDENTE_REQUISICAO`, `PENDENTE_FATURA`, `EM_VALIDACAO` (novo), `POR_PAGAR`, `PAGO`.
-- **Link "Executar":** usar `processos[].tipoProcesso` + `processos[].etapa` para abrir o ecrã da etapa desse processo.
+→ `{ "id": "<uuid do prestador>" }` — repara que o uuid vem em **`id`**, não em `uuid`.
 
-### Lista Etapa Missão (novo)
+O array `emails` segue a [sincronização de listas](#sincronização-de-listas): um email omitido passa
+a `estado: "I"`. O `GET /prestadores/{uuid}` devolve **todos** os emails com o seu estado (é o ecrã
+de edição); o ecrã da etapa só recebe os activos.
 
-`GET /api/v1/missao-servico/processos?etapa=VALIDACAO_UGAL&tipoProcesso=BILHETE_PASSAGEM&pageNumber=0&pageSize=10`
-
-- Filtros opcionais: `etapa` (domínio `TIPO_PROCESSO_ETAPA`) e `tipoProcesso` (domínio `TIPO_PROCESSO`). Um valor fora do domínio → **400**.
-- Só mostra processos activos de missões activas (sem canceladas nem finalizadas).
-```jsonc
-{ "content": [
-    { "missaoUuid": "…", "nrMissaoFormatado": "3/2026", "nacionalInternacional": "Internacional",
-      "destino": "Paris", "dataInicio": "2026-10-05", "dataFim": "2026-10-09",
-      "processoUuid": "…", "tipoProcesso": "BILHETE_PASSAGEM", "etapa": "VALIDACAO_UGAL", "etapaDesc": "Validação UGAL" } ],
-  "pageNumber": 0, "pageSize": 10, "totalElements": 1, "totalPages": 1, "first": true, "last": true }
-```
-
-### Cancelar
-
-`PATCH /api/v1/missao-servico/{uuid}/cancelar` — o corpo não muda: `{ "motivoCancelamento": "…" }`.
-
-- **O que fica inactivo:** para além do que já ficava, também os processos, os pareceres, os colaboradores das requisições e as avaliações.
-- **Missão já cancelada** → **400**. **Missão finalizada** → **400**.
-- **Quando se notifica:** se algum processo já passou da primeira etapa do seu percurso.
-- **Quem é notificado:**
-  - todos os que já receberam emails desta missão: prestadores, emails adicionais e destinatários das requisições;
-  - cada colaborador recebe um aviso no portal.
-
----
-
-## 2026-09-14 — Cabimentação e Autorização, por processo (Fase 9)
-
-| Ecrã | Método | Path |
-|---|---|---|
-| Cabimentação — carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/cabimento` |
-| Cabimentação — gravar / cabimentar | `PUT` | idem |
-| Autorização — carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/autorizacao` |
-| Autorização — autorizar | `PUT` | idem |
-
-Os dois `GET` devolvem a mesma estrutura:
-```jsonc
-{
-  "processo": { "tipoProcesso": "BILHETE_PASSAGEM", "etapa": "CABIMENTO" },
-  "estadoMissao": "A",
-  "valorTotal": 180000,
-  "itens": [
-    { "logisticaUuid": "…", "referencia": "BILHETE_PASSAGEM", "nome": "Halcyon Viagens",
-      "valorTotal": 90000, "moeda": "CVE", "cabId": null, "estadoCabimento": null,
-      "colaboradores": [ { "nomeColaborador": "…" } ], "documento": { … } }
-  ]
-}
-```
-Na coluna `nome` aparece o **prestador** (bilhete e alojamento), a **seguradora** (seguro) ou o **colaborador** (ajuda de custo).
-
-**PUT Cabimentação**
-```jsonc
-{ "itens": [ { "logisticaUuid": "…", "selecionado": true,
-               "cabId": null,                                   // só em cabimento manual/internacional
-               "anexo": { "tipoDocumentoId": 21, "documento": "nota_transferencia.pdf" } } ],
-  "processoEtapaAction": "NEXT" }
-```
-
-**PUT Autorização** — sem campos:
-```jsonc
-{ "processoEtapaAction": "NEXT" }
-```
-→ `{ "id": "…", "etapa": "PAGAMENTO", "estadoMissao": "FINALIZADO" }`
-
-| Acção | Efeito |
-|---|---|
-| Cabimentação `SAVE` | Grava anexos e `cabId` manual; não muda estados |
-| Cabimentação `NEXT` | Linhas seleccionadas → `CABIMENTADO`. Só avança para `AUTORIZACAO` com **todas** as linhas cabimentadas; se faltar alguma → **400** |
-| Autorização `SAVE` | Não faz nada |
-| Autorização `NEXT` | **Todas** as linhas → `AUTORIZADO`; processo → `PAGAMENTO` |
-| Último processo activo a chegar a `PAGAMENTO` | Missão `estado: "FINALIZADO"` |
-
-- ✅ **Acabou a autorização parcial:** o `NEXT` exige todas as linhas.
-- ⚠️ **`cabId` continua `null`:** a integração com o SGAL ainda não existe.
-- **Erros:**
+**Erros:**
 
 | Situação | Resposta |
 |---|---|
-| Linha que não pertence ao processo | **400** |
-| Alterar o `cabId` de uma linha já autorizada | **400** |
-| `NEXT` fora da etapa | **400** |
+| Sem `entId` | **400** `entId é obrigatório` |
+| Sem `email` | **400** `email é obrigatório` |
+| Email principal ou adicional mal formado | **400** `Email inválido: {valor}` |
+| Prestador inexistente (`GET`/`PUT`) | **404** |
 
 ---
 
-## 2026-09-14 — Validação UGAL, Aprovação RH e Avaliar Prestador (Fases 7–8)
+## 5. Ecrã — Lista Missão
 
-### Pareceres
+`GET /api/v1/missao-servico` — paginada. Filtros: nº de missão e período.
 
-| Ecrã | Método | Path |
+Cada linha traz a missão **e a sub-lista dos seus processos**, que é o que a linha expande:
+
+```jsonc
+{ "content": [ {
+    "uuid": "…", "nrMissaoFormatado": "3/2026", "destino": "…",
+    "nacionalInternacional": "Nacional", "dataMissao": "2026-11-10",
+    "estado": "A", "estadoDesc": "Activo",        // A | I (cancelada) | FINALIZADO
+    "etapa": "PRESTADOR_SERVICO",                  // etapa menos avançada dos processos activos
+    "situacao": "PENDENTE_REQUISICAO", "situacaoDesc": "Pendente de Requisição",
+    "processos": [
+      { "uuid": "…", "tipoProcesso": "BILHETE_PASSAGEM", "tipoProcessoDesc": "Bilhete Passagem",
+        "etapa": "LOGISTICA", "etapaDesc": "Processamento Logístico",
+        "estado": "A", "valorTotal": 223000 }
+    ] } ],
+  "pageNumber": 0, "pageSize": 10, "totalElements": 3, "totalPages": 1 }
+```
+
+Acções da linha: Editar Missão, Cancelar Missão, Ver Notificação, Ver Alerta. Acções da sub-linha:
+Ver/Executar Processo (leva ao ecrã da etapa daquele processo) e Avaliar Prestador.
+
+> O processo com `estado: "I"` é um processo inactivo — tipicamente o `ALOJAMENTO` quando a missão
+> tem "Alojamento = Não". Mostrar a cinzento ou esconder, mas não oferecer "Executar".
+
+---
+
+## 6. Ecrã — Lista Missão por Etapa
+
+A lista de trabalho. `GET /processos?etapa=&tipoProcesso=` — uma linha **por processo**, paginada.
+
+```jsonc
+{ "content": [ {
+    "missaoUuid": "…", "nrMissaoFormatado": "3/2026",
+    "nacionalInternacional": "Nacional", "destino": "…",
+    "dataInicio": "2026-11-10", "dataFim": "2026-11-14",
+    "processoUuid": "…", "tipoProcesso": "AJUDA_CUSTO", "tipoProcessoDesc": "Ajuda Custo",
+    "etapa": "LOGISTICA", "etapaDesc": "Processamento Logístico" } ],
+  "opcoesEtapa":        [ { "valor": "PRESTADOR_SERVICO", "descricao": "Prestador Serviço" }, … ],
+  "opcoesTipoProcesso": [ { "valor": "BILHETE_PASSAGEM",  "descricao": "Bilhete Passagem"  }, … ],
+  "pageNumber": 0, "pageSize": 10, "totalElements": 7, "totalPages": 1 }
+```
+
+Os dois *selects* do filtro vêm na própria resposta: `opcoesEtapa` (as 8 etapas, pela ordem do fluxo)
+e `opcoesTipoProcesso` (os 4 tipos). Usar `valor` no pedido e `descricao` no ecrã.
+
+Ambos os filtros são **opcionais na API** — sem eles devolve todos os processos. O ecrã marca a
+Etapa como obrigatória; essa exigência é do lado do front-end.
+
+---
+
+## 7. Ecrã — Nova Missão / Registo de Missão
+
+| Acção | Método | Path |
 |---|---|---|
-| Validação UGAL — carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/validacao-ugal` |
-| Validação UGAL — gravar / emitir | `PUT` | idem |
-| Aprovação RH — carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/aprovacao-rh` |
-| Aprovação RH — gravar / emitir | `PUT` | idem |
+| Criar | `POST` | `/submissao` |
+| Carregar para edição | `GET` | `/{uuid}/submissao` |
+| Editar | `PUT` | `/{uuid}/submissao` |
 
-**PUT** (os dois ecrãs usam o mesmo corpo)
+**Lookups:** países, ilhas, concelhos, tipos de documento e a pesquisa de colaboradores.
+
 ```jsonc
 {
-  "responsavel": "COORDENADOR_RH",   // só na Aprovação RH: COORDENADOR_RH | DIRECTOR_RH (na UGAL omitir)
-  "parecer": "DESFAVORAVEL",         // domínio PARECER: FAVORAVEL | DESFAVORAVEL
-  "observacao": "Fatura com valor diferente da proposta",  // obrigatória com DESFAVORAVEL (máx. 500)
-  "processoEtapaAction": "NEXT"      // SAVE = rascunho | NEXT = emitir
-}
-```
-→ `{ "id": "<processoUuid>", "etapa": "APROVACAO_RH", "parecer": "<parecerUuid>" }`
-
-**Regras**
-
-| Situação | Efeito |
-|---|---|
-| `SAVE` | Guarda **rascunho** (`estado: "P"`); pode ser regravado |
-| `NEXT` | **Emite** (`estado: "A"`); só com o processo **exactamente** nessa etapa |
-| UGAL favorável | Processo → `APROVACAO_RH` |
-| Coordenador (qualquer parecer) | Fica registado; **não** muda a etapa (não vinculativo) |
-| Director sem parecer emitido do Coordenador | **400** |
-| Director favorável | Processo → `CABIMENTO` |
-| UGAL **ou** Director desfavorável | Processo → **`LOGISTICA`**; os pareceres do ciclo ficam `"I"` (anulados) e a ronda recomeça |
-| Emitir de novo no mesmo ciclo | **400** `já foi emitido neste ciclo` |
-
-**GET Validação UGAL**
-```jsonc
-{
-  "autorizacao": [ { "documento": "convite.pdf", … } ],        // anexos da submissão
-  "requisicoes": [ { "documento": "…_requisicao_RMS-2026-3.pdf" } ],  // só bilhete/alojamento
-  "faturas": [ { "documento": "bilhete.pdf" } ],                // anexos da logística
-  "parecerAtual": { "parecer": "FAVORAVEL", "estado": "P", "estadoDesc": "Rascunho", "executadoPor": "…" },
-  "historico": [ … ]                                            // inclui os anulados ("I")
-}
-```
-
-**GET Aprovação RH** → `parecerCoordenador`, `parecerDirector` (do ciclo actual), `parecerUgal` (o parecer emitido que abriu a etapa) e `historico`.
-
-> ⚠️ O "cabimento automático" no fim da Aprovação RH ainda não chama o SGAL (integração sem contrato). O processo segue para `CABIMENTO` sem nº de cabimento.
-
-### Avaliar Prestador
-
-| Ecrã | Método | Path |
-|---|---|---|
-| Carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/prestadores/{missaoPrestUuid}/avaliacao` |
-| Gravar | `PUT` | idem |
-
-`{missaoPrestUuid}` = `prestadores[].uuid` do GET de prestadores do processo.
-
-**PUT** — valores do domínio `AVALIACAO_FORNECEDOR` (`opcoesAvaliacao` do GET):
-```jsonc
-{ "sistemaQualidade": "100", "prazoFornecimento": "100", "qualidadeProduto": "100",
-  "capacidadeResposta": "100", "preco": "75" }
-```
-→ `{ "id": "<uuid>", "total": 95.00, "designacao": "A" }`
-
-**GET**
-```jsonc
-{
-  "nomePrestador": "Halcyon Viagens", "podeAvaliar": true, "avaliado": true,
-  "criterios": [
-    { "criterio": "SISTEMA_QUALIDADE", "peso": 5, "avaliacao": "100", "avaliacaoDesc": "Muito Bom", "pontos": 5.00 },
-    …
+  "paisDestinoId": 1238,                   // obrigatório
+  "ilhaId": 12387,                         // só se o destino for Cabo Verde
+  "concelhoId": 1238704,                   // idem
+  "descricaoDestino": "Praia — formação",  // obrigatório
+  "ambitoMissao": "Formação sobre RH",     // obrigatório
+  "dataInicio": "2026-11-10",              // obrigatório
+  "dataFim": "2026-11-14",                 // obrigatório, >= dataInicio
+  "alojamento": true,                      // a instituição trata do alojamento?
+  "autorizadoPor": "Director de RH",       // obrigatório
+  "dataAutorizacao": "2026-09-15",         // obrigatório
+  "colaboradores": [                       // obrigatório, pelo menos um
+    { "colaboradorId": "<funUuid>", "numeroDocumento": "PA496450" },
+    { "colaboradorId": "<funUuid>" }       // sem numeroDocumento usa o do funcionário
   ],
-  "total": 95.00, "designacao": "A", "designacaoDesc": "Fornecedor Preferencial",
-  "opcoesAvaliacao": [ { "valor": "100", "descricao": "Muito Bom" }, { "valor": "75", "descricao": "Bom" }, … ]
+  "documentos": [ { "tipoDocumentoId": 20, "documento": "convite.pdf" } ],
+  "processoEtapaAction": "SAVE"
 }
 ```
+→ `{ "nrMissao": 3, "id": "<uuid da missão>" }`
 
-- **Pesos:** vêm do domínio (referência `PESO`); os da spec são o valor por defeito: 5, 15, 40, 20, 20.
-- **Classes:** A &gt; 75, B ]40;75], C ]25;40], D [0;25].
-- **Quem se pode avaliar:** só prestadores com **requisição activa** no processo. Os outros vêm com `podeAvaliar: false` e o `PUT` devolve **400**.
-- Regravar **actualiza** a avaliação existente.
-- A avaliação passa a aparecer em `GET /prestadores/{uuid}/avaliacoes`.
+**O que acontece ao gravar pela primeira vez:** são criados os **4 processos**, cada um na etapa
+inicial do seu percurso — `BILHETE_PASSAGEM` e `ALOJAMENTO` em `PRESTADOR_SERVICO`, `SEGURO_VIAGEM`
+e `AJUDA_CUSTO` em `LOGISTICA`.
 
-**Erros**
+**O campo `alojamento` comanda o processo `ALOJAMENTO`:** a `false` inactiva-o (`estado: "I"`), a
+`true` reactiva-o. Pode alternar-se a qualquer momento editando a submissão.
+
+`nrDias` é calculado pelo servidor a partir das datas — o ecrã mostra-o, não o envia.
+
+O `GET /{uuid}/submissao` devolve `processos[]`, `colaboradores[]` (com `funUuid` e `uuid`),
+`documentos[]` e a auditoria (`userRegistoName`, `dataRegisto`, …).
+
+> `GET /{uuid}` é um resumo e **não** traz `processos[]`. Para o ecrã de edição usar
+> `GET /{uuid}/submissao`; para a listagem, a lista geral.
+
+**Erros:**
 
 | Situação | Resposta |
 |---|---|
-| Critério em falta | **400** |
-| Valor fora do domínio | **400** |
-| Prestador que não pertence ao processo | **404** |
+| `dataFim` anterior a `dataInicio` | **400** `dataFim não pode ser anterior a dataInicio` |
+| Sem colaboradores | **400** `colaboradores é obrigatório` |
+| Sem `paisDestinoId`, `descricaoDestino`, `ambitoMissao`, `dataInicio`, `dataFim`, `autorizadoPor` ou `dataAutorizacao` | **400** `{campo} é obrigatório` |
+
+> `alojamento` é o único campo marcado com `*` no ecrã que a API aceita em falta: quando não vem, a
+> criação assume **Sim**. É um valor por defeito deliberado.
 
 ---
 
-## 2026-09-14 — Logística, por processo (Fase 6)
+## 8. Ecrã — Prestadores Serviço *(ex-Análise)*
 
-Um ecrã por processo. Os 4 tipos passam por esta etapa.
+Só em `BILHETE_PASSAGEM` e `ALOJAMENTO`.
 
-| Ecrã | Método | Path |
-|---|---|---|
-| Carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/logistica` |
-| Gravar / Avançar | `PUT` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/logistica` |
+`GET`/`PUT /{uuid}/processos/{tipoProcesso}/prestadores`
 
-**GET**
+O `GET` devolve os prestadores **já escolhidos** e o texto da notificação. O catálogo para escolher
+vem de `GET /prestadores` (capítulo 4).
+
 ```jsonc
 {
-  "processo": { "tipoProcesso": "ALOJAMENTO", "etapa": "LOGISTICA" },
-  "dataInicioMissao": "2026-10-05", "dataFimMissao": "2026-10-09",
-  "bilhetesPassagem": [], "segurosViagem": [], "ajudasCusto": [],     // só a secção do tipo vem preenchida
-  "alojamentos": [
-    { "uuid": "…", "lugarHospedagem": "Hotel Praia Mar", "flgAlimentacao": "NAO",
-      "valorDiario": 12000, "valorTotal": 60000, "moeda": "CVE",
-      "dataInicio": "2026-10-05", "dataFim": "2026-10-09", "nrDias": 5,
-      "colaboradores": [ { "funcionarioUuid": "…", "nomeColaborador": "…" } ],
-      "colaborador": { … },                                           // primeiro (compatibilidade)
-      "documento": { "id": 40, "documento": "reserva.pdf" } }
-  ],
-  "colaboradoresDisponiveis": [
-    { "funUuid": "…", "nomeColaborador": "…", "missaoPrestId": 17, "nomePrestador": "Halcyon Viagens" }
-  ],
-  "notificacao": { "assunto": "…", "corpoEmail": "…" }
-}
-```
-
-**`colaboradoresDisponiveis`** — no bilhete e no alojamento só aparecem os colaboradores com **requisição** neste processo, cada um com o seu prestador (usar para agrupar o multiselect). No seguro e na ajuda de custo aparecem todos os colaboradores activos da missão.
-
-**PUT** — enviar **só** a secção do tipo do processo:
-```jsonc
-// BILHETE_PASSAGEM
-{ "bilhetesPassagem": [ { "colaboradorIds": ["<funUuid>"], "valor": 90000,
-                          "anexo": { "tipoDocumentoId": 21, "documento": "bilhete.pdf" } } ],
-  "processoEtapaAction": "SAVE" }
-
-// SEGURO_VIAGEM
-{ "segurosViagem": [ { "entId": 12, "nomeSeguradora": "Impar Seguros",     // nome opcional: por defeito, o da entidade
-                       "colaboradorIds": ["<funUuid>"], "valor": 15000 } ] }
-
-// ALOJAMENTO — agora com vários colaboradores
-{ "alojamentos": [ { "colaboradorIds": ["<funUuid>", "<funUuid>"], "lugarHospedagem": "Hotel Praia Mar",
-                     "flgAlimentacao": "NAO", "valorDiario": 12000,
-                     "valorTotal": null,                  // null = valorDiario × nº de dias
-                     "dataInicio": null, "dataFim": null, // null = datas da missão
-                     "moeda": "CVE" } ] }
-
-// AJUDA_CUSTO — uma linha por colaborador
-{ "ajudasCusto": [ { "colaboradorId": "<funUuid>", "flgAlojamento": true,
-                     "numeroDiasAlojamento": 5, "valorDiario": 12000 } ] }
-```
-→ `{ "id": "<processoUuid>", "etapa": "VALIDACAO_UGAL" }`
-
-- **Secção:** a lista enviada é a **secção completa**. Uma linha que fica de fora é removida (inactivada) e `null` não altera nada.
-- **Linhas reaproveitadas:** uma linha com o mesmo conjunto de colaboradores mantém o `uuid` e o anexo entre gravações.
-- **Ajuda de custo:** o valor diário gravado é `valorDiario` × a fracção:
-
-| Situação | Fracção |
-|---|---|
-| `flgAlojamento: false` (alojamento próprio ou casa de família) | 100% |
-| `flgAlojamento: true` e alojamento **sem** alimentação | ⅔ |
-| `flgAlojamento: true` e alojamento **com** alimentação | ⅓ |
-
-  A alimentação é lida do alojamento do colaborador, no processo `ALOJAMENTO`. Por isso, registe primeiro o alojamento.
-- **`NEXT`:** exige pelo menos uma linha, avança para `VALIDACAO_UGAL` e grava um aviso para cada colaborador envolvido.
-
-**Erros**
-
-| Situação | Resposta |
-|---|---|
-| Secção de outro tipo | **400** `O processo X só aceita a secção do seu tipo` |
-| Campo obrigatório em falta | **400** |
-| `flgAlimentacao` diferente de `SIM` ou `NAO` | **400** |
-| Colaborador sem requisição neste processo (bilhete ou alojamento) | **400** |
-| Colaboradores de prestadores diferentes na mesma linha | **400** |
-| Colaborador repetido em duas linhas | **400** |
-| Seguradora inexistente | **400** |
-| Remover ou alterar o valor de uma linha já cabimentada | **400** |
-| `NEXT` sem linhas | **400** |
-
----
-
-## 2026-09-14 — Emissão de Requisição, por processo (Fase 5)
-
-Uma **requisição por prestador**, com N colaboradores. Só existe em `BILHETE_PASSAGEM` e `ALOJAMENTO`.
-
-| Ecrã | Método | Path |
-|---|---|---|
-| Carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/requisicoes` |
-| Gravar / Avançar | `PUT` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/requisicoes` |
-| Extrair Requisição (PDF) | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/requisicoes/{requisicaoUuid}/pdf` |
-
-**GET** — um item por prestador activo do processo:
-```jsonc
-{
-  "processo": { "tipoProcesso": "BILHETE_PASSAGEM", "etapa": "EMISSAO_REQUISICAO" },
-  "requisicoes": [
-    { "missaoPrestUuid": "…", "nomePrestador": "Halcyon Viagens", "selecionado": true,
-      "requisicaoUuid": "…", "nrRequisicao": 3, "anoRequisicao": 2026, "notaEncomenda": "RMS-2026/3",
-      "valorTotal": 105000,
-      "colaboradores": [ { "uuid": "…", "funUuid": "…", "nomeColaborador": "Wilson Cabral Tavares" } ],
-      "proposta": { "id": 12, "tipoDocumentoId": 20, "documento": "proposta.pdf" },
-      "documentoRequisicao": { "id": 13, "documento": "…_requisicao_RMS-2026-3.pdf" } },   // só depois do NEXT
-    { "missaoPrestUuid": "…", "nomePrestador": "Cabo Verde Travel", "selecionado": false, "colaboradores": [] }
-  ],
-  "colaboradoresMissao": [ { "uuid": "…", "funUuid": "…", "nomeColaborador": "…" } ]
-}
-```
-
-**PUT**
-```jsonc
-{
-  "requisicoes": [
-    { "missaoPrestUuid": "…", "selecionado": true,
-      "funcionarioUuids": ["<funUuid>", "<funUuid>"],        // uuid do FUNCIONÁRIO (colaboradoresMissao[].funUuid)
-      "valorTotal": 105000,                                  // null = não mexer
-      "proposta": { "tipoDocumentoId": 20, "documento": "proposta.pdf" } }
-  ],
+  "prestadores": ["<paramPrestUuid>", "<paramPrestUuid>"],   // 1 a 3; lista completa
+  "notificacao": {
+    "assunto": "Pedido de proposta — Missão 3/2026",
+    "corpoEmail": "Exmos. Senhores, solicitamos proposta…"   // vazio = template parametrizado
+  },
   "processoEtapaAction": "NEXT"
 }
 ```
-→ `{ "id": "<processoUuid>", "etapa": "LOGISTICA" }`
 
-- **Nº de requisição:** gerado na primeira gravação, sequencial dentro do ano e fixo daí em diante. Aparece no PDF como `RMS-{ano}/{nr}`.
-- **Prestador sem `selecionado: true`:** a requisição dele passa a inactiva.
-- **Colaboradores:** um colaborador só pode estar numa requisição de cada processo.
-- **`NEXT`:**
-  - gera o PDF da nota de encomenda e guarda-o (aparece em `documentoRequisicao`);
-  - envia email ao prestador (principal e emails adicionais);
-  - avança para `LOGISTICA`.
-- ⚠️ **O email segue sem o PDF anexado.** O serviço de correio (`sipsv0.SEND_MAIL_V1`) não suporta anexos; o PDF fica disponível para descarregar.
-- **Extrair:** gera o PDF com os dados actuais. Funciona antes do `NEXT`, como pré-visualização.
-- **PDF:** lista "{tipo} a favor de {colaborador}" e o **total** da requisição, também por extenso. Não há valor por linha, porque o modelo de dados só guarda o total.
+No `GET`, cada prestador traz `emails[]` — o principal **mais os adicionais activos**. São esses que
+recebem o pedido de proposta no `NEXT`.
 
-**Erros**
+`NEXT` → etapa passa a `EMISSAO_REQUISICAO` e notifica todos esses emails.
+
+**Erros:**
 
 | Situação | Resposta |
 |---|---|
-| Prestador que não está seleccionado no processo | **400** |
-| Requisição sem colaboradores | **400** |
-| Colaborador que não pertence à missão | **400** |
-| Colaborador já associado a outra requisição do mesmo processo | **400** |
-| `NEXT` sem nenhum prestador seleccionado | **400** |
-| Retirar uma requisição que já seguiu para a logística | **400** |
-| PDF de uma requisição que não pertence ao processo | **404** |
+| Mais de 3 prestadores **distintos** | **400** `Máximo de 3 prestadores por processo` |
+| Lista vazia | **400** `Selecione pelo menos um prestador` |
+| Em `SEGURO_VIAGEM` ou `AJUDA_CUSTO` | **400** `O processo {tipo} não passa pela etapa PRESTADOR_SERVICO` |
+| `tipoProcesso` inexistente | **400** `Tipo de processo inválido: {valor}` |
+
+> Prestadores repetidos no array são deduplicados antes de se validar o limite — enviar o mesmo
+> prestador duas vezes não consome duas vagas.
 
 ---
 
-## 2026-09-14 — Etapa Prestadores Serviço, por processo (Fase 4)
+## 9. Ecrã — Emissão de Requisição
 
-Substitui o ecrã **Análise**. É executada **por processo** e só existe em `BILHETE_PASSAGEM` e `ALOJAMENTO`.
+Só em `BILHETE_PASSAGEM` e `ALOJAMENTO`.
 
-| Ecrã | Método | Path |
-|---|---|---|
-| Carregar | `GET` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/prestadores` |
-| Gravar / Avançar | `PUT` | `/api/v1/missao-servico/{uuid}/processos/{tipoProcesso}/prestadores` |
+`GET`/`PUT /{uuid}/processos/{tipoProcesso}/requisicoes`
 
-`{tipoProcesso}` = `BILHETE_PASSAGEM` | `ALOJAMENTO` (vem de `processos[].tipoProcesso` do GET da submissão).
+Uma requisição **por prestador**, cada uma com N colaboradores. O `GET` devolve uma linha por
+prestador escolhido na etapa anterior, e `colaboradoresMissao[]` para o multiselect.
 
-**Lookup de prestadores:** `GET /api/v1/missao-servico/prestadores?estado=A`
-
-**GET**
 ```jsonc
 {
-  "missaoUuid": "…", "nrMissaoFormatado": "3/2026",
-  "processo": { "uuid": "…", "tipoProcesso": "BILHETE_PASSAGEM", "etapa": "PRESTADOR_SERVICO", "estado": "A" },
-  "prestadores": [
-    { "uuid": "…", "paramPrestUuid": "…", "nome": "Halcyon Viagens",
-      "email": "reservas@halcyon.cv", "emails": ["reservas@halcyon.cv", "financeiro@halcyon.cv"], "estado": "A" }
+  "requisicoes": [
+    { "missaoPrestUuid": "…",              // do GET: requisicoes[].missaoPrestUuid
+      "selecionado": true,
+      "funcionarioUuids": ["<funUuid>"],   // colaboradores desta requisição
+      "valorTotal": 125000,
+      "proposta": { "tipoDocumentoId": 20, "documento": "proposta.pdf" } }
   ],
-  "notificacao": { "assunto": "…", "corpoEmail": "…" },   // pré-preenchida com o template (editável)
-  "executadoPor": "…", "dataExecucao": "2026-09-14"
+  "processoEtapaAction": "SAVE"
 }
 ```
 
-**PUT**
-```jsonc
-{
-  "prestadores": ["<paramPrestUuid>", "<paramPrestUuid>"],   // selecção completa, 1 a 3
-  "notificacao": { "assunto": "…", "corpoEmail": "…" },     // opcional — vazio usa o template
-  "processoEtapaAction": "SAVE"                              // SAVE | NEXT
-}
-```
-→ `{ "id": "<processoUuid>", "etapa": "EMISSAO_REQUISICAO" }`
+Ao gravar, cada requisição recebe um **número anual sequencial** e uma nota de encomenda:
+`nrRequisicao: 3`, `anoRequisicao: 2026`, `notaEncomenda: "RMS-2026/3"`.
 
-- **`NEXT`:** envia o pedido de proposta a **todos os emails activos** de cada prestador (o principal e os adicionais) e avança o processo para `EMISSAO_REQUISICAO`.
-- Um `NEXT` com o processo já adiante só notifica os prestadores **acrescentados** nessa gravação.
-- **Erros:**
+**Extrair Requisição (PDF):**
+`GET /{uuid}/processos/{tipoProcesso}/requisicoes/{requisicaoUuid}/pdf` → `application/pdf`.
+Gerado a partir dos dados, sempre disponível. No `NEXT` fica também arquivado em documentos.
+
+**Erros:**
 
 | Situação | Resposta |
 |---|---|
-| Nenhum prestador seleccionado, ou mais de 3 | **400** |
-| Prestador inactivo ou inexistente | **400** |
-| Retirar um prestador que já tem requisição activa | **400** |
-| Tipo de processo que não passa por esta etapa (`SEGURO_VIAGEM`, `AJUDA_CUSTO`) | **400** |
-| Missão cancelada | **400** |
-| `NEXT` com o processo numa etapa anterior | **400** |
+| Colaborador em duas requisições do mesmo processo | **400** `O colaborador {nome} já está associado à requisição de {prestador}` |
+| Colaborador que não é da missão | **400** `Colaborador não pertence à missão: {uuid}` |
+| Prestador não escolhido na etapa anterior | **400** `Prestador não seleccionado neste processo: {uuid}` |
+| Requisição sem colaboradores | **400** `Associe pelo menos um colaborador à requisição de {prestador}` |
+| PDF de requisição inexistente | **404** |
 
 ---
 
-## 2026-09-14 — Submissão cria os 4 processos (Fase 3)
+## 10. Ecrã — Logística
 
-**Endpoints:** `POST /submissao`, `PUT /{uuid}/submissao` (request) e `GET /{uuid}/submissao` (response)
+Todos os processos passam por aqui. `GET`/`PUT /{uuid}/processos/{tipoProcesso}/logistica`
 
-Cada missão passa a ter 4 processos, cada um com a sua etapa. São criados na primeira gravação.
-
-```jsonc
-// request — campo novo
-{ ..., "alojamento": true }
-
-// response — campos novos
-{
-  "alojamento": true,
-  "processos": [
-    { "uuid": "…", "tipoProcesso": "BILHETE_PASSAGEM", "tipoProcessoDesc": "Bilhete Passagem",
-      "etapa": "PRESTADOR_SERVICO", "etapaDesc": "Prestador Serviço", "estado": "A" },
-    { "uuid": "…", "tipoProcesso": "SEGURO_VIAGEM", "etapa": "LOGISTICA", "estado": "A" },
-    { "uuid": "…", "tipoProcesso": "AJUDA_CUSTO",   "etapa": "LOGISTICA", "estado": "A" },
-    { "uuid": "…", "tipoProcesso": "ALOJAMENTO",    "etapa": "PRESTADOR_SERVICO", "estado": "A" }
-  ]
-}
-```
-
-- **Percursos:** bilhete e alojamento começam em `PRESTADOR_SERVICO`; seguro e ajuda de custo começam em `LOGISTICA` (não têm prestador nem requisição).
-- **`alojamento`:** `false` inactiva o processo `ALOJAMENTO`; `true` reactiva-o. Omitido ou `null` não altera nada; na criação, sem o campo, fica activo.
-- Retirar o alojamento com o processo já fora da primeira etapa → **400** `Não é possível retirar o alojamento: o processo ALOJAMENTO já está na etapa …`.
-
----
-
-## 2026-09-14 — Gestão de Prestadores de Serviço (Fase 2)
-
-Menu próprio. Base: `/api/v1/missao-servico/prestadores`
-
-| Ecrã | Método | Path |
-|---|---|---|
-| Lista | `GET` | `?nome=&ilhaId=&estado=&pageNumber=0&pageSize=10` |
-| Detalhe / Editar (carregar) | `GET` | `/{uuid}` |
-| Registar | `POST` | `/` |
-| Editar | `PUT` | `/{uuid}` |
-| Ver Avaliação | `GET` | `/{uuid}/avaliacoes` |
-
-**Registar / Editar**
-```jsonc
-{
-  "entId": 11,                          // lookup GET /api/v1/parametrizacao/entidades/ativos — obrigatório
-  "nome": "Halcyon Viagens",            // opcional: por defeito, o nome da entidade
-  "nif": "200123456",
-  "email": "reservas@halcyon.cv",       // obrigatório
-  "telefone": "2601234",
-  "ilhaId": 2387,
-  "morada": "Praia, Plateau",
-  "estado": "A",                        // A | I — no registo, por defeito A
-  "emails": [                           // outros emails
-    { "email": "financeiro@halcyon.cv" },
-    { "id": 4, "email": "geral@halcyon.cv" }
-  ]
-}
-```
-→ `{ "id": "<uuid>" }`
-
-- **`emails`:** sem `id` cria; com `id` actualiza; um email que fica de fora do array passa a `estado: "I"`. Omitido ou `null` não altera nada; `[]` inactiva todos.
-- **Erros:**
-
-| Situação | Resposta |
-|---|---|
-| `entId` inexistente | **400** `Entidade inválida` |
-| Entidade já registada noutro prestador | **409** |
-| Email principal ou adicional mal formado | **400** `Email inválido` |
-| Email repetido (entre o principal e os adicionais) | **400** `Email duplicado` |
-| `estado` diferente de `A`/`I` | **400** |
-
-**Lista** — `content[]` com `nome`, `email`, `morada`, `telefone`, `estado`/`estadoDesc` e os `emails` **activos**. O **detalhe** traz todos os emails, com o respectivo estado.
-
-**Ver Avaliação** — `[{ nrMissaoFormatado, tipoProcesso, sistemaQualidade, prazoFornecimento, qualidadeProduto, capacidadeResposta, preco, total, designacao }]`. Fica vazio até existir o ecrã Avaliar Prestador.
-
----
-
-## 2026-09-14 — Ilha/concelho na submissão e nº/valor da requisição
-
-**Branch:** `feat/missao-servico-processos`
-
-Primeiro passo rumo à spec 14/09 (modelo por processo). Só campos novos — nada foi removido nem mudou de nome.
-
-### Submissão — `ilhaId` e `concelhoId`
-
-**Endpoints:** `POST /submissao`, `PUT /{uuid}/submissao` (request) e `GET /{uuid}/submissao` (response)
+**Só a secção do tipo do processo é aceite.** As outras devem vir a `null` (não mexer). O `GET`
+devolve `colaboradoresDisponiveis[]`, com `funUuid`, `uuid` e — quando aplicável — o prestador de
+que esse colaborador vem.
 
 ```jsonc
-// request — só quando o país de destino é Cabo Verde
-{ "paisDestinoId": 1238, "ilhaId": 2387, "concelhoId": 238704, ... }
-
-// response
-{ "ilhaId": 2387, "ilhaNome": "Santiago", "concelhoId": 238704, "concelhoNome": "Praia", ... }
-```
-
-- Opcionais. Com destino **estrangeiro** são ignorados e gravados a `null`.
-- Id inexistente em `GLB_T_GEOGRAFIA` → **404**.
-
-### Emissão de Requisição — `valorTotal` e nº de requisição
-
-`PUT /{uuid}/emissao-requisicao` — novo campo opcional por prestador:
-```jsonc
-{ "requisicoes": [
-    { "missaoPrestId": 17, "selecionado": true, "valorTotal": 105000,
-      "missaoColabIds": ["<funUuid>"], "documentoProposta": { ... } } ],
+// BILHETE_PASSAGEM
+{ "bilhetesPassagem": [ { "colaboradorIds": ["<uuid>"], "valor": 125000,
+                          "anexo": { "tipoDocumentoId": 21, "documento": "fatura.pdf" } } ],
   "processoEtapaAction": "SAVE" }
-```
-- `valorTotal` omitido ou `null` **mantém** o valor gravado.
 
-`GET /{uuid}/emissao-requisicao` — cada item de `requisicoes[]` passa a trazer:
-```jsonc
-{ "missaoPrestId": 17, "nrRequisicao": 3, "anoRequisicao": 2026, "valorTotal": 105000, ... }
-```
-- `nrRequisicao` é **gerado** ao gravar: sequencial dentro do ano, o mesmo para todos os colaboradores do mesmo prestador. Não muda em gravações seguintes.
-- Prestador ainda sem requisição → `nrRequisicao`, `anoRequisicao` e `valorTotal` a `null`.
+// SEGURO_VIAGEM
+{ "segurosViagem": [ { "colaboradorIds": ["<uuid>", "<uuid>"], "valor": 45000, "entId": 100000003 } ] }
 
-> **Corrige:** a BD passou a exigir `NR_REQUISACAO` (NOT NULL) e a gravação da Emissão de Requisição falhava com `ORA-01400`.
+// ALOJAMENTO — todos os campos obrigatórios
+{ "alojamentos": [ { "colaboradorId": "<uuid>", "lugarHospedagem": "Hotel Praia Mar",
+                     "flgAlimentacao": "SIM",        // "SIM" | "NAO"
+                     "valorDiario": 6000, "numeroDias": 5, "valor": 30000 } ] }
+
+// AJUDA_CUSTO
+{ "ajudasCusto": [ { "colaboradorId": "<uuid>", "flgAlojamento": true,
+                     "numeroDiasAlojamento": 5, "valorDiario": 6000 } ] }
+```
+
+### O cálculo da ajuda de custo
+
+`valorDiario` é a **base** enviada pelo ecrã. O servidor aplica-lhe a fracção e devolve o
+`valorDiario` efectivo e o `valorTotal` — ambos só de leitura no ecrã.
+
+| `flgAlojamento` | Alimentação no processo ALOJAMENTO | Fracção | Exemplo com base 6000 × 5 dias |
+|---|---|---|---|
+| `false` | — | **100%** | 6000/dia → 30 000 |
+| `true` | `NAO`, ou sem linha de alojamento | **⅔** | 4000/dia → 20 000 |
+| `true` | `SIM` | **⅓** | 2000/dia → 10 000 |
+
+> **A ordem importa.** O ⅓ só se aplica se o processo `ALOJAMENTO` já tiver, para esse colaborador,
+> uma linha com `flgAlimentacao: "SIM"`. Gravar a ajuda de custo antes do alojamento dá ⅔ **sem
+> erro nenhum**. Gravar o alojamento primeiro, ou regravar a ajuda de custo depois.
+
+`NEXT` → `VALIDACAO_UGAL` e notifica os colaboradores.
+
+**Erros:** campos obrigatórios em falta (`{secção}: {campo} é obrigatório`), colaborador que não é da
+missão, e colaboradores de prestadores diferentes na mesma linha.
 
 ---
 
-## 1. Correção — `cabId` deixou de ser obrigatório
+## 11. Ecrã — Validação UGAL
+
+`GET`/`PUT /{uuid}/processos/{tipoProcesso}/validacao-ugal`
+
+O `GET` traz os documentos a consultar, em três listas — `autorizacao` (anexos do registo da
+missão), `requisicoes` (PDFs emitidos) e `faturas` (anexos da logística) — mais `parecerAtual`,
+`historico` e as opções do *select*:
+
+```jsonc
+{ "processo": { … },
+  "autorizacao": [], "requisicoes": [ { "id": 513, "tipoDocumentoDesc": "…", "documento": "…" } ],
+  "faturas": [],
+  "parecerAtual": null,
+  "historico": [],
+  "opcoesParecer": [ { "valor": "FAVORAVEL",    "descricao": "Favorável" },
+                     { "valor": "DESFAVORAVEL", "descricao": "Desfavorável" } ] }
+```
+
+```jsonc
+{ "parecer": "FAVORAVEL", "observacao": "Conforme.", "processoEtapaAction": "NEXT" }
+```
+
+- **Favorável + `NEXT`** → `APROVACAO_RH`.
+- **Desfavorável + `NEXT`** → o processo **volta a `LOGISTICA`** e o parecer é arquivado no
+  histórico (`estado: "I"`); abre-se um ciclo novo.
+
+**Erros:**
+
+| Situação | Resposta |
+|---|---|
+| Sem `parecer` | **400** `parecer é obrigatório (FAVORAVEL ou DESFAVORAVEL)` |
+| Desfavorável sem `observacao` | **400** `A observação é obrigatória num parecer desfavorável` |
+| `parecer` fora do domínio | **400** `Parecer inválido: {valor}` |
+
+> O protótipo marca a Observação como opcional. É opcional **só** no parecer favorável.
+
+---
+
+## 12. Ecrã — Aprovação RH
+
+`GET`/`PUT /{uuid}/processos/{tipoProcesso}/aprovacao-rh`
+
+Dois pareceres sequenciais no mesmo ecrã. O `GET` devolve `parecerCoordenador`, `parecerDirector`,
+`parecerUgal` (o que abriu a etapa, para consulta), `historico` e dois *selects*:
+`opcoesParecer` e `opcoesResponsavel` (`COORDENADOR_RH`, `DIRECTOR_RH`).
+
+```jsonc
+{ "responsavel": "COORDENADOR_RH",   // obrigatório neste ecrã
+  "parecer": "FAVORAVEL", "observacao": "Concordo.",
+  "processoEtapaAction": "NEXT" }
+```
+
+**A ordem é fixa:** o Coordenador emite primeiro; só depois o Director. O parecer do Director é o
+que faz avançar — e ao avançar dispara o cabimento, passando a etapa a `CABIMENTO`. O parecer do
+Coordenador é obrigatório mas não vinculativo.
+
+**Erros:**
+
+| Situação | Resposta |
+|---|---|
+| Director antes do Coordenador | **400** `O parecer do Director exige o parecer emitido do Coordenador RH` |
+| Sem `parecer` | **400** `parecer é obrigatório (FAVORAVEL ou DESFAVORAVEL)` |
+| Desfavorável sem `observacao` | **400** `A observação é obrigatória num parecer desfavorável` |
+
+---
+
+## 13. Ecrãs — Cabimentação e Autorização
+
+`GET`/`PUT /{uuid}/processos/{tipoProcesso}/cabimento` e `.../autorizacao`
+
+São **etapas distintas** com a mesma estrutura de resposta — já não se distinguem pelo
+`estadoCabimento`:
+
+```jsonc
+{ "processo": { "etapa": "CABIMENTO" }, "estadoMissao": "A", "valorTotal": 45000,
+  "itens": [ { "logisticaUuid": "…", "referencia": "SEGURO_VIAGEM",
+               "nome": "Halcyon Viagens",     // prestador, seguradora ou colaborador
+               "valorTotal": 45000, "moeda": "CVE",
+               "cabId": null, "estadoCabimento": null,
+               "colaboradores": [ … ], "documento": null } ] }
+```
+
+**Cabimentação:**
+```jsonc
+{ "itens": [ { "logisticaUuid": "…", "selecionado": true,
+               "cabId": null,     // só no cabimento manual/internacional
+               "anexo": { "tipoDocumentoId": 21, "documento": "nota.pdf" } } ],
+  "processoEtapaAction": "NEXT" }
+```
+
+**Autorização** — sem campos: `{ "processoEtapaAction": "NEXT" }`
+
+| Acção | Efeito |
+|---|---|
+| Cabimentação `NEXT` | Linhas seleccionadas → `CABIMENTADO`. Só avança com **todas** cabimentadas |
+| Autorização `NEXT` | **Todas** as linhas → `AUTORIZADO`; processo → `PAGAMENTO` |
+| Último processo activo a chegar a `PAGAMENTO` | Missão passa a `estado: "FINALIZADO"` |
+
+**Erros:** `Faltam cabimentar {n} linha(s) do processo`, linha que não pertence ao processo, e
+alterar o `cabId` de uma linha já autorizada.
+
+> **`cabId` continua `null`** — a integração com o SGAL ainda não existe. Acabou a autorização
+> parcial: o `NEXT` exige todas as linhas.
+
+---
+
+## 14. Ecrã — Pagamento
+
+`GET`/`PUT /{uuid}/pagamento` — continua a ser **por missão**, não por processo.
+
+Exige a missão em `FINALIZADO`, ou seja, os quatro processos activos autorizados.
+
+| Situação | Resposta |
+|---|---|
+| Missão por finalizar | **400** `O pagamento só pode ser registado com a missão finalizada (todos os processos autorizados)` |
+
+---
+
+## 15. Ecrã — Avaliar Prestador
+
+`GET`/`PUT /{uuid}/processos/{tipoProcesso}/prestadores/{missaoPrestUuid}/avaliacao`
+
+Acessível pela sub-lista de processos da Lista Missão. O `GET` traz tudo o que o ecrã precisa —
+critérios, pesos e as opções dos *selects*:
+
+```jsonc
+{ "nomePrestador": "…", "nrMissaoFormatado": "3/2026", "tipoProcesso": "ALOJAMENTO",
+  "podeAvaliar": true, "avaliado": false,
+  "criterios": [ { "criterio": "SISTEMA_QUALIDADE",  "peso": 5,  "avaliacao": null, … },
+                 { "criterio": "PRAZO_FORNECIMENTO", "peso": 15, … },
+                 { "criterio": "QUALIDADE_PRODUTO",  "peso": 40, … },
+                 { "criterio": "CAPACIDADE_RESPOSTA","peso": 20, … },
+                 { "criterio": "PRECO",              "peso": 20, … } ],
+  "opcoesAvaliacao": [ { "valor": "100", "descricao": "Muito Bom" },
+                       { "valor": "75",  "descricao": "Bom" },
+                       { "valor": "50",  "descricao": "Satisfaz" },
+                       { "valor": "25",  "descricao": "Mau" } ],
+  "total": null, "designacao": null, "designacaoDesc": null }
+```
+
+```jsonc
+{ "sistemaQualidade": "100", "prazoFornecimento": "75", "qualidadeProduto": "100",
+  "capacidadeResposta": "75", "preco": "50" }
+```
+→ `{ "total": 81.25, "designacao": "A", "id": "…" }`
+
+O total é a soma de `peso × (avaliação/100)`. A classe vem do total: **A** > 75, **B** ]40;75],
+**C** ]25;40], **D** [0;25] — `designacaoDesc` traz o texto (ex.: "Fornecedor Preferencial").
+
+**Erros:** `Avaliação obrigatória para o critério {X}` e
+`Avaliação inválida para {X}: {v} (valores: 100, 75, 50, 25)`.
+
+> O protótipo mostra totais numa escala 1–5 com "Muito Bom / Bom / Regular". A API segue o texto da
+> spec: total ponderado 0–100 e classes **A–D**. Vale a API.
+
+---
+
+## 16. Cancelar Missão
+
+`PATCH /{uuid}/cancelar` → `{ "motivoCancelamento": "…" }` *(obrigatório)*
+
+Inactiva a missão e, com ela, os processos, os pareceres, os colaboradores das requisições e as
+avaliações.
+
+**Notificação:** se algum processo já passou da primeira etapa do seu percurso, são renotificados
+todos os que já tinham recebido email desta missão — prestadores, emails adicionais e destinatários
+das requisições — com o nº da missão e o motivo. Cada colaborador recebe um aviso no portal.
+
+| Situação | Resposta |
+|---|---|
+| Sem `motivoCancelamento` | **400** `motivoCancelamento é obrigatório` |
+| Missão já cancelada | **400** `A missão já está cancelada` |
+| Missão finalizada | **400** `A missão está finalizada e não pode ser cancelada` |
+
+---
+
+## 17. Limitações conhecidas
+
+| Tema | Situação |
+|---|---|
+| `cabId` (SGAL) | Não gerado — integração por definir (sem endpoint nem contrato). As linhas ficam `CABIMENTADO` com `cabId: null` |
+| `valorDiario` | A base vem do cliente, sem validação. A tabela de preços da ajuda de custo nunca foi especificada |
+| `entId` | Aceite sem validação — confirmar contra `parametrizacao/entidades/ativos` no ecrã |
+| Pesquisa de entidades | `entidades/ativos` devolve 11 981 registos sem filtro nem paginação |
+| Alojamento em grupo | O DTO força uma linha por colaborador; a spec admite cabimento único para o mesmo hotel |
+| Identidade do utilizador | `executadoPor` grava `anonymousUser` em desenvolvimento; sem bloqueio por perfil nesta fase |
+| Encoding | Enviar `Content-Type: application/json; charset=utf-8` |
+
+---
+
+# Histórico
+
+> **Tudo o que se segue está superado.** Descreve o modelo anterior, em que a missão tinha uma etapa
+> única e os endpoints não levavam o tipo de processo no caminho. Fica como registo do que mudou,
+> para quem ainda esteja a migrar. **Não implementar a partir daqui** — em particular, a afirmação
+> "não existe etapa `AUTORIZACAO`" deixou de ser verdade, e as etapas `ANALISE` e `CABIMENTO`
+> passaram a `PRESTADOR_SERVICO` e a `CABIMENTO` + `AUTORIZACAO` separadas.
+
+
+### 1. Correção — `cabId` deixou de ser obrigatório
 
 `PUT /{uuid}/cabimento` rejeitava com **400 `cabId é obrigatório`** qualquer item selecionado sem `cabId`.
 
@@ -739,7 +660,7 @@ Estava errado: segundo a Especificação Técnica Funcional, o número de cabime
 
 ---
 
-## 2. `SAVE` vs `NEXT` — comportamento corrigido em todas as etapas
+### 2. `SAVE` vs `NEXT` — comportamento corrigido em todas as etapas
 
 Todos os `PUT` de etapa aceitam `processoEtapaAction` com dois valores: `"SAVE"` (Gravar) e `"NEXT"` (Avançar/Cabimentar/Autorizar).
 
@@ -758,7 +679,7 @@ Todos os `PUT` de etapa aceitam `processoEtapaAction` com dois valores: `"SAVE"`
 
 ---
 
-## 3. A etapa nunca retrocede
+### 3. A etapa nunca retrocede
 
 Cada `salvar*` escrevia a etapa do seu ecrã de forma incondicional. Numa missão em `PAGAMENTO`, gravar no ecrã de submissão devolvia-a a `SUBMISSAO`, reabrindo etapas já concluídas.
 
@@ -768,7 +689,7 @@ Ordem das etapas: `SUBMISSAO` → `ANALISE` → `EMISSAO_REQUISICAO` → `LOGIST
 
 ---
 
-## 4. Guarda de ordem — `NEXT` fora de sequência dá 400
+### 4. Guarda de ordem — `NEXT` fora de sequência dá 400
 
 | Ação | Etapa à frente da atual | Etapa já ultrapassada |
 |---|---|---|
@@ -787,7 +708,7 @@ Ordem das etapas: `SUBMISSAO` → `ANALISE` → `EMISSAO_REQUISICAO` → `LOGIST
 
 ---
 
-## 5. Gravações idempotentes
+### 5. Gravações idempotentes
 
 Gravar duas vezes o mesmo formulário deixou de ter efeitos colaterais.
 
@@ -812,7 +733,7 @@ Gravar duas vezes o mesmo formulário deixou de ter efeitos colaterais.
 
 ---
 
-## 6. Novo campo — `colaboradoresMissao`
+### 6. Novo campo — `colaboradoresMissao`
 
 **Endpoints:** `GET /{uuid}/emissao-requisicao` e `GET /{uuid}/logistica`
 
@@ -858,7 +779,7 @@ Colaborador com `missaoPrestId: null` ficou de fora da Emissão de Requisição 
 
 ---
 
-## 7. Novo campo — `colaboradores` por linha
+### 7. Novo campo — `colaboradores` por linha
 
 **Endpoints:** `GET /{uuid}/cabimento` e `GET /{uuid}/autorizacao`
 
@@ -889,7 +810,7 @@ Cada item passa a incluir os seus colaboradores:
 
 ---
 
-## 8. `numDocumento` — passaportes deixaram de se perder
+### 8. `numDocumento` — passaportes deixaram de se perder
 
 Números de documento **alfanuméricos** (ex.: passaporte `PA466262`) eram convertidos para `null` sem erro, por a coluna `RH_T_MISSAO_COLABORADOR.NUM_DOCUMENTO` ser `NUMBER`. Passou a `VARCHAR2`, e a leitura usa o funcionário como fonte de verdade.
 
@@ -899,7 +820,7 @@ Aplica-se retroativamente: missões já gravadas passam a mostrar o valor corret
 
 ---
 
-## Fluxo completo — o que enviar em cada etapa
+### Fluxo completo — o que enviar em cada etapa
 
 Percurso real de uma missão com 2 colaboradores repartidos por 2 agências.
 
@@ -1079,7 +1000,7 @@ Sem `processoEtapaAction`.
 
 ---
 
-## Como saber que ecrã mostrar
+### Como saber que ecrã mostrar
 
 **Não existe etapa `AUTORIZACAO`.** Depois de cabimentar, `etapaAtual` continua `CABIMENTO` — conforme a spec, que manda escrever `'CABIMENTO'` no fim da Cabimentação e `'PAGAMENTO'` no fim da Autorização.
 
@@ -1105,13 +1026,3 @@ Recomendação para o frontend: só permitir Autorizar quando todos os itens est
 
 ---
 
-## Limitações conhecidas
-
-| Tema | Situação |
-|---|---|
-| `cabId` (SGAL) | Não gerado — integração por definir (sem endpoint nem contrato). Linhas ficam `CABIMENTADO` com `cabId: null`. |
-| `valorDiario` | Vem do cliente, sem validação. Tabela de preços da ajuda de custo não existe. |
-| `entId` | Aceite sem validação — não há lookup de entidades (agências/seguradoras). |
-| Alojamento em grupo | O DTO força uma linha por colaborador; a spec admite cabimento único para o mesmo hotel. |
-| Autorização parcial | Avança para `PAGAMENTO` mesmo com itens por autorizar. |
-| Encoding | Enviar `Content-Type: application/json; charset=utf-8` — há nomes com mojibake vindos de `/funcionarios`. |
