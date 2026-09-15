@@ -15,19 +15,17 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
-
 @IgrpDTO
-public class BaseDecisaoDTO  {
+public class BaseDecisaoDTO {
 
   @NotNull(message = "The field <parecer> is required")
 
-  private ParecerProcesso parecer ;
+  private ParecerProcesso parecer;
 
+  private String observacao;
 
-  private String observacao ;
+  private LocalDate data;
 
-
-  private LocalDate data ;
+  private String executadoPor;
 
 }

@@ -85,6 +85,8 @@ public class EmprestimoReadService {
       dto.setNumeroContaBanco(o.getNuConta());
     });
 
+    // TODO 15/09/2026 20:18 outros emprestimons
+
     var another = emprestimoEntityRepository.findByUuidNotAndTiprel_FunId(entity.getUuid(), funId)
         .stream()
         .map(obj -> new OutrosEmprestimosDTO(
@@ -147,6 +149,7 @@ public class EmprestimoReadService {
     baseDecision.setParecer(ParecerProcesso.fromCode(obj.getDecisao()).orElse(null));
     baseDecision.setObservacao(obj.getObs());
     baseDecision.setData(obj.getCreatedDate().toLocalDate());
+    baseDecision.setExecutadoPor(obj.getLastModifiedBy());
     return baseDecision;
   }
 
