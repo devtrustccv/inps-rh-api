@@ -1,15 +1,15 @@
-> Updated: 2026-09-15 11:05
+> Updated: 2026-09-15 11:40
 
 ## Goal
 
 Fechar o módulo **Missão de Serviço** segundo a spec de 14/09/2026, que reestruturou a missão em
-4 processos independentes. O fluxo está implementado e validado; falta o **job de alertas** e
-algumas dependências de negócio/BD que o bloqueiam.
+4 processos independentes. O fluxo está implementado e validado. O que falta é sobretudo
+**parametrização e decisões de negócio**, levantadas em `docs/duvidas_analista_missao_servico.md`.
 
 ## Current state
 
 Tudo em `develop` (branch `feat/missao-servico-processos` já integrado por fast-forward). **Só o
-commit `d13f2df8` está por empurrar.**
+commit `a31663c9` está por empurrar.**
 
 Implementado e validado contra a API a correr:
 - 4 processos por missão, cada um com a sua etapa; 25 endpoints em `/api/v1/missao-servico`.
@@ -27,6 +27,14 @@ Documentação: [docs/frontend_changes_missao_servico.md](../../docs/frontend_ch
 é a versão HTML gerada dele. A spec `.docx` está convertida em
 [docs/spec_missao_servico_14_09.html](../../docs/spec_missao_servico_14_09.html) com os 27 ecrãs do protótipo.
 
+**[docs/duvidas_analista_missao_servico.md](../../docs/duvidas_analista_missao_servico.md) é o
+documento a levar ao analista** — 6 temas, 8 pontos marcados como bloqueantes, cada um com citação
+da spec, estado actual e a pergunta. Ler antes de retomar: evita reabrir o que já está levantado.
+
+**Notificações são enviadas, não só gravadas.** O padrão é `try { emailService.sendEmail(...) }
+catch { estado = "Erro" }` e grava sempre em `RH_T_NOTIFICACAO` com o estado que resultou. Em dev
+não há SMTP, por isso ficam em `"Erro"` — o fluxo nunca parte por causa disso.
+
 ## Decisions made — do not re-litigate
 
 - **Endpoints antigos ficam vivos e `deprecated`**: remover só quando o front-end migrar (Fase 11).
@@ -40,6 +48,12 @@ Documentação: [docs/frontend_changes_missao_servico.md](../../docs/frontend_ch
 - **Avaliação segue o texto da spec (total 0–100, classes A–D)**, não o protótipo (escala 1–5,
   "Muito Bom/Bom/Regular").
 - **`alojamento` continua opcional** na submissão: ausente = `true`. Default deliberado.
+- **Os pesos da avaliação NÃO estão errados na spec.** O `Total : 5+15+40+20+15 = 95%` é um
+  *exemplo* (o Preço pontua "Bom": 20 × 75% = 15 pontos); os pesos são 5/15/40/20/**20** = 100% e
+  conferem com o domínio. Já foi levantado como bug e é falso — não reabrir.
+- **A notificação por processo na Logística é fiel à spec**, não um bug de âmbito: a secção da etapa
+  manda notificar em cada `NEXT`. A secção de Notificações pede uma de síntese. A spec diz as duas
+  coisas — está em aberto (dúvida 1.1), não corrigir por iniciativa própria.
 
 ## Constraints
 
@@ -54,10 +68,18 @@ Documentação: [docs/frontend_changes_missao_servico.md](../../docs/frontend_ch
 
 ## Blockers & risks
 
-- **Job de alertas: 5 dos 6 alertas não são construíveis.** Falta no modelo: data de vencimento da
-  fatura (é um anexo em `RH_T_DOCUMENTO`, sem datas), conceito de "a agência confirmou a
-  requisição", e a parametrização de prazos/limiares que a própria spec exige. Desbloqueia com
-  decisão de negócio + DDL.
+- **Job de alertas: o âmbito é que está por decidir, não a infra.** A TRANSVERSAL (§JOB Alerta)
+  especifica **2** alertas para a missão e marca-os *"Pendente: A por verificar se isso faz sentido
+  ainda fazer"*; a spec da missão descreve **6**. A infra existe e funciona (`@Scheduled` diário,
+  3 tipos noutros módulos, prazos por `CONFIGURACAO_PRAZO`). Dos 6, dois precisam de uma data de
+  vencimento da fatura que não existe no modelo. Ver dúvidas 2.1, 2.2, 3.2.
+- **Limiares das classes A–D sem origem.** `AvaliacaoPrestadorCalculo.designacao()` tem
+  `A > 75, B ]40;75], C ]25;40], D [0;25]` fixos. Não estão na spec de 14/09, nem na de 19/08, nem
+  no domínio `AVALIACAO_FORNECEDOR` (que só tem as designações). Ver dúvida 1.3.
+- **Parametrização: 3 dos 5 mecanismos existem.** Templates ✅ (faltam os textos — 2 dos 3 tipos da
+  missão nem estão registados e o que está diz "Polhover imoant"); tipos ✅; prazos ✅ (domínio
+  vazio); destinatários ⚠️ (existe, mas só para envio manual — os papéis RH/SGAL/Financeiro/Agência
+  não existem); gatilhos ❌ (não há tabela).
 - **A JVM cai com `0xC0000005`** (JIT do JDK 23) a meio de sessões longas, mesmo com
   `-XX:TieredStopAtLevel=1`. Correr pelo jar, não por `spring-boot:run`.
 - `cabId` do SGAL fica `null` — sem contrato de integração.
@@ -124,19 +146,23 @@ Caminhos não felizes a cobrir: missão **cancelada** (não deve gerar alerta), 
 
 ## Open questions
 
-- **Negócio:** qual o prazo de "fatura em falta" e "requisição sem resposta"? Quais os documentos
-  obrigatórios por etapa? Decide o RH.
-- **DBA:** acrescentar data de vencimento à fatura e um estado de confirmação à requisição?
-- **Negócio/arquitectura:** a parametrização de prazos e limiares **está na spec como requisito mas
-  não está especificada** — a secção "Parametrizações" é uma frase por item, sem tabela, colunas
-  nem valores, ao contrário do resto da spec, que mapeia campo a campo. A doc de BD também não a
-  cobre: `RH_T_PARAM_NOTIFICACAO` só tem `TIPO_NOTIFICACAO`/`ASSUNTO`/`CORPO`/`ESTADO` (templates),
-  sem prazo, limiar, gatilho ou destinatário. É decisão de desenho por tomar, não implementação
-  pendente: que tabela, que colunas, que valor por alerta.
-- A spec soma os pesos da avaliação como `5+15+40+20+15 = 95%`, mas usa 20 no preço (= 100).
-  Seguimos 100; confirmar com o negócio.
+Todas levantadas, com citação da fonte, em
+**[docs/duvidas_analista_missao_servico.md](../../docs/duvidas_analista_missao_servico.md)**.
+As que mais desbloqueiam:
+
+1. **Âmbito dos alertas** (dúvida 2.1) — decide se há job a fazer e qual.
+2. **Destinatários por papel** (3.3) — desbloqueia 5 notificações internas de uma vez.
+3. **Tabela de preços da ajuda de custo** (5.2) — é onde há risco financeiro hoje: o `valorDiario`
+   vem do cliente sem validação.
+4. **Contrato do SGAL** (5.1) — depende de terceiros, convém arrancar cedo.
+5. **Notificação da logística: uma ou quatro** (1.1) — afecta o que o colaborador recebe já hoje.
+6. **Limiares A–D** (1.3) — hoje fixos no código sem origem conhecida.
 
 ## Next step
 
-Empurrar `d13f2df8`. Depois, levar as perguntas acima ao RH/DBA — sem elas, 5 dos 6 alertas não
-avançam. O alerta "missão próxima do início sem confirmação" pode ser implementado já, em paralelo.
+Empurrar `a31663c9` e levar `docs/duvidas_analista_missao_servico.md` ao analista. Sem a decisão de
+âmbito (2.1), implementar alertas é adivinhar.
+
+Enquanto isso, há trabalho seguro que não depende de ninguém: registar os 2 templates em falta e
+substituir o de teste em `RH_T_PARAM_NOTIFICACAO` (basta ter os textos), e carregar o domínio
+`CONFIGURACAO_PRAZO`.
