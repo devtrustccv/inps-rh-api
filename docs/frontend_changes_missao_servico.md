@@ -42,10 +42,54 @@ estar em Cabimento enquanto a ajuda de custo ainda está na Logística.
 4. **Chamar uma etapa que o processo não percorre dá 400** (ex.: `prestadores` em
    `SEGURO_VIAGEM`), tal como chamar uma etapa fora de sequência.
 
-### Endpoints antigos
+### Endpoints antigos — para onde migrar
 
 Os dez endpoints do modelo anterior continuam a responder, marcados `deprecated = true` no
-Swagger. Vão ser removidos numa fase seguinte — migrar para as rotas por processo.
+Swagger. Vão ser removidos numa fase seguinte, assim que o front-end migrar.
+
+`{tipoProcesso}` é um de `BILHETE_PASSAGEM` | `SEGURO_VIAGEM` | `AJUDA_CUSTO` | `ALOJAMENTO`.
+Onde a chamada era **uma por missão**, passa a ser **uma por processo**.
+
+| Antigo (deprecated) | Novo | Nota |
+|---|---|---|
+| `GET /{uuid}/analise` | `GET /{uuid}/processos/{tipoProcesso}/prestadores` | Só em `BILHETE_PASSAGEM` e `ALOJAMENTO` |
+| `PUT /{uuid}/analise` | `PUT /{uuid}/processos/{tipoProcesso}/prestadores` | idem |
+| `GET /{uuid}/emissao-requisicao` | `GET /{uuid}/processos/{tipoProcesso}/requisicoes` | idem |
+| `PUT /{uuid}/emissao-requisicao` | `PUT /{uuid}/processos/{tipoProcesso}/requisicoes` | Uma requisição **por prestador**, com N colaboradores |
+| `GET /{uuid}/logistica` | `GET /{uuid}/processos/{tipoProcesso}/logistica` | Devolve só a secção daquele processo |
+| `PUT /{uuid}/logistica` | `PUT /{uuid}/processos/{tipoProcesso}/logistica` | idem |
+| `GET /{uuid}/cabimento` | `GET /{uuid}/processos/{tipoProcesso}/cabimento` | |
+| `PUT /{uuid}/cabimento` | `PUT /{uuid}/processos/{tipoProcesso}/cabimento` | |
+| `GET /{uuid}/autorizacao` | `GET /{uuid}/processos/{tipoProcesso}/autorizacao` | Etapa própria — já não se distingue pelo `estadoCabimento` |
+| `PUT /{uuid}/autorizacao` | `PUT /{uuid}/processos/{tipoProcesso}/autorizacao` | Acabou a autorização parcial |
+
+> No Swagger, os dois `emissao-requisicao` antigos têm o parâmetro de caminho escrito `uui` em vez
+> de `uuid` (gralha do modelo antigo). A URL é a mesma; só afecta quem gere cliente a partir do
+> OpenAPI. As rotas novas não têm o problema.
+
+### Endpoints novos, sem equivalente antigo
+
+| Ecrã | Método | Path |
+|---|---|---|
+| Gestão de Prestadores — criar | `POST` | `/api/v1/missao-servico/prestadores` |
+| Gestão de Prestadores — editar | `PUT` | `/api/v1/missao-servico/prestadores/{uuid}` |
+| Gestão de Prestadores — lista | `GET` | `/api/v1/missao-servico/prestadores` |
+| Gestão de Prestadores — detalhe | `GET` | `/api/v1/missao-servico/prestadores/{uuid}` |
+| Ver Avaliação do prestador | `GET` | `/api/v1/missao-servico/prestadores/{uuid}/avaliacoes` |
+| Lista Etapa Missão (lista de trabalho) | `GET` | `/api/v1/missao-servico/processos?etapa=&tipoProcesso=` |
+| Validação UGAL | `GET`/`PUT` | `/{uuid}/processos/{tipoProcesso}/validacao-ugal` |
+| Aprovação RH | `GET`/`PUT` | `/{uuid}/processos/{tipoProcesso}/aprovacao-rh` |
+| Avaliar Prestador | `GET`/`PUT` | `/{uuid}/processos/{tipoProcesso}/prestadores/{missaoPrestUuid}/avaliacao` |
+| Extrair Requisição (PDF) | `GET` | `/{uuid}/processos/{tipoProcesso}/requisicoes/{requisicaoUuid}/pdf` |
+
+### Endpoints que se mantêm
+
+`POST /submissao`, `GET`/`PUT /{uuid}/submissao`, `GET /{uuid}`, a lista `GET /api/v1/missao-servico`
+e `PATCH /{id}/cancelar` mantêm o caminho. Mudou o **conteúdo**: a submissão aceita `ilhaId`/
+`concelhoId` e o campo `alojamento`, e as respostas ganham `processos[]`.
+
+`GET`/`PUT /{uuid}/pagamento` mantém o caminho e continua a ser **por missão** — mas o `PUT` passou
+a exigir a missão em `FINALIZADO` (os quatro processos activos autorizados), senão devolve **400**.
 
 ### Comportamentos a ter em conta
 

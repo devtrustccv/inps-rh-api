@@ -90,8 +90,42 @@ th { background: var(--thead); font-weight: 600; }
 <li><strong>Chamar uma etapa que o processo não percorre dá 400</strong> (ex.: <code>prestadores</code> em</li>
 </ol>
 <p><code>SEGURO_VIAGEM</code>), tal como chamar uma etapa fora de sequência.</p>
-<h3>Endpoints antigos</h3>
-<p>Os dez endpoints do modelo anterior continuam a responder, marcados <code>deprecated = true</code> no Swagger. Vão ser removidos numa fase seguinte — migrar para as rotas por processo.</p>
+<h3>Endpoints antigos — para onde migrar</h3>
+<p>Os dez endpoints do modelo anterior continuam a responder, marcados <code>deprecated = true</code> no Swagger. Vão ser removidos numa fase seguinte, assim que o front-end migrar.</p>
+<p><code>{tipoProcesso}</code> é um de <code>BILHETE_PASSAGEM</code> | <code>SEGURO_VIAGEM</code> | <code>AJUDA_CUSTO</code> | <code>ALOJAMENTO</code>. Onde a chamada era <strong>uma por missão</strong>, passa a ser <strong>uma por processo</strong>.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Antigo (deprecated)</th><th>Novo</th><th>Nota</th></tr></thead>
+<tbody>
+<tr><td><code>GET /{uuid}/analise</code></td><td><code>GET /{uuid}/processos/{tipoProcesso}/prestadores</code></td><td>Só em <code>BILHETE_PASSAGEM</code> e <code>ALOJAMENTO</code></td></tr>
+<tr><td><code>PUT /{uuid}/analise</code></td><td><code>PUT /{uuid}/processos/{tipoProcesso}/prestadores</code></td><td>idem</td></tr>
+<tr><td><code>GET /{uuid}/emissao-requisicao</code></td><td><code>GET /{uuid}/processos/{tipoProcesso}/requisicoes</code></td><td>idem</td></tr>
+<tr><td><code>PUT /{uuid}/emissao-requisicao</code></td><td><code>PUT /{uuid}/processos/{tipoProcesso}/requisicoes</code></td><td>Uma requisição <strong>por prestador</strong>, com N colaboradores</td></tr>
+<tr><td><code>GET /{uuid}/logistica</code></td><td><code>GET /{uuid}/processos/{tipoProcesso}/logistica</code></td><td>Devolve só a secção daquele processo</td></tr>
+<tr><td><code>PUT /{uuid}/logistica</code></td><td><code>PUT /{uuid}/processos/{tipoProcesso}/logistica</code></td><td>idem</td></tr>
+<tr><td><code>GET /{uuid}/cabimento</code></td><td><code>GET /{uuid}/processos/{tipoProcesso}/cabimento</code></td><td></td></tr>
+<tr><td><code>PUT /{uuid}/cabimento</code></td><td><code>PUT /{uuid}/processos/{tipoProcesso}/cabimento</code></td><td></td></tr>
+<tr><td><code>GET /{uuid}/autorizacao</code></td><td><code>GET /{uuid}/processos/{tipoProcesso}/autorizacao</code></td><td>Etapa própria — já não se distingue pelo <code>estadoCabimento</code></td></tr>
+<tr><td><code>PUT /{uuid}/autorizacao</code></td><td><code>PUT /{uuid}/processos/{tipoProcesso}/autorizacao</code></td><td>Acabou a autorização parcial</td></tr>
+</tbody></table></div>
+<blockquote><p>No Swagger, os dois <code>emissao-requisicao</code> antigos têm o parâmetro de caminho escrito <code>uui</code> em vez de <code>uuid</code> (gralha do modelo antigo). A URL é a mesma; só afecta quem gere cliente a partir do OpenAPI. As rotas novas não têm o problema.</p></blockquote>
+<h3>Endpoints novos, sem equivalente antigo</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Ecrã</th><th>Método</th><th>Path</th></tr></thead>
+<tbody>
+<tr><td>Gestão de Prestadores — criar</td><td><code>POST</code></td><td><code>/api/v1/missao-servico/prestadores</code></td></tr>
+<tr><td>Gestão de Prestadores — editar</td><td><code>PUT</code></td><td><code>/api/v1/missao-servico/prestadores/{uuid}</code></td></tr>
+<tr><td>Gestão de Prestadores — lista</td><td><code>GET</code></td><td><code>/api/v1/missao-servico/prestadores</code></td></tr>
+<tr><td>Gestão de Prestadores — detalhe</td><td><code>GET</code></td><td><code>/api/v1/missao-servico/prestadores/{uuid}</code></td></tr>
+<tr><td>Ver Avaliação do prestador</td><td><code>GET</code></td><td><code>/api/v1/missao-servico/prestadores/{uuid}/avaliacoes</code></td></tr>
+<tr><td>Lista Etapa Missão (lista de trabalho)</td><td><code>GET</code></td><td><code>/api/v1/missao-servico/processos?etapa=&amp;tipoProcesso=</code></td></tr>
+<tr><td>Validação UGAL</td><td><code>GET</code>/<code>PUT</code></td><td><code>/{uuid}/processos/{tipoProcesso}/validacao-ugal</code></td></tr>
+<tr><td>Aprovação RH</td><td><code>GET</code>/<code>PUT</code></td><td><code>/{uuid}/processos/{tipoProcesso}/aprovacao-rh</code></td></tr>
+<tr><td>Avaliar Prestador</td><td><code>GET</code>/<code>PUT</code></td><td><code>/{uuid}/processos/{tipoProcesso}/prestadores/{missaoPrestUuid}/avaliacao</code></td></tr>
+<tr><td>Extrair Requisição (PDF)</td><td><code>GET</code></td><td><code>/{uuid}/processos/{tipoProcesso}/requisicoes/{requisicaoUuid}/pdf</code></td></tr>
+</tbody></table></div>
+<h3>Endpoints que se mantêm</h3>
+<p><code>POST /submissao</code>, <code>GET</code>/<code>PUT /{uuid}/submissao</code>, <code>GET /{uuid}</code>, a lista <code>GET /api/v1/missao-servico</code> e <code>PATCH /{id}/cancelar</code> mantêm o caminho. Mudou o <strong>conteúdo</strong>: a submissão aceita <code>ilhaId</code>/ <code>concelhoId</code> e o campo <code>alojamento</code>, e as respostas ganham <code>processos[]</code>.</p>
+<p><code>GET</code>/<code>PUT /{uuid}/pagamento</code> mantém o caminho e continua a ser <strong>por missão</strong> — mas o <code>PUT</code> passou a exigir a missão em <code>FINALIZADO</code> (os quatro processos activos autorizados), senão devolve <strong>400</strong>.</p>
 <h3>Comportamentos a ter em conta</h3>
 <ul>
 <li><strong>Anexos e PDFs não bloqueiam o fluxo.</strong> Se o storage falhar, a gravação da etapa é feita na</li>
