@@ -48,6 +48,25 @@ código. Agora todos os servem:
 
 Cada opção é `{ "valor": "...", "descricao": "..." }` — usar `valor` no `PUT` e `descricao` no ecrã.
 
+### De onde vêm os restantes *selects* (fora do módulo de missão)
+
+Quatro campos dos ecrãs não são servidos pelos endpoints da missão — vêm da parametrização
+partilhada. Todos foram verificados em execução:
+
+| Campo do ecrã | Endpoint | Notas |
+| --- | --- | --- |
+| País de Destino | `GET /api/v1/parametrizacao/geografias?nivelDetalhe=1` | 223 países. Cabo Verde é `1238` |
+| Ilha | `GET /api/v1/parametrizacao/geografias?nivelDetalhe=2&geogrId=1238` | 10 ilhas; só para destino em Cabo Verde |
+| Concelho | `GET /api/v1/parametrizacao/geografias?nivelDetalhe=3&geogrId={ilhaId}` | ex.: `12387` (Santiago) → 9 concelhos, Praia = `1238704` |
+| Tipo Documento (anexos) | `GET /api/v1/parametrizacao/tipo-documento/ativos` | 28 tipos; `value` é o `tipoDocumentoId` a enviar |
+| Prestador (`entId`) | `GET /api/v1/parametrizacao/entidades/ativos` | o `value` é o `entId` do registo de prestador |
+
+Formato de todas: `{ "label": "...", "value": 123 }` — `value` é o que segue no `PUT`.
+
+> `entidades/ativos` devolve **11 981** registos de uma vez, sem filtro nem paginação. Para a caixa
+> "Pesquisar prestador de serviços…" do ecrã de registo, filtrar no cliente ou pedir um endpoint
+> de pesquisa.
+
 ### Ordem que importa: ajuda de custo depois do alojamento
 
 O valor da ajuda de custo é ⅓ do diário **apenas** quando o processo `ALOJAMENTO` já tem, para

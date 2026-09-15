@@ -85,6 +85,19 @@ th { background: var(--thead); font-weight: 600; }
 <tr><td>Lista Missão por Etapa</td><td><code>opcoesEtapa</code>, <code>opcoesTipoProcesso</code></td><td>as 8 etapas e os 4 tipos, pela ordem do fluxo</td></tr>
 </tbody></table></div>
 <p>Cada opção é <code>{ &quot;valor&quot;: &quot;...&quot;, &quot;descricao&quot;: &quot;...&quot; }</code> — usar <code>valor</code> no <code>PUT</code> e <code>descricao</code> no ecrã.</p>
+<h3>De onde vêm os restantes *selects* (fora do módulo de missão)</h3>
+<p>Quatro campos dos ecrãs não são servidos pelos endpoints da missão — vêm da parametrização partilhada. Todos foram verificados em execução:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Campo do ecrã</th><th>Endpoint</th><th>Notas</th></tr></thead>
+<tbody>
+<tr><td>País de Destino</td><td><code>GET /api/v1/parametrizacao/geografias?nivelDetalhe=1</code></td><td>223 países. Cabo Verde é <code>1238</code></td></tr>
+<tr><td>Ilha</td><td><code>GET /api/v1/parametrizacao/geografias?nivelDetalhe=2&amp;geogrId=1238</code></td><td>10 ilhas; só para destino em Cabo Verde</td></tr>
+<tr><td>Concelho</td><td><code>GET /api/v1/parametrizacao/geografias?nivelDetalhe=3&amp;geogrId={ilhaId}</code></td><td>ex.: <code>12387</code> (Santiago) → 9 concelhos, Praia = <code>1238704</code></td></tr>
+<tr><td>Tipo Documento (anexos)</td><td><code>GET /api/v1/parametrizacao/tipo-documento/ativos</code></td><td>28 tipos; <code>value</code> é o <code>tipoDocumentoId</code> a enviar</td></tr>
+<tr><td>Prestador (<code>entId</code>)</td><td><code>GET /api/v1/parametrizacao/entidades/ativos</code></td><td>o <code>value</code> é o <code>entId</code> do registo de prestador</td></tr>
+</tbody></table></div>
+<p>Formato de todas: <code>{ &quot;label&quot;: &quot;...&quot;, &quot;value&quot;: 123 }</code> — <code>value</code> é o que segue no <code>PUT</code>.</p>
+<blockquote><p><code>entidades/ativos</code> devolve <strong>11 981</strong> registos de uma vez, sem filtro nem paginação. Para a caixa &quot;Pesquisar prestador de serviços…&quot; do ecrã de registo, filtrar no cliente ou pedir um endpoint de pesquisa.</p></blockquote>
 <h3>Ordem que importa: ajuda de custo depois do alojamento</h3>
 <p>O valor da ajuda de custo é ⅓ do diário <strong>apenas</strong> quando o processo <code>ALOJAMENTO</code> já tem, para esse colaborador, uma linha de logística com <code>flgAlimentacao = &quot;SIM&quot;</code>. Se a ajuda de custo for gravada antes, sai ⅔ — sem erro. Gravar o <strong>alojamento primeiro</strong>, ou regravar a ajuda de custo depois.</p>
 <div class="table-wrap"><table>
