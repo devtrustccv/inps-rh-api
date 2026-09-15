@@ -457,7 +457,27 @@ th { background: var(--thead); font-weight: 600; }
 <p><strong>Erros:</strong> <code>Avaliação obrigatória para o critério {X}</code> e <code>Avaliação inválida para {X}: {v} (valores: 100, 75, 50, 25)</code>.</p>
 <blockquote><p>O protótipo mostra totais numa escala 1–5 com &quot;Muito Bom / Bom / Regular&quot;. A API segue o texto da spec: total ponderado 0–100 e classes <strong>A–D</strong>. Vale a API.</p></blockquote>
 <hr>
-<h2>16. Cancelar Missão</h2>
+<h2>16. Ecrã — Ver Notificação</h2>
+<p><code>GET /api/v1/missao-servico/{uuid}/notificacoes</code> — o botão &quot;Ver Notificação&quot; da Lista Missão.</p>
+<p>Devolve <strong>todas</strong> as notificações emitidas no âmbito da missão numa só chamada, da mais recente para a mais antiga. Ficam gravadas com referências diferentes conforme a etapa que as gerou, e o campo <code>origem</code> diz qual:</p>
+<pre><code>[ { &quot;uuid&quot;: &quot;…&quot;, &quot;tipoNotificacao&quot;: &quot;MISSAO_CANCELAMENTO&quot;,
+    &quot;assunto&quot;: &quot;Cancelamento de Missão Nº 6&quot;,
+    &quot;mensagem&quot;: &quot;A missão Nº 6 foi cancelada. Motivo: …&quot;,
+    &quot;email&quot;: &quot;geral@atlanticoviagens.cv&quot;,     // null = aviso no portal do colaborador
+    &quot;nomeReceptor&quot;: &quot;Atlantico Viagens Teste&quot;,
+    &quot;dataEnvio&quot;: &quot;2026-09-15&quot;, &quot;estado&quot;: &quot;Enviado&quot;,
+    &quot;origem&quot;: &quot;RH_T_MISSAO_SERVICO&quot; } ]</code></pre>
+<div class="table-wrap"><table>
+<thead><tr><th><code>origem</code></th><th>Notificações</th></tr></thead>
+<tbody>
+<tr><td><code>RH_T_MISSAO_PRESTADOR</code></td><td>pedido de proposta (um registo por email do prestador)</td></tr>
+<tr><td><code>RH_T_MISSAO_REQUISICAO</code></td><td>envio da requisição</td></tr>
+<tr><td><code>RH_T_MISSAO_COLABORADOR</code></td><td>aviso de logística ao colaborador</td></tr>
+<tr><td><code>RH_T_MISSAO_SERVICO</code></td><td>cancelamento</td></tr>
+</tbody></table></div>
+<p>O endpoint genérico <code>GET /api/v1/funcionarios/notificacoes</code> ganhou também os filtros <code>referenciaName</code> e <code>referenciaUuid</code>, úteis para consultar as notificações de <strong>uma</strong> entidade concreta. Para o ecrã da missão usar o endpoint acima: evita ter de somar uma chamada por prestador, requisição e colaborador.</p>
+<hr>
+<h2>17. Cancelar Missão</h2>
 <p><code>PATCH /{uuid}/cancelar</code> → <code>{ &quot;motivoCancelamento&quot;: &quot;…&quot; }</code> *(obrigatório)*</p>
 <p>Inactiva a missão e, com ela, os processos, os pareceres, os colaboradores das requisições e as avaliações.</p>
 <p><strong>Notificação:</strong> se algum processo já passou da primeira etapa do seu percurso, são renotificados todos os que já tinham recebido email desta missão — prestadores, emails adicionais e destinatários das requisições — com o nº da missão e o motivo. Cada colaborador recebe um aviso no portal.</p>
@@ -469,7 +489,7 @@ th { background: var(--thead); font-weight: 600; }
 <tr><td>Missão finalizada</td><td><strong>400</strong> <code>A missão está finalizada e não pode ser cancelada</code></td></tr>
 </tbody></table></div>
 <hr>
-<h2>17. Limitações conhecidas</h2>
+<h2>18. Limitações conhecidas</h2>
 <div class="table-wrap"><table>
 <thead><tr><th>Tema</th><th>Situação</th></tr></thead>
 <tbody>
@@ -480,9 +500,7 @@ th { background: var(--thead); font-weight: 600; }
 <tr><td>Alojamento em grupo</td><td>O DTO força uma linha por colaborador; a spec admite cabimento único para o mesmo hotel</td></tr>
 <tr><td>Identidade do utilizador</td><td><code>executadoPor</code> grava <code>anonymousUser</code> em desenvolvimento; sem bloqueio por perfil nesta fase</td></tr>
 <tr><td>Encoding</td><td>Enviar <code>Content-Type: application/json; charset=utf-8</code></td></tr>
-<tr><td><strong>&quot;Ver Notificação&quot;</strong> (Lista Missão)</td><td>Sem endpoint por missão. <code>GET /api/v1/funcionarios/notificacoes</code> devolve <strong>todas</strong> as notificações e <strong>não traz referência à missão</strong>, por isso nem filtrar no cliente é possível. O botão não é implementável sem um endpoint novo</td></tr>
 <tr><td><strong>&quot;Ver Alerta&quot;</strong> (Lista Missão)</td><td><code>GET /api/v1/funcionarios/alertas</code> devolve vazio — o *job* de alertas é fase 2 do projecto. O botão não tem o que mostrar</td></tr>
-<tr><td><code>GET /{uuid}/pagamento</code></td><td>Devolve <code>etapaAtual: &quot;SUBMISSAO&quot;</code> mesmo com a missão <code>FINALIZADO</code>. O campo é vestigial do modelo antigo — usar <code>estado</code>, não <code>etapaAtual</code></td></tr>
 <tr><td>Templates de notificação</td><td>Em desenvolvimento, o template <code>MISSAO_PRESTADOR</code> tem texto de preenchimento (&quot;Polhover imoant…&quot;). É dado de parametrização, não código</td></tr>
 </tbody></table></div>
 <hr>

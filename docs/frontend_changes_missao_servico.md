@@ -611,7 +611,39 @@ O total é a soma de `peso × (avaliação/100)`. A classe vem do total: **A** >
 
 ---
 
-## 16. Cancelar Missão
+## 16. Ecrã — Ver Notificação
+
+`GET /api/v1/missao-servico/{uuid}/notificacoes` — o botão "Ver Notificação" da Lista Missão.
+
+Devolve **todas** as notificações emitidas no âmbito da missão numa só chamada, da mais recente
+para a mais antiga. Ficam gravadas com referências diferentes conforme a etapa que as gerou, e o
+campo `origem` diz qual:
+
+```jsonc
+[ { "uuid": "…", "tipoNotificacao": "MISSAO_CANCELAMENTO",
+    "assunto": "Cancelamento de Missão Nº 6",
+    "mensagem": "A missão Nº 6 foi cancelada. Motivo: …",
+    "email": "geral@atlanticoviagens.cv",     // null = aviso no portal do colaborador
+    "nomeReceptor": "Atlantico Viagens Teste",
+    "dataEnvio": "2026-09-15", "estado": "Enviado",
+    "origem": "RH_T_MISSAO_SERVICO" } ]
+```
+
+| `origem` | Notificações |
+|---|---|
+| `RH_T_MISSAO_PRESTADOR` | pedido de proposta (um registo por email do prestador) |
+| `RH_T_MISSAO_REQUISICAO` | envio da requisição |
+| `RH_T_MISSAO_COLABORADOR` | aviso de logística ao colaborador |
+| `RH_T_MISSAO_SERVICO` | cancelamento |
+
+O endpoint genérico `GET /api/v1/funcionarios/notificacoes` ganhou também os filtros
+`referenciaName` e `referenciaUuid`, úteis para consultar as notificações de **uma** entidade
+concreta. Para o ecrã da missão usar o endpoint acima: evita ter de somar uma chamada por
+prestador, requisição e colaborador.
+
+---
+
+## 17. Cancelar Missão
 
 `PATCH /{uuid}/cancelar` → `{ "motivoCancelamento": "…" }` *(obrigatório)*
 
@@ -630,7 +662,7 @@ das requisições — com o nº da missão e o motivo. Cada colaborador recebe u
 
 ---
 
-## 17. Limitações conhecidas
+## 18. Limitações conhecidas
 
 | Tema | Situação |
 |---|---|
@@ -641,9 +673,7 @@ das requisições — com o nº da missão e o motivo. Cada colaborador recebe u
 | Alojamento em grupo | O DTO força uma linha por colaborador; a spec admite cabimento único para o mesmo hotel |
 | Identidade do utilizador | `executadoPor` grava `anonymousUser` em desenvolvimento; sem bloqueio por perfil nesta fase |
 | Encoding | Enviar `Content-Type: application/json; charset=utf-8` |
-| **"Ver Notificação"** (Lista Missão) | Sem endpoint por missão. `GET /api/v1/funcionarios/notificacoes` devolve **todas** as notificações e **não traz referência à missão**, por isso nem filtrar no cliente é possível. O botão não é implementável sem um endpoint novo |
 | **"Ver Alerta"** (Lista Missão) | `GET /api/v1/funcionarios/alertas` devolve vazio — o *job* de alertas é fase 2 do projecto. O botão não tem o que mostrar |
-| `GET /{uuid}/pagamento` | Devolve `etapaAtual: "SUBMISSAO"` mesmo com a missão `FINALIZADO`. O campo é vestigial do modelo antigo — usar `estado`, não `etapaAtual` |
 | Templates de notificação | Em desenvolvimento, o template `MISSAO_PRESTADOR` tem texto de preenchimento ("Polhover imoant…"). É dado de parametrização, não código |
 
 ---

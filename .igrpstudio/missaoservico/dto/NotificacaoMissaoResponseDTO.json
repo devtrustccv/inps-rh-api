@@ -1,17 +1,11 @@
 {
   "type": "dto",
   "module": "missaoservico",
-  "name": "ProcessoPrestadorResponse",
+  "name": "NotificacaoMissaoResponse",
   "template": "classic",
   "enableCustonValidation": false,
   "readOnly": true,
   "attributes": [
-    {
-      "name": "id",
-      "type": "long",
-      "objectType": "java",
-      "required": false
-    },
     {
       "name": "uuid",
       "type": "uuid",
@@ -19,19 +13,19 @@
       "required": false
     },
     {
-      "name": "paramPrestUuid",
-      "type": "uuid",
+      "name": "tipoNotificacao",
+      "type": "string",
       "objectType": "java",
       "required": false
     },
     {
-      "name": "entId",
-      "type": "long",
+      "name": "assunto",
+      "type": "string",
       "objectType": "java",
       "required": false
     },
     {
-      "name": "nome",
+      "name": "mensagem",
       "type": "string",
       "objectType": "java",
       "required": false
@@ -43,11 +37,16 @@
       "required": false
     },
     {
-      "name": "emails",
+      "name": "nomeReceptor",
       "type": "string",
       "objectType": "java",
-      "required": false,
-      "collectionType": "list"
+      "required": false
+    },
+    {
+      "name": "dataEnvio",
+      "type": "date",
+      "objectType": "java",
+      "required": false
     },
     {
       "name": "estado",
@@ -56,23 +55,11 @@
       "required": false
     },
     {
-      "name": "notaAvaliacao",
-      "type": "double",
-      "objectType": "java",
-      "required": false
-    },
-    {
-      "name": "notaAvaliacaoDesignacao",
-      "type": "string",
-      "objectType": "java",
-      "required": false
-    },
-    {
-      "name": "notaAvaliacaoDesc",
+      "name": "origem",
       "type": "string",
       "objectType": "java",
       "required": false
     }
   ],
-  "id": "msvdto10procprestitem"
+  "id": "msvdto34notifmissaoresp"
 }

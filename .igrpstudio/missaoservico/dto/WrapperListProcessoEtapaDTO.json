@@ -6,13 +6,66 @@
   "enableCustonValidation": false,
   "readOnly": true,
   "attributes": [
-    { "name": "content", "type": "ProcessoEtapaListaItem", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" },
-    { "name": "pageNumber", "type": "int", "objectType": "java", "required": false },
-    { "name": "pageSize", "type": "int", "objectType": "java", "required": false },
-    { "name": "totalElements", "type": "long", "objectType": "java", "required": false },
-    { "name": "totalPages", "type": "int", "objectType": "java", "required": false },
-    { "name": "first", "type": "boolean", "objectType": "java", "required": false },
-    { "name": "last", "type": "boolean", "objectType": "java", "required": false }
+    {
+      "name": "content",
+      "type": "ProcessoEtapaListaItem",
+      "objectType": "dto",
+      "required": false,
+      "collectionType": "list",
+      "module": "missaoservico"
+    },
+    {
+      "name": "pageNumber",
+      "type": "int",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "pageSize",
+      "type": "int",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "totalElements",
+      "type": "long",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "totalPages",
+      "type": "int",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "first",
+      "type": "boolean",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "last",
+      "type": "boolean",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "opcoesEtapa",
+      "type": "OpcaoDominioResponse",
+      "objectType": "dto",
+      "required": false,
+      "collectionType": "list",
+      "module": "missaoservico"
+    },
+    {
+      "name": "opcoesTipoProcesso",
+      "type": "OpcaoDominioResponse",
+      "objectType": "dto",
+      "required": false,
+      "collectionType": "list",
+      "module": "missaoservico"
+    }
   ],
   "id": "msvdto32wrapperprocetapa"
 }

@@ -15,6 +15,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import cv.inps.rh.missaoservico.application.dto.NotificacaoMissaoResponseDTO;
+import cv.inps.rh.missaoservico.application.queries.GetNotificacoesMissaoQuery;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -587,6 +590,35 @@ public class MissaoProcessoController {
   {
 
       final var query = new GetListaProcessosEtapaQuery(etapa, tipoProcesso, pageNumber, pageSize);
+
+      return queryBus.handle(query);
+
+  }
+
+
+   @GetMapping(
+   value = "{uuid}/notificacoes"
+  )
+  @Operation(
+    summary = "Get notificacoes da missao",
+    description = "Todas as notificacoes emitidas no ambito da missao (ecra Ver Notificacao)",
+    responses = {
+      @ApiResponse(
+          responseCode = "200",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(
+                  implementation = NotificacaoMissaoResponseDTO.class,
+                  type = "array")
+          )
+      )
+    }
+  )
+   public ResponseEntity<List<NotificacaoMissaoResponseDTO>> getNotificacoesMissao(
+    @PathVariable("uuid") String uuid)
+  {
+
+      final var query = new GetNotificacoesMissaoQuery(uuid);
 
       return queryBus.handle(query);
 

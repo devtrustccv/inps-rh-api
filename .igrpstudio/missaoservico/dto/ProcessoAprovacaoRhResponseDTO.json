@@ -6,13 +6,70 @@
   "enableCustonValidation": false,
   "readOnly": true,
   "attributes": [
-    { "name": "missaoUuid", "type": "uuid", "objectType": "java", "required": false },
-    { "name": "nrMissaoFormatado", "type": "string", "objectType": "java", "required": false },
-    { "name": "processo", "type": "MissaoProcessoResponse", "objectType": "dto", "required": false, "module": "missaoservico" },
-    { "name": "parecerCoordenador", "type": "ParecerResponse", "objectType": "dto", "required": false, "module": "missaoservico" },
-    { "name": "parecerDirector", "type": "ParecerResponse", "objectType": "dto", "required": false, "module": "missaoservico" },
-    { "name": "parecerUgal", "type": "ParecerResponse", "objectType": "dto", "required": false, "module": "missaoservico" },
-    { "name": "historico", "type": "ParecerResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" }
+    {
+      "name": "missaoUuid",
+      "type": "uuid",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "nrMissaoFormatado",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "processo",
+      "type": "MissaoProcessoResponse",
+      "objectType": "dto",
+      "required": false,
+      "module": "missaoservico"
+    },
+    {
+      "name": "parecerCoordenador",
+      "type": "ParecerResponse",
+      "objectType": "dto",
+      "required": false,
+      "module": "missaoservico"
+    },
+    {
+      "name": "parecerDirector",
+      "type": "ParecerResponse",
+      "objectType": "dto",
+      "required": false,
+      "module": "missaoservico"
+    },
+    {
+      "name": "parecerUgal",
+      "type": "ParecerResponse",
+      "objectType": "dto",
+      "required": false,
+      "module": "missaoservico"
+    },
+    {
+      "name": "historico",
+      "type": "ParecerResponse",
+      "objectType": "dto",
+      "required": false,
+      "collectionType": "list",
+      "module": "missaoservico"
+    },
+    {
+      "name": "opcoesParecer",
+      "type": "OpcaoDominioResponse",
+      "objectType": "dto",
+      "required": false,
+      "collectionType": "list",
+      "module": "missaoservico"
+    },
+    {
+      "name": "opcoesResponsavel",
+      "type": "OpcaoDominioResponse",
+      "objectType": "dto",
+      "required": false,
+      "collectionType": "list",
+      "module": "missaoservico"
+    }
   ],
   "id": "msvdto20procaprovresp"
 }

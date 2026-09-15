@@ -6,14 +6,72 @@
   "enableCustonValidation": false,
   "readOnly": true,
   "attributes": [
-    { "name": "missaoUuid", "type": "uuid", "objectType": "java", "required": false },
-    { "name": "nrMissaoFormatado", "type": "string", "objectType": "java", "required": false },
-    { "name": "processo", "type": "MissaoProcessoResponse", "objectType": "dto", "required": false, "module": "missaoservico" },
-    { "name": "autorizacao", "type": "AnexoResp", "objectType": "dto", "required": false, "collectionType": "list", "module": "shared" },
-    { "name": "requisicoes", "type": "AnexoResp", "objectType": "dto", "required": false, "collectionType": "list", "module": "shared" },
-    { "name": "faturas", "type": "AnexoResp", "objectType": "dto", "required": false, "collectionType": "list", "module": "shared" },
-    { "name": "parecerAtual", "type": "ParecerResponse", "objectType": "dto", "required": false, "module": "missaoservico" },
-    { "name": "historico", "type": "ParecerResponse", "objectType": "dto", "required": false, "collectionType": "list", "module": "missaoservico" }
+    {
+      "name": "missaoUuid",
+      "type": "uuid",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "nrMissaoFormatado",
+      "type": "string",
+      "objectType": "java",
+      "required": false
+    },
+    {
+      "name": "processo",
+      "type": "MissaoProcessoResponse",
+      "objectType": "dto",
+      "required": false,
+      "module": "missaoservico"
+    },
+    {
+      "name": "autorizacao",
+      "type": "AnexoResp",
+      "objectType": "dto",
+      "required": false,
+      "collectionType": "list",
+      "module": "shared"
+    },
+    {
+      "name": "requisicoes",
+      "type": "AnexoResp",
+      "objectType": "dto",
+      "required": false,
+      "collectionType": "list",
+      "module": "shared"
+    },
+    {
+      "name": "faturas",
+      "type": "AnexoResp",
+      "objectType": "dto",
+      "required": false,
+      "collectionType": "list",
+      "module": "shared"
+    },
+    {
+      "name": "parecerAtual",
+      "type": "ParecerResponse",
+      "objectType": "dto",
+      "required": false,
+      "module": "missaoservico"
+    },
+    {
+      "name": "historico",
+      "type": "ParecerResponse",
+      "objectType": "dto",
+      "required": false,
+      "collectionType": "list",
+      "module": "missaoservico"
+    },
+    {
+      "name": "opcoesParecer",
+      "type": "OpcaoDominioResponse",
+      "objectType": "dto",
+      "required": false,
+      "collectionType": "list",
+      "module": "missaoservico"
+    }
   ],
   "id": "msvdto19procugalresp"
 }

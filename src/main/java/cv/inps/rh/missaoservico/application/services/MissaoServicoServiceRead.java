@@ -6,6 +6,8 @@ import cv.inps.rh.missaoservico.application.constants.TipoProcesso;
 import cv.inps.rh.missaoservico.application.dto.*;
 import cv.inps.rh.missaoservico.application.queries.*;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.missaoservico.application.dto.NotificacaoMissaoResponseDTO;
+import cv.inps.rh.shared.infrastructure.persistence.entity.NotificacaoEntity;
 import cv.inps.rh.shared.application.constants.custom.TableName;
 import cv.inps.rh.shared.application.dto.AnexoRespDTO;
 import cv.inps.rh.shared.domain.models.IdentificadorUnico;
@@ -292,8 +294,13 @@ public class MissaoServicoServiceRead {
 
     var response = new MissaoPagamentoResponseDTO();
     response.setMissaoId(missao.getId());
-    response.setEtapaAtual(missao.getEtapa());
-    response.setEtapaAtualDesc(resolveEtapaDesc(missao.getEtapa()));
+    // No modelo por processo a etapa da missão fica em SUBMISSAO: mostrar a do processo activo
+    // mais atrasado, como na lista, em vez de um valor que não diz nada ao ecrã.
+    var processos = missaoProcessoRepository.findAllByMissaoServId_UuidOrderByIdAsc(missaoUuid);
+    var etapa = processoMaisAtrasado(processos).map(MissaoProcessoEntity::getEtapa).orElse(missao.getEtapa());
+    response.setEtapaAtual(etapa);
+    var etapaEnum = EtapaProcesso.fromCode(etapa);
+    response.setEtapaAtualDesc(etapaEnum != null ? etapaEnum.getDescricao() : resolveEtapaDesc(etapa));
     response.setEstado(missao.getEstado());
     response.setReferenciaPagamento(missao.getReferenciaPagamento());
     response.setDataPagamento(missao.getDataPagamento());
@@ -1047,5 +1054,53 @@ public class MissaoServicoServiceRead {
 
   private java.time.LocalDate toLocalDate(LocalDateTime dt) {
     return dt != null ? dt.toLocalDate() : null;
+  }
+
+  /**
+   * Todas as notificações emitidas no âmbito de uma missão — ecrã "Ver Notificação" da Lista Missão.
+   *
+   * <p>Ficam espalhadas por quatro referências: a missão (cancelamento), o prestador (pedido de
+   * proposta, um registo por email), a requisição (envio ao prestador) e o colaborador (aviso de
+   * logística). Este método junta-as e ordena da mais recente para a mais antiga.
+   */
+  @Transactional(readOnly = true)
+  public ResponseEntity<List<NotificacaoMissaoResponseDTO>> listarNotificacoes(UUID missaoUuid) {
+    var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
+
+    var encontradas = new java.util.LinkedHashMap<Long, NotificacaoMissaoResponseDTO>();
+    java.util.function.BiConsumer<String, UUID> recolher = (referencia, uuid) -> {
+      if (uuid == null)
+        return;
+      for (var n : notificacaoRepository.findAllByReferenciaNameAndReferenciaUuid(referencia, uuid)) {
+        encontradas.putIfAbsent(n.getId(), toNotificacaoDto(n, referencia));
+      }
+    };
+
+    recolher.accept(TableName.RH_T_MISSAO_SERVICO.name(), missao.getUuid());
+    for (var p : missaoPrestadorRepository.findAllByMissaoServId_Uuid(missaoUuid))
+      recolher.accept(TableName.RH_T_MISSAO_PRESTADOR.name(), p.getUuid());
+    for (var r : missaoRequisicaoRepository.findAllByMissaoPrestId_MissaoServId_Uuid(missaoUuid))
+      recolher.accept(TableName.RH_T_MISSAO_REQUISICAO.name(), r.getUuid());
+    for (var c : missaoColaboradorRepository.findAllByMissaoServId_Uuid(missaoUuid))
+      recolher.accept(TableName.RH_T_MISSAO_COLABORADOR.name(), c.getUuid());
+
+    var out = new java.util.ArrayList<>(encontradas.values());
+    out.sort(java.util.Comparator.comparing(NotificacaoMissaoResponseDTO::getDataEnvio,
+        java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())));
+    return ResponseEntity.ok(out);
+  }
+
+  private NotificacaoMissaoResponseDTO toNotificacaoDto(NotificacaoEntity n, String origem) {
+    var dto = new NotificacaoMissaoResponseDTO();
+    dto.setUuid(n.getUuid());
+    dto.setTipoNotificacao(n.getTipoNotificacao());
+    dto.setAssunto(n.getAssunto());
+    dto.setMensagem(n.getMessage());
+    dto.setEmail(n.getEmail());
+    dto.setNomeReceptor(n.getNomeReceptor());
+    dto.setDataEnvio(n.getDataEnvio());
+    dto.setEstado(n.getEstado());
+    dto.setOrigem(origem);
+    return dto;
   }
 }

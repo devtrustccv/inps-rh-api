@@ -14,14 +14,27 @@
           "name": "OK",
           "content": {
             "application/json": {
-              "schema": { "type": "ProcessoPrestadoresResponse", "objectType": "dto", "collectionType": "none", "module": "missaoservico" }
+              "schema": {
+                "type": "ProcessoPrestadoresResponse",
+                "objectType": "dto",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
             }
           }
         }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -31,7 +44,12 @@
       "requestBody": {
         "content": {
           "application/json": {
-            "schema": { "type": "ProcessoPrestadoresRequest", "collectionType": "none", "objectType": "dto", "module": "missaoservico" }
+            "schema": {
+              "type": "ProcessoPrestadoresRequest",
+              "collectionType": "none",
+              "objectType": "dto",
+              "module": "missaoservico"
+            }
           }
         }
       },
@@ -40,14 +58,25 @@
           "name": "OK",
           "content": {
             "application/json": {
-              "schema": { "type": "string", "collectionType": "map" }
+              "schema": {
+                "type": "string",
+                "collectionType": "map"
+              }
             }
           }
         }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -59,14 +88,27 @@
           "name": "OK",
           "content": {
             "application/json": {
-              "schema": { "type": "ProcessoRequisicoesResponse", "objectType": "dto", "collectionType": "none", "module": "missaoservico" }
+              "schema": {
+                "type": "ProcessoRequisicoesResponse",
+                "objectType": "dto",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
             }
           }
         }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -76,7 +118,12 @@
       "requestBody": {
         "content": {
           "application/json": {
-            "schema": { "type": "ProcessoRequisicoesRequest", "collectionType": "none", "objectType": "dto", "module": "missaoservico" }
+            "schema": {
+              "type": "ProcessoRequisicoesRequest",
+              "collectionType": "none",
+              "objectType": "dto",
+              "module": "missaoservico"
+            }
           }
         }
       },
@@ -85,14 +132,25 @@
           "name": "OK",
           "content": {
             "application/json": {
-              "schema": { "type": "string", "collectionType": "map" }
+              "schema": {
+                "type": "string",
+                "collectionType": "map"
+              }
             }
           }
         }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -104,15 +162,29 @@
           "name": "OK",
           "content": {
             "application/pdf": {
-              "schema": { "type": "binary" }
+              "schema": {
+                "type": "binary"
+              }
             }
           }
         }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true },
-        { "name": "requisicaoUuid", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "requisicaoUuid",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -124,14 +196,27 @@
           "name": "OK",
           "content": {
             "application/json": {
-              "schema": { "type": "ProcessoLogisticaResponse", "objectType": "dto", "collectionType": "none", "module": "missaoservico" }
+              "schema": {
+                "type": "ProcessoLogisticaResponse",
+                "objectType": "dto",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
             }
           }
         }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -141,7 +226,12 @@
       "requestBody": {
         "content": {
           "application/json": {
-            "schema": { "type": "ProcessoLogisticaRequest", "collectionType": "none", "objectType": "dto", "module": "missaoservico" }
+            "schema": {
+              "type": "ProcessoLogisticaRequest",
+              "collectionType": "none",
+              "objectType": "dto",
+              "module": "missaoservico"
+            }
           }
         }
       },
@@ -150,14 +240,25 @@
           "name": "OK",
           "content": {
             "application/json": {
-              "schema": { "type": "string", "collectionType": "map" }
+              "schema": {
+                "type": "string",
+                "collectionType": "map"
+              }
             }
           }
         }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -165,11 +266,31 @@
       "path": "{uuid}/processos/{tipoProcesso}/validacao-ugal",
       "method": "GET",
       "responses": {
-        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "ProcessoValidacaoUgalResponse", "objectType": "dto", "collectionType": "none", "module": "missaoservico" } } } }
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ProcessoValidacaoUgalResponse",
+                "objectType": "dto",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -177,14 +298,41 @@
       "path": "{uuid}/processos/{tipoProcesso}/validacao-ugal",
       "method": "PUT",
       "requestBody": {
-        "content": { "application/json": { "schema": { "type": "ParecerRequest", "collectionType": "none", "objectType": "dto", "module": "missaoservico" } } }
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ParecerRequest",
+              "collectionType": "none",
+              "objectType": "dto",
+              "module": "missaoservico"
+            }
+          }
+        }
       },
       "responses": {
-        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "string", "collectionType": "map" } } } }
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -192,11 +340,31 @@
       "path": "{uuid}/processos/{tipoProcesso}/aprovacao-rh",
       "method": "GET",
       "responses": {
-        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "ProcessoAprovacaoRhResponse", "objectType": "dto", "collectionType": "none", "module": "missaoservico" } } } }
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ProcessoAprovacaoRhResponse",
+                "objectType": "dto",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -204,14 +372,41 @@
       "path": "{uuid}/processos/{tipoProcesso}/aprovacao-rh",
       "method": "PUT",
       "requestBody": {
-        "content": { "application/json": { "schema": { "type": "ParecerRequest", "collectionType": "none", "objectType": "dto", "module": "missaoservico" } } }
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ParecerRequest",
+              "collectionType": "none",
+              "objectType": "dto",
+              "module": "missaoservico"
+            }
+          }
+        }
       },
       "responses": {
-        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "string", "collectionType": "map" } } } }
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -219,12 +414,36 @@
       "path": "{uuid}/processos/{tipoProcesso}/prestadores/{missaoPrestUuid}/avaliacao",
       "method": "GET",
       "responses": {
-        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "AvaliacaoPrestadorResponse", "objectType": "dto", "collectionType": "none", "module": "missaoservico" } } } }
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "AvaliacaoPrestadorResponse",
+                "objectType": "dto",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true },
-        { "name": "missaoPrestUuid", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "missaoPrestUuid",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -232,15 +451,46 @@
       "path": "{uuid}/processos/{tipoProcesso}/prestadores/{missaoPrestUuid}/avaliacao",
       "method": "PUT",
       "requestBody": {
-        "content": { "application/json": { "schema": { "type": "AvaliacaoPrestadorRequest", "collectionType": "none", "objectType": "dto", "module": "missaoservico" } } }
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "AvaliacaoPrestadorRequest",
+              "collectionType": "none",
+              "objectType": "dto",
+              "module": "missaoservico"
+            }
+          }
+        }
       },
       "responses": {
-        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "string", "collectionType": "map" } } } }
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true },
-        { "name": "missaoPrestUuid", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "missaoPrestUuid",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -248,11 +498,31 @@
       "path": "{uuid}/processos/{tipoProcesso}/cabimento",
       "method": "GET",
       "responses": {
-        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "ProcessoCabimentoResponse", "objectType": "dto", "collectionType": "none", "module": "missaoservico" } } } }
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ProcessoCabimentoResponse",
+                "objectType": "dto",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -260,14 +530,41 @@
       "path": "{uuid}/processos/{tipoProcesso}/cabimento",
       "method": "PUT",
       "requestBody": {
-        "content": { "application/json": { "schema": { "type": "ProcessoCabimentoRequest", "collectionType": "none", "objectType": "dto", "module": "missaoservico" } } }
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ProcessoCabimentoRequest",
+              "collectionType": "none",
+              "objectType": "dto",
+              "module": "missaoservico"
+            }
+          }
+        }
       },
       "responses": {
-        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "string", "collectionType": "map" } } } }
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -275,11 +572,31 @@
       "path": "{uuid}/processos/{tipoProcesso}/autorizacao",
       "method": "GET",
       "responses": {
-        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "ProcessoCabimentoResponse", "objectType": "dto", "collectionType": "none", "module": "missaoservico" } } } }
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "ProcessoCabimentoResponse",
+                "objectType": "dto",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -287,14 +604,41 @@
       "path": "{uuid}/processos/{tipoProcesso}/autorizacao",
       "method": "PUT",
       "requestBody": {
-        "content": { "application/json": { "schema": { "type": "ProcessoEtapaActionRequest", "collectionType": "none", "objectType": "dto", "module": "missaoservico" } } }
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "ProcessoEtapaActionRequest",
+              "collectionType": "none",
+              "objectType": "dto",
+              "module": "missaoservico"
+            }
+          }
+        }
       },
       "responses": {
-        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "string", "collectionType": "map" } } } }
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "collectionType": "map"
+              }
+            }
+          }
+        }
       },
       "pathVariables": [
-        { "name": "uuid", "type": "string", "isRequired": true },
-        { "name": "tipoProcesso", "type": "string", "isRequired": true }
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        },
+        {
+          "name": "tipoProcesso",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     },
     {
@@ -302,13 +646,70 @@
       "path": "processos",
       "method": "GET",
       "responses": {
-        "200": { "name": "OK", "content": { "application/json": { "schema": { "type": "WrapperListProcessoEtapa", "objectType": "dto", "collectionType": "none", "module": "missaoservico" } } } }
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "WrapperListProcessoEtapa",
+                "objectType": "dto",
+                "collectionType": "none",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
       },
       "requestParams": [
-        { "type": "string", "name": "etapa", "isRequired": false },
-        { "type": "string", "name": "tipoProcesso", "isRequired": false },
-        { "type": "string", "name": "pageNumber", "value": "0", "isRequired": false },
-        { "type": "string", "name": "pageSize", "value": "10", "isRequired": false }
+        {
+          "type": "string",
+          "name": "etapa",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "tipoProcesso",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageNumber",
+          "value": "0",
+          "isRequired": false
+        },
+        {
+          "type": "string",
+          "name": "pageSize",
+          "value": "10",
+          "isRequired": false
+        }
+      ]
+    },
+    {
+      "actionName": "getNotificacoesMissao",
+      "path": "{uuid}/notificacoes",
+      "method": "GET",
+      "responses": {
+        "200": {
+          "name": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "NotificacaoMissaoResponse",
+                "objectType": "dto",
+                "collectionType": "list",
+                "module": "missaoservico"
+              }
+            }
+          }
+        }
+      },
+      "pathVariables": [
+        {
+          "name": "uuid",
+          "type": "string",
+          "isRequired": true
+        }
       ]
     }
   ],
