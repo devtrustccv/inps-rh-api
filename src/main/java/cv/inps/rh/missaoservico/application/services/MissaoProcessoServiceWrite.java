@@ -376,7 +376,9 @@ public class MissaoProcessoServiceWrite {
 
       var colaboradores = new ArrayList<MissaoColaboradorEntity>();
       for (var funUuid : funUuids) {
+        // Aceita o uuid do funcionário ou o do colaborador da missão — o ecrã expõe os dois.
         var colab = missaoColaboradorRepository.findByMissaoServId_UuidAndFunId_Uuid(missaoUuid, funUuid)
+            .or(() -> missaoColaboradorRepository.findByMissaoServId_UuidAndUuid(missaoUuid, funUuid))
             .filter(c -> ESTADO_ATIVO.equals(c.getEstado()))
             .orElseThrow(() -> IgrpResponseStatusException.badRequest("Colaborador não pertence à missão: " + funUuid));
         var outro = prestadorDoColaborador.putIfAbsent(colab.getId(), prestador.getNome());
@@ -755,15 +757,25 @@ public class MissaoProcessoServiceWrite {
     return log;
   }
 
-  private List<MissaoColaboradorEntity> colaboradoresDaLinha(UUID missaoUuid, List<UUID> funUuids, String seccao) {
-    var distintos = funUuids == null ? List.<UUID>of() : funUuids.stream().filter(Objects::nonNull).distinct().toList();
+  /**
+   * Resolve os colaboradores de uma linha de logística.
+   *
+   * <p>O ecrã recebe, para cada colaborador, dois identificadores lado a lado
+   * ({@code colaboradoresDisponiveis[].funUuid} e {@code .uuid}); aceitam-se ambos, para que a
+   * escolha do campo errado não se traduza num 400 "não pertence à missão" difícil de diagnosticar.
+   */
+  private List<MissaoColaboradorEntity> colaboradoresDaLinha(UUID missaoUuid, List<UUID> colaboradorUuids, String seccao) {
+    var distintos = colaboradorUuids == null
+        ? List.<UUID>of()
+        : colaboradorUuids.stream().filter(Objects::nonNull).distinct().toList();
     if (distintos.isEmpty()) {
       throw IgrpResponseStatusException.badRequest(seccao + ": indique pelo menos um colaborador");
     }
     return distintos.stream()
-        .map(funUuid -> missaoColaboradorRepository.findByMissaoServId_UuidAndFunId_Uuid(missaoUuid, funUuid)
+        .map(uuid -> missaoColaboradorRepository.findByMissaoServId_UuidAndFunId_Uuid(missaoUuid, uuid)
+            .or(() -> missaoColaboradorRepository.findByMissaoServId_UuidAndUuid(missaoUuid, uuid))
             .filter(c -> ESTADO_ATIVO.equals(c.getEstado()))
-            .orElseThrow(() -> IgrpResponseStatusException.badRequest(seccao + ": colaborador não pertence à missão: " + funUuid)))
+            .orElseThrow(() -> IgrpResponseStatusException.badRequest(seccao + ": colaborador não pertence à missão: " + uuid)))
         .toList();
   }
 

@@ -31,7 +31,7 @@ public class AlojamentoRequestDTO  {
   private LocalDate dataInicio;           // default: dataInicio da missão — editável
   private LocalDate dataFim;              // default: dataFim da missão — editável
   // nrDias calculado no service: ChronoUnit.DAYS.between(dataInicio, dataFim)
-  private UUID colaboradorId;             // MissaoColaboradorEntity.id — um colaborador por registo
+  private UUID colaboradorId;             // funUuid OU uuid do colaborador da missão — um colaborador por registo
   private List<UUID> colaboradorIds;      // uuid do funcionário — um ou mais (spec 14/09); prevalece sobre colaboradorId
   private AnexoReqDTO anexo;  // upload PDF — opcional
 

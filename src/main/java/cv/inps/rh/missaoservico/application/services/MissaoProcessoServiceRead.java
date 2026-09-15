@@ -6,6 +6,7 @@ import cv.inps.rh.missaoservico.application.dto.*;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoPrestadoresQuery;
 import cv.inps.rh.missaoservico.application.queries.GetProcessoRequisicoesQuery;
 import cv.inps.rh.missaoservico.application.constants.EtapaProcesso;
+import cv.inps.rh.missaoservico.application.constants.Parecer;
 import cv.inps.rh.missaoservico.application.constants.ResponsavelParecer;
 import cv.inps.rh.missaoservico.application.queries.GetListaProcessosEtapaQuery;
 import cv.inps.rh.missaoservico.application.queries.GetAvaliacaoPrestadorQuery;
@@ -370,6 +371,7 @@ public class MissaoProcessoServiceRead {
     response.setFaturas(documentos(TableName.RH_T_MISSAO_LOGISTICA.name(), linhaUuids, false));
     response.setParecerAtual(parecerDoCiclo(ugal));
     response.setHistorico(ugal.stream().map(this::toParecerDto).toList());
+    response.setOpcoesParecer(support.opcoesParecer());
     return ResponseEntity.ok(response);
   }
 
@@ -399,6 +401,8 @@ public class MissaoProcessoServiceRead {
         .stream()
         .map(this::toParecerDto)
         .toList());
+    response.setOpcoesParecer(support.opcoesParecer());
+    response.setOpcoesResponsavel(support.opcoesResponsavelAprovacaoRh());
     return ResponseEntity.ok(response);
   }
 
@@ -424,7 +428,7 @@ public class MissaoProcessoServiceRead {
     dto.setUuid(d.getUuid());
     dto.setResponsavel(d.getResponsavel());
     dto.setParecer(d.getParecer());
-    dto.setParecerDesc("FAVORAVEL".equals(d.getParecer()) ? "Favorável" : "DESFAVORAVEL".equals(d.getParecer()) ? "Desfavorável" : d.getParecer());
+    dto.setParecerDesc(Parecer.descricaoDe(d.getParecer()));
     dto.setObservacao(d.getObservacao());
     dto.setEstado(d.getEstado());
     dto.setEstadoDesc(switch (d.getEstado()) {
@@ -642,6 +646,8 @@ public class MissaoProcessoServiceRead {
     wrapper.setTotalPages(page.getTotalPages());
     wrapper.setFirst(page.isFirst());
     wrapper.setLast(page.isLast());
+    wrapper.setOpcoesEtapa(support.opcoesEtapa());
+    wrapper.setOpcoesTipoProcesso(support.opcoesTipoProcesso());
     return ResponseEntity.ok(wrapper);
   }
 

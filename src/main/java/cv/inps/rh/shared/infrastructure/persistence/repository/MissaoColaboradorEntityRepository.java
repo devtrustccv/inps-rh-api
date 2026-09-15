@@ -20,6 +20,9 @@ public interface MissaoColaboradorEntityRepository extends
 
   Optional<MissaoColaboradorEntity> findByMissaoServId_UuidAndFunId_Uuid(UUID missaoUuid, UUID funUuid);
 
+  /** O ecrã expõe o uuid do colaborador da missão a par do do funcionário — aceitam-se os dois. */
+  Optional<MissaoColaboradorEntity> findByMissaoServId_UuidAndUuid(UUID missaoUuid, UUID uuid);
+
   Optional<MissaoColaboradorEntity> findByFunId_Uuid(UUID uuid);
 
   default MissaoColaboradorEntity findByUuidOrThrow(UUID uuid) {

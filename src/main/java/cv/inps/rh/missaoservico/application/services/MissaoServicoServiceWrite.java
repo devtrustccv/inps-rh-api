@@ -615,6 +615,11 @@ public class MissaoServicoServiceWrite {
     var missaoUuid = parseUuid(command != null ? command.getId() : null, "id");
     var dto = command != null ? command.getMissaocancelarrequest() : null;
 
+    // O motivo fica no registo e segue nas notificações de cancelamento — sem ele perde-se o rasto.
+    if (dto == null || !StringUtils.hasText(dto.getMotivoCancelamento())) {
+      throw IgrpResponseStatusException.badRequest("motivoCancelamento é obrigatório");
+    }
+
     var missao = missaoServicoRepository.findByUuidOrThrow(missaoUuid);
     if (ESTADO_INATIVO.equals(missao.getEstado())) {
       throw IgrpResponseStatusException.badRequest("A missão já está cancelada");
@@ -1287,6 +1292,10 @@ public class MissaoServicoServiceWrite {
     }
     if (!StringUtils.hasText(dto.getDescricaoDestino())) {
       throw IgrpResponseStatusException.badRequest("descricaoDestino é obrigatório");
+    }
+    // Obrigatório no ecrã "Registo de Missão" (Âmbito da Missão), e é o que justifica a deslocação.
+    if (!StringUtils.hasText(dto.getAmbitoMissao())) {
+      throw IgrpResponseStatusException.badRequest("ambitoMissao é obrigatório");
     }
     if (dto.getDataInicio() == null) {
       throw IgrpResponseStatusException.badRequest("dataInicio é obrigatório");

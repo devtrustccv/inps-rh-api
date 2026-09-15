@@ -63,6 +63,38 @@ th { background: var(--thead); font-weight: 600; }
 <p>Base de todos os endpoints: <code>/api/v1/missao-servico</code></p>
 <blockquote><p>Versão em HTML para partilhar com a equipa de front-end: <a href="evidencias_missao.html">evidencias_missao.html</a> (gerada a partir deste ficheiro — em caso de divergência, vale o Markdown).</p></blockquote>
 <hr>
+<h2>2026-09-15 — Correcções saídas da bateria de testes</h2>
+<p>Alterações <strong>retro-compatíveis</strong>: nada do que já funcionava deixa de funcionar.</p>
+<h3>Os identificadores de colaborador deixaram de ser ambíguos</h3>
+<p>Nos ecrãs de <strong>Logística</strong> e <strong>Emissão de Requisição</strong>, o <code>GET</code> devolve, para cada colaborador, dois identificadores lado a lado — <code>funUuid</code> (do funcionário) e <code>uuid</code> (do colaborador *desta* missão). Antes só um deles era aceite na gravação, e o outro dava <code>400 &quot;colaborador não pertence à missão&quot;</code>. <strong>Agora os dois são aceites</strong>, em todos os campos de colaborador: <code>bilhetesPassagem[].colaboradorIds</code>, <code>segurosViagem[].colaboradorIds</code>, <code>alojamentos[].colaboradorId</code>, <code>ajudasCusto[].colaboradorId</code> e <code>requisicoes[].funcionarioUuids</code>.</p>
+<h3>Dois campos passaram a ser validados</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Campo</th><th>Onde</th><th>Antes</th><th>Agora</th></tr></thead>
+<tbody>
+<tr><td><code>ambitoMissao</code></td><td><code>POST</code>/<code>PUT /submissao</code></td><td>aceite vazio</td><td><strong>400</strong> — é obrigatório no ecrã</td></tr>
+<tr><td><code>motivoCancelamento</code></td><td><code>PATCH /{uuid}/cancelar</code></td><td>aceite vazio</td><td><strong>400</strong> — sem ele perdia-se o motivo no registo e nas notificações</td></tr>
+</tbody></table></div>
+<blockquote><p><code>alojamento</code> continua opcional: quando não vem, a criação assume <strong>Sim</strong>. É um valor por defeito deliberado, não um esquecimento.</p></blockquote>
+<h3>Os <code>GET</code> passaram a servir as opções dos *selects*</h3>
+<p>O ecrã de avaliação já devolvia <code>opcoesAvaliacao</code>; os outros obrigavam a replicar os domínios em código. Agora todos os servem:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Ecrã</th><th>Campo novo na resposta</th><th>Conteúdo</th></tr></thead>
+<tbody>
+<tr><td>Validação UGAL</td><td><code>opcoesParecer</code></td><td><code>FAVORAVEL</code> / <code>DESFAVORAVEL</code>, com descrição</td></tr>
+<tr><td>Aprovação RH</td><td><code>opcoesParecer</code>, <code>opcoesResponsavel</code></td><td>pareceres e <code>COORDENADOR_RH</code> / <code>DIRECTOR_RH</code></td></tr>
+<tr><td>Lista Missão por Etapa</td><td><code>opcoesEtapa</code>, <code>opcoesTipoProcesso</code></td><td>as 8 etapas e os 4 tipos, pela ordem do fluxo</td></tr>
+</tbody></table></div>
+<p>Cada opção é <code>{ &quot;valor&quot;: &quot;...&quot;, &quot;descricao&quot;: &quot;...&quot; }</code> — usar <code>valor</code> no <code>PUT</code> e <code>descricao</code> no ecrã.</p>
+<h3>Ordem que importa: ajuda de custo depois do alojamento</h3>
+<p>O valor da ajuda de custo é ⅓ do diário <strong>apenas</strong> quando o processo <code>ALOJAMENTO</code> já tem, para esse colaborador, uma linha de logística com <code>flgAlimentacao = &quot;SIM&quot;</code>. Se a ajuda de custo for gravada antes, sai ⅔ — sem erro. Gravar o <strong>alojamento primeiro</strong>, ou regravar a ajuda de custo depois.</p>
+<div class="table-wrap"><table>
+<thead><tr><th><code>flgAlojamento</code></th><th>alimentação no alojamento</th><th>valor diário</th></tr></thead>
+<tbody>
+<tr><td><code>false</code></td><td>—</td><td><strong>100%</strong> do enviado</td></tr>
+<tr><td><code>true</code></td><td><code>NAO</code> ou sem linha de alojamento</td><td><strong>⅔</strong></td></tr>
+<tr><td><code>true</code></td><td><code>SIM</code></td><td><strong>⅓</strong></td></tr>
+</tbody></table></div>
+<hr>
 <h2>2026-09-14 — LEIA PRIMEIRO: a missão deixou de ter uma etapa</h2>
 <p>Este é o resumo da alteração estrutural da spec de 14/09. As secções por fase, mais abaixo, têm os payloads campo a campo.</p>
 <h3>O que mudou</h3>

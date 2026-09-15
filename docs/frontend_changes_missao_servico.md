@@ -11,6 +11,58 @@ Base de todos os endpoints: `/api/v1/missao-servico`
 
 ---
 
+## 2026-09-15 — Correcções saídas da bateria de testes
+
+Alterações **retro-compatíveis**: nada do que já funcionava deixa de funcionar.
+
+### Os identificadores de colaborador deixaram de ser ambíguos
+
+Nos ecrãs de **Logística** e **Emissão de Requisição**, o `GET` devolve, para cada colaborador,
+dois identificadores lado a lado — `funUuid` (do funcionário) e `uuid` (do colaborador *desta*
+missão). Antes só um deles era aceite na gravação, e o outro dava `400 "colaborador não pertence
+à missão"`. **Agora os dois são aceites**, em todos os campos de colaborador:
+`bilhetesPassagem[].colaboradorIds`, `segurosViagem[].colaboradorIds`,
+`alojamentos[].colaboradorId`, `ajudasCusto[].colaboradorId` e
+`requisicoes[].funcionarioUuids`.
+
+### Dois campos passaram a ser validados
+
+| Campo | Onde | Antes | Agora |
+| --- | --- | --- | --- |
+| `ambitoMissao` | `POST`/`PUT /submissao` | aceite vazio | **400** — é obrigatório no ecrã |
+| `motivoCancelamento` | `PATCH /{uuid}/cancelar` | aceite vazio | **400** — sem ele perdia-se o motivo no registo e nas notificações |
+
+> `alojamento` continua opcional: quando não vem, a criação assume **Sim**. É um valor por
+> defeito deliberado, não um esquecimento.
+
+### Os `GET` passaram a servir as opções dos *selects*
+
+O ecrã de avaliação já devolvia `opcoesAvaliacao`; os outros obrigavam a replicar os domínios em
+código. Agora todos os servem:
+
+| Ecrã | Campo novo na resposta | Conteúdo |
+| --- | --- | --- |
+| Validação UGAL | `opcoesParecer` | `FAVORAVEL` / `DESFAVORAVEL`, com descrição |
+| Aprovação RH | `opcoesParecer`, `opcoesResponsavel` | pareceres e `COORDENADOR_RH` / `DIRECTOR_RH` |
+| Lista Missão por Etapa | `opcoesEtapa`, `opcoesTipoProcesso` | as 8 etapas e os 4 tipos, pela ordem do fluxo |
+
+Cada opção é `{ "valor": "...", "descricao": "..." }` — usar `valor` no `PUT` e `descricao` no ecrã.
+
+### Ordem que importa: ajuda de custo depois do alojamento
+
+O valor da ajuda de custo é ⅓ do diário **apenas** quando o processo `ALOJAMENTO` já tem, para
+esse colaborador, uma linha de logística com `flgAlimentacao = "SIM"`. Se a ajuda de custo for
+gravada antes, sai ⅔ — sem erro. Gravar o **alojamento primeiro**, ou regravar a ajuda de custo
+depois.
+
+| `flgAlojamento` | alimentação no alojamento | valor diário |
+| --- | --- | --- |
+| `false` | — | **100%** do enviado |
+| `true` | `NAO` ou sem linha de alojamento | **⅔** |
+| `true` | `SIM` | **⅓** |
+
+---
+
 ## 2026-09-14 — LEIA PRIMEIRO: a missão deixou de ter uma etapa
 
 Este é o resumo da alteração estrutural da spec de 14/09. As secções por fase, mais abaixo,

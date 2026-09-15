@@ -24,5 +24,8 @@ public class ProcessoAprovacaoRhResponseDTO {
   private ParecerResponseDTO parecerDirector;     // ciclo actual (rascunho ou emitido)
   private ParecerResponseDTO parecerUgal;         // parecer UGAL que abriu esta aprovação (consulta)
   private List<ParecerResponseDTO> historico;     // todos os pareceres do Coordenador e do Director
+  // Opções dos selects do ecrã
+  private List<OpcaoDominioResponseDTO> opcoesParecer;
+  private List<OpcaoDominioResponseDTO> opcoesResponsavel;  // COORDENADOR_RH | DIRECTOR_RH
 
 }

@@ -23,5 +23,8 @@ public class WrapperListProcessoEtapaDTO {
   private int totalPages;
   private boolean first;
   private boolean last;
+  // Opções dos filtros "Etapa" (obrigatório) e "Tipo Processo" do ecrã Lista Missão por Etapa
+  private List<OpcaoDominioResponseDTO> opcoesEtapa;
+  private List<OpcaoDominioResponseDTO> opcoesTipoProcesso;
 
 }

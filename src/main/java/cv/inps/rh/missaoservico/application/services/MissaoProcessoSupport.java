@@ -2,8 +2,11 @@ package cv.inps.rh.missaoservico.application.services;
 
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import cv.inps.rh.missaoservico.application.constants.EtapaProcesso;
+import cv.inps.rh.missaoservico.application.constants.Parecer;
+import cv.inps.rh.missaoservico.application.constants.ResponsavelParecer;
 import cv.inps.rh.missaoservico.application.constants.TipoProcesso;
 import cv.inps.rh.missaoservico.application.dto.MissaoColaboradorResponseDTO;
+import cv.inps.rh.missaoservico.application.dto.OpcaoDominioResponseDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoNotificacaoRequestDTO;
 import cv.inps.rh.missaoservico.application.dto.MissaoProcessoResponseDTO;
 import cv.inps.rh.shared.application.constants.Estado;
@@ -27,12 +30,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 /** Apoio comum aos ecrãs dos processos de missão: resolução do processo e conteúdo das notificações. */
 @Component
@@ -264,5 +270,34 @@ public class MissaoProcessoSupport {
       template = template.replace("{" + entry.getKey() + "}", entry.getValue() != null ? entry.getValue() : "");
     }
     return template;
+  }
+
+  /**
+   * Opções dos <i>selects</i> dos ecrãs. Vão na resposta do próprio ecrã — como já acontecia com as
+   * da avaliação do prestador — para o front-end não ter de replicar os domínios em código.
+   */
+  public List<OpcaoDominioResponseDTO> opcoesParecer() {
+    return Arrays.stream(Parecer.values())
+        .map(p -> new OpcaoDominioResponseDTO(p.name(), p.getDescricao()))
+        .toList();
+  }
+
+  /** Só os responsáveis da Aprovação RH: o parecer da UGAL é emitido no ecrã anterior. */
+  public List<OpcaoDominioResponseDTO> opcoesResponsavelAprovacaoRh() {
+    return Stream.of(ResponsavelParecer.COORDENADOR_RH, ResponsavelParecer.DIRECTOR_RH)
+        .map(r -> new OpcaoDominioResponseDTO(r.name(), r.getDescricao()))
+        .toList();
+  }
+
+  public List<OpcaoDominioResponseDTO> opcoesEtapa() {
+    return Arrays.stream(EtapaProcesso.values())
+        .map(e -> new OpcaoDominioResponseDTO(e.name(), e.getDescricao()))
+        .toList();
+  }
+
+  public List<OpcaoDominioResponseDTO> opcoesTipoProcesso() {
+    return Arrays.stream(TipoProcesso.values())
+        .map(t -> new OpcaoDominioResponseDTO(t.name(), t.getDescricao()))
+        .toList();
   }
 }

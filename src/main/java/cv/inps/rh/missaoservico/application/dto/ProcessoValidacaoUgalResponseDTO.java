@@ -27,5 +27,7 @@ public class ProcessoValidacaoUgalResponseDTO {
   private List<AnexoRespDTO> faturas;         // anexos das linhas de logística
   private ParecerResponseDTO parecerAtual;    // rascunho ou parecer emitido no ciclo actual
   private List<ParecerResponseDTO> historico; // todos os pareceres UGAL, incluindo os anulados
+  // Opções do select "Parecer" — evita replicar o domínio no front-end
+  private List<OpcaoDominioResponseDTO> opcoesParecer;
 
 }
