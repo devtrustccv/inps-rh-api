@@ -6,6 +6,9 @@
 
 Base de todos os endpoints: `/api/v1/missao-servico`
 
+> Versão em HTML para partilhar com a equipa de front-end: [evidencias_missao.html](evidencias_missao.html)
+> (gerada a partir deste ficheiro — em caso de divergência, vale o Markdown).
+
 ---
 
 ## 2026-09-14 — LEIA PRIMEIRO: a missão deixou de ter uma etapa
@@ -63,8 +66,8 @@ Swagger. Vão ser removidos numa fase seguinte — migrar para as rotas por proc
 
 Bateria de 129 passos a percorrer os ecrãs pela ordem de utilização (lista → formulário →
 `GET by id` → editar → gravar → reler), com caminhos felizes e negativos, e com confirmação
-directa na base de dados depois de cada escrita. Evidências (pedido, resposta e SQL) em
-`scratchpad/evidencias_missao.html`.
+directa na base de dados depois de cada escrita. Todos os payloads e respostas documentados
+abaixo saíram dessa bateria, corrida contra o ambiente de desenvolvimento.
 
 ---
 
