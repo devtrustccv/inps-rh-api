@@ -127,8 +127,12 @@ Caminhos não felizes a cobrir: missão **cancelada** (não deve gerar alerta), 
 - **Negócio:** qual o prazo de "fatura em falta" e "requisição sem resposta"? Quais os documentos
   obrigatórios por etapa? Decide o RH.
 - **DBA:** acrescentar data de vencimento à fatura e um estado de confirmação à requisição?
-- **Negócio/arquitectura:** a parametrização de prazos e limiares é tabela nova ou entra em
-  `RH_T_PARAM_NOTIFICACAO`?
+- **Negócio/arquitectura:** a parametrização de prazos e limiares **está na spec como requisito mas
+  não está especificada** — a secção "Parametrizações" é uma frase por item, sem tabela, colunas
+  nem valores, ao contrário do resto da spec, que mapeia campo a campo. A doc de BD também não a
+  cobre: `RH_T_PARAM_NOTIFICACAO` só tem `TIPO_NOTIFICACAO`/`ASSUNTO`/`CORPO`/`ESTADO` (templates),
+  sem prazo, limiar, gatilho ou destinatário. É decisão de desenho por tomar, não implementação
+  pendente: que tabela, que colunas, que valor por alerta.
 - A spec soma os pesos da avaliação como `5+15+40+20+15 = 95%`, mas usa 20 no preço (= 100).
   Seguimos 100; confirmar com o negócio.
 
