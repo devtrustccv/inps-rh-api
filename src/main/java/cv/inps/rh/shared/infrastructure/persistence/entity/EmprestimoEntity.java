@@ -164,4 +164,8 @@ public class EmprestimoEntity extends AuditEntity {
 
   @Column(name = "VALOR_JURO_TOTAL")
   private BigDecimal valorJuroTotal;
+
+  @Size(max = 300)
+  @Column(name = "NOME_FORNECEDOR", length = 300)
+  private String nomeFornecedor;
 }

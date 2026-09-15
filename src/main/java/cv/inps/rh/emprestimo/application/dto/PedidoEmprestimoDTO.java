@@ -31,6 +31,7 @@ public class PedidoEmprestimoDTO {
 
   private String marca;
 
+  private String nomeFornecedor;
 
   private Long anoFabrico;
 

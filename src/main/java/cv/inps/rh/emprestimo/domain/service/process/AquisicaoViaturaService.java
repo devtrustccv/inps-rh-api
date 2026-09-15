@@ -58,6 +58,7 @@ public class AquisicaoViaturaService {
       entity.setVersao(1L);
     }
 
+    entity.setNomeFornecedor(request.getNomeFornecedor());
     entity.setBanco(Objects.nonNull(request.getBancoId()) ? bancoEntityRepository.findById(request.getBancoId()).orElseThrow() : null);
     entity.setTiprel(currentRelation);
     entity.setMarca(request.getMarca());

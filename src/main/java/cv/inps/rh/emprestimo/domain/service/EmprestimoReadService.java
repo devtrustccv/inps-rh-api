@@ -51,6 +51,7 @@ public class EmprestimoReadService {
     var funId = entity.getTiprel().getFunId();
 
     var dto = new DetalhesEmprestimoDTO();
+    dto.setNomeFornecedor(entity.getNomeFornecedor());
     dto.setDataInicio(entity.getDataInicio());
     dto.setDataFim(entity.getDataFim());
     dto.setValorPrestacao(entity.getValorPrestacao());
