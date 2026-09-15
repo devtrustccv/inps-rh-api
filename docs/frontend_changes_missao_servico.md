@@ -39,8 +39,10 @@ estar em Cabimento enquanto a ajuda de custo ainda está na Logística.
    devolve uma linha por processo. A lista geral (`GET /missao-servico`) traz a missão com a
    sub-lista dos seus quatro processos e respectivas etapas.
 3. **O ecrã a mostrar decide-se pela etapa do processo**, não pela etapa da missão.
-4. **Chamar uma etapa que o processo não percorre dá 400** (ex.: `prestadores` em
-   `SEGURO_VIAGEM`), tal como chamar uma etapa fora de sequência.
+4. **A guarda de etapa está no `PUT`, não no `GET`.** Gravar numa etapa que o processo não
+   percorre (ex.: `prestadores` em `SEGURO_VIAGEM` ou `AJUDA_CUSTO`), ou fora de sequência, dá
+   **400**. O `GET` correspondente devolve **200** com as listas vazias — não uses o `GET` para
+   decidir se o ecrã existe; usa o percurso do tipo de processo (tabela acima).
 
 ### Endpoints antigos — para onde migrar
 

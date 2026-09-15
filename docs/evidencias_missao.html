@@ -87,9 +87,9 @@ th { background: var(--thead); font-weight: 600; }
 <p>devolve uma linha por processo. A lista geral (<code>GET /missao-servico</code>) traz a missão com a sub-lista dos seus quatro processos e respectivas etapas.</p>
 <ol>
 <li><strong>O ecrã a mostrar decide-se pela etapa do processo</strong>, não pela etapa da missão.</li>
-<li><strong>Chamar uma etapa que o processo não percorre dá 400</strong> (ex.: <code>prestadores</code> em</li>
+<li><strong>A guarda de etapa está no <code>PUT</code>, não no <code>GET</code>.</strong> Gravar numa etapa que o processo não</li>
 </ol>
-<p><code>SEGURO_VIAGEM</code>), tal como chamar uma etapa fora de sequência.</p>
+<p>percorre (ex.: <code>prestadores</code> em <code>SEGURO_VIAGEM</code> ou <code>AJUDA_CUSTO</code>), ou fora de sequência, dá <strong>400</strong>. O <code>GET</code> correspondente devolve <strong>200</strong> com as listas vazias — não uses o <code>GET</code> para decidir se o ecrã existe; usa o percurso do tipo de processo (tabela acima).</p>
 <h3>Endpoints antigos — para onde migrar</h3>
 <p>Os dez endpoints do modelo anterior continuam a responder, marcados <code>deprecated = true</code> no Swagger. Vão ser removidos numa fase seguinte, assim que o front-end migrar.</p>
 <p><code>{tipoProcesso}</code> é um de <code>BILHETE_PASSAGEM</code> | <code>SEGURO_VIAGEM</code> | <code>AJUDA_CUSTO</code> | <code>ALOJAMENTO</code>. Onde a chamada era <strong>uma por missão</strong>, passa a ser <strong>uma por processo</strong>.</p>
