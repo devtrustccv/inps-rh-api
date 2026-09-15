@@ -7,6 +7,7 @@ import cv.igrp.framework.stereotype.IgrpDTO;
 import cv.inps.rh.emprestimo.application.constants.ParecerProcesso;
 import cv.inps.rh.emprestimo.application.constants.ProcessStepAction;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,28 +23,42 @@ import java.util.List;
 
 
 @IgrpDTO
-public class AnaliseRhRequestDTO  {
+public class AnaliseRhRequestDTO {
 
   @NotNull(message = "The field <valorEmprestimo> is required")
 
-  private BigDecimal valorEmprestimo ;
+  private BigDecimal valorEmprestimo;
   @NotNull(message = "The field <numeroPrestacao> is required")
 
-  private Long numeroPrestacao ;
+  private Long numeroPrestacao;
   @NotNull(message = "The field <juros> is required")
 
-  private BigDecimal juros ;
+  private BigDecimal juros;
   @NotNull(message = "The field <parecer> is required")
 
-  private ParecerProcesso parecer ;
+  private ParecerProcesso parecer;
 
 
-  private String observacao ;
+  private String observacao;
 
   @Valid
   private List<DocumentoDTO> documentos = new ArrayList<>();
   @NotNull(message = "The field <action> is required")
 
-  private ProcessStepAction action ;
+  private ProcessStepAction action;
+
+  @Valid
+  private Responsavel responsavel;
+
+  public record Responsavel(
+
+      @NotNull(message = "O parecer do responsável é obrigatório")
+      ParecerProcesso parecer,
+
+      @NotBlank(message = "A observação do responsável é obrigatória")
+      String observacao
+
+  ) {
+  }
 
 }

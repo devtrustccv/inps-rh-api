@@ -97,7 +97,7 @@ public class EmprestimoReadService {
             obj.getValorPrestacao()
         ))
         .toList();
-    dto.setOutrosEmprestimos(another);
+    dto.setOutrosEmprestimosFuncionario(another);
 
     final var allDecisions = new DecisaoEmprestimoDTO();
 
@@ -150,6 +150,16 @@ public class EmprestimoReadService {
     baseDecision.setObservacao(obj.getObs());
     baseDecision.setData(obj.getCreatedDate().toLocalDate());
     baseDecision.setExecutadoPor(obj.getLastModifiedBy());
+
+    var responsavel = new BaseDecisaoDTO.Responsavel(
+        obj.getParecerResponsavel(),
+        obj.getObservacaoResponsavel(),
+        obj.getDataObservacaoResponsavel(),
+        obj.getUtilizadorObservacaoResponsavel()
+    );
+
+    baseDecision.setResponsavel(responsavel);
+
     return baseDecision;
   }
 

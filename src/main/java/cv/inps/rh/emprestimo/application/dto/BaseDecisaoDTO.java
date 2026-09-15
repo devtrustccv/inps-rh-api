@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -27,5 +28,15 @@ public class BaseDecisaoDTO {
   private LocalDate data;
 
   private String executadoPor;
+
+  private Responsavel responsavel;
+
+  public record Responsavel(
+      String parecer,
+      String observacao,
+      LocalDateTime data,
+      String nome
+  ) {
+  }
 
 }

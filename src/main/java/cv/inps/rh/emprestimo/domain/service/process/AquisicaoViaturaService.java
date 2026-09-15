@@ -8,6 +8,7 @@ import cv.inps.rh.emprestimo.domain.service.EmprestimoWriteService;
 import cv.inps.rh.emprestimo.domain.service.constants.*;
 import cv.inps.rh.funcionario.application.rules.FuncionarioRules;
 import cv.inps.rh.shared.application.constants.Estado;
+import cv.inps.rh.shared.config.ApplicationAuditorAware;
 import cv.inps.rh.shared.domain.exceptions.IgrpResponseStatusException;
 import cv.inps.rh.shared.infrastructure.persistence.entity.EmprestimoEntity;
 import cv.inps.rh.shared.infrastructure.persistence.entity.PedidoDecisaoEntity;
@@ -21,7 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Transactional
@@ -36,6 +39,7 @@ public class AquisicaoViaturaService {
   private final FuncionarioRules funcionarioRules;
   private final EmprestimoDocumentService documentService;
   private final EmprestimoWriteService emprestimoWriteService;
+  private final ApplicationAuditorAware auditorAware;
 
   public IdDTO saveUpdatePedidoEmprestimo(String emprestimoId, PedidoEmprestimoRequestDTO request) {
 
@@ -121,7 +125,12 @@ public class AquisicaoViaturaService {
     var order = loan.getPedido();
     order.setEtapa(EtapaEmprestimo.ANALISE_RH_PEDIDO.name());
 
-    if (request.getAction().equals(ProcessStepAction.NEXT)) {
+    var isNextDecision = request.getAction().equals(ProcessStepAction.NEXT);
+    if (isNextDecision) {
+
+      if (Optional.ofNullable(request.getResponsavel()).map(AnaliseRhRequestDTO.Responsavel::parecer).isEmpty())
+        throw IgrpResponseStatusException.badRequest("O parecer do responsável é obrigatório");
+
       switch (request.getParecer()) {
         case FAVORAVEL -> {
           order.setEtapa(EtapaEmprestimo.ANALISE_FINANCEIRA_PEDIDO.name());
@@ -148,6 +157,13 @@ public class AquisicaoViaturaService {
         obj -> {
           obj.setDecisao(request.getParecer().name());
           obj.setObs(request.getObservacao());
+          Optional.ofNullable(request.getResponsavel())
+              .ifPresent(resp -> {
+                obj.setParecerResponsavel(resp.parecer().name());
+                obj.setObservacaoResponsavel(resp.observacao());
+                obj.setUtilizadorObservacaoResponsavel(auditorAware.getCurrentSubjectName());
+                obj.setDataObservacaoResponsavel(LocalDateTime.now());
+              });
           pedidoDecisaoEntityRepository.save(obj);
         },
         () -> {
