@@ -155,11 +155,32 @@ Escritas só com autorização por fluxo.
 
 No fim, `docs/frontend_changes_missao_servico.md` recebe o relatório consolidado **por ecrã**: endpoints, payloads, respostas e erros esperados.
 
-### Fora deste plano (fase 2 do projecto, segundo a spec)
-- Job de alertas (fatura a vencer/em atraso/em falta, requisição sem resposta, missão próxima sem logística).
-- Parametrização de notificações/gatilhos/prazos.
-- Portal do colaborador.
-- Integração SGAL real (sem contrato).
+### Fora deste plano
+
+**Fase 2 do projecto, segundo a spec:**
+- Portal do colaborador — é o único ponto que a spec marca explicitamente como "segunda Fase".
+
+**Bloqueado por falta de contrato:**
+- Integração SGAL real.
+
+**Por implementar — a spec pede, e este plano adiou sem base (corrigido a 2026-09-15):**
+- **Job de alertas.** A spec lista "Implementar job que regista alerta (alertas descritas acima)"
+  como acção, a par de "Enviar notificação em cada uma das etapas", que foi implementada. A infra
+  existe e está provada: `AlertaWriteService.executarJobAlertas()`, `@Scheduled` diário às 6h, com
+  três tipos já a funcionar (renovação e conversão de contrato, licença sem vencimento).
+  Faltam os casos da missão — mas **só um dos seis é construível com o modelo actual**:
+
+  | Alerta | Dados necessários | Estado |
+  |---|---|---|
+  | Missão próxima do início sem confirmação | `dataInicio` + linhas de logística | ✅ construível hoje |
+  | Fatura próxima do vencimento | data de vencimento da fatura | ❌ não existe: a fatura é um anexo em `RH_T_DOCUMENTO`, que não tem datas |
+  | Fatura em atraso | idem | ❌ idem |
+  | Fatura em falta | data da requisição + prazo | ⚠️ a data existe (auditoria); o prazo não está parametrizado |
+  | Requisição pendente de resposta | envio + confirmação da agência | ⚠️ o envio existe; **não há conceito de "agência confirmou"** |
+  | Documentos obrigatórios em falta | lista do que é obrigatório por etapa | ⚠️ por definir com o negócio |
+
+- **Parametrização de prazos e limiares.** A própria spec diz que é "essencial para alertas baseados
+  em tempo ou valores". Sem ela, os limiares dos alertas ficariam no código.
 
 ---
 
